@@ -24,6 +24,7 @@ This folder gathers every document about the app: from what it does to how each 
 | 10 | [Developer guide](10-developer-guide.md) | Setup, commands, code generation (Freezed), conventions and how to add new modules |
 | 11 | [Multi-tenancy and Super Admin](11-multitenancy.md) | Plans, tenant approval, stores, employees, plan upgrades and the super admin panel |
 | 12 | [Architecture decisions](12-architecture-decisions.md) | The "why" behind each technical decision: Clean Architecture, contracts, price snapshot, atomic stock, credit, SaaS auth and secure storage |
+| 13 | [Build and release per platform](13-build-and-release.md) | How to build the app on Android, iOS, Windows and Web: requirements, signing, deploy and a publishing checklist |
 
 ---
 
