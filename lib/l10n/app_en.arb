@@ -1,0 +1,662 @@
+{
+  "@@locale": "en",
+  "appTitle": "Dumbhanengue ERP",
+  "onboardingTitle": "Welcome!",
+  "onboardingHeading": "Activate your business in the ERP",
+  "onboardingSubtitle": "Choose a plan, enter your business name and set the currency and language. Your access will be granted after approval (within 24h).",
+  "onboardingBusinessLabel": "Business name",
+  "onboardingBusinessError": "Enter your business name.",
+  "onboardingPlanLabel": "Choose a plan",
+  "onboardingPlansError": "Could not load the plans.",
+  "onboardingPlanDetails": "{stores} store(s) · {employees} employee(s)",
+  "@onboardingPlanDetails": {
+    "description": "Plan limits summary",
+    "placeholders": {
+      "stores": {
+        "type": "int"
+      },
+      "employees": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSubmit": "Request access",
+  "onboardingSuccess": "Request for {business} sent! Wait for approval (within 24h).",
+  "@onboardingSuccess": {
+    "description": "Feedback after requesting access",
+    "placeholders": {
+      "business": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingChoosePlanError": "Choose a plan to continue.",
+  "onboardingGenericError": "Could not send the request. Try again.",
+  "onboardingLanguageLabel": "Language",
+  "onboardingLanguageHint": "App language",
+  "onboardingCurrencyLabel": "Currency",
+  "onboardingCurrencyHint": "Currency used for amounts",
+  "languagePortuguese": "Portuguese",
+  "languageEnglish": "English",
+  "currencyBrl": "Brazilian Real (BRL)",
+  "currencyUsd": "US Dollar (USD)",
+  "currencyEur": "Euro (EUR)",
+  "currencyMzn": "Mozambican Metical (MZN)",
+  "settingsSave": "Save settings",
+  "settingsSaved": "Settings saved!",
+  "settingsGenericError": "Could not save the settings. Try again.",
+  "commonSearch": "Search...",
+  "commonRetry": "Try again",
+  "commonSignOut": "Sign out",
+  "appSheetClose": "Close",
+  "storeSelectorActiveTooltip": "Active store",
+  "tenantPendingTitle": "Waiting for approval",
+  "tenantPendingSubtitle": "The access request for \"{business}\" was sent successfully. The super admin will review it and you will get access within 24h.",
+  "@tenantPendingSubtitle": {
+    "placeholders": {
+      "business": {
+        "type": "String"
+      }
+    }
+  },
+  "tenantPendingHint": "Once approved, you will be able to create stores, hire employees and start operating.",
+  "tenantRejectedTitle": "Request rejected",
+  "tenantRejectedSubtitle": "The access request for \"{business}\" was not approved.",
+  "@tenantRejectedSubtitle": {
+    "placeholders": {
+      "business": {
+        "type": "String"
+      }
+    }
+  },
+  "authErrorRestoreSession": "Could not restore your session",
+  "authErrorCheckConnection": "Check your connection and try again.",
+  "authErrorLoadAccount": "Could not load your account",
+  "loginSubtitleSignUp": "Create your account to get started",
+  "loginSubtitleSignIn": "Simple management for your business",
+  "loginNameLabel": "Name",
+  "loginEmailLabel": "Email",
+  "loginEmailError": "Enter a valid email.",
+  "loginPasswordLabel": "Password",
+  "loginPasswordError": "Password must be at least 8 characters.",
+  "loginShowPassword": "Show password",
+  "loginHidePassword": "Hide password",
+  "loginConfirmLabel": "Confirm password",
+  "loginConfirmError": "Passwords do not match.",
+  "loginSignUp": "Sign up",
+  "loginSignIn": "Sign in",
+  "loginSwitchToSignIn": "Already have an account — sign in",
+  "loginSwitchToSignUp": "No account yet — sign up",
+  "loginSignUpSuccess": "Account created! Confirm your email to sign in.",
+  "loginSignUpError": "Could not create the account. Try again.",
+  "loginSignInError": "Could not sign in. Check your email and password.",
+  "loginSecurityNote": "Your data is protected with encryption.",
+  "appNavHome": "Home",
+  "appNavProducts": "Products",
+  "appNavSales": "Sales",
+  "appNavFinancial": "Finance",
+  "appNavCredit": "Credit",
+  "appNavCustomers": "Customers",
+  "dashboardGreeting": "Hello, {name} 👋",
+  "@dashboardGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardSignOutTooltip": "Sign out",
+  "dashboardOwnerFallback": "Owner",
+  "dashboardTotalSales": "Total sales",
+  "dashboardAllTime": "All time",
+  "dashboardCashBalance": "Cash balance",
+  "dashboardReceivables": "Receivables (credit)",
+  "dashboardStockLabel": "Stock in products",
+  "commonUnits": "u.",
+  "dashboardQuickActions": "Quick actions",
+  "dashboardQuickNewSale": "New sale",
+  "dashboardQuickAddProduct": "Add product",
+  "dashboardQuickAddTransaction": "Add transaction",
+  "dashboardQuickAddDebt": "Add credit",
+  "dashboardModules": "Modules",
+  "dashboardModuleCustomers": "Customers",
+  "dashboardModulePurchases": "Purchases",
+  "dashboardModuleReports": "Reports",
+  "dashboardModuleStores": "Stores",
+  "dashboardRecentSales": "Recent sales",
+  "dashboardNoSales": "No sales yet — record your first one!",
+  "dashboardLowStock": "Low stock",
+  "dashboardSaleItems": "{count, plural, =1{1 item} other{{count} items}}",
+  "@dashboardSaleItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "weekdayMonday": "Monday",
+  "weekdayTuesday": "Tuesday",
+  "weekdayWednesday": "Wednesday",
+  "weekdayThursday": "Thursday",
+  "weekdayFriday": "Friday",
+  "weekdaySaturday": "Saturday",
+  "weekdaySunday": "Sunday",
+  "storesTitle": "Stores",
+  "storesTabStores": "Stores",
+  "storesTabEmployees": "Employees",
+  "storesTabUpgrades": "Upgrades",
+  "storesTabSettings": "Settings",
+  "storesAddStore": "New store",
+  "storesAddEmployee": "New employee",
+  "storesLoadError": "Could not load the stores.",
+  "storesEmptyTitle": "No stores created",
+  "storesEmptySubtitle": "Create the first store of your business.",
+  "employeesLoadError": "Could not load the employees.",
+  "employeesEmptyTitle": "No employees linked",
+  "employeesEmptySubtitle": "Create the employee account and pick a store.",
+  "roleManager": "Manager",
+  "roleEmployee": "Employee",
+  "upgradesLoadError": "Could not load the plan upgrade requests.",
+  "upgradesEmptyTitle": "No upgrade requests",
+  "upgradesEmptySubtitle": "Request a bigger plan in the card above.",
+  "statusPending": "Pending",
+  "statusApproved": "Approved",
+  "statusRejected": "Rejected",
+  "upgradesRequestedOn": "Requested on {date}",
+  "@upgradesRequestedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planCardTitle": "Plan",
+  "planCardUpgrade": "Upgrade",
+  "planCardStores": "Stores",
+  "planCardEmployees": "Employees",
+  "planDetails": "{stores} store(s) · {employees} employee(s)",
+  "@planDetails": {
+    "placeholders": {
+      "stores": {
+        "type": "int"
+      },
+      "employees": {
+        "type": "int"
+      }
+    }
+  },
+  "addStoreTitle": "New store",
+  "addStoreNameLabel": "Store name",
+  "addStoreNameError": "Enter the store name.",
+  "addStoreAddressLabel": "Address (optional)",
+  "addStoreSuccess": "Store {name} created!",
+  "@addStoreSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addStoreError": "Could not create the store. Try again.",
+  "addStoreSubmit": "Create store",
+  "addEmployeeTitle": "New employee",
+  "addEmployeeNameLabel": "Full name",
+  "addEmployeeNameError": "Enter the employee name.",
+  "addEmployeeEmailLabel": "Email",
+  "addEmployeeEmailError": "Enter a valid email.",
+  "addEmployeePasswordLabel": "Access password",
+  "addEmployeePasswordError": "Password must be at least 6 characters.",
+  "addEmployeeStoreLabel": "Store",
+  "addEmployeeNoStores": "Create a store before adding employees.",
+  "addEmployeeRoleLabel": "Role",
+  "addEmployeeSuccess": "Employee registered! The access account was created.",
+  "addEmployeeError": "Could not register the employee. Check if the email is already in use.",
+  "addEmployeeSubmit": "Register employee",
+  "upgradeTitle": "Plan upgrade",
+  "upgradeSubtitle": "Choose the new plan. The super admin will need to approve the request before the plan changes.",
+  "upgradeMaxReached": "You are already on the highest available plan.",
+  "upgradeChooseError": "Choose the target plan.",
+  "upgradeSuccess": "Upgrade request sent! The super admin will review it.",
+  "upgradeError": "Could not send the request. Try again.",
+  "upgradeSubmit": "Request upgrade",
+  "commonRefresh": "Refresh",
+  "commonCancel": "Cancel",
+  "commonDescription": "Description",
+  "commonNoResults": "No results",
+  "commonNoResultsHint": "Try searching another term.",
+  "commonSave": "Save",
+  "commonSoldOut": "Sold out",
+  "periodToday": "Today",
+  "periodWeek": "7 days",
+  "periodMonth": "This month",
+  "periodAll": "All",
+  "paymentCash": "Cash",
+  "paymentDebitCard": "Debit card",
+  "paymentCreditCard": "Credit card",
+  "paymentPix": "Pix",
+  "paymentTransfer": "Bank transfer",
+  "productsSearchHint": "Search product...",
+  "productsLoadError": "Could not load the products.",
+  "productsEmptyTitle": "No products registered",
+  "productsEmptySubtitle": "Tap \"New product\" to get started.",
+  "productsAddNew": "New product",
+  "productsBuySell": "Buy: {buy} · Sell: {sell}",
+  "@productsBuySell": {
+    "placeholders": {
+      "buy": {
+        "type": "String"
+      },
+      "sell": {
+        "type": "String"
+      }
+    }
+  },
+  "productsAdded": "Product added!",
+  "productsAddError": "Could not add the product. Try again.",
+  "productsNameError": "Enter the product name.",
+  "productsDescriptionLabel": "Description (optional)",
+  "productsPurchasePrice": "Purchase price",
+  "productsPurchasePriceError": "Enter the purchase price.",
+  "productsSalePrice": "Sale price",
+  "productsSalePriceError": "Enter the sale price.",
+  "productsStockQuantity": "Stock quantity",
+  "productsStockError": "Enter a valid quantity.",
+  "productsAddSubmit": "Add product",
+  "customersSearchHint": "Search customer...",
+  "customersLoadError": "Could not load the customers.",
+  "customersEmptyTitle": "No customers registered",
+  "customersEmptySubtitle": "Tap \"New customer\" to get started.",
+  "customersAddNew": "New customer",
+  "customersCreditLabel": "Credit {amount}",
+  "@customersCreditLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "customersAdded": "Customer {name} registered!",
+  "@customersAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "customersAddError": "Could not register the customer. Try again.",
+  "customersNameError": "Enter the customer name.",
+  "customersPhoneLabel": "Phone (optional)",
+  "customersEmailLabel": "Email (optional)",
+  "customersAddSubmit": "Register customer",
+  "purchasesTitle": "Purchases",
+  "purchasesAddNew": "New purchase",
+  "purchasesLoadError": "Could not load the purchases.",
+  "purchasesEmptyTitle": "No purchases registered",
+  "purchasesEmptySubtitle": "Tap \"New purchase\" to record incoming goods and restock.",
+  "purchasesSupplierError": "Enter the purchase supplier.",
+  "purchasesCartItemUnavailable": "A cart item is no longer available. Try again.",
+  "purchasesRegistered": "Purchase registered: {amount}!",
+  "@purchasesRegistered": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "purchasesProductNotFound": "Product {id} not found in the catalog.",
+  "@purchasesProductNotFound": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "purchasesRegisterError": "Could not register the purchase. Try again.",
+  "purchasesSupplierLabel": "Supplier",
+  "purchasesNoProductsTitle": "No products to buy",
+  "purchasesNoProductsSubtitle": "Register products to record purchases.",
+  "purchasesConfirm": "Confirm purchase",
+  "purchasesStockLabel": "{quantity} {unit} in stock",
+  "@purchasesStockLabel": {
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsTitle": "Reports",
+  "reportsRevenue": "Revenue",
+  "reportsProfit": "Gross profit",
+  "reportsMargin": "Margin",
+  "reportsBestSellers": "Best sellers",
+  "reportsLoadError": "Could not load the report.",
+  "reportsEmptyTitle": "No sales in the period",
+  "reportsEmptySubtitle": "Record sales to see the report.",
+  "reportsSalesPerDay": "Sales per day",
+  "reportsRevenueLabel": "{amount} sold",
+  "@reportsRevenueLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financialTitle": "Finance",
+  "financialRegister": "Register",
+  "financialIncome": "Income",
+  "financialExpense": "Expenses",
+  "financialBalance": "Balance",
+  "financialTransactions": "Transactions",
+  "financialLoadError": "Could not load the transactions.",
+  "financialEmptyTitle": "No transactions",
+  "financialEmptySubtitle": "Record cash income and expenses to track the cash flow.",
+  "financialReceivePendingTitle": "Receive pending amount?",
+  "financialReceivePendingBody": "Confirm receiving {amount}? The transaction will count in the realized cash.",
+  "@financialReceivePendingBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financialReceive": "Receive",
+  "financialReceived": "Transaction received!",
+  "financialReceiveError": "Could not receive the pending amount. Try again.",
+  "financialAddTitle": "Register transaction",
+  "financialIncomingType": "Income",
+  "financialOutgoingType": "Expense",
+  "financialDescriptionLabel": "Description",
+  "financialDescriptionError": "Enter a description.",
+  "financialCategoryLabel": "Category (optional)",
+  "financialAmountLabel": "Amount",
+  "financialAmountError": "Enter an amount greater than zero.",
+  "financialPendingLabel": "Pending (credit)",
+  "financialPendingHint": "Does not count in realized cash until received.",
+  "financialRegistered": "Transaction registered!",
+  "financialRegisterError": "Could not register the transaction. Try again.",
+  "financialDefaultCategoryIncome": "Sales",
+  "financialDefaultCategoryExpense": "Expenses",
+  "debtsTitle": "Credit (credit sales)",
+  "debtsAddDebt": "Register credit",
+  "debtsTabPending": "Pending",
+  "debtsTabSettled": "Settled",
+  "debtsTotalPending": "Total to receive",
+  "debtsNoPendingCustomers": "No pending customers",
+  "debtsPendingCustomers": "{count, plural, =1{1 pending customer} other{{count} pending customers}}",
+  "@debtsPendingCustomers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsPendingSection": "Pending debts",
+  "debtsLoadError": "Could not load the debts.",
+  "debtsEmptyPendingTitle": "No pending credit 🎉",
+  "debtsEmptyPendingSubtitle": "No customer owes anything right now.",
+  "debtsTotalSettled": "Total settled",
+  "debtsSettledCount": "{count, plural, =1{1 settlement recorded} other{{count} settlements recorded}}",
+  "@debtsSettledCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsSettledSection": "Settlement history",
+  "debtsHistoryLoadError": "Could not load the history.",
+  "debtsEmptySettledTitle": "No settlements yet",
+  "debtsEmptySettledSubtitle": "When credit is settled, it appears here.",
+  "debtsSettleTitle": "Settle debt?",
+  "debtsSettleBody": "Receive {amount} from {name}? A cash income entry will be recorded.",
+  "@debtsSettleBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsSettle": "Settle",
+  "debtsSettled": "{name}'s credit settled — {amount} in cash.",
+  "@debtsSettled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsNotFound": "This debt is no longer pending.",
+  "debtsSettleError": "Could not settle the debt. Try again.",
+  "debtsLate": "Late",
+  "debtsDueToday": "Due today",
+  "debtsDueIn": "In {days, plural, =1{1 day} other{{days} days}}",
+  "@debtsDueIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsSettleAction": "Settle debt",
+  "debtsSettledLabel": "Settled",
+  "debtsSettledOn": "Settled on {date}",
+  "@debtsSettledOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsDueDateHelp": "Credit due date",
+  "debtsRegisteredFor": "Credit registered for {name}!",
+  "@debtsRegisteredFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPendingEntryError": "Credit registered, but the pending entry in Finance could not be created. Check the transactions.",
+  "debtsRegisterError": "Could not register the credit. Try again.",
+  "debtsCustomerLinkLabel": "Linked customer (optional)",
+  "debtsNoCustomer": "No link",
+  "debtsCustomerNameLabel": "Customer name",
+  "debtsCustomerNameError": "Enter the customer name.",
+  "debtsDueDateLabel": "Due date",
+  "salesTitle": "Sales",
+  "salesNewSale": "New sale",
+  "salesLoadError": "Could not load the sales.",
+  "salesEmptyTitle": "No sales registered",
+  "salesEmptySubtitle": "Tap \"New sale\" to record your first one.",
+  "salesItemUnavailable": "A cart item is no longer available. Try again.",
+  "salesRegistered": "Sale registered: {amount}!",
+  "@salesRegistered": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "salesInsufficientStock": "Insufficient stock{product}. Available: {available}.",
+  "@salesInsufficientStock": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "salesStockFor": "of {name}",
+  "@salesStockFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "salesProductNotFound": "Product {id} not found in stock.",
+  "@salesProductNotFound": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "salesRegisterError": "Could not register the sale. Try again.",
+  "salesSearchProducts": "Search product...",
+  "salesNoProductsTitle": "No products to sell",
+  "salesNoProductsSubtitle": "Register products to record sales.",
+  "salesConfirm": "Confirm sale",
+  "saleDetailTitle": "Sale details",
+  "saleDetailId": "Sale {id}",
+  "@saleDetailId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "saleDetailTotalLabel": "Sale total",
+  "saleDetailItems": "Items",
+  "saleDetailTotal": "Total",
+  "saleDetailSnapshot": "Prices frozen at the time of the sale.",
+  "adminTitle": "Super Admin Panel",
+  "adminNavRequests": "Requests",
+  "adminNavPlans": "Plans",
+  "adminNavUpgrades": "Upgrades",
+  "adminTenantsTitle": "Tenants",
+  "adminPendingOnly": "Pending",
+  "adminAll": "All",
+  "adminAwaitingCount": "{count} waiting for approval",
+  "@adminAwaitingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminTenantsEmpty": "No tenants registered yet.",
+  "adminRequestsLoadError": "Could not load the requests.",
+  "adminNothingPendingTitle": "Nothing waiting for approval",
+  "adminNothingPendingSubtitle": "New tenant requests appear here.",
+  "adminTenantsLoadError": "Could not load the tenants.",
+  "adminRejectError": "Could not reject the request.",
+  "adminApproveError": "Could not approve the request.",
+  "adminAccessApproved": "Access for {name} approved!",
+  "@adminAccessApproved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRequestRejected": "Request for {name} rejected.",
+  "@adminRequestRejected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRejectTitle": "Reject {name}",
+  "@adminRejectTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRejectReasonLabel": "Rejection reason",
+  "adminRejectReasonHint": "E.g. incomplete registration info",
+  "adminApprove": "Approve",
+  "adminReject": "Reject",
+  "adminPlanLabel": "Plan: {plan}",
+  "@adminPlanLabel": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlanSolicited": "Plan: {plan} · Requested: {date}",
+  "@adminPlanSolicited": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlansTitle": "Plans",
+  "adminPlanNewTooltip": "New plan",
+  "adminPlansLoadError": "Could not load the plans.",
+  "adminPlansEmptyTitle": "No plans created",
+  "adminPlansEmptySubtitle": "Create the first plan to enable subscriptions.",
+  "adminPlanInactive": "Inactive",
+  "adminPlanDetails": "{price}/month · {stores} store(s) · {employees} employee(s)",
+  "@adminPlanDetails": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "stores": {
+        "type": "int"
+      },
+      "employees": {
+        "type": "int"
+      }
+    }
+  },
+  "adminPlanNameError": "Enter the plan name.",
+  "adminPlanPriceError": "Enter a valid price (≥ 0).",
+  "adminPlanStoresError": "The plan must allow at least 1 store.",
+  "adminPlanEmployeesError": "The plan must allow at least 1 employee.",
+  "adminPlanCreated": "Plan {name} created!",
+  "@adminPlanCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlanUpdated": "Plan {name} updated!",
+  "@adminPlanUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlanSaveError": "Could not save the plan. Try again.",
+  "adminPlanNewTitle": "New plan",
+  "adminPlanEditTitle": "Edit plan",
+  "adminPlanNameLabel": "Plan name",
+  "adminPlanPriceLabel": "Monthly price",
+  "adminPlanMaxStores": "Max stores",
+  "adminPlanMaxEmployees": "Max employees",
+  "adminPlanActiveTitle": "Active plan",
+  "adminPlanActiveSubtitle": "Deactivate to prevent new subscriptions.",
+  "adminPlanCreate": "Create plan",
+  "adminUpgradesTitle": "Plan upgrades",
+  "adminUpgradesLoadError": "Could not load the upgrade requests.",
+  "adminUpgradesEmptyTitle": "No pending upgrades",
+  "adminUpgradesEmptySubtitle": "Plan change requests appear here.",
+  "adminUpgradeApproved": "Upgrade approved — tenant plan updated!",
+  "adminUpgradeRejected": "Upgrade rejected.",
+  "adminUpgradeProcessError": "Could not process the request.",
+  "adminPlanRequested": "Requested",
+  "adminPlanCurrent": "Current"
+}

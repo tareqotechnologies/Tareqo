@@ -1,0 +1,264 @@
+# 🏭 E2E Production-Readiness Audit — Dumbhanengue ERP
+
+**Audit date:** Aug 4, 2026 · **Stack:** Flutter 3.44.6 / Dart 3.12.2 · **Size:** 211 files / ~20k LOC in `lib/`, 49 test files
+
+> **Update (Aug 5, 2026):** findings **C1, C3, C4** and **H3** are resolved — each finding below carries a status line, and the specialized reports, checklist, score, tech-debt estimate and roadmap were refreshed accordingly. A live schema verification also ran (Aug 5): the C3/C4 hardening layer had **never been applied** to the Supabase project — it was applied in one transaction and re-verified **10/10** (see Methodology).
+>
+> **🔴 Critical bug found & fixed by the live E2E (Aug 5):** operator **precedence** in Postgres — `||` and `->>` share precedence (left-assoc), so `'t' || p_sale->>'id'` parsed as `('t' || p_sale)->>'id'` = **jsonb concatenation** → `22P02 invalid input syntax for type json, Token "t" is invalid`. Every `'t' || (jsonb->>'field')` in `process_sale`, `register_debt` and `process_purchase` (cash-entry ids **and** descriptions) broke — **no sale, debt or purchase could be recorded in Supabase mode**. Fixed with parentheses (`'t' || (p_sale->>'id')`), re-applied to the live project, E2E re-run **22/22 PASS**; `sql_check.sh` extended with section **[4/4]** that executes the RPCs so the bug cannot regress silently (the previous smoke test never executed the money path).
+
+## 0. Methodology — what was actually verified
+
+| Check | Result |
+|---|---|
+| `flutter analyze` | ✅ **0 issues** (clean) |
+| `flutter test` | ✅ **196/196 passing** (updated Aug 5) |
+| `flutter pub outdated` | ⚠️ `sqlite3` 2.9.0→3.5.1, `sqlite3_flutter_libs` **EOL** (`0.6.0+eol`), minor transitive updates |
+| Schema review (`supabase/schema.sql`, 1438 lines) | ✅ Full read: RLS, triggers, RPCs, policies, seed |
+| Live schema verification (read-only via pooler **eu-north-1**, project `dotklbpqmlnhcdifiukd`) | ✅ **Ran Aug 5, 2026**: found **outdated schema** — only the 13 base tables; `super_admins`, new `is_super_admin()`, `settle_debt`, atomic RPCs and limit triggers **absent** → `schema.sql` applied in ONE transaction → re-verified **10/10 PASS** (14 tables · 52 policies · 39 indexes · 20 triggers · 17 functions · plans intact) |
+| **Live E2E money path** (REST/RPC with real JWT, same payloads the app sends) | ✅ **Ran Aug 5**: signup/login → onboarding (tenant pending) → super-admin promotion (`promote_super_admin.sql`) → approval → store → product → `process_sale` → `register_debt` → `settle_debt`, plus sale/settle **idempotency**, negatives (total mismatch, insufficient stock), and RLS isolation — **22/22 PASS**. Exposed the critical **22P02 precedence bug** (see update note), fixed + re-applied + re-run green; web build boots in Supabase mode with no console errors |
+| Build config (Android/iOS/Web/Windows) | ✅ Reviewed |
+| Screens reviewed in depth | Login, AuthGate, Shell, Dashboard, providers; all 24 screens inventoried |
+| Prior work | `PRODUCTION_CHECKLIST.md` (a prior audit session, dated today) confirms continuity |
+
+**Could NOT be verified from the repo** (external facts — flagged explicitly where they matter):
+- Whether the Supabase project has **email confirmation ON/OFF** (dashboard setting) — no longer gates C3 (the role is DB-backed now); still relevant for signup security and 2FA (H9)
+- ~~Whether `schema.sql` was executed on the live project~~ — **resolved Aug 5**: it had NOT been (only the 13 base tables); now applied and verified 10/10 (see table above)
+- Keystore, signing credentials, store accounts, Apple/Google console state
+- Runtime performance profiling on real devices / network conditions
+- Whether `SUPER_ADMIN_EMAIL` / `SUPABASE_*` dart-defines are supplied in any real build
+
+---
+
+## 1. Executive Summary
+
+This is a **well-engineered codebase** — unusually so for its size: clean `flutter analyze`, 196 green tests, real Clean Architecture, Material 3 theming with dark mode, RLS on every table, atomic `SECURITY DEFINER` RPCs with idempotency for sales/purchases/debts, anti-forgery triggers, and 11 chapters of bilingual documentation.
+
+**But it is not shippable to production today.** The blockers are not in code quality — they are in **release operations, authorization modeling, and money-path integrity**:
+
+1. **Release builds sign with the debug keystore** (`android/app/build.gradle.kts`) — cannot be published, and debug keys are a known-credential risk. *(✅ fixed Aug 5 — real keystore + `key.properties`, see C1)*
+2. **Employees cannot see any business data in SaaS mode** — RLS is scoped `auth.uid() = user_id`, but employees are *different* auth users; the "add employee" feature ships but is non-functional in Supabase mode.
+3. **Super-admin authorization is a hardcoded email string** checked against the JWT email claim, on both client and server. Safe *only if* email confirmation is ON (unverifiable from repo); if OFF, **anyone can self-register as the super admin**. *(✅ fixed Aug 5 — DB-backed role, see C3)*
+4. **Debt settlement on Supabase is still non-atomic** (two separate REST calls) — the one remaining money-path hole. *(✅ fixed Aug 5 — `settle_debt` RPC, see C4)*
+5. **Money is `double`** in every entity while the DB uses `NUMERIC(12,2)`; KPIs and reports sum in Dart on full-table fetches — precision and scaling risk.
+6. **Production ops**: CI/CD + SQL/RLS smoke runner added *(✅ H3)*; crash reporting, flavors, placeholder app identity (`com.dumbhanengue.dumbhanengue`, web meta still says *"A new Flutter project."*), single git commit, no changelog remain.
+
+**Bottom line: an excellent codebase with a clear path to production — roughly 2–3 focused engineer-weeks plus external blockers (store accounts, billing, Play App Signing activation).**
+
+---
+
+## 2. Findings — ranked by severity
+
+Top findings use the full 9-point format; the long tail is condensed into tables (category / severity / location / problem / fix).
+
+---
+
+### 🔴 C1 — CRITICAL — Release build signs with the debug keystore
+
+**Status: ✅ FIXED (Aug 5, 2026)** — `android/app/build.gradle.kts` now signs releases from the gitignored `android/key.properties` using a real upload keystore (`android/app/upload-keystore.jks`, alias `upload`, RSA 2048, valid to 2053); debug-keystore fallback only in CI/dev; `*.jks`/`key.properties` added to `.gitignore`; setup documented in `android/key.properties.example` + developer guide. Remaining (external): activate **Play App Signing** and register the upload key SHA-256 in the Play Console, and finalize the `applicationId` placeholder before the first upload.
+
+1. **Category:** Production readiness / Security
+2. **Severity:** **Critical (blocker)**
+3. **Location:** `android/app/build.gradle.kts` (lines 30–31, `signingConfigs.getByName("debug")`)
+4. **Problem:** The release build uses `signingConfigs.getByName("debug")`, and the file still contains Flutter's template TODOs ("Specify your own unique Application ID", "Add your own signing config"). Every Flutter debug keystore is created with a **well-known default password** (`android`) and the same key — any APK you ship is effectively signed with a public key, enabling impersonation/repackaging attacks.
+5. **Business impact:** Cannot upload to Google Play at all; if leaked/shipped, users could install tampered builds (banking app).
+6. **Technical impact:** Zero signature integrity; also `applicationId` `com.dumbhanengue.dumbhanengue` is a placeholder (doubled name, not reverse-DNS).
+7. **Recommended solution:** Generate a real upload keystore, store it **outside the repo**, wire `key.properties` (gitignored), set up Play App Signing.
+8. **Implementation steps:** (1) `keytool -genkey -v -keystore upload.jks`; (2) add `key.properties` + signingConfigs.release; (3) add `*.jks`/`key.properties` to `.gitignore`; (4) verify with `flutter build apk --release` + `apksigner verify`.
+9. **Code example:**
+```kotlin
+signingConfigs {
+    create("release") {
+        val props = Properties().apply {
+            load(File("key.properties").inputStream())
+        }
+        storeFile = file(props["storeFile"] as String)
+        storePassword = props["storePassword"] as String
+        keyAlias = props["keyAlias"] as String
+        keyPassword = props["keyPassword"] as String
+    }
+}
+buildTypes {
+    release {
+        signingConfig = signingConfigs.getByName("release")
+        isMinifyEnabled = true
+        isShrinkResources = true
+    }
+}
+```
+
+---
+
+### 🔴 C2 — CRITICAL — Employees have no access to business data in Supabase mode
+
+1. **Category:** Business logic / Multi-tenancy
+2. **Severity:** **Critical (blocker for the multi-user value proposition)**
+3. **Location:** `supabase/schema.sql` (all RLS policies use `auth.uid() = user_id`), `lib/data/services/supabase_employee_account_service.dart`, `lib/presentation/screens/stores/stores_screen.dart`
+4. **Problem:** The schema seeds business rows with `user_id` = **owner's** auth UID. RLS everywhere is `auth.uid() = user_id`. A store employee is a **different** auth user (created via `auth.signUp`). Employee queries therefore return **zero rows** — the entire dashboard, products, sales, etc. are empty for employees. The checklist (item 1.3) marks this 🔴/undecided. The "add employee" feature exists in the UI but is non-functional in SaaS mode.
+5. **Business impact:** Selling a plan with `max_employees > 1` (all three plans!) promises a feature that doesn't work. Highest-priority product gap.
+6. **Technical impact:** Two RLS models collide (user-scoped business rows vs. store-employee scoping). Requires a schema-wide decision: share owner `user_id` (simplest, no RLS change — employees read owner data) or introduce store-scoped policies via `store_employees` (clean, bigger migration).
+7. **Recommended solution:** Decide ownership model — recommend the **owner-scoped** model for v1 (all tenant business rows keep owner's `user_id`; employees authenticate but the tenant resolves via `store_employees`), or go full store-scoped with policy functions like `is_my_store()` applied to every table. Also: replace owner-chosen employee passwords with **invite/magic-link + forced password reset** (the owner currently knows the employee's password; and with email confirmation OFF, `auth.signUp` **replaces the owner's active session** with the new employee's session — a latent bug in `SupabaseEmployeeAccountService`).
+8. **Implementation steps:** (1) Product decision (owner-shared vs store-scoped); (2) if store-scoped: add `is_employee_of_store(store_id)` policy function + swap policies; (3) rework employee onboarding to invite flow; (4) widget test for employee login → data visibility.
+9. **Code example (store-scoped select policy, chosen route):**
+```sql
+CREATE POLICY products_select ON public.products
+  FOR SELECT USING (
+    public.is_my_store(store_id)   -- owner OR employee of that store
+  );
+```
+
+---
+
+### 🔴 C3 — HIGH/CRITICAL — Super-admin authorization is a hardcoded email
+
+**Status: ✅ FIXED (Aug 5, 2026)** — super-admin is now a **DB-backed role**: `public.super_admins` table (RLS enabled with no policies + conditional REVOKE from anon/authenticated) and `is_super_admin()` rewritten as `SECURITY DEFINER` reading that table; the client resolves the role via RPC (`IAdminRepository` → `isSuperAdminProvider`), `super_admin_config.dart` deleted; a one-time migration promotes the legacy admin. All admin RLS policies and plan-limit triggers enforce against the table. The dashboard email-confirmation check no longer gates this finding (still relevant for signup security — see H9).
+
+1. **Category:** Security / Authorization
+2. **Severity:** **High (Critical if email confirmation is OFF)**
+3. **Location:** `lib/core/config/super_admin_config.dart` (`admin@dumbhanengue.com`), `supabase/schema.sql` → `is_super_admin()` (line ~555), `lib/presentation/screens/auth/auth_gate.dart`
+4. **Problem:** Both client (`SuperAdminConfig.isSuperAdmin(email)`) and server (`is_super_admin()` reads `auth.jwt()->>'email'`) treat a **string equality on a hardcoded email** as super-admin. Authorization is derived from a JWT claim that reflects the signup email — so the ONLY thing protecting the admin panel is that nobody can register `admin@dumbhanengue.com`. If email confirmation is disabled in the Supabase project, **anyone can claim that email and become super admin** — approving tenants, editing plans, deleting data. If email confirmation is ON, an attacker would need to own that mailbox (likely not registered). This cannot be verified from the repo → must be checked in the dashboard.
+5. **Business impact:** Full tenant-control compromise = data of all customers at risk.
+6. **Technical impact:** No database-backed role; email string duplicated in two places that can drift.
+7. **Recommended solution:** Store a super-admin flag in `auth.users` metadata (`app_metadata` or a `roles` table) set by a trusted bootstrap process; change `is_super_admin()` to read metadata; keep client gating as UX only.
+8. **Implementation steps:** (1) Verify email confirmation is ON in the dashboard (immediate); (2) add `role` to user metadata / roles table; (3) update `is_super_admin()`; (4) enable 2FA on the admin account; (5) add a test.
+9. **Code example:**
+```sql
+CREATE OR REPLACE FUNCTION public.is_super_admin()
+RETURNS boolean LANGUAGE sql STABLE AS $$
+  SELECT COALESCE((auth.jwt()->'app_metadata'->>'is_super_admin')::boolean, false);
+$$;
+```
+
+---
+
+### 🔴 C4 — HIGH — Debt settlement is not atomic on Supabase (money path)
+
+**Status: ✅ FIXED (Aug 5, 2026)** — new `settle_debt` RPC (`SECURITY DEFINER`, idempotent, store/tenant-scoped) mirrors the composite use case in **one DB transaction**; `IDebtAtomicProcessor.settle()` + `SupabaseDebtProcessor` wired through `SettleDebtUseCase` (Supabase mode); server lookups are targeted (`WHERE id/debt_id` + index `idx_financial_transactions_debt`). The SQLite/in-memory composite path remains O(n) (checklist 4.3).
+
+1. **Category:** Data integrity / Business logic
+2. **Severity:** **High** (money path — silent inconsistency)
+3. **Location:** `lib/domain/usecases/settle_debt_use_case.dart` + `supabase/schema.sql` (no `settle_debt` RPC; checklist 1.1c2 ⏳)
+4. **Problem:** On Supabase the `IUnitOfWork` is a no-op, so `SettleDebtUseCase` issues **two independent REST calls** (`debts.markAsPaid` then `financial_transactions.markAsPaid`). A network failure between them leaves a paid debt with a pending cash entry (or vice versa). Every other money mutation (sale/purchase/debt registration) was already moved to atomic RPCs — this one wasn't.
+5. **Business impact:** Cash book out of sync with credit ledger; reconciliation burden on merchants.
+6. **Technical impact:** Also `_find` fetches **all debts and all transactions** to locate one record (checklist 4.3) — O(n) per settlement.
+7. **Recommended solution:** Add `settle_debt(p_debt_id text, p_store text)` RPC that marks the debt paid + resolves the linked transaction in one transaction, then wire `IDebtAtomicProcessor` (or a new settle processor) in `service_locator.dart`; narrow the lookup to `WHERE id = ... AND store_id = ...`.
+8. **Implementation steps:** (1) Write `settle_debt` RPC mirroring `register_debt` (idempotent on debt id); (2) add `ISettleDebtProcessor` + Supabase impl; (3) inject into `SettleDebtUseCase`; (4) SQL smoke test (see T1).
+9. **Code example:**
+```sql
+CREATE OR REPLACE FUNCTION public.settle_debt(p_debt_id text, p_store text)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_uid uuid := auth.uid();
+BEGIN
+  IF v_uid IS NULL THEN RAISE EXCEPTION 'Sessão necessária.'; END IF;
+  UPDATE public.debts SET is_paid = TRUE, paid_at = now()
+   WHERE id = p_debt_id AND store_id = p_store AND user_id = v_uid
+     AND NOT is_paid;
+  IF NOT FOUND THEN RETURN; END IF;  -- idempotent / not found
+  UPDATE public.financial_transactions SET status = 'paid'
+   WHERE debt_id = p_debt_id AND store_id = p_store
+     AND user_id = v_uid AND status = 'pending';
+END; $$;
+```
+
+---
+
+### High-severity findings (condensed)
+
+| # | Category | Location | Problem | Recommended fix |
+|---|---|---|---|---|
+| H1 | Money integrity | All entities (`sale.dart`, `product.dart`, `financial_transaction.dart`, `plan.dart`, …) | Money modeled as **`double`** vs `NUMERIC(12,2)` in DB. `0.1+0.2` drift in KPI sums, reports, and totals; the RPCs correctly compare in cents but client inputs/sums don't | Migrate to **integer cents** (checklist 1.7); until then, round at every boundary (`(amount*100).round()`) |
+| H2 | Performance | All Supabase `getAll` (`supabase_product/sale/debt/financial_*_data_source.dart`) | **No pagination** (`.range`/`.limit` only on `.order`); dashboard KPI = Dart-side `fold` over full tables; `get_cash_flow` sums every transaction client-side | Add `.range`/`.limit` + keyset pagination; move KPI/report aggregation into SQL RPCs (checklist 4.1/4.2) |
+| H3 | Ops | Repo-wide | **No CI/CD** (no `.github/`), no integration tests (`integration_test/` absent), no coverage gate, no `sqlcheck` runner for the SQL suite — **✅ fixed Aug 5**: `.github/workflows/ci.yml` (analyze → test+coverage → release APK → sql-check on Postgres 16) + `scripts/sql_check.sh`, validated locally against real Postgres 16 (PASS, re-runnable) | Remaining: integration tests (`integration_test/`), coverage-gate baseline (checklist 6.5) |
+| H4 | Observability | `lib/main.dart` | No `FlutterError.onError`/`PlatformDispatcher.onError`, no Sentry/Crashlytics, no analytics — **zero crash visibility**; errors only `debugPrint` | Integrate Sentry (or Crashlytics); wrap `runZonedGuarded`; keep `debugPrint` behind `kReleaseMode` guards |
+| H5 | Config | `lib/core/config/supabase_config.dart` | **Real project URL + anon key compiled into the binary as defaults.** Anon keys are public by design, but: (a) the app always points at the *dev* project unless rebuilt with `--dart-define`; (b) a release without defines silently talks to a hardcoded project — no fail-fast | Flavor-based config (dev/prod) + fail fast in release when `SUPABASE_URL` is the placeholder; revoke/rotate the embedded key (checklist 2.4/7.2) |
+| H6 | Security | `supabase/schema.sql` (`tenants_insert` policy) | Any logged-in user can create **unlimited pending tenants** — free DoS on the manual-approval queue + unauthenticated signup spam | Rate-limit tenant creation (e.g., 1 pending tenant per user), require confirmed email before creating a tenant, reCAPTCHA on signup |
+| H7 | Security | `lib/data/services/supabase_employee_account_service.dart` | Owner-defined employee passwords (owner knows them); with email confirmation OFF, `signUp` **replaces the owner's session** mid-flow | Invite-based onboarding (magic link / temp password + forced reset); assert `session.user?.id` unchanged after employee creation |
+| H8 | Security | `supabase/schema.sql` | No **audit trail** for admin decisions (approve/reject/plan edits) — `decided_at` exists but no actor/immutable log | `audit_log` table + `decided_by`; log via trigger (checklist 2.3) |
+| H9 | Security | `supabase/schema.sql` (`is_super_admin`) + dashboard | No 2FA on admin account; no email-confirmation verification possible from repo | Enable 2FA + confirm email verification (checklist 2.1/2.2) |
+
+---
+
+### Medium findings (condensed)
+
+| # | Category | Location | Problem | Fix |
+|---|---|---|---|---|
+| M1 | Data | `supabase/schema.sql` seed | Demo seed works **only for the first user** (PKs `p1`…`tn_demo` conflict → `DO NOTHING`). Documented, but confusing in a multi-tenant prod | Ship no seed in prod schema; move to a one-time migration |
+| M2 | Ops | `web/index.html`, `web/manifest.json`, `ios/Runner/Info.plist`, Android label | Placeholder branding everywhere: meta description *"A new Flutter project."*, title `dumbhanengue`, default icons, no CSP | Real metadata, favicons, `Content-Security-Policy` meta (checklist 2.7/7.4) |
+| M3 | Perf | `lib/presentation/screens/shell/app_shell.dart` | `IndexedStack` keeps all 6 sections alive (memory + build cost); dashboard folds on every list change | Acceptable at this scale; if growing, lazy-load tabs / use `AutomaticKeepAlive` |
+| M4 | Deps | `pubspec.yaml` | `sqlite3_flutter_libs` is **EOL** (`0.6.0+eol`); `sqlite3` 2.9.0 pinned vs 3.5.1 | Plan migration (checklist 8.2) — only affects the local/SQLite dev mode |
+| M5 | Code | `supabase_tenant_data_source.dart` L63, `supabase_plan_request_data_source.dart` L54, `admin_plans_screen.dart` L197 | `AppIds` migration **incomplete** — tenant/plan-request/plan creation still uses `microsecondsSinceEpoch` (checklist 1.10 claims ✅) | Replace remaining call sites with `AppIds.newId('tn'/'pr'/'pl')` |
+| M6 | Security | `.gitignore` | No keystore/key.properties exclusion; no secrets-scanning | Add `*.jks`, `key.properties`, `.env`; run `gitleaks`/`trufflehog` pre-merge |
+| M7 | Security | `supabase/schema.sql` password policy | Client enforces 8 chars; Supabase default min is 6 — direct API users get weaker passwords | Set `password_min_length=8` in project settings |
+| M8 | UX | Dashboard low-stock | Threshold hardcoded `< 5` units | Make it configurable per product/category |
+| M9 | Ops | Versioning | `1.0.0+1` everywhere; single commit; no CHANGELOG, no flavors | Define versioning + flavor strategy before first release (checklist 9.2) |
+| M10 | Docs | `docs/` | Docs still reference `dio`/`Failure` and pre-RPC architecture (checklist 9.1) | Sync docs with the atomic-RPC path |
+| M11 | Reliability | Supabase client defaults | No explicit timeouts/retries on REST calls; no connectivity-awareness UI | Configure timeouts + retry with backoff for idempotent reads; offline banner |
+| M12 | Scale | Schema | TEXT PKs generated client-side (fine at small scale; collision odds low with `AppIds`) | Revisit UUID v7 PKs at scale |
+
+### Low findings
+
+| # | Location | Issue |
+|---|---|---|
+| L1 | `app.dart`, package name | Product name "Dumbhanengue" + doubled applicationId read as template placeholders — confirm the final brand before store submission |
+| L2 | `finance_providers.dart` / `reports_providers.dart` | Duplicated `_startOfDay` helper → extract to `core/utils` |
+| L3 | `supabase_auth_remote_data_source.dart` | Signup-without-confirmation returns placeholder `AppUser(id: email)` — guarded by flow, but fragile; assert real uid |
+| L4 | `AppIds.newId` | Format `p<ts36>_<hex6>` is fine, but a `_` in PKs is awkward for URL/key usage — cosmetic |
+| L5 | Localization | All strings hardcoded pt-BR — acceptable for the target market; i18n only when expanding |
+
+---
+
+## 3. Specialized Reports
+
+### 🔐 Security Report
+**Strengths:** RLS enabled on **all 14 tables** with per-tenant policies (incl. `super_admins`, zero policies); DB-backed super-admin role (`public.super_admins` + SECURITY DEFINER `is_super_admin`); anti-forgery triggers force `user_id = auth.uid()` and validate `store_id` against the user's stores on every insert; plan-limit enforcement **in the DB** (triggers `enforce_store_limit`/`enforce_employee_limit`); atomic `SECURITY DEFINER` RPCs with pinned `search_path`, explicit `user_id`/`store_id` filters and **idempotency keys**; `FOR UPDATE` locking closes TOCTOU on stock; tokens in `flutter_secure_storage` (Keychain/Keystore AES-GCM); no `service_role` key anywhere; no `print`/plaintext secrets; the seed's "preserve value when no JWT" backdoor is harmless under RLS.
+
+**Gaps (by severity):** H6 (tenant spam), H7 (employee session/password), H8 (no audit log), H9 (no 2FA), M7 (password policy consistency), M11 (no timeouts/retry). *(C1/C3 fixed Aug 5.)* XSS/CSRF: N/A (native + PostgREST JWT; web target would need CSP — checklist 2.7). SQL injection: N/A (typed PostgREST + parameterized SQL). MITM: TLS enforced by Supabase endpoints; no custom cert validation code to audit.
+
+### 🏛️ Architecture Report
+Genuine Clean Architecture: domain (entities/usecases/repos) is framework-free; data layer split local/remote with repository pattern; DI via GetIt + Riverpod providers (dual-DI is documented and test-friendly — one provider override covers the chain). Atomic processors (`ISaleAtomicProcessor` etc.) keep use cases backend-agnostic. **Praise:** separation, testability, documentation. **Flaws:** misleading `*LocalDataSource` naming for Supabase impls (M—cosmetic, documented); exception-based error handling (deliberately dropped the `Failure` hierarchy — acceptable, but screens catch bare `Exception`); `SettleDebtUseCase` O(n) lookup on the SQLite/memory composite path (Supabase is targeted via the `settle_debt` RPC); `AppIds` migration incomplete; no offline repository abstraction yet.
+
+### 🎨 UX/UI Report
+Genuinely strong. Verified in code: consistent Material 3 theme with **dark mode**, emerald identity, filled inputs, borderless cards, 52px buttons, adaptive `NavigationRail`/`NavigationBar` (>880px), `IndexedStack` state preservation, store selector scoped to all modules, consistent loading/empty/error states (`KpiCard`, `EmptyState`, `ErrorView`, `StatusChip`), polished login (password visibility toggle, min-8 + confirm validation, autofill hints, generic error messages, explicit auth-stream error screen with retry — no silent login drops), dashboard KPIs + quick actions + low-stock alerts. **Gaps:** no explicit `Semantics` labels; accessibility (font scaling, contrast ratios, touch targets at large text) untested; low-stock threshold hardcoded; no pull-to-refresh on lists; placeholder branding; onboarding/admin screens not widget-tested.
+
+### ⚡ Performance Report
+At **1–100 users: excellent.** At 10k+ rows: breaks — no pagination, client-side sums of full tables (dashboard KPIs, cash flow, sales report), `SettleDebtUseCase` O(all data) on the SQLite/memory path (Supabase is targeted via the `settle_debt` RPC). Startup: SQLite open/seed on the main isolate (dev mode only). `IndexedStack` keeps all tabs mounted. Recommendations: keyset pagination, SQL aggregation RPCs, targeted lookups, deferred SQLite, and offline-first as the strategic play (checklist 4.x).
+
+### 💼 Business Readiness Report
+Plans (Essencial/Profissional/Empresa) with **DB-enforced** store/employee limits — unusually good server-side gating. Missing: **billing entirely** (manual approval, no payments), no trial, no self-serve upgrade/downgrade, no downgrade-below-usage protection (queued), no edit/void/delete for products/customers/sales (daily merchant need, queued), and the C2 employee-access gap undermines the multi-user plans.
+
+---
+
+## 4. Production Readiness Checklist
+
+| Area | ✅ Ready | 🔴 Not ready |
+|---|---|---|
+| Code quality | analyze clean, 196 tests, docs | — |
+| Data integrity | atomic sale/purchase/debt RPCs (incl. `settle_debt`), idempotent, stock locking | money as double (H1) |
+| Security | RLS, anti-forgery triggers, DB-backed super-admin role (C3), secure storage | tenant spam (H6), audit log, 2FA |
+| Release | keystore-based release signing (C1) | appId/branding placeholders, flavors |
+| Ops | CI/CD + SQL/RLS smoke runner (H3) | no crash reporting, no coverage gate |
+| Multi-user | — | employee data access (C2), invite flow |
+| Scale | — | pagination, aggregation RPCs |
+
+## 5. Release Checklist (pre-store)
+1. ✅ Real upload keystore + `key.properties` gitignored (C1) — keystore generated; external: activate Play App Signing + register upload key
+2. ✅ Super-admin role fixed (C3); external: verify email confirmation ON + enable 2FA (H9)
+3. ✅ `settle_debt` RPC (C4) + SQL smoke test (H3) — `schema.sql` **applied to the live project** (eu-north-1) and re-verified 10/10 (Aug 5)
+4. Employee RLS decision + invite flow (C2)
+5. Branding: appId, labels, web metadata, icons/splash (M2)
+6. ✅ CI pipeline (H3); crash reporting (H4) still open
+7. Privacy policy / ToS (legal) · data backup policy (checklist 7.5/7.6)
+
+## 6. Final Production Score: **62 / 100** *(updated Aug 5 after C1/C3/C4/H3 — approximate)*
+Architecture 85 · Testing 72 · Security 62 · UX/UI 80 · Performance/Scalability 50 · Business/Billing 30 · Production Ops 48 · Documentation 90.
+
+## 7. Estimated Technical Debt
+~**12–15 engineering days** (≈ 2–3 weeks): 1–2 days remaining blocker (C2), 5–7 days High items (H1/H2/H6/H7), 4–6 days Medium (M1–M7), remainder hardening + tests. Excludes external work (store accounts, Play App Signing activation, billing integration, legal).
+
+## 8. Priority Roadmap
+- **Immediate (blockers):** ✅ done — C1 signing, C3 super-admin role, C4 `settle_debt` RPC, SQL smoke test (H3), keystore gitignore, `schema.sql` applied to live + 10/10 verification (Aug 5). Remaining: **C2 product decision** (employee data access) · external: verify email confirmation ON + 2FA (H9)
+- **Short term (1–3 weeks):** employee RLS + invite flow · integer-cents migration · pagination + aggregation RPCs · Sentry (H4) · web metadata/CSP · complete `AppIds` migration (M5) · docs sync
+- **Long term (post-launch):** billing (Stripe/Mercado Pago) + self-serve plans · offline-first sync · audit log + data export · i18n · integration tests + coverage gate
+
+---
+
+*Scope note: the original audit was read-only; fixes for C1/C3/C4/H3 were implemented in follow-up sessions (Aug 5, 2026) — statuses above. The live schema verification also ran Aug 5 (read-only via pooler eu-north-1): the hardening layer was missing in production, `schema.sql` was applied in one transaction and re-verified 10/10. External items (email confirmation, Play App Signing activation, store console) must be verified in the Supabase dashboard and store consoles, not in code.*

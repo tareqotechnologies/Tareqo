@@ -1,0 +1,662 @@
+{
+  "@@locale": "pt",
+  "appTitle": "Dumbhanengue ERP",
+  "onboardingTitle": "Bem-vindo!",
+  "onboardingHeading": "Ative seu negócio no ERP",
+  "onboardingSubtitle": "Escolha um plano, informe o nome do seu negócio e defina a moeda e o idioma. Seu acesso será liberado após a aprovação (prazo de até 24h).",
+  "onboardingBusinessLabel": "Nome do negócio",
+  "onboardingBusinessError": "Informe o nome do seu negócio.",
+  "onboardingPlanLabel": "Escolha o plano",
+  "onboardingPlansError": "Não foi possível carregar os planos.",
+  "onboardingPlanDetails": "{stores} loja(s) · {employees} funcionário(s)",
+  "@onboardingPlanDetails": {
+    "description": "Resumo dos limites do plano",
+    "placeholders": {
+      "stores": {
+        "type": "int"
+      },
+      "employees": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSubmit": "Solicitar acesso",
+  "onboardingSuccess": "Solicitação de {business} enviada! Aguarde a aprovação (até 24h).",
+  "@onboardingSuccess": {
+    "description": "Feedback após enviar a solicitação de acesso",
+    "placeholders": {
+      "business": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingChoosePlanError": "Escolha um plano para continuar.",
+  "onboardingGenericError": "Não foi possível enviar a solicitação. Tente novamente.",
+  "onboardingLanguageLabel": "Idioma",
+  "onboardingLanguageHint": "Idioma do aplicativo",
+  "onboardingCurrencyLabel": "Moeda",
+  "onboardingCurrencyHint": "Moeda usada nos valores",
+  "languagePortuguese": "Português",
+  "languageEnglish": "English",
+  "currencyBrl": "Real (BRL)",
+  "currencyUsd": "Dólar (USD)",
+  "currencyEur": "Euro (EUR)",
+  "currencyMzn": "Metical (MZN)",
+  "settingsSave": "Salvar ajustes",
+  "settingsSaved": "Ajustes salvos!",
+  "settingsGenericError": "Não foi possível salvar os ajustes. Tente novamente.",
+  "commonSearch": "Buscar...",
+  "commonRetry": "Tentar novamente",
+  "commonSignOut": "Sair da conta",
+  "appSheetClose": "Fechar",
+  "storeSelectorActiveTooltip": "Loja ativa",
+  "tenantPendingTitle": "Aguardando aprovação",
+  "tenantPendingSubtitle": "A solicitação de acesso de \"{business}\" foi enviada com sucesso. O super admin vai analisar e você receberá acesso em até 24h.",
+  "@tenantPendingSubtitle": {
+    "placeholders": {
+      "business": {
+        "type": "String"
+      }
+    }
+  },
+  "tenantPendingHint": "Assim que aprovado, você poderá criar lojas, contratar funcionários e começar a operar.",
+  "tenantRejectedTitle": "Solicitação rejeitada",
+  "tenantRejectedSubtitle": "A solicitação de acesso de \"{business}\" não foi aprovada.",
+  "@tenantRejectedSubtitle": {
+    "placeholders": {
+      "business": {
+        "type": "String"
+      }
+    }
+  },
+  "authErrorRestoreSession": "Não foi possível restaurar sua sessão",
+  "authErrorCheckConnection": "Verifique sua conexão e tente novamente.",
+  "authErrorLoadAccount": "Não foi possível carregar sua conta",
+  "loginSubtitleSignUp": "Crie sua conta para começar",
+  "loginSubtitleSignIn": "Gestão simples para o seu negócio",
+  "loginNameLabel": "Nome",
+  "loginEmailLabel": "E-mail",
+  "loginEmailError": "Informe um e-mail válido.",
+  "loginPasswordLabel": "Senha",
+  "loginPasswordError": "A senha deve ter ao menos 8 caracteres.",
+  "loginShowPassword": "Mostrar senha",
+  "loginHidePassword": "Ocultar senha",
+  "loginConfirmLabel": "Confirmar senha",
+  "loginConfirmError": "As senhas não coincidem.",
+  "loginSignUp": "Cadastrar",
+  "loginSignIn": "Entrar",
+  "loginSwitchToSignIn": "Já tenho conta — entrar",
+  "loginSwitchToSignUp": "Não tenho conta — cadastrar",
+  "loginSignUpSuccess": "Conta criada! Confirme seu e-mail para entrar.",
+  "loginSignUpError": "Não foi possível criar a conta. Tente novamente.",
+  "loginSignInError": "Não foi possível entrar. Verifique e-mail e senha.",
+  "loginSecurityNote": "Seus dados ficam protegidos com criptografia.",
+  "appNavHome": "Início",
+  "appNavProducts": "Produtos",
+  "appNavSales": "Vendas",
+  "appNavFinancial": "Financeiro",
+  "appNavCredit": "Crédito",
+  "appNavCustomers": "Clientes",
+  "dashboardGreeting": "Olá, {name} 👋",
+  "@dashboardGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardSignOutTooltip": "Sair",
+  "dashboardOwnerFallback": "Dono",
+  "dashboardTotalSales": "Total de vendas",
+  "dashboardAllTime": "Todo o histórico",
+  "dashboardCashBalance": "Saldo em caixa",
+  "dashboardReceivables": "A receber (fiado)",
+  "dashboardStockLabel": "Estoque em produtos",
+  "commonUnits": "un.",
+  "dashboardQuickActions": "Ações rápidas",
+  "dashboardQuickNewSale": "Nova venda",
+  "dashboardQuickAddProduct": "Adicionar produto",
+  "dashboardQuickAddTransaction": "Registrar transação",
+  "dashboardQuickAddDebt": "Registrar fiado",
+  "dashboardModules": "Módulos",
+  "dashboardModuleCustomers": "Clientes",
+  "dashboardModulePurchases": "Compras",
+  "dashboardModuleReports": "Relatórios",
+  "dashboardModuleStores": "Lojas",
+  "dashboardRecentSales": "Vendas recentes",
+  "dashboardNoSales": "Nenhuma venda ainda — registre a primeira!",
+  "dashboardLowStock": "Estoque baixo",
+  "dashboardSaleItems": "{count, plural, =1{1 item} other{{count} itens}}",
+  "@dashboardSaleItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "weekdayMonday": "Segunda-feira",
+  "weekdayTuesday": "Terça-feira",
+  "weekdayWednesday": "Quarta-feira",
+  "weekdayThursday": "Quinta-feira",
+  "weekdayFriday": "Sexta-feira",
+  "weekdaySaturday": "Sábado",
+  "weekdaySunday": "Domingo",
+  "storesTitle": "Lojas",
+  "storesTabStores": "Lojas",
+  "storesTabEmployees": "Funcionários",
+  "storesTabUpgrades": "Upgrades",
+  "storesTabSettings": "Ajustes",
+  "storesAddStore": "Nova loja",
+  "storesAddEmployee": "Novo funcionário",
+  "storesLoadError": "Não foi possível carregar as lojas.",
+  "storesEmptyTitle": "Nenhuma loja criada",
+  "storesEmptySubtitle": "Crie a primeira loja do seu negócio.",
+  "employeesLoadError": "Não foi possível carregar os funcionários.",
+  "employeesEmptyTitle": "Nenhum funcionário vinculado",
+  "employeesEmptySubtitle": "Crie a conta do funcionário e escolha a loja.",
+  "roleManager": "Gerente",
+  "roleEmployee": "Funcionário",
+  "upgradesLoadError": "Não foi possível carregar os pedidos de upgrade.",
+  "upgradesEmptyTitle": "Nenhum pedido de upgrade",
+  "upgradesEmptySubtitle": "Solicite um plano maior no card acima.",
+  "statusPending": "Pendente",
+  "statusApproved": "Aprovado",
+  "statusRejected": "Rejeitado",
+  "upgradesRequestedOn": "Solicitado em {date}",
+  "@upgradesRequestedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planCardTitle": "Plano",
+  "planCardUpgrade": "Upgrade",
+  "planCardStores": "Lojas",
+  "planCardEmployees": "Funcionários",
+  "planDetails": "{stores} lojas · {employees} funcionários",
+  "@planDetails": {
+    "placeholders": {
+      "stores": {
+        "type": "int"
+      },
+      "employees": {
+        "type": "int"
+      }
+    }
+  },
+  "addStoreTitle": "Nova loja",
+  "addStoreNameLabel": "Nome da loja",
+  "addStoreNameError": "Informe o nome da loja.",
+  "addStoreAddressLabel": "Endereço (opcional)",
+  "addStoreSuccess": "Loja {name} criada!",
+  "@addStoreSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addStoreError": "Não foi possível criar a loja. Tente novamente.",
+  "addStoreSubmit": "Criar loja",
+  "addEmployeeTitle": "Novo funcionário",
+  "addEmployeeNameLabel": "Nome completo",
+  "addEmployeeNameError": "Informe o nome do funcionário.",
+  "addEmployeeEmailLabel": "E-mail",
+  "addEmployeeEmailError": "Informe um e-mail válido.",
+  "addEmployeePasswordLabel": "Senha de acesso",
+  "addEmployeePasswordError": "A senha deve ter ao menos 6 caracteres.",
+  "addEmployeeStoreLabel": "Loja",
+  "addEmployeeNoStores": "Crie uma loja antes de cadastrar funcionários.",
+  "addEmployeeRoleLabel": "Cargo",
+  "addEmployeeSuccess": "Funcionário cadastrado! A conta de acesso foi criada.",
+  "addEmployeeError": "Não foi possível cadastrar o funcionário. Verifique se o e-mail já não está em uso.",
+  "addEmployeeSubmit": "Cadastrar funcionário",
+  "upgradeTitle": "Upgrade de plano",
+  "upgradeSubtitle": "Escolha o novo plano. O super admin precisará aprovar o pedido antes de o plano ser alterado.",
+  "upgradeMaxReached": "Você já está no plano máximo disponível.",
+  "upgradeChooseError": "Escolha o plano de destino.",
+  "upgradeSuccess": "Pedido de upgrade enviado! O super admin vai analisar.",
+  "upgradeError": "Não foi possível enviar o pedido. Tente novamente.",
+  "upgradeSubmit": "Solicitar upgrade",
+  "commonRefresh": "Atualizar",
+  "commonCancel": "Cancelar",
+  "commonDescription": "Descrição",
+  "commonNoResults": "Nenhum resultado",
+  "commonNoResultsHint": "Tente buscar por outro termo.",
+  "commonSave": "Salvar",
+  "commonSoldOut": "Esgotado",
+  "periodToday": "Hoje",
+  "periodWeek": "7 dias",
+  "periodMonth": "Este mês",
+  "periodAll": "Tudo",
+  "paymentCash": "Dinheiro",
+  "paymentDebitCard": "Cartão de débito",
+  "paymentCreditCard": "Cartão de crédito",
+  "paymentPix": "Pix",
+  "paymentTransfer": "Transferência",
+  "productsSearchHint": "Buscar produto...",
+  "productsLoadError": "Não foi possível carregar os produtos.",
+  "productsEmptyTitle": "Nenhum produto cadastrado",
+  "productsEmptySubtitle": "Toque em \"Novo produto\" para começar.",
+  "productsAddNew": "Novo produto",
+  "productsBuySell": "Compra: {buy} · Venda: {sell}",
+  "@productsBuySell": {
+    "placeholders": {
+      "buy": {
+        "type": "String"
+      },
+      "sell": {
+        "type": "String"
+      }
+    }
+  },
+  "productsAdded": "Produto adicionado!",
+  "productsAddError": "Não foi possível adicionar o produto. Tente novamente.",
+  "productsNameError": "Informe o nome do produto.",
+  "productsDescriptionLabel": "Descrição (opcional)",
+  "productsPurchasePrice": "Preço de compra",
+  "productsPurchasePriceError": "Informe o preço de compra.",
+  "productsSalePrice": "Preço de venda",
+  "productsSalePriceError": "Informe o preço de venda.",
+  "productsStockQuantity": "Quantidade em estoque",
+  "productsStockError": "Informe uma quantidade válida.",
+  "productsAddSubmit": "Adicionar produto",
+  "customersSearchHint": "Buscar cliente...",
+  "customersLoadError": "Não foi possível carregar os clientes.",
+  "customersEmptyTitle": "Nenhum cliente cadastrado",
+  "customersEmptySubtitle": "Toque em \"Novo cliente\" para começar.",
+  "customersAddNew": "Novo cliente",
+  "customersCreditLabel": "Fiado {amount}",
+  "@customersCreditLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "customersAdded": "Cliente {name} cadastrado!",
+  "@customersAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "customersAddError": "Não foi possível cadastrar o cliente. Tente novamente.",
+  "customersNameError": "Informe o nome do cliente.",
+  "customersPhoneLabel": "Telefone (opcional)",
+  "customersEmailLabel": "E-mail (opcional)",
+  "customersAddSubmit": "Cadastrar cliente",
+  "purchasesTitle": "Compras",
+  "purchasesAddNew": "Nova compra",
+  "purchasesLoadError": "Não foi possível carregar as compras.",
+  "purchasesEmptyTitle": "Nenhuma compra registrada",
+  "purchasesEmptySubtitle": "Toque em \"Nova compra\" para registrar a entrada de mercadoria e abastecer o estoque.",
+  "purchasesSupplierError": "Informe o fornecedor da compra.",
+  "purchasesCartItemUnavailable": "Um item do carrinho não está mais disponível. Tente novamente.",
+  "purchasesRegistered": "Compra registrada: {amount}!",
+  "@purchasesRegistered": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "purchasesProductNotFound": "Produto {id} não encontrado no catálogo.",
+  "@purchasesProductNotFound": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "purchasesRegisterError": "Não foi possível registrar a compra. Tente novamente.",
+  "purchasesSupplierLabel": "Fornecedor",
+  "purchasesNoProductsTitle": "Nenhum produto para comprar",
+  "purchasesNoProductsSubtitle": "Cadastre produtos para registrar compras.",
+  "purchasesConfirm": "Confirmar compra",
+  "purchasesStockLabel": "{quantity} {unit} em estoque",
+  "@purchasesStockLabel": {
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsTitle": "Relatórios",
+  "reportsRevenue": "Faturamento",
+  "reportsProfit": "Lucro bruto",
+  "reportsMargin": "Margem",
+  "reportsBestSellers": "Mais vendidos",
+  "reportsLoadError": "Não foi possível carregar o relatório.",
+  "reportsEmptyTitle": "Sem vendas no período",
+  "reportsEmptySubtitle": "Registre vendas para ver o relatório.",
+  "reportsSalesPerDay": "Vendas por dia",
+  "reportsRevenueLabel": "{amount} vendidos",
+  "@reportsRevenueLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financialTitle": "Financeiro",
+  "financialRegister": "Registrar",
+  "financialIncome": "Entradas",
+  "financialExpense": "Saídas",
+  "financialBalance": "Saldo",
+  "financialTransactions": "Movimentações",
+  "financialLoadError": "Não foi possível carregar as movimentações.",
+  "financialEmptyTitle": "Nenhuma movimentação",
+  "financialEmptySubtitle": "Registre entradas e saídas para acompanhar o fluxo de caixa.",
+  "financialReceivePendingTitle": "Receber pendência?",
+  "financialReceivePendingBody": "Confirmar o recebimento de {amount}? A movimentação passa a contar no caixa realizado.",
+  "@financialReceivePendingBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financialReceive": "Receber",
+  "financialReceived": "Movimentação recebida!",
+  "financialReceiveError": "Não foi possível receber a pendência. Tente novamente.",
+  "financialAddTitle": "Registrar movimentação",
+  "financialIncomingType": "Entrada",
+  "financialOutgoingType": "Saída",
+  "financialDescriptionLabel": "Descrição",
+  "financialDescriptionError": "Informe a descrição.",
+  "financialCategoryLabel": "Categoria (opcional)",
+  "financialAmountLabel": "Valor", 
+  "financialAmountError": "Informe um valor maior que zero.",
+  "financialPendingLabel": "Pendente (fiado)",
+  "financialPendingHint": "Não conta no caixa realizado até ser recebido.",
+  "financialRegistered": "Movimentação registrada!",
+  "financialRegisterError": "Não foi possível registrar a movimentação. Tente novamente.",
+  "financialDefaultCategoryIncome": "Vendas",
+  "financialDefaultCategoryExpense": "Despesas",
+  "debtsTitle": "Crédito (fiado)",
+  "debtsAddDebt": "Registrar fiado",
+  "debtsTabPending": "Pendentes",
+  "debtsTabSettled": "Quitadas",
+  "debtsTotalPending": "Total a receber",
+  "debtsNoPendingCustomers": "Nenhum cliente pendente",
+  "debtsPendingCustomers": "{count, plural, =1{1 cliente pendente} other{{count} clientes pendentes}}",
+  "@debtsPendingCustomers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsPendingSection": "Dívidas pendentes",
+  "debtsLoadError": "Não foi possível carregar as dívidas.",
+  "debtsEmptyPendingTitle": "Nenhum fiado pendente 🎉",
+  "debtsEmptyPendingSubtitle": "Nenhum cliente está devendo no momento.",
+  "debtsTotalSettled": "Total quitado",
+  "debtsSettledCount": "{count, plural, =1{1 baixa registrada} other{{count} baixas registradas}}",
+  "@debtsSettledCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsSettledSection": "Histórico de quitações",
+  "debtsHistoryLoadError": "Não foi possível carregar o histórico.",
+  "debtsEmptySettledTitle": "Nenhuma quitação ainda",
+  "debtsEmptySettledSubtitle": "Quando um fiado for quitado, ele aparece aqui.",
+  "debtsSettleTitle": "Quitar dívida?",
+  "debtsSettleBody": "Receber {amount} de {name}? Será registrada uma entrada no caixa.",
+  "@debtsSettleBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsSettle": "Quitar",
+  "debtsSettled": "Fiado de {name} quitado — {amount} no caixa.",
+  "@debtsSettled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsNotFound": "Esta dívida não está mais pendente.",
+  "debtsSettleError": "Não foi possível quitar a dívida. Tente novamente.",
+  "debtsLate": "Atrasada",
+  "debtsDueToday": "Vence hoje",
+  "debtsDueIn": "Em {days, plural, =1{1 dia} other{{days} dias}}",
+  "@debtsDueIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsSettleAction": "Quitar dívida",
+  "debtsSettledLabel": "Quitada",
+  "debtsSettledOn": "Quitada em {date}",
+  "@debtsSettledOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsDueDateHelp": "Vencimento do fiado",
+  "debtsRegisteredFor": "Fiado registrado para {name}!",
+  "@debtsRegisteredFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPendingEntryError": "Fiado registrado, mas a pendência no Financeiro não pôde ser criada. Verifique as movimentações.",
+  "debtsRegisterError": "Não foi possível registrar o fiado. Tente novamente.",
+  "debtsCustomerLinkLabel": "Cliente vinculado (opcional)",
+  "debtsNoCustomer": "Sem vínculo",
+  "debtsCustomerNameLabel": "Nome do cliente",
+  "debtsCustomerNameError": "Informe o nome do cliente.",
+  "debtsDueDateLabel": "Vencimento",
+  "salesTitle": "Vendas",
+  "salesNewSale": "Nova venda",
+  "salesLoadError": "Não foi possível carregar as vendas.",
+  "salesEmptyTitle": "Nenhuma venda registrada",
+  "salesEmptySubtitle": "Toque em \"Nova venda\" para registrar a primeira.",
+  "salesItemUnavailable": "Um item do carrinho não está mais disponível. Tente novamente.",
+  "salesRegistered": "Venda registrada: {amount}!",
+  "@salesRegistered": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "salesInsufficientStock": "Estoque insuficiente{product}. Disponível: {available}.",
+  "@salesInsufficientStock": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "salesStockFor": "para {name}",
+  "@salesStockFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "salesProductNotFound": "Produto {id} não encontrado no estoque.",
+  "@salesProductNotFound": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "salesRegisterError": "Não foi possível registrar a venda. Tente novamente.",
+  "salesSearchProducts": "Buscar produto...",
+  "salesNoProductsTitle": "Nenhum produto para vender",
+  "salesNoProductsSubtitle": "Cadastre produtos para registrar vendas.",
+  "salesConfirm": "Confirmar venda",
+  "saleDetailTitle": "Detalhes da venda",
+  "saleDetailId": "Venda {id}",
+  "@saleDetailId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "saleDetailTotalLabel": "Total da venda",
+  "saleDetailItems": "Itens",
+  "saleDetailTotal": "Total",
+  "saleDetailSnapshot": "Preços congelados no momento da venda.",
+  "adminTitle": "Painel do Super Admin",
+  "adminNavRequests": "Solicitações",
+  "adminNavPlans": "Planos",
+  "adminNavUpgrades": "Upgrades",
+  "adminTenantsTitle": "Tenants",
+  "adminPendingOnly": "Pendentes",
+  "adminAll": "Todos",
+  "adminAwaitingCount": "{count} aguardando aprovação",
+  "@adminAwaitingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminTenantsEmpty": "Nenhum tenant registrado ainda.",
+  "adminRequestsLoadError": "Não foi possível carregar as solicitações.",
+  "adminNothingPendingTitle": "Nada aguardando aprovação",
+  "adminNothingPendingSubtitle": "Novas solicitações de tenant aparecem aqui.",
+  "adminTenantsLoadError": "Não foi possível carregar os tenants.",
+  "adminRejectError": "Não foi possível rejeitar a solicitação.",
+  "adminApproveError": "Não foi possível aprovar a solicitação.",
+  "adminAccessApproved": "Acesso de {name} aprovado!",
+  "@adminAccessApproved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRequestRejected": "Solicitação de {name} rejeitada.",
+  "@adminRequestRejected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRejectTitle": "Rejeitar {name}",
+  "@adminRejectTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRejectReasonLabel": "Motivo da rejeição",
+  "adminRejectReasonHint": "Ex.: informações incompletas no cadastro",
+  "adminApprove": "Aprovar",
+  "adminReject": "Rejeitar",
+  "adminPlanLabel": "Plano: {plan}",
+  "@adminPlanLabel": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlanSolicited": "Plano: {plan} · Solicitado: {date}",
+  "@adminPlanSolicited": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlansTitle": "Planos",
+  "adminPlanNewTooltip": "Novo plano",
+  "adminPlansLoadError": "Não foi possível carregar os planos.",
+  "adminPlansEmptyTitle": "Nenhum plano criado",
+  "adminPlansEmptySubtitle": "Crie o primeiro plano para liberar assinaturas.",
+  "adminPlanInactive": "Inativo",
+  "adminPlanDetails": "{price}/mês · {stores} loja(s) · {employees} funcionário(s)",
+  "@adminPlanDetails": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "stores": {
+        "type": "int"
+      },
+      "employees": {
+        "type": "int"
+      }
+    }
+  },
+  "adminPlanNameError": "Informe o nome do plano.",
+  "adminPlanPriceError": "Informe um preço válido (≥ 0).",
+  "adminPlanStoresError": "O plano deve permitir ao menos 1 loja.",
+  "adminPlanEmployeesError": "O plano deve permitir ao menos 1 funcionário.",
+  "adminPlanCreated": "Plano {name} criado!",
+  "@adminPlanCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlanUpdated": "Plano {name} atualizado!",
+  "@adminPlanUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlanSaveError": "Não foi possível salvar o plano. Tente novamente.",
+  "adminPlanNewTitle": "Novo plano",
+  "adminPlanEditTitle": "Editar plano",
+  "adminPlanNameLabel": "Nome do plano",
+  "adminPlanPriceLabel": "Preço mensal", 
+  "adminPlanMaxStores": "Máx. lojas",
+  "adminPlanMaxEmployees": "Máx. funcionários",
+  "adminPlanActiveTitle": "Plano ativo",
+  "adminPlanActiveSubtitle": "Desative para impedir novas assinaturas.",
+  "adminPlanCreate": "Criar plano",
+  "adminUpgradesTitle": "Upgrades de plano",
+  "adminUpgradesLoadError": "Não foi possível carregar os pedidos de upgrade.",
+  "adminUpgradesEmptyTitle": "Nenhum upgrade pendente",
+  "adminUpgradesEmptySubtitle": "Pedidos de mudança de plano aparecem aqui.",
+  "adminUpgradeApproved": "Upgrade aprovado — plano do tenant atualizado!",
+  "adminUpgradeRejected": "Upgrade rejeitado.",
+  "adminUpgradeProcessError": "Não foi possível processar o pedido.",
+  "adminPlanRequested": "Solicitado",
+  "adminPlanCurrent": "Atual"
+}

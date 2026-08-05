@@ -1,0 +1,58 @@
+# Modelo de configuração da assinatura de RELEASE.
+#
+# Copie este arquivo para `key.properties` (que NUNCA deve ser versionado —
+# está no .gitignore) e preencha com os valores do SEU upload keystore.
+# O `app/build.gradle.kts` só usa a assinatura de produção quando este
+# arquivo existe; sem ele, o build de release cai para o keystore de DEBUG
+# (não publicável na loja — serve apenas para CI/dev).
+
+# ── 1. Gerar o keystore (UMA única vez) ─────────────────────────────────
+#
+#   keytool -genkey -v -keystore upload-keystore.jks -alias upload \
+#     -keyalg RSA -keysize 2048 -validity 10000
+#
+# ⚠️ Desde o JDK 9 o keytool gera keystores PKCS12 por padrão, que usam UMA
+# ÚNICA senha para o cofre e para a chave — o `-keypass` é ignorado. Por
+# isso `storePassword` e `keyPassword` abaixo devem ser o MESMO valor.
+# Em máquinas sem JDK, rode via Docker:
+#
+#   docker run --rm -v "$PWD:/workspace" -w /workspace \
+#     -e STORE_PW='SUA_SENHA' eclipse-temurin:17-jre keytool -genkey -v \
+#     -keystore /workspace/android/app/upload-keystore.jks -alias upload \
+#     -keyalg RSA -keysize 2048 -validity 10000 \
+#     -storepass "$STORE_PW" -dname "CN=Dumbhanengue ERP, O=Dumbhanengue, C=BR"
+
+# ── 2. Backup (CRÍTICO) ─────────────────────────────────────────────────
+# Guarde o arquivo `upload-keystore.jks` E estas senhas num cofre de senhas
+# (Bitwarden/1Password/keepass) e/ou mídia offline. Se perder o keystore
+# com o Play App Signing ativo, o Google permite REGISTRAR uma nova chave
+# de upload — mas a chave de assinatura do app (com o Google) não muda.
+# Sem Play App Signing, perder o keystore = perder a capacidade de
+# publicar atualizações do app para sempre.
+
+# ── 3. Preencher ────────────────────────────────────────────────────────
+# `storeFile` é relativo a android/app/ (onde o .jks deve ficar).
+storePassword=
+keyPassword=
+keyAlias=upload
+storeFile=upload-keystore.jks
+
+# ── 4. Google Play Console ──────────────────────────────────────────────
+# - Publique o primeiro APK/AAB assinado com ESTA chave e ative o
+#   "Play App Signing" (a chave de assinatura do app passa a viver no
+#   Google; a sua vira a "chave de upload").
+# - Em Play Console → Setup → App integrity, registre a impressão digital
+#   (SHA-256) da chave de upload:
+#     keytool -list -v -keystore upload-keystore.jks -storepass SUA_SENHA
+# - Rotação: se esta chave vazar, gere outra e registre em "Upload key" —
+#   o Google não exige a mesma chave de upload nas atualizações.
+
+# ── 5. CI (GitHub Actions) ──────────────────────────────────────────────
+# O CI atual NÃO assina o APK de release (usa o fallback de debug) — o
+# keystore não fica no repositório. Quando quiser gerar artefatos
+# publicáveis no CI, decodifique o keystore de um secret:
+#   - echo "$KEYSTORE_B64" | base64 -d > android/app/upload-keystore.jks
+#   - preencha as variáveis (storePassword/keyPassword/keyAlias) via
+#     secrets de ambiente em vez de `key.properties` versionado.
+
+# Referência: https://docs.flutter.dev/deployment/android#sign-the-app

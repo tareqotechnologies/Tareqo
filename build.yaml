@@ -1,0 +1,13 @@
+# Configuração global dos builders de geração de código.
+#
+# `explicit_to_json: true` faz o json_serializable chamar `toJson()` em
+# objetos aninhados (ex.: `List<SaleItem>` dentro de `Sale`). Aplicar via
+# build.yaml (e não via anotação `@JsonSerializable(explicitToJson: true)`)
+# evita o conflito do freezed 3 com essa anotação, que quebra o codegen
+# com "Cannot populate the required constructor argument".
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          explicit_to_json: true

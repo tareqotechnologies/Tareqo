@@ -1,0 +1,77 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../domain/entities/app_user.dart';
+import 'auth_remote_data_source.dart';
+
+/// Implementação [AuthRemoteDataSource] sobre o Supabase (gotrue).
+///
+/// Toda a conversão do `User` do Supabase para o [AppUser] do domínio
+/// acontece aqui — as camadas acima nunca enxergam gotrue.
+final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  GoTrueClient get _auth => Supabase.instance.client.auth;
+
+  @override
+  Future<AppUser> signUp({
+    required String email,
+    required String password,
+    String? fullName,
+  }) async {
+    final response = await _auth.signUp(
+      email: email,
+      password: password,
+      data: fullName == null ? null : {'full_name': fullName},
+    );
+    // Se a confirmação por e-mail estiver ativa, o `user` pode ser null
+    // (a conta é criada, mas a sessão só vem após confirmar).
+    return _toAppUser(response.user, fallbackEmail: email, fallbackName: fullName);
+  }
+
+  @override
+  Future<AppUser> signIn({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+    final user = response.user;
+    if (user == null) {
+      throw AuthException('Falha ao autenticar: nenhum usuário retornado.');
+    }
+    return _toAppUser(user);
+  }
+
+  @override
+  Future<void> signOut() => _auth.signOut();
+
+  @override
+  Stream<AppUser?> get authStateChanges => _auth.onAuthStateChange.map(
+        (state) {
+          final user = state.session?.user;
+          return user == null ? null : _toAppUser(user);
+        },
+      );
+
+  AppUser _toAppUser(
+    User? user, {
+    String? fallbackEmail,
+    String? fallbackName,
+  }) {
+    if (user == null) {
+      // Confirmação de e-mail pendente: ainda não existe um uid real do
+      // Supabase. O id é um PLACEHOLDER (não canônico) — nenhum dado deve
+      // ser associado a ele; a sessão real só chega após a confirmação.
+      return AppUser(
+        id: fallbackEmail ?? '',
+        email: fallbackEmail ?? '',
+        fullName: fallbackName ?? '',
+      );
+    }
+    return AppUser(
+      id: user.id,
+      email: user.email ?? fallbackEmail ?? '',
+      fullName: (user.userMetadata?['full_name'] as String?) ?? fallbackName ?? '',
+    );
+  }
+}
