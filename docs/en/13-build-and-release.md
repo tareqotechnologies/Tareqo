@@ -1,6 +1,6 @@
 # Build and Release per Platform
 
-> This guide covers how to **compile the app on each platform** (Android, iOS, Windows and Web) and the **requirements** for each one. For the initial project setup, environment variables and conventions, see the [Developer guide](10-developer-guide.md). For the pre-release checklist, see the [Production checklist](PRODUCTION_CHECKLIST.md).
+> This guide covers how to **compile the app on each platform** (Android, iOS, Windows and Web) and the **requirements** for each one. For the initial project setup, environment variables and conventions, see the [Developer guide](10-developer-guide.md). For the pre-release checklist, see the [Production checklist](../pt/PRODUCTION_CHECKLIST.md).
 
 ---
 
