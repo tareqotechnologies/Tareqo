@@ -8,6 +8,7 @@ import '../../controllers/admin_providers.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/status_chip.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Painel do super admin — aprovar/rejeitar solicitações de acesso de
 /// novos tenants e acompanhar o histórico de decisões.
@@ -15,8 +16,7 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
   const AdminTenantsScreen({super.key});
 
   @override
-  ConsumerState<AdminTenantsScreen> createState() =>
-      _AdminTenantsScreenState();
+  ConsumerState<AdminTenantsScreen> createState() => _AdminTenantsScreenState();
 }
 
 class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
@@ -43,8 +43,7 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
             },
           ),
           TextButton(
-            onPressed: () =>
-                setState(() => _showAll = !_showAll),
+            onPressed: () => setState(() => _showAll = !_showAll),
             child: Text(_showAll ? l10n.adminPendingOnly : l10n.adminAll),
           ),
         ],
@@ -59,18 +58,14 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
                 child: Text(
                   l10n.adminAwaitingCount(pending.length),
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
                 ),
               ),
             ),
           Expanded(
             child: _showAll
-                ? _buildList(
-                    context,
-                    allAsync,
-                    l10n.adminTenantsEmpty,
-                  )
+                ? _buildList(context, allAsync, l10n.adminTenantsEmpty)
                 : _buildPendingList(context, pendingAsync),
           ),
         ],
@@ -80,13 +75,18 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
 
   /// Nome do plano pelo id (usa o provider de planos ativos).
   String _plansById(String id) =>
-      ref.watch(plansProvider).value
+      ref
+          .watch(plansProvider)
+          .value
           ?.where((plan) => plan.id == id)
           .firstOrNull
           ?.name ??
       id;
 
-  Widget _buildPendingList(BuildContext context, AsyncValue<List<Tenant>> async) {
+  Widget _buildPendingList(
+    BuildContext context,
+    AsyncValue<List<Tenant>> async,
+  ) {
     final l10n = context.l10n;
 
     return async.when(
@@ -105,8 +105,7 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
           );
         }
         return RefreshIndicator(
-          onRefresh: () =>
-              ref.read(pendingTenantsProvider.notifier).refresh(),
+          onRefresh: () => ref.read(pendingTenantsProvider.notifier).refresh(),
           child: ListView.separated(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             physics: const AlwaysScrollableScrollPhysics(),
@@ -124,8 +123,11 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
     );
   }
 
-  Widget _buildList(BuildContext context, AsyncValue<List<Tenant>> async,
-      String emptyMessage) {
+  Widget _buildList(
+    BuildContext context,
+    AsyncValue<List<Tenant>> async,
+    String emptyMessage,
+  ) {
     final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
 
@@ -138,10 +140,7 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
       ),
       data: (tenants) {
         if (tenants.isEmpty) {
-          return EmptyState(
-            icon: Icons.business_outlined,
-            title: emptyMessage,
-          );
+          return EmptyState(icon: Icons.business_outlined, title: emptyMessage);
         }
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
@@ -182,20 +181,24 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
       try {
         await ref.read(rejectTenantUseCaseProvider).call(tenant.id, reason);
       } catch (error, stackTrace) {
-        debugPrint('Erro ao rejeitar tenant: $error\n$stackTrace');
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.adminRejectError)),
+        CrashReporting.capture(
+          error,
+          stackTrace,
+          hint: 'Erro ao rejeitar tenant',
         );
+        messenger.showSnackBar(SnackBar(content: Text(l10n.adminRejectError)));
         return;
       }
     } else {
       try {
         await ref.read(approveTenantUseCaseProvider).call(tenant.id);
       } catch (error, stackTrace) {
-        debugPrint('Erro ao aprovar tenant: $error\n$stackTrace');
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.adminApproveError)),
+        CrashReporting.capture(
+          error,
+          stackTrace,
+          hint: 'Erro ao aprovar tenant',
         );
+        messenger.showSnackBar(SnackBar(content: Text(l10n.adminApproveError)));
         return;
       }
     }

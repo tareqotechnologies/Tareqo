@@ -26,7 +26,8 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
           'stock_quantity',
         )
         .eq('store_id', storeId)
-        .order('name', ascending: true);
+        .order('name', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -83,12 +84,12 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
   }
 
   Product _map(Map<String, dynamic> row) => Product(
-        id: row['id'] as String,
-        storeId: row['store_id'] as String,
-        name: row['name'] as String,
-        description: (row['description'] as String?) ?? '',
-        purchasePrice: (row['purchase_price'] as num).toDouble(),
-        salePrice: (row['sale_price'] as num).toDouble(),
-        stockQuantity: (row['stock_quantity'] as num).toInt(),
-      );
+    id: row['id'] as String,
+    storeId: row['store_id'] as String,
+    name: row['name'] as String,
+    description: (row['description'] as String?) ?? '',
+    purchasePrice: (row['purchase_price'] as num).toDouble(),
+    salePrice: (row['sale_price'] as num).toDouble(),
+    stockQuantity: (row['stock_quantity'] as num).toInt(),
+  );
 }

@@ -16,6 +16,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/status_chip.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Tela de clientes — busca local, listagem com total de fiado pendente por
 /// cliente e cadastro via bottom sheet. O fiado (módulo Crédito) vincula as
@@ -108,11 +109,13 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                 final filtered = _query.isEmpty
                     ? customers
                     : customers
-                        .where((customer) =>
-                            customer.name.toLowerCase().contains(_query) ||
-                            customer.phone.contains(_query) ||
-                            customer.email.toLowerCase().contains(_query))
-                        .toList();
+                          .where(
+                            (customer) =>
+                                customer.name.toLowerCase().contains(_query) ||
+                                customer.phone.contains(_query) ||
+                                customer.email.toLowerCase().contains(_query),
+                          )
+                          .toList();
 
                 if (filtered.isEmpty) {
                   return EmptyState(
@@ -284,7 +287,11 @@ class _AddCustomerSheetState extends ConsumerState<_AddCustomerSheet> {
     } on InvalidCustomerException catch (error) {
       setState(() => _formError = error.message);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao cadastrar cliente: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao cadastrar cliente',
+      );
       setState(() {
         _formError = l10n.customersAddError;
       });

@@ -9,6 +9,7 @@ import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../widgets/app_sheet.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Bottom sheet para registrar uma transação financeira
 /// (entrada/saída de caixa).
@@ -64,13 +65,11 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       type: _type,
       category: _categoryController.text.trim().isEmpty
           ? (_type == TransactionType.income
-              ? context.l10n.financialDefaultCategoryIncome
-              : context.l10n.financialDefaultCategoryExpense)
+                ? context.l10n.financialDefaultCategoryIncome
+                : context.l10n.financialDefaultCategoryExpense)
           : _categoryController.text.trim(),
       date: DateTime.now(),
-      status: _isPending
-          ? TransactionStatus.pending
-          : TransactionStatus.paid,
+      status: _isPending ? TransactionStatus.pending : TransactionStatus.paid,
     );
 
     final messenger = ScaffoldMessenger.of(context);
@@ -80,13 +79,15 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       await ref.read(addTransactionUseCaseProvider).call(transaction);
       if (!mounted) return;
       Navigator.of(context).pop();
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.financialRegistered)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.financialRegistered)));
     } on InvalidAmountException catch (error) {
       setState(() => _formError = error.message);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao registrar transação: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao registrar transação',
+      );
       setState(() {
         _formError = l10n.financialRegisterError;
       });

@@ -33,5 +33,9 @@ INSERT INTO auth.users (id, email) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO auth.users (id, email) VALUES
+  ('22222222-2222-2222-2222-222222222222', 'funcionario@loja.com')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO auth.users (id, email) VALUES
   ('99999999-9999-9999-9999-999999999999', 'admin@dumbhanengue.com')
 ON CONFLICT (id) DO NOTHING;

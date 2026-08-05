@@ -18,6 +18,7 @@ import '../../controllers/sales_providers.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/search_field.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Carrinho de nova venda: seleciona produtos, define quantidades,
 /// escolhe a forma de pagamento e confirma via [ProcessSaleUseCase].
@@ -58,8 +59,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     return total;
   }
 
-  int get _itemCount =>
-      _cart.values.fold(0, (sum, quantity) => sum + quantity);
+  int get _itemCount => _cart.values.fold(0, (sum, quantity) => sum + quantity);
 
   Product? _productById(String id) => _productsById[id];
 
@@ -164,7 +164,11 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
         _error = l10n.salesProductNotFound(error.productId);
       });
     } catch (error, stackTrace) {
-      debugPrint('Erro ao registrar venda: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao registrar venda',
+      );
       setState(() {
         _error = l10n.salesRegisterError;
       });
@@ -202,8 +206,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
           ),
           Expanded(
             child: productsAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (_, _) => Center(
                 child: Text(
                   l10n.productsLoadError,
@@ -214,9 +217,11 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                 final filtered = _query.isEmpty
                     ? all
                     : all
-                        .where((product) =>
-                            product.name.toLowerCase().contains(_query))
-                        .toList();
+                          .where(
+                            (product) =>
+                                product.name.toLowerCase().contains(_query),
+                          )
+                          .toList();
 
                 if (filtered.isEmpty) {
                   return EmptyState(
@@ -230,8 +235,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   itemCount: filtered.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 6),
-                  itemBuilder: (context, index) =>
-                      _CartProductRow(
+                  itemBuilder: (context, index) => _CartProductRow(
                     product: filtered[index],
                     quantity: _cart[filtered[index].id] ?? 0,
                     onAdd: () => _add(filtered[index]),
@@ -296,14 +300,12 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                 ],
                 const SizedBox(height: 12),
                 FilledButton.icon(
-                  onPressed:
-                      _cart.isEmpty || _isSubmitting ? null : _confirm,
+                  onPressed: _cart.isEmpty || _isSubmitting ? null : _confirm,
                   icon: _isSubmitting
                       ? const SizedBox(
                           height: 18,
                           width: 18,
-                          child:
-                              CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.check),
                   label: Text(l10n.salesConfirm),
@@ -356,9 +358,7 @@ class _CartProductRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: outOfStock
-                          ? theme.colorScheme.outline
-                          : null,
+                      color: outOfStock ? theme.colorScheme.outline : null,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -366,7 +366,7 @@ class _CartProductRow extends StatelessWidget {
                     outOfStock
                         ? l10n.commonSoldOut
                         : '${Formatters.currency(product.salePrice)} · '
-                            '${product.stockQuantity} ${l10n.commonUnits}',
+                              '${product.stockQuantity} ${l10n.commonUnits}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -410,4 +410,3 @@ class _CartProductRow extends StatelessWidget {
     );
   }
 }
-

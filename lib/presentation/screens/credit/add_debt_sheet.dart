@@ -13,6 +13,7 @@ import '../../controllers/customers_providers.dart';
 import '../../controllers/debts_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../widgets/app_sheet.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Bottom sheet para registrar uma dívida ("fiado") de cliente.
 ///
@@ -117,13 +118,21 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
       // A dívida foi registrada; apenas a pendência falhou. Não sugerir
       // nova tentativa (duplicaria o fiado): orienta a conferir o
       // Financeiro e recarrega o que já foi registrado.
-      debugPrint('Fiado registrado sem pendência: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Fiado registrado sem pendência',
+      );
       setState(() {
         _formError = l10n.debtsPendingEntryError;
       });
       ref.invalidate(pendingDebtsProvider);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao registrar fiado: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao registrar fiado',
+      );
       setState(() {
         _formError = l10n.debtsRegisterError;
       });

@@ -123,7 +123,98 @@ admin_sees="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${ADMIN_UI
   exit 1
 }
 
-echo "==> [4/4] RPCs atômicos do dinheiro (process_sale / register_debt / settle_debt)"
+EMP_UID="22222222-2222-2222-2222-222222222222"
+
+echo "==> [4/5] Funcionário: acesso por LOJA no modo SaaS (auditoria C2)"
+# Bloqueador C2 da auditoria: funcionários são OUTROS usuários (não o
+# dono), então o RLS antigo (auth.uid() = user_id) os deixava sem NENHUM
+# dado de negócio. O fix: políticas por loja (is_my_store) nas tabelas de
+# negócio + RPCs com guarda is_my_store e filtros por store_id.
+
+# Dono cria o vínculo de funcionário na loja do smoke (pl1 permite 3).
+psql_app -v ON_ERROR_STOP=1 <<SQL
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+INSERT INTO public.store_employees
+  (id, store_id, user_id, full_name, email, role)
+VALUES ('e_smoke', 'st_smoke', '22222222-2222-2222-2222-222222222222',
+        'Funcionária', 'funcionario@loja.com', 'employee')
+ON CONFLICT (id) DO NOTHING;
+-- Produto próprio da loja para a venda do funcionário (não interfere no
+-- estoque do smoke1 usado pelo passo [5/5]).
+INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
+VALUES ('smoke2', 'Produto do funcionário', 'st_smoke', 1.0, 2.0, 5)
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+# 4.1 RLS: o funcionário ENXERGA o produto da loja dele (do dono).
+emp_sees="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.products WHERE id = 'smoke1';" | tail -n 1)"
+[ "$emp_sees" = "1" ] || {
+  echo "FALHA: funcionário deveria enxergar o produto da própria loja (obtido: '$emp_sees')"
+  exit 1
+}
+
+# 4.2 RLS: o funcionário NÃO enxerga produtos de OUTRA loja (st1 do seed).
+emp_other="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.products WHERE store_id = 'st1';" | tail -n 1)"
+[ "$emp_other" = "0" ] || {
+  echo "FALHA: funcionário não deveria enxergar produtos de outra loja (obtido: '$emp_other')"
+  exit 1
+}
+
+# 4.3 RLS: o funcionário vê a loja dele no seletor (stores_select).
+emp_stores="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.stores WHERE id = 'st_smoke';" | tail -n 1)"
+[ "$emp_stores" = "1" ] || {
+  echo "FALHA: funcionário deveria ver a própria loja (obtido: '$emp_stores')"
+  exit 1
+}
+
+# 4.4 RPC: funcionário REGISTRA venda na loja dele (produto do dono).
+psql_app -v ON_ERROR_STOP=1 <<SQL
+SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+SELECT public.process_sale(
+  ('{"id":"s_emp","store_id":"st_smoke","total_amount":4,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":2,"unit_price":2}]'::jsonb
+);
+SQL
+
+emp_sale="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.sales WHERE id = 's_emp';" | tail -n 1)"
+[ "$emp_sale" = "1" ] || {
+  echo "FALHA: venda do funcionário não registrada (obtido: '$emp_sale')"
+  exit 1
+}
+
+# 4.5 RPC: a venda do funcionário é visível para o DONO (is_my_store).
+owner_sees_emp="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sales WHERE id = 's_emp';" | tail -n 1)"
+[ "$owner_sees_emp" = "1" ] || {
+  echo "FALHA: dono deveria enxergar a venda do funcionário (obtido: '$owner_sees_emp')"
+  exit 1
+}
+
+# 4.6 RPC: funcionário NÃO consegue vender numa loja de OUTRO tenant (guarda).
+psql_app -v ON_ERROR_STOP=1 <<SQL
+SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+DO \$\$
+BEGIN
+  BEGIN
+    PERFORM public.process_sale(
+      ('{"id":"s_bad2","store_id":"st1","total_amount":1,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+      '[{"product_id":"p1","product_name":"X","quantity":1,"unit_price":1}]'::jsonb
+    );
+    RAISE EXCEPTION 'SENTINELA: venda em loja de outro tenant deveria ter sido rejeitada';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: venda em loja de outro tenant deveria ter sido rejeitada' THEN
+      RAISE;
+    END IF;
+  END;
+END \$\$;
+SQL
+
+bad2_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.sales WHERE id = 's_bad2';" | tail -n 1)"
+[ "$bad2_ok" = "0" ] || {
+  echo "FALHA: venda em loja de outro tenant não deveria existir (obtido: '$bad2_ok')"
+  exit 1
+}
+
+echo "==> [5/5] RPCs atômicos do dinheiro (process_sale / register_debt / settle_debt)"
 # Executa o caminho do dinheiro como app_user — exatamente o que o app faz
 # no Supabase. Valida efeitos: venda+item+estoque+caixa, dívida+pendência,
 # quitação da MESMA pendência, idempotência e rejeição de estoque.
@@ -218,4 +309,4 @@ bad_stock="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID
   exit 1
 }
 
-echo "OK: schema aplicado, super admin via tabela, RLS e RPCs atômicos do dinheiro conforme esperado."
+echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas e RPCs atômicos do dinheiro conforme esperado."

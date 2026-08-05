@@ -24,7 +24,8 @@ final class FinancialTransactionSupabaseDataSourceImpl
           'debt_id',
         )
         .eq('store_id', storeId)
-        .order('date', ascending: false);
+        .order('date', ascending: false)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -65,16 +66,15 @@ final class FinancialTransactionSupabaseDataSourceImpl
     }
   }
 
-  FinancialTransaction _map(Map<String, dynamic> row) =>
-      FinancialTransaction(
-        id: row['id'] as String,
-        storeId: row['store_id'] as String,
-        description: row['description'] as String,
-        amount: (row['amount'] as num).toDouble(),
-        type: TransactionType.values.byName(row['type'] as String),
-        category: row['category'] as String,
-        date: DateTime.parse(row['date'] as String).toLocal(),
-        status: TransactionStatus.values.byName(row['status'] as String),
-        debtId: row['debt_id'] as String?,
-      );
+  FinancialTransaction _map(Map<String, dynamic> row) => FinancialTransaction(
+    id: row['id'] as String,
+    storeId: row['store_id'] as String,
+    description: row['description'] as String,
+    amount: (row['amount'] as num).toDouble(),
+    type: TransactionType.values.byName(row['type'] as String),
+    category: row['category'] as String,
+    date: DateTime.parse(row['date'] as String).toLocal(),
+    status: TransactionStatus.values.byName(row['status'] as String),
+    debtId: row['debt_id'] as String?,
+  );
 }

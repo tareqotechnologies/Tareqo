@@ -1,3 +1,4 @@
+import '../../core/utils/money.dart';
 import '../entities/financial_transaction.dart';
 import '../repositories/i_financial_transaction_repository.dart';
 
@@ -54,22 +55,30 @@ class GetCashFlowUseCase {
       );
     }
 
-    final transactions =
-        await _repository.getByPeriod(storeId: storeId, start: start, end: end);
+    final transactions = await _repository.getByPeriod(
+      storeId: storeId,
+      start: start,
+      end: end,
+    );
 
-    var income = 0.0;
-    var expense = 0.0;
+    // Acúmulo em CENTAVOS (auditoria H1): somar doubles como 0.1+0.2
+    // acumula erro de representação; somar inteiros de centavos é exato.
+    final incomeValues = <double>[];
+    final expenseValues = <double>[];
     for (final transaction in transactions) {
       // Caixa realizado: ignora transações ainda pendentes.
       if (transaction.status != TransactionStatus.paid) continue;
 
       if (transaction.type == TransactionType.income) {
-        income += transaction.amount;
+        incomeValues.add(transaction.amount);
       } else {
-        expense += transaction.amount;
+        expenseValues.add(transaction.amount);
       }
     }
 
-    return CashFlow(income: income, expense: expense);
+    return CashFlow(
+      income: Money.sum(incomeValues),
+      expense: Money.sum(expenseValues),
+    );
   }
 }

@@ -16,6 +16,7 @@ import '../../widgets/error_view.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/status_chip.dart';
 import 'add_debt_sheet.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Aba exibida na tela de crédito.
 enum _DebtView {
@@ -45,10 +46,16 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     final settledAsync = ref.watch(settledDebtsProvider);
 
     final debts = debtsAsync.value ?? const <Debt>[];
-    final pendingTotal = debts.fold<double>(0, (sum, debt) => sum + debt.amount);
+    final pendingTotal = debts.fold<double>(
+      0,
+      (sum, debt) => sum + debt.amount,
+    );
 
     final settled = settledAsync.value ?? const <Debt>[];
-    final settledTotal = settled.fold<double>(0, (sum, debt) => sum + debt.amount);
+    final settledTotal = settled.fold<double>(
+      0,
+      (sum, debt) => sum + debt.amount,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -245,16 +252,12 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
       ref.invalidate(cashFlowProvider);
     } on DebtNotFoundException {
       if (!context.mounted) return;
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.debtsNotFound)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.debtsNotFound)));
       ref.invalidate(pendingDebtsProvider);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao quitar fiado: $error\n$stackTrace');
+      CrashReporting.capture(error, stackTrace, hint: 'Erro ao quitar fiado');
       if (!context.mounted) return;
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.debtsSettleError)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.debtsSettleError)));
     }
   }
 }
@@ -356,10 +359,7 @@ class _DebtCard extends StatelessWidget {
         ? (l10n.debtsLate, AppColors.expense)
         : daysUntilDue == 0
         ? (l10n.debtsDueToday, AppColors.warning)
-        : (
-            l10n.debtsDueIn(-daysUntilDue),
-            theme.colorScheme.primary,
-          );
+        : (l10n.debtsDueIn(-daysUntilDue), theme.colorScheme.primary);
 
     return Card(
       child: Padding(

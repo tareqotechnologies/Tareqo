@@ -1,3 +1,4 @@
+import '../../../core/utils/ids.dart';
 import '../../../domain/entities/plan_request.dart';
 import 'plan_request_local_data_source.dart';
 
@@ -35,7 +36,7 @@ final class PlanRequestLocalDataSourceImpl implements PlanRequestLocalDataSource
     required String requestedPlanId,
   }) async {
     final request = PlanRequest(
-      id: 'pr_${DateTime.now().microsecondsSinceEpoch}',
+      id: AppIds.newId('pr'),
       tenantId: tenantId,
       currentPlanId: currentPlanId,
       requestedPlanId: requestedPlanId,

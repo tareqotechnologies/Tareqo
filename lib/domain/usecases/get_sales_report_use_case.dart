@@ -1,3 +1,4 @@
+import '../../core/utils/money.dart';
 import '../repositories/i_product_repository.dart';
 import '../repositories/i_sale_repository.dart';
 
@@ -71,8 +72,10 @@ class GetSalesReportUseCase {
     required DateTime end,
   }) async {
     final sales = (await _saleRepository.getAll(storeId: storeId))
-        .where((sale) =>
-            !sale.dateTime.isBefore(start) && !sale.dateTime.isAfter(end))
+        .where(
+          (sale) =>
+              !sale.dateTime.isBefore(start) && !sale.dateTime.isAfter(end),
+        )
         .toList();
 
     final products = await _productRepository.getAll(storeId: storeId);
@@ -80,6 +83,9 @@ class GetSalesReportUseCase {
       for (final product in products) product.id: product.purchasePrice,
     };
 
+    // Acúmulos em CENTAVOS (auditoria H1): somar/multiplicar doubles
+    // acumula erro de representação binária (0.1+0.2); usar centavos é
+    // exato para 2 casas. Cada fronteira arredonda via [Money].
     var revenue = 0.0;
     var profit = 0.0;
     final quantityById = <String, int>{};
@@ -88,38 +94,52 @@ class GetSalesReportUseCase {
     final dayTotals = <DateTime, double>{};
 
     for (final sale in sales) {
-      revenue += sale.totalAmount;
+      revenue = Money.round2(revenue + sale.totalAmount);
 
-      final day = DateTime(sale.dateTime.year, sale.dateTime.month, sale.dateTime.day);
-      dayTotals[day] = (dayTotals[day] ?? 0) + sale.totalAmount;
+      final day = DateTime(
+        sale.dateTime.year,
+        sale.dateTime.month,
+        sale.dateTime.day,
+      );
+      dayTotals[day] = Money.round2((dayTotals[day] ?? 0) + sale.totalAmount);
 
       for (final item in sale.items) {
         final cost = purchasePriceById[item.productId] ?? 0.0;
-        profit += item.quantity * (item.unitPrice - cost);
+        // Lucro por item: quantidade × (preço de venda − custo), com a
+        // diferença arredondada a centavos (auditoria H1).
+        profit = Money.round2(
+          profit + Money.times(item.quantity, item.unitPrice - cost),
+        );
 
         quantityById[item.productId] =
             (quantityById[item.productId] ?? 0) + item.quantity;
-        revenueById[item.productId] =
-            (revenueById[item.productId] ?? 0) + item.quantity * item.unitPrice;
+        revenueById[item.productId] = Money.round2(
+          (revenueById[item.productId] ?? 0) +
+              Money.times(item.quantity, item.unitPrice),
+        );
         // Último snapshot de nome vence (produtos renomeados no catálogo).
         nameById[item.productId] = item.productName;
       }
     }
 
-    final bestSellers = quantityById.entries
-        .map((entry) => BestSeller(
-              productId: entry.key,
-              productName: nameById[entry.key] ?? entry.key,
-              quantity: entry.value,
-              revenue: revenueById[entry.key] ?? 0,
-            ))
-        .toList()
-      ..sort((a, b) => b.quantity.compareTo(a.quantity));
+    final bestSellers =
+        quantityById.entries
+            .map(
+              (entry) => BestSeller(
+                productId: entry.key,
+                productName: nameById[entry.key] ?? entry.key,
+                quantity: entry.value,
+                revenue: revenueById[entry.key] ?? 0,
+              ),
+            )
+            .toList()
+          ..sort((a, b) => b.quantity.compareTo(a.quantity));
 
-    final perDay = dayTotals.entries
-        .map((entry) => DailySales(day: entry.key, total: entry.value))
-        .toList()
-      ..sort((a, b) => a.day.compareTo(b.day));
+    final perDay =
+        dayTotals.entries
+            .map((entry) => DailySales(day: entry.key, total: entry.value))
+            .toList()
+          ..sort((a, b) => a.day.compareTo(b.day));
 
     return SalesReport(
       totalRevenue: revenue,

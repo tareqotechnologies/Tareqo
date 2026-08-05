@@ -30,8 +30,7 @@ class _FakeProductRepository implements IProductRepository {
       List.unmodifiable(_products);
 
   @override
-  Future<Product?> getById(String id, {required String storeId}) async =>
-      null;
+  Future<Product?> getById(String id, {required String storeId}) async => null;
 
   @override
   Future<void> add(Product product) async {}
@@ -99,18 +98,8 @@ void main() {
     ];
 
     const products = [
-      Product(
-        id: 'p1',
-        name: 'Caneta',
-        purchasePrice: 1.0,
-        salePrice: 3.0,
-      ),
-      Product(
-        id: 'p2',
-        name: 'Caderno',
-        purchasePrice: 5.0,
-        salePrice: 10.0,
-      ),
+      Product(id: 'p1', name: 'Caneta', purchasePrice: 1.0, salePrice: 3.0),
+      Product(id: 'p2', name: 'Caderno', purchasePrice: 5.0, salePrice: 10.0),
     ];
 
     final useCase = GetSalesReportUseCase(
@@ -189,5 +178,40 @@ void main() {
 
     expect(report.totalProfit, 10.0);
     expect(report.bestSellers.first.productName, 'Produto antigo');
+  });
+
+  test('acúmulo exato em centavos (regressão auditoria H1)', () async {
+    // 3 vendas de 9.9 → double soma 29.700000000000003; o relatório deve
+    // arredondar cada fronteira e devolver 29.7 exato em faturamento,
+    // vendas por dia e receita por produto.
+    final sales = [
+      for (var i = 0; i < 3; i++)
+        Sale(
+          id: 's$i',
+          items: const [
+            SaleItem(
+              productId: 'p1',
+              productName: 'Caneta',
+              quantity: 1,
+              unitPrice: 9.9,
+            ),
+          ],
+          totalAmount: 9.9,
+          paymentMethod: PaymentMethod.pix,
+          dateTime: DateTime(2026, 8, 3),
+        ),
+    ];
+
+    final report = await GetSalesReportUseCase(
+      _FakeSaleRepository(sales),
+      _FakeProductRepository(const [
+        Product(id: 'p1', name: 'Caneta', purchasePrice: 5.0, salePrice: 9.9),
+      ]),
+    )(storeId: 'st1', start: DateTime(2026, 8, 1), end: DateTime(2026, 8, 31));
+
+    expect(report.totalRevenue, 29.7);
+    expect(report.totalProfit, closeTo(14.7, 0.0000001)); // 3 × 4.9
+    expect(report.perDay.first.total, 29.7);
+    expect(report.bestSellers.first.revenue, 29.7);
   });
 }

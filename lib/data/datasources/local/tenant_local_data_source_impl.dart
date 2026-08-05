@@ -1,3 +1,4 @@
+import '../../../core/utils/ids.dart';
 import '../../../domain/entities/tenant.dart';
 import 'tenant_local_data_source.dart';
 
@@ -47,7 +48,7 @@ final class TenantLocalDataSourceImpl implements TenantLocalDataSource {
     required String language,
   }) async {
     final tenant = Tenant(
-      id: 'tn_${DateTime.now().microsecondsSinceEpoch}',
+      id: AppIds.newId('tn'),
       ownerUserId: ownerUserId,
       businessName: businessName,
       planId: planId,

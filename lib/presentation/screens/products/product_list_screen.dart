@@ -15,6 +15,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/status_chip.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Tela de listagem de produtos — busca local, pull-to-refresh e
 /// cadastro via bottom sheet. Consome apenas o estado de
@@ -37,10 +38,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   }
 
   Future<void> _openAddSheet() async {
-    await showAppSheet<void>(
-      context,
-      builder: (_) => const _AddProductSheet(),
-    );
+    await showAppSheet<void>(context, builder: (_) => const _AddProductSheet());
     if (!mounted) return;
     ref.invalidate(productsProvider);
   }
@@ -78,8 +76,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           ),
           Expanded(
             child: productsAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => ErrorView(
                 message: l10n.productsLoadError,
                 details: error.toString(),
@@ -97,12 +94,14 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 final filtered = _query.isEmpty
                     ? products
                     : products
-                        .where((product) =>
-                            product.name.toLowerCase().contains(_query) ||
-                            product.description
-                                .toLowerCase()
-                                .contains(_query))
-                        .toList();
+                          .where(
+                            (product) =>
+                                product.name.toLowerCase().contains(_query) ||
+                                product.description.toLowerCase().contains(
+                                  _query,
+                                ),
+                          )
+                          .toList();
 
                 if (filtered.isEmpty) {
                   return EmptyState(
@@ -258,7 +257,9 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
     final l10n = context.l10n;
 
     try {
-      await ref.read(addProductUseCaseProvider).call(
+      await ref
+          .read(addProductUseCaseProvider)
+          .call(
             Product(
               id: AppIds.newId('p'),
               storeId: storeId ?? 'st1',
@@ -271,13 +272,17 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
           );
       if (!mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.productsAdded)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.productsAdded)));
     } on InvalidPriceException catch (error) {
       setState(() => _formError = error.message);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao adicionar produto: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao adicionar produto',
+      );
       setState(() => _formError = l10n.productsAddError);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -333,10 +338,9 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                         labelText: l10n.productsPurchasePrice,
                         prefixIcon: const Icon(Icons.south),
                       ),
-                      validator: (value) =>
-                          _parsePrice(value ?? '') <= 0
-                              ? l10n.productsPurchasePriceError
-                              : null,
+                      validator: (value) => _parsePrice(value ?? '') <= 0
+                          ? l10n.productsPurchasePriceError
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -348,10 +352,9 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
                         labelText: l10n.productsSalePrice,
                         prefixIcon: const Icon(Icons.north),
                       ),
-                      validator: (value) =>
-                          _parsePrice(value ?? '') <= 0
-                              ? l10n.productsSalePriceError
-                              : null,
+                      validator: (value) => _parsePrice(value ?? '') <= 0
+                          ? l10n.productsSalePriceError
+                          : null,
                     ),
                   ),
                 ],

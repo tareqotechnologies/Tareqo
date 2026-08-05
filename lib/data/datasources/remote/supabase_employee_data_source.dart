@@ -11,7 +11,8 @@ final class EmployeeSupabaseDataSourceImpl implements EmployeeLocalDataSource {
   const EmployeeSupabaseDataSourceImpl();
 
   static const _table = 'store_employees';
-  static const _columns = 'id, tenant_id, store_id, user_id, full_name, '
+  static const _columns =
+      'id, tenant_id, store_id, user_id, full_name, '
       'email, role';
 
   @override
@@ -20,7 +21,8 @@ final class EmployeeSupabaseDataSourceImpl implements EmployeeLocalDataSource {
         .from(_table)
         .select(_columns)
         .eq('tenant_id', tenantId)
-        .order('full_name', ascending: true);
+        .order('full_name', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -30,7 +32,8 @@ final class EmployeeSupabaseDataSourceImpl implements EmployeeLocalDataSource {
         .from(_table)
         .select(_columns)
         .eq('store_id', storeId)
-        .order('full_name', ascending: true);
+        .order('full_name', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -48,12 +51,12 @@ final class EmployeeSupabaseDataSourceImpl implements EmployeeLocalDataSource {
   }
 
   StoreEmployee _map(Map<String, dynamic> row) => StoreEmployee(
-        id: row['id'] as String,
-        tenantId: row['tenant_id'] as String,
-        storeId: row['store_id'] as String,
-        userId: row['user_id'] as String,
-        fullName: row['full_name'] as String,
-        email: row['email'] as String,
-        role: EmployeeRole.values.byName(row['role'] as String),
-      );
+    id: row['id'] as String,
+    tenantId: row['tenant_id'] as String,
+    storeId: row['store_id'] as String,
+    userId: row['user_id'] as String,
+    fullName: row['full_name'] as String,
+    email: row['email'] as String,
+    role: EmployeeRole.values.byName(row['role'] as String),
+  );
 }

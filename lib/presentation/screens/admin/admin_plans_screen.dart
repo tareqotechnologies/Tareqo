@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/utils/ids.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
@@ -10,6 +12,7 @@ import '../../controllers/admin_providers.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/status_chip.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Painel do super admin — gestão de planos (criar, editar, ativar/desativar).
 /// Os planos limitam a estrutura de cada tenant (nº de lojas e funcionários).
@@ -99,8 +102,10 @@ class _PlanTile extends StatelessWidget {
         onTap: onEdit,
         leading: CircleAvatar(
           backgroundColor: scheme.primaryContainer,
-          child: Icon(Icons.workspaces_outline,
-              color: scheme.onPrimaryContainer),
+          child: Icon(
+            Icons.workspaces_outline,
+            color: scheme.onPrimaryContainer,
+          ),
         ),
         title: Row(
           children: [
@@ -113,10 +118,7 @@ class _PlanTile extends StatelessWidget {
               ),
             ),
             if (!plan.isActive)
-              StatusChip(
-                label: l10n.adminPlanInactive,
-                color: scheme.outline,
-              ),
+              StatusChip(label: l10n.adminPlanInactive, color: scheme.outline),
           ],
         ),
         subtitle: Text(
@@ -142,10 +144,12 @@ class _PlanEditorSheet extends ConsumerStatefulWidget {
 }
 
 class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
-  late final _nameController =
-      TextEditingController(text: widget.plan?.name ?? '');
-  late final _descriptionController =
-      TextEditingController(text: widget.plan?.description ?? '');
+  late final _nameController = TextEditingController(
+    text: widget.plan?.name ?? '',
+  );
+  late final _descriptionController = TextEditingController(
+    text: widget.plan?.description ?? '',
+  );
   late final _priceController = TextEditingController(
     text: widget.plan == null ? '' : widget.plan!.priceMonthly.toString(),
   );
@@ -200,7 +204,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
 
     final messenger = ScaffoldMessenger.of(context);
     final plan = Plan(
-      id: widget.plan?.id ?? 'pl_${DateTime.now().microsecondsSinceEpoch}',
+      id: widget.plan?.id ?? AppIds.newId('pl'),
       name: _nameController.text.trim(),
       description: _descriptionController.text.trim(),
       priceMonthly: price,
@@ -229,7 +233,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
     } on InvalidPlanException catch (error) {
       setState(() => _formError = error.message);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao salvar plano: $error\n$stackTrace');
+      CrashReporting.capture(error, stackTrace, hint: 'Erro ao salvar plano');
       setState(() {
         _formError = l10n.adminPlanSaveError;
       });

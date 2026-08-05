@@ -18,7 +18,8 @@ final class CustomerSupabaseDataSourceImpl implements CustomerLocalDataSource {
         .from(_table)
         .select('id, store_id, name, phone, email')
         .eq('store_id', storeId)
-        .order('name', ascending: true);
+        .order('name', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -35,10 +36,10 @@ final class CustomerSupabaseDataSourceImpl implements CustomerLocalDataSource {
   }
 
   Customer _map(Map<String, dynamic> row) => Customer(
-        id: row['id'] as String,
-        storeId: row['store_id'] as String,
-        name: row['name'] as String,
-        phone: (row['phone'] as String?) ?? '',
-        email: (row['email'] as String?) ?? '',
-      );
+    id: row['id'] as String,
+    storeId: row['store_id'] as String,
+    name: row['name'] as String,
+    phone: (row['phone'] as String?) ?? '',
+    email: (row['email'] as String?) ?? '',
+  );
 }

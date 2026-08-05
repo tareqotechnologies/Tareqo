@@ -34,8 +34,9 @@ class _FakeFinancialTransactionRepository
   @override
   Future<void> markAsPaid(String id, {required String storeId}) async {
     final index = _allTransactions.indexWhere((t) => t.id == id);
-    _allTransactions[index] =
-        _allTransactions[index].copyWith(status: TransactionStatus.paid);
+    _allTransactions[index] = _allTransactions[index].copyWith(
+      status: TransactionStatus.paid,
+    );
   }
 }
 
@@ -66,21 +67,42 @@ void main() {
 
   test('calcula o saldo = entradas − saídas no período', () async {
     final repository = _FakeFinancialTransactionRepository([
-      _transaction('1',
-          description: 'Venda', amount: 1000, type: TransactionType.income, date: august),
-      _transaction('2',
-          description: 'Venda', amount: 500, type: TransactionType.income, date: august),
-      _transaction('3',
-          description: 'Aluguel', amount: 300, type: TransactionType.expense, date: august),
-      _transaction('4',
-          description: 'Energia elétrica',
-          amount: 150,
-          type: TransactionType.expense,
-          date: august),
+      _transaction(
+        '1',
+        description: 'Venda',
+        amount: 1000,
+        type: TransactionType.income,
+        date: august,
+      ),
+      _transaction(
+        '2',
+        description: 'Venda',
+        amount: 500,
+        type: TransactionType.income,
+        date: august,
+      ),
+      _transaction(
+        '3',
+        description: 'Aluguel',
+        amount: 300,
+        type: TransactionType.expense,
+        date: august,
+      ),
+      _transaction(
+        '4',
+        description: 'Energia elétrica',
+        amount: 150,
+        type: TransactionType.expense,
+        date: august,
+      ),
     ]);
     final useCase = GetCashFlowUseCase(repository);
 
-    final result = await useCase.call(storeId: 'st1', start: august, end: august);
+    final result = await useCase.call(
+      storeId: 'st1',
+      start: august,
+      end: august,
+    );
 
     expect(result.income, 1500);
     expect(result.expense, 450);
@@ -89,25 +111,35 @@ void main() {
 
   test('ignora transações fora do período consultado', () async {
     final repository = _FakeFinancialTransactionRepository([
-      _transaction('1',
-          description: 'Venda julho',
-          amount: 2000,
-          type: TransactionType.income,
-          date: july),
-      _transaction('2',
-          description: 'Venda agosto',
-          amount: 1000,
-          type: TransactionType.income,
-          date: august),
-      _transaction('3',
-          description: 'Aluguel setembro',
-          amount: 400,
-          type: TransactionType.expense,
-          date: september),
+      _transaction(
+        '1',
+        description: 'Venda julho',
+        amount: 2000,
+        type: TransactionType.income,
+        date: july,
+      ),
+      _transaction(
+        '2',
+        description: 'Venda agosto',
+        amount: 1000,
+        type: TransactionType.income,
+        date: august,
+      ),
+      _transaction(
+        '3',
+        description: 'Aluguel setembro',
+        amount: 400,
+        type: TransactionType.expense,
+        date: september,
+      ),
     ]);
     final useCase = GetCashFlowUseCase(repository);
 
-    final result = await useCase.call(storeId: 'st1', start: august, end: august);
+    final result = await useCase.call(
+      storeId: 'st1',
+      start: august,
+      end: august,
+    );
 
     // Apenas a transação de agosto entra no cálculo.
     expect(result.income, 1000);
@@ -119,36 +151,50 @@ void main() {
     final repository = _FakeFinancialTransactionRepository(const []);
     final useCase = GetCashFlowUseCase(repository);
 
-    final result = await useCase.call(storeId: 'st1', start: august, end: august);
+    final result = await useCase.call(
+      storeId: 'st1',
+      start: august,
+      end: august,
+    );
 
     expect(result.income, 0);
     expect(result.expense, 0);
     expect(result.balance, 0);
   });
 
-  test('ignora transações pendentes (fiado não infla o caixa realizado)',
-      () async {
-    final repository = _FakeFinancialTransactionRepository([
-      _transaction('1',
+  test(
+    'ignora transações pendentes (fiado não infla o caixa realizado)',
+    () async {
+      final repository = _FakeFinancialTransactionRepository([
+        _transaction(
+          '1',
           description: 'Venda à vista',
           amount: 1000,
           type: TransactionType.income,
-          date: august),
-      _transaction('2',
+          date: august,
+        ),
+        _transaction(
+          '2',
           description: 'Venda fiada (pendente)',
           amount: 500,
           type: TransactionType.income,
           date: august,
-          status: TransactionStatus.pending),
-    ]);
-    final useCase = GetCashFlowUseCase(repository);
+          status: TransactionStatus.pending,
+        ),
+      ]);
+      final useCase = GetCashFlowUseCase(repository);
 
-    final result = await useCase.call(storeId: 'st1', start: august, end: august);
+      final result = await useCase.call(
+        storeId: 'st1',
+        start: august,
+        end: august,
+      );
 
-    expect(result.income, 1000);
-    expect(result.expense, 0);
-    expect(result.balance, 1000);
-  });
+      expect(result.income, 1000);
+      expect(result.expense, 0);
+      expect(result.balance, 1000);
+    },
+  );
 
   test('lança InvalidPeriodException quando start é posterior a end', () async {
     final repository = _FakeFinancialTransactionRepository(const []);
@@ -162,12 +208,40 @@ void main() {
 
   test('rejeita amount negativo (invariante da entidade)', () {
     expect(
-      () => _transaction('x',
-          description: 'Inválida',
-          amount: -5,
-          type: TransactionType.income,
-          date: august),
+      () => _transaction(
+        'x',
+        description: 'Inválida',
+        amount: -5,
+        type: TransactionType.income,
+        date: august,
+      ),
       throwsAssertionError,
     );
+  });
+
+  test('acúmulo exato em centavos (regressão auditoria H1)', () async {
+    // 3 × 9.9 em double acumula 29.700000000000003; o fluxo deve somar
+    // centavos e devolver 29.7 exato.
+    final repository = _FakeFinancialTransactionRepository([
+      for (var i = 0; i < 3; i++)
+        _transaction(
+          'c$i',
+          description: 'Venda',
+          amount: 9.9,
+          type: TransactionType.income,
+          date: august,
+        ),
+    ]);
+    final useCase = GetCashFlowUseCase(repository);
+
+    final result = await useCase.call(
+      storeId: 'st1',
+      start: august,
+      end: august,
+    );
+
+    expect(result.income, 29.7);
+    expect(result.income, closeTo(29.7, 0.0000001));
+    expect(result.balance, 29.7);
   });
 }

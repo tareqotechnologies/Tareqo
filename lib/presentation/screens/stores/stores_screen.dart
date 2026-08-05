@@ -21,6 +21,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/status_chip.dart';
 import '../../widgets/store_scoped_content.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Gestão do tenant (dono): lojas, funcionários e plano contratado.
 ///
@@ -43,9 +44,10 @@ class StoresScreen extends ConsumerStatefulWidget {
 
 class _StoresScreenState extends ConsumerState<StoresScreen>
     with SingleTickerProviderStateMixin {
-  late final TabController _tabController =
-      TabController(length: 4, vsync: this)
-        ..addListener(_onTabChanged);
+  late final TabController _tabController = TabController(
+    length: 4,
+    vsync: this,
+  )..addListener(_onTabChanged);
 
   void _onTabChanged() {
     // Rebuild para atualizar o FAB (rótulo/visibilidade por aba).
@@ -113,45 +115,45 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
       body: StoreScopedContent(
         child: Column(
           children: [
-          _PlanCard(
-            tenant: tenant,
-            plan: currentPlan,
-            storeCount: storesAsync.value?.length ?? 0,
-            employeeCount: employeesAsync.value?.length ?? 0,
-            onUpgrade: _requestUpgrade,
-          ),
-          TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(text: l10n.storesTabStores),
-              Tab(text: l10n.storesTabEmployees),
-              Tab(text: l10n.storesTabUpgrades),
-              Tab(text: l10n.storesTabSettings),
-            ],
-            labelStyle: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w700,
+            _PlanCard(
+              tenant: tenant,
+              plan: currentPlan,
+              storeCount: storesAsync.value?.length ?? 0,
+              employeeCount: employeesAsync.value?.length ?? 0,
+              onUpgrade: _requestUpgrade,
             ),
-          ),
-          Expanded(
-            child: TabBarView(
+            TabBar(
               controller: _tabController,
-              children: [
-                _buildStores(storesAsync),
-                _buildEmployees(employeesAsync),
-                _buildUpgrades(requestsAsync),
-                _SettingsTab(tenant: tenant),
+              tabs: [
+                Tab(text: l10n.storesTabStores),
+                Tab(text: l10n.storesTabEmployees),
+                Tab(text: l10n.storesTabUpgrades),
+                Tab(text: l10n.storesTabSettings),
               ],
+              labelStyle: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildStores(storesAsync),
+                  _buildEmployees(employeesAsync),
+                  _buildUpgrades(requestsAsync),
+                  _SettingsTab(tenant: tenant),
+                ],
+              ),
+            ),
           ],
         ),
       ),
       floatingActionButton: showFab
           ? FloatingActionButton.extended(
               onPressed: index == 0 ? _openAddStore : _openAddEmployee,
-              icon: Icon(index == 0
-                  ? Icons.add_business_outlined
-                  : Icons.person_add_alt),
+              icon: Icon(
+                index == 0 ? Icons.add_business_outlined : Icons.person_add_alt,
+              ),
               label: Text(
                 index == 0 ? l10n.storesAddStore : l10n.storesAddEmployee,
               ),
@@ -188,13 +190,11 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                 leading: const Icon(Icons.store_outlined),
                 title: Text(
                   store.name,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
-                subtitle: store.address.isEmpty
-                    ? null
-                    : Text(store.address),
+                subtitle: store.address.isEmpty ? null : Text(store.address),
               ),
             );
           },
@@ -205,8 +205,8 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
 
   Widget _buildEmployees(AsyncValue<List<StoreEmployee>> async) {
     final l10n = context.l10n;
-    final stores = ref.watch(storesProvider(widget.tenant.id)).value ??
-        const <Store>[];
+    final stores =
+        ref.watch(storesProvider(widget.tenant.id)).value ?? const <Store>[];
 
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -249,9 +249,9 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                 ),
                 title: Text(
                   employee.fullName,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 subtitle: Text(
                   '${storeName(employee.storeId)} · ${employee.email}',
@@ -287,8 +287,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
       error: (error, _) => ErrorView(
         message: l10n.upgradesLoadError,
         details: error.toString(),
-        onRetry: () =>
-            ref.invalidate(myPlanRequestsProvider(widget.tenant.id)),
+        onRetry: () => ref.invalidate(myPlanRequestsProvider(widget.tenant.id)),
       ),
       data: (requests) {
         if (requests.isEmpty) {
@@ -306,12 +305,15 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
             final request = requests[index];
             final scheme = Theme.of(context).colorScheme;
             final (color, label) = switch (request.status) {
-              PlanRequestStatus.pending =>
-                (scheme.tertiary, l10n.statusPending),
-              PlanRequestStatus.approved =>
-                (scheme.primary, l10n.statusApproved),
-              PlanRequestStatus.rejected =>
-                (scheme.error, l10n.statusRejected),
+              PlanRequestStatus.pending => (
+                scheme.tertiary,
+                l10n.statusPending,
+              ),
+              PlanRequestStatus.approved => (
+                scheme.primary,
+                l10n.statusApproved,
+              ),
+              PlanRequestStatus.rejected => (scheme.error, l10n.statusRejected),
             };
             return Card(
               child: ListTile(
@@ -319,9 +321,9 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                 title: Text(
                   '${planName(request.currentPlanId)} → '
                   '${planName(request.requestedPlanId)}',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 subtitle: Text(
                   l10n.upgradesRequestedOn(
@@ -379,8 +381,10 @@ class _PlanCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.workspace_premium_outlined,
-                  color: scheme.onPrimaryContainer),
+              Icon(
+                Icons.workspace_premium_outlined,
+                color: scheme.onPrimaryContainer,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -462,17 +466,15 @@ class _LimitMeter extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: scheme.onPrimaryContainer.withValues(alpha: 0.8),
-                  ),
+                color: scheme.onPrimaryContainer.withValues(alpha: 0.8),
+              ),
             ),
             Text(
               '$used/$max',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: reached
-                        ? scheme.error
-                        : scheme.onPrimaryContainer,
-                  ),
+                fontWeight: FontWeight.w700,
+                color: reached ? scheme.error : scheme.onPrimaryContainer,
+              ),
             ),
           ],
         ),
@@ -548,7 +550,7 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
     } on TenantNotApprovedException catch (error) {
       setState(() => _formError = error.message);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao criar loja: $error\n$stackTrace');
+      CrashReporting.capture(error, stackTrace, hint: 'Erro ao criar loja');
       setState(() {
         _formError = l10n.addStoreError;
       });
@@ -663,28 +665,32 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
 
     try {
       // 1. Cria a conta de acesso do funcionário (e-mail/senha do dono).
-      final userId = await ref.read(employeeAccountServiceProvider).createAccount(
+      final userId = await ref
+          .read(employeeAccountServiceProvider)
+          .createAccount(
             email: _emailController.text.trim(),
             password: _passwordController.text,
             fullName: _nameController.text.trim(),
           );
 
       // 2. Vincula o funcionário à loja.
-      await ref.read(addEmployeeUseCaseProvider).call(StoreEmployee(
-            id: AppIds.newId('e'),
-            tenantId: widget.tenant.id,
-            storeId: _selectedStoreId!,
-            userId: userId,
-            fullName: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            role: _role,
-          ));
+      await ref
+          .read(addEmployeeUseCaseProvider)
+          .call(
+            StoreEmployee(
+              id: AppIds.newId('e'),
+              tenantId: widget.tenant.id,
+              storeId: _selectedStoreId!,
+              userId: userId,
+              fullName: _nameController.text.trim(),
+              email: _emailController.text.trim(),
+              role: _role,
+            ),
+          );
 
       if (!mounted) return;
       Navigator.of(context).pop();
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.addEmployeeSuccess)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.addEmployeeSuccess)));
     } on InvalidEmployeeException catch (error) {
       setState(() => _formError = error.message);
     } on PlanLimitExceededException catch (error) {
@@ -692,7 +698,11 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
     } on TenantNotApprovedException catch (error) {
       setState(() => _formError = error.message);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao cadastrar funcionário: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao cadastrar funcionário',
+      );
       setState(() {
         _formError = l10n.addEmployeeError;
       });
@@ -783,9 +793,8 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
                       ChoiceChip(
                         label: Text(store.name),
                         selected: _selectedStoreId == store.id,
-                        onSelected: (_) => setState(
-                          () => _selectedStoreId = store.id,
-                        ),
+                        onSelected: (_) =>
+                            setState(() => _selectedStoreId = store.id),
                       ),
                   ],
                 );
@@ -868,20 +877,24 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
     final l10n = context.l10n;
 
     try {
-      await ref.read(requestPlanUpgradeUseCaseProvider).call(
+      await ref
+          .read(requestPlanUpgradeUseCaseProvider)
+          .call(
             tenantId: widget.tenant.id,
             currentPlanId: widget.tenant.planId,
             requestedPlanId: _selectedPlanId!,
           );
       if (!mounted) return;
       Navigator.of(context).pop();
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.upgradeSuccess)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.upgradeSuccess)));
     } on InvalidPlanRequestException catch (error) {
       setState(() => _formError = error.message);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao solicitar upgrade: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao solicitar upgrade',
+      );
       setState(() {
         _formError = l10n.upgradeError;
       });
@@ -1016,15 +1029,15 @@ class _UpgradePlanTile extends StatelessWidget {
                   Text(
                     plan.name,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     l10n.planDetails(plan.maxStores, plan.maxEmployees),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -1032,9 +1045,9 @@ class _UpgradePlanTile extends StatelessWidget {
             Text(
               Formatters.currency(plan.priceMonthly),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: scheme.primary,
-                  ),
+                fontWeight: FontWeight.w700,
+                color: scheme.primary,
+              ),
             ),
           ],
         ),
@@ -1073,7 +1086,9 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
     final l10n = context.l10n;
 
     try {
-      await ref.read(updateTenantSettingsUseCaseProvider).call(
+      await ref
+          .read(updateTenantSettingsUseCaseProvider)
+          .call(
             tenantId: widget.tenant.id,
             currencyCode: _currencyCode,
             language: _language,
@@ -1085,7 +1100,7 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
       if (user != null) ref.invalidate(myTenantProvider(user.id));
       messenger.showSnackBar(SnackBar(content: Text(l10n.settingsSaved)));
     } catch (error, stackTrace) {
-      debugPrint('Erro ao salvar ajustes: $error\n$stackTrace');
+      CrashReporting.capture(error, stackTrace, hint: 'Erro ao salvar ajustes');
       setState(() => _formError = l10n.settingsGenericError);
     } finally {
       if (mounted) setState(() => _isSaving = false);

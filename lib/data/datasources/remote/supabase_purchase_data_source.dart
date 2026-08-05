@@ -24,24 +24,27 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
   /// `auth.uid()` no servidor.
   Future<void> processPurchase(Purchase purchase) async {
     requireCurrentUserId(); // Falha cedo (cliente) se não houver sessão.
-    await supabaseClient.rpc('process_purchase', params: {
-      'p_purchase': {
-        'id': purchase.id,
-        'store_id': purchase.storeId,
-        'supplier_name': purchase.supplierName,
-        'total_amount': purchase.totalAmount,
-        'date_time': purchase.dateTime.toUtc().toIso8601String(),
+    await supabaseClient.rpc(
+      'process_purchase',
+      params: {
+        'p_purchase': {
+          'id': purchase.id,
+          'store_id': purchase.storeId,
+          'supplier_name': purchase.supplierName,
+          'total_amount': purchase.totalAmount,
+          'date_time': purchase.dateTime.toUtc().toIso8601String(),
+        },
+        'p_items': [
+          for (final item in purchase.items)
+            {
+              'product_id': item.productId,
+              'product_name': item.productName,
+              'quantity': item.quantity,
+              'unit_price': item.unitPrice,
+            },
+        ],
       },
-      'p_items': [
-        for (final item in purchase.items)
-          {
-            'product_id': item.productId,
-            'product_name': item.productName,
-            'quantity': item.quantity,
-            'unit_price': item.unitPrice,
-          },
-      ],
-    });
+    );
   }
 
   @override
@@ -50,7 +53,8 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
         .from(_table)
         .select('*, purchase_items(*)')
         .eq('store_id', storeId)
-        .order('date_time', ascending: false);
+        .order('date_time', ascending: false)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -78,19 +82,19 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
   }
 
   Purchase _map(Map<String, dynamic> row) => Purchase(
-        id: row['id'] as String,
-        storeId: row['store_id'] as String,
-        supplierName: row['supplier_name'] as String,
-        items: [
-          for (final item in (row['purchase_items'] as List<dynamic>? ?? const []))
-            PurchaseItem(
-              productId: (item as Map<String, dynamic>)['product_id'] as String,
-              productName: item['product_name'] as String,
-              quantity: (item['quantity'] as num).toInt(),
-              unitPrice: (item['unit_price'] as num).toDouble(),
-            ),
-        ],
-        totalAmount: (row['total_amount'] as num).toDouble(),
-        dateTime: DateTime.parse(row['date_time'] as String).toLocal(),
-      );
+    id: row['id'] as String,
+    storeId: row['store_id'] as String,
+    supplierName: row['supplier_name'] as String,
+    items: [
+      for (final item in (row['purchase_items'] as List<dynamic>? ?? const []))
+        PurchaseItem(
+          productId: (item as Map<String, dynamic>)['product_id'] as String,
+          productName: item['product_name'] as String,
+          quantity: (item['quantity'] as num).toInt(),
+          unitPrice: (item['unit_price'] as num).toDouble(),
+        ),
+    ],
+    totalAmount: (row['total_amount'] as num).toDouble(),
+    dateTime: DateTime.parse(row['date_time'] as String).toLocal(),
+  );
 }

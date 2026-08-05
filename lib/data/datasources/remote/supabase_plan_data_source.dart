@@ -20,7 +20,8 @@ final class PlanSupabaseDataSourceImpl implements PlanLocalDataSource {
         .from(_table)
         .select(_columns)
         .eq('is_active', true)
-        .order('price_monthly', ascending: true);
+        .order('price_monthly', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -29,7 +30,8 @@ final class PlanSupabaseDataSourceImpl implements PlanLocalDataSource {
     final rows = await supabaseClient
         .from(_table)
         .select(_columns)
-        .order('price_monthly', ascending: true);
+        .order('price_monthly', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -76,12 +78,12 @@ final class PlanSupabaseDataSourceImpl implements PlanLocalDataSource {
   }
 
   Plan _map(Map<String, dynamic> row) => Plan(
-        id: row['id'] as String,
-        name: row['name'] as String,
-        description: (row['description'] as String?) ?? '',
-        priceMonthly: (row['price_monthly'] as num).toDouble(),
-        maxStores: (row['max_stores'] as num).toInt(),
-        maxEmployees: (row['max_employees'] as num).toInt(),
-        isActive: (row['is_active'] as bool?) ?? true,
-      );
+    id: row['id'] as String,
+    name: row['name'] as String,
+    description: (row['description'] as String?) ?? '',
+    priceMonthly: (row['price_monthly'] as num).toDouble(),
+    maxStores: (row['max_stores'] as num).toInt(),
+    maxEmployees: (row['max_employees'] as num).toInt(),
+    isActive: (row['is_active'] as bool?) ?? true,
+  );
 }

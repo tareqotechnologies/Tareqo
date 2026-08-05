@@ -20,7 +20,8 @@ final class StoreSupabaseDataSourceImpl implements StoreLocalDataSource {
         .from(_table)
         .select(_columns)
         .eq('tenant_id', tenantId)
-        .order('created_at', ascending: true);
+        .order('created_at', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -35,9 +36,9 @@ final class StoreSupabaseDataSourceImpl implements StoreLocalDataSource {
   }
 
   Store _map(Map<String, dynamic> row) => Store(
-        id: row['id'] as String,
-        tenantId: row['tenant_id'] as String,
-        name: row['name'] as String,
-        address: (row['address'] as String?) ?? '',
-      );
+    id: row['id'] as String,
+    tenantId: row['tenant_id'] as String,
+    name: row['name'] as String,
+    address: (row['address'] as String?) ?? '',
+  );
 }

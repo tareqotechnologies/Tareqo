@@ -1,3 +1,4 @@
+import '../../../core/utils/ids.dart';
 import '../../../domain/entities/plan_request.dart';
 import '../local/plan_request_local_data_source.dart';
 import 'supabase_datasource_helpers.dart';
@@ -11,7 +12,8 @@ final class PlanRequestSupabaseDataSourceImpl
   const PlanRequestSupabaseDataSourceImpl();
 
   static const _table = 'plan_requests';
-  static const _columns = 'id, tenant_id, current_plan_id, requested_plan_id, '
+  static const _columns =
+      'id, tenant_id, current_plan_id, requested_plan_id, '
       'status, decided_at, created_at';
 
   @override
@@ -20,7 +22,8 @@ final class PlanRequestSupabaseDataSourceImpl
         .from(_table)
         .select(_columns)
         .eq('tenant_id', tenantId)
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -40,7 +43,8 @@ final class PlanRequestSupabaseDataSourceImpl
         .from(_table)
         .select(_columns)
         .eq('status', PlanRequestStatus.pending.name)
-        .order('created_at', ascending: true);
+        .order('created_at', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -50,13 +54,16 @@ final class PlanRequestSupabaseDataSourceImpl
     required String currentPlanId,
     required String requestedPlanId,
   }) async {
-    final rows = await supabaseClient.from(_table).insert({
-      'id': 'pr_${DateTime.now().microsecondsSinceEpoch}',
-      'tenant_id': tenantId,
-      'current_plan_id': currentPlanId,
-      'requested_plan_id': requestedPlanId,
-      'status': PlanRequestStatus.pending.name,
-    }).select(_columns);
+    final rows = await supabaseClient
+        .from(_table)
+        .insert({
+          'id': AppIds.newId('pr'),
+          'tenant_id': tenantId,
+          'current_plan_id': currentPlanId,
+          'requested_plan_id': requestedPlanId,
+          'status': PlanRequestStatus.pending.name,
+        })
+        .select(_columns);
     return _map(rows.first);
   }
 
@@ -78,14 +85,14 @@ final class PlanRequestSupabaseDataSourceImpl
   }
 
   PlanRequest _map(Map<String, dynamic> row) => PlanRequest(
-        id: row['id'] as String,
-        tenantId: row['tenant_id'] as String,
-        currentPlanId: row['current_plan_id'] as String,
-        requestedPlanId: row['requested_plan_id'] as String,
-        status: PlanRequestStatus.values.byName(row['status'] as String),
-        decidedAt: row['decided_at'] == null
-            ? null
-            : DateTime.parse(row['decided_at'] as String).toLocal(),
-        createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
-      );
+    id: row['id'] as String,
+    tenantId: row['tenant_id'] as String,
+    currentPlanId: row['current_plan_id'] as String,
+    requestedPlanId: row['requested_plan_id'] as String,
+    status: PlanRequestStatus.values.byName(row['status'] as String),
+    decidedAt: row['decided_at'] == null
+        ? null
+        : DateTime.parse(row['decided_at'] as String).toLocal(),
+    createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
+  );
 }

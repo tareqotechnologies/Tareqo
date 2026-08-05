@@ -21,10 +21,10 @@ final class DebtSupabaseDataSourceImpl implements DebtLocalDataSource {
   /// o caminho composto ([markAsPaid] + entrada) permanece para os demais.
   Future<void> settleDebt(String debtId, {required String storeId}) async {
     requireCurrentUserId(); // Falha cedo (cliente) se não houver sessão.
-    await supabaseClient.rpc('settle_debt', params: {
-      'p_debt_id': debtId,
-      'p_store': storeId,
-    });
+    await supabaseClient.rpc(
+      'settle_debt',
+      params: {'p_debt_id': debtId, 'p_store': storeId},
+    );
   }
 
   /// Registra a dívida E a pendência financeira vinculada **atomicamente**
@@ -34,17 +34,20 @@ final class DebtSupabaseDataSourceImpl implements DebtLocalDataSource {
   /// o [add] composto permanece para os demais backends.
   Future<void> registerDebt(Debt debt) async {
     requireCurrentUserId(); // Falha cedo (cliente) se não houver sessão.
-    await supabaseClient.rpc('register_debt', params: {
-      'p_debt': {
-        'id': debt.id,
-        'store_id': debt.storeId,
-        'person_name': debt.personName,
-        'amount': debt.amount,
-        'due_date': debt.dueDate.toUtc().toIso8601String(),
-        'is_customer_debt': debt.isCustomerDebt,
-        if (debt.customerId != null) 'customer_id': debt.customerId,
+    await supabaseClient.rpc(
+      'register_debt',
+      params: {
+        'p_debt': {
+          'id': debt.id,
+          'store_id': debt.storeId,
+          'person_name': debt.personName,
+          'amount': debt.amount,
+          'due_date': debt.dueDate.toUtc().toIso8601String(),
+          'is_customer_debt': debt.isCustomerDebt,
+          if (debt.customerId != null) 'customer_id': debt.customerId,
+        },
       },
-    });
+    );
   }
 
   @override
@@ -56,7 +59,8 @@ final class DebtSupabaseDataSourceImpl implements DebtLocalDataSource {
           'is_paid, paid_at, customer_id',
         )
         .eq('store_id', storeId)
-        .order('due_date', ascending: true);
+        .order('due_date', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -71,7 +75,8 @@ final class DebtSupabaseDataSourceImpl implements DebtLocalDataSource {
       'due_date': debt.dueDate.toUtc().toIso8601String(),
       'is_customer_debt': debt.isCustomerDebt,
       'is_paid': debt.isPaid,
-      if (debt.paidAt != null) 'paid_at': debt.paidAt!.toUtc().toIso8601String(),
+      if (debt.paidAt != null)
+        'paid_at': debt.paidAt!.toUtc().toIso8601String(),
       if (debt.customerId != null) 'customer_id': debt.customerId,
     }, defaultToNull: false);
   }
@@ -95,16 +100,16 @@ final class DebtSupabaseDataSourceImpl implements DebtLocalDataSource {
   }
 
   Debt _map(Map<String, dynamic> row) => Debt(
-        id: row['id'] as String,
-        storeId: row['store_id'] as String,
-        personName: row['person_name'] as String,
-        amount: (row['amount'] as num).toDouble(),
-        dueDate: DateTime.parse(row['due_date'] as String).toLocal(),
-        isCustomerDebt: row['is_customer_debt'] as bool,
-        isPaid: row['is_paid'] as bool,
-        paidAt: row['paid_at'] == null
-            ? null
-            : DateTime.parse(row['paid_at'] as String).toLocal(),
-        customerId: row['customer_id'] as String?,
-      );
+    id: row['id'] as String,
+    storeId: row['store_id'] as String,
+    personName: row['person_name'] as String,
+    amount: (row['amount'] as num).toDouble(),
+    dueDate: DateTime.parse(row['due_date'] as String).toLocal(),
+    isCustomerDebt: row['is_customer_debt'] as bool,
+    isPaid: row['is_paid'] as bool,
+    paidAt: row['paid_at'] == null
+        ? null
+        : DateTime.parse(row['paid_at'] as String).toLocal(),
+    customerId: row['customer_id'] as String?,
+  );
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../controllers/auth_providers.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Tela de autenticação: login e cadastro em um único formulário.
 ///
@@ -54,7 +55,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final password = _passwordController.text;
 
       if (_isSignUpMode) {
-        await ref.read(signUpUseCaseProvider).call(
+        await ref
+            .read(signUpUseCaseProvider)
+            .call(
               email: email,
               password: password,
               fullName: _nameController.text.trim(),
@@ -65,16 +68,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           SnackBar(content: Text(l10n.loginSignUpSuccess)),
         );
       } else {
-        await ref.read(signInUseCaseProvider).call(
-              email: email,
-              password: password,
-            );
+        await ref
+            .read(signInUseCaseProvider)
+            .call(email: email, password: password);
         // Sucesso: o authStateProvider emite o usuário e o AuthGate navega.
       }
     } catch (error, stackTrace) {
       // Log detalhado para diagnóstico; a UI mostra apenas mensagem genérica
       // (não expõe detalhes internos do provedor ao usuário).
-      debugPrint('Erro de autenticação: $error\n$stackTrace');
+      CrashReporting.capture(error, stackTrace, hint: 'Erro de autenticação');
       messenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -174,9 +176,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               TextFormField(
                                 controller: _nameController,
                                 textInputAction: TextInputAction.next,
-                                autofillHints: const [
-                                  AutofillHints.name,
-                                ],
+                                autofillHints: const [AutofillHints.name],
                                 decoration: InputDecoration(
                                   labelText: l10n.loginNameLabel,
                                   prefixIcon: const Icon(Icons.person_outline),
@@ -195,7 +195,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               validator: (value) {
                                 final email = value?.trim() ?? '';
-                                if (email.isEmpty || !_emailRegExp.hasMatch(email)) {
+                                if (email.isEmpty ||
+                                    !_emailRegExp.hasMatch(email)) {
                                   return l10n.loginEmailError;
                                 }
                                 return null;
@@ -283,20 +284,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       height: 20,
                                       width: 20,
                                       child: CircularProgressIndicator(
-                                          strokeWidth: 2),
+                                        strokeWidth: 2,
+                                      ),
                                     )
-                                  : Text(_isSignUpMode ? l10n.loginSignUp : l10n.loginSignIn),
+                                  : Text(
+                                      _isSignUpMode
+                                          ? l10n.loginSignUp
+                                          : l10n.loginSignIn,
+                                    ),
                             ),
                             const SizedBox(height: 4),
                             TextButton(
                               onPressed: _isSubmitting
                                   ? null
                                   : () => setState(() {
-                                        _isSignUpMode = !_isSignUpMode;
-                                        // Limpa o campo de confirmação ao
-                                        // trocar de modo.
-                                        _confirmController.clear();
-                                      }),
+                                      _isSignUpMode = !_isSignUpMode;
+                                      // Limpa o campo de confirmação ao
+                                      // trocar de modo.
+                                      _confirmController.clear();
+                                    }),
                               child: Text(
                                 _isSignUpMode
                                     ? l10n.loginSwitchToSignIn

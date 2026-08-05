@@ -9,6 +9,7 @@ import '../../../domain/entities/app_user.dart';
 import '../../../domain/entities/plan.dart';
 import '../../../domain/usecases/request_tenant_access_use_case.dart';
 import '../../controllers/account_providers.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Onboarding do dono: escolhe o plano, o nome do negócio, a **moeda** e o
 /// **idioma** do app para solicitar acesso ao ERP. A solicitação nasce
@@ -25,7 +26,8 @@ class TenantOnboardingScreen extends ConsumerStatefulWidget {
       _TenantOnboardingScreenState();
 }
 
-class _TenantOnboardingScreenState extends ConsumerState<TenantOnboardingScreen> {
+class _TenantOnboardingScreenState
+    extends ConsumerState<TenantOnboardingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _businessController = TextEditingController();
 
@@ -61,27 +63,30 @@ class _TenantOnboardingScreenState extends ConsumerState<TenantOnboardingScreen>
     final l10n = context.l10n;
 
     try {
-      final tenant =
-          await ref.read(requestTenantAccessUseCaseProvider).call(
-                ownerUserId: widget.user.id,
-                businessName: _businessController.text.trim(),
-                planId: _selectedPlan!.id,
-                currencyCode: _currencyCode,
-                language: _language,
-              );
+      final tenant = await ref
+          .read(requestTenantAccessUseCaseProvider)
+          .call(
+            ownerUserId: widget.user.id,
+            businessName: _businessController.text.trim(),
+            planId: _selectedPlan!.id,
+            currencyCode: _currencyCode,
+            language: _language,
+          );
       if (!mounted) return;
       // O myTenantProvider reage: o AuthGate leva à tela "aguardando
       // aprovação" automaticamente (já no idioma escolhido).
       ref.invalidate(myTenantProvider(widget.user.id));
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.onboardingSuccess(tenant.businessName)),
-        ),
+        SnackBar(content: Text(l10n.onboardingSuccess(tenant.businessName))),
       );
     } on InvalidTenantRequestException catch (error) {
       setState(() => _formError = error.message);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao solicitar acesso: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao solicitar acesso',
+      );
       setState(() => _formError = l10n.onboardingGenericError);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -139,13 +144,12 @@ class _TenantOnboardingScreenState extends ConsumerState<TenantOnboardingScreen>
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                               labelText: l10n.onboardingBusinessLabel,
-                              prefixIcon:
-                                  const Icon(Icons.business_outlined),
+                              prefixIcon: const Icon(Icons.business_outlined),
                             ),
                             validator: (value) =>
                                 (value == null || value.trim().isEmpty)
-                                    ? l10n.onboardingBusinessError
-                                    : null,
+                                ? l10n.onboardingBusinessError
+                                : null,
                           ),
                           const SizedBox(height: 20),
                           Text(
@@ -202,9 +206,7 @@ class _TenantOnboardingScreenState extends ConsumerState<TenantOnboardingScreen>
                           plansAsync.when(
                             loading: () => const Padding(
                               padding: EdgeInsets.all(16),
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
+                              child: Center(child: CircularProgressIndicator()),
                             ),
                             error: (error, _) => Text(
                               l10n.onboardingPlansError,
@@ -218,9 +220,8 @@ class _TenantOnboardingScreenState extends ConsumerState<TenantOnboardingScreen>
                                   _PlanCard(
                                     plan: plan,
                                     selected: _selectedPlan?.id == plan.id,
-                                    onTap: () => setState(
-                                      () => _selectedPlan = plan,
-                                    ),
+                                    onTap: () =>
+                                        setState(() => _selectedPlan = plan),
                                   ),
                                   const SizedBox(height: 10),
                                 ],
@@ -265,10 +266,7 @@ class _TenantOnboardingScreenState extends ConsumerState<TenantOnboardingScreen>
 
   /// Rótulo localizado da moeda (ex.: "Real (BRL)" em pt, "US Dollar
   /// (USD)" em en).
-  String _currencyLabel(
-    AppLocalizations l10n,
-    String code,
-  ) {
+  String _currencyLabel(AppLocalizations l10n, String code) {
     switch (code) {
       case 'USD':
         return l10n.currencyUsd;
@@ -357,8 +355,8 @@ class _PlanCard extends StatelessWidget {
                   Text(
                     plan.name,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -367,8 +365,8 @@ class _PlanCard extends StatelessWidget {
                       plan.maxEmployees,
                     ),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -376,9 +374,9 @@ class _PlanCard extends StatelessWidget {
             Text(
               Formatters.currency(plan.priceMonthly),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: scheme.primary,
-                  ),
+                fontWeight: FontWeight.w700,
+                color: scheme.primary,
+              ),
             ),
           ],
         ),

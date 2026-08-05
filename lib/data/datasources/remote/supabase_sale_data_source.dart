@@ -27,24 +27,27 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
   /// for insuficiente ou se o total não corresponder aos itens.
   Future<void> processSale(Sale sale) async {
     requireCurrentUserId(); // Falha cedo (cliente) se não houver sessão.
-    await supabaseClient.rpc('process_sale', params: {
-      'p_sale': {
-        'id': sale.id,
-        'store_id': sale.storeId,
-        'total_amount': sale.totalAmount,
-        'payment_method': sale.paymentMethod.name,
-        'date_time': sale.dateTime.toUtc().toIso8601String(),
+    await supabaseClient.rpc(
+      'process_sale',
+      params: {
+        'p_sale': {
+          'id': sale.id,
+          'store_id': sale.storeId,
+          'total_amount': sale.totalAmount,
+          'payment_method': sale.paymentMethod.name,
+          'date_time': sale.dateTime.toUtc().toIso8601String(),
+        },
+        'p_items': [
+          for (final item in sale.items)
+            {
+              'product_id': item.productId,
+              'product_name': item.productName,
+              'quantity': item.quantity,
+              'unit_price': item.unitPrice,
+            },
+        ],
       },
-      'p_items': [
-        for (final item in sale.items)
-          {
-            'product_id': item.productId,
-            'product_name': item.productName,
-            'quantity': item.quantity,
-            'unit_price': item.unitPrice,
-          },
-      ],
-    });
+    );
   }
 
   @override
@@ -54,7 +57,8 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
         .from(_table)
         .select('*, sale_items(*)')
         .eq('store_id', storeId)
-        .order('date_time', ascending: false);
+        .order('date_time', ascending: false)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -82,22 +86,21 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
   }
 
   Sale _map(Map<String, dynamic> row) => Sale(
-        id: row['id'] as String,
-        storeId: row['store_id'] as String,
-        items: [
-          for (final item in (row['sale_items'] as List<dynamic>? ?? const []))
-            _mapItem(item as Map<String, dynamic>),
-        ],
-        totalAmount: (row['total_amount'] as num).toDouble(),
-        paymentMethod:
-            PaymentMethod.values.byName(row['payment_method'] as String),
-        dateTime: DateTime.parse(row['date_time'] as String).toLocal(),
-      );
+    id: row['id'] as String,
+    storeId: row['store_id'] as String,
+    items: [
+      for (final item in (row['sale_items'] as List<dynamic>? ?? const []))
+        _mapItem(item as Map<String, dynamic>),
+    ],
+    totalAmount: (row['total_amount'] as num).toDouble(),
+    paymentMethod: PaymentMethod.values.byName(row['payment_method'] as String),
+    dateTime: DateTime.parse(row['date_time'] as String).toLocal(),
+  );
 
   SaleItem _mapItem(Map<String, dynamic> row) => SaleItem(
-        productId: row['product_id'] as String,
-        productName: row['product_name'] as String,
-        quantity: (row['quantity'] as num).toInt(),
-        unitPrice: (row['unit_price'] as num).toDouble(),
-      );
+    productId: row['product_id'] as String,
+    productName: row['product_name'] as String,
+    quantity: (row['quantity'] as num).toInt(),
+    unitPrice: (row['unit_price'] as num).toDouble(),
+  );
 }

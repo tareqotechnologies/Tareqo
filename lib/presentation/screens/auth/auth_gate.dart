@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/observability/crash_reporting.dart';
 import '../../../domain/entities/app_user.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
@@ -38,7 +39,11 @@ class AuthGate extends ConsumerWidget {
       // vez de voltar silenciosamente para o login (evita confundir uma
       // falha transitória com "sessão encerrada").
       error: (error, stackTrace) {
-        debugPrint('AuthGate: erro no stream de sessão: $error\n$stackTrace');
+        CrashReporting.capture(
+          error,
+          stackTrace,
+          hint: 'AuthGate: erro no stream de sessão',
+        );
         return _AuthErrorScreen(
           onRetry: () => ref.invalidate(authStateProvider),
         );
@@ -57,9 +62,10 @@ class AuthGate extends ConsumerWidget {
             return adminAsync.when(
               loading: () => const _SplashScreen(),
               error: (error, stackTrace) {
-                debugPrint(
-                  'AuthGate: erro ao verificar papel de super admin: '
-                  '$error\n$stackTrace',
+                CrashReporting.capture(
+                  error,
+                  stackTrace,
+                  hint: 'AuthGate: erro ao verificar papel de super admin',
                 );
                 return _tenantGate(ref, user);
               },
@@ -79,8 +85,10 @@ class AuthGate extends ConsumerWidget {
     return tenantAsync.when(
       loading: () => const _SplashScreen(),
       error: (error, stackTrace) {
-        debugPrint(
-          'AuthGate: erro ao resolver tenant: $error\n$stackTrace',
+        CrashReporting.capture(
+          error,
+          stackTrace,
+          hint: 'AuthGate: erro ao resolver tenant',
         );
         // Não voltar para o login (usuário já logado): mostra um estado de
         // erro com tentar novamente.
@@ -158,10 +166,7 @@ class _AuthErrorScreen extends StatelessWidget {
 /// Estado de erro na resolução do tenant: mantém o usuário logado e
 /// oferece "tentar novamente" e "sair da conta".
 class _TenantErrorScreen extends StatelessWidget {
-  const _TenantErrorScreen({
-    required this.onRetry,
-    required this.onSignOut,
-  });
+  const _TenantErrorScreen({required this.onRetry, required this.onSignOut});
 
   final VoidCallback onRetry;
   final VoidCallback onSignOut;
@@ -261,7 +266,10 @@ class _SplashScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              Text('Dumbhanengue', style: Theme.of(context).textTheme.headlineMedium),
+              Text(
+                'Dumbhanengue',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
               const SizedBox(height: 28),
               const SizedBox(
                 height: 24,

@@ -33,7 +33,11 @@ class _AdminShellState extends State<AdminShell> {
     final l10n = context.l10n;
 
     final destinations = [
-      (Icons.verified_user_outlined, Icons.verified_user, l10n.adminNavRequests),
+      (
+        Icons.verified_user_outlined,
+        Icons.verified_user,
+        l10n.adminNavRequests,
+      ),
       (Icons.workspaces_outline, Icons.workspaces, l10n.adminNavPlans),
       (Icons.upgrade_outlined, Icons.upgrade, l10n.adminNavUpgrades),
     ];
@@ -43,10 +47,7 @@ class _AdminShellState extends State<AdminShell> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.adminTitle),
-        actions: const [
-          SignOutButton(),
-          SizedBox(width: 8),
-        ],
+        actions: const [SignOutButton(), SizedBox(width: 8)],
       ),
       body: wide
           ? Row(

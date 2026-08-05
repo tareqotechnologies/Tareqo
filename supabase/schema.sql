@@ -238,7 +238,58 @@ ALTER TABLE public.purchases              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.purchase_items         ENABLE ROW LEVEL SECURITY;
 
 -- ---------------------------------------------------------------
--- 1.3 Políticas de isolamento por tenant (auth.uid() = user_id)
+-- 1.2b Helpers de acesso (definidos AQUI, ANTES das políticas 1.3 que os
+-- consultam): o usuário é dono do tenant? / tem acesso à loja?
+-- ---------------------------------------------------------------
+
+-- Helper: o usuário é dono do tenant [target_tenant_id]?
+CREATE OR REPLACE FUNCTION public.is_tenant_owner(target_tenant_id TEXT)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.tenants t
+    WHERE t.id = target_tenant_id AND t.owner_user_id = auth.uid()
+  );
+$$;
+
+-- Helper: o usuário tem acesso à loja [target_store_id]? O dono do tenant
+-- vale para todas as lojas do tenant; o FUNCIONÁRIO vale para a loja do
+-- vínculo em store_employees (auditoria C2 — acesso por loja no SaaS).
+CREATE OR REPLACE FUNCTION public.is_my_store(target_store_id TEXT)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.stores s
+    WHERE s.id = target_store_id
+      AND (
+        public.is_tenant_owner(s.tenant_id)
+        OR EXISTS (
+          SELECT 1 FROM public.store_employees e
+          WHERE e.store_id = s.id AND e.user_id = auth.uid()
+        )
+      )
+  );
+$$;
+
+-- ---------------------------------------------------------------
+-- 1.3 Políticas de isolamento por tenant E LOJA (auditoria C2)
+--
+-- Regra de acesso às tabelas de negócio: o registro é visível/gravável
+-- quando o usuário logado É o criador (`auth.uid() = user_id`) OU quando
+-- tem acesso à LOJA do registro (`public.is_my_store(store_id)`) — o dono
+-- do tenant vale para todas as lojas do tenant; o FUNCIONÁRIO vale para a
+-- loja do vínculo em `store_employees`. Sem isso, funcionários (outros
+-- usuários) não enxergavam NENHUM dado de negócio no modo SaaS (bloqueador
+-- C2 da auditoria forense).
+--
+-- `is_my_store` é STABLE e consulta `stores`/`store_employees` — o RLS
+-- dessas tabelas (1.7) já garante que a subconsulta só vê o que o usuário
+-- pode ver (sem recursão: nenhuma política chama a própria tabela).
+--
 -- Usamos DROP POLICY IF EXISTS + CREATE POLICY: compatível com
 -- PostgreSQL 12/13/14 (o CREATE OR REPLACE POLICY é do PG 15+) e
 -- idempotente — pode reexecutar a parte 1 quantas vezes quiser.
@@ -247,112 +298,188 @@ ALTER TABLE public.purchase_items         ENABLE ROW LEVEL SECURITY;
 -- products
 DROP POLICY IF EXISTS products_select ON public.products;
 CREATE POLICY products_select ON public.products
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS products_insert ON public.products;
 CREATE POLICY products_insert ON public.products
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS products_update ON public.products;
 CREATE POLICY products_update ON public.products
-  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
+  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS products_delete ON public.products;
+-- DELETE só de registros PRÓPRIOS: o app não exclui nada (zero
+-- impacto) e impede um cliente direto de destruir registros de
+-- outro usuário da loja (endurecimento pós-auditoria C2).
 CREATE POLICY products_delete ON public.products
   FOR DELETE USING (auth.uid() = user_id);
 
 -- sales
 DROP POLICY IF EXISTS sales_select ON public.sales;
 CREATE POLICY sales_select ON public.sales
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS sales_insert ON public.sales;
 CREATE POLICY sales_insert ON public.sales
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS sales_update ON public.sales;
 CREATE POLICY sales_update ON public.sales
-  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
+  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS sales_delete ON public.sales;
+-- DELETE só de registros PRÓPRIOS: o app não exclui nada (zero
+-- impacto) e impede um cliente direto de destruir registros de
+-- outro usuário da loja (endurecimento pós-auditoria C2).
 CREATE POLICY sales_delete ON public.sales
   FOR DELETE USING (auth.uid() = user_id);
 
--- sale_items (isolamento direto pela coluna user_id, como as demais)
+-- sale_items: NÃO tem store_id — o acesso vem do pai (`sales.store_id`)
+-- via subconsulta. O RLS da subconsulta (sales_select) já filtra pelo que
+-- o usuário pode ver; o EXISTS apenas confirma o vínculo no pai visível.
 DROP POLICY IF EXISTS sale_items_select ON public.sale_items;
 CREATE POLICY sale_items_select ON public.sale_items
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.sales s
+      WHERE s.id = sale_items.sale_id AND public.is_my_store(s.store_id)
+    )
+  );
 DROP POLICY IF EXISTS sale_items_insert ON public.sale_items;
 CREATE POLICY sale_items_insert ON public.sale_items
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT WITH CHECK (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.sales s
+      WHERE s.id = sale_items.sale_id AND public.is_my_store(s.store_id)
+    )
+  );
 DROP POLICY IF EXISTS sale_items_update ON public.sale_items;
 CREATE POLICY sale_items_update ON public.sale_items
-  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR UPDATE USING (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.sales s
+      WHERE s.id = sale_items.sale_id AND public.is_my_store(s.store_id)
+    )
+  ) WITH CHECK (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.sales s
+      WHERE s.id = sale_items.sale_id AND public.is_my_store(s.store_id)
+    )
+  );
 DROP POLICY IF EXISTS sale_items_delete ON public.sale_items;
+-- DELETE só de registros PRÓPRIOS (o app não exclui nada).
 CREATE POLICY sale_items_delete ON public.sale_items
   FOR DELETE USING (auth.uid() = user_id);
 
 -- financial_transactions
 DROP POLICY IF EXISTS financial_transactions_select ON public.financial_transactions;
 CREATE POLICY financial_transactions_select ON public.financial_transactions
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS financial_transactions_insert ON public.financial_transactions;
 CREATE POLICY financial_transactions_insert ON public.financial_transactions
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS financial_transactions_update ON public.financial_transactions;
 CREATE POLICY financial_transactions_update ON public.financial_transactions
-  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
+  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS financial_transactions_delete ON public.financial_transactions;
+-- DELETE só de registros PRÓPRIOS: o app não exclui nada (zero
+-- impacto) e impede um cliente direto de destruir registros de
+-- outro usuário da loja (endurecimento pós-auditoria C2).
 CREATE POLICY financial_transactions_delete ON public.financial_transactions
   FOR DELETE USING (auth.uid() = user_id);
 
 -- debts
 DROP POLICY IF EXISTS debts_select ON public.debts;
 CREATE POLICY debts_select ON public.debts
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS debts_insert ON public.debts;
 CREATE POLICY debts_insert ON public.debts
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS debts_update ON public.debts;
 CREATE POLICY debts_update ON public.debts
-  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
+  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS debts_delete ON public.debts;
+-- DELETE só de registros PRÓPRIOS: o app não exclui nada (zero
+-- impacto) e impede um cliente direto de destruir registros de
+-- outro usuário da loja (endurecimento pós-auditoria C2).
 CREATE POLICY debts_delete ON public.debts
   FOR DELETE USING (auth.uid() = user_id);
 
 -- customers
 DROP POLICY IF EXISTS customers_select ON public.customers;
 CREATE POLICY customers_select ON public.customers
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS customers_insert ON public.customers;
 CREATE POLICY customers_insert ON public.customers
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS customers_update ON public.customers;
 CREATE POLICY customers_update ON public.customers
-  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
+  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS customers_delete ON public.customers;
+-- DELETE só de registros PRÓPRIOS: o app não exclui nada (zero
+-- impacto) e impede um cliente direto de destruir registros de
+-- outro usuário da loja (endurecimento pós-auditoria C2).
 CREATE POLICY customers_delete ON public.customers
   FOR DELETE USING (auth.uid() = user_id);
 
 -- purchases
 DROP POLICY IF EXISTS purchases_select ON public.purchases;
 CREATE POLICY purchases_select ON public.purchases
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS purchases_insert ON public.purchases;
 CREATE POLICY purchases_insert ON public.purchases
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS purchases_update ON public.purchases;
 CREATE POLICY purchases_update ON public.purchases
-  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
+  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS purchases_delete ON public.purchases;
+-- DELETE só de registros PRÓPRIOS: o app não exclui nada (zero
+-- impacto) e impede um cliente direto de destruir registros de
+-- outro usuário da loja (endurecimento pós-auditoria C2).
 CREATE POLICY purchases_delete ON public.purchases
   FOR DELETE USING (auth.uid() = user_id);
 
--- purchase_items (isolamento direto pela coluna user_id, como as demais)
+-- purchase_items: idem sale_items — acesso via pai (`purchases.store_id`)
 DROP POLICY IF EXISTS purchase_items_select ON public.purchase_items;
 CREATE POLICY purchase_items_select ON public.purchase_items
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.purchases p
+      WHERE p.id = purchase_items.purchase_id AND public.is_my_store(p.store_id)
+    )
+  );
 DROP POLICY IF EXISTS purchase_items_insert ON public.purchase_items;
 CREATE POLICY purchase_items_insert ON public.purchase_items
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT WITH CHECK (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.purchases p
+      WHERE p.id = purchase_items.purchase_id AND public.is_my_store(p.store_id)
+    )
+  );
 DROP POLICY IF EXISTS purchase_items_update ON public.purchase_items;
 CREATE POLICY purchase_items_update ON public.purchase_items
-  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  FOR UPDATE USING (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.purchases p
+      WHERE p.id = purchase_items.purchase_id AND public.is_my_store(p.store_id)
+    )
+  ) WITH CHECK (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.purchases p
+      WHERE p.id = purchase_items.purchase_id AND public.is_my_store(p.store_id)
+    )
+  );
 DROP POLICY IF EXISTS purchase_items_delete ON public.purchase_items;
+-- DELETE só de registros PRÓPRIOS (o app não exclui nada).
 CREATE POLICY purchase_items_delete ON public.purchase_items
   FOR DELETE USING (auth.uid() = user_id);
 
@@ -466,36 +593,8 @@ CREATE TRIGGER trg_purchase_items_user_id
 -- defesa em profundidade no servidor. No SQL Editor (sem JWT) o valor
 -- informado é preservado — permite o seed da Parte 2.
 
--- Helper: o usuário é dono do tenant [tenantId]? (definido AQUI, antes
--- dos triggers que o consultam — o RLS da seção 1.7 também o usa).
-CREATE OR REPLACE FUNCTION public.is_tenant_owner(target_tenant_id TEXT)
-RETURNS boolean
-LANGUAGE sql
-STABLE
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.tenants t
-    WHERE t.id = target_tenant_id AND t.owner_user_id = auth.uid()
-  );
-$$;
-
-CREATE OR REPLACE FUNCTION public.is_my_store(target_store_id TEXT)
-RETURNS boolean
-LANGUAGE sql
-STABLE
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.stores s
-    WHERE s.id = target_store_id
-      AND (
-        public.is_tenant_owner(s.tenant_id)
-        OR EXISTS (
-          SELECT 1 FROM public.store_employees e
-          WHERE e.store_id = s.id AND e.user_id = auth.uid()
-        )
-      )
-  );
-$$;
+-- Helper: o usuário é dono do tenant [tenantId]? (definido na seção 1.2b —
+-- o RLS da seção 1.7 também o usa).
 
 CREATE OR REPLACE FUNCTION public.set_record_store_id()
 RETURNS trigger
@@ -966,9 +1065,14 @@ CREATE TRIGGER trg_zzz_employee_limit
 -- TUDO em uma única transação do Postgres.
 --
 -- ⚠️ Segurança: como a função roda com privilégios do definer (dono das
--- tabelas), o RLS é dispensado DENTRO da função — por isso TODA consulta
--- filtra explicitamente por `user_id = auth.uid()` e `store_id`, e o
--- `search_path` é fixado em `public`. Nunca remova esses filtros.
+-- tabelas), o RLS é dispensado DENTRO da função — por isso TODA função
+-- valida o acesso à loja com `public.is_my_store(v_store)` logo no início
+-- (dono do tenant ou funcionário vinculado) e filtra explicitamente por
+-- `store_id`, e o `search_path` é fixado em `public`. Nunca remova a
+-- guarda nem os filtros — eles substituem o RLS dentro da função.
+-- Escopo por loja (não por user_id): registros da loja pertencem ao
+-- tenant; a guarda de acesso torna o filtro de user_id redundante e
+-- permite que FUNCIONÁRIOS da loja também operem (bloqueador C2).
 --
 -- ⚠️ Armadilha de precedência (Postgres): `||` e `->>` têm a MESMA
 -- precedência (associatividade à esquerda) — `'t' || p_sale->>'id'` é
@@ -1009,7 +1113,6 @@ $$;
 CREATE OR REPLACE FUNCTION public.lock_products_or_raise(
   p_items jsonb,
   p_store text,
-  p_uid uuid,
   p_require_stock boolean
 )
 RETURNS void
@@ -1024,7 +1127,7 @@ BEGIN
     IF p_require_stock THEN
       PERFORM 1 FROM public.products
         WHERE id = (v_item->>'product_id') AND store_id = p_store
-          AND user_id = p_uid AND stock_quantity >= (v_item->>'quantity')::int
+          AND stock_quantity >= (v_item->>'quantity')::int
         FOR UPDATE;
       IF NOT FOUND THEN
         RAISE EXCEPTION 'Estoque insuficiente para o produto % (loja %).',
@@ -1033,7 +1136,6 @@ BEGIN
     ELSE
       PERFORM 1 FROM public.products
         WHERE id = (v_item->>'product_id') AND store_id = p_store
-          AND user_id = p_uid
         FOR UPDATE;
       IF NOT FOUND THEN
         RAISE EXCEPTION 'Produto % não existe no catálogo da loja %.',
@@ -1059,6 +1161,11 @@ BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a venda.';
   END IF;
+  -- Guarda de acesso: a loja precisa pertencer ao usuário (dono do tenant
+  -- ou funcionário vinculado). Substitui o RLS dentro do SECURITY DEFINER.
+  IF NOT public.is_my_store(v_store) THEN
+    RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', v_store;
+  END IF;
   -- Idioma do tenant (escolha do dono) — define a descrição/categoria
   -- gravadas na entrada do caixa (padrão pt).
   SELECT t.language INTO v_lang
@@ -1070,7 +1177,7 @@ BEGIN
   END IF;
   -- Idempotência: o id da venda é a chave de idempotência — um retry após
   -- sucesso (ex.: timeout no cliente) não duplica nada.
-  IF EXISTS (SELECT 1 FROM public.sales WHERE id = p_sale->>'id' AND user_id = v_uid) THEN
+  IF EXISTS (SELECT 1 FROM public.sales WHERE id = p_sale->>'id' AND store_id = v_store) THEN
     RETURN;
   END IF;
   IF jsonb_array_length(p_items) = 0 THEN
@@ -1085,7 +1192,7 @@ BEGIN
   END IF;
 
   -- Trava e valida o estoque de TODOS os itens (fecha TOCTOU).
-  PERFORM public.lock_products_or_raise(p_items, v_store, v_uid, TRUE);
+  PERFORM public.lock_products_or_raise(p_items, v_store, TRUE);
 
   -- Venda + itens (snapshot de nome/preço).
   INSERT INTO public.sales
@@ -1103,7 +1210,7 @@ BEGIN
   UPDATE public.products p
   SET stock_quantity = p.stock_quantity - (x->>'quantity')::int
   FROM jsonb_array_elements(p_items) x
-  WHERE p.id = (x->>'product_id') AND p.store_id = v_store AND p.user_id = v_uid;
+  WHERE p.id = (x->>'product_id') AND p.store_id = v_store;
 
   -- Entrada no caixa (mesma transação).
   INSERT INTO public.financial_transactions
@@ -1132,6 +1239,9 @@ BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar o fiado.';
   END IF;
+  IF NOT public.is_my_store(v_store) THEN
+    RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', v_store;
+  END IF;
   SELECT t.language INTO v_lang
   FROM public.stores s
   JOIN public.tenants t ON t.id = s.tenant_id
@@ -1143,7 +1253,7 @@ BEGIN
     RAISE EXCEPTION 'O valor da dívida deve ser maior que zero.';
   END IF;
   -- Idempotência: retry após sucesso não duplica dívida nem pendência.
-  IF EXISTS (SELECT 1 FROM public.debts WHERE id = p_debt->>'id' AND user_id = v_uid) THEN
+  IF EXISTS (SELECT 1 FROM public.debts WHERE id = p_debt->>'id' AND store_id = v_store) THEN
     RETURN;
   END IF;
 
@@ -1194,6 +1304,9 @@ BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para quitar o fiado.';
   END IF;
+  IF NOT public.is_my_store(p_store) THEN
+    RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', p_store;
+  END IF;
   SELECT t.language INTO v_lang
   FROM public.stores s
   JOIN public.tenants t ON t.id = s.tenant_id
@@ -1203,7 +1316,7 @@ BEGIN
   END IF;
 
   SELECT * INTO v_debt FROM public.debts
-  WHERE id = p_debt_id AND store_id = p_store AND user_id = v_uid;
+  WHERE id = p_debt_id AND store_id = p_store;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Dívida % não encontrada na loja %.', p_debt_id, p_store;
   END IF;
@@ -1217,7 +1330,7 @@ BEGIN
   -- 1. Baixa da dívida (guarda de concorrência: só baixa se ainda
   --    pendente — se outra chamada já quitou, retorna sem efeito).
   UPDATE public.debts SET is_paid = TRUE, paid_at = now()
-  WHERE id = p_debt_id AND store_id = p_store AND user_id = v_uid
+  WHERE id = p_debt_id AND store_id = p_store
     AND NOT is_paid;
   IF NOT FOUND THEN
     RETURN;
@@ -1226,7 +1339,7 @@ BEGIN
   -- 2. Pendência vinculada (debt_id): marca a MESMA transação como paga
   --    (nunca cria duplicata no caixa).
   UPDATE public.financial_transactions SET status = 'paid'
-  WHERE debt_id = p_debt_id AND store_id = p_store AND user_id = v_uid
+  WHERE debt_id = p_debt_id AND store_id = p_store
     AND status = 'pending';
 
   -- 3. Fiado antigo SEM nenhuma transação vinculada (pendente ou paga):
@@ -1236,7 +1349,7 @@ BEGIN
   --    ('t' || debt_id) nem com ids do AppIds ('t<ts>_<hex>').
   IF NOT EXISTS (
     SELECT 1 FROM public.financial_transactions
-    WHERE debt_id = p_debt_id AND store_id = p_store AND user_id = v_uid
+    WHERE debt_id = p_debt_id AND store_id = p_store
   ) THEN
     INSERT INTO public.financial_transactions
       (id, user_id, store_id, description, amount, type, category,
@@ -1267,6 +1380,9 @@ BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a compra.';
   END IF;
+  IF NOT public.is_my_store(v_store) THEN
+    RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', v_store;
+  END IF;
   SELECT t.language INTO v_lang
   FROM public.stores s
   JOIN public.tenants t ON t.id = s.tenant_id
@@ -1275,7 +1391,7 @@ BEGIN
     v_lang := 'pt';
   END IF;
   -- Idempotência: o id da compra é a chave de idempotência.
-  IF EXISTS (SELECT 1 FROM public.purchases WHERE id = p_purchase->>'id' AND user_id = v_uid) THEN
+  IF EXISTS (SELECT 1 FROM public.purchases WHERE id = p_purchase->>'id' AND store_id = v_store) THEN
     RETURN;
   END IF;
   IF jsonb_array_length(p_items) = 0 THEN
@@ -1290,7 +1406,7 @@ BEGIN
 
   -- Valida e trava a existência de TODOS os produtos ANTES de mutar
   -- (mesmo padrão do process_sale; fecha corrida com exclusão).
-  PERFORM public.lock_products_or_raise(p_items, v_store, v_uid, FALSE);
+  PERFORM public.lock_products_or_raise(p_items, v_store, FALSE);
 
   -- Compra + itens.
   INSERT INTO public.purchases
@@ -1308,7 +1424,7 @@ BEGIN
   UPDATE public.products p
   SET stock_quantity = p.stock_quantity + (x->>'quantity')::int
   FROM jsonb_array_elements(p_items) x
-  WHERE p.id = (x->>'product_id') AND p.store_id = v_store AND p.user_id = v_uid;
+  WHERE p.id = (x->>'product_id') AND p.store_id = v_store;
 
   -- Saída no caixa (mesma transação).
   INSERT INTO public.financial_transactions

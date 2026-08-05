@@ -10,6 +10,7 @@ import '../../controllers/admin_providers.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/status_chip.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Painel do super admin — decidir pedidos de upgrade de plano. Ao aprovar,
 /// o plano do tenant é trocado para o solicitado.
@@ -89,28 +90,27 @@ class _AdminPlanRequestsScreenState
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
     try {
-      await ref.read(decidePlanRequestUseCaseProvider).call(
-            request.id,
-            approve: approve,
-          );
+      await ref
+          .read(decidePlanRequestUseCaseProvider)
+          .call(request.id, approve: approve);
       if (!mounted) return;
       await ref.read(pendingPlanRequestsProvider.notifier).refresh();
       await ref.read(allTenantsProvider.notifier).refresh();
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            approve
-                ? l10n.adminUpgradeApproved
-                : l10n.adminUpgradeRejected,
+            approve ? l10n.adminUpgradeApproved : l10n.adminUpgradeRejected,
           ),
         ),
       );
     } catch (error, stackTrace) {
-      debugPrint('Erro ao decidir upgrade: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao decidir upgrade',
+      );
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.adminUpgradeProcessError),
-        ),
+        SnackBar(content: Text(l10n.adminUpgradeProcessError)),
       );
     }
   }
@@ -245,9 +245,9 @@ class _PlanBadge extends StatelessWidget {
         children: [
           Text(
             isUpgrade ? l10n.adminPlanRequested : l10n.adminPlanCurrent,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: color),
           ),
           const SizedBox(height: 2),
           Text(
@@ -255,9 +255,9 @@ class _PlanBadge extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
         ],
       ),

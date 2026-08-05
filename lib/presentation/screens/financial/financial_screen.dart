@@ -13,6 +13,7 @@ import '../../widgets/kpi_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/status_chip.dart';
 import 'add_transaction_sheet.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Tela financeira — fluxo de caixa por período e movimentações.
 class FinancialScreen extends ConsumerWidget {
@@ -127,10 +128,9 @@ class FinancialScreen extends ConsumerWidget {
                       transaction: transaction,
                       onReceive:
                           transaction.status == TransactionStatus.pending &&
-                                  transaction.type == TransactionType.income
-                              ? () =>
-                                  _receivePending(context, ref, transaction)
-                              : null,
+                              transaction.type == TransactionType.income
+                          ? () => _receivePending(context, ref, transaction)
+                          : null,
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -183,13 +183,15 @@ class FinancialScreen extends ConsumerWidget {
           .read(markTransactionAsPaidUseCaseProvider)
           .call(transaction.id, storeId: transaction.storeId);
       if (!context.mounted) return;
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.financialReceived)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.financialReceived)));
       ref.invalidate(transactionsProvider);
       ref.invalidate(cashFlowProvider);
     } catch (error, stackTrace) {
-      debugPrint('Erro ao receber pendência: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao receber pendência',
+      );
       if (!context.mounted) return;
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.financialReceiveError)),
@@ -197,10 +199,7 @@ class FinancialScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _openAddTransaction(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  Future<void> _openAddTransaction(BuildContext context, WidgetRef ref) async {
     await showAppSheet<void>(
       context,
       builder: (_) => const AddTransactionSheet(),
@@ -239,9 +238,7 @@ class _TransactionCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                isIncome
-                    ? Icons.south_west
-                    : Icons.north_east,
+                isIncome ? Icons.south_west : Icons.north_east,
                 size: 20,
                 color: color,
               ),

@@ -1,3 +1,4 @@
+import '../../../core/utils/ids.dart';
 import '../../../domain/entities/tenant.dart';
 import '../local/tenant_local_data_source.dart';
 import 'supabase_datasource_helpers.dart';
@@ -12,7 +13,8 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
   const TenantSupabaseDataSourceImpl();
 
   static const _table = 'tenants';
-  static const _columns = 'id, owner_user_id, business_name, plan_id, status, '
+  static const _columns =
+      'id, owner_user_id, business_name, plan_id, status, '
       'rejection_reason, approved_at, created_at, currency_code, language';
 
   @override
@@ -61,15 +63,18 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
     required String currencyCode,
     required String language,
   }) async {
-    final rows = await supabaseClient.from(_table).insert({
-      'id': 'tn_${DateTime.now().microsecondsSinceEpoch}',
-      'owner_user_id': ownerUserId,
-      'business_name': businessName,
-      'plan_id': planId,
-      'status': TenantStatus.pending.name,
-      'currency_code': currencyCode,
-      'language': language,
-    }).select(_columns);
+    final rows = await supabaseClient
+        .from(_table)
+        .insert({
+          'id': AppIds.newId('tn'),
+          'owner_user_id': ownerUserId,
+          'business_name': businessName,
+          'plan_id': planId,
+          'status': TenantStatus.pending.name,
+          'currency_code': currencyCode,
+          'language': language,
+        })
+        .select(_columns);
     return _map(rows.first);
   }
 
@@ -137,7 +142,8 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
         .from(_table)
         .select(_columns)
         .eq('status', TenantStatus.pending.name)
-        .order('created_at', ascending: true);
+        .order('created_at', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -146,23 +152,24 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
     final rows = await supabaseClient
         .from(_table)
         .select(_columns)
-        .order('created_at', ascending: true);
+        .order('created_at', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
   Tenant _map(Map<String, dynamic> row) => Tenant(
-        id: row['id'] as String,
-        ownerUserId: row['owner_user_id'] as String,
-        businessName: row['business_name'] as String,
-        planId: row['plan_id'] as String,
-        status: TenantStatus.values.byName(row['status'] as String),
-        rejectionReason: row['rejection_reason'] as String?,
-        approvedAt: row['approved_at'] == null
-            ? null
-            : DateTime.parse(row['approved_at'] as String).toLocal(),
-        createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
-        // Defaults para bancos ainda sem a migração das colunas.
-        currencyCode: (row['currency_code'] as String?) ?? 'BRL',
-        language: (row['language'] as String?) ?? 'pt',
-      );
+    id: row['id'] as String,
+    ownerUserId: row['owner_user_id'] as String,
+    businessName: row['business_name'] as String,
+    planId: row['plan_id'] as String,
+    status: TenantStatus.values.byName(row['status'] as String),
+    rejectionReason: row['rejection_reason'] as String?,
+    approvedAt: row['approved_at'] == null
+        ? null
+        : DateTime.parse(row['approved_at'] as String).toLocal(),
+    createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
+    // Defaults para bancos ainda sem a migração das colunas.
+    currencyCode: (row['currency_code'] as String?) ?? 'BRL',
+    language: (row['language'] as String?) ?? 'pt',
+  );
 }

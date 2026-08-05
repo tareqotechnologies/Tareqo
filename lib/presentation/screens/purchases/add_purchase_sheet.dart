@@ -15,6 +15,7 @@ import '../../controllers/products_providers.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/search_field.dart';
+import '../../../core/observability/crash_reporting.dart';
 
 /// Carrinho de nova compra: fornecedor, produtos com steppers de quantidade
 /// e confirmação via [ProcessPurchaseUseCase] (aumenta o estoque + saída no
@@ -58,8 +59,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
     return total;
   }
 
-  int get _itemCount =>
-      _cart.values.fold(0, (sum, quantity) => sum + quantity);
+  int get _itemCount => _cart.values.fold(0, (sum, quantity) => sum + quantity);
 
   Product? _productById(String id) => _productsById[id];
 
@@ -142,9 +142,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            l10n.purchasesRegistered(
-              Formatters.currency(purchase.totalAmount),
-            ),
+            l10n.purchasesRegistered(Formatters.currency(purchase.totalAmount)),
           ),
         ),
       );
@@ -153,7 +151,11 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
         _error = l10n.purchasesProductNotFound(error.productId);
       });
     } catch (error, stackTrace) {
-      debugPrint('Erro ao registrar compra: $error\n$stackTrace');
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao registrar compra',
+      );
       setState(() {
         _error = l10n.purchasesRegisterError;
       });
@@ -201,8 +203,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
           ),
           Expanded(
             child: productsAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (_, _) => Center(
                 child: Text(
                   l10n.productsLoadError,
@@ -213,9 +214,11 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                 final filtered = _query.isEmpty
                     ? all
                     : all
-                        .where((product) =>
-                            product.name.toLowerCase().contains(_query))
-                        .toList();
+                          .where(
+                            (product) =>
+                                product.name.toLowerCase().contains(_query),
+                          )
+                          .toList();
 
                 if (filtered.isEmpty) {
                   return EmptyState(
@@ -229,8 +232,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   itemCount: filtered.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 6),
-                  itemBuilder: (context, index) =>
-                      _CartProductRow(
+                  itemBuilder: (context, index) => _CartProductRow(
                     product: filtered[index],
                     quantity: _cart[filtered[index].id] ?? 0,
                     onAdd: () => _add(filtered[index]),
