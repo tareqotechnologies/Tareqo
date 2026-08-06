@@ -40,7 +40,7 @@
 
 ## 1. Executive Summary
 
-This is a **well-engineered codebase** — unusually so for its size: clean `flutter analyze`, 300 green tests (Aug 6), real Clean Architecture, Material 3 theming with dark mode, RLS on every table, atomic `SECURITY DEFINER` RPCs with idempotency for sales/purchases/debts, anti-forgery triggers, secure session storage (Keychain/Keystore), and 14 chapters of bilingual documentation.
+This is a **well-engineered codebase** — unusually so for its size: clean `flutter analyze`, 300 green tests (Aug 6), real Clean Architecture, Material 3 theming with dark mode, RLS on every table, atomic `SECURITY DEFINER` RPCs with idempotency for sales/purchases/debts, anti-forgery triggers, secure session storage (Keychain/Keystore), and 15 chapters of bilingual documentation.
 
 **But it is not shippable to production today.** The blockers are not in code quality — they are in **release operations, authorization modeling, and money-path integrity**:
 
@@ -252,7 +252,7 @@ Plans (Essencial/Profissional/Empresa) with **DB-enforced** store/employee limit
 1. ✅ Real upload keystore + `key.properties` gitignored (C1) — keystore generated; external: activate Play App Signing + register upload key
 2. ✅ Super-admin role fixed (C3); external: verify email confirmation ON + enable 2FA (H9)
 3. ✅ `settle_debt` RPC (C4) + SQL smoke test (H3) — `schema.sql` **applied to the live project** (eu-north-1) and re-verified 10/10 (Aug 5)
-3b. ⏳ Apply **`supabase/upgrade.sql`** (W4 cents + H2 RPCs — old migrations 010/011) to the live project + re-verify with `sql_check_live.sh` (**14 checks**)
+3b. ⏳ Apply **`supabase/upgrade.sql`** (W4 cents + H2 RPCs — old migrations 010/011) to the live project + re-verify with `sql_check_live.sh` (**14 checks**) — **runbook: [capítulo 15](15-migracao-w4-h2.md)** (backup, pré-flight, transação única, verificação, rollback)
 4. ✅ Store-scoped employee RLS + access matrix (C2, Aug 6); ⏳ invite flow (H7)
 5. Branding: appId, labels, web metadata, icons/splash (M2)
 6. ✅ CI pipeline (H3) + Sentry (H4) + **iOS TestFlight pipeline (W1, Aug 6)**
@@ -278,7 +278,7 @@ Architecture 88 · Testing 80 · Security 68 · UX/UI 88 · Performance/Scalabil
 
 | # | Item (checklist) | Tipo | Estado |
 |---|---|---|---|
-| 1 | **Aplicar `supabase/upgrade.sql` ao Supabase live** (antigas migrações 010/011 — W4 cents + H2 RPCs) + re-verificar com `scripts/sql_check_live.sh` (**14/14**) | Interno → live | ⏳ único item interno restante (runbook: aplicar via SQL Editor/pooler `-1`, backup + pré-flight antes) |
+| 1 | **Aplicar `supabase/upgrade.sql` ao Supabase live** (antigas migrações 010/011 — W4 cents + H2 RPCs) + re-verificar com `scripts/sql_check_live.sh` (**14/14**) | Interno → live | ⏳ único item interno restante (**runbook: [capítulo 15](15-migracao-w4-h2.md)** — backup, pré-flight, aplicar via SQL Editor/pooler `-1`, verificar 14/14) |
 | 2 | Ativar **Play App Signing** + registrar o SHA-256 da upload key (7.1 — parte externa do C1) | Externo (Play Console) | ⏳ |
 | 3 | Verificar **e-mail de confirmação ON** + habilitar **2FA no super admin** (2.1/2.2 — H9) | Externo (dashboard Supabase) | ⏳ |
 | 4 | `password_min_length = 8` nas settings do projeto (M7) | Externo (dashboard Supabase) | ⏳ |

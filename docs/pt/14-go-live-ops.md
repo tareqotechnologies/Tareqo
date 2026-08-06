@@ -40,6 +40,9 @@
    conteúdo de `supabase/upgrade.sql` (leva um banco EXISTENTE ao estado
    atual — substitui as antigas migrações 002..011; 100% idempotente, seguro
    reexecutar). Para projetos novos, só o `supabase/schema.sql` basta.
+   → **Runbook completo (W4 centavos + H2 RPCs): [capítulo 15](15-migracao-w4-h2.md)**
+   — backup, pré-flight, aplicação em transação única, verificação
+   `sql_check_live.sh` 14/14 e rollback.
 5. Rate limits de e-mail: deixar os padrões (o cadastro de funcionário não usa
    e-mail — RPC `create_employee_account`).
 

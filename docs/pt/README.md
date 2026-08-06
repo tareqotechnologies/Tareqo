@@ -25,6 +25,8 @@ Este diretório reúne todos os documentos do app: do que ele faz até como cada
 | 11 | [Multi-tenancy e Super Admin](11-multitenancy.md) | Planos, aprovação de tenants, lojas, funcionários, upgrade de plano e o painel do super admin |
 | 12 | [Decisões de arquitetura](12-decisoes-de-arquitetura.md) | O "porquê" de cada decisão técnica: Clean Architecture, contratos, snapshot de preço, estoque atômico, fiado, autenticação SaaS e armazenamento seguro |
 | 13 | [Build e publicação por plataforma](13-build-e-publicacao.md) | Como compilar o app em Android, iOS, Windows e Web, requisitos, assinatura, deploy e checklist de publicação |
+| 14 | [Go-Live: operações externas](14-go-live-ops.md) | Checklist manual das consolas (Play, Apple, Supabase) e secrets do CI para o primeiro release |
+| 15 | [Migração W4 + H2 no live](15-migracao-w4-h2.md) | Runbook passo a passo para aplicar `supabase/upgrade.sql` no projeto de produção + verificação pós-migração |
 
 ---
 
