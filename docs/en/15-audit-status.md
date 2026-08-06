@@ -45,7 +45,7 @@ This caught and fixed a **genuine W4 bug**: `SUM(bigint)` returns `numeric`, whi
 
 | # | Item (checklist) | Type | Status |
 |---|---|---|---|
-| 1 | **Apply `supabase/upgrade.sql` to the live Supabase** (former migrations 010/011 — W4 cents + H2 RPCs) + re-verify with `scripts/sql_check_live.sh` (**14/14**) | Internal → live | ⏳ only remaining internal item (runbook: apply via SQL Editor / pooler with `-1`; backup + pre-flight checks before) |
+| 1 | **Apply `supabase/upgrade.sql` to the live Supabase** (former migrations 010/011 — W4 cents + H2 RPCs) + re-verify with `scripts/sql_check_live.sh` (**14/14**) | Internal → live | ⏳ only remaining internal item (**runbook: [chapter 16](16-migracao-w4-h2.md)** — backup, pre-flight, apply via SQL Editor / pooler with `-1`, verify 14/14) |
 | 2 | Activate **Play App Signing** + register the upload-key SHA-256 (7.1 — external part of C1) | External (Play Console) | ⏳ |
 | 3 | Verify **email confirmation ON** + enable **2FA on the super admin** (2.1/2.2 — H9) | External (Supabase dashboard) | ⏳ |
 | 4 | `password_min_length = 8` in project settings (M7) | External (Supabase dashboard) | ⏳ |
