@@ -19,7 +19,7 @@ import '../../../domain/entities/tenant.dart';
 /// relativas a `DateTime.now()` para que períodos (hoje/7 dias/mês)
 /// funcionem desde o primeiro dia.
 ///
-/// Desde a migração W4, TODO dinheiro está em **centavos inteiros**
+/// Desde a migração W4, todo o dinheiro está em **centavos inteiros**
 /// (ex.: 13.9 → 1390).
 abstract final class DemoSeed {
   /// Usuário demo usado como dono do tenant nas implementações em memória.
