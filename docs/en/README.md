@@ -4,7 +4,7 @@ Welcome to the complete documentation of **Dumbhanengue ERP** — a business man
 
 > 🌐 **Language:** This is the English version. The Portuguese documentation lives in ([`docs/pt/`](../pt/README.md)).
 >
-> 📌 **Audit docs:** the production-readiness audit reports ([`docs/pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md)) and the live checklist ([`docs/pt/PRODUCTION_CHECKLIST.md`](../pt/PRODUCTION_CHECKLIST.md)) are maintained in Portuguese (the project's primary language) and are the authoritative source for audit status. An English summary of the latest audit status (Update 6 + pending production items) is available in [15-audit-status.md](15-audit-status.md), and the W4 + H2 live migration runbook in [16-migracao-w4-h2.md](16-migracao-w4-h2.md). The English chapters were synced with the Aug 5/6 changes (flavors, store-scoped RLS, DB-backed super admin, atomic RPCs, secure session storage, CI/CD, W4/H2/W10, SQL consolidation) — the Portuguese docs remain the primary reference.
+> 📌 **Audit docs:** the production-readiness audit reports ([`docs/pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md)) and the live checklist ([`docs/pt/PRODUCTION_CHECKLIST.md`](../pt/PRODUCTION_CHECKLIST.md)) are maintained in Portuguese (the project's primary language) and are the authoritative source for audit status. An English summary of the latest audit status (Update 6 + pending production items) is available in [15-audit-status.md](15-audit-status.md), the W4 + H2 live migration runbook in [16-migracao-w4-h2.md](16-migracao-w4-h2.md), and the production readiness checklist in [17-production-checklist.md](17-production-checklist.md). The English chapters were synced with the Aug 5/6 changes (flavors, store-scoped RLS, DB-backed super admin, atomic RPCs, secure session storage, CI/CD, W4/H2/W10, SQL consolidation) — the Portuguese docs remain the primary reference.
 
 This folder gathers every document about the app: from what it does to how each layer works, with code examples, diagrams and practical guides for developers.
 
@@ -30,6 +30,7 @@ This folder gathers every document about the app: from what it does to how each 
 | 14 | [Go-live operations](14-go-live-ops.md) | Pre-launch and launch-day ops: Supabase project setup, environment variables, SQL apply, verification scripts, rollback and monitoring |
 | 15 | [Audit status & pending items](15-audit-status.md) | English summary of the latest audit status (Update 6: SQL consolidation + real-DB validation) and the pending production-checklist items |
 | 16 | [W4 + H2 live migration runbook](16-migracao-w4-h2.md) | Step-by-step runbook to apply `supabase/upgrade.sql` to the production project (backup, pre-flight, apply, verify, rollback) |
+| 17 | [Production readiness checklist](17-production-checklist.md) | English mirror of the production checklist: data integrity, security, architecture, performance, testing, ops, dependencies and docs status |
 
 ---
 
