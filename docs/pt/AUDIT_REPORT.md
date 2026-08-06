@@ -252,7 +252,7 @@ Plans (Essencial/Profissional/Empresa) with **DB-enforced** store/employee limit
 1. ✅ Real upload keystore + `key.properties` gitignored (C1) — keystore generated; external: activate Play App Signing + register upload key
 2. ✅ Super-admin role fixed (C3); external: verify email confirmation ON + enable 2FA (H9)
 3. ✅ `settle_debt` RPC (C4) + SQL smoke test (H3) — `schema.sql` **applied to the live project** (eu-north-1) and re-verified 10/10 (Aug 5)
-3b. ⏳ Apply **`supabase/upgrade.sql`** (W4 cents + H2 RPCs — old migrations 010/011) to the live project + re-verify with `sql_check_live.sh` (**14 checks**) — **runbook: [capítulo 15](15-migracao-w4-h2.md)** (backup, pré-flight, transação única, verificação, rollback)
+3b. ✅ Apply **`supabase/upgrade.sql`** (W4 cents + H2 RPCs — old migrations 010/011) to the live project + re-verify with `sql_check_live.sh` — **DONE Aug 6** via pooler eu-north-1 (transação única `-1`, PostgreSQL 17.6): 9 colunas de dinheiro → `bigint`, zero fracionários, `sql_check_live.sh` **14/14 PASS**, idempotência confirmada (reaplicação sem efeito). Backup `backup_pre_w4.sql` gerado (gitignored). **runbook: [capítulo 15](15-migracao-w4-h2.md)**
 4. ✅ Store-scoped employee RLS + access matrix (C2, Aug 6); ⏳ invite flow (H7)
 5. Branding: appId, labels, web metadata, icons/splash (M2)
 6. ✅ CI pipeline (H3) + Sentry (H4) + **iOS TestFlight pipeline (W1, Aug 6)**
@@ -274,11 +274,11 @@ Architecture 88 · Testing 80 · Security 68 · UX/UI 88 · Performance/Scalabil
 
 ## 9. Itens ainda pendentes do checklist de produção
 
-> Status final (Update 6, Aug 6): **todo o trabalho interno de engenharia está concluído** (W4, H2, W10, W1–W11, consolidação SQL) e validado em Postgres real. O que resta é: **1 item interno de aplicação no ambiente live** + **ops externas** + long tail opcional.
+> Status final (Update 6, Aug 6): **todo o trabalho interno de engenharia está concluído** (W4, H2, W10, W1–W11, consolidação SQL) e validado em Postgres real. **O `upgrade.sql` foi aplicado ao live em Aug 6 (item 1 ✅)** — o que resta é apenas **ops externas** + long tail opcional.
 
 | # | Item (checklist) | Tipo | Estado |
 |---|---|---|---|
-| 1 | **Aplicar `supabase/upgrade.sql` ao Supabase live** (antigas migrações 010/011 — W4 cents + H2 RPCs) + re-verificar com `scripts/sql_check_live.sh` (**14/14**) | Interno → live | ⏳ único item interno restante (**runbook: [capítulo 15](15-migracao-w4-h2.md)** — backup, pré-flight, aplicar via SQL Editor/pooler `-1`, verificar 14/14) |
+| 1 | **Aplicar `supabase/upgrade.sql` ao Supabase live** (antigas migrações 010/011 — W4 cents + H2 RPCs) + re-verificar com `scripts/sql_check_live.sh` (**14/14**) | Interno → live | ✅ **Aplicado Aug 6** (pooler eu-north-1, transação única `-1`, PostgreSQL 17.6): 9 colunas → `bigint`, zero fracionários, `sql_check_live.sh` **14/14 PASS**, idempotência confirmada. Backup `backup_pre_w4.sql` (gitignored). **runbook: [capítulo 15](15-migracao-w4-h2.md)** |
 | 2 | Ativar **Play App Signing** + registrar o SHA-256 da upload key (7.1 — parte externa do C1) | Externo (Play Console) | ⏳ |
 | 3 | Verificar **e-mail de confirmação ON** + habilitar **2FA no super admin** (2.1/2.2 — H9) | Externo (dashboard Supabase) | ⏳ |
 | 4 | `password_min_length = 8` nas settings do projeto (M7) | Externo (dashboard Supabase) | ⏳ |

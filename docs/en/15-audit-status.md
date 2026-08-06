@@ -41,11 +41,11 @@ This caught and fixed a **genuine W4 bug**: `SUM(bigint)` returns `numeric`, whi
 
 ## Section 9 — Pending production checklist items
 
-> Final status (Update 6, Aug 6): **all internal engineering work is complete** (W4, H2, W10, W1–W11, SQL consolidation) and validated on real PostgreSQL. What remains is **1 internal item to apply on the live environment** + **external ops** + optional long tail.
+> Final status (Update 6, Aug 6): **all internal engineering work is complete** (W4, H2, W10, W1–W11, SQL consolidation) and validated on real PostgreSQL. **`upgrade.sql` was applied to the live project on Aug 6 (item 1 ✅)** — what remains is only **external ops** + optional long tail.
 
 | # | Item (checklist) | Type | Status |
 |---|---|---|---|
-| 1 | **Apply `supabase/upgrade.sql` to the live Supabase** (former migrations 010/011 — W4 cents + H2 RPCs) + re-verify with `scripts/sql_check_live.sh` (**14/14**) | Internal → live | ⏳ only remaining internal item (**runbook: [chapter 16](16-migracao-w4-h2.md)** — backup, pre-flight, apply via SQL Editor / pooler with `-1`, verify 14/14) |
+| 1 | **Apply `supabase/upgrade.sql` to the live Supabase** (former migrations 010/011 — W4 cents + H2 RPCs) + re-verify with `scripts/sql_check_live.sh` (**14/14**) | Internal → live | ✅ **Applied Aug 6** (pooler eu-north-1, single transaction `-1`, PostgreSQL 17.6): 9 money columns → `bigint`, zero fractional values, `sql_check_live.sh` **14/14 PASS**, idempotency confirmed. Backup `backup_pre_w4.sql` (gitignored). **runbook: [chapter 16](16-migracao-w4-h2.md)** |
 | 2 | Activate **Play App Signing** + register the upload-key SHA-256 (7.1 — external part of C1) | External (Play Console) | ⏳ |
 | 3 | Verify **email confirmation ON** + enable **2FA on the super admin** (2.1/2.2 — H9) | External (Supabase dashboard) | ⏳ |
 | 4 | `password_min_length = 8` in project settings (M7) | External (Supabase dashboard) | ⏳ |

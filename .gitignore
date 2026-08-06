@@ -48,6 +48,9 @@ app.*.map.json
 # Assinatura de release (keystore de produção) — nunca versionar
 android/key.properties
 *.jks
+
+# Backups de banco de producao (contem dados reais - nunca commitar)
+backup_*.sql
 *.keystore
 
 # Ambiente de produção — nunca versionar (o exemplo em env/*.example é o modelo)
