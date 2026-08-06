@@ -1,0 +1,63 @@
+# 📊 Audit Status & Pending Production Items (English)
+
+> **Authoritative source:** the full production-readiness audit lives in Portuguese at [`../pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md) (the project's primary language). This chapter is the **English version of Update 6** (final session, part 3 — Aug 6, 2026) **and Section 9** (pending production-checklist items). Numbers mirror the authoritative report: `300/300` tests, `sql_check.sh` **12/12**, `sql_check_live.sh` **14/14**, `schema.sql` 2,311 lines, 72 test files.
+
+---
+
+## Update 6 (Aug 6, 2026 — final session, part 3: SQL consolidation + real-DB validation)
+
+Delivered the **SQL consolidation** and **hard validation on real PostgreSQL**.
+
+**(a) SQL consolidated to 4 files.** The 10 migration files (`002..011`) were merged into **one idempotent script `supabase/upgrade.sql`** (Parts 1–8 — DDL, RLS helpers, manager gate, audit log, employee account, W4 column migration, final cents RPCs). Fresh installs use `supabase/schema.sql` alone; existing databases apply `supabase/upgrade.sql` (re-runnable, no partial state when run in a single transaction with `-1`).
+
+**(b) Real-DB validation (Docker Postgres 16, exact CI config — scram over TCP).** `scripts/sql_check.sh` now runs **12/12 steps**:
+
+- **[1b]** `upgrade.sql` applied twice → **idempotency** confirmed
+- **[10/10]** `get_dashboard_kpis` (W5) with value assertions
+- **[11/11]** `get_cash_flow` / `get_sales_report` (H2) with value assertions
+- **[12/12]** the W4 NUMERIC→cents migration with real data (25.50 → 2550, **no double-apply**)
+
+This caught and fixed a **genuine W4 bug**: `SUM(bigint)` returns `numeric`, which breaks the BIGINT `RETURNS TABLE` of `get_dashboard_kpis` / `get_cash_flow` / `get_sales_report` at runtime — fixed with explicit `::bigint` casts in both `schema.sql` and `upgrade.sql`.
+
+**(c) `scripts/sql_check_live.sh` extended to 14 read-only checks** — 9 money columns as BIGINT, zero fractional values, H2 RPCs present with `SECURITY DEFINER` + BIGINT returns — validated **14/14**; the stale `lock_products_or_raise` signature was fixed.
+
+**(d) CI.** The `sql-check` jobs in `.github/workflows/ci.yml` + `.github/workflows/release.yml` run the full 12 steps on Postgres 16 (validated locally with the exact service-container config, scram/TCP; `timeout-minutes: 30`).
+
+**`flutter analyze` 0 issues · `flutter test` 300/300.**
+
+---
+
+## Final status of internal engineering (W4, H2, W10)
+
+| Item | Status |
+|---|---|
+| **W4 — money in integer cents end-to-end** | ✅ Done — `*Cents` in domain, SQLite `INTEGER` + idempotent ×100 migration, Supabase `BIGINT` (+ W4 column migration, Part 7 of `upgrade.sql`), RPCs compare/sum in cents directly (no `ROUND(x*100)`), seeds ×100, `Money.parse` / `Formatters.currency(cents)` |
+| **H2 — server-side aggregation + keyset pagination** | ✅ Done — `get_cash_flow` + `get_sales_report` RPCs (SECURITY DEFINER, `is_my_store`-scoped, BIGINT, day bucketing in device timezone; Parts 8.6–8.7 of `upgrade.sql`); `fetchAllKeyset` (stable `id` cursor, `pageSize` batches) replacing `.limit(1000)` on all 6 Supabase `getAll` |
+| **W10 — sqlite3 3.x** | ✅ Done — `sqlite3` ^3.5.1 via build hooks/native assets; `sqlite3_flutter_libs` (EOL) removed; `dispose()` → `close()` |
+| **SQL consolidation** | ✅ Done — 13 → 4 SQL files (`schema.sql` fresh install, `upgrade.sql` existing DBs, `promote_super_admin.sql` ops helper, `sqlcheck_stub.sql` smoke-test stub); `supabase/migrations/` deleted |
+| **Validation** | ✅ `sql_check.sh` **12/12** on real Postgres 16 (incl. idempotency + W4 migration with real data) · `sql_check_live.sh` **14/14** · CI runs the full suite in `ci.yml` + `release.yml` |
+
+---
+
+## Section 9 — Pending production checklist items
+
+> Final status (Update 6, Aug 6): **all internal engineering work is complete** (W4, H2, W10, W1–W11, SQL consolidation) and validated on real PostgreSQL. What remains is **1 internal item to apply on the live environment** + **external ops** + optional long tail.
+
+| # | Item (checklist) | Type | Status |
+|---|---|---|---|
+| 1 | **Apply `supabase/upgrade.sql` to the live Supabase** (former migrations 010/011 — W4 cents + H2 RPCs) + re-verify with `scripts/sql_check_live.sh` (**14/14**) | Internal → live | ⏳ only remaining internal item (runbook: apply via SQL Editor / pooler with `-1`; backup + pre-flight checks before) |
+| 2 | Activate **Play App Signing** + register the upload-key SHA-256 (7.1 — external part of C1) | External (Play Console) | ⏳ |
+| 3 | Verify **email confirmation ON** + enable **2FA on the super admin** (2.1/2.2 — H9) | External (Supabase dashboard) | ⏳ |
+| 4 | `password_min_length = 8` in project settings (M7) | External (Supabase dashboard) | ⏳ |
+| 5 | Google Play / Apple accounts + secrets in CI (7.9) | External | ⏳ |
+| 6 | Privacy policy / ToS + backup policy (7.5/7.6) | Legal | ⏳ |
+| 7 | **Billing** (W2) — deferred by product decision; plan limits are already DB-enforced | Product | ⏳ deferred |
+| 8 | Tenant-creation rate limit + reCAPTCHA (H6) | Security | ⏳ |
+| 9 | Employee invite flow (H7 — external part of C2) | Security/UX | ⏳ |
+| 10 | Optional long tail: M1 (seed in prod), M3 (lazy tabs), M5 (remaining AppIds), M6 (gitleaks), M8 (low-stock per product), M12 (UUID v7); M2 (CSP, only if web ships) | Maintenance | ⏳ optional |
+
+All remaining checklist items (1.1–1.18, 2.3–2.4, 4.1–4.2, 6.2, 7.1–7.8, 8.1–8.3, 9.1–9.2) are **✅**.
+
+---
+
+*Scope note: the original audit was read-only; fixes for C1/C3/C4/H3 were implemented in follow-up sessions (Aug 5, 2026) and W4/H2/W10 + the SQL consolidation in the final sessions (Aug 6, 2026). The live schema verification ran Aug 5 (read-only via pooler eu-north-1): the hardening layer was missing in production, `schema.sql` was applied in one transaction and re-verified 10/10. External items (email confirmation, Play App Signing activation, store console) must be verified in the Supabase dashboard and store consoles, not in code. Full details: [`../pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md).*
