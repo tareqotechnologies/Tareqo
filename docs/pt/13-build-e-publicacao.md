@@ -225,7 +225,7 @@ O workflow `.github/workflows/ci.yml` já executa em todo push/PR:
 1. **analyze** — `flutter analyze` (zero erros/avisos);
 2. **test** — `flutter test --coverage` + resumo de cobertura;
 3. **build** — `flutter build apk --release` (assinatura debug, pois o CI não tem `key.properties`) e publica o APK como artefato;
-4. **sql-check** — smoke test do `supabase/schema.sql` + RLS num Postgres real.
+4. **sql-check** — smoke test do `supabase/schema.sql` + `supabase/upgrade.sql` (aplicação dupla = idempotência + migração W4 NUMERIC→centavos), RLS por loja, RPCs atômicas do dinheiro e agregações server-side (`get_dashboard_kpis`/`get_cash_flow`/`get_sales_report` — W5/H2) contra um Postgres 16 real — **12 passos**.
 
 Para gerar artefatos **publicáveis** no CI, decodifique o keystore de um secret (ver `android/key.properties.example` e o [Guia do desenvolvedor](10-guia-desenvolvedor.md#assinatura-de-release-android)).
 

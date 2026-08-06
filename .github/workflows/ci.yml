@@ -9,8 +9,12 @@
 #               por design (guarda de produção — main.dart). A assinatura
 #               real do AAB de PRODUÇÃO acontece no workflow release.yml
 #               (tag v*, Fastlane, secrets do keystore);
-#   sql-check — smoke test do supabase/schema.sql + RLS contra um Postgres
-#               real (scripts/sql_check.sh — checklist 6.2).
+#   sql-check — smoke test do supabase/schema.sql + upgrade.sql + RLS
+#               contra um Postgres 16 real (scripts/sql_check.sh — 12
+#               passos: RLS por loja, RPCs atômicas do dinheiro,
+#               get_dashboard_kpis (W5), get_cash_flow/get_sales_report
+#               (H2), upgrade.sql idempotente (aplicação dupla) e
+#               migração W4 NUMERIC→centavos — checklist 6.2).
 name: CI
 
 on:
@@ -98,8 +102,9 @@ jobs:
           path: build/app/outputs/flutter-apk/app-dev-release.apk
 
   sql-check:
-    name: SQL / RLS check
+    name: SQL / RLS check (12 passos — W4/H2/upgrade)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:16
@@ -115,7 +120,10 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - name: Run SQL/RLS smoke test
+      # 12 passos: schema.sql + upgrade.sql 2x (idempotência) + RLS por loja
+      # + RPCs atômicas + get_dashboard_kpis/get_cash_flow/get_sales_report
+      # + migração W4 NUMERIC→centavos (25.50→2550, sem dupla aplicação).
+      - name: Run SQL/RLS smoke test (W4/H2/upgrade)
         env:
           PGPASSWORD: postgres
         run: bash scripts/sql_check.sh localhost postgres dumbhanengue

@@ -54,8 +54,9 @@ jobs:
           fi
 
   sql-check:
-    name: SQL / RLS check
+    name: SQL / RLS check (12 passos — W4/H2/upgrade)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:16
@@ -71,7 +72,10 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - name: Run SQL/RLS smoke test
+      # 12 passos: schema.sql + upgrade.sql 2x (idempotência) + RLS por loja
+      # + RPCs atômicas + get_dashboard_kpis/get_cash_flow/get_sales_report
+      # + migração W4 NUMERIC→centavos (25.50→2550, sem dupla aplicação).
+      - name: Run SQL/RLS smoke test (W4/H2/upgrade)
         env:
           PGPASSWORD: postgres
         run: bash scripts/sql_check.sh localhost postgres dumbhanengue
