@@ -1,6 +1,6 @@
 # Dumbhanengue ERP — Production Readiness Checklist
 
-> Origin: E2E production audit (Aug 4, 2026). Base facts: `flutter analyze` clean · **301 tests green** (Aug 6, sessão final) · Flutter 3.44.6 / Dart 3.12.2.
+> Origin: E2E production audit (Aug 4, 2026). Base facts: `flutter analyze` clean · **300 tests green** (Aug 6, sessão final) · Flutter 3.44.6 / Dart 3.12.2.
 > Status legend: ✅ done (merged/verified) · 🔄 in progress · ⏳ queued · 🔴 blocked/needs external resource · ❓ needs verification outside the repo.
 
 ---
@@ -31,7 +31,7 @@
 |---|------|--------|-------|
 | 2.1 | Verify email confirmation is enabled in Supabase | ❓ | Dashboard check required. |
 | 2.2 | Enable 2FA on super-admin account | 🔴 | Dashboard / Supabase feature. |
-| 2.3 | Audit log for admin decisions (approve/reject/plan edits) | 🔄 | `decided_by` (UUID) + trigger `set_decided_by` em tenants/plan_requests (S4, Aug 5). Tabela `audit_log` completa segue ⏳. |
+| 2.3 | Audit log for admin decisions (approve/reject/plan edits) | ✅ | **H8 (Aug 6):** `audit_log` completa — DDL + triggers `trg_audit_*` (tenants/plan_requests/plans) + `get_audit_log` no `supabase/upgrade.sql` (Parte 5) + `decided_by` (S4, Aug 5). Consistente com o AUDIT_REPORT H8 ✅. |
 | 2.4 | Remove dev Supabase URL/anon-key defaults; fail fast in release | ✅ | Fail-fast em release: `SupabaseBootstrap` lança se `SUPABASE_URL/SUPABASE_ANON_KEY` default embutidos (S2, Aug 5). Flavors dev/prod implementados (7.2, Aug 5). |
 | 2.5 | Login hardening: strict email, min-8 password, confirm field, visibility toggle | ✅ | `login_screen.dart`. Senha de FUNCIONÁRIO alinhada ao mínimo 8 (M7, Aug 5). |
 | 2.6 | AuthGate: explicit auth-stream error state (no silent login drop) | ✅ | `auth_gate.dart`. |
@@ -71,7 +71,7 @@
 
 | # | Item | Status | Notes |
 |---|------|--------|-------|
-| 6.1 | Supabase datasource contract tests | ⏳ | Money path has zero automated coverage today. |
+| 6.1 | Supabase datasource contract tests | 🔄 | O **money path tem cobertura automática via `sql_check.sh` (12/12)**, que EXECUTA `process_sale`/`register_debt`/`settle_debt`/`get_dashboard_kpis`/`get_cash_flow`/`get_sales_report` como `app_user` e verifica efeitos + valores. Restam contract tests unitários Dart para os datasources remotos (⏳). |
 | 6.2 | SQL/RLS test suite (Docker Postgres + `sqlcheck_stub.sql`) | ✅ | H3 audit: `scripts/sql_check.sh` (papel não-superusuário `app_user` para o RLS valer; schema apply + super admin + isolamento). Re-validado **Aug 5** pós-C3/C4. **Extendido com a seção [4/4] (Aug 5): EXECUTA `process_sale`/`register_debt`/`settle_debt` como `app_user` e verifica efeitos** (venda+item+estoque+caixa, dívida+pendência, quitação da MESMA pendência, negativo de estoque) — regressão do bug 1.17 (22P02). **Aug 6:** assert de DATA DE REALIZAÇÃO pós-`settle_debt` (1.18) + passo **[10/10]** `get_dashboard_kpis` (baseline + delta após `process_sale`). **Sessão final (Aug 6):** passos **[1b]** (upgrade.sql aplicado 2x — idempotência), **[11/11]** (`get_cash_flow`/`get_sales_report` — H2) e **[12/12]** (migração W4 NUMERIC→centavos com dado real 25.50→2550, sem dupla aplicação). Rodado no CI (jobs `sql-check` do `ci.yml` e `release.yml`, Postgres 16, scram via TCP) — **12/12 verdes**. |
 | 6.3 | Widget tests: dashboard, customers, reports, purchases, admin, onboarding, auth_gate | 🔄 | `auth_gate_test.dart` ✅ — 5 testes: papel admin (banco) → AdminShell (incl. tenant pendente), sem papel → fluxo do tenant, falha transitória fail-open, deslogado → Login. Demais telas seguem no audit §7. |
 | 6.4 | Integration tests (`integration_test/`) | ✅ | `integration_test/access_levels_web_test.dart` (E2E browser do gating de acesso dono/gerente/funcionário contra o Supabase real, via `test_driver/`) — rodar com `flutter test integration_test -d chrome --dart-define-from-file=env/dev.env`. |
@@ -89,9 +89,10 @@
 | 7.3 | CI/CD (GitHub Actions: analyze → test → build) | ✅ | `.github/workflows/ci.yml` — analyze, test+coverage, build APK release (flavor dev + `env/dev.env`), sql-check (Postgres service). Release: `.github/workflows/release.yml` (tag `v*` → Fastlane: AAB prod assinado → upload Internal testing, Aug 5). |
 | 7.4 | App icons, splash, branding, store metadata | 🔄 | **Ícones ✅ (W7, Aug 6):** adaptativo Android (mipmap-anydpi-v26 + drawables), iOS completo (21 imagens), web (favicon + manifest); originais em `assets/branding/` + gerador `tool/generate_icons_test.dart`; ícones default do template removidos. Splash/store metadata (consoles) seguem externos 🔴. |
 | 7.5 | Privacy policy / ToS | 🔴 | Legal. |
-| 7.6 | Data backup/export | ⏳ | CSV export + Supabase backups. |
+| 7.6 | Data backup/export | ⏳ | CSV export + Supabase backups. **Fluxo de backup do DB exercitado Aug 6** (pg_dump via pooler 5432 → `backup_pre_w4.sql`, gitignored) antes da migração W4/H2 (7.8b). |
 | 7.7 | Release build size budget (obfuscate, split-per-abi) | ⏳ | Add to build scripts. |
 | 7.8 | `schema.sql` applied to live Supabase + read-only verification | ✅ | Aug 5, 2026: applied in ONE transaction (COMMIT) via pooler `aws-0-eu-north-1` (projeto `dotklbpqmlnhcdifiukd` — host direto é IPv6-only, usar o pooler). Achado pré-aplicação: apenas as 13 tabelas base — a camada de hardening C3/C4 NUNCA havia sido aplicada (is_super_admin antiga por e-mail; sem `settle_debt`, sem RPCs atômicos, sem triggers de limite). Pós-aplicação: 14 tabelas · 52 policies · 39 índices · 20 triggers · 17 funções · plans intactos (3, sem duplicatas). Re-verificação read-only **10/10 PASS** (`scripts/sql_check_live.sh`). |
+| 7.8b | **`upgrade.sql` applied to live (W4 cents + H2 RPCs)** + read-only verification | ✅ | **Aug 6, 2026:** applied in ONE transaction (`-1`) via pooler `aws-0-eu-north-1` (PostgreSQL **17.6**): 9 colunas de dinheiro → `BIGINT` (centavos), zero valores fracionários, RPCs H2 (`get_cash_flow`/`get_sales_report`/`get_dashboard_kpis`) ativas; `sql_check_live.sh` **14/14 PASS**; idempotência confirmada (reaplicação sem efeito). Backup `backup_pre_w4.sql` (gitignored). **Runbook: [`docs/pt/15-migracao-w4-h2.md`](15-migracao-w4-h2.md) (cap 15)**. |
 | 7.9 | Pipeline iOS (TestFlight) | ✅ | W1 (Aug 6): `ios/Podfile` + lane `ios_testflight` no Fastfile + `.github/workflows/ios.yml` (runner macOS: analyze → test → build+sign iOS → TestFlight; secrets `ASC_KEY_ID`/`ASC_ISSUER_ID`/`ASC_KEY_BASE64`). Falta externo: conta Apple + certs nos secrets do repo. |
 | 7.10 | Guia de go-live (ops) | ✅ | W3 (Aug 6): `docs/{pt,en}/14-go-live-ops.md` — secrets do CI (`KEYSTORE_BASE64` + senhas, `PLAY_*`), export base64 do keystore, checklist Play Console (Play App Signing, 2FA, confirmação de e-mail), passos do TestFlight. |
 
