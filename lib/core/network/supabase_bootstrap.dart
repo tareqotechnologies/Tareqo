@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/supabase_config.dart';
 import '../security/secure_supabase_local_storage.dart';
+import 'timeout_retry_http_client.dart';
 
 /// Inicialização do cliente Supabase (chamada no `main()` antes do runApp).
 abstract final class SupabaseBootstrap {
@@ -33,6 +34,9 @@ abstract final class SupabaseBootstrap {
     await Supabase.initialize(
       url: SupabaseConfig.url,
       publishableKey: SupabaseConfig.anonKey,
+      // W6: timeout global + retry de leituras idempotentes (GET/HEAD) em
+      // timeout/5xx/429 — cobre todas as chamadas REST de forma central.
+      httpClient: TimeoutRetryHttpClient(),
       // Auditoria S1 (Aug 6): a sessão do Supabase é persistida no
       // Keychain/Keystore via [SecureSupabaseLocalStorage] em plataformas
       // nativas — o default do SDK usa `shared_preferences` (texto claro).

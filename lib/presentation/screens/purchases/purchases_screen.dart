@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/purchase.dart';
+import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/purchases_providers.dart';
@@ -25,11 +26,12 @@ class PurchasesScreen extends ConsumerWidget {
       builder: (_) => const AddPurchaseSheet(),
     );
     if (!context.mounted) return;
-    // Estoque, compras e caixa mudaram — as telas recarregam.
+    // Estoque, compras, caixa e KPIs mudaram — as telas recarregam.
     ref.invalidate(purchasesProvider);
     ref.invalidate(productsProvider);
     ref.invalidate(transactionsProvider);
     ref.invalidate(cashFlowProvider);
+    ref.invalidate(dashboardKpisProvider);
   }
 
   @override

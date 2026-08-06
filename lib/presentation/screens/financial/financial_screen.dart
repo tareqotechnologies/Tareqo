@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/financial_transaction.dart';
+import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
@@ -48,8 +49,16 @@ class FinancialScreen extends ConsumerWidget {
         icon: const Icon(Icons.add),
         label: Text(l10n.financialRegister),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
+      body: RefreshIndicator(
+        // W8: puxar para atualizar — recarrega caixa e movimentações.
+        onRefresh: () async {
+          ref.invalidate(cashFlowProvider);
+          ref.invalidate(transactionsProvider);
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
         children: [
           Center(
             child: SegmentedButton<CashFlowPeriod>(
@@ -139,7 +148,8 @@ class FinancialScreen extends ConsumerWidget {
               );
             },
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -187,6 +197,7 @@ class FinancialScreen extends ConsumerWidget {
       messenger.showSnackBar(SnackBar(content: Text(l10n.financialReceived)));
       ref.invalidate(transactionsProvider);
       ref.invalidate(cashFlowProvider);
+      ref.invalidate(dashboardKpisProvider);
     } catch (error, stackTrace) {
       CrashReporting.capture(
         error,
@@ -208,6 +219,7 @@ class FinancialScreen extends ConsumerWidget {
     if (!context.mounted) return;
     ref.invalidate(cashFlowProvider);
     ref.invalidate(transactionsProvider);
+    ref.invalidate(dashboardKpisProvider);
   }
 }
 

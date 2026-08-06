@@ -10,6 +10,7 @@ import '../../../domain/usecases/add_debt_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/customers_providers.dart';
+import '../../controllers/dashboard_providers.dart';
 import '../../controllers/debts_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../widgets/app_sheet.dart';
@@ -108,10 +109,11 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.debtsRegisteredFor(debt.personName))),
       );
-      // Fiado e Financeiro mudaram — as telas recarregam.
+      // Fiado, Financeiro e KPIs mudaram — as telas recarregam.
       ref.invalidate(pendingDebtsProvider);
       ref.invalidate(transactionsProvider);
       ref.invalidate(cashFlowProvider);
+      ref.invalidate(dashboardKpisProvider);
     } on InvalidDebtAmountException catch (error) {
       setState(() => _formError = error.message);
     } on PendingEntryRegistrationException catch (error, stackTrace) {

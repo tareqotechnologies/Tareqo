@@ -9,6 +9,7 @@ import '../../../domain/entities/product.dart';
 import '../../../domain/usecases/add_product_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
+import '../../controllers/dashboard_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
@@ -41,6 +42,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     await showAppSheet<void>(context, builder: (_) => const _AddProductSheet());
     if (!mounted) return;
     ref.invalidate(productsProvider);
+    ref.invalidate(dashboardKpisProvider);
   }
 
   @override

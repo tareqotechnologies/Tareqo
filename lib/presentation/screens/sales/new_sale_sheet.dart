@@ -13,6 +13,7 @@ import '../../../domain/usecases/process_sale_use_case.dart';
 import '../../../domain/usecases/update_product_stock_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
+import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/sales_providers.dart';
@@ -146,11 +147,12 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
           ),
         ),
       );
-      // Estoque, vendas e caixa mudaram — as telas recarregam.
+      // Estoque, vendas, caixa e KPIs mudaram — as telas recarregam.
       ref.invalidate(productsProvider);
       ref.invalidate(salesListProvider);
       ref.invalidate(transactionsProvider);
       ref.invalidate(cashFlowProvider);
+      ref.invalidate(dashboardKpisProvider);
     } on InsufficientStockException catch (error) {
       final product = _productById(error.productId);
       setState(() {

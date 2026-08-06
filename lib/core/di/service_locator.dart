@@ -50,6 +50,7 @@ import '../../data/repositories/product_repository_impl.dart';
 import '../../data/repositories/purchase_repository_impl.dart';
 import '../../data/repositories/sale_repository_impl.dart';
 import '../../data/repositories/store_repository_impl.dart';
+import '../../data/repositories/supabase_dashboard_kpis_repository.dart';
 import '../../data/repositories/tenant_repository_impl.dart';
 import '../../data/repositories/local_admin_repository.dart';
 import '../../data/services/local_employee_account_service.dart';
@@ -65,6 +66,7 @@ import '../../domain/repositories/i_customer_repository.dart';
 import '../../domain/repositories/i_debt_processor.dart';
 import '../../domain/repositories/i_debt_repository.dart';
 import '../../domain/repositories/i_employee_repository.dart';
+import '../../domain/repositories/i_dashboard_kpis_repository.dart';
 import '../../domain/repositories/i_financial_transaction_repository.dart';
 import '../../domain/repositories/i_plan_repository.dart';
 import '../../domain/repositories/i_plan_request_repository.dart';
@@ -88,6 +90,7 @@ import '../../domain/usecases/approve_tenant_use_case.dart';
 import '../../domain/usecases/decide_plan_request_use_case.dart';
 import '../../domain/usecases/get_all_tenants_use_case.dart';
 import '../../domain/usecases/get_cash_flow_use_case.dart';
+import '../../domain/usecases/get_dashboard_kpis_use_case.dart';
 import '../../domain/usecases/get_customers_use_case.dart';
 import '../../domain/usecases/get_employees_use_case.dart';
 import '../../domain/usecases/get_my_plan_requests_use_case.dart';
@@ -230,6 +233,16 @@ final class ServiceLocator {
       // banco (sem contas órfãs se o limite do plano for atingido).
       ..registerLazySingleton<IEmployeeAccountProcessor>(
         () => const SupabaseEmployeeProcessor(),
+      )
+      // KPIs do dashboard (escala W5): agregação SERVER-SIDE via RPC
+      // `get_dashboard_kpis` — uma chamada em vez de 4 listagens de até
+      // 1000 linhas somadas no cliente. Registado apenas no modo remoto;
+      // no modo local o provider usa o fallback client-side.
+      ..registerLazySingleton<IDashboardKpisRepository>(
+        () => const SupabaseDashboardKpisRepository(),
+      )
+      ..registerLazySingleton<GetDashboardKpisUseCase>(
+        () => GetDashboardKpisUseCase(instance<IDashboardKpisRepository>()),
       );
   }
 

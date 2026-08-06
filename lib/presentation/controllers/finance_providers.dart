@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
+import '../../core/utils/period_utils.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/financial_transaction.dart';
 import '../../domain/repositories/i_financial_transaction_repository.dart';
@@ -54,9 +55,6 @@ final markTransactionAsPaidUseCaseProvider =
   (ref) => ServiceLocator.instance<MarkTransactionAsPaidUseCase>(),
 );
 
-DateTime _startOfDay(DateTime date) =>
-    DateTime(date.year, date.month, date.day);
-
 /// Estado do fluxo de caixa (entradas, saídas e saldo) para o período
 /// selecionado — reconstrói automaticamente quando o período muda.
 final cashFlowProvider =
@@ -72,9 +70,9 @@ class CashFlowNotifier extends AsyncNotifier<CashFlow> {
 
     final start = switch (period) {
       // Todos os períodos alinhados ao início do dia (semântica única).
-      CashFlowPeriod.today => _startOfDay(now),
+      CashFlowPeriod.today => startOfDay(now),
       CashFlowPeriod.week =>
-        _startOfDay(now.subtract(const Duration(days: 7))),
+        startOfDay(now.subtract(const Duration(days: 7))),
       CashFlowPeriod.month => DateTime(now.year, now.month, 1),
       CashFlowPeriod.all => DateTime(2000),
     };

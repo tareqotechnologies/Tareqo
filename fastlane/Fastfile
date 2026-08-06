@@ -99,3 +99,69 @@ platform :android do
     UI.success("AAB #{File.basename(aab)} enviado para o track Internal testing 🎉")
   end
 end
+
+# --- iOS (W1): build do IPA + upload para o TestFlight ---
+#
+# Correr: `bundle exec fastlane ios beta` (no CI: .github/workflows/ios.yml,
+# disparado pela mesma tag v* do release Android).
+#
+# Variáveis de ambiente obrigatórias:
+#   SUPABASE_URL / SUPABASE_ANON_KEY  — defines de produção (dart-define)
+#   APPLE_ISSUER_ID / APPLE_KEY_ID / APPLE_KEY_CONTENT — API key da App
+#      Store Connect (key_content é o base64 do ficheiro .p8)
+#   APPLE_TEAM_ID                     — team da Apple Developer (assinatura
+#      automática via DEVELOPMENT_TEAM; alternativa: match com MATCH_GIT_URL)
+#   SENTRY_DSN (opcional)
+platform :ios do
+  desc "Build do IPA e upload para o TestFlight (App Store Connect)"
+  lane :beta do
+    fastlane_dir = FastlaneCore::FastlaneFolder.path
+    UI.user_error!("Não foi possível localizar a pasta do Fastlane") if fastlane_dir.nil?
+    Dir.chdir(File.expand_path("..", fastlane_dir))
+
+    required = {
+      "APPLE_ISSUER_ID" => ENV["APPLE_ISSUER_ID"],
+      "APPLE_KEY_ID" => ENV["APPLE_KEY_ID"],
+      "APPLE_KEY_CONTENT" => ENV["APPLE_KEY_CONTENT"],
+      "APPLE_TEAM_ID" => ENV["APPLE_TEAM_ID"],
+      "SUPABASE_URL" => ENV["SUPABASE_URL"],
+      "SUPABASE_ANON_KEY" => ENV["SUPABASE_ANON_KEY"],
+    }
+    required.each do |name, value|
+      UI.user_error!("Variável de ambiente #{name} é obrigatória") if value.nil? || value.empty?
+    end
+
+    dart_defines = [
+      "--dart-define=SUPABASE_URL=#{required["SUPABASE_URL"]}",
+      "--dart-define=SUPABASE_ANON_KEY=#{required["SUPABASE_ANON_KEY"]}",
+    ]
+    unless ENV["SENTRY_DSN"].to_s.empty?
+      dart_defines << "--dart-define=SENTRY_DSN=#{ENV["SENTRY_DSN"]}"
+    end
+
+    sh("flutter", "pub", "get")
+    # Passo 1: valida que o target iOS COMPILA (sem assinatura).
+    sh("flutter", "build", "ios", "--release", *dart_defines, "--no-codesign")
+
+    # Passo 2: autentica na App Store Connect via API key.
+    app_store_connect_api_key(
+      key_id: required["APPLE_KEY_ID"],
+      issuer_id: required["APPLE_ISSUER_ID"],
+      key_content: required["APPLE_KEY_CONTENT"],
+      is_key_content_base64: true,
+      duration: 1200,
+    )
+
+    # Passo 3: IPA assinado (assinatura automática com o team definido).
+    gym(
+      scheme: "Runner",
+      clean: true,
+      export_method: "app-store-connect",
+      xcargs: "DEVELOPMENT_TEAM=#{required["APPLE_TEAM_ID"]}",
+    )
+
+    # Passo 4: upload para o TestFlight.
+    upload_to_testflight(skip_waiting_for_build_processing: true)
+    UI.success("IPA enviado para o TestFlight 🎉")
+  end
+end

@@ -26,6 +26,9 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
   supabase_flutter: ^2.16.0
+  # W6: cliente HTTP central com timeout + retry de leituras idempotentes
+  # (injetado no Supabase.initialize — ver core/network).
+  http: ^1.6.0
   flutter_secure_storage: ^10.3.1
   sqlite3: 2.9.0
   # 0.6.0+eol: última versão (EOL) — recompilada contra compileSdk 36;
@@ -40,7 +43,7 @@ dependencies:
   # O dono do tenant escolhe moeda (BRL/USD/EUR/MZN) e idioma (pt/en).
   flutter_localizations:
     sdk: flutter
-  intl: any
+  intl: ^0.20.2
   # 9.x: corrige a incompatibilidade com o Kotlin "built-in" do Flutter
   # 3.44+ (o 8.14.2 fixava languageVersion=1.6 e quebrava o build de
   # release — falha pré-existente do CI, auditoria M4/7.7).
@@ -48,6 +51,12 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+
+  # Testes de integração E2E no browser (Chrome) contra o Supabase real:
+  # flutter test integration_test -d chrome --dart-define-from-file=env/dev.env
+  # (as credenciais reais são passadas via --dart-define=TEST_*_EMAIL/PASSWORD).
+  integration_test:
     sdk: flutter
 
   # Conjunto de lints recomendados pelo Flutter
@@ -58,6 +67,11 @@ dev_dependencies:
   # transitiva do supabase_flutter declarada explicitamente para os testes
   # (depend_on_referenced_packages).
   postgrest: 2.8.0
+
+  # --- Branding (W7) ---
+  # Gera os ícones nativos a partir de assets/branding (gerados por
+  # tool/generate_icons_test.dart): `dart run flutter_launcher_icons`.
+  flutter_launcher_icons: ^0.14.3
 
   # --- Geração de código (Freezed + json_serializable) ---
   # Execute `dart run build_runner build --delete-conflicting-outputs`
@@ -84,3 +98,14 @@ flutter:
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf
+
+# Ícones nativos (W7) — gerados por tool/generate_icons_test.dart.
+# Correr: flutter test tool/generate_icons_test.dart && dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/branding/icon_legacy.png"
+  adaptive_icon_background: "#0F766E"
+  adaptive_icon_foreground: "assets/branding/icon_fg.png"
+  adaptive_icon_monochrome: "assets/branding/icon_fg.png"
+  remove_alpha_ios: true

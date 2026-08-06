@@ -5,7 +5,6 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/utils/money.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/sale.dart';
@@ -13,7 +12,7 @@ import '../../../domain/entities/store.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
-import '../../controllers/debts_providers.dart';
+import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/purchases_providers.dart';
@@ -26,6 +25,11 @@ import '../purchases/purchases_screen.dart';
 import '../reports/reports_screen.dart';
 import '../shell/app_shell.dart';
 import '../stores/stores_screen.dart';
+
+/// Limiar de "stock baixo" (W8): produtos com quantidade inferior a este
+/// valor entram no alerta do dashboard. Constante nomeada para permitir
+/// ajuste central sem literais espalhados.
+const int lowStockThreshold = 5;
 
 /// Tela inicial do ERP — visão geral do negócio: indicadores (KPIs),
 /// ações rápidas, vendas recentes e alertas de estoque.
@@ -49,8 +53,10 @@ class DashboardScreen extends ConsumerWidget {
 
     final productsAsync = ref.watch(productsProvider);
     final salesAsync = ref.watch(salesListProvider);
-    final cashFlowAsync = ref.watch(cashFlowProvider);
-    final debtsAsync = ref.watch(pendingDebtsProvider);
+    // KPIs (W5): no modo Supabase a agregação roda no SERVIDOR (RPC
+    // `get_dashboard_kpis` — uma chamada em vez de 4 listagens de até 1000
+    // linhas); no modo local, fallback client-side idêntico ao anterior.
+    final kpisAsync = ref.watch(dashboardKpisProvider);
     final cashFlowPeriod = ref.watch(cashFlowPeriodProvider);
     // Loja ativa (seletor no topo das telas) — o dashboard mostra os
     // indicadores da loja selecionada e exibe o nome dela no topo.
@@ -64,22 +70,13 @@ class DashboardScreen extends ConsumerWidget {
         ? null
         : stores.where((store) => store.id == activeStoreId).firstOrNull;
 
-    // Acúmulos em CENTAVOS (auditoria H1): somar doubles (0.1+0.2) acumula
-    // erro de representação; [Money.sum] soma inteiros de centavos.
-    final totalSales = Money.sum(
-      salesAsync.value?.map((sale) => sale.totalAmount) ?? const [],
-    );
-    final cashBalance = cashFlowAsync.value?.balance ?? 0;
-    final pendingTotal = Money.sum(
-      debtsAsync.value?.map((debt) => debt.amount) ?? const [],
-    );
-    final stockTotal = productsAsync.value
-            ?.fold<int>(0, (sum, product) => sum + product.stockQuantity) ??
-        0;
+    final kpis = kpisAsync.value;
 
     final products = productsAsync.value ?? const <Product>[];
     final lowStock =
-        products.where((product) => product.stockQuantity < 5).toList();
+        products
+            .where((product) => product.stockQuantity < lowStockThreshold)
+            .toList();
     final recentSales = (salesAsync.value ?? const <Sale>[]).take(3).toList();
 
     final displayName = (user?.fullName.isNotEmpty ?? false)
@@ -162,33 +159,33 @@ class DashboardScreen extends ConsumerWidget {
                   children: [
                     KpiCard(
                       label: l10n.dashboardTotalSales,
-                      value: Formatters.currency(totalSales),
+                      value: Formatters.currency(kpis?.totalSales ?? 0),
                       caption: l10n.dashboardAllTime,
                       icon: Icons.point_of_sale_outlined,
-                      loading: salesAsync.isLoading,
+                      loading: kpisAsync.isLoading,
                     ),
                     KpiCard(
                       label: l10n.dashboardCashBalance,
-                      value: Formatters.currency(cashBalance),
+                      value: Formatters.currency(kpis?.cashBalance ?? 0),
                       caption: cashFlowPeriod.label(context.l10n),
                       icon: Icons.account_balance_wallet_outlined,
                       iconBackground: AppColors.income.withValues(alpha: 0.14),
                       iconColor: AppColors.income,
-                      loading: cashFlowAsync.isLoading,
+                      loading: kpisAsync.isLoading,
                     ),
                     KpiCard(
                       label: l10n.dashboardReceivables,
-                      value: Formatters.currency(pendingTotal),
+                      value: Formatters.currency(kpis?.pendingTotal ?? 0),
                       icon: Icons.receipt_long_outlined,
                       iconBackground: AppColors.warning.withValues(alpha: 0.14),
                       iconColor: AppColors.warning,
-                      loading: debtsAsync.isLoading,
+                      loading: kpisAsync.isLoading,
                     ),
                     KpiCard(
                       label: l10n.dashboardStockLabel,
-                      value: '$stockTotal ${l10n.commonUnits}',
+                      value: '${kpis?.stockTotal ?? 0} ${l10n.commonUnits}',
                       icon: Icons.inventory_2_outlined,
-                      loading: productsAsync.isLoading,
+                      loading: kpisAsync.isLoading,
                     ),
                   ],
                 );

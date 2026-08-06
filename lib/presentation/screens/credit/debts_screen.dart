@@ -8,6 +8,7 @@ import '../../../domain/entities/debt.dart';
 import '../../../domain/usecases/settle_debt_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
+import '../../controllers/dashboard_providers.dart';
 import '../../controllers/debts_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../widgets/app_sheet.dart';
@@ -77,8 +78,16 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         icon: const Icon(Icons.add),
         label: Text(l10n.debtsAddDebt),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 96),
+      body: RefreshIndicator(
+        // W8: puxar para atualizar — recarrega fiado (pendente e histórico).
+        onRefresh: () async {
+          ref.invalidate(pendingDebtsProvider);
+          ref.invalidate(settledDebtsProvider);
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 96),
         children: [
           Center(
             child: SegmentedButton<_DebtView>(
@@ -183,7 +192,8 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
               },
             ),
           ],
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -192,6 +202,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     await showAppSheet<void>(context, builder: (_) => const AddDebtSheet());
     if (!context.mounted) return;
     ref.invalidate(pendingDebtsProvider);
+    ref.invalidate(dashboardKpisProvider);
   }
 
   /// Fluxo de baixa do fiado: confirmação → marca como paga → entrada no
@@ -246,11 +257,12 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
           ),
         ),
       );
-      // Fiado, histórico, caixa e saldo mudaram — as telas recarregam.
+      // Fiado, histórico, caixa, saldo e KPIs mudaram — as telas recarregam.
       ref.invalidate(pendingDebtsProvider);
       ref.invalidate(settledDebtsProvider);
       ref.invalidate(transactionsProvider);
       ref.invalidate(cashFlowProvider);
+      ref.invalidate(dashboardKpisProvider);
     } on DebtNotFoundException {
       if (!context.mounted) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.debtsNotFound)));

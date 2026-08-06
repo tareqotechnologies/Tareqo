@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
+import '../../core/utils/period_utils.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../domain/usecases/get_sales_report_use_case.dart';
 import 'account_providers.dart';
@@ -36,8 +37,6 @@ final getSalesReportUseCaseProvider = Provider<GetSalesReportUseCase>(
   (ref) => ServiceLocator.instance<GetSalesReportUseCase>(),
 );
 
-DateTime _startOfDay(DateTime date) => DateTime(date.year, date.month, date.day);
-
 /// Estado do relatório de vendas — reconstrói automaticamente quando o
 /// período muda.
 final salesReportProvider =
@@ -54,8 +53,8 @@ class SalesReportNotifier extends AsyncNotifier<SalesReport> {
     final storeId = user == null ? null : ref.watch(activeStoreIdProvider(user.id));
 
     final start = switch (period) {
-      ReportPeriod.today => _startOfDay(now),
-      ReportPeriod.week => _startOfDay(now.subtract(const Duration(days: 7))),
+      ReportPeriod.today => startOfDay(now),
+      ReportPeriod.week => startOfDay(now.subtract(const Duration(days: 7))),
       ReportPeriod.month => DateTime(now.year, now.month, 1),
       ReportPeriod.all => DateTime(2000),
     };

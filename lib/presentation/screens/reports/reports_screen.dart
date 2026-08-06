@@ -40,8 +40,15 @@ class ReportsScreen extends ConsumerWidget {
       // de loja ativa é re-adicionado e o relatório reflete a loja
       // selecionada.
       body: StoreScopedContent(
-        child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
+        child: RefreshIndicator(
+          // W8: puxar para atualizar — recarrega o relatório.
+          onRefresh: () async {
+            ref.invalidate(salesReportProvider);
+            await Future<void>.delayed(const Duration(milliseconds: 300));
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
         children: [
           Center(
             child: SegmentedButton<ReportPeriod>(
@@ -150,7 +157,8 @@ class ReportsScreen extends ConsumerWidget {
               );
             },
           ),
-        ],
+          ],
+        ),
       ),
       ),
     );

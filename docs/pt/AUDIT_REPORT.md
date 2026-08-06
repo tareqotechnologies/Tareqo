@@ -6,6 +6,8 @@
 >
 > **Update 3 (Aug 6, 2026 — follow-up session):** follow-up E2E pass with **287/287 tests green** and `flutter analyze` 0 issues. **New HIGH finding S1-FIXED in this session:** the Supabase auth session (access + refresh tokens) was persisted by the SDK default `SharedPreferencesLocalStorage` — **plaintext XML** on the device. Implemented `SecureSupabaseLocalStorage` + `SecureGotrueAsyncStorage` (PKCE code verifier) in `lib/core/security/secure_supabase_local_storage.dart`, backed by `flutter_secure_storage` (Keychain/Keystore), wired via `authOptions: FlutterAuthClientOptions(localStorage: …, pkceAsyncStorage: …)` in `SupabaseBootstrap` (native platforms; web keeps the SDK default — documented limitation). Also fixed a **cross-mode DB inconsistency**: `settle_debt` RPC now stamps `date = now()` on the linked pending entry (realization date) — matching the local SQLite `markAsPaid` semantics; new idempotent migration `supabase/migrations/004_settle_debt_realization_date.sql` + an **airtight** `sql_check.sh` assertion (transaction date must be ≥ the debt's `paid_at`, both stamped in the same settle transaction — a time-window assertion wouldn't catch the regression). Housekeeping: stale doc comments corrected (trigger name, super-admin email refs, duplicated facade comment, `Money` typo), `CHANGELOG.md` created, README/build commands synced to the flavor strategy. See the report below for the complete findings catalog.
 >
+> **Update 4 (Aug 6, 2026 — final session):** **301/301 tests green**, `flutter analyze` 0 issues, `sql_check.sh` **10/10 steps** against a real Postgres 16. Delivered: **(W5)** server-side dashboard KPIs — RPC `get_dashboard_kpis` (single SQL `SELECT`, `is_my_store`-scoped) + `dashboardKpisProvider` with automatic local fallback + invalidation on all 7 mutation screens + migration `009_dashboard_kpis.sql` + sql_check step [10/10]; **(W6/M11)** `TimeoutRetryHttpClient` (global timeouts + retry with backoff for idempotent GET/HEAD on timeout/5xx/429) injected into `Supabase.initialize` — including a real retry bug fixed (request clone per attempt); **(W7/M2)** full app icon set — Android adaptive, iOS (21 images), web favicon/manifest, originals in `assets/branding/` + `tool/generate_icons_test.dart`; **(W8)** pull-to-refresh on Finance/Debts/Reports lists + **text-scale 2.0 accessibility test** + `lowStockThreshold` constant (M8); **(W11/L2)** shared `startOfDay` in `core/utils/period_utils.dart`; **(W1)** iOS release pipeline — `ios/Podfile`, Fastlane `ios_testflight` lane, `.github/workflows/ios.yml` (TestFlight via App Store Connect secrets) + `integration_test/access_levels_web_test.dart` browser E2E; **(W3)** go-live ops guide (`docs/{pt,en}/14-go-live-ops.md`) — CI secrets (KEYSTORE_BASE64 + key.properties equivalents + PLAY_*), keystore base64 export, Play Console/2FA/email-confirmation checklist, TestFlight steps. **Remaining (deferred/external):** W2 billing (deferred by product decision — limits already DB-enforced), W4 money-in-cents migration (H1 mitigation `Money` in place), W10 `sqlite3_android` migration, and external ops (Play App Signing activation, store accounts, 2FA + email-confirmation verification, privacy/ToS).
+>
 > **Update 2 (Aug 5, 2026, follow-up session):** findings **C2, H4, H1(UI), H5/S2, S3, S4, S6, S7, M7** addressed in code: (1) C2 — store-scoped RLS (`is_my_store`) applied to all business tables in `schema.sql` (employees now see/write their store's data); (2) H4 — Sentry integrated (`lib/core/observability/crash_reporting.dart`, `main.dart`); (3) H1 — `Money` helper (cents arithmetic) applied at every accumulation boundary in use cases and UI sums (dashboard, customers, cart total); (4) S2 — fail-fast in release when `SUPABASE_URL`/`SUPABASE_ANON_KEY` defaults are embedded; (5) S3 — `UNIQUE INDEX idx_tenants_one_pending` (1 pending tenant per user); (6) S4 — `decided_by` audit columns + trigger on tenants/plan_requests; (7) S6 — `android:allowBackup=false` + data extraction rules; (8) S7 — R8/minify enabled; (9) M7 — employee password min length aligned to 8; (10) S1 — `SupabaseEmployeeAccountService` restores the owner's session after employee `signUp` (GoTrue auto-sign-in with confirmation OFF would otherwise replace the owner's session). CI now enforces a 45% coverage gate. `flutter analyze` 0 issues · `flutter test` **233/233**.
 >
 > **🔴 Critical bug found & fixed by the live E2E (Aug 5):** operator **precedence** in Postgres — `||` and `->>` share precedence (left-assoc), so `'t' || p_sale->>'id'` parsed as `('t' || p_sale)->>'id'` = **jsonb concatenation** → `22P02 invalid input syntax for type json, Token "t" is invalid`. Every `'t' || (jsonb->>'field')` in `process_sale`, `register_debt` and `process_purchase` (cash-entry ids **and** descriptions) broke — **no sale, debt or purchase could be recorded in Supabase mode**. Fixed with parentheses (`'t' || (p_sale->>'id')`), re-applied to the live project, E2E re-run **22/22 PASS**; `sql_check.sh` extended with section **[4/4]** that executes the RPCs so the bug cannot regress silently (the previous smoke test never executed the money path).
@@ -15,7 +17,7 @@
 | Check | Result |
 |---|---|
 | `flutter analyze` | ✅ **0 issues** (clean) |
-| `flutter test` | ✅ **282/282 passing** (updated Aug 6) |
+| `flutter test` | ✅ **301/301 passing** (updated Aug 6 — final session) |
 | `flutter pub outdated` | ⚠️ `sqlite3` 2.9.0→3.5.1, `sqlite3_flutter_libs` **EOL** (`0.6.0+eol`), minor transitive updates |
 | Schema review (`supabase/schema.sql`, 1438 lines) | ✅ Full read: RLS, triggers, RPCs, policies, seed |
 | Live schema verification (read-only via pooler **eu-north-1**, project `dotklbpqmlnhcdifiukd`) | ✅ **Ran Aug 5, 2026**: found **outdated schema** — only the 13 base tables; `super_admins`, new `is_super_admin()`, `settle_debt`, atomic RPCs and limit triggers **absent** → `schema.sql` applied in ONE transaction → re-verified **10/10 PASS** (14 tables · 52 policies · 39 indexes · 20 triggers · 17 functions · plans intact) |
@@ -35,7 +37,7 @@
 
 ## 1. Executive Summary
 
-This is a **well-engineered codebase** — unusually so for its size: clean `flutter analyze`, 282 green tests (Aug 6), real Clean Architecture, Material 3 theming with dark mode, RLS on every table, atomic `SECURITY DEFINER` RPCs with idempotency for sales/purchases/debts, anti-forgery triggers, secure session storage (Keychain/Keystore), and 11 chapters of bilingual documentation.
+This is a **well-engineered codebase** — unusually so for its size: clean `flutter analyze`, 301 green tests (Aug 6), real Clean Architecture, Material 3 theming with dark mode, RLS on every table, atomic `SECURITY DEFINER` RPCs with idempotency for sales/purchases/debts, anti-forgery triggers, secure session storage (Keychain/Keystore), and 11 chapters of bilingual documentation.
 
 **But it is not shippable to production today.** The blockers are not in code quality — they are in **release operations, authorization modeling, and money-path integrity**:
 
@@ -46,7 +48,7 @@ This is a **well-engineered codebase** — unusually so for its size: clean `flu
 5. **Money is `double`** in every entity while the DB uses `NUMERIC(12,2)`; KPIs and reports sum in Dart on full-table fetches — precision and scaling risk.
 6. **Production ops**: CI/CD + SQL/RLS smoke runner added *(✅ H3)*; crash reporting, flavors, placeholder app identity (`com.dumbhanengue.dumbhanengue`, web meta still says *"A new Flutter project."*), single git commit, no changelog remain.
 
-**Bottom line: an excellent codebase with a clear path to production — roughly 2–3 focused engineer-weeks plus external blockers (store accounts, billing, Play App Signing activation).**
+**Bottom line (Aug 6, final session): all critical code-level blockers resolved — the remaining work is external ops (store accounts, Play App Signing activation, billing, 2FA/email-confirmation verification, legal) plus three deferred engineering items (W4 cents migration, W10 `sqlite3_android`, remaining H2 pagination). The codebase is conditionally approved for production.**
 
 ---
 
@@ -170,7 +172,7 @@ END; $$;
 | # | Category | Location | Problem | Recommended fix |
 |---|---|---|---|---|
 | H1 | Money integrity | All entities (`sale.dart`, `product.dart`, `financial_transaction.dart`, `plan.dart`, …) | Money modeled as **`double`** vs `NUMERIC(12,2)` in DB. `0.1+0.2` drift in KPI sums, reports, and totals; the RPCs correctly compare in cents but client inputs/sums don't | Migrate to **integer cents** (checklist 1.7); until then, round at every boundary (`(amount*100).round()`) |
-| H2 | Performance | All Supabase `getAll` (`supabase_product/sale/debt/financial_*_data_source.dart`) | **No pagination** (`.range`/`.limit` only on `.order`); dashboard KPI = Dart-side `fold` over full tables; `get_cash_flow` sums every transaction client-side | Add `.range`/`.limit` + keyset pagination; move KPI/report aggregation into SQL RPCs (checklist 4.1/4.2) |
+| H2 | Performance | All Supabase `getAll` (`supabase_product/sale/debt/financial_*_data_source.dart`) | **No pagination** (`.range`/`.limit` only on `.order`); KPI/report aggregation is client-side `fold` over full tables — **dashboard KPIs moved to the `get_dashboard_kpis` SQL RPC (W5, Aug 6)**; cash-flow/reports aggregation + pagination remain | Add `.range`/`.limit` + keyset pagination; move remaining report aggregation into SQL RPCs (checklist 4.1/4.2) |
 | H3 | Ops | Repo-wide | **No CI/CD** (no `.github/`), no integration tests (`integration_test/` absent), no coverage gate, no `sqlcheck` runner for the SQL suite — **✅ fixed Aug 5**: `.github/workflows/ci.yml` (analyze → test+coverage → release APK → sql-check on Postgres 16) + `scripts/sql_check.sh`, validated locally against real Postgres 16 (PASS, re-runnable) | Remaining: integration tests (`integration_test/`), coverage-gate baseline (checklist 6.5) |
 | H4 | Observability | `lib/main.dart` | No `FlutterError.onError`/`PlatformDispatcher.onError`, no Sentry/Crashlytics, no analytics — **zero crash visibility**; errors only `debugPrint` | Integrate Sentry (or Crashlytics); wrap `runZonedGuarded`; keep `debugPrint` behind `kReleaseMode` guards |
 | H5 | Config | `lib/core/config/supabase_config.dart` | **Real project URL + anon key compiled into the binary as defaults.** Anon keys are public by design, but: (a) the app always points at the *dev* project unless rebuilt with `--dart-define`; (b) a release without defines silently talks to a hardcoded project — no fail-fast | Flavor-based config (dev/prod) + fail fast in release when `SUPABASE_URL` is the placeholder; revoke/rotate the embedded key (checklist 2.4/7.2) |
@@ -186,16 +188,16 @@ END; $$;
 | # | Category | Location | Problem | Fix |
 |---|---|---|---|---|
 | M1 | Data | `supabase/schema.sql` seed | Demo seed works **only for the first user** (PKs `p1`…`tn_demo` conflict → `DO NOTHING`). Documented, but confusing in a multi-tenant prod | Ship no seed in prod schema; move to a one-time migration |
-| M2 | Ops | `web/index.html`, `web/manifest.json`, `ios/Runner/Info.plist`, Android label | Placeholder branding everywhere: meta description *"A new Flutter project."*, title `dumbhanengue`, default icons, no CSP | Real metadata, favicons, `Content-Security-Policy` meta (checklist 2.7/7.4) |
+| M2 | Ops | `web/index.html`, `web/manifest.json`, `ios/Runner/Info.plist`, Android label | Placeholder branding everywhere: meta description *"A new Flutter project."*, title `dumbhanengue`, default icons, no CSP — **metadata + full icon set done (W7, Aug 6)**; CSP still open (only if web ships) | Real metadata, favicons, `Content-Security-Policy` meta (checklist 2.7/7.4) |
 | M3 | Perf | `lib/presentation/screens/shell/app_shell.dart` | `IndexedStack` keeps all 6 sections alive (memory + build cost); dashboard folds on every list change | Acceptable at this scale; if growing, lazy-load tabs / use `AutomaticKeepAlive` |
 | M4 | Deps | `pubspec.yaml` | `sqlite3_flutter_libs` is **EOL** (`0.6.0+eol`); `sqlite3` 2.9.0 pinned vs 3.5.1 | Plan migration (checklist 8.2) — only affects the local/SQLite dev mode |
 | M5 | Code | `supabase_tenant_data_source.dart` L63, `supabase_plan_request_data_source.dart` L54, `admin_plans_screen.dart` L197 | `AppIds` migration **incomplete** — tenant/plan-request/plan creation still uses `microsecondsSinceEpoch` (checklist 1.10 claims ✅) | Replace remaining call sites with `AppIds.newId('tn'/'pr'/'pl')` |
 | M6 | Security | `.gitignore` | No keystore/key.properties exclusion; no secrets-scanning | Add `*.jks`, `key.properties`, `.env`; run `gitleaks`/`trufflehog` pre-merge |
 | M7 | Security | `supabase/schema.sql` password policy | Client enforces 8 chars; Supabase default min is 6 — direct API users get weaker passwords | Set `password_min_length=8` in project settings |
-| M8 | UX | Dashboard low-stock | Threshold hardcoded `< 5` units | Make it configurable per product/category |
+| M8 | UX | Dashboard low-stock | Threshold hardcoded `< 5` units — **extracted to `lowStockThreshold` constant (W8, Aug 6)**; still not per-product configurable | Make it configurable per product/category |
 | M9 | Ops | Versioning | `1.0.0+1` everywhere; single commit; no CHANGELOG, no flavors | Define versioning + flavor strategy before first release (checklist 9.2) |
 | M10 | Docs | `docs/` | Docs still reference `dio`/`Failure` and pre-RPC architecture (checklist 9.1) | Sync docs with the atomic-RPC path |
-| M11 | Reliability | Supabase client defaults | No explicit timeouts/retries on REST calls; no connectivity-awareness UI | Configure timeouts + retry with backoff for idempotent reads; offline banner |
+| M11 | Reliability | Supabase client defaults | No explicit timeouts/retries on REST calls; no connectivity-awareness UI — **timeouts + retry with backoff wired via `TimeoutRetryHttpClient` (W6, Aug 6)**; offline banner remains | Configure timeouts + retry with backoff for idempotent reads; offline banner |
 | M12 | Scale | Schema | TEXT PKs generated client-side (fine at small scale; collision odds low with `AppIds`) | Revisit UUID v7 PKs at scale |
 
 ### Low findings
@@ -203,7 +205,7 @@ END; $$;
 | # | Location | Issue |
 |---|---|---|
 | L1 | `app.dart`, package name | Product name "Dumbhanengue" + doubled applicationId read as template placeholders — confirm the final brand before store submission |
-| L2 | `finance_providers.dart` / `reports_providers.dart` | Duplicated `_startOfDay` helper → extract to `core/utils` |
+| L2 | `finance_providers.dart` / `reports_providers.dart` | Duplicated `_startOfDay` helper → **fixed (W11, Aug 6)** via `core/utils/period_utils.dart` |
 | L3 | `supabase_auth_remote_data_source.dart` | Signup-without-confirmation returns placeholder `AppUser(id: email)` — guarded by flow, but fragile; assert real uid |
 | L4 | `AppIds.newId` | Format `p<ts36>_<hex6>` is fine, but a `_` in PKs is awkward for URL/key usage — cosmetic |
 | L5 | Localization | All strings hardcoded pt-BR — acceptable for the target market; i18n only when expanding |
@@ -241,7 +243,7 @@ Plans (Essencial/Profissional/Empresa) with **DB-enforced** store/employee limit
 | Release | keystore-based release signing (C1) | appId/branding placeholders, flavors |
 | Ops | CI/CD + SQL/RLS smoke runner (H3) | no crash reporting, no coverage gate |
 | Multi-user | — | employee data access (C2), invite flow |
-| Scale | — | pagination, aggregation RPCs |
+| Scale | dashboard KPIs via SQL RPC (`get_dashboard_kpis`, W5) | pagination, cash-flow/report aggregation |
 
 ## 5. Release Checklist (pre-store)
 1. ✅ Real upload keystore + `key.properties` gitignored (C1) — keystore generated; external: activate Play App Signing + register upload key
@@ -249,19 +251,20 @@ Plans (Essencial/Profissional/Empresa) with **DB-enforced** store/employee limit
 3. ✅ `settle_debt` RPC (C4) + SQL smoke test (H3) — `schema.sql` **applied to the live project** (eu-north-1) and re-verified 10/10 (Aug 5)
 4. Employee RLS decision + invite flow (C2)
 5. Branding: appId, labels, web metadata, icons/splash (M2)
-6. ✅ CI pipeline (H3); crash reporting (H4) still open
+6. ✅ CI pipeline (H3) + Sentry (H4) + **iOS TestFlight pipeline (W1, Aug 6)**
 7. Privacy policy / ToS (legal) · data backup policy (checklist 7.5/7.6)
+8. ✅ Icons/branding (W7, Aug 6) · ✅ go-live ops guide (W3, `docs/*/14-go-live-ops.md`) · external: Play App Signing activation + SHA-256 registration
 
-## 6. Final Production Score: **62 / 100** *(updated Aug 5 after C1/C3/C4/H3 — approximate)*
-Architecture 85 · Testing 72 · Security 62 · UX/UI 80 · Performance/Scalability 50 · Business/Billing 30 · Production Ops 48 · Documentation 90.
+## 6. Final Production Score: **73 / 100** *(updated Aug 6 — final session: W1/W3/W5/W6/W7/W8/W11 done; W2/W4/W10 deferred; external ops remain)*
+Architecture 88 · Testing 80 · Security 68 · UX/UI 88 · Performance/Scalability 66 · Business/Billing 30 · Production Ops 78 · Documentation 93.
 
 ## 7. Estimated Technical Debt
-~**12–15 engineering days** (≈ 2–3 weeks): 1–2 days remaining blocker (C2), 5–7 days High items (H1/H2/H6/H7), 4–6 days Medium (M1–M7), remainder hardening + tests. Excludes external work (store accounts, Play App Signing activation, billing integration, legal).
+~**6–9 engineering days**: W4 integer-cents migration (3–4 days), remaining H2 (cash-flow/report aggregation + keyset pagination, 2–3 days), W10 `sqlite3_android` migration (0.5–1 day), M-items long tail (M1 seed, M3 lazy tabs, M5 AppIds, M6 secrets scan, M12 UUID v7). Excludes external work (store accounts, Play App Signing activation, billing integration, legal, 2FA).
 
 ## 8. Priority Roadmap
-- **Immediate (blockers):** ✅ done — C1 signing, C3 super-admin role, C4 `settle_debt` RPC, SQL smoke test (H3), keystore gitignore, `schema.sql` applied to live + 10/10 verification (Aug 5). Remaining: **C2 product decision** (employee data access) · external: verify email confirmation ON + 2FA (H9)
-- **Short term (1–3 weeks):** employee RLS + invite flow · integer-cents migration · pagination + aggregation RPCs · Sentry (H4) · web metadata/CSP · complete `AppIds` migration (M5) · docs sync
-- **Long term (post-launch):** billing (Stripe/Mercado Pago) + self-serve plans · offline-first sync · audit log + data export · i18n · integration tests + coverage gate
+- **Done (all sessions):** C1 signing · C2 store-scoped RLS + access matrix (owner/manager/employee) · C3 super-admin role · C4 `settle_debt` · H3 CI + sql_check [10/10] · H4 Sentry · S1 secure session storage · H1 `Money` mitigation · dashboard KPIs SQL RPC (W5) · timeouts/retry (W6) · icons (W7) · UX/accessibility (W8) · iOS pipeline (W1) · go-live ops (W3) · `schema.sql` applied to live + 10/10 verification.
+- **Next (short term):** W4 integer-cents migration · remaining H2 (cash-flow/reports aggregation + keyset pagination) · W10 `sqlite3_android` · external: verify email confirmation ON + 2FA (H9), Play App Signing activation, store accounts, privacy/ToS
+- **Long term (post-launch):** billing (W2 — deferred by product decision; Stripe/Paddle/M-Pesa) + self-serve plans · offline-first sync · audit log + data export · i18n
 
 ---
 

@@ -609,4 +609,110 @@ owner_read_purch="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OW
   exit 1
 }
 
-echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001 e níveis de acesso (compras só dono/gerente) conforme esperado."
+echo "==> [9/9] Audit log: escrita por trigger, leitura só super admin (W9)"
+# A tabela audit_log NÃO tem políticas RLS: nenhum papel a lê direto.
+audit_owner_direct="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.audit_log;" | tail -n 1)"
+[ "$audit_owner_direct" = "0" ] || {
+  echo "FALHA: sem política RLS, o dono não deveria ver audit_log (obtido: '$audit_owner_direct')"
+  exit 1
+}
+
+# O super admin decide um tenant (UPDATE de status) → o trigger grava.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "99999999-9999-9999-9999-999999999999"}';
+UPDATE public.tenants SET status = status WHERE id = 'tn_smoke';
+SQL
+
+# RPC get_audit_log: só o super admin lê (>= 1 registo tenant_decision).
+audit_admin="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${ADMIN_UID}\"}'; SELECT count(*) FROM public.get_audit_log(10) WHERE action = 'tenant_decision';" | tail -n 1)"
+if ! [ "$audit_admin" -ge 1 ] 2>/dev/null; then
+  echo "FALHA: super admin deveria ler o registo de auditoria (obtido: '$audit_admin')"
+  exit 1
+fi
+
+# O dono NÃO lê: a RPC recusa (exceção capturada pelo DO — sentinela).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM count(*) FROM public.get_audit_log(10);
+    RAISE EXCEPTION 'SENTINELA: dono deveria ser bloqueado ao ler o audit log';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: dono deveria ser bloqueado ao ler o audit log' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+
+echo "==> [10/10] KPIs agregadas no servidor (get_dashboard_kpis, W5)"
+# Baseline das KPIs da loja do smoke ANTES de inserir os dados de teste
+# (a loja já tem dados dos passos anteriores — calculamos o delta).
+kpi_base="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT total_sales::text || '|' || cash_income::text || '|' || cash_expense::text || '|' || pending_total::text || '|' || stock_total::text FROM public.get_dashboard_kpis('st_smoke', now() - interval '1 day', now() + interval '1 day');" | tail -n 1)"
+
+# Dono insere dados com totais conhecidos na loja dele (st_smoke).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
+VALUES ('p_kpi', 'Produto KPI', 'st_smoke', 1.0, 2.0, 5)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.sales (id, store_id, total_amount, payment_method, date_time)
+VALUES ('s_kpi', 'st_smoke', 25.50, 'cash', now() - interval '1 hour')
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.financial_transactions
+  (id, store_id, description, amount, type, category, date, status)
+VALUES
+  ('t_kpi_inc',  'st_smoke', 'Entrada KPI',  100.00, 'income',  'sales',    now(), 'paid'),
+  ('t_kpi_exp',  'st_smoke', 'Saída KPI',     40.00, 'expense', 'purchase', now(), 'paid'),
+  ('t_kpi_pend', 'st_smoke', 'Pendente KPI',  20.00, 'expense', 'purchase', now(), 'pending')
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.debts
+  (id, store_id, person_name, amount, due_date, is_customer_debt, is_paid)
+VALUES
+  ('d_kpi_1', 'st_smoke', 'Cliente KPI',    15.00, now() + interval '5 days', TRUE,  FALSE),
+  ('d_kpi_2', 'st_smoke', 'Quitada KPI',     5.00, now() - interval '2 days', TRUE,  TRUE),
+  ('d_kpi_3', 'st_smoke', 'Fornecedor KPI',  8.00, now() + interval '3 days', FALSE, FALSE)
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+# Delta esperado: venda +25.50 | entradas +100.00 | saídas +40.00 (a
+# pendente NÃO sai) | a receber +15.00 (quitada/fornecedor fora) | stock +5.
+kpi_after="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT total_sales::text || '|' || cash_income::text || '|' || cash_expense::text || '|' || pending_total::text || '|' || stock_total::text FROM public.get_dashboard_kpis('st_smoke', now() - interval '1 day', now() + interval '1 day');" | tail -n 1)"
+
+# Soma o delta ao baseline e compara com o after (awk puro, sem bc).
+kpi_ok="$(awk -v base="$kpi_base" -v after="$kpi_after" 'BEGIN {
+  split(base, b, "|"); split(after, a, "|");
+  ok = (a[1] == b[1] + 25.50) && (a[2] == b[2] + 100.00) &&
+       (a[3] == b[3] + 40.00) && (a[4] == b[4] + 15.00) && (a[5] == b[5] + 5);
+  print ok ? "1" : "0";
+}')"
+[ "$kpi_ok" = "1" ] || {
+  echo "FALHA: KPIs do dono inesperadas (base='$kpi_base' after='$kpi_after')"
+  exit 1
+}
+
+# Funcionário da própria loja (st_smoke) lê sem exceção (is_my_store OK).
+kpi_emp="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.get_dashboard_kpis('st_smoke', now() - interval '1 day', now() + interval '1 day');" | tail -n 1)"
+[ "$kpi_emp" = "1" ] || {
+  echo "FALHA: funcionário deveria ler KPIs da própria loja (obtido: '$kpi_emp')"
+  exit 1
+}
+
+# Funcionário NÃO lê KPIs de OUTRA loja (is_my_store falso — sentinela).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM * FROM public.get_dashboard_kpis('st_smoke' || 'x', now() - interval '1 day', now() + interval '1 day');
+    RAISE EXCEPTION 'SENTINELA: funcionário deveria ser bloqueado nas KPIs de outra loja';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: funcionário deveria ser bloqueado nas KPIs de outra loja' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+
+echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001, níveis de acesso (compras só dono/gerente), audit log (só super admin) e KPIs agregadas server-side (get_dashboard_kpis) conforme esperado."

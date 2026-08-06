@@ -787,6 +787,129 @@ INSERT INTO public.super_admins (user_id)
 SELECT id FROM auth.users WHERE lower(email) = 'admin@dumbhanengue.com'
 ON CONFLICT (user_id) DO NOTHING;
 
+-- ---------------------------------------------------------------
+-- 2.3 Audit log (W9): trilha imutável e somente-super-admin
+-- ---------------------------------------------------------------
+-- Registo de decisões administrativas (aprovar/rejeitar tenant e pedido
+-- de plano; alterações de planos). Escrita via triggers SECURITY DEFINER
+-- (nenhum papel escreve direto); leitura apenas pela RPC get_audit_log,
+-- que exige is_super_admin(). RLS sem políticas + REVOKE de
+-- anon/authenticated — mesmo padrão de public.super_admins.
+CREATE TABLE IF NOT EXISTS public.audit_log (
+  id            BIGSERIAL PRIMARY KEY,
+  actor_user_id UUID,
+  action        TEXT NOT NULL CHECK (action <> ''),
+  entity_type   TEXT NOT NULL CHECK (entity_type <> ''),
+  entity_id     TEXT,
+  detail        JSONB,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.audit_log ENABLE ROW LEVEL SECURITY;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM pg_roles WHERE rolname IN ('anon', 'authenticated')
+  ) THEN
+    EXECUTE 'REVOKE ALL ON public.audit_log FROM anon, authenticated';
+  END IF;
+END
+$$;
+
+-- Função do trigger: grava a entrada com o ator resolvido do JWT e o
+-- estado novo da linha (JSONB). A ação vem de TG_ARGV[0] (por trigger).
+CREATE OR REPLACE FUNCTION public.log_audit_entry()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+BEGIN
+  INSERT INTO public.audit_log
+    (actor_user_id, action, entity_type, entity_id, detail)
+  VALUES (auth.uid(), TG_ARGV[0], TG_TABLE_NAME, NEW.id::text, to_jsonb(NEW));
+  RETURN NEW;
+END $$;
+
+DROP TRIGGER IF EXISTS trg_audit_tenant_decision ON public.tenants;
+CREATE TRIGGER trg_audit_tenant_decision
+  AFTER UPDATE OF status ON public.tenants
+  FOR EACH ROW EXECUTE FUNCTION public.log_audit_entry('tenant_decision');
+
+DROP TRIGGER IF EXISTS trg_audit_plan_request_decision ON public.plan_requests;
+CREATE TRIGGER trg_audit_plan_request_decision
+  AFTER UPDATE OF status ON public.plan_requests
+  FOR EACH ROW EXECUTE FUNCTION public.log_audit_entry('plan_request_decision');
+
+DROP TRIGGER IF EXISTS trg_audit_plan_change ON public.plans;
+CREATE TRIGGER trg_audit_plan_change
+  AFTER UPDATE ON public.plans
+  FOR EACH ROW EXECUTE FUNCTION public.log_audit_entry('plan_change');
+
+-- Leitura: apenas o super admin (guarda dentro da própria RPC — o papel
+-- anon/authenticated não tem permissão de tabela e o RLS não tem
+-- políticas; o SECURITY DEFINER + guarda fecham a porta).
+CREATE OR REPLACE FUNCTION public.get_audit_log(p_limit integer DEFAULT 100)
+RETURNS SETOF public.audit_log
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+BEGIN
+  IF NOT public.is_super_admin() THEN
+    RAISE EXCEPTION 'Apenas o super admin pode consultar o registo de auditoria.';
+  END IF;
+  RETURN QUERY SELECT * FROM public.audit_log
+    ORDER BY id DESC
+    LIMIT GREATEST(1, p_limit);
+END $$;
+
+-- W5 — KPIs do dashboard agregadas NO SERVIDOR (get_dashboard_kpis).
+-- Uma única chamada RPC devolve os 4 indicadores da loja (vendas totais,
+-- caixa do período, a receber, estoque) em vez de 4 listagens de até 1000
+-- linhas agregadas no cliente. Guarda is_my_store (dono ou funcionário da
+-- loja); o período [p_start, p_end] afeta APENAS o caixa (status paid) —
+-- vendas, fiado e estoque são totais da loja (mesma semântica client-side).
+CREATE OR REPLACE FUNCTION public.get_dashboard_kpis(
+  p_store_id TEXT,
+  p_start TIMESTAMPTZ,
+  p_end TIMESTAMPTZ
+)
+RETURNS TABLE (
+  total_sales   NUMERIC(14, 2),
+  cash_income   NUMERIC(14, 2),
+  cash_expense  NUMERIC(14, 2),
+  pending_total NUMERIC(14, 2),
+  stock_total   BIGINT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+BEGIN
+  IF NOT public.is_my_store(p_store_id) THEN
+    RAISE EXCEPTION 'Acesso negado a esta loja.';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    COALESCE((SELECT SUM(s.total_amount) FROM public.sales s
+              WHERE s.store_id = p_store_id), 0),
+    COALESCE((SELECT SUM(t.amount) FROM public.financial_transactions t
+              WHERE t.store_id = p_store_id AND t.type = 'income'
+                AND t.status = 'paid'
+                AND t.date >= p_start AND t.date <= p_end), 0),
+    COALESCE((SELECT SUM(t.amount) FROM public.financial_transactions t
+              WHERE t.store_id = p_store_id AND t.type = 'expense'
+                AND t.status = 'paid'
+                AND t.date >= p_start AND t.date <= p_end), 0),
+    COALESCE((SELECT SUM(d.amount) FROM public.debts d
+              WHERE d.store_id = p_store_id
+                AND d.is_customer_debt = TRUE AND d.is_paid = FALSE), 0),
+    COALESCE((SELECT SUM(p.stock_quantity) FROM public.products p
+              WHERE p.store_id = p_store_id), 0);
+END $$;
+
 -- plans — leitura para todos os logados; escrita só do super admin
 DROP POLICY IF EXISTS plans_select ON public.plans;
 CREATE POLICY plans_select ON public.plans
