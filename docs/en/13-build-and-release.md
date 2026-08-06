@@ -16,19 +16,22 @@ flutter pub get
 
 - **App version:** `version: 1.0.0+1` in `pubspec.yaml` (applied automatically to `versionCode`/`versionName` on Android and `CFBundleVersion` on iOS).
 
-> ⚠️ **SaaS vs. local mode:** the app uses the **embedded** Supabase credentials (`lib/core/config/supabase_config.dart`). To point a production build at another project, pass them via `--dart-define` (the anon key is public by design — real security comes from RLS; **never** embed the service role key):
+> ⚠️ **SaaS vs. local mode (flavors dev/prod):** credentials are supplied via `--dart-define-from-file` — `env/dev.env` (committed, dev project) and `env/prod.env` (**never** versioned; model in `env/prod.env.example`). `FLUTTER_APP_FLAVOR` is a **reserved define** injected from `--flavor`. A **release** build without `--flavor prod` (or with the embedded dev defaults) **throws at startup** (fail-fast S2); the Gradle config also **fails `prodRelease` without `android/key.properties`**. The anon key is public by design — real security comes from RLS; **never** embed the service role key:
 
 ```bash
-flutter build apk --release \
-  --dart-define=SUPABASE_URL=https://your-project.supabase.co \
-  --dart-define=SUPABASE_ANON_KEY=eyJ...
+# Development (debug/hot reload)
+flutter run --flavor dev --dart-define-from-file=env/dev.env
+
+# Production (release)
+flutter build appbundle --flavor prod --release \
+  --dart-define-from-file=env/prod.env
 ```
 
 ## Platform summary
 
 | Platform | OS required to **build** | Main requirements | Release command | Generated artifact |
 | -------- | ------------------------ | ----------------- | --------------- | ------------------ |
-| **Android** | Windows, macOS, Linux | JDK 17 + Android SDK | `flutter build appbundle --release` | `app-release.aab` |
+| **Android** | Windows, macOS, Linux | JDK 17 + Android SDK + `key.properties` | `flutter build appbundle --flavor prod --release --dart-define-from-file=env/prod.env` | `app-prod-release.aab` |
 | **iOS** | **macOS** (mandatory) | Xcode + CocoaPods + Apple Developer account | `flutter build ios --release` | `Runner.app` (or `.ipa` via Xcode) |
 | **Windows** | Windows 10/11 | Visual Studio 2022 (C++ workload) | `flutter build windows --release` | `dumbhanengue.exe` |
 | **Web** | Any OS | A browser (for testing) | `flutter build web --release` | `build/web/` (static site) |
@@ -48,27 +51,35 @@ flutter build apk --release \
 Release signing reads `android/key.properties` (never versioned — see `android/key.properties.example` and the [Developer guide](10-developer-guide.md#android-release-signing)):
 
 - With `key.properties` present → **production** signing (upload keystore + Play App Signing);
-- Without the file (CI/dev) → the release build falls back to the **debug** keystore (not publishable).
+- Without the file (CI/dev) → the release build falls back to the **debug** keystore (not publishable);
+- **Gradle guard (Aug 5):** a `prodRelease` build **fails at configuration time** without `key.properties` — a production AAB can never be debug-signed. The CI build (`ci.yml`) therefore uses the **dev** flavor (`com.dumbhanengue.dumbhanengue.dev`) purely as a compile validation.
 
 ### Commands
 
 ```bash
-# Single APK (direct distribution / testing)
-flutter build apk --release
-# → build/app/outputs/flutter-apk/app-release.apk
+# ── Flavors ────────────────────────────────────────────────────────────
+# dev  → applicationId com.dumbhanengue.dumbhanengue.dev, label "Dev"
+# prod → production applicationId com.dumbhanengue.dumbhanengue
 
-# Per-ABI APK (smaller, per architecture: armeabi-v7a, arm64-v8a, x86_64)
-flutter build apk --split-per-abi
+# Dev APK (direct distribution / testing)
+flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
+# → build/app/outputs/flutter-apk/app-dev-release.apk
 
-# AAB — the format required by Google Play
-flutter build appbundle --release
-# → build/app/outputs/bundle/release/app-release.aab
+# PROD AAB — the format required by Google Play
+flutter build appbundle --flavor prod --release \
+  --dart-define-from-file=env/prod.env
+# → build/app/outputs/bundle/prodRelease/app-prod-release.aab
+
+# PROD AAB with Dart obfuscation (recommended before publishing)
+flutter build appbundle --flavor prod --release \
+  --dart-define-from-file=env/prod.env \
+  --obfuscate --split-debug-info=build/symbols
 
 # Test on a device/emulator (debug, with hot reload)
-flutter run
+flutter run --flavor dev --dart-define-from-file=env/dev.env
 ```
 
-> R8/minify are **disabled** (Flutter template default). To shrink the APK, enable `isMinifyEnabled`/`isShrinkResources` together with the libraries' `-keep` rules (checklist 7.7). Before publishing, set the final **Application ID** in `android/app/build.gradle.kts` (currently a placeholder: `com.dumbhanengue.dumbhanengue`).
+> **R8/minify are ENABLED** (`isMinifyEnabled`/`isShrinkResources`, Aug 5) — the Dart code can additionally be obfuscated with `--obfuscate --split-debug-info` (upload the symbols to Sentry: `sentry-cli debug-files upload`). The prod flavor keeps the immutable `applicationId com.dumbhanengue.dumbhanengue`; the dev flavor has the `.dev` suffix so both can coexist on one device.
 
 ---
 
@@ -168,16 +179,23 @@ Then run `flutter build linux --release` (requires GTK/clang) and `flutter build
 
 ---
 
-## CI (GitHub Actions)
+## CI/CD (GitHub Actions)
 
-The `.github/workflows/ci.yml` workflow already runs on every push/PR:
+**`.github/workflows/ci.yml`** (every push/PR):
 
 1. **analyze** — `flutter analyze` (zero errors/warnings);
-2. **test** — `flutter test --coverage` + coverage summary;
-3. **build** — `flutter build apk --release` (debug signing, since CI has no `key.properties`) and uploads the APK as an artifact;
-4. **sql-check** — smoke test of `supabase/schema.sql` + RLS against a real Postgres.
+2. **test** — `flutter test --coverage` + **45% coverage gate**;
+3. **build** — `flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env` (dev-only, compile validation — debug signing) + APK artifact;
+4. **sql-check** — `scripts/sql_check.sh` against a real Postgres 16 service (schema apply + super admin + RLS by store + **atomic RPC execution**).
 
-To produce **publishable** artifacts in CI, decode the keystore from a secret (see `android/key.properties.example` and the [Developer guide](10-developer-guide.md#android-release-signing)).
+**`.github/workflows/release.yml`** (tag `v*` — publishable AAB): runs analyze + test, then **Fastlane** (`fastlane/Fastfile`, lane `deploy`):
+
+1. validates the production defines/secrets (fail-fast);
+2. decodes the upload keystore from `KEYSTORE_BASE64` and writes `android/key.properties`;
+3. builds the **prod AAB** (`--flavor prod --release --obfuscate --split-debug-info=build/symbols`);
+4. uploads to the **Internal testing** track via the service account from `PLAY_SERVICE_ACCOUNT_JSON`.
+
+> Secrets required: `SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`, `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `PLAY_SERVICE_ACCOUNT_JSON` (+ optional `SENTRY_DSN`). Full setup: `docs/pt/13-build-e-publicacao.md`.
 
 ---
 
@@ -188,5 +206,5 @@ To produce **publishable** artifacts in CI, decode the keystore from a secret (s
 - [ ] **Android:** final Application ID + `key.properties` + AAB tested in Play Console (Internal testing);
 - [ ] **iOS:** signing team in Xcode + archive tested on TestFlight;
 - [ ] **Windows/Web:** local release build validated and artifact distributable;
-- [ ] **SaaS:** `--dart-define` pointing to the production Supabase project;
+- [ ] **SaaS:** prod flavor + `env/prod.env` pointing to the production Supabase project;
 - [ ] Review the [Production checklist](../pt/PRODUCTION_CHECKLIST.md) and the [Audit report](../pt/AUDIT_REPORT.md).

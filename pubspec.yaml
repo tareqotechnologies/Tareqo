@@ -28,7 +28,11 @@ dependencies:
   supabase_flutter: ^2.16.0
   flutter_secure_storage: ^10.3.1
   sqlite3: 2.9.0
-  sqlite3_flutter_libs: 0.5.27
+  # 0.6.0+eol: última versão (EOL) — recompilada contra compileSdk 36;
+  # a 0.5.27 era compilada contra android-32 e QUEBRAVA o build de release
+  # (falha pré-existente do CI, auditoria M4/8.2). Migração futura:
+  # sqlite3_android (lib nativa do SO) — ver checklist 8.2.
+  sqlite3_flutter_libs: 0.6.0+eol
   path_provider: ^2.1.6
   path: ^1.9.1
 
@@ -37,7 +41,10 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
-  sentry_flutter: ^8.14.2
+  # 9.x: corrige a incompatibilidade com o Kotlin "built-in" do Flutter
+  # 3.44+ (o 8.14.2 fixava languageVersion=1.6 e quebrava o build de
+  # release — falha pré-existente do CI, auditoria M4/7.7).
+  sentry_flutter: ^9.26.0
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +52,12 @@ dev_dependencies:
 
   # Conjunto de lints recomendados pelo Flutter
   flutter_lints: ^6.0.0
+
+  # O teste de SupabaseEmployeeProcessor constrói PostgrestException
+  # (tradução dos erros da RPC create_employee_account) — dependência
+  # transitiva do supabase_flutter declarada explicitamente para os testes
+  # (depend_on_referenced_packages).
+  postgrest: 2.8.0
 
   # --- Geração de código (Freezed + json_serializable) ---
   # Execute `dart run build_runner build --delete-conflicting-outputs`

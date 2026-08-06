@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/money.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/sale.dart';
@@ -40,6 +41,11 @@ class DashboardScreen extends ConsumerWidget {
     final tenant = user == null
         ? null
         : ref.watch(myTenantProvider(user.id)).value;
+    // Nível de acesso (dono/gerente/funcionário): condiciona os módulos
+    // de gestão (Lojas = só dono) e os módulos de nível gerencial
+    // (Compras/Relatórios = gerente+). O servidor continua sendo a
+    // autoridade (RLS + guardas das RPCs).
+    final accessLevel = ref.watch(currentAccessLevelProvider);
 
     final productsAsync = ref.watch(productsProvider);
     final salesAsync = ref.watch(salesListProvider);
@@ -58,13 +64,15 @@ class DashboardScreen extends ConsumerWidget {
         ? null
         : stores.where((store) => store.id == activeStoreId).firstOrNull;
 
-    final totalSales = salesAsync.value
-            ?.fold<double>(0, (sum, sale) => sum + sale.totalAmount) ??
-        0;
+    // Acúmulos em CENTAVOS (auditoria H1): somar doubles (0.1+0.2) acumula
+    // erro de representação; [Money.sum] soma inteiros de centavos.
+    final totalSales = Money.sum(
+      salesAsync.value?.map((sale) => sale.totalAmount) ?? const [],
+    );
     final cashBalance = cashFlowAsync.value?.balance ?? 0;
-    final pendingTotal = debtsAsync.value
-            ?.fold<double>(0, (sum, debt) => sum + debt.amount) ??
-        0;
+    final pendingTotal = Money.sum(
+      debtsAsync.value?.map((debt) => debt.amount) ?? const [],
+    );
     final stockTotal = productsAsync.value
             ?.fold<int>(0, (sum, product) => sum + product.stockQuantity) ??
         0;
@@ -237,35 +245,44 @@ class DashboardScreen extends ConsumerWidget {
                       .read(shellIndexProvider.notifier)
                       .goTo(AppSection.customers),
                 ),
-                _ModuleCard(
-                  icon: Icons.local_shipping_outlined,
-                  label: l10n.dashboardModulePurchases,
-                  onTap: () {
-                    // Dados frescos ao reabrir (providers de escopo raiz).
-                    ref.invalidate(purchasesProvider);
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const PurchasesScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _ModuleCard(
-                  icon: Icons.bar_chart_outlined,
-                  label: l10n.dashboardModuleReports,
-                  onTap: () {
-                    // Dados frescos ao reabrir (providers de escopo raiz).
-                    ref.invalidate(salesReportProvider);
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const ReportsScreen(),
-                      ),
-                    );
-                  },
-                ),
+                // Compras e Relatórios: módulos de nível GERENCIAL —
+                // visíveis para dono e gerente, ocultos para funcionários
+                // (matriz de acesso). O servidor também nega compras de
+                // funcionários (is_manager_of_store no process_purchase e
+                // nas políticas RLS de purchases).
+                if (accessLevel != UserAccessLevel.employee)
+                  _ModuleCard(
+                    icon: Icons.local_shipping_outlined,
+                    label: l10n.dashboardModulePurchases,
+                    onTap: () {
+                      // Dados frescos ao reabrir (providers de escopo raiz).
+                      ref.invalidate(purchasesProvider);
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const PurchasesScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                if (accessLevel != UserAccessLevel.employee)
+                  _ModuleCard(
+                    icon: Icons.bar_chart_outlined,
+                    label: l10n.dashboardModuleReports,
+                    onTap: () {
+                      // Dados frescos ao reabrir (providers de escopo raiz).
+                      ref.invalidate(salesReportProvider);
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const ReportsScreen(),
+                        ),
+                      );
+                    },
+                  ),
                 // Lojas: gestão do tenant (lojas, funcionários e plano) —
-                // visível para donos com tenant aprovado.
-                if (tenant != null && tenant.status == TenantStatus.approved)
+                // visível APENAS para o DONO com tenant aprovado.
+                if (tenant != null &&
+                    tenant.status == TenantStatus.approved &&
+                    accessLevel == UserAccessLevel.owner)
                   _ModuleCard(
                     icon: Icons.storefront_outlined,
                     label: l10n.dashboardModuleStores,

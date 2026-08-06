@@ -205,7 +205,7 @@
   "addEmployeeEmailLabel": "E-mail",
   "addEmployeeEmailError": "Informe um e-mail válido.",
   "addEmployeePasswordLabel": "Senha de acesso",
-  "addEmployeePasswordError": "A senha deve ter ao menos 6 caracteres.",
+  "addEmployeePasswordError": "A senha deve ter ao menos 8 caracteres.",
   "addEmployeeStoreLabel": "Loja",
   "addEmployeeNoStores": "Crie uma loja antes de cadastrar funcionários.",
   "addEmployeeRoleLabel": "Cargo",

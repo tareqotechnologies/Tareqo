@@ -22,8 +22,23 @@ Owner signs up → picks plan + business name → tenant PENDING
 | Role | How it is identified | What it can do |
 | ---- | -------------------- | -------------- |
 | **Super admin** | DB-backed role (`public.super_admins`) | Approve/reject tenants, decide plan upgrades and create/edit plans (admin panel) |
-| **Owner** | `tenants.owner_user_id = auth.uid()` | Request access, create stores, create employee accounts, request plan upgrades and operate the ERP |
-| **Employee** | Link in `store_employees` | Signs in and operates the ERP — scoped by **store** (`store_id`) |
+| **Owner** | `tenants.owner_user_id = auth.uid()` | **Full access:** request access, create stores, create employee accounts, request plan upgrades and operate the ERP. Only role that can manage stores/employees/plan/settings (`Stores` module) |
+| **Manager** | Link in `store_employees` with `role = 'manager'` | **Full operations:** sells, products, finance, credit, customers, **purchases and reports** — but **no** store/employee/plan/settings management (owner only) |
+| **Employee** | Link in `store_employees` with `role = 'employee'` | **Daily operations only:** sells, products, finance, credit and customers — **no** purchases, **no** reports, **no** management |
+
+### Access-level matrix (Aug 6)
+
+| Module | Owner | Manager | Employee |
+| ------ | ----- | ------- | -------- |
+| Sales / Products / Finance / Credit / Customers | ✅ | ✅ | ✅ |
+| Purchases | ✅ | ✅ | ❌ |
+| Reports | ✅ | ✅ | ❌ |
+| Stores (stores/employees/plan/settings) | ✅ | ❌ | ❌ |
+
+- **UI (UX only):** the dashboard hides the Purchases/Reports cards for employees and the Stores card for anyone who is not the owner — `currentAccessLevelProvider` (`account_providers.dart`) resolves the signed-in user's level from `tenants.owner_user_id` or the highest role among their `store_employees` links;
+- **Server (authority):** the `process_purchase` RPC and the `purchases`/`purchase_items` RLS policies require `public.is_manager_of_store(store_id)` (owner or manager). Even a modified client that calls PostgREST directly is blocked — the DB is the final gate. Store/employee/plan/settings management was already owner-only via the `is_tenant_owner`-based RLS policies.
+
+Migration: `supabase/migrations/007_manager_purchase_gate.sql` (helper + RPC guard + policies).
 
 ### Super admin (DB-backed role)
 
@@ -113,7 +128,7 @@ State providers in `lib/presentation/controllers/admin_providers.dart` (`pending
 - **Employees tab:** list with store and role; creation via sheet with **name, email and password** (the owner creates the access account) + store and role selection (`manager`/`employee`) — respects `maxEmployees`;
 - **Upgrades tab:** the tenant's request history (pending/approved/rejected).
 
-> **Employee account creation:** the app uses the Supabase sign-up (`EmployeeAccountService`) with the email/password set by the owner. If email confirmation is enabled in the project, the employee receives a confirmation email before first sign-in. In local dev without Supabase, a synthetic id is used (in-memory).
+> **Employee account creation:** the app calls the `create_employee_account` RPC (`SECURITY DEFINER` in the schema), which creates the account server-side by **inserting directly into `auth.users` + `auth.identities`** (pgcrypto bcrypt hash, `email_confirmed_at = now()` — immediate confirmation, no confirmation email, no provider rate limits; current Supabase removed the `auth.admin_create_user` internal function, and the GoTrue Admin API is HTTP/async which would break atomicity) **and the store link in `store_employees` in the same transaction** — if the link fails (e.g. the plan's employee limit is reached), the account is rolled back too: **no orphan accounts**. The password is set by the owner and the owner's session is never replaced. In local dev without Supabase, a synthetic id + repository link is used (in-memory).
 
 ---
 
@@ -157,10 +172,12 @@ The business tables (`products`, `sales`, `financial_transactions`, `debts`, `cu
 
 - **Defense in depth:** if the client sends a `store_id` that is not the user's (tenant owner or linked employee), the trigger rewrites it to the first accessible store — nobody writes to a store outside their own access;
 - **Helper `public.is_my_store(store_id)`:** a tenant owner is valid for all of the tenant's stores; an employee is valid for their linked store;
+- **Helper `public.is_manager_of_store(store_id)` (Aug 6):** a tenant owner or a linked employee with `role = 'manager'` — used by the `process_purchase` guard and the purchases RLS policies (managerial level);
 - Without a session (e.g. seeding via SQL Editor) the provided value is preserved.
 
 - **Helper `public.is_super_admin()`:** queries the `public.super_admins` table (DB-backed role) — `SECURITY DEFINER` to bypass the table's own RLS;
 - **Helper `public.is_tenant_owner(tenant_id)`:** checks `tenants.owner_user_id = auth.uid()`;
+- **`is_my_store`/`is_tenant_owner` are `SECURITY DEFINER`** (`search_path` pinned): they run inside the policies and query tables that carry their own policies (`stores`/`tenants`/`store_employees`) — as definers they ignore RLS internally, which breaks the cross-table policy cycle and prevents `54001 max_stack_depth` on full-table scans (regression found Aug 6 on Supabase cloud with an older schema; see `supabase/migrations/006_rls_helpers_security_definer.sql`);
 - **Trigger guards:** when there is no session (e.g. seeding via SQL Editor), the provided value is preserved — the seed keeps working.
 
 ### Seed

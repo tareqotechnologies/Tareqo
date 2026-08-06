@@ -42,12 +42,18 @@ O **Dumbhanengue ERP** é um aplicativo para pequenos comerciantes administrarem
 
 ```bash
 flutter pub get
-flutter run                              # modo dev (persistência local)
-flutter run --dart-define=SUPABASE_URL=https://seu-projeto.supabase.co \
-             --dart-define=SUPABASE_ANON_KEY=eyJ...   # modo SaaS (Supabase)
+# Desenvolvimento (debug/hot reload) — flavor dev + defines do env/dev.env
+flutter run --flavor dev --dart-define-from-file=env/dev.env
+
+# Modo SaaS (Supabase): a anon key vem do env/dev.env (projeto de dev).
+# Produção (release, assinada): usa env/prod.env (NUNCA versionado —
+# veja env/prod.env.example) + key.properties (veja docs/13-build-e-publicacao).
+flutter build appbundle --flavor prod --release \
+  --dart-define-from-file=env/prod.env
 ```
 
 > A anon key do Supabase é **pública por design** (a segurança real vem do RLS). **Nunca** embuta a *service role key* no cliente.
+> A sessão do Supabase é persistida no **Keychain/Keystore** (criptografada) — nunca em texto claro.
 
 ## Testes
 
@@ -56,7 +62,7 @@ flutter analyze
 flutter test
 ```
 
-O projeto tem **mais de 200 testes** (unitários de domínio, repositórios, providers e widgets) e CI no GitHub Actions.
+O projeto tem **mais de 280 testes** (unitários de domínio, repositórios, providers e widgets) e CI no GitHub Actions (analyze → test+coverage → build APK dev → SQL/RLS check). Publicação via tag `v*` → Fastlane (ver `docs/pt/13-build-e-publicacao.md`).
 
 ## Documentação
 

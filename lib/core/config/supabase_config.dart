@@ -25,4 +25,11 @@ abstract final class SupabaseConfig {
 
   /// Se as credenciais estão preenchidas para inicializar o cliente.
   static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
+
+  /// O build está a usar os DEFAULTS embutidos (projeto de desenvolvimento)
+  /// em vez de `--dart-define`? Em release isso é um erro de configuração:
+  /// um APK publicado falaria silenciosamente contra o projeto errado
+  /// (auditoria H5/S2).
+  static bool get usesEmbeddedDefaults =>
+      url == _defaultUrl && anonKey == _defaultAnonKey;
 }

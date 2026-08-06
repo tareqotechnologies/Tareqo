@@ -8,7 +8,8 @@
 ///    doubles: `sum([0.1, 0.2, 0.3]) == 0.6` exato;
 /// 2. **Fronteiras de persistência** — o banco já usa NUMERIC(12,2);
 /// 3. **Exibição** — [round2] antes de formatar.
-////// Regra de arredondamento: arredondamento binário padrão do Dart
+///
+/// Regra de arredondamento: arredondamento binário padrão do Dart
 /// (`round()` — meio para longe de zero). Como `double` não representa
 /// 2.675 exatamente (vira 2.67499…), `Money.round2(2.675) == 2.67` — o
 /// mesmo comportamento de `(x * 100).round() / 100` e do `NUMERIC` do

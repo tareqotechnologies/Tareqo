@@ -52,13 +52,14 @@ import '../../data/repositories/sale_repository_impl.dart';
 import '../../data/repositories/store_repository_impl.dart';
 import '../../data/repositories/tenant_repository_impl.dart';
 import '../../data/repositories/local_admin_repository.dart';
-import '../../data/services/employee_account_service.dart';
 import '../../data/services/local_employee_account_service.dart';
 import '../../data/services/supabase_debt_processor.dart';
-import '../../data/services/supabase_employee_account_service.dart';
+import '../../data/services/supabase_employee_processor.dart';
 import '../../data/services/supabase_purchase_processor.dart';
 import '../../data/services/supabase_sale_processor.dart';
 import '../../domain/repositories/i_admin_repository.dart';
+import '../../domain/repositories/i_employee_account_processor.dart';
+import '../../domain/repositories/i_employee_account_service.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../../domain/repositories/i_customer_repository.dart';
 import '../../domain/repositories/i_debt_processor.dart';
@@ -133,12 +134,6 @@ final class ServiceLocator {
       ..registerLazySingleton<IAuthRepository>(
         () => AuthRepositoryImpl(SupabaseAuthRemoteDataSourceImpl()),
       )
-      // Criação de contas de funcionários (o dono cadastra o funcionário).
-      ..registerLazySingleton<EmployeeAccountService>(
-        () => SupabaseConfig.isConfigured
-            ? const SupabaseEmployeeAccountService()
-            : const LocalEmployeeAccountService(),
-      )
       // Papel de super admin (baseado em BANCO — `public.super_admins` no
       // Supabase via RPC `is_super_admin`; nunca e-mail hardcoded). Sem
       // Supabase não há sessão nem papel — ninguém é super admin.
@@ -147,6 +142,17 @@ final class ServiceLocator {
             ? const AdminRepositoryImpl()
             : const LocalAdminRepository(),
       );
+
+    // Criação de contas de funcionários — apenas no modo LOCAL (sem
+    // Supabase): o vínculo é criado pelo caso de uso com um id sintético.
+    // No modo Supabase quem cria a conta + vínculo é o processador atômico
+    // IEmployeeAccountProcessor (RPC create_employee_account — UMA
+    // transação, sem contas órfãs).
+    if (!SupabaseConfig.isConfigured) {
+      instance.registerLazySingleton<EmployeeAccountService>(
+        () => const LocalEmployeeAccountService(),
+      );
+    }
 
     // Persistência (em ordem de precedência):
     // 1. Supabase configurado → datasources REMOTOS (dados por tenant via
@@ -218,6 +224,12 @@ final class ServiceLocator {
       )
       ..registerLazySingleton<PlanRequestLocalDataSource>(
         () => const PlanRequestSupabaseDataSourceImpl(),
+      )
+      // Cadastro de funcionário ATÔMICO (RPC `create_employee_account`):
+      // conta de acesso + vínculo em `store_employees` em UMA transação no
+      // banco (sem contas órfãs se o limite do plano for atingido).
+      ..registerLazySingleton<IEmployeeAccountProcessor>(
+        () => const SupabaseEmployeeProcessor(),
       );
   }
 
@@ -391,6 +403,15 @@ final class ServiceLocator {
           instance<ITenantRepository>(),
           instance<IPlanRepository>(),
           instance<IStoreRepository>(),
+          // Supabase: processador atômico registrado (conta + vínculo).
+          // Local: serviço de conta sintética registrado. Exatamente um
+          // dos dois existe em cada modo.
+          accountService: instance.isRegistered<EmployeeAccountService>()
+              ? instance<EmployeeAccountService>()
+              : null,
+          processor: instance.isRegistered<IEmployeeAccountProcessor>()
+              ? instance<IEmployeeAccountProcessor>()
+              : null,
         ),
       )
       ..registerLazySingleton<GetMyPlanRequestsUseCase>(

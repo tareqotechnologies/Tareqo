@@ -22,6 +22,7 @@ import '../../widgets/error_view.dart';
 import '../../widgets/status_chip.dart';
 import '../../widgets/store_scoped_content.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../domain/repositories/i_employee_account_service.dart';
 
 /// Gestão do tenant (dono): lojas, funcionários e plano contratado.
 ///
@@ -150,6 +151,10 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
       ),
       floatingActionButton: showFab
           ? FloatingActionButton.extended(
+              // Hero tag único: o AppShell mantém as 6 seções vivas num
+              // IndexedStack — sem tags distintas, os FABs (mesmo tag
+              // padrão) quebravam o Hero em qualquer transição de rota.
+              heroTag: 'fab-stores',
               onPressed: index == 0 ? _openAddStore : _openAddEmployee,
               icon: Icon(
                 index == 0 ? Icons.add_business_outlined : Icons.person_add_alt,
@@ -664,29 +669,23 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
     final l10n = context.l10n;
 
     try {
-      // 1. Cria a conta de acesso do funcionário (e-mail/senha do dono).
-      final userId = await ref
-          .read(employeeAccountServiceProvider)
-          .createAccount(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-            fullName: _nameController.text.trim(),
-          );
-
-      // 2. Vincula o funcionário à loja.
-      await ref
-          .read(addEmployeeUseCaseProvider)
-          .call(
-            StoreEmployee(
-              id: AppIds.newId('e'),
-              tenantId: widget.tenant.id,
-              storeId: _selectedStoreId!,
-              userId: userId,
-              fullName: _nameController.text.trim(),
-              email: _emailController.text.trim(),
-              role: _role,
-            ),
-          );
+      // Cria a conta E o vínculo na loja: no modo Supabase a RPC
+      // create_employee_account faz os dois em UMA transação (sem contas
+      // órfãs se o limite do plano for atingido); no modo local o caso de
+      // uso usa um id sintético + repositório.
+      await ref.read(addEmployeeUseCaseProvider).call(
+        StoreEmployee(
+          id: AppIds.newId('e'),
+          tenantId: widget.tenant.id,
+          storeId: _selectedStoreId!,
+          // Preenchido pelo caso de uso com o id real da conta criada.
+          userId: '',
+          fullName: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          role: _role,
+        ),
+        password: _passwordController.text,
+      );
 
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -696,6 +695,10 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
     } on PlanLimitExceededException catch (error) {
       setState(() => _formError = error.message);
     } on TenantNotApprovedException catch (error) {
+      setState(() => _formError = error.message);
+    } on EmployeeAccountCreationException catch (error) {
+      // Falha ao criar a conta no servidor (e-mail já em uso, senha
+      // fraca...) — mensagem amigável vinda da RPC, sem Sentry.
       setState(() => _formError = error.message);
     } catch (error, stackTrace) {
       CrashReporting.capture(
@@ -763,7 +766,7 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
                 labelText: l10n.addEmployeePasswordLabel,
                 prefixIcon: const Icon(Icons.lock_outline),
               ),
-              validator: (value) => (value ?? '').length < 6
+              validator: (value) => (value ?? '').length < 8
                   ? l10n.addEmployeePasswordError
                   : null,
             ),

@@ -198,22 +198,18 @@ Receivables are **tied-up capital**: the merchandise has left (and was paid to t
 ## Why is authentication the first step of the SaaS model?
 
 1. **Multi-tenant from day one.** Every merchant is a *tenant*: without login there is no way to separate each customer's data in the same database. Authentication provides the identity that isolates the data.
-2. **Security enforced in the database (RLS).** Supabase uses the user's JWT in Postgres *Row Level Security*: the isolation rule (`auth.uid() = user_id`) is enforced by the database, not just the UI — even if a UI bug leaks data, the database filters it.
+2. **Security enforced in the database (RLS).** Supabase uses the user's JWT in Postgres *Row Level Security*: the isolation rule (`auth.uid() = user_id` **OR** `public.is_my_store(store_id)`) is enforced by the database, not just the UI — even if a UI bug leaks data, the database filters it.
 3. **Revenue model.** SaaS charges per subscription/plan; authentication identifies who pays, which plan and which limits apply.
 4. **Onboarding and retention.** Sign up → login → personal data; a persistent session improves the experience and reduces daily friction.
 
 ### How the session stays active (session persistence)
 
-1. **Secure storage.** `supabase_flutter` persists the session automatically: `flutter_secure_storage` (Android/iOS) and `localStorage` (web) — no extra code.
+1. **Secure storage.** `supabase_flutter` persists the session through a custom `LocalStorage` we wire at bootstrap — `SecureSupabaseLocalStorage` delegates to **`flutter_secure_storage` (Keychain/Keystore)** on native platforms (the SDK default would use `shared_preferences` plaintext — fixed in the Aug 6 audit). The PKCE code verifier uses the same secure backend. On **web** the SDK default (`window.localStorage`) is kept — `flutter_secure_storage` 10.x has no web support.
 2. **Restore on boot.** On app open, the auth stream re-emits the saved session. The `AuthGate` reacts: restored session → straight to the dashboard, no new login.
 3. **Automatic JWT renewal.** GoTrue renews the access token with the refresh token before it expires.
 4. **Reactivity.** Login/logout emit events on the same stream; navigation and any session-dependent state react automatically.
 
-The development project credentials are already embedded in `SupabaseConfig` (the anon key is public by design in Supabase — real security comes from RLS; **never** put the service role key in the client). To point at another project (e.g. production):
-
-```bash
-flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co --dart-define=SUPABASE_ANON_KEY=eyJ...
-```
+Credentials are supplied via **flavors + `--dart-define-from-file`** (`env/dev.env` committed, `env/prod.env` gitignored); a **release** build with the embedded dev defaults throws at startup (fail-fast S2).
 
 ### Tenant currency and language (presentation)
 
@@ -245,9 +241,9 @@ The owner chooses the **currency** (BRL, USD, EUR, MZN) and **language** (pt, en
 - **Abstracted backend** (`SecureStorageBackend`): the real implementation uses Keychain/Keystore via `flutter_secure_storage`; tests use an in-memory backend.
 - **Centralized keys** in `SecureStorageKeys`: avoids typos and lets you audit exactly what is treated as sensitive.
 
-### Responsibility boundary (important to avoid session duplication)
+### Responsibility boundary (single storage backend, no duplication)
 
-The **Supabase session** is already persisted internally by `supabase_flutter` in its own `flutter_secure_storage` instance. So `SecureStorageService` **must not** store those tokens — it exists for **application secrets**: third-party API keys, configuration secrets and credentials needed by the data/presentation layer. Keeping this boundary avoids two places writing the session.
+The **Supabase session** is persisted by `supabase_flutter` through the **same secure backend** we provide (`SecureSupabaseLocalStorage` → `flutter_secure_storage`); the PKCE verifier uses it too (`SecureGotrueAsyncStorage`). There is exactly **one** storage layer for auth material — no duplication, no plaintext. `SecureStorageService` also serves **application secrets**: third-party API keys, configuration secrets and credentials needed by the data/presentation layer.
 
 ### Platform caveat (technical precision)
 

@@ -1,0 +1,3 @@
+# Identificador do app no Google Play Console (flavor prod).
+# O flavor dev (`com.dumbhanengue.dumbhanengue.dev`) nunca é publicado.
+package_name("com.dumbhanengue.dumbhanengue")

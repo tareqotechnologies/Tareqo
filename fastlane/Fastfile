@@ -1,0 +1,101 @@
+# Fastlane — release Android (auditoria 2.4: flavors + dart-defines
+# obrigatórios + assinatura + upload).
+#
+# A lane `deploy` é o passo final do CI (workflow `.github/workflows/
+# release.yml`, disparado por tag v*):
+#   1. valida os dart-defines/credenciais de PRODUÇÃO (fail-fast);
+#   2. descodifica o upload keystore do secret e monta android/key.properties;
+#   3. builda o AAB (--flavor prod --release --obfuscate --split-debug-info);
+#   4. faz upload para o track Internal testing do Google Play.
+#
+# Variáveis de ambiente obrigatórias:
+#   SUPABASE_URL / SUPABASE_ANON_KEY  — defines de produção (dart-define)
+#   KEYSTORE_BASE64                   — upload-keystore.jks em base64
+#   KEYSTORE_PASSWORD                 — senha do cofre (PKCS12: uma senha só)
+#   KEY_ALIAS (opcional, padrão "upload")
+#   PLAY_SERVICE_ACCOUNT_JSON         — JSON da service account do Play (upload)
+#   SENTRY_DSN (opcional)             — define de observabilidade
+
+require "base64"
+
+default_platform(:android)
+
+platform :android do
+  desc "Build do AAB de produção e upload para o track Internal testing"
+  lane :deploy do
+    # O projeto Flutter está um nível acima da pasta do Fastlane
+    # (funciona independentemente de onde `fastlane deploy` é invocado).
+    fastlane_dir = FastlaneCore::FastlaneFolder.path
+    UI.user_error!("Não foi possível localizar a pasta do Fastlane") if fastlane_dir.nil?
+    Dir.chdir(File.expand_path("..", fastlane_dir))
+
+    required = {
+      "SUPABASE_URL" => ENV["SUPABASE_URL"],
+      "SUPABASE_ANON_KEY" => ENV["SUPABASE_ANON_KEY"],
+      "KEYSTORE_BASE64" => ENV["KEYSTORE_BASE64"],
+      "KEYSTORE_PASSWORD" => ENV["KEYSTORE_PASSWORD"],
+      "KEY_ALIAS" => ENV["KEY_ALIAS"].to_s.empty? ? "upload" : ENV["KEY_ALIAS"],
+      "PLAY_SERVICE_ACCOUNT_JSON" => ENV["PLAY_SERVICE_ACCOUNT_JSON"],
+    }
+    required.each do |name, value|
+      UI.user_error!("Variável de ambiente #{name} é obrigatória") if value.nil? || value.empty?
+    end
+
+    # --- 1. Keystore de upload: descodifica do secret e monta key.properties
+    keystore_path = File.join(Dir.pwd, "android", "app", "upload-keystore.jks")
+    begin
+      decoded = Base64.strict_decode64(required["KEYSTORE_BASE64"])
+    rescue ArgumentError
+      UI.user_error!("KEYSTORE_BASE64 não é base64 válido")
+    end
+    File.binwrite(keystore_path, decoded)
+    if File.size(keystore_path).zero?
+      UI.user_error!("KEYSTORE_BASE64 descodificou num ficheiro vazio")
+    end
+    key_props = <<~PROPS
+      storePassword=#{required["KEYSTORE_PASSWORD"]}
+      keyPassword=#{required["KEYSTORE_PASSWORD"]}
+      keyAlias=#{required["KEY_ALIAS"]}
+      storeFile=upload-keystore.jks
+    PROPS
+    File.write(File.join(Dir.pwd, "android", "key.properties"), key_props)
+    UI.message("Keystore de upload descodificado e key.properties montado.")
+
+    # --- 2. Build do AAB de produção (dart-defines obrigatórios + ofuscação)
+    # FLUTTER_APP_FLAVOR é injetado pelo framework a partir do --flavor prod
+    # (define reservado — AppFlavorConfig lê automaticamente).
+    dart_defines = [
+      "--dart-define=SUPABASE_URL=#{required["SUPABASE_URL"]}",
+      "--dart-define=SUPABASE_ANON_KEY=#{required["SUPABASE_ANON_KEY"]}",
+    ]
+    unless ENV["SENTRY_DSN"].to_s.empty?
+      dart_defines << "--dart-define=SENTRY_DSN=#{ENV["SENTRY_DSN"]}"
+    end
+
+    sh("flutter", "pub", "get")
+    sh(
+      "flutter", "build", "appbundle",
+      "--flavor", "prod",
+      "--release",
+      *dart_defines,
+      "--obfuscate",
+      "--split-debug-info=build/symbols",
+    )
+    aab = File.join(
+      Dir.pwd, "build", "app", "outputs", "bundle", "prodRelease",
+      "app-prod-release.aab",
+    )
+    UI.user_error!("AAB não encontrado em #{aab}") unless File.exist?(aab)
+
+    # --- 3. Upload para o Internal testing (release pronta para testadores)
+    json_key = File.join(Dir.pwd, "fastlane", "play-service-account.json")
+    File.write(json_key, required["PLAY_SERVICE_ACCOUNT_JSON"])
+    upload_to_play_store(
+      track: "internal",
+      aab: aab,
+      json_key_file: json_key,
+      release_status: "completed",
+    )
+    UI.success("AAB #{File.basename(aab)} enviado para o track Internal testing 🎉")
+  end
+end

@@ -115,4 +115,36 @@ void main() {
     expect(find.text('Nova loja'), findsNothing);
     expect(find.text('Novo funcionário'), findsNothing);
   });
+
+  testWidgets(
+      'Senha de funcionário exige mínimo de 8 caracteres (auditoria S1/M7)',
+      (tester) async {
+    await tester.pumpWidget(build());
+    await tester.pumpAndSettle();
+
+    // Abre a sheet de novo funcionário.
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Novo funcionário'));
+    await tester.pumpAndSettle();
+
+    // Preenche nome, e-mail e senha CURTA (6 caracteres) e submete.
+    await tester.enterText(
+      find.byType(TextFormField).at(0),
+      'Ana Lima',
+    );
+    await tester.enterText(
+      find.byType(TextFormField).at(1),
+      'ana@loja.com',
+    );
+    await tester.enterText(
+      find.byType(TextFormField).at(2),
+      'abc123',
+    );
+    await tester.tap(find.text('Cadastrar funcionário'));
+    await tester.pumpAndSettle();
+
+    // A validação de mínimo 8 bloqueia o envio (sem chamada ao serviço).
+    expect(find.text('A senha deve ter ao menos 8 caracteres.'), findsOneWidget);
+  });
 }

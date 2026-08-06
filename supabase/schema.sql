@@ -243,10 +243,24 @@ ALTER TABLE public.purchase_items         ENABLE ROW LEVEL SECURITY;
 -- ---------------------------------------------------------------
 
 -- Helper: o usuário é dono do tenant [target_tenant_id]?
+--
+-- SECURITY DEFINER + search_path fixo (auditoria Aug 6 — regressão 54001
+-- max_stack_depth): estes helpers são chamados DENTRO das políticas RLS e
+-- consultam tabelas (tenants/stores/store_employees) que TÊM políticas
+-- próprias que voltam a chamar os helpers — um ciclo entre tabelas que,
+-- dependendo do plano de execução/versão do Postgres, estoura a pilha
+-- (erro 54001 em varreduras completas no Supabase). Com SECURITY DEFINER
+-- as consultas internas ignoram o RLS (o mesmo padrão de is_super_admin e
+-- das RPCs do dinheiro), quebrando o ciclo POR CONSTRUÇÃO — a recursão
+-- vira impossível em qualquer versão. Segurança: a função só devolve um
+-- BOOLEAN sobre um id explícito (não exfiltra dados) e o search_path está
+-- fixado em public.
 CREATE OR REPLACE FUNCTION public.is_tenant_owner(target_tenant_id TEXT)
 RETURNS boolean
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.tenants t
@@ -257,10 +271,17 @@ $$;
 -- Helper: o usuário tem acesso à loja [target_store_id]? O dono do tenant
 -- vale para todas as lojas do tenant; o FUNCIONÁRIO vale para a loja do
 -- vínculo em store_employees (auditoria C2 — acesso por loja no SaaS).
+--
+-- SECURITY DEFINER + search_path fixo: mesmo motivo do is_tenant_owner
+-- acima — as políticas de stores/tenants/store_employees formam um ciclo
+-- entre tabelas que pode estourar a pilha (54001) em varreduras completas;
+-- o definer quebra o ciclo (ver comentário do is_tenant_owner).
 CREATE OR REPLACE FUNCTION public.is_my_store(target_store_id TEXT)
 RETURNS boolean
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.stores s
@@ -270,6 +291,40 @@ AS $$
         OR EXISTS (
           SELECT 1 FROM public.store_employees e
           WHERE e.store_id = s.id AND e.user_id = auth.uid()
+        )
+      )
+  );
+$$;
+
+-- Helper: o usuário tem PODER DE GESTÃO na loja [target_store_id]? (dono
+-- do tenant OU funcionário com cargo 'manager' no vínculo).
+--
+-- Matriz de acesso (Aug 6): compras e relatórios são nível GERENCIAL — o
+-- FUNCIONÁRIO comum opera vendas/estoque/fiado, mas NÃO registra compras
+-- nem acede aos relatórios de negócio. Este helper é usado na guarda do
+-- `process_purchase` (RPC) e nas políticas RLS de purchases/purchase_items
+-- — o servidor é a autoridade, mesmo que um cliente modificado chame o
+-- PostgREST diretamente.
+--
+-- SECURITY DEFINER + search_path fixo: mesmo padrão dos demais helpers RLS
+-- (is_tenant_owner/is_my_store) — evita o ciclo entre tabelas (54001) e
+-- só devolve um BOOLEAN sobre um id explícito (não exfiltra dados).
+CREATE OR REPLACE FUNCTION public.is_manager_of_store(target_store_id TEXT)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.stores s
+    WHERE s.id = target_store_id
+      AND (
+        public.is_tenant_owner(s.tenant_id)
+        OR EXISTS (
+          SELECT 1 FROM public.store_employees e
+          WHERE e.store_id = s.id AND e.user_id = auth.uid()
+            AND e.role = 'manager'
         )
       )
   );
@@ -286,9 +341,10 @@ $$;
 -- usuários) não enxergavam NENHUM dado de negócio no modo SaaS (bloqueador
 -- C2 da auditoria forense).
 --
--- `is_my_store` é STABLE e consulta `stores`/`store_employees` — o RLS
--- dessas tabelas (1.7) já garante que a subconsulta só vê o que o usuário
--- pode ver (sem recursão: nenhuma política chama a própria tabela).
+-- `is_my_store`/`is_tenant_owner` são STABLE + SECURITY DEFINER e consultam
+-- `stores`/`tenants`/`store_employees` SEM RLS interno — sem ciclo de
+-- políticas entre tabelas, logo sem recursão (regressão 54001 resolvida
+-- por construção; ver o comentário das funções em 1.2b).
 --
 -- Usamos DROP POLICY IF EXISTS + CREATE POLICY: compatível com
 -- PostgreSQL 12/13/14 (o CREATE OR REPLACE POLICY é do PG 15+) e
@@ -430,58 +486,74 @@ CREATE POLICY customers_delete ON public.customers
 DROP POLICY IF EXISTS purchases_select ON public.purchases;
 CREATE POLICY purchases_select ON public.purchases
   FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
+-- purchases — módulo de nível GERENCIAL (matriz de acesso Aug 6): dono e
+-- gerente leem/gravam; FUNCIONÁRIO comum não acede. A autoridade é o
+-- servidor: o RLS nega mesmo se o app esconder só na UI. (O app usa a RPC
+-- process_purchase para gravar — as políticas são defesa para acesso
+-- direto ao PostgREST.)
+DROP POLICY IF EXISTS purchases_select ON public.purchases;
+CREATE POLICY purchases_select ON public.purchases
+  FOR SELECT USING (public.is_manager_of_store(store_id));
 DROP POLICY IF EXISTS purchases_insert ON public.purchases;
 CREATE POLICY purchases_insert ON public.purchases
-  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+  FOR INSERT WITH CHECK (public.is_manager_of_store(store_id));
 DROP POLICY IF EXISTS purchases_update ON public.purchases;
 CREATE POLICY purchases_update ON public.purchases
-  FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
-  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+  FOR UPDATE USING (public.is_manager_of_store(store_id))
+  WITH CHECK (public.is_manager_of_store(store_id));
 DROP POLICY IF EXISTS purchases_delete ON public.purchases;
--- DELETE só de registros PRÓPRIOS: o app não exclui nada (zero
--- impacto) e impede um cliente direto de destruir registros de
--- outro usuário da loja (endurecimento pós-auditoria C2).
+-- DELETE gerencial (intencional): compras são nível manager+ — um gerente
+-- pode remover QUALQUER compra da loja (incluindo do dono), consistente com
+-- o papel gerencial. O app não exclui nada hoje; se um dia excluir, a regra
+-- continua coerente com a matriz (o dono cobre tudo via is_tenant_owner).
 CREATE POLICY purchases_delete ON public.purchases
-  FOR DELETE USING (auth.uid() = user_id);
+  FOR DELETE USING (public.is_manager_of_store(store_id));
 
--- purchase_items: idem sale_items — acesso via pai (`purchases.store_id`)
+-- purchase_items: idem sale_items — acesso via pai (`purchases.store_id`),
+-- mas com a MESMA regra gerencial do pai (manager+).
 DROP POLICY IF EXISTS purchase_items_select ON public.purchase_items;
 CREATE POLICY purchase_items_select ON public.purchase_items
   FOR SELECT USING (
-    auth.uid() = user_id
-    OR EXISTS (
+    EXISTS (
       SELECT 1 FROM public.purchases p
-      WHERE p.id = purchase_items.purchase_id AND public.is_my_store(p.store_id)
+      WHERE p.id = purchase_items.purchase_id
+        AND public.is_manager_of_store(p.store_id)
     )
   );
 DROP POLICY IF EXISTS purchase_items_insert ON public.purchase_items;
 CREATE POLICY purchase_items_insert ON public.purchase_items
   FOR INSERT WITH CHECK (
-    auth.uid() = user_id
-    OR EXISTS (
+    EXISTS (
       SELECT 1 FROM public.purchases p
-      WHERE p.id = purchase_items.purchase_id AND public.is_my_store(p.store_id)
+      WHERE p.id = purchase_items.purchase_id
+        AND public.is_manager_of_store(p.store_id)
     )
   );
 DROP POLICY IF EXISTS purchase_items_update ON public.purchase_items;
 CREATE POLICY purchase_items_update ON public.purchase_items
   FOR UPDATE USING (
-    auth.uid() = user_id
-    OR EXISTS (
+    EXISTS (
       SELECT 1 FROM public.purchases p
-      WHERE p.id = purchase_items.purchase_id AND public.is_my_store(p.store_id)
+      WHERE p.id = purchase_items.purchase_id
+        AND public.is_manager_of_store(p.store_id)
     )
   ) WITH CHECK (
-    auth.uid() = user_id
-    OR EXISTS (
+    EXISTS (
       SELECT 1 FROM public.purchases p
-      WHERE p.id = purchase_items.purchase_id AND public.is_my_store(p.store_id)
+      WHERE p.id = purchase_items.purchase_id
+        AND public.is_manager_of_store(p.store_id)
     )
   );
 DROP POLICY IF EXISTS purchase_items_delete ON public.purchase_items;
--- DELETE só de registros PRÓPRIOS (o app não exclui nada).
+-- DELETE gerencial (o app não exclui nada).
 CREATE POLICY purchase_items_delete ON public.purchase_items
-  FOR DELETE USING (auth.uid() = user_id);
+  FOR DELETE USING (
+    EXISTS (
+      SELECT 1 FROM public.purchases p
+      WHERE p.id = purchase_items.purchase_id
+        AND public.is_manager_of_store(p.store_id)
+    )
+  );
 
 -- ---------------------------------------------------------------
 -- 1.4 Índices de consulta por tenant
@@ -844,6 +916,12 @@ CREATE INDEX IF NOT EXISTS idx_plan_requests_tenant
   ON public.plan_requests (tenant_id);
 CREATE INDEX IF NOT EXISTS idx_plan_requests_status
   ON public.plan_requests (status);
+
+-- Anti-spam (auditoria S3): no máximo UM tenant PENDENTE por usuário —
+-- impede a criação ilimitada de solicitações (DoS na fila de aprovação
+-- manual + abuso de signup). Tenants aprovados/rejeitados não contam.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_tenants_one_pending
+  ON public.tenants (owner_user_id) WHERE status = 'pending';
 
 -- ---------------------------------------------------------------
 -- 1.9 Triggers anti-forja da Camada de Contas
@@ -1337,8 +1415,13 @@ BEGIN
   END IF;
 
   -- 2. Pendência vinculada (debt_id): marca a MESMA transação como paga
-  --    (nunca cria duplicata no caixa).
-  UPDATE public.financial_transactions SET status = 'paid'
+  --    (nunca cria duplicata no caixa) e carimba a DATA DE REALIZAÇÃO
+  --    (`date = now()`) — mesma semântica do datasource SQLite local
+  --    (markAsPaid): o caixa realizado reconhece o dinheiro quando ele
+  --    ENTRA, não quando a pendência foi registrada (auditoria Aug 6 —
+  --    alinhamento entre os modos local e SaaS).
+  UPDATE public.financial_transactions
+  SET status = 'paid', date = now()
   WHERE debt_id = p_debt_id AND store_id = p_store
     AND status = 'pending';
 
@@ -1380,8 +1463,12 @@ BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a compra.';
   END IF;
-  IF NOT public.is_my_store(v_store) THEN
-    RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', v_store;
+  -- Guarda de nível gerencial (matriz de acesso Aug 6): compras exigem
+  -- DONO ou GERENTE da loja — o funcionário comum opera vendas/estoque,
+  -- mas NÃO registra compras. Substitui o RLS dentro do SECURITY DEFINER
+  -- (e o RLS de purchases também exige is_manager_of_store).
+  IF NOT public.is_manager_of_store(v_store) THEN
+    RAISE EXCEPTION 'Apenas o dono ou um gerente podem registrar compras na loja %.', v_store;
   END IF;
   SELECT t.language INTO v_lang
   FROM public.stores s
@@ -1436,6 +1523,228 @@ BEGIN
           v_total, 'expense',
           CASE WHEN v_lang = 'en' THEN 'Purchases' ELSE 'Compras' END,
           (p_purchase->>'date_time')::timestamptz, 'paid');
+END;
+$$;
+
+-- ---------------------------------------------------------------
+-- 1.12 Trilha de auditoria das decisões de admin (auditoria S4)
+-- ---------------------------------------------------------------
+-- Regista QUEM decidiu cada tenant/upgrade (aprovar/rejeitar) — a coluna
+-- `decided_by` é carimbada com o auth.uid() do super admin no momento da
+-- decisão, via trigger. O RLS já restringe o UPDATE a super admins; esta
+-- coluna adiciona o ator ao histórico (antes não havia rasto).
+ALTER TABLE IF EXISTS public.tenants
+  ADD COLUMN IF NOT EXISTS decided_by UUID;
+ALTER TABLE IF EXISTS public.plan_requests
+  ADD COLUMN IF NOT EXISTS decided_by UUID;
+
+CREATE OR REPLACE FUNCTION public.set_decided_by()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  -- Só carimba quando a decisão acontece (pending → approved/rejected) e
+  -- há sessão (JWT). Rejeições/aprovações repetidas não sobrescrevem o
+  -- primeiro ator.
+  IF auth.uid() IS NOT NULL
+     AND NEW.status IN ('approved', 'rejected')
+     AND OLD.status = 'pending' THEN
+    NEW.decided_by := auth.uid();
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_tenants_decided_by ON public.tenants;
+CREATE TRIGGER trg_tenants_decided_by
+  BEFORE UPDATE OF status ON public.tenants
+  FOR EACH ROW EXECUTE FUNCTION public.set_decided_by();
+
+DROP TRIGGER IF EXISTS trg_plan_requests_decided_by ON public.plan_requests;
+CREATE TRIGGER trg_plan_requests_decided_by
+  BEFORE UPDATE OF status ON public.plan_requests
+  FOR EACH ROW EXECUTE FUNCTION public.set_decided_by();
+
+-- ---------------------------------------------------------------
+-- 1.12 Conta de acesso do funcionário (RPC create_employee_account)
+-- ---------------------------------------------------------------
+-- O dono cadastra o funcionário (nome + e-mail + senha + loja + cargo).
+-- O app NÃO usa `auth.signUp` para isso: com a confirmação de e-mail
+-- ATIVA no projeto, cada signUp dispara um e-mail de confirmação — o que
+-- (1) sofre rate limit do provedor (`over_email_send_rate_limit`, 429 — o
+-- cadastro falhava no meio do fluxo) e (2) deixava a conta PENDENTE até o
+-- funcionário clicar no link (não conseguia entrar; `email_not_confirmed`).
+--
+-- Esta função `SECURITY DEFINER` NÃO depende de `auth.admin_create_user`:
+-- o Supabase atual REMOVEU essa função interna (a Admin API do GoTrue é
+-- HTTP e ASSÍNCRONA — quebraria a atomicidade e o retorno do user_id). A
+-- conta é criada por INSERÇÃO DIRETA em `auth.users` + `auth.identities`
+-- com hash bcrypt (pgcrypto) — síncrona e TRANSACIONAL — e o vínculo em
+-- `store_employees` é criado na MESMA transação:
+--   * a conta nasce confirmada (email_confirmed_at = now()), com a senha
+--     escolhida pelo dono, e NENHUM e-mail é enviado — o funcionário entra
+--     direto com login/senha normais (o GoTrue verifica o hash bcrypt);
+--   * se o vínculo falhar (ex.: limite de funcionários do plano — trigger
+--     `enforce_employee_limit`, ou loja inválida), a conta criada aqui é
+--     desfeita junto — NENHUMA conta órfã fica para trás;
+--   * a sessão do dono nunca é substituída (elimina o bug S1 do signUp).
+--
+-- ⚠️ Trade-off documentado: inserir em `auth.users` é a ÚNICA forma
+-- SÍNCRONA de criar a conta com atomicidade (conta + vínculo + retorno do
+-- user_id na mesma transação). As colunas usadas são as ESTÁVEIS do GoTrue
+-- (id, instance_id, aud, role, email, encrypted_password,
+-- email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at,
+-- updated_at + a identidade de e-mail em auth.identities); `confirmed_at`
+-- é coluna GERADA pelo banco (nunca inserida).
+--
+-- Guardas (substituem o RLS dentro da função): apenas o DONO do tenant
+-- (auth.uid() dono da loja informada); senha mínima de 8 caracteres
+-- (política M7); cargo válido; e-mail duplicado vira mensagem amigável.
+-- Idempotente: o id do vínculo (p_employee_id) é a chave — retry após
+-- sucesso devolve o MESMO user_id sem duplicar nada.
+--
+-- A versão antiga (apenas conta, sem vínculo — 3 parâmetros) é removida
+-- para não ficar sobrecarregada no banco.
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+DROP FUNCTION IF EXISTS public.create_employee_account(text, text, text);
+
+CREATE OR REPLACE FUNCTION public.create_employee_account(
+  p_employee_id text,
+  p_email text,
+  p_password text,
+  p_full_name text,
+  p_store_id text,
+  p_role text DEFAULT 'employee'
+)
+RETURNS text
+LANGUAGE plpgsql
+SECURITY DEFINER
+-- `extensions` no search_path: em projetos Supabase geridos as funções do
+-- pgcrypto (crypt/gen_salt) vivem no schema `extensions`, não no `public`.
+SET search_path = public, extensions
+AS $$
+DECLARE
+  v_owner uuid := auth.uid();
+  v_user_id uuid;
+  v_tenant_id text;
+  v_linked uuid;
+BEGIN
+  IF v_owner IS NULL THEN
+    RAISE EXCEPTION 'Sessão necessária para cadastrar funcionário.';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM public.tenants t WHERE t.owner_user_id = v_owner
+  ) THEN
+    RAISE EXCEPTION 'Apenas o dono do tenant pode cadastrar funcionários.';
+  END IF;
+  IF char_length(p_password) < 8 THEN
+    RAISE EXCEPTION 'A senha deve ter pelo menos 8 caracteres.';
+  END IF;
+  IF p_full_name IS NULL OR trim(p_full_name) = '' THEN
+    RAISE EXCEPTION 'Informe o nome do funcionário.';
+  END IF;
+  IF p_role IS NULL OR p_role NOT IN ('manager', 'employee') THEN
+    RAISE EXCEPTION 'Cargo inválido para o funcionário.';
+  END IF;
+  IF p_email IS NULL OR position('@' IN p_email) = 0 THEN
+    RAISE EXCEPTION 'Informe um e-mail válido para o funcionário.';
+  END IF;
+
+  -- A loja precisa pertencer a um tenant do DONO autenticado.
+  SELECT s.tenant_id INTO v_tenant_id
+  FROM public.stores s
+  JOIN public.tenants t ON t.id = s.tenant_id
+  WHERE s.id = p_store_id AND t.owner_user_id = v_owner;
+  IF v_tenant_id IS NULL THEN
+    RAISE EXCEPTION 'Escolha uma loja do seu tenant.';
+  END IF;
+
+  -- Idempotência: retry após sucesso devolve o mesmo user_id. O vínculo é
+  -- localizado PELA MESMA LOJA — nunca devolve o user_id de outra loja/tenant.
+  IF EXISTS (
+    SELECT 1 FROM public.store_employees
+    WHERE id = p_employee_id AND store_id = p_store_id
+  ) THEN
+    SELECT user_id INTO v_user_id FROM public.store_employees
+    WHERE id = p_employee_id AND store_id = p_store_id;
+    RETURN v_user_id::text;
+  END IF;
+
+  -- E-mail duplicado (mensagem amigável). A corrida é protegida pelo
+  -- índice único parcial (lower(email) WHERE deleted_at IS NULL) do GoTrue.
+  IF EXISTS (
+    SELECT 1 FROM auth.users u
+    WHERE lower(u.email) = lower(p_email) AND u.deleted_at IS NULL
+  ) THEN
+    RAISE EXCEPTION 'Já existe uma conta com este e-mail.';
+  END IF;
+
+  -- Conta confirmada (sem e-mail): inserção direta em auth.users +
+  -- auth.identities com hash bcrypt (pgcrypto). Síncrona e transacional —
+  -- se o vínculo abaixo falhar, a conta é desfeita junto.
+  --
+  -- ⚠️ O struct User do GoTrue faz SELECT * e faz scan de TODAS as colunas;
+  -- os campos NÃO-anuláveis em Go (string/bool/int) NÃO podem ficar NULL no
+  -- banco, senão o login do funcionário rebenta com 500 "Database error
+  -- querying schema". Por isso TODAS as colunas do struct são preenchidas
+  -- com os mesmos zero-values que o GoTrue grava no signup ('' / false / 0).
+  -- `confirmed_at` é coluna GERADA (nunca inserida); `last_sign_in_at`,
+  -- `banned_until`, `deleted_at` e os *_sent_at são *time.Time no struct
+  -- (NULL é seguro nesses).
+  v_user_id := gen_random_uuid();
+  INSERT INTO auth.users
+    (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
+     confirmation_token, recovery_token,
+     email_change_token_current, email_change_token_new, email_change,
+     email_change_confirm_status, phone_change_token, phone_change,
+     reauthentication_token, is_sso_user, is_anonymous,
+     raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  VALUES
+    (v_user_id, '00000000-0000-0000-0000-000000000000', 'authenticated',
+     'authenticated', lower(p_email), crypt(p_password, gen_salt('bf', 10)),
+     now(), '', '', '', '', '', 0, '', '', '', FALSE, FALSE,
+     '{"provider":"email","providers":["email"]}'::jsonb,
+     jsonb_build_object('full_name', btrim(p_full_name)), now(), now());
+
+  INSERT INTO auth.identities
+    (id, provider_id, user_id, identity_data, provider, last_sign_in_at,
+     created_at, updated_at)
+  VALUES
+    (gen_random_uuid(), v_user_id::text, v_user_id,
+     jsonb_build_object('sub', v_user_id::text, 'email', lower(p_email),
+                        'email_verified', true, 'phone_verified', false,
+                        'date_last_signed_in', now()::text),
+     'email', now(), now(), now());
+
+  -- Vínculo na loja NA MESMA transação. O trigger enforce_employee_limit
+  -- valida o limite do plano e a aprovação do tenant; se falhar, a conta
+  -- criada acima é desfeita junto (sem contas órfãs).
+  INSERT INTO public.store_employees
+    (id, tenant_id, store_id, user_id, full_name, email, role)
+  VALUES (p_employee_id, v_tenant_id, p_store_id, v_user_id,
+          btrim(p_full_name), lower(p_email), p_role);
+
+  RETURN v_user_id::text;
+
+EXCEPTION
+  WHEN unique_violation THEN
+    -- Corrida: ou o MESMO vínculo foi criado por outra chamada (retry), ou
+    -- o e-mail foi criado por outra chamada concorrente.
+    SELECT user_id INTO v_linked FROM public.store_employees
+    WHERE id = p_employee_id AND store_id = p_store_id;
+    IF v_linked IS NOT NULL THEN
+      RETURN v_linked::text;
+    END IF;
+    IF EXISTS (
+      SELECT 1 FROM auth.users u
+      WHERE lower(u.email) = lower(p_email) AND u.deleted_at IS NULL
+    ) THEN
+      RAISE EXCEPTION 'Já existe uma conta com este e-mail.';
+    END IF;
+    RAISE EXCEPTION 'Não foi possível criar a conta do funcionário. Tente novamente.';
 END;
 $$;
 

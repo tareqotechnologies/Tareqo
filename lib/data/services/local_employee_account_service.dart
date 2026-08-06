@@ -1,5 +1,5 @@
 import '../../core/utils/ids.dart';
-import 'employee_account_service.dart';
+import '../../domain/repositories/i_employee_account_service.dart';
 
 /// Implementação local (dev sem Supabase) do [EmployeeAccountService].
 ///

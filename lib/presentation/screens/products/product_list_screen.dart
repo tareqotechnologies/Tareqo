@@ -60,6 +60,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab-products',
         onPressed: _openAddSheet,
         icon: const Icon(Icons.add),
         label: Text(l10n.productsAddNew),

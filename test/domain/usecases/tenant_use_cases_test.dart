@@ -142,6 +142,40 @@ void main() {
         throwsA(isA<InvalidTenantRequestException>()),
       );
     });
+
+    test('bloqueia nova solicitação quando o usuário já tem tenant (S3)',
+        () async {
+      final repository = _FakeTenantRepository();
+      final useCase = RequestTenantAccessUseCase(repository);
+
+      // Primeira solicitação é criada normalmente.
+      await useCase(
+        ownerUserId: 'u1',
+        businessName: 'Comercial X',
+        planId: 'pl1',
+        currencyCode: 'BRL',
+        language: 'pt',
+      );
+
+      // Segunda solicitação (re-submissão) é bloqueada com mensagem amigável.
+      await expectLater(
+        useCase(
+          ownerUserId: 'u1',
+          businessName: 'Comercial Y',
+          planId: 'pl1',
+          currencyCode: 'BRL',
+          language: 'pt',
+        ),
+        throwsA(
+          isA<InvalidTenantRequestException>().having(
+            (e) => e.message,
+            'message',
+            contains('já possui um cadastro'),
+          ),
+        ),
+      );
+      expect(await repository.getAll(), hasLength(1));
+    });
   });
 
   group('Fluxo de aprovação', () {

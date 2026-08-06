@@ -905,7 +905,7 @@ abstract class AppLocalizations {
   /// No description provided for @addEmployeePasswordError.
   ///
   /// In pt, this message translates to:
-  /// **'A senha deve ter ao menos 6 caracteres.'**
+  /// **'A senha deve ter ao menos 8 caracteres.'**
   String get addEmployeePasswordError;
 
   /// No description provided for @addEmployeeStoreLabel.

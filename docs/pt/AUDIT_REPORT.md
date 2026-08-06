@@ -4,6 +4,10 @@
 
 > **Update (Aug 5, 2026):** findings **C1, C3, C4** and **H3** are resolved — each finding below carries a status line, and the specialized reports, checklist, score, tech-debt estimate and roadmap were refreshed accordingly. A live schema verification also ran (Aug 5): the C3/C4 hardening layer had **never been applied** to the Supabase project — it was applied in one transaction and re-verified **10/10** (see Methodology).
 >
+> **Update 3 (Aug 6, 2026 — follow-up session):** follow-up E2E pass with **287/287 tests green** and `flutter analyze` 0 issues. **New HIGH finding S1-FIXED in this session:** the Supabase auth session (access + refresh tokens) was persisted by the SDK default `SharedPreferencesLocalStorage` — **plaintext XML** on the device. Implemented `SecureSupabaseLocalStorage` + `SecureGotrueAsyncStorage` (PKCE code verifier) in `lib/core/security/secure_supabase_local_storage.dart`, backed by `flutter_secure_storage` (Keychain/Keystore), wired via `authOptions: FlutterAuthClientOptions(localStorage: …, pkceAsyncStorage: …)` in `SupabaseBootstrap` (native platforms; web keeps the SDK default — documented limitation). Also fixed a **cross-mode DB inconsistency**: `settle_debt` RPC now stamps `date = now()` on the linked pending entry (realization date) — matching the local SQLite `markAsPaid` semantics; new idempotent migration `supabase/migrations/004_settle_debt_realization_date.sql` + an **airtight** `sql_check.sh` assertion (transaction date must be ≥ the debt's `paid_at`, both stamped in the same settle transaction — a time-window assertion wouldn't catch the regression). Housekeeping: stale doc comments corrected (trigger name, super-admin email refs, duplicated facade comment, `Money` typo), `CHANGELOG.md` created, README/build commands synced to the flavor strategy. See the report below for the complete findings catalog.
+>
+> **Update 2 (Aug 5, 2026, follow-up session):** findings **C2, H4, H1(UI), H5/S2, S3, S4, S6, S7, M7** addressed in code: (1) C2 — store-scoped RLS (`is_my_store`) applied to all business tables in `schema.sql` (employees now see/write their store's data); (2) H4 — Sentry integrated (`lib/core/observability/crash_reporting.dart`, `main.dart`); (3) H1 — `Money` helper (cents arithmetic) applied at every accumulation boundary in use cases and UI sums (dashboard, customers, cart total); (4) S2 — fail-fast in release when `SUPABASE_URL`/`SUPABASE_ANON_KEY` defaults are embedded; (5) S3 — `UNIQUE INDEX idx_tenants_one_pending` (1 pending tenant per user); (6) S4 — `decided_by` audit columns + trigger on tenants/plan_requests; (7) S6 — `android:allowBackup=false` + data extraction rules; (8) S7 — R8/minify enabled; (9) M7 — employee password min length aligned to 8; (10) S1 — `SupabaseEmployeeAccountService` restores the owner's session after employee `signUp` (GoTrue auto-sign-in with confirmation OFF would otherwise replace the owner's session). CI now enforces a 45% coverage gate. `flutter analyze` 0 issues · `flutter test` **233/233**.
+>
 > **🔴 Critical bug found & fixed by the live E2E (Aug 5):** operator **precedence** in Postgres — `||` and `->>` share precedence (left-assoc), so `'t' || p_sale->>'id'` parsed as `('t' || p_sale)->>'id'` = **jsonb concatenation** → `22P02 invalid input syntax for type json, Token "t" is invalid`. Every `'t' || (jsonb->>'field')` in `process_sale`, `register_debt` and `process_purchase` (cash-entry ids **and** descriptions) broke — **no sale, debt or purchase could be recorded in Supabase mode**. Fixed with parentheses (`'t' || (p_sale->>'id')`), re-applied to the live project, E2E re-run **22/22 PASS**; `sql_check.sh` extended with section **[4/4]** that executes the RPCs so the bug cannot regress silently (the previous smoke test never executed the money path).
 
 ## 0. Methodology — what was actually verified
@@ -11,7 +15,7 @@
 | Check | Result |
 |---|---|
 | `flutter analyze` | ✅ **0 issues** (clean) |
-| `flutter test` | ✅ **196/196 passing** (updated Aug 5) |
+| `flutter test` | ✅ **282/282 passing** (updated Aug 6) |
 | `flutter pub outdated` | ⚠️ `sqlite3` 2.9.0→3.5.1, `sqlite3_flutter_libs` **EOL** (`0.6.0+eol`), minor transitive updates |
 | Schema review (`supabase/schema.sql`, 1438 lines) | ✅ Full read: RLS, triggers, RPCs, policies, seed |
 | Live schema verification (read-only via pooler **eu-north-1**, project `dotklbpqmlnhcdifiukd`) | ✅ **Ran Aug 5, 2026**: found **outdated schema** — only the 13 base tables; `super_admins`, new `is_super_admin()`, `settle_debt`, atomic RPCs and limit triggers **absent** → `schema.sql` applied in ONE transaction → re-verified **10/10 PASS** (14 tables · 52 policies · 39 indexes · 20 triggers · 17 functions · plans intact) |
@@ -31,7 +35,7 @@
 
 ## 1. Executive Summary
 
-This is a **well-engineered codebase** — unusually so for its size: clean `flutter analyze`, 196 green tests, real Clean Architecture, Material 3 theming with dark mode, RLS on every table, atomic `SECURITY DEFINER` RPCs with idempotency for sales/purchases/debts, anti-forgery triggers, and 11 chapters of bilingual documentation.
+This is a **well-engineered codebase** — unusually so for its size: clean `flutter analyze`, 282 green tests (Aug 6), real Clean Architecture, Material 3 theming with dark mode, RLS on every table, atomic `SECURITY DEFINER` RPCs with idempotency for sales/purchases/debts, anti-forgery triggers, secure session storage (Keychain/Keystore), and 11 chapters of bilingual documentation.
 
 **But it is not shippable to production today.** The blockers are not in code quality — they are in **release operations, authorization modeling, and money-path integrity**:
 

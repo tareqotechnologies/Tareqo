@@ -1,5 +1,8 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../core/utils/ids.dart';
 import '../../../domain/entities/tenant.dart';
+import '../../../domain/usecases/request_tenant_access_use_case.dart';
 import '../local/tenant_local_data_source.dart';
 import 'supabase_datasource_helpers.dart';
 
@@ -7,8 +10,9 @@ import 'supabase_datasource_helpers.dart';
 ///
 /// O dono cria a solicitação (`status = pending`) e consulta o próprio
 /// tenant; o super admin decide. O RLS garante que cada papel enxergue
-/// apenas o que pode (`auth.uid() = owner_user_id` para o dono; e-mail do
-/// super admin para o painel).
+/// apenas o que pode (`auth.uid() = owner_user_id` para o dono; papel de
+/// super admin baseado em BANCO — tabela `public.super_admins` via RPC
+/// `is_super_admin` — para o painel).
 final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
   const TenantSupabaseDataSourceImpl();
 
@@ -63,19 +67,31 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
     required String currencyCode,
     required String language,
   }) async {
-    final rows = await supabaseClient
-        .from(_table)
-        .insert({
-          'id': AppIds.newId('tn'),
-          'owner_user_id': ownerUserId,
-          'business_name': businessName,
-          'plan_id': planId,
-          'status': TenantStatus.pending.name,
-          'currency_code': currencyCode,
-          'language': language,
-        })
-        .select(_columns);
-    return _map(rows.first);
+    try {
+      final rows = await supabaseClient
+          .from(_table)
+          .insert({
+            'id': AppIds.newId('tn'),
+            'owner_user_id': ownerUserId,
+            'business_name': businessName,
+            'plan_id': planId,
+            'status': TenantStatus.pending.name,
+            'currency_code': currencyCode,
+            'language': language,
+          })
+          .select(_columns);
+      return _map(rows.first);
+    } on PostgrestException catch (error) {
+      // Anti-spam (auditoria S3): violação do índice único de tenant
+      // pendente (23505) — corrida entre a guarda do use case e o INSERT.
+      // Converte o erro cru do banco numa mensagem amigável.
+      if (error.code == '23505') {
+        throw const InvalidTenantRequestException(
+          'Você já possui um cadastro de acesso. Aguarde a aprovação.',
+        );
+      }
+      rethrow;
+    }
   }
 
   @override

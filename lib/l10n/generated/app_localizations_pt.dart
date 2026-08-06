@@ -447,7 +447,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addEmployeePasswordError =>
-      'A senha deve ter ao menos 6 caracteres.';
+      'A senha deve ter ao menos 8 caracteres.';
 
   @override
   String get addEmployeeStoreLabel => 'Loja';

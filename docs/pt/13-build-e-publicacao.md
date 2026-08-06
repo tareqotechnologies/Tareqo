@@ -16,19 +16,24 @@ flutter pub get
 
 - **Versão do app:** `version: 1.0.0+1` em `pubspec.yaml` (aplicada automaticamente ao `versionCode`/`versionName` no Android e ao CFBundleVersion no iOS).
 
-> ⚠️ **Modo SaaS vs. local:** o app usa as credenciais do Supabase **embutidas** (`lib/core/config/supabase_config.dart`). Para apontar o build de produção para outro projeto, passe via `--dart-define` (a anon key é pública por design — a segurança real vem do RLS; **nunca** embuta a service role key):
+> ⚠️ **Modo SaaS vs. local:** o app usa as credenciais do Supabase **embutidas** (`lib/core/config/supabase_config.dart`) apontando para o projeto de DESENVOLVIMENTO — em produção isso é erro de configuração (guarda S2). Desde a auditoria (Aug 5) o projeto tem **flavors `dev`/`prod`** com dart-defines **obrigatórios** fornecidos via `--dart-define-from-file`:
 
 ```bash
-flutter build apk --release \
-  --dart-define=SUPABASE_URL=https://seu-projeto.supabase.co \
-  --dart-define=SUPABASE_ANON_KEY=eyJ...
+# Desenvolvimento (debug/hot reload)
+flutter run --flavor dev --dart-define-from-file=env/dev.env
+
+# Produção (release)
+flutter build appbundle --flavor prod --release \
+  --dart-define-from-file=env/prod.env
 ```
+
+> A anon key é pública por design (a segurança real vem do RLS — **nunca** embuta a service role key). `env/dev.env` é commitado (valores de dev); `env/prod.env` **nunca** é versionado (ver `.gitignore`) e `env/prod.env.example` é o modelo.
 
 ## Resumo por plataforma
 
 | Plataforma | SO para **buildar** | Requisitos principais | Comando de release | Artefato gerado |
 | ---------- | ------------------- | --------------------- | ------------------ | --------------- |
-| **Android** | Windows, macOS, Linux | JDK 17 + Android SDK | `flutter build appbundle --release` | `app-release.aab` |
+| **Android** | Windows, macOS, Linux | JDK 17 + Android SDK | `flutter build appbundle --flavor prod --release --dart-define-from-file=env/prod.env` | `app-prod-release.aab` |
 | **iOS** | **macOS** (obrigatório) | Xcode + CocoaPods + conta Apple Developer | `flutter build ios --release` | `Runner.app` (ou `.ipa` via Xcode) |
 | **Windows** | Windows 10/11 | Visual Studio 2022 (workload C++) | `flutter build windows --release` | `dumbhanengue.exe` |
 | **Web** | Qualquer SO | Navegador (para testar) | `flutter build web --release` | `build/web/` (site estático) |
@@ -50,25 +55,70 @@ A assinatura de produção lê `android/key.properties` (nunca versionado — ve
 - Com `key.properties` presente → assinatura de **produção** (upload keystore + Play App Signing);
 - Sem o arquivo (CI/dev) → o build de release cai para o keystore de **debug** (não publicável).
 
+> **Guarda de produção (auditoria 2.4):** o Gradle falha o build de `prodRelease` se `android/key.properties` não existir — um AAB de produção nunca é assinado com a chave de debug. No CI, o workflow `release.yml` descodifica o keystore do secret `KEYSTORE_BASE64` antes do build (via Fastlane).
+
 ### Comandos
 
 ```bash
-# APK único (distribuição direta / testes)
-flutter build apk --release
-# → build/app/outputs/flutter-apk/app-release.apk
+# ── Flavors (auditoria 2.4) ────────────────────────────────────────────
+# dev  → applicationId com.dumbhanengue.dumbhanengue.dev, label "Dev"
+# prod → applicationId de produção com.dumbhanengue.dumbhanengue
 
-# APK por ABI (menor, por arquitetura: armeabi-v7a, arm64-v8a, x86_64)
-flutter build apk --split-per-abi
+# APK dev (distribuição direta / testes)
+flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
+# → build/app/outputs/flutter-apk/app-dev-release.apk
 
-# AAB — formato obrigatório para o Google Play
-flutter build appbundle --release
-# → build/app/outputs/bundle/release/app-release.aab
+# AAB de PRODUÇÃO — formato obrigatório para o Google Play
+flutter build appbundle --flavor prod --release \
+  --dart-define-from-file=env/prod.env
+# → build/app/outputs/bundle/prodRelease/app-prod-release.aab
+
+# AAB de produção com ofuscação Dart (recomendado antes de publicar)
+flutter build appbundle --flavor prod --release \
+  --dart-define-from-file=env/prod.env \
+  --obfuscate --split-debug-info=build/symbols
 
 # Testar em dispositivo/emulador (debug, com hot reload)
-flutter run
+flutter run --flavor dev --dart-define-from-file=env/dev.env
 ```
 
-> R8/minify estão **desativados** (padrão do template). Para reduzir o APK, habilite `isMinifyEnabled`/`isShrinkResources` junto com as `-keep` rules das libs (checklist 7.7). Antes de publicar, defina o **Application ID** definitivo (`android/app/build.gradle.kts` — hoje é placeholder `com.dumbhanengue.dumbhanengue`).
+> **R8/minify estão ATIVADOS** (auditoria S7, Aug 5): `isMinifyEnabled`/`isShrinkResources` no `build.gradle.kts`. Para ofuscar também o código **Dart**, adicione ao comando de release: `flutter build apk --release --obfuscate --split-debug-info=build/symbols` (e faça o upload dos símbolos ao Sentry: `sentry-cli debug-files upload`). Para reduzir o APK de 61 MB, use `--split-per-abi` (ou `flutter build appbundle` — formato exigido pela Play). Com os flavors (Aug 5), `prod` mantém o Application ID `com.dumbhanengue.dumbhanengue` e `dev` ganhou o sufixo `.dev`. ⚠️ **O package de produção é imutável após o primeiro upload ao Play** — se um dia decidir mudá-lo, será um app NOVO no console (sem herdar reviews/installs).
+
+### Publicação via CI (Fastlane)
+
+O passo final antes de publicar é o workflow **`.github/workflows/release.yml`**, disparado por uma tag `v*`:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+O workflow roda `flutter analyze` + `flutter test` e, em seguida, o **Fastlane** (`fastlane/Fastfile`, lane `deploy`), que:
+
+1. valida os defines/credenciais de produção (fail-fast — `UI.user_error!` se faltar algum secret);
+2. descodifica o upload keystore do secret `KEYSTORE_BASE64` e monta `android/key.properties`;
+3. builda o **AAB** (`--flavor prod --release --obfuscate --split-debug-info=build/symbols`);
+4. faz upload para o track **Internal testing** do Play Console (service account do secret `PLAY_SERVICE_ACCOUNT_JSON`).
+
+**Secrets exigidos** (GitHub → Settings → Secrets and variables → Actions): `SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`, `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `PLAY_SERVICE_ACCOUNT_JSON`, e `SENTRY_DSN` (opcional).
+
+**Pré-requisito único manual:** o app `com.dumbhanengue.dumbhanengue` tem de existir no Play Console com o primeiro AAB/APK enviado e o **Play App Signing** ativado (upload key registada). Depois disso, todas as atualizações podem sair pela tag `v*`. Para enviar os símbolos Dart ao Sentry: `sentry-cli debug-files upload --org <org> --project <proj> build/symbols`.
+
+#### Preparação dos secrets do GitHub
+
+Crie os secrets em **GitHub → Settings → Secrets and variables → Actions** antes do primeiro `v*`:
+
+| Secret | Valor | Como obter |
+| --- | --- | --- |
+| `KEYSTORE_BASE64` | upload keystore em base64 | Linux/macOS: `base64 -w0 android/app/upload-keystore.jks` · Windows/git-bash: `openssl base64 -in android/app/upload-keystore.jks -A` |
+| `KEYSTORE_PASSWORD` | senha do cofre | `android/key.properties` (PKCS12: a mesma senha para store e key) |
+| `KEY_ALIAS` | alias da chave | `android/key.properties` (padrão `upload`) |
+| `SUPABASE_URL_PROD` | URL do projeto de produção | Supabase → Project Settings → API |
+| `SUPABASE_ANON_KEY_PROD` | anon key (pública por design — RLS é a segurança) | Supabase → Project Settings → API |
+| `PLAY_SERVICE_ACCOUNT_JSON` | JSON da service account do Play | Play Console → Setup and testing → API access → criar/associar service account (papel de upload/release do app) → gerar chave JSON → colar o conteúdo na íntegra |
+| `SENTRY_DSN` (opcional) | DSN do Sentry | Sentry → Settings → Projects → Client Keys (DSN) |
+
+> ⚠️ A **service account** precisa de permissão de **upload/release** no app (papel "Release manager" do app no Play Console). O secret `PLAY_SERVICE_ACCOUNT_JSON` é o ficheiro JSON da chave na íntegra.
 
 ---
 
@@ -92,7 +142,7 @@ flutter build ios --release --no-codesign
 # → build/ios/iphoneos/Runner.app
 
 # Rodar em simulador/dispositivo (debug)
-flutter run
+flutter run 
 ```
 
 ### Publicação na App Store

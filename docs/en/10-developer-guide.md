@@ -22,11 +22,11 @@ flutter pub get
 # classes annotated with @freezed
 dart run build_runner build --delete-conflicting-outputs
 
-# Run on a device/emulator
-flutter run
+# Run on a device/emulator (flavor dev + env defines)
+flutter run --flavor dev --dart-define-from-file=env/dev.env
 
 # Run on web (in-memory fallback)
-flutter run -d chrome
+flutter run -d chrome --flavor dev --dart-define-from-file=env/dev.env
 
 # Tests
 flutter test
@@ -37,12 +37,15 @@ flutter analyze
 
 ### Point to another Supabase project (e.g.: production)
 
+Credentials are supplied via **flavors + `--dart-define-from-file`** (`FLUTTER_APP_FLAVOR` is reserved — injected from `--flavor`):
+
 ```bash
-flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co \
-            --dart-define=SUPABASE_ANON_KEY=eyJ...
+flutter build appbundle --flavor prod --release \
+  --dart-define-from-file=env/prod.env
 ```
 
-> The `Dio` API base (`API_BASE_URL`) is configured the same way, with `http://localhost:3000/api` as default.
+- `env/dev.env` is committed (dev project); `env/prod.env` is **never** versioned (model in `env/prod.env.example`);
+- A **release** build without `--flavor prod` (or with the embedded dev defaults) **throws at startup** (fail-fast S2).
 
 ### Define the super admin
 
@@ -58,7 +61,7 @@ ON CONFLICT (user_id) DO NOTHING;
 
 ### Active persistence (Supabase × local)
 
-With Supabase configured (default — credentials embedded in `SupabaseConfig`), products, sales, finance and credit are written **remotely** per tenant (RLS — datasources in `lib/data/datasources/remote/`). To develop with local persistence (SQLite on native / in-memory on web), run with **empty** variables:
+With Supabase configured (`env/dev.env` — dev project), the business modules are written **remotely** per tenant **and store** (RLS + atomic RPCs — datasources in `lib/data/datasources/remote/`). To develop with **local persistence** (SQLite on native / in-memory on web), run with **empty** variables:
 
 ```bash
 flutter run --dart-define=SUPABASE_URL= --dart-define=SUPABASE_ANON_KEY=
@@ -71,9 +74,9 @@ Release signing reads `android/key.properties` (never versioned — see `.gitign
 - **Keystore:** `android/app/upload-keystore.jks` (already generated — alias `upload`, RSA 2048, valid until 2053);
 - **`key.properties`:** already filled with the generated credentials (passwords live in the file — back it up in a password manager together with the `.jks`; losing both means you can't publish updates);
 - **⚠️ PKCS12 (JDK 9+):** the store and the key share a SINGLE password — `storePassword` and `keyPassword` must be equal;
-- **Without `key.properties`** (CI/dev): the release build falls back to the **debug** keystore — not publishable;
+- **Without `key.properties`** (CI/dev): the release build falls back to the **debug** keystore — not publishable. **Gradle guard:** a `prodRelease` build **fails** at configuration time without `key.properties` (a production AAB can never be debug-signed);
 - **Play Console:** publish the first AAB with this key, enable *Play App Signing*, and register the upload key's SHA-256 fingerprint in *Setup → App integrity*;
-- **CI:** the current pipeline does NOT sign releases (debug fallback). For publishable artifacts in CI, decode the keystore from a secret (instructions in `key.properties.example`).
+- **CI/CD:** `.github/workflows/ci.yml` builds only the **dev** flavor (validation). Publishable artifacts come from `.github/workflows/release.yml` (tag `v*` → **Fastlane**): it decodes the keystore from the `KEYSTORE_BASE64` secret, builds the prod AAB (`--obfuscate --split-debug-info`) and uploads to **Internal testing** (service account from `PLAY_SERVICE_ACCOUNT_JSON`). See `docs/pt/13-build-e-publicacao.md` for the full secrets list.
 
 To inspect the key:
 
@@ -174,8 +177,9 @@ Fictional example: **Suppliers** module.
 | `flutter analyze` | Static analysis (lints) |
 | `flutter test` | Run all tests |
 | `flutter test test/<file>` | Run one test file |
-| `flutter run -d chrome` | Run on web |
-| `flutter run --dart-define=...` | Run with custom configuration |
+| `flutter run -d chrome --flavor dev --dart-define-from-file=env/dev.env` | Run on web |
+| `flutter build appbundle --flavor prod --release --dart-define-from-file=env/prod.env` | Production AAB (signed) |
+| `bash scripts/sql_check.sh [PGHOST] [PGUSER] [PGDATABASE]` | SQL/RLS/RPC harness (throwaway Postgres) |
 
 ---
 

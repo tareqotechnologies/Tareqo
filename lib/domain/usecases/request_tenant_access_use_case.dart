@@ -36,6 +36,19 @@ class RequestTenantAccessUseCase {
     if (planId.isEmpty) {
       throw const InvalidTenantRequestException('Escolha um plano.');
     }
+
+    // Anti-spam (auditoria S3): se o usuário JÁ pertence a um tenant
+    // (pendente, aprovado ou rejeitado), não cria outra solicitação — a
+    // mensagem amigável substitui o erro cru de violação de unicidade do
+    // banco (23505) que o cliente veria ao re-submeter o onboarding.
+    // Mensagem neutra: cobre os três estados (a aprovação manual decide).
+    final existing = await _repository.getMyTenant(ownerUserId);
+    if (existing != null) {
+      throw const InvalidTenantRequestException(
+        'Você já possui um cadastro de acesso. Aguarde a aprovação.',
+      );
+    }
+
     return _repository.requestAccess(
       ownerUserId: ownerUserId,
       businessName: businessName.trim(),

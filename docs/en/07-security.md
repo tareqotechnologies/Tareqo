@@ -40,17 +40,15 @@ SecureStorageService
 
 ---
 
-## Responsibility limit (don't duplicate the session!)
+## The Supabase session now lives in the secure backend (S1, Aug 6)
 
-The **Supabase session** (sign-in access + refresh token) **is already persisted internally** by `supabase_flutter` in its own `flutter_secure_storage` instance (keys `sb-...-auth-token`), with automatic renewal.
+The **Supabase session** (access + refresh tokens) is persisted by `supabase_flutter` through a `LocalStorage` we provide — [`SecureSupabaseLocalStorage`](06-authentication.md#persistent-session-how-the-app-remembers-the-user) — which delegates to **`flutter_secure_storage` (Keychain/Keystore)** on native platforms. The PKCE code verifier uses the same backend (`SecureGotrueAsyncStorage`). The SDK default (`shared_preferences`, plaintext XML) is **not** used on native; on **web** the SDK default (`window.localStorage`) is kept because `flutter_secure_storage` 10.x has no web support.
 
-That's why `SecureStorageService` **must not store those tokens**. It exists for **app secrets**:
+`SecureStorageService` remains the single abstraction over the secure backend — it backs the auth wiring **and** app secrets:
 
 - API keys of external services (e.g.: payment gateway);
 - configuration secrets;
 - any credential the data/presentation layer needs to keep.
-
-Keeping this boundary avoids **two places storing the session** (a source of conflict and audit confusion).
 
 ---
 
@@ -58,9 +56,13 @@ Keeping this boundary avoids **two places storing the session** (a source of con
 
 - The anon key is **public by design** — embedded in the client. The real security comes from the database:
   ```sql
-  -- per-tenant isolation rule
-  user_id = auth.uid()
+  -- per-tenant AND per-store isolation rule
+  user_id = auth.uid() OR public.is_my_store(store_id)
   ```
+- **`is_my_store(store_id)`:** the tenant owner is valid for all of the tenant's stores; a linked employee is valid for their store (`store_employees`). Anti-forgery triggers force `user_id = auth.uid()` and a valid `store_id` on every insert.
+- **`is_manager_of_store(store_id)` (Aug 6):** access-level matrix — the tenant owner **or** a linked employee whose `store_employees.role = 'manager'` has *managerial* power over the store. Used by the `process_purchase` RPC guard and by the `purchases`/`purchase_items` RLS policies: a regular employee can operate sales/stock/credit but **cannot register purchases nor read them** — enforced server-side, even if a modified client calls PostgREST directly.
+- The **RLS helper functions** (`is_my_store`, `is_tenant_owner`, `is_manager_of_store`) are `SECURITY DEFINER` with `search_path` pinned to `public` (Aug 6): they are called *inside* the policies and query tables that have their own policies (`stores`/`tenants`/`store_employees`), which previously formed a cross-table cycle that could blow the stack (`54001 max_stack_depth`) on full-table scans. As definers they bypass RLS internally, breaking the cycle **by construction** — same pattern as `is_super_admin` and the money RPCs. They only return a boolean about an explicit id, so no data is exposed.
+- The **money RPCs** (`process_sale`, `register_debt`, `settle_debt`, `process_purchase`) are `SECURITY DEFINER` and re-validate access inside, since the definer bypasses RLS — with `search_path` pinned to `public`. `process_sale`/`register_debt`/`settle_debt` require `is_my_store` (any linked employee); `process_purchase` requires `is_manager_of_store` (owner or manager).
 - Even if a UI bug leaks data, the **database filters it**.
 - **Never** put the *service role key* in the client (it bypasses RLS).
 

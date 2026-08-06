@@ -88,13 +88,13 @@ if (SupabaseConfig.isConfigured) {
 
 They implement **the same contracts** (`ProductLocalDataSource`, `SaleLocalDataSource`, `FinancialTransactionLocalDataSource`, `DebtLocalDataSource`) with the backend on Supabase's Postgres — the domain, use cases and UI don't change.
 
-- **Tenant isolation:** every INSERT writes `user_id` (from the session — `requireCurrentUserId()`); **RLS** (`auth.uid() = user_id`) filters in the database and the `set_tenant_user_id()` **trigger** in the schema enforces the value on the server (forgery-proof);
+- **Tenant/store isolation:** every INSERT writes `user_id` (from the session — `requireCurrentUserId()`); **RLS** (`auth.uid() = user_id` **OR** `public.is_my_store(store_id)`) filters in the database, and the `set_tenant_user_id()` + `set_record_store_id()` **triggers** in the schema enforce both values on the server (forgery-proof);
 - **Enums** persisted by name; **dates** as TIMESTAMPTZ (ISO 8601); **booleans** as BOOLEAN;
-- **Sales:** a `Sale` + its `SaleItem`s are written in **a single request** via PostgREST nested insert (FK `sale_items.sale_id → sales.id`), with `defaultToNull: false`; reads use the embedded resource `select('*, sale_items(*)')`;
-- **Unit of Work:** no-op (each REST call is its own database transaction) — full cross-table atomicity (sale + stock + cash) is the next step via a `SECURITY DEFINER` RPC;
+- **Atomic money flows:** the sale/purchase/debt/settlement use cases **delegate to `SECURITY DEFINER` RPCs** (`process_sale`, `process_purchase`, `register_debt`, `settle_debt`) that run the whole operation in **one DB transaction** (sale + items + stock + cash, or debt + pending entry, or settlement + resolution) with idempotency keys and `FOR UPDATE` stock locking. The PostgREST nested insert (sale + items in one request) remains as the fallback `add` for the contract;
+- **Unit of Work:** no-op in Supabase mode (each REST call is its own transaction) — that is why the atomic RPCs exist;
 - **No session:** the datasources throw `StateError` — data screens are only reachable after sign-in (`AuthGate`).
 
-The schema (tables, RLS, policies, indexes, triggers and seed) lives in [`supabase/schema.sql`](../../supabase/schema.sql), validated on PostgreSQL 14.
+The schema (tables, RLS, policies, indexes, triggers, functions and seed) lives in [`supabase/schema.sql`](../../supabase/schema.sql), validated by `scripts/sql_check.sh` against PostgreSQL 16 (see [Testing](09-testing.md)).
 
 ---
 
@@ -111,6 +111,7 @@ The schema (tables, RLS, policies, indexes, triggers and seed) lives in [`supaba
 ```sql
 CREATE TABLE products (
   id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',  -- Phase 2: store scope
   name TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
   purchase_price REAL NOT NULL CHECK (purchase_price >= 0),
@@ -120,6 +121,7 @@ CREATE TABLE products (
 
 CREATE TABLE sales (
   id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
   total_amount REAL NOT NULL CHECK (total_amount >= 0),
   payment_method TEXT NOT NULL,          -- enum name (stable)
   date_time INTEGER NOT NULL             -- epoch millis
@@ -137,6 +139,7 @@ CREATE INDEX idx_sale_items_sale_id ON sale_items(sale_id);
 
 CREATE TABLE financial_transactions (
   id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
   description TEXT NOT NULL,
   amount REAL NOT NULL CHECK (amount >= 0),
   type TEXT NOT NULL,                    -- income | expense
@@ -148,14 +151,18 @@ CREATE TABLE financial_transactions (
 
 CREATE TABLE debts (
   id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
   person_name TEXT NOT NULL,
   amount REAL NOT NULL CHECK (amount >= 0),
   due_date INTEGER NOT NULL,             -- epoch millis
   is_customer_debt INTEGER NOT NULL,     -- 0/1
   is_paid INTEGER NOT NULL DEFAULT 0,    -- 0/1
-  paid_at INTEGER                        -- epoch millis (settlement date)
+  paid_at INTEGER,                       -- epoch millis (settlement date)
+  customer_id TEXT                       -- link to customers (credit module)
 );
 ```
+
+(`customers`, `purchases` and `purchase_items` follow the same pattern — `store_id` + snapshots.)
 
 **Serialization conventions:**
 
@@ -174,7 +181,8 @@ The `CHECK` constraints (`stock_quantity >= 0`, `amount >= 0`, `quantity > 0`) a
 
 1. **`debts.is_paid`** — added with `DEFAULT 0` (old debts remain pending);
 2. **`financial_transactions.debt_id`** — added as `NULL` (old debts will settle via a new income, no duplicate);
-3. **`debts.paid_at`** — added as `NULL` (already settled debts have no settlement date until a new settlement).
+3. **`debts.paid_at`** — added as `NULL` (already settled debts have no settlement date until a new settlement);
+4. **`store_id`** on all 6 business tables (Phase 2) — added as `'st1'` + per-store indexes.
 
 All of them use `PRAGMA table_info` to check the column first — **safe for re-execution** (new databases already create the columns in `CREATE TABLE`).
 
@@ -243,13 +251,13 @@ Important detail: on `signUp`, if **email confirmation** is enabled, `response.u
 
 ## Accounts layer (multi-tenancy)
 
-The Accounts datasources (plans, tenants, stores, employees and upgrades) follow the **same dual-implementation pattern**: contract + in-memory (`*_impl.dart`) in the local branch and a Supabase datasource (`remote/`) in the remote branch. In local dev, the seed injects 3 plans, an **already-approved demo tenant** (`tn1`), 2 stores and 1 employee — the app opens straight into the management area. Flow details in [Multi-tenancy and Super Admin](11-multitenancy.md).
+The Accounts datasources (plans, tenants, stores, employees and upgrades) follow the **same dual-implementation pattern**: contract + in-memory (`*_impl.dart`) in the local branch and a Supabase datasource (`remote/`) in the remote branch. In local dev, the seed injects 3 plans, an **already-approved demo tenant** (`tn_demo`), 2 stores and 1 employee — the app opens straight into the management area. Flow details in [Multi-tenancy and Super Admin](11-multitenancy.md).
 
 ---
 
 ## Demo data (`DemoSeed`)
 
-Generates: 5 products, 3 sales (with items), 7 financial transactions and 5 debts — all with **dates relative to `DateTime.now()`** so the periods (Today/7 days/Month) work from day one.
+Generates: 7 products, 4 sales (with items), 10 financial transactions, 5 debts and 4 customers — all with **dates relative to `DateTime.now()`** so the periods (Today/7 days/Month) work from day one (business data is split across stores `st1`/`st2` to demonstrate the store scope).
 
 Important seed relationships:
 - `t1` ↔ sale `s1`, `t3` ↔ `s2`, `t6` ↔ `s3` (every sale has its cash income);

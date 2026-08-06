@@ -162,20 +162,27 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                   : null,
             ),
             const SizedBox(height: 4),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                l10n.financialPendingLabel,
-                style: theme.textTheme.bodyMedium,
-              ),
-              subtitle: Text(
-                l10n.financialPendingHint,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+            // Material explícito: o SwitchListTile pinta o fundo e o ink no
+            // Material ancestral; dentro do Container colorido do app_sheet
+            // (DecoratedBox) o Flutter emite a assertion "ListTile background
+            // color or ink splashes may be invisible".
+            Material(
+              type: MaterialType.transparency,
+              child: SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  l10n.financialPendingLabel,
+                  style: theme.textTheme.bodyMedium,
                 ),
+                subtitle: Text(
+                  l10n.financialPendingHint,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                value: _isPending,
+                onChanged: (value) => setState(() => _isPending = value),
               ),
-              value: _isPending,
-              onChanged: (value) => setState(() => _isPending = value),
             ),
             if (_formError != null) ...[
               const SizedBox(height: 8),

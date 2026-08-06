@@ -7,7 +7,7 @@ The project has **test coverage in every layer**, following the testability that
 ## How to run
 
 ```bash
-# All tests
+# All tests (290+ green — Aug 6)
 flutter test
 
 # A specific file
@@ -16,6 +16,8 @@ flutter test test/domain/usecases/process_sale_use_case_sqlite_test.dart
 # With coverage report
 flutter test --coverage
 ```
+
+> **CI:** `.github/workflows/ci.yml` runs analyze → test+coverage (**45% gate**) → dev-flavor APK build → **`sql_check.sh`** against a real Postgres 16 service (the SQL/RLS/RPC harness — see below).
 
 > **SQLite on the Windows VM:** the `package:sqlite3` loader automatically falls back to the system `winsqlite3.dll` (via `AppDatabase.configureLoader` — a defensive probe in `test/helpers/test_sqlite.dart`). No manual setup is required.
 
@@ -27,7 +29,9 @@ flutter test --coverage
 test/
 ├── core/
 │   ├── database/app_database_test.dart          # Schema, re-entrant transactions, migrations
-│   └── security/secure_storage_service_test.dart # In-memory backend
+│   └── security/
+│       ├── secure_storage_service_test.dart           # In-memory backend
+│       └── secure_supabase_local_storage_test.dart    # Secure session + PKCE storage (S1, Aug 6)
 ├── data/
 │   ├── datasources/local/
 │   │   ├── product_sqlite_data_source_test.dart
@@ -109,6 +113,20 @@ test/
 | Test database | SQLite **in-memory** (`sqlite3.openInMemory`) with the real schema, no seed |
 | Atomicity | `ProcessSaleUseCase` tests validate full rollback when a step fails |
 | Immutability | Datasources return immutable lists (tests verify copy/sorting behaviors) |
+
+---
+
+## SQL/RLS/RPC harness (`scripts/sql_check.sh`)
+
+Runs `sqlcheck_stub.sql` (auth stubs) + `supabase/schema.sql` against a throwaway PostgreSQL, then as a **non-superuser** role (`app_user`, mirroring Supabase's `authenticated`):
+
+1. schema applies cleanly;
+2. super-admin role resolves via the `public.super_admins` table (C3 — never JWT email);
+3. RLS isolates by `auth.uid()` with anti-forgery triggers;
+4. employee access is scoped by **store** (`is_my_store`, C2);
+5. the atomic money RPCs **execute for real** (`process_sale`, `register_debt`, `settle_debt`, `process_purchase`) with effects verified — including the **realization date** stamped on settlement (Aug 6) and negative cases (insufficient stock).
+
+Run locally (Docker): `PGPASSWORD=... bash scripts/sql_check.sh [PGHOST] [PGUSER] [PGDATABASE]` (⚠️ destructive — throwaway DB only).
 
 ---
 

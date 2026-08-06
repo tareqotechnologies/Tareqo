@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
+import '../../../core/utils/money.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/sale.dart';
 import '../../../domain/entities/sale_item.dart';
@@ -49,15 +50,14 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     super.dispose();
   }
 
-  double get _total {
-    var total = 0.0;
-    for (final entry in _cart.entries) {
-      final product = _productById(entry.key);
-      if (product == null) continue;
-      total += product.salePrice * entry.value;
-    }
-    return total;
-  }
+  // Total do carrinho acumulado em CENTAVOS (auditoria H1): [Money.times]
+  // multiplica exatamente por inteiro e [Money.sum] soma inteiros de
+  // centavos — sem artefatos de double (0.1+0.2).
+  double get _total => Money.sum([
+        for (final entry in _cart.entries)
+          if (_productById(entry.key) case final Product product)
+            Money.times(entry.value, product.salePrice),
+      ]);
 
   int get _itemCount => _cart.values.fold(0, (sum, quantity) => sum + quantity);
 

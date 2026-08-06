@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/app_settings.dart';
 import '../../core/di/service_locator.dart';
-import '../../data/services/employee_account_service.dart';
 import '../../domain/entities/plan.dart';
 import '../../domain/entities/plan_request.dart';
 import '../../domain/entities/store.dart';
@@ -88,10 +87,6 @@ final addEmployeeUseCaseProvider = Provider<AddEmployeeUseCase>(
   (ref) => ServiceLocator.instance<AddEmployeeUseCase>(),
 );
 
-final employeeAccountServiceProvider = Provider<EmployeeAccountService>(
-  (ref) => ServiceLocator.instance<EmployeeAccountService>(),
-);
-
 final getMyPlanRequestsUseCaseProvider = Provider<GetMyPlanRequestsUseCase>(
   (ref) => ServiceLocator.instance<GetMyPlanRequestsUseCase>(),
 );
@@ -168,6 +163,47 @@ final employeesProvider =
     FutureProvider.autoDispose.family<List<StoreEmployee>, String>(
   (ref, tenantId) => ref.watch(getEmployeesUseCaseProvider).call(tenantId),
 );
+
+/// Nível de acesso do usuário logado dentro do tenant.
+///
+/// Ordem de privilégio: **owner** > **manager** > **employee**.
+///
+/// - **owner** — dono do tenant: acesso total (operação + gestão de
+///   lojas/funcionários/plano/ajustes);
+/// - **manager** — gerente de loja: operação completa (inclui compras e
+///   relatórios), mas SEM gestão (só do dono);
+/// - **employee** — funcionário comum: apenas operação diária (vendas,
+///   produtos, financeiro, fiado, clientes).
+enum UserAccessLevel {
+  owner,
+  manager,
+  employee,
+}
+
+/// Nível de acesso do usuário logado: [UserAccessLevel.owner] para o dono
+/// do tenant; caso contrário, o **maior cargo** entre os vínculos do
+/// usuário em `store_employees` (manager > employee). `null` enquanto o
+/// tenant/vínculos não estiverem resolvidos (ou usuário sem tenant).
+///
+/// ⚠️ Isto é apenas orientação de **navegação/UX**. A autoridade real é o
+/// **servidor**: o RLS e as guardas das RPCs (ex.: `is_manager_of_store`
+/// no `process_purchase`) negam a operação mesmo se um cliente modificado
+/// chamar o PostgREST diretamente.
+final currentAccessLevelProvider = Provider<UserAccessLevel?>((ref) {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return null;
+  final tenant = ref.watch(myTenantProvider(user.id)).value;
+  if (tenant == null) return null;
+  // Dono do tenant → acesso total (sem precisar ler os vínculos).
+  if (tenant.ownerUserId == user.id) return UserAccessLevel.owner;
+  // Funcionário: resolve o cargo pelo vínculo em store_employees. Se o
+  // usuário tiver vários vínculos, vale o MAIOR cargo (manager > employee).
+  final employees =
+      ref.watch(employeesProvider(tenant.id)).value ?? const <StoreEmployee>[];
+  final links = employees.where((employee) => employee.userId == user.id);
+  final isManager = links.any((employee) => employee.role == EmployeeRole.manager);
+  return isManager ? UserAccessLevel.manager : UserAccessLevel.employee;
+});
 
 /// Estado: pedidos de upgrade do tenant.
 final myPlanRequestsProvider =

@@ -43,6 +43,7 @@ class FinancialScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab-financial',
         onPressed: () => _openAddTransaction(context, ref),
         icon: const Icon(Icons.add),
         label: Text(l10n.financialRegister),

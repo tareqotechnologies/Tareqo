@@ -90,7 +90,7 @@ BEGIN
   RAISE NOTICE 'PASS: is_super_admin() OK (SECURITY DEFINER, DB-backed)';
 END $$;
 
-\echo '== 4. RPCs atomicos do money path: SECURITY DEFINER (1.1/1.1b/1.1c/C4) =='
+\echo '== 4. RPCs atomicos do money path: SECURITY DEFINER (1.1/1.1b/1.1c/C4 + 005) =='
 DO $$
 DECLARE
   r record;
@@ -99,7 +99,8 @@ BEGIN
     'public.process_sale(jsonb,jsonb)',
     'public.process_purchase(jsonb,jsonb)',
     'public.register_debt(jsonb)',
-    'public.settle_debt(text,text)'
+    'public.settle_debt(text,text)',
+    'public.create_employee_account(text,text,text,text,text,text)'
   ]) AS sig
   LOOP
     IF to_regprocedure(r.sig) IS NULL THEN
@@ -109,7 +110,7 @@ BEGIN
       RAISE EXCEPTION 'FAIL: % nao e SECURITY DEFINER', r.sig;
     END IF;
   END LOOP;
-  RAISE NOTICE 'PASS: process_sale / process_purchase / register_debt / settle_debt OK';
+  RAISE NOTICE 'PASS: process_sale / process_purchase / register_debt / settle_debt / create_employee_account OK';
 END $$;
 
 \echo '== 5. index idx_financial_transactions_debt (C4) =='

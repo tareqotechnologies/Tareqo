@@ -1,6 +1,8 @@
 import '../entities/plan.dart';
 import '../entities/store_employee.dart';
 import '../entities/tenant.dart';
+import '../repositories/i_employee_account_processor.dart';
+import '../repositories/i_employee_account_service.dart';
 import '../repositories/i_employee_repository.dart';
 import '../repositories/i_plan_repository.dart';
 import '../repositories/i_store_repository.dart';
@@ -19,26 +21,41 @@ final class InvalidEmployeeException implements Exception {
 
 /// Caso de uso: vincular um funcionário a uma loja do tenant (dono).
 ///
-/// Aplica o limite de funcionários do [Plan]: se o total do tenant já
-/// atingiu `maxEmployees`, lança [PlanLimitExceededException].
+/// Valida os dados de entrada, a aprovação do tenant, a loja e o limite de
+/// funcionários do [Plan] (mensagens amigáveis na UI; o banco também
+/// valida no servidor).
 ///
-/// O dono informa nome, e-mail e a loja; a criação da conta de acesso do
-/// funcionário fica a cargo da UI (que usa o cadastro do Supabase com o
-/// e-mail/senha definidos pelo dono — Fase 1).
+/// A criação da conta de acesso fica a cargo do [IEmployeeAccountProcessor]
+/// no modo Supabase — conta + vínculo em UMA transação (sem contas órfãs
+/// se o limite for atingido) — ou do caminho composto no modo local
+/// (conta sintética via [EmployeeAccountService] + repositório).
 class AddEmployeeUseCase {
   const AddEmployeeUseCase(
     this._employeeRepository,
     this._tenantRepository,
     this._planRepository,
-    this._storeRepository,
-  );
+    this._storeRepository, {
+    this._accountService,
+    this._processor,
+  });
 
   final IEmployeeRepository _employeeRepository;
   final ITenantRepository _tenantRepository;
   final IPlanRepository _planRepository;
   final IStoreRepository _storeRepository;
 
-  Future<void> call(StoreEmployee employee) async {
+  /// Criação de conta LOCAL (dev sem Supabase) — id sintético. No modo
+  /// Supabase é `null` (a conta é criada pelo [_processor], com vínculo).
+  final EmployeeAccountService? _accountService;
+
+  /// Processador atômico do modo Supabase (conta + vínculo numa transação);
+  /// `null` nos modos SQLite/memória.
+  final IEmployeeAccountProcessor? _processor;
+
+  Future<void> call(
+    StoreEmployee employee, {
+    required String password,
+  }) async {
     if (employee.fullName.trim().isEmpty || employee.email.trim().isEmpty) {
       throw const InvalidEmployeeException(
         'Informe nome e e-mail do funcionário.',
@@ -70,6 +87,26 @@ class AddEmployeeUseCase {
       );
     }
 
-    await _employeeRepository.add(employee);
+    // Supabase: conta + vínculo em UMA transação (RPC
+    // create_employee_account). O banco revalida o limite e a loja.
+    final processor = _processor;
+    if (processor != null) {
+      await processor.create(employee: employee, password: password);
+      return;
+    }
+
+    // Local: conta sintética + vínculo via repositório.
+    final accountService = _accountService;
+    if (accountService == null) {
+      throw StateError(
+        'EmployeeAccountService não registrado no modo local.',
+      );
+    }
+    final userId = await accountService.createAccount(
+      email: employee.email,
+      password: password,
+      fullName: employee.fullName,
+    );
+    await _employeeRepository.add(employee.copyWith(userId: userId));
   }
 }

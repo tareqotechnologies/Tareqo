@@ -6,7 +6,8 @@ import 'supabase_datasource_helpers.dart';
 ///
 /// O dono vincula funcionários às lojas do tenant; o RLS limita a gestão
 /// ao dono (e leitura ao próprio funcionário). O `tenant_id` é reforçado
-/// pelo trigger `set_employee_tenant_from_store` do schema.
+/// pelo trigger anti-forja `trg_store_employees_tenant` (função
+/// `set_employee_tenant`) do schema.
 final class EmployeeSupabaseDataSourceImpl implements EmployeeLocalDataSource {
   const EmployeeSupabaseDataSourceImpl();
 

@@ -22,8 +22,23 @@ Dono se cadastra → escolhe plano + nome do negócio → tenant PENDING
 | Papel | Como é identificado | O que pode fazer |
 | ----- | ------------------- | ---------------- |
 | **Super admin** | Papel em banco (`public.super_admins`) | Aprovar/rejeitar tenants, decidir upgrades de plano e criar/editar planos (painel administrativo) |
-| **Dono** | `tenants.owner_user_id = auth.uid()` | Solicitar acesso, criar lojas, criar contas de funcionários, pedir upgrade de plano e operar o ERP |
-| **Funcionário** | Vínculo em `store_employees` | Faz login e opera o ERP — escopo por **loja** (`store_id`) |
+| **Dono** | `tenants.owner_user_id = auth.uid()` | **Acesso total:** solicitar acesso, criar lojas, criar contas de funcionários, pedir upgrade de plano e operar o ERP. Único papel que gerencia lojas/funcionários/plano/ajustes (módulo Lojas) |
+| **Gerente** | Vínculo em `store_employees` com `role = 'manager'` | **Operação completa:** vendas, produtos, financeiro, fiado, clientes, **compras e relatórios** — mas SEM gestão de lojas/funcionários/plano/ajustes (só do dono) |
+| **Funcionário** | Vínculo em `store_employees` com `role = 'employee'` | **Apenas operação diária:** vendas, produtos, financeiro, fiado e clientes — SEM compras, SEM relatórios, SEM gestão |
+
+### Matriz de acesso (Aug 6)
+
+| Módulo | Dono | Gerente | Funcionário |
+| ------ | ---- | ------- | ----------- |
+| Vendas / Produtos / Financeiro / Fiado / Clientes | ✅ | ✅ | ✅ |
+| Compras | ✅ | ✅ | ❌ |
+| Relatórios | ✅ | ✅ | ❌ |
+| Lojas (lojas/funcionários/plano/ajustes) | ✅ | ❌ | ❌ |
+
+- **UI (apenas UX):** o dashboard oculta os cards de Compras/Relatórios para funcionários e o card de Lojas para quem não é dono — o `currentAccessLevelProvider` (`account_providers.dart`) resolve o nível do usuário logado a partir de `tenants.owner_user_id` ou do maior cargo entre os vínculos em `store_employees`;
+- **Servidor (autoridade):** a RPC `process_purchase` e as políticas RLS de `purchases`/`purchase_items` exigem `public.is_manager_of_store(store_id)` (dono ou gerente). Mesmo um cliente modificado que chame o PostgREST direto é bloqueado — o banco é o portão final. A gestão de lojas/funcionários/plano/ajustes já era exclusiva do dono via políticas `is_tenant_owner`.
+
+Migração: `supabase/migrations/007_manager_purchase_gate.sql` (helper + guarda da RPC + políticas).
 
 ### Super admin (papel baseado em banco)
 
@@ -113,7 +128,7 @@ Providers de estado em `lib/presentation/controllers/admin_providers.dart` (`pen
 - **Aba Funcionários:** lista com loja e cargo; criação via sheet com **nome, e-mail e senha** (o dono cria a conta de acesso) + escolha de loja e cargo (`manager`/`employee`) — respeita `maxEmployees`;
 - **Aba Upgrades:** histórico dos pedidos do tenant (pendente/aprovado/rejeitado).
 
-> **Criação da conta do funcionário:** o app usa o cadastro do Supabase (`EmployeeAccountService`) com o e-mail/senha definidos pelo dono. Se a confirmação de e-mail estiver ativa no projeto, o funcionário recebe um e-mail para confirmar antes do primeiro login. Em dev sem Supabase, um id sintético é usado (memória).
+> **Criação da conta do funcionário:** o app chama a RPC `create_employee_account` (`SECURITY DEFINER` no schema), que cria a conta no servidor por **inserção direta em `auth.users` + `auth.identities`** (hash bcrypt via pgcrypto, `email_confirmed_at = now()` — confirmação imediata, sem e-mail, nada de rate limit; o Supabase atual removeu a função interna `auth.admin_create_user`, e a Admin API do GoTrue é HTTP/assíncrona — quebraria a atomicidade) **e o vínculo em `store_employees` na MESMA transação** — se o vínculo falhar (ex.: limite de funcionários do plano atingido), a conta é desfeita junto: **sem contas órfãs**. A senha é definida pelo dono e a sessão do dono nunca é substituída. Em dev sem Supabase, id sintético + vínculo via repositório (memória).
 
 ---
 
@@ -157,11 +172,12 @@ As tabelas de negócio (`products`, `sales`, `financial_transactions`, `debts`, 
 
 - **Defesa em profundidade:** se o cliente enviar um `store_id` que não é do usuário (dono do tenant ou funcionário vinculado), o trigger reescreve para a primeira loja acessível — ninguém escreve em loja de fora do próprio acesso;
 - **Helper `public.is_my_store(store_id)`:** dono do tenant vale para todas as lojas do tenant; funcionário vale para a loja do vínculo;
+- **Helper `public.is_manager_of_store(store_id)` (Aug 6):** dono do tenant ou funcionário vinculado com `role = 'manager'` — usado na guarda do `process_purchase` e nas políticas RLS de compras (nível gerencial);
 - Sem sessão (ex.: seed via SQL Editor) o valor informado é preservado.
 
 - **Helper `public.is_super_admin()`:** consulta a tabela `public.super_admins` (papel em banco) — `SECURITY DEFINER` para dispensar o RLS da própria tabela;
-- **Helper `public.is_tenant_owner(tenant_id)`:**
-  verifica `tenants.owner_user_id = auth.uid()`;
+- **Helper `public.is_tenant_owner(tenant_id)`:** verifica `tenants.owner_user_id = auth.uid()`;
+- **`is_my_store`/`is_tenant_owner` são `SECURITY DEFINER`** (`search_path` fixado): rodam DENTRO das políticas e consultam tabelas que têm políticas próprias (`stores`/`tenants`/`store_employees`) — como definers ignoram o RLS internamente, quebrando o ciclo entre tabelas e impedindo o `54001 max_stack_depth` em varreduras completas (regressão encontrada em Aug 6 num Supabase cloud com schema antigo; ver `supabase/migrations/006_rls_helpers_security_definer.sql`);
 - **Guardas nos triggers:** quando não há sessão (ex.: seed via SQL Editor), o valor informado é preservado — o seed continua funcionando.
 
 ### Seed

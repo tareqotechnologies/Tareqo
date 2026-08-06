@@ -12,9 +12,11 @@ lib/
 │   ├── config/                  # Configuration (Supabase URL/anon key via --dart-define)
 │   ├── database/                # SQLite facade (conditional import io × stub)
 │   ├── di/                      # Service Locator (GetIt) — central dependency registry
-│   ├── errors/                  # Failure hierarchy (ServerFailure, NetworkFailure, CacheFailure)
-│   ├── network/                 # Supabase bootstrap
-│   ├── security/                # Secure storage (Keychain/Keystore)
+│   ├── errors/                  # (empty — domain exceptions replace the old Failure hierarchy)
+│   ├── i18n/                    # L10n helpers + transaction description strings
+│   ├── observability/           # Crash reporting (Sentry) — CrashReporting
+│   ├── network/                 # Supabase bootstrap + secure session storage wiring
+│   ├── security/                # Secure storage (Keychain/Keystore) + SecureSupabaseLocalStorage
 │   ├── theme/                   # Material 3 theme (AppTheme, AppColors)
 │   └── utils/                   # Generic helpers (pt-BR Formatters)
 ├── domain/                      # CORE: pure business rules, no external dependencies
@@ -43,7 +45,7 @@ Dependencies always point **inward**:
 presentation → domain   (the UI only knows abstractions: entities, use cases, contracts)
 data         → domain   (implements the domain contracts)
 core         → nothing  (serves all layers)
-domain       → nothing  (does not know Flutter, Dio, SQLite, Riverpod, GetIt...)
+domain       → nothing  (does not know Flutter, SQLite, Riverpod, GetIt...)
 ```
 
 - **The domain imports no other layer.** Entities, contracts and use cases are pure Dart (with Freezed annotations for immutability and serialization).
@@ -65,7 +67,7 @@ ProductRepositoryImpl → ProductLocalDataSource (data layer)
 dumbhanengue.db database
 ```
 
-The `presentation` layer knows **only abstractions** — `Product`, `GetProductsUseCase`, `IProductRepository` — never datasources, SQL, Dio or concrete implementations.
+The `presentation` layer knows **only abstractions** — `Product`, `GetProductsUseCase`, `IProductRepository` — never datasources, SQL or concrete implementations.
 
 ---
 
@@ -88,7 +90,7 @@ The `presentation` layer knows **only abstractions** — `Product`, `GetProducts
 
 `lib/core/di/service_locator.dart` registers **everything** in `ServiceLocator.initialize()`:
 
-1. `Dio`, `SecureStorageService` and `IAuthRepository`;
+1. `SecureStorageService`, `IAuthRepository` and `EmployeeAccountService`;
 2. **Conditional persistence:**
    - `AppDatabase.openAppDatabase()` returns `true` (native) → registers **SQLite** datasources + `SqliteUnitOfWork`;
    - `false` (web or native library failure) → registers **in-memory** datasources + no-op unit of work.
@@ -130,16 +132,9 @@ export 'app_database_stub.dart' if (dart.library.io) 'app_database_io.dart';
 
 ---
 
-## Error pattern: `Failure`
+## Error pattern: domain exceptions + `CrashReporting`
 
-`lib/core/errors/failure.dart` defines a **sealed** hierarchy:
-
-- `Failure(message)` — base;
-- `ServerFailure` — HTTP error (4xx/5xx);
-- `NetworkFailure` — connectivity;
-- `CacheFailure` — local persistence.
-
-The layers convert infrastructure exceptions into `Failure` before exposing them to the UI, keeping layers decoupled. (The **domain** exceptions — `InvalidSaleException`, `InsufficientStockException`, etc. — are thrown by use cases and caught by the screens; see [Domain](03-domain.md).)
+The app does **not** use a `Failure` hierarchy. Business errors are **domain exceptions** (e.g. `InvalidSaleException`, `InsufficientStockException`) thrown by use cases and caught by the screens, which translate them into friendly messages. Unexpected errors (and any caught exception) are routed to **`CrashReporting.capture`** — `debugPrint` in debug, **Sentry** in release when `SENTRY_DSN` is present (see `lib/core/observability/crash_reporting.dart`).
 
 ---
 

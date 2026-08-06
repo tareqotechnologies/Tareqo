@@ -205,7 +205,7 @@
   "addEmployeeEmailLabel": "Email",
   "addEmployeeEmailError": "Enter a valid email.",
   "addEmployeePasswordLabel": "Access password",
-  "addEmployeePasswordError": "Password must be at least 6 characters.",
+  "addEmployeePasswordError": "Password must be at least 8 characters.",
   "addEmployeeStoreLabel": "Store",
   "addEmployeeNoStores": "Create a store before adding employees.",
   "addEmployeeRoleLabel": "Role",

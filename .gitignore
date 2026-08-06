@@ -43,8 +43,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/build/
 
 # Assinatura de release (keystore de produção) — nunca versionar
 android/key.properties
 *.jks
 *.keystore
+
+# Ambiente de produção — nunca versionar (o exemplo em env/*.example é o modelo)
+env/prod.env
+
+# Fastlane — credenciais locais da service account
+fastlane/play-service-account.json

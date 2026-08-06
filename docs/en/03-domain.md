@@ -19,7 +19,7 @@ All entities are `@freezed` classes (immutable, with `copyWith`, `==`/`hashCode`
 
 | Field | Type | Notes |
 | ----- | ---- | ----- |
-| `id` | `String` | Primary key (generated as `p<microsecondsSinceEpoch>` in the UI) |
+| `id` | `String` | Primary key (generated with `AppIds.newId('p')` — timestamp + entropy, collision-free) |
 | `storeId` | `String` | The store it belongs to (default `'st1'` — Phase 2) |
 | `name` | `String` | Required |
 | `description` | `String` | Default `''` |
@@ -40,7 +40,7 @@ enum PaymentMethod {
 
 | `Sale` | Type | Notes |
 | ------ | ---- | ----- |
-| `id` | `String` | `s<microsecondsSinceEpoch>` |
+| `id` | `String` | `AppIds.newId('s')` (collision-free) |
 | `storeId` | `String` | The sale's store (default `'st1'` — Phase 2) |
 | `items` | `List<SaleItem>` | Snapshot of the sold items |
 | `totalAmount` | `double` | Sum of items at the time of sale |
@@ -60,7 +60,7 @@ enum PaymentMethod {
 
 | Field | Type | Notes |
 | ----- | ---- | ----- |
-| `id` | `String` | `d<microsecondsSinceEpoch>` |
+| `id` | `String` | `AppIds.newId('d')` (collision-free) |
 | `storeId` | `String` | The debt's store (default `'st1'` — Phase 2) |
 | `personName` | `String` | Customer (or supplier) name |
 | `amount` | `double` | `@Assert('amount >= 0')` |
@@ -78,7 +78,7 @@ enum TransactionStatus { paid('Pago'), pending('Pendente') }
 
 | Field | Type | Notes |
 | ----- | ---- | ----- |
-| `id` | `String` | `t<microsecondsSinceEpoch>` |
+| `id` | `String` | `AppIds.newId('t')` (collision-free) |
 | `storeId` | `String` | The movement's store (default `'st1'` — Phase 2) |
 | `description` | `String` | E.g.: "Venda via PIX", "Aluguel da loja" |
 | `amount` | `double` | **Always a positive magnitude**; direction comes from `type` |

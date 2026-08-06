@@ -4,6 +4,8 @@ import 'package:dumbhanengue/domain/entities/plan.dart';
 import 'package:dumbhanengue/domain/entities/store.dart';
 import 'package:dumbhanengue/domain/entities/store_employee.dart';
 import 'package:dumbhanengue/domain/entities/tenant.dart';
+import 'package:dumbhanengue/domain/repositories/i_employee_account_processor.dart';
+import 'package:dumbhanengue/domain/repositories/i_employee_account_service.dart';
 import 'package:dumbhanengue/domain/repositories/i_employee_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_plan_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_store_repository.dart';
@@ -109,6 +111,35 @@ class _FakeEmployeeRepository implements IEmployeeRepository {
   Future<void> add(StoreEmployee employee) async {
     addCalled = true;
     _employees.add(employee);
+  }
+}
+
+/// Modo LOCAL: devolve um id sintético (o vínculo fica com o repositório).
+class _FakeEmployeeAccountService implements EmployeeAccountService {
+  @override
+  Future<String> createAccount({
+    required String email,
+    required String password,
+    required String fullName,
+  }) async =>
+      'u-sintetico';
+}
+
+/// Modo SUPABASE: processador atômico (conta + vínculo numa transação).
+class _FakeEmployeeProcessor implements IEmployeeAccountProcessor {
+  StoreEmployee? lastEmployee;
+  String? lastPassword;
+  int calls = 0;
+
+  @override
+  Future<String> create({
+    required StoreEmployee employee,
+    required String password,
+  }) async {
+    calls++;
+    lastEmployee = employee;
+    lastPassword = password;
+    return 'u-remoto';
   }
 }
 
@@ -235,18 +266,24 @@ void main() {
           maxEmployees: 5,
         )),
         storeRepository,
+        accountService: _FakeEmployeeAccountService(),
       );
 
-      await useCase(const StoreEmployee(
-        id: 'e1',
-        tenantId: 'tn1',
-        storeId: 'st1',
-        userId: 'u2',
-        fullName: 'Carlos',
-        email: 'carlos@loja.com',
-      ));
+      await useCase(
+        const StoreEmployee(
+          id: 'e1',
+          tenantId: 'tn1',
+          storeId: 'st1',
+          userId: 'u2',
+          fullName: 'Carlos',
+          email: 'carlos@loja.com',
+        ),
+        password: 'senha-forte',
+      );
 
       expect(employeeRepository.addCalled, isTrue);
+      // O id da conta sintética (modo local) foi copiado para o vínculo.
+      expect(employeeRepository._employees.single.userId, 'u-sintetico');
     });
 
     test('lança PlanLimitExceededException ao atingir o limite', () async {
@@ -268,6 +305,7 @@ void main() {
           maxEmployees: 1,
         )),
         storeRepository,
+        accountService: _FakeEmployeeAccountService(),
       );
       await employeeRepository.add(const StoreEmployee(
         id: 'e1',
@@ -279,14 +317,17 @@ void main() {
       ));
 
       await expectLater(
-        useCase(const StoreEmployee(
-          id: 'e2',
-          tenantId: 'tn1',
-          storeId: 'st1',
-          userId: 'u3',
-          fullName: 'Carlos',
-          email: 'carlos@loja.com',
-        )),
+        useCase(
+          const StoreEmployee(
+            id: 'e2',
+            tenantId: 'tn1',
+            storeId: 'st1',
+            userId: 'u3',
+            fullName: 'Carlos',
+            email: 'carlos@loja.com',
+          ),
+          password: 'senha-forte',
+        ),
         throwsA(isA<PlanLimitExceededException>()),
       );
     });
@@ -300,17 +341,21 @@ void main() {
         _FakeTenantRepository(approvedTenant()),
         _FakePlanRepository(const Plan(id: 'pl1', name: 'X')),
         storeRepository,
+        accountService: _FakeEmployeeAccountService(),
       );
 
       await expectLater(
-        useCase(const StoreEmployee(
-          id: 'e1',
-          tenantId: 'tn1',
-          storeId: 'stX',
-          userId: 'u2',
-          fullName: 'Carlos',
-          email: 'carlos@loja.com',
-        )),
+        useCase(
+          const StoreEmployee(
+            id: 'e1',
+            tenantId: 'tn1',
+            storeId: 'stX',
+            userId: 'u2',
+            fullName: 'Carlos',
+            email: 'carlos@loja.com',
+          ),
+          password: 'senha-forte',
+        ),
         throwsA(isA<InvalidEmployeeException>()),
       );
     });
@@ -327,19 +372,70 @@ void main() {
         _FakeTenantRepository(approvedTenant()),
         _FakePlanRepository(const Plan(id: 'pl1', name: 'X')),
         storeRepository,
+        accountService: _FakeEmployeeAccountService(),
       );
 
       await expectLater(
-        useCase(const StoreEmployee(
+        useCase(
+          const StoreEmployee(
+            id: 'e1',
+            tenantId: 'tn1',
+            storeId: 'st1',
+            userId: 'u2',
+            fullName: '',
+            email: '',
+          ),
+          password: 'senha-forte',
+        ),
+        throwsA(isA<InvalidEmployeeException>()),
+      );
+    });
+
+    test('modo Supabase: delega ao processador atômico e NÃO duplica o '
+        'vínculo (conta + vínculo numa transação)', () async {
+      final employeeRepository = _FakeEmployeeRepository();
+      final storeRepository = _FakeStoreRepository();
+      await storeRepository.add(const Store(
+        id: 'st1',
+        tenantId: 'tn1',
+        name: 'Loja Centro',
+      ));
+      final processor = _FakeEmployeeProcessor();
+
+      final useCase = AddEmployeeUseCase(
+        employeeRepository,
+        _FakeTenantRepository(approvedTenant()),
+        _FakePlanRepository(const Plan(
+          id: 'pl1',
+          name: 'Essencial',
+          maxStores: 3,
+          maxEmployees: 5,
+        )),
+        storeRepository,
+        processor: processor,
+      );
+
+      await useCase(
+        const StoreEmployee(
           id: 'e1',
           tenantId: 'tn1',
           storeId: 'st1',
-          userId: 'u2',
-          fullName: '',
-          email: '',
-        )),
-        throwsA(isA<InvalidEmployeeException>()),
+          userId: '',
+          fullName: 'Carlos',
+          email: 'carlos@loja.com',
+        ),
+        password: 'senha-forte',
       );
+
+      // O processador recebeu o funcionário + senha (conta + vínculo em
+      // UMA transação no servidor)...
+      expect(processor.calls, 1);
+      expect(processor.lastEmployee?.id, 'e1');
+      expect(processor.lastEmployee?.email, 'carlos@loja.com');
+      expect(processor.lastPassword, 'senha-forte');
+      // ...e o vínculo NÃO foi inserido de novo pelo repositório (evita
+      // o duplicado que existiria com o fluxo em duas chamadas).
+      expect(employeeRepository.addCalled, isFalse);
     });
   });
 }

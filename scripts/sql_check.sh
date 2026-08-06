@@ -15,6 +15,10 @@
 #      quitação com efeitos verificados no banco. Regressão da armadilha
 #      de precedência `||`/`->>` (22P02): se um `'t' || (x->>'id')` voltar
 #      a ser parseado como concatenação jsonb, este passo falha.
+#   5. o RPC create_employee_account cria a conta do funcionário E o
+#      vínculo na loja em UMA transação (sem e-mail — regressão do rate
+#      limit 429; sem contas órfãs se o limite do plano for atingido) e
+#      rejeita e-mail duplicado e não-donos.
 #
 # ⚠️ As verificações de RLS rodam como um papel NÃO-superusuário
 # (`app_user`), porque o superusuário do Postgres ignora o RLS — o mesmo
@@ -284,6 +288,22 @@ settled_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UI
   exit 1
 }
 
+# Auditoria Aug 6: a quitação carimba a DATA DE REALIZAÇÃO (date = now())
+# na pendência vinculada — mesma semântica do markAsPaid local (SQLite).
+# Sem isso, o fluxo de caixa do período reconheceria o recebimento na data
+# do REGISTRO da pendência (modo SaaS) vs. data da QUITAÇÃO (modo local).
+#
+# Assertiva AIRTIGHT: `date` (realização) deve ser >= `paid_at` da dívida —
+# os dois são carimbados na MESMA transação do settle_debt (now() no mesmo
+# instante). Sem o fix, `date` = momento do register_debt (segundos ANTES do
+# paid_at) e a assertiva falha. (Uma janela `now() - interval` não bastaria:
+# o teste roda em segundos e o registro também usa now().)
+settled_date_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT (ft.date >= d.paid_at) FROM public.financial_transactions ft JOIN public.debts d ON d.id = 'd_smoke' WHERE ft.id = 'td_smoke';" | tail -n 1)"
+[ "$settled_date_ok" = "t" ] || {
+  echo "FALHA: pendência quitada deveria ter date = now() (realização) (obtido: '$settled_date_ok')"
+  exit 1
+}
+
 # --- Rejeição: estoque insuficiente (negativo) não muta nada
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
@@ -309,4 +329,284 @@ bad_stock="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID
   exit 1
 }
 
-echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas e RPCs atômicos do dinheiro conforme esperado."
+echo "==> [6/6] RPC create_employee_account (conta + vínculo, SEM e-mail)"
+# Regressão do rate limit 429: o app não usa mais auth.signUp para criar a
+# conta do funcionário (cada tentativa enviava e-mail de confirmação). A
+# RPC SECURITY DEFINER cria a conta por INSERÇÃO DIRETA em auth.users +
+# auth.identities com hash bcrypt (pgcrypto) — email_confirmed_at = now()
+# (conta nasce confirmada, sem e-mail, sem mexer na sessão do dono) — e
+# cria TAMBÉM o vínculo em store_employees NA MESMA transação: se o vínculo
+# falhar (ex.: limite do plano), a conta é desfeita junto (sem órfãs).
+# (O Supabase atual removeu auth.admin_create_user; a Admin API HTTP é
+# assíncrona e quebraria a atomicidade.)
+#
+# Usamos um tenant/loja DEDICADOS (tn_emp/st_emp, plano pl_emp máx. 2
+# funcionários), criados SEM JWT (superuser): os triggers anti-forja
+# preservam os valores explícitos — determinístico, sem depender de qual
+# tenant o seed/trigger escolheu para as lojas dos passos anteriores.
+
+# Tenant/loja dedicados + plano com limite de 2 funcionários.
+psql -v ON_ERROR_STOP=1 <<'SQL'
+INSERT INTO public.plans (id, name, max_stores, max_employees, is_active)
+VALUES ('pl_emp', 'Plano Emp', 1, 2, TRUE)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tenants (id, owner_user_id, business_name, plan_id, status, approved_at)
+VALUES ('tn_emp', '11111111-1111-1111-1111-111111111111', 'Tenant Emp', 'pl_emp', 'approved', now())
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.stores (id, tenant_id, name)
+VALUES ('st_emp', 'tn_emp', 'Loja Emp')
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+# Dono cadastra funcionário (conta + vínculo) e recebe o id do usuário.
+emp_created="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT public.create_employee_account('e_emp1', 'func-smoke@loja.com', 'senha-forte', 'Funcionária Smoke', 'st_emp', 'employee');" | tail -n 1)"
+[ -n "$emp_created" ] || {
+  echo "FALHA: create_employee_account não devolveu o id do usuário"
+  exit 1
+}
+
+# O VÍNCULO foi criado na MESMA transação (tenant herdado da loja).
+link_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.store_employees WHERE id = 'e_emp1' AND user_id = '$emp_created'::uuid AND tenant_id = 'tn_emp' AND store_id = 'st_emp';" | tail -n 1)"
+[ "$link_ok" = "1" ] || {
+  echo "FALHA: vínculo em store_employees não criado pela RPC (obtido: '$link_ok')"
+  exit 1
+}
+
+# O usuário existe em auth.users (no Supabase real: confirmado e ativo).
+# A consulta roda como superusuário: app_user não tem SELECT no schema auth
+# (mesmo modelo do Supabase real — o cliente autenticado nunca lê auth.users).
+emp_exists="$(psql -q -tAc "SELECT count(*) FROM auth.users WHERE id = '$emp_created'::uuid AND email = 'func-smoke@loja.com';" | tail -n 1)"
+[ "$emp_exists" = "1" ] || {
+  echo "FALHA: usuário criado não encontrado em auth.users (obtido: '$emp_exists')"
+  exit 1
+}
+
+# Idempotência: retry com o MESMO id de vínculo devolve o mesmo user_id
+# (sem duplicar conta nem vínculo).
+emp_retry="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT public.create_employee_account('e_emp1', 'func-smoke@loja.com', 'senha-forte', 'Funcionária Smoke', 'st_emp', 'employee');" | tail -n 1)"
+[ "$emp_retry" = "$emp_created" ] || {
+  echo "FALHA: retry deveria devolver o MESMO user_id (obtido: '$emp_retry' vs '$emp_created')"
+  exit 1
+}
+
+# E-mail duplicado (novo id de vínculo) → mensagem amigável, sem criar
+# conta nem vínculo.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.create_employee_account('e_dup', 'func-smoke@loja.com', 'outra-senha', 'Outra', 'st_emp', 'employee');
+    RAISE EXCEPTION 'SENTINELA: e-mail duplicado deveria ter sido rejeitado';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: e-mail duplicado deveria ter sido rejeitado' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+
+# Não-dono (funcionário sem tenant próprio) é rejeitado.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.create_employee_account('e_outro', 'outro@loja.com', 'senha-forte', 'Outro', 'st_emp', 'employee');
+    RAISE EXCEPTION 'SENTINELA: não-dono deveria ter sido rejeitado';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: não-dono deveria ter sido rejeitado' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+
+# Limite do plano (pl_emp = 2): e_emp1 já existe, e_emp2 cabe (2º) e
+# e_emp3 estoura — a conta criada na MESMA transação é desfeita junto
+# (NENHUMA conta órfã).
+emp_2="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT public.create_employee_account('e_emp2', 'func-2@loja.com', 'senha-forte', 'Segunda', 'st_emp', 'employee');" | tail -n 1)"
+[ -n "$emp_2" ] || {
+  echo "FALHA: 2º funcionário deveria caber no plano (obtido vazio)"
+  exit 1
+}
+
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.create_employee_account('e_emp3', 'func-limit@loja.com', 'senha-forte', 'Terceiro', 'st_emp', 'employee');
+    RAISE EXCEPTION 'SENTINELA: limite de funcionários deveria ter sido atingido';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: limite de funcionários deveria ter sido atingido' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+
+# A conta do 3º NÃO existe (transação desfeita — sem conta órfã).
+orphan_ok="$(psql -q -tAc "SELECT count(*) FROM auth.users WHERE email = 'func-limit@loja.com';" | tail -n 1)"
+[ "$orphan_ok" = "0" ] || {
+  echo "FALHA: conta órfã criada mesmo com o limite do plano atingido (obtido: '$orphan_ok')"
+  exit 1
+}
+
+echo "==> [7/7] RLS sem recursão em VARREDURA COMPLETA (regressão 54001)"
+# Regressão Aug 6: num Supabase com schema antigo, SELECTs sem WHERE (como
+# as listagens do app: `select=*` + limit) rebentavam com 54001
+# max_stack_depth em TODAS as tabelas de negócio — as políticas de
+# stores/tenants/store_employees chamam is_my_store/is_tenant_owner, que
+# consultam essas MESMAS tabelas (ciclo entre tabelas). Com SECURITY
+# DEFINER nos helpers, o RLS interno é ignorado e a recursão vira
+# impossível. Estes SELECTs SEM WHERE replicam exatamente o formato das
+# consultas do app/PostgREST.
+
+# Dono: varredura completa em todas as tabelas principais (sem erro).
+full_owner_products="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.products;" | tail -n 1)"
+[ "$full_owner_products" -ge 1 ] 2>/dev/null || {
+  echo "FALHA: varredura completa do dono em products falhou/recursiva (obtido: '$full_owner_products')"
+  exit 1
+}
+full_owner_stores="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.stores;" | tail -n 1)"
+[ "$full_owner_stores" -ge 1 ] 2>/dev/null || {
+  echo "FALHA: varredura completa do dono em stores falhou/recursiva (obtido: '$full_owner_stores')"
+  exit 1
+}
+full_owner_emps="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.store_employees;" | tail -n 1)"
+[ "$full_owner_emps" -ge 1 ] 2>/dev/null || {
+  echo "FALHA: varredura completa do dono em store_employees falhou/recursiva (obtido: '$full_owner_emps')"
+  exit 1
+}
+full_owner_tenants="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.tenants;" | tail -n 1)"
+[ "$full_owner_tenants" -ge 1 ] 2>/dev/null || {
+  echo "FALHA: varredura completa do dono em tenants falhou/recursiva (obtido: '$full_owner_tenants')"
+  exit 1
+}
+full_owner_sales="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sales;" | tail -n 1)"
+[ "$full_owner_sales" -ge 1 ] 2>/dev/null || {
+  echo "FALHA: varredura completa do dono em sales falhou/recursiva (obtido: '$full_owner_sales')"
+  exit 1
+}
+
+# Funcionário: varredura completa vê SÓ a loja dele (smoke1 + smoke2) —
+# RLS por loja ativo também sem WHERE.
+full_emp_products="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.products;" | tail -n 1)"
+[ "$full_emp_products" = "2" ] || {
+  echo "FALHA: funcionário deveria ver exatamente 2 produtos (loja st_smoke) na varredura completa (obtido: '$full_emp_products')"
+  exit 1
+}
+
+# Anon (sem JWT): varredura completa devolve VAZIO, sem erro.
+full_anon_products="$(psql_app -q -tAc "SELECT count(*) FROM public.products;" | tail -n 1)"
+[ "$full_anon_products" = "0" ] || {
+  echo "FALHA: anon deveria ver 0 produtos (obtido: '$full_anon_products')"
+  exit 1
+}
+
+MGR_UID="33333333-3333-3333-3333-333333333333"
+
+echo "==> [8/8] Níveis de acesso: compras exigem DONO ou GERENTE (matriz de acesso)"
+# Matriz de acesso (Aug 6): DONO = tudo; GERENTE = operação completa
+# (inclui compras/relatórios); FUNCIONÁRIO = só operação diária (SEM
+# compras, SEM relatórios, SEM gestão). O servidor é a autoridade: o
+# helper is_manager_of_store + a guarda do process_purchase + o RLS de
+# purchases/purchase_items negam compras de funcionários mesmo que um
+# cliente modificado chame o PostgREST direto.
+
+# Dono cria o vínculo do GERENTE na loja do smoke (cargo 'manager').
+psql_app -v ON_ERROR_STOP=1 <<SQL
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+INSERT INTO public.store_employees
+  (id, store_id, user_id, full_name, email, role)
+VALUES ('e_mgr_smoke', 'st_smoke', '${MGR_UID}',
+        'Gerente Smoke', 'gerente@loja.com', 'manager')
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+# 8.1 Helper is_manager_of_store: gerente = t, funcionário = f, dono = t.
+mgr_is_mgr="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${MGR_UID}\"}'; SELECT public.is_manager_of_store('st_smoke');" | tail -n 1)"
+[ "$mgr_is_mgr" = "t" ] || {
+  echo "FALHA: gerente deveria ser is_manager_of_store (obtido: '$mgr_is_mgr')"
+  exit 1
+}
+emp_is_mgr="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT public.is_manager_of_store('st_smoke');" | tail -n 1)"
+[ "$emp_is_mgr" = "f" ] || {
+  echo "FALHA: funcionário NÃO deveria ser is_manager_of_store (obtido: '$emp_is_mgr')"
+  exit 1
+}
+owner_is_mgr="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT public.is_manager_of_store('st_smoke');" | tail -n 1)"
+[ "$owner_is_mgr" = "t" ] || {
+  echo "FALHA: dono deveria ser is_manager_of_store (obtido: '$owner_is_mgr')"
+  exit 1
+}
+
+# 8.2 RPC: FUNCIONÁRIO não registra compra (guarda is_manager_of_store).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.process_purchase(
+      ('{"id":"p_emp","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":2,"date_time":"' || now()::text || '"}')::jsonb,
+      '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1,"unit_price":2}]'::jsonb
+    );
+    RAISE EXCEPTION 'SENTINELA: funcionário deveria ter sido bloqueado ao registrar compra';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: funcionário deveria ter sido bloqueado ao registrar compra' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+
+p_emp_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.purchases WHERE id = 'p_emp';" | tail -n 1)"
+[ "$p_emp_ok" = "0" ] || {
+  echo "FALHA: compra de funcionário não deveria existir (obtido: '$p_emp_ok')"
+  exit 1
+}
+
+# 8.3 RLS: funcionário NÃO lê compras (SELECT = 0, mesmo na loja dele).
+emp_read_purch="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.purchases;" | tail -n 1)"
+[ "$emp_read_purch" = "0" ] || {
+  echo "FALHA: funcionário não deveria ler compras (obtido: '$emp_read_purch')"
+  exit 1
+}
+
+# 8.4 RPC: GERENTE registra compra na loja (efeitos completos).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "33333333-3333-3333-3333-333333333333"}';
+SELECT public.process_purchase(
+  ('{"id":"p_mgr","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":2,"date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1,"unit_price":2}]'::jsonb
+);
+SQL
+
+mgr_purch_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.purchases WHERE id = 'p_mgr' AND supplier_name = 'Fornecedor';" | tail -n 1)"
+[ "$mgr_purch_ok" = "1" ] || {
+  echo "FALHA: compra do gerente não registrada (obtido: '$mgr_purch_ok')"
+  exit 1
+}
+mgr_stock_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke2';" | tail -n 1)"
+# smoke2: 5 (criado no passo 4) - 2 (venda do funcionário, passo 4.4)
+#        + 1 (compra do gerente, passo 8.4) = 4. Acoplado à ordem dos passos:
+# se reordenar, recalcular a derivação.
+[ "$mgr_stock_ok" = "4" ] || {
+  echo "FALHA: estoque não atualizado pela compra do gerente (5-2+1=4, obtido: '$mgr_stock_ok')"
+  exit 1
+}
+
+# 8.5 RLS: gerente LÊ compras (SELECT > 0); dono também.
+mgr_read_purch="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${MGR_UID}\"}'; SELECT count(*) FROM public.purchases WHERE id = 'p_mgr';" | tail -n 1)"
+[ "$mgr_read_purch" = "1" ] || {
+  echo "FALHA: gerente deveria ler a própria compra (obtido: '$mgr_read_purch')"
+  exit 1
+}
+owner_read_purch="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.purchases WHERE id = 'p_mgr';" | tail -n 1)"
+[ "$owner_read_purch" = "1" ] || {
+  echo "FALHA: dono deveria ler a compra do gerente (obtido: '$owner_read_purch')"
+  exit 1
+}
+
+echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001 e níveis de acesso (compras só dono/gerente) conforme esperado."

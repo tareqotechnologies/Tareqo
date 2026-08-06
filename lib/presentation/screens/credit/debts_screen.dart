@@ -72,6 +72,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab-credit',
         onPressed: () => _openAddDebt(context),
         icon: const Icon(Icons.add),
         label: Text(l10n.debtsAddDebt),

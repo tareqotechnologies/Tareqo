@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
+import '../../../core/utils/money.dart';
 import '../../../domain/entities/customer.dart';
 import '../../../domain/entities/debt.dart';
 import '../../../domain/usecases/add_customer_use_case.dart';
@@ -54,12 +55,14 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     final l10n = context.l10n;
 
     // Total de fiado pendente por cliente (para o chip no card).
+    // Acúmulo em CENTAVOS (auditoria H1) — somar doubles acumula erro.
     final pendingByCustomer = <String, double>{};
     for (final debt in debtsAsync.value ?? const <Debt>[]) {
       final customerId = debt.customerId;
       if (customerId != null) {
-        pendingByCustomer[customerId] =
-            (pendingByCustomer[customerId] ?? 0) + debt.amount;
+        pendingByCustomer[customerId] = Money.round2(
+          (pendingByCustomer[customerId] ?? 0) + debt.amount,
+        );
       }
     }
 
@@ -75,6 +78,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab-customers',
         onPressed: _openAddSheet,
         icon: const Icon(Icons.person_add_alt),
         label: Text(l10n.customersAddNew),

@@ -6,6 +6,8 @@ This document explains how the use cases combine into the real flows of the syst
 
 ## 1. Sale processing (atomic flow)
 
+> **Two execution paths, one contract.** On **SQLite/in-memory** the flow below runs inside an **`IUnitOfWork`** (single transaction). On **Supabase**, `ProcessSaleUseCase` delegates the whole operation to the **`process_sale` RPC** (`SECURITY DEFINER`) — sale + items + stock lock/decrement + cash entry in **one DB transaction** on the server, with idempotency on the sale id and the same validation (stock, total in cents). The local description below is the business contract; the RPC mirrors it (see `supabase/schema.sql` §1.11). The same applies to purchases (`process_purchase`), debt registration (`register_debt`) and settlement (`settle_debt`).
+
 The `ProcessSaleUseCase` integrates **Sales + Stock + Finance** with a deliberate operation order, all inside an **`IUnitOfWork`** (a single transaction — either everything is written, or nothing):
 
 ```text
@@ -71,10 +73,14 @@ Each `SaleItem` keeps `productName` and `unitPrice` **at the time of sale** (plu
 3. Mark the debt as paid (isPaid = true, paidAt = now)
 4. Cash income:
    ├─ linked pending entry exists (debtId)?
-   │    ├─ pending → mark the SAME transaction as paid
+   │    ├─ pending → mark the SAME transaction as paid AND stamp the
+   │    │          realization date (date = now — cash flow recognizes
+   │    │          the money when it ENTERS, in both local and SaaS modes)
    │    └─ already paid → nothing (idempotent)
    └─ doesn't exist → record a new income (category "Fiado")
 ```
+
+> On **Supabase** the whole settlement runs as the **`settle_debt` RPC** — one transaction, idempotent, scoped by store. Since Aug 6 it also stamps `date = now()` on the linked pending entry, matching the local SQLite `markAsPaid` semantics.
 
 **Deliberate order:** the settlement happens **before** the income. If something fails in the middle, the worst case is a settled debt without a cash movement (understated books) — never the reverse, which would allow **charging the customer twice**.
 

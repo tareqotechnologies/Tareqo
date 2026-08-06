@@ -3,8 +3,12 @@
 # Jobs:
 #   analyze   — flutter analyze (zero erros/avisos);
 #   test      — flutter test --coverage + resumo de cobertura;
-#   build     — APK release Android (sem key.properties no CI → fallback de
-#               assinatura debug; a assinatura real é feita fora do CI);
+#   build     — APK release do flavor DEV (sem key.properties no CI →
+#               fallback de assinatura debug). O artefato é apenas de
+#               VALIDAÇÃO de compilação: um release dev falha no arranque
+#               por design (guarda de produção — main.dart). A assinatura
+#               real do AAB de PRODUÇÃO acontece no workflow release.yml
+#               (tag v*, Fastlane, secrets do keystore);
 #   sql-check — smoke test do supabase/schema.sql + RLS contra um Postgres
 #               real (scripts/sql_check.sh — checklist 6.2).
 name: CI
@@ -48,10 +52,17 @@ jobs:
       - name: Coverage summary
         run: |
           if [ -f coverage/lcov.info ]; then
+            # Comparação em ponto flutuante com awk puro (sem depender de bc).
             pct=$(awk -F: '/^LF:/{lf+=$2} /^LH:/{lh+=$2} END {printf "%.1f", (lf>0 ? 100*lh/lf : 0)}' coverage/lcov.info)
             echo "Line coverage: ${pct}%"
-            # Gate de cobertura: ajuste o limite após medir a linha de base.
-            # threshold=50.0
+            # Gate de cobertura (auditoria H3/6.5): baseline medido em
+            # 48.1% (Aug 5, 2026). Subir o limite conforme novos testes.
+            threshold=45.0
+            below=$(awk -v p="$pct" -v t="$threshold" 'BEGIN { print (p < t) ? 1 : 0 }')
+            if [ "$below" = "1" ]; then
+              echo "::error::Coverage ${pct}% is below the ${threshold}% threshold"
+              exit 1
+            fi
           fi
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
@@ -60,7 +71,7 @@ jobs:
           path: coverage/lcov.info
 
   build:
-    name: Build (Android release APK)
+    name: Build (Android release APK, flavor dev)
     runs-on: ubuntu-latest
     needs: [analyze, test]
     steps:
@@ -74,14 +85,17 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      # Sem key.properties no CI → assinatura debug (fallback) — valida que
-      # o build de release compila. A assinatura de produção é feita com os
-      # secrets do keystore em um workflow de release dedicado.
-      - run: flutter build apk --release
+      # Build do flavor DEV com os dart-defines de desenvolvimento
+      # (env/dev.env, commitado). Sem key.properties no CI → assinatura
+      # debug (fallback) — valida que o build de release compila e que os
+      # flavors + dart-define-from-file funcionam. O AAB de PRODUÇÃO
+      # (assinado) é construído apenas no workflow release.yml (tag v*,
+      # Fastlane, secrets do keystore).
+      - run: flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
       - uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-dev-release.apk
 
   sql-check:
     name: SQL / RLS check

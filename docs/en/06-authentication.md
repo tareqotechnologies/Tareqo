@@ -46,13 +46,15 @@ static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
 ```
 
 - The **anon key is public by design** in Supabase (it is embedded in the client) — the real security comes from **RLS**. **Never** put the *service role key* in the client.
-- To point to another project (e.g.: production):
+- **Flavors (dev/prod):** credentials are provided via `--dart-define-from-file` (`env/dev.env` committed, `env/prod.env` gitignored). `FLUTTER_APP_FLAVOR` is a **reserved define** injected from `--flavor` — do not set it manually:
 
 ```bash
-flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co \
-            --dart-define=SUPABASE_ANON_KEY=eyJ...
+flutter run --flavor dev --dart-define-from-file=env/dev.env
+flutter build appbundle --flavor prod --release \
+  --dart-define-from-file=env/prod.env
 ```
 
+- **Fail-fast in release (S2):** a **release** build with the embedded defaults (or without `--flavor prod`) throws at startup — a published APK can never silently point at the dev project. In debug the defaults are fine for development.
 - Without credentials, `SupabaseBootstrap.initialize()` only logs a warning; the app opens and `authStateProvider` emits `null` (signed out) — sign in fails with a friendly message instead of crashing.
 
 ---
@@ -61,7 +63,7 @@ flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co \
 
 ### Sign in (`SignInUseCase` → `signInWithPassword`)
 
-1. `LoginScreen._submit()` validates the form (email with `@`, password ≥ 6 characters);
+1. `LoginScreen._submit()` validates the form (email with domain/TLD, password **≥ 8** characters, confirmation match on signup);
 2. Calls `signInUseCaseProvider` → `IAuthRepository.signIn` → gotrue;
 3. **Success:** the `authStateChanges` stream emits the `AppUser` → `AuthGate` switches to `AppShell` **automatically** (the screen does not navigate manually);
 4. **Failure:** detailed log via `debugPrint` + generic SnackBar ("Não foi possível entrar. Verifique e-mail e senha.") — does not expose provider internals.
@@ -81,10 +83,12 @@ flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co \
 
 ## Persistent session (how the app "remembers" the user)
 
-1. **Storage:** `supabase_flutter` persists the session automatically — `flutter_secure_storage` (Android/iOS) and `localStorage` (web). Zero extra code.
-2. **Boot restore:** `onAuthStateChange` re-emits the saved session (with `recoverSession` on web). The `AuthGate` reacts: session restored → straight to the dashboard, no new login.
+1. **Storage:** the session is persisted via a **custom `LocalStorage` wired into `Supabase.initialize`** — [`SecureSupabaseLocalStorage`](../pt/07-seguranca.md) backs it with **`flutter_secure_storage` (Keychain/Keystore)** on native platforms (the SDK default would use `shared_preferences` plaintext — fixed Aug 6). The PKCE code verifier uses the same secure backend. On **web** the SDK default (`window.localStorage`) is kept — `flutter_secure_storage` 10.x has no web support (documented limitation).
+2. **Boot restore:** `onAuthStateChange` re-emits the saved session. The `AuthGate` reacts: session restored → straight to the dashboard, no new login.
 3. **Automatic renewal:** gotrue renews the access token with the refresh token before it expires.
 4. **Reactivity:** sign in/out emit events on the same stream; navigation and any session-dependent state react automatically.
+
+> ⚠️ **Migration note:** installations with a session previously stored by the SDK default will sign out **once** after upgrading (the session moves to the Keychain/Keystore).
 
 ---
 
@@ -97,11 +101,11 @@ After signing up, the owner goes through **onboarding** (`TenantOnboardingScreen
 ## Multi-tenant and RLS (why authentication comes first)
 
 1. **Data isolation:** without login there is no way to separate each store's data in the same database;
-2. **Security in the database:** Supabase applies the JWT in **Row Level Security** (`user_id = auth.uid()`) — even if the UI leaks data, the database filters it;
+2. **Security in the database:** Supabase applies the JWT in **Row Level Security** — `auth.uid() = user_id` **or** `public.is_my_store(store_id)` (tenant owner = all stores; linked employee = their store) — even if the UI leaks data, the database filters it;
 3. **Revenue model:** identity identifies who pays, which plan and which quotas apply;
 4. **Onboarding/retention:** persistent session reduces daily friction.
 
-> ⚠️ **Current state:** authentication is implemented and functional, but the **business modules (products, sales, finance, credit) are not yet synced per tenant** — persistence is local (SQLite/in-memory). Syncing with Supabase and enabling RLS is the suggested next step (see [Overview](01-overview.md#current-state-and-next-steps)).
+> ✅ **Current state:** authentication + **full SaaS sync** are implemented — business modules (products, sales, finance, credit, customers, purchases) persist per tenant **and per store** in Supabase with RLS + anti-forgery triggers and atomic money RPCs.
 
 ---
 

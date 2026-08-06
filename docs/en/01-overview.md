@@ -73,7 +73,8 @@
 | `flutter_secure_storage` ^10.3.1 | Encrypted persistence (Keychain/Keystore) | core |
 | `sqlite3` + `sqlite3_flutter_libs` | Local relational persistence (parameterized SQL) | data |
 | `path_provider` + `path` | Database file location | core/data |
-| `dio` ^5.11.0 | HTTP client (reserved for future REST APIs) | data |
+| `sentry_flutter` ^9.26.0 | Crash reporting (Sentry, DSN via `--dart-define=SENTRY_DSN`) | core |
+| `flutter_localizations` + `intl` | i18n (pt/en) and currency/date formatting | core |
 
 > Dart SDK `^3.12.2` (recent Flutter 3.x).
 
@@ -81,15 +82,15 @@
 
 ## Current state and next steps
 
-The app is fully functional end-to-end. With Supabase configured (default), the business modules **sync to Postgres per tenant and per store** — products, sales, finance, credit, customers and purchases — with RLS + isolation triggers (schema in `supabase/schema.sql`). Without Supabase configured, persistence falls back to **SQLite (native)** or **in-memory (web)**.
+The app is fully functional end-to-end. With Supabase configured (default), the business modules **sync to Postgres per tenant and per store** — products, sales, finance, credit, customers and purchases — with RLS + isolation triggers (schema in `supabase/schema.sql`), and the **money flows (sale, purchase, debt, settlement) run as atomic `SECURITY DEFINER` RPCs** in a single DB transaction. Without Supabase configured, persistence falls back to **SQLite (native)** or **in-memory (web)**.
 
-Next steps:
+Remaining roadmap:
 
-1. Cross-table atomicity in the sale flow via a `SECURITY DEFINER` RPC (today each REST call is an isolated transaction);
-2. Recurring fixed expenses (scheduling rent/electricity);
-3. "Pay" action for pending expenses in Finance (today only income has "Receive");
-4. Offline cache (local read + sync) for use without connection;
-5. Plan limits enforced on the server (Postgres triggers/RPC — today validated in the app).
+1. Recurring fixed expenses (scheduling rent/electricity);
+2. "Pay" action for pending expenses in Finance (today only income has "Receive");
+3. Offline cache (local read + sync) for use without connection;
+4. Server-side aggregation/pagination for large datasets (KPIs are client-side today, capped at 1000 rows per listing);
+5. Billing/payments and self-serve plan changes.
 
 ---
 

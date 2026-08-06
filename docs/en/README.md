@@ -3,6 +3,8 @@
 Welcome to the complete documentation of **Dumbhanengue ERP** — a business management system (inventory, sales, finance and credit/"fiado" tracking) built in Flutter with **Clean Architecture**.
 
 > 🌐 **Language:** This is the English version. The Portuguese documentation lives in ([`docs/pt/`](../pt/README.md)).
+>
+> 📌 **Audit docs:** the production-readiness audit reports ([`docs/pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md)) and the live checklist ([`docs/pt/PRODUCTION_CHECKLIST.md`](../pt/PRODUCTION_CHECKLIST.md)) are maintained in Portuguese (the project's primary language) and are the authoritative source for audit status. The English chapters were synced with the Aug 5/6 changes (flavors, store-scoped RLS, DB-backed super admin, atomic RPCs, secure session storage, CI/CD) — the Portuguese docs remain the primary reference.
 
 This folder gathers every document about the app: from what it does to how each layer works, with code examples, diagrams and practical guides for developers.
 
