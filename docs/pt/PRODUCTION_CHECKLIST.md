@@ -17,13 +17,13 @@
 | 1.2 | Super-admin role hardened (DB table/claims, not email string) | ✅ | C3 audit: `public.super_admins` table + `is_super_admin()` SECURITY DEFINER RPC (schema.sql) + client RPC check (`isSuperAdminProvider`). Schema applied to live project (7.8); verify email confirmation is ON in dashboard (2.1). |
 | 1.3 | Employee access to business data (RLS by store_employees) | ✅ | Store-scoped RLS `is_my_store()` aplicado a todas as tabelas de negócio (C2, Aug 5) — funcionário vê/grava dados da própria loja; dono cobre todas. |
 | 1.4 | Plan-limit enforcement in DB (triggers on stores / store_employees) | ✅ | `enforce_store_limit` / `enforce_employee_limit` added to `schema.sql`; applied to live project (7.8). |
-| 1.4b | **Access-level matrix (Aug 6):** compras são nível GERENCIAL — dono ou gerente registram/lêem compras; funcionário comum não (nem mesmo via PostgREST direto) | ✅ | Helper `is_manager_of_store` + guarda do `process_purchase` + políticas RLS de `purchases`/`purchase_items` no `schema.sql` e na migração `007_manager_purchase_gate.sql`; UI oculta Compras/Relatórios (funcionário) e Lojas (não-dono) via `currentAccessLevelProvider`; regressão [8/8] no `sql_check.sh` (funcionário bloqueado, gerente autorizado). |
+| 1.4b | **Access-level matrix (Aug 6):** compras são nível GERENCIAL — dono ou gerente registram/lêem compras; funcionário comum não (nem mesmo via PostgREST direto) | ✅ | Helper `is_manager_of_store` + guarda do `process_purchase` + políticas RLS de `purchases`/`purchase_items` no `schema.sql` e no `supabase/upgrade.sql` (Parte 4); UI oculta Compras/Relatórios (funcionário) e Lojas (não-dono) via `currentAccessLevelProvider`; regressão [8/8] no `sql_check.sh` (funcionário bloqueado, gerente autorizado). |
 | 1.5 | Atomic stock decrement on Supabase (no lost updates) | ✅ | Solved inside `process_sale`/`process_purchase` RPCs (`FOR UPDATE` + guarded UPDATE). |
-| 1.7 | Money as integer cents (replace double/REAL) | 🔄 | Migração integral segue ⏳; mitigação H1 aplicada: helper `Money` (soma/multiplicação em centavos) em todos os acúmulos de use cases + somas da UI (dashboard, customers, carrinho). |
+| 1.7 | Money as integer cents (replace double/REAL) | ✅ | **W4 (Aug 6 — sessão final):** migração integral para **centavos inteiros** — domínio (`*Cents`), SQLite (`INTEGER` + migração ×100 idempotente por afinidade de coluna), Supabase (`BIGINT` + migração ×100 com guarda — Parte 7 do `supabase/upgrade.sql`), RPCs comparando em centavos (sem `ROUND(x*100)`), seeds ×100, UI (`Money.parse`/`Formatters.currency(cents)`). 300/300 testes verdes. |
 | 1.10 | Collision-free IDs | ✅ | `AppIds.newId()` (timestamp + entropy) replaces all `microsecondsSinceEpoch` IDs. |
 | 1.16 | `SettleDebtUseCase` inside `IUnitOfWork` (SQLite atomicity) | ✅ | Debt settlement + cash entry roll back together on SQLite. |
 | 1.17 | **Critical (Aug 5):** operator-precedence bug in atomic RPCs — `'t' || p->>'id'` parses as `('t' || p)->>'id'` (`||` and `->>` share precedence), becoming jsonb concat → `22P02 Token "t" is invalid` on every sale/debt/purchase insert in Supabase mode | ✅ | Fixed with parentheses `'t' || (p->>'id')` (ids + descriptions in `process_sale`/`register_debt`/`process_purchase`), re-applied to live (7.8), E2E re-run **22/22**; `sql_check.sh` [4/4] executes the RPCs so it cannot regress silently. |
-| 1.18 | **Aug 6:** `settle_debt` carimba a DATA DE REALIZAÇÃO (`date = now()`) na pendência vinculada — mesmo semântica do `markAsPaid` local (SQLite). Antes, o modo SaaS mantinha a data do REGISTRO da pendência e o fluxo de caixa reconhecia o recebimento no período errado | ✅ | `schema.sql` + `migrations/004_settle_debt_realization_date.sql` (idempotente) + assert de data no `sql_check.sh`. |
+| 1.18 | **Aug 6:** `settle_debt` carimba a DATA DE REALIZAÇÃO (`date = now()`) na pendência vinculada — mesmo semântica do `markAsPaid` local (SQLite). Antes, o modo SaaS mantinha a data do REGISTRO da pendência e o fluxo de caixa reconhecia o recebimento no período errado | ✅ | `schema.sql` + `supabase/upgrade.sql` (Parte 8.3, idempotente) + assert de data no `sql_check.sh`. |
 
 ## 2. Security
 
@@ -52,8 +52,8 @@
 
 | # | Item | Status | Notes |
 |---|------|--------|-------|
-| 4.1 | Pagination (.range/.limit) on all Supabase `getAll` | ⏳ | High impact at 10k+ rows. |
-| 4.2 | Server-side aggregation RPCs for KPIs/reports/cash flow | 🔄 | **W5 (Aug 6):** RPC `get_dashboard_kpis` (vendas, caixa, pendências, stock num SELECT único, scoped `is_my_store`) + `dashboardKpisProvider` com fallback local + invalidação nas 7 telas de mutação + migração `009_dashboard_kpis.sql` + passo [10/10] no `sql_check.sh`. Cash flow/relatórios ainda somam no cliente — seguem ⏳. |
+| 4.1 | Pagination (.range/.limit) on all Supabase `getAll` | ✅ | **H2 (Aug 6 — sessão final):** paginação **keyset** no `getAll` dos 6 datasources remotos (produtos, vendas, caixa, fiado, compras, clientes) — helper `fetchAllKeyset` (lotes de `pageSize` pelo `id` como cursor estável, `gt(id, último)` na página seguinte) substitui o `.limit(1000)` único que truncava lojas com 10k+ linhas; ordenação de exibição preservada (produtos re-ordenam por nome no datasource; os demais nos providers). |
+| 4.2 | Server-side aggregation RPCs for KPIs/reports/cash flow | ✅ | **W5 (Aug 6):** RPC `get_dashboard_kpis` + provider com fallback local + migração `009`. **H2 (Aug 6 — sessão final):** novas RPCs `get_cash_flow` (entradas/saídas PAID do período) e `get_sales_report` (faturamento, lucro bruto, top 5 vendidos e vendas por dia no fuso do dispositivo) — `SECURITY DEFINER` com guarda `is_my_store`, valores em BIGINT (centavos). `GetCashFlowUseCase`/`GetSalesReportUseCase` ganharam `serverRepository` opcional (`SupabaseCashFlowRepository`/`SupabaseSalesReportRepository`, registrados só no modo SaaS); local/testes continuam somando client-side. Consolidado em `supabase/upgrade.sql` (Partes 8.6–8.7) + passo **[11/11]** no `sql_check.sh`. |
 | 4.3 | `SettleDebtUseCase` targeted lookups (WHERE id/debt_id) | 🔄 | Supabase now delegates to the targeted `settle_debt` RPC (C4); composite path (SQLite/memória) still O(all debts + all transactions). |
 | 4.4 | Defer SQLite open/seed off the main isolate | ⏳ | Startup frame. |
 | 4.5 | Offline cache + sync queue (local-first) | 🔴 | Strategic; biggest UX win for target market. |
@@ -100,8 +100,8 @@
 | # | Item | Status | Notes |
 |---|------|--------|-------|
 | 8.1 | Remove `dio` | ✅ | Dead dependency removed. |
-| 8.2 | Migrate `sqlite3` 2.9.0 → 3.x + `sqlite3_android` | 🔄 | `sqlite3_flutter_libs` atualizado 0.5.27 → **0.6.0+eol** (Aug 5) — corrigiu build de release quebrado (a 0.5.27 era compilada contra android-32). Migração completa para `sqlite3_android` + `sqlite3` 3.x segue ⏳. |
-| 8.3 | `dart pub upgrade` + re-verify 175 tests | ⏳ | After 8.2. |
+| 8.2 | Migrate `sqlite3` 2.9.0 → 3.x + `sqlite3_android` | ✅ | **W10 (Aug 6 — sessão final):** `sqlite3` **2.9.0 → ^3.5.1** — desde a 3.0.0 o pacote usa **build hooks (native assets)** e compila/empacota o SQLite para Android/iOS/desktop; removidos `sqlite3_flutter_libs` (EOL) e o loader manual (`open.overrideFor`/`DynamicLibrary`), `dispose()` → `close()`. Nenhum `sqlite3_android` é necessário (o hook cobre o Android). |
+| 8.3 | `dart pub upgrade` + re-verify 175 tests | ✅ | **Aug 6 (sessão final):** após o W10, `dart pub get` + suíte completa **300/300 testes verdes** + `flutter analyze` 0 issues. |
 
 ## 9. Docs & housekeeping
 
@@ -114,7 +114,5 @@
 
 ## Immediate priorities (next working session)
 1. **Externos (bloqueadores de loja):** ativar Play App Signing + registrar o SHA-256 da upload key (7.1); verificar e-mail de confirmação ON + 2FA no dashboard do Supabase (2.1/2.2); contas Google Play/Apple + secrets no CI (7.9); privacy policy/ToS (7.5).
-2. **W4** — migração de dinheiro para centavos inteiros (1.7) — único refactor de dados remanescente.
-3. **H2 restante** — agregação de cash flow/relatórios em SQL + paginação keyset (4.1/4.2).
-4. **W10** — migração `sqlite3_android` (8.2).
-5. **W2** — billing (adiado por decisão de produto; limites já no servidor).
+2. **W2** — billing (adiado por decisão de produto; limites já no servidor).
+3. Aplicar as migrações **010** (W4 cents) e **011** (H2 RPCs) ao Supabase live + rodar `sql_check.sh` [11/11] no CI. 👈 *Os três itens internos (W4, H2 restante, W10) foram concluídos na sessão final Aug 6.*

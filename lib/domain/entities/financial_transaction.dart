@@ -5,7 +5,7 @@ part 'financial_transaction.g.dart';
 
 /// Direção do movimento financeiro.
 ///
-/// O [FinancialTransaction.amount] é sempre um valor **positivo**
+/// O [FinancialTransaction.amountCents] é sempre um valor **positivo**
 /// (magnitude); a direção é definida por este enum.
 enum TransactionType {
   income('Entrada'),
@@ -42,14 +42,16 @@ abstract class FinancialTransaction with _$FinancialTransaction {
   // O valor é sempre magnitude positiva; a direção é definida por [type].
   // Assertions rodam em desenvolvimento e testes (em produção, valide no
   // use case e use CHECK no banco).
-  @Assert('amount >= 0', 'O valor da transação deve ser positivo.')
+  @Assert('amountCents >= 0', 'O valor da transação deve ser positivo.')
   const factory FinancialTransaction({
     required String id,
     // Loja dona do movimento — o caixa é por loja (Fase 2 do
     // multi-tenancy).
     @Default('st1') String storeId,
     required String description,
-    required double amount,
+    // Valor em CENTAVOS inteiros (W4 — migração de dinheiro para
+    // centavos; o banco persiste BIGINT/INTEGER).
+    required int amountCents,
     required TransactionType type,
     required String category,
     required DateTime date,

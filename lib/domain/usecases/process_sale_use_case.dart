@@ -110,7 +110,7 @@ class ProcessSaleUseCase {
             language: Formatters.currentLanguage,
             paymentMethod: sale.paymentMethod,
           ),
-          amount: sale.totalAmount,
+          amountCents: sale.totalAmountCents,
           type: TransactionType.income,
           category:
               TransactionDescriptions.saleCategory(Formatters.currentLanguage),
@@ -129,19 +129,16 @@ class ProcessSaleUseCase {
       );
     }
 
-    final itemsTotal = sale.items.fold<double>(
+    // Soma em CENTAVOS inteiros (W4): int é exato — sem arredondamento
+    // de fronteira (antes: 2 × 9.9 + 9.9 acumulava 29.700000000000003).
+    final itemsTotalCents = sale.items.fold<int>(
       0,
-      (sum, item) => sum + item.quantity * item.unitPrice,
+      (sum, item) => sum + item.quantity * item.unitPriceCents,
     );
-    // Comparação em CENTAVOS: tolerância absoluta em double pode gerar
-    // falso positivo em totais grandes (ex.: 2 × 9.9 + 9.9 acumula
-    // 29.700000000000003).
-    final itemsCents = (itemsTotal * 100).round();
-    final totalCents = (sale.totalAmount * 100).round();
-    if (itemsCents != totalCents) {
+    if (itemsTotalCents != sale.totalAmountCents) {
       throw InvalidSaleException(
-        'O total da venda (${sale.totalAmount}) não corresponde aos itens '
-        '($itemsTotal).',
+        'O total da venda (${sale.totalAmountCents}) não corresponde aos '
+        'itens ($itemsTotalCents).',
       );
     }
   }

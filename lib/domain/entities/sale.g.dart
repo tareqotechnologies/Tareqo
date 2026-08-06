@@ -12,7 +12,7 @@ _Sale _$SaleFromJson(Map<String, dynamic> json) => _Sale(
   items: (json['items'] as List<dynamic>)
       .map((e) => SaleItem.fromJson(e as Map<String, dynamic>))
       .toList(),
-  totalAmount: (json['totalAmount'] as num).toDouble(),
+  totalAmountCents: (json['totalAmountCents'] as num).toInt(),
   paymentMethod: $enumDecode(_$PaymentMethodEnumMap, json['paymentMethod']),
   dateTime: DateTime.parse(json['dateTime'] as String),
 );
@@ -21,7 +21,7 @@ Map<String, dynamic> _$SaleToJson(_Sale instance) => <String, dynamic>{
   'id': instance.id,
   'storeId': instance.storeId,
   'items': instance.items.map((e) => e.toJson()).toList(),
-  'totalAmount': instance.totalAmount,
+  'totalAmountCents': instance.totalAmountCents,
   'paymentMethod': _$PaymentMethodEnumMap[instance.paymentMethod]!,
   'dateTime': instance.dateTime.toIso8601String(),
 };

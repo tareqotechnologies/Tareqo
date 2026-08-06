@@ -61,8 +61,8 @@ class SalesReportNotifier extends AsyncNotifier<SalesReport> {
 
     if (storeId == null) {
       return Future.value(const SalesReport(
-        totalRevenue: 0,
-        totalProfit: 0,
+        totalRevenueCents: 0,
+        totalProfitCents: 0,
         bestSellers: [],
         perDay: [],
       ));

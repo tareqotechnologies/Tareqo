@@ -10,7 +10,7 @@ void main() {
   late Database db;
 
   setUp(() => db = openTestDatabase());
-  tearDown(() => db.dispose());
+  tearDown(() => db.close());
 
   test('add persiste e getAll reconstrói enums, data e valor', () async {
     final dataSource = FinancialTransactionSqliteDataSourceImpl(db);
@@ -19,7 +19,7 @@ void main() {
       FinancialTransaction(
         id: 't1',
         description: 'Energia elétrica',
-        amount: 180.0,
+        amountCents: 18000,
         type: TransactionType.expense,
         category: 'Contas',
         date: DateTime(2026, 8, 3, 9, 15),
@@ -33,7 +33,7 @@ void main() {
     final transaction = transactions.first;
     expect(transaction.id, 't1');
     expect(transaction.description, 'Energia elétrica');
-    expect(transaction.amount, 180.0);
+    expect(transaction.amountCents, 18000);
     expect(transaction.type, TransactionType.expense);
     expect(transaction.category, 'Contas');
     expect(transaction.date, DateTime(2026, 8, 3, 9, 15));
@@ -47,7 +47,7 @@ void main() {
       FinancialTransaction(
         id: 't2',
         description: 'Venda',
-        amount: 50.0,
+        amountCents: 5000,
         type: TransactionType.income,
         category: 'Vendas',
         date: DateTime(2026, 8, 3),
@@ -67,7 +67,7 @@ void main() {
       FinancialTransaction(
         id: 't3',
         description: 'Venda fiado (João)',
-        amount: 25.0,
+        amountCents: 2500,
         type: TransactionType.income,
         category: 'Fiado',
         date: DateTime(2026, 8, 3),
@@ -89,7 +89,7 @@ void main() {
       FinancialTransaction(
         id: 't1',
         description: 'Venda fiado',
-        amount: 25.0,
+        amountCents: 2500,
         type: TransactionType.income,
         category: 'Fiado',
         date: DateTime(2026, 8, 3),

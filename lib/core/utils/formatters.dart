@@ -6,6 +6,9 @@ import 'package:intl/intl.dart';
 /// via [applySettings] — o [AppSettings] é aplicado no `DumbhanengueApp`
 /// sempre que o tenant carrega/altera. Sem configuração (testes, antes do
 /// login), o padrão é BRL + pt-BR, mantendo o comportamento original.
+///
+/// Desde a migração W4, todo dinheiro vive em **centavos inteiros** —
+/// [currency] recebe centavos (`123456` → `R$ 1.234,56`).
 abstract final class Formatters {
   static String _currencyCode = 'BRL';
   static String _language = 'pt';
@@ -33,11 +36,12 @@ abstract final class Formatters {
   /// Idioma atualmente ativo (default `pt`).
   static String get currentLanguage => _language;
 
-  /// Formata um valor na moeda e idioma ativos:
+  /// Formata um valor em CENTAVOS na moeda e idioma ativos:
   /// `R$ 1.234,56` (pt) ou `US$ 1,234.56` (en).
-  static String currency(double value) {
+  static String currency(int cents) {
     final symbol = _currencySymbols[_currencyCode] ?? '$_currencyCode ';
     final locale = _language == 'en' ? 'en_US' : 'pt_BR';
+    final value = cents / 100;
     final formatted = NumberFormat('#,##0.00', locale).format(value);
     return '$symbol $formatted';
   }

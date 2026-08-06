@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/money.dart';
 import '../../../domain/entities/plan.dart';
 import '../../../domain/usecases/add_plan_use_case.dart';
 import '../../controllers/account_providers.dart';
@@ -123,7 +124,7 @@ class _PlanTile extends StatelessWidget {
         ),
         subtitle: Text(
           l10n.adminPlanDetails(
-            Formatters.currency(plan.priceMonthly),
+            Formatters.currency(plan.priceMonthlyCents),
             plan.maxStores,
             plan.maxEmployees,
           ),
@@ -151,7 +152,9 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
     text: widget.plan?.description ?? '',
   );
   late final _priceController = TextEditingController(
-    text: widget.plan == null ? '' : widget.plan!.priceMonthly.toString(),
+    text: widget.plan == null
+        ? ''
+        : (widget.plan!.priceMonthlyCents / 100).toString(),
   );
   late final _maxStoresController = TextEditingController(
     text: widget.plan == null ? '1' : widget.plan!.maxStores.toString(),
@@ -176,7 +179,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
 
   Future<void> _submit() async {
     final l10n = context.l10n;
-    final price = double.tryParse(_priceController.text.trim());
+    final priceCents = Money.parse(_priceController.text.trim());
     final maxStores = int.tryParse(_maxStoresController.text.trim());
     final maxEmployees = int.tryParse(_maxEmployeesController.text.trim());
 
@@ -184,7 +187,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
       setState(() => _formError = l10n.adminPlanNameError);
       return;
     }
-    if (price == null || price < 0) {
+    if (_priceController.text.trim().isEmpty || priceCents < 0) {
       setState(() => _formError = l10n.adminPlanPriceError);
       return;
     }
@@ -207,7 +210,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
       id: widget.plan?.id ?? AppIds.newId('pl'),
       name: _nameController.text.trim(),
       description: _descriptionController.text.trim(),
-      priceMonthly: price,
+      priceMonthlyCents: priceCents,
       maxStores: maxStores,
       maxEmployees: maxEmployees,
       isActive: _isActive,

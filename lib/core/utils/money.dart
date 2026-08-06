@@ -1,49 +1,61 @@
-/// Operações seguras com dinheiro representado como [double].
+/// Helpers de conversão/parse de DINHEIRO em CENTAVOS inteiros (W4).
 ///
-/// O domínio usa `double` para valores monetários (mesma convenção do
-/// SQLite/UI). `double` não representa decimais exatamente, então toda
-/// FRONTEIRA de cálculo precisa arredondar para centavos (auditoria H1):
+/// Após a migração W4, o domínio representa todo dinheiro como
+/// **centavos inteiros** (`int`) — elimina os artefatos de `double`
+/// (0.1 + 0.2 → 0.30000000000000004) em somas, relatórios e comparações.
 ///
-/// 1. **Acúmulos** (fluxo de caixa, relatórios) — somar centavos em vez de
-///    doubles: `sum([0.1, 0.2, 0.3]) == 0.6` exato;
-/// 2. **Fronteiras de persistência** — o banco já usa NUMERIC(12,2);
-/// 3. **Exibição** — [round2] antes de formatar.
+/// Esta classe concentra as **bordas de conversão**:
+/// 1. **Entrada da UI** — [parse] interpreta o texto digitado
+///    ("13,90" ou "13.90") → centavos;
+/// 2. **Legado/JSON externo** — [fromReais] converte um `double` (ou
+///    `NUMERIC` do banco antigo) em centavos.
 ///
-/// Regra de arredondamento: arredondamento binário padrão do Dart
-/// (`round()` — meio para longe de zero). Como `double` não representa
-/// 2.675 exatamente (vira 2.67499…), `Money.round2(2.675) == 2.67` — o
-/// mesmo comportamento de `(x * 100).round() / 100` e do `NUMERIC` do
-/// Postgres. Valores com 2 casas vêm de entrada com máscara decimal ou do
-/// banco (NUMERIC(12,2)), então o caso real de "meio centavo" não ocorre.
+/// Regra de arredondamento: padrão do Dart (`round()` — meio para longe
+/// de zero), o mesmo comportamento do Postgres NUMERIC.
 abstract final class Money {
   /// Fator de centavos (10²).
   static const int _centsFactor = 100;
 
-  /// Arredonda [value] para 2 casas decimais (centavos).
+  /// Interpreta [input] digitado na UI como centavos inteiros.
   ///
-  /// Aritmética em centavos: `(v × 100).round()` elimina os artefatos de
-  /// `double` na segunda casa (ex.: `0.1 + 0.2 → 0.30000000000000004` vira
-  /// `0.3` exato) e segue o arredondamento do Postgres NUMERIC.
-  static double round2(double value) =>
-      (value * _centsFactor).round() / _centsFactor;
+  /// Aceita separador decimal vírgula (pt) ou ponto (en), com ou sem
+  /// milhares (`1.234,56` → 123456; `1,234.56` → 123456). Retorna 0
+  /// para entradas vazias/inválidas (a validação de "maior que zero"
+  /// fica no use case / validator do formulário).
+  static int parse(String input) {
+    var normalized = input.trim().replaceAll(' ', '');
+    if (normalized.isEmpty) return 0;
 
-  /// Soma [values] acumulando em CENTAVOS (inteiros) — exata para 2 casas.
-  /// Retorna o total arredondado a centavos.
-  static double sum(Iterable<num> values) {
-    var cents = 0;
-    for (final value in values) {
-      cents += (round2(value.toDouble()) * _centsFactor).round();
+    // Detecta o separador decimal pelo ÚLTIMO separador presente: o
+    // texto com milhares tem DOIS separadores distintos ou um padrão
+    // claro (grupos de 3); sem milhares, o único separador é o decimal.
+    final comma = normalized.lastIndexOf(',');
+    final dot = normalized.lastIndexOf('.');
+    if (comma > dot) {
+      // pt: vírgula decimal; pontos são milhares.
+      normalized = normalized.replaceAll('.', '').replaceFirst(',', '.');
+    } else if (dot > comma) {
+      // en: ponto decimal; vírgulas são milhares.
+      normalized = normalized.replaceAll(',', '');
+    } else {
+      // Sem separador algum (ex.: "1390") — nada a normalizar; o número
+      // é lido como reais inteiros. (Um único separador é tratado como
+      // decimal na heurística acima; milhar sem decimal é ambíguo e não
+      // é distinguível de um decimal — comportamento documentado.)
+      normalized = normalized.replaceAll(',', '').replaceAll('.', '');
     }
-    return cents / _centsFactor;
+
+    final value = double.tryParse(normalized);
+    if (value == null) return 0;
+    return fromReais(value);
   }
 
-  /// Valor em centavos (int) — base para comparações exatas
-  /// (`Money.cents(9.9) == 990`).
-  static int cents(double value) => (round2(value) * _centsFactor).round();
+  /// Converte [value] em reais (double) para centavos inteiros.
+  ///
+  /// Usado nas bordas: parse da UI e leitura de dados legados. Soma e
+  /// comparação a partir daqui são SEMPRE em centavos (exatas).
+  static int fromReais(double value) => (value * _centsFactor).round();
 
-  /// Multiplicação exata `[quantity] × [unitPrice]` arredondada a centavos —
-  /// o preço unitário tem 2 casas; multiplicar por inteiro não introduz
-  /// erro além do arredondamento do próprio preço.
-  static double times(int quantity, double unitPrice) =>
-      cents(unitPrice) * quantity / _centsFactor;
+  /// Converte centavos inteiros em reais (double) — para formatar/plotar.
+  static double toReais(int cents) => cents / _centsFactor;
 }

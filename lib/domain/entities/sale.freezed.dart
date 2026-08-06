@@ -17,7 +17,9 @@ mixin _$Sale {
 
  String get id;// Loja onde a venda foi realizada (Fase 2 do multi-tenancy). Cada
 // loja tem seu próprio histórico de vendas.
- String get storeId; List<SaleItem> get items; double get totalAmount; PaymentMethod get paymentMethod; DateTime get dateTime;
+ String get storeId; List<SaleItem> get items;// Valor TOTAL da venda em CENTAVOS inteiros (W4 — migração de
+// dinheiro para centavos; o banco persiste BIGINT/INTEGER).
+ int get totalAmountCents; PaymentMethod get paymentMethod; DateTime get dateTime;
 /// Create a copy of Sale
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,16 +32,16 @@ $SaleCopyWith<Sale> get copyWith => _$SaleCopyWithImpl<Sale>(this as Sale, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Sale&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.totalAmount, totalAmount) || other.totalAmount == totalAmount)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Sale&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.totalAmountCents, totalAmountCents) || other.totalAmountCents == totalAmountCents)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,storeId,const DeepCollectionEquality().hash(items),totalAmount,paymentMethod,dateTime);
+int get hashCode => Object.hash(runtimeType,id,storeId,const DeepCollectionEquality().hash(items),totalAmountCents,paymentMethod,dateTime);
 
 @override
 String toString() {
-  return 'Sale(id: $id, storeId: $storeId, items: $items, totalAmount: $totalAmount, paymentMethod: $paymentMethod, dateTime: $dateTime)';
+  return 'Sale(id: $id, storeId: $storeId, items: $items, totalAmountCents: $totalAmountCents, paymentMethod: $paymentMethod, dateTime: $dateTime)';
 }
 
 
@@ -50,7 +52,7 @@ abstract mixin class $SaleCopyWith<$Res>  {
   factory $SaleCopyWith(Sale value, $Res Function(Sale) _then) = _$SaleCopyWithImpl;
 @useResult
 $Res call({
- String id, String storeId, List<SaleItem> items, double totalAmount, PaymentMethod paymentMethod, DateTime dateTime
+ String id, String storeId, List<SaleItem> items, int totalAmountCents, PaymentMethod paymentMethod, DateTime dateTime
 });
 
 
@@ -67,13 +69,13 @@ class _$SaleCopyWithImpl<$Res>
 
 /// Create a copy of Sale
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? items = null,Object? totalAmount = null,Object? paymentMethod = null,Object? dateTime = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? items = null,Object? totalAmountCents = null,Object? paymentMethod = null,Object? dateTime = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
-as List<SaleItem>,totalAmount: null == totalAmount ? _self.totalAmount : totalAmount // ignore: cast_nullable_to_non_nullable
-as double,paymentMethod: null == paymentMethod ? _self.paymentMethod : paymentMethod // ignore: cast_nullable_to_non_nullable
+as List<SaleItem>,totalAmountCents: null == totalAmountCents ? _self.totalAmountCents : totalAmountCents // ignore: cast_nullable_to_non_nullable
+as int,paymentMethod: null == paymentMethod ? _self.paymentMethod : paymentMethod // ignore: cast_nullable_to_non_nullable
 as PaymentMethod,dateTime: null == dateTime ? _self.dateTime : dateTime // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
@@ -160,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  List<SaleItem> items,  double totalAmount,  PaymentMethod paymentMethod,  DateTime dateTime)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  List<SaleItem> items,  int totalAmountCents,  PaymentMethod paymentMethod,  DateTime dateTime)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Sale() when $default != null:
-return $default(_that.id,_that.storeId,_that.items,_that.totalAmount,_that.paymentMethod,_that.dateTime);case _:
+return $default(_that.id,_that.storeId,_that.items,_that.totalAmountCents,_that.paymentMethod,_that.dateTime);case _:
   return orElse();
 
 }
@@ -181,10 +183,10 @@ return $default(_that.id,_that.storeId,_that.items,_that.totalAmount,_that.payme
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  List<SaleItem> items,  double totalAmount,  PaymentMethod paymentMethod,  DateTime dateTime)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  List<SaleItem> items,  int totalAmountCents,  PaymentMethod paymentMethod,  DateTime dateTime)  $default,) {final _that = this;
 switch (_that) {
 case _Sale():
-return $default(_that.id,_that.storeId,_that.items,_that.totalAmount,_that.paymentMethod,_that.dateTime);case _:
+return $default(_that.id,_that.storeId,_that.items,_that.totalAmountCents,_that.paymentMethod,_that.dateTime);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +203,10 @@ return $default(_that.id,_that.storeId,_that.items,_that.totalAmount,_that.payme
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  List<SaleItem> items,  double totalAmount,  PaymentMethod paymentMethod,  DateTime dateTime)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  List<SaleItem> items,  int totalAmountCents,  PaymentMethod paymentMethod,  DateTime dateTime)?  $default,) {final _that = this;
 switch (_that) {
 case _Sale() when $default != null:
-return $default(_that.id,_that.storeId,_that.items,_that.totalAmount,_that.paymentMethod,_that.dateTime);case _:
+return $default(_that.id,_that.storeId,_that.items,_that.totalAmountCents,_that.paymentMethod,_that.dateTime);case _:
   return null;
 
 }
@@ -216,7 +218,7 @@ return $default(_that.id,_that.storeId,_that.items,_that.totalAmount,_that.payme
 @JsonSerializable()
 
 class _Sale implements Sale {
-  const _Sale({required this.id, this.storeId = 'st1', required final  List<SaleItem> items, required this.totalAmount, required this.paymentMethod, required this.dateTime}): _items = items;
+  const _Sale({required this.id, this.storeId = 'st1', required final  List<SaleItem> items, required this.totalAmountCents, required this.paymentMethod, required this.dateTime}): _items = items;
   factory _Sale.fromJson(Map<String, dynamic> json) => _$SaleFromJson(json);
 
 @override final  String id;
@@ -230,7 +232,9 @@ class _Sale implements Sale {
   return EqualUnmodifiableListView(_items);
 }
 
-@override final  double totalAmount;
+// Valor TOTAL da venda em CENTAVOS inteiros (W4 — migração de
+// dinheiro para centavos; o banco persiste BIGINT/INTEGER).
+@override final  int totalAmountCents;
 @override final  PaymentMethod paymentMethod;
 @override final  DateTime dateTime;
 
@@ -247,16 +251,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Sale&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.totalAmount, totalAmount) || other.totalAmount == totalAmount)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Sale&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.totalAmountCents, totalAmountCents) || other.totalAmountCents == totalAmountCents)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,storeId,const DeepCollectionEquality().hash(_items),totalAmount,paymentMethod,dateTime);
+int get hashCode => Object.hash(runtimeType,id,storeId,const DeepCollectionEquality().hash(_items),totalAmountCents,paymentMethod,dateTime);
 
 @override
 String toString() {
-  return 'Sale(id: $id, storeId: $storeId, items: $items, totalAmount: $totalAmount, paymentMethod: $paymentMethod, dateTime: $dateTime)';
+  return 'Sale(id: $id, storeId: $storeId, items: $items, totalAmountCents: $totalAmountCents, paymentMethod: $paymentMethod, dateTime: $dateTime)';
 }
 
 
@@ -267,7 +271,7 @@ abstract mixin class _$SaleCopyWith<$Res> implements $SaleCopyWith<$Res> {
   factory _$SaleCopyWith(_Sale value, $Res Function(_Sale) _then) = __$SaleCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String storeId, List<SaleItem> items, double totalAmount, PaymentMethod paymentMethod, DateTime dateTime
+ String id, String storeId, List<SaleItem> items, int totalAmountCents, PaymentMethod paymentMethod, DateTime dateTime
 });
 
 
@@ -284,13 +288,13 @@ class __$SaleCopyWithImpl<$Res>
 
 /// Create a copy of Sale
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? items = null,Object? totalAmount = null,Object? paymentMethod = null,Object? dateTime = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? items = null,Object? totalAmountCents = null,Object? paymentMethod = null,Object? dateTime = null,}) {
   return _then(_Sale(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
-as List<SaleItem>,totalAmount: null == totalAmount ? _self.totalAmount : totalAmount // ignore: cast_nullable_to_non_nullable
-as double,paymentMethod: null == paymentMethod ? _self.paymentMethod : paymentMethod // ignore: cast_nullable_to_non_nullable
+as List<SaleItem>,totalAmountCents: null == totalAmountCents ? _self.totalAmountCents : totalAmountCents // ignore: cast_nullable_to_non_nullable
+as int,paymentMethod: null == paymentMethod ? _self.paymentMethod : paymentMethod // ignore: cast_nullable_to_non_nullable
 as PaymentMethod,dateTime: null == dateTime ? _self.dateTime : dateTime // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));

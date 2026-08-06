@@ -28,7 +28,7 @@ final class PurchaseSqliteDataSourceImpl implements PurchaseLocalDataSource {
           storeId: row['store_id'] as String,
           supplierName: row['supplier_name'] as String,
           items: _itemsOf(row['id'] as String),
-          totalAmount: row['total_amount'] as double,
+          totalAmountCents: (row['total_amount'] as num).toInt(),
           dateTime: DateTime.fromMillisecondsSinceEpoch(
             row['date_time'] as int,
           ),
@@ -48,7 +48,7 @@ final class PurchaseSqliteDataSourceImpl implements PurchaseLocalDataSource {
           productId: row['product_id'] as String,
           productName: row['product_name'] as String,
           quantity: row['quantity'] as int,
-          unitPrice: row['unit_price'] as double,
+          unitPriceCents: (row['unit_price'] as num).toInt(),
         ),
     ];
   }
@@ -63,7 +63,7 @@ final class PurchaseSqliteDataSourceImpl implements PurchaseLocalDataSource {
           purchase.id,
           purchase.storeId,
           purchase.supplierName,
-          purchase.totalAmount,
+          purchase.totalAmountCents,
           purchase.dateTime.millisecondsSinceEpoch,
         ],
       );
@@ -77,7 +77,7 @@ final class PurchaseSqliteDataSourceImpl implements PurchaseLocalDataSource {
             item.productId,
             item.productName,
             item.quantity,
-            item.unitPrice,
+            item.unitPriceCents,
           ],
         );
       }

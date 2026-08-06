@@ -7,10 +7,10 @@ import 'package:dumbhanengue/core/database/app_database_io.dart';
 /// Abre um banco SQLite **em memória** com o schema do app (sem seed),
 /// para testes de datasources/repositórios.
 ///
-/// Na VM Windows o loader cai para a `winsqlite3.dll` do sistema via
-/// [AppDatabase.configureLoader] — sem necessidade de setup manual.
+/// W10: com sqlite3 3.x os build hooks carregam a biblioteca nativa em
+/// todas as plataformas (na VM Windows cai para a winsqlite3.dll do
+/// sistema via hook) — sem setup manual de loader.
 Database openTestDatabase() {
-  AppDatabase.configureLoader();
   final db = sqlite3.openInMemory();
   db.execute('PRAGMA foreign_keys = ON;');
   AppDatabase.createSchema(db);

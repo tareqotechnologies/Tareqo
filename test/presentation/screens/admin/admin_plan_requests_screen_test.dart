@@ -89,8 +89,8 @@ void main() {
     createdAt: DateTime(2026, 7, 1),
   );
   const plans = [
-    Plan(id: 'pl1', name: 'Essencial', priceMonthly: 29.9),
-    Plan(id: 'pl2', name: 'Comercial', priceMonthly: 99.0),
+    Plan(id: 'pl1', name: 'Essencial', priceMonthlyCents: 2990),
+    Plan(id: 'pl2', name: 'Comercial', priceMonthlyCents: 9900),
   ];
   final request = PlanRequest(
     id: 'r1',

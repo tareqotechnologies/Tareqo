@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_app.dart';
 
 import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
+import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_financial_transaction_repository.dart';
 import 'package:dumbhanengue/domain/usecases/get_cash_flow_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/mark_transaction_as_paid_use_case.dart';
@@ -48,12 +49,15 @@ class _FakeFinanceRepository implements IFinancialTransactionRepository {
 
 class _FakeGetCashFlowUseCase implements GetCashFlowUseCase {
   @override
+  final ICashFlowRepository? serverRepository = null;
+
+  @override
   Future<CashFlow> call({
     required String storeId,
     required DateTime start,
     required DateTime end,
   }) async =>
-      const CashFlow(income: 1500, expense: 450);
+      const CashFlow(incomeCents: 150000, expenseCents: 45000);
 }
 
 class _FakeMarkTransactionAsPaidUseCase implements MarkTransactionAsPaidUseCase {
@@ -91,7 +95,7 @@ void main() {
           FinancialTransaction(
             id: 't1',
             description: 'Venda PIX',
-            amount: 1000,
+            amountCents: 100000,
             type: TransactionType.income,
             category: 'Vendas',
             date: now,
@@ -99,7 +103,7 @@ void main() {
           FinancialTransaction(
             id: 't2',
             description: 'Aluguel da loja',
-            amount: 200,
+            amountCents: 20000,
             type: TransactionType.expense,
             category: 'Contas',
             date: now,
@@ -107,7 +111,7 @@ void main() {
           FinancialTransaction(
             id: 't3',
             description: 'Venda fiado (João)',
-            amount: 25,
+            amountCents: 2500,
             type: TransactionType.income,
             category: 'Fiado',
             date: now,
@@ -143,7 +147,7 @@ void main() {
       FinancialTransaction(
         id: 't3',
         description: 'Venda fiado (João)',
-        amount: 25,
+        amountCents: 2500,
         type: TransactionType.income,
         category: 'Fiado',
         date: now,

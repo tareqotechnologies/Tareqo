@@ -1,10 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
+import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_financial_transaction_repository.dart';
 import 'package:dumbhanengue/domain/usecases/get_cash_flow_use_case.dart';
 
 /// Fake que simula a consulta por período (como o SQL faria).
+/// Fake do repositório de agregação server-side (H2) — simula a RPC.
+class _FakeCashFlowRepository implements ICashFlowRepository {
+  _FakeCashFlowRepository(this._handler);
+
+  final CashFlow Function(String storeId, DateTime start, DateTime end)
+      _handler;
+
+  @override
+  Future<CashFlow> fetchCashFlow({
+    required String storeId,
+    required DateTime start,
+    required DateTime end,
+  }) async =>
+      _handler(storeId, start, end);
+}
+
 class _FakeFinancialTransactionRepository
     implements IFinancialTransactionRepository {
   _FakeFinancialTransactionRepository(this._allTransactions);
@@ -43,7 +60,7 @@ class _FakeFinancialTransactionRepository
 FinancialTransaction _transaction(
   String id, {
   required String description,
-  required double amount,
+  required int amountCents,
   required TransactionType type,
   String category = 'vendas',
   required DateTime date,
@@ -52,7 +69,7 @@ FinancialTransaction _transaction(
   return FinancialTransaction(
     id: id,
     description: description,
-    amount: amount,
+    amountCents: amountCents,
     type: type,
     category: category,
     date: date,
@@ -70,28 +87,28 @@ void main() {
       _transaction(
         '1',
         description: 'Venda',
-        amount: 1000,
+        amountCents: 100000,
         type: TransactionType.income,
         date: august,
       ),
       _transaction(
         '2',
         description: 'Venda',
-        amount: 500,
+        amountCents: 50000,
         type: TransactionType.income,
         date: august,
       ),
       _transaction(
         '3',
         description: 'Aluguel',
-        amount: 300,
+        amountCents: 30000,
         type: TransactionType.expense,
         date: august,
       ),
       _transaction(
         '4',
         description: 'Energia elétrica',
-        amount: 150,
+        amountCents: 15000,
         type: TransactionType.expense,
         date: august,
       ),
@@ -104,9 +121,9 @@ void main() {
       end: august,
     );
 
-    expect(result.income, 1500);
-    expect(result.expense, 450);
-    expect(result.balance, 1050);
+    expect(result.incomeCents, 150000);
+    expect(result.expenseCents, 45000);
+    expect(result.balanceCents, 105000);
   });
 
   test('ignora transações fora do período consultado', () async {
@@ -114,21 +131,21 @@ void main() {
       _transaction(
         '1',
         description: 'Venda julho',
-        amount: 2000,
+        amountCents: 200000,
         type: TransactionType.income,
         date: july,
       ),
       _transaction(
         '2',
         description: 'Venda agosto',
-        amount: 1000,
+        amountCents: 100000,
         type: TransactionType.income,
         date: august,
       ),
       _transaction(
         '3',
         description: 'Aluguel setembro',
-        amount: 400,
+        amountCents: 40000,
         type: TransactionType.expense,
         date: september,
       ),
@@ -142,9 +159,9 @@ void main() {
     );
 
     // Apenas a transação de agosto entra no cálculo.
-    expect(result.income, 1000);
-    expect(result.expense, 0);
-    expect(result.balance, 1000);
+    expect(result.incomeCents, 100000);
+    expect(result.expenseCents, 0);
+    expect(result.balanceCents, 100000);
   });
 
   test('período sem transações resulta em saldo zero', () async {
@@ -157,9 +174,9 @@ void main() {
       end: august,
     );
 
-    expect(result.income, 0);
-    expect(result.expense, 0);
-    expect(result.balance, 0);
+    expect(result.incomeCents, 0);
+    expect(result.expenseCents, 0);
+    expect(result.balanceCents, 0);
   });
 
   test(
@@ -169,14 +186,14 @@ void main() {
         _transaction(
           '1',
           description: 'Venda à vista',
-          amount: 1000,
+          amountCents: 100000,
           type: TransactionType.income,
           date: august,
         ),
         _transaction(
           '2',
           description: 'Venda fiada (pendente)',
-          amount: 500,
+          amountCents: 50000,
           type: TransactionType.income,
           date: august,
           status: TransactionStatus.pending,
@@ -190,9 +207,9 @@ void main() {
         end: august,
       );
 
-      expect(result.income, 1000);
-      expect(result.expense, 0);
-      expect(result.balance, 1000);
+      expect(result.incomeCents, 100000);
+      expect(result.expenseCents, 0);
+      expect(result.balanceCents, 100000);
     },
   );
 
@@ -211,12 +228,37 @@ void main() {
       () => _transaction(
         'x',
         description: 'Inválida',
-        amount: -5,
+        amountCents: -500,
         type: TransactionType.income,
         date: august,
       ),
       throwsAssertionError,
     );
+  });
+
+  test('delega para o repositório server-side quando fornecido (H2)',
+      () async {
+    // Fake do ICashFlowRepository: simula a RPC get_cash_flow.
+    final serverCalls = <String>[];
+    final useCase = GetCashFlowUseCase(
+      _FakeFinancialTransactionRepository(const []),
+      serverRepository: _FakeCashFlowRepository((storeId, start, end) {
+        serverCalls.add(storeId);
+        return const CashFlow(incomeCents: 1111, expenseCents: 222);
+      }),
+    );
+
+    final result = await useCase.call(
+      storeId: 'st1',
+      start: august,
+      end: august,
+    );
+
+    // Uma única chamada ao servidor; nenhum cálculo local.
+    expect(serverCalls, ['st1']);
+    expect(result.incomeCents, 1111);
+    expect(result.expenseCents, 222);
+    expect(result.balanceCents, 889);
   });
 
   test('acúmulo exato em centavos (regressão auditoria H1)', () async {
@@ -227,7 +269,7 @@ void main() {
         _transaction(
           'c$i',
           description: 'Venda',
-          amount: 9.9,
+          amountCents: 990,
           type: TransactionType.income,
           date: august,
         ),
@@ -240,8 +282,7 @@ void main() {
       end: august,
     );
 
-    expect(result.income, 29.7);
-    expect(result.income, closeTo(29.7, 0.0000001));
-    expect(result.balance, 29.7);
+    expect(result.incomeCents, 2970);
+    expect(result.balanceCents, 2970);
   });
 }

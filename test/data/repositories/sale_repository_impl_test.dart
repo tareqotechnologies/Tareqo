@@ -17,10 +17,10 @@ void main() {
             productId: 'p1',
             productName: 'Caneta',
             quantity: 2,
-            unitPrice: 2.0,
+            unitPriceCents: 200,
           ),
         ],
-        totalAmount: 4.0,
+        totalAmountCents: 400,
         paymentMethod: PaymentMethod.pix,
         dateTime: DateTime(2026, 8, 3),
       ),
@@ -30,6 +30,6 @@ void main() {
 
     expect(sales, hasLength(1));
     expect(sales.first.id, 's1');
-    expect(sales.first.totalAmount, 4.0);
+    expect(sales.first.totalAmountCents, 400);
   });
 }

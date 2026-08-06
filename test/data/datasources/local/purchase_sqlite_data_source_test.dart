@@ -10,7 +10,7 @@ void main() {
   late Database db;
 
   setUp(() => db = openTestDatabase());
-  tearDown(() => db.dispose());
+  tearDown(() => db.close());
 
   test('add persiste compra + itens e getAll reconstrói', () async {
     final dataSource = PurchaseSqliteDataSourceImpl(db);
@@ -24,16 +24,16 @@ void main() {
             productId: 'p1',
             productName: 'Caneta',
             quantity: 5,
-            unitPrice: 1.0,
+            unitPriceCents: 100,
           ),
           PurchaseItem(
             productId: 'p2',
             productName: 'Caderno',
             quantity: 2,
-            unitPrice: 5.0,
+            unitPriceCents: 500,
           ),
         ],
-        totalAmount: 15.0,
+        totalAmountCents: 1500,
         dateTime: DateTime(2026, 8, 4, 10, 30),
       ),
     );
@@ -43,12 +43,12 @@ void main() {
     expect(purchases, hasLength(1));
     final purchase = purchases.first;
     expect(purchase.supplierName, 'Distribuidora');
-    expect(purchase.totalAmount, 15.0);
+    expect(purchase.totalAmountCents, 1500);
     expect(purchase.dateTime, DateTime(2026, 8, 4, 10, 30));
     expect(purchase.items, hasLength(2));
     expect(purchase.items.first.productName, 'Caneta');
     expect(purchase.items.first.quantity, 5);
-    expect(purchase.items.last.unitPrice, 5.0);
+    expect(purchase.items.last.unitPriceCents, 500);
   });
 
   test('add persiste múltiplas compras e ordena por data desc', () async {
@@ -63,10 +63,10 @@ void main() {
             productId: 'p1',
             productName: 'Caneta',
             quantity: 1,
-            unitPrice: 1.0,
+            unitPriceCents: 100,
           ),
         ],
-        totalAmount: 1.0,
+        totalAmountCents: 100,
         dateTime: DateTime(2026, 8, 4),
       ),
     );
@@ -79,10 +79,10 @@ void main() {
             productId: 'p1',
             productName: 'Caneta',
             quantity: 1,
-            unitPrice: 1.0,
+            unitPriceCents: 100,
           ),
         ],
-        totalAmount: 1.0,
+        totalAmountCents: 100,
         dateTime: DateTime(2026, 8, 1),
       ),
     );

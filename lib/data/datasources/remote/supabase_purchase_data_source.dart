@@ -31,7 +31,7 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
           'id': purchase.id,
           'store_id': purchase.storeId,
           'supplier_name': purchase.supplierName,
-          'total_amount': purchase.totalAmount,
+          'total_amount': purchase.totalAmountCents,
           'date_time': purchase.dateTime.toUtc().toIso8601String(),
         },
         'p_items': [
@@ -40,7 +40,7 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
               'product_id': item.productId,
               'product_name': item.productName,
               'quantity': item.quantity,
-              'unit_price': item.unitPrice,
+              'unit_price': item.unitPriceCents,
             },
         ],
       },
@@ -49,12 +49,15 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
 
   @override
   Future<List<Purchase>> getAll({required String storeId}) async {
-    final rows = await supabaseClient
-        .from(_table)
-        .select('*, purchase_items(*)')
-        .eq('store_id', storeId)
-        .order('date_time', ascending: false)
-        .limit(SupabaseQueryLimits.pageSize);
+    // Embedded resource: itens vêm junto na mesma resposta. Paginação
+    // keyset (H2): lotes de pageSize pelo id, sem teto total de 1000.
+    // A ordem final de exibição (data desc) é aplicada pelo provider.
+    final rows = await fetchAllKeyset(
+      supabaseClient
+          .from(_table)
+          .select('*, purchase_items(*)')
+          .eq('store_id', storeId),
+    );
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -66,7 +69,7 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
       'user_id': userId,
       'store_id': purchase.storeId,
       'supplier_name': purchase.supplierName,
-      'total_amount': purchase.totalAmount,
+      'total_amount': purchase.totalAmountCents,
       'date_time': purchase.dateTime.toUtc().toIso8601String(),
       'purchase_items': [
         for (final item in purchase.items)
@@ -75,7 +78,7 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
             'product_id': item.productId,
             'product_name': item.productName,
             'quantity': item.quantity,
-            'unit_price': item.unitPrice,
+            'unit_price': item.unitPriceCents,
           },
       ],
     }, defaultToNull: false);
@@ -91,10 +94,10 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
           productId: (item as Map<String, dynamic>)['product_id'] as String,
           productName: item['product_name'] as String,
           quantity: (item['quantity'] as num).toInt(),
-          unitPrice: (item['unit_price'] as num).toDouble(),
+          unitPriceCents: (item['unit_price'] as num).toInt(),
         ),
     ],
-    totalAmount: (row['total_amount'] as num).toDouble(),
+    totalAmountCents: (row['total_amount'] as num).toInt(),
     dateTime: DateTime.parse(row['date_time'] as String).toLocal(),
   );
 }

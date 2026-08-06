@@ -18,6 +18,9 @@ import '../../../domain/entities/tenant.dart';
 /// que o app de demonstração abra com conteúdo realista. Datas são
 /// relativas a `DateTime.now()` para que períodos (hoje/7 dias/mês)
 /// funcionem desde o primeiro dia.
+///
+/// Desde a migração W4, TODO dinheiro está em **centavos inteiros**
+/// (ex.: 13.9 → 1390).
 abstract final class DemoSeed {
   /// Usuário demo usado como dono do tenant nas implementações em memória.
   static const demoOwnerUserId = 'demo-owner';
@@ -29,7 +32,7 @@ abstract final class DemoSeed {
         id: 'pl1',
         name: 'Essencial',
         description: 'Para começar: 1 loja e até 3 funcionários.',
-        priceMonthly: 49.0,
+        priceMonthlyCents: 4900,
         maxStores: 1,
         maxEmployees: 3,
       ),
@@ -37,7 +40,7 @@ abstract final class DemoSeed {
         id: 'pl2',
         name: 'Profissional',
         description: 'Para crescer: 3 lojas e até 10 funcionários.',
-        priceMonthly: 99.0,
+        priceMonthlyCents: 9900,
         maxStores: 3,
         maxEmployees: 10,
       ),
@@ -45,7 +48,7 @@ abstract final class DemoSeed {
         id: 'pl3',
         name: 'Empresa',
         description: 'Para expandir: 10 lojas e até 50 funcionários.',
-        priceMonthly: 199.0,
+        priceMonthlyCents: 19900,
         maxStores: 10,
         maxEmployees: 50,
       ),
@@ -113,8 +116,8 @@ abstract final class DemoSeed {
         storeId: 'st1',
         name: 'Caneta esferográfica',
         description: 'Azul, ponta 0.7mm',
-        purchasePrice: 1.0,
-        salePrice: 2.0,
+        purchasePriceCents: 100,
+        salePriceCents: 200,
         stockQuantity: 100,
       ),
       Product(
@@ -122,8 +125,8 @@ abstract final class DemoSeed {
         storeId: 'st1',
         name: 'Caderno 96 folhas',
         description: 'Capa dura, pautado',
-        purchasePrice: 5.0,
-        salePrice: 9.9,
+        purchasePriceCents: 500,
+        salePriceCents: 990,
         stockQuantity: 50,
       ),
       Product(
@@ -131,8 +134,8 @@ abstract final class DemoSeed {
         storeId: 'st1',
         name: 'Arroz 5kg',
         description: 'Tipo 1',
-        purchasePrice: 18.0,
-        salePrice: 24.0,
+        purchasePriceCents: 1800,
+        salePriceCents: 2400,
         stockQuantity: 30,
       ),
       Product(
@@ -140,8 +143,8 @@ abstract final class DemoSeed {
         storeId: 'st1',
         name: 'Refrigerante 2L',
         description: 'Cola',
-        purchasePrice: 6.0,
-        salePrice: 8.5,
+        purchasePriceCents: 600,
+        salePriceCents: 850,
         stockQuantity: 20,
       ),
       Product(
@@ -149,8 +152,8 @@ abstract final class DemoSeed {
         storeId: 'st1',
         name: 'Sabonete',
         description: 'Neutro 90g',
-        purchasePrice: 1.5,
-        salePrice: 3.0,
+        purchasePriceCents: 150,
+        salePriceCents: 300,
         stockQuantity: 4,
       ),
       // Loja Shopping (st2) — catálogo próprio, demonstrando que cada
@@ -160,8 +163,8 @@ abstract final class DemoSeed {
         storeId: 'st2',
         name: 'Café torrado 500g',
         description: 'Grãos selecionados',
-        purchasePrice: 12.0,
-        salePrice: 19.9,
+        purchasePriceCents: 1200,
+        salePriceCents: 1990,
         stockQuantity: 15,
       ),
       Product(
@@ -169,8 +172,8 @@ abstract final class DemoSeed {
         storeId: 'st2',
         name: 'Água mineral 1.5L',
         description: 'Garrafa',
-        purchasePrice: 1.5,
-        salePrice: 3.5,
+        purchasePriceCents: 150,
+        salePriceCents: 350,
         stockQuantity: 24,
       ),
     ];
@@ -186,16 +189,16 @@ abstract final class DemoSeed {
             productId: 'p1',
             productName: 'Caneta esferográfica',
             quantity: 2,
-            unitPrice: 2.0,
+            unitPriceCents: 200,
           ),
           SaleItem(
             productId: 'p2',
             productName: 'Caderno 96 folhas',
             quantity: 1,
-            unitPrice: 9.9,
+            unitPriceCents: 990,
           ),
         ],
-        totalAmount: 13.9,
+        totalAmountCents: 1390,
         paymentMethod: PaymentMethod.pix,
         dateTime: now.subtract(const Duration(hours: 2)),
       ),
@@ -206,10 +209,10 @@ abstract final class DemoSeed {
             productId: 'p3',
             productName: 'Arroz 5kg',
             quantity: 1,
-            unitPrice: 24.0,
+            unitPriceCents: 2400,
           ),
         ],
-        totalAmount: 24.0,
+        totalAmountCents: 2400,
         paymentMethod: PaymentMethod.cash,
         dateTime: now.subtract(const Duration(days: 1)),
       ),
@@ -220,10 +223,10 @@ abstract final class DemoSeed {
             productId: 'p4',
             productName: 'Refrigerante 2L',
             quantity: 2,
-            unitPrice: 8.5,
+            unitPriceCents: 850,
           ),
         ],
-        totalAmount: 17.0,
+        totalAmountCents: 1700,
         paymentMethod: PaymentMethod.debitCard,
         dateTime: now.subtract(const Duration(days: 3)),
       ),
@@ -236,10 +239,10 @@ abstract final class DemoSeed {
             productId: 'p6',
             productName: 'Café torrado 500g',
             quantity: 1,
-            unitPrice: 19.9,
+            unitPriceCents: 1990,
           ),
         ],
-        totalAmount: 19.9,
+        totalAmountCents: 1990,
         paymentMethod: PaymentMethod.pix,
         dateTime: now.subtract(const Duration(days: 1)),
       ),
@@ -294,16 +297,16 @@ abstract final class DemoSeed {
             productId: 'p3',
             productName: 'Arroz 5kg',
             quantity: 10,
-            unitPrice: 18.0,
+            unitPriceCents: 1800,
           ),
           PurchaseItem(
             productId: 'p4',
             productName: 'Refrigerante 2L',
             quantity: 5,
-            unitPrice: 6.0,
+            unitPriceCents: 600,
           ),
         ],
-        totalAmount: 210.0,
+        totalAmountCents: 21000,
         dateTime: now.subtract(const Duration(days: 4)),
       ),
       Purchase(
@@ -315,16 +318,16 @@ abstract final class DemoSeed {
             productId: 'p1',
             productName: 'Caneta esferográfica',
             quantity: 50,
-            unitPrice: 1.0,
+            unitPriceCents: 100,
           ),
           PurchaseItem(
             productId: 'p2',
             productName: 'Caderno 96 folhas',
             quantity: 20,
-            unitPrice: 5.0,
+            unitPriceCents: 500,
           ),
         ],
-        totalAmount: 150.0,
+        totalAmountCents: 15000,
         dateTime: now.subtract(const Duration(days: 8)),
       ),
     ];
@@ -339,7 +342,7 @@ abstract final class DemoSeed {
       FinancialTransaction(
         id: 't1',
         description: 'Venda via PIX',
-        amount: 13.9, // = s1
+        amountCents: 1390, // = s1
         type: TransactionType.income,
         category: 'Vendas',
         date: now.subtract(const Duration(hours: 2)),
@@ -347,7 +350,7 @@ abstract final class DemoSeed {
       FinancialTransaction(
         id: 't2',
         description: 'Energia elétrica',
-        amount: 180,
+        amountCents: 18000,
         type: TransactionType.expense,
         category: 'Contas',
         date: now.subtract(const Duration(hours: 5)),
@@ -355,7 +358,7 @@ abstract final class DemoSeed {
       FinancialTransaction(
         id: 't3',
         description: 'Venda em dinheiro',
-        amount: 24.0, // = s2
+        amountCents: 2400, // = s2
         type: TransactionType.income,
         category: 'Vendas',
         date: now.subtract(const Duration(days: 1)),
@@ -363,7 +366,7 @@ abstract final class DemoSeed {
       FinancialTransaction(
         id: 't4',
         description: 'Venda fiado (João)',
-        amount: 25.0, // = d1 (João da Silva)
+        amountCents: 2500, // = d1 (João da Silva)
         type: TransactionType.income,
         category: 'Fiado',
         date: now.subtract(const Duration(days: 1)),
@@ -373,7 +376,7 @@ abstract final class DemoSeed {
       FinancialTransaction(
         id: 't5',
         description: 'Aluguel da loja',
-        amount: 900,
+        amountCents: 90000,
         type: TransactionType.expense,
         category: 'Contas',
         date: now.subtract(const Duration(days: 2)),
@@ -381,7 +384,7 @@ abstract final class DemoSeed {
       FinancialTransaction(
         id: 't6',
         description: 'Venda no débito',
-        amount: 17.0, // = s3
+        amountCents: 1700, // = s3
         type: TransactionType.income,
         category: 'Vendas',
         date: now.subtract(const Duration(days: 3)),
@@ -389,7 +392,7 @@ abstract final class DemoSeed {
       FinancialTransaction(
         id: 't7',
         description: 'Compra de mercadoria',
-        amount: 320,
+        amountCents: 32000,
         type: TransactionType.expense,
         category: 'Compras',
         date: now.subtract(const Duration(days: 4)),
@@ -398,7 +401,7 @@ abstract final class DemoSeed {
       FinancialTransaction(
         id: 't8',
         description: 'Compra — Distribuidora Norte',
-        amount: 210.0,
+        amountCents: 21000,
         type: TransactionType.expense,
         category: 'Compras',
         date: now.subtract(const Duration(days: 4)),
@@ -406,7 +409,7 @@ abstract final class DemoSeed {
       FinancialTransaction(
         id: 't9',
         description: 'Compra — Fornecedor Central',
-        amount: 150.0,
+        amountCents: 15000,
         type: TransactionType.expense,
         category: 'Compras',
         date: now.subtract(const Duration(days: 8)),
@@ -416,7 +419,7 @@ abstract final class DemoSeed {
         id: 't10',
         storeId: 'st2',
         description: 'Venda via PIX (Shopping)',
-        amount: 19.9, // = s4
+        amountCents: 1990, // = s4
         type: TransactionType.income,
         category: 'Vendas',
         date: now.subtract(const Duration(days: 1)),
@@ -430,7 +433,7 @@ abstract final class DemoSeed {
       Debt(
         id: 'd1',
         personName: 'João da Silva',
-        amount: 25.0,
+        amountCents: 2500,
         dueDate: now.add(const Duration(days: 3)),
         isCustomerDebt: true,
         customerId: 'c1',
@@ -438,7 +441,7 @@ abstract final class DemoSeed {
       Debt(
         id: 'd2',
         personName: 'Maria Souza',
-        amount: 60.0,
+        amountCents: 6000,
         dueDate: now.subtract(const Duration(days: 2)),
         isCustomerDebt: true,
         customerId: 'c2',
@@ -446,7 +449,7 @@ abstract final class DemoSeed {
       Debt(
         id: 'd3',
         personName: 'Pedro Alves',
-        amount: 15.5,
+        amountCents: 1550,
         dueDate: now.add(const Duration(days: 10)),
         isCustomerDebt: true,
         customerId: 'c3',
@@ -455,7 +458,7 @@ abstract final class DemoSeed {
       Debt(
         id: 'd4',
         personName: 'Distribuidora Norte',
-        amount: 120.0,
+        amountCents: 12000,
         dueDate: now.add(const Duration(days: 5)),
         isCustomerDebt: false,
       ),
@@ -463,7 +466,7 @@ abstract final class DemoSeed {
       Debt(
         id: 'd5',
         personName: 'Ana Lima',
-        amount: 40.0,
+        amountCents: 4000,
         dueDate: now.subtract(const Duration(days: 20)),
         isCustomerDebt: true,
         isPaid: true,

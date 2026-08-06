@@ -28,7 +28,9 @@ abstract class Sale with _$Sale {
     // loja tem seu próprio histórico de vendas.
     @Default('st1') String storeId,
     required List<SaleItem> items,
-    required double totalAmount,
+    // Valor TOTAL da venda em CENTAVOS inteiros (W4 — migração de
+    // dinheiro para centavos; o banco persiste BIGINT/INTEGER).
+    required int totalAmountCents,
     required PaymentMethod paymentMethod,
     required DateTime dateTime,
   }) = _Sale;

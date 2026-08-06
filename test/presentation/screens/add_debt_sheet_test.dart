@@ -51,7 +51,7 @@ void main() {
 
     expect(addDebt.calls, 1);
     expect(addDebt.lastDebt?.personName, 'Maria Souza');
-    expect(addDebt.lastDebt?.amount, 50.0);
+    expect(addDebt.lastDebt?.amountCents, 5000);
     expect(addDebt.lastDebt?.isCustomerDebt, isTrue);
   });
 }

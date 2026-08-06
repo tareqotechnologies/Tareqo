@@ -114,8 +114,8 @@ void main() {
       const Product(
         id: 'p1',
         name: 'Caneta',
-        purchasePrice: 1.0,
-        salePrice: 2.0,
+        purchasePriceCents: 100,
+        salePriceCents: 200,
         stockQuantity: 10,
       ),
     ]);
@@ -132,7 +132,7 @@ void main() {
 
   Purchase buildPurchase({
     List<PurchaseItem>? items,
-    double? totalAmount,
+    int? totalAmountCents,
     String supplier = 'Distribuidora',
   }) {
     final effectiveItems = items ??
@@ -141,16 +141,16 @@ void main() {
             productId: 'p1',
             productName: 'Caneta',
             quantity: 5,
-            unitPrice: 1.0,
+            unitPriceCents: 100,
           ),
         ];
     return Purchase(
       id: 'pc1',
       supplierName: supplier,
       items: effectiveItems,
-      totalAmount: totalAmount ?? effectiveItems.fold<double>(
+      totalAmountCents: totalAmountCents ?? effectiveItems.fold<int>(
         0,
-        (sum, item) => sum + item.quantity * item.unitPrice,
+        (sum, item) => sum + item.quantity * item.unitPriceCents,
       ),
       dateTime: DateTime(2026, 8, 4, 10),
     );
@@ -177,7 +177,7 @@ void main() {
     expect(transactions.first.type, TransactionType.expense);
     expect(transactions.first.category, 'Compras');
     expect(transactions.first.status, TransactionStatus.paid);
-    expect(transactions.first.amount, 5.0);
+    expect(transactions.first.amountCents, 500);
 
     // Tudo rodou dentro do unit of work.
     expect(unitOfWork.runs, 1);
@@ -197,7 +197,7 @@ void main() {
 
   test('lança InvalidPurchaseException para total divergente', () async {
     await expectLater(
-      useCase(buildPurchase(totalAmount: 99.0)),
+      useCase(buildPurchase(totalAmountCents: 9900)),
       throwsA(isA<InvalidPurchaseException>()),
     );
 
@@ -220,7 +220,7 @@ void main() {
               productId: 'nope',
               productName: 'Inexistente',
               quantity: 1,
-              unitPrice: 1.0,
+              unitPriceCents: 100,
             ),
           ],
         ),
@@ -265,7 +265,7 @@ void main() {
 
     // Total divergente → inválido antes de qualquer chamada ao servidor.
     await expectLater(
-      atomicUseCase(buildPurchase(totalAmount: 99.0)),
+      atomicUseCase(buildPurchase(totalAmountCents: 9900)),
       throwsA(isA<InvalidPurchaseException>()),
     );
     expect(processor.calls, 0);

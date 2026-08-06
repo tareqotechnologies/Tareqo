@@ -68,7 +68,7 @@ class AddDebtUseCase {
   /// é persistido) ou [PendingEntryRegistrationException] se a dívida foi
   /// gravada mas a pendência falhou.
   Future<void> call(Debt debt) async {
-    if (debt.amount <= 0) {
+    if (debt.amountCents <= 0) {
       throw InvalidDebtAmountException(
         'O valor da dívida deve ser maior que zero.',
       );
@@ -101,7 +101,7 @@ class AddDebtUseCase {
             isCustomerDebt: debt.isCustomerDebt,
             personName: debt.personName,
           ),
-          amount: debt.amount,
+          amountCents: debt.amountCents,
           type: debt.isCustomerDebt
               ? TransactionType.income
               : TransactionType.expense,

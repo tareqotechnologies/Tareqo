@@ -77,14 +77,14 @@ List<Debt> _debts() => [
   Debt(
     id: 'd1',
     personName: 'João',
-    amount: 25.0,
+    amountCents: 2500,
     dueDate: DateTime(2026, 8, 6),
     isCustomerDebt: true,
   ),
   Debt(
     id: 'd2',
     personName: 'Maria Souza',
-    amount: 60.0,
+    amountCents: 6000,
     dueDate: DateTime(2026, 8, 1),
     isCustomerDebt: true,
   ),
@@ -178,7 +178,7 @@ void main() {
           Debt(
             id: 'd5',
             personName: 'Ana Lima',
-            amount: 40.0,
+            amountCents: 4000,
             dueDate: DateTime(2026, 7, 15),
             isCustomerDebt: true,
             isPaid: true,
@@ -188,7 +188,7 @@ void main() {
           Debt(
             id: 'd6',
             personName: 'Carlos',
-            amount: 15.0,
+            amountCents: 1500,
             dueDate: DateTime(2026, 7, 1),
             isCustomerDebt: true,
             isPaid: true,

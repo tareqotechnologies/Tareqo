@@ -36,8 +36,10 @@
 2. **2FA on the super admin account** — enable on the `super_admins` email
    account (or ideally TOTP in Supabase itself when available).
 3. **`password_min_length = 8`** — Authentication → Settings (aligns with the client).
-4. **Apply migration 008** (audit log) to the production project: SQL Editor ←
-   contents of `supabase/migrations/008_audit_log.sql`.
+4. **Apply the consolidated upgrade** to the production project: SQL Editor ←
+   contents of `supabase/upgrade.sql` (brings an EXISTING database to the
+   current state — replaces the old migrations 002..011; 100% idempotent, safe
+   to re-run). For brand-new projects, `supabase/schema.sql` alone is enough.
 5. Email rate limits: keep defaults (employee registration does not use
    email — the `create_employee_account` RPC).
 

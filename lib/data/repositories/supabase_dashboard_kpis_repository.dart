@@ -27,11 +27,12 @@ final class SupabaseDashboardKpisRepository implements IDashboardKpisRepository 
     if (rows.isEmpty) return DashboardKpis.empty;
 
     final row = rows.first as Map<String, dynamic>;
+    // Valores em CENTAVOS inteiros (W4): a RPC devolve BIGINT.
     return DashboardKpis(
-      totalSales: (row['total_sales'] as num).toDouble(),
-      cashIncome: (row['cash_income'] as num).toDouble(),
-      cashExpense: (row['cash_expense'] as num).toDouble(),
-      pendingTotal: (row['pending_total'] as num).toDouble(),
+      totalSalesCents: (row['total_sales'] as num).toInt(),
+      cashIncomeCents: (row['cash_income'] as num).toInt(),
+      cashExpenseCents: (row['cash_expense'] as num).toInt(),
+      pendingTotalCents: (row['pending_total'] as num).toInt(),
       stockTotal: (row['stock_total'] as num).toInt(),
     );
   }

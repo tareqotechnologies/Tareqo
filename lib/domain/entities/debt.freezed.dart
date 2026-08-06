@@ -17,7 +17,9 @@ mixin _$Debt {
 
  String get id;// Loja dona do fiado (Fase 2 do multi-tenancy). Cada loja tem seu
 // próprio "a receber / a pagar".
- String get storeId; String get personName; double get amount; DateTime get dueDate; bool get isCustomerDebt; bool get isPaid;// Data da baixa (carimbada pelo SettleDebtUseCase) — null enquanto
+ String get storeId; String get personName;// Valor em CENTAVOS inteiros (W4 — migração de dinheiro para
+// centavos; o banco persiste BIGINT/INTEGER).
+ int get amountCents; DateTime get dueDate; bool get isCustomerDebt; bool get isPaid;// Data da baixa (carimbada pelo SettleDebtUseCase) — null enquanto
 // a dívida estiver pendente. Alimenta o histórico de quitações.
  DateTime? get paidAt;// Vínculo opcional com o cadastro de clientes. O [personName] continua
 // sendo o "snapshot" exibido no histórico — se o cadastro do cliente
@@ -35,16 +37,16 @@ $DebtCopyWith<Debt> get copyWith => _$DebtCopyWithImpl<Debt>(this as Debt, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Debt&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.personName, personName) || other.personName == personName)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isCustomerDebt, isCustomerDebt) || other.isCustomerDebt == isCustomerDebt)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.customerId, customerId) || other.customerId == customerId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Debt&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.personName, personName) || other.personName == personName)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isCustomerDebt, isCustomerDebt) || other.isCustomerDebt == isCustomerDebt)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.customerId, customerId) || other.customerId == customerId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,storeId,personName,amount,dueDate,isCustomerDebt,isPaid,paidAt,customerId);
+int get hashCode => Object.hash(runtimeType,id,storeId,personName,amountCents,dueDate,isCustomerDebt,isPaid,paidAt,customerId);
 
 @override
 String toString() {
-  return 'Debt(id: $id, storeId: $storeId, personName: $personName, amount: $amount, dueDate: $dueDate, isCustomerDebt: $isCustomerDebt, isPaid: $isPaid, paidAt: $paidAt, customerId: $customerId)';
+  return 'Debt(id: $id, storeId: $storeId, personName: $personName, amountCents: $amountCents, dueDate: $dueDate, isCustomerDebt: $isCustomerDebt, isPaid: $isPaid, paidAt: $paidAt, customerId: $customerId)';
 }
 
 
@@ -55,7 +57,7 @@ abstract mixin class $DebtCopyWith<$Res>  {
   factory $DebtCopyWith(Debt value, $Res Function(Debt) _then) = _$DebtCopyWithImpl;
 @useResult
 $Res call({
- String id, String storeId, String personName, double amount, DateTime dueDate, bool isCustomerDebt, bool isPaid, DateTime? paidAt, String? customerId
+ String id, String storeId, String personName, int amountCents, DateTime dueDate, bool isCustomerDebt, bool isPaid, DateTime? paidAt, String? customerId
 });
 
 
@@ -72,13 +74,13 @@ class _$DebtCopyWithImpl<$Res>
 
 /// Create a copy of Debt
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? personName = null,Object? amount = null,Object? dueDate = null,Object? isCustomerDebt = null,Object? isPaid = null,Object? paidAt = freezed,Object? customerId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? personName = null,Object? amountCents = null,Object? dueDate = null,Object? isCustomerDebt = null,Object? isPaid = null,Object? paidAt = freezed,Object? customerId = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,personName: null == personName ? _self.personName : personName // ignore: cast_nullable_to_non_nullable
-as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as double,dueDate: null == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
+as String,amountCents: null == amountCents ? _self.amountCents : amountCents // ignore: cast_nullable_to_non_nullable
+as int,dueDate: null == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
 as DateTime,isCustomerDebt: null == isCustomerDebt ? _self.isCustomerDebt : isCustomerDebt // ignore: cast_nullable_to_non_nullable
 as bool,isPaid: null == isPaid ? _self.isPaid : isPaid // ignore: cast_nullable_to_non_nullable
 as bool,paidAt: freezed == paidAt ? _self.paidAt : paidAt // ignore: cast_nullable_to_non_nullable
@@ -168,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  String personName,  double amount,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  String personName,  int amountCents,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Debt() when $default != null:
-return $default(_that.id,_that.storeId,_that.personName,_that.amount,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
+return $default(_that.id,_that.storeId,_that.personName,_that.amountCents,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
   return orElse();
 
 }
@@ -189,10 +191,10 @@ return $default(_that.id,_that.storeId,_that.personName,_that.amount,_that.dueDa
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  String personName,  double amount,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  String personName,  int amountCents,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)  $default,) {final _that = this;
 switch (_that) {
 case _Debt():
-return $default(_that.id,_that.storeId,_that.personName,_that.amount,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
+return $default(_that.id,_that.storeId,_that.personName,_that.amountCents,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +211,10 @@ return $default(_that.id,_that.storeId,_that.personName,_that.amount,_that.dueDa
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  String personName,  double amount,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  String personName,  int amountCents,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)?  $default,) {final _that = this;
 switch (_that) {
 case _Debt() when $default != null:
-return $default(_that.id,_that.storeId,_that.personName,_that.amount,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
+return $default(_that.id,_that.storeId,_that.personName,_that.amountCents,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
   return null;
 
 }
@@ -224,7 +226,7 @@ return $default(_that.id,_that.storeId,_that.personName,_that.amount,_that.dueDa
 @JsonSerializable()
 
 class _Debt implements Debt {
-  const _Debt({required this.id, this.storeId = 'st1', required this.personName, required this.amount, required this.dueDate, required this.isCustomerDebt, this.isPaid = false, this.paidAt, this.customerId}): assert(amount >= 0, 'O valor da dívida deve ser positivo.');
+  const _Debt({required this.id, this.storeId = 'st1', required this.personName, required this.amountCents, required this.dueDate, required this.isCustomerDebt, this.isPaid = false, this.paidAt, this.customerId}): assert(amountCents >= 0, 'O valor da dívida deve ser positivo.');
   factory _Debt.fromJson(Map<String, dynamic> json) => _$DebtFromJson(json);
 
 @override final  String id;
@@ -232,7 +234,9 @@ class _Debt implements Debt {
 // próprio "a receber / a pagar".
 @override@JsonKey() final  String storeId;
 @override final  String personName;
-@override final  double amount;
+// Valor em CENTAVOS inteiros (W4 — migração de dinheiro para
+// centavos; o banco persiste BIGINT/INTEGER).
+@override final  int amountCents;
 @override final  DateTime dueDate;
 @override final  bool isCustomerDebt;
 @override@JsonKey() final  bool isPaid;
@@ -257,16 +261,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Debt&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.personName, personName) || other.personName == personName)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isCustomerDebt, isCustomerDebt) || other.isCustomerDebt == isCustomerDebt)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.customerId, customerId) || other.customerId == customerId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Debt&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.personName, personName) || other.personName == personName)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isCustomerDebt, isCustomerDebt) || other.isCustomerDebt == isCustomerDebt)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.customerId, customerId) || other.customerId == customerId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,storeId,personName,amount,dueDate,isCustomerDebt,isPaid,paidAt,customerId);
+int get hashCode => Object.hash(runtimeType,id,storeId,personName,amountCents,dueDate,isCustomerDebt,isPaid,paidAt,customerId);
 
 @override
 String toString() {
-  return 'Debt(id: $id, storeId: $storeId, personName: $personName, amount: $amount, dueDate: $dueDate, isCustomerDebt: $isCustomerDebt, isPaid: $isPaid, paidAt: $paidAt, customerId: $customerId)';
+  return 'Debt(id: $id, storeId: $storeId, personName: $personName, amountCents: $amountCents, dueDate: $dueDate, isCustomerDebt: $isCustomerDebt, isPaid: $isPaid, paidAt: $paidAt, customerId: $customerId)';
 }
 
 
@@ -277,7 +281,7 @@ abstract mixin class _$DebtCopyWith<$Res> implements $DebtCopyWith<$Res> {
   factory _$DebtCopyWith(_Debt value, $Res Function(_Debt) _then) = __$DebtCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String storeId, String personName, double amount, DateTime dueDate, bool isCustomerDebt, bool isPaid, DateTime? paidAt, String? customerId
+ String id, String storeId, String personName, int amountCents, DateTime dueDate, bool isCustomerDebt, bool isPaid, DateTime? paidAt, String? customerId
 });
 
 
@@ -294,13 +298,13 @@ class __$DebtCopyWithImpl<$Res>
 
 /// Create a copy of Debt
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? personName = null,Object? amount = null,Object? dueDate = null,Object? isCustomerDebt = null,Object? isPaid = null,Object? paidAt = freezed,Object? customerId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? personName = null,Object? amountCents = null,Object? dueDate = null,Object? isCustomerDebt = null,Object? isPaid = null,Object? paidAt = freezed,Object? customerId = freezed,}) {
   return _then(_Debt(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,personName: null == personName ? _self.personName : personName // ignore: cast_nullable_to_non_nullable
-as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as double,dueDate: null == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
+as String,amountCents: null == amountCents ? _self.amountCents : amountCents // ignore: cast_nullable_to_non_nullable
+as int,dueDate: null == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
 as DateTime,isCustomerDebt: null == isCustomerDebt ? _self.isCustomerDebt : isCustomerDebt // ignore: cast_nullable_to_non_nullable
 as bool,isPaid: null == isPaid ? _self.isPaid : isPaid // ignore: cast_nullable_to_non_nullable
 as bool,paidAt: freezed == paidAt ? _self.paidAt : paidAt // ignore: cast_nullable_to_non_nullable

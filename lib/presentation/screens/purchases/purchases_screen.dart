@@ -153,7 +153,7 @@ class _PurchaseCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  Formatters.currency(purchase.totalAmount),
+                  Formatters.currency(purchase.totalAmountCents),
                   style: theme.textTheme.titleMedium,
                 ),
                 const SizedBox(height: 2),

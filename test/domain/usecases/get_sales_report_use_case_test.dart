@@ -5,6 +5,7 @@ import 'package:dumbhanengue/domain/entities/sale.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
 import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
+import 'package:dumbhanengue/domain/repositories/i_sales_report_repository.dart';
 import 'package:dumbhanengue/domain/usecases/get_sales_report_use_case.dart';
 
 class _FakeSaleRepository implements ISaleRepository {
@@ -18,6 +19,22 @@ class _FakeSaleRepository implements ISaleRepository {
   @override
   Future<List<Sale>> getAll({required String storeId}) async =>
       List.unmodifiable(_sales);
+}
+
+/// Fake do repositório de agregação server-side (H2) — simula a RPC.
+class _FakeSalesReportRepository implements ISalesReportRepository {
+  _FakeSalesReportRepository(this._handler);
+
+  final SalesReport Function(String storeId, DateTime start, DateTime end)
+      _handler;
+
+  @override
+  Future<SalesReport> fetchSalesReport({
+    required String storeId,
+    required DateTime start,
+    required DateTime end,
+  }) async =>
+      _handler(storeId, start, end);
 }
 
 class _FakeProductRepository implements IProductRepository {
@@ -53,10 +70,10 @@ void main() {
             productId: 'p1',
             productName: 'Caneta',
             quantity: 2,
-            unitPrice: 3.0, // custo atual 1.0 → lucro 2.0 por unidade
+            unitPriceCents: 300, // custo atual 1.0 → lucro 2.0 por unidade
           ),
         ],
-        totalAmount: 6.0,
+        totalAmountCents: 600,
         paymentMethod: PaymentMethod.pix,
         dateTime: DateTime(2026, 8, 3, 9),
       ),
@@ -67,16 +84,16 @@ void main() {
             productId: 'p1',
             productName: 'Caneta',
             quantity: 1,
-            unitPrice: 3.0,
+            unitPriceCents: 300,
           ),
           SaleItem(
             productId: 'p2',
             productName: 'Caderno',
             quantity: 1,
-            unitPrice: 10.0, // custo atual 5.0 → lucro 5.0
+            unitPriceCents: 1000, // custo atual 5.0 → lucro 5.0
           ),
         ],
-        totalAmount: 13.0,
+        totalAmountCents: 1300,
         paymentMethod: PaymentMethod.cash,
         dateTime: DateTime(2026, 8, 4, 15),
       ),
@@ -88,18 +105,18 @@ void main() {
             productId: 'p1',
             productName: 'Caneta',
             quantity: 10,
-            unitPrice: 3.0,
+            unitPriceCents: 300,
           ),
         ],
-        totalAmount: 30.0,
+        totalAmountCents: 3000,
         paymentMethod: PaymentMethod.cash,
         dateTime: DateTime(2025, 1, 1),
       ),
     ];
 
     const products = [
-      Product(id: 'p1', name: 'Caneta', purchasePrice: 1.0, salePrice: 3.0),
-      Product(id: 'p2', name: 'Caderno', purchasePrice: 5.0, salePrice: 10.0),
+      Product(id: 'p1', name: 'Caneta', purchasePriceCents: 100, salePriceCents: 300),
+      Product(id: 'p2', name: 'Caderno', purchasePriceCents: 500, salePriceCents: 1000),
     ];
 
     final useCase = GetSalesReportUseCase(
@@ -113,21 +130,51 @@ void main() {
       end: DateTime(2026, 8, 31),
     );
 
-    expect(report.totalRevenue, 19.0); // 6.0 + 13.0
+    expect(report.totalRevenueCents, 1900); // 6.0 + 13.0
     // Lucro: caneta 2×2 + 1×2 + caderno 1×5 = 4 + 2 + 5 = 11.
-    expect(report.totalProfit, 11.0);
+    expect(report.totalProfitCents, 1100);
     expect(report.margin, closeTo(11.0 / 19.0 * 100, 0.001));
 
     // Mais vendidos: p1 (3 un.) à frente de p2 (1 un.).
     expect(report.bestSellers, hasLength(2));
     expect(report.bestSellers.first.productId, 'p1');
     expect(report.bestSellers.first.quantity, 3);
-    expect(report.bestSellers.first.revenue, 9.0);
+    expect(report.bestSellers.first.revenueCents, 900);
 
     // Vendas por dia: 03/08 (6.0) e 04/08 (13.0).
     expect(report.perDay, hasLength(2));
-    expect(report.perDay.first.total, 6.0);
-    expect(report.perDay.last.total, 13.0);
+    expect(report.perDay.first.totalCents, 600);
+    expect(report.perDay.last.totalCents, 1300);
+  });
+
+  test('delega para o repositório server-side quando fornecido (H2)',
+      () async {
+    // Fake do ISalesReportRepository: simula a RPC get_sales_report.
+    final serverCalls = <String>[];
+    final useCase = GetSalesReportUseCase(
+      _FakeSaleRepository(const []),
+      _FakeProductRepository(const []),
+      serverRepository: _FakeSalesReportRepository((storeId, start, end) {
+        serverCalls.add(storeId);
+        return const SalesReport(
+          totalRevenueCents: 9000,
+          totalProfitCents: 3000,
+          bestSellers: [],
+          perDay: [],
+        );
+      }),
+    );
+
+    final report = await useCase(
+      storeId: 'st1',
+      start: DateTime(2026, 8, 1),
+      end: DateTime(2026, 8, 31),
+    );
+
+    // Uma única chamada ao servidor; nenhum cálculo local.
+    expect(serverCalls, ['st1']);
+    expect(report.totalRevenueCents, 9000);
+    expect(report.totalProfitCents, 3000);
   });
 
   test('margem é 0 quando não há faturamento', () async {
@@ -142,8 +189,8 @@ void main() {
       end: DateTime(2026, 8, 31),
     );
 
-    expect(report.totalRevenue, 0);
-    expect(report.totalProfit, 0);
+    expect(report.totalRevenueCents, 0);
+    expect(report.totalProfitCents, 0);
     expect(report.margin, 0);
     expect(report.bestSellers, isEmpty);
     expect(report.perDay, isEmpty);
@@ -159,10 +206,10 @@ void main() {
               productId: 'antigo',
               productName: 'Produto antigo',
               quantity: 1,
-              unitPrice: 10.0,
+              unitPriceCents: 1000,
             ),
           ],
-          totalAmount: 10.0,
+          totalAmountCents: 1000,
           paymentMethod: PaymentMethod.pix,
           dateTime: DateTime(2026, 8, 3),
         ),
@@ -176,7 +223,7 @@ void main() {
       end: DateTime(2026, 8, 31),
     );
 
-    expect(report.totalProfit, 10.0);
+    expect(report.totalProfitCents, 1000);
     expect(report.bestSellers.first.productName, 'Produto antigo');
   });
 
@@ -193,10 +240,10 @@ void main() {
               productId: 'p1',
               productName: 'Caneta',
               quantity: 1,
-              unitPrice: 9.9,
+              unitPriceCents: 990,
             ),
           ],
-          totalAmount: 9.9,
+          totalAmountCents: 990,
           paymentMethod: PaymentMethod.pix,
           dateTime: DateTime(2026, 8, 3),
         ),
@@ -205,13 +252,13 @@ void main() {
     final report = await GetSalesReportUseCase(
       _FakeSaleRepository(sales),
       _FakeProductRepository(const [
-        Product(id: 'p1', name: 'Caneta', purchasePrice: 5.0, salePrice: 9.9),
+        Product(id: 'p1', name: 'Caneta', purchasePriceCents: 500, salePriceCents: 990),
       ]),
     )(storeId: 'st1', start: DateTime(2026, 8, 1), end: DateTime(2026, 8, 31));
 
-    expect(report.totalRevenue, 29.7);
-    expect(report.totalProfit, closeTo(14.7, 0.0000001)); // 3 × 4.9
-    expect(report.perDay.first.total, 29.7);
-    expect(report.bestSellers.first.revenue, 29.7);
+    expect(report.totalRevenueCents, 2970);
+    expect(report.totalProfitCents, closeTo(1470, 0.0000001)); // 3 × 4.9
+    expect(report.perDay.first.totalCents, 2970);
+    expect(report.bestSellers.first.revenueCents, 2970);
   });
 }

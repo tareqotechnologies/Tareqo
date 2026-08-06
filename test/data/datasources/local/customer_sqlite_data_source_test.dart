@@ -10,7 +10,7 @@ void main() {
   late Database db;
 
   setUp(() => db = openTestDatabase());
-  tearDown(() => db.dispose());
+  tearDown(() => db.close());
 
   test('add persiste e getAll reconstrói o cliente com contatos', () async {
     final dataSource = CustomerSqliteDataSourceImpl(db);

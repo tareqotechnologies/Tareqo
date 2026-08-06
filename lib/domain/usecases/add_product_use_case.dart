@@ -27,10 +27,10 @@ class AddProductUseCase {
   /// Lança [InvalidPriceException] se a validação falhar; o produto
   /// **não** é persistido nesse caso.
   Future<void> call(Product product) async {
-    if (product.salePrice < product.purchasePrice) {
+    if (product.salePriceCents < product.purchasePriceCents) {
       throw InvalidPriceException(
-        'O preço de venda (${product.salePrice}) não pode ser menor '
-        'que o preço de compra (${product.purchasePrice}).',
+        'O preço de venda (${product.salePriceCents}) não pode ser menor '
+        'que o preço de compra (${product.purchasePriceCents}).',
       );
     }
 

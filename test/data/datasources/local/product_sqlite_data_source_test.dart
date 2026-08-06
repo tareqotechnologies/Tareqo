@@ -10,14 +10,14 @@ void main() {
   late Database db;
 
   setUp(() => db = openTestDatabase());
-  tearDown(() => db.dispose());
+  tearDown(() => db.close());
 
   Product buildProduct(String id) => Product(
         id: id,
         name: 'Caneta $id',
         description: 'Azul',
-        purchasePrice: 1.0,
-        salePrice: 2.0,
+        purchasePriceCents: 100,
+        salePriceCents: 200,
         stockQuantity: 10,
       );
 

@@ -91,7 +91,7 @@ class ProcessPurchaseUseCase {
             language: Formatters.currentLanguage,
             supplierName: purchase.supplierName,
           ),
-          amount: purchase.totalAmount,
+          amountCents: purchase.totalAmountCents,
           type: TransactionType.expense,
           category: TransactionDescriptions.purchaseCategory(
             Formatters.currentLanguage,
@@ -111,17 +111,16 @@ class ProcessPurchaseUseCase {
       );
     }
 
-    final itemsTotal = purchase.items.fold<double>(
+    // Soma em CENTAVOS inteiros (W4): int é exato — sem arredondamento
+    // de fronteira (mesma técnica do ProcessSaleUseCase).
+    final itemsTotalCents = purchase.items.fold<int>(
       0,
-      (sum, item) => sum + item.quantity * item.unitPrice,
+      (sum, item) => sum + item.quantity * item.unitPriceCents,
     );
-    // Comparação em CENTAVOS (mesma técnica do ProcessSaleUseCase).
-    final itemsCents = (itemsTotal * 100).round();
-    final totalCents = (purchase.totalAmount * 100).round();
-    if (itemsCents != totalCents) {
+    if (itemsTotalCents != purchase.totalAmountCents) {
       throw InvalidPurchaseException(
-        'O total da compra (${purchase.totalAmount}) não corresponde aos '
-        'itens ($itemsTotal).',
+        'O total da compra (${purchase.totalAmountCents}) não corresponde '
+        'aos itens ($itemsTotalCents).',
       );
     }
   }

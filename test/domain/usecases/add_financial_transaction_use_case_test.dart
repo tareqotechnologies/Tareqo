@@ -33,10 +33,10 @@ class _FakeFinancialTransactionRepository
   }
 }
 
-FinancialTransaction _transaction(double amount) => FinancialTransaction(
+FinancialTransaction _transaction(int amountCents) => FinancialTransaction(
       id: 't1',
       description: 'Venda',
-      amount: amount,
+      amountCents: amountCents,
       type: TransactionType.income,
       category: 'Vendas',
       date: DateTime(2026, 8, 3),
@@ -47,10 +47,10 @@ void main() {
     final repository = _FakeFinancialTransactionRepository();
     final useCase = AddFinancialTransactionUseCase(repository);
 
-    await useCase(_transaction(100));
+    await useCase(_transaction(10000));
 
     expect(repository.items, hasLength(1));
-    expect(repository.items.first.amount, 100);
+    expect(repository.items.first.amountCents, 10000);
   });
 
   test('rejeita valor zero e NÃO persiste', () async {

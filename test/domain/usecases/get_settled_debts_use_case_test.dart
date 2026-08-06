@@ -36,7 +36,7 @@ Debt _debt(
     Debt(
       id: id,
       personName: 'Pessoa $id',
-      amount: 25.0,
+      amountCents: 2500,
       dueDate: DateTime(2026, 8, 15),
       isCustomerDebt: isCustomerDebt,
       isPaid: isPaid,

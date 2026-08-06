@@ -89,7 +89,7 @@ class SaleDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    Formatters.currency(sale.totalAmount),
+                    Formatters.currency(sale.totalAmountCents),
                     style: theme.textTheme.headlineMedium,
                   ),
                 ],
@@ -121,7 +121,7 @@ class SaleDetailScreen extends StatelessWidget {
                 Text(l10n.saleDetailTotal, style: theme.textTheme.titleMedium),
                 const Spacer(),
                 Text(
-                  Formatters.currency(sale.totalAmount),
+                  Formatters.currency(sale.totalAmountCents),
                   style: theme.textTheme.headlineSmall,
                 ),
               ],
@@ -166,7 +166,7 @@ class _ItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final subtotal = item.quantity * item.unitPrice;
+    final subtotal = item.quantity * item.unitPriceCents;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -187,7 +187,7 @@ class _ItemRow extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${item.quantity} × '
-                  '${Formatters.currency(item.unitPrice)}',
+                  '${Formatters.currency(item.unitPriceCents)}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

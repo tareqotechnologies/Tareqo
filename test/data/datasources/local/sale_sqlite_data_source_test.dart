@@ -11,7 +11,7 @@ void main() {
   late Database db;
 
   setUp(() => db = openTestDatabase());
-  tearDown(() => db.dispose());
+  tearDown(() => db.close());
 
   Sale buildSale(String id) => Sale(
         id: id,
@@ -20,16 +20,16 @@ void main() {
             productId: 'p1',
             productName: 'Caneta',
             quantity: 2,
-            unitPrice: 2.0,
+            unitPriceCents: 200,
           ),
           SaleItem(
             productId: 'p2',
             productName: 'Caderno',
             quantity: 1,
-            unitPrice: 9.9,
+            unitPriceCents: 990,
           ),
         ],
-        totalAmount: 13.9,
+        totalAmountCents: 1390,
         paymentMethod: PaymentMethod.pix,
         dateTime: DateTime(2026, 8, 3, 14, 30),
       );
@@ -46,7 +46,7 @@ void main() {
     final sale = sales.first;
     expect(sale.id, 's1');
     expect(sale.paymentMethod, PaymentMethod.pix);
-    expect(sale.totalAmount, 13.9);
+    expect(sale.totalAmountCents, 1390);
     expect(sale.dateTime, DateTime(2026, 8, 3, 14, 30));
     expect(sale.items, hasLength(2));
     expect(sale.items.first.productName, 'Caneta');

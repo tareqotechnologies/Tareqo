@@ -33,7 +33,7 @@ class AddPlanUseCase {
         'O plano deve permitir ao menos 1 funcionário.',
       );
     }
-    if (plan.priceMonthly < 0) {
+    if (plan.priceMonthlyCents < 0) {
       throw const InvalidPlanException('O preço não pode ser negativo.');
     }
     await _repository.add(plan);

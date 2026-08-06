@@ -26,7 +26,7 @@ class AddFinancialTransactionUseCase {
   /// Lança [InvalidAmountException] em caso de falha; a transação **não**
   /// é persistida nesse caso.
   Future<void> call(FinancialTransaction transaction) async {
-    if (transaction.amount <= 0) {
+    if (transaction.amountCents <= 0) {
       throw InvalidAmountException(
         'O valor da transação deve ser maior que zero.',
       );

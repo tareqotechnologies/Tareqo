@@ -9,6 +9,7 @@ import 'package:dumbhanengue/domain/entities/purchase.dart';
 import 'package:dumbhanengue/domain/entities/sale.dart';
 import 'package:dumbhanengue/domain/entities/store.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
+import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
 import 'package:dumbhanengue/domain/usecases/get_cash_flow_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_purchases_use_case.dart';
@@ -30,8 +31,8 @@ class _StoreScopedGetProductsUseCase implements GetProductsUseCase {
           id: 'p-$storeId',
           storeId: storeId,
           name: storeId == 'st1' ? 'Produto Loja Centro' : 'Produto Loja Shopping',
-          purchasePrice: 1.0,
-          salePrice: 2.0,
+          purchasePriceCents: 100,
+          salePriceCents: 200,
           stockQuantity: 2, // estoque baixo → aparece no dashboard
         ),
       ];
@@ -49,9 +50,9 @@ class _StoreScopedGetPurchasesUseCase implements GetPurchasesUseCase {
               ? 'Fornecedor Centro'
               : 'Fornecedor Shopping',
           items: const [
-            PurchaseItem(productId: 'p1', productName: 'X', quantity: 1, unitPrice: 1),
+            PurchaseItem(productId: 'p1', productName: 'X', quantity: 1, unitPriceCents: 100),
           ],
-          totalAmount: 10,
+          totalAmountCents: 1000,
           dateTime: DateTime.now(),
         ),
       ];
@@ -67,12 +68,15 @@ class _EmptySalesRepository implements ISaleRepository {
 
 class _ZeroCashFlowUseCase implements GetCashFlowUseCase {
   @override
+  final ICashFlowRepository? serverRepository = null;
+
+  @override
   Future<CashFlow> call({
     required String storeId,
     required DateTime start,
     required DateTime end,
   }) async =>
-      const CashFlow(income: 0, expense: 0);
+      const CashFlow(incomeCents: 0, expenseCents: 0);
 }
 
 void main() {

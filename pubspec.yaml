@@ -30,12 +30,12 @@ dependencies:
   # (injetado no Supabase.initialize — ver core/network).
   http: ^1.6.0
   flutter_secure_storage: ^10.3.1
-  sqlite3: 2.9.0
-  # 0.6.0+eol: última versão (EOL) — recompilada contra compileSdk 36;
-  # a 0.5.27 era compilada contra android-32 e QUEBRAVA o build de release
-  # (falha pré-existente do CI, auditoria M4/8.2). Migração futura:
-  # sqlite3_android (lib nativa do SO) — ver checklist 8.2.
-  sqlite3_flutter_libs: 0.6.0+eol
+  # W10 (checklist 8.2): sqlite3 3.x usa BUILD HOOKS (native assets) — o
+  # próprio pacote compila/empacota o SQLite para Android/iOS/desktop, sem
+  # precisar de sqlite3_flutter_libs nem de sqlite3_android (o loader
+  # manual/open.overrideFor foi removido de AppDatabase). Ver changelog
+  # 3.0.0: "Use build hooks to load SQLite instead of DynamicLibrary".
+  sqlite3: ^3.5.1
   path_provider: ^2.1.6
   path: ^1.9.1
 

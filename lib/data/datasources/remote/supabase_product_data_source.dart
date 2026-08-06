@@ -19,15 +19,18 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
 
   @override
   Future<List<Product>> getAll({required String storeId}) async {
-    final rows = await supabaseClient
-        .from(_table)
-        .select(
-          'id, store_id, name, description, purchase_price, sale_price, '
-          'stock_quantity',
-        )
-        .eq('store_id', storeId)
-        .order('name', ascending: true)
-        .limit(SupabaseQueryLimits.pageSize);
+    // Paginação keyset (H2): lotes de pageSize pelo id, sem teto total.
+    // O provider de produtos NÃO reordena — mantemos a ordem por nome
+    // (mesma do contrato anterior) com um sort local após a coleta.
+    final rows = await fetchAllKeyset(
+      supabaseClient
+          .from(_table)
+          .select(
+            'id, store_id, name, description, purchase_price, sale_price, '
+            'stock_quantity',
+          )
+          .eq('store_id', storeId),
+    )..sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -56,8 +59,8 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
       'store_id': product.storeId,
       'name': product.name,
       'description': product.description,
-      'purchase_price': product.purchasePrice,
-      'sale_price': product.salePrice,
+      'purchase_price': product.purchasePriceCents,
+      'sale_price': product.salePriceCents,
       'stock_quantity': product.stockQuantity,
     });
   }
@@ -88,8 +91,8 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
     storeId: row['store_id'] as String,
     name: row['name'] as String,
     description: (row['description'] as String?) ?? '',
-    purchasePrice: (row['purchase_price'] as num).toDouble(),
-    salePrice: (row['sale_price'] as num).toDouble(),
+    purchasePriceCents: (row['purchase_price'] as num).toInt(),
+    salePriceCents: (row['sale_price'] as num).toInt(),
     stockQuantity: (row['stock_quantity'] as num).toInt(),
   );
 }

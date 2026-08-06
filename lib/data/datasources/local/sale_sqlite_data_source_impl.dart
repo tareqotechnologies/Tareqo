@@ -28,7 +28,7 @@ final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
           id: row['id'] as String,
           storeId: row['store_id'] as String,
           items: _itemsOf(row['id'] as String),
-          totalAmount: row['total_amount'] as double,
+          totalAmountCents: (row['total_amount'] as num).toInt(),
           paymentMethod:
               PaymentMethod.values.byName(row['payment_method'] as String),
           dateTime: DateTime.fromMillisecondsSinceEpoch(
@@ -50,7 +50,7 @@ final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
           productId: row['product_id'] as String,
           productName: row['product_name'] as String,
           quantity: row['quantity'] as int,
-          unitPrice: row['unit_price'] as double,
+          unitPriceCents: (row['unit_price'] as num).toInt(),
         ),
     ];
   }
@@ -64,7 +64,7 @@ final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
         [
           sale.id,
           sale.storeId,
-          sale.totalAmount,
+          sale.totalAmountCents,
           sale.paymentMethod.name,
           sale.dateTime.millisecondsSinceEpoch,
         ],
@@ -79,7 +79,7 @@ final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
             item.productId,
             item.productName,
             item.quantity,
-            item.unitPrice,
+            item.unitPriceCents,
           ],
         );
       }

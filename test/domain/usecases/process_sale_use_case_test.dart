@@ -90,19 +90,19 @@ class _FakeTransactionRepository implements IFinancialTransactionRepository {
 Product _product(String id, {int stock = 10}) => Product(
       id: id,
       name: 'Produto $id',
-      purchasePrice: 5.0,
-      salePrice: 9.9,
+      purchasePriceCents: 500,
+      salePriceCents: 990,
       stockQuantity: stock,
     );
 
-Sale _sale(List<SaleItem> items, {double? totalAmount}) => Sale(
+Sale _sale(List<SaleItem> items, {int? totalAmountCents}) => Sale(
       id: 'VENDA-1',
       items: items,
       // Total consistente com os itens (quantidade × preço unitário).
-      totalAmount: totalAmount ??
-          items.fold(
-            0.0,
-            (sum, item) => sum + item.quantity * item.unitPrice,
+      totalAmountCents: totalAmountCents ??
+          items.fold<int>(
+            0,
+            (sum, item) => sum + item.quantity * item.unitPriceCents,
           ),
       paymentMethod: PaymentMethod.pix,
       dateTime: DateTime.utc(2026, 8, 3),
@@ -164,9 +164,9 @@ void main() {
 
     await useCase(_sale(const [
       SaleItem(
-          productId: '1', productName: 'Produto 1', quantity: 2, unitPrice: 9.9),
+          productId: '1', productName: 'Produto 1', quantity: 2, unitPriceCents: 990),
       SaleItem(
-          productId: '2', productName: 'Produto 2', quantity: 1, unitPrice: 9.9),
+          productId: '2', productName: 'Produto 2', quantity: 1, unitPriceCents: 990),
     ]));
 
     expect(saleRepository.registerCalled, isTrue);
@@ -178,8 +178,8 @@ void main() {
     // Entrada no caixa: valor exato da venda, categoria Vendas, paga.
     expect(transactionRepository.transactions, hasLength(1));
     final entry = transactionRepository.transactions.first;
-    // closeTo: tolerância para precisão de ponto flutuante (2 × 9.9 + 9.9).
-    expect(entry.amount, closeTo(29.7, 0.0001));
+    // 2 × 9.90 + 9.90 = 29,70 → 2970 centavos (inteiro, exato).
+    expect(entry.amountCents, 2970);
     expect(entry.type, TransactionType.income);
     expect(entry.status, TransactionStatus.paid);
     expect(entry.category, 'Vendas');
@@ -194,7 +194,7 @@ void main() {
     await expectLater(
       useCase(_sale(const [
         SaleItem(
-            productId: '1', productName: 'Produto 1', quantity: 5, unitPrice: 9.9),
+            productId: '1', productName: 'Produto 1', quantity: 5, unitPriceCents: 990),
       ])),
       throwsA(
         isA<InsufficientStockException>()
@@ -221,7 +221,7 @@ void main() {
     await expectLater(
       useCase(_sale(const [
         SaleItem(
-            productId: 'X', productName: 'Fantasma', quantity: 1, unitPrice: 9.9),
+            productId: 'X', productName: 'Fantasma', quantity: 1, unitPriceCents: 990),
       ])),
       throwsA(isA<ProductNotFoundException>()),
     );
@@ -254,8 +254,8 @@ void main() {
     await expectLater(
       useCase(_sale(const [
         SaleItem(
-            productId: '1', productName: 'Produto 1', quantity: 1, unitPrice: 9.9),
-      ], totalAmount: 99.0)),
+            productId: '1', productName: 'Produto 1', quantity: 1, unitPriceCents: 990),
+      ], totalAmountCents: 9900)),
       throwsA(isA<InvalidSaleException>()),
     );
 
@@ -273,8 +273,8 @@ void main() {
     await expectLater(
       useCase(_sale(const [
         SaleItem(
-            productId: '1', productName: 'Produto 1', quantity: 1, unitPrice: 9.9),
-      ], totalAmount: 99.0)),
+            productId: '1', productName: 'Produto 1', quantity: 1, unitPriceCents: 990),
+      ], totalAmountCents: 9900)),
       throwsA(isA<InvalidSaleException>()),
     );
 
@@ -299,7 +299,7 @@ void main() {
           productId: '1',
           productName: 'Produto 1',
           quantity: 1,
-          unitPrice: 9.9),
+          unitPriceCents: 990),
     ]));
 
     final entry = transactionRepository.transactions.first;
@@ -320,7 +320,7 @@ void main() {
 
     final sale = _sale(const [
       SaleItem(
-          productId: '1', productName: 'Produto 1', quantity: 1, unitPrice: 9.9),
+          productId: '1', productName: 'Produto 1', quantity: 1, unitPriceCents: 990),
     ]);
     await useCase(sale);
 
@@ -346,8 +346,8 @@ void main() {
     await expectLater(
       useCase(_sale(const [
         SaleItem(
-            productId: '1', productName: 'Produto 1', quantity: 1, unitPrice: 9.9),
-      ], totalAmount: 99.0)),
+            productId: '1', productName: 'Produto 1', quantity: 1, unitPriceCents: 990),
+      ], totalAmountCents: 9900)),
       throwsA(isA<InvalidSaleException>()),
     );
     expect(processor.calls, 0);

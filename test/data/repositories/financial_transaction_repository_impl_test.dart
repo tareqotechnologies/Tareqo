@@ -8,7 +8,7 @@ FinancialTransaction _transaction(String id, DateTime date) =>
     FinancialTransaction(
       id: id,
       description: 'Movimento $id',
-      amount: 10,
+      amountCents: 1000,
       type: TransactionType.income,
       category: 'Vendas',
       date: date,

@@ -11,8 +11,8 @@ _Product _$ProductFromJson(Map<String, dynamic> json) => _Product(
   storeId: json['storeId'] as String? ?? 'st1',
   name: json['name'] as String,
   description: json['description'] as String? ?? '',
-  purchasePrice: (json['purchasePrice'] as num).toDouble(),
-  salePrice: (json['salePrice'] as num).toDouble(),
+  purchasePriceCents: (json['purchasePriceCents'] as num).toInt(),
+  salePriceCents: (json['salePriceCents'] as num).toInt(),
   stockQuantity: (json['stockQuantity'] as num?)?.toInt() ?? 0,
 );
 
@@ -21,7 +21,7 @@ Map<String, dynamic> _$ProductToJson(_Product instance) => <String, dynamic>{
   'storeId': instance.storeId,
   'name': instance.name,
   'description': instance.description,
-  'purchasePrice': instance.purchasePrice,
-  'salePrice': instance.salePrice,
+  'purchasePriceCents': instance.purchasePriceCents,
+  'salePriceCents': instance.salePriceCents,
   'stockQuantity': instance.stockQuantity,
 };

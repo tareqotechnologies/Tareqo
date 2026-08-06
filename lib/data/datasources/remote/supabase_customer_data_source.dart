@@ -14,12 +14,14 @@ final class CustomerSupabaseDataSourceImpl implements CustomerLocalDataSource {
 
   @override
   Future<List<Customer>> getAll({required String storeId}) async {
-    final rows = await supabaseClient
-        .from(_table)
-        .select('id, store_id, name, phone, email')
-        .eq('store_id', storeId)
-        .order('name', ascending: true)
-        .limit(SupabaseQueryLimits.pageSize);
+    // Paginação keyset (H2): lotes de pageSize pelo id, sem teto total.
+    // A ordem final de exibição (nome) é aplicada pelo provider.
+    final rows = await fetchAllKeyset(
+      supabaseClient
+          .from(_table)
+          .select('id, store_id, name, phone, email')
+          .eq('store_id', storeId),
+    );
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 

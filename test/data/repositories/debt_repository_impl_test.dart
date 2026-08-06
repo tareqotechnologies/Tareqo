@@ -12,7 +12,7 @@ void main() {
       Debt(
         id: 'd1',
         personName: 'João',
-        amount: 25.0,
+        amountCents: 2500,
         dueDate: DateTime(2026, 8, 15),
         isCustomerDebt: true,
       ),
@@ -34,7 +34,7 @@ void main() {
         id: 'd1',
         storeId: 'st1',
         personName: 'João',
-        amount: 25.0,
+        amountCents: 2500,
         dueDate: DateTime(2026, 8, 15),
         isCustomerDebt: true,
       ),

@@ -38,7 +38,7 @@ Owner signs up → picks plan + business name → tenant PENDING
 - **UI (UX only):** the dashboard hides the Purchases/Reports cards for employees and the Stores card for anyone who is not the owner — `currentAccessLevelProvider` (`account_providers.dart`) resolves the signed-in user's level from `tenants.owner_user_id` or the highest role among their `store_employees` links;
 - **Server (authority):** the `process_purchase` RPC and the `purchases`/`purchase_items` RLS policies require `public.is_manager_of_store(store_id)` (owner or manager). Even a modified client that calls PostgREST directly is blocked — the DB is the final gate. Store/employee/plan/settings management was already owner-only via the `is_tenant_owner`-based RLS policies.
 
-Migration: `supabase/migrations/007_manager_purchase_gate.sql` (helper + RPC guard + policies).
+Consolidated in `supabase/upgrade.sql` (Part 4 — helper + RPC guard + policies).
 
 ### Super admin (DB-backed role)
 
@@ -177,7 +177,7 @@ The business tables (`products`, `sales`, `financial_transactions`, `debts`, `cu
 
 - **Helper `public.is_super_admin()`:** queries the `public.super_admins` table (DB-backed role) — `SECURITY DEFINER` to bypass the table's own RLS;
 - **Helper `public.is_tenant_owner(tenant_id)`:** checks `tenants.owner_user_id = auth.uid()`;
-- **`is_my_store`/`is_tenant_owner` are `SECURITY DEFINER`** (`search_path` pinned): they run inside the policies and query tables that carry their own policies (`stores`/`tenants`/`store_employees`) — as definers they ignore RLS internally, which breaks the cross-table policy cycle and prevents `54001 max_stack_depth` on full-table scans (regression found Aug 6 on Supabase cloud with an older schema; see `supabase/migrations/006_rls_helpers_security_definer.sql`);
+- **`is_my_store`/`is_tenant_owner` are `SECURITY DEFINER`** (`search_path` pinned): they run inside the policies and query tables that carry their own policies (`stores`/`tenants`/`store_employees`) — as definers they ignore RLS internally, which breaks the cross-table policy cycle and prevents `54001 max_stack_depth` on full-table scans (regression found Aug 6 on Supabase cloud with an older schema; consolidated in `supabase/upgrade.sql`, Part 3);
 - **Trigger guards:** when there is no session (e.g. seeding via SQL Editor), the provided value is preserved — the seed keeps working.
 
 ### Seed

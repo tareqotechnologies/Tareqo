@@ -7,7 +7,7 @@ void main() {
     final transaction = FinancialTransaction(
       id: '1',
       description: 'Venda à vista',
-      amount: 50.0,
+      amountCents: 5000,
       type: TransactionType.income,
       category: 'vendas',
       date: DateTime.utc(2026, 8, 3),
@@ -20,7 +20,7 @@ void main() {
     final transaction = FinancialTransaction(
       id: '2',
       description: 'Venda fiada',
-      amount: 80.0,
+      amountCents: 8000,
       type: TransactionType.income,
       category: 'vendas',
       date: DateTime.utc(2026, 8, 3),
@@ -34,7 +34,7 @@ void main() {
     final transaction = FinancialTransaction(
       id: '2',
       description: 'Venda fiada',
-      amount: 80.0,
+      amountCents: 8000,
       type: TransactionType.income,
       category: 'vendas',
       date: DateTime.utc(2026, 8, 3),

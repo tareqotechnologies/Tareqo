@@ -10,7 +10,7 @@ void main() {
   late Database db;
 
   setUp(() => db = openTestDatabase());
-  tearDown(() => db.dispose());
+  tearDown(() => db.close());
 
   test('add persiste e getAll reconstrói a dívida (incl. booleanos)', () async {
     final dataSource = DebtSqliteDataSourceImpl(db);
@@ -19,7 +19,7 @@ void main() {
       Debt(
         id: 'd1',
         personName: 'João',
-        amount: 25.0,
+        amountCents: 2500,
         dueDate: DateTime(2026, 8, 15),
         isCustomerDebt: true,
         isPaid: true,
@@ -29,7 +29,7 @@ void main() {
       Debt(
         id: 'd2',
         personName: 'Distribuidora',
-        amount: 120.0,
+        amountCents: 12000,
         dueDate: DateTime(2026, 8, 20),
         isCustomerDebt: false,
       ),
@@ -53,7 +53,7 @@ void main() {
       Debt(
         id: 'd1',
         personName: 'João',
-        amount: 25.0,
+        amountCents: 2500,
         dueDate: DateTime(2026, 8, 15),
         isCustomerDebt: true,
       ),
@@ -82,7 +82,7 @@ void main() {
       Debt(
         id: 'd1',
         personName: 'Ana',
-        amount: 40.0,
+        amountCents: 4000,
         dueDate: DateTime(2026, 7, 15),
         isCustomerDebt: true,
         isPaid: true,

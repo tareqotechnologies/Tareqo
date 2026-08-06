@@ -11,16 +11,16 @@ void main() {
         productId: '1',
         productName: 'Caneta',
         quantity: 2,
-        unitPrice: 2.0,
+        unitPriceCents: 200,
       ),
       SaleItem(
         productId: '2',
         productName: 'Caderno',
         quantity: 1,
-        unitPrice: 9.9,
+        unitPriceCents: 990,
       ),
     ],
-    totalAmount: 13.9,
+    totalAmountCents: 1390,
     paymentMethod: PaymentMethod.pix,
     dateTime: DateTime.utc(2026, 8, 3, 14, 30),
   );
@@ -33,7 +33,7 @@ void main() {
     expect(restored.dateTime, DateTime.utc(2026, 8, 3, 14, 30));
     expect(restored.items, hasLength(2));
     expect(restored.items.first.productName, 'Caneta');
-    expect(restored.items.first.unitPrice, 2.0);
+    expect(restored.items.first.unitPriceCents, 200);
   });
 
   test('PaymentMethod é serializado pelo nome do enum', () {
@@ -50,7 +50,7 @@ void main() {
 
     // O item preserva o valor cobrado na data da venda — mesmo que o
     // preço atual do catálogo mude depois, o histórico não é afetado.
-    expect(item.unitPrice, 2.0);
+    expect(item.unitPriceCents, 200);
     expect(item.productId, '1');
   });
 }

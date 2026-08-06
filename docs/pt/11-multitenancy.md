@@ -38,7 +38,7 @@ Dono se cadastra → escolhe plano + nome do negócio → tenant PENDING
 - **UI (apenas UX):** o dashboard oculta os cards de Compras/Relatórios para funcionários e o card de Lojas para quem não é dono — o `currentAccessLevelProvider` (`account_providers.dart`) resolve o nível do usuário logado a partir de `tenants.owner_user_id` ou do maior cargo entre os vínculos em `store_employees`;
 - **Servidor (autoridade):** a RPC `process_purchase` e as políticas RLS de `purchases`/`purchase_items` exigem `public.is_manager_of_store(store_id)` (dono ou gerente). Mesmo um cliente modificado que chame o PostgREST direto é bloqueado — o banco é o portão final. A gestão de lojas/funcionários/plano/ajustes já era exclusiva do dono via políticas `is_tenant_owner`.
 
-Migração: `supabase/migrations/007_manager_purchase_gate.sql` (helper + guarda da RPC + políticas).
+Consolidado em `supabase/upgrade.sql` (Parte 4 — helper + guarda da RPC + políticas).
 
 ### Super admin (papel baseado em banco)
 
@@ -177,7 +177,7 @@ As tabelas de negócio (`products`, `sales`, `financial_transactions`, `debts`, 
 
 - **Helper `public.is_super_admin()`:** consulta a tabela `public.super_admins` (papel em banco) — `SECURITY DEFINER` para dispensar o RLS da própria tabela;
 - **Helper `public.is_tenant_owner(tenant_id)`:** verifica `tenants.owner_user_id = auth.uid()`;
-- **`is_my_store`/`is_tenant_owner` são `SECURITY DEFINER`** (`search_path` fixado): rodam DENTRO das políticas e consultam tabelas que têm políticas próprias (`stores`/`tenants`/`store_employees`) — como definers ignoram o RLS internamente, quebrando o ciclo entre tabelas e impedindo o `54001 max_stack_depth` em varreduras completas (regressão encontrada em Aug 6 num Supabase cloud com schema antigo; ver `supabase/migrations/006_rls_helpers_security_definer.sql`);
+- **`is_my_store`/`is_tenant_owner` são `SECURITY DEFINER`** (`search_path` fixado): rodam DENTRO das políticas e consultam tabelas que têm políticas próprias (`stores`/`tenants`/`store_employees`) — como definers ignoram o RLS internamente, quebrando o ciclo entre tabelas e impedindo o `54001 max_stack_depth` em varreduras completas (regressão encontrada em Aug 6 num Supabase cloud com schema antigo; consolidado em `supabase/upgrade.sql`, Parte 3);
 - **Guardas nos triggers:** quando não há sessão (ex.: seed via SQL Editor), o valor informado é preservado — o seed continua funcionando.
 
 ### Seed

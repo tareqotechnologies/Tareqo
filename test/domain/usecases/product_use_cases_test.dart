@@ -45,14 +45,14 @@ class _FakeProductRepository implements IProductRepository {
 
 Product _product({
   String name = 'Caneta',
-  double purchasePrice = 1.0,
-  double salePrice = 2.0,
+  int purchasePriceCents = 100,
+  int salePriceCents = 200,
 }) {
   return Product(
     id: '1',
     name: name,
-    purchasePrice: purchasePrice,
-    salePrice: salePrice,
+    purchasePriceCents: purchasePriceCents,
+    salePriceCents: salePriceCents,
   );
 }
 
@@ -77,7 +77,7 @@ void main() {
       final useCase = AddProductUseCase(repository);
 
       await expectLater(
-        useCase(_product(purchasePrice: 3.0, salePrice: 2.0)),
+        useCase(_product(purchasePriceCents: 300, salePriceCents: 200)),
         throwsA(isA<InvalidPriceException>()),
       );
 
@@ -89,7 +89,7 @@ void main() {
       final repository = _FakeProductRepository();
       final useCase = AddProductUseCase(repository);
 
-      await useCase(_product(purchasePrice: 2.0, salePrice: 2.0));
+      await useCase(_product(purchasePriceCents: 200, salePriceCents: 200));
 
       expect(repository.addCalled, isTrue);
     });

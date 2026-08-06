@@ -78,10 +78,10 @@ class _FakeDebtProcessor implements IDebtAtomicProcessor {
   }
 }
 
-Debt _debt(double amount, {bool isCustomerDebt = true}) => Debt(
+Debt _debt(int amountCents, {bool isCustomerDebt = true}) => Debt(
       id: 'd1',
       personName: 'João',
-      amount: amount,
+      amountCents: amountCents,
       dueDate: DateTime(2026, 8, 15),
       isCustomerDebt: isCustomerDebt,
     );
@@ -93,15 +93,15 @@ void main() {
     final transactions = _FakeTransactionRepository();
     final useCase = AddDebtUseCase(repository, transactions);
 
-    await useCase(_debt(25));
+    await useCase(_debt(2500));
 
     expect(repository.items, hasLength(1));
-    expect(repository.items.first.amount, 25);
+    expect(repository.items.first.amountCents, 2500);
 
     // O livro reflete o fiado desde o início: entrada PENDENTE vinculada.
     expect(transactions.transactions, hasLength(1));
     final entry = transactions.transactions.first;
-    expect(entry.amount, 25);
+    expect(entry.amountCents, 2500);
     expect(entry.type, TransactionType.income);
     expect(entry.status, TransactionStatus.pending);
     expect(entry.category, 'Fiado');
@@ -114,7 +114,7 @@ void main() {
     final transactions = _FakeTransactionRepository();
     final useCase = AddDebtUseCase(repository, transactions);
 
-    await useCase(_debt(120, isCustomerDebt: false));
+    await useCase(_debt(12000, isCustomerDebt: false));
 
     final entry = transactions.transactions.first;
     expect(entry.type, TransactionType.expense);
@@ -164,7 +164,7 @@ void main() {
       processor: processor,
     );
 
-    final debt = _debt(25);
+    final debt = _debt(2500);
     await useCase(debt);
 
     // O caminho composto NÃO roda — o servidor grava dívida + pendência

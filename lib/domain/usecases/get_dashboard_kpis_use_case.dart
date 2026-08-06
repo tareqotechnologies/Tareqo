@@ -2,38 +2,43 @@ import '../repositories/i_dashboard_kpis_repository.dart';
 
 /// Agregados das KPIs do dashboard (calculados no SERVIDOR no modo SaaS
 /// via RPC `get_dashboard_kpis`; no modo local, fallback client-side).
+///
+/// Valores em CENTAVOS inteiros (W4) — o Postgres persiste BIGINT.
 final class DashboardKpis {
   const DashboardKpis({
-    required this.totalSales,
-    required this.cashIncome,
-    required this.cashExpense,
-    required this.pendingTotal,
+    required this.totalSalesCents,
+    required this.cashIncomeCents,
+    required this.cashExpenseCents,
+    required this.pendingTotalCents,
     required this.stockTotal,
   });
 
-  /// Total de vendas da loja (histórico completo — sem filtro de período).
-  final double totalSales;
+  /// Total de vendas da loja (histórico completo — sem filtro de período),
+  /// em centavos.
+  final int totalSalesCents;
 
-  /// Entradas realizadas no período (transações `paid` do tipo income).
-  final double cashIncome;
+  /// Entradas realizadas no período (transações `paid` do tipo income),
+  /// em centavos.
+  final int cashIncomeCents;
 
-  /// Saídas realizadas no período (transações `paid` do tipo expense).
-  final double cashExpense;
+  /// Saídas realizadas no período (transações `paid` do tipo expense),
+  /// em centavos.
+  final int cashExpenseCents;
 
-  /// Total a receber de clientes ("fiado") ainda pendente.
-  final double pendingTotal;
+  /// Total a receber de clientes ("fiado") ainda pendente, em centavos.
+  final int pendingTotalCents;
 
   /// Soma das quantidades em estoque (unidades).
   final int stockTotal;
 
-  /// Saldo em caixa: entradas − saídas do período.
-  double get cashBalance => cashIncome - cashExpense;
+  /// Saldo em caixa: entradas − saídas do período (centavos).
+  int get cashBalanceCents => cashIncomeCents - cashExpenseCents;
 
   static const empty = DashboardKpis(
-    totalSales: 0,
-    cashIncome: 0,
-    cashExpense: 0,
-    pendingTotal: 0,
+    totalSalesCents: 0,
+    cashIncomeCents: 0,
+    cashExpenseCents: 0,
+    pendingTotalCents: 0,
     stockTotal: 0,
   );
 }

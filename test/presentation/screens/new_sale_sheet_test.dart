@@ -21,8 +21,8 @@ class _FakeGetProductsUseCase implements GetProductsUseCase {
         Product(
           id: 'p1',
           name: 'Caneta',
-          purchasePrice: 1.0,
-          salePrice: 2.0,
+          purchasePriceCents: 100,
+          salePriceCents: 200,
           stockQuantity: 10,
         ),
       ];
@@ -75,6 +75,6 @@ void main() {
 
     // O use case foi chamado exatamente uma vez, com o total calculado.
     expect(processSale.calls, 1);
-    expect(processSale.lastSale?.totalAmount, 2.0);
+    expect(processSale.lastSale?.totalAmountCents, 200);
   });
 }

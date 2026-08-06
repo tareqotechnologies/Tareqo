@@ -69,7 +69,7 @@ class ReportsScreen extends ConsumerWidget {
               Expanded(
                 child: KpiCard(
                   label: l10n.reportsRevenue,
-                  value: Formatters.currency(report?.totalRevenue ?? 0),
+                  value: Formatters.currency(report?.totalRevenueCents ?? 0),
                   icon: Icons.point_of_sale_outlined,
                   loading: reportAsync.isLoading,
                 ),
@@ -78,7 +78,7 @@ class ReportsScreen extends ConsumerWidget {
               Expanded(
                 child: KpiCard(
                   label: l10n.reportsProfit,
-                  value: Formatters.currency(report?.totalProfit ?? 0),
+                  value: Formatters.currency(report?.totalProfitCents ?? 0),
                   icon: Icons.trending_up,
                   iconBackground: AppColors.income.withValues(alpha: 0.14),
                   iconColor: AppColors.income,
@@ -126,7 +126,7 @@ class ReportsScreen extends ConsumerWidget {
                       rank: i + 1,
                       name: data.bestSellers[i].productName,
                       quantity: data.bestSellers[i].quantity,
-                      revenue: data.bestSellers[i].revenue,
+                      revenue: data.bestSellers[i].revenueCents,
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -149,7 +149,7 @@ class ReportsScreen extends ConsumerWidget {
                       if (i > 0) const Divider(height: 1, indent: 14, endIndent: 14),
                       _DailyRow(
                         day: data.perDay[i].day,
-                        total: data.perDay[i].total,
+                        total: data.perDay[i].totalCents,
                       ),
                     ],
                   ],
@@ -177,7 +177,7 @@ class _BestSellerRow extends StatelessWidget {
   final int rank;
   final String name;
   final int quantity;
-  final double revenue;
+  final int revenue;
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +240,7 @@ class _DailyRow extends StatelessWidget {
   const _DailyRow({required this.day, required this.total});
 
   final DateTime day;
-  final double total;
+  final int total;
 
   @override
   Widget build(BuildContext context) {

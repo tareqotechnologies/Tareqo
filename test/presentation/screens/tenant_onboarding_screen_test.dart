@@ -19,7 +19,7 @@ class _FakeGetPlansUseCase implements GetPlansUseCase {
           id: 'pl2',
           name: 'Profissional',
           description: 'Para negócios em crescimento',
-          priceMonthly: 199.9,
+          priceMonthlyCents: 19990,
           maxStores: 3,
           maxEmployees: 10,
         ),

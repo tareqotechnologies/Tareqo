@@ -18,8 +18,10 @@ abstract class Product with _$Product {
     @Default('st1') String storeId,
     required String name,
     @Default('') String description,
-    required double purchasePrice,
-    required double salePrice,
+    // Preços em CENTAVOS inteiros (W4 — migração de dinheiro para
+    // centavos; o banco persiste BIGINT/INTEGER).
+    required int purchasePriceCents,
+    required int salePriceCents,
     @Default(0) int stockQuantity,
   }) = _Product;
 

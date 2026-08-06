@@ -83,7 +83,7 @@ void main() {
         useCase(const Plan(
           id: 'pl1',
           name: 'X',
-          priceMonthly: -1,
+          priceMonthlyCents: -100,
         )),
         throwsA(isA<InvalidPlanException>()),
       );

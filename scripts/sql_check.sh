@@ -66,9 +66,17 @@ $$;
 ALTER ROLE app_user PASSWORD 'app';
 SQL
 
-echo "==> [1/4] Aplicando stub de auth + supabase/schema.sql"
+echo "==> [1/4] Aplicando stub de auth + supabase/schema.sql + upgrade.sql"
 psql -v ON_ERROR_STOP=1 -f sqlcheck_stub.sql
 psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
+
+# upgrade.sql (CONSOLIDADO — substitui as antigas migrações 002..011):
+# aplicado 2x SEM ERROS sobre o schema novo — prova a idempotência
+# (ADD COLUMN IF NOT EXISTS / CREATE UNIQUE INDEX IF NOT EXISTS /
+# CREATE OR REPLACE / DROP + CREATE) e que é seguro reexecutar à vontade.
+echo "==> [1b] upgrade.sql consolidado: aplicação dupla sem erro"
+psql -v ON_ERROR_STOP=1 -f supabase/upgrade.sql
+psql -v ON_ERROR_STOP=1 -f supabase/upgrade.sql
 
 psql -v ON_ERROR_STOP=1 <<'SQL'
 GRANT USAGE ON SCHEMA public, auth TO app_user;
@@ -111,7 +119,7 @@ ON CONFLICT (id) DO NOTHING;
 -- store_id explícito ('st_smoke' É loja do dono — o trigger anti-forja
 -- preserva; sem isso o produto cairia em st1, a primeira loja do seed).
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('smoke1', 'Produto do dono', 'st_smoke', 1.0, 2.0, 5)
+VALUES ('smoke1', 'Produto do dono', 'st_smoke', 100, 200, 5)
 ON CONFLICT (id) DO NOTHING;
 SQL
 
@@ -146,7 +154,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Produto próprio da loja para a venda do funcionário (não interfere no
 -- estoque do smoke1 usado pelo passo [5/5]).
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('smoke2', 'Produto do funcionário', 'st_smoke', 1.0, 2.0, 5)
+VALUES ('smoke2', 'Produto do funcionário', 'st_smoke', 100, 200, 5)
 ON CONFLICT (id) DO NOTHING;
 SQL
 
@@ -175,8 +183,8 @@ emp_stores="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}
 psql_app -v ON_ERROR_STOP=1 <<SQL
 SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
 SELECT public.process_sale(
-  ('{"id":"s_emp","store_id":"st_smoke","total_amount":4,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":2,"unit_price":2}]'::jsonb
+  ('{"id":"s_emp","store_id":"st_smoke","total_amount":400,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":2,"unit_price":200}]'::jsonb
 );
 SQL
 
@@ -200,8 +208,8 @@ DO \$\$
 BEGIN
   BEGIN
     PERFORM public.process_sale(
-      ('{"id":"s_bad2","store_id":"st1","total_amount":1,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
-      '[{"product_id":"p1","product_name":"X","quantity":1,"unit_price":1}]'::jsonb
+      ('{"id":"s_bad2","store_id":"st1","total_amount":100,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+      '[{"product_id":"p1","product_name":"X","quantity":1,"unit_price":100}]'::jsonb
     );
     RAISE EXCEPTION 'SENTINELA: venda em loja de outro tenant deveria ter sido rejeitada';
   EXCEPTION WHEN raise_exception THEN
@@ -227,12 +235,12 @@ echo "==> [5/5] RPCs atômicos do dinheiro (process_sale / register_debt / settl
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.process_sale(
-  ('{"id":"s_smoke","store_id":"st_smoke","total_amount":4,"payment_method":"pix","date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"smoke1","product_name":"Produto do dono","quantity":2,"unit_price":2}]'::jsonb
+  ('{"id":"s_smoke","store_id":"st_smoke","total_amount":400,"payment_method":"pix","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke1","product_name":"Produto do dono","quantity":2,"unit_price":200}]'::jsonb
 );
 SQL
 
-sale_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sales WHERE id = 's_smoke' AND total_amount = 4;" | tail -n 1)"
+sale_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sales WHERE id = 's_smoke' AND total_amount = 400;" | tail -n 1)"
 [ "$sale_ok" = "1" ] || {
   echo "FALHA: venda process_sale não registrou a venda (obtido: '$sale_ok')"
   exit 1
@@ -250,7 +258,7 @@ stock_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}
   exit 1
 }
 
-cash_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.financial_transactions WHERE id = 'ts_smoke' AND amount = 4 AND type = 'income' AND status = 'paid';" | tail -n 1)"
+cash_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.financial_transactions WHERE id = 'ts_smoke' AND amount = 400 AND type = 'income' AND status = 'paid';" | tail -n 1)"
 [ "$cash_ok" = "1" ] || {
   echo "FALHA: entrada no caixa da venda ausente/incorreta (obtido: '$cash_ok')"
   exit 1
@@ -260,11 +268,11 @@ cash_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.register_debt(
-  ('{"id":"d_smoke","store_id":"st_smoke","person_name":"Fulano","amount":10,"due_date":"' || (now() + interval '30 days')::text || '","is_customer_debt":true}')::jsonb
+  ('{"id":"d_smoke","store_id":"st_smoke","person_name":"Fulano","amount":1000,"due_date":"' || (now() + interval '30 days')::text || '","is_customer_debt":true}')::jsonb
 );
 SQL
 
-pend_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.financial_transactions WHERE id = 'td_smoke' AND amount = 10 AND type = 'income' AND status = 'pending' AND debt_id = 'd_smoke';" | tail -n 1)"
+pend_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.financial_transactions WHERE id = 'td_smoke' AND amount = 1000 AND type = 'income' AND status = 'pending' AND debt_id = 'd_smoke';" | tail -n 1)"
 [ "$pend_ok" = "1" ] || {
   echo "FALHA: pendência vinculada do fiado ausente/incorreta (obtido: '$pend_ok')"
   exit 1
@@ -311,8 +319,8 @@ DO $$
 BEGIN
   BEGIN
     PERFORM public.process_sale(
-      ('{"id":"s_bad","store_id":"st_smoke","total_amount":99,"payment_method":"pix","date_time":"' || now()::text || '"}')::jsonb,
-      '[{"product_id":"smoke1","product_name":"X","quantity":99,"unit_price":1}]'::jsonb
+      ('{"id":"s_bad","store_id":"st_smoke","total_amount":9900,"payment_method":"pix","date_time":"' || now()::text || '"}')::jsonb,
+      '[{"product_id":"smoke1","product_name":"X","quantity":99,"unit_price":100}]'::jsonb
     );
     RAISE EXCEPTION 'SENTINELA: venda com estoque insuficiente deveria ter sido rejeitada';
   EXCEPTION WHEN raise_exception THEN
@@ -549,8 +557,8 @@ DO $$
 BEGIN
   BEGIN
     PERFORM public.process_purchase(
-      ('{"id":"p_emp","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":2,"date_time":"' || now()::text || '"}')::jsonb,
-      '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1,"unit_price":2}]'::jsonb
+      ('{"id":"p_emp","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":200,"date_time":"' || now()::text || '"}')::jsonb,
+      '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1,"unit_price":200}]'::jsonb
     );
     RAISE EXCEPTION 'SENTINELA: funcionário deveria ter sido bloqueado ao registrar compra';
   EXCEPTION WHEN raise_exception THEN
@@ -578,8 +586,8 @@ emp_read_purch="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "33333333-3333-3333-3333-333333333333"}';
 SELECT public.process_purchase(
-  ('{"id":"p_mgr","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":2,"date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1,"unit_price":2}]'::jsonb
+  ('{"id":"p_mgr","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":200,"date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1,"unit_price":200}]'::jsonb
 );
 SQL
 
@@ -655,36 +663,36 @@ kpi_base="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('p_kpi', 'Produto KPI', 'st_smoke', 1.0, 2.0, 5)
+VALUES ('p_kpi', 'Produto KPI', 'st_smoke', 100, 200, 5)
 ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.sales (id, store_id, total_amount, payment_method, date_time)
-VALUES ('s_kpi', 'st_smoke', 25.50, 'cash', now() - interval '1 hour')
+VALUES ('s_kpi', 'st_smoke', 2550, 'cash', now() - interval '1 hour')
 ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.financial_transactions
   (id, store_id, description, amount, type, category, date, status)
 VALUES
-  ('t_kpi_inc',  'st_smoke', 'Entrada KPI',  100.00, 'income',  'sales',    now(), 'paid'),
-  ('t_kpi_exp',  'st_smoke', 'Saída KPI',     40.00, 'expense', 'purchase', now(), 'paid'),
-  ('t_kpi_pend', 'st_smoke', 'Pendente KPI',  20.00, 'expense', 'purchase', now(), 'pending')
+  ('t_kpi_inc',  'st_smoke', 'Entrada KPI',  10000, 'income',  'sales',    now(), 'paid'),
+  ('t_kpi_exp',  'st_smoke', 'Saída KPI',     4000, 'expense', 'purchase', now(), 'paid'),
+  ('t_kpi_pend', 'st_smoke', 'Pendente KPI',  2000, 'expense', 'purchase', now(), 'pending')
 ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.debts
   (id, store_id, person_name, amount, due_date, is_customer_debt, is_paid)
 VALUES
-  ('d_kpi_1', 'st_smoke', 'Cliente KPI',    15.00, now() + interval '5 days', TRUE,  FALSE),
-  ('d_kpi_2', 'st_smoke', 'Quitada KPI',     5.00, now() - interval '2 days', TRUE,  TRUE),
-  ('d_kpi_3', 'st_smoke', 'Fornecedor KPI',  8.00, now() + interval '3 days', FALSE, FALSE)
+  ('d_kpi_1', 'st_smoke', 'Cliente KPI',    1500, now() + interval '5 days', TRUE,  FALSE),
+  ('d_kpi_2', 'st_smoke', 'Quitada KPI',     500, now() - interval '2 days', TRUE,  TRUE),
+  ('d_kpi_3', 'st_smoke', 'Fornecedor KPI',  800, now() + interval '3 days', FALSE, FALSE)
 ON CONFLICT (id) DO NOTHING;
 SQL
 
-# Delta esperado: venda +25.50 | entradas +100.00 | saídas +40.00 (a
-# pendente NÃO sai) | a receber +15.00 (quitada/fornecedor fora) | stock +5.
+# Delta esperado: venda +2550 | entradas +10000 | saídas +4000 (a
+# pendente NÃO sai) | a receber +1500 (quitada/fornecedor fora) | stock +5.
 kpi_after="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT total_sales::text || '|' || cash_income::text || '|' || cash_expense::text || '|' || pending_total::text || '|' || stock_total::text FROM public.get_dashboard_kpis('st_smoke', now() - interval '1 day', now() + interval '1 day');" | tail -n 1)"
 
 # Soma o delta ao baseline e compara com o after (awk puro, sem bc).
 kpi_ok="$(awk -v base="$kpi_base" -v after="$kpi_after" 'BEGIN {
   split(base, b, "|"); split(after, a, "|");
-  ok = (a[1] == b[1] + 25.50) && (a[2] == b[2] + 100.00) &&
-       (a[3] == b[3] + 40.00) && (a[4] == b[4] + 15.00) && (a[5] == b[5] + 5);
+  ok = (a[1] == b[1] + 2550) && (a[2] == b[2] + 10000) &&
+       (a[3] == b[3] + 4000) && (a[4] == b[4] + 1500) && (a[5] == b[5] + 5);
   print ok ? "1" : "0";
 }')"
 [ "$kpi_ok" = "1" ] || {
@@ -715,4 +723,126 @@ BEGIN
 END $$;
 SQL
 
-echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001, níveis de acesso (compras só dono/gerente), audit log (só super admin) e KPIs agregadas server-side (get_dashboard_kpis) conforme esperado."
+echo "==> [11/11] H2: cash flow + relatório de vendas agregados no servidor"
+# W4/H2: as novas RPCs agregam no Postgres em CENTAVOS inteiros (BIGINT).
+# Usa os MESMOS dados da loja do smoke criados nos passos anteriores:
+#   vendas s_smoke (400) + s_emp (400) + s_kpi (2550) no período de 1 dia;
+#   caixa: s_smoke/s_emp/s_kpi geram entradas paid (400+400+2550);
+#   KPI: t_kpi_inc 10000 (paid) e t_kpi_exp 4000 (paid) no mesmo período.
+
+# --- get_cash_flow: entradas/saídas PAID do período (dono).
+# A loja st_smoke acumulou ao longo dos passos anteriores, todos PAID no
+# período de 1 dia. Entradas de CAIXA vêm das transações geradas pelos
+# RPCs (process_sale cria 't' || id da venda) + a KPI t_kpi_inc + a
+# quitação do fiado td_smoke:
+#   entradas: ts_smoke 400 + ts_emp 400 + t_kpi_inc 10000 + quitação
+#             td_smoke 1000 = 11800 (mínimo conhecido). A venda s_kpi foi
+#             inserida DIRETO no passo [10/10] (não via process_sale) —
+#             conta no faturamento do relatório, mas NÃO gera entrada de
+#             caixa (fiel ao comportamento do get_cash_flow);
+#   saídas:   t_kpi_exp 4000 + compra do gerente p_mgr 200 = 4200.
+# A pendente t_kpi_pend (2000) NÃO entra. Usa >= (mínimo) para não
+# acoplar à ordem exata dos passos anteriores.
+cf="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT income_cents::text || '|' || expense_cents::text FROM public.get_cash_flow('st_smoke', now() - interval '1 day', now() + interval '1 day');" | tail -n 1)"
+cf_ok="$(awk -v cf="$cf" 'BEGIN {
+  split(cf, a, "|");
+  ok = (a[1] >= 11800) && (a[2] >= 4200);
+  print ok ? "1" : "0";
+}')"
+[ "$cf_ok" = "1" ] || {
+  echo "FALHA: get_cash_flow do dono inesperado (obtido: '$cf')"
+  exit 1
+}
+
+# --- get_sales_report: faturamento/lucro/mais vendidos/diário (dono).
+sr="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT jsonb_pretty(public.get_sales_report('st_smoke', now() - interval '1 day', now() + interval '1 day'));" | tail -n 1)"
+[ -n "$sr" ] || {
+  echo "FALHA: get_sales_report não devolveu JSON (obtido: '$sr')"
+  exit 1
+}
+sr_rev="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT (public.get_sales_report('st_smoke', now() - interval '1 day', now() + interval '1 day') ->> 'total_revenue_cents')::bigint;" | tail -n 1)"
+# Faturamento >= s_smoke (400) + s_emp (400) + s_kpi (2550).
+[ "$sr_rev" -ge 3350 ] 2>/dev/null || {
+  echo "FALHA: faturamento do relatório inesperado (obtido: '$sr_rev')"
+  exit 1
+}
+sr_best="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT jsonb_array_length(public.get_sales_report('st_smoke', now() - interval '1 day', now() + interval '1 day') -> 'best_sellers');" | tail -n 1)"
+[ "$sr_best" -ge 1 ] 2>/dev/null || {
+  echo "FALHA: relatório sem mais vendidos (obtido: '$sr_best')"
+  exit 1
+}
+
+# Funcionário da própria loja lê as RPCs sem exceção (is_my_store).
+cf_emp="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.get_cash_flow('st_smoke', now() - interval '1 day', now() + interval '1 day');" | tail -n 1)"
+[ "$cf_emp" = "1" ] || {
+  echo "FALHA: funcionário deveria ler cash flow da própria loja (obtido: '$cf_emp')"
+  exit 1
+}
+
+# Funcionário NÃO lê de OUTRA loja (is_my_store falso — sentinela).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM * FROM public.get_cash_flow('st_smoke' || 'x', now() - interval '1 day', now() + interval '1 day');
+    RAISE EXCEPTION 'SENTINELA: funcionário deveria ser bloqueado no cash flow de outra loja';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: funcionário deveria ser bloqueado no cash flow de outra loja' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+
+echo "==> [12/12] W4: upgrade.sql migra NUMERIC → centavos em base legada"
+# Simula uma base PRÉ-W4 (estado real do projeto de produção): reverte
+# TODAS as colunas de dinheiro para NUMERIC(12,2) e insere um produto com
+# valor em REAIS (fração). Reaplicar o upgrade.sql deve migrar ×100
+# (25.50 → 2550 centavos) e recriar as RPCs — e reaplicar de novo NÃO
+# pode multiplicar de novo (guarda central da Parte 7).
+psql -v ON_ERROR_STOP=1 <<'SQL'
+ALTER TABLE public.products
+  ALTER COLUMN purchase_price TYPE NUMERIC(12,2),
+  ALTER COLUMN sale_price     TYPE NUMERIC(12,2);
+ALTER TABLE public.sales              ALTER COLUMN total_amount TYPE NUMERIC(12,2);
+ALTER TABLE public.sale_items         ALTER COLUMN unit_price   TYPE NUMERIC(12,2);
+ALTER TABLE public.financial_transactions ALTER COLUMN amount   TYPE NUMERIC(12,2);
+ALTER TABLE public.debts              ALTER COLUMN amount       TYPE NUMERIC(12,2);
+ALTER TABLE public.purchases          ALTER COLUMN total_amount TYPE NUMERIC(12,2);
+ALTER TABLE public.purchase_items     ALTER COLUMN unit_price   TYPE NUMERIC(12,2);
+ALTER TABLE public.plans              ALTER COLUMN price_monthly TYPE NUMERIC(12,2);
+-- user_id explícito: sem sessão (superuser do SQL Editor/CI) o trigger
+-- anti-forja preserva o valor informado, e products.user_id é NOT NULL.
+INSERT INTO public.products (id, user_id, name, store_id, purchase_price, sale_price, stock_quantity)
+VALUES ('legacy1', '11111111-1111-1111-1111-111111111111', 'Produto legado', 'st_smoke', 25.50, 39.90, 1)
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+psql -v ON_ERROR_STOP=1 -f supabase/upgrade.sql
+
+legacy_type="$(psql -q -tAc "SELECT data_type FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'purchase_price';" | tail -n 1)"
+[ "$legacy_type" = "bigint" ] || {
+  echo "FALHA: purchase_price não migrou para bigint (obtido: '$legacy_type')"
+  exit 1
+}
+legacy_buy="$(psql -q -tAc "SELECT purchase_price FROM public.products WHERE id = 'legacy1';" | tail -n 1)"
+[ "$legacy_buy" = "2550" ] || {
+  echo "FALHA: 25.50 deveria virar 2550 centavos (obtido: '$legacy_buy')"
+  exit 1
+}
+legacy_sell="$(psql -q -tAc "SELECT sale_price FROM public.products WHERE id = 'legacy1';" | tail -n 1)"
+[ "$legacy_sell" = "3990" ] || {
+  echo "FALHA: 39.90 deveria virar 3990 centavos (obtido: '$legacy_sell')"
+  exit 1
+}
+
+# Idempotência da migração: reaplicar NÃO multiplica de novo.
+psql -v ON_ERROR_STOP=1 -f supabase/upgrade.sql
+legacy_buy2="$(psql -q -tAc "SELECT purchase_price FROM public.products WHERE id = 'legacy1';" | tail -n 1)"
+[ "$legacy_buy2" = "2550" ] || {
+  echo "FALHA: guarda da Parte 7 não impediu dupla migração (obtido: '$legacy_buy2')"
+  exit 1
+}
+
+echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001, níveis de acesso (compras só dono/gerente), audit log (só super admin), KPIs agregadas server-side (get_dashboard_kpis), agregações H2 (get_cash_flow / get_sales_report), upgrade.sql idempotente e migração W4 NUMERIC→centavos (×100, sem dupla aplicação) conforme esperado."

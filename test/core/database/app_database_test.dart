@@ -12,7 +12,6 @@ void main() {
   late String dbPath;
 
   setUp(() async {
-    AppDatabase.configureLoader();
     tempDirectory = await Directory.systemTemp.createTemp('dumbhanengue_test');
     dbPath = '${tempDirectory.path}${Platform.pathSeparator}test.db';
   });
@@ -41,14 +40,14 @@ void main() {
     expect(db.select('SELECT COUNT(*) AS c FROM customers').first['c'], 4);
     expect(db.select('SELECT COUNT(*) AS c FROM purchases').first['c'], 2);
 
-    db.dispose();
+    db.close();
   });
 
   test('dados persistem entre aberturas e seed não duplica', () async {
     // Primeira abertura: cria + semeia.
     final first = sqlite3.open(dbPath);
     AppDatabase.initialize(first);
-    first.dispose();
+    first.close();
 
     // Segunda abertura: o seed NÃO deve duplicar os dados.
     final second = sqlite3.open(dbPath);
@@ -62,8 +61,8 @@ void main() {
       const Product(
         id: 'novo',
         name: 'Produto novo',
-        purchasePrice: 2.0,
-        salePrice: 4.0,
+        purchasePriceCents: 200,
+        salePriceCents: 400,
         stockQuantity: 3,
       ),
     );
@@ -72,7 +71,7 @@ void main() {
       3,
     );
 
-    second.dispose();
+    second.close();
 
     // Terceira abertura: o produto adicionado continua lá.
     final third = sqlite3.open(dbPath);
@@ -81,7 +80,7 @@ void main() {
           ?.name,
       'Produto novo',
     );
-    third.dispose();
+    third.close();
   });
 
   test('migra banco existente sem as colunas is_paid e paid_at', () {
@@ -123,7 +122,7 @@ void main() {
       isNull,
     );
 
-    db.dispose();
+    db.close();
   });
 
   test('transação faz rollback em caso de erro', () {
@@ -152,6 +151,6 @@ void main() {
     // O primeiro INSERT também foi desfeito pelo rollback.
     expect(db.select('SELECT COUNT(*) AS c FROM products').first['c'], 0);
 
-    db.dispose();
+    db.close();
   });
 }

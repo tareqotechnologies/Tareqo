@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
+import '../../../core/utils/money.dart';
 import '../../../domain/entities/customer.dart';
 import '../../../domain/entities/debt.dart';
 import '../../../domain/usecases/add_debt_use_case.dart';
@@ -48,8 +49,8 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
     super.dispose();
   }
 
-  double _parseAmount(String value) =>
-      double.tryParse(value.replaceAll(',', '.')) ?? 0;
+  // Interpreta o texto digitado como CENTAVOS inteiros (W4).
+  int _parseAmount(String value) => Money.parse(value);
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
@@ -91,7 +92,7 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
       id: AppIds.newId('d'),
       storeId: storeId ?? 'st1',
       personName: _nameController.text.trim(),
-      amount: _parseAmount(_amountController.text),
+      amountCents: _parseAmount(_amountController.text),
       dueDate: _dueDate,
       isCustomerDebt: true,
       customerId: _customer?.id,

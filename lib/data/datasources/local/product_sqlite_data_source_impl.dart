@@ -46,8 +46,8 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
         product.storeId,
         product.name,
         product.description,
-        product.purchasePrice,
-        product.salePrice,
+        product.purchasePriceCents,
+        product.salePriceCents,
         product.stockQuantity,
       ],
     );
@@ -75,8 +75,8 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
         storeId: row['store_id'] as String,
         name: row['name'] as String,
         description: row['description'] as String,
-        purchasePrice: row['purchase_price'] as double,
-        salePrice: row['sale_price'] as double,
+        purchasePriceCents: (row['purchase_price'] as num).toInt(),
+        salePriceCents: (row['sale_price'] as num).toInt(),
         stockQuantity: row['stock_quantity'] as int,
       );
 }

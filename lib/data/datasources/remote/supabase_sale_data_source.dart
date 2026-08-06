@@ -33,7 +33,7 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
         'p_sale': {
           'id': sale.id,
           'store_id': sale.storeId,
-          'total_amount': sale.totalAmount,
+          'total_amount': sale.totalAmountCents,
           'payment_method': sale.paymentMethod.name,
           'date_time': sale.dateTime.toUtc().toIso8601String(),
         },
@@ -43,7 +43,7 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
               'product_id': item.productId,
               'product_name': item.productName,
               'quantity': item.quantity,
-              'unit_price': item.unitPrice,
+              'unit_price': item.unitPriceCents,
             },
         ],
       },
@@ -52,13 +52,15 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
 
   @override
   Future<List<Sale>> getAll({required String storeId}) async {
-    // Embedded resource: itens vêm junto na mesma resposta.
-    final rows = await supabaseClient
-        .from(_table)
-        .select('*, sale_items(*)')
-        .eq('store_id', storeId)
-        .order('date_time', ascending: false)
-        .limit(SupabaseQueryLimits.pageSize);
+    // Embedded resource: itens vêm junto na mesma resposta. Paginação
+    // keyset (H2): lotes de pageSize pelo id, sem teto total de 1000.
+    // A ordem final de exibição (data desc) é aplicada pelo provider.
+    final rows = await fetchAllKeyset(
+      supabaseClient
+          .from(_table)
+          .select('*, sale_items(*)')
+          .eq('store_id', storeId),
+    );
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -69,7 +71,7 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
       'id': sale.id,
       'user_id': userId,
       'store_id': sale.storeId,
-      'total_amount': sale.totalAmount,
+      'total_amount': sale.totalAmountCents,
       'payment_method': sale.paymentMethod.name,
       'date_time': sale.dateTime.toUtc().toIso8601String(),
       'sale_items': [
@@ -79,7 +81,7 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
             'product_id': item.productId,
             'product_name': item.productName,
             'quantity': item.quantity,
-            'unit_price': item.unitPrice,
+            'unit_price': item.unitPriceCents,
           },
       ],
     }, defaultToNull: false);
@@ -92,7 +94,7 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
       for (final item in (row['sale_items'] as List<dynamic>? ?? const []))
         _mapItem(item as Map<String, dynamic>),
     ],
-    totalAmount: (row['total_amount'] as num).toDouble(),
+    totalAmountCents: (row['total_amount'] as num).toInt(),
     paymentMethod: PaymentMethod.values.byName(row['payment_method'] as String),
     dateTime: DateTime.parse(row['date_time'] as String).toLocal(),
   );
@@ -101,6 +103,6 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
     productId: row['product_id'] as String,
     productName: row['product_name'] as String,
     quantity: (row['quantity'] as num).toInt(),
-    unitPrice: (row['unit_price'] as num).toDouble(),
+    unitPriceCents: (row['unit_price'] as num).toInt(),
   );
 }

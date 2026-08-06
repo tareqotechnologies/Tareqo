@@ -78,7 +78,7 @@ class CashFlowNotifier extends AsyncNotifier<CashFlow> {
     };
 
     if (storeId == null) {
-      return Future.value(const CashFlow(income: 0, expense: 0));
+      return Future.value(const CashFlow(incomeCents: 0, expenseCents: 0));
     }
 
     return ref

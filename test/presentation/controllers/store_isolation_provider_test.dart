@@ -52,8 +52,8 @@ void main() {
       storeId: 'st1',
       name: 'Caneta Centro',
       description: '',
-      purchasePrice: 1,
-      salePrice: 2,
+      purchasePriceCents: 100,
+      salePriceCents: 200,
       stockQuantity: 10,
     ));
     await productDataSource.add(Product(
@@ -61,8 +61,8 @@ void main() {
       storeId: 'st2',
       name: 'Café Shopping',
       description: '',
-      purchasePrice: 10,
-      salePrice: 15,
+      purchasePriceCents: 1000,
+      salePriceCents: 1500,
       stockQuantity: 10,
     ));
 
@@ -70,9 +70,9 @@ void main() {
       id: 's-centro',
       storeId: 'st1',
       items: const [
-        SaleItem(productId: 'p1', productName: 'Caneta', quantity: 2, unitPrice: 2),
+        SaleItem(productId: 'p1', productName: 'Caneta', quantity: 2, unitPriceCents: 200),
       ],
-      totalAmount: 4,
+      totalAmountCents: 400,
       paymentMethod: PaymentMethod.cash,
       dateTime: DateTime.now(),
     ));
@@ -80,9 +80,9 @@ void main() {
       id: 's-shopping',
       storeId: 'st2',
       items: const [
-        SaleItem(productId: 'p6', productName: 'Café', quantity: 1, unitPrice: 15),
+        SaleItem(productId: 'p6', productName: 'Café', quantity: 1, unitPriceCents: 1500),
       ],
-      totalAmount: 15,
+      totalAmountCents: 1500,
       paymentMethod: PaymentMethod.pix,
       dateTime: DateTime.now(),
     ));
@@ -92,7 +92,7 @@ void main() {
       id: 'd-centro',
       storeId: 'st1',
       personName: 'Cliente Centro',
-      amount: 50,
+      amountCents: 5000,
       dueDate: DateTime.now(),
       isCustomerDebt: true,
     ));
@@ -100,7 +100,7 @@ void main() {
       id: 'd-shopping',
       storeId: 'st2',
       personName: 'Cliente Shopping',
-      amount: 80,
+      amountCents: 8000,
       dueDate: DateTime.now(),
       isCustomerDebt: true,
     ));
@@ -110,7 +110,7 @@ void main() {
       id: 't-centro',
       storeId: 'st1',
       description: 'Entrada Centro',
-      amount: 100,
+      amountCents: 10000,
       type: TransactionType.income,
       category: 'Venda',
       date: DateTime.now(),
@@ -119,7 +119,7 @@ void main() {
       id: 't-shopping',
       storeId: 'st2',
       description: 'Entrada Shopping',
-      amount: 200,
+      amountCents: 20000,
       type: TransactionType.income,
       category: 'Venda',
       date: DateTime.now(),
@@ -152,7 +152,7 @@ void main() {
   testWidgets('providers de produtos e vendas expõem apenas a loja ativa',
       (tester) async {
     final db = openTestDatabase();
-    addTearDown(db.dispose);
+    addTearDown(db.close);
 
     await tester.runAsync(() => seedDatabase(db));
 
@@ -262,7 +262,7 @@ void main() {
   testWidgets('voltar para a loja anterior restaura apenas os dados dela',
       (tester) async {
     final db = openTestDatabase();
-    addTearDown(db.dispose);
+    addTearDown(db.close);
 
     await tester.runAsync(() => seedDatabase(db));
 

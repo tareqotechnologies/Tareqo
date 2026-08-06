@@ -1,11 +1,7 @@
-import 'dart:ffi';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:sqlite3/open.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import '../../data/datasources/local/customer_local_data_source.dart';
@@ -32,36 +28,17 @@ import '../../domain/repositories/i_unit_of_work.dart';
 /// o registro no ServiceLocator muda.
 abstract final class AppDatabase {
   static Database? _database;
-  static bool _loaderConfigured = false;
-
-  /// Garante que o `sqlite3` consiga carregar a biblioteca nativa:
-  ///
-  /// - no app Flutter, o `sqlite3_flutter_libs` empacota o `sqlite3.dll`
-  ///   (o loader padrão o encontra); em testes na VM Windows, o próprio
-  ///   `package:sqlite3` já cai para a `winsqlite3.dll` do sistema;
-  /// - este probe + override é **defensivo** (caso o fallback padrão mude).
-  static void configureLoader() {
-    if (_loaderConfigured) return;
-    _loaderConfigured = true;
-    if (kIsWeb || !Platform.isWindows) return;
-
-    try {
-      sqlite3.openInMemory().dispose();
-    } catch (_) {
-      open.overrideFor(
-        OperatingSystem.windows,
-        () => DynamicLibrary.open('winsqlite3.dll'),
-      );
-    }
-  }
 
   /// Abre o banco persistente (`dumbhanengue.db` em documentos) e prepara
   /// o schema/seed. Retorna `true` quando o SQLite está ativo; `false`
   /// (sem efeitos colaterais) se a biblioteca nativa falhar — nesse caso
   /// o ServiceLocator usa os datasources em memória.
+  ///
+  /// W10: desde o sqlite3 3.x, o carregamento da biblioteca nativa é feito
+  /// por BUILD HOOKS (native assets) — o pacote empacota o SQLite para
+  /// todas as plataformas, sem `open.overrideFor`/`sqlite3_flutter_libs`.
   static Future<bool> openAppDatabase() async {
     if (kIsWeb) return false;
-    configureLoader();
 
     Database? db;
     try {
@@ -72,7 +49,7 @@ abstract final class AppDatabase {
       _database = db;
       return true;
     } catch (error, stackTrace) {
-      db?.dispose();
+      db?.close();
       debugPrint(
         'AppDatabase: SQLite indisponível ($error) — usando memória.\n'
         '$stackTrace',
@@ -112,11 +89,51 @@ abstract final class AppDatabase {
       );
   }
 
-  /// Cria as tabelas (idempotente) e semeia dados demo se o banco estiver
-  /// vazio.
+  /// Cria as tabelas (idempotente), migra dinheiro para CENTAVOS (W4) e
+  /// semeia dados demo se o banco estiver vazio.
   static void initialize(Database db) {
     createSchema(db);
+    migrateMoneyToCents(db);
     seedIfEmpty(db);
+  }
+
+  /// Migração W4 (centavos inteiros): bancos criados antes da migração
+  /// guardavam dinheiro como REAL (reais com fração); a partir daqui o
+  /// domínio e o schema usam **centavos inteiros**. Detecta o schema
+  /// antigo pela afinidade REAL das colunas de dinheiro (PRAGMA
+  /// table_info — o novo schema declara INTEGER) e multiplica os valores
+  /// por 100, arredondando. Idempotente: bancos novos (INTEGER) não são
+  /// tocados; bancos já migrados não voltam a ser multiplicados.
+  ///
+  /// SQLite é dinamicamente tipado: depois da multiplicação, a coluna
+  /// REAL guarda inteiros (lidos como int pelo driver) — não é preciso
+  /// rebuild da tabela; bancos NOVOS já nascem com INTEGER.
+  static void migrateMoneyToCents(Database db) {
+    // Colunas de dinheiro por tabela (schema antigo = REAL).
+    const moneyColumns = <String, List<String>>{
+      'products': ['purchase_price', 'sale_price'],
+      'sales': ['total_amount'],
+      'sale_items': ['unit_price'],
+      'financial_transactions': ['amount'],
+      'debts': ['amount'],
+      'purchases': ['total_amount'],
+      'purchase_items': ['unit_price'],
+    };
+
+    for (final entry in moneyColumns.entries) {
+      final table = entry.key;
+      final columns = db.select('PRAGMA table_info($table)');
+      for (final column in columns) {
+        final name = column['name'] as String;
+        final type = column['type'] as String;
+        if (type == 'REAL' && entry.value.contains(name)) {
+          db.execute(
+            'UPDATE $table SET $name = CAST(ROUND($name * 100) AS INTEGER) '
+            'WHERE $name IS NOT NULL',
+          );
+        }
+      }
+    }
   }
 
   /// Profundidade de transação ativa na conexão compartilhada. SQLite não
@@ -179,6 +196,8 @@ abstract final class AppDatabase {
   /// Cria o schema. Os `CHECK` são a salvaguarda final do banco contra
   /// valores inválidos (estoque/valores nunca negativos) — as regras de
   /// negócio continuam no domínio.
+  ///
+  /// Desde a migração W4, colunas de dinheiro são **INTEGER (centavos)**.
   static void createSchema(Database db) {
     db.execute('''
       CREATE TABLE IF NOT EXISTS products (
@@ -186,8 +205,8 @@ abstract final class AppDatabase {
         store_id TEXT NOT NULL DEFAULT 'st1',
         name TEXT NOT NULL,
         description TEXT NOT NULL DEFAULT '',
-        purchase_price REAL NOT NULL CHECK (purchase_price >= 0),
-        sale_price REAL NOT NULL CHECK (sale_price >= 0),
+        purchase_price INTEGER NOT NULL CHECK (purchase_price >= 0),
+        sale_price INTEGER NOT NULL CHECK (sale_price >= 0),
         stock_quantity INTEGER NOT NULL DEFAULT 0
           CHECK (stock_quantity >= 0)
       );
@@ -196,7 +215,7 @@ abstract final class AppDatabase {
       CREATE TABLE IF NOT EXISTS sales (
         id TEXT PRIMARY KEY,
         store_id TEXT NOT NULL DEFAULT 'st1',
-        total_amount REAL NOT NULL CHECK (total_amount >= 0),
+        total_amount INTEGER NOT NULL CHECK (total_amount >= 0),
         payment_method TEXT NOT NULL,
         date_time INTEGER NOT NULL
       );
@@ -208,7 +227,7 @@ abstract final class AppDatabase {
         product_id TEXT NOT NULL,
         product_name TEXT NOT NULL,
         quantity INTEGER NOT NULL CHECK (quantity > 0),
-        unit_price REAL NOT NULL CHECK (unit_price >= 0)
+        unit_price INTEGER NOT NULL CHECK (unit_price >= 0)
       );
       CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id
         ON sale_items(sale_id);
@@ -218,7 +237,7 @@ abstract final class AppDatabase {
         id TEXT PRIMARY KEY,
         store_id TEXT NOT NULL DEFAULT 'st1',
         description TEXT NOT NULL,
-        amount REAL NOT NULL CHECK (amount >= 0),
+        amount INTEGER NOT NULL CHECK (amount >= 0),
         type TEXT NOT NULL,
         category TEXT NOT NULL,
         date INTEGER NOT NULL,
@@ -231,7 +250,7 @@ abstract final class AppDatabase {
         id TEXT PRIMARY KEY,
         store_id TEXT NOT NULL DEFAULT 'st1',
         person_name TEXT NOT NULL,
-        amount REAL NOT NULL CHECK (amount >= 0),
+        amount INTEGER NOT NULL CHECK (amount >= 0),
         due_date INTEGER NOT NULL,
         is_customer_debt INTEGER NOT NULL,
         is_paid INTEGER NOT NULL DEFAULT 0,
@@ -253,7 +272,7 @@ abstract final class AppDatabase {
         id TEXT PRIMARY KEY,
         store_id TEXT NOT NULL DEFAULT 'st1',
         supplier_name TEXT NOT NULL,
-        total_amount REAL NOT NULL CHECK (total_amount >= 0),
+        total_amount INTEGER NOT NULL CHECK (total_amount >= 0),
         date_time INTEGER NOT NULL
       );
     ''');
@@ -264,7 +283,7 @@ abstract final class AppDatabase {
         product_id TEXT NOT NULL,
         product_name TEXT NOT NULL,
         quantity INTEGER NOT NULL CHECK (quantity > 0),
-        unit_price REAL NOT NULL CHECK (unit_price >= 0),
+        unit_price INTEGER NOT NULL CHECK (unit_price >= 0),
         UNIQUE (purchase_id, product_id)
       );
       CREATE INDEX IF NOT EXISTS idx_purchase_items_purchase_id
@@ -359,8 +378,8 @@ abstract final class AppDatabase {
             product.storeId,
             product.name,
             product.description,
-            product.purchasePrice,
-            product.salePrice,
+            product.purchasePriceCents,
+            product.salePriceCents,
             product.stockQuantity,
           ],
         );
@@ -373,7 +392,7 @@ abstract final class AppDatabase {
           [
             sale.id,
             sale.storeId,
-            sale.totalAmount,
+            sale.totalAmountCents,
             sale.paymentMethod.name,
             sale.dateTime.millisecondsSinceEpoch,
           ],
@@ -388,7 +407,7 @@ abstract final class AppDatabase {
               item.productId,
               item.productName,
               item.quantity,
-              item.unitPrice,
+              item.unitPriceCents,
             ],
           );
         }
@@ -403,7 +422,7 @@ abstract final class AppDatabase {
             transaction.id,
             transaction.storeId,
             transaction.description,
-            transaction.amount,
+            transaction.amountCents,
             transaction.type.name,
             transaction.category,
             transaction.date.millisecondsSinceEpoch,
@@ -422,7 +441,7 @@ abstract final class AppDatabase {
             debt.id,
             debt.storeId,
             debt.personName,
-            debt.amount,
+            debt.amountCents,
             debt.dueDate.millisecondsSinceEpoch,
             debt.isCustomerDebt ? 1 : 0,
             debt.isPaid ? 1 : 0,
@@ -454,7 +473,7 @@ abstract final class AppDatabase {
             purchase.id,
             purchase.storeId,
             purchase.supplierName,
-            purchase.totalAmount,
+            purchase.totalAmountCents,
             purchase.dateTime.millisecondsSinceEpoch,
           ],
         );
@@ -468,7 +487,7 @@ abstract final class AppDatabase {
               item.productId,
               item.productName,
               item.quantity,
-              item.unitPrice,
+              item.unitPriceCents,
             ],
           );
         }

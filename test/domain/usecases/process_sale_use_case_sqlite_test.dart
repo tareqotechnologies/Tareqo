@@ -51,7 +51,7 @@ void main() {
   late Database db;
 
   setUp(() => db = openTestDatabase());
-  tearDown(() => db.dispose());
+  tearDown(() => db.close());
 
   ProcessSaleUseCase buildUseCase(Database database) {
     final productDs = ProductSqliteDataSourceImpl(database);
@@ -72,10 +72,10 @@ void main() {
             productId: 'p1',
             productName: 'Caneta',
             quantity: 2,
-            unitPrice: 2.0,
+            unitPriceCents: 200,
           ),
         ],
-        totalAmount: 4.0,
+        totalAmountCents: 400,
         paymentMethod: PaymentMethod.pix,
         dateTime: DateTime.utc(2026, 8, 3),
       );
@@ -85,8 +85,8 @@ void main() {
       const Product(
         id: 'p1',
         name: 'Caneta',
-        purchasePrice: 1.0,
-        salePrice: 2.0,
+        purchasePriceCents: 100,
+        salePriceCents: 200,
         stockQuantity: 10,
       ),
     );
@@ -96,7 +96,7 @@ void main() {
     // Venda com itens persistida.
     final sales = await SaleSqliteDataSourceImpl(db).getAll(storeId: 'st1');
     expect(sales, hasLength(1));
-    expect(sales.first.totalAmount, 4.0);
+    expect(sales.first.totalAmountCents, 400);
     expect(sales.first.items, hasLength(1));
 
     // Estoque baixado.
@@ -111,7 +111,7 @@ void main() {
         await FinancialTransactionSqliteDataSourceImpl(db)
             .getAll(storeId: 'st1');
     expect(transactions, hasLength(1));
-    expect(transactions.first.amount, 4.0);
+    expect(transactions.first.amountCents, 400);
     expect(transactions.first.status, TransactionStatus.paid);
   });
 
@@ -122,8 +122,8 @@ void main() {
         id: 'p1',
         storeId: 'st1',
         name: 'Caneta',
-        purchasePrice: 1.0,
-        salePrice: 2.0,
+        purchasePriceCents: 100,
+        salePriceCents: 200,
         stockQuantity: 10,
       ),
     );
@@ -157,8 +157,8 @@ void main() {
       const Product(
         id: 'p1',
         name: 'Caneta',
-        purchasePrice: 1.0,
-        salePrice: 2.0,
+        purchasePriceCents: 100,
+        salePriceCents: 200,
         stockQuantity: 10,
       ),
     );

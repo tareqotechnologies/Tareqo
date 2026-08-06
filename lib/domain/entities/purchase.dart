@@ -5,15 +5,17 @@ part 'purchase.g.dart';
 
 /// Item de compra: "fotografia" do produto no momento da compra.
 ///
-/// Guarda [productName] e [unitPrice] (preço de compra) na data da compra —
-/// mesmo padrão de snapshot do [SaleItem], preservando o histórico.
+/// Guarda [productName] e [unitPriceCents] (preço de compra) na data da
+/// compra — mesmo padrão de snapshot do [SaleItem], preservando o
+/// histórico.
 @freezed
 abstract class PurchaseItem with _$PurchaseItem {
   const factory PurchaseItem({
     required String productId,
     required String productName,
     required int quantity,
-    required double unitPrice,
+    // Preço unitário de compra em CENTAVOS inteiros (W4).
+    required int unitPriceCents,
   }) = _PurchaseItem;
 
   factory PurchaseItem.fromJson(Map<String, dynamic> json) =>
@@ -35,7 +37,8 @@ abstract class Purchase with _$Purchase {
     @Default('st1') String storeId,
     required String supplierName,
     required List<PurchaseItem> items,
-    required double totalAmount,
+    // Valor TOTAL da compra em CENTAVOS inteiros (W4).
+    required int totalAmountCents,
     required DateTime dateTime,
   }) = _Purchase;
 

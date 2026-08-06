@@ -48,16 +48,13 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
     super.dispose();
   }
 
-  double get _total {
-    var total = 0.0;
-    for (final entry in _cart.entries) {
-      final product = _productById(entry.key);
-      if (product == null) continue;
-      // Preço de compra na data — o custo de reposição do produto.
-      total += product.purchasePrice * entry.value;
-    }
-    return total;
-  }
+  // Total em CENTAVOS inteiros (W4): quantidade × preço de compra em
+  // centavos — soma exata.
+  int get _totalCents => _cart.entries.fold<int>(
+        0,
+        (sum, entry) => sum +
+            (entry.value * (_productById(entry.key)?.purchasePriceCents ?? 0)),
+      );
 
   int get _itemCount => _cart.values.fold(0, (sum, quantity) => sum + quantity);
 
@@ -109,7 +106,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
           productId: product.id,
           productName: product.name,
           quantity: entry.value,
-          unitPrice: product.purchasePrice,
+          unitPriceCents: product.purchasePriceCents,
         ),
       );
     }
@@ -125,7 +122,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
       storeId: storeId ?? 'st1',
       supplierName: _supplierController.text.trim(),
       items: items,
-      totalAmount: _total,
+      totalAmountCents: _totalCents,
       dateTime: DateTime.now(),
     );
 
@@ -142,7 +139,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            l10n.purchasesRegistered(Formatters.currency(purchase.totalAmount)),
+            l10n.purchasesRegistered(Formatters.currency(purchase.totalAmountCents)),
           ),
         ),
       );
@@ -265,7 +262,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                       ),
                     ),
                     Text(
-                      Formatters.currency(_total),
+                      Formatters.currency(_totalCents),
                       style: theme.textTheme.titleLarge,
                     ),
                   ],
@@ -338,7 +335,7 @@ class _CartProductRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${Formatters.currency(product.purchasePrice)} · '
+                    '${Formatters.currency(product.purchasePriceCents)} · '
                     '${l10n.purchasesStockLabel(product.stockQuantity, l10n.commonUnits)}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,

@@ -8,26 +8,26 @@ void main() {
     Formatters.applySettings(currencyCode: 'BRL', language: 'pt');
   });
 
-  group('currency', () {
+  group('currency (recebe CENTAVOS inteiros — W4)', () {
     test('padrão: BRL + pt (sem configuração)', () {
       expect(Formatters.currentCurrencyCode, 'BRL');
       expect(Formatters.currentLanguage, 'pt');
-      expect(Formatters.currency(1234.56), 'R\$ 1.234,56');
+      expect(Formatters.currency(123456), 'R\$ 1.234,56');
     });
 
     test('USD + en usa separador de milhar norte-americano', () {
       Formatters.applySettings(currencyCode: 'USD', language: 'en');
-      expect(Formatters.currency(1234.56), 'US\$ 1,234.56');
+      expect(Formatters.currency(123456), 'US\$ 1,234.56');
     });
 
     test('EUR mantém vírgula decimal em pt', () {
       Formatters.applySettings(currencyCode: 'EUR', language: 'pt');
-      expect(Formatters.currency(1234.5), '€ 1.234,50');
+      expect(Formatters.currency(123450), '€ 1.234,50');
     });
 
     test('MZN (metical) tem símbolo próprio', () {
       Formatters.applySettings(currencyCode: 'MZN', language: 'en');
-      expect(Formatters.currency(5000), 'MTn 5,000.00');
+      expect(Formatters.currency(500000), 'MTn 5,000.00');
     });
   });
 

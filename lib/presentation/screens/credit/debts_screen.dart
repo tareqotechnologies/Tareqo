@@ -47,15 +47,16 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     final settledAsync = ref.watch(settledDebtsProvider);
 
     final debts = debtsAsync.value ?? const <Debt>[];
-    final pendingTotal = debts.fold<double>(
+    // Somas em CENTAVOS inteiros (W4) — int é exato.
+    final pendingTotalCents = debts.fold<int>(
       0,
-      (sum, debt) => sum + debt.amount,
+      (sum, debt) => sum + debt.amountCents,
     );
 
     final settled = settledAsync.value ?? const <Debt>[];
-    final settledTotal = settled.fold<double>(
+    final settledTotalCents = settled.fold<int>(
       0,
-      (sum, debt) => sum + debt.amount,
+      (sum, debt) => sum + debt.amountCents,
     );
 
     return Scaffold(
@@ -113,7 +114,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
               color: AppColors.warning,
               icon: Icons.receipt_long,
               title: l10n.debtsTotalPending,
-              value: Formatters.currency(pendingTotal),
+              value: Formatters.currency(pendingTotalCents),
               subtitle: debts.isEmpty
                   ? l10n.debtsNoPendingCustomers
                   : l10n.debtsPendingCustomers(debts.length),
@@ -157,7 +158,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
               color: AppColors.income,
               icon: Icons.history,
               title: l10n.debtsTotalSettled,
-              value: Formatters.currency(settledTotal),
+              value: Formatters.currency(settledTotalCents),
               subtitle: l10n.debtsSettledCount(settled.length),
             ),
             const SizedBox(height: 24),
@@ -218,7 +219,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         title: Text(l10n.debtsSettleTitle),
         content: Text(
           l10n.debtsSettleBody(
-            Formatters.currency(debt.amount),
+            Formatters.currency(debt.amountCents),
             debt.personName,
           ),
         ),
@@ -252,7 +253,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
           content: Text(
             l10n.debtsSettled(
               debt.personName,
-              Formatters.currency(debt.amount),
+              Formatters.currency(debt.amountCents),
             ),
           ),
         ),
@@ -414,7 +415,7 @@ class _DebtCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  Formatters.currency(debt.amount),
+                  Formatters.currency(debt.amountCents),
                   style: theme.textTheme.titleMedium,
                 ),
               ],
@@ -487,7 +488,7 @@ class _SettledDebtCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              Formatters.currency(debt.amount),
+              Formatters.currency(debt.amountCents),
               style: theme.textTheme.titleMedium,
             ),
           ],

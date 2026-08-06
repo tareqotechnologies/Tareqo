@@ -17,15 +17,17 @@ final class FinancialTransactionSupabaseDataSourceImpl
 
   @override
   Future<List<FinancialTransaction>> getAll({required String storeId}) async {
-    final rows = await supabaseClient
-        .from(_table)
-        .select(
-          'id, store_id, description, amount, type, category, date, status, '
-          'debt_id',
-        )
-        .eq('store_id', storeId)
-        .order('date', ascending: false)
-        .limit(SupabaseQueryLimits.pageSize);
+    // Paginação keyset (H2): lotes de pageSize pelo id, sem teto total.
+    // A ordem final de exibição (data desc) é aplicada pelo provider.
+    final rows = await fetchAllKeyset(
+      supabaseClient
+          .from(_table)
+          .select(
+            'id, store_id, description, amount, type, category, date, status, '
+            'debt_id',
+          )
+          .eq('store_id', storeId),
+    );
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -36,7 +38,7 @@ final class FinancialTransactionSupabaseDataSourceImpl
       'user_id': requireCurrentUserId(),
       'store_id': transaction.storeId,
       'description': transaction.description,
-      'amount': transaction.amount,
+      'amount': transaction.amountCents,
       'type': transaction.type.name,
       'category': transaction.category,
       'date': transaction.date.toUtc().toIso8601String(),
@@ -70,7 +72,7 @@ final class FinancialTransactionSupabaseDataSourceImpl
     id: row['id'] as String,
     storeId: row['store_id'] as String,
     description: row['description'] as String,
-    amount: (row['amount'] as num).toDouble(),
+    amountCents: (row['amount'] as num).toInt(),
     type: TransactionType.values.byName(row['type'] as String),
     category: row['category'] as String,
     date: DateTime.parse(row['date'] as String).toLocal(),

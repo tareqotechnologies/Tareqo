@@ -11,7 +11,7 @@ _PurchaseItem _$PurchaseItemFromJson(Map<String, dynamic> json) =>
       productId: json['productId'] as String,
       productName: json['productName'] as String,
       quantity: (json['quantity'] as num).toInt(),
-      unitPrice: (json['unitPrice'] as num).toDouble(),
+      unitPriceCents: (json['unitPriceCents'] as num).toInt(),
     );
 
 Map<String, dynamic> _$PurchaseItemToJson(_PurchaseItem instance) =>
@@ -19,7 +19,7 @@ Map<String, dynamic> _$PurchaseItemToJson(_PurchaseItem instance) =>
       'productId': instance.productId,
       'productName': instance.productName,
       'quantity': instance.quantity,
-      'unitPrice': instance.unitPrice,
+      'unitPriceCents': instance.unitPriceCents,
     };
 
 _Purchase _$PurchaseFromJson(Map<String, dynamic> json) => _Purchase(
@@ -29,7 +29,7 @@ _Purchase _$PurchaseFromJson(Map<String, dynamic> json) => _Purchase(
   items: (json['items'] as List<dynamic>)
       .map((e) => PurchaseItem.fromJson(e as Map<String, dynamic>))
       .toList(),
-  totalAmount: (json['totalAmount'] as num).toDouble(),
+  totalAmountCents: (json['totalAmountCents'] as num).toInt(),
   dateTime: DateTime.parse(json['dateTime'] as String),
 );
 
@@ -38,6 +38,6 @@ Map<String, dynamic> _$PurchaseToJson(_Purchase instance) => <String, dynamic>{
   'storeId': instance.storeId,
   'supplierName': instance.supplierName,
   'items': instance.items.map((e) => e.toJson()).toList(),
-  'totalAmount': instance.totalAmount,
+  'totalAmountCents': instance.totalAmountCents,
   'dateTime': instance.dateTime.toIso8601String(),
 };

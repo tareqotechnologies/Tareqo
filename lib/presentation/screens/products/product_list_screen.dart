@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
+import '../../../core/utils/money.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/usecases/add_product_use_case.dart';
 import '../../controllers/account_providers.dart';
@@ -180,8 +181,8 @@ class _ProductTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     l10n.productsBuySell(
-                      Formatters.currency(product.purchasePrice),
-                      Formatters.currency(product.salePrice),
+                      Formatters.currency(product.purchasePriceCents),
+                      Formatters.currency(product.salePriceCents),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -236,8 +237,8 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
     super.dispose();
   }
 
-  double _parsePrice(String value) =>
-      double.tryParse(value.replaceAll(',', '.')) ?? 0;
+  // Interpreta o preço digitado como CENTAVOS inteiros (W4).
+  int _parsePrice(String value) => Money.parse(value);
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -247,8 +248,8 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
       _formError = null;
     });
 
-    final purchasePrice = _parsePrice(_purchasePriceController.text);
-    final salePrice = _parsePrice(_salePriceController.text);
+    final purchasePriceCents = _parsePrice(_purchasePriceController.text);
+    final salePriceCents = _parsePrice(_salePriceController.text);
     final stock = int.tryParse(_stockController.text.trim()) ?? 0;
 
     // O produto pertence à loja ativa (cada loja tem seu próprio estoque).
@@ -268,8 +269,8 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
               storeId: storeId ?? 'st1',
               name: _nameController.text.trim(),
               description: _descriptionController.text.trim(),
-              purchasePrice: purchasePrice,
-              salePrice: salePrice,
+              purchasePriceCents: purchasePriceCents,
+              salePriceCents: salePriceCents,
               stockQuantity: stock,
             ),
           );

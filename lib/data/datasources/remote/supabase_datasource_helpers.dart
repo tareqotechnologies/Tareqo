@@ -4,16 +4,45 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Limites de leitura das listagens remotas (auditoria H2).
 ///
-/// Paginação de UI (scroll infinito) está fora do escopo atual — até lá,
-/// toda listagem é **capada explicitamente** no servidor: o PostgREST já
-/// limita por padrão a 1000 linhas, mas deixar o limite explícito garante
-/// que o app nunca carregue um dataset inteiro numa só requisição (resposta
-/// enorme, memória e latência) nem dependa do default do servidor. Listagens
-/// administrativas (tenants/plan requests pendentes) são naturalmente
-/// pequenas e usam o mesmo teto por segurança.
+/// Tamanho da PÁGINA da paginação keyset ([fetchAllKeyset]): o app nunca
+/// carrega mais de [pageSize] linhas por requisição (resposta enorme,
+/// memória e latência) — o loop percorre todas as páginas pelo cursor
+/// estável `id` em vez de um `.limit` único que truncava lojas com 10k+
+/// linhas. Listagens administrativas (tenants/plan requests pendentes) são
+/// naturalmente pequenas e usam o mesmo teto por segurança.
 abstract final class SupabaseQueryLimits {
-  /// Teto de linhas por requisição de listagem.
+  /// Teto de linhas por requisição de listagem (página da paginação keyset).
   static const int pageSize = 1000;
+}
+
+/// Busca TODAS as linhas de uma listagem usando **paginação keyset** (H2):
+/// lotes de [SupabaseQueryLimits.pageSize] ordenados pelo [cursorColumn]
+/// (o `id`, única e estável), com `gt(id, último)` na página seguinte — em
+/// vez de um único `.limit(1000)` que truncava lojas com 10k+ linhas.
+///
+/// [query] deve já conter os filtros fixos (ex.: `.eq('store_id', ...)`);
+/// o cursor e o teto são aplicados aqui. Devolve as linhas em ordem de
+/// [cursorColumn] — a ordenação de exibição final é feita pelos providers
+/// (ou por um sort explícito no datasource, quando o contrato exige).
+Future<List<Map<String, dynamic>>> fetchAllKeyset(
+  PostgrestFilterBuilder<List<Map<String, dynamic>>> query, {
+  String cursorColumn = 'id',
+}) async {
+  final all = <Map<String, dynamic>>[];
+  String? cursor;
+  while (true) {
+    var page = query;
+    if (cursor != null) {
+      page = page.gt(cursorColumn, cursor);
+    }
+    final rows = await page
+        .order(cursorColumn, ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
+    all.addAll(rows);
+    if (rows.length < SupabaseQueryLimits.pageSize) break;
+    cursor = rows.last[cursorColumn] as String;
+  }
+  return all;
 }
 
 /// Cliente Supabase — requer `SupabaseBootstrap.initialize()` no `main()`

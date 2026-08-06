@@ -85,7 +85,7 @@ void main() {
             id: 'pl1',
             name: 'Essencial',
             description: 'Para começar',
-            priceMonthly: 29.9,
+            priceMonthlyCents: 2990,
             maxStores: 1,
             maxEmployees: 2,
             isActive: true,
@@ -94,7 +94,7 @@ void main() {
             id: 'pl2',
             name: 'Comercial',
             description: 'Crescendo',
-            priceMonthly: 99.0,
+            priceMonthlyCents: 9900,
             maxStores: 3,
             maxEmployees: 10,
             isActive: false,
@@ -153,7 +153,7 @@ void main() {
 
     expect(addPlan.calls, 1);
     expect(addPlan.lastPlan?.name, 'Premium');
-    expect(addPlan.lastPlan?.priceMonthly, 199.9);
+    expect(addPlan.lastPlan?.priceMonthlyCents, 19990);
     expect(find.text('Plano Premium criado!'), findsOneWidget);
   });
 

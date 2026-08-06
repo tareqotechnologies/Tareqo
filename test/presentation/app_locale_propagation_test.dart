@@ -70,7 +70,7 @@ void main() {
     // Formatters aplicou a moeda/idioma do tenant (formato en_US + MTn).
     expect(Formatters.currentLanguage, 'en');
     expect(Formatters.currentCurrencyCode, 'MZN');
-    expect(Formatters.currency(1234.5), 'MTn 1,234.50');
+    expect(Formatters.currency(123450), 'MTn 1,234.50');
   });
 
   testWidgets('app sem sessão abre em pt e mantém BRL', (tester) async {

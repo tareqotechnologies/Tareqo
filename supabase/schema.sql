@@ -43,8 +43,9 @@ CREATE TABLE IF NOT EXISTS public.products (
   store_id       TEXT NOT NULL DEFAULT 'st1',
   name           TEXT NOT NULL,
   description    TEXT NOT NULL DEFAULT '',
-  purchase_price NUMERIC(12, 2) NOT NULL CHECK (purchase_price >= 0),
-  sale_price     NUMERIC(12, 2) NOT NULL CHECK (sale_price >= 0),
+  -- W4: dinheiro em CENTAVOS inteiros (BIGINT) — sem fração de double.
+  purchase_price BIGINT NOT NULL CHECK (purchase_price >= 0),
+  sale_price     BIGINT NOT NULL CHECK (sale_price >= 0),
   stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0)
 );
 
@@ -53,7 +54,7 @@ CREATE TABLE IF NOT EXISTS public.sales (
   id             TEXT PRIMARY KEY,
   user_id        UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   store_id       TEXT NOT NULL DEFAULT 'st1',
-  total_amount   NUMERIC(12, 2) NOT NULL CHECK (total_amount >= 0),
+  total_amount   BIGINT NOT NULL CHECK (total_amount >= 0),
   payment_method TEXT NOT NULL CHECK (payment_method IN
     ('cash', 'debitCard', 'creditCard', 'pix', 'transfer')),
   date_time      TIMESTAMPTZ NOT NULL
@@ -67,7 +68,7 @@ CREATE TABLE IF NOT EXISTS public.sale_items (
   product_id   TEXT NOT NULL,
   product_name TEXT NOT NULL,
   quantity     INTEGER NOT NULL CHECK (quantity > 0),
-  unit_price   NUMERIC(12, 2) NOT NULL CHECK (unit_price >= 0),
+  unit_price   BIGINT NOT NULL CHECK (unit_price >= 0),
   UNIQUE (sale_id, product_id)
 );
 
@@ -78,7 +79,7 @@ CREATE TABLE IF NOT EXISTS public.financial_transactions (
   user_id     UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   store_id    TEXT NOT NULL DEFAULT 'st1',
   description TEXT NOT NULL,
-  amount      NUMERIC(12, 2) NOT NULL CHECK (amount >= 0),
+  amount      BIGINT NOT NULL CHECK (amount >= 0),
   type        TEXT NOT NULL CHECK (type IN ('income', 'expense')),
   category    TEXT NOT NULL,
   date        TIMESTAMPTZ NOT NULL,
@@ -96,7 +97,7 @@ CREATE TABLE IF NOT EXISTS public.debts (
   user_id         UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   store_id        TEXT NOT NULL DEFAULT 'st1',
   person_name     TEXT NOT NULL,
-  amount          NUMERIC(12, 2) NOT NULL CHECK (amount >= 0),
+  amount          BIGINT NOT NULL CHECK (amount >= 0),
   due_date        TIMESTAMPTZ NOT NULL,
   is_customer_debt BOOLEAN NOT NULL,
   is_paid         BOOLEAN NOT NULL DEFAULT FALSE,
@@ -121,7 +122,7 @@ CREATE TABLE IF NOT EXISTS public.purchases (
   user_id       UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   store_id      TEXT NOT NULL DEFAULT 'st1',
   supplier_name TEXT NOT NULL,
-  total_amount  NUMERIC(12, 2) NOT NULL CHECK (total_amount >= 0),
+  total_amount  BIGINT NOT NULL CHECK (total_amount >= 0),
   date_time     TIMESTAMPTZ NOT NULL
 );
 
@@ -133,7 +134,7 @@ CREATE TABLE IF NOT EXISTS public.purchase_items (
   product_id   TEXT NOT NULL,
   product_name TEXT NOT NULL,
   quantity     INTEGER NOT NULL CHECK (quantity > 0),
-  unit_price   NUMERIC(12, 2) NOT NULL CHECK (unit_price >= 0),
+  unit_price   BIGINT NOT NULL CHECK (unit_price >= 0),
   UNIQUE (purchase_id, product_id)
 );
 
@@ -150,7 +151,7 @@ CREATE TABLE IF NOT EXISTS public.plans (
   id            TEXT PRIMARY KEY,
   name          TEXT NOT NULL,
   description   TEXT NOT NULL DEFAULT '',
-  price_monthly NUMERIC(10, 2) NOT NULL DEFAULT 0
+  price_monthly BIGINT NOT NULL DEFAULT 0
                 CHECK (price_monthly >= 0),
   max_stores    INTEGER NOT NULL DEFAULT 1 CHECK (max_stores >= 1),
   max_employees INTEGER NOT NULL DEFAULT 1 CHECK (max_employees >= 1),
@@ -876,10 +877,11 @@ CREATE OR REPLACE FUNCTION public.get_dashboard_kpis(
   p_end TIMESTAMPTZ
 )
 RETURNS TABLE (
-  total_sales   NUMERIC(14, 2),
-  cash_income   NUMERIC(14, 2),
-  cash_expense  NUMERIC(14, 2),
-  pending_total NUMERIC(14, 2),
+  -- W4: valores em CENTAVOS inteiros (BIGINT).
+  total_sales   BIGINT,
+  cash_income   BIGINT,
+  cash_expense  BIGINT,
+  pending_total BIGINT,
   stock_total   BIGINT
 )
 LANGUAGE plpgsql
@@ -894,20 +896,134 @@ BEGIN
   RETURN QUERY
   SELECT
     COALESCE((SELECT SUM(s.total_amount) FROM public.sales s
-              WHERE s.store_id = p_store_id), 0),
+              WHERE s.store_id = p_store_id), 0)::bigint,
     COALESCE((SELECT SUM(t.amount) FROM public.financial_transactions t
               WHERE t.store_id = p_store_id AND t.type = 'income'
                 AND t.status = 'paid'
-                AND t.date >= p_start AND t.date <= p_end), 0),
+                AND t.date >= p_start AND t.date <= p_end), 0)::bigint,
     COALESCE((SELECT SUM(t.amount) FROM public.financial_transactions t
               WHERE t.store_id = p_store_id AND t.type = 'expense'
                 AND t.status = 'paid'
-                AND t.date >= p_start AND t.date <= p_end), 0),
+                AND t.date >= p_start AND t.date <= p_end), 0)::bigint,
     COALESCE((SELECT SUM(d.amount) FROM public.debts d
               WHERE d.store_id = p_store_id
-                AND d.is_customer_debt = TRUE AND d.is_paid = FALSE), 0),
+                AND d.is_customer_debt = TRUE AND d.is_paid = FALSE), 0)::bigint,
     COALESCE((SELECT SUM(p.stock_quantity) FROM public.products p
-              WHERE p.store_id = p_store_id), 0);
+              WHERE p.store_id = p_store_id), 0)::bigint;
+END $$;
+
+-- H2 — fluxo de caixa agregado NO SERVIDOR (get_cash_flow).
+-- Mesma semântica do GetCashFlowUseCase client-side: apenas transações
+-- PAID no período; vendas fiadas só contam quando recebidas. Guarda
+-- is_my_store; retorna valores em CENTAVOS inteiros (BIGINT, W4).
+CREATE OR REPLACE FUNCTION public.get_cash_flow(
+  p_store_id TEXT,
+  p_start TIMESTAMPTZ,
+  p_end TIMESTAMPTZ
+)
+RETURNS TABLE (
+  income_cents  BIGINT,
+  expense_cents BIGINT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+BEGIN
+  IF NOT public.is_my_store(p_store_id) THEN
+    RAISE EXCEPTION 'Acesso negado a esta loja.';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    COALESCE((SELECT SUM(t.amount) FROM public.financial_transactions t
+              WHERE t.store_id = p_store_id AND t.type = 'income'
+                AND t.status = 'paid'
+                AND t.date >= p_start AND t.date <= p_end), 0)::bigint,
+    COALESCE((SELECT SUM(t.amount) FROM public.financial_transactions t
+              WHERE t.store_id = p_store_id AND t.type = 'expense'
+                AND t.status = 'paid'
+                AND t.date >= p_start AND t.date <= p_end), 0)::bigint;
+END $$;
+
+-- H2 — relatório de vendas agregado NO SERVIDOR (get_sales_report).
+-- Mesma semântica do GetSalesReportUseCase client-side (faturamento,
+-- lucro bruto, mais vendidos e vendas por dia), em CENTAVOS inteiros.
+-- O dia é agrupado no fuso do dispositivo (p_tz_offset_minutes) para
+-- casar com o DateTime(y, m, d) local do cliente. Guarda is_my_store.
+CREATE OR REPLACE FUNCTION public.get_sales_report(
+  p_store_id TEXT,
+  p_start TIMESTAMPTZ,
+  p_end TIMESTAMPTZ,
+  p_tz_offset_minutes INT DEFAULT 0
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+DECLARE
+  v_revenue BIGINT;
+  v_profit  BIGINT;
+  v_best    JSONB;
+  v_daily   JSONB;
+BEGIN
+  IF NOT public.is_my_store(p_store_id) THEN
+    RAISE EXCEPTION 'Acesso negado a esta loja.';
+  END IF;
+
+  -- Faturamento: soma dos totais das vendas no período.
+  SELECT COALESCE(SUM(s.total_amount), 0)::bigint INTO v_revenue
+  FROM public.sales s
+  WHERE s.store_id = p_store_id
+    AND s.date_time >= p_start AND s.date_time <= p_end;
+
+  -- Lucro bruto: Σ quantity × (unit_price − purchase_price ATUAL do
+  -- catálogo; 0 para produtos que não existem mais) — mesma semântica
+  -- client-side.
+  SELECT COALESCE(SUM(si.quantity * (si.unit_price - COALESCE(pr.purchase_price, 0))), 0)::bigint
+  INTO v_profit
+  FROM public.sale_items si
+  JOIN public.sales s ON s.id = si.sale_id
+  LEFT JOIN public.products pr
+         ON pr.id = si.product_id AND pr.store_id = p_store_id
+  WHERE s.store_id = p_store_id
+    AND s.date_time >= p_start AND s.date_time <= p_end;
+
+  -- Mais vendidos (top 5 por quantidade) com receita por produto.
+  SELECT COALESCE(jsonb_agg(row ORDER BY row.quantity DESC), '[]'::jsonb)
+  INTO v_best
+  FROM (
+    SELECT si.product_id, si.product_name,
+           SUM(si.quantity)::bigint AS quantity,
+           SUM(si.quantity * si.unit_price)::bigint AS revenue_cents
+    FROM public.sale_items si
+    JOIN public.sales s ON s.id = si.sale_id
+    WHERE s.store_id = p_store_id
+      AND s.date_time >= p_start AND s.date_time <= p_end
+    GROUP BY si.product_id, si.product_name
+    ORDER BY quantity DESC
+    LIMIT 5
+  ) row;
+
+  -- Vendas por dia (fuso local do cliente via offset em minutos).
+  SELECT COALESCE(jsonb_agg(d ORDER BY d.day), '[]'::jsonb)
+  INTO v_daily
+  FROM (
+    SELECT ((s.date_time + make_interval(mins => p_tz_offset_minutes)) AT TIME ZONE 'UTC')::date AS day,
+           SUM(s.total_amount)::bigint AS total_cents
+    FROM public.sales s
+    WHERE s.store_id = p_store_id
+      AND s.date_time >= p_start AND s.date_time <= p_end
+    GROUP BY 1
+  ) d;
+
+  RETURN jsonb_build_object(
+    'total_revenue_cents', v_revenue,
+    'total_profit_cents', v_profit,
+    'best_sellers', v_best,
+    'per_day', v_daily
+  );
 END $$;
 
 -- plans — leitura para todos os logados; escrita só do super admin
@@ -1356,7 +1472,8 @@ AS $$
 DECLARE
   v_uid uuid := auth.uid();
   v_store text := p_sale->>'store_id';
-  v_total numeric := (p_sale->>'total_amount')::numeric;
+  -- W4: total em CENTAVOS inteiros (BIGINT) — comparação exata.
+  v_total bigint := (p_sale->>'total_amount')::bigint;
   v_lang text;
 BEGIN
   IF v_uid IS NULL THEN
@@ -1385,10 +1502,11 @@ BEGIN
     RAISE EXCEPTION 'A venda deve conter ao menos um item.';
   END IF;
 
-  -- Total deve corresponder aos itens (comparação em centavos).
-  IF ROUND((SELECT SUM((x->>'quantity')::numeric * (x->>'unit_price')::numeric)
-            FROM jsonb_array_elements(p_items) x) * 100)
-     <> ROUND(v_total * 100) THEN
+  -- Total deve corresponder aos itens — tudo em CENTAVOS inteiros (W4),
+  -- comparação exata sem arredondamento.
+  IF (SELECT SUM((x->>'quantity')::bigint * (x->>'unit_price')::bigint)
+      FROM jsonb_array_elements(p_items) x)
+     <> v_total THEN
     RAISE EXCEPTION 'O total da venda não corresponde aos itens.';
   END IF;
 
@@ -1404,7 +1522,7 @@ BEGIN
   INSERT INTO public.sale_items
     (sale_id, user_id, product_id, product_name, quantity, unit_price)
   SELECT p_sale->>'id', v_uid, (x->>'product_id'), (x->>'product_name'),
-         (x->>'quantity')::int, (x->>'unit_price')::numeric
+         (x->>'quantity')::int, (x->>'unit_price')::bigint
   FROM jsonb_array_elements(p_items) x;
 
   -- Baixa do estoque (valor atômico no banco — sem leitura/escrita cega).
@@ -1450,7 +1568,7 @@ BEGIN
   IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en') THEN
     v_lang := 'pt';
   END IF;
-  IF (p_debt->>'amount')::numeric <= 0 THEN
+  IF (p_debt->>'amount')::bigint <= 0 THEN
     RAISE EXCEPTION 'O valor da dívida deve ser maior que zero.';
   END IF;
   -- Idempotência: retry após sucesso não duplica dívida nem pendência.
@@ -1463,7 +1581,7 @@ BEGIN
     (id, user_id, store_id, person_name, amount, due_date,
      is_customer_debt, is_paid, paid_at, customer_id)
   VALUES (p_debt->>'id', v_uid, v_store, p_debt->>'person_name',
-          (p_debt->>'amount')::numeric, (p_debt->>'due_date')::timestamptz,
+          (p_debt->>'amount')::bigint, (p_debt->>'due_date')::timestamptz,
           v_customer_debt, FALSE, NULL, p_debt->>'customer_id');
 
   INSERT INTO public.financial_transactions
@@ -1478,7 +1596,7 @@ BEGIN
                  THEN 'Fiado a receber — ' || (p_debt->>'person_name')
                  ELSE 'Fiado a pagar — ' || (p_debt->>'person_name') END
           END,
-          (p_debt->>'amount')::numeric,
+          (p_debt->>'amount')::bigint,
           CASE WHEN v_customer_debt THEN 'income' ELSE 'expense' END,
           CASE WHEN v_lang = 'en' THEN 'Credit' ELSE 'Fiado' END,
           now(), 'pending', p_debt->>'id');
@@ -1580,7 +1698,8 @@ AS $$
 DECLARE
   v_uid uuid := auth.uid();
   v_store text := p_purchase->>'store_id';
-  v_total numeric := (p_purchase->>'total_amount')::numeric;
+  -- W4: total em CENTAVOS inteiros (BIGINT) — comparação exata.
+  v_total bigint := (p_purchase->>'total_amount')::bigint;
   v_lang text;
 BEGIN
   IF v_uid IS NULL THEN
@@ -1608,9 +1727,9 @@ BEGIN
     RAISE EXCEPTION 'A compra deve conter ao menos um item.';
   END IF;
 
-  IF ROUND((SELECT SUM((x->>'quantity')::numeric * (x->>'unit_price')::numeric)
-            FROM jsonb_array_elements(p_items) x) * 100)
-     <> ROUND(v_total * 100) THEN
+  IF (SELECT SUM((x->>'quantity')::bigint * (x->>'unit_price')::bigint)
+      FROM jsonb_array_elements(p_items) x)
+     <> v_total THEN
     RAISE EXCEPTION 'O total da compra não corresponde aos itens.';
   END IF;
 
@@ -1627,7 +1746,7 @@ BEGIN
   INSERT INTO public.purchase_items
     (purchase_id, user_id, product_id, product_name, quantity, unit_price)
   SELECT p_purchase->>'id', v_uid, (x->>'product_id'), (x->>'product_name'),
-         (x->>'quantity')::int, (x->>'unit_price')::numeric
+         (x->>'quantity')::int, (x->>'unit_price')::bigint
   FROM jsonb_array_elements(p_items) x;
 
   -- Entrada de estoque (produtos já validados acima).
@@ -1887,116 +2006,116 @@ $$;
 -- demonstrar o escopo por loja)
 INSERT INTO public.products
   (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p1', u.id, 'st1', 'Caneta esferográfica', 'Azul, ponta 0.7mm', 1.0, 2.0, 100
+SELECT 'p1', u.id, 'st1', 'Caneta esferográfica', 'Azul, ponta 0.7mm', 100, 200, 100
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.products
   (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p2', u.id, 'st1', 'Caderno 96 folhas', 'Capa dura, pautado', 5.0, 9.9, 50
+SELECT 'p2', u.id, 'st1', 'Caderno 96 folhas', 'Capa dura, pautado', 500, 990, 50
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.products
   (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p3', u.id, 'st1', 'Arroz 5kg', 'Tipo 1', 18.0, 24.0, 30
+SELECT 'p3', u.id, 'st1', 'Arroz 5kg', 'Tipo 1', 1800, 2400, 30
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.products
   (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p4', u.id, 'st1', 'Refrigerante 2L', 'Cola', 6.0, 8.5, 20
+SELECT 'p4', u.id, 'st1', 'Refrigerante 2L', 'Cola', 600, 850, 20
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.products
   (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p5', u.id, 'st1', 'Sabonete', 'Neutro 90g', 1.5, 3.0, 4
+SELECT 'p5', u.id, 'st1', 'Sabonete', 'Neutro 90g', 150, 300, 4
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.products
   (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p6', u.id, 'st2', 'Café torrado 500g', 'Grãos selecionados', 12.0, 19.9, 15
+SELECT 'p6', u.id, 'st2', 'Café torrado 500g', 'Grãos selecionados', 1200, 1990, 15
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.products
   (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p7', u.id, 'st2', 'Água mineral 1.5L', 'Garrafa', 1.5, 3.5, 24
+SELECT 'p7', u.id, 'st2', 'Água mineral 1.5L', 'Garrafa', 150, 350, 24
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 -- Vendas (4 — 3 na Loja Centro st1, 1 na Loja Shopping st2)
 INSERT INTO public.sales (id, user_id, store_id, total_amount, payment_method, date_time)
-SELECT 's1', u.id, 'st1', 13.9, 'pix', now() - interval '2 hours'
+SELECT 's1', u.id, 'st1', 1390, 'pix', now() - interval '2 hours'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.sales (id, user_id, store_id, total_amount, payment_method, date_time)
-SELECT 's2', u.id, 'st1', 24.0, 'cash', now() - interval '1 day'
+SELECT 's2', u.id, 'st1', 2400, 'cash', now() - interval '1 day'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.sales (id, user_id, store_id, total_amount, payment_method, date_time)
-SELECT 's3', u.id, 'st1', 17.0, 'debitCard', now() - interval '3 days'
+SELECT 's3', u.id, 'st1', 1700, 'debitCard', now() - interval '3 days'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.sales (id, user_id, store_id, total_amount, payment_method, date_time)
-SELECT 's4', u.id, 'st2', 19.9, 'pix', now() - interval '1 day'
+SELECT 's4', u.id, 'st2', 1990, 'pix', now() - interval '1 day'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 -- Itens das vendas (idempotente via UNIQUE (sale_id, product_id))
 INSERT INTO public.sale_items
   (sale_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 's1', u.id, 'p1', 'Caneta esferográfica', 2, 2.0
+SELECT 's1', u.id, 'p1', 'Caneta esferográfica', 2, 200
 FROM auth.users u LIMIT 1
 ON CONFLICT (sale_id, product_id) DO NOTHING;
 
 INSERT INTO public.sale_items
   (sale_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 's1', u.id, 'p2', 'Caderno 96 folhas', 1, 9.9
+SELECT 's1', u.id, 'p2', 'Caderno 96 folhas', 1, 990
 FROM auth.users u LIMIT 1
 ON CONFLICT (sale_id, product_id) DO NOTHING;
 
 INSERT INTO public.sale_items
   (sale_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 's2', u.id, 'p3', 'Arroz 5kg', 1, 24.0
+SELECT 's2', u.id, 'p3', 'Arroz 5kg', 1, 2400
 FROM auth.users u LIMIT 1
 ON CONFLICT (sale_id, product_id) DO NOTHING;
 
 INSERT INTO public.sale_items
   (sale_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 's3', u.id, 'p4', 'Refrigerante 2L', 2, 8.5
+SELECT 's3', u.id, 'p4', 'Refrigerante 2L', 2, 850
 FROM auth.users u LIMIT 1
 ON CONFLICT (sale_id, product_id) DO NOTHING;
 
 INSERT INTO public.sale_items
   (sale_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 's4', u.id, 'p6', 'Café torrado 500g', 1, 19.9
+SELECT 's4', u.id, 'p6', 'Café torrado 500g', 1, 1990
 FROM auth.users u LIMIT 1
 ON CONFLICT (sale_id, product_id) DO NOTHING;
 
 -- Movimentações financeiras (10 — 9 na Loja Centro st1, 1 na Shopping st2)
 INSERT INTO public.financial_transactions
   (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't1', u.id, 'st1', 'Venda via PIX', 13.9, 'income', 'Vendas',
+SELECT 't1', u.id, 'st1', 'Venda via PIX', 1390, 'income', 'Vendas',
        now() - interval '2 hours', 'paid', NULL
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.financial_transactions
   (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't2', u.id, 'st1', 'Energia elétrica', 180, 'expense', 'Contas',
+SELECT 't2', u.id, 'st1', 'Energia elétrica', 18000, 'expense', 'Contas',
        now() - interval '5 hours', 'paid', NULL
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.financial_transactions
   (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't3', u.id, 'st1', 'Venda em dinheiro', 24.0, 'income', 'Vendas',
+SELECT 't3', u.id, 'st1', 'Venda em dinheiro', 2400, 'income', 'Vendas',
        now() - interval '1 day', 'paid', NULL
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
@@ -2004,28 +2123,28 @@ ON CONFLICT (id) DO NOTHING;
 -- Pendência de fiado vinculada à dívida d1 (a baixa marca a MESMA transação)
 INSERT INTO public.financial_transactions
   (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't4', u.id, 'st1', 'Venda fiado (João)', 25.0, 'income', 'Fiado',
+SELECT 't4', u.id, 'st1', 'Venda fiado (João)', 2500, 'income', 'Fiado',
        now() - interval '1 day', 'pending', 'd1'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.financial_transactions
   (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't5', u.id, 'st1', 'Aluguel da loja', 900, 'expense', 'Contas',
+SELECT 't5', u.id, 'st1', 'Aluguel da loja', 90000, 'expense', 'Contas',
        now() - interval '2 days', 'paid', NULL
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.financial_transactions
   (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't6', u.id, 'st1', 'Venda no débito', 17.0, 'income', 'Vendas',
+SELECT 't6', u.id, 'st1', 'Venda no débito', 1700, 'income', 'Vendas',
        now() - interval '3 days', 'paid', NULL
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.financial_transactions
   (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't7', u.id, 'st1', 'Compra de mercadoria', 320, 'expense', 'Compras',
+SELECT 't7', u.id, 'st1', 'Compra de mercadoria', 32000, 'expense', 'Compras',
        now() - interval '4 days', 'paid', NULL
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
@@ -2033,21 +2152,21 @@ ON CONFLICT (id) DO NOTHING;
 -- Saídas das compras demo (pc1 = 210, pc2 = 150)
 INSERT INTO public.financial_transactions
   (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't8', u.id, 'st1', 'Compra — Distribuidora Norte', 210, 'expense', 'Compras',
+SELECT 't8', u.id, 'st1', 'Compra — Distribuidora Norte', 21000, 'expense', 'Compras',
        now() - interval '4 days', 'paid', NULL
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.financial_transactions
   (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't9', u.id, 'st1', 'Compra — Fornecedor Central', 150, 'expense', 'Compras',
+SELECT 't9', u.id, 'st1', 'Compra — Fornecedor Central', 15000, 'expense', 'Compras',
        now() - interval '8 days', 'paid', NULL
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.financial_transactions
   (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't10', u.id, 'st2', 'Venda via PIX (Shopping)', 19.9, 'income', 'Vendas',
+SELECT 't10', u.id, 'st2', 'Venda via PIX (Shopping)', 1990, 'income', 'Vendas',
        now() - interval '1 day', 'paid', NULL
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
@@ -2076,37 +2195,37 @@ ON CONFLICT (id) DO NOTHING;
 -- Compras (2 — Loja Centro st1) + itens
 INSERT INTO public.purchases
   (id, user_id, store_id, supplier_name, total_amount, date_time)
-SELECT 'pc1', u.id, 'st1', 'Distribuidora Norte', 210, now() - interval '4 days'
+SELECT 'pc1', u.id, 'st1', 'Distribuidora Norte', 21000, now() - interval '4 days'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.purchase_items
   (purchase_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 'pc1', u.id, 'p3', 'Arroz 5kg', 10, 18.0
+SELECT 'pc1', u.id, 'p3', 'Arroz 5kg', 10, 1800
 FROM auth.users u LIMIT 1
 ON CONFLICT (purchase_id, product_id) DO NOTHING;
 
 INSERT INTO public.purchase_items
   (purchase_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 'pc1', u.id, 'p4', 'Refrigerante 2L', 5, 6.0
+SELECT 'pc1', u.id, 'p4', 'Refrigerante 2L', 5, 600
 FROM auth.users u LIMIT 1
 ON CONFLICT (purchase_id, product_id) DO NOTHING;
 
 INSERT INTO public.purchases
   (id, user_id, store_id, supplier_name, total_amount, date_time)
-SELECT 'pc2', u.id, 'st1', 'Fornecedor Central', 150, now() - interval '8 days'
+SELECT 'pc2', u.id, 'st1', 'Fornecedor Central', 15000, now() - interval '8 days'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.purchase_items
   (purchase_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 'pc2', u.id, 'p1', 'Caneta esferográfica', 50, 1.0
+SELECT 'pc2', u.id, 'p1', 'Caneta esferográfica', 50, 100
 FROM auth.users u LIMIT 1
 ON CONFLICT (purchase_id, product_id) DO NOTHING;
 
 INSERT INTO public.purchase_items
   (purchase_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 'pc2', u.id, 'p2', 'Caderno 96 folhas', 20, 5.0
+SELECT 'pc2', u.id, 'p2', 'Caderno 96 folhas', 20, 500
 FROM auth.users u LIMIT 1
 ON CONFLICT (purchase_id, product_id) DO NOTHING;
 
@@ -2117,9 +2236,9 @@ ON CONFLICT (purchase_id, product_id) DO NOTHING;
 INSERT INTO public.plans
   (id, name, description, price_monthly, max_stores, max_employees, is_active)
 VALUES
-  ('pl1', 'Essencial', 'Para começar: 1 loja e até 3 funcionários.', 49, 1, 3, TRUE),
-  ('pl2', 'Profissional', 'Para crescer: 3 lojas e até 10 funcionários.', 99, 3, 10, TRUE),
-  ('pl3', 'Empresa', 'Para expandir: 10 lojas e até 50 funcionários.', 199, 10, 50, TRUE)
+  ('pl1', 'Essencial', 'Para começar: 1 loja e até 3 funcionários.', 4900, 1, 3, TRUE),
+  ('pl2', 'Profissional', 'Para crescer: 3 lojas e até 10 funcionários.', 9900, 3, 10, TRUE),
+  ('pl3', 'Empresa', 'Para expandir: 10 lojas e até 50 funcionários.', 19900, 10, 50, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 -- Tenant demo JÁ APROVADO para o primeiro usuário (dono) — assim o app
@@ -2156,26 +2275,26 @@ ON CONFLICT (id) DO NOTHING;
 -- Dívidas (5 — Loja Centro st1) — clientes vinculados via customer_id
 INSERT INTO public.debts
   (id, user_id, store_id, person_name, amount, due_date, is_customer_debt, is_paid, paid_at, customer_id)
-SELECT 'd1', u.id, 'st1', 'João da Silva', 25.0, now() + interval '3 days', TRUE, FALSE, NULL, 'c1'
+SELECT 'd1', u.id, 'st1', 'João da Silva', 2500, now() + interval '3 days', TRUE, FALSE, NULL, 'c1'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.debts
   (id, user_id, store_id, person_name, amount, due_date, is_customer_debt, is_paid, paid_at, customer_id)
-SELECT 'd2', u.id, 'st1', 'Maria Souza', 60.0, now() - interval '2 days', TRUE, FALSE, NULL, 'c2'
+SELECT 'd2', u.id, 'st1', 'Maria Souza', 6000, now() - interval '2 days', TRUE, FALSE, NULL, 'c2'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.debts
   (id, user_id, store_id, person_name, amount, due_date, is_customer_debt, is_paid, paid_at, customer_id)
-SELECT 'd3', u.id, 'st1', 'Pedro Alves', 15.5, now() + interval '10 days', TRUE, FALSE, NULL, 'c3'
+SELECT 'd3', u.id, 'st1', 'Pedro Alves', 1550, now() + interval '10 days', TRUE, FALSE, NULL, 'c3'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
 
 -- A pagar (fornecedor) — filtrada pelos casos de uso de crédito
 INSERT INTO public.debts
   (id, user_id, store_id, person_name, amount, due_date, is_customer_debt, is_paid, paid_at, customer_id)
-SELECT 'd4', u.id, 'st1', 'Distribuidora Norte', 120.0, now() + interval '5 days',
+SELECT 'd4', u.id, 'st1', 'Distribuidora Norte', 12000, now() + interval '5 days',
        FALSE, FALSE, NULL, NULL
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;
@@ -2183,7 +2302,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Já quitada — aparece no histórico de quitações
 INSERT INTO public.debts
   (id, user_id, store_id, person_name, amount, due_date, is_customer_debt, is_paid, paid_at, customer_id)
-SELECT 'd5', u.id, 'st1', 'Ana Lima', 40.0, now() - interval '20 days',
+SELECT 'd5', u.id, 'st1', 'Ana Lima', 4000, now() - interval '20 days',
        TRUE, TRUE, now() - interval '10 days', 'c4'
 FROM auth.users u LIMIT 1
 ON CONFLICT (id) DO NOTHING;

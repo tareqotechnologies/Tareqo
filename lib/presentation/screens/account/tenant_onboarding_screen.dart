@@ -372,7 +372,7 @@ class _PlanCard extends StatelessWidget {
               ),
             ),
             Text(
-              Formatters.currency(plan.priceMonthly),
+              Formatters.currency(plan.priceMonthlyCents),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: scheme.primary,

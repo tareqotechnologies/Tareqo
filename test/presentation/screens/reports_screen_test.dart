@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/store_context.dart';
 
+import 'package:dumbhanengue/domain/repositories/i_sales_report_repository.dart';
 import 'package:dumbhanengue/domain/usecases/get_sales_report_use_case.dart';
 import 'package:dumbhanengue/presentation/controllers/reports_providers.dart';
 import 'package:dumbhanengue/presentation/screens/reports/reports_screen.dart';
@@ -13,6 +14,9 @@ class _FakeGetSalesReportUseCase implements GetSalesReportUseCase {
   _FakeGetSalesReportUseCase(this._report);
 
   final SalesReport _report;
+
+  @override
+  final ISalesReportRepository? serverRepository = null;
 
   @override
   Future<SalesReport> call({
@@ -24,6 +28,9 @@ class _FakeGetSalesReportUseCase implements GetSalesReportUseCase {
 }
 
 class _ThrowingGetSalesReportUseCase implements GetSalesReportUseCase {
+  @override
+  final ISalesReportRepository? serverRepository = null;
+
   @override
   Future<SalesReport> call({
     required String storeId,
@@ -40,13 +47,13 @@ const _bestSellers = [
     productId: 'p1',
     productName: 'Caneta',
     quantity: 12,
-    revenue: 24.0,
+    revenueCents: 2400,
   ),
   BestSeller(
     productId: 'p2',
     productName: 'Caderno',
     quantity: 5,
-    revenue: 30.0,
+    revenueCents: 3000,
   ),
 ];
 
@@ -57,12 +64,12 @@ DateTime get _today => DateTime.now();
 DateTime get _yesterday => DateTime.now().subtract(const Duration(days: 1));
 
 SalesReport _report() => SalesReport(
-  totalRevenue: 54.0,
-  totalProfit: 18.0,
+  totalRevenueCents: 5400,
+  totalProfitCents: 1800,
   bestSellers: _bestSellers,
   perDay: [
-    DailySales(day: _yesterday, total: 20.0),
-    DailySales(day: _today, total: 34.0),
+    DailySales(day: _yesterday, totalCents: 2000),
+    DailySales(day: _today, totalCents: 3400),
   ],
 );
 
@@ -113,8 +120,8 @@ void main() {
       _buildApp(
         _FakeGetSalesReportUseCase(
           const SalesReport(
-            totalRevenue: 0,
-            totalProfit: 0,
+            totalRevenueCents: 0,
+            totalProfitCents: 0,
             bestSellers: [],
             perDay: [],
           ),

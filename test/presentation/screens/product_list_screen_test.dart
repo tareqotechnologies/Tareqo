@@ -48,14 +48,14 @@ void main() {
           Product(
             id: '1',
             name: 'Caneta',
-            purchasePrice: 1.0,
-            salePrice: 2.0,
+            purchasePriceCents: 100,
+            salePriceCents: 200,
           ),
           Product(
             id: '2',
             name: 'Caderno',
-            purchasePrice: 5.0,
-            salePrice: 9.9,
+            purchasePriceCents: 500,
+            salePriceCents: 990,
           ),
         ]),
       ),

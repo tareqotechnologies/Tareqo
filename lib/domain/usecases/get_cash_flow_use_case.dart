@@ -1,5 +1,5 @@
-import '../../core/utils/money.dart';
 import '../entities/financial_transaction.dart';
+import '../repositories/i_cash_flow_repository.dart';
 import '../repositories/i_financial_transaction_repository.dart';
 
 /// Exceção de domínio: período inválido para cálculo de fluxo de caixa.
@@ -13,28 +13,40 @@ final class InvalidPeriodException implements Exception {
 }
 
 /// Resultado do fluxo de caixa em um período.
+///
+/// Valores em CENTAVOS inteiros (W4) — a soma é exata (nunca 0.1+0.2).
 final class CashFlow {
-  const CashFlow({required this.income, required this.expense});
+  const CashFlow({required this.incomeCents, required this.expenseCents});
 
-  /// Total de entradas no período.
-  final double income;
+  /// Total de entradas no período (centavos).
+  final int incomeCents;
 
-  /// Total de saídas no período.
-  final double expense;
+  /// Total de saídas no período (centavos).
+  final int expenseCents;
 
-  /// Saldo: entradas − saídas.
-  double get balance => income - expense;
+  /// Saldo: entradas − saídas (centavos).
+  int get balanceCents => incomeCents - expenseCents;
 
   @override
-  String toString() =>
-      'CashFlow(income: $income, expense: $expense, balance: $balance)';
+  String toString() => 'CashFlow(income: $incomeCents, expense: $expenseCents, '
+      'balance: $balanceCents)';
 }
 
 /// Caso de uso: calcular o fluxo de caixa (entradas − saídas) em um período.
+///
+/// Modo Supabase (H2): quando um [ICashFlowRepository] é injetado, a
+/// agregação acontece NO SERVIDOR (RPC `get_cash_flow` — UMA chamada).
+/// Sem ele (modo local/testes), calcula client-side pelas transações.
 class GetCashFlowUseCase {
-  const GetCashFlowUseCase(this._repository);
+  const GetCashFlowUseCase(
+    this._repository, {
+    this.serverRepository,
+  });
 
   final IFinancialTransactionRepository _repository;
+
+  /// Agregação server-side (H2) — `null` no modo local/testes.
+  final ICashFlowRepository? serverRepository;
 
   /// Calcula o **fluxo de caixa realizado** da loja [storeId] no período
   /// `[start, end]` (inclusive) — considera apenas transações com
@@ -55,30 +67,37 @@ class GetCashFlowUseCase {
       );
     }
 
+    final server = serverRepository;
+    if (server != null) {
+      // Modo Supabase (H2): agregação no Postgres em UMA chamada RPC.
+      return server.fetchCashFlow(
+        storeId: storeId,
+        start: start,
+        end: end,
+      );
+    }
+
     final transactions = await _repository.getByPeriod(
       storeId: storeId,
       start: start,
       end: end,
     );
 
-    // Acúmulo em CENTAVOS (auditoria H1): somar doubles como 0.1+0.2
-    // acumula erro de representação; somar inteiros de centavos é exato.
-    final incomeValues = <double>[];
-    final expenseValues = <double>[];
+    // Soma em CENTAVOS inteiros (W4): `int` não tem artefato de
+    // representação — a aritmética é exata por construção.
+    var incomeCents = 0;
+    var expenseCents = 0;
     for (final transaction in transactions) {
       // Caixa realizado: ignora transações ainda pendentes.
       if (transaction.status != TransactionStatus.paid) continue;
 
       if (transaction.type == TransactionType.income) {
-        incomeValues.add(transaction.amount);
+        incomeCents += transaction.amountCents;
       } else {
-        expenseValues.add(transaction.amount);
+        expenseCents += transaction.amountCents;
       }
     }
 
-    return CashFlow(
-      income: Money.sum(incomeValues),
-      expense: Money.sum(expenseValues),
-    );
+    return CashFlow(incomeCents: incomeCents, expenseCents: expenseCents);
   }
 }

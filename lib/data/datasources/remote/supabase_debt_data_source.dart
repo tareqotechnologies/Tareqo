@@ -41,7 +41,7 @@ final class DebtSupabaseDataSourceImpl implements DebtLocalDataSource {
           'id': debt.id,
           'store_id': debt.storeId,
           'person_name': debt.personName,
-          'amount': debt.amount,
+          'amount': debt.amountCents,
           'due_date': debt.dueDate.toUtc().toIso8601String(),
           'is_customer_debt': debt.isCustomerDebt,
           if (debt.customerId != null) 'customer_id': debt.customerId,
@@ -52,15 +52,18 @@ final class DebtSupabaseDataSourceImpl implements DebtLocalDataSource {
 
   @override
   Future<List<Debt>> getAll({required String storeId}) async {
-    final rows = await supabaseClient
-        .from(_table)
-        .select(
-          'id, store_id, person_name, amount, due_date, is_customer_debt, '
-          'is_paid, paid_at, customer_id',
-        )
-        .eq('store_id', storeId)
-        .order('due_date', ascending: true)
-        .limit(SupabaseQueryLimits.pageSize);
+    // Paginação keyset (H2): lotes de pageSize pelo id, sem teto total.
+    // A ordem final de exibição (vencimento/baixa) é aplicada pelo
+    // provider (pendentes por due_date, quitadas por paid_at).
+    final rows = await fetchAllKeyset(
+      supabaseClient
+          .from(_table)
+          .select(
+            'id, store_id, person_name, amount, due_date, is_customer_debt, '
+            'is_paid, paid_at, customer_id',
+          )
+          .eq('store_id', storeId),
+    );
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
@@ -71,7 +74,7 @@ final class DebtSupabaseDataSourceImpl implements DebtLocalDataSource {
       'user_id': requireCurrentUserId(),
       'store_id': debt.storeId,
       'person_name': debt.personName,
-      'amount': debt.amount,
+      'amount': debt.amountCents,
       'due_date': debt.dueDate.toUtc().toIso8601String(),
       'is_customer_debt': debt.isCustomerDebt,
       'is_paid': debt.isPaid,
@@ -103,7 +106,7 @@ final class DebtSupabaseDataSourceImpl implements DebtLocalDataSource {
     id: row['id'] as String,
     storeId: row['store_id'] as String,
     personName: row['person_name'] as String,
-    amount: (row['amount'] as num).toDouble(),
+    amountCents: (row['amount'] as num).toInt(),
     dueDate: DateTime.parse(row['due_date'] as String).toLocal(),
     isCustomerDebt: row['is_customer_debt'] as bool,
     isPaid: row['is_paid'] as bool,

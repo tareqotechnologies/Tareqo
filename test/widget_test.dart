@@ -8,6 +8,7 @@ import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/sale.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
+import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
 import 'package:dumbhanengue/domain/usecases/get_cash_flow_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_customers_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_pending_debts_use_case.dart';
@@ -27,8 +28,8 @@ class _FakeGetProductsUseCase implements GetProductsUseCase {
         Product(
           id: 'p1',
           name: 'Caneta',
-          purchasePrice: 1.0,
-          salePrice: 2.0,
+          purchasePriceCents: 100,
+          salePriceCents: 200,
           stockQuantity: 10,
         ),
       ];
@@ -47,10 +48,10 @@ class _FakeSalesRepository implements ISaleRepository {
               productId: 'p1',
               productName: 'Caneta',
               quantity: 2,
-              unitPrice: 2.0,
+              unitPriceCents: 200,
             ),
           ],
-          totalAmount: 4.0,
+          totalAmountCents: 400,
           paymentMethod: PaymentMethod.pix,
           dateTime: DateTime.now(),
         ),
@@ -59,12 +60,15 @@ class _FakeSalesRepository implements ISaleRepository {
 
 class _FakeGetCashFlowUseCase implements GetCashFlowUseCase {
   @override
+  final ICashFlowRepository? serverRepository = null;
+
+  @override
   Future<CashFlow> call({
     required String storeId,
     required DateTime start,
     required DateTime end,
   }) async =>
-      const CashFlow(income: 100, expense: 40);
+      const CashFlow(incomeCents: 10000, expenseCents: 4000);
 }
 
 class _FakeGetPendingDebtsUseCase implements GetPendingDebtsUseCase {
@@ -73,7 +77,7 @@ class _FakeGetPendingDebtsUseCase implements GetPendingDebtsUseCase {
         Debt(
           id: 'd1',
           personName: 'João',
-          amount: 25.0,
+          amountCents: 2500,
           dueDate: DateTime.now().add(const Duration(days: 3)),
           isCustomerDebt: true,
         ),

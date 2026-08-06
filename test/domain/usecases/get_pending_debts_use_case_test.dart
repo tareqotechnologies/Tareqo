@@ -28,13 +28,13 @@ class _FakeDebtRepository implements IDebtRepository {
 Debt _debt(
   String id, {
   required String personName,
-  required double amount,
+  required int amountCents,
   required bool isCustomerDebt,
 }) {
   return Debt(
     id: id,
     personName: personName,
-    amount: amount,
+    amountCents: amountCents,
     dueDate: DateTime.utc(2026, 8, 15),
     isCustomerDebt: isCustomerDebt,
   );
@@ -43,12 +43,12 @@ Debt _debt(
 void main() {
   test('retorna apenas as dívidas a receber de clientes', () async {
     final repository = _FakeDebtRepository([
-      _debt('1', personName: 'Maria', amount: 120.0, isCustomerDebt: true),
-      _debt('2', personName: 'João', amount: 45.5, isCustomerDebt: true),
+      _debt('1', personName: 'Maria', amountCents: 12000, isCustomerDebt: true),
+      _debt('2', personName: 'João', amountCents: 4550, isCustomerDebt: true),
       _debt(
         '3',
         personName: 'Fornecedor ABC',
-        amount: 300.0,
+        amountCents: 30000,
         isCustomerDebt: false,
       ),
     ]);
@@ -67,7 +67,7 @@ void main() {
       _debt(
         '3',
         personName: 'Fornecedor ABC',
-        amount: 300.0,
+        amountCents: 30000,
         isCustomerDebt: false,
       ),
     ]);
@@ -89,10 +89,10 @@ void main() {
       _debt(
         '1',
         personName: 'Maria',
-        amount: 120.0,
+        amountCents: 12000,
         isCustomerDebt: true,
       ).copyWith(isPaid: true),
-      _debt('2', personName: 'João', amount: 45.5, isCustomerDebt: true),
+      _debt('2', personName: 'João', amountCents: 4550, isCustomerDebt: true),
     ]);
     final useCase = GetPendingDebtsUseCase(repository);
 

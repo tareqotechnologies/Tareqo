@@ -159,14 +159,14 @@ class DashboardScreen extends ConsumerWidget {
                   children: [
                     KpiCard(
                       label: l10n.dashboardTotalSales,
-                      value: Formatters.currency(kpis?.totalSales ?? 0),
+                      value: Formatters.currency(kpis?.totalSalesCents ?? 0),
                       caption: l10n.dashboardAllTime,
                       icon: Icons.point_of_sale_outlined,
                       loading: kpisAsync.isLoading,
                     ),
                     KpiCard(
                       label: l10n.dashboardCashBalance,
-                      value: Formatters.currency(kpis?.cashBalance ?? 0),
+                      value: Formatters.currency(kpis?.cashBalanceCents ?? 0),
                       caption: cashFlowPeriod.label(context.l10n),
                       icon: Icons.account_balance_wallet_outlined,
                       iconBackground: AppColors.income.withValues(alpha: 0.14),
@@ -175,7 +175,7 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     KpiCard(
                       label: l10n.dashboardReceivables,
-                      value: Formatters.currency(kpis?.pendingTotal ?? 0),
+                      value: Formatters.currency(kpis?.pendingTotalCents ?? 0),
                       icon: Icons.receipt_long_outlined,
                       iconBackground: AppColors.warning.withValues(alpha: 0.14),
                       iconColor: AppColors.warning,
@@ -484,7 +484,7 @@ class _RecentSaleCard extends StatelessWidget {
               ),
             ),
             Text(
-              Formatters.currency(sale.totalAmount),
+              Formatters.currency(sale.totalAmountCents),
               style: theme.textTheme.titleMedium,
             ),
           ],

@@ -12,6 +12,7 @@ import 'package:dumbhanengue/domain/entities/sale.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
 import 'package:dumbhanengue/domain/entities/store.dart';
 import 'package:dumbhanengue/domain/entities/store_employee.dart';
+import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
 import 'package:dumbhanengue/domain/usecases/get_cash_flow_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_employees_use_case.dart';
@@ -53,6 +54,9 @@ class _FakeGetCashFlowUseCase implements GetCashFlowUseCase {
   final CashFlow _cashFlow;
 
   @override
+  final ICashFlowRepository? serverRepository = null;
+
+  @override
   Future<CashFlow> call({
     required String storeId,
     required DateTime start,
@@ -79,17 +83,17 @@ class _FakeGetEmployeesUseCase implements GetEmployeesUseCase {
   Future<List<StoreEmployee>> call(String tenantId) async => _employees;
 }
 
-Sale _sale({required double total}) => Sale(
-  id: 's-$total',
+Sale _sale({required int totalCents}) => Sale(
+  id: 's-$totalCents',
   items: const [
     SaleItem(
       productId: 'p1',
       productName: 'Caneta',
       quantity: 1,
-      unitPrice: 2.0,
+      unitPriceCents: 200,
     ),
   ],
-  totalAmount: total,
+  totalAmountCents: totalCents,
   paymentMethod: PaymentMethod.pix,
   dateTime: DateTime.now(),
 );
@@ -163,7 +167,7 @@ Widget _buildAppAsEmployee({
       ),
       salesRepositoryProvider.overrideWithValue(_FakeSalesRepository(const [])),
       getCashFlowUseCaseProvider.overrideWithValue(
-        _FakeGetCashFlowUseCase(const CashFlow(income: 0, expense: 0)),
+        _FakeGetCashFlowUseCase(const CashFlow(incomeCents: 0, expenseCents: 0)),
       ),
       getPendingDebtsUseCaseProvider.overrideWithValue(
         _FakeGetPendingDebtsUseCase(const []),
@@ -191,21 +195,21 @@ void main() {
       tester,
       _buildApp(
         products: const [
-          Product(id: 'p1', name: 'Caneta', purchasePrice: 1.0, salePrice: 2.0),
+          Product(id: 'p1', name: 'Caneta', purchasePriceCents: 100, salePriceCents: 200),
           Product(
             id: 'p2',
             name: 'Caderno',
-            purchasePrice: 3.0,
-            salePrice: 6.0,
+            purchasePriceCents: 300,
+            salePriceCents: 600,
           ),
         ],
-        sales: [_sale(total: 20), _sale(total: 10)],
-        cashFlow: const CashFlow(income: 100, expense: 40),
+        sales: [_sale(totalCents: 2000), _sale(totalCents: 1000)],
+        cashFlow: const CashFlow(incomeCents: 10000, expenseCents: 4000),
         debts: [
           Debt(
             id: 'd1',
             personName: 'Cliente A',
-            amount: 15.0,
+            amountCents: 1500,
             dueDate: DateTime.now(),
             isCustomerDebt: true,
           ),
@@ -242,20 +246,20 @@ void main() {
           Product(
             id: 'p1',
             name: 'Caneta',
-            purchasePrice: 1.0,
-            salePrice: 2.0,
+            purchasePriceCents: 100,
+            salePriceCents: 200,
             stockQuantity: 2,
           ),
           Product(
             id: 'p2',
             name: 'Caderno',
-            purchasePrice: 3.0,
-            salePrice: 6.0,
+            purchasePriceCents: 300,
+            salePriceCents: 600,
             stockQuantity: 10,
           ),
         ],
         sales: [],
-        cashFlow: const CashFlow(income: 0, expense: 0),
+        cashFlow: const CashFlow(incomeCents: 0, expenseCents: 0),
         debts: const [],
       ),
     );
@@ -273,7 +277,7 @@ void main() {
       _buildApp(
         products: const [],
         sales: const [],
-        cashFlow: const CashFlow(income: 0, expense: 0),
+        cashFlow: const CashFlow(incomeCents: 0, expenseCents: 0),
         debts: const [],
       ),
     );
@@ -292,7 +296,7 @@ void main() {
       _buildApp(
         products: const [],
         sales: const [],
-        cashFlow: const CashFlow(income: 0, expense: 0),
+        cashFlow: const CashFlow(incomeCents: 0, expenseCents: 0),
         debts: const [],
       ),
     );

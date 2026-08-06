@@ -14,8 +14,8 @@ void main() {
   Product buildProduct(String id, String name) => Product(
         id: id,
         name: name,
-        purchasePrice: 5.0,
-        salePrice: 9.9,
+        purchasePriceCents: 500,
+        salePriceCents: 990,
       );
 
   test('getAll retorna lista vazia inicialmente', () async {

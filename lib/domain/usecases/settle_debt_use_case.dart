@@ -110,7 +110,7 @@ class SettleDebtUseCase {
             language: Formatters.currentLanguage,
             personName: debt.personName,
           ),
-          amount: debt.amount,
+          amountCents: debt.amountCents,
           type: TransactionType.income,
           category:
               TransactionDescriptions.debtCategory(Formatters.currentLanguage),

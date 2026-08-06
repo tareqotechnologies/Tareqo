@@ -10,7 +10,7 @@ void main() {
   late Database db;
 
   setUp(() => db = openTestDatabase());
-  tearDown(() => db.dispose());
+  tearDown(() => db.close());
 
   int productCount() =>
       db.select('SELECT COUNT(*) AS c FROM products').first['c'] as int;

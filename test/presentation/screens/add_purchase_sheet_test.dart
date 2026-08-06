@@ -88,8 +88,8 @@ void main() {
           Product(
             id: 'p1',
             name: 'Caneta',
-            purchasePrice: 0.5,
-            salePrice: 2.0,
+            purchasePriceCents: 50,
+            salePriceCents: 200,
             stockQuantity: 10,
           ),
         ],
@@ -122,7 +122,7 @@ void main() {
     expect(processPurchase.lastPurchase?.supplierName, 'Distribuidora Central');
     expect(processPurchase.lastPurchase?.items.length, 1);
     expect(processPurchase.lastPurchase?.items.first.quantity, 2);
-    expect(processPurchase.lastPurchase?.totalAmount, 1.0);
+    expect(processPurchase.lastPurchase?.totalAmountCents, 100);
   });
 
   testWidgets('o botão de confirmar fica desabilitado sem itens no carrinho',
@@ -133,8 +133,8 @@ void main() {
           Product(
             id: 'p1',
             name: 'Caneta',
-            purchasePrice: 0.5,
-            salePrice: 2.0,
+            purchasePriceCents: 50,
+            salePriceCents: 200,
           ),
         ],
       ),
@@ -155,8 +155,8 @@ void main() {
           Product(
             id: 'p1',
             name: 'Caneta',
-            purchasePrice: 0.5,
-            salePrice: 2.0,
+            purchasePriceCents: 50,
+            salePriceCents: 200,
           ),
         ],
       ),

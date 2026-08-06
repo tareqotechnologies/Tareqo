@@ -79,7 +79,7 @@ class FinancialScreen extends ConsumerWidget {
               Expanded(
                 child: KpiCard(
                   label: l10n.financialIncome,
-                  value: Formatters.currency(cashFlow?.income ?? 0),
+                  value: Formatters.currency(cashFlow?.incomeCents ?? 0),
                   icon: Icons.south_west,
                   iconBackground: AppColors.income.withValues(alpha: 0.14),
                   iconColor: AppColors.income,
@@ -90,7 +90,7 @@ class FinancialScreen extends ConsumerWidget {
               Expanded(
                 child: KpiCard(
                   label: l10n.financialExpense,
-                  value: Formatters.currency(cashFlow?.expense ?? 0),
+                  value: Formatters.currency(cashFlow?.expenseCents ?? 0),
                   icon: Icons.north_east,
                   iconBackground: AppColors.expense.withValues(alpha: 0.14),
                   iconColor: AppColors.expense,
@@ -101,7 +101,7 @@ class FinancialScreen extends ConsumerWidget {
               Expanded(
                 child: KpiCard(
                   label: l10n.financialBalance,
-                  value: Formatters.currency(cashFlow?.balance ?? 0),
+                  value: Formatters.currency(cashFlow?.balanceCents ?? 0),
                   icon: Icons.account_balance_wallet_outlined,
                   loading: cashFlowAsync.isLoading,
                 ),
@@ -170,7 +170,7 @@ class FinancialScreen extends ConsumerWidget {
         title: Text(l10n.financialReceivePendingTitle),
         content: Text(
           l10n.financialReceivePendingBody(
-            Formatters.currency(transaction.amount),
+            Formatters.currency(transaction.amountCents),
           ),
         ),
         actions: [
@@ -285,7 +285,7 @@ class _TransactionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '$sign ${Formatters.currency(transaction.amount)}',
+                  '$sign ${Formatters.currency(transaction.amountCents)}',
                   style: theme.textTheme.titleMedium?.copyWith(color: color),
                 ),
                 const SizedBox(height: 4),

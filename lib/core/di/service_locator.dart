@@ -50,7 +50,9 @@ import '../../data/repositories/product_repository_impl.dart';
 import '../../data/repositories/purchase_repository_impl.dart';
 import '../../data/repositories/sale_repository_impl.dart';
 import '../../data/repositories/store_repository_impl.dart';
+import '../../data/repositories/supabase_cash_flow_repository.dart';
 import '../../data/repositories/supabase_dashboard_kpis_repository.dart';
+import '../../data/repositories/supabase_sales_report_repository.dart';
 import '../../data/repositories/tenant_repository_impl.dart';
 import '../../data/repositories/local_admin_repository.dart';
 import '../../data/services/local_employee_account_service.dart';
@@ -66,8 +68,10 @@ import '../../domain/repositories/i_customer_repository.dart';
 import '../../domain/repositories/i_debt_processor.dart';
 import '../../domain/repositories/i_debt_repository.dart';
 import '../../domain/repositories/i_employee_repository.dart';
+import '../../domain/repositories/i_cash_flow_repository.dart';
 import '../../domain/repositories/i_dashboard_kpis_repository.dart';
 import '../../domain/repositories/i_financial_transaction_repository.dart';
+import '../../domain/repositories/i_sales_report_repository.dart';
 import '../../domain/repositories/i_plan_repository.dart';
 import '../../domain/repositories/i_plan_request_repository.dart';
 import '../../domain/repositories/i_product_repository.dart';
@@ -243,6 +247,17 @@ final class ServiceLocator {
       )
       ..registerLazySingleton<GetDashboardKpisUseCase>(
         () => GetDashboardKpisUseCase(instance<IDashboardKpisRepository>()),
+      )
+      // Agregações H2 no SERVIDOR (cash flow + relatório de vendas): as
+      // RPCs `get_cash_flow`/`get_sales_report` devolvem os agregados em
+      // UMA chamada (em vez de listar e somar no cliente). Registradas
+      // apenas no modo remoto; os use cases recebem via
+      // `instance.isRegistered` (null → cálculo client-side).
+      ..registerLazySingleton<ICashFlowRepository>(
+        () => const SupabaseCashFlowRepository(),
+      )
+      ..registerLazySingleton<ISalesReportRepository>(
+        () => const SupabaseSalesReportRepository(),
       );
   }
 
@@ -475,7 +490,13 @@ final class ServiceLocator {
         ),
       )
       ..registerLazySingleton<GetCashFlowUseCase>(
-        () => GetCashFlowUseCase(instance<IFinancialTransactionRepository>()),
+        () => GetCashFlowUseCase(
+          instance<IFinancialTransactionRepository>(),
+          // Supabase: agregação server-side (H2). Local/testes: null.
+          serverRepository: instance.isRegistered<ICashFlowRepository>()
+              ? instance<ICashFlowRepository>()
+              : null,
+        ),
       )
       ..registerLazySingleton<AddFinancialTransactionUseCase>(
         () => AddFinancialTransactionUseCase(
@@ -538,6 +559,10 @@ final class ServiceLocator {
         () => GetSalesReportUseCase(
           instance<ISaleRepository>(),
           instance<IProductRepository>(),
+          // Supabase: agregação server-side (H2). Local/testes: null.
+          serverRepository: instance.isRegistered<ISalesReportRepository>()
+              ? instance<ISalesReportRepository>()
+              : null,
         ),
       );
   }

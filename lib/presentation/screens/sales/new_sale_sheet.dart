@@ -5,7 +5,6 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
-import '../../../core/utils/money.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/sale.dart';
 import '../../../domain/entities/sale_item.dart';
@@ -51,14 +50,13 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     super.dispose();
   }
 
-  // Total do carrinho acumulado em CENTAVOS (auditoria H1): [Money.times]
-  // multiplica exatamente por inteiro e [Money.sum] soma inteiros de
-  // centavos — sem artefatos de double (0.1+0.2).
-  double get _total => Money.sum([
-        for (final entry in _cart.entries)
-          if (_productById(entry.key) case final Product product)
-            Money.times(entry.value, product.salePrice),
-      ]);
+  // Total do carrinho em CENTAVOS inteiros (W4): quantidade × preço de
+  // venda em centavos — soma exata, sem artefatos de double (0.1+0.2).
+  int get _totalCents => _cart.entries.fold<int>(
+        0,
+        (sum, entry) => sum +
+            (entry.value * (_productById(entry.key)?.salePriceCents ?? 0)),
+      );
 
   int get _itemCount => _cart.values.fold(0, (sum, quantity) => sum + quantity);
 
@@ -109,7 +107,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
           productId: product.id,
           productName: product.name,
           quantity: entry.value,
-          unitPrice: product.salePrice,
+          unitPriceCents: product.salePriceCents,
         ),
       );
     }
@@ -125,7 +123,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       id: AppIds.newId('s'),
       storeId: storeId ?? 'st1',
       items: items,
-      totalAmount: _total,
+      totalAmountCents: _totalCents,
       paymentMethod: _paymentMethod,
       dateTime: DateTime.now(),
     );
@@ -143,7 +141,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            l10n.salesRegistered(Formatters.currency(sale.totalAmount)),
+            l10n.salesRegistered(Formatters.currency(sale.totalAmountCents)),
           ),
         ),
       );
@@ -286,7 +284,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                       ),
                     ),
                     Text(
-                      Formatters.currency(_total),
+                      Formatters.currency(_totalCents),
                       style: theme.textTheme.titleLarge,
                     ),
                   ],
@@ -367,7 +365,7 @@ class _CartProductRow extends StatelessWidget {
                   Text(
                     outOfStock
                         ? l10n.commonSoldOut
-                        : '${Formatters.currency(product.salePrice)} · '
+                        : '${Formatters.currency(product.salePriceCents)} · '
                               '${product.stockQuantity} ${l10n.commonUnits}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,

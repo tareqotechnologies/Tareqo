@@ -98,7 +98,7 @@ class _FakeDebtProcessor implements IDebtAtomicProcessor {
 Debt _debt(String id, {bool isPaid = false}) => Debt(
   id: id,
   personName: 'João da Silva',
-  amount: 25.0,
+  amountCents: 2500,
   dueDate: DateTime(2026, 8, 15),
   isCustomerDebt: true,
   isPaid: isPaid,
@@ -119,7 +119,7 @@ void main() {
     // Entrada no caixa: recebimento de fiado, valor exato da dívida.
     expect(transactions.transactions, hasLength(1));
     final entry = transactions.transactions.first;
-    expect(entry.amount, 25.0);
+    expect(entry.amountCents, 2500);
     expect(entry.type, TransactionType.income);
     expect(entry.status, TransactionStatus.paid);
     expect(entry.category, 'Fiado');
@@ -164,7 +164,7 @@ void main() {
         FinancialTransaction(
           id: 't4',
           description: 'Venda fiado (João)',
-          amount: 25.0,
+          amountCents: 2500,
           type: TransactionType.income,
           category: 'Fiado',
           date: DateTime(2026, 8, 1),
@@ -194,7 +194,7 @@ void main() {
         FinancialTransaction(
           id: 't4',
           description: 'Venda fiado (João)',
-          amount: 25.0,
+          amountCents: 2500,
           type: TransactionType.income,
           category: 'Fiado',
           date: DateTime(2026, 8, 1),

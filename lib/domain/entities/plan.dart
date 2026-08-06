@@ -15,7 +15,9 @@ abstract class Plan with _$Plan {
     required String id,
     required String name,
     @Default('') String description,
-    @Default(0) double priceMonthly,
+    // Preço mensal em CENTAVOS inteiros (W4 — migração de dinheiro para
+    // centavos; o banco persiste BIGINT/INTEGER).
+    @Default(0) int priceMonthlyCents,
     @Default(1) int maxStores,
     @Default(1) int maxEmployees,
     @Default(true) bool isActive,

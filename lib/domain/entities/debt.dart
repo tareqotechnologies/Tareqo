@@ -15,14 +15,16 @@ part 'debt.g.dart';
 /// baixa e registra a entrada no caixa).
 @freezed
 abstract class Debt with _$Debt {
-  @Assert('amount >= 0', 'O valor da dívida deve ser positivo.')
+  @Assert('amountCents >= 0', 'O valor da dívida deve ser positivo.')
   const factory Debt({
     required String id,
     // Loja dona do fiado (Fase 2 do multi-tenancy). Cada loja tem seu
     // próprio "a receber / a pagar".
     @Default('st1') String storeId,
     required String personName,
-    required double amount,
+    // Valor em CENTAVOS inteiros (W4 — migração de dinheiro para
+    // centavos; o banco persiste BIGINT/INTEGER).
+    required int amountCents,
     required DateTime dueDate,
     required bool isCustomerDebt,
     @Default(false) bool isPaid,

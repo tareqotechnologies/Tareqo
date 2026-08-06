@@ -94,7 +94,7 @@ void main() {
 
     expect(useCase.calls, 1);
     expect(useCase.lastTransaction?.description, 'Venda à vista');
-    expect(useCase.lastTransaction?.amount, 120.5);
+    expect(useCase.lastTransaction?.amountCents, 12050);
     expect(useCase.lastTransaction?.type, TransactionType.income);
     expect(useCase.lastTransaction?.category, 'Vendas');
     expect(useCase.lastTransaction?.status, TransactionStatus.paid);

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/ids.dart';
+import '../../../core/utils/money.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../../domain/usecases/add_financial_transaction_use_case.dart';
 import '../../controllers/account_providers.dart';
@@ -40,8 +41,8 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     super.dispose();
   }
 
-  double _parseAmount(String value) =>
-      double.tryParse(value.replaceAll(',', '.')) ?? 0;
+  // Interpreta o texto digitado como CENTAVOS inteiros (W4).
+  int _parseAmount(String value) => Money.parse(value);
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -61,7 +62,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       id: AppIds.newId('t'),
       storeId: storeId ?? 'st1',
       description: _descriptionController.text.trim(),
-      amount: _parseAmount(_amountController.text),
+      amountCents: _parseAmount(_amountController.text),
       type: _type,
       category: _categoryController.text.trim().isEmpty
           ? (_type == TransactionType.income

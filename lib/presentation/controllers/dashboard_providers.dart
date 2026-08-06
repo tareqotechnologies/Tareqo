@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
-import '../../core/utils/money.dart';
 import '../../core/utils/period_utils.dart';
 import '../../domain/usecases/get_dashboard_kpis_use_case.dart';
 import 'account_providers.dart';
@@ -78,11 +77,18 @@ class DashboardKpisNotifier extends AsyncNotifier<DashboardKpis> {
     final cashFlow = await ref.watch(cashFlowProvider.future);
     final debts = await ref.watch(pendingDebtsProvider.future);
 
+    // Soma em CENTAVOS inteiros (W4): int é exato — sem Money.sum/round.
     return DashboardKpis(
-      totalSales: Money.sum(sales.map((sale) => sale.totalAmount)),
-      cashIncome: cashFlow.income,
-      cashExpense: cashFlow.expense,
-      pendingTotal: Money.sum(debts.map((debt) => debt.amount)),
+      totalSalesCents: sales.fold<int>(
+        0,
+        (sum, sale) => sum + sale.totalAmountCents,
+      ),
+      cashIncomeCents: cashFlow.incomeCents,
+      cashExpenseCents: cashFlow.expenseCents,
+      pendingTotalCents: debts.fold<int>(
+        0,
+        (sum, debt) => sum + debt.amountCents,
+      ),
       stockTotal: products.fold<int>(
         0,
         (sum, product) => sum + product.stockQuantity,

@@ -25,7 +25,7 @@ void main() {
   late Database db;
 
   setUp(() => db = openTestDatabase());
-  tearDown(() => db.dispose());
+  tearDown(() => db.close());
 
   group('isolamento por loja no SQLite — st1 nunca vaza para st2', () {
     test('products: getAll(st1) retorna só produtos de st1 e vice-versa',
@@ -36,8 +36,8 @@ void main() {
         storeId: 'st1',
         name: 'Caneta Centro',
         description: '',
-        purchasePrice: 1,
-        salePrice: 2,
+        purchasePriceCents: 100,
+        salePriceCents: 200,
         stockQuantity: 10,
       ));
       await dataSource.add(Product(
@@ -45,8 +45,8 @@ void main() {
         storeId: 'st2',
         name: 'Café Shopping',
         description: '',
-        purchasePrice: 10,
-        salePrice: 15,
+        purchasePriceCents: 1000,
+        salePriceCents: 1500,
         stockQuantity: 10,
       ));
 
@@ -65,9 +65,9 @@ void main() {
         id: 's-centro',
         storeId: 'st1',
         items: const [
-          SaleItem(productId: 'p1', productName: 'Caneta', quantity: 2, unitPrice: 2),
+          SaleItem(productId: 'p1', productName: 'Caneta', quantity: 2, unitPriceCents: 200),
         ],
-        totalAmount: 4,
+        totalAmountCents: 400,
         paymentMethod: PaymentMethod.cash,
         dateTime: DateTime.now(),
       ));
@@ -75,9 +75,9 @@ void main() {
         id: 's-shopping',
         storeId: 'st2',
         items: const [
-          SaleItem(productId: 'p6', productName: 'Café', quantity: 1, unitPrice: 15),
+          SaleItem(productId: 'p6', productName: 'Café', quantity: 1, unitPriceCents: 1500),
         ],
-        totalAmount: 15,
+        totalAmountCents: 1500,
         paymentMethod: PaymentMethod.pix,
         dateTime: DateTime.now(),
       ));
@@ -86,9 +86,9 @@ void main() {
       final fromSt2 = await dataSource.getAll(storeId: 'st2');
 
       expect(fromSt1.map((s) => s.id), ['s-centro']);
-      expect(fromSt1.single.totalAmount, 4);
+      expect(fromSt1.single.totalAmountCents, 400);
       expect(fromSt2.map((s) => s.id), ['s-shopping']);
-      expect(fromSt2.single.totalAmount, 15);
+      expect(fromSt2.single.totalAmountCents, 1500);
     });
 
     test('financial_transactions: getAll(st1) retorna só movimentos de st1',
@@ -98,7 +98,7 @@ void main() {
         id: 't-centro',
         storeId: 'st1',
         description: 'Venda Centro',
-        amount: 100,
+        amountCents: 10000,
         type: TransactionType.income,
         category: 'Vendas',
         date: DateTime.now(),
@@ -107,7 +107,7 @@ void main() {
         id: 't-shopping',
         storeId: 'st2',
         description: 'Venda Shopping',
-        amount: 50,
+        amountCents: 5000,
         type: TransactionType.income,
         category: 'Vendas',
         date: DateTime.now(),
@@ -128,7 +128,7 @@ void main() {
         id: 'd-centro',
         storeId: 'st1',
         personName: 'Cliente Centro',
-        amount: 25,
+        amountCents: 2500,
         dueDate: DateTime.now(),
         isCustomerDebt: true,
       ));
@@ -136,7 +136,7 @@ void main() {
         id: 'd-shopping',
         storeId: 'st2',
         personName: 'Cliente Shopping',
-        amount: 40,
+        amountCents: 4000,
         dueDate: DateTime.now(),
         isCustomerDebt: true,
       ));
@@ -181,9 +181,9 @@ void main() {
         storeId: 'st1',
         supplierName: 'Fornecedor Centro',
         items: const [
-          PurchaseItem(productId: 'p3', productName: 'Arroz', quantity: 10, unitPrice: 5),
+          PurchaseItem(productId: 'p3', productName: 'Arroz', quantity: 10, unitPriceCents: 500),
         ],
-        totalAmount: 50,
+        totalAmountCents: 5000,
         dateTime: DateTime.now(),
       ));
       await dataSource.add(Purchase(
@@ -191,9 +191,9 @@ void main() {
         storeId: 'st2',
         supplierName: 'Fornecedor Shopping',
         items: const [
-          PurchaseItem(productId: 'p6', productName: 'Café', quantity: 5, unitPrice: 10),
+          PurchaseItem(productId: 'p6', productName: 'Café', quantity: 5, unitPriceCents: 1000),
         ],
-        totalAmount: 50,
+        totalAmountCents: 5000,
         dateTime: DateTime.now(),
       ));
 
@@ -218,8 +218,8 @@ void main() {
           storeId: 'st1',
           name: 'Centro $i',
           description: '',
-          purchasePrice: 1,
-          salePrice: 2,
+          purchasePriceCents: 100,
+          salePriceCents: 200,
           stockQuantity: i,
         ));
         await dataSource.add(Product(
@@ -227,8 +227,8 @@ void main() {
           storeId: 'st2',
           name: 'Shopping $i',
           description: '',
-          purchasePrice: 1,
-          salePrice: 2,
+          purchasePriceCents: 100,
+          salePriceCents: 200,
           stockQuantity: i,
         ));
       }
@@ -259,8 +259,8 @@ void main() {
         storeId: 'st1',
         name: 'Caneta Centro',
         description: '',
-        purchasePrice: 1,
-        salePrice: 2,
+        purchasePriceCents: 100,
+        salePriceCents: 200,
         stockQuantity: 10,
       ));
 
@@ -281,8 +281,8 @@ void main() {
         storeId: 'st1',
         name: 'Caneta Centro',
         description: '',
-        purchasePrice: 1,
-        salePrice: 2,
+        purchasePriceCents: 100,
+        salePriceCents: 200,
         stockQuantity: 10,
       ));
 
@@ -314,7 +314,7 @@ void main() {
         id: 'd-centro',
         storeId: 'st1',
         personName: 'Cliente Centro',
-        amount: 25,
+        amountCents: 2500,
         dueDate: DateTime.now(),
         isCustomerDebt: true,
       ));
@@ -345,7 +345,7 @@ void main() {
         id: 't-centro',
         storeId: 'st1',
         description: 'Venda fiado Centro',
-        amount: 100,
+        amountCents: 10000,
         type: TransactionType.income,
         category: 'Fiado',
         date: DateTime.now(),
