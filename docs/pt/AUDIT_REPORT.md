@@ -275,20 +275,21 @@ Architecture 88 · Testing 80 · Security 68 · UX/UI 88 · Performance/Scalabil
 
 ## 9. Itens ainda pendentes do checklist de produção
 
-> Status final (Update 6, Aug 6): **todo o trabalho interno de engenharia está concluído** (W4, H2, W10, W1–W11, consolidação SQL) e validado em Postgres real. **O `upgrade.sql` foi aplicado ao live em Aug 6 (item 1 ✅)** — o que resta é apenas **ops externas** + long tail opcional.
+> Status final (Update 6, Aug 6): **todo o trabalho interno de engenharia está concluído** (W4, H2, W10, W1–W11, consolidação SQL) e validado em Postgres real. **O `upgrade.sql` foi aplicado ao live em Aug 6 (item 1 ✅, removido da lista)** — o que resta é apenas **ops externas** (1–6) + **itens de produto/segurança** (7–8) + long tail opcional (9).
 
 | # | Item (checklist) | Tipo | Estado |
 |---|---|---|---|
-| 1 | **Aplicar `supabase/upgrade.sql` ao Supabase live** (antigas migrações 010/011 — W4 cents + H2 RPCs) + re-verificar com `scripts/sql_check_live.sh` (**14/14**) | Interno → live | ✅ **Aplicado Aug 6** (pooler eu-north-1, transação única `-1`, PostgreSQL 17.6): 9 colunas → `bigint`, zero fracionários, `sql_check_live.sh` **14/14 PASS**, idempotência confirmada. Backup `backup_pre_w4.sql` (gitignored). **runbook: [capítulo 15](15-migracao-w4-h2.md)** |
-| 2 | Ativar **Play App Signing** + registrar o SHA-256 da upload key (7.1 — parte externa do C1) | Externo (Play Console) | ⏳ |
-| 3 | Verificar **e-mail de confirmação ON** + habilitar **2FA no super admin** (2.1/2.2 — H9) | Externo (dashboard Supabase) | ⏳ |
-| 4 | `password_min_length = 8` nas settings do projeto (M7) | Externo (dashboard Supabase) | ⏳ |
-| 5 | Contas Google Play/Apple + secrets no CI (7.9) | Externo | ⏳ |
-| 6 | Privacy policy / ToS + política de backup (7.5/7.6) | Legal | ⏳ |
-| 7 | **Billing** (W2) — adiado por decisão de produto; limites de plano já são DB-enforced | Produto | ⏳ deferido |
-| 8 | Rate-limit de criação de tenants + reCAPTCHA (H6) | Segurança | ⏳ |
-| 9 | Invite flow do funcionário (H7 — parte externa do C2) | Segurança/UX | ⏳ |
-| 10 | Long tail opcional: M1 (seed em prod), M3 (lazy tabs), M5 (AppIds restantes), M6 (gitleaks), M8 (low-stock por produto), M12 (UUID v7); M2 (CSP, só se web ship) | Manutenção | ⏳ opcional |
+| 1 | Ativar **Play App Signing** + registrar o SHA-256 da upload key (7.1 — parte externa do C1) | Externo (Play Console) | ⏳ |
+| 2 | Verificar **e-mail de confirmação ON** + habilitar **2FA no super admin** (2.1/2.2 — H9) | Externo (dashboard Supabase) | ⏳ |
+| 3 | `password_min_length = 8` nas settings do projeto (M7) | Externo (dashboard Supabase) | ⏳ |
+| 4 | Contas Google Play/Apple + secrets no CI (7.9) | Externo | ⏳ |
+| 5 | Privacy policy / ToS + política de backup (7.5/7.6) | Legal | ⏳ |
+| 6 | **Billing** (W2) — adiado por decisão de produto; limites de plano já são DB-enforced | Produto | ⏳ deferido |
+| 7 | Rate-limit de criação de tenants + reCAPTCHA (H6) | Segurança | ⏳ |
+| 8 | Invite flow do funcionário (H7 — parte externa do C2) | Segurança/UX | ⏳ |
+| 9 | Long tail opcional: M1 (seed em prod), M3 (lazy tabs), M5 (AppIds restantes), M6 (gitleaks), M8 (low-stock por produto), M12 (UUID v7); M2 (CSP, só se web ship) | Manutenção | ⏳ opcional |
+
+**Concluído em Aug 6 (removido da lista):** aplicar `supabase/upgrade.sql` ao live (item 1 antigo) — pooler eu-north-1, transação única `-1`, PostgreSQL 17.6: 9 colunas → `bigint`, zero fracionários, `sql_check_live.sh` **14/14 PASS**, idempotência confirmada; backup `backup_pre_w4.sql` (gitignored); E2E web re-validado pós-migração. Runbook: [capítulo 15](15-migracao-w4-h2.md).
 
 Todos os demais itens do checklist (1.1–1.18, 2.3–2.4, 4.1–4.2, 6.2, 7.1–7.8, 8.1–8.3, 9.1–9.2) estão **✅**.
 
