@@ -11,6 +11,11 @@
 #   C4 → settle_debt(text,text) + index idx_financial_transactions_debt
 #   RPCs atômicos → process_sale / process_purchase / register_debt
 #   RLS → habilitado nas 14 tabelas; plans_update usa is_super_admin()
+#   W4 → as 9 colunas de dinheiro em BIGINT (centavos) e NENHUM valor
+#        fracionário (migração ×100 completa — upgrade.sql, Parte 7)
+#   W5/H2 → get_dashboard_kpis / get_cash_flow / get_sales_report
+#        presentes, SECURITY DEFINER, com retornos BIGINT (não NUMERIC
+#        pré-W4)
 #   Migração → quantidade de super_admins registrados (informativo)
 #
 # Uso:
@@ -134,7 +139,7 @@ BEGIN
     'public.set_tenant_user_id()',
     'public.enforce_store_limit()',
     'public.enforce_employee_limit()',
-    'public.lock_products_or_raise(jsonb,text,uuid,boolean)',
+    'public.lock_products_or_raise(jsonb,text,boolean)',
     'public.is_tenant_owner(text)'
   ]) AS sig
   LOOP
@@ -184,6 +189,101 @@ SELECT count(*) AS super_admins_registrados FROM public.super_admins;
 
 \echo '== 10. RPC read-only is_super_admin() executável (informativo) =='
 SELECT public.is_super_admin() AS is_super_admin_do_role_atual;
+
+\echo '== 11. W4: as 9 colunas de dinheiro em BIGINT (centavos) =='
+DO $$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN SELECT unnest(ARRAY[
+    'products.purchase_price',
+    'products.sale_price',
+    'sales.total_amount',
+    'sale_items.unit_price',
+    'financial_transactions.amount',
+    'debts.amount',
+    'purchases.total_amount',
+    'purchase_items.unit_price',
+    'plans.price_monthly'
+  ]) AS col
+  LOOP
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = split_part(r.col, '.', 1)
+        AND column_name = split_part(r.col, '.', 2)
+        AND data_type = 'bigint'
+    ) THEN
+      RAISE EXCEPTION 'FAIL: % deveria ser bigint (W4/upgrade.sql Parte 7 nao aplicado?)', r.col;
+    END IF;
+  END LOOP;
+  RAISE NOTICE 'PASS: 9 colunas de dinheiro em BIGINT (centavos)';
+END $$;
+
+\echo '== 12. W4: nenhum valor de dinheiro fracionário (migração ×100 completa) =='
+DO $$
+DECLARE
+  r record;
+  v_bad integer;
+BEGIN
+  FOR r IN SELECT * FROM (VALUES
+    ('products','purchase_price'), ('products','sale_price'),
+    ('sales','total_amount'), ('sale_items','unit_price'),
+    ('financial_transactions','amount'), ('debts','amount'),
+    ('purchases','total_amount'), ('purchase_items','unit_price'),
+    ('plans','price_monthly')
+  ) AS t(tbl, col)
+  LOOP
+    EXECUTE format(
+      'SELECT count(*) FROM public.%I WHERE %I <> floor(%I)',
+      r.tbl, r.col, r.col
+    ) INTO v_bad;
+    IF v_bad > 0 THEN
+      RAISE EXCEPTION 'FAIL: % valor(es) fracionário(s) em %.% (migração ×100 incompleta)', v_bad, r.tbl, r.col;
+    END IF;
+  END LOOP;
+  RAISE NOTICE 'PASS: todos os valores de dinheiro são inteiros (centavos)';
+END $$;
+
+\echo '== 13. W5/H2: RPCs de agregação presentes + SECURITY DEFINER =='
+DO $$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN SELECT unnest(ARRAY[
+    'public.get_dashboard_kpis(text,timestamptz,timestamptz)',
+    'public.get_cash_flow(text,timestamptz,timestamptz)',
+    'public.get_sales_report(text,timestamptz,timestamptz,int)'
+  ]) AS sig
+  LOOP
+    IF to_regprocedure(r.sig) IS NULL THEN
+      RAISE EXCEPTION 'FAIL: RPC % ausente (rodar supabase/upgrade.sql)', r.sig;
+    END IF;
+    IF NOT (SELECT prosecdef FROM pg_proc WHERE oid = to_regprocedure(r.sig)) THEN
+      RAISE EXCEPTION 'FAIL: % nao e SECURITY DEFINER', r.sig;
+    END IF;
+  END LOOP;
+  RAISE NOTICE 'PASS: get_dashboard_kpis / get_cash_flow / get_sales_report OK';
+END $$;
+
+\echo '== 14. W4/H2: retornos das RPCs em BIGINT (não NUMERIC pré-W4) =='
+DO $$
+DECLARE
+  v_kpis text;
+  v_cf text;
+BEGIN
+  SELECT pg_get_function_result(oid) INTO v_kpis
+  FROM pg_proc WHERE oid = to_regprocedure('public.get_dashboard_kpis(text,timestamptz,timestamptz)');
+  SELECT pg_get_function_result(oid) INTO v_cf
+  FROM pg_proc WHERE oid = to_regprocedure('public.get_cash_flow(text,timestamptz,timestamptz)');
+  IF lower(v_kpis) NOT LIKE '%bigint%' THEN
+    RAISE EXCEPTION 'FAIL: get_dashboard_kpis nao devolve BIGINT (versao pre-W4 NUMERIC?): %', v_kpis;
+  END IF;
+  IF lower(v_cf) NOT LIKE '%bigint%' THEN
+    RAISE EXCEPTION 'FAIL: get_cash_flow nao devolve BIGINT: %', v_cf;
+  END IF;
+  RAISE NOTICE 'PASS: get_dashboard_kpis e get_cash_flow com retornos BIGINT (centavos)';
+END $$;
 SQL
 
 # ── Executor: psql local ou container postgres:16 ───────────────────────
