@@ -98,7 +98,7 @@ if (database != null) {
 
 Detalhes da implementação:
 
-- **`lib/core/database/app_database.dart`** — abre `dumbhanengue.db` em `getApplicationDocumentsDirectory()`, cria o schema (`CREATE TABLE IF NOT EXISTS` com `CHECK` de não-negatividade como salvaguarda final), semeia os dados demo na primeira execução e expõe `runInTransaction` (BEGIN/COMMIT/ROLLBACK) para gravações atômicas (ex.: venda + itens).
+- **`lib/core/database/app_database.dart`** — abre `dumbhanengue.db` em `getApplicationDocumentsDirectory()`, cria o schema (`CREATE TABLE IF NOT EXISTS` com `CHECK` de não-negatividade como salvaguarda final), não semeia dados (o banco nasce vazio — só dados reais) e expõe `runInTransaction` (BEGIN/COMMIT/ROLLBACK) para gravações atômicas (ex.: venda + itens).
 - **Vendas** são persistidas em tabelas normalizadas (`sales` + `sale_items`) numa **única transação**.
 - **Enums** são persistidos pelo nome; **datas** como epoch millis; **booleanos** como 0/1.
 - **Web**: o sqlite3 nativo não roda no navegador (o `dart:ffi` não existe lá), então `AppDatabase` usa **import condicional** e o app cai automaticamente para os datasources em memória (mesmos contratos — a UI continua igual).
@@ -217,7 +217,7 @@ flutter run --dart-define=SUPABASE_URL=https://seu-projeto.supabase.co --dart-de
 
 ### Moeda e idioma do tenant (apresentação)
 
-O dono escolhe a **moeda** (BRL, USD, EUR, MZN) e o **idioma** (pt, en) no onboarding e pode alterar em **Lojas → Ajustes**. As preferências vivem na tabela `tenants` (`currency_code`, `language`) e propagam para o app inteiro: o locale do `MaterialApp` e a formatação de moeda (`Formatters`) seguem o `tenantSettingsProvider` — funcionários herdam a escolha do dono.
+O dono escolhe a **moeda** (BRL, USD, EUR, MZN — **padrão MZN**, metical, mercado-alvo Moçambique) e o **idioma** (pt, en) no onboarding e pode alterar em **Lojas → Ajustes**. As preferências vivem na tabela `tenants` (`currency_code`, `language`) e propagam para o app inteiro: o locale do `MaterialApp` e a formatação de moeda (`Formatters`) seguem o `tenantSettingsProvider` — funcionários herdam a escolha do dono. A gravação passa pela RPC `update_tenant_settings` (SECURITY DEFINER, guarda `is_tenant_owner`): a política RLS `tenants_update` só permite o super admin alterar a linha do tenant, então o UPDATE direto do dono era bloqueado (ajustes que não salvavam) — a RPC limita o UPDATE às colunas de apresentação.
 
 ## Armazenamento seguro: por que não usar `shared_preferences` para dados sensíveis?
 

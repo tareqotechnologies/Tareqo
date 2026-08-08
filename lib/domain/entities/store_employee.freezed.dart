@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$StoreEmployee {
 
- String get id; String get tenantId; String get storeId; String get userId; String get fullName; String get email; EmployeeRole get role;
+ String get id; String get tenantId; String get storeId; String get userId; String get fullName; String get email; EmployeeRole get role;/// Vínculo ATIVO? `false` = funcionário desativado (conta suspensa).
+ bool get isActive;
 /// Create a copy of StoreEmployee
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +29,16 @@ $StoreEmployeeCopyWith<StoreEmployee> get copyWith => _$StoreEmployeeCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoreEmployee&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoreEmployee&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.isActive, isActive) || other.isActive == isActive));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,tenantId,storeId,userId,fullName,email,role);
+int get hashCode => Object.hash(runtimeType,id,tenantId,storeId,userId,fullName,email,role,isActive);
 
 @override
 String toString() {
-  return 'StoreEmployee(id: $id, tenantId: $tenantId, storeId: $storeId, userId: $userId, fullName: $fullName, email: $email, role: $role)';
+  return 'StoreEmployee(id: $id, tenantId: $tenantId, storeId: $storeId, userId: $userId, fullName: $fullName, email: $email, role: $role, isActive: $isActive)';
 }
 
 
@@ -48,7 +49,7 @@ abstract mixin class $StoreEmployeeCopyWith<$Res>  {
   factory $StoreEmployeeCopyWith(StoreEmployee value, $Res Function(StoreEmployee) _then) = _$StoreEmployeeCopyWithImpl;
 @useResult
 $Res call({
- String id, String tenantId, String storeId, String userId, String fullName, String email, EmployeeRole role
+ String id, String tenantId, String storeId, String userId, String fullName, String email, EmployeeRole role, bool isActive
 });
 
 
@@ -65,7 +66,7 @@ class _$StoreEmployeeCopyWithImpl<$Res>
 
 /// Create a copy of StoreEmployee
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? tenantId = null,Object? storeId = null,Object? userId = null,Object? fullName = null,Object? email = null,Object? role = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? tenantId = null,Object? storeId = null,Object? userId = null,Object? fullName = null,Object? email = null,Object? role = null,Object? isActive = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,tenantId: null == tenantId ? _self.tenantId : tenantId // ignore: cast_nullable_to_non_nullable
@@ -74,7 +75,8 @@ as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullabl
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as EmployeeRole,
+as EmployeeRole,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -159,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String tenantId,  String storeId,  String userId,  String fullName,  String email,  EmployeeRole role)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String tenantId,  String storeId,  String userId,  String fullName,  String email,  EmployeeRole role,  bool isActive)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StoreEmployee() when $default != null:
-return $default(_that.id,_that.tenantId,_that.storeId,_that.userId,_that.fullName,_that.email,_that.role);case _:
+return $default(_that.id,_that.tenantId,_that.storeId,_that.userId,_that.fullName,_that.email,_that.role,_that.isActive);case _:
   return orElse();
 
 }
@@ -180,10 +182,10 @@ return $default(_that.id,_that.tenantId,_that.storeId,_that.userId,_that.fullNam
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String tenantId,  String storeId,  String userId,  String fullName,  String email,  EmployeeRole role)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String tenantId,  String storeId,  String userId,  String fullName,  String email,  EmployeeRole role,  bool isActive)  $default,) {final _that = this;
 switch (_that) {
 case _StoreEmployee():
-return $default(_that.id,_that.tenantId,_that.storeId,_that.userId,_that.fullName,_that.email,_that.role);case _:
+return $default(_that.id,_that.tenantId,_that.storeId,_that.userId,_that.fullName,_that.email,_that.role,_that.isActive);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +202,10 @@ return $default(_that.id,_that.tenantId,_that.storeId,_that.userId,_that.fullNam
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String tenantId,  String storeId,  String userId,  String fullName,  String email,  EmployeeRole role)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String tenantId,  String storeId,  String userId,  String fullName,  String email,  EmployeeRole role,  bool isActive)?  $default,) {final _that = this;
 switch (_that) {
 case _StoreEmployee() when $default != null:
-return $default(_that.id,_that.tenantId,_that.storeId,_that.userId,_that.fullName,_that.email,_that.role);case _:
+return $default(_that.id,_that.tenantId,_that.storeId,_that.userId,_that.fullName,_that.email,_that.role,_that.isActive);case _:
   return null;
 
 }
@@ -215,7 +217,7 @@ return $default(_that.id,_that.tenantId,_that.storeId,_that.userId,_that.fullNam
 @JsonSerializable()
 
 class _StoreEmployee implements StoreEmployee {
-  const _StoreEmployee({required this.id, required this.tenantId, required this.storeId, required this.userId, required this.fullName, required this.email, this.role = EmployeeRole.employee});
+  const _StoreEmployee({required this.id, required this.tenantId, required this.storeId, required this.userId, required this.fullName, required this.email, this.role = EmployeeRole.employee, this.isActive = true});
   factory _StoreEmployee.fromJson(Map<String, dynamic> json) => _$StoreEmployeeFromJson(json);
 
 @override final  String id;
@@ -225,6 +227,8 @@ class _StoreEmployee implements StoreEmployee {
 @override final  String fullName;
 @override final  String email;
 @override@JsonKey() final  EmployeeRole role;
+/// Vínculo ATIVO? `false` = funcionário desativado (conta suspensa).
+@override@JsonKey() final  bool isActive;
 
 /// Create a copy of StoreEmployee
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +243,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoreEmployee&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoreEmployee&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.isActive, isActive) || other.isActive == isActive));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,tenantId,storeId,userId,fullName,email,role);
+int get hashCode => Object.hash(runtimeType,id,tenantId,storeId,userId,fullName,email,role,isActive);
 
 @override
 String toString() {
-  return 'StoreEmployee(id: $id, tenantId: $tenantId, storeId: $storeId, userId: $userId, fullName: $fullName, email: $email, role: $role)';
+  return 'StoreEmployee(id: $id, tenantId: $tenantId, storeId: $storeId, userId: $userId, fullName: $fullName, email: $email, role: $role, isActive: $isActive)';
 }
 
 
@@ -259,7 +263,7 @@ abstract mixin class _$StoreEmployeeCopyWith<$Res> implements $StoreEmployeeCopy
   factory _$StoreEmployeeCopyWith(_StoreEmployee value, $Res Function(_StoreEmployee) _then) = __$StoreEmployeeCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String tenantId, String storeId, String userId, String fullName, String email, EmployeeRole role
+ String id, String tenantId, String storeId, String userId, String fullName, String email, EmployeeRole role, bool isActive
 });
 
 
@@ -276,7 +280,7 @@ class __$StoreEmployeeCopyWithImpl<$Res>
 
 /// Create a copy of StoreEmployee
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? tenantId = null,Object? storeId = null,Object? userId = null,Object? fullName = null,Object? email = null,Object? role = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? tenantId = null,Object? storeId = null,Object? userId = null,Object? fullName = null,Object? email = null,Object? role = null,Object? isActive = null,}) {
   return _then(_StoreEmployee(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,tenantId: null == tenantId ? _self.tenantId : tenantId // ignore: cast_nullable_to_non_nullable
@@ -285,7 +289,8 @@ as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullabl
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as EmployeeRole,
+as EmployeeRole,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

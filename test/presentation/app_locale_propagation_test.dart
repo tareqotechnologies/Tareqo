@@ -73,7 +73,7 @@ void main() {
     expect(Formatters.currency(123450), 'MTn 1,234.50');
   });
 
-  testWidgets('app sem sessão abre em pt e mantém BRL', (tester) async {
+  testWidgets('app sem sessão abre em pt e mantém MZN', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -88,9 +88,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
-    // Sem sessão → sem tenant → padrão pt.
+    // Sem sessão → sem tenant → padrão pt + MZN (metical — mercado-alvo).
     expect(app.locale, const Locale('pt'));
     expect(Formatters.currentLanguage, 'pt');
-    expect(Formatters.currentCurrencyCode, 'BRL');
+    expect(Formatters.currentCurrencyCode, 'MZN');
   });
 }

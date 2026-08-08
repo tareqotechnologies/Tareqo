@@ -17,7 +17,7 @@ class UpdateTenantSettingsUseCase {
     required String language,
   }) {
     final safeCurrency =
-        AppSettings.isValidCurrency(currencyCode) ? currencyCode : 'BRL';
+        AppSettings.isValidCurrency(currencyCode) ? currencyCode : 'MZN';
     final safeLanguage =
         AppSettings.isValidLanguage(language) ? language : 'pt';
     return _repository.updateSettings(

@@ -15,7 +15,11 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Debt {
 
- String get id;// Loja dona do fiado (Fase 2 do multi-tenancy). Cada loja tem seu
+ String get id;// Número SEQUENCIAL da dívida DENTRO da loja (ex.: D-00001, D-00002).
+// Atribuído pelo banco no insert — SQLite: MAX+1 por loja dentro da
+// transação; Supabase: RPC register_debt com advisory lock por loja.
+// O default 0 nunca é persistido (é substituído na gravação).
+ int get number;// Loja dona do fiado (Fase 2 do multi-tenancy). Cada loja tem seu
 // próprio "a receber / a pagar".
  String get storeId; String get personName;// Valor em CENTAVOS inteiros (W4 — migração de dinheiro para
 // centavos; o banco persiste BIGINT/INTEGER).
@@ -37,16 +41,16 @@ $DebtCopyWith<Debt> get copyWith => _$DebtCopyWithImpl<Debt>(this as Debt, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Debt&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.personName, personName) || other.personName == personName)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isCustomerDebt, isCustomerDebt) || other.isCustomerDebt == isCustomerDebt)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.customerId, customerId) || other.customerId == customerId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Debt&&(identical(other.id, id) || other.id == id)&&(identical(other.number, number) || other.number == number)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.personName, personName) || other.personName == personName)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isCustomerDebt, isCustomerDebt) || other.isCustomerDebt == isCustomerDebt)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.customerId, customerId) || other.customerId == customerId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,storeId,personName,amountCents,dueDate,isCustomerDebt,isPaid,paidAt,customerId);
+int get hashCode => Object.hash(runtimeType,id,number,storeId,personName,amountCents,dueDate,isCustomerDebt,isPaid,paidAt,customerId);
 
 @override
 String toString() {
-  return 'Debt(id: $id, storeId: $storeId, personName: $personName, amountCents: $amountCents, dueDate: $dueDate, isCustomerDebt: $isCustomerDebt, isPaid: $isPaid, paidAt: $paidAt, customerId: $customerId)';
+  return 'Debt(id: $id, number: $number, storeId: $storeId, personName: $personName, amountCents: $amountCents, dueDate: $dueDate, isCustomerDebt: $isCustomerDebt, isPaid: $isPaid, paidAt: $paidAt, customerId: $customerId)';
 }
 
 
@@ -57,7 +61,7 @@ abstract mixin class $DebtCopyWith<$Res>  {
   factory $DebtCopyWith(Debt value, $Res Function(Debt) _then) = _$DebtCopyWithImpl;
 @useResult
 $Res call({
- String id, String storeId, String personName, int amountCents, DateTime dueDate, bool isCustomerDebt, bool isPaid, DateTime? paidAt, String? customerId
+ String id, int number, String storeId, String personName, int amountCents, DateTime dueDate, bool isCustomerDebt, bool isPaid, DateTime? paidAt, String? customerId
 });
 
 
@@ -74,10 +78,11 @@ class _$DebtCopyWithImpl<$Res>
 
 /// Create a copy of Debt
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? personName = null,Object? amountCents = null,Object? dueDate = null,Object? isCustomerDebt = null,Object? isPaid = null,Object? paidAt = freezed,Object? customerId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? number = null,Object? storeId = null,Object? personName = null,Object? amountCents = null,Object? dueDate = null,Object? isCustomerDebt = null,Object? isPaid = null,Object? paidAt = freezed,Object? customerId = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
+as String,number: null == number ? _self.number : number // ignore: cast_nullable_to_non_nullable
+as int,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,personName: null == personName ? _self.personName : personName // ignore: cast_nullable_to_non_nullable
 as String,amountCents: null == amountCents ? _self.amountCents : amountCents // ignore: cast_nullable_to_non_nullable
 as int,dueDate: null == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable
@@ -170,10 +175,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  String personName,  int amountCents,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int number,  String storeId,  String personName,  int amountCents,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Debt() when $default != null:
-return $default(_that.id,_that.storeId,_that.personName,_that.amountCents,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
+return $default(_that.id,_that.number,_that.storeId,_that.personName,_that.amountCents,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
   return orElse();
 
 }
@@ -191,10 +196,10 @@ return $default(_that.id,_that.storeId,_that.personName,_that.amountCents,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  String personName,  int amountCents,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int number,  String storeId,  String personName,  int amountCents,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)  $default,) {final _that = this;
 switch (_that) {
 case _Debt():
-return $default(_that.id,_that.storeId,_that.personName,_that.amountCents,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
+return $default(_that.id,_that.number,_that.storeId,_that.personName,_that.amountCents,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +216,10 @@ return $default(_that.id,_that.storeId,_that.personName,_that.amountCents,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  String personName,  int amountCents,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int number,  String storeId,  String personName,  int amountCents,  DateTime dueDate,  bool isCustomerDebt,  bool isPaid,  DateTime? paidAt,  String? customerId)?  $default,) {final _that = this;
 switch (_that) {
 case _Debt() when $default != null:
-return $default(_that.id,_that.storeId,_that.personName,_that.amountCents,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
+return $default(_that.id,_that.number,_that.storeId,_that.personName,_that.amountCents,_that.dueDate,_that.isCustomerDebt,_that.isPaid,_that.paidAt,_that.customerId);case _:
   return null;
 
 }
@@ -226,10 +231,15 @@ return $default(_that.id,_that.storeId,_that.personName,_that.amountCents,_that.
 @JsonSerializable()
 
 class _Debt implements Debt {
-  const _Debt({required this.id, this.storeId = 'st1', required this.personName, required this.amountCents, required this.dueDate, required this.isCustomerDebt, this.isPaid = false, this.paidAt, this.customerId}): assert(amountCents >= 0, 'O valor da dívida deve ser positivo.');
+  const _Debt({required this.id, this.number = 0, this.storeId = 'st1', required this.personName, required this.amountCents, required this.dueDate, required this.isCustomerDebt, this.isPaid = false, this.paidAt, this.customerId}): assert(amountCents >= 0, 'O valor da dívida deve ser positivo.');
   factory _Debt.fromJson(Map<String, dynamic> json) => _$DebtFromJson(json);
 
 @override final  String id;
+// Número SEQUENCIAL da dívida DENTRO da loja (ex.: D-00001, D-00002).
+// Atribuído pelo banco no insert — SQLite: MAX+1 por loja dentro da
+// transação; Supabase: RPC register_debt com advisory lock por loja.
+// O default 0 nunca é persistido (é substituído na gravação).
+@override@JsonKey() final  int number;
 // Loja dona do fiado (Fase 2 do multi-tenancy). Cada loja tem seu
 // próprio "a receber / a pagar".
 @override@JsonKey() final  String storeId;
@@ -261,16 +271,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Debt&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.personName, personName) || other.personName == personName)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isCustomerDebt, isCustomerDebt) || other.isCustomerDebt == isCustomerDebt)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.customerId, customerId) || other.customerId == customerId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Debt&&(identical(other.id, id) || other.id == id)&&(identical(other.number, number) || other.number == number)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.personName, personName) || other.personName == personName)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.dueDate, dueDate) || other.dueDate == dueDate)&&(identical(other.isCustomerDebt, isCustomerDebt) || other.isCustomerDebt == isCustomerDebt)&&(identical(other.isPaid, isPaid) || other.isPaid == isPaid)&&(identical(other.paidAt, paidAt) || other.paidAt == paidAt)&&(identical(other.customerId, customerId) || other.customerId == customerId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,storeId,personName,amountCents,dueDate,isCustomerDebt,isPaid,paidAt,customerId);
+int get hashCode => Object.hash(runtimeType,id,number,storeId,personName,amountCents,dueDate,isCustomerDebt,isPaid,paidAt,customerId);
 
 @override
 String toString() {
-  return 'Debt(id: $id, storeId: $storeId, personName: $personName, amountCents: $amountCents, dueDate: $dueDate, isCustomerDebt: $isCustomerDebt, isPaid: $isPaid, paidAt: $paidAt, customerId: $customerId)';
+  return 'Debt(id: $id, number: $number, storeId: $storeId, personName: $personName, amountCents: $amountCents, dueDate: $dueDate, isCustomerDebt: $isCustomerDebt, isPaid: $isPaid, paidAt: $paidAt, customerId: $customerId)';
 }
 
 
@@ -281,7 +291,7 @@ abstract mixin class _$DebtCopyWith<$Res> implements $DebtCopyWith<$Res> {
   factory _$DebtCopyWith(_Debt value, $Res Function(_Debt) _then) = __$DebtCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String storeId, String personName, int amountCents, DateTime dueDate, bool isCustomerDebt, bool isPaid, DateTime? paidAt, String? customerId
+ String id, int number, String storeId, String personName, int amountCents, DateTime dueDate, bool isCustomerDebt, bool isPaid, DateTime? paidAt, String? customerId
 });
 
 
@@ -298,10 +308,11 @@ class __$DebtCopyWithImpl<$Res>
 
 /// Create a copy of Debt
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? personName = null,Object? amountCents = null,Object? dueDate = null,Object? isCustomerDebt = null,Object? isPaid = null,Object? paidAt = freezed,Object? customerId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? number = null,Object? storeId = null,Object? personName = null,Object? amountCents = null,Object? dueDate = null,Object? isCustomerDebt = null,Object? isPaid = null,Object? paidAt = freezed,Object? customerId = freezed,}) {
   return _then(_Debt(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
+as String,number: null == number ? _self.number : number // ignore: cast_nullable_to_non_nullable
+as int,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,personName: null == personName ? _self.personName : personName // ignore: cast_nullable_to_non_nullable
 as String,amountCents: null == amountCents ? _self.amountCents : amountCents // ignore: cast_nullable_to_non_nullable
 as int,dueDate: null == dueDate ? _self.dueDate : dueDate // ignore: cast_nullable_to_non_nullable

@@ -93,7 +93,7 @@ Future<void> _tap(WidgetTester tester, String text) async {
 }
 
 void main() {
-  testWidgets('onboarding renderiza plano, moeda e idioma com padrões pt/BRL',
+  testWidgets('onboarding renderiza plano, moeda e idioma com padrões pt/MZN',
       (tester) async {
     await tester.pumpWidget(_build(_CapturingRequestTenantAccess()));
     await tester.pumpAndSettle();
@@ -105,13 +105,13 @@ void main() {
     expect(find.text('English'), findsOneWidget);
     expect(_chipSelected(tester, 'Português'), isTrue);
     expect(_chipSelected(tester, 'English'), isFalse);
-    // Moeda: as 4 opções, padrão Real (BRL) selecionado.
+    // Moeda: as 4 opções, padrão Metical (MZN) selecionado (mercado-alvo).
     expect(find.text('Real (BRL)'), findsOneWidget);
     expect(find.text('Dólar (USD)'), findsOneWidget);
     expect(find.text('Euro (EUR)'), findsOneWidget);
     expect(find.text('Metical (MZN)'), findsOneWidget);
-    expect(_chipSelected(tester, 'Real (BRL)'), isTrue);
-    expect(_chipSelected(tester, 'Metical (MZN)'), isFalse);
+    expect(_chipSelected(tester, 'Metical (MZN)'), isTrue);
+    expect(_chipSelected(tester, 'Real (BRL)'), isFalse);
     // Plano carregado + botão de submit.
     expect(find.text('Profissional'), findsOneWidget);
     expect(find.text('Solicitar acesso'), findsOneWidget);

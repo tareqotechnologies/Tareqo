@@ -72,6 +72,15 @@ flutter run --dart-define=SUPABASE_URL=https://seu-projeto.supabase.co \
 2. `signUp(email, password, data: {'full_name': ...})`;
 3. Com **confirmação de e-mail ativa** (padrão no Supabase), `response.user` pode ser `null` — a conta é criada mas a sessão só vem após confirmar. A UI mostra: *"Conta criada! Confirme seu e-mail para entrar."*
 4. Nesse caso o datasource retorna um `AppUser` com **id placeholder** (`fallbackEmail`) — **nenhum dado deve ser associado a esse id**; a sessão real chega após a confirmação.
+5. **Deep link (Aug 8):** o link de confirmação do e-mail aponta para `dumbhanengue://callback` (`site_url` do projeto) — o OS abre o app, e o `DeepLinkHandler` (`lib/core/network/deep_link_handler.dart`, package `app_links`) entrega a URI ao gotrue (`getSessionFromUrl`), que conclui a confirmação e o stream de sessão reage sozinho. Sem isso, o link caía em `http://localhost:3000` (default) e a confirmação nunca completava.
+
+> **Limite de envio de e-mails (Aug 8):** no plano free, quando a cota de
+> envio esgota (~2/h), o GoTrue responde **429 "email rate limit exceeded"**
+> — a `LoginScreen` captura (`AuthApiException` com `statusCode 429`) e mostra
+> *"Muitas tentativas seguidas. Aguarde cerca de 1 hora e tente novamente."*
+> (chave `loginRateLimitError`, pt/en), em vez do erro genérico. É transiente:
+> o cadastro volta a funcionar na próxima janela. Para produção, ver o plano
+> de SMTP customizado em [Go-Live](14-go-live-ops.md) §2.6.
 
 ### Logout (`SignOutUseCase` → `signOut`)
 
@@ -91,6 +100,15 @@ Botão "Sair" no dashboard → `signOutUseCaseProvider.call()` → stream emite 
 ## Aprovação de acesso (dono → tenant)
 
 Após o cadastro, o dono passa pelo **onboarding** (`TenantOnboardingScreen`): escolhe o plano e informa o nome do negócio → cria a solicitação (`RequestTenantAccessUseCase`). O `AuthGate` então roteia pelo status do tenant: `pending` (tela de espera ≤ 24h), `rejected` (motivo) ou `approved` (ERP completo). O super admin decide as solicitações no painel administrativo — detalhes em [Multi-tenancy e Super Admin](11-multitenancy.md).
+
+## Funcionário desativado (acesso suspenso)
+
+O **dono** ativa/desativa funcionários na aba **Funcionários** do módulo Lojas (interruptor + confirmação; RPC `set_employee_active`). Para o funcionário desativado, o bloqueio é **duplo**:
+
+- **App:** o `AuthGate` resolve os vínculos do usuário em `store_employees`; se todos estiverem com `is_active = false`, mostra a tela **"Acesso suspenso"** (`_BlockedEmployeeScreen` — com botão de sair) em vez do ERP. O bloqueio é **reativo e instantâneo**: no modo Supabase, o app assina **Realtime** (`postgres_changes` em `store_employees` com filtro `user_id = auth.uid()`) — quando o dono desativa o funcionário em OUTRO dispositivo, o evento chega na hora e a sessão cai na tela de suspensão **sem reiniciar o app** (a reativação devolve o acesso no mesmo fluxo). Um timer de **fallback** (30s, `employeePollIntervalProvider`, centralizado no provider `employeesPollingProvider`) re-busca os vínculos no modo local e quando o websocket estiver fora do ar — e o polling inteiro (timer + Realtime) é **cancelado no sign-out** (`autoDispose`), sem nada rodando em segundo plano;
+- **Servidor (autoridade):** `is_my_store`/`is_manager_of_store` exigem vínculo **ativo** — RLS e guardas das RPCs negam toda operação nas lojas, mesmo para um cliente modificado chamando o PostgREST direto.
+
+Detalhes da implementação (coluna `store_employees.is_active`, RPC e helpers) em [Multi-tenancy e Super Admin](11-multitenancy.md).
 
 ---
 

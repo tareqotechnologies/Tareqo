@@ -38,17 +38,7 @@ class _AdminPlanRequestsScreenState
         plans.where((p) => p.id == id).firstOrNull?.name ?? id;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.adminUpgradesTitle),
-        actions: [
-          IconButton(
-            tooltip: l10n.commonRefresh,
-            icon: const Icon(Icons.refresh),
-            onPressed: () =>
-                ref.read(pendingPlanRequestsProvider.notifier).refresh(),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.adminUpgradesTitle)),
       body: requestsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => ErrorView(

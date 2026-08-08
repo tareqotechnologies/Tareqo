@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
+import '../../helpers/viewport.dart';
 
 import 'package:dumbhanengue/domain/entities/debt.dart';
 import 'package:dumbhanengue/domain/repositories/i_debt_processor.dart';
@@ -76,6 +77,7 @@ Widget _buildApp({
 List<Debt> _debts() => [
   Debt(
     id: 'd1',
+    number: 1,
     personName: 'João',
     amountCents: 2500,
     dueDate: DateTime(2026, 8, 6),
@@ -83,6 +85,7 @@ List<Debt> _debts() => [
   ),
   Debt(
     id: 'd2',
+    number: 2,
     personName: 'Maria Souza',
     amountCents: 6000,
     dueDate: DateTime(2026, 8, 1),
@@ -107,6 +110,9 @@ void main() {
     expect(find.text('R\$ 85,00'), findsOneWidget);
     expect(find.text('João'), findsOneWidget);
     expect(find.text('Maria Souza'), findsOneWidget);
+    // Número SEQUENCIAL do fiado na loja ao lado do chip de vencimento.
+    expect(find.text('D-00001'), findsOneWidget); // d1 (João)
+    expect(find.text('D-00002'), findsOneWidget); // d2 (Maria Souza)
     expect(find.text('Registrar fiado'), findsOneWidget);
     expect(find.text('Quitar dívida'), findsNWidgets(2));
   });
@@ -177,6 +183,7 @@ void main() {
         settledUseCase: _FakeGetSettledDebtsUseCase([
           Debt(
             id: 'd5',
+            number: 1,
             personName: 'Ana Lima',
             amountCents: 4000,
             dueDate: DateTime(2026, 7, 15),
@@ -187,6 +194,7 @@ void main() {
           // Sem data de baixa (dados migrados) — chip fallback 'Quitada'.
           Debt(
             id: 'd6',
+            number: 2,
             personName: 'Carlos',
             amountCents: 1500,
             dueDate: DateTime(2026, 7, 1),
@@ -212,12 +220,16 @@ void main() {
     expect(find.text('Quitada em 03/08/2026'), findsOneWidget);
     expect(find.text('Carlos'), findsOneWidget);
     expect(find.text('Quitada'), findsOneWidget); // fallback sem data
+    // Número SEQUENCIAL também no histórico de quitações.
+    expect(find.text('D-00001'), findsOneWidget); // d5 (Ana Lima)
+    expect(find.text('D-00002'), findsOneWidget); // d6 (Carlos)
     // Sem ação de quitação no histórico.
     expect(find.text('Quitar dívida'), findsNothing);
   });
 
-  testWidgets('quitar dívida também a registra no histórico (aba Quitadas)',
-      (tester) async {
+  testWidgets('quitar dívida também a registra no histórico (aba Quitadas)', (
+    tester,
+  ) async {
     // Lista compartilhada: a baixa muta a dívida e os fakes refletem.
     final debts = _debts();
     final settle = _FakeSettleDebtUseCase((debtId) {
@@ -301,5 +313,81 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(settle.called, isEmpty);
+  });
+
+  // Regressão (UI): os valores dos cards e o seletor de abas ficavam sem
+  // Flexível/FittedBox — com escala de texto 2.0 em tela estreita, os Rows
+  // estouravam. Agora os valores encolhem (ellipsis) e as abas escalam;
+  // overflows de RenderFlex falham o teste via takeException.
+  testWidgets('não estoura com escala de texto 2.0 em tela estreita', (
+    tester,
+  ) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Estreita (360) porém alta: garante que resumo e cards sejam
+    // construídos/pintados com escala 2.0 (abaixo do fold o overflow
+    // ficaria mascarado).
+    tester.view.physicalSize = const Size(360, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      _buildApp(
+        useCase: _FakeGetPendingDebtsUseCase([
+          Debt(
+            id: 'd1',
+            personName: 'Estabelecimento Comercial Santana de Parnaíba',
+            amountCents: 999999999,
+            dueDate: DateTime(2026, 8, 1),
+            isCustomerDebt: true,
+          ),
+        ]),
+        settleUseCase: _FakeSettleDebtUseCase(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Resumo e card seguem renderizados, sem overflow.
+    expect(find.text('Registrar fiado'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  // Rotação (UI): aba Fiado em paisagem — abas Pendentes/Quitadas,
+  // resumo e cards seguem íntegros após o giro; trocar de aba em
+  // paisagem continua funcionando. Overflows de RenderFlex falham o
+  // teste via takeException.
+  testWidgets('fiado sobrevive à rotação para paisagem', (tester) async {
+    usePortraitViewport(tester);
+
+    await tester.pumpWidget(
+      _buildApp(
+        useCase: _FakeGetPendingDebtsUseCase(_debts()),
+        settleUseCase: _FakeSettleDebtUseCase(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Retrato: abas + resumo + dívidas pendentes.
+    expect(find.text('Pendentes'), findsOneWidget);
+    expect(find.text('Quitadas'), findsOneWidget);
+    expect(find.text('João'), findsOneWidget);
+    expect(find.text('Maria Souza'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Gira para paisagem.
+    await rotateToLandscape(tester);
+
+    // Sem overflow; abas e dívidas seguem presentes após o giro.
+    expect(tester.takeException(), isNull);
+    expect(find.text('Pendentes'), findsOneWidget);
+    expect(find.text('João'), findsOneWidget);
+    expect(find.text('Maria Souza'), findsOneWidget);
+
+    // Trocar para Quitadas em paisagem continua funcionando.
+    await tester.tap(find.text('Quitadas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Histórico de quitações'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

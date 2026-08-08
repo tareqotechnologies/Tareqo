@@ -76,7 +76,7 @@ void main() {
           ),
         ],
         totalAmountCents: 400,
-        paymentMethod: PaymentMethod.pix,
+        paymentMethod: PaymentMethod.mPesa,
         dateTime: DateTime.utc(2026, 8, 3),
       );
 

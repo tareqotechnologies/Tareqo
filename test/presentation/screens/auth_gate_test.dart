@@ -9,10 +9,12 @@ import '../../helpers/test_app.dart';
 import 'package:dumbhanengue/domain/entities/app_user.dart';
 import 'package:dumbhanengue/domain/entities/plan.dart';
 import 'package:dumbhanengue/domain/entities/plan_request.dart';
+import 'package:dumbhanengue/domain/entities/store_employee.dart';
 import 'package:dumbhanengue/domain/entities/tenant.dart';
 import 'package:dumbhanengue/domain/repositories/i_admin_repository.dart';
 import 'package:dumbhanengue/domain/usecases/get_all_plans_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_all_tenants_use_case.dart';
+import 'package:dumbhanengue/domain/usecases/get_employees_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_my_tenant_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_pending_plan_requests_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_pending_tenants_use_case.dart';
@@ -21,6 +23,8 @@ import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
 import 'package:dumbhanengue/presentation/screens/auth/auth_gate.dart';
+import 'package:dumbhanengue/presentation/screens/auth/login_screen.dart';
+import 'package:dumbhanengue/presentation/screens/shell/app_shell.dart';
 
 import '../../helpers/store_context.dart';
 
@@ -98,18 +102,78 @@ Widget _buildApp({
   required Stream<AppUser?> authStream,
   required IAdminRepository adminRepository,
   GetMyTenantUseCase? getMyTenant,
+  GetEmployeesUseCase? getEmployees,
+  // Intervalo do polling CENTRAL (employeePollIntervalProvider) — curto
+  // para os testes dispararem o timer com `tester.pump`.
+  Duration pollInterval = const Duration(seconds: 2),
 }) {
   return ProviderScope(
     overrides: [
       authStateProvider.overrideWith((ref) => authStream),
       adminRepositoryProvider.overrideWithValue(adminRepository),
+      employeePollIntervalProvider.overrideWithValue(pollInterval),
       getMyTenantUseCaseProvider.overrideWithValue(
         getMyTenant ?? FakeGetMyTenantUseCase(approvedTenant()),
       ),
+      if (getEmployees != null)
+        getEmployeesUseCaseProvider.overrideWithValue(getEmployees),
       ..._adminPanelOverrides(),
     ],
-    child: testApp(home: AuthGate()),
+    child: testApp(home: const AuthGate()),
   );
+}
+
+/// Funcionário com vínculo DESATIVADO (o tenant pertence a outro usuário e
+/// o link `store_employees` tem `isActive: false`) — o AuthGate deve
+/// bloquear com a tela de acesso suspenso.
+class _InactiveEmployeeLink implements GetEmployeesUseCase {
+  const _InactiveEmployeeLink();
+
+  @override
+  Future<List<StoreEmployee>> call(String tenantId) async => const [
+        StoreEmployee(
+          id: 'e1',
+          tenantId: 'tn1',
+          storeId: 'st1',
+          userId: 'u1',
+          fullName: 'Carlos',
+          email: 'carlos@loja.com',
+          role: EmployeeRole.employee,
+          isActive: false,
+        ),
+      ];
+}
+
+/// Estoque MUTÁVEL de vínculos — simula a mudança feita pelo DONO em
+/// OUTRO dispositivo (o próximo poll do AuthGate re-busca e reavalia).
+class _MutableEmployeeLink implements GetEmployeesUseCase {
+  // ignore: prefer_initializing_formals
+  _MutableEmployeeLink({bool isActive = true}) : _isActive = isActive;
+
+  bool _isActive;
+
+  /// Número de chamadas a `call()` — prova que o polling CENTRAL dispara
+  /// refreshes dos vínculos (e que PARA no sign-out).
+  int calls = 0;
+
+  void setActive(bool isActive) => _isActive = isActive;
+
+  @override
+  Future<List<StoreEmployee>> call(String tenantId) async {
+    calls++;
+    return [
+      StoreEmployee(
+        id: 'e1',
+        tenantId: 'tn1',
+        storeId: 'st1',
+        userId: 'u1',
+        fullName: 'Carlos',
+        email: 'carlos@loja.com',
+        role: EmployeeRole.employee,
+        isActive: _isActive,
+      ),
+    ];
+  }
 }
 
 void main() {
@@ -209,5 +273,111 @@ void main() {
     expect(find.text('Entrar'), findsOneWidget);
     expect(find.text('Painel do Super Admin'), findsNothing);
     expect(find.text('Aguardando aprovação'), findsNothing);
+  });
+
+  testWidgets('funcionário DESATIVADO vê a tela de acesso suspenso',
+      (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        authStream: Stream.value(
+          AppUser(id: 'u1', email: 'carlos@loja.com'),
+        ),
+        adminRepository: const FakeAdminRepository(),
+        // Tenant APROVADO de OUTRO dono + vínculo inativo → bloqueado.
+        getMyTenant: FakeGetMyTenantUseCase(
+          approvedTenant(ownerUserId: '9'),
+        ),
+        getEmployees: const _InactiveEmployeeLink(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Acesso suspenso'), findsOneWidget);
+    expect(find.textContaining('desativada pelo dono'), findsOneWidget);
+    // NÃO cai no AppShell (bloqueio total).
+    expect(find.byType(AppShell), findsNothing);
+  });
+
+  testWidgets('funcionário é bloqueado REATIVAMENTE quando o dono desativa '
+      'em outro dispositivo', (tester) async {
+    final links = _MutableEmployeeLink(isActive: true);
+    await tester.pumpWidget(
+      _buildApp(
+        authStream: Stream.value(
+          AppUser(id: 'u1', email: 'carlos@loja.com'),
+        ),
+        adminRepository: const FakeAdminRepository(),
+        // Tenant aprovado de OUTRO dono + vínculo ATIVO no início.
+        getMyTenant: FakeGetMyTenantUseCase(
+          approvedTenant(ownerUserId: '9'),
+        ),
+        getEmployees: links,
+        // Intervalo curto para o teste (produção: 30s).
+        pollInterval: const Duration(seconds: 2),
+      ),
+    );    await tester.pumpAndSettle();
+
+    // Começa com acesso normal (AppShell).
+    expect(find.byType(AppShell), findsOneWidget);
+
+    // O DONO desativa o funcionário em OUTRO dispositivo: o próximo poll
+    // re-busca o vínculo e o AuthGate troca para a tela de suspensão SEM
+    // reiniciar o app.
+    links.setActive(false);
+    await tester.pump(const Duration(seconds: 2)); // dispara o timer
+    await tester.pumpAndSettle(); // refresh + rebuild
+
+    expect(find.text('Acesso suspenso'), findsOneWidget);
+    expect(find.byType(AppShell), findsNothing);
+
+    // Reativação (dono reverter em outro dispositivo): o próximo poll
+    // devolve o acesso, de novo sem reiniciar.
+    links.setActive(true);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppShell), findsOneWidget);
+    expect(find.text('Acesso suspenso'), findsNothing);
+  });
+
+  testWidgets('sign-out encerra o polling CENTRAL (autoDispose cancela o '
+      'timer e o Realtime)', (tester) async {
+    final auth = StreamController<AppUser?>();
+    final links = _MutableEmployeeLink(isActive: true);
+    await tester.pumpWidget(
+      _buildApp(
+        authStream: auth.stream,
+        adminRepository: const FakeAdminRepository(),
+        getMyTenant: FakeGetMyTenantUseCase(
+          approvedTenant(ownerUserId: '9'),
+        ),
+        getEmployees: links,
+      ),
+    );
+    auth.add(AppUser(id: 'u1', email: 'carlos@loja.com'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppShell), findsOneWidget);
+
+    // Um tick do timer dispara a re-busca dos vínculos (contagem sobe).
+    final callsBefore = links.calls;
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(links.calls, greaterThan(callsBefore));
+
+    // Sign-out: o AuthGate para de observar o provider → autoDispose
+    // descarta o provider e CANCELA o timer de fallback + o Realtime.
+    auth.add(null);
+    await tester.pumpAndSettle();
+    expect(find.byType(LoginScreen), findsOneWidget);
+
+    final callsAtSignOut = links.calls;
+    // Avança MUITO além do intervalo: se o timer continuasse vivo, a
+    // contagem subiria (e o teste falharia com "Timer is still pending").
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+
+    expect(links.calls, callsAtSignOut);
+    await auth.close();
   });
 }

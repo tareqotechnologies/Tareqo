@@ -8,6 +8,7 @@ part of 'debt.dart';
 
 _Debt _$DebtFromJson(Map<String, dynamic> json) => _Debt(
   id: json['id'] as String,
+  number: (json['number'] as num?)?.toInt() ?? 0,
   storeId: json['storeId'] as String? ?? 'st1',
   personName: json['personName'] as String,
   amountCents: (json['amountCents'] as num).toInt(),
@@ -22,6 +23,7 @@ _Debt _$DebtFromJson(Map<String, dynamic> json) => _Debt(
 
 Map<String, dynamic> _$DebtToJson(_Debt instance) => <String, dynamic>{
   'id': instance.id,
+  'number': instance.number,
   'storeId': instance.storeId,
   'personName': instance.personName,
   'amountCents': instance.amountCents,

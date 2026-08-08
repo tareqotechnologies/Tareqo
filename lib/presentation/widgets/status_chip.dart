@@ -30,14 +30,21 @@ class StatusChip extends StatelessWidget {
             Icon(icon, size: 12, color: color),
             const SizedBox(width: 4),
           ],
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: scheme.brightness == Brightness.dark
-                  ? color.withValues(alpha: 0.9)
-                  : color,
+          // Flexible + ellipsis: com escala de texto alta ou rótulos
+          // longos (ex.: 'Fiado R\$ 1.234.567,89'), o chip encolhe em vez
+          // de estourar o Row que o contém.
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: scheme.brightness == Brightness.dark
+                    ? color.withValues(alpha: 0.9)
+                    : color,
+              ),
             ),
           ),
         ],

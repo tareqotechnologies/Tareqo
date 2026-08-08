@@ -18,6 +18,10 @@ enum EmployeeRole {
 /// O dono cria a conta (nome + e-mail + senha) e escolhe a loja e o cargo;
 /// o funcionário apenas faz login depois (Fase 1). Na Fase 2 os módulos de
 /// negócio passam a ser filtrados pelas lojas onde o usuário atua.
+///
+/// **Ativação:** o dono pode DESATIVAR um funcionário ([isActive] `false`)
+/// — o app bloqueia o acesso (AuthGate) e o servidor nega as operações
+/// (`is_my_store`/`is_manager_of_store` passam a exigir vínculo ativo).
 @freezed
 abstract class StoreEmployee with _$StoreEmployee {
   const factory StoreEmployee({
@@ -28,6 +32,8 @@ abstract class StoreEmployee with _$StoreEmployee {
     required String fullName,
     required String email,
     @Default(EmployeeRole.employee) EmployeeRole role,
+    /// Vínculo ATIVO? `false` = funcionário desativado (conta suspensa).
+    @Default(true) bool isActive,
   }) = _StoreEmployee;
 
   factory StoreEmployee.fromJson(Map<String, dynamic> json) =>

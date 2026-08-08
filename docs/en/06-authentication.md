@@ -74,6 +74,15 @@ flutter build appbundle --flavor prod --release \
 2. `signUp(email, password, data: {'full_name': ...})`;
 3. With **email confirmation enabled** (Supabase default), `response.user` may be `null` — the account is created but the session only comes after confirmation. The UI shows: *"Conta criada! Confirme seu e-mail para entrar."*
 4. In that case the datasource returns an `AppUser` with a **placeholder id** (`fallbackEmail`) — **no data must be associated with this id**; the real session arrives after confirmation.
+5. **Deep link (Aug 8):** the confirmation link in the email points to `dumbhanengue://callback` (the project `site_url`) — the OS opens the app, and the `DeepLinkHandler` (`lib/core/network/deep_link_handler.dart`, `app_links` package) hands the URI to gotrue (`getSessionFromUrl`), which completes the confirmation and the session stream reacts on its own. Without this, the link landed on `http://localhost:3000` (default) and the confirmation never completed.
+
+> **Email send rate limit (Aug 8):** on the free plan, when the sending quota
+> is exhausted (~2/hour), GoTrue answers **429 "email rate limit exceeded"** —
+> the `LoginScreen` catches it (`AuthApiException` with `statusCode 429`) and
+> shows *"Too many attempts in a row. Please wait about an hour and try
+> again."* (`loginRateLimitError` key, pt/en) instead of the generic error. It
+> is transient: sign-up resumes on the next window. For production, see the
+> custom SMTP plan in [Go-Live](14-go-live-ops.md) §2.6.
 
 ### Sign out (`SignOutUseCase` → `signOut`)
 
@@ -95,6 +104,15 @@ flutter build appbundle --flavor prod --release \
 ## Access approval (owner → tenant)
 
 After signing up, the owner goes through **onboarding** (`TenantOnboardingScreen`): picks the plan and enters the business name → creates the request (`RequestTenantAccessUseCase`). The `AuthGate` then routes by tenant status: `pending` (waiting screen ≤ 24h), `rejected` (reason) or `approved` (full ERP). The super admin decides requests in the admin panel — details in [Multi-tenancy and Super Admin](11-multitenancy.md).
+
+## Deactivated employee (access suspended)
+
+The **owner** activates/deactivates employees in the **Employees** tab of the Stores module (switch + confirmation; `set_employee_active` RPC). For a deactivated employee, the block is **two-layered**:
+
+- **App:** the `AuthGate` resolves the user's links in `store_employees`; if all have `is_active = false`, it shows the **"Access suspended"** screen (`_BlockedEmployeeScreen` — with a sign-out button) instead of the ERP. The block is **reactive and instant**: in Supabase mode the app subscribes to **Realtime** (`postgres_changes` on `store_employees` filtered by `user_id = auth.uid()`) — when the owner deactivates the employee on ANOTHER device, the event arrives immediately and the session drops onto the suspended screen **without restarting the app** (reactivation restores access through the same flow). A **fallback timer** (30s, `employeePollIntervalProvider`, centralized in the `employeesPollingProvider`) re-fetches the links in local mode and when the websocket is down — and the whole polling (timer + Realtime) is **cancelled on sign-out** (`autoDispose`), with nothing running in the background;
+- **Server (authority):** `is_my_store`/`is_manager_of_store` require an **active** link — RLS and RPC guards deny every operation in the stores, even for a modified client calling PostgREST directly.
+
+Implementation details (the `store_employees.is_active` column, RPC and helpers) in [Multi-tenancy and Super Admin](11-multitenancy.md).
 
 ---
 

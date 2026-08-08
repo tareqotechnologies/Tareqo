@@ -8,7 +8,6 @@ import '../../data/datasources/local/customer_local_data_source.dart';
 import '../../data/datasources/local/customer_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/debt_local_data_source.dart';
 import '../../data/datasources/local/debt_sqlite_data_source_impl.dart';
-import '../../data/datasources/local/demo_seed.dart';
 import '../../data/datasources/local/financial_transaction_local_data_source.dart';
 import '../../data/datasources/local/financial_transaction_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/product_local_data_source.dart';
@@ -30,7 +29,7 @@ abstract final class AppDatabase {
   static Database? _database;
 
   /// Abre o banco persistente (`dumbhanengue.db` em documentos) e prepara
-  /// o schema/seed. Retorna `true` quando o SQLite está ativo; `false`
+  /// o schema. Retorna `true` quando o SQLite está ativo; `false`
   /// (sem efeitos colaterais) se a biblioteca nativa falhar — nesse caso
   /// o ServiceLocator usa os datasources em memória.
   ///
@@ -89,12 +88,12 @@ abstract final class AppDatabase {
       );
   }
 
-  /// Cria as tabelas (idempotente), migra dinheiro para CENTAVOS (W4) e
-  /// semeia dados demo se o banco estiver vazio.
+  /// Cria as tabelas (idempotente) e migra dinheiro para CENTAVOS (W4).
+  /// Nenhum dado é semeado: o banco nasce vazio e só registra dados REAIS
+  /// criados pelo usuário.
   static void initialize(Database db) {
     createSchema(db);
     migrateMoneyToCents(db);
-    seedIfEmpty(db);
   }
 
   /// Migração W4 (centavos inteiros): bancos criados antes da migração
@@ -215,6 +214,11 @@ abstract final class AppDatabase {
       CREATE TABLE IF NOT EXISTS sales (
         id TEXT PRIMARY KEY,
         store_id TEXT NOT NULL DEFAULT 'st1',
+        -- Número SEQUENCIAL da venda dentro da loja (S-00001, S-00002...).
+        -- Atribuído pelo datasource no insert (MAX+1 por loja, dentro da
+        -- transação). DEFAULT 0 é apenas a migração para bancos antigos;
+        -- todo INSERT informa o valor real.
+        sale_number INTEGER NOT NULL DEFAULT 0,
         total_amount INTEGER NOT NULL CHECK (total_amount >= 0),
         payment_method TEXT NOT NULL,
         date_time INTEGER NOT NULL
@@ -249,6 +253,11 @@ abstract final class AppDatabase {
       CREATE TABLE IF NOT EXISTS debts (
         id TEXT PRIMARY KEY,
         store_id TEXT NOT NULL DEFAULT 'st1',
+        -- Número SEQUENCIAL da dívida dentro da loja (D-00001, D-00002...).
+        -- Atribuído pelo datasource no insert (MAX+1 por loja, dentro da
+        -- transação). DEFAULT 0 é apenas a migração para bancos antigos;
+        -- todo INSERT informa o valor real.
+        debt_number INTEGER NOT NULL DEFAULT 0,
         person_name TEXT NOT NULL,
         amount INTEGER NOT NULL CHECK (amount >= 0),
         due_date INTEGER NOT NULL,
@@ -271,8 +280,17 @@ abstract final class AppDatabase {
       CREATE TABLE IF NOT EXISTS purchases (
         id TEXT PRIMARY KEY,
         store_id TEXT NOT NULL DEFAULT 'st1',
+        -- Número SEQUENCIAL da compra dentro da loja (C-00001, C-00002...).
+        -- Atribuído pelo datasource no insert (MAX+1 por loja, dentro da
+        -- transação). DEFAULT 0 é apenas a migração para bancos antigos;
+        -- todo INSERT informa o valor real.
+        purchase_number INTEGER NOT NULL DEFAULT 0,
         supplier_name TEXT NOT NULL,
         total_amount INTEGER NOT NULL CHECK (total_amount >= 0),
+        -- Forma de pagamento do fornecedor (mesmo enum de vendas, gravado
+        -- pelo NOME). DEFAULT 'cash': compras antigas não registravam o
+        -- método — a migração abaixo interpreta como pagamento à vista.
+        payment_method TEXT NOT NULL DEFAULT 'cash',
         date_time INTEGER NOT NULL
       );
     ''');
@@ -289,6 +307,35 @@ abstract final class AppDatabase {
       CREATE INDEX IF NOT EXISTS idx_purchase_items_purchase_id
         ON purchase_items(purchase_id);
     ''');
+
+    // Migração leve: bancos criados antes do `sale_number` (numeração
+    // sequencial por loja) recebem a coluna com DEFAULT 0 e são re-numerados
+    // em ordem de data (a venda mais antiga da loja = 1). Idempotente para
+    // bancos novos, que já criam a coluna no CREATE TABLE acima.
+    final salesColumns = db.select('PRAGMA table_info(sales)');
+    final hasSaleNumber = salesColumns.any((row) => row['name'] == 'sale_number');
+    if (!hasSaleNumber) {
+      db.execute(
+        'ALTER TABLE sales ADD COLUMN sale_number INTEGER NOT NULL DEFAULT 0',
+      );
+      db.execute('''
+        WITH numbered AS (
+          SELECT id, ROW_NUMBER() OVER (
+            PARTITION BY store_id ORDER BY date_time, id
+          ) AS rn
+          FROM sales
+        )
+        UPDATE sales
+        SET sale_number = (SELECT rn FROM numbered WHERE numbered.id = sales.id)
+      ''');
+    }
+    // Garantia de unicidade por loja (defesa em profundidade — o datasource
+    // já atribui MAX+1 dentro da transação).
+    db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_store_number '
+      'ON sales(store_id, sale_number)',
+    );
+
 
     // Migração leve: bancos criados antes da coluna `is_paid` (baixa de
     // fiado) recebem a coluna com DEFAULT 0 (tudo pendente). Idempotente
@@ -335,9 +382,9 @@ abstract final class AppDatabase {
     }
 
     // Migração leve (Fase 2 do multi-tenancy): bancos criados antes do
-    // escopo por loja recebem `store_id` com DEFAULT 'st1' (a loja demo) —
-    // registros antigos continuam visíveis na loja de demonstração.
-    // Idempotente para bancos novos (já criam a coluna no CREATE TABLE).
+    // escopo por loja recebem `store_id` com DEFAULT 'st1' — registros
+    // antigos continuam visíveis na loja padrão. Idempotente para bancos
+    // novos (já criam a coluna no CREATE TABLE).
     final migrationTargets = <String, String>{
       'products': 'idx_products_store',
       'sales': 'idx_sales_store',
@@ -358,140 +405,91 @@ abstract final class AppDatabase {
       db.execute('CREATE INDEX IF NOT EXISTS ${entry.value} '
           'ON ${entry.key}(store_id)');
     }
+
+    // Migração leve (NUMERAÇÃO SEQUENCIAL): roda DEPOIS da migração de
+    // store_id acima (os backfills referenciam store_id; em bancos legados
+    // a coluna acaba de ser adicionada). Bancos criados antes de
+    // `purchase_number`/`debt_number` recebem a coluna com DEFAULT 0 e são
+    // re-numerados (compra mais antiga da loja = 1; dívida mais antiga = 1).
+    // Idempotente para bancos novos, que já criam as colunas no CREATE
+    // TABLE acima.
+    final purchasesColumns = db.select('PRAGMA table_info(purchases)');
+    final hasPurchaseNumber =
+        purchasesColumns.any((row) => row['name'] == 'purchase_number');
+    if (!hasPurchaseNumber) {
+      db.execute(
+        'ALTER TABLE purchases ADD COLUMN purchase_number '
+        'INTEGER NOT NULL DEFAULT 0',
+      );
+      db.execute('''
+        WITH numbered AS (
+          SELECT id, ROW_NUMBER() OVER (
+            PARTITION BY store_id ORDER BY date_time, id
+          ) AS rn
+          FROM purchases
+        )
+        UPDATE purchases
+        SET purchase_number =
+          (SELECT rn FROM numbered WHERE numbered.id = purchases.id)
+      ''');
+    }
+    // Garantia de unicidade por loja (defesa em profundidade — o datasource
+    // já atribui MAX+1 dentro da transação).
+    db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS uq_purchases_store_number '
+      'ON purchases(store_id, purchase_number)',
+    );
+
+    final debtNumberColumns = db.select('PRAGMA table_info(debts)');
+    final hasDebtNumber =
+        debtNumberColumns.any((row) => row['name'] == 'debt_number');
+    if (!hasDebtNumber) {
+      db.execute(
+        'ALTER TABLE debts ADD COLUMN debt_number INTEGER NOT NULL DEFAULT 0',
+      );
+      db.execute('''
+        WITH numbered AS (
+          SELECT id, ROW_NUMBER() OVER (
+            PARTITION BY store_id ORDER BY due_date, id
+          ) AS rn
+          FROM debts
+        )
+        UPDATE debts
+        SET debt_number = (SELECT rn FROM numbered WHERE numbered.id = debts.id)
+      ''');
+    }
+    // Garantia de unicidade por loja (defesa em profundidade — o datasource
+    // já atribui MAX+1 dentro da transação).
+    db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS uq_debts_store_number '
+      'ON debts(store_id, debt_number)',
+    );
+
+    // Migração leve (forma de pagamento das compras): bancos criados antes
+    // da coluna `payment_method` recebem a coluna com DEFAULT 'cash' — as
+    // compras antigas não registravam o método e são interpretadas como
+    // pagamento à vista (mesmo enum de vendas, gravado pelo NOME).
+    // Idempotente para bancos novos, que já criam a coluna no CREATE TABLE.
+    final purchasePaymentColumns = db.select('PRAGMA table_info(purchases)');
+    final hasPurchasePayment =
+        purchasePaymentColumns.any((row) => row['name'] == 'payment_method');
+    if (!hasPurchasePayment) {
+      db.execute(
+        "ALTER TABLE purchases ADD COLUMN payment_method TEXT NOT NULL "
+        "DEFAULT 'cash'",
+      );
+    }
+
+    // Migração leve (formas de pagamento): o produto trocou o Pix (BR)
+    // pelas carteiras de dinheiro móvel de Moçambique (M-Pesa e E-Mola).
+    // O enum PaymentMethod é persistido pelo NOME (values.byName), então
+    // vendas antigas com 'pix' quebrariam a leitura — reescreve para
+    // 'mPesa' (escolha do produto: operadora dominante). Idempotente:
+    // reexecutar com dados é um no-op (não há mais 'pix').
+    db.execute(
+      "UPDATE sales SET payment_method = 'mPesa' "
+      "WHERE payment_method = 'pix'",
+    );
   }
 
-  /// Semeia os dados de demonstração apenas na primeira execução. A
-  /// guarda usa a tabela `products` como indicador de "banco já criado"
-  /// (suposição razoável para o demo).
-  static void seedIfEmpty(Database db) {
-    final count = db.select('SELECT COUNT(*) AS c FROM products').first;
-    if ((count['c'] as int) > 0) return;
-
-    runInTransaction(db, () {
-      for (final product in DemoSeed.products()) {
-        db.execute(
-          'INSERT INTO products '
-          '(id, store_id, name, description, purchase_price, sale_price, '
-          'stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [
-            product.id,
-            product.storeId,
-            product.name,
-            product.description,
-            product.purchasePriceCents,
-            product.salePriceCents,
-            product.stockQuantity,
-          ],
-        );
-      }
-
-      for (final sale in DemoSeed.sales()) {
-        db.execute(
-          'INSERT INTO sales (id, store_id, total_amount, payment_method, '
-          'date_time) VALUES (?, ?, ?, ?, ?)',
-          [
-            sale.id,
-            sale.storeId,
-            sale.totalAmountCents,
-            sale.paymentMethod.name,
-            sale.dateTime.millisecondsSinceEpoch,
-          ],
-        );
-        for (final item in sale.items) {
-          db.execute(
-            'INSERT INTO sale_items '
-            '(sale_id, product_id, product_name, quantity, unit_price) '
-            'VALUES (?, ?, ?, ?, ?)',
-            [
-              sale.id,
-              item.productId,
-              item.productName,
-              item.quantity,
-              item.unitPriceCents,
-            ],
-          );
-        }
-      }
-
-      for (final transaction in DemoSeed.transactions()) {
-        db.execute(
-          'INSERT INTO financial_transactions '
-          '(id, store_id, description, amount, type, category, date, status, '
-          'debt_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-          [
-            transaction.id,
-            transaction.storeId,
-            transaction.description,
-            transaction.amountCents,
-            transaction.type.name,
-            transaction.category,
-            transaction.date.millisecondsSinceEpoch,
-            transaction.status.name,
-            transaction.debtId,
-          ],
-        );
-      }
-
-      for (final debt in DemoSeed.debts()) {
-        db.execute(
-          'INSERT INTO debts '
-          '(id, store_id, person_name, amount, due_date, is_customer_debt, '
-          'is_paid, paid_at, customer_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-          [
-            debt.id,
-            debt.storeId,
-            debt.personName,
-            debt.amountCents,
-            debt.dueDate.millisecondsSinceEpoch,
-            debt.isCustomerDebt ? 1 : 0,
-            debt.isPaid ? 1 : 0,
-            debt.paidAt?.millisecondsSinceEpoch,
-            debt.customerId,
-          ],
-        );
-      }
-
-      for (final customer in DemoSeed.customers()) {
-        db.execute(
-          'INSERT INTO customers (id, store_id, name, phone, email) '
-          'VALUES (?, ?, ?, ?, ?)',
-          [
-            customer.id,
-            customer.storeId,
-            customer.name,
-            customer.phone,
-            customer.email,
-          ],
-        );
-      }
-
-      for (final purchase in DemoSeed.purchases()) {
-        db.execute(
-          'INSERT INTO purchases (id, store_id, supplier_name, total_amount, '
-          'date_time) VALUES (?, ?, ?, ?, ?)',
-          [
-            purchase.id,
-            purchase.storeId,
-            purchase.supplierName,
-            purchase.totalAmountCents,
-            purchase.dateTime.millisecondsSinceEpoch,
-          ],
-        );
-        for (final item in purchase.items) {
-          db.execute(
-            'INSERT INTO purchase_items '
-            '(purchase_id, product_id, product_name, quantity, unit_price) '
-            'VALUES (?, ?, ?, ?, ?)',
-            [
-              purchase.id,
-              item.productId,
-              item.productName,
-              item.quantity,
-              item.unitPriceCents,
-            ],
-          );
-        }
-      }
-    });
-  }
 }

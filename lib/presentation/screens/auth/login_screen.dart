@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../controllers/auth_providers.dart';
@@ -19,6 +20,22 @@ class LoginScreen extends ConsumerStatefulWidget {
 /// Validação de e-mail mais rigorosa (exige domínio e TLD) — evita
 /// aceitar 'a@b' como endereço válido.
 final RegExp _emailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
+/// Classes de caracteres exigidas pela política de senha do provedor
+/// (GoTrue/Supabase): pelo menos uma minúscula, uma maiúscula, um número
+/// e um símbolo — espelha a regra do servidor para validar ANTES do envio.
+final RegExp _lowercaseRegExp = RegExp(r'[a-z]');
+final RegExp _uppercaseRegExp = RegExp(r'[A-Z]');
+final RegExp _digitRegExp = RegExp(r'[0-9]');
+final RegExp _symbolRegExp = RegExp(
+  "[!@#\$%^&*()_+\\-=\\[\\]{};:'\",.?`~<>/\\\\|]",
+);
+
+bool _isStrongPassword(String value) =>
+    _lowercaseRegExp.hasMatch(value) &&
+    _uppercaseRegExp.hasMatch(value) &&
+    _digitRegExp.hasMatch(value) &&
+    _symbolRegExp.hasMatch(value);
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -72,6 +89,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             .read(signInUseCaseProvider)
             .call(email: email, password: password);
         // Sucesso: o authStateProvider emite o usuário e o AuthGate navega.
+      }
+    } on AuthWeakPasswordException {
+      // Política de senha do provedor (GoTrue): mostra o requisito exato em
+      // vez do erro genérico — é validação de entrada, não falha do app.
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.loginWeakPasswordError)),
+      );
+    } on AuthApiException catch (error) {
+      // 429 — limite de requisições do provedor (ex.: envio de e-mails de
+      // confirmação). É transiente: orienta a aguardar em vez de mostrar a
+      // falha genérica — e não vale logar como erro inesperado do app.
+      if (error.statusCode == '429') {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.loginRateLimitError)),
+        );
+      } else {
+        // Outros erros do provedor (ex.: credenciais inválidas): mantém o
+        // comportamento anterior — loga para diagnóstico e mostra o erro
+        // genérico.
+        CrashReporting.capture(
+          error,
+          StackTrace.current,
+          hint: 'Erro de autenticação (API)',
+        );
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              _isSignUpMode ? l10n.loginSignUpError : l10n.loginSignInError,
+            ),
+          ),
+        );
       }
     } catch (error, stackTrace) {
       // Log detalhado para diagnóstico; a UI mostra apenas mensagem genérica
@@ -220,6 +268,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               decoration: InputDecoration(
                                 labelText: l10n.loginPasswordLabel,
                                 prefixIcon: const Icon(Icons.lock_outline),
+                                helperText: _isSignUpMode
+                                    ? l10n.loginPasswordHint
+                                    : null,
                                 suffixIcon: IconButton(
                                   tooltip: _obscurePassword
                                       ? l10n.loginShowPassword
@@ -235,8 +286,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                               ),
                               validator: (value) {
-                                if ((value ?? '').length < 8) {
+                                final password = value ?? '';
+                                if (password.length < 8) {
                                   return l10n.loginPasswordError;
+                                }
+                                if (_isSignUpMode &&
+                                    !_isStrongPassword(password)) {
+                                  return l10n.loginWeakPasswordError;
                                 }
                                 return null;
                               },

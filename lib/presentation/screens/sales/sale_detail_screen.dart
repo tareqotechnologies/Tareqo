@@ -55,7 +55,7 @@ class SaleDetailScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              l10n.saleDetailId(sale.id),
+                              l10n.saleDetailId(Formatters.saleLabel(sale.number)),
                               style: theme.textTheme.titleMedium,
                             ),
                             const SizedBox(height: 2),

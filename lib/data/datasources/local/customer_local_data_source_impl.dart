@@ -4,8 +4,8 @@ import 'customer_local_data_source.dart';
 /// Implementação em memória do [CustomerLocalDataSource].
 ///
 /// Simula a tabela de clientes com uma `List<Customer>`. Inicia vazia por
-/// padrão (testes dependem disso); o seed de demonstração é injetado pelo
-/// ServiceLocator.
+/// padrão (testes dependem disso) — nunca há dados de demonstração; o
+/// ServiceLocator injeta apenas o que a aplicação cria de real.
 final class CustomerLocalDataSourceImpl implements CustomerLocalDataSource {
   CustomerLocalDataSourceImpl({List<Customer> seed = const []})
       : _customers = [...seed];

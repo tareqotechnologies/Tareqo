@@ -314,6 +314,24 @@ abstract class AppLocalizations {
   /// **'A solicitação de acesso de \"{business}\" não foi aprovada.'**
   String tenantRejectedSubtitle(String business);
 
+  /// No description provided for @authBlockedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesso suspenso'**
+  String get authBlockedTitle;
+
+  /// No description provided for @authBlockedMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua conta de funcionário foi desativada pelo dono do estabelecimento. Se tiver dúvidas, fale com ele.'**
+  String get authBlockedMessage;
+
+  /// No description provided for @authBlockedSignOut.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair'**
+  String get authBlockedSignOut;
+
   /// No description provided for @authErrorRestoreSession.
   ///
   /// In pt, this message translates to:
@@ -373,6 +391,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'A senha deve ter ao menos 8 caracteres.'**
   String get loginPasswordError;
+
+  /// No description provided for @loginPasswordHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mín. 8 caracteres com minúscula, maiúscula, número e símbolo.'**
+  String get loginPasswordHint;
+
+  /// No description provided for @loginWeakPasswordError.
+  ///
+  /// In pt, this message translates to:
+  /// **'A senha deve conter letras minúsculas, maiúsculas, números e símbolos.'**
+  String get loginWeakPasswordError;
+
+  /// No description provided for @loginRateLimitError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas tentativas seguidas. Aguarde cerca de 1 hora e tente novamente.'**
+  String get loginRateLimitError;
 
   /// No description provided for @loginShowPassword.
   ///
@@ -602,11 +638,29 @@ abstract class AppLocalizations {
   /// **'Vendas recentes'**
   String get dashboardRecentSales;
 
+  /// No description provided for @dashboardViewAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver todas'**
+  String get dashboardViewAll;
+
   /// No description provided for @dashboardNoSales.
   ///
   /// In pt, this message translates to:
   /// **'Nenhuma venda ainda — registre a primeira!'**
   String get dashboardNoSales;
+
+  /// No description provided for @dashboardRecentPurchases.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compras recentes'**
+  String get dashboardRecentPurchases;
+
+  /// No description provided for @dashboardNoPurchases.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma compra ainda — registre a primeira!'**
+  String get dashboardNoPurchases;
 
   /// No description provided for @dashboardLowStock.
   ///
@@ -751,6 +805,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Funcionário'**
   String get roleEmployee;
+
+  /// No description provided for @employeeActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativo'**
+  String get employeeActive;
+
+  /// No description provided for @employeeInactive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inativo'**
+  String get employeeInactive;
+
+  /// No description provided for @employeeDeactivateConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desativar {name}? O funcionário perde o acesso imediatamente e não poderá vender até ser reativado.'**
+  String employeeDeactivateConfirm(Object name);
+
+  /// No description provided for @employeeReactivateConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reativar {name}? O funcionário volta a ter acesso à loja.'**
+  String employeeReactivateConfirm(Object name);
+
+  /// No description provided for @employeeDeactivated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Funcionário desativado.'**
+  String get employeeDeactivated;
+
+  /// No description provided for @employeeReactivated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Funcionário reativado.'**
+  String get employeeReactivated;
+
+  /// No description provided for @employeeDeactivateAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desativar'**
+  String get employeeDeactivateAction;
+
+  /// No description provided for @employeeReactivateAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reativar'**
+  String get employeeReactivateAction;
 
   /// No description provided for @upgradesLoadError.
   ///
@@ -986,12 +1088,6 @@ abstract class AppLocalizations {
   /// **'Solicitar upgrade'**
   String get upgradeSubmit;
 
-  /// No description provided for @commonRefresh.
-  ///
-  /// In pt, this message translates to:
-  /// **'Atualizar'**
-  String get commonRefresh;
-
   /// No description provided for @commonCancel.
   ///
   /// In pt, this message translates to:
@@ -1037,7 +1133,7 @@ abstract class AppLocalizations {
   /// No description provided for @periodWeek.
   ///
   /// In pt, this message translates to:
-  /// **'7 dias'**
+  /// **'Esta semana'**
   String get periodWeek;
 
   /// No description provided for @periodMonth.
@@ -1070,17 +1166,29 @@ abstract class AppLocalizations {
   /// **'Cartão de crédito'**
   String get paymentCreditCard;
 
-  /// No description provided for @paymentPix.
+  /// No description provided for @paymentEMola.
   ///
   /// In pt, this message translates to:
-  /// **'Pix'**
-  String get paymentPix;
+  /// **'E-Mola'**
+  String get paymentEMola;
+
+  /// No description provided for @paymentMPesa.
+  ///
+  /// In pt, this message translates to:
+  /// **'M-Pesa'**
+  String get paymentMPesa;
 
   /// No description provided for @paymentTransfer.
   ///
   /// In pt, this message translates to:
   /// **'Transferência'**
   String get paymentTransfer;
+
+  /// No description provided for @purchasesSearchHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar compra...'**
+  String get purchasesSearchHint;
 
   /// No description provided for @productsSearchHint.
   ///
@@ -1285,6 +1393,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Toque em \"Nova compra\" para registrar a entrada de mercadoria e abastecer o estoque.'**
   String get purchasesEmptySubtitle;
+
+  /// Contagem de compras de hoje no resumo da tela de compras
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{0 compras} =1{1 compra} other{{count} compras}}'**
+  String purchasesHeaderCount(int count);
+
+  /// No description provided for @purchasesHeaderVsYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'vs ontem'**
+  String get purchasesHeaderVsYesterday;
+
+  /// Chip do card de compra: unidades adicionadas ao estoque
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque +{units} {unit}'**
+  String purchasesStockAdded(int units, String unit);
+
+  /// No description provided for @purchasesEmptyFilteredTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma compra encontrada'**
+  String get purchasesEmptyFilteredTitle;
+
+  /// No description provided for @purchasesEmptyFilteredSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajuste o filtro de período.'**
+  String get purchasesEmptyFilteredSubtitle;
+
+  /// No description provided for @purchasesClearFilters.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpar filtros'**
+  String get purchasesClearFilters;
 
   /// No description provided for @purchasesSupplierError.
   ///
@@ -1831,6 +1975,60 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Toque em \"Nova venda\" para registrar a primeira.'**
   String get salesEmptySubtitle;
+
+  /// No description provided for @salesSearchHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar venda...'**
+  String get salesSearchHint;
+
+  /// No description provided for @periodYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ontem'**
+  String get periodYesterday;
+
+  /// No description provided for @paymentFilterCard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cartão'**
+  String get paymentFilterCard;
+
+  /// No description provided for @salesStatusPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pago'**
+  String get salesStatusPaid;
+
+  /// Contagem de transações de hoje no resumo da tela de vendas
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{0 transações} =1{1 transação} other{{count} transações}}'**
+  String salesHeaderTransactions(int count);
+
+  /// No description provided for @salesHeaderVsYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'vs ontem'**
+  String get salesHeaderVsYesterday;
+
+  /// No description provided for @salesEmptyFilteredTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma venda encontrada'**
+  String get salesEmptyFilteredTitle;
+
+  /// No description provided for @salesEmptyFilteredSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajuste a busca ou os filtros.'**
+  String get salesEmptyFilteredSubtitle;
+
+  /// No description provided for @salesClearFilters.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpar filtros'**
+  String get salesClearFilters;
 
   /// No description provided for @salesItemUnavailable.
   ///

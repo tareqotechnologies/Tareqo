@@ -4,8 +4,8 @@ import 'sale_local_data_source.dart';
 /// Implementação em memória do [SaleLocalDataSource].
 ///
 /// Simula a tabela de vendas com uma `List<Sale>`. Inicia vazia por
-/// padrão (testes dependem disso); o [seed] de demonstração é injetado
-/// pelo ServiceLocator. Para migrar a SQLite, basta criar uma
+/// padrão (testes dependem disso) — sem dados de demonstração. Para
+/// migrar a SQLite, basta criar uma
 /// implementação com as mesmas assinaturas e trocá-la no registro.
 final class SaleLocalDataSourceImpl implements SaleLocalDataSource {
   SaleLocalDataSourceImpl({List<Sale> seed = const []})

@@ -17,6 +17,7 @@ _StoreEmployee _$StoreEmployeeFromJson(Map<String, dynamic> json) =>
       role:
           $enumDecodeNullable(_$EmployeeRoleEnumMap, json['role']) ??
           EmployeeRole.employee,
+      isActive: json['isActive'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$StoreEmployeeToJson(_StoreEmployee instance) =>
@@ -28,6 +29,7 @@ Map<String, dynamic> _$StoreEmployeeToJson(_StoreEmployee instance) =>
       'fullName': instance.fullName,
       'email': instance.email,
       'role': _$EmployeeRoleEnumMap[instance.role]!,
+      'isActive': instance.isActive,
     };
 
 const _$EmployeeRoleEnumMap = {

@@ -104,7 +104,7 @@ Sale _sale(List<SaleItem> items, {int? totalAmountCents}) => Sale(
             0,
             (sum, item) => sum + item.quantity * item.unitPriceCents,
           ),
-      paymentMethod: PaymentMethod.pix,
+      paymentMethod: PaymentMethod.mPesa,
       dateTime: DateTime.utc(2026, 8, 3),
     );
 
@@ -183,7 +183,7 @@ void main() {
     expect(entry.type, TransactionType.income);
     expect(entry.status, TransactionStatus.paid);
     expect(entry.category, 'Vendas');
-    expect(entry.description, contains('Pix'));
+    expect(entry.description, contains('M-Pesa'));
   });
 
   test('lança InsufficientStockException e NÃO registra a venda', () async {
@@ -303,7 +303,7 @@ void main() {
     ]));
 
     final entry = transactionRepository.transactions.first;
-    expect(entry.description, 'Sale — Pix');
+    expect(entry.description, 'Sale — M-Pesa');
     expect(entry.category, 'Sales');
   });
 

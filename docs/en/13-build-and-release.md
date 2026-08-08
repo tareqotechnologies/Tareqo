@@ -81,6 +81,20 @@ flutter run --flavor dev --dart-define-from-file=env/dev.env
 
 > **R8/minify are ENABLED** (`isMinifyEnabled`/`isShrinkResources`, Aug 5) — the Dart code can additionally be obfuscated with `--obfuscate --split-debug-info` (upload the symbols to Sentry: `sentry-cli debug-files upload`). The prod flavor keeps the immutable `applicationId com.dumbhanengue.dumbhanengue`; the dev flavor has the `.dev` suffix so both can coexist on one device.
 
+#### Known build warning (sentry_flutter + KGP) — tracked upstream
+
+> ⚠️ **Aug 8:** Flutter 3.44+ with AGP 9+ prints a **warning** while configuring Gradle for ANY Android build (dev or prod):
+>
+> ```
+> WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): sentry_flutter
+> Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+> ```
+>
+> - **Benign today** — it is only an informational warning; the build completes normally (verified on `assembleDevRelease`). Only **future** Flutter versions will fail on this.
+> - **Cause:** `sentry_flutter`'s `android/build.gradle` applies `kotlin-android` (KGP) unconditionally, and Flutter's tooling flags such plugins when AGP ≥ 9 (this project uses 9.3.1). There is **no** published version that fixes it (9.26.0, `10.0.0-alpha.3` and sentry-dart `main` still apply KGP) and no suppression flag in Flutter 3.44.
+> - **Upstream tracking:** **getsentry/sentry-dart#3738** (DART-382) — the plugin's migration to Built-in Kotlin is targeted for the **v10 stable (~end of Aug/mid-Sep 2026)**, blocked on the `jni` package (dart-lang/native#3415).
+> - **Action when v10 ships:** bump `sentry_flutter` to `^10.0.0` in `pubspec.yaml` — the warning disappears on its own.
+
 ---
 
 ## iOS

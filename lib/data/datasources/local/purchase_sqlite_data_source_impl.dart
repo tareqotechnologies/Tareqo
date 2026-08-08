@@ -2,6 +2,7 @@ import 'package:sqlite3/sqlite3.dart';
 
 import '../../../core/database/app_database_io.dart';
 import '../../../domain/entities/purchase.dart';
+import '../../../domain/entities/sale.dart' show PaymentMethod;
 import 'purchase_local_data_source.dart';
 
 /// Implementação SQLite do [PurchaseLocalDataSource].
@@ -17,8 +18,9 @@ final class PurchaseSqliteDataSourceImpl implements PurchaseLocalDataSource {
   @override
   Future<List<Purchase>> getAll({required String storeId}) async {
     final rows = _db.select(
-      'SELECT id, store_id, supplier_name, total_amount, date_time '
-      'FROM purchases WHERE store_id = ? ORDER BY date_time DESC',
+      'SELECT id, store_id, purchase_number, supplier_name, total_amount, '
+      'payment_method, date_time FROM purchases WHERE store_id = ? '
+      'ORDER BY date_time DESC',
       [storeId],
     );
     return [
@@ -26,9 +28,12 @@ final class PurchaseSqliteDataSourceImpl implements PurchaseLocalDataSource {
         Purchase(
           id: row['id'] as String,
           storeId: row['store_id'] as String,
+          number: (row['purchase_number'] as num).toInt(),
           supplierName: row['supplier_name'] as String,
           items: _itemsOf(row['id'] as String),
           totalAmountCents: (row['total_amount'] as num).toInt(),
+          paymentMethod:
+              PaymentMethod.values.byName(row['payment_method'] as String),
           dateTime: DateTime.fromMillisecondsSinceEpoch(
             row['date_time'] as int,
           ),
@@ -56,14 +61,27 @@ final class PurchaseSqliteDataSourceImpl implements PurchaseLocalDataSource {
   @override
   Future<void> add(Purchase purchase) async {
     AppDatabase.runInTransaction(_db, () {
+      // Número SEQUENCIAL da compra na loja: MAX+1 calculado DENTRO da
+      // mesma transação (BEGIN IMMEDIATE segura a escrita) — duas compras
+      // concorrentes nunca recebem o mesmo número. O valor enviado no
+      // objeto é ignorado: o banco é a autoridade.
+      final nextNumber = _db.select(
+        'SELECT COALESCE(MAX(purchase_number), 0) + 1 AS next '
+        'FROM purchases WHERE store_id = ?',
+        [purchase.storeId],
+      ).first['next'] as int;
+
       _db.execute(
-        'INSERT INTO purchases (id, store_id, supplier_name, total_amount, '
-        'date_time) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO purchases '
+        '(id, store_id, purchase_number, supplier_name, total_amount, '
+        'payment_method, date_time) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [
           purchase.id,
           purchase.storeId,
+          nextNumber,
           purchase.supplierName,
           purchase.totalAmountCents,
+          purchase.paymentMethod.name,
           purchase.dateTime.millisecondsSinceEpoch,
         ],
       );

@@ -43,8 +43,64 @@
    → **Runbook completo (W4 centavos + H2 RPCs): [capítulo 15](15-migracao-w4-h2.md)**
    — backup, pré-flight, aplicação em transação única, verificação
    `sql_check_live.sh` 14/14 e rollback.
-5. Rate limits de e-mail: deixar os padrões (o cadastro de funcionário não usa
-   e-mail — RPC `create_employee_account`).
+5. **Rate limits de e-mail (dev):** deixar os padrões. No plano free o envio é
+   limitado (~2 e-mails/hora) — quando a cota esgota, o GoTrue responde
+   **429 "email rate limit exceeded"** e o app mostra a mensagem específica
+   *"Muitas tentativas seguidas. Aguarde cerca de 1 hora e tente novamente."*
+   (chave `loginRateLimitError` — o cadastro volta a funcionar na próxima
+   janela, sem ação necessária; o cadastro de funcionário não usa e-mail —
+   RPC `create_employee_account`).
+6. **SMTP customizado em produção (plano: Resend + domínio próprio):** o free
+   tier também limita os e-mails de confirmação (2/h e 4/dia) — inaceitável em
+   produção com cadastros reais. Antes do go-live:
+   1. **Resend** → adicionar o domínio próprio (ex.: `dumbhanengue.com`) e
+      concluir a verificação de DNS (SPF + DKIM + DMARC). ⚠️ O domínio de
+      teste `onboarding@resend.dev` só entrega para o e-mail da conta — não
+      serve para remetentes reais.
+   2. **Resend** → criar uma API key **restrita a envio** (send-only, `re_…`).
+   3. **Supabase → Authentication → Emails → SMTP Settings**:
+
+      | Campo | Valor |
+      |---|---|
+      | Host | `smtp.resend.com` |
+      | Porta | `587` |
+      | Username | `resend` (fixo — a API key vai no Password) |
+      | Password | a API key (`re_…`) |
+      | From e-mail | `no-reply@dumbhanengue.com` |
+      | From name | `Dumbhanengue` |
+      | Admin e-mail | e-mail do super admin (recuperação) |
+
+   4. **Alternativa programática (Management API):** `PATCH
+      /v1/projects/{ref}/config/auth` com `smtp_host`, `smtp_port`,
+      `smtp_user` (**`resend`**), `smtp_pass` (a API key), `smtp_sender_email`,
+      `smtp_sender_name` e `smtp_admin_email` (token `sbp_…` de Settings →
+      Access Tokens). ⚠️ **O PATCH substitui a config inteira** — envie todos
+      os campos `smtp_*` de uma vez (validado em Aug 8: um PATCH parcial zerou
+      o SMTP).
+   5. **Teste:** disparar um cadastro e confirmar a entrega do e-mail de
+      confirmação; a chave Resend também pode ser testada com um POST direto
+      em `https://api.resend.com/emails`.
+
+   > **Decisão registrada (Aug 8):** `dumbhanengue.com` **não está registrado**
+   > (RDAP 404 — domínio disponível) e o time optou por **não comprar domínio
+   > por enquanto** — o e-mail de confirmação segue pelo SMTP do Resend com o
+   > domínio de teste `onboarding@resend.dev`, que **só entrega para o e-mail
+   > da conta Resend** (`jalaneoanalista@gmail.com`); qualquer outro e-mail no
+   > cadastro recebe 403. Implicações para testes dev:
+   >
+   > - Só é possível confirmar cadastros feitos com `jalaneoanalista@gmail.com`;
+   >   outros e-mails não recebem o link (o app fica na tela de confirmação).
+   > - Alternativa para testes: `mailer_autoconfirm = true` no dev (novos
+   >   cadastros confirmam sozinhos, sem e-mail) — usado nos testes E2E.
+   >
+   > ⚠️ **Importante (mito desfeito): pagar o plano do Supabase NÃO resolve o
+   > envio de e-mail.** O serviço de e-mail padrão do Supabase é severamente
+   > limitado mesmo nos planos pagos (~2 e-mails/hora; restrito a membros da
+   > organização no free) — a recomendação oficial é SMTP externo (o que já
+   > usamos: Resend). O desbloqueio real custa só o **registro do domínio
+   > (~US$ 8–12/ano)**: o plano gratuito do Resend já permite **1 domínio
+   > verificado** (SPF/DKIM/DMARC) com 3.000 e-mails/mês (100/dia) — suficiente
+   > para o go-live de um comércio pequeno, **sem pagar nada ao Supabase**.
 
 ## 3. Google Play Console
 
@@ -74,6 +130,7 @@
 
 - [ ] Secrets do §1 todos preenchidos
 - [ ] Supabase: confirmação de e-mail ON + 2FA + migração 008 aplicada
+- [ ] SMTP customizado no Supabase de produção (Resend + domínio próprio) — §2.6
 - [ ] Play App Signing ativado + service account criada
 - [ ] Apple Developer + API key criadas
 - [ ] Política de privacidade + ToS publicadas (links nas lojas)

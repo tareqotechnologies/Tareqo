@@ -65,16 +65,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.appNavCustomers),
-        actions: [
-          IconButton(
-            tooltip: l10n.commonRefresh,
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(customersProvider.notifier).refresh(),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.appNavCustomers)),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab-customers',
         onPressed: _openAddSheet,
@@ -154,7 +145,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 /// Card do cliente: avatar com inicial, nome, contatos e chip de fiado
 /// pendente (se houver).
 class _CustomerTile extends StatelessWidget {
-  const _CustomerTile({required this.customer, required this.pendingTotalCents});
+  const _CustomerTile({
+    required this.customer,
+    required this.pendingTotalCents,
+  });
 
   final Customer customer;
   final int pendingTotalCents;
@@ -215,12 +209,16 @@ class _CustomerTile extends StatelessWidget {
             ),
             if (pendingTotalCents > 0) ...[
               const SizedBox(width: 8),
-              StatusChip(
-                label: l10n.customersCreditLabel(
-                  Formatters.currency(pendingTotalCents),
+              // Flexible: 'Fiado R\$ 1.234.567,89' encolhe (ellipsis) com
+              // escala de texto alta em vez de estourar o card.
+              Flexible(
+                child: StatusChip(
+                  label: l10n.customersCreditLabel(
+                    Formatters.currency(pendingTotalCents),
+                  ),
+                  color: theme.colorScheme.tertiary,
+                  icon: Icons.receipt_long_outlined,
                 ),
-                color: theme.colorScheme.tertiary,
-                icon: Icons.receipt_long_outlined,
               ),
             ],
           ],

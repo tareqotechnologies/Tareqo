@@ -17,7 +17,7 @@ _Tenant _$TenantFromJson(Map<String, dynamic> json) => _Tenant(
       ? null
       : DateTime.parse(json['approvedAt'] as String),
   createdAt: DateTime.parse(json['createdAt'] as String),
-  currencyCode: json['currencyCode'] as String? ?? 'BRL',
+  currencyCode: json['currencyCode'] as String? ?? 'MZN',
   language: json['language'] as String? ?? 'pt',
 );
 

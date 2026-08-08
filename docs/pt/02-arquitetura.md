@@ -24,7 +24,7 @@ lib/
 ├── data/                        # Implementações concretas do que o domínio define
 │   ├── datasources/
 │   │   ├── auth/                # AuthRemoteDataSource (Supabase)
-│   │   └── local/               # Contratos + impls em memória e SQLite (product, sale, financial_transaction, debt) + unit of work + seed
+│   │   └── local/               # Contratos + impls em memória e SQLite (product, sale, financial_transaction, debt) + unit of work + catálogo de planos
 │   ├── models/                  # DTOs serializáveis (reservado)
 │   └── repositories/            # Implementações dos contratos do domínio (ProductRepositoryImpl, ...)
 └── presentation/                # Tudo que o usuário vê e interage
@@ -123,7 +123,7 @@ Em **testes**, esses providers são sobrescritos com `overrideWithValue`/`overri
 export 'app_database_stub.dart' if (dart.library.io) 'app_database_io.dart';
 ```
 
-- **`app_database_io.dart`** — abre `dumbhanengue.db`, cria schema, semeia demo, expõe transações re-entrantes;
+- **`app_database_io.dart`** — abre `dumbhanengue.db`, cria schema, não semeia dados (banco nasce vazio), expõe transações re-entrantes;
 - **`app_database_stub.dart`** — `openAppDatabase()` sempre retorna `false` (web cai para memória).
 
 > ⚠️ **Manter as assinaturas de `openAppDatabase()` e `registerDatasources()` em sincronia** entre os dois arquivos (há comentário no código sobre isso).

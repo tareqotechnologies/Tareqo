@@ -6,6 +6,7 @@ import 'package:dumbhanengue/domain/entities/sale_item.dart';
 void main() {
   final sale = Sale(
     id: 'VENDA-001',
+    number: 42,
     items: const [
       SaleItem(
         productId: '1',
@@ -21,7 +22,7 @@ void main() {
       ),
     ],
     totalAmountCents: 1390,
-    paymentMethod: PaymentMethod.pix,
+    paymentMethod: PaymentMethod.mPesa,
     dateTime: DateTime.utc(2026, 8, 3, 14, 30),
   );
 
@@ -29,15 +30,18 @@ void main() {
     final restored = Sale.fromJson(sale.toJson());
 
     expect(restored, sale);
-    expect(restored.paymentMethod, PaymentMethod.pix);
+    expect(restored.paymentMethod, PaymentMethod.mPesa);
     expect(restored.dateTime, DateTime.utc(2026, 8, 3, 14, 30));
     expect(restored.items, hasLength(2));
     expect(restored.items.first.productName, 'Caneta');
     expect(restored.items.first.unitPriceCents, 200);
+    // Número SEQUENCIAL da venda na loja sobrevive ao round-trip.
+    expect(restored.number, 42);
+    expect(sale.toJson()['number'], 42);
   });
 
   test('PaymentMethod é serializado pelo nome do enum', () {
-    expect(sale.toJson()['paymentMethod'], 'pix');
+    expect(sale.toJson()['paymentMethod'], 'mPesa');
 
     // Mapa completo (com base no JSON da venda) trocando apenas o método.
     final json = sale.toJson();

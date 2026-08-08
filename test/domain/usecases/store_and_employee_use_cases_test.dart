@@ -12,6 +12,7 @@ import 'package:dumbhanengue/domain/repositories/i_store_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_tenant_repository.dart';
 import 'package:dumbhanengue/domain/usecases/add_employee_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/add_store_use_case.dart';
+import 'package:dumbhanengue/domain/usecases/set_employee_active_use_case.dart';
 
 class _FakeTenantRepository implements ITenantRepository {
   final Tenant tenant;
@@ -98,6 +99,8 @@ class _FakeStoreRepository implements IStoreRepository {
 class _FakeEmployeeRepository implements IEmployeeRepository {
   final List<StoreEmployee> _employees = [];
   bool addCalled = false;
+  String? lastSetActiveId;
+  bool? lastSetActiveValue;
 
   @override
   Future<List<StoreEmployee>> getByTenant(String tenantId) async =>
@@ -111,6 +114,19 @@ class _FakeEmployeeRepository implements IEmployeeRepository {
   Future<void> add(StoreEmployee employee) async {
     addCalled = true;
     _employees.add(employee);
+  }
+
+  @override
+  Future<void> setActive({
+    required String employeeId,
+    required bool isActive,
+  }) async {
+    lastSetActiveId = employeeId;
+    lastSetActiveValue = isActive;
+    final index = _employees.indexWhere((e) => e.id == employeeId);
+    if (index >= 0) {
+      _employees[index] = _employees[index].copyWith(isActive: isActive);
+    }
   }
 }
 
@@ -436,6 +452,84 @@ void main() {
       // ...e o vínculo NÃO foi inserido de novo pelo repositório (evita
       // o duplicado que existiria com o fluxo em duas chamadas).
       expect(employeeRepository.addCalled, isFalse);
+    });
+  });
+
+  group('SetEmployeeActiveUseCase', () {
+    StoreEmployee buildEmployee({
+      String id = 'e1',
+      bool isActive = true,
+    }) =>
+        StoreEmployee(
+          id: id,
+          tenantId: 'tn1',
+          storeId: 'st1',
+          userId: 'u1',
+          fullName: 'Carlos',
+          email: 'carlos@loja.com',
+          role: EmployeeRole.employee,
+          isActive: isActive,
+        );
+
+    test('desativa funcionário existente', () async {
+      final repository = _FakeEmployeeRepository();
+      repository._employees.add(buildEmployee());
+      final useCase = SetEmployeeActiveUseCase(repository);
+
+      await useCase.call(
+        tenantId: 'tn1',
+        employeeId: 'e1',
+        isActive: false,
+      );
+
+      expect(repository.lastSetActiveId, 'e1');
+      expect(repository.lastSetActiveValue, isFalse);
+      expect(repository._employees.single.isActive, isFalse);
+    });
+
+    test('reativa funcionário desativado', () async {
+      final repository = _FakeEmployeeRepository();
+      repository._employees.add(buildEmployee(isActive: false));
+      final useCase = SetEmployeeActiveUseCase(repository);
+
+      await useCase.call(
+        tenantId: 'tn1',
+        employeeId: 'e1',
+        isActive: true,
+      );
+
+      expect(repository.lastSetActiveValue, isTrue);
+      expect(repository._employees.single.isActive, isTrue);
+    });
+
+    test('não chama o repositório quando o status já é o pedido', () async {
+      final repository = _FakeEmployeeRepository();
+      repository._employees.add(buildEmployee());
+      final useCase = SetEmployeeActiveUseCase(repository);
+
+      await useCase.call(
+        tenantId: 'tn1',
+        employeeId: 'e1',
+        isActive: true,
+      );
+
+      expect(repository.lastSetActiveId, isNull);
+    });
+
+    test('lança EmployeeNotFoundException para vínculo inexistente',
+        () async {
+      final repository = _FakeEmployeeRepository();
+      final useCase = SetEmployeeActiveUseCase(repository);
+
+      expect(
+        () => useCase.call(
+          tenantId: 'tn1',
+          employeeId: 'desconhecido',
+          isActive: false,
+        ),
+        throwsA(isA<EmployeeNotFoundException>()),
+      );
+      expect(repository.lastSetActiveId, isNull);
     });
   });
 }

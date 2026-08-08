@@ -83,7 +83,7 @@ void main() {
         SaleItem(productId: 'p6', productName: 'Café', quantity: 1, unitPriceCents: 1500),
       ],
       totalAmountCents: 1500,
-      paymentMethod: PaymentMethod.pix,
+      paymentMethod: PaymentMethod.mPesa,
       dateTime: DateTime.now(),
     ));
 

@@ -16,6 +16,13 @@
 #   W5/H2 → get_dashboard_kpis / get_cash_flow / get_sales_report
 #        presentes, SECURITY DEFINER, com retornos BIGINT (não NUMERIC
 #        pré-W4)
+#   Numeração → sale_number / purchase_number / debt_number (BIGINT NOT
+#        NULL + índices únicos por loja + RPCs com advisory lock)
+#   M-Pesa/E-Mola → CHECKs de payment_method em sales/purchases com
+#        mPesa/eMola (Partes 17-18 — sem isso, QUALQUER venda/compra nova
+#        viola o constraint)
+#   Funcionários → store_employees.is_active + RPC set_employee_active
+#        (Parte 19) e publicação Realtime de store_employees (Parte 20)
 #   Migração → quantidade de super_admins registrados (informativo)
 #
 # Uso:
@@ -105,17 +112,18 @@ BEGIN
     'public.process_purchase(jsonb,jsonb)',
     'public.register_debt(jsonb)',
     'public.settle_debt(text,text)',
-    'public.create_employee_account(text,text,text,text,text,text)'
+    'public.create_employee_account(text,text,text,text,text,text)',
+    'public.update_tenant_settings(text,text,text)'
   ]) AS sig
   LOOP
     IF to_regprocedure(r.sig) IS NULL THEN
-      RAISE EXCEPTION 'FAIL: RPC % ausente (rodar schema.sql)', r.sig;
+      RAISE EXCEPTION 'FAIL: RPC % ausente (rodar schema.sql/upgrade.sql)', r.sig;
     END IF;
     IF NOT (SELECT prosecdef FROM pg_proc WHERE oid = to_regprocedure(r.sig)) THEN
       RAISE EXCEPTION 'FAIL: % nao e SECURITY DEFINER', r.sig;
     END IF;
   END LOOP;
-  RAISE NOTICE 'PASS: process_sale / process_purchase / register_debt / settle_debt / create_employee_account OK';
+  RAISE NOTICE 'PASS: process_sale / process_purchase / register_debt / settle_debt / create_employee_account / update_tenant_settings OK';
 END $$;
 
 \echo '== 5. index idx_financial_transactions_debt (C4) =='
@@ -284,6 +292,209 @@ BEGIN
   END IF;
   RAISE NOTICE 'PASS: get_dashboard_kpis e get_cash_flow com retornos BIGINT (centavos)';
 END $$;
+
+\echo '== 15. Numeração sequencial de vendas por loja (sale_number) =='
+DO $$
+DECLARE
+  v_type text;
+  v_notnull boolean;
+  v_def text;
+BEGIN
+  -- Coluna sale_number: BIGINT, NOT NULL.
+  SELECT data_type, is_nullable
+  INTO v_type, v_notnull
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'sales'
+    AND column_name = 'sale_number';
+  IF v_type IS NULL THEN
+    RAISE EXCEPTION 'FAIL: coluna sales.sale_number ausente (upgrade.sql Parte 14 nao aplicado?)';
+  END IF;
+  IF v_type <> 'bigint' OR v_notnull = 'YES' THEN
+    RAISE EXCEPTION 'FAIL: sales.sale_number deveria ser bigint NOT NULL (atual: % not_null=%)', v_type, v_notnull;
+  END IF;
+  -- Índice único por loja.
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public' AND indexname = 'uq_sales_store_number'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: indice unico uq_sales_store_number ausente';
+  END IF;
+  -- RPC process_sale atualizada (atribui o número com advisory lock).
+  SELECT pg_get_functiondef(oid) INTO v_def
+  FROM pg_proc WHERE oid = to_regprocedure('public.process_sale(jsonb,jsonb)');
+  IF position('pg_advisory_xact_lock' IN v_def) = 0
+     OR position('sale_number' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: process_sale nao atribui sale_number (versao antiga no ar?)';
+  END IF;
+  RAISE NOTICE 'PASS: sale_number bigint NOT NULL + uq_sales_store_number + process_sale com advisory lock';
+END $$;
+
+\echo '== 16. sale_number sem valores nulos (informativo) =='
+SELECT count(*) AS vendas, count(sale_number) AS com_numero
+FROM public.sales;
+
+\echo '== 17. Numeração sequencial de compras por loja (purchase_number) =='
+DO $$
+DECLARE
+  v_type text;
+  v_notnull boolean;
+  v_def text;
+BEGIN
+  -- Coluna purchase_number: BIGINT, NOT NULL.
+  SELECT data_type, is_nullable
+  INTO v_type, v_notnull
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'purchases'
+    AND column_name = 'purchase_number';
+  IF v_type IS NULL THEN
+    RAISE EXCEPTION 'FAIL: coluna purchases.purchase_number ausente (upgrade.sql Parte 15 nao aplicado?)';
+  END IF;
+  IF v_type <> 'bigint' OR v_notnull = 'YES' THEN
+    RAISE EXCEPTION 'FAIL: purchases.purchase_number deveria ser bigint NOT NULL (atual: % not_null=%)', v_type, v_notnull;
+  END IF;
+  -- Índice único por loja.
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public' AND indexname = 'uq_purchases_store_number'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: indice unico uq_purchases_store_number ausente';
+  END IF;
+  -- RPC process_purchase atualizada (atribui o número com advisory lock).
+  SELECT pg_get_functiondef(oid) INTO v_def
+  FROM pg_proc WHERE oid = to_regprocedure('public.process_purchase(jsonb,jsonb)');
+  IF position('pg_advisory_xact_lock' IN v_def) = 0
+     OR position('purchase_number' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: process_purchase nao atribui purchase_number (versao antiga no ar?)';
+  END IF;
+  RAISE NOTICE 'PASS: purchase_number bigint NOT NULL + uq_purchases_store_number + process_purchase com advisory lock';
+END $$;
+
+\echo '== 18. purchase_number sem valores nulos (informativo) =='
+SELECT count(*) AS compras, count(purchase_number) AS com_numero
+FROM public.purchases;
+
+\echo '== 19. Numeração sequencial de fiado por loja (debt_number) =='
+DO $$
+DECLARE
+  v_type text;
+  v_notnull boolean;
+  v_def text;
+BEGIN
+  -- Coluna debt_number: BIGINT, NOT NULL.
+  SELECT data_type, is_nullable
+  INTO v_type, v_notnull
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'debts'
+    AND column_name = 'debt_number';
+  IF v_type IS NULL THEN
+    RAISE EXCEPTION 'FAIL: coluna debts.debt_number ausente (upgrade.sql Parte 16 nao aplicado?)';
+  END IF;
+  IF v_type <> 'bigint' OR v_notnull = 'YES' THEN
+    RAISE EXCEPTION 'FAIL: debts.debt_number deveria ser bigint NOT NULL (atual: % not_null=%)', v_type, v_notnull;
+  END IF;
+  -- Índice único por loja.
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public' AND indexname = 'uq_debts_store_number'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: indice unico uq_debts_store_number ausente';
+  END IF;
+  -- RPC register_debt atualizada (atribui o número com advisory lock).
+  SELECT pg_get_functiondef(oid) INTO v_def
+  FROM pg_proc WHERE oid = to_regprocedure('public.register_debt(jsonb)');
+  IF position('pg_advisory_xact_lock' IN v_def) = 0
+     OR position('debt_number' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: register_debt nao atribui debt_number (versao antiga no ar?)';
+  END IF;
+  RAISE NOTICE 'PASS: debt_number bigint NOT NULL + uq_debts_store_number + register_debt com advisory lock';
+END $$;
+
+\echo '== 20. debt_number sem valores nulos (informativo) =='
+SELECT count(*) AS dividas, count(debt_number) AS com_numero
+FROM public.debts;
+
+\echo '== 21. store_employees.is_active + RPC set_employee_active (Parte 19) =='
+DO $$
+DECLARE
+  v_type text;
+  v_oid oid;
+BEGIN
+  -- Coluna is_active (DEFAULT TRUE — funcionários existentes continuam ativos).
+  SELECT data_type INTO v_type
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'store_employees'
+    AND column_name = 'is_active';
+  IF v_type IS NULL THEN
+    RAISE EXCEPTION 'FAIL: coluna store_employees.is_active ausente (upgrade.sql Parte 19 nao aplicado?)';
+  END IF;
+  IF v_type <> 'boolean' THEN
+    RAISE EXCEPTION 'FAIL: store_employees.is_active deveria ser boolean (atual: %)', v_type;
+  END IF;
+  -- RPC set_employee_active (dono ativa/desativa; SECURITY DEFINER).
+  v_oid := to_regprocedure('public.set_employee_active(text,boolean)');
+  IF v_oid IS NULL THEN
+    RAISE EXCEPTION 'FAIL: RPC set_employee_active ausente (upgrade.sql Parte 19.2 nao aplicado?)';
+  END IF;
+  IF NOT (SELECT prosecdef FROM pg_proc WHERE oid = v_oid) THEN
+    RAISE EXCEPTION 'FAIL: set_employee_active nao e SECURITY DEFINER';
+  END IF;
+  RAISE NOTICE 'PASS: store_employees.is_active + set_employee_active OK';
+END $$;
+
+\echo '== 22. CHECK de payment_method com M-Pesa/E-Mola (Partes 17-18) =='
+DO $$
+DECLARE
+  v_sales text;
+  v_purchases text;
+BEGIN
+  -- sales: o CHECK precisa aceitar mPesa/eMola (o app já envia mPesa por
+  -- padrão — sem a migração, QUALQUER venda nova viola o constraint).
+  SELECT pg_get_constraintdef(oid) INTO v_sales
+  FROM pg_constraint
+  WHERE conrelid = 'public.sales'::regclass
+    AND conname = 'sales_payment_method_check';
+  IF v_sales IS NULL OR position('mPesa' IN v_sales) = 0
+     OR position('eMola' IN v_sales) = 0 THEN
+    RAISE EXCEPTION 'FAIL: sales.payment_method sem mPesa/eMola no CHECK (upgrade.sql Parte 17 nao aplicado?): %', v_sales;
+  END IF;
+  -- purchases: mesmo enum de vendas (coluna + CHECK da Parte 18).
+  SELECT pg_get_constraintdef(oid) INTO v_purchases
+  FROM pg_constraint
+  WHERE conrelid = 'public.purchases'::regclass
+    AND conname = 'purchases_payment_method_check';
+  IF v_purchases IS NULL OR position('mPesa' IN v_purchases) = 0
+     OR position('eMola' IN v_purchases) = 0 THEN
+    RAISE EXCEPTION 'FAIL: purchases.payment_method sem mPesa/eMola no CHECK (upgrade.sql Parte 18 nao aplicado?): %', v_purchases;
+  END IF;
+  RAISE NOTICE 'PASS: CHECK payment_method com mPesa/eMola em sales e purchases';
+END $$;
+
+\echo '== 23. purchases.payment_method: coluna existe (Parte 18) =='
+DO $$
+DECLARE
+  v_type text;
+BEGIN
+  SELECT data_type INTO v_type
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'purchases'
+    AND column_name = 'payment_method';
+  IF v_type IS NULL THEN
+    RAISE EXCEPTION 'FAIL: coluna purchases.payment_method ausente (upgrade.sql Parte 18 nao aplicado?)';
+  END IF;
+  RAISE NOTICE 'PASS: purchases.payment_method OK';
+END $$;
+
+\echo '== 24. Realtime: store_employees publicada no supabase_realtime (Parte 20, informativo) =='
+-- pg_publication_tables expõe as colunas pubname/schemaname/TABLENAME
+-- (relname é de pg_class — fix Aug 8: o check usava o nome errado e
+-- falhava com 'column relname does not exist' no banco ao vivo).
+SELECT COALESCE(
+  (SELECT string_agg(tablename, ', ')
+   FROM pg_publication_tables
+   WHERE pubname = 'supabase_realtime'
+     AND schemaname = 'public' AND tablename = 'store_employees'),
+  '(publicacao supabase_realtime ausente ou store_employees nao publicada — Realtime do bloqueio de funcionarios inativo)'
+) AS realtime_store_employees;
 SQL
 
 # ── Executor: psql local ou container postgres:16 ───────────────────────

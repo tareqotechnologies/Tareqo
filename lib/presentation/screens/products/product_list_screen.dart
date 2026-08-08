@@ -50,24 +50,22 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   Widget build(BuildContext context) {
     final productsAsync = ref.watch(productsProvider);
     final l10n = context.l10n;
+    // Funcionário comum NÃO cria produto (só vende): o cadastro fica para
+    // dono e gerente (matriz de acesso). O servidor também restringe o
+    // INSERT (política products_insert via is_my_store do dono/gerente).
+    final canManageProducts =
+        ref.watch(currentAccessLevelProvider) != UserAccessLevel.employee;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.appNavProducts),
-        actions: [
-          IconButton(
-            tooltip: l10n.commonRefresh,
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(productsProvider.notifier).refresh(),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab-products',
-        onPressed: _openAddSheet,
-        icon: const Icon(Icons.add),
-        label: Text(l10n.productsAddNew),
-      ),
+      appBar: AppBar(title: Text(l10n.appNavProducts)),
+      floatingActionButton: canManageProducts
+          ? FloatingActionButton.extended(
+              heroTag: 'fab-products',
+              onPressed: _openAddSheet,
+              icon: const Icon(Icons.add),
+              label: Text(l10n.productsAddNew),
+            )
+          : null,
       body: Column(
         children: [
           Padding(
@@ -194,12 +192,16 @@ class _ProductTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            StatusChip(
-              label: '${product.stockQuantity} ${l10n.commonUnits}',
-              color: lowStock ? AppColors.warning : theme.colorScheme.primary,
-              icon: lowStock
-                  ? Icons.warning_amber_rounded
-                  : Icons.inventory_2_outlined,
+            // Flexible: o chip encolhe (ellipsis) com escala de texto alta
+            // ou estoque grande — o Expanded do nome cede espaço primeiro.
+            Flexible(
+              child: StatusChip(
+                label: '${product.stockQuantity} ${l10n.commonUnits}',
+                color: lowStock ? theme.warning : theme.colorScheme.primary,
+                icon: lowStock
+                    ? Icons.warning_amber_rounded
+                    : Icons.inventory_2_outlined,
+              ),
             ),
           ],
         ),

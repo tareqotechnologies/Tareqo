@@ -5,6 +5,7 @@ import 'package:dumbhanengue/app.dart';
 import 'package:dumbhanengue/domain/entities/customer.dart';
 import 'package:dumbhanengue/domain/entities/debt.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
+import 'package:dumbhanengue/domain/entities/purchase.dart';
 import 'package:dumbhanengue/domain/entities/sale.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
@@ -13,8 +14,10 @@ import 'package:dumbhanengue/domain/usecases/get_cash_flow_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_customers_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_pending_debts_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
+import 'package:dumbhanengue/domain/usecases/get_purchases_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_settled_debts_use_case.dart';
 import 'package:dumbhanengue/presentation/controllers/customers_providers.dart';
+import 'package:dumbhanengue/presentation/controllers/purchases_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/debts_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/finance_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/products_providers.dart';
@@ -52,7 +55,7 @@ class _FakeSalesRepository implements ISaleRepository {
             ),
           ],
           totalAmountCents: 400,
-          paymentMethod: PaymentMethod.pix,
+          paymentMethod: PaymentMethod.mPesa,
           dateTime: DateTime.now(),
         ),
       ];
@@ -89,6 +92,11 @@ class _FakeGetSettledDebtsUseCase implements GetSettledDebtsUseCase {
   Future<List<Debt>> call({required String storeId}) async => const [];
 }
 
+class _FakeGetPurchasesUseCase implements GetPurchasesUseCase {
+  @override
+  Future<List<Purchase>> call({required String storeId}) async => const [];
+}
+
 class _FakeGetCustomersUseCase implements GetCustomersUseCase {
   @override
   Future<List<Customer>> call({required String storeId}) async => const [
@@ -116,6 +124,8 @@ void main() {
               .overrideWithValue(_FakeGetSettledDebtsUseCase()),
           getCustomersUseCaseProvider
               .overrideWithValue(_FakeGetCustomersUseCase()),
+          getPurchasesUseCaseProvider
+              .overrideWithValue(_FakeGetPurchasesUseCase()),
         ],
         child: const DumbhanengueApp(),
       ),

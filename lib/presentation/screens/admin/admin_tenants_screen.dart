@@ -34,14 +34,6 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
       appBar: AppBar(
         title: Text(l10n.adminTenantsTitle),
         actions: [
-          IconButton(
-            tooltip: l10n.commonRefresh,
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.read(pendingTenantsProvider.notifier).refresh();
-              ref.read(allTenantsProvider.notifier).refresh();
-            },
-          ),
           TextButton(
             onPressed: () => setState(() => _showAll = !_showAll),
             child: Text(_showAll ? l10n.adminPendingOnly : l10n.adminAll),

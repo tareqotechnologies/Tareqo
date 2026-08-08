@@ -6,9 +6,9 @@
 --      https://supabase.com/dashboard/project/dotklbpqmlnhcdifiukd/sql/new
 --   2. Cole TODO o script e execute (o comando "Run").
 --   3. A Parte 1 (estrutura) é idempotente e pode ser executada a qualquer
---      momento. A Parte 2 (seed demo) insere dados para o PRIMEIRO usuário
---      encontrado em auth.users — se ainda não houver nenhum usuário, ela
---      não insere nada (basta reexecutá-la depois de se cadastrar no app).
+--      momento. A Parte 2 (catálogo de planos) também é idempotente — o
+--      ERP NÃO semeia dados de demonstração: cada tenant começa vazio e
+--      registra apenas dados reais.
 --
 -- O design segue o modelo multi-tenant documentado: cada tabela tem a coluna
 -- `user_id` (vínculo com auth.users) e o RLS isola os dados por
@@ -50,13 +50,20 @@ CREATE TABLE IF NOT EXISTS public.products (
 );
 
 -- Vendas (espelha a entidade Sale) — store_id: histórico por loja.
+-- `sale_number` é o número SEQUENCIAL da venda dentro da loja (S-00001,
+-- S-00002...): atribuído pelo RPC process_sale sob advisory lock por loja
+-- (bases antigas recebem a coluna + backfill via upgrade.sql, Parte 14).
+-- Unicidade (store_id, sale_number) garantida pelo índice uq_sales_store_number.
 CREATE TABLE IF NOT EXISTS public.sales (
   id             TEXT PRIMARY KEY,
   user_id        UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   store_id       TEXT NOT NULL DEFAULT 'st1',
+  sale_number    BIGINT NOT NULL,
   total_amount   BIGINT NOT NULL CHECK (total_amount >= 0),
+  -- Formas de pagamento (mercado-alvo Moçambique: dinheiro móvel
+  -- M-Pesa/E-Mola no lugar do Pix BR). O nome do enum é o valor gravado.
   payment_method TEXT NOT NULL CHECK (payment_method IN
-    ('cash', 'debitCard', 'creditCard', 'pix', 'transfer')),
+    ('cash', 'debitCard', 'creditCard', 'mPesa', 'eMola', 'transfer')),
   date_time      TIMESTAMPTZ NOT NULL
 );
 
@@ -92,10 +99,18 @@ CREATE TABLE IF NOT EXISTS public.financial_transactions (
 --  antes do módulo de clientes — idempotente)
 ALTER TABLE IF EXISTS public.debts
   ADD COLUMN IF NOT EXISTS customer_id TEXT;
+-- `debt_number` é o número SEQUENCIAL da dívida dentro da loja (D-00001,
+-- D-00002...): atribuído pelo RPC register_debt sob advisory lock por loja
+-- (bases antigas recebem a coluna + backfill via upgrade.sql, Parte 16).
+-- Unicidade (store_id, debt_number) garantida pelo índice
+-- uq_debts_store_number.
+ALTER TABLE IF EXISTS public.debts
+  ADD COLUMN IF NOT EXISTS debt_number BIGINT;
 CREATE TABLE IF NOT EXISTS public.debts (
   id              TEXT PRIMARY KEY,
   user_id         UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   store_id        TEXT NOT NULL DEFAULT 'st1',
+  debt_number     BIGINT NOT NULL,
   person_name     TEXT NOT NULL,
   amount          BIGINT NOT NULL CHECK (amount >= 0),
   due_date        TIMESTAMPTZ NOT NULL,
@@ -117,13 +132,24 @@ CREATE TABLE IF NOT EXISTS public.customers (
 
 -- Compras de fornecedores (espelha a entidade Purchase) — store_id: a
 -- entrada de estoque é por loja.
+-- `purchase_number` é o número SEQUENCIAL da compra dentro da loja
+-- (C-00001, C-00002...): atribuído pelo RPC process_purchase sob advisory
+-- lock por loja (bases antigas recebem a coluna + backfill via
+-- upgrade.sql, Parte 15). Unicidade (store_id, purchase_number) garantida
+-- pelo índice uq_purchases_store_number.
 CREATE TABLE IF NOT EXISTS public.purchases (
-  id            TEXT PRIMARY KEY,
-  user_id       UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
-  store_id      TEXT NOT NULL DEFAULT 'st1',
-  supplier_name TEXT NOT NULL,
-  total_amount  BIGINT NOT NULL CHECK (total_amount >= 0),
-  date_time     TIMESTAMPTZ NOT NULL
+  id              TEXT PRIMARY KEY,
+  user_id         UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  store_id        TEXT NOT NULL DEFAULT 'st1',
+  purchase_number BIGINT NOT NULL,
+  supplier_name   TEXT NOT NULL,
+  total_amount    BIGINT NOT NULL CHECK (total_amount >= 0),
+  -- Forma de pagamento do fornecedor (mesmo enum de vendas). O nome do
+  -- enum é o valor gravado. DEFAULT 'cash': compras antigas não registravam
+  -- o método — a migração (upgrade.sql, Parte 18) interpreta como à vista.
+  payment_method  TEXT NOT NULL DEFAULT 'cash' CHECK (payment_method IN
+    ('cash', 'debitCard', 'creditCard', 'mPesa', 'eMola', 'transfer')),
+  date_time       TIMESTAMPTZ NOT NULL
 );
 
 -- Itens de compra (espelha a entidade PurchaseItem — snapshot de nome/preço)
@@ -175,7 +201,9 @@ CREATE TABLE IF NOT EXISTS public.tenants (
   -- Preferências de apresentação escolhidas pelo DONO no onboarding
   -- (alteráveis em Lojas → Ajustes): moeda dos valores e idioma do app.
   -- `language` ∈ ('pt', 'en') — o app só usa esses dois valores.
-  currency_code    TEXT NOT NULL DEFAULT 'BRL'
+  -- Moeda padrão dos novos tenants: MZN (metical — mercado-alvo
+  -- Moçambique); o dono altera em Lojas → Ajustes.
+  currency_code    TEXT NOT NULL DEFAULT 'MZN'
                     CHECK (currency_code IN ('BRL', 'USD', 'EUR', 'MZN')),
   language         TEXT NOT NULL DEFAULT 'pt'
                     CHECK (language IN ('pt', 'en'))
@@ -184,7 +212,7 @@ CREATE TABLE IF NOT EXISTS public.tenants (
 -- Migração idempotente para bancos já criados (CREATE TABLE IF NOT EXISTS
 -- não altera tabelas existentes): adiciona as colunas com defaults.
 ALTER TABLE IF EXISTS public.tenants
-  ADD COLUMN IF NOT EXISTS currency_code TEXT NOT NULL DEFAULT 'BRL';
+  ADD COLUMN IF NOT EXISTS currency_code TEXT NOT NULL DEFAULT 'MZN';
 ALTER TABLE IF EXISTS public.tenants
   ADD COLUMN IF NOT EXISTS language TEXT NOT NULL DEFAULT 'pt';
 
@@ -209,6 +237,7 @@ CREATE TABLE IF NOT EXISTS public.store_employees (
   email      TEXT NOT NULL,
   role       TEXT NOT NULL DEFAULT 'employee' CHECK (role IN
     ('manager', 'employee')),
+  is_active  BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -292,6 +321,7 @@ AS $$
         OR EXISTS (
           SELECT 1 FROM public.store_employees e
           WHERE e.store_id = s.id AND e.user_id = auth.uid()
+            AND e.is_active
         )
       )
   );
@@ -326,6 +356,7 @@ AS $$
           SELECT 1 FROM public.store_employees e
           WHERE e.store_id = s.id AND e.user_id = auth.uid()
             AND e.role = 'manager'
+            AND e.is_active
         )
       )
   );
@@ -567,6 +598,10 @@ CREATE INDEX IF NOT EXISTS idx_sales_user_datetime
   ON public.sales (user_id, date_time DESC);
 CREATE INDEX IF NOT EXISTS idx_sales_store
   ON public.sales (store_id);
+-- Unicidade do número SEQUENCIAL de venda por loja (defesa em
+-- profundidade — a atribuição no process_sale usa advisory lock).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_store_number
+  ON public.sales (store_id, sale_number);
 CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id
   ON public.sale_items (sale_id);
 CREATE INDEX IF NOT EXISTS idx_financial_transactions_user_date
@@ -580,6 +615,10 @@ CREATE INDEX IF NOT EXISTS idx_debts_user_due
   ON public.debts (user_id, due_date);
 CREATE INDEX IF NOT EXISTS idx_debts_store
   ON public.debts (store_id);
+-- Unicidade do número SEQUENCIAL de dívida por loja (defesa em
+-- profundidade — a atribuição no register_debt usa advisory lock).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_debts_store_number
+  ON public.debts (store_id, debt_number);
 CREATE INDEX IF NOT EXISTS idx_customers_user_name
   ON public.customers (user_id, name);
 CREATE INDEX IF NOT EXISTS idx_customers_store
@@ -588,6 +627,10 @@ CREATE INDEX IF NOT EXISTS idx_purchases_user_datetime
   ON public.purchases (user_id, date_time DESC);
 CREATE INDEX IF NOT EXISTS idx_purchases_store
   ON public.purchases (store_id);
+-- Unicidade do número SEQUENCIAL de compra por loja (defesa em
+-- profundidade — a atribuição no process_purchase usa advisory lock).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_purchases_store_number
+  ON public.purchases (store_id, purchase_number);
 CREATE INDEX IF NOT EXISTS idx_purchase_items_purchase_id
   ON public.purchase_items (purchase_id);
 
@@ -605,7 +648,7 @@ SET search_path = public
 AS $$
 BEGIN
   -- Só força o valor quando há sessão (JWT). No SQL Editor (sem sessão),
-  -- o valor informado é preservado — permite o seed da Parte 2.
+  -- o valor informado é preservado.
   IF auth.uid() IS NOT NULL THEN
     NEW.user_id := auth.uid();
   END IF;
@@ -664,7 +707,7 @@ CREATE TRIGGER trg_purchase_items_user_id
 --
 -- ⚠️ O app envia o store_id da loja ATIVA explicitamente; o trigger é a
 -- defesa em profundidade no servidor. No SQL Editor (sem JWT) o valor
--- informado é preservado — permite o seed da Parte 2.
+-- informado é preservado.
 
 -- Helper: o usuário é dono do tenant [tenantId]? (definido na seção 1.2b —
 -- o RLS da seção 1.7 também o usa).
@@ -736,6 +779,32 @@ ALTER TABLE public.tenants         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.stores          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.store_employees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.plan_requests   ENABLE ROW LEVEL SECURITY;
+
+-- Publica `store_employees` no Realtime (bloqueio INSTANTÂNEO de
+-- funcionários desativados): o app assina `postgres_changes` com filtro
+-- `user_id = auth.uid()`; sem a publicação, o canal nunca recebe eventos.
+-- O RLS da tabela (próprio usuário/dono/super admin) limita cada sessão
+-- aos eventos do PRÓPRIO vínculo — o funcionário continua recebendo a
+-- mudança de `is_active` mesmo após ser desativado (ele ainda lê a linha).
+-- Idempotente (fix Aug 8): em PostgreSQL PURO, ADD TABLE numa tabela já
+-- publicada é um no-op, mas no SUPABASE é um ERRO 42710
+-- (duplicate_object) — o bloco confere a associação em
+-- pg_publication_tables ANTES de publicar. Em PostgreSQL puro
+-- (sql_check.sh) a publicação não existe → no-op também.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'store_employees'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.store_employees;
+  END IF;
+END
+$$;
 
 -- Super admin: papel BASEADO EM BANCO (tabela public.super_admins) —
 -- substitui a checagem por e-mail hardcoded (auditoria C3). O papel vive
@@ -1137,6 +1206,47 @@ CREATE POLICY plan_requests_delete ON public.plan_requests
   FOR DELETE USING (public.is_super_admin());
 
 -- ---------------------------------------------------------------
+-- 1.7c Ajustes do tenant (moeda/idioma) — RPC do DONO
+-- ---------------------------------------------------------------
+-- A política `tenants_update` acima só permite o SUPER ADMIN alterar a
+-- linha do tenant (status/plano são decisões administrativas). Para o
+-- DONO trocar moeda e idioma em Lojas → Ajustes sem abrir um UPDATE
+-- irrestrito, a operação passa por esta RPC SECURITY DEFINER: a guarda
+-- `is_tenant_owner` limita a chamada a quem é dono e o UPDATE toca
+-- APENAS as duas colunas de apresentação — o dono nunca alcança
+-- status/plano/motivo pelo banco.
+CREATE OR REPLACE FUNCTION public.update_tenant_settings(
+  p_tenant_id TEXT,
+  p_currency_code TEXT,
+  p_language TEXT
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_currency text := CASE WHEN p_currency_code IN ('BRL','USD','EUR','MZN')
+                          THEN p_currency_code ELSE 'MZN' END;
+  v_lang text := CASE WHEN p_language IN ('pt','en')
+                      THEN p_language ELSE 'pt' END;
+BEGIN
+  IF NOT public.is_tenant_owner(p_tenant_id) THEN
+    RAISE EXCEPTION 'Apenas o dono do tenant pode alterar moeda e idioma.';
+  END IF;
+
+  UPDATE public.tenants
+     SET currency_code = v_currency,
+         language = v_lang
+   WHERE id = p_tenant_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Tenant % não encontrado.', p_tenant_id;
+  END IF;
+END;
+$$;
+
+-- ---------------------------------------------------------------
 -- 1.8 Índices da Camada de Contas
 -- ---------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_tenants_owner
@@ -1413,13 +1523,15 @@ AS $$
   SELECT CASE WHEN p_lang = 'en' THEN
       CASE p_method
         WHEN 'cash' THEN 'Cash' WHEN 'debitCard' THEN 'Debit card'
-        WHEN 'creditCard' THEN 'Credit card' WHEN 'pix' THEN 'Pix'
-        WHEN 'transfer' THEN 'Bank transfer' ELSE p_method END
+        WHEN 'creditCard' THEN 'Credit card' WHEN 'mPesa' THEN 'M-Pesa'
+        WHEN 'eMola' THEN 'E-Mola' WHEN 'transfer' THEN 'Bank transfer'
+        ELSE p_method END
     ELSE
       CASE p_method
         WHEN 'cash' THEN 'Dinheiro' WHEN 'debitCard' THEN 'Cartão de débito'
-        WHEN 'creditCard' THEN 'Cartão de crédito' WHEN 'pix' THEN 'Pix'
-        WHEN 'transfer' THEN 'Transferência' ELSE p_method END
+        WHEN 'creditCard' THEN 'Cartão de crédito' WHEN 'mPesa' THEN 'M-Pesa'
+        WHEN 'eMola' THEN 'E-Mola' WHEN 'transfer' THEN 'Transferência'
+        ELSE p_method END
     END;
 $$;
 
@@ -1475,6 +1587,8 @@ DECLARE
   -- W4: total em CENTAVOS inteiros (BIGINT) — comparação exata.
   v_total bigint := (p_sale->>'total_amount')::bigint;
   v_lang text;
+  -- Número SEQUENCIAL da venda na loja (sale_number).
+  v_sale_number bigint;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a venda.';
@@ -1513,10 +1627,18 @@ BEGIN
   -- Trava e valida o estoque de TODOS os itens (fecha TOCTOU).
   PERFORM public.lock_products_or_raise(p_items, v_store, TRUE);
 
+  -- Número SEQUENCIAL da venda na loja: atribuído AQUI no servidor, dentro
+  -- da mesma transação, sob uma advisory lock por loja — duas vendas
+  -- concorrentes na mesma loja nunca recebem o mesmo número. O id continua
+  -- sendo a chave de idempotência (o RETURN acima não consome número).
+  PERFORM pg_advisory_xact_lock(hashtextextended('sale_number:' || v_store, 0));
+  SELECT COALESCE(MAX(sale_number), 0) + 1 INTO v_sale_number
+  FROM public.sales WHERE store_id = v_store;
+
   -- Venda + itens (snapshot de nome/preço).
   INSERT INTO public.sales
-    (id, user_id, store_id, total_amount, payment_method, date_time)
-  VALUES (p_sale->>'id', v_uid, v_store, v_total,
+    (id, user_id, store_id, sale_number, total_amount, payment_method, date_time)
+  VALUES (p_sale->>'id', v_uid, v_store, v_sale_number, v_total,
           p_sale->>'payment_method', (p_sale->>'date_time')::timestamptz);
 
   INSERT INTO public.sale_items
@@ -1554,6 +1676,8 @@ DECLARE
   v_store text := p_debt->>'store_id';
   v_customer_debt boolean := (p_debt->>'is_customer_debt')::boolean;
   v_lang text;
+  -- Número SEQUENCIAL da dívida na loja (debt_number).
+  v_debt_number bigint;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar o fiado.';
@@ -1576,11 +1700,20 @@ BEGIN
     RETURN;
   END IF;
 
+  -- Número SEQUENCIAL da dívida na loja: atribuído AQUI no servidor,
+  -- dentro da mesma transação, sob uma advisory lock por loja — duas
+  -- dívidas concorrentes na mesma loja nunca recebem o mesmo número.
+  -- O id continua sendo a chave de idempotência (o RETURN acima não
+  -- consome número).
+  PERFORM pg_advisory_xact_lock(hashtextextended('debt_number:' || v_store, 0));
+  SELECT COALESCE(MAX(debt_number), 0) + 1 INTO v_debt_number
+  FROM public.debts WHERE store_id = v_store;
+
   -- Dívida + pendência financeira vinculada em UMA transação.
   INSERT INTO public.debts
-    (id, user_id, store_id, person_name, amount, due_date,
+    (id, user_id, store_id, debt_number, person_name, amount, due_date,
      is_customer_debt, is_paid, paid_at, customer_id)
-  VALUES (p_debt->>'id', v_uid, v_store, p_debt->>'person_name',
+  VALUES (p_debt->>'id', v_uid, v_store, v_debt_number, p_debt->>'person_name',
           (p_debt->>'amount')::bigint, (p_debt->>'due_date')::timestamptz,
           v_customer_debt, FALSE, NULL, p_debt->>'customer_id');
 
@@ -1701,6 +1834,8 @@ DECLARE
   -- W4: total em CENTAVOS inteiros (BIGINT) — comparação exata.
   v_total bigint := (p_purchase->>'total_amount')::bigint;
   v_lang text;
+  -- Número SEQUENCIAL da compra na loja (purchase_number).
+  v_purchase_number bigint;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a compra.';
@@ -1737,11 +1872,24 @@ BEGIN
   -- (mesmo padrão do process_sale; fecha corrida com exclusão).
   PERFORM public.lock_products_or_raise(p_items, v_store, FALSE);
 
-  -- Compra + itens.
+  -- Número SEQUENCIAL da compra na loja: atribuído AQUI no servidor,
+  -- dentro da mesma transação, sob uma advisory lock por loja — duas
+  -- compras concorrentes na mesma loja nunca recebem o mesmo número.
+  -- O id continua sendo a chave de idempotência (o RETURN acima não
+  -- consome número).
+  PERFORM pg_advisory_xact_lock(
+    hashtextextended('purchase_number:' || v_store, 0));
+  SELECT COALESCE(MAX(purchase_number), 0) + 1 INTO v_purchase_number
+  FROM public.purchases WHERE store_id = v_store;
+
+  -- Compra + itens. payment_method vem no payload (mesmo enum de vendas);
+  -- clientes antigos sem o campo caem em 'cash' (compra à vista).
   INSERT INTO public.purchases
-    (id, user_id, store_id, supplier_name, total_amount, date_time)
-  VALUES (p_purchase->>'id', v_uid, v_store, p_purchase->>'supplier_name',
-          v_total, (p_purchase->>'date_time')::timestamptz);
+    (id, user_id, store_id, purchase_number, supplier_name, total_amount, payment_method, date_time)
+  VALUES (p_purchase->>'id', v_uid, v_store, v_purchase_number,
+          p_purchase->>'supplier_name',
+          v_total, COALESCE(p_purchase->>'payment_method', 'cash'),
+          (p_purchase->>'date_time')::timestamptz);
 
   INSERT INTO public.purchase_items
     (purchase_id, user_id, product_id, product_name, quantity, unit_price)
@@ -1990,321 +2138,62 @@ EXCEPTION
 END;
 $$;
 
+-- ----------------------------------------------------------------------------
+-- Ativar/desativar funcionário (dono).
+--
+-- SECURITY DEFINER + guarda is_tenant_owner: apenas o DONO do tenant do
+-- vínculo muda o status (a política store_employees_update já limita o
+-- UPDATE ao dono, mas a guarda aqui torna a intenção explícita e resiliente
+-- a mudanças futuras de política). Funcionário DESATIVADO (is_active
+-- FALSE) perde o acesso imediatamente: `is_my_store`/`is_manager_of_store`
+-- exigem vínculo ativo, então RLS e guardas das RPCs negam TUDO nas lojas.
+--
+-- Parâmetros: p_employee_id (id do vínculo), p_is_active (novo status).
+-- Idempotente: atualizar com o mesmo status não falha.
+CREATE OR REPLACE FUNCTION public.set_employee_active(
+  p_employee_id TEXT,
+  p_is_active BOOLEAN
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_tenant_id TEXT;
+BEGIN
+  SELECT tenant_id INTO v_tenant_id
+  FROM public.store_employees WHERE id = p_employee_id;
+
+  IF v_tenant_id IS NULL THEN
+    RAISE EXCEPTION 'Funcionário não encontrado.';
+  END IF;
+  IF NOT public.is_tenant_owner(v_tenant_id) THEN
+    RAISE EXCEPTION 'Apenas o dono do tenant pode ativar/desativar funcionários.';
+  END IF;
+
+  UPDATE public.store_employees
+  SET is_active = p_is_active
+  WHERE id = p_employee_id;
+END;
+$$;
+
 -- ============================================================================
--- PARTE 2 — DADOS DE DEMONSTRAÇÃO (SEED)
+-- PARTE 2 — CATÁLOGO DE PLANOS DE ASSINATURA (dados reais, não demo)
 -- ============================================================================
--- Os INSERTs abaixo usam `SELECT ... FROM auth.users u LIMIT 1` como fonte:
--- o user_id vira o do PRIMEIRO usuário da lista. Se ainda não existe nenhum
--- usuário, nenhuma linha é inserida — rode esta parte novamente depois de se
--- cadastrar no app (ou troque a subconsulta pelo seu UUID de
--- Authentication → Users).
--- As datas são relativas a now() para os períodos (Hoje/7 dias/Mês) baterem.
--- Idempotente: ON CONFLICT (id) DO NOTHING.
--- ============================================================================
-
--- Produtos (7 — 5 na Loja Centro st1, 2 na Loja Shopping st2 para
--- demonstrar o escopo por loja)
-INSERT INTO public.products
-  (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p1', u.id, 'st1', 'Caneta esferográfica', 'Azul, ponta 0.7mm', 100, 200, 100
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.products
-  (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p2', u.id, 'st1', 'Caderno 96 folhas', 'Capa dura, pautado', 500, 990, 50
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.products
-  (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p3', u.id, 'st1', 'Arroz 5kg', 'Tipo 1', 1800, 2400, 30
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.products
-  (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p4', u.id, 'st1', 'Refrigerante 2L', 'Cola', 600, 850, 20
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.products
-  (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p5', u.id, 'st1', 'Sabonete', 'Neutro 90g', 150, 300, 4
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.products
-  (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p6', u.id, 'st2', 'Café torrado 500g', 'Grãos selecionados', 1200, 1990, 15
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.products
-  (id, user_id, store_id, name, description, purchase_price, sale_price, stock_quantity)
-SELECT 'p7', u.id, 'st2', 'Água mineral 1.5L', 'Garrafa', 150, 350, 24
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
--- Vendas (4 — 3 na Loja Centro st1, 1 na Loja Shopping st2)
-INSERT INTO public.sales (id, user_id, store_id, total_amount, payment_method, date_time)
-SELECT 's1', u.id, 'st1', 1390, 'pix', now() - interval '2 hours'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.sales (id, user_id, store_id, total_amount, payment_method, date_time)
-SELECT 's2', u.id, 'st1', 2400, 'cash', now() - interval '1 day'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.sales (id, user_id, store_id, total_amount, payment_method, date_time)
-SELECT 's3', u.id, 'st1', 1700, 'debitCard', now() - interval '3 days'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.sales (id, user_id, store_id, total_amount, payment_method, date_time)
-SELECT 's4', u.id, 'st2', 1990, 'pix', now() - interval '1 day'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
--- Itens das vendas (idempotente via UNIQUE (sale_id, product_id))
-INSERT INTO public.sale_items
-  (sale_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 's1', u.id, 'p1', 'Caneta esferográfica', 2, 200
-FROM auth.users u LIMIT 1
-ON CONFLICT (sale_id, product_id) DO NOTHING;
-
-INSERT INTO public.sale_items
-  (sale_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 's1', u.id, 'p2', 'Caderno 96 folhas', 1, 990
-FROM auth.users u LIMIT 1
-ON CONFLICT (sale_id, product_id) DO NOTHING;
-
-INSERT INTO public.sale_items
-  (sale_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 's2', u.id, 'p3', 'Arroz 5kg', 1, 2400
-FROM auth.users u LIMIT 1
-ON CONFLICT (sale_id, product_id) DO NOTHING;
-
-INSERT INTO public.sale_items
-  (sale_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 's3', u.id, 'p4', 'Refrigerante 2L', 2, 850
-FROM auth.users u LIMIT 1
-ON CONFLICT (sale_id, product_id) DO NOTHING;
-
-INSERT INTO public.sale_items
-  (sale_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 's4', u.id, 'p6', 'Café torrado 500g', 1, 1990
-FROM auth.users u LIMIT 1
-ON CONFLICT (sale_id, product_id) DO NOTHING;
-
--- Movimentações financeiras (10 — 9 na Loja Centro st1, 1 na Shopping st2)
-INSERT INTO public.financial_transactions
-  (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't1', u.id, 'st1', 'Venda via PIX', 1390, 'income', 'Vendas',
-       now() - interval '2 hours', 'paid', NULL
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.financial_transactions
-  (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't2', u.id, 'st1', 'Energia elétrica', 18000, 'expense', 'Contas',
-       now() - interval '5 hours', 'paid', NULL
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.financial_transactions
-  (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't3', u.id, 'st1', 'Venda em dinheiro', 2400, 'income', 'Vendas',
-       now() - interval '1 day', 'paid', NULL
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
--- Pendência de fiado vinculada à dívida d1 (a baixa marca a MESMA transação)
-INSERT INTO public.financial_transactions
-  (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't4', u.id, 'st1', 'Venda fiado (João)', 2500, 'income', 'Fiado',
-       now() - interval '1 day', 'pending', 'd1'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.financial_transactions
-  (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't5', u.id, 'st1', 'Aluguel da loja', 90000, 'expense', 'Contas',
-       now() - interval '2 days', 'paid', NULL
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.financial_transactions
-  (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't6', u.id, 'st1', 'Venda no débito', 1700, 'income', 'Vendas',
-       now() - interval '3 days', 'paid', NULL
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.financial_transactions
-  (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't7', u.id, 'st1', 'Compra de mercadoria', 32000, 'expense', 'Compras',
-       now() - interval '4 days', 'paid', NULL
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
--- Saídas das compras demo (pc1 = 210, pc2 = 150)
-INSERT INTO public.financial_transactions
-  (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't8', u.id, 'st1', 'Compra — Distribuidora Norte', 21000, 'expense', 'Compras',
-       now() - interval '4 days', 'paid', NULL
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.financial_transactions
-  (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't9', u.id, 'st1', 'Compra — Fornecedor Central', 15000, 'expense', 'Compras',
-       now() - interval '8 days', 'paid', NULL
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.financial_transactions
-  (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
-SELECT 't10', u.id, 'st2', 'Venda via PIX (Shopping)', 1990, 'income', 'Vendas',
-       now() - interval '1 day', 'paid', NULL
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
--- Clientes (4 — todos da Loja Centro st1)
-INSERT INTO public.customers (id, user_id, store_id, name, phone, email)
-SELECT 'c1', u.id, 'st1', 'João da Silva', '(11) 99911-1111', 'joao@email.com'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.customers (id, user_id, store_id, name, phone, email)
-SELECT 'c2', u.id, 'st1', 'Maria Souza', '(11) 98822-2222', 'maria@email.com'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.customers (id, user_id, store_id, name, phone, email)
-SELECT 'c3', u.id, 'st1', 'Pedro Alves', '(11) 97733-3333', 'pedro@email.com'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.customers (id, user_id, store_id, name, phone, email)
-SELECT 'c4', u.id, 'st1', 'Ana Lima', '(11) 96644-4444', 'ana@email.com'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
--- Compras (2 — Loja Centro st1) + itens
-INSERT INTO public.purchases
-  (id, user_id, store_id, supplier_name, total_amount, date_time)
-SELECT 'pc1', u.id, 'st1', 'Distribuidora Norte', 21000, now() - interval '4 days'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.purchase_items
-  (purchase_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 'pc1', u.id, 'p3', 'Arroz 5kg', 10, 1800
-FROM auth.users u LIMIT 1
-ON CONFLICT (purchase_id, product_id) DO NOTHING;
-
-INSERT INTO public.purchase_items
-  (purchase_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 'pc1', u.id, 'p4', 'Refrigerante 2L', 5, 600
-FROM auth.users u LIMIT 1
-ON CONFLICT (purchase_id, product_id) DO NOTHING;
-
-INSERT INTO public.purchases
-  (id, user_id, store_id, supplier_name, total_amount, date_time)
-SELECT 'pc2', u.id, 'st1', 'Fornecedor Central', 15000, now() - interval '8 days'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.purchase_items
-  (purchase_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 'pc2', u.id, 'p1', 'Caneta esferográfica', 50, 100
-FROM auth.users u LIMIT 1
-ON CONFLICT (purchase_id, product_id) DO NOTHING;
-
-INSERT INTO public.purchase_items
-  (purchase_id, user_id, product_id, product_name, quantity, unit_price)
-SELECT 'pc2', u.id, 'p2', 'Caderno 96 folhas', 20, 500
-FROM auth.users u LIMIT 1
-ON CONFLICT (purchase_id, product_id) DO NOTHING;
-
--- ---------------------------------------------------------------
--- Camada de Contas: planos + tenant demo Aprovado para o primeiro usuário
--- ---------------------------------------------------------------
--- Planos (3) — os MESMOS limites do DemoSeed local (pl1/pl2/pl3).
+-- O ERP NÃO semeia mais dados de demonstração (produtos, vendas, clientes,
+-- fiados, compras, tenant demo etc.): cada tenant começa VAZIO e registra
+-- apenas dados reais criados pelo usuário (auditoria M1 — seed removido).
+-- O que esta parte insere é a tabela de preços real — os MESMOS planos do
+-- catálogo local (PlanCatalog no app, pl1/pl2/pl3) — sem os quais o
+-- onboarding do dono não teria o que oferecer. Idempotente: ON CONFLICT
+-- (id) DO NOTHING.
 INSERT INTO public.plans
   (id, name, description, price_monthly, max_stores, max_employees, is_active)
 VALUES
-  ('pl1', 'Essencial', 'Para começar: 1 loja e até 3 funcionários.', 4900, 1, 3, TRUE),
-  ('pl2', 'Profissional', 'Para crescer: 3 lojas e até 10 funcionários.', 9900, 3, 10, TRUE),
-  ('pl3', 'Empresa', 'Para expandir: 10 lojas e até 50 funcionários.', 19900, 10, 50, TRUE)
-ON CONFLICT (id) DO NOTHING;
-
--- Tenant demo JÁ APROVADO para o primeiro usuário (dono) — assim o app
--- abre direto na área de gestão, com loja e funcionário de exemplo.
--- Para testar o fluxo de aprovação, cadastre uma NOVA conta.
-INSERT INTO public.tenants
-  (id, owner_user_id, business_name, plan_id, status, approved_at, created_at)
-SELECT 'tn_demo', u.id, 'Comercial Dumbhanengue', 'pl2', 'approved', now(),
-       now() - interval '30 days'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
--- Lojas demo do tenant demo (st1 = Loja Centro, st2 = Loja Shopping) —
--- duas lojas para demonstrar o seletor e o escopo por store_id da Fase 2.
-INSERT INTO public.stores (id, tenant_id, name, address)
-SELECT 'st1', 'tn_demo', 'Loja Centro', 'Av. Principal, 100'
-WHERE EXISTS (SELECT 1 FROM public.tenants WHERE id = 'tn_demo')
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.stores (id, tenant_id, name, address)
-SELECT 'st2', 'tn_demo', 'Loja Shopping', 'Rua das Flores, 250'
-WHERE EXISTS (SELECT 1 FROM public.tenants WHERE id = 'tn_demo')
-ON CONFLICT (id) DO NOTHING;
-
--- Funcionário demo: o próprio dono como gerente da Loja Centro.
-INSERT INTO public.store_employees
-  (id, tenant_id, store_id, user_id, full_name, email, role)
-SELECT 'e1', 'tn_demo', 'st1', u.id,
-       COALESCE(u.raw_user_meta_data->>'full_name', u.email), u.email,
-       'manager'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
--- Dívidas (5 — Loja Centro st1) — clientes vinculados via customer_id
-INSERT INTO public.debts
-  (id, user_id, store_id, person_name, amount, due_date, is_customer_debt, is_paid, paid_at, customer_id)
-SELECT 'd1', u.id, 'st1', 'João da Silva', 2500, now() + interval '3 days', TRUE, FALSE, NULL, 'c1'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.debts
-  (id, user_id, store_id, person_name, amount, due_date, is_customer_debt, is_paid, paid_at, customer_id)
-SELECT 'd2', u.id, 'st1', 'Maria Souza', 6000, now() - interval '2 days', TRUE, FALSE, NULL, 'c2'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.debts
-  (id, user_id, store_id, person_name, amount, due_date, is_customer_debt, is_paid, paid_at, customer_id)
-SELECT 'd3', u.id, 'st1', 'Pedro Alves', 1550, now() + interval '10 days', TRUE, FALSE, NULL, 'c3'
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
--- A pagar (fornecedor) — filtrada pelos casos de uso de crédito
-INSERT INTO public.debts
-  (id, user_id, store_id, person_name, amount, due_date, is_customer_debt, is_paid, paid_at, customer_id)
-SELECT 'd4', u.id, 'st1', 'Distribuidora Norte', 12000, now() + interval '5 days',
-       FALSE, FALSE, NULL, NULL
-FROM auth.users u LIMIT 1
-ON CONFLICT (id) DO NOTHING;
-
--- Já quitada — aparece no histórico de quitações
-INSERT INTO public.debts
-  (id, user_id, store_id, person_name, amount, due_date, is_customer_debt, is_paid, paid_at, customer_id)
-SELECT 'd5', u.id, 'st1', 'Ana Lima', 4000, now() - interval '20 days',
-       TRUE, TRUE, now() - interval '10 days', 'c4'
-FROM auth.users u LIMIT 1
+  ('pl1', 'Essencial', 'Para começar: 1 loja e até 3 funcionários.', 50000, 1, 3, TRUE),
+  ('pl2', 'Profissional', 'Para crescer: 3 lojas e até 10 funcionários.', 100000, 3, 10, TRUE),
+  ('pl3', 'Empresa', 'Para expandir: 10 lojas e até 50 funcionários.', 200000, 10, 50, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 COMMIT;

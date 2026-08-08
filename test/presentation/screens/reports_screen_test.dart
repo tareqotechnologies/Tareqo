@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
+import '../../helpers/viewport.dart';
 import '../../helpers/store_context.dart';
 
 import 'package:dumbhanengue/domain/repositories/i_sales_report_repository.dart';
@@ -153,5 +154,49 @@ void main() {
 
     // Continua renderizando os dados (o fake devolve sempre o mesmo).
     expect(find.text('Faturamento'), findsOneWidget);
+  });
+
+  // Rotação (UI): em paisagem o seletor de período renderiza em escala
+  // natural (sem o FittedBox encolher) e os três KPIs seguem lado a lado
+  // com os Expanded. Overflows de RenderFlex falham o teste via
+  // takeException; trocar de período após o giro prova que o seletor
+  // continua funcional.
+  testWidgets('KPIs e seletor de período sobrevivem à rotação para paisagem',
+      (tester) async {
+    usePortraitViewport(tester);
+
+    await tester.pumpWidget(_buildApp(_FakeGetSalesReportUseCase(_report())));
+    await tester.pumpAndSettle();
+
+    // Retrato: os três KPIs e o seletor de período visíveis.
+    expect(find.text('Faturamento'), findsOneWidget);
+    expect(find.text('Lucro bruto'), findsOneWidget);
+    expect(find.text('Margem'), findsOneWidget);
+    expect(find.byType(SegmentedButton<ReportPeriod>), findsOneWidget);
+    expect(find.text('Este mês'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Gira para paisagem.
+    await rotateToLandscape(tester);
+
+    // Sem overflow; KPIs e seletor seguem presentes após o giro.
+    expect(tester.takeException(), isNull);
+    expect(find.text('Faturamento'), findsOneWidget);
+    expect(find.text('Lucro bruto'), findsOneWidget);
+    expect(find.text('R\$ 54,00'), findsOneWidget);
+    expect(find.byType(SegmentedButton<ReportPeriod>), findsOneWidget);
+
+    // Trocar de período em paisagem continua funcionando (Tudo).
+    await tester.tap(find.text('Tudo'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<SegmentedButton<ReportPeriod>>(
+            find.byType(SegmentedButton<ReportPeriod>),
+          )
+          .selected,
+      {ReportPeriod.all},
+    );
+    expect(tester.takeException(), isNull);
   });
 }

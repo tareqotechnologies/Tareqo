@@ -127,6 +127,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get authBlockedTitle => 'Access suspended';
+
+  @override
+  String get authBlockedMessage =>
+      'Your employee account was deactivated by the business owner. If you have questions, please contact them.';
+
+  @override
+  String get authBlockedSignOut => 'Sign out';
+
+  @override
   String get authErrorRestoreSession => 'Could not restore your session';
 
   @override
@@ -155,6 +165,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginPasswordError => 'Password must be at least 8 characters.';
+
+  @override
+  String get loginPasswordHint =>
+      'Min. 8 characters with lowercase, uppercase, number and symbol.';
+
+  @override
+  String get loginWeakPasswordError =>
+      'Password must include lowercase, uppercase, numbers and symbols.';
+
+  @override
+  String get loginRateLimitError =>
+      'Too many attempts in a row. Please wait about an hour and try again.';
 
   @override
   String get loginShowPassword => 'Show password';
@@ -275,7 +297,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardRecentSales => 'Recent sales';
 
   @override
+  String get dashboardViewAll => 'View all';
+
+  @override
   String get dashboardNoSales => 'No sales yet — record your first one!';
+
+  @override
+  String get dashboardRecentPurchases => 'Recent purchases';
+
+  @override
+  String get dashboardNoPurchases =>
+      'No purchases yet — record your first one!';
 
   @override
   String get dashboardLowStock => 'Low stock';
@@ -357,6 +389,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get roleEmployee => 'Employee';
+
+  @override
+  String get employeeActive => 'Active';
+
+  @override
+  String get employeeInactive => 'Inactive';
+
+  @override
+  String employeeDeactivateConfirm(Object name) {
+    return 'Deactivate $name? The employee loses access immediately and cannot sell until reactivated.';
+  }
+
+  @override
+  String employeeReactivateConfirm(Object name) {
+    return 'Reactivate $name? The employee gets store access again.';
+  }
+
+  @override
+  String get employeeDeactivated => 'Employee deactivated.';
+
+  @override
+  String get employeeReactivated => 'Employee reactivated.';
+
+  @override
+  String get employeeDeactivateAction => 'Deactivate';
+
+  @override
+  String get employeeReactivateAction => 'Reactivate';
 
   @override
   String get upgradesLoadError => 'Could not load the plan upgrade requests.';
@@ -489,9 +549,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upgradeSubmit => 'Request upgrade';
 
   @override
-  String get commonRefresh => 'Refresh';
-
-  @override
   String get commonCancel => 'Cancel';
 
   @override
@@ -513,7 +570,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get periodToday => 'Today';
 
   @override
-  String get periodWeek => '7 days';
+  String get periodWeek => 'This week';
 
   @override
   String get periodMonth => 'This month';
@@ -531,10 +588,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentCreditCard => 'Credit card';
 
   @override
-  String get paymentPix => 'Pix';
+  String get paymentEMola => 'E-Mola';
+
+  @override
+  String get paymentMPesa => 'M-Pesa';
 
   @override
   String get paymentTransfer => 'Bank transfer';
+
+  @override
+  String get purchasesSearchHint => 'Search purchase...';
 
   @override
   String get productsSearchHint => 'Search product...';
@@ -644,6 +707,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get purchasesEmptySubtitle =>
       'Tap \"New purchase\" to record incoming goods and restock.';
+
+  @override
+  String purchasesHeaderCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count purchases',
+      one: '1 purchase',
+      zero: '0 purchases',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get purchasesHeaderVsYesterday => 'vs yesterday';
+
+  @override
+  String purchasesStockAdded(int units, String unit) {
+    return 'Stock +$units $unit';
+  }
+
+  @override
+  String get purchasesEmptyFilteredTitle => 'No purchases found';
+
+  @override
+  String get purchasesEmptyFilteredSubtitle => 'Adjust the period filter.';
+
+  @override
+  String get purchasesClearFilters => 'Clear filters';
 
   @override
   String get purchasesSupplierError => 'Enter the purchase supplier.';
@@ -969,6 +1061,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get salesEmptySubtitle => 'Tap \"New sale\" to record your first one.';
+
+  @override
+  String get salesSearchHint => 'Search sales...';
+
+  @override
+  String get periodYesterday => 'Yesterday';
+
+  @override
+  String get paymentFilterCard => 'Card';
+
+  @override
+  String get salesStatusPaid => 'Paid';
+
+  @override
+  String salesHeaderTransactions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions',
+      one: '1 transaction',
+      zero: '0 transactions',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get salesHeaderVsYesterday => 'vs yesterday';
+
+  @override
+  String get salesEmptyFilteredTitle => 'No sales found';
+
+  @override
+  String get salesEmptyFilteredSubtitle => 'Adjust your search or filters.';
+
+  @override
+  String get salesClearFilters => 'Clear filters';
 
   @override
   String get salesItemUnavailable =>

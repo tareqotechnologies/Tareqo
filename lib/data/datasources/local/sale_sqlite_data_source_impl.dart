@@ -18,8 +18,8 @@ final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
   @override
   Future<List<Sale>> getAll({required String storeId}) async {
     final rows = _db.select(
-      'SELECT id, store_id, total_amount, payment_method, date_time '
-      'FROM sales WHERE store_id = ? ORDER BY date_time DESC',
+      'SELECT id, store_id, sale_number, total_amount, payment_method, '
+      'date_time FROM sales WHERE store_id = ? ORDER BY date_time DESC',
       [storeId],
     );
     return [
@@ -27,6 +27,7 @@ final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
         Sale(
           id: row['id'] as String,
           storeId: row['store_id'] as String,
+          number: (row['sale_number'] as num).toInt(),
           items: _itemsOf(row['id'] as String),
           totalAmountCents: (row['total_amount'] as num).toInt(),
           paymentMethod:
@@ -58,12 +59,24 @@ final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
   @override
   Future<void> add(Sale sale) async {
     AppDatabase.runInTransaction(_db, () {
+      // Número SEQUENCIAL da venda na loja: MAX+1 calculado DENTRO da
+      // mesma transação (BEGIN IMMEDIATE segura a escrita) — duas vendas
+      // concorrentes nunca recebem o mesmo número. O valor enviado no
+      // objeto é ignorado: o banco é a autoridade.
+      final nextNumber = _db.select(
+        'SELECT COALESCE(MAX(sale_number), 0) + 1 AS next '
+        'FROM sales WHERE store_id = ?',
+        [sale.storeId],
+      ).first['next'] as int;
+
       _db.execute(
-        'INSERT INTO sales (id, store_id, total_amount, payment_method, '
-        'date_time) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO sales '
+        '(id, store_id, sale_number, total_amount, payment_method, '
+        'date_time) VALUES (?, ?, ?, ?, ?, ?)',
         [
           sale.id,
           sale.storeId,
+          nextNumber,
           sale.totalAmountCents,
           sale.paymentMethod.name,
           sale.dateTime.millisecondsSinceEpoch,

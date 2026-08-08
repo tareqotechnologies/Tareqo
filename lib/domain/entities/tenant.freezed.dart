@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 mixin _$Tenant {
 
  String get id; String get ownerUserId; String get businessName; String get planId; TenantStatus get status; String? get rejectionReason; DateTime? get approvedAt; DateTime get createdAt;/// Moeda padrão dos valores (BRL, USD, EUR, MZN) — escolhida pelo dono
-/// no onboarding e alterável em Lojas → Ajustes.
+/// no onboarding e alterável em Lojas → Ajustes. Novos tenants nascem
+/// com MZN (mercado-alvo Moçambique).
  String get currencyCode;/// Idioma do aplicativo (`pt` ou `en`) — escolhido pelo dono.
  String get language;
 /// Create a copy of Tenant
@@ -221,7 +222,7 @@ return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that
 @JsonSerializable()
 
 class _Tenant implements Tenant {
-  const _Tenant({required this.id, required this.ownerUserId, required this.businessName, required this.planId, required this.status, this.rejectionReason, this.approvedAt, required this.createdAt, this.currencyCode = 'BRL', this.language = 'pt'});
+  const _Tenant({required this.id, required this.ownerUserId, required this.businessName, required this.planId, required this.status, this.rejectionReason, this.approvedAt, required this.createdAt, this.currencyCode = 'MZN', this.language = 'pt'});
   factory _Tenant.fromJson(Map<String, dynamic> json) => _$TenantFromJson(json);
 
 @override final  String id;
@@ -233,7 +234,8 @@ class _Tenant implements Tenant {
 @override final  DateTime? approvedAt;
 @override final  DateTime createdAt;
 /// Moeda padrão dos valores (BRL, USD, EUR, MZN) — escolhida pelo dono
-/// no onboarding e alterável em Lojas → Ajustes.
+/// no onboarding e alterável em Lojas → Ajustes. Novos tenants nascem
+/// com MZN (mercado-alvo Moçambique).
 @override@JsonKey() final  String currencyCode;
 /// Idioma do aplicativo (`pt` ou `en`) — escolhido pelo dono.
 @override@JsonKey() final  String language;

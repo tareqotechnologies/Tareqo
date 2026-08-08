@@ -1,7 +1,9 @@
 # 🏭 E2E Production-Readiness Audit — Dumbhanengue ERP
 
-**Audit date:** Aug 4, 2026 · **Stack:** Flutter 3.44.6 / Dart 3.12.2 · **Size:** 211 files / ~20k LOC in `lib/`, 72 test files
+**Audit date:** Aug 4, 2026 · **Stack:** Flutter 3.44.6 / Dart 3.12.2 · **Size:** 211 files / ~20k LOC in `lib/`, 73 test files (Aug 7)
 
+> **Update 7 (Aug 7, 2026):** **Employee activation/deactivation + product creation matrix** — the **owner** now activates/deactivates employees (switch in the Stores → Employees tab with confirmation; deactivated employees lose access **immediately** via the two-layered block: the AuthGate shows the "Access suspended" screen and the server denies every operation — `is_my_store`/`is_manager_of_store` require an **active** link, `is_active = TRUE`). Implementation: `store_employees.is_active` (DEFAULT TRUE, legacy-safe) + RPC `set_employee_active` (SECURITY DEFINER, owner only, idempotent) + `is_my_store`/`is_manager_of_store` with active-link requirement — `schema.sql` + `supabase/upgrade.sql` (Parte 19); `sql_check.sh` new section [6b] (deactivate → `is_my_store` FALSE, reactivate → TRUE, non-owner rejected). Separately, a regular **employee does not create products** (only lists/sells) — the "New product" FAB is hidden when `currentAccessLevelProvider == employee` (owner/manager keep it; server RLS unchanged). **381/381 tests green · `flutter analyze` 0 issues.**
+>
 > **Update (Aug 5, 2026):** findings **C1, C3, C4** and **H3** are resolved — each finding below carries a status line, and the specialized reports, checklist, score, tech-debt estimate and roadmap were refreshed accordingly. A live schema verification also ran (Aug 5): the C3/C4 hardening layer had **never been applied** to the Supabase project — it was applied in one transaction and re-verified **10/10** (see Methodology).
 >
 > **Update 3 (Aug 6, 2026 — follow-up session):** follow-up E2E pass with **287/287 tests green** and `flutter analyze` 0 issues. **New HIGH finding S1-FIXED in this session:** the Supabase auth session (access + refresh tokens) was persisted by the SDK default `SharedPreferencesLocalStorage` — **plaintext XML** on the device. Implemented `SecureSupabaseLocalStorage` + `SecureGotrueAsyncStorage` (PKCE code verifier) in `lib/core/security/secure_supabase_local_storage.dart`, backed by `flutter_secure_storage` (Keychain/Keystore), wired via `authOptions: FlutterAuthClientOptions(localStorage: …, pkceAsyncStorage: …)` in `SupabaseBootstrap` (native platforms; web keeps the SDK default — documented limitation). Also fixed a **cross-mode DB inconsistency**: `settle_debt` RPC now stamps `date = now()` on the linked pending entry (realization date) — matching the local SQLite `markAsPaid` semantics; consolidated into `supabase/upgrade.sql` (Part 8.3) + an **airtight** `sql_check.sh` assertion (transaction date must be ≥ the debt's `paid_at`, both stamped in the same settle transaction — a time-window assertion wouldn't catch the regression). Housekeeping: stale doc comments corrected (trigger name, super-admin email refs, duplicated facade comment, `Money` typo), `CHANGELOG.md` created, README/build commands synced to the flavor strategy. See the report below for the complete findings catalog.
@@ -19,7 +21,7 @@
 | Check | Result |
 |---|---|
 | `flutter analyze` | ✅ **0 issues** (clean) |
-| `flutter test` | ✅ **300/300 passing** (Aug 6 — final session) |
+| `flutter test` | ✅ **381/381 passing** (Aug 7 — + employee activation/deactivation + product creation matrix) |
 | `flutter pub outdated` | ✅ **Resolved (W10):** `sqlite3` → ^3.5.1 (build hooks/native assets); `sqlite3_flutter_libs` (EOL) removed |
 | SQL/RLS smoke test (`scripts/sql_check.sh` + `sqlcheck_stub.sql`) | ✅ **12/12 steps** on real Postgres 16 (Docker, CI config — scram/TCP): RLS per store, atomic money RPCs, `get_dashboard_kpis` (W5), `get_cash_flow`/`get_sales_report` (H2), `upgrade.sql` idempotency, W4 NUMERIC→cents migration (25.50→2550, no double-apply) |
 | Schema review (`supabase/schema.sql`, 2311 lines) | ✅ Full read: RLS, triggers, RPCs, policies, seed |
@@ -191,7 +193,7 @@ END; $$;
 
 | # | Category | Location | Problem | Fix |
 |---|---|---|---|---|
-| M1 | Data | `supabase/schema.sql` seed | Demo seed works **only for the first user** (PKs `p1`…`tn_demo` conflict → `DO NOTHING`). Documented, but confusing in a multi-tenant prod | Ship no seed in prod schema; move to a one-time migration |
+| M1 | Data | `supabase/schema.sql` seed | Demo seed works **only for the first user** (PKs `p1`…`tn_demo` conflict → `DO NOTHING`). Documented, but confusing in a multi-tenant prod | ✅ Seed demo removido do schema (Parte 2 agora só insere o catálogo de planos); bases existentes são limpas com `supabase/cleanup_demo_data.sql` |
 | M2 | Ops | `web/index.html`, `web/manifest.json`, `ios/Runner/Info.plist`, Android label | Placeholder branding everywhere: meta description *"A new Flutter project."*, title `dumbhanengue`, default icons, no CSP — **metadata + full icon set done (W7, Aug 6)**; CSP still open (only if web ships) | ✅ metadata + icon set (W7); ⏳ `Content-Security-Policy` meta (só se web ship) |
 | M3 | Perf | `lib/presentation/screens/shell/app_shell.dart` | `IndexedStack` keeps all 6 sections alive (memory + build cost); dashboard folds on every list change | Acceptable at this scale; if growing, lazy-load tabs / use `AutomaticKeepAlive` |
 | M4 | Deps | `pubspec.yaml` | **✅ FIXED (Aug 6, W10):** `sqlite3` → ^3.5.1 (build hooks/native assets), `sqlite3_flutter_libs` (EOL) removed | Done (checklist 8.2) |
@@ -241,7 +243,7 @@ Plans (Essencial/Profissional/Empresa) with **DB-enforced** store/employee limit
 
 | Area | ✅ Ready | 🔴 Not ready |
 |---|---|---|
-| Code quality | analyze clean, 300 tests, docs | — |
+| Code quality | analyze clean, 381 tests, docs | — |
 | Data integrity | atomic sale/purchase/debt RPCs (incl. `settle_debt`), idempotent, stock locking, **money in integer cents (W4)** | — |
 | Security | RLS, anti-forgery triggers, DB-backed super-admin role (C3), secure storage, **audit log (H8)** | tenant spam (H6), 2FA (H9) |
 | Release | keystore-based release signing (C1), flavors | applicationId/branding placeholder (L1) |

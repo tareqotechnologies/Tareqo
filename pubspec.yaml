@@ -26,6 +26,14 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
   supabase_flutter: ^2.16.0
+  # Deep links de autenticação (confirmação de e-mail / OAuth com PKCE): o
+  # link do e-mail (dumbhanengue://callback) reabre o app e conclui o fluxo
+  # — ver core/network/deep_link_handler.dart e o site_url no Supabase.
+  app_links: ^7.2.1
+  # postgrest: exceções do cliente do Supabase — usada em PRODUÇÃO agora
+  # (tradução dos erros da RPC set_employee_active no datasource remoto de
+  # funcionários; antes só nos testes do SupabaseEmployeeProcessor).
+  postgrest: 2.8.0
   # W6: cliente HTTP central com timeout + retry de leituras idempotentes
   # (injetado no Supabase.initialize — ver core/network).
   http: ^1.6.0
@@ -47,6 +55,17 @@ dependencies:
   # 9.x: corrige a incompatibilidade com o Kotlin "built-in" do Flutter
   # 3.44+ (o 8.14.2 fixava languageVersion=1.6 e quebrava o build de
   # release — falha pré-existente do CI, auditoria M4/7.7).
+  #
+  # ⚠️ AVISO CONHECIDO (build AGP 9+, Flutter 3.44): o android/build.gradle
+  # do sentry_flutter ainda aplica `apply plugin: 'kotlin-android'` (KGP), e o
+  # tooling do Flutter emite: "Your app uses the following plugins that apply
+  # Kotlin Gradle Plugin (KGP): sentry_flutter — Future versions of Flutter
+  # will fail to build". É BENIGNO hoje (apenas aviso, o build passa) e NÃO há
+  # como suprimir via gradle.properties. Nenhuma versão publicada corrige
+  # ainda: o 9.26.0, o 10.0.0-alpha.3 e até o main do sentry-dart aplicam KGP.
+  # A migração upstream (getsentry/sentry-dart#3738, DART-382) está prevista
+  # para o v10 estável (~fim de ago/meio de set 2026, bloqueada no jni).
+  # Quando o v10 sair: subir para ^10.0.0 — o aviso desaparece sozinho.
   sentry_flutter: ^9.26.0
 
 dev_dependencies:
@@ -61,12 +80,6 @@ dev_dependencies:
 
   # Conjunto de lints recomendados pelo Flutter
   flutter_lints: ^6.0.0
-
-  # O teste de SupabaseEmployeeProcessor constrói PostgrestException
-  # (tradução dos erros da RPC create_employee_account) — dependência
-  # transitiva do supabase_flutter declarada explicitamente para os testes
-  # (depend_on_referenced_packages).
-  postgrest: 2.8.0
 
   # --- Branding (W7) ---
   # Gera os ícones nativos a partir de assets/branding (gerados por
@@ -89,23 +102,31 @@ flutter:
   # Garante que a fonte de ícones Material esteja incluída no aplicativo.
   uses-material-design: true
 
-  # Para adicionar assets:
-  # assets:
-  #   - assets/images/
+  # Logotipo oficial da marca (azul/branco, Aug 8) — usada pela tela de
+  # abertura in-app (_SplashScreen do AuthGate). Gerada por
+  # tool/generate_icons_test.dart a partir de assets/branding/icon_official.png.
+  assets:
+    - assets/branding/splash_logo.png
 
-  # Para adicionar fontes customizadas:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  # Fonte tipográfica do ERP: Inter (variável, eixo opsz+wght).
+  # Escolhida por legibilidade em telas densas de dados (ERP) e suporte
+  # nativo a pesos via eixo wght no Flutter (fontWeight mapeia o eixo).
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
 
-# Ícones nativos (W7) — gerados por tool/generate_icons_test.dart.
-# Correr: flutter test tool/generate_icons_test.dart && dart run flutter_launcher_icons
+# Ícones nativos (W7) — gerados por tool/generate_icons_test.dart a partir
+# da imagem-fonte assets/branding/icon_official.png (design OFICIAL
+# azul/branco, Aug 8 — upscaled do dumbhanengue.ico). Correr:
+# flutter test tool/generate_icons_test.dart && dart run flutter_launcher_icons
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/branding/icon_legacy.png"
-  adaptive_icon_background: "#0F766E"
+  # Fundo BRANCO do adaptativo — a mesma cara do .ico oficial (fundo branco
+  # + logotipo azul no foreground, keyado).
+  adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "assets/branding/icon_fg.png"
-  adaptive_icon_monochrome: "assets/branding/icon_fg.png"
+  adaptive_icon_monochrome: "assets/branding/icon_mono.png"
   remove_alpha_ios: true

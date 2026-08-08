@@ -10,4 +10,10 @@ abstract interface class EmployeeLocalDataSource {
 
   /// Vincula um funcionário a uma loja.
   Future<void> add(StoreEmployee employee);
+
+  /// Ativa/desativa um funcionário do tenant (dono).
+  Future<void> setActive({
+    required String employeeId,
+    required bool isActive,
+  });
 }

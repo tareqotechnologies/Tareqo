@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderSliver;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
+import '../../helpers/viewport.dart';
 import '../../helpers/store_context.dart';
 
 import 'package:dumbhanengue/domain/entities/purchase.dart';
+import 'package:dumbhanengue/domain/entities/sale.dart' show PaymentMethod;
 import 'package:dumbhanengue/domain/usecases/get_purchases_use_case.dart';
 import 'package:dumbhanengue/presentation/controllers/purchases_providers.dart';
 import 'package:dumbhanengue/presentation/screens/purchases/purchases_screen.dart';
+import 'package:dumbhanengue/presentation/widgets/skeleton.dart';
 
 /// Fake do [GetPurchasesUseCase] — a tela nunca toca em GetIt nem em
 /// datasources; o provider é sobrescrito no [ProviderScope].
@@ -39,61 +43,102 @@ Widget _buildApp(GetPurchasesUseCase useCase) {
   );
 }
 
+Purchase _purchase({
+  required String id,
+  required int number,
+  required String supplierName,
+  int totalAmountCents = 100,
+  List<PurchaseItem>? items,
+  PaymentMethod? paymentMethod,
+  DateTime? dateTime,
+}) {
+  return Purchase(
+    id: id,
+    number: number,
+    storeId: 'st1',
+    supplierName: supplierName,
+    items: items ??
+        [
+          PurchaseItem(
+            productId: 'p1',
+            productName: 'Caneta',
+            quantity: 1,
+            unitPriceCents: totalAmountCents,
+          ),
+        ],
+    totalAmountCents: totalAmountCents,
+    paymentMethod: paymentMethod ?? PaymentMethod.cash,
+    // Data fixa no PASSADO: o resumo do dia (hoje) nunca é afetado pela
+    // data real da execução do teste (determinístico).
+    dateTime: dateTime ?? DateTime(2024, 1, 10, 9, 15),
+  );
+}
+
+/// Compras com data fixa no passado (2024) — usadas pelos testes base.
 List<Purchase> get _purchases => [
-  Purchase(
-    id: 'c1',
-    storeId: 'st1',
-    supplierName: 'Distribuidora Central',
-    items: const [
-      PurchaseItem(
-        productId: 'p1',
-        productName: 'Caneta',
-        quantity: 50,
-        unitPriceCents: 50,
+      _purchase(
+        id: 'c1',
+        number: 1,
+        supplierName: 'Distribuidora Central',
+        totalAmountCents: 8500,
+        items: const [
+          PurchaseItem(
+            productId: 'p1',
+            productName: 'Caneta',
+            quantity: 50,
+            unitPriceCents: 50,
+          ),
+          PurchaseItem(
+            productId: 'p2',
+            productName: 'Caderno',
+            quantity: 20,
+            unitPriceCents: 300,
+          ),
+        ],
       ),
-      PurchaseItem(
-        productId: 'p2',
-        productName: 'Caderno',
-        quantity: 20,
-        unitPriceCents: 300,
+      _purchase(
+        id: 'c2',
+        number: 2,
+        supplierName: 'Papelaria Souza',
+        totalAmountCents: 2000,
+        items: const [
+          PurchaseItem(
+            productId: 'p3',
+            productName: 'Borracha',
+            quantity: 100,
+            unitPriceCents: 20,
+          ),
+        ],
+        dateTime: DateTime(2024, 1, 8, 16, 40),
       ),
-    ],
-    totalAmountCents: 8500,
-    dateTime: DateTime(2026, 8, 3, 9, 15),
-  ),
-  Purchase(
-    id: 'c2',
-    storeId: 'st1',
-    supplierName: 'Papelaria Souza',
-    items: const [
-      PurchaseItem(
-        productId: 'p3',
-        productName: 'Borracha',
-        quantity: 100,
-        unitPriceCents: 20,
-      ),
-    ],
-    totalAmountCents: 2000,
-    dateTime: DateTime(2026, 8, 1, 16, 40),
-  ),
-];
+    ];
 
 void main() {
   testWidgets('exibe as compras registradas pelo caso de uso', (tester) async {
     await tester.pumpWidget(_buildApp(_FakeGetPurchasesUseCase(_purchases)));
 
-    // Estado inicial: carregando.
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    // Estado inicial: carregando (skeleton).
+    expect(find.byType(Skeleton), findsOneWidget);
 
     await tester.pumpAndSettle();
 
     expect(find.text('Distribuidora Central'), findsOneWidget);
     expect(find.text('Papelaria Souza'), findsOneWidget);
-    // Nº de itens + data do dia (o formato da data varia com o relógio).
-    expect(find.textContaining('2 itens ·'), findsOneWidget);
-    expect(find.textContaining('1 item ·'), findsOneWidget);
+    // Número SEQUENCIAL da compra na loja em cada card.
+    expect(find.textContaining('C-00001 ·'), findsOneWidget);
+    expect(find.textContaining('C-00002 ·'), findsOneWidget);
+    // Nº de itens por card.
+    expect(find.textContaining('2 itens'), findsOneWidget);
+    expect(find.textContaining('1 item'), findsOneWidget);
+    // Unidades adicionadas ao estoque (50+20 e 100).
+    expect(find.text('Estoque +70 un.'), findsOneWidget);
+    expect(find.text('Estoque +100 un.'), findsOneWidget);
+    // Valores dos cards.
     expect(find.text('R\$ 85,00'), findsOneWidget);
     expect(find.text('R\$ 20,00'), findsOneWidget);
+    // Resumo do dia presente (compras antigas → hoje zerado).
+    expect(find.text('R\$ 0,00'), findsOneWidget);
+    expect(find.text('0 compras'), findsOneWidget);
   });
 
   testWidgets('exibe estado vazio quando não há compras', (tester) async {
@@ -120,13 +165,311 @@ void main() {
     expect(find.text('Tentar novamente'), findsOneWidget);
   });
 
-  testWidgets('o botão de atualizar recarrega a lista', (tester) async {
+  testWidgets('o pull-to-refresh recarrega a lista', (tester) async {
     await tester.pumpWidget(_buildApp(_FakeGetPurchasesUseCase(_purchases)));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.refresh));
+    // Arrastar para baixo dispara o RefreshIndicator.
+    await tester.fling(
+      find.text('Distribuidora Central'),
+      const Offset(0, 300),
+      1000,
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Distribuidora Central'), findsOneWidget);
+  });
+
+  testWidgets('resumo mostra o gasto e o número de compras de hoje', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetPurchasesUseCase([
+          _purchase(
+            id: 'c1',
+            number: 1,
+            supplierName: 'Fornecedor Hoje',
+            totalAmountCents: 8500,
+            dateTime: DateTime.now(),
+          ),
+        ]),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Valor do dia aparece no resumo E no card (2 instâncias).
+    expect(find.text('R\$ 85,00'), findsNWidgets(2));
+    expect(find.text('1 compra'), findsOneWidget);
+  });
+
+  testWidgets('filtra por forma de pagamento', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetPurchasesUseCase([
+          _purchase(
+            id: 'c1',
+            number: 1,
+            supplierName: 'Fornecedor M-Pesa',
+            paymentMethod: PaymentMethod.mPesa,
+          ),
+          _purchase(
+            id: 'c2',
+            number: 2,
+            supplierName: 'Fornecedor Dinheiro',
+          ),
+        ]),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Ambos os fornecedores visíveis inicialmente.
+    expect(find.text('Fornecedor M-Pesa'), findsOneWidget);
+    expect(find.text('Fornecedor Dinheiro'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilterChip, 'M-Pesa'));
+    await tester.pump();
+
+    // Só a compra paga via M-Pesa permanece.
+    expect(find.text('Fornecedor M-Pesa'), findsOneWidget);
+    expect(find.text('Fornecedor Dinheiro'), findsNothing);
+  });
+
+  testWidgets('filtra por período Hoje', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetPurchasesUseCase([
+          _purchase(
+            id: 'c1',
+            number: 1,
+            supplierName: 'Fornecedor Hoje',
+            dateTime: DateTime.now(),
+          ),
+          _purchase(
+            id: 'c2',
+            number: 2,
+            supplierName: 'Fornecedor Ontem',
+            dateTime: DateTime.now().subtract(const Duration(days: 1)),
+          ),
+        ]),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Ambos os fornecedores visíveis inicialmente.
+    expect(find.text('Fornecedor Hoje'), findsOneWidget);
+    expect(find.text('Fornecedor Ontem'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Hoje'));
+    await tester.pump();
+
+    // Só a compra de hoje permanece.
+    expect(find.text('Fornecedor Hoje'), findsOneWidget);
+    expect(find.text('Fornecedor Ontem'), findsNothing);
+  });
+
+  testWidgets('filtro sem resultado mostra estado vazio e limpa', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(_FakeGetPurchasesUseCase([_purchases.first])),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Compra de 2024 não cai no "Hoje" → estado vazio com ação de limpar.
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Hoje'));
+    await tester.pump();
+
+    expect(find.text('Nenhuma compra encontrada'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Limpar filtros'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Limpar filtros'));
+    await tester.pump();
+
+    expect(find.text('Distribuidora Central'), findsOneWidget);
+    expect(find.text('Nenhuma compra encontrada'), findsNothing);
+  });
+
+  testWidgets('busca por fornecedor ou número da compra', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(_FakeGetPurchasesUseCase(_purchases)),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Busca pelo número SEQUENCIAL da compra (C-00002).
+    await tester.enterText(find.byType(TextField), 'C-00002');
+    await tester.pump();
+
+    expect(find.text('Papelaria Souza'), findsOneWidget);
+    expect(find.text('Distribuidora Central'), findsNothing);
+
+    // Busca pelo fornecedor (case-insensitive).
+    await tester.enterText(find.byType(TextField), 'distribuidora');
+    await tester.pump();
+
+    expect(find.text('Distribuidora Central'), findsOneWidget);
+    expect(find.text('Papelaria Souza'), findsNothing);
+  });
+
+  testWidgets('busca sem resultado limpa a busca junto com os filtros', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(_FakeGetPurchasesUseCase([_purchases.first])),
+    );
+
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'zzz');
+    await tester.pump();
+
+    expect(find.text('Nenhuma compra encontrada'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Limpar filtros'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Limpar filtros'));
+    await tester.pump();
+
+    // A lista volta E o campo de busca foi limpo.
+    expect(find.text('Distribuidora Central'), findsOneWidget);
+    expect(find.text('Nenhuma compra encontrada'), findsNothing);
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller?.text,
+      isEmpty,
+    );
+  });
+
+  testWidgets('busca e filtros ficam fixos ao rolar a lista', (tester) async {
+    // Várias compras para permitir rolagem real.
+    final many = [
+      for (var i = 1; i <= 15; i++)
+        _purchase(
+          id: 'c$i',
+          number: i,
+          supplierName: 'Fornecedor $i',
+          totalAmountCents: 100 + i,
+        ),
+    ];
+    await tester.pumpWidget(
+      _buildApp(_FakeGetPurchasesUseCase(many)),
+    );
+    await tester.pumpAndSettle();
+
+    // Busca visível no topo, junto com o resumo do dia.
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('R\$ 0,00'), findsOneWidget);
+
+    // Rola a lista até o fim.
+    await tester.drag(
+      find.byType(CustomScrollView),
+      const Offset(0, -2000),
+    );
+    await tester.pumpAndSettle();
+
+    // A busca continua FIXA (pinned), mas o resumo rolou para fora.
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('R\$ 0,00'), findsNothing);
+  });
+
+  testWidgets('re-mede a barra fixa quando a escala de texto muda em runtime',
+      (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetPurchasesUseCase([_purchases.first, _purchases.last]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Altura pintada do header fixo (RenderSliver, não RenderBox).
+    double headerHeight() {
+      final render = tester.renderObject(
+        find.byType(SliverPersistentHeader),
+      ) as RenderSliver;
+      return render.geometry!.paintExtent;
+    }
+
+    final before = headerHeight();
+
+    // Usuário ajusta a escala de texto do sistema DEPOIS da montagem:
+    // a altura da barra fixa precisa ser re-medida (senão o conteúdo
+    // ficaria cortado pelo extent antigo).
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+    await tester.pumpAndSettle();
+
+    final after = headerHeight();
+    expect(after, greaterThan(before));
+    expect(find.byType(TextField), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('não estoura com escala de texto 2.0 em tela estreita', (
+    tester,
+  ) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Estreita (360) porém alta: garante que os cards sejam construídos/
+    // pintados com escala 2.0 (abaixo do fold o overflow ficaria mascarado).
+    tester.view.physicalSize = const Size(360, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(_buildApp(_FakeGetPurchasesUseCase(_purchases)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nova compra'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  // Rotação (UI): em paisagem a largura muda e a barra fixa precisa ser
+  // re-medida em runtime (mesmo mecanismo do text-scale — o PinnedHeader
+  // assina MediaQuery). A busca continua fixa e sem overflow após o giro;
+  // rolando, o resumo sai de cena e a busca permanece.
+  testWidgets('busca fixa sobrevive à rotação para paisagem', (tester) async {
+    // Retrato estreito: busca + filtros visíveis no topo.
+    usePortraitViewport(tester);
+
+    // Várias compras para permitir rolagem real.
+    final many = [
+      for (var i = 1; i <= 15; i++)
+        _purchase(
+          id: 'c$i',
+          number: i,
+          supplierName: 'Fornecedor $i',
+          totalAmountCents: 100 + i,
+        ),
+    ];
+    await tester.pumpWidget(_buildApp(_FakeGetPurchasesUseCase(many)));
+    await tester.pumpAndSettle();
+
+    // Busca fixa no topo, junto com o resumo do dia.
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('R\$ 0,00'), findsOneWidget);
+
+    // Gira para paisagem (800×600): a largura maior quebra os chips em
+    // menos linhas — a barra precisa re-medir o próprio extent.
+    await rotateToLandscape(tester);
+
+    // Sem overflow e a busca continua fixa após o giro.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(TextField), findsOneWidget);
+
+    // Rolando até o fim, a busca permanece FIXA e o resumo rolou para fora.
+    await tester.drag(
+      find.byType(CustomScrollView),
+      const Offset(0, -2000),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('R\$ 0,00'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 }

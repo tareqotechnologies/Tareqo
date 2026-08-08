@@ -33,8 +33,9 @@ abstract class Tenant with _$Tenant {
     required DateTime createdAt,
 
     /// Moeda padrão dos valores (BRL, USD, EUR, MZN) — escolhida pelo dono
-    /// no onboarding e alterável em Lojas → Ajustes.
-    @Default('BRL') String currencyCode,
+    /// no onboarding e alterável em Lojas → Ajustes. Novos tenants nascem
+    /// com MZN (mercado-alvo Moçambique).
+    @Default('MZN') String currencyCode,
 
     /// Idioma do aplicativo (`pt` ou `en`) — escolhido pelo dono.
     @Default('pt') String language,

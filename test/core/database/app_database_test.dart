@@ -22,38 +22,42 @@ void main() {
     }
   });
 
-  test('abre arquivo, cria schema e semeia dados demo (produção)', () {
+  test('abre arquivo e cria schema vazio (sem dados de demonstração)', () {
     final db = sqlite3.open(dbPath);
     AppDatabase.initialize(db);
 
-    // Seed da demonstração presente após a primeira inicialização
-    // (Fase 2: 7 produtos e 4 vendas — 2 produtos e 1 venda extra da
-    // Loja Shopping para demonstrar o escopo por loja).
-    expect(db.select('SELECT COUNT(*) AS c FROM products').first['c'], 7);
-    expect(db.select('SELECT COUNT(*) AS c FROM sales').first['c'], 4);
-    expect(db.select('SELECT COUNT(*) AS c FROM sale_items').first['c'], 5);
-    expect(
-      db.select('SELECT COUNT(*) AS c FROM financial_transactions').first['c'],
-      10,
-    );
-    expect(db.select('SELECT COUNT(*) AS c FROM debts').first['c'], 5);
-    expect(db.select('SELECT COUNT(*) AS c FROM customers').first['c'], 4);
-    expect(db.select('SELECT COUNT(*) AS c FROM purchases').first['c'], 2);
+    // O app não semeia NADA: o banco nasce com o schema criado e vazio —
+    // só registra dados REAIS criados pelo usuário.
+    for (final table in [
+      'products',
+      'sales',
+      'sale_items',
+      'financial_transactions',
+      'debts',
+      'customers',
+      'purchases',
+      'purchase_items',
+    ]) {
+      expect(
+        db.select('SELECT COUNT(*) AS c FROM $table').first['c'],
+        0,
+        reason: 'tabela $table deveria nascer vazia',
+      );
+    }
 
     db.close();
   });
 
-  test('dados persistem entre aberturas e seed não duplica', () async {
-    // Primeira abertura: cria + semeia.
+  test('dados reais persistem entre aberturas (sem seed)', () async {
+    // Primeira abertura: cria o schema vazio.
     final first = sqlite3.open(dbPath);
     AppDatabase.initialize(first);
     first.close();
 
-    // Segunda abertura: o seed NÃO deve duplicar os dados.
+    // Segunda abertura: continua VAZIO (nada é semeado).
     final second = sqlite3.open(dbPath);
     AppDatabase.initialize(second);
-
-    expect(second.select('SELECT COUNT(*) AS c FROM products').first['c'], 7);
+    expect(second.select('SELECT COUNT(*) AS c FROM products').first['c'], 0);
 
     // Round-trip real via datasource sobre o arquivo.
     final dataSource = ProductSqliteDataSourceImpl(second);
@@ -73,13 +77,15 @@ void main() {
 
     second.close();
 
-    // Terceira abertura: o produto adicionado continua lá.
+    // Terceira abertura: o produto adicionado continua lá (persistência
+    // real) e nenhum dado de demonstração apareceu.
     final third = sqlite3.open(dbPath);
     expect(
       (await ProductSqliteDataSourceImpl(third).getById('novo', storeId: 'st1'))
           ?.name,
       'Produto novo',
     );
+    expect(third.select('SELECT COUNT(*) AS c FROM products').first['c'], 1);
     third.close();
   });
 
@@ -150,6 +156,76 @@ void main() {
 
     // O primeiro INSERT também foi desfeito pelo rollback.
     expect(db.select('SELECT COUNT(*) AS c FROM products').first['c'], 0);
+
+    db.close();
+  });
+
+  test('migra vendas antigas com forma de pagamento pix para mPesa', () {
+    final db = sqlite3.open(dbPath);
+
+    // Simula um banco criado antes da troca Pix → M-Pesa/E-Mola: o enum é
+    // persistido pelo NOME, então uma venda 'pix' quebraria a leitura
+    // (PaymentMethod.values.byName('pix') lança) sem a migração.
+    db.execute('''
+      CREATE TABLE sales (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL DEFAULT 'st1',
+        sale_number INTEGER NOT NULL DEFAULT 0,
+        total_amount INTEGER NOT NULL,
+        payment_method TEXT NOT NULL,
+        date_time INTEGER NOT NULL
+      );
+    ''');
+    db.execute(
+      "INSERT INTO sales (id, total_amount, payment_method, date_time) "
+      "VALUES ('s1', 400, 'pix', 100)",
+    );
+
+    AppDatabase.createSchema(db);
+
+    // A venda foi reescrita para 'mPesa' (escolha do produto: M-Pesa é a
+    // operadora dominante) — a leitura via values.byName volta a funcionar.
+    expect(
+      db.select("SELECT payment_method FROM sales WHERE id = 's1'")
+          .first['payment_method'],
+      'mPesa',
+    );
+
+    db.close();
+  });
+
+  test('adiciona forma de pagamento em compras antigas (backfill cash)', () {
+    final db = sqlite3.open(dbPath);
+
+    // Simula um banco criado antes da coluna `payment_method` (compras
+    // antigas não registravam o método do fornecedor).
+    db.execute('''
+      CREATE TABLE purchases (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL DEFAULT 'st1',
+        purchase_number INTEGER NOT NULL DEFAULT 0,
+        supplier_name TEXT NOT NULL,
+        total_amount INTEGER NOT NULL,
+        date_time INTEGER NOT NULL
+      );
+    ''');
+    db.execute(
+      "INSERT INTO purchases "
+      "(id, supplier_name, total_amount, date_time) "
+      "VALUES ('pc1', 'Fornecedor', 2000, 100)",
+    );
+
+    AppDatabase.createSchema(db);
+
+    // A coluna foi adicionada e a compra existente virou 'cash' (compra à
+    // vista) — a leitura via PaymentMethod.values.byName não quebra.
+    final columns = db.select('PRAGMA table_info(purchases)').map((r) => r['name']);
+    expect(columns, contains('payment_method'));
+    expect(
+      db.select("SELECT payment_method FROM purchases WHERE id = 'pc1'")
+          .first['payment_method'],
+      'cash',
+    );
 
     db.close();
   });

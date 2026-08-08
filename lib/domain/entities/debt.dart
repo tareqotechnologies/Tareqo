@@ -18,6 +18,11 @@ abstract class Debt with _$Debt {
   @Assert('amountCents >= 0', 'O valor da dívida deve ser positivo.')
   const factory Debt({
     required String id,
+    // Número SEQUENCIAL da dívida DENTRO da loja (ex.: D-00001, D-00002).
+    // Atribuído pelo banco no insert — SQLite: MAX+1 por loja dentro da
+    // transação; Supabase: RPC register_debt com advisory lock por loja.
+    // O default 0 nunca é persistido (é substituído na gravação).
+    @Default(0) int number,
     // Loja dona do fiado (Fase 2 do multi-tenancy). Cada loja tem seu
     // próprio "a receber / a pagar".
     @Default('st1') String storeId,

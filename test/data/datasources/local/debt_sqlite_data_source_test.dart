@@ -6,6 +6,14 @@ import 'package:dumbhanengue/domain/entities/debt.dart';
 
 import '../../../helpers/test_sqlite.dart';
 
+Debt _buildDebt(String id, String personName) => Debt(
+  id: id,
+  personName: personName,
+  amountCents: 2500,
+  dueDate: DateTime(2026, 8, 15),
+  isCustomerDebt: true,
+);
+
 void main() {
   late Database db;
 
@@ -43,6 +51,32 @@ void main() {
     expect(debts.last.isCustomerDebt, isFalse);
     expect(debts.last.isPaid, isFalse);
     expect(debts.first.dueDate, DateTime(2026, 8, 15));
+    // Número SEQUENCIAL atribuído pelo banco (ordem de inserção).
+    expect(debts.map((d) => d.number).toList(), [1, 2]);
+  });
+
+  test('add atribui número SEQUENCIAL por loja (MAX+1) e ignora o do objeto',
+      () async {
+    final dataSource = DebtSqliteDataSourceImpl(db);
+
+    await dataSource.add(_buildDebt('d1', 'João'));
+    // Mesmo que o objeto traga number: 999, o banco atribui o próximo.
+    await dataSource.add(_buildDebt('d2', 'Maria').copyWith(number: 999));
+    await dataSource.add(_buildDebt('d3', 'Ana'));
+
+    final debts = await dataSource.getAll(storeId: 'st1');
+    expect(debts, hasLength(3));
+    expect(debts.map((d) => d.number).toSet(), {1, 2, 3});
+  });
+
+  test('numeração é independente por loja (cada loja começa em 1)', () async {
+    final dataSource = DebtSqliteDataSourceImpl(db);
+
+    await dataSource.add(_buildDebt('d1', 'João'));
+    await dataSource.add(_buildDebt('d2', 'Maria').copyWith(storeId: 'st2'));
+
+    expect((await dataSource.getAll(storeId: 'st1')).first.number, 1);
+    expect((await dataSource.getAll(storeId: 'st2')).first.number, 1);
   });
 
   test('markAsPaid marca a dívida como paga e carimba a data da baixa',

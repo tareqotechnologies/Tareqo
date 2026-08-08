@@ -19,4 +19,11 @@ final class EmployeeRepositoryImpl implements IEmployeeRepository {
   @override
   Future<void> add(StoreEmployee employee) =>
       _localDataSource.add(employee);
+
+  @override
+  Future<void> setActive({
+    required String employeeId,
+    required bool isActive,
+  }) =>
+      _localDataSource.setActive(employeeId: employeeId, isActive: isActive);
 }

@@ -15,7 +15,7 @@ import 'presentation/screens/auth/auth_gate.dart';
 /// **Idioma e moeda** (escolha do dono do tenant): o locale do
 /// [MaterialApp] e a formatação de moeda seguem [tenantSettingsProvider]
 /// — definidos no onboarding e alteráveis em Lojas → Ajustes. Sem tenant
-/// (login / super admin) o padrão é pt + BRL.
+/// (login / super admin) o padrão é pt + MZN (mercado-alvo Moçambique).
 class DumbhanengueApp extends ConsumerWidget {
   const DumbhanengueApp({super.key});
 
@@ -24,7 +24,7 @@ class DumbhanengueApp extends ConsumerWidget {
     final settings = ref.watch(tenantSettingsProvider);
 
     Formatters.applySettings(
-      currencyCode: settings?.currencyCode ?? 'BRL',
+      currencyCode: settings?.currencyCode ?? 'MZN',
       language: settings?.language ?? 'pt',
     );
 

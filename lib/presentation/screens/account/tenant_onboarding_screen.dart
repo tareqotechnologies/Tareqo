@@ -33,10 +33,10 @@ class _TenantOnboardingScreenState
 
   Plan? _selectedPlan;
 
-  /// Escolhas do dono — padrões pt + BRL (alteráveis em Lojas → Ajustes
-  /// depois da aprovação).
+  /// Escolhas do dono — padrões pt + MZN (o mercado-alvo é Moçambique;
+  /// alteráveis em Lojas → Ajustes depois da aprovação).
   String _language = 'pt';
-  String _currencyCode = 'BRL';
+  String _currencyCode = 'MZN';
 
   bool _isSubmitting = false;
   String? _formError;
@@ -219,6 +219,8 @@ class _TenantOnboardingScreenState
                                 for (final plan in plans) ...[
                                   _PlanCard(
                                     plan: plan,
+                                    currencyCode: _currencyCode,
+                                    language: _language,
                                     selected: _selectedPlan?.id == plan.id,
                                     onTap: () =>
                                         setState(() => _selectedPlan = plan),
@@ -311,11 +313,23 @@ class _ChoiceChip extends StatelessWidget {
 class _PlanCard extends StatelessWidget {
   const _PlanCard({
     required this.plan,
+    required this.currencyCode,
+    required this.language,
     required this.selected,
     required this.onTap,
   });
 
   final Plan plan;
+
+  /// Moeda SELECIONADA no onboarding — o preço do plano acompanha a
+  /// escolha ao vivo (padrão MZN), independente do Formatters global
+  /// (que ainda não tem tenant neste ponto).
+  final String currencyCode;
+
+  /// Idioma selecionado no onboarding (pt/en) — o preço também segue a
+  /// formatação do idioma escolhido (ex.: `MTn 1,000.00` em en).
+  final String language;
+
   final bool selected;
   final VoidCallback onTap;
 
@@ -372,7 +386,11 @@ class _PlanCard extends StatelessWidget {
               ),
             ),
             Text(
-              Formatters.currency(plan.priceMonthlyCents),
+              Formatters.currencyFor(
+                currencyCode,
+                plan.priceMonthlyCents,
+                language: language,
+              ),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: scheme.primary,

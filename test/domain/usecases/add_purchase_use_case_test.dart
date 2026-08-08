@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/purchase.dart';
+import 'package:dumbhanengue/domain/entities/sale.dart' show PaymentMethod;
 import 'package:dumbhanengue/domain/repositories/i_financial_transaction_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_purchase_processor.dart';
@@ -134,6 +135,7 @@ void main() {
     List<PurchaseItem>? items,
     int? totalAmountCents,
     String supplier = 'Distribuidora',
+    PaymentMethod paymentMethod = PaymentMethod.cash,
   }) {
     final effectiveItems = items ??
         const [
@@ -152,6 +154,7 @@ void main() {
         0,
         (sum, item) => sum + item.quantity * item.unitPriceCents,
       ),
+      paymentMethod: paymentMethod,
       dateTime: DateTime(2026, 8, 4, 10),
     );
   }
@@ -240,12 +243,14 @@ void main() {
       processor: processor,
     );
 
-    final purchase = buildPurchase();
+    final purchase = buildPurchase(paymentMethod: PaymentMethod.mPesa);
     await atomicUseCase(purchase);
 
     // O caminho composto NÃO roda — a compra inteira é do servidor.
     expect(processor.calls, 1);
     expect(processor.lastPurchase?.id, purchase.id);
+    // A forma de pagamento chega intacta ao processador atômico.
+    expect(processor.lastPurchase?.paymentMethod, PaymentMethod.mPesa);
     expect(
       purchaseRepository.getAll(storeId: 'st1'),
       completion(isEmpty),

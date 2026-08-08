@@ -5,7 +5,7 @@ The `lib/data/` layer concretely implements what the domain declares. It contain
 - **Datasources** — local data sources (contracts + implementations), remote business sources (Supabase) and remote auth;
 - **Repositories** — implementations of the domain contracts;
 - **Unit of Work** — atomic transactions (SQLite);
-- **Demo seed** — demo data injected at the composition root.
+- **Plan catalog** — the real price table injected at the composition root (no demo data).
 
 ---
 
@@ -41,7 +41,7 @@ lib/data/
 │       ├── employee_local_data_source.dart / _impl   # Employees (Accounts)
 │       ├── plan_request_local_data_source.dart / _impl  # Upgrades (Accounts)
 │       ├── sqlite_unit_of_work.dart                  # Real IUnitOfWork (transaction)
-│       └── demo_seed.dart                            # Demo data
+│       └── plan_catalog.dart                        # Plans (real catalog)
 └── repositories/
     ├── product_repository_impl.dart
     ├── sale_repository_impl.dart
@@ -122,6 +122,7 @@ CREATE TABLE products (
 CREATE TABLE sales (
   id TEXT PRIMARY KEY,
   store_id TEXT NOT NULL DEFAULT 'st1',
+  sale_number INTEGER NOT NULL DEFAULT 0,  -- sequential per store (S-00001)
   total_amount REAL NOT NULL CHECK (total_amount >= 0),
   payment_method TEXT NOT NULL,          -- enum name (stable)
   date_time INTEGER NOT NULL             -- epoch millis
@@ -152,6 +153,7 @@ CREATE TABLE financial_transactions (
 CREATE TABLE debts (
   id TEXT PRIMARY KEY,
   store_id TEXT NOT NULL DEFAULT 'st1',
+  debt_number INTEGER NOT NULL DEFAULT 0,  -- sequential per store (D-00001)
   person_name TEXT NOT NULL,
   amount REAL NOT NULL CHECK (amount >= 0),
   due_date INTEGER NOT NULL,             -- epoch millis
@@ -162,7 +164,7 @@ CREATE TABLE debts (
 );
 ```
 
-(`customers`, `purchases` and `purchase_items` follow the same pattern — `store_id` + snapshots.)
+(`customers`, `purchases` and `purchase_items` follow the same pattern — `store_id` + snapshots; `purchases` also has `purchase_number INTEGER NOT NULL DEFAULT 0` for the sequential per-store number C-00001 and `payment_method TEXT NOT NULL DEFAULT 'cash'` — the supplier payment method, same enum as sales, backfilled as cash for legacy rows.)
 
 **Serialization conventions:**
 
@@ -183,12 +185,16 @@ The `CHECK` constraints (`stock_quantity >= 0`, `amount >= 0`, `quantity > 0`) a
 2. **`financial_transactions.debt_id`** — added as `NULL` (old debts will settle via a new income, no duplicate);
 3. **`debts.paid_at`** — added as `NULL` (already settled debts have no settlement date until a new settlement);
 4. **`store_id`** on all 6 business tables (Phase 2) — added as `'st1'` + per-store indexes.
+5. **`sales.sale_number`** — sequential per store (S-00001…), backfilled by date order; unique `(store_id, sale_number)`;
+6. **`purchases.purchase_number`** — sequential per store (C-00001…), backfilled by date order; unique `(store_id, purchase_number)`;
+7. **`debts.debt_number`** — sequential per store (D-00001…), backfilled by due date order; unique `(store_id, debt_number)`;
+8. **`purchases.payment_method`** — supplier payment method (same enum as sales), added as `'cash'` (legacy purchases were immediate cash expenses).
 
-All of them use `PRAGMA table_info` to check the column first — **safe for re-execution** (new databases already create the columns in `CREATE TABLE`).
+The numbering migrations run **after** the `store_id` migration (the backfills reference `store_id`). All of them use `PRAGMA table_info` to check the column first — **safe for re-execution** (new databases already create the columns in `CREATE TABLE`).
 
-### Automatic seed
+### No automatic seed
 
-`seedIfEmpty` inserts the demo data **only on the first run** (guard: `COUNT(*)` of `products`), in a single transaction.
+The database **never seeds demo data**: `AppDatabase.initialize` only creates the schema and migrates money to cents (W4) — products, sales, cash, credit, customers and purchases start **empty** and only record real data created by the user.
 
 ---
 
@@ -251,19 +257,13 @@ Important detail: on `signUp`, if **email confirmation** is enabled, `response.u
 
 ## Accounts layer (multi-tenancy)
 
-The Accounts datasources (plans, tenants, stores, employees and upgrades) follow the **same dual-implementation pattern**: contract + in-memory (`*_impl.dart`) in the local branch and a Supabase datasource (`remote/`) in the remote branch. In local dev, the seed injects 3 plans, an **already-approved demo tenant** (`tn_demo`), 2 stores and 1 employee — the app opens straight into the management area. Flow details in [Multi-tenancy and Super Admin](11-multitenancy.md).
+The Accounts datasources (plans, tenants, stores, employees and upgrades) follow the **same dual-implementation pattern**: contract + in-memory (`*_impl.dart`) in the local branch and a Supabase datasource (`remote/`) in the remote branch. In local dev, the composition root only injects the **real plan catalog**; tenant, stores, employees and upgrades start empty — the owner goes through onboarding and approval. Flow details in [Multi-tenancy and Super Admin](11-multitenancy.md).
 
 ---
 
-## Demo data (`DemoSeed`)
+## No demo data
 
-Generates: 7 products, 4 sales (with items), 10 financial transactions, 5 debts and 4 customers — all with **dates relative to `DateTime.now()`** so the periods (Today/7 days/Month) work from day one (business data is split across stores `st1`/`st2` to demonstrate the store scope).
-
-Important seed relationships:
-- `t1` ↔ sale `s1`, `t3` ↔ `s2`, `t6` ↔ `s3` (every sale has its cash income);
-- `t4` (João's credit, **pending**) is linked to debt `d1` via `debtId` → when settled, the **same** transaction is marked as paid;
-- `d4` is **payable** (supplier) → filtered out by the credit use cases;
-- `d5` is already **settled** with `paidAt` → appears in the history.
+The app **never seeds sample content** (neither locally nor in the production schema): the only injected data is the **real plan catalog** (`PlanCatalog`, mirrored in Part 2 of `schema.sql`). Products, sales, transactions, credit, customers and purchases start empty — the periods (Today/7 days/Month) only reflect real data. Existing databases that received the old seed can be cleaned with `supabase/cleanup_demo_data.sql`.
 
 ---
 

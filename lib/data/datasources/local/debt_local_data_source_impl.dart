@@ -4,8 +4,8 @@ import 'debt_local_data_source.dart';
 /// Implementação em memória do [DebtLocalDataSource].
 ///
 /// Simula a tabela de dívidas com uma `List<Debt>`. Inicia vazia por
-/// padrão (testes dependem disso); o [seed] de demonstração é injetado
-/// pelo ServiceLocator. Para migrar a SQLite, basta criar uma
+/// padrão (testes dependem disso) — sem dados de demonstração. Para
+/// migrar a SQLite, basta criar uma
 /// implementação com as mesmas assinaturas e trocá-la no registro.
 final class DebtLocalDataSourceImpl implements DebtLocalDataSource {
   DebtLocalDataSourceImpl({List<Debt> seed = const []}) : _debts = [...seed];

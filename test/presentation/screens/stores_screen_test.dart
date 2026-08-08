@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
 
+import 'package:dumbhanengue/domain/entities/app_user.dart';
 import 'package:dumbhanengue/domain/entities/plan.dart';
 import 'package:dumbhanengue/domain/entities/plan_request.dart';
 import 'package:dumbhanengue/domain/entities/store.dart';
@@ -13,7 +16,9 @@ import 'package:dumbhanengue/domain/usecases/get_my_plan_requests_use_case.dart'
 import 'package:dumbhanengue/domain/usecases/get_plans_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_stores_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_employees_use_case.dart';
+import 'package:dumbhanengue/domain/usecases/set_employee_active_use_case.dart';
 import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
+import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
 import 'package:dumbhanengue/presentation/screens/stores/stores_screen.dart';
 
 class _FakeGetPlansUseCase implements GetPlansUseCase {
@@ -36,18 +41,40 @@ class _FakeGetStoresUseCase implements GetStoresUseCase {
 }
 
 class _FakeGetEmployeesUseCase implements GetEmployeesUseCase {
+  final List<StoreEmployee> employees;
+  _FakeGetEmployeesUseCase({List<StoreEmployee>? employees})
+      : employees = employees ?? [
+          const StoreEmployee(
+            id: 'e1',
+            tenantId: 'tn1',
+            storeId: 'st1',
+            userId: 'u2',
+            fullName: 'Carlos',
+            email: 'carlos@loja.com',
+            role: EmployeeRole.manager,
+          ),
+        ];
+
   @override
-  Future<List<StoreEmployee>> call(String tenantId) async => const [
-        StoreEmployee(
-          id: 'e1',
-          tenantId: 'tn1',
-          storeId: 'st1',
-          userId: 'u2',
-          fullName: 'Carlos',
-          email: 'carlos@loja.com',
-          role: EmployeeRole.manager,
-        ),
-      ];
+  Future<List<StoreEmployee>> call(String tenantId) async =>
+      List.unmodifiable(employees);
+}
+
+class _FakeSetEmployeeActiveUseCase implements SetEmployeeActiveUseCase {
+  String? lastEmployeeId;
+  bool? lastIsActive;
+  int calls = 0;
+
+  @override
+  Future<void> call({
+    required String tenantId,
+    required String employeeId,
+    required bool isActive,
+  }) async {
+    calls++;
+    lastEmployeeId = employeeId;
+    lastIsActive = isActive;
+  }
 }
 
 class _FakeGetMyPlanRequestsUseCase implements GetMyPlanRequestsUseCase {
@@ -66,12 +93,21 @@ void main() {
     createdAt: DateTime.now(),
   );
 
+  late final _FakeGetEmployeesUseCase employeesUseCase =
+      _FakeGetEmployeesUseCase();
+  final setActiveUseCase = _FakeSetEmployeeActiveUseCase();
+
   Widget build() => ProviderScope(
         overrides: [
+          // Sessão do DONO do tenant (u1) — habilita o interruptor de
+          // ativar/desativar na aba Funcionários.
+          authStateProvider.overrideWith(
+            (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+          ),
           getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
           getStoresUseCaseProvider.overrideWithValue(_FakeGetStoresUseCase()),
-          getEmployeesUseCaseProvider
-              .overrideWithValue(_FakeGetEmployeesUseCase()),
+          getEmployeesUseCaseProvider.overrideWithValue(employeesUseCase),
+          setEmployeeActiveUseCaseProvider.overrideWithValue(setActiveUseCase),
           getMyPlanRequestsUseCaseProvider
               .overrideWithValue(_FakeGetMyPlanRequestsUseCase()),
         ],
@@ -146,5 +182,34 @@ void main() {
 
     // A validação de mínimo 8 bloqueia o envio (sem chamada ao serviço).
     expect(find.text('A senha deve ter ao menos 8 caracteres.'), findsOneWidget);
+  });
+
+  testWidgets('Dono desativa e reativa funcionário pelo interruptor',
+      (tester) async {
+    await tester.pumpWidget(build());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpAndSettle();
+
+    // O card mostra o cargo (Gerente) e o interruptor do DONO.
+    expect(find.text('Carlos'), findsOneWidget);
+    expect(find.text('Gerente'), findsOneWidget);
+    expect(find.byType(Switch), findsOneWidget);
+
+    // Desativa: confirma o diálogo (botão de ação = "Desativar").
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Desativar Carlos?'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Desativar')); // botão de confirmação
+    await tester.pumpAndSettle();
+
+    expect(setActiveUseCase.calls, 1);
+    expect(setActiveUseCase.lastEmployeeId, 'e1');
+    expect(setActiveUseCase.lastIsActive, isFalse);
+    expect(find.text('Funcionário desativado.'), findsOneWidget); // snack
   });
 }

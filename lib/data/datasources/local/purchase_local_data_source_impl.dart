@@ -4,8 +4,7 @@ import 'purchase_local_data_source.dart';
 /// Implementação em memória do [PurchaseLocalDataSource].
 ///
 /// Simula a tabela de compras com uma `List<Purchase>`. Inicia vazia por
-/// padrão (testes dependem disso); o seed de demonstração é injetado pelo
-/// ServiceLocator.
+/// padrão (testes dependem disso) — sem dados de demonstração.
 final class PurchaseLocalDataSourceImpl implements PurchaseLocalDataSource {
   PurchaseLocalDataSourceImpl({List<Purchase> seed = const []})
       : _purchases = [...seed];

@@ -27,6 +27,16 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Deep link de autenticação (confirmação de e-mail / OAuth
+                 PKCE): dumbhanengue://callback reabre o app e conclui o
+                 fluxo — o gotrue troca o code e o stream de sessão reage
+                 (ver core/network/deep_link_handler.dart). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="dumbhanengue" android:host="callback"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

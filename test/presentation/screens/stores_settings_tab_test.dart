@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
+import '../../helpers/viewport.dart';
 
 import 'package:dumbhanengue/domain/entities/app_user.dart';
 import 'package:dumbhanengue/domain/entities/plan.dart';
@@ -85,6 +86,9 @@ bool _chipSelected(WidgetTester tester, String label) {
 }
 
 void main() {
+  // Fixture com BRL EXPLÍCITO: o padrão de novos tenants é MZN (metical),
+  // mas este teste cobre um tenant legado/ajustado para Real — a aba deve
+  // refletir o estado SALVO do tenant, não o padrão.
   final tenant = Tenant(
     id: 'tn1',
     ownerUserId: 'u1',
@@ -93,6 +97,7 @@ void main() {
     status: TenantStatus.approved,
     approvedAt: DateTime.now(),
     createdAt: DateTime.now(),
+    currencyCode: 'BRL',
   );
 
   Widget build(_CapturingUpdateTenantSettings settings) => ProviderScope(
@@ -176,5 +181,41 @@ void main() {
     );
     expect(find.text('Ajustes salvos!'), findsNothing);
     expect(settings.language, isNull);
+  });
+
+  // Rotação (UI): a tela Lojas (pushed) tem TabBar com 4 abas — em
+  // paisagem as abas e o conteúdo da aba Ajustes (idioma/moeda) seguem
+  // íntegros; voltar para a aba Lojas em paisagem também funciona.
+  // Overflows de RenderFlex falham o teste via takeException.
+  testWidgets('Lojas/Ajustes sobrevivem à rotação para paisagem',
+      (tester) async {
+    usePortraitViewport(tester);
+
+    await tester.pumpWidget(build(_CapturingUpdateTenantSettings()));
+    await tester.pumpAndSettle();
+
+    // Retrato: aba Lojas com a loja do tenant visível.
+    expect(find.text('Loja Centro'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Gira para paisagem.
+    await rotateToLandscape(tester);
+
+    // Sem overflow; as quatro abas e a loja seguem presentes após o giro.
+    expect(tester.takeException(), isNull);
+    expect(find.text('Loja Centro'), findsOneWidget);
+
+    // Abrir a aba Ajustes em paisagem funciona.
+    await openSettingsTab(tester);
+    expect(find.text('Idioma'), findsOneWidget);
+    expect(find.text('Moeda'), findsOneWidget);
+    expect(find.text('Salvar ajustes'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Voltar para a aba Lojas em paisagem também funciona.
+    await tester.tap(find.byType(Tab).at(0));
+    await tester.pumpAndSettle();
+    expect(find.text('Loja Centro'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

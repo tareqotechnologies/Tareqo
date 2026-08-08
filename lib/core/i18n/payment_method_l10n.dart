@@ -10,7 +10,8 @@ extension PaymentMethodL10n on PaymentMethod {
         PaymentMethod.cash => l10n.paymentCash,
         PaymentMethod.debitCard => l10n.paymentDebitCard,
         PaymentMethod.creditCard => l10n.paymentCreditCard,
-        PaymentMethod.pix => l10n.paymentPix,
+        PaymentMethod.mPesa => l10n.paymentMPesa,
+        PaymentMethod.eMola => l10n.paymentEMola,
         PaymentMethod.transfer => l10n.paymentTransfer,
       };
 }

@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'sale.dart' show PaymentMethod;
+
 part 'purchase.freezed.dart';
 part 'purchase.g.dart';
 
@@ -32,6 +34,11 @@ abstract class PurchaseItem with _$PurchaseItem {
 abstract class Purchase with _$Purchase {
   const factory Purchase({
     required String id,
+    // Número SEQUENCIAL da compra DENTRO da loja (ex.: C-00001, C-00002).
+    // Atribuído pelo banco no insert — SQLite: MAX+1 por loja dentro da
+    // transação; Supabase: RPC process_purchase com advisory lock por loja.
+    // O default 0 nunca é persistido (é substituído na gravação).
+    @Default(0) int number,
     // Loja que realizou a compra (Fase 2 do multi-tenancy) — a entrada
     // de estoque é por loja.
     @Default('st1') String storeId,
@@ -39,6 +46,10 @@ abstract class Purchase with _$Purchase {
     required List<PurchaseItem> items,
     // Valor TOTAL da compra em CENTAVOS inteiros (W4).
     required int totalAmountCents,
+    // Forma de pagamento usada para pagar o fornecedor (mesmo enum de
+    // Vendas). DEFAULT cash: compras antigas não registravam o método —
+    // a migração interpreta como pagamento à vista.
+    @Default(PaymentMethod.cash) PaymentMethod paymentMethod,
     required DateTime dateTime,
   }) = _Purchase;
 

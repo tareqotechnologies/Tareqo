@@ -40,8 +40,63 @@
    contents of `supabase/upgrade.sql` (brings an EXISTING database to the
    current state — replaces the old migrations 002..011; 100% idempotent, safe
    to re-run). For brand-new projects, `supabase/schema.sql` alone is enough.
-5. Email rate limits: keep defaults (employee registration does not use
-   email — the `create_employee_account` RPC).
+5. **Email rate limits (dev):** keep defaults. On the free plan sending is
+   capped (~2 emails/hour) — when the quota is exhausted GoTrue answers
+   **429 "email rate limit exceeded"** and the app shows the specific message
+   *"Too many attempts in a row. Please wait about an hour and try again."*
+   (`loginRateLimitError` key — sign-up resumes on the next window, no action
+   needed; employee registration does not use email — the
+   `create_employee_account` RPC).
+6. **Custom SMTP in production (plan: Resend + own domain):** the free tier
+   also caps confirmation emails (2/hour and 4/day) — unacceptable in
+   production with real sign-ups. Before go-live:
+   1. **Resend** → add your own domain (e.g. `dumbhanengue.com`) and complete
+      the DNS verification (SPF + DKIM + DMARC). ⚠️ The test domain
+      `onboarding@resend.dev` only delivers to the account email — not usable
+      for real senders.
+   2. **Resend** → create a **send-only** API key (`re_…`).
+   3. **Supabase → Authentication → Emails → SMTP Settings**:
+
+      | Field | Value |
+      |---|---|
+      | Host | `smtp.resend.com` |
+      | Port | `587` |
+      | Username | `resend` (fixed — the API key goes in Password) |
+      | Password | the API key (`re_…`) |
+      | From email | `no-reply@dumbhanengue.com` |
+      | From name | `Dumbhanengue` |
+      | Admin email | super admin email (recovery) |
+
+   4. **Programmatic alternative (Management API):** `PATCH
+      /v1/projects/{ref}/config/auth` with `smtp_host`, `smtp_port`,
+      `smtp_user` (**`resend`**), `smtp_pass` (the API key), `smtp_sender_email`,
+      `smtp_sender_name` and `smtp_admin_email` (token `sbp_…` from Settings →
+      Access Tokens). ⚠️ **The PATCH replaces the whole config** — send all
+      `smtp_*` fields at once (validated Aug 8: a partial PATCH wiped the SMTP).
+   5. **Test:** trigger a sign-up and confirm the confirmation email is
+      delivered; the Resend key can also be tested with a direct POST to
+      `https://api.resend.com/emails`.
+
+   > **Decision recorded (Aug 8):** `dumbhanengue.com` is **not registered**
+   > (RDAP 404 — domain available) and the team chose **not to buy a domain
+   > for now** — the confirmation email keeps going through the Resend SMTP
+   > with the test domain `onboarding@resend.dev`, which **only delivers to
+   > the Resend account email** (`jalaneoanalista@gmail.com`); any other email
+   > in a sign-up gets a 403. Dev-test implications:
+   >
+   > - Only sign-ups with `jalaneoanalista@gmail.com` can be confirmed; other
+   >   emails never receive the link (the app stays on the confirmation screen).
+   > - Testing alternative: `mailer_autoconfirm = true` on dev (new sign-ups
+   >   confirm instantly, no email) — used in the E2E tests.
+   >
+   > ⚠️ **Important (myth debunked): paying for a Supabase plan does NOT solve
+   > email delivery.** Supabase's built-in email service is severely limited
+   > even on paid plans (~2 emails/hour; free tier restricted to organization
+   > members) — the official recommendation is an external SMTP (what we
+   > already use: Resend). The real unlock costs only the **domain registration
+   > (~US$ 8–12/year)**: the Resend free tier already allows **1 verified
+   > domain** (SPF/DKIM/DMARC) with 3,000 emails/month (100/day) — enough for
+   > a small shop's go-live, **at no cost to Supabase**.
 
 ## 3. Google Play Console
 
@@ -71,6 +126,7 @@
 
 - [ ] All §1 secrets filled
 - [ ] Supabase: email confirmation ON + 2FA + migration 008 applied
+- [ ] Custom SMTP on the production Supabase (Resend + own domain) — §2.6
 - [ ] Play App Signing enabled + service account created
 - [ ] Apple Developer + API keys created
 - [ ] Privacy policy + ToS published (store links)

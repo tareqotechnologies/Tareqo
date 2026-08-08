@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
+import '../../helpers/viewport.dart';
 import '../../helpers/store_context.dart';
 
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/purchase.dart';
+import 'package:dumbhanengue/domain/entities/sale.dart' show PaymentMethod;
 import 'package:dumbhanengue/domain/repositories/i_purchase_processor.dart';
 import 'package:dumbhanengue/domain/usecases/add_purchase_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
@@ -123,6 +125,46 @@ void main() {
     expect(processPurchase.lastPurchase?.items.length, 1);
     expect(processPurchase.lastPurchase?.items.first.quantity, 2);
     expect(processPurchase.lastPurchase?.totalAmountCents, 100);
+    // Forma de pagamento padrão: M-Pesa (mesmo padrão do carrinho de vendas).
+    expect(processPurchase.lastPurchase?.paymentMethod, PaymentMethod.mPesa);
+  });
+
+  testWidgets('permite escolher a forma de pagamento do fornecedor',
+      (tester) async {
+    final processPurchase = _FakeProcessPurchaseUseCase();
+
+    await tester.pumpWidget(
+      _buildApp(
+        products: const [
+          Product(
+            id: 'p1',
+            name: 'Caneta',
+            purchasePriceCents: 50,
+            salePriceCents: 200,
+          ),
+        ],
+        processPurchase: processPurchase,
+      ),
+    );
+    await _openSheet(tester);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Fornecedor'),
+      'Distribuidora',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.add).first);
+    await tester.pumpAndSettle();
+
+    // Troca o padrão (M-Pesa) para Dinheiro.
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Dinheiro'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Confirmar compra'));
+    await tester.pumpAndSettle();
+
+    expect(processPurchase.calls, 1);
+    expect(processPurchase.lastPurchase?.paymentMethod, PaymentMethod.cash);
   });
 
   testWidgets('o botão de confirmar fica desabilitado sem itens no carrinho',
@@ -171,5 +213,65 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Informe o fornecedor da compra.'), findsOneWidget);
+  });
+
+  // Rotação (UI): o sheet de nova compra (bottom sheet com maxHeight 90%)
+  // em paisagem fica mais baixo — a lista de produtos (Expanded) precisa
+  // encolher e o rodapé (forma de pagamento + total + confirmar) segue
+  // acessível. Overflows de RenderFlex falham o teste via takeException.
+  testWidgets('carrinho de compra sobrevive à rotação para paisagem',
+      (tester) async {
+    final processPurchase = _FakeProcessPurchaseUseCase();
+
+    usePortraitViewport(tester);
+
+    await tester.pumpWidget(
+      _buildApp(
+        products: const [
+          Product(
+            id: 'p1',
+            name: 'Caneta',
+            purchasePriceCents: 50,
+            salePriceCents: 200,
+            stockQuantity: 10,
+          ),
+        ],
+        processPurchase: processPurchase,
+      ),
+    );
+    await _openSheet(tester);
+
+    // Retrato: produto no catálogo e rodapé com total + confirmar.
+    expect(find.text('Caneta'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Confirmar compra'),
+        findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Gira para paisagem com o sheet aberto.
+    await rotateToLandscape(tester);
+
+    // Sem overflow; o catálogo e o rodapé seguem presentes após o giro.
+    expect(tester.takeException(), isNull);
+    expect(find.text('Caneta'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Confirmar compra'),
+        findsOneWidget);
+
+    // O carrinho continua funcional em paisagem: adiciona, preenche o
+    // fornecedor e confirma.
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Fornecedor'),
+      'Distribuidora',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.add).first);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Confirmar compra'));
+    await tester.pumpAndSettle();
+
+    expect(processPurchase.calls, 1);
+    expect(processPurchase.lastPurchase?.supplierName, 'Distribuidora');
+    expect(processPurchase.lastPurchase?.totalAmountCents, 50);
+    expect(tester.takeException(), isNull);
   });
 }

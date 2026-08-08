@@ -125,7 +125,7 @@ New feature:
 
 ### SQLite for new data
 
-When adding tables/columns: create them in `createSchema` (with guard `CHECK`s), add an idempotent migration if needed, and extend the seed if the demo requires it.
+When adding tables/columns: create them in `createSchema` (with guard `CHECK`s) and add an idempotent migration if needed — remember the database starts **empty** (no seed).
 
 ### State (Riverpod)
 

@@ -34,7 +34,8 @@ Todas as entidades são classes `@freezed` (imutáveis, com `copyWith`, `==`/`ha
 ```dart
 enum PaymentMethod {
   cash('Dinheiro'), debitCard('Cartão de débito'),
-  creditCard('Cartão de crédito'), pix('Pix'), transfer('Transferência');
+  creditCard('Cartão de crédito'), mPesa('M-Pesa'), eMola('E-Mola'),
+  transfer('Transferência');
 }
 ```
 
@@ -80,7 +81,7 @@ enum TransactionStatus { paid('Pago'), pending('Pendente') }
 | ----- | ---- | ---------- |
 | `id` | `String` | `t<microsecondsSinceEpoch>` |
 | `storeId` | `String` | Loja do movimento (default `'st1'` — Fase 2) |
-| `description` | `String` | Ex.: "Venda via PIX", "Aluguel da loja" |
+| `description` | `String` | Ex.: "Venda M-Pesa", "Aluguel da loja" |
 | `amount` | `double` | **Sempre magnitude positiva**; direção vem de `type` |
 | `type` | `TransactionType` | Entrada ou saída |
 | `category` | `String` | Ex.: "Vendas", "Contas", "Compras", "Fiado" |

@@ -98,7 +98,7 @@ if (database != null) {
 
 Implementation details:
 
-- **`lib/core/database/app_database.dart`** — opens `dumbhanengue.db` in `getApplicationDocumentsDirectory()`, creates the schema (`CREATE TABLE IF NOT EXISTS` with non-negativity `CHECK`s as a final safeguard), seeds demo data on first run and exposes `runInTransaction` (BEGIN/COMMIT/ROLLBACK) for atomic writes (e.g. sale + items).
+- **`lib/core/database/app_database.dart`** — opens `dumbhanengue.db` in `getApplicationDocumentsDirectory()`, creates the schema (`CREATE TABLE IF NOT EXISTS` with non-negativity `CHECK`s as a final safeguard), never seeds data (the database starts empty — only real data) and exposes `runInTransaction` (BEGIN/COMMIT/ROLLBACK) for atomic writes (e.g. sale + items).
 - **Sales** are persisted in normalized tables (`sales` + `sale_items`) in a **single transaction**.
 - **Enums** are persisted by name; **dates** as epoch millis; **booleans** as 0/1.
 - **Web**: the native sqlite3 does not run in the browser (`dart:ffi` does not exist there), so `AppDatabase` uses a **conditional import** and the app falls back to the in-memory datasources (same contracts — the UI stays identical).
@@ -213,7 +213,7 @@ Credentials are supplied via **flavors + `--dart-define-from-file`** (`env/dev.e
 
 ### Tenant currency and language (presentation)
 
-The owner chooses the **currency** (BRL, USD, EUR, MZN) and **language** (pt, en) during onboarding and can change them in **Stores → Settings**. Preferences live in the `tenants` table (`currency_code`, `language`) and propagate to the whole app: the `MaterialApp` locale and currency formatting (`Formatters`) follow the `tenantSettingsProvider` — employees inherit the owner's choice.
+The owner chooses the **currency** (BRL, USD, EUR, MZN — **MZN by default**, Mozambican Metical, the target market) and **language** (pt, en) during onboarding and can change them in **Stores → Settings**. Preferences live in the `tenants` table (`currency_code`, `language`) and propagate to the whole app: the `MaterialApp` locale and currency formatting (`Formatters`) follow the `tenantSettingsProvider` — employees inherit the owner's choice. Saving goes through the `update_tenant_settings` RPC (SECURITY DEFINER, `is_tenant_owner` guard): the `tenants_update` RLS policy only lets the super admin change the tenant row, so a direct owner UPDATE was blocked (settings that never saved) — the RPC restricts the UPDATE to the presentation columns.
 
 ## Secure storage: why not use `shared_preferences` for sensitive data?
 

@@ -12,6 +12,7 @@ void main() {
   ) async {
     final sale = Sale(
       id: 's1',
+      number: 1,
       items: const [
         SaleItem(
           productId: 'p1',
@@ -27,7 +28,7 @@ void main() {
         ),
       ],
       totalAmountCents: 1390,
-      paymentMethod: PaymentMethod.pix,
+      paymentMethod: PaymentMethod.mPesa,
       dateTime: DateTime(2026, 8, 3, 14, 30),
     );
 
@@ -35,8 +36,9 @@ void main() {
 
     // Resumo.
     expect(find.text('Detalhes da venda'), findsOneWidget);
-    expect(find.text('Venda s1'), findsOneWidget);
-    expect(find.text('Pix'), findsOneWidget);
+    // O número SEQUENCIAL da venda na loja vira 'Venda S-00001'.
+    expect(find.text('Venda S-00001'), findsOneWidget);
+    expect(find.text('M-Pesa'), findsOneWidget);
 
     // Itens com quantidade × preço unitário e subtotal.
     expect(find.text('Caneta'), findsOneWidget);

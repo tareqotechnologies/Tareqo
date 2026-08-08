@@ -18,7 +18,20 @@
 #   5. o RPC create_employee_account cria a conta do funcionário E o
 #      vínculo na loja em UMA transação (sem e-mail — regressão do rate
 #      limit 429; sem contas órfãs se o limite do plano for atingido) e
-#      rejeita e-mail duplicado e não-donos.
+#      rejeita e-mail duplicado e não-donos;
+#   6. a desativação pelo dono (RPC set_employee_active) derruba o acesso
+#      do funcionário NA HORA (is_my_store exige vínculo ativo) e a
+#      reativação devolve; não-dono é rejeitado;
+#   7. [1c] REGRESSÃO do 42703 (bug achado no live Aug 8): o upgrade.sql
+#      aplicado numa base LEGADA sem store_employees.is_active recria a
+#      coluna (Parte 3.0) ANTES das funções LANGUAGE sql que a
+#      referenciam — sem isso, o CREATE das funções falha com 'column
+#      e.is_active does not exist'.
+#   8. [16/16] REGRESSÃO do 42710 (Supabase real — bug achado no live Aug 8):
+#      com a publicação supabase_realtime criada e store_employees JÁ membro,
+#      o upgrade.sql reaplica 2x SEM erro (o bloco da Parte 20 confere
+#      pg_publication_tables antes do ADD TABLE) e o catálogo de planos
+#      (pl1/pl2/pl3 — Parte 21, seed do onboarding do dono) permanece semeado.
 #
 # ⚠️ As verificações de RLS rodam como um papel NÃO-superusuário
 # (`app_user`), porque o superusuário do Postgres ignora o RLS — o mesmo
@@ -78,6 +91,23 @@ echo "==> [1b] upgrade.sql consolidado: aplicação dupla sem erro"
 psql -v ON_ERROR_STOP=1 -f supabase/upgrade.sql
 psql -v ON_ERROR_STOP=1 -f supabase/upgrade.sql
 
+# Regressão do 42703 (banco LEGADO, bug achado no live Aug 8): num banco
+# que ainda NÃO tem a coluna store_employees.is_active (upgrade parcial,
+# apenas as Partes 1-16 aplicadas), as funções LANGUAGE sql
+# is_my_store/is_manager_of_store são VALIDADAS no momento do CREATE e
+# falham com 'column e.is_active does not exist' se a coluna não existir.
+# O upgrade.sql precisa recriar a coluna (Parte 3.0) ANTES das funções.
+# Este passo simula o cenário: dropa a coluna e reaplica o upgrade.
+echo "==> [1c] upgrade.sql em base LEGADA sem is_active (regressão 42703)"
+psql -v ON_ERROR_STOP=1 -c "ALTER TABLE public.store_employees DROP COLUMN is_active;"
+psql -v ON_ERROR_STOP=1 -f supabase/upgrade.sql
+legacy_active_ok="$(psql -q -tAc "SELECT count(*) FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'store_employees' AND column_name = 'is_active';" | tail -n 1)"
+[ "$legacy_active_ok" = "1" ] || {
+  echo "FALHA: is_active não foi recriado pela Parte 3.0 (obtido: '$legacy_active_ok')"
+  exit 1
+}
+echo "OK: upgrade.sql recria is_active antes das funções LANGUAGE sql"
+
 psql -v ON_ERROR_STOP=1 <<'SQL'
 GRANT USAGE ON SCHEMA public, auth TO app_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
@@ -108,7 +138,7 @@ echo "==> [3/4] RLS + triggers anti-forja (escrita escopada pelo JWT)"
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 -- Sessão do dono: o trigger set_tenant_owner força owner_user_id =
 -- auth.uid() e o enforce_store_limit exige tenant aprovado com plano
--- válido (pl1 existe no seed).
+-- válido (pl1 existe no catálogo da Parte 2).
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 -- ON CONFLICT: permite reexecutar o script contra o mesmo banco.
 INSERT INTO public.tenants (id, business_name, plan_id, status, approved_at)
@@ -117,7 +147,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.stores (id, name) VALUES ('st_smoke', 'Loja Smoke')
 ON CONFLICT (id) DO NOTHING;
 -- store_id explícito ('st_smoke' É loja do dono — o trigger anti-forja
--- preserva; sem isso o produto cairia em st1, a primeira loja do seed).
+-- preserva; sem isso o produto cairia na primeira loja do usuário).
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
 VALUES ('smoke1', 'Produto do dono', 'st_smoke', 100, 200, 5)
 ON CONFLICT (id) DO NOTHING;
@@ -132,6 +162,46 @@ owner_sees="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UI
 admin_sees="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${ADMIN_UID}\"}'; SELECT count(*) FROM public.products WHERE id = 'smoke1';" | tail -n 1)"
 [ "$admin_sees" = "0" ] || {
   echo "FALHA: outro usuário não deveria enxergar o produto do dono (obtido: '$admin_sees')"
+  exit 1
+}
+
+echo "==> [3b] Ajustes do tenant (moeda/idioma): RPC do dono, RLS protege status"
+# O dono altera moeda/idioma do PRÓPRIO tenant via RPC update_tenant_settings
+# (SECURITY DEFINER + guarda is_tenant_owner). Sem a RPC, o UPDATE direto
+# caía na política tenants_update (só super admin) e retornava 0 linhas —
+# o bug real dos "ajustes que não salvam".
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.update_tenant_settings('tn_smoke', 'USD', 'en');
+SQL
+
+settings_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT currency_code || '|' || language FROM public.tenants WHERE id = 'tn_smoke';" | tail -n 1)"
+[ "$settings_ok" = "USD|en" ] || {
+  echo "FALHA: ajustes do dono não salvos via RPC (obtido: '$settings_ok')"
+  exit 1
+}
+
+# Funcionário (não-dono) NÃO altera ajustes de outro tenant (guarda da RPC).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.update_tenant_settings('tn_smoke', 'EUR', 'pt');
+    RAISE EXCEPTION 'SENTINELA: não-dono deveria ter sido bloqueado nos ajustes';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: não-dono deveria ter sido bloqueado nos ajustes' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+
+# Direto no PostgREST (RLS): o dono NÃO consegue mexer no status — a
+# política tenants_update continua restrita ao super admin.
+owner_status="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; UPDATE public.tenants SET status = 'approved' WHERE id = 'tn_smoke' RETURNING id;" | tail -n 1)"
+[ -z "$owner_status" ] || {
+  echo "FALHA: dono não deveria alterar o status via UPDATE direto (obtido: '$owner_status')"
   exit 1
 }
 
@@ -235,7 +305,7 @@ echo "==> [5/5] RPCs atômicos do dinheiro (process_sale / register_debt / settl
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.process_sale(
-  ('{"id":"s_smoke","store_id":"st_smoke","total_amount":400,"payment_method":"pix","date_time":"' || now()::text || '"}')::jsonb,
+  ('{"id":"s_smoke","store_id":"st_smoke","total_amount":400,"payment_method":"mPesa","date_time":"' || now()::text || '"}')::jsonb,
   '[{"product_id":"smoke1","product_name":"Produto do dono","quantity":2,"unit_price":200}]'::jsonb
 );
 SQL
@@ -319,7 +389,7 @@ DO $$
 BEGIN
   BEGIN
     PERFORM public.process_sale(
-      ('{"id":"s_bad","store_id":"st_smoke","total_amount":9900,"payment_method":"pix","date_time":"' || now()::text || '"}')::jsonb,
+      ('{"id":"s_bad","store_id":"st_smoke","total_amount":9900,"payment_method":"mPesa","date_time":"' || now()::text || '"}')::jsonb,
       '[{"product_id":"smoke1","product_name":"X","quantity":99,"unit_price":100}]'::jsonb
     );
     RAISE EXCEPTION 'SENTINELA: venda com estoque insuficiente deveria ter sido rejeitada';
@@ -461,6 +531,65 @@ orphan_ok="$(psql -q -tAc "SELECT count(*) FROM auth.users WHERE email = 'func-l
   exit 1
 }
 
+echo "==> [6b] Ativação/desativação de funcionário (set_employee_active)"
+# O dono ativa/desativa; o funcionário DESATIVADO perde o acesso NA HORA:
+# is_my_store (helper de TODAS as RLS e guardas de RPC) passa a exigir
+# vínculo ATIVO — a venda/leitura dele é negada mesmo com um cliente
+# modificado chamando o PostgREST direto. Não-dono é rejeitado.
+
+# Antes: o funcionário recém-criado tem acesso à loja (is_my_store TRUE).
+emp_before="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${emp_created}\"}'; SELECT public.is_my_store('st_emp');" | tail -n 1)"
+[ "$emp_before" = "t" ] || {
+  echo "FALHA: funcionário ativo deveria ter acesso à loja (obtido: '$emp_before')"
+  exit 1
+}
+
+# O DONO desativa o funcionário.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.set_employee_active('e_emp1', FALSE);
+SQL
+
+desactive_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT is_active FROM public.store_employees WHERE id = 'e_emp1';" | tail -n 1)"
+[ "$desactive_ok" = "f" ] || {
+  echo "FALHA: is_active deveria ser FALSE após a desativação (obtido: '$desactive_ok')"
+  exit 1
+}
+
+# Depois: o funcionário DESATIVADO não tem mais acesso à loja.
+emp_after="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${emp_created}\"}'; SELECT public.is_my_store('st_emp');" | tail -n 1)"
+[ "$emp_after" = "f" ] || {
+  echo "FALHA: funcionário desativado deveria ter perdido o acesso (obtido: '$emp_after')"
+  exit 1
+}
+
+# Reativação devolve o acesso (idempotente — pode reexecutar).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.set_employee_active('e_emp1', TRUE);
+SQL
+emp_react="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${emp_created}\"}'; SELECT public.is_my_store('st_emp');" | tail -n 1)"
+[ "$emp_react" = "t" ] || {
+  echo "FALHA: reativação deveria devolver o acesso (obtido: '$emp_react')"
+  exit 1
+}
+
+# Não-dono (funcionário de outro tenant) é rejeitado.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.set_employee_active('e_emp1', FALSE);
+    RAISE EXCEPTION 'SENTINELA: não-dono deveria ter sido rejeitado';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: não-dono deveria ter sido rejeitado' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+
 echo "==> [7/7] RLS sem recursão em VARREDURA COMPLETA (regressão 54001)"
 # Regressão Aug 6: num Supabase com schema antigo, SELECTs sem WHERE (como
 # as listagens do app: `select=*` + limit) rebentavam com 54001
@@ -585,15 +714,14 @@ emp_read_purch="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_
 # 8.4 RPC: GERENTE registra compra na loja (efeitos completos).
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "33333333-3333-3333-3333-333333333333"}';
-SELECT public.process_purchase(
-  ('{"id":"p_mgr","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":200,"date_time":"' || now()::text || '"}')::jsonb,
+SELECT public.process_purchase(      ('{"id":"p_mgr","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":200,"payment_method":"mPesa","date_time":"' || now()::text || '"}')::jsonb,
   '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1,"unit_price":200}]'::jsonb
 );
 SQL
 
-mgr_purch_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.purchases WHERE id = 'p_mgr' AND supplier_name = 'Fornecedor';" | tail -n 1)"
+mgr_purch_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.purchases WHERE id = 'p_mgr' AND supplier_name = 'Fornecedor' AND payment_method = 'mPesa';" | tail -n 1)"
 [ "$mgr_purch_ok" = "1" ] || {
-  echo "FALHA: compra do gerente não registrada (obtido: '$mgr_purch_ok')"
+  echo "FALHA: compra do gerente não registrada com forma de pagamento mPesa (obtido: '$mgr_purch_ok')"
   exit 1
 }
 mgr_stock_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke2';" | tail -n 1)"
@@ -664,10 +792,14 @@ psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
 VALUES ('p_kpi', 'Produto KPI', 'st_smoke', 100, 200, 5)
-ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.sales (id, store_id, total_amount, payment_method, date_time)
-VALUES ('s_kpi', 'st_smoke', 2550, 'cash', now() - interval '1 hour')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO NOTHING;  -- A venda direta (fora da RPC) também precisa do sale_number NOT NULL —
+  -- numeração é do servidor; aqui calcula o próximo da loja.
+  INSERT INTO public.sales (id, store_id, sale_number, total_amount, payment_method, date_time)
+  SELECT 's_kpi', 'st_smoke',
+         (SELECT COALESCE(MAX(sale_number), 0) + 1 FROM public.sales
+          WHERE store_id = 'st_smoke'),
+         2550, 'cash', now() - interval '1 hour'
+  ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.financial_transactions
   (id, store_id, description, amount, type, category, date, status)
 VALUES
@@ -675,12 +807,22 @@ VALUES
   ('t_kpi_exp',  'st_smoke', 'Saída KPI',     4000, 'expense', 'purchase', now(), 'paid'),
   ('t_kpi_pend', 'st_smoke', 'Pendente KPI',  2000, 'expense', 'purchase', now(), 'pending')
 ON CONFLICT (id) DO NOTHING;
+-- A numeração aqui é direta (fora da RPC) — MAX atual + ROW_NUMBER para
+-- não violar o índice único uq_debts_store_number (todas as 3 na mesma
+-- transação recebem números distintos, consecutivos).
 INSERT INTO public.debts
-  (id, store_id, person_name, amount, due_date, is_customer_debt, is_paid)
-VALUES
+  (id, store_id, debt_number, person_name, amount, due_date, is_customer_debt, is_paid)
+SELECT id, store_id,
+       COALESCE(mx.max_num, 0) + ROW_NUMBER() OVER (ORDER BY id) AS debt_number,
+       person_name, amount, due_date, is_customer_debt, is_paid
+FROM (VALUES
   ('d_kpi_1', 'st_smoke', 'Cliente KPI',    1500, now() + interval '5 days', TRUE,  FALSE),
   ('d_kpi_2', 'st_smoke', 'Quitada KPI',     500, now() - interval '2 days', TRUE,  TRUE),
   ('d_kpi_3', 'st_smoke', 'Fornecedor KPI',  800, now() + interval '3 days', FALSE, FALSE)
+) AS v(id, store_id, person_name, amount, due_date, is_customer_debt, is_paid)
+CROSS JOIN LATERAL (
+  SELECT COALESCE(MAX(debt_number), 0) AS max_num FROM public.debts
+) mx
 ON CONFLICT (id) DO NOTHING;
 SQL
 
@@ -845,4 +987,246 @@ legacy_buy2="$(psql -q -tAc "SELECT purchase_price FROM public.products WHERE id
   exit 1
 }
 
-echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001, níveis de acesso (compras só dono/gerente), audit log (só super admin), KPIs agregadas server-side (get_dashboard_kpis), agregações H2 (get_cash_flow / get_sales_report), upgrade.sql idempotente e migração W4 NUMERIC→centavos (×100, sem dupla aplicação) conforme esperado."
+echo "==> [13/13] Numeração SEQUENCIAL de venda por loja (sale_number)"
+# O process_sale atribui S-00001, S-00002... dentro da loja (advisory lock
+# por loja + MAX+1 na mesma transação). Valida: números consecutivos na
+# mesma loja; loja diferente recomeça em 1; retry idempotente NÃO consome
+# número.
+
+# Produto dedicado para os testes de numeração (não interfere nas
+# assertivas anteriores de estoque do smoke1/smoke2).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
+VALUES ('smoke3', 'Produto numeração', 'st_smoke', 50, 100, 10)
+ON CONFLICT (id) DO NOTHING;
+-- Produto na loja dedicada st_emp (não tem vendas — a primeira deve ser 1).
+INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
+VALUES ('emp_p1', 'Produto da loja emp', 'st_emp', 50, 100, 5)
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+# Duas vendas consecutivas na MESMA loja → números consecutivos.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.process_sale(
+  ('{"id":"s_num1","store_id":"st_smoke","total_amount":100,"payment_method":"mPesa","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke3","product_name":"Produto numeração","quantity":1,"unit_price":100}]'::jsonb
+);
+SELECT public.process_sale(
+  ('{"id":"s_num2","store_id":"st_smoke","total_amount":100,"payment_method":"mPesa","date_time":"' || (now() + interval '1 minute')::text || '"}')::jsonb,
+  '[{"product_id":"smoke3","product_name":"Produto numeração","quantity":1,"unit_price":100}]'::jsonb
+);
+SQL
+
+num1="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT sale_number FROM public.sales WHERE id = 's_num1';" | tail -n 1)"
+num2="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT sale_number FROM public.sales WHERE id = 's_num2';" | tail -n 1)"
+[ "$num2" = "$((num1 + 1))" ] || {
+  echo "FALHA: vendas da MESMA loja deveriam ter números consecutivos (obtido: $num1, $num2)"
+  exit 1
+}
+
+# Loja SEM vendas anteriores (st_emp) começa em 1 — numeração é POR LOJA.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.process_sale(
+  ('{"id":"s_emp_num","store_id":"st_emp","total_amount":100,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"emp_p1","product_name":"Produto da loja emp","quantity":1,"unit_price":100}]'::jsonb
+);
+SQL
+emp_num="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT sale_number FROM public.sales WHERE id = 's_emp_num';" | tail -n 1)"
+[ "$emp_num" = "1" ] || {
+  echo "FALHA: primeira venda da loja st_emp deveria ter número 1 (obtido: '$emp_num')"
+  exit 1
+}
+
+# Retry idempotente (mesmo id) NÃO consome número nem altera o existente.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.process_sale(
+  ('{"id":"s_num1","store_id":"st_smoke","total_amount":100,"payment_method":"mPesa","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke3","product_name":"Produto numeração","quantity":1,"unit_price":100}]'::jsonb
+);
+SQL
+num1_retry="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT sale_number FROM public.sales WHERE id = 's_num1';" | tail -n 1)"
+[ "$num1_retry" = "$num1" ] || {
+  echo "FALHA: retry idempotente não deveria consumir/alterar número (obtido: $num1 -> $num1_retry)"
+  exit 1
+}
+
+# Unicidade por loja: nenhum (store_id, sale_number) duplicado na loja testada.
+num_dupes="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM (SELECT store_id, sale_number FROM public.sales WHERE store_id = 'st_smoke' GROUP BY 1, 2 HAVING count(*) > 1) dup;" | tail -n 1)"
+[ "$num_dupes" = "0" ] || {
+  echo "FALHA: números duplicados na loja (obtido: '$num_dupes' duplicados)"
+  exit 1
+}
+
+echo "==> [14/15] Numeração SEQUENCIAL de compra por loja (purchase_number)"
+# O process_purchase atribui C-00001, C-00002... dentro da loja (advisory
+# lock por loja + MAX+1 na mesma transação). Valida: números consecutivos
+# na mesma loja; loja diferente recomeça em 1; retry idempotente NÃO
+# consome número.
+
+# Produto dedicado para os testes de numeração de compra.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
+VALUES ('smoke4', 'Produto compras', 'st_smoke', 50, 100, 10)
+ON CONFLICT (id) DO NOTHING;
+-- Produto na loja dedicada st_emp (não tem compras — a primeira deve ser 1).
+INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
+VALUES ('emp_p2', 'Produto compras emp', 'st_emp', 50, 100, 5)
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+# Duas compras consecutivas na MESMA loja → números consecutivos.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.process_purchase(
+  ('{"id":"pc_num1","store_id":"st_smoke","supplier_name":"Fornecedor A","total_amount":100,"payment_method":"eMola","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke4","product_name":"Produto compras","quantity":1,"unit_price":100}]'::jsonb
+);
+SELECT public.process_purchase(
+  ('{"id":"pc_num2","store_id":"st_smoke","supplier_name":"Fornecedor B","total_amount":100,"date_time":"' || (now() + interval '1 minute')::text || '"}')::jsonb,
+  '[{"product_id":"smoke4","product_name":"Produto compras","quantity":1,"unit_price":100}]'::jsonb
+);
+SQL
+
+pc_num1="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT purchase_number FROM public.purchases WHERE id = 'pc_num1';" | tail -n 1)"
+pc_num2="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT purchase_number FROM public.purchases WHERE id = 'pc_num2';" | tail -n 1)"
+[ "$pc_num2" = "$((pc_num1 + 1))" ] || {
+  echo "FALHA: compras da MESMA loja deveriam ter números consecutivos (obtido: $pc_num1, $pc_num2)"
+  exit 1
+}
+
+# A forma de pagamento (eMola) enviada no payload foi persistida.
+pc_num1_method="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT payment_method FROM public.purchases WHERE id = 'pc_num1';" | tail -n 1)"
+[ "$pc_num1_method" = "eMola" ] || {
+  echo "FALHA: forma de pagamento da compra não persistida (obtido: '$pc_num1_method')"
+  exit 1
+}
+
+# Loja SEM compras anteriores (st_emp) começa em 1 — numeração é POR LOJA.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.process_purchase(
+  ('{"id":"pc_emp_num","store_id":"st_emp","supplier_name":"Fornecedor C","total_amount":100,"date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"emp_p2","product_name":"Produto compras emp","quantity":1,"unit_price":100}]'::jsonb
+);
+SQL
+pc_emp_num="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT purchase_number FROM public.purchases WHERE id = 'pc_emp_num';" | tail -n 1)"
+[ "$pc_emp_num" = "1" ] || {
+  echo "FALHA: primeira compra da loja st_emp deveria ter número 1 (obtido: '$pc_emp_num')"
+  exit 1
+}
+
+# Retry idempotente (mesmo id) NÃO consome número nem altera o existente.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.process_purchase(
+  ('{"id":"pc_num1","store_id":"st_smoke","supplier_name":"Fornecedor A","total_amount":100,"payment_method":"eMola","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke4","product_name":"Produto compras","quantity":1,"unit_price":100}]'::jsonb
+);
+SQL
+pc_num1_retry="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT purchase_number FROM public.purchases WHERE id = 'pc_num1';" | tail -n 1)"
+[ "$pc_num1_retry" = "$pc_num1" ] || {
+  echo "FALHA: retry idempotente não deveria consumir/alterar número (obtido: $pc_num1 -> $pc_num1_retry)"
+  exit 1
+}
+
+# Unicidade por loja: nenhum (store_id, purchase_number) duplicado.
+pc_dupes="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM (SELECT store_id, purchase_number FROM public.purchases WHERE store_id = 'st_smoke' GROUP BY 1, 2 HAVING count(*) > 1) dup;" | tail -n 1)"
+[ "$pc_dupes" = "0" ] || {
+  echo "FALHA: números duplicados na loja (obtido: '$pc_dupes' duplicados)"
+  exit 1
+}
+
+echo "==> [15/15] Numeração SEQUENCIAL de fiado por loja (debt_number)"
+# O register_debt atribui D-00001, D-00002... dentro da loja (advisory
+# lock por loja + MAX+1 na mesma transação). Valida: números consecutivos
+# na mesma loja; loja diferente recomeça em 1; retry idempotente NÃO
+# consome número.
+
+# Duas dívidas consecutivas na MESMA loja → números consecutivos.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.register_debt(
+  ('{"id":"d_num1","store_id":"st_smoke","person_name":"Cliente A","amount":100,"due_date":"' || (now() + interval '5 days')::text || '","is_customer_debt":true}')::jsonb
+);
+SELECT public.register_debt(
+  ('{"id":"d_num2","store_id":"st_smoke","person_name":"Cliente B","amount":200,"due_date":"' || (now() + interval '6 days')::text || '","is_customer_debt":true}')::jsonb
+);
+SQL
+
+d_num1="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT debt_number FROM public.debts WHERE id = 'd_num1';" | tail -n 1)"
+d_num2="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT debt_number FROM public.debts WHERE id = 'd_num2';" | tail -n 1)"
+[ "$d_num2" = "$((d_num1 + 1))" ] || {
+  echo "FALHA: dívidas da MESMA loja deveriam ter números consecutivos (obtido: $d_num1, $d_num2)"
+  exit 1
+}
+
+# Loja SEM dívidas anteriores (st_emp) começa em 1 — numeração é POR LOJA.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.register_debt(
+  ('{"id":"d_emp_num","store_id":"st_emp","person_name":"Cliente C","amount":300,"due_date":"' || (now() + interval '7 days')::text || '","is_customer_debt":true}')::jsonb
+);
+SQL
+d_emp_num="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT debt_number FROM public.debts WHERE id = 'd_emp_num';" | tail -n 1)"
+[ "$d_emp_num" = "1" ] || {
+  echo "FALHA: primeira dívida da loja st_emp deveria ter número 1 (obtido: '$d_emp_num')"
+  exit 1
+}
+
+# Retry idempotente (mesmo id) NÃO consome número nem altera o existente.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.register_debt(
+  ('{"id":"d_num1","store_id":"st_smoke","person_name":"Cliente A","amount":100,"due_date":"' || (now() + interval '5 days')::text || '","is_customer_debt":true}')::jsonb
+);
+SQL
+d_num1_retry="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT debt_number FROM public.debts WHERE id = 'd_num1';" | tail -n 1)"
+[ "$d_num1_retry" = "$d_num1" ] || {
+  echo "FALHA: retry idempotente não deveria consumir/alterar número (obtido: $d_num1 -> $d_num1_retry)"
+  exit 1
+}
+
+# Unicidade por loja: nenhum (store_id, debt_number) duplicado.
+d_dupes="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM (SELECT store_id, debt_number FROM public.debts WHERE store_id = 'st_smoke' GROUP BY 1, 2 HAVING count(*) > 1) dup;" | tail -n 1)"
+[ "$d_dupes" = "0" ] || {
+  echo "FALHA: números duplicados na loja (obtido: '$d_dupes' duplicados)"
+  exit 1
+}
+
+echo "==> [16/16] Regressão 42710: Realtime idempotente no cenário Supabase"
+# O Postgres puro (sem a publicação) NÃO pega o erro 42710 'relation
+# "store_employees" is already member of publication "supabase_realtime"'
+# (duplicate_object) que o Supabase REAL dispara quando o upgrade.sql roda
+# de novo com store_employees já publicada (bug achado no live Aug 8 — a
+# Parte 20 fazia ALTER PUBLICATION ADD TABLE sem conferir
+# pg_publication_tables; o sql_check.sh antigo não pegava justamente por
+# rodar sem a publicação). Simulamos o Supabase aqui: cria a publicação,
+# adiciona a tabela como membro e reaplica o upgrade.sql 2x — antes do fix
+# isso falhava com 42710 no bloco DO da Parte 20.
+psql -v ON_ERROR_STOP=1 <<'SQL'
+CREATE PUBLICATION supabase_realtime;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.store_employees;
+SQL
+psql -v ON_ERROR_STOP=1 -f supabase/upgrade.sql
+psql -v ON_ERROR_STOP=1 -f supabase/upgrade.sql
+
+realtime_member="$(psql -q -tAc "SELECT count(*) FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'store_employees';" | tail -n 1)"
+[ "$realtime_member" = "1" ] || {
+  echo "FALHA: store_employees saiu da publicação supabase_realtime (obtido: '$realtime_member')"
+  exit 1
+}
+# O catálogo de planos (fix Aug 8 — Parte 21 do upgrade.sql) deve sobreviver
+# à reaplicação no cenário Supabase (seed idempotente).
+catalog_ok="$(psql -q -tAc "SELECT count(*) FROM public.plans WHERE id IN ('pl1','pl2','pl3');" | tail -n 1)"
+[ "$catalog_ok" = "3" ] || {
+  echo "FALHA: catálogo de planos (pl1/pl2/pl3) ausente após reaplicação (obtido: '$catalog_ok')"
+  exit 1
+}
+echo "OK: upgrade.sql reaplicado 2x no cenário Supabase (publicação + tabela membro) SEM 42710; store_employees segue publicada; catálogo pl1/pl2/pl3 presente"
+
+echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001, níveis de acesso (compras só dono/gerente), audit log (só super admin), KPIs agregadas server-side (get_dashboard_kpis), agregações H2 (get_cash_flow / get_sales_report), upgrade.sql idempotente, migração W4 NUMERIC→centavos (×100, sem dupla aplicação), numeração sequencial por loja (vendas S-00001..., compras C-00001..., fiado D-00001...), Realtime sem 42710 no cenário Supabase e catálogo de planos pl1/pl2/pl3 presente conforme esperado."

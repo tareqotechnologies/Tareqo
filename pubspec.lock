@@ -18,7 +18,7 @@ packages:
     source: hosted
     version: "10.2.0"
   app_links:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: app_links
       sha256: f8db46d2ea9ff6f3a37191a7fd5b7813da1253ace8c32c1b9eadace41d1188ea
@@ -781,7 +781,7 @@ packages:
     source: hosted
     version: "6.5.2"
   postgrest:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: postgrest
       sha256: "10e3f195e131eec944fa872644aed89b33b5be998f3fc77c87325db3927bc646"

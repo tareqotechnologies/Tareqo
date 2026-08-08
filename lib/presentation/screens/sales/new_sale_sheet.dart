@@ -40,7 +40,8 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   /// Catálogo por id — evita busca O(n) a cada interação do carrinho.
   Map<String, Product> _productsById = const {};
 
-  PaymentMethod _paymentMethod = PaymentMethod.pix;
+  // Padrão: M-Pesa (dinheiro móvel dominante em Moçambique).
+  PaymentMethod _paymentMethod = PaymentMethod.mPesa;
   bool _isSubmitting = false;
   String? _error;
 

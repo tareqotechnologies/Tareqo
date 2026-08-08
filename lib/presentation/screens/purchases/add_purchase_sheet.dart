@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/purchase.dart';
+import '../../../domain/entities/sale.dart' show PaymentMethod;
 import '../../../domain/usecases/add_purchase_use_case.dart';
 import '../../../domain/usecases/update_product_stock_use_case.dart';
 import '../../controllers/account_providers.dart';
@@ -37,6 +39,10 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
 
   /// Catálogo por id — evita busca O(n) a cada interação do carrinho.
   Map<String, Product> _productsById = const {};
+
+  // Padrão: M-Pesa (dinheiro móvel dominante em Moçambique — mesmo padrão
+  // do carrinho de Vendas).
+  PaymentMethod _paymentMethod = PaymentMethod.mPesa;
 
   bool _isSubmitting = false;
   String? _error;
@@ -123,6 +129,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
       supplierName: _supplierController.text.trim(),
       items: items,
       totalAmountCents: _totalCents,
+      paymentMethod: _paymentMethod,
       dateTime: DateTime.now(),
     );
 
@@ -251,6 +258,21 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Forma de pagamento do fornecedor (mesmo padrão de Vendas).
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final method in PaymentMethod.values)
+                      ChoiceChip(
+                        label: Text(method.labelFor(context.l10n)),
+                        selected: _paymentMethod == method,
+                        onSelected: (_) =>
+                            setState(() => _paymentMethod = method),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
+import '../../helpers/viewport.dart';
 import '../../helpers/store_context.dart';
 
 import 'package:dumbhanengue/domain/entities/customer.dart';
@@ -116,5 +117,78 @@ void main() {
     // Ana tem 50 + 25.5 = R$ 75,50 pendentes (chip "Fiado R$ 75,50");
     // Bruno não tem fiado (sem chip).
     expect(find.text('Fiado R\$ 75,50'), findsOneWidget);
+  });
+
+  // Regressão (UI): o chip de fiado ficava sem Flexível — com escala de
+  // texto 2.0 em tela estreita e um total grande, o Row do card estourava.
+  // Agora o chip encolhe (ellipsis); overflows de RenderFlex falham o
+  // teste via takeException.
+  testWidgets('não estoura com escala de texto 2.0 em tela estreita', (
+    tester,
+  ) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Estreita (360) porém alta: garante que o tile seja construído/pintado
+    // com escala 2.0 (abaixo do fold o overflow ficaria mascarado).
+    tester.view.physicalSize = const Size(360, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      _buildApp(
+        customers: const [
+          Customer(
+            id: 'c1',
+            name: 'Empresa de Equipamentos Industriais Ltda',
+            phone: '11999990000',
+            email: 'contato@empresa.com.br',
+          ),
+        ],
+        debts: [
+          Debt(
+            id: 'd1',
+            customerId: 'c1',
+            personName: 'Empresa de Equipamentos Industriais Ltda',
+            amountCents: 999999999,
+            dueDate: DateTime.now(),
+            isCustomerDebt: true,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // O cliente continua visível e nenhum overflow foi registrado.
+    expect(
+      find.text('Empresa de Equipamentos Industriais Ltda'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  // Rotação (UI): aba Clientes em paisagem — busca e lista seguem
+  // íntegras após o giro, sem overflow. Overflows de RenderFlex falham
+  // o teste via takeException.
+  testWidgets('clientes sobrevivem à rotação para paisagem', (tester) async {
+    usePortraitViewport(tester);
+
+    await tester.pumpWidget(_buildApp(customers: _customers));
+    await tester.pumpAndSettle();
+
+    // Retrato: busca e os dois clientes visíveis.
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('Ana Souza'), findsOneWidget);
+    expect(find.text('Bruno Lima'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Gira para paisagem.
+    await rotateToLandscape(tester);
+
+    // Sem overflow; busca e clientes seguem presentes após o giro.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('Ana Souza'), findsOneWidget);
+    expect(find.text('Bruno Lima'), findsOneWidget);
   });
 }

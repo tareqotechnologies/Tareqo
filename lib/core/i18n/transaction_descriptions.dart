@@ -64,7 +64,9 @@ abstract final class TransactionDescriptions {
         language == 'en' ? 'Debit card' : 'Cartão de débito',
       PaymentMethod.creditCard =>
         language == 'en' ? 'Credit card' : 'Cartão de crédito',
-      PaymentMethod.pix => 'Pix',
+      // Dinheiro móvel de Moçambique — mesmo nome em pt e en (marca).
+      PaymentMethod.mPesa => 'M-Pesa',
+      PaymentMethod.eMola => 'E-Mola',
       PaymentMethod.transfer =>
         language == 'en' ? 'Bank transfer' : 'Transferência',
     };

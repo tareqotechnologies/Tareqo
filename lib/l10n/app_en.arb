@@ -69,6 +69,9 @@
       }
     }
   },
+  "authBlockedTitle": "Access suspended",
+  "authBlockedMessage": "Your employee account was deactivated by the business owner. If you have questions, please contact them.",
+  "authBlockedSignOut": "Sign out",
   "authErrorRestoreSession": "Could not restore your session",
   "authErrorCheckConnection": "Check your connection and try again.",
   "authErrorLoadAccount": "Could not load your account",
@@ -79,6 +82,9 @@
   "loginEmailError": "Enter a valid email.",
   "loginPasswordLabel": "Password",
   "loginPasswordError": "Password must be at least 8 characters.",
+  "loginPasswordHint": "Min. 8 characters with lowercase, uppercase, number and symbol.",
+  "loginWeakPasswordError": "Password must include lowercase, uppercase, numbers and symbols.",
+  "loginRateLimitError": "Too many attempts in a row. Please wait about an hour and try again.",
   "loginShowPassword": "Show password",
   "loginHidePassword": "Hide password",
   "loginConfirmLabel": "Confirm password",
@@ -124,7 +130,10 @@
   "dashboardModuleReports": "Reports",
   "dashboardModuleStores": "Stores",
   "dashboardRecentSales": "Recent sales",
+  "dashboardViewAll": "View all",
   "dashboardNoSales": "No sales yet — record your first one!",
+  "dashboardRecentPurchases": "Recent purchases",
+  "dashboardNoPurchases": "No purchases yet — record your first one!",
   "dashboardLowStock": "Low stock",
   "dashboardSaleItems": "{count, plural, =1{1 item} other{{count} items}}",
   "@dashboardSaleItems": {
@@ -156,6 +165,14 @@
   "employeesEmptySubtitle": "Create the employee account and pick a store.",
   "roleManager": "Manager",
   "roleEmployee": "Employee",
+  "employeeActive": "Active",
+  "employeeInactive": "Inactive",
+  "employeeDeactivateConfirm": "Deactivate {name}? The employee loses access immediately and cannot sell until reactivated.",
+  "employeeReactivateConfirm": "Reactivate {name}? The employee gets store access again.",
+  "employeeDeactivated": "Employee deactivated.",
+  "employeeReactivated": "Employee reactivated.",
+  "employeeDeactivateAction": "Deactivate",
+  "employeeReactivateAction": "Reactivate",
   "upgradesLoadError": "Could not load the plan upgrade requests.",
   "upgradesEmptyTitle": "No upgrade requests",
   "upgradesEmptySubtitle": "Request a bigger plan in the card above.",
@@ -219,7 +236,6 @@
   "upgradeSuccess": "Upgrade request sent! The super admin will review it.",
   "upgradeError": "Could not send the request. Try again.",
   "upgradeSubmit": "Request upgrade",
-  "commonRefresh": "Refresh",
   "commonCancel": "Cancel",
   "commonDescription": "Description",
   "commonNoResults": "No results",
@@ -233,8 +249,10 @@
   "paymentCash": "Cash",
   "paymentDebitCard": "Debit card",
   "paymentCreditCard": "Credit card",
-  "paymentPix": "Pix",
+  "paymentEMola": "E-Mola",
+  "paymentMPesa": "M-Pesa",
   "paymentTransfer": "Bank transfer",
+  "purchasesSearchHint": "Search purchase...",
   "productsSearchHint": "Search product...",
   "productsLoadError": "Could not load the products.",
   "productsEmptyTitle": "No products registered",
@@ -293,6 +311,31 @@
   "purchasesLoadError": "Could not load the purchases.",
   "purchasesEmptyTitle": "No purchases registered",
   "purchasesEmptySubtitle": "Tap \"New purchase\" to record incoming goods and restock.",
+  "purchasesHeaderCount": "{count, plural, =0{0 purchases} =1{1 purchase} other{{count} purchases}}",
+  "@purchasesHeaderCount": {
+    "description": "Today's purchase count in the purchases screen summary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "purchasesHeaderVsYesterday": "vs yesterday",
+  "purchasesStockAdded": "Stock +{units} {unit}",
+  "@purchasesStockAdded": {
+    "description": "Purchase card chip: units added to stock",
+    "placeholders": {
+      "units": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "purchasesEmptyFilteredTitle": "No purchases found",
+  "purchasesEmptyFilteredSubtitle": "Adjust the period filter.",
+  "purchasesClearFilters": "Clear filters",
   "purchasesSupplierError": "Enter the purchase supplier.",
   "purchasesCartItemUnavailable": "A cart item is no longer available. Try again.",
   "purchasesRegistered": "Purchase registered: {amount}!",
@@ -477,6 +520,24 @@
   "salesLoadError": "Could not load the sales.",
   "salesEmptyTitle": "No sales registered",
   "salesEmptySubtitle": "Tap \"New sale\" to record your first one.",
+  "salesSearchHint": "Search sales...",
+  "periodYesterday": "Yesterday",
+  "periodWeek": "This week",
+  "paymentFilterCard": "Card",
+  "salesStatusPaid": "Paid",
+  "salesHeaderTransactions": "{count, plural, =0{0 transactions} =1{1 transaction} other{{count} transactions}}",
+  "@salesHeaderTransactions": {
+    "description": "Today's transaction count in the sales screen summary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "salesHeaderVsYesterday": "vs yesterday",
+  "salesEmptyFilteredTitle": "No sales found",
+  "salesEmptyFilteredSubtitle": "Adjust your search or filters.",
+  "salesClearFilters": "Clear filters",
   "salesItemUnavailable": "A cart item is no longer available. Try again.",
   "salesRegistered": "Sale registered: {amount}!",
   "@salesRegistered": {

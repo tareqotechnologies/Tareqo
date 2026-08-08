@@ -75,7 +75,7 @@ void main() {
           db.execute(
             'INSERT INTO sales '
             '(id, total_amount, payment_method, date_time) '
-            "VALUES ('s1', 4.0, 'pix', 100)",
+            "VALUES ('s1', 4.0, 'mPesa', 100)",
           );
           db.execute(
             'INSERT INTO sale_items '

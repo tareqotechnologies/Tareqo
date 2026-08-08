@@ -122,7 +122,7 @@ Nova funcionalidade:
 
 ### SQLite para dados novos
 
-Ao adicionar tabelas/colunas: crie no `createSchema` (com `CHECK` de salvaguarda), adicione migração idempotente se necessário, e estenda o seed se o demo precisar.
+Ao adicionar tabelas/colunas: crie no `createSchema` (com `CHECK` de salvaguarda) e adicione migração idempotente se necessário — lembre que o banco nasce **vazio** (sem seed).
 
 ### Estado (Riverpod)
 

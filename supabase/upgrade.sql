@@ -33,7 +33,11 @@
 -- PARTE 1 — Preferências do tenant (moeda e idioma)  [migração 002]
 -- ============================================================================
 ALTER TABLE public.tenants
-  ADD COLUMN IF NOT EXISTS currency_code TEXT NOT NULL DEFAULT 'BRL',
+  -- Moeda padrão dos novos tenants: MZN (metical — mercado-alvo
+  -- Moçambique); o dono altera em Lojas → Ajustes. Linhas existentes
+  -- preservam o valor que já tinham (ALTER ADD COLUMN com DEFAULT só
+  -- vale para linhas novas).
+  ADD COLUMN IF NOT EXISTS currency_code TEXT NOT NULL DEFAULT 'MZN',
   ADD COLUMN IF NOT EXISTS language TEXT NOT NULL DEFAULT 'pt';
 
 -- CHECKs idempotentes: só criam a constraint se ela ainda não existir.
@@ -128,6 +132,19 @@ CREATE TRIGGER trg_plan_requests_decided_by
 -- PARTE 3 — Helpers RLS com SECURITY DEFINER (correção da regressão 54001)
 --           [migração 006]
 -- ============================================================================
+-- ⚠️ ORDEM CRÍTICA: `is_my_store`/`is_manager_of_store` são LANGUAGE sql — o
+-- PostgreSQL VALIDA as colunas no momento do CREATE (diferente do plpgsql,
+-- que valida na primeira execução). As funções abaixo referenciam
+-- `e.is_active`; sem a coluna, o CREATE falharia com `42703: column
+-- e.is_active does not exist`. Por isso a coluna é adicionada AQUI, antes
+-- das funções. (A Parte 19 repete o ADD COLUMN IF NOT EXISTS — idempotente
+-- — para quem ler a seção de ativação/desativação isoladamente.)
+
+-- 3.0 Coluna is_active no vínculo store_employees (DEFAULT TRUE —
+-- funcionários existentes permanecem ativos).
+ALTER TABLE public.store_employees
+  ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
+
 -- Versões FINAIS (schema.sql). SECURITY DEFINER + search_path fixo: as
 -- políticas de stores/tenants/store_employees formam um ciclo entre tabelas
 -- que pode estourar a pilha (54001) em varreduras completas; o definer
@@ -160,6 +177,7 @@ AS $$
         OR EXISTS (
           SELECT 1 FROM public.store_employees e
           WHERE e.store_id = s.id AND e.user_id = auth.uid()
+            AND e.is_active
         )
       )
   );
@@ -185,6 +203,7 @@ AS $$
           SELECT 1 FROM public.store_employees e
           WHERE e.store_id = s.id AND e.user_id = auth.uid()
             AND e.role = 'manager'
+            AND e.is_active
         )
       )
   );
@@ -540,6 +559,8 @@ DECLARE
   -- W4: total em CENTAVOS inteiros (BIGINT) — comparação exata.
   v_total bigint := (p_sale->>'total_amount')::bigint;
   v_lang text;
+  -- Número SEQUENCIAL da venda na loja (sale_number).
+  v_sale_number bigint;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a venda.';
@@ -578,10 +599,18 @@ BEGIN
   -- Trava e valida o estoque de TODOS os itens (fecha TOCTOU).
   PERFORM public.lock_products_or_raise(p_items, v_store, TRUE);
 
+  -- Número SEQUENCIAL da venda na loja: atribuído AQUI no servidor, dentro
+  -- da mesma transação, sob uma advisory lock por loja — duas vendas
+  -- concorrentes na mesma loja nunca recebem o mesmo número. O id continua
+  -- sendo a chave de idempotência (o RETURN acima não consome número).
+  PERFORM pg_advisory_xact_lock(hashtextextended('sale_number:' || v_store, 0));
+  SELECT COALESCE(MAX(sale_number), 0) + 1 INTO v_sale_number
+  FROM public.sales WHERE store_id = v_store;
+
   -- Venda + itens (snapshot de nome/preço).
   INSERT INTO public.sales
-    (id, user_id, store_id, total_amount, payment_method, date_time)
-  VALUES (p_sale->>'id', v_uid, v_store, v_total,
+    (id, user_id, store_id, sale_number, total_amount, payment_method, date_time)
+  VALUES (p_sale->>'id', v_uid, v_store, v_sale_number, v_total,
           p_sale->>'payment_method', (p_sale->>'date_time')::timestamptz);
 
   INSERT INTO public.sale_items
@@ -622,6 +651,8 @@ DECLARE
   v_store text := p_debt->>'store_id';
   v_customer_debt boolean := (p_debt->>'is_customer_debt')::boolean;
   v_lang text;
+  -- Número SEQUENCIAL da dívida na loja (debt_number).
+  v_debt_number bigint;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar o fiado.';
@@ -644,11 +675,20 @@ BEGIN
     RETURN;
   END IF;
 
+  -- Número SEQUENCIAL da dívida na loja: atribuído AQUI no servidor,
+  -- dentro da mesma transação, sob uma advisory lock por loja — duas
+  -- dívidas concorrentes na mesma loja nunca recebem o mesmo número.
+  -- O id continua sendo a chave de idempotência (o RETURN acima não
+  -- consome número).
+  PERFORM pg_advisory_xact_lock(hashtextextended('debt_number:' || v_store, 0));
+  SELECT COALESCE(MAX(debt_number), 0) + 1 INTO v_debt_number
+  FROM public.debts WHERE store_id = v_store;
+
   -- Dívida + pendência financeira vinculada em UMA transação.
   INSERT INTO public.debts
-    (id, user_id, store_id, person_name, amount, due_date,
+    (id, user_id, store_id, debt_number, person_name, amount, due_date,
      is_customer_debt, is_paid, paid_at, customer_id)
-  VALUES (p_debt->>'id', v_uid, v_store, p_debt->>'person_name',
+  VALUES (p_debt->>'id', v_uid, v_store, v_debt_number, p_debt->>'person_name',
           (p_debt->>'amount')::bigint, (p_debt->>'due_date')::timestamptz,
           v_customer_debt, FALSE, NULL, p_debt->>'customer_id');
 
@@ -768,6 +808,8 @@ DECLARE
   -- W4: total em CENTAVOS inteiros (BIGINT) — comparação exata.
   v_total bigint := (p_purchase->>'total_amount')::bigint;
   v_lang text;
+  -- Número SEQUENCIAL da compra na loja (purchase_number).
+  v_purchase_number bigint;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a compra.';
@@ -803,11 +845,24 @@ BEGIN
   -- Valida e trava a existência de TODOS os produtos ANTES de mutar.
   PERFORM public.lock_products_or_raise(p_items, v_store, FALSE);
 
-  -- Compra + itens.
+  -- Número SEQUENCIAL da compra na loja: atribuído AQUI no servidor,
+  -- dentro da mesma transação, sob uma advisory lock por loja — duas
+  -- compras concorrentes na mesma loja nunca recebem o mesmo número.
+  -- O id continua sendo a chave de idempotência (o RETURN acima não
+  -- consome número).
+  PERFORM pg_advisory_xact_lock(
+    hashtextextended('purchase_number:' || v_store, 0));
+  SELECT COALESCE(MAX(purchase_number), 0) + 1 INTO v_purchase_number
+  FROM public.purchases WHERE store_id = v_store;
+
+  -- Compra + itens. payment_method vem no payload (mesmo enum de vendas);
+  -- clientes antigos sem o campo caem em 'cash' (compra à vista).
   INSERT INTO public.purchases
-    (id, user_id, store_id, supplier_name, total_amount, date_time)
-  VALUES (p_purchase->>'id', v_uid, v_store, p_purchase->>'supplier_name',
-          v_total, (p_purchase->>'date_time')::timestamptz);
+    (id, user_id, store_id, purchase_number, supplier_name, total_amount, payment_method, date_time)
+  VALUES (p_purchase->>'id', v_uid, v_store, v_purchase_number,
+          p_purchase->>'supplier_name',
+          v_total, COALESCE(p_purchase->>'payment_method', 'cash'),
+          (p_purchase->>'date_time')::timestamptz);
 
   INSERT INTO public.purchase_items
     (purchase_id, user_id, product_id, product_name, quantity, unit_price)
@@ -992,3 +1047,358 @@ BEGIN
     'per_day', v_daily
   );
 END $$;
+
+
+-- ============================================================================
+-- PARTE 13 — Ajustes do tenant (moeda/idioma) por RPC (update_tenant_settings)
+-- ============================================================================
+-- O dono altera moeda/idioma em Lojas → Ajustes via RPC SECURITY DEFINER
+-- (guarda is_tenant_owner + UPDATE restrito às colunas de apresentação) em
+-- vez de UPDATE direto: a política RLS tenants_update continua restrita ao
+-- super admin (status/plano são decisões do admin). Sem esta RPC, o UPDATE
+-- do dono batia na política e retornava 0 linhas — os ajustes nunca salvavam.
+CREATE OR REPLACE FUNCTION public.update_tenant_settings(
+  p_tenant_id TEXT,
+  p_currency_code TEXT,
+  p_language TEXT
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_currency text := CASE WHEN p_currency_code IN ('BRL','USD','EUR','MZN')
+                          THEN p_currency_code ELSE 'MZN' END;
+  v_lang text := CASE WHEN p_language IN ('pt','en')
+                      THEN p_language ELSE 'pt' END;
+BEGIN
+  IF NOT public.is_tenant_owner(p_tenant_id) THEN
+    RAISE EXCEPTION 'Apenas o dono do tenant pode alterar moeda e idioma.';
+  END IF;
+
+  UPDATE public.tenants
+     SET currency_code = v_currency,
+         language = v_lang
+   WHERE id = p_tenant_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Tenant % não encontrado.', p_tenant_id;
+  END IF;
+END;
+$$;
+
+-- ============================================================================
+-- PARTE 14 — Número SEQUENCIAL de venda por loja (sale_number)
+-- ============================================================================
+-- O app exibe "S-00001, S-00002..." (número SEQUENCIAL dentro da loja, em
+-- ordem de data). A coluna é atribuída pelo RPC process_sale (atualizado na
+-- Parte 8.1 acima — CREATE OR REPLACE) sob advisory lock por loja; bases
+-- antigas ganham a coluna aqui e têm as vendas existentes re-numeradas
+-- (a mais antiga da loja = 1). Idempotente: ADD COLUMN IF NOT EXISTS;
+-- re-executar renumera com base na ordem atual (sem duplicatas, pois o
+-- backfill usa ROW_NUMBER e o índice único garante a unicidade).
+ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS sale_number BIGINT;
+
+-- Backfill IDEMPOTENTE: numera APENAS as vendas ainda sem número (NULL),
+-- começando depois do maior número já existente da loja. Nunca renumera
+-- linhas já numeradas — reaplicar o upgrade.sql com dados é um no-op (não
+-- reordena números nem gera violação transitória do índice único por troca
+-- de valores durante o UPDATE).
+UPDATE public.sales s
+SET sale_number = s2.max_so_far + s2.rn
+FROM (
+  SELECT s1.id,
+         ROW_NUMBER() OVER (
+           PARTITION BY s1.store_id ORDER BY s1.date_time, s1.id
+         ) AS rn,
+         mx.max_so_far
+  FROM public.sales s1
+  JOIN (
+    SELECT store_id, COALESCE(MAX(sale_number), 0) AS max_so_far
+    FROM public.sales
+    GROUP BY store_id
+  ) mx ON mx.store_id = s1.store_id
+  WHERE s1.sale_number IS NULL
+) s2
+WHERE s.id = s2.id;
+
+-- A partir daqui todo INSERT precisa informar o número (o process_sale
+-- atribui; o PostgREST direto sem sale_number falha — comportamento
+-- intencional: numeração é responsabilidade do servidor).
+ALTER TABLE public.sales ALTER COLUMN sale_number SET NOT NULL;
+
+-- Unicidade do número por loja (defesa em profundidade).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_store_number
+  ON public.sales (store_id, sale_number);
+
+-- ============================================================================
+-- PARTE 15 — Número SEQUENCIAL de compra por loja (purchase_number)
+-- ============================================================================
+-- O app exibe "C-00001, C-00002..." (número SEQUENCIAL dentro da loja, em
+-- ordem de data). A coluna é atribuída pelo RPC process_purchase
+-- (atualizado na Parte 8.2 acima — CREATE OR REPLACE) sob advisory lock
+-- por loja; bases antigas ganham a coluna aqui e têm as compras existentes
+-- re-numeradas (a mais antiga da loja = 1). Idempotente: ADD COLUMN IF NOT
+-- EXISTS; o backfill numera APENAS as linhas sem número, começando depois
+-- do maior número já existente da loja (reaplicar com dados é um no-op).
+ALTER TABLE public.purchases ADD COLUMN IF NOT EXISTS purchase_number BIGINT;
+
+-- Backfill IDEMPOTENTE: numera APENAS as compras ainda sem número (NULL),
+-- começando depois do maior número já existente da loja. Nunca renumera
+-- linhas já numeradas — reaplicar o upgrade.sql com dados é um no-op (não
+-- reordena números nem gera violação transitória do índice único por troca
+-- de valores durante o UPDATE).
+UPDATE public.purchases s
+SET purchase_number = s2.max_so_far + s2.rn
+FROM (
+  SELECT s1.id,
+         ROW_NUMBER() OVER (
+           PARTITION BY s1.store_id ORDER BY s1.date_time, s1.id
+         ) AS rn,
+         mx.max_so_far
+  FROM public.purchases s1
+  JOIN (
+    SELECT store_id, COALESCE(MAX(purchase_number), 0) AS max_so_far
+    FROM public.purchases
+    GROUP BY store_id
+  ) mx ON mx.store_id = s1.store_id
+  WHERE s1.purchase_number IS NULL
+) s2
+WHERE s.id = s2.id;
+
+-- A partir daqui todo INSERT precisa informar o número (o process_purchase
+-- atribui; o PostgREST direto sem purchase_number falha — comportamento
+-- intencional: numeração é responsabilidade do servidor).
+ALTER TABLE public.purchases ALTER COLUMN purchase_number SET NOT NULL;
+
+-- Unicidade do número por loja (defesa em profundidade).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_purchases_store_number
+  ON public.purchases (store_id, purchase_number);
+
+-- ============================================================================
+-- PARTE 16 — Número SEQUENCIAL de fiado por loja (debt_number)
+-- ============================================================================
+-- O app exibe "D-00001, D-00002..." (número SEQUENCIAL dentro da loja, em
+-- ordem de vencimento). A coluna é atribuída pelo RPC register_debt
+-- (atualizado na Parte 8.2 acima — CREATE OR REPLACE) sob advisory lock
+-- por loja; bases antigas ganham a coluna aqui e têm as dívidas existentes
+-- re-numeradas (a mais antiga da loja = 1). Idempotente: ADD COLUMN IF NOT
+-- EXISTS; o backfill numera APENAS as linhas sem número, começando depois
+-- do maior número já existente da loja (reaplicar com dados é um no-op).
+ALTER TABLE public.debts ADD COLUMN IF NOT EXISTS debt_number BIGINT;
+
+-- Backfill IDEMPOTENTE: numera APENAS as dívidas ainda sem número (NULL),
+-- começando depois do maior número já existente da loja. Nunca renumera
+-- linhas já numeradas — reaplicar o upgrade.sql com dados é um no-op (não
+-- reordena números nem gera violação transitória do índice único por troca
+-- de valores durante o UPDATE).
+UPDATE public.debts s
+SET debt_number = s2.max_so_far + s2.rn
+FROM (
+  SELECT s1.id,
+         ROW_NUMBER() OVER (
+           PARTITION BY s1.store_id ORDER BY s1.due_date, s1.id
+         ) AS rn,
+         mx.max_so_far
+  FROM public.debts s1
+  JOIN (
+    SELECT store_id, COALESCE(MAX(debt_number), 0) AS max_so_far
+    FROM public.debts
+    GROUP BY store_id
+  ) mx ON mx.store_id = s1.store_id
+  WHERE s1.debt_number IS NULL
+) s2
+WHERE s.id = s2.id;
+
+-- A partir daqui todo INSERT precisa informar o número (o register_debt
+-- atribui; o PostgREST direto sem debt_number falha — comportamento
+-- intencional: numeração é responsabilidade do servidor).
+ALTER TABLE public.debts ALTER COLUMN debt_number SET NOT NULL;
+
+-- Unicidade do número por loja (defesa em profundidade).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_debts_store_number
+  ON public.debts (store_id, debt_number);
+
+
+-- ============================================================================
+-- PARTE 17 — Formas de pagamento: Pix → M-Pesa e E-Mola
+-- ============================================================================
+-- O produto trocou o Pix (BR) pelas carteiras de dinheiro móvel de
+-- Moçambique (M-Pesa e E-Mola). O payment_method é TEXT com CHECK — bases
+-- antigas precisam: (1) DERrubar o CHECK legado ANTES de migrar os dados
+-- (o constraint antigo aceita 'pix' mas NÃO 'mPesa' — o UPDATE com o CHECK
+-- em pé violaria 23514), (2) migrar os registros 'pix' para 'mPesa'
+-- (escolha do produto: M-Pesa é a operadora dominante; o enum Dart é
+-- persistido pelo nome, então sem migração a leitura quebraria), (3) criar
+-- o CHECK novo com a lista oficial e (4) recriar o payment_method_label
+-- (rótulos da descrição no caixa). Idempotente: o DROP/ADD do CHECK é IF
+-- EXISTS / recriação com o mesmo nome e a migração só toca 'pix'.
+-- ============================================================================
+
+-- 17.1 DROP do CHECK legado PRIMEIRO (sem ele, o UPDATE abaixo viola o
+-- constraint antigo: 23514 check_violation).
+ALTER TABLE public.sales DROP CONSTRAINT IF EXISTS sales_payment_method_check;
+
+-- 17.2 Migração de dados: 'pix' → 'mPesa' (no-op se não houver 'pix').
+UPDATE public.sales SET payment_method = 'mPesa'
+WHERE payment_method = 'pix';
+
+-- 17.3 CHECK novo (CREATE TABLE IF NOT EXISTS não altera tabelas
+-- existentes; o nome segue a convenção <tabela>_<coluna>_check).
+ALTER TABLE public.sales ADD CONSTRAINT sales_payment_method_check
+  CHECK (payment_method IN
+    ('cash', 'debitCard', 'creditCard', 'mPesa', 'eMola', 'transfer'));
+
+-- 17.4 Rótulo localizado (espelha o TransactionDescriptions.paymentMethodName
+-- do Dart e o payment_method_label do schema.sql — fonte da verdade; o
+-- process_sale da Parte 8.1 chama esta função, então a nova versão vale
+-- imediatamente).
+CREATE OR REPLACE FUNCTION public.payment_method_label(
+  p_method text,
+  p_lang text DEFAULT 'pt'
+)
+RETURNS text
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT CASE WHEN p_lang = 'en' THEN
+      CASE p_method
+        WHEN 'cash' THEN 'Cash' WHEN 'debitCard' THEN 'Debit card'
+        WHEN 'creditCard' THEN 'Credit card' WHEN 'mPesa' THEN 'M-Pesa'
+        WHEN 'eMola' THEN 'E-Mola' WHEN 'transfer' THEN 'Bank transfer'
+        ELSE p_method END
+    ELSE
+      CASE p_method
+        WHEN 'cash' THEN 'Dinheiro' WHEN 'debitCard' THEN 'Cartão de débito'
+        WHEN 'creditCard' THEN 'Cartão de crédito' WHEN 'mPesa' THEN 'M-Pesa'
+        WHEN 'eMola' THEN 'E-Mola' WHEN 'transfer' THEN 'Transferência'
+        ELSE p_method END
+    END;
+$$;
+
+-- ============================================================================
+-- 18. Compras: forma de pagamento do fornecedor (mesmo enum de vendas)
+-- ============================================================================
+-- O Purchase ganhou `paymentMethod` (espelha o enum de Vendas). A compra
+-- antiga não registrava o método — a coluna nasce com DEFAULT 'cash'
+-- (interpretação: pagamento à vista) e o CHECK passa a valer a lista
+-- oficial. O `process_purchase` (Parte 8.4) já lê `payment_method` do
+-- payload (COALESCE 'cash' para clientes antigos). Idempotente: ADD
+-- COLUMN IF NOT EXISTS + DROP/ADD do CHECK com o mesmo nome.
+-- ============================================================================
+
+-- 18.1 Coluna + backfill implícito (DEFAULT 'cash' para linhas existentes).
+ALTER TABLE public.purchases
+  ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'cash';
+
+-- 18.2 CHECK novo (DROP + ADD: CREATE TABLE IF NOT EXISTS não altera
+-- tabelas existentes; o nome segue a convenção <tabela>_<coluna>_check).
+ALTER TABLE public.purchases
+  DROP CONSTRAINT IF EXISTS purchases_payment_method_check;
+ALTER TABLE public.purchases
+  ADD CONSTRAINT purchases_payment_method_check
+  CHECK (payment_method IN
+    ('cash', 'debitCard', 'creditCard', 'mPesa', 'eMola', 'transfer'));
+
+-- ============================================================================
+-- 19. Ativação/desativação de funcionários (dono) + bloqueio de inativos
+-- ============================================================================
+-- O dono ativa/desativa funcionários; o funcionário DESATIVADO perde o
+-- acesso imediatamente: `is_my_store`/`is_manager_of_store` passam a
+-- exigir vínculo ATIVO (abaixo), então RLS e guardas das RPCs negam
+-- qualquer operação nas lojas. Coluna nasce DEFAULT TRUE (funcionários
+-- existentes permanecem ativos). Idempotente (ADD COLUMN IF NOT EXISTS).
+-- ============================================================================
+
+-- 19.1 Coluna is_active no vínculo store_employees. (Já adicionada na
+-- Parte 3.0 — ANTES das funções LANGUAGE sql is_my_store/is_manager_of_store
+-- que a referenciam. Repetida aqui por clareza; ADD COLUMN IF NOT EXISTS é
+-- idempotente.)
+ALTER TABLE public.store_employees
+  ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
+
+-- 19.2 RPC set_employee_active (SECURITY DEFINER + guarda is_tenant_owner):
+-- apenas o DONO do tenant do vínculo muda o status.
+CREATE OR REPLACE FUNCTION public.set_employee_active(
+  p_employee_id TEXT,
+  p_is_active BOOLEAN
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_tenant_id TEXT;
+BEGIN
+  SELECT tenant_id INTO v_tenant_id
+  FROM public.store_employees WHERE id = p_employee_id;
+
+  IF v_tenant_id IS NULL THEN
+    RAISE EXCEPTION 'Funcionário não encontrado.';
+  END IF;
+  IF NOT public.is_tenant_owner(v_tenant_id) THEN
+    RAISE EXCEPTION 'Apenas o dono do tenant pode ativar/desativar funcionários.';
+  END IF;
+
+  UPDATE public.store_employees
+  SET is_active = p_is_active
+  WHERE id = p_employee_id;
+END;
+$$;
+
+-- 19.3 is_my_store / is_manager_of_store exigem vínculo ATIVO (aplicado
+-- também acima nas definições das funções; idempotente por definição).
+
+-- ============================================================================
+-- 20. Realtime de funcionários: publica store_employees (bloqueio instantâneo)
+-- ============================================================================
+-- O app assina `postgres_changes` em `store_employees` com filtro
+-- `user_id = auth.uid()` para derrubar a sessão de um funcionário
+-- desativado NA HORA (sem polling). Sem a tabela na publicação
+-- `supabase_realtime`, o canal nunca recebe eventos. O RLS da tabela
+-- limita cada sessão ao PRÓPRIO vínculo (e o funcionário segue lendo a
+-- própria linha após desativado, então ele recebe a mudança de
+-- `is_active`). Idempotente (fix Aug 8): em PostgreSQL PURO, ADD TABLE
+-- numa tabela já publicada é um no-op, mas no SUPABASE é um ERRO 42710
+-- (duplicate_object) — o bloco confere a associação em
+-- pg_publication_tables ANTES de publicar. Em PostgreSQL puro
+-- (sql_check.sh) a publicação não existe → no-op também.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'store_employees'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.store_employees;
+  END IF;
+END
+$$;
+
+-- ============================================================================
+-- 21. Seed idempotente do CATÁLOGO DE PLANOS (fix Aug 8 — registro de dono)
+-- ============================================================================
+-- BUG CORRIGIDO: o catálogo de planos (pl1/pl2/pl3) era inserido apenas na
+-- Parte 2 do `schema.sql` (instalação nova). Bancos EXISTENTES migrados por
+-- ESTE arquivo ficavam com a tabela `plans` VAZIA → o onboarding do dono
+-- carregava zero planos → o registro de novo tenant era impossível (e o
+-- INSERT em `tenants` falharia por FK `plan_id REFERENCES public.plans`).
+--
+-- Este seed é o MESMO do schema.sql (Parte 2): a tabela de preços REAL,
+-- espelhando o catálogo local (PlanCatalog no app — pl1/pl2/pl3), NÃO dados
+-- de demonstração. Idempotente: ON CONFLICT (id) DO NOTHING — pode reexecutar
+-- o upgrade.sql à vontade; planos editados pelo super admin não são tocados.
+-- (No SQL Editor a sessão é dona do schema e ignora o RLS, então o INSERT
+-- passa mesmo com a política plans_insert exigindo is_super_admin.)
+INSERT INTO public.plans
+  (id, name, description, price_monthly, max_stores, max_employees, is_active)
+VALUES
+  ('pl1', 'Essencial', 'Para começar: 1 loja e até 3 funcionários.', 50000, 1, 3, TRUE),
+  ('pl2', 'Profissional', 'Para crescer: 3 lojas e até 10 funcionários.', 100000, 3, 10, TRUE),
+  ('pl3', 'Empresa', 'Para expandir: 10 lojas e até 50 funcionários.', 200000, 10, 50, TRUE)
+ON CONFLICT (id) DO NOTHING;

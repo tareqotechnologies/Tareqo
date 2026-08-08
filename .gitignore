@@ -55,6 +55,9 @@ backup_*.sql
 
 # Ambiente de produção — nunca versionar (o exemplo em env/*.example é o modelo)
 env/prod.env
+env/db.env
+# Visual Studio (pasta .vs/ local do Windows)
+windows/.vs/
 
 # Fastlane — credenciais locais da service account
 fastlane/play-service-account.json

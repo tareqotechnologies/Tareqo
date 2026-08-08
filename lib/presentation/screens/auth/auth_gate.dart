@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/network/deep_link_handler.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../domain/entities/app_user.dart';
+import '../../../domain/entities/store_employee.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/admin_providers.dart';
@@ -26,13 +28,43 @@ import 'login_screen.dart';
 /// - tenant `pending` → [TenantPendingScreen] (aguardando aprovação ≤ 24h);
 /// - tenant `rejected` → [TenantRejectedScreen] (motivo da rejeição);
 /// - tenant `approved` → [AppShell] (área de gestão do dono).
-class AuthGate extends ConsumerWidget {
+///
+/// **Bloqueio REATIVO de funcionários desativados:** o polling CENTRAL
+/// ([employeesPollingProvider]) re-busca os vínculos no Realtime (Supabase
+/// — bloqueio INSTANTÂNEO quando o dono desativa em outro dispositivo) e
+/// num timer de fallback de 30s ([employeePollIntervalProvider], modo
+/// local/websocket fora do ar). O servidor segue sendo a autoridade:
+/// RLS/RPCs negam as operações imediatamente.
+class AuthGate extends ConsumerStatefulWidget {
   const AuthGate({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
+  ConsumerState<AuthGate> createState() => _AuthGateState();
+}
 
+class _AuthGateState extends ConsumerState<AuthGate> {
+  @override
+  void initState() {
+    super.initState();
+    // Deep links de autenticação: o link de confirmação de e-mail
+    // (dumbhanengue://callback) reabre o app e conclui o fluxo no gotrue.
+    // Idempotente e à prova de falhas (no-op sem Supabase / em testes).
+    DeepLinkHandler.init();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authStateProvider);
+    // POLLING CENTRAL: mantém o provider vivo APENAS com usuário logado —
+    // o refresh dos vínculos acontece dentro do provider a cada sinal
+    // (timer + Realtime). No sign-out (usuário null) o autoDispose
+    // descarta o provider e CANCELA o timer de fallback e o canal
+    // Realtime — nada roda em segundo plano durante a sessão inteira.
+    // (Dono/super admin/pendente continuam com o timer vivo, mas o guard
+    // de [refreshEmployeeLinksIfNeeded] torna cada tick um no-op barato.)
+    if (authState.value != null) {
+      ref.watch(employeesPollingProvider);
+    }
     return authState.when(
       loading: () => const _SplashScreen(),
       // Erro no stream de sessão: mostra um estado explícito com retry em
@@ -76,10 +108,8 @@ class AuthGate extends ConsumerWidget {
         );
       },
     );
-  }
-
-  /// Portão do tenant (dono/funcionário): resolve o tenant do usuário e
-  /// decide entre onboarding, pendente, rejeitado ou área de gestão.
+  }/// Portão do tenant (dono/funcionário): resolve o tenant do usuário e
+/// decide entre onboarding, pendente, rejeitado ou área de gestão.
   Widget _tenantGate(WidgetRef ref, AppUser user) {
     final tenantAsync = ref.watch(myTenantProvider(user.id));
     return tenantAsync.when(
@@ -101,12 +131,84 @@ class AuthGate extends ConsumerWidget {
         if (tenant == null) {
           return TenantOnboardingScreen(user: user);
         }
+        // Funcionário DESATIVADO pelo dono: bloqueio total — o app mostra
+        // a tela de acesso suspenso (o servidor também nega as operações,
+        // via is_my_store exigindo vínculo ativo). O dono nunca passa aqui.
+        if (tenant.status == TenantStatus.approved &&
+            tenant.ownerUserId != user.id) {
+          final employees =
+              ref.watch(employeesProvider(tenant.id)).value ??
+              const <StoreEmployee>[];
+          final myLinks = employees
+              .where((employee) => employee.userId == user.id)
+              .toList();
+          // Sem vínculo OU todos os vínculos desativados → conta suspensa.
+          if (myLinks.isEmpty || myLinks.every((link) => !link.isActive)) {
+            return _BlockedEmployeeScreen(
+              onSignOut: () => ref.read(signOutUseCaseProvider).call(),
+            );
+          }
+        }
         return switch (tenant.status) {
           TenantStatus.pending => TenantPendingScreen(tenant: tenant),
           TenantStatus.rejected => TenantRejectedScreen(tenant: tenant),
           TenantStatus.approved => const AppShell(),
         };
       },
+    );
+  }
+}
+
+/// Funcionário com acesso suspenso pelo dono (conta desativada).
+///
+/// Mostra um estado explícito com sair da conta — espelha o bloqueio do
+/// servidor (vínculo `is_active = false` nega toda operação nas lojas).
+class _BlockedEmployeeScreen extends StatelessWidget {
+  const _BlockedEmployeeScreen({required this.onSignOut});
+
+  final VoidCallback onSignOut;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.block, size: 48, color: scheme.error),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.authBlockedTitle,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.authBlockedMessage,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: onSignOut,
+                  icon: const Icon(Icons.logout),
+                  label: Text(l10n.authBlockedSignOut),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -222,59 +324,56 @@ class _TenantErrorScreen extends StatelessWidget {
   }
 }
 
+/// Tela de abertura (restaurando sessão / resolvendo papel e tenant).
+///
+/// V4 (Aug 8): fundo BRANCO da identidade oficial (o mesmo do .ico) com o
+/// logotipo azul (`assets/branding/splash_logo.png`), o nome da marca em
+/// cinza-escuro e o spinner na cor do logotipo. Espelha o ícone oficial
+/// (tool/generate_icons_test.dart) — abertura sem "flash" (o splash
+/// sistêmico do Android também é branco).
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = scheme.brightness == Brightness.dark;
-
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [const Color(0xFF16211E), scheme.surface]
-                : [const Color(0xFFE4F2EC), scheme.surface],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFFFFFFF), Color(0xFFF6F7F8)],
           ),
         ),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: scheme.primary,
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: scheme.primary.withValues(alpha: 0.3),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.storefront,
-                  size: 38,
-                  color: scheme.onPrimary,
-                ),
+              // Logotipo OFICIAL (azul/branco, v4) — empacotado como asset
+              // do app (assets/branding/splash_logo.png).
+              Image.asset(
+                'assets/branding/splash_logo.png',
+                width: 116,
+                height: 116,
+                fit: BoxFit.contain,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
               Text(
                 'Dumbhanengue',
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: const Color(0xFF202023),
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 30),
               const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(strokeWidth: 2.5),
+                height: 22,
+                width: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Color(0xFF0076F6),
+                ),
               ),
             ],
           ),

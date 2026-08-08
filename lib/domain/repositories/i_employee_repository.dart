@@ -10,4 +10,10 @@ abstract interface class IEmployeeRepository {
 
   /// Vincula um funcionário a uma loja do tenant.
   Future<void> add(StoreEmployee employee);
+
+  /// Ativa/desativa um funcionário do tenant (dono).
+  Future<void> setActive({
+    required String employeeId,
+    required bool isActive,
+  });
 }

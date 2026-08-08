@@ -13,6 +13,7 @@ import '../../../domain/entities/tenant.dart';
 import '../../../domain/usecases/add_employee_use_case.dart';
 import '../../../domain/usecases/add_store_use_case.dart';
 import '../../../domain/usecases/request_plan_upgrade_use_case.dart';
+import '../../../domain/usecases/set_employee_active_use_case.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
@@ -126,10 +127,23 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
             TabBar(
               controller: _tabController,
               tabs: [
-                Tab(text: l10n.storesTabStores),
-                Tab(text: l10n.storesTabEmployees),
-                Tab(text: l10n.storesTabUpgrades),
-                Tab(text: l10n.storesTabSettings),
+                // FittedBox: rótulos longos ('Funcionários', 'Upgrades')
+                // encolhem em vez de estourar o Tab de largura fixa em
+                // telas estreitas. Defensivo: a regressão REAL de 21px
+                // achada nos testes de rotação foi no _LimitMeter; aqui o
+                // risco é de overflow a ~100px por aba com escala alta.
+                for (final label in [
+                  l10n.storesTabStores,
+                  l10n.storesTabEmployees,
+                  l10n.storesTabUpgrades,
+                  l10n.storesTabSettings,
+                ])
+                  Tab(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(label, maxLines: 1),
+                    ),
+                  ),
               ],
               labelStyle: theme.textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w700,
@@ -212,6 +226,10 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
     final l10n = context.l10n;
     final stores =
         ref.watch(storesProvider(widget.tenant.id)).value ?? const <Store>[];
+    // Só o DONO do tenant vê o interruptor ativar/desativar.
+    final user = ref.watch(authStateProvider).value;
+    final isOwner =
+        user != null && widget.tenant.ownerUserId == user.id;
 
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -238,6 +256,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
           itemBuilder: (context, index) {
             final employee = employees[index];
             final scheme = Theme.of(context).colorScheme;
+            final isManager = employee.role == EmployeeRole.manager;
             return Card(
               child: ListTile(
                 leading: CircleAvatar(
@@ -261,16 +280,48 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                 subtitle: Text(
                   '${storeName(employee.storeId)} · ${employee.email}',
                 ),
-                trailing: StatusChip(
-                  label: employee.role == EmployeeRole.manager
-                      ? l10n.roleManager
-                      : l10n.roleEmployee,
-                  color: employee.role == EmployeeRole.manager
-                      ? scheme.primary
-                      : scheme.outline,
-                  icon: employee.role == EmployeeRole.manager
-                      ? Icons.manage_accounts_outlined
-                      : Icons.person_outline,
+                // Desativado: o card inteiro perde o destaque (opacidade +
+                // chip "Inativo" em vermelho) — o funcionário perdeu acesso.
+                isThreeLine: false,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Defensivo: com escala de texto alta, nome/e-mail
+                    // longos no título/subtítulo comprimem o trailing — o
+                    // Column de chips cede (Flexible + ellipsis no chip).
+                    Flexible(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                        StatusChip(
+                          label: isManager
+                              ? l10n.roleManager
+                              : l10n.roleEmployee,
+                          color: isManager
+                              ? scheme.primary
+                              : scheme.outline,
+                          icon: isManager
+                              ? Icons.manage_accounts_outlined
+                              : Icons.person_outline,
+                        ),
+                        const SizedBox(height: 4),
+                        if (!employee.isActive)
+                          StatusChip(
+                            label: l10n.employeeInactive,
+                            color: scheme.error,
+                            icon: Icons.block,
+                          ),
+                      ],
+                    ),
+                    ),
+                    if (isOwner)
+                      Switch(
+                        value: employee.isActive,
+                        onChanged: (value) =>
+                            _toggleEmployee(employee, value),
+                      ),
+                  ],
                 ),
               ),
             );
@@ -278,6 +329,69 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
         );
       },
     );
+  }
+
+  /// Confirma e ativa/desativa o funcionário (só o dono chega aqui).
+  Future<void> _toggleEmployee(
+    StoreEmployee employee,
+    bool isActive,
+  ) async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          isActive ? l10n.employeeReactivateConfirm(employee.fullName) :
+          l10n.employeeDeactivateConfirm(employee.fullName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              isActive
+                  ? l10n.employeeReactivateAction
+                  : l10n.employeeDeactivateAction,
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await ref.read(setEmployeeActiveUseCaseProvider).call(
+        tenantId: widget.tenant.id,
+        employeeId: employee.id,
+        isActive: isActive,
+      );
+      if (!mounted) return;
+      ref.invalidate(employeesProvider(widget.tenant.id));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isActive
+                ? l10n.employeeReactivated
+                : l10n.employeeDeactivated,
+          ),
+        ),
+      );
+    } on EmployeeNotFoundException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+    } catch (error) {
+      // Supabase: o RPC pode rejeitar (não-dono, rede) — a mensagem já
+      // vem amigável do datasource; cai aqui sem derrubar a tela.
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$error')),
+      );
+    }
   }
 
   Widget _buildUpgrades(AsyncValue<List<PlanRequest>> async) {
@@ -468,17 +582,29 @@ class _LimitMeter extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: scheme.onPrimaryContainer.withValues(alpha: 0.8),
+            // Flexible: em telas estreitas o cartão de plano fica com
+            // colunas ~158px — sem flex o rótulo longo estourava o Row
+            // (regressão encontrada nos testes de rotação).
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: scheme.onPrimaryContainer.withValues(alpha: 0.8),
+                ),
               ),
             ),
-            Text(
-              '$used/$max',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: reached ? scheme.error : scheme.onPrimaryContainer,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                '$used/$max',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: reached ? scheme.error : scheme.onPrimaryContainer,
+                ),
               ),
             ),
           ],

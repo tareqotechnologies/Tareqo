@@ -51,7 +51,7 @@ O nome *Dumbhanengue* é o apelido do projeto; o produto em si é um ERP enxuto,
 - **Acesso por papel:** super admin entra no painel administrativo; dono sem aprovação vê as telas de espera/motivo até a liberação; dono aprovado opera o ERP e gerencia lojas/funcionários.
 - **Tema claro e escuro** (Material 3) com um único acento verde-esmeralda.
 - **Formatação pt-BR:** moeda (`R$ 1.234,56`), datas (`04/08/2026`) e dias relativos (`Hoje`, `Ontem`).
-- **Dados de demonstração:** o app abre com conteúdo realista (seed) para demonstração imediata.
+- **100% dados reais:** o app não traz dados de demonstração — cada tenant começa vazio e registra apenas o que o usuário criar.
 
 ---
 

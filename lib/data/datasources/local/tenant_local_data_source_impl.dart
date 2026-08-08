@@ -4,8 +4,8 @@ import 'tenant_local_data_source.dart';
 
 /// Implementação em memória do [TenantLocalDataSource].
 ///
-/// Inicia vazia por padrão (testes dependem disso); o seed de demonstração
-/// é injetado pelo ServiceLocator.
+/// Inicia vazia por padrão (testes dependem disso) — sem dados de
+/// demonstração; o ServiceLocator injeta apenas o que é real.
 final class TenantLocalDataSourceImpl implements TenantLocalDataSource {
   TenantLocalDataSourceImpl({
     List<Tenant> seed = const [],

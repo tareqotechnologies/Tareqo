@@ -8,6 +8,7 @@ part of 'sale.dart';
 
 _Sale _$SaleFromJson(Map<String, dynamic> json) => _Sale(
   id: json['id'] as String,
+  number: (json['number'] as num?)?.toInt() ?? 0,
   storeId: json['storeId'] as String? ?? 'st1',
   items: (json['items'] as List<dynamic>)
       .map((e) => SaleItem.fromJson(e as Map<String, dynamic>))
@@ -19,6 +20,7 @@ _Sale _$SaleFromJson(Map<String, dynamic> json) => _Sale(
 
 Map<String, dynamic> _$SaleToJson(_Sale instance) => <String, dynamic>{
   'id': instance.id,
+  'number': instance.number,
   'storeId': instance.storeId,
   'items': instance.items.map((e) => e.toJson()).toList(),
   'totalAmountCents': instance.totalAmountCents,
@@ -30,6 +32,7 @@ const _$PaymentMethodEnumMap = {
   PaymentMethod.cash: 'cash',
   PaymentMethod.debitCard: 'debitCard',
   PaymentMethod.creditCard: 'creditCard',
-  PaymentMethod.pix: 'pix',
+  PaymentMethod.mPesa: 'mPesa',
+  PaymentMethod.eMola: 'eMola',
   PaymentMethod.transfer: 'transfer',
 };

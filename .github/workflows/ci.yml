@@ -10,11 +10,13 @@
 #               real do AAB de PRODUÇÃO acontece no workflow release.yml
 #               (tag v*, Fastlane, secrets do keystore);
 #   sql-check — smoke test do supabase/schema.sql + upgrade.sql + RLS
-#               contra um Postgres 16 real (scripts/sql_check.sh — 12
+#               contra um Postgres 16 real (scripts/sql_check.sh — 16
 #               passos: RLS por loja, RPCs atômicas do dinheiro,
 #               get_dashboard_kpis (W5), get_cash_flow/get_sales_report
-#               (H2), upgrade.sql idempotente (aplicação dupla) e
-#               migração W4 NUMERIC→centavos — checklist 6.2).
+#               (H2), upgrade.sql idempotente (aplicação dupla),
+#               migração W4 NUMERIC→centavos, numeração sequencial por
+#               loja, regressão 42710 do Realtime no cenário Supabase e
+#               catálogo de planos pl1/pl2/pl3 — checklist 6.2).
 name: CI
 
 on:
@@ -102,7 +104,7 @@ jobs:
           path: build/app/outputs/flutter-apk/app-dev-release.apk
 
   sql-check:
-    name: SQL / RLS check (12 passos — W4/H2/upgrade)
+    name: SQL / RLS check (16 passos — W4/H2/upgrade/42710)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     services:
@@ -120,9 +122,11 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      # 12 passos: schema.sql + upgrade.sql 2x (idempotência) + RLS por loja
+      # 16 passos: schema.sql + upgrade.sql 2x (idempotência) + RLS por loja
       # + RPCs atômicas + get_dashboard_kpis/get_cash_flow/get_sales_report
-      # + migração W4 NUMERIC→centavos (25.50→2550, sem dupla aplicação).
+      # + migração W4 NUMERIC→centavos (25.50→2550, sem dupla aplicação)
+      # + numeração sequencial + regressão 42710 (Realtime no cenário
+      # Supabase) + catálogo de planos pl1/pl2/pl3.
       - name: Run SQL/RLS smoke test (W4/H2/upgrade)
         env:
           PGPASSWORD: postgres

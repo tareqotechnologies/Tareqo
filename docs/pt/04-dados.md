@@ -5,7 +5,7 @@ A camada `lib/data/` implementa concretamente o que o domínio declara. Ela cont
 - **Datasources** — fontes de dados locais (contratos + implementações), remotas de negócio (Supabase) e remotas de auth;
 - **Repositórios** — implementações dos contratos do domínio;
 - **Unit of Work** — transações atômicas (SQLite);
-- **Seed de demonstração** — dados demo injetados no composition root.
+- **Catálogo de planos** — a tabela de preços real injetada no composition root (sem dados demo).
 
 ---
 
@@ -41,7 +41,7 @@ lib/data/
 │       ├── employee_local_data_source.dart / _impl   # Funcionários (Contas)
 │       ├── plan_request_local_data_source.dart / _impl  # Upgrades (Contas)
 │       ├── sqlite_unit_of_work.dart                  # IUnitOfWork real (transação)
-│       └── demo_seed.dart                            # Dados demo
+│       └── plan_catalog.dart                        # Planos (catálogo real)
 └── repositories/
     ├── product_repository_impl.dart
     ├── sale_repository_impl.dart
@@ -120,6 +120,7 @@ CREATE TABLE products (
 
 CREATE TABLE sales (
   id TEXT PRIMARY KEY,
+  sale_number INTEGER NOT NULL DEFAULT 0,  -- sequencial por loja (S-00001)
   total_amount REAL NOT NULL CHECK (total_amount >= 0),
   payment_method TEXT NOT NULL,          -- nome do enum (estável)
   date_time INTEGER NOT NULL             -- epoch millis
@@ -148,6 +149,7 @@ CREATE TABLE financial_transactions (
 
 CREATE TABLE debts (
   id TEXT PRIMARY KEY,
+  debt_number INTEGER NOT NULL DEFAULT 0,  -- sequencial por loja (D-00001)
   person_name TEXT NOT NULL,
   amount REAL NOT NULL CHECK (amount >= 0),
   due_date INTEGER NOT NULL,             -- epoch millis
@@ -156,6 +158,8 @@ CREATE TABLE debts (
   paid_at INTEGER                        -- epoch millis (data da baixa)
 );
 ```
+
+(`purchases` também tem `purchase_number INTEGER NOT NULL DEFAULT 0` para o número sequencial por loja C-00001 e `payment_method TEXT NOT NULL DEFAULT 'cash'` — a forma de pagamento do fornecedor, mesmo enum de vendas, backfill como à vista para compras antigas.)
 
 **Convenções de serialização:**
 
@@ -174,13 +178,18 @@ Os `CHECK` (`stock_quantity >= 0`, `amount >= 0`, `quantity > 0`) são a **salva
 
 1. **`debts.is_paid`** — adiciona com `DEFAULT 0` (dívidas antigas ficam pendentes);
 2. **`financial_transactions.debt_id`** — adiciona `NULL` (dívidas antigas quitarão via nova entrada, sem duplicata);
-3. **`debts.paid_at`** — adiciona `NULL` (dívidas já quitadas ficam sem data de baixa até nova quitação).
+3. **`debts.paid_at`** — adiciona `NULL` (dívidas já quitadas ficam sem data de baixa até nova quitação);
+4. **`store_id`** em todas as 6 tabelas de negócio (Fase 2) — adiciona `'st1'` + índices por loja;
+5. **`sales.sale_number`** — sequencial por loja (S-00001…), backfill em ordem de data; único `(store_id, sale_number)`;
+6. **`purchases.purchase_number`** — sequencial por loja (C-00001…), backfill em ordem de data; único `(store_id, purchase_number)`;
+7. **`debts.debt_number`** — sequencial por loja (D-00001…), backfill em ordem de vencimento; único `(store_id, debt_number)`;
+8. **`purchases.payment_method`** — forma de pagamento do fornecedor (mesmo enum de vendas), adicionada como `'cash'` (compras antigas eram despesas imediatas à vista).
 
-Todas usam `PRAGMA table_info` para verificar a coluna antes — **seguras para re-execução** (bancos novos já criam as colunas no `CREATE TABLE`).
+As migrações de numeração rodam **depois** da de `store_id` (os backfills referenciam `store_id`). Todas usam `PRAGMA table_info` para verificar a coluna antes — **seguras para re-execução** (bancos novos já criam as colunas no `CREATE TABLE`).
 
-### Seed automático
+### Sem seed automático
 
-`seedIfEmpty` insere os dados demo **apenas na primeira execução** (guarda: `COUNT(*)` de `products`), numa única transação.
+O banco **não semeia dados de demonstração**: `AppDatabase.initialize` apenas cria o schema e migra dinheiro para centavos (W4) — produtos, vendas, caixa, fiado, clientes e compras nascem **vazios** e só registram dados reais criados pelo usuário.
 
 ---
 
@@ -243,19 +252,13 @@ Detalhe importante: no `signUp`, se a **confirmação de e-mail** estiver ativa,
 
 ## Camada de Contas (multi-tenancy)
 
-Os datasources de Contas (planos, tenants, lojas, funcionários e upgrades) seguem o **mesmo padrão de dupla implementação**: contrato + memória (`*_impl.dart`) no ramo local e datasource Supabase (`remote/`) no ramo remoto. Em dev local, o seed injeta 3 planos, um **tenant demo aprovado** (`tn1`), 2 lojas e 1 funcionário — o app abre direto na área de gestão. Detalhes do fluxo em [Multi-tenancy e Super Admin](11-multitenancy.md).
+Os datasources de Contas (planos, tenants, lojas, funcionários e upgrades) seguem o **mesmo padrão de dupla implementação**: contrato + memória (`*_impl.dart`) no ramo local e datasource Supabase (`remote/`) no ramo remoto. Em dev local, o composition root injeta apenas o **catálogo real de planos**; tenant, lojas, funcionários e upgrades nascem vazios — o dono passa pelo onboarding e pela aprovação. Detalhes do fluxo em [Multi-tenancy e Super Admin](11-multitenancy.md).
 
 ---
 
-## Dados de demonstração (`DemoSeed`)
+## Sem dados de demonstração
 
-Gera: 5 produtos, 3 vendas (com itens), 7 movimentações financeiras e 5 dívidas — todos com **datas relativas a `DateTime.now()`** para que os períodos (Hoje/7 dias/Mês) funcionem desde o primeiro dia.
-
-Relações importantes no seed:
-- `t1` ↔ venda `s1`, `t3` ↔ `s2`, `t6` ↔ `s3` (cada venda tem sua entrada no caixa);
-- `t4` (fiado do João, **pendente**) está vinculada à dívida `d1` via `debtId` → ao quitar, a **mesma** transação é marcada como paga;
-- `d4` é **a pagar** (fornecedor) → filtrada pelos casos de uso de crédito;
-- `d5` já está **quitada** com `paidAt` → aparece no histórico.
+O app **não semeia conteúdo de exemplo** (nem local nem no schema de produção): o único dado injetado é o **catálogo real de planos** (`PlanCatalog`, espelhado na Parte 2 do `schema.sql`). Produtos, vendas, movimentações, fiado, clientes e compras nascem vazios — os períodos (Hoje/7 dias/Mês) refletem apenas dados reais. Bases já existentes que receberam o seed antigo podem ser limpas com `supabase/cleanup_demo_data.sql`.
 
 ---
 

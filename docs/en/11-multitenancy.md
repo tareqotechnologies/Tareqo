@@ -23,22 +23,24 @@ Owner signs up → picks plan + business name → tenant PENDING
 | ---- | -------------------- | -------------- |
 | **Super admin** | DB-backed role (`public.super_admins`) | Approve/reject tenants, decide plan upgrades and create/edit plans (admin panel) |
 | **Owner** | `tenants.owner_user_id = auth.uid()` | **Full access:** request access, create stores, create employee accounts, request plan upgrades and operate the ERP. Only role that can manage stores/employees/plan/settings (`Stores` module) |
-| **Manager** | Link in `store_employees` with `role = 'manager'` | **Full operations:** sells, products, finance, credit, customers, **purchases and reports** — but **no** store/employee/plan/settings management (owner only) |
-| **Employee** | Link in `store_employees` with `role = 'employee'` | **Daily operations only:** sells, products, finance, credit and customers — **no** purchases, **no** reports, **no** management |
+| **Manager** | Link in `store_employees` with `role = 'manager'` | **Full operations:** sells, products (including **creating**), finance, credit, customers, **purchases and reports** — but **no** store/employee/plan/settings management (owner only) |
+| **Employee** | Link in `store_employees` with `role = 'employee'` | **Daily operations only:** sells, products (list/sell, **not create**), finance, credit and customers — **no** product creation, **no** purchases, **no** reports, **no** management |
 
-### Access-level matrix (Aug 6)
+### Access-level matrix (Aug 7)
 
 | Module | Owner | Manager | Employee |
 | ------ | ----- | ------- | -------- |
-| Sales / Products / Finance / Credit / Customers | ✅ | ✅ | ✅ |
+| Sales / Products (list/sell) / Finance / Credit / Customers | ✅ | ✅ | ✅ |
+| **Create product** ("New product" FAB) | ✅ | ✅ | ❌ |
 | Purchases | ✅ | ✅ | ❌ |
 | Reports | ✅ | ✅ | ❌ |
 | Stores (stores/employees/plan/settings) | ✅ | ❌ | ❌ |
 
 - **UI (UX only):** the dashboard hides the Purchases/Reports cards for employees and the Stores card for anyone who is not the owner — `currentAccessLevelProvider` (`account_providers.dart`) resolves the signed-in user's level from `tenants.owner_user_id` or the highest role among their `store_employees` links;
+- **Products (Aug 7):** a regular **employee does not create products** — they only list and sell. The "New product" FAB (and the empty-state action) is hidden when `currentAccessLevelProvider == employee`; the owner and managers keep it. The server also restricts the INSERT (`products_insert` via `is_my_store`);
 - **Server (authority):** the `process_purchase` RPC and the `purchases`/`purchase_items` RLS policies require `public.is_manager_of_store(store_id)` (owner or manager). Even a modified client that calls PostgREST directly is blocked — the DB is the final gate. Store/employee/plan/settings management was already owner-only via the `is_tenant_owner`-based RLS policies.
 
-Consolidated in `supabase/upgrade.sql` (Part 4 — helper + RPC guard + policies).
+Consolidated in `supabase/upgrade.sql` (Parts 4 and 19 — helpers + RPC guards + policies).
 
 ### Super admin (DB-backed role)
 
@@ -125,8 +127,10 @@ State providers in `lib/presentation/controllers/admin_providers.dart` (`pending
 
 - **Plan card:** name, description, usage meters (`stores used/max` and `employees used/max`) and an **Upgrade** button;
 - **Stores tab:** list and creation of stores (sheet with name + address) — respects `maxStores`;
-- **Employees tab:** list with store and role; creation via sheet with **name, email and password** (the owner creates the access account) + store and role selection (`manager`/`employee`) — respects `maxEmployees`;
+- **Employees tab:** list with store, role and status; creation via sheet with **name, email and password** (the owner creates the access account) + store and role selection (`manager`/`employee`) — respects `maxEmployees`;
 - **Upgrades tab:** the tenant's request history (pending/approved/rejected).
+
+> **Employee activation/deactivation (Aug 7):** the OWNER activates and deactivates employees via the **switch** on the employee card (with a confirmation dialog — "Deactivate Carlos?"). A deactivated employee loses access **immediately**: the **app** shows the "Access suspended" screen in the AuthGate (with sign out), and the **server** denies every operation in the stores — `is_my_store`/`is_manager_of_store` now require an **active** link (`is_active = TRUE`), so RLS and RPC guards block even a modified client. The app-side block is **reactive and instant**: in Supabase mode the `AuthGate` subscribes to Realtime (`postgres_changes` on `store_employees` filtered by the user — the table is published to `supabase_realtime`, Part 20 of the upgrade) and drops the session of an employee logged in on ANOTHER device as soon as the owner deactivates them; in local mode (and when the websocket is down) a 30s timer re-fetches the links as a fallback. The `store_employees.is_active` column defaults to `TRUE` (existing employees stay active) and status changes go through the `set_employee_active` RPC (SECURITY DEFINER, owner only; idempotent).
 
 > **Employee account creation:** the app calls the `create_employee_account` RPC (`SECURITY DEFINER` in the schema), which creates the account server-side by **inserting directly into `auth.users` + `auth.identities`** (pgcrypto bcrypt hash, `email_confirmed_at = now()` — immediate confirmation, no confirmation email, no provider rate limits; current Supabase removed the `auth.admin_create_user` internal function, and the GoTrue Admin API is HTTP/async which would break atomicity) **and the store link in `store_employees` in the same transaction** — if the link fails (e.g. the plan's employee limit is reached), the account is rolled back too: **no orphan accounts**. The password is set by the owner and the owner's session is never replaced. In local dev without Supabase, a synthetic id + repository link is used (in-memory).
 
@@ -171,20 +175,20 @@ New tables: `plans`, `tenants`, `stores`, `store_employees`, `plan_requests` —
 The business tables (`products`, `sales`, `financial_transactions`, `debts`, `customers`, `purchases`) gained the `store_id` column + per-store indexes and the **`set_record_store_id`** trigger (Phase 2):
 
 - **Defense in depth:** if the client sends a `store_id` that is not the user's (tenant owner or linked employee), the trigger rewrites it to the first accessible store — nobody writes to a store outside their own access;
-- **Helper `public.is_my_store(store_id)`:** a tenant owner is valid for all of the tenant's stores; an employee is valid for their linked store;
-- **Helper `public.is_manager_of_store(store_id)` (Aug 6):** a tenant owner or a linked employee with `role = 'manager'` — used by the `process_purchase` guard and the purchases RLS policies (managerial level);
+- **Helper `public.is_my_store(store_id)`:** a tenant owner is valid for all of the tenant's stores; an employee is valid for their linked store **only with `is_active = TRUE`** (Aug 7 — a deactivated employee loses access immediately);
+- **Helper `public.is_manager_of_store(store_id)` (Aug 6; active-link requirement Aug 7):** a tenant owner or a linked employee with `role = 'manager'` **and active** — used by the `process_purchase` guard and the purchases RLS policies (managerial level);
 - Without a session (e.g. seeding via SQL Editor) the provided value is preserved.
 
 - **Helper `public.is_super_admin()`:** queries the `public.super_admins` table (DB-backed role) — `SECURITY DEFINER` to bypass the table's own RLS;
 - **Helper `public.is_tenant_owner(tenant_id)`:** checks `tenants.owner_user_id = auth.uid()`;
 - **`is_my_store`/`is_tenant_owner` are `SECURITY DEFINER`** (`search_path` pinned): they run inside the policies and query tables that carry their own policies (`stores`/`tenants`/`store_employees`) — as definers they ignore RLS internally, which breaks the cross-table policy cycle and prevents `54001 max_stack_depth` on full-table scans (regression found Aug 6 on Supabase cloud with an older schema; consolidated in `supabase/upgrade.sql`, Part 3);
-- **Trigger guards:** when there is no session (e.g. seeding via SQL Editor), the provided value is preserved — the seed keeps working.
+- **Trigger guards:** when there is no session (e.g. inserts via the SQL Editor), the provided value is preserved — the Part 2 catalog keeps working.
 
-### Seed
+### Catalog (no seed)
 
-- 3 plans (`pl1` Essential, `pl2` Professional, `pl3` Enterprise — same limits as the local `DemoSeed`);
-- One **already-approved demo tenant** for the first user (`tn_demo`, plan `pl2`), with **two stores** (`st1` Downtown Store, `st2` Mall Store — to demonstrate the selector and per-store scoping) and the owner as manager of the Downtown Store (`e1`). To test the approval flow, register a **new account**;
-- Business data spread across the stores (e.g. 7 products — 5 in `st1`, 2 in `st2`).
+- 3 plans (`pl1` Essential, `pl2` Professional, `pl3` Enterprise) — the **real subscription catalog**, inserted in Part 2 of `schema.sql` and mirrored in the local `PlanCatalog` (no-Supabase mode);
+- **No demo data:** the database never seeds tenants, stores, employees or business data. Every new user goes through the real flow: sign-up → onboarding (choose plan) → `pending` request → manual super-admin approval.
+- Databases that already received the old seed are cleaned with `supabase/cleanup_demo_data.sql`.
 
 ---
 

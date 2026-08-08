@@ -315,7 +315,8 @@ void main() {
       );
 
       final updated = await repository.getById(request.id);
-      expect(updated!.currencyCode, 'BRL');
+      // Moeda inválida cai no padrão de novos tenants: MZN (metical).
+      expect(updated!.currencyCode, 'MZN');
       expect(updated.language, 'pt');
     });
   });

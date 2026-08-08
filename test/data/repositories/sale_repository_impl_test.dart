@@ -21,7 +21,7 @@ void main() {
           ),
         ],
         totalAmountCents: 400,
-        paymentMethod: PaymentMethod.pix,
+        paymentMethod: PaymentMethod.mPesa,
         dateTime: DateTime(2026, 8, 3),
       ),
     );

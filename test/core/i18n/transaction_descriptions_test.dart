@@ -23,8 +23,10 @@ void main() {
     });
 
     test('nome da forma de pagamento', () {
-      expect(TransactionDescriptions.paymentMethodName('pt', PaymentMethod.pix),
-          'Pix');
+      expect(
+          TransactionDescriptions.paymentMethodName(
+              'pt', PaymentMethod.mPesa),
+          'M-Pesa');
       expect(
           TransactionDescriptions.paymentMethodName(
               'en', PaymentMethod.creditCard),

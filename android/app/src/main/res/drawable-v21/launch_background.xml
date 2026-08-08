@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
+<!-- Tela de abertura Android 21+ (<12) — identidade OFICIAL (v4, Aug 8):
+     fundo @color/ic_launcher_background (branco #FFFFFF, mesmo do .ico
+     oficial) + logotipo azul centralizado (drawable-nodpi/launch_image.png,
+     gerado por tool/generate_icons_test.dart). -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="?android:colorBackground" />
-
-    <!-- You can insert your own image assets here -->
-    <!-- <item>
+    <item android:drawable="@color/ic_launcher_background" />
+    <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/launch_image" />
-    </item> -->
+            android:src="@drawable/launch_image" />
+    </item>
 </layer-list>

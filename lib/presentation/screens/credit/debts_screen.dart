@@ -43,6 +43,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
     final debtsAsync = ref.watch(pendingDebtsProvider);
     final settledAsync = ref.watch(settledDebtsProvider);
 
@@ -60,19 +61,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.debtsTitle),
-        actions: [
-          IconButton(
-            tooltip: l10n.commonRefresh,
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.read(pendingDebtsProvider.notifier).refresh();
-              ref.read(settledDebtsProvider.notifier).refresh();
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.debtsTitle)),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab-credit',
         onPressed: () => _openAddDebt(context),
@@ -89,110 +78,116 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 96),
-        children: [
-          Center(
-            child: SegmentedButton<_DebtView>(
-              showSelectedIcon: false,
-              segments: [
-                ButtonSegment(
-                  value: _DebtView.pending,
-                  label: Text(l10n.debtsTabPending),
-                ),
-                ButtonSegment(
-                  value: _DebtView.settled,
-                  label: Text(l10n.debtsTabSettled),
-                ),
-              ],
-              selected: {_view},
-              onSelectionChanged: (selection) =>
-                  setState(() => _view = selection.first),
-            ),
-          ),
-          const SizedBox(height: 16),
-          if (_view == _DebtView.pending) ...[
-            _SummaryCard(
-              color: AppColors.warning,
-              icon: Icons.receipt_long,
-              title: l10n.debtsTotalPending,
-              value: Formatters.currency(pendingTotalCents),
-              subtitle: debts.isEmpty
-                  ? l10n.debtsNoPendingCustomers
-                  : l10n.debtsPendingCustomers(debts.length),
-            ),
-            const SizedBox(height: 24),
-            SectionHeader(title: l10n.debtsPendingSection),
-            const SizedBox(height: 12),
-            debtsAsync.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.all(32),
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (error, _) => ErrorView(
-                message: l10n.debtsLoadError,
-                details: error.toString(),
-                onRetry: () => ref.invalidate(pendingDebtsProvider),
-              ),
-              data: (items) {
-                if (items.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.celebration_outlined,
-                    title: l10n.debtsEmptyPendingTitle,
-                    subtitle: l10n.debtsEmptyPendingSubtitle,
-                  );
-                }
-                return Column(
-                  children: [
-                    for (final debt in items) ...[
-                      _DebtCard(
-                        debt: debt,
-                        onSettle: () => _settleDebt(context, debt),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
+          children: [
+            // FittedBox: as abas Pendentes/Quitadas encolhem em telas
+            // estreitas com escala de texto alta (o SegmentedButton não
+            // quebra linha).
+            Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: SegmentedButton<_DebtView>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(
+                      value: _DebtView.pending,
+                      label: Text(l10n.debtsTabPending),
+                    ),
+                    ButtonSegment(
+                      value: _DebtView.settled,
+                      label: Text(l10n.debtsTabSettled),
+                    ),
                   ],
-                );
-              },
-            ),
-          ] else ...[
-            _SummaryCard(
-              color: AppColors.income,
-              icon: Icons.history,
-              title: l10n.debtsTotalSettled,
-              value: Formatters.currency(settledTotalCents),
-              subtitle: l10n.debtsSettledCount(settled.length),
-            ),
-            const SizedBox(height: 24),
-            SectionHeader(title: l10n.debtsSettledSection),
-            const SizedBox(height: 12),
-            settledAsync.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.all(32),
-                child: Center(child: CircularProgressIndicator()),
+                  selected: {_view},
+                  onSelectionChanged: (selection) =>
+                      setState(() => _view = selection.first),
+                ),
               ),
-              error: (error, _) => ErrorView(
-                message: l10n.debtsHistoryLoadError,
-                details: error.toString(),
-                onRetry: () => ref.invalidate(settledDebtsProvider),
+            ),
+            const SizedBox(height: 16),
+            if (_view == _DebtView.pending) ...[
+              _SummaryCard(
+                color: theme.warning,
+                icon: Icons.receipt_long,
+                title: l10n.debtsTotalPending,
+                value: Formatters.currency(pendingTotalCents),
+                subtitle: debts.isEmpty
+                    ? l10n.debtsNoPendingCustomers
+                    : l10n.debtsPendingCustomers(debts.length),
               ),
-              data: (items) {
-                if (items.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.history_toggle_off,
-                    title: l10n.debtsEmptySettledTitle,
-                    subtitle: l10n.debtsEmptySettledSubtitle,
-                  );
-                }
-                return Column(
-                  children: [
-                    for (final debt in items) ...[
-                      _SettledDebtCard(debt: debt),
-                      const SizedBox(height: 8),
+              const SizedBox(height: 24),
+              SectionHeader(title: l10n.debtsPendingSection),
+              const SizedBox(height: 12),
+              debtsAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => ErrorView(
+                  message: l10n.debtsLoadError,
+                  details: error.toString(),
+                  onRetry: () => ref.invalidate(pendingDebtsProvider),
+                ),
+                data: (items) {
+                  if (items.isEmpty) {
+                    return EmptyState(
+                      icon: Icons.celebration_outlined,
+                      title: l10n.debtsEmptyPendingTitle,
+                      subtitle: l10n.debtsEmptyPendingSubtitle,
+                    );
+                  }
+                  return Column(
+                    children: [
+                      for (final debt in items) ...[
+                        _DebtCard(
+                          debt: debt,
+                          onSettle: () => _settleDebt(context, debt),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ],
-                  ],
-                );
-              },
-            ),
-          ],
+                  );
+                },
+              ),
+            ] else ...[
+              _SummaryCard(
+                color: theme.income,
+                icon: Icons.history,
+                title: l10n.debtsTotalSettled,
+                value: Formatters.currency(settledTotalCents),
+                subtitle: l10n.debtsSettledCount(settled.length),
+              ),
+              const SizedBox(height: 24),
+              SectionHeader(title: l10n.debtsSettledSection),
+              const SizedBox(height: 12),
+              settledAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => ErrorView(
+                  message: l10n.debtsHistoryLoadError,
+                  details: error.toString(),
+                  onRetry: () => ref.invalidate(settledDebtsProvider),
+                ),
+                data: (items) {
+                  if (items.isEmpty) {
+                    return EmptyState(
+                      icon: Icons.history_toggle_off,
+                      title: l10n.debtsEmptySettledTitle,
+                      subtitle: l10n.debtsEmptySettledSubtitle,
+                    );
+                  }
+                  return Column(
+                    children: [
+                      for (final debt in items) ...[
+                        _SettledDebtCard(debt: debt),
+                        const SizedBox(height: 8),
+                      ],
+                    ],
+                  );
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -370,9 +365,9 @@ class _DebtCard extends StatelessWidget {
 
     final l10n = context.l10n;
     final (chipLabel, chipColor) = daysUntilDue > 0
-        ? (l10n.debtsLate, AppColors.expense)
+        ? (l10n.debtsLate, theme.expense)
         : daysUntilDue == 0
-        ? (l10n.debtsDueToday, AppColors.warning)
+        ? (l10n.debtsDueToday, theme.warning)
         : (l10n.debtsDueIn(-daysUntilDue), theme.colorScheme.primary);
 
     return Card(
@@ -409,14 +404,36 @@ class _DebtCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      StatusChip(label: chipLabel, color: chipColor),
+                      // Número SEQUENCIAL do fiado na loja (D-00001) + chip
+                      // de vencimento — Wrap para não estourar em telas
+                      // estreitas com escala de texto alta.
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            Formatters.debtLabel(debt.number),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          StatusChip(label: chipLabel, color: chipColor),
+                        ],
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  Formatters.currency(debt.amountCents),
-                  style: theme.textTheme.titleMedium,
+                // Flexible: valores altos (ou escala de texto alta) encolhem
+                // com ellipsis em vez de estourar o card.
+                Flexible(
+                  child: Text(
+                    Formatters.currency(debt.amountCents),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium,
+                  ),
                 ),
               ],
             ),
@@ -449,13 +466,13 @@ class _SettledDebtCard extends StatelessWidget {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: AppColors.income.withValues(alpha: 0.14),
+              backgroundColor: theme.income.withValues(alpha: 0.14),
               child: Text(
                 debt.personName.isEmpty
                     ? '?'
                     : debt.personName.substring(0, 1).toUpperCase(),
                 style: TextStyle(
-                  color: AppColors.income,
+                  color: theme.income,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -474,22 +491,42 @@ class _SettledDebtCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  StatusChip(
-                    label: debt.paidAt == null
-                        ? context.l10n.debtsSettledLabel
-                        : context.l10n.debtsSettledOn(
-                            Formatters.date(debt.paidAt!),
-                          ),
-                    color: AppColors.income,
-                    icon: Icons.check_circle_outline,
+                  // Número SEQUENCIAL do fiado (D-00001) + chip de baixa
+                  // (Wrap, mesma proteção contra overflow de escala de
+                  // texto alta).
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        Formatters.debtLabel(debt.number),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      StatusChip(
+                        label: debt.paidAt == null
+                            ? context.l10n.debtsSettledLabel
+                            : context.l10n.debtsSettledOn(
+                                Formatters.date(debt.paidAt!),
+                              ),
+                        color: theme.income,
+                        icon: Icons.check_circle_outline,
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              Formatters.currency(debt.amountCents),
-              style: theme.textTheme.titleMedium,
+            Flexible(
+              child: Text(
+                Formatters.currency(debt.amountCents),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium,
+              ),
             ),
           ],
         ),

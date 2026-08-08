@@ -74,7 +74,7 @@ void main() {
           ),
         ],
         totalAmountCents: 600,
-        paymentMethod: PaymentMethod.pix,
+        paymentMethod: PaymentMethod.mPesa,
         dateTime: DateTime(2026, 8, 3, 9),
       ),
       Sale(
@@ -210,7 +210,7 @@ void main() {
             ),
           ],
           totalAmountCents: 1000,
-          paymentMethod: PaymentMethod.pix,
+          paymentMethod: PaymentMethod.mPesa,
           dateTime: DateTime(2026, 8, 3),
         ),
       ]),
@@ -244,7 +244,7 @@ void main() {
             ),
           ],
           totalAmountCents: 990,
-          paymentMethod: PaymentMethod.pix,
+          paymentMethod: PaymentMethod.mPesa,
           dateTime: DateTime(2026, 8, 3),
         ),
     ];

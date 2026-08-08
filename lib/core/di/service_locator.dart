@@ -8,7 +8,7 @@ import '../../data/datasources/local/customer_local_data_source.dart';
 import '../../data/datasources/local/customer_local_data_source_impl.dart';
 import '../../data/datasources/local/debt_local_data_source.dart';
 import '../../data/datasources/local/debt_local_data_source_impl.dart';
-import '../../data/datasources/local/demo_seed.dart';
+import '../../data/datasources/local/plan_catalog.dart';
 import '../../data/datasources/local/employee_local_data_source.dart';
 import '../../data/datasources/local/employee_local_data_source_impl.dart';
 import '../../data/datasources/local/financial_transaction_local_data_source.dart';
@@ -55,13 +55,16 @@ import '../../data/repositories/supabase_dashboard_kpis_repository.dart';
 import '../../data/repositories/supabase_sales_report_repository.dart';
 import '../../data/repositories/tenant_repository_impl.dart';
 import '../../data/repositories/local_admin_repository.dart';
+import '../../data/services/empty_employee_realtime_signal_source.dart';
 import '../../data/services/local_employee_account_service.dart';
 import '../../data/services/supabase_debt_processor.dart';
 import '../../data/services/supabase_employee_processor.dart';
+import '../../data/services/supabase_employee_realtime_signal_source.dart';
 import '../../data/services/supabase_purchase_processor.dart';
 import '../../data/services/supabase_sale_processor.dart';
 import '../../domain/repositories/i_admin_repository.dart';
 import '../../domain/repositories/i_employee_account_processor.dart';
+import '../../domain/repositories/i_employee_realtime_signal_source.dart';
 import '../../domain/repositories/i_employee_account_service.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../../domain/repositories/i_customer_repository.dart';
@@ -85,6 +88,7 @@ import '../../domain/repositories/i_unit_of_work.dart';
 import '../../domain/usecases/add_customer_use_case.dart';
 import '../../domain/usecases/add_debt_use_case.dart';
 import '../../domain/usecases/add_employee_use_case.dart';
+import '../../domain/usecases/set_employee_active_use_case.dart';
 import '../../domain/usecases/add_financial_transaction_use_case.dart';
 import '../../domain/usecases/add_plan_use_case.dart';
 import '../../domain/usecases/add_product_use_case.dart';
@@ -229,6 +233,11 @@ final class ServiceLocator {
       ..registerLazySingleton<EmployeeLocalDataSource>(
         () => const EmployeeSupabaseDataSourceImpl(),
       )
+      // Realtime de funcionários (bloqueio INSTANTÂNEO de desativados):
+      // postgres_changes em store_employees filtrado pelo usuário logado.
+      ..registerLazySingleton<IEmployeeRealtimeSignalSource>(
+        () => SupabaseEmployeeRealtimeSignalSource(),
+      )
       ..registerLazySingleton<PlanRequestLocalDataSource>(
         () => const PlanRequestSupabaseDataSourceImpl(),
       )
@@ -262,77 +271,76 @@ final class ServiceLocator {
   }
 
   /// Datasources da camada de Contas **em memória** (dev local sem
-  /// Supabase): planos de exemplo e um tenant demo já aprovado, para que o
-  /// app de demonstração abra na área de gestão.
+  /// Supabase): apenas o catálogo REAL de planos; tenant, lojas,
+  /// funcionários e upgrades nascem vazios — o dono passa pelo fluxo real
+  /// de onboarding + aprovação (nenhum dado de demonstração).
   static void _registerLocalAccountDatasources() {
     instance
       ..registerLazySingleton<PlanLocalDataSource>(
-        () => PlanLocalDataSourceImpl(seed: DemoSeed.plans()),
+        () => PlanLocalDataSourceImpl(seed: PlanCatalog.plans()),
       )
       ..registerLazySingleton<TenantLocalDataSource>(
-        () => TenantLocalDataSourceImpl(
-          seed: DemoSeed.tenants(),
-          employeeUserIds: [
-            for (final employee in DemoSeed.employees()) employee.userId,
-          ],
-        ),
+        () => TenantLocalDataSourceImpl(),
       )
       ..registerLazySingleton<StoreLocalDataSource>(
-        () => StoreLocalDataSourceImpl(seed: DemoSeed.stores()),
+        () => StoreLocalDataSourceImpl(),
       )
       ..registerLazySingleton<EmployeeLocalDataSource>(
-        () => EmployeeLocalDataSourceImpl(seed: DemoSeed.employees()),
+        () => EmployeeLocalDataSourceImpl(),
+      )
+      // Sem servidor no modo local: fonte de sinais vazia (o polling do
+      // AuthGate continua cobrindo o bloqueio reativo).
+      ..registerLazySingleton<IEmployeeRealtimeSignalSource>(
+        () => const EmptyEmployeeRealtimeSignalSource(),
       )
       ..registerLazySingleton<PlanRequestLocalDataSource>(
-        () => PlanRequestLocalDataSourceImpl(seed: DemoSeed.planRequests()),
+        () => PlanRequestLocalDataSourceImpl(),
       );
   }
 
   /// Fallback em memória (web / falha da biblioteca nativa) — mesma
-  /// estrutura dos testes, com seed de demonstração.
+  /// estrutura dos testes: dados nascem VAZIOS, apenas com o catálogo de
+  /// planos. Nenhum dado de demonstração.
   static void _registerInMemoryDatasources() {
     instance
       ..registerLazySingleton<IUnitOfWork>(() => const _DirectUnitOfWork())
       ..registerLazySingleton<ProductLocalDataSource>(
-        () => ProductLocalDataSourceImpl(seed: DemoSeed.products()),
+        () => ProductLocalDataSourceImpl(),
       )
       ..registerLazySingleton<SaleLocalDataSource>(
-        () => SaleLocalDataSourceImpl(seed: DemoSeed.sales()),
+        () => SaleLocalDataSourceImpl(),
       )
       ..registerLazySingleton<FinancialTransactionLocalDataSource>(
-        () => FinancialTransactionLocalDataSourceImpl(
-          seed: DemoSeed.transactions(),
-        ),
+        () => FinancialTransactionLocalDataSourceImpl(),
       )
       ..registerLazySingleton<DebtLocalDataSource>(
-        () => DebtLocalDataSourceImpl(seed: DemoSeed.debts()),
+        () => DebtLocalDataSourceImpl(),
       )
       ..registerLazySingleton<CustomerLocalDataSource>(
-        () => CustomerLocalDataSourceImpl(seed: DemoSeed.customers()),
+        () => CustomerLocalDataSourceImpl(),
       )
       ..registerLazySingleton<PurchaseLocalDataSource>(
-        () => PurchaseLocalDataSourceImpl(seed: DemoSeed.purchases()),
+        () => PurchaseLocalDataSourceImpl(),
       )
-      // Camada de Contas em memória (plano demo + tenant aprovado).
+      // Camada de Contas em memória — catálogo real de planos; tenant,
+      // lojas, funcionários e upgrades nascem vazios (fluxo real).
       ..registerLazySingleton<PlanLocalDataSource>(
-        () => PlanLocalDataSourceImpl(seed: DemoSeed.plans()),
+        () => PlanLocalDataSourceImpl(seed: PlanCatalog.plans()),
       )
       ..registerLazySingleton<TenantLocalDataSource>(
-        () => TenantLocalDataSourceImpl(
-          seed: DemoSeed.tenants(),
-          employeeUserIds: [
-            for (final employee in DemoSeed.employees()) employee.userId,
-          ],
-        ),
+        () => TenantLocalDataSourceImpl(),
       )
       ..registerLazySingleton<StoreLocalDataSource>(
-        () => StoreLocalDataSourceImpl(seed: DemoSeed.stores()),
+        () => StoreLocalDataSourceImpl(),
       )
       ..registerLazySingleton<EmployeeLocalDataSource>(
-        () => EmployeeLocalDataSourceImpl(seed: DemoSeed.employees()),
+        () => EmployeeLocalDataSourceImpl(),
+      )
+      ..registerLazySingleton<IEmployeeRealtimeSignalSource>(
+        () => const EmptyEmployeeRealtimeSignalSource(),
       )
       ..registerLazySingleton<PlanRequestLocalDataSource>(
-        () => PlanRequestLocalDataSourceImpl(seed: DemoSeed.planRequests()),
+        () => PlanRequestLocalDataSourceImpl(),
       );
   }
 
@@ -424,6 +432,9 @@ final class ServiceLocator {
       )
       ..registerLazySingleton<GetEmployeesUseCase>(
         () => GetEmployeesUseCase(instance<IEmployeeRepository>()),
+      )
+      ..registerLazySingleton<SetEmployeeActiveUseCase>(
+        () => SetEmployeeActiveUseCase(instance<IEmployeeRepository>()),
       )
       ..registerLazySingleton<AddEmployeeUseCase>(
         () => AddEmployeeUseCase(

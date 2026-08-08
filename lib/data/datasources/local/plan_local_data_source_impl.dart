@@ -3,8 +3,8 @@ import 'plan_local_data_source.dart';
 
 /// Implementação em memória do [PlanLocalDataSource].
 ///
-/// Inicia vazia por padrão (testes dependem disso); o seed de demonstração
-/// é injetado pelo ServiceLocator.
+/// Inicia vazia por padrão (testes dependem disso); o catálogo real de
+/// planos é injetado pelo ServiceLocator (ver PlanCatalog).
 final class PlanLocalDataSourceImpl implements PlanLocalDataSource {
   PlanLocalDataSourceImpl({List<Plan> seed = const []}) : _plans = [...seed];
 

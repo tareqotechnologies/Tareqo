@@ -51,7 +51,7 @@
 - **Role-based access:** the super admin enters the admin panel; an owner without approval sees waiting/reason screens until release; an approved owner operates the ERP and manages stores/employees.
 - **Light and dark themes** (Material 3) with a single emerald-green accent.
 - **pt-BR formatting:** currency (`R$ 1.234,56`), dates (`04/08/2026`) and relative days (`Hoje`, `Ontem`).
-- **Demo data:** the app opens with realistic content (seed) for immediate demonstration.
+- **100% real data:** the app ships no demo data — every tenant starts empty and only records what the user creates.
 
 ---
 

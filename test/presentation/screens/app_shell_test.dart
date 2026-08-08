@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
+import '../../helpers/viewport.dart';
 
 import 'package:dumbhanengue/domain/entities/customer.dart';
 import 'package:dumbhanengue/domain/entities/debt.dart';
@@ -165,6 +166,64 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nenhuma venda registrada'), findsOneWidget);
+  });
+
+  // Rotação/responsividade: em paisagem com largura >= 880px o AppShell
+  // troca o NavigationBar (mobile) pelo NavigationRail (web/desktop) — o
+  // conteúdo fica centralizado num ConstrainedBox (maxWidth 1040). Gira do
+  // retrato (barra) para a paisagem larga (rail) e verifica: o rail
+  // aparece, a barra some, as 6 abas continuam navegáveis e nenhum
+  // overflow foi registrado.
+  testWidgets('AppShell em paisagem larga usa NavigationRail (>= 880px)',
+      (tester) async {
+    // Retrato estreito: NavigationBar (mobile).
+    usePortraitViewport(tester);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ...storeContextOverrides(),
+          getProductsUseCaseProvider
+              .overrideWithValue(_FakeGetProductsUseCase()),
+          salesRepositoryProvider.overrideWithValue(_FakeSalesRepository()),
+          getCashFlowUseCaseProvider
+              .overrideWithValue(_FakeGetCashFlowUseCase()),
+          getPendingDebtsUseCaseProvider
+              .overrideWithValue(_FakeGetPendingDebtsUseCase()),
+          getSettledDebtsUseCaseProvider
+              .overrideWithValue(_FakeGetSettledDebtsUseCase()),
+          financeRepositoryProvider.overrideWithValue(_FakeFinanceRepository()),
+          getCustomersUseCaseProvider
+              .overrideWithValue(_FakeGetCustomersUseCase()),
+        ],
+        child: testApp(home: AppShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Retrato: barra de navegação mobile, sem rail.
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NavigationRail), findsNothing);
+    expect(find.text('Início'), findsOneWidget);
+
+    // Gira para paisagem LARGA (1280×800) — acima do limiar de 880px.
+    await rotateToLandscape(tester, size: const Size(1280, 800));
+
+    // O rail aparece no lugar da barra, com todas as 6 abas.
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+    for (final label in ['Início', 'Produtos', 'Vendas', 'Financeiro',
+        'Crédito', 'Clientes']) {
+      expect(find.text(label), findsWidgets);
+    }
+    expect(tester.takeException(), isNull);
+
+    // Navega pelo rail até a aba de Vendas (lista vazia no fake).
+    await tester.tap(find.text('Vendas'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nenhuma venda registrada'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(

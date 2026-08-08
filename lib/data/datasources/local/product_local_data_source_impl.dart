@@ -13,8 +13,8 @@ import 'product_local_data_source.dart';
 final class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   /// Lista simulando as linhas da tabela de produtos.
   ///
-  /// Inicia vazia por padrão (testes dependem disso); o seed de
-  /// demonstração é injetado pelo ServiceLocator.
+  /// Inicia vazia por padrão (testes dependem disso) — sem dados de
+  /// demonstração; o ServiceLocator injeta apenas dados reais.
   ProductLocalDataSourceImpl({List<Product> seed = const []})
       : _products = [...seed];
 

@@ -1,8 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'dart:async';
+
 import '../../core/config/app_settings.dart';
 import '../../core/di/service_locator.dart';
+import '../../data/services/empty_employee_realtime_signal_source.dart';
 import '../../domain/entities/plan.dart';
+import '../../domain/repositories/i_employee_realtime_signal_source.dart';
 import '../../domain/entities/plan_request.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/entities/store_employee.dart';
@@ -19,6 +23,7 @@ import '../../domain/usecases/get_stores_use_case.dart';
 import '../../domain/usecases/reject_tenant_use_case.dart';
 import '../../domain/usecases/request_plan_upgrade_use_case.dart';
 import '../../domain/usecases/request_tenant_access_use_case.dart';
+import '../../domain/usecases/set_employee_active_use_case.dart';
 import '../../domain/usecases/update_plan_use_case.dart';
 import '../../domain/usecases/update_tenant_settings_use_case.dart';
 import 'auth_providers.dart';
@@ -85,6 +90,10 @@ final getEmployeesUseCaseProvider = Provider<GetEmployeesUseCase>(
 
 final addEmployeeUseCaseProvider = Provider<AddEmployeeUseCase>(
   (ref) => ServiceLocator.instance<AddEmployeeUseCase>(),
+);
+
+final setEmployeeActiveUseCaseProvider = Provider<SetEmployeeActiveUseCase>(
+  (ref) => ServiceLocator.instance<SetEmployeeActiveUseCase>(),
 );
 
 final getMyPlanRequestsUseCaseProvider = Provider<GetMyPlanRequestsUseCase>(
@@ -163,6 +172,95 @@ final employeesProvider =
     FutureProvider.autoDispose.family<List<StoreEmployee>, String>(
   (ref, tenantId) => ref.watch(getEmployeesUseCaseProvider).call(tenantId),
 );
+
+/// Fonte de sinais de REALTIME do vínculo do funcionário logado
+/// (bloqueio INSTANTÂNEO de desativados).
+///
+/// O `AuthGate` assina `.signals` e re-busca os vínculos a cada sinal —
+/// emitido quando a linha do usuário em `store_employees` muda no servidor
+/// (ex.: o dono desativou/reativou em outro dispositivo), sem esperar o
+/// polling.
+///
+/// Modo Supabase: fonte real (postgres_changes, registrada pelo
+/// ServiceLocator). Modo local/testes: fonte VAZIA (nunca emite — nenhum
+/// canal de websocket é aberto; o polling do `AuthGate` segue como
+/// fallback).
+final employeeRealtimeSignalsProvider = Provider<IEmployeeRealtimeSignalSource>(
+  (ref) {
+    if (!ServiceLocator.instance.isRegistered<IEmployeeRealtimeSignalSource>()) {
+      return const EmptyEmployeeRealtimeSignalSource();
+    }
+    return ServiceLocator.instance<IEmployeeRealtimeSignalSource>();
+  },
+);
+
+/// Intervalo do polling de fallback do bloqueio reativo.
+///
+/// Padrão de produção: 30s. Override nos testes (ex.: 2s) para disparar
+/// o timer com `tester.pump` sem esperar de verdade.
+final employeePollIntervalProvider = Provider<Duration>(
+  (ref) => const Duration(seconds: 30),
+);
+
+/// Polling CENTRAL do bloqueio reativo de funcionários desativados.
+///
+/// Enquanto ALGUÉM observar este provider (ex.: o [AuthGate], quando há um
+/// usuário logado), ele mantém ativas as duas fontes de re-verificação dos
+/// vínculos do usuário:
+///
+/// 1. **Realtime** (Supabase): o vínculo do usuário mudou no servidor
+///    (o dono desativou/reativou em outro dispositivo) — bloqueio
+///    INSTANTÂNEO;
+/// 2. **Timer de fallback** ([employeePollIntervalProvider]): cobre o
+///    modo local (sem servidor) e websockets fora do ar.
+///
+/// A CADA sinal, [refreshEmployeeLinksIfNeeded] re-busca os vínculos — o
+/// refresh re-emite `employeesProvider` e o bloqueio é reavaliado no build
+/// do gate. **`autoDispose`**: quando o último consumidor sai (ex.:
+/// sign-out), o timer de fallback e o canal Realtime são cancelados — nada
+/// roda em segundo plano durante toda a sessão. Sem self-refresh: o
+/// provider NÃO observa `employeesProvider`, então re-buscar não o recria
+/// — sem loop.
+final employeesPollingProvider = Provider.autoDispose<void>((ref) {
+  final interval = ref.watch(employeePollIntervalProvider);
+  final realtime = ref.watch(employeeRealtimeSignalsProvider);
+
+  // Cada sinal (timer + Realtime) dispara a re-verificação automaticamente
+  // — o consumidor só precisa MANTER o provider vivo (ref.watch); a
+  // assinatura vive aqui e é cancelada no dispose.
+  void onSignal() => refreshEmployeeLinksIfNeeded(ref);
+
+  final periodicSub = Stream<void>.periodic(interval, (_) {}).listen(
+    (_) => onSignal(),
+  );
+  final realtimeSub = realtime.signals.listen((_) => onSignal());
+  ref.onDispose(() {
+    periodicSub.cancel();
+    realtimeSub.cancel();
+  });
+});
+
+/// Re-busca os vínculos quando o usuário logado NÃO é o dono do tenant
+/// aprovado (dono não pode ser desativado — evita consulta inútil). O
+/// refresh dispara o rebuild de quem observa [employeesProvider],
+/// reavaliando o bloqueio com dados frescos.
+///
+/// Chamado a cada sinal de [employeesPollingProvider].
+void refreshEmployeeLinksIfNeeded(Ref ref) {
+  final user = ref.read(authStateProvider).value;
+  if (user == null) return;
+  final tenant = ref.read(myTenantProvider(user.id)).value;
+  // Só faz sentido para tenant APROVADO de não-dono (é o único caso em
+  // que o bloqueio é avaliado — evita refresh inútil em pendente/rejeitado).
+  if (tenant == null ||
+      tenant.ownerUserId == user.id ||
+      tenant.status != TenantStatus.approved) {
+    return;
+  }
+  // O retorno é intencionalmente descartado (fire-and-forget).
+  // ignore: unused_result
+  ref.refresh(employeesProvider(tenant.id));
+}
 
 /// Nível de acesso do usuário logado dentro do tenant.
 ///

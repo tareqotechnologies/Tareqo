@@ -34,7 +34,8 @@ All entities are `@freezed` classes (immutable, with `copyWith`, `==`/`hashCode`
 ```dart
 enum PaymentMethod {
   cash('Dinheiro'), debitCard('Cartão de débito'),
-  creditCard('Cartão de crédito'), pix('Pix'), transfer('Transferência');
+  creditCard('Cartão de crédito'), mPesa('M-Pesa'), eMola('E-Mola'),
+  transfer('Transferência');
 }
 ```
 
@@ -80,7 +81,7 @@ enum TransactionStatus { paid('Pago'), pending('Pendente') }
 | ----- | ---- | ----- |
 | `id` | `String` | `AppIds.newId('t')` (collision-free) |
 | `storeId` | `String` | The movement's store (default `'st1'` — Phase 2) |
-| `description` | `String` | E.g.: "Venda via PIX", "Aluguel da loja" |
+| `description` | `String` | E.g.: "Venda M-Pesa", "Aluguel da loja" |
 | `amount` | `double` | **Always a positive magnitude**; direction comes from `type` |
 | `type` | `TransactionType` | Income or expense |
 | `category` | `String` | E.g.: "Vendas", "Contas", "Compras", "Fiado" |

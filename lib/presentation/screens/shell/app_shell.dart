@@ -11,19 +11,13 @@ import '../products/product_list_screen.dart';
 import '../sales/sales_screen.dart';
 
 /// Seções principais do ERP, na ordem da navegação.
-enum AppSection {
-  dashboard,
-  products,
-  sales,
-  financial,
-  credit,
-  customers;
-}
+enum AppSection { dashboard, products, sales, financial, credit, customers }
 
 /// Índice da seção ativa — permite que qualquer tela (ex.: ações rápidas
 /// do dashboard) troque de aba programaticamente.
-final shellIndexProvider =
-    NotifierProvider<ShellIndexNotifier, int>(ShellIndexNotifier.new);
+final shellIndexProvider = NotifierProvider<ShellIndexNotifier, int>(
+  ShellIndexNotifier.new,
+);
 
 class ShellIndexNotifier extends Notifier<int> {
   @override
@@ -56,11 +50,7 @@ class AppShell extends ConsumerWidget {
     final l10n = context.l10n;
 
     final destinations = [
-      (
-        Icons.space_dashboard_outlined,
-        Icons.space_dashboard,
-        l10n.appNavHome,
-      ),
+      (Icons.space_dashboard_outlined, Icons.space_dashboard, l10n.appNavHome),
       (Icons.inventory_2_outlined, Icons.inventory_2, l10n.appNavProducts),
       (Icons.point_of_sale_outlined, Icons.point_of_sale, l10n.appNavSales),
       (
@@ -96,12 +86,22 @@ class AppShell extends ConsumerWidget {
                       NavigationRailDestination(
                         icon: Icon(icon),
                         selectedIcon: Icon(selected),
-                        label: Text(label),
+                        label: _NavLabel(text: label),
                       ),
                   ],
                 ),
                 // O NavigationRail já desenha a própria divisória à direita.
-                Expanded(child: content),
+                // O conteúdo é centralizado com largura máxima: em monitores
+                // largos (web/desktop) as telas não se esticam até a borda,
+                // mantendo a leitura e a hierarquia visuais confortáveis.
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1040),
+                      child: content,
+                    ),
+                  ),
+                ),
               ],
             )
           : content,
@@ -112,6 +112,9 @@ class AppShell extends ConsumerWidget {
               onDestinationSelected: onSelect,
               destinations: [
                 for (final (icon, selected, label) in destinations)
+                  // O label do NavigationBar é String e recebe o
+                  // labelTextStyle compacto do tema (uma linha em telas
+                  // estreitas — ver app_theme.dart).
                   NavigationDestination(
                     icon: Icon(icon),
                     selectedIcon: Icon(selected),
@@ -119,6 +122,23 @@ class AppShell extends ConsumerWidget {
                   ),
               ],
             ),
+    );
+  }
+}
+
+/// Rótulo de aba em uma ÚNICA linha: o [FittedBox] encolhe o texto em telas
+/// estreitas em vez de quebrar (ex.: 'Customers' ocupava duas linhas no
+/// NavigationBar mobile). A navegação em si não muda.
+class _NavLabel extends StatelessWidget {
+  const _NavLabel({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(text, maxLines: 1),
     );
   }
 }

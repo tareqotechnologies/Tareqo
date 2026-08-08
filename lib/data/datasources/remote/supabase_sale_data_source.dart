@@ -15,7 +15,28 @@ import 'supabase_datasource_helpers.dart';
 /// que delega a função RPC `process_sale` (`SECURITY DEFINER`) — venda +
 /// itens + baixa de estoque + entrada no caixa em UMA transação do banco.
 final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
-  const SaleSupabaseDataSourceImpl();
+  /// [rpc] injetável para testes — mesmo contrato do `SupabaseEmployeeProcessor`
+  /// (`Future<dynamic> Function(String fn, Map<String, dynamic> params)`),
+  /// que permite o teste de CONTRATO da RPC atômica `process_sale` sem
+  /// inicializar o cliente real. `null` (padrão) → cliente global
+  /// ([supabaseClient]).
+  const SaleSupabaseDataSourceImpl({
+    Future<dynamic> Function(String fn, Map<String, dynamic> params)? rpc,
+  }) : _rpcOverride = rpc;
+
+  final Future<dynamic> Function(String fn, Map<String, dynamic> params)?
+  _rpcOverride;
+
+  Future<dynamic> _rpc(String fn, Map<String, dynamic> params) =>
+      _rpcOverride != null
+          ? _rpcOverride(fn, params)
+          : supabaseClient.rpc(fn, params: params);
+
+  /// Em modo de teste (rpc injetado), o guard de sessão é ignorado — o
+  /// teste controla o contrato da RPC. Em produção, falha cedo sem sessão.
+  void _requireSessionOrTest() {
+    if (_rpcOverride == null) requireCurrentUserId();
+  }
 
   static const _table = 'sales';
 
@@ -26,10 +47,10 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
   /// transação, com `auth.uid()` no servidor. Lança exceção se o estoque
   /// for insuficiente ou se o total não corresponder aos itens.
   Future<void> processSale(Sale sale) async {
-    requireCurrentUserId(); // Falha cedo (cliente) se não houver sessão.
-    await supabaseClient.rpc(
+    _requireSessionOrTest();
+    await _rpc(
       'process_sale',
-      params: {
+      {
         'p_sale': {
           'id': sale.id,
           'store_id': sale.storeId,
@@ -67,10 +88,22 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
   @override
   Future<void> add(Sale sale) async {
     final userId = requireCurrentUserId();
+    // Fallback não-atômico (não usado pelo app no modo SaaS — as vendas
+    // vão pela RPC process_sale, que numera no servidor). Melhor esforço:
+    // lê o maior sale_number da loja e incrementa.
+    final last = await supabaseClient
+        .from(_table)
+        .select('sale_number')
+        .eq('store_id', sale.storeId)
+        .order('sale_number', ascending: false)
+        .limit(1);
+    final nextNumber =
+        last.isEmpty ? 1 : ((last.first['sale_number'] as num).toInt() + 1);
     await supabaseClient.from(_table).insert({
       'id': sale.id,
       'user_id': userId,
       'store_id': sale.storeId,
+      'sale_number': nextNumber,
       'total_amount': sale.totalAmountCents,
       'payment_method': sale.paymentMethod.name,
       'date_time': sale.dateTime.toUtc().toIso8601String(),
@@ -90,6 +123,7 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
   Sale _map(Map<String, dynamic> row) => Sale(
     id: row['id'] as String,
     storeId: row['store_id'] as String,
+    number: (row['sale_number'] as num?)?.toInt() ?? 0,
     items: [
       for (final item in (row['sale_items'] as List<dynamic>? ?? const []))
         _mapItem(item as Map<String, dynamic>),

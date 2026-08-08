@@ -100,14 +100,19 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
     required String currencyCode,
     required String language,
   }) async {
-    final rows = await supabaseClient
-        .from(_table)
-        .update({'currency_code': currencyCode, 'language': language})
-        .eq('id', id)
-        .select('id');
-    if (rows.isEmpty) {
-      throw StateError('Tenant $id não encontrado para atualizar ajustes.');
-    }
+    // A política RLS `tenants_update` só permite o SUPER ADMIN alterar o
+    // tenant (status/plano são decisões administrativas) — um UPDATE direto
+    // do dono retornava 0 linhas e os ajustes nunca salvavam. O dono troca
+    // moeda/idioma pela RPC SECURITY DEFINER `update_tenant_settings`, que
+    // valida is_tenant_owner e atualiza APENAS as colunas de apresentação.
+    await supabaseClient.rpc(
+      'update_tenant_settings',
+      params: {
+        'p_tenant_id': id,
+        'p_currency_code': currencyCode,
+        'p_language': language,
+      },
+    );
   }
 
   @override
@@ -185,7 +190,7 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
         : DateTime.parse(row['approved_at'] as String).toLocal(),
     createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
     // Defaults para bancos ainda sem a migração das colunas.
-    currencyCode: (row['currency_code'] as String?) ?? 'BRL',
+    currencyCode: (row['currency_code'] as String?) ?? 'MZN',
     language: (row['language'] as String?) ?? 'pt',
   );
 }

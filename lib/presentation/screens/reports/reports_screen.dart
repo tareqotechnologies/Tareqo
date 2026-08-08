@@ -24,18 +24,10 @@ class ReportsScreen extends ConsumerWidget {
     final l10n = context.l10n;
 
     final report = reportAsync.value;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.reportsTitle),
-        actions: [
-          IconButton(
-            tooltip: l10n.commonRefresh,
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(salesReportProvider.notifier).refresh(),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.reportsTitle)),
       // A tela é empurrada por cima do AppShell (fora da casca): o seletor
       // de loja ativa é re-adicionado e o relatório reflete a loja
       // selecionada.
@@ -49,117 +41,123 @@ class ReportsScreen extends ConsumerWidget {
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
-        children: [
-          Center(
-            child: SegmentedButton<ReportPeriod>(
-              showSelectedIcon: false,
-              segments: [
-                for (final value in ReportPeriod.values)
-                  ButtonSegment(value: value, label: Text(value.label(l10n))),
-              ],
-              selected: {period},
-              onSelectionChanged: (selection) => ref
-                  .read(reportPeriodProvider.notifier)
-                  .select(selection.first),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
             children: [
-              Expanded(
-                child: KpiCard(
-                  label: l10n.reportsRevenue,
-                  value: Formatters.currency(report?.totalRevenueCents ?? 0),
-                  icon: Icons.point_of_sale_outlined,
-                  loading: reportAsync.isLoading,
+              Center(
+                child: SegmentedButton<ReportPeriod>(
+                  showSelectedIcon: false,
+                  segments: [
+                    for (final value in ReportPeriod.values)
+                      ButtonSegment(
+                        value: value,
+                        label: Text(value.label(l10n)),
+                      ),
+                  ],
+                  selected: {period},
+                  onSelectionChanged: (selection) => ref
+                      .read(reportPeriodProvider.notifier)
+                      .select(selection.first),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: KpiCard(
-                  label: l10n.reportsProfit,
-                  value: Formatters.currency(report?.totalProfitCents ?? 0),
-                  icon: Icons.trending_up,
-                  iconBackground: AppColors.income.withValues(alpha: 0.14),
-                  iconColor: AppColors.income,
-                  loading: reportAsync.isLoading,
-                ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: KpiCard(
+                      label: l10n.reportsRevenue,
+                      value: Formatters.currency(
+                        report?.totalRevenueCents ?? 0,
+                      ),
+                      icon: Icons.point_of_sale_outlined,
+                      loading: reportAsync.isLoading,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: KpiCard(
+                      label: l10n.reportsProfit,
+                      value: Formatters.currency(report?.totalProfitCents ?? 0),
+                      icon: Icons.trending_up,
+                      iconBackground: theme.income.withValues(alpha: 0.14),
+                      iconColor: theme.income,
+                      loading: reportAsync.isLoading,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: KpiCard(
+                      label: l10n.reportsMargin,
+                      value: '${(report?.margin ?? 0).toStringAsFixed(1)}%',
+                      icon: Icons.percent,
+                      iconBackground: theme.warning.withValues(alpha: 0.14),
+                      iconColor: theme.warning,
+                      loading: reportAsync.isLoading,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: KpiCard(
-                  label: l10n.reportsMargin,
-                  value: '${(report?.margin ?? 0).toStringAsFixed(1)}%',
-                  icon: Icons.percent,
-                  iconBackground: AppColors.warning.withValues(alpha: 0.14),
-                  iconColor: AppColors.warning,
-                  loading: reportAsync.isLoading,
+              const SizedBox(height: 24),
+              SectionHeader(title: l10n.reportsBestSellers),
+              const SizedBox(height: 12),
+              reportAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator()),
                 ),
+                error: (error, _) => ErrorView(
+                  message: l10n.reportsLoadError,
+                  details: error.toString(),
+                  onRetry: () => ref.invalidate(salesReportProvider),
+                ),
+                data: (data) {
+                  if (data.bestSellers.isEmpty) {
+                    return EmptyState(
+                      icon: Icons.bar_chart_outlined,
+                      title: l10n.reportsEmptyTitle,
+                      subtitle: l10n.reportsEmptySubtitle,
+                    );
+                  }
+                  return Column(
+                    children: [
+                      for (var i = 0; i < data.bestSellers.length; i++) ...[
+                        _BestSellerRow(
+                          rank: i + 1,
+                          name: data.bestSellers[i].productName,
+                          quantity: data.bestSellers[i].quantity,
+                          revenue: data.bestSellers[i].revenueCents,
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              SectionHeader(title: l10n.reportsSalesPerDay),
+              const SizedBox(height: 12),
+              reportAsync.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (data) {
+                  if (data.perDay.isEmpty) return const SizedBox.shrink();
+                  return Card(
+                    child: Column(
+                      children: [
+                        for (var i = 0; i < data.perDay.length; i++) ...[
+                          if (i > 0)
+                            const Divider(height: 1, indent: 14, endIndent: 14),
+                          _DailyRow(
+                            day: data.perDay[i].day,
+                            total: data.perDay[i].totalCents,
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          SectionHeader(title: l10n.reportsBestSellers),
-          const SizedBox(height: 12),
-          reportAsync.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(32),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (error, _) => ErrorView(
-              message: l10n.reportsLoadError,
-              details: error.toString(),
-              onRetry: () => ref.invalidate(salesReportProvider),
-            ),
-            data: (data) {
-              if (data.bestSellers.isEmpty) {
-                return EmptyState(
-                  icon: Icons.bar_chart_outlined,
-                  title: l10n.reportsEmptyTitle,
-                  subtitle: l10n.reportsEmptySubtitle,
-                );
-              }
-              return Column(
-                children: [
-                  for (var i = 0; i < data.bestSellers.length; i++) ...[
-                    _BestSellerRow(
-                      rank: i + 1,
-                      name: data.bestSellers[i].productName,
-                      quantity: data.bestSellers[i].quantity,
-                      revenue: data.bestSellers[i].revenueCents,
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 24),
-          SectionHeader(title: l10n.reportsSalesPerDay),
-          const SizedBox(height: 12),
-          reportAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (_, _) => const SizedBox.shrink(),
-            data: (data) {
-              if (data.perDay.isEmpty) return const SizedBox.shrink();
-              return Card(
-                child: Column(
-                  children: [
-                    for (var i = 0; i < data.perDay.length; i++) ...[
-                      if (i > 0) const Divider(height: 1, indent: 14, endIndent: 14),
-                      _DailyRow(
-                        day: data.perDay[i].day,
-                        total: data.perDay[i].totalCents,
-                      ),
-                    ],
-                  ],
-                ),
-              );
-            },
-          ),
-          ],
         ),
-      ),
       ),
     );
   }
@@ -258,10 +256,7 @@ class _DailyRow extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            Formatters.currency(total),
-            style: theme.textTheme.titleMedium,
-          ),
+          Text(Formatters.currency(total), style: theme.textTheme.titleMedium),
         ],
       ),
     );

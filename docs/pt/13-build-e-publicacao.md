@@ -84,6 +84,20 @@ flutter run --flavor dev --dart-define-from-file=env/dev.env
 
 > **R8/minify estão ATIVADOS** (auditoria S7, Aug 5): `isMinifyEnabled`/`isShrinkResources` no `build.gradle.kts`. Para ofuscar também o código **Dart**, adicione ao comando de release: `flutter build apk --release --obfuscate --split-debug-info=build/symbols` (e faça o upload dos símbolos ao Sentry: `sentry-cli debug-files upload`). Para reduzir o APK de 61 MB, use `--split-per-abi` (ou `flutter build appbundle` — formato exigido pela Play). Com os flavors (Aug 5), `prod` mantém o Application ID `com.dumbhanengue.dumbhanengue` e `dev` ganhou o sufixo `.dev`. ⚠️ **O package de produção é imutável após o primeiro upload ao Play** — se um dia decidir mudá-lo, será um app NOVO no console (sem herdar reviews/installs).
 
+#### Aviso conhecido no build (sentry_flutter + KGP) — rastreado upstream
+
+> ⚠️ **Aug 8:** o Flutter 3.44+ com AGP 9+ emite um **aviso** ao configurar o Gradle de QUALQUER build Android (dev ou prod):
+>
+> ```
+> WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): sentry_flutter
+> Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+> ```
+>
+> - **É benigno hoje** — apenas um aviso informativo; o build passa normalmente (confirmado no `assembleDevRelease`). Só versões **futuras** do Flutter falharão nisso.
+> - **Causa:** o `android/build.gradle` do `sentry_flutter` aplica `kotlin-android` (KGP) incondicionalmente, e o tooling do Flutter sinaliza plugins assim quando o AGP ≥ 9 (este projeto usa 9.3.1). Não há **nenhuma** versão publicada que corrija (9.26.0, `10.0.0-alpha.3` e o `main` do sentry-dart ainda aplicam KGP) nem flag de supressão no Flutter 3.44.
+> - **Rastreio upstream:** **getsentry/sentry-dart#3738** (DART-382) — a migração do plugin para Kotlin built-in está prevista para o **v10 estável (~fim de ago/meio de set 2026)**, bloqueada no pacote `jni` (dart-lang/native#3415).
+> - **Ação quando o v10 sair:** subir `sentry_flutter` para `^10.0.0` no `pubspec.yaml` — o aviso desaparece sozinho.
+
 ### Publicação via CI (Fastlane)
 
 O passo final antes de publicar é o workflow **`.github/workflows/release.yml`**, disparado por uma tag `v*`:

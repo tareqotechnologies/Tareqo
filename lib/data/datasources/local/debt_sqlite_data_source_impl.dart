@@ -1,5 +1,6 @@
 import 'package:sqlite3/sqlite3.dart';
 
+import '../../../core/database/app_database_io.dart';
 import '../../../domain/entities/debt.dart';
 import 'debt_local_data_source.dart';
 
@@ -14,8 +15,8 @@ final class DebtSqliteDataSourceImpl implements DebtLocalDataSource {
   final Database _db;
 
   static const _columns =
-      'id, store_id, person_name, amount, due_date, is_customer_debt, '
-      'is_paid, paid_at, customer_id';
+      'id, store_id, debt_number, person_name, amount, due_date, '
+      'is_customer_debt, is_paid, paid_at, customer_id';
 
   @override
   Future<List<Debt>> getAll({required String storeId}) async {
@@ -28,20 +29,33 @@ final class DebtSqliteDataSourceImpl implements DebtLocalDataSource {
 
   @override
   Future<void> add(Debt debt) async {
-    _db.execute(
-      'INSERT INTO debts ($_columns) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [
-        debt.id,
-        debt.storeId,
-        debt.personName,
-        debt.amountCents,
-        debt.dueDate.millisecondsSinceEpoch,
-        debt.isCustomerDebt ? 1 : 0,
-        debt.isPaid ? 1 : 0,
-        debt.paidAt?.millisecondsSinceEpoch,
-        debt.customerId,
-      ],
-    );
+    AppDatabase.runInTransaction(_db, () {
+      // Número SEQUENCIAL da dívida na loja: MAX+1 calculado DENTRO da
+      // mesma transação (BEGIN IMMEDIATE segura a escrita) — duas dívidas
+      // concorrentes na mesma loja nunca recebem o mesmo número. O valor
+      // enviado no objeto é ignorado: o banco é a autoridade.
+      final nextNumber = _db.select(
+        'SELECT COALESCE(MAX(debt_number), 0) + 1 AS next '
+        'FROM debts WHERE store_id = ?',
+        [debt.storeId],
+      ).first['next'] as int;
+
+      _db.execute(
+        'INSERT INTO debts ($_columns) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          debt.id,
+          debt.storeId,
+          nextNumber,
+          debt.personName,
+          debt.amountCents,
+          debt.dueDate.millisecondsSinceEpoch,
+          debt.isCustomerDebt ? 1 : 0,
+          debt.isPaid ? 1 : 0,
+          debt.paidAt?.millisecondsSinceEpoch,
+          debt.customerId,
+        ],
+      );
+    });
   }
 
   @override
@@ -61,6 +75,7 @@ final class DebtSqliteDataSourceImpl implements DebtLocalDataSource {
   Debt _map(Row row) => Debt(
     id: row['id'] as String,
     storeId: row['store_id'] as String,
+    number: (row['debt_number'] as num).toInt(),
     personName: row['person_name'] as String,
     amountCents: (row['amount'] as num).toInt(),
     dueDate: DateTime.fromMillisecondsSinceEpoch(row['due_date'] as int),
