@@ -237,6 +237,7 @@
   "upgradeError": "Could not send the request. Try again.",
   "upgradeSubmit": "Request upgrade",
   "commonCancel": "Cancel",
+  "commonConfirm": "Confirm",
   "commonDescription": "Description",
   "commonNoResults": "No results",
   "commonNoResultsHint": "Try searching another term.",
@@ -719,5 +720,53 @@
   "adminUpgradeRejected": "Upgrade rejected.",
   "adminUpgradeProcessError": "Could not process the request.",
   "adminPlanRequested": "Requested",
-  "adminPlanCurrent": "Current"
+  "adminPlanCurrent": "Current",
+  "productsCodeLabel": "Barcode (PLU)",
+  "productsCodeHint": "Code used by label scales (e.g. 12345)",
+  "productsCodeError": "Invalid code: use up to 5 digits.",
+  "productsWeighLabel": "Sell by weight (fraction)",
+  "productsWeighHint": "Accepts decimal quantities (e.g. 1.75 kg)",
+  "productsUnitLabel": "Sale unit",
+  "productsExpiryLabel": "Expiry",
+  "productsExpiryAdd": "Set expiry date",
+  "productsExpiryHelp": "Product expiry date",
+  "productsExpiryClear": "Clear expiry date",
+  "productsStockWeightHint": "In sale units (e.g. 1.75)",
+  "salesBarcodeLabel": "Barcode",
+  "salesBarcodeScan": "Scan with camera",
+  "salesBarcodeNotFound": "No product found for this code.",
+  "salesBarcodeInvalid": "Invalid scale barcode.",
+  "salesStockLimit": "Stock limit reached for {product}.",
+  "@salesStockLimit": {
+    "description": "Error adding more than the available stock",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "salesQuantityLabel": "Quantity",
+  "salesQuantityHint": "Quantity (e.g. 1.75)",
+  "purchasesExpiryLabel": "Expiry",
+  "purchasesExpiryAdd": "Set expiry date",
+  "purchasesExpiryHelp": "Lot expiry date",
+  "dashboardExpiryAlerts": "Expiry",
+  "dashboardExpiredIn": "Expired {days} day(s) ago",
+  "@dashboardExpiredIn": {
+    "description": "Expired lot — days since expiry",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardExpiresIn": "Expires in {days} day(s)",
+  "@dashboardExpiresIn": {
+    "description": "Expiring lot — days remaining",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  }
 }

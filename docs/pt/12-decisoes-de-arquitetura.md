@@ -161,6 +161,40 @@ O `UpdateProductStockUseCase` é a **única porta de entrada** para mutar estoqu
 
 O `ProcessSaleUseCase` depende **apenas de abstrações**: o contrato `ISaleRepository` e o `UpdateProductStockUseCase` (que depende do contrato `IProductRepository`). Nenhum deles conhece datasources ou SQLite. A composição acontece na **fiação** (ServiceLocator/GetIt), nunca dentro das regras de negócio.
 
+## Por que quantidades em MILÉSIMOS inteiros (W11)?
+
+A W4 eliminou o `double` do dinheiro (centavos inteiros); a W11 faz o mesmo com as **quantidades**: `1000` = 1 unidade/kg, tudo `int`.
+
+1. **Mesma filosofia dos centavos.** Balanças e PDVs por peso produzem frações (1,75 kg); `double` acumula erros de arredondamento em somas longas (carrinho, relatórios, baixas FIFO). Milésimos inteiros tornam a aritmética **exata** em todas as camadas.
+2. **Paridade Dart ↔ SQL.** O contrato é um só: `quantidade × preço ~/ 1000` (divisão inteira) no Dart **e** nas RPCs do servidor — total do carrinho, caixa e relatórios batem byte a byte.
+3. **Borda de conversão concentrada.** `Quantity` (`lib/core/utils/quantity.dart`) concentra conversões e formatação ("1,75 kg"); o resto do app só enxerga `int`.
+
+## Por que FIFO por lotes com validade?
+
+Perecíveis e validade são o dia a dia de uma mercearia: o estoque precisa sair na ordem certa, ou o comerciante vende mercadoria vencida (prejuízo + risco sanitário).
+
+1. **O lote é a unidade de rastreio.** Cada entrada de mercadoria cria um `StockLot` (quantidade inicial/atual, validade, custo de aquisição) — dá para saber quanto sobrou de cada entrada e qual vence antes.
+2. **Baixa FIFO determinística.** O `FifoStockUseCase` (e o `process_sale` no servidor) consome lotes em ordem `validade ASC → entrada ASC → id`; o excedente passa ao lote seguinte; a soma dos lotes é **pré-validada antes de qualquer mutação** (sem baixa parcial).
+3. **Invariante `stock = Σ lotes`.** O `products.stock_quantity` é sempre a soma dos lotes ativos — verificada por teste (`sql_check.sh`) e pela query read-only do `sql_check_live.sh`. A migração W11 cria um lote inicial (`lot-mig-…`) para cada produto com estoque, então a invariante vale desde o primeiro dia.
+4. **Alertas de validade.** O dashboard mostra **vermelho** (lote vencido com estoque) e **amarelo** (vence em < 30 dias) — ação preventiva antes do prejuízo.
+
+## Por que o formato de balança `20PPPPPWWWWW`?
+
+É o padrão das balanças etiquetadoras de mercado: prefixo `20`, 5 dígitos do produto (PLU) e 5 do valor da pesagem.
+
+1. **Zero configuração no PDV.** A leitura (scanner USB ou câmera) cai no campo de código; o `ScaleBarcode` identifica o padrão, extrai o PLU e **deriva a fração** `peso = valor ÷ preço` — nunca cobra a mais, mesmo quando a balança grava valor monetário.
+2. **Segurança do fallback.** Só é tratado como balança quando o produto existe e é `vendaPorFracao`; EAN-12 que comece com `20` (códigos normais) cai no caminho comum. PLUs são normalizados (zeros à esquerda) na busca (`123` ≡ `00123`).
+3. **Milésimos de ponta a ponta.** A fração entra no carrinho em milésimos — total, baixa FIFO e relatórios usam a mesma aritmética inteira.
+
+## Por que a escala tipográfica segue Apple HIG e Material (34/28/22/20/17/15/13/11)?
+
+A `TextTheme` do app não é um conjunto de tamanhos arbitrários: ela segue uma **escala modular** inspirada no Human Interface Guidelines (Apple) e no Material Design (Google), adaptada às necessidades de um ERP/PDV de balcão — onde tablets ficam a poucos centímetros dos olhos e a hierarquia precisa ser lida de relance.
+
+1. **Hierarquia por proporção, não por excesso de tamanhos.** A escala (34/28/22/20/17/15/13/11 sp) cria níveis claros — Large Title 34 (login, boas-vindas, fechos de caixa consolidados), Título 1 28 (cabeçalhos de páginas/seções), Título 2 22 (cartões de resumo, cabeçalhos de modais), Título 3 20 (subtítulos) — e o corpo usa poucos tamanhos (17/15/13) com **variação de peso** (w400 para texto, w600 para valores e rótulos importantes), a regra de ouro dos ecossistemas Apple/Google. Em vez de inflar a quantidade de tamanhos, a hierarquia vem do contraste de pesos.
+2. **Alinhamento numérico (`tabularFigures`).** Preços (MZN) e quantidades (kg/unidades) aparecem em colunas — relatórios, carrinho, chips de estado. O `FontFeature.tabularFigures()` dá a **todos os dígitos a mesma largura** (largura tabular), fazendo as colunas de valores alinharem dígito a dígito, como em planilhas. É aplicado aos estilos **numéricos** (`displaySmall`, `headlineMedium/Small`, `titleLarge/Medium`, `bodyLarge/Medium/Small`) e deliberadamente **não** aos rótulos (`titleSmall`, `labelLarge/Medium/Small`), que não carregam números.
+3. **Legibilidade em qualquer ecrã.** `sp` é *scale-independent pixel*: respeita a escala de acessibilidade de texto do SO. A suíte valida até fonte 2.0× sem overflow — tanto no tablet de balcão quanto no telemóvel.
+4. **Escala travada por teste.** O `typography_scale_test.dart` audita tamanho, peso e a presença/ausência de `tabularFigures` em cada papel tipográfico (claro e escuro) — qualquer regressão na escala quebra o teste deliberadamente.
+
 ## Por que uma entidade financeira separada da venda?
 
 O `FinancialTransaction` (entrada/saída de caixa) é um conceito **financeiro**; a `Sale` é um evento **operacional**. Separar os dois é deliberado:
@@ -266,6 +300,7 @@ A **sessão do Supabase** já é persistida internamente pelo `supabase_flutter`
 | `supabase_flutter` | Autenticação SaaS, banco de dados e realtime | data |
 | `flutter_secure_storage` | Persistência criptografada de tokens e chaves | core |
 | `sqlite3` + `sqlite3_flutter_libs` | Persistência local relacional | data |
+| `mobile_scanner` | Leitura de código de barras por câmera no PDV (balanças/PLU, W11) | presentation |
 | `path_provider` | Caminho do diretório de documentos | data/core |
 
 ### Geração de código (Freezed)

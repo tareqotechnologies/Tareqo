@@ -23,11 +23,29 @@ All entities are `@freezed` classes (immutable, with `copyWith`, `==`/`hashCode`
 | `storeId` | `String` | The store it belongs to (default `'st1'` — Phase 2) |
 | `name` | `String` | Required |
 | `description` | `String` | Default `''` |
-| `purchasePrice` | `double` | Purchase price |
-| `salePrice` | `double` | Sale price |
-| `stockQuantity` | `int` | Default `0` |
+| `purchasePrice` | `int` | Purchase price in **cents** (W4) |
+| `salePrice` | `int` | Sale price in **cents** (W4) |
+| `stockQuantity` | `int` | Default `0` — in **milli-units** (W11: 1000 = 1 unit/kg) |
+| `code` | `String?` | Scale-label barcode/PLU (W11, optional, 5 digits) |
+| `vendaPorFracao` | `bool` | Default `false` — sold by weight (fractions allowed) |
+| `unitLabel` | `String` | Default `'un'` — sale unit (`kg`/`un`) |
 
 **Associated business rule:** `salePrice >= purchasePrice` — validated in `AddProductUseCase`.
+
+### `StockLot` (W11 — FIFO lots)
+
+| Field | Type | Notes |
+| ----- | ---- | ----- |
+| `id` | `String` | `AppIds.newId('lot')` (collision-free) |
+| `storeId` | `String` | The lot's store (default `'st1'` — Phase 2) |
+| `productId` | `String` | Product the lot belongs to |
+| `entryDate` | `DateTime` | Stock-in date |
+| `expiryDate` | `DateTime?` | Expiry (optional — `null` = FIFO by entry date) |
+| `initialQuantity` | `int` | Original quantity in **milli-units** (W11) |
+| `currentQuantity` | `int` | Remaining quantity in **milli-units** (W11) |
+| `costPriceCents` | `int` | Acquisition cost per unit, in **cents** |
+
+> **Invariant:** `products.stock_quantity` is always the sum of the active lots' `currentQuantity` — guaranteed since the W11 migration (an initial `lot-mig-…` lot is created for every product with stock).
 
 ### `Sale` + `SaleItem`
 
@@ -44,7 +62,7 @@ enum PaymentMethod {
 | `id` | `String` | `AppIds.newId('s')` (collision-free) |
 | `storeId` | `String` | The sale's store (default `'st1'` — Phase 2) |
 | `items` | `List<SaleItem>` | Snapshot of the sold items |
-| `totalAmount` | `double` | Sum of items at the time of sale |
+| `totalAmount` | `int` | Sum of items at the time of sale, in **cents** (W4) |
 | `paymentMethod` | `PaymentMethod` | Payment method |
 | `dateTime` | `DateTime` | Time of sale |
 
@@ -53,7 +71,7 @@ enum PaymentMethod {
 | `productId` | `String` | Traceability only |
 | `productName` | `String` | **Snapshot** of the name at the time of sale |
 | `quantity` | `int` | Quantity |
-| `unitPrice` | `double` | **Snapshot** of the price at the time of sale |
+| `unitPrice` | `int` | **Snapshot** of the price at the time of sale, in **cents** (W4) |
 
 > **Why snapshots?** Future price/name changes in the catalog cannot corrupt history: reports and audits use the value charged **at the time**, not the current one. See [Business flows](08-business-flows.md).
 
@@ -64,7 +82,7 @@ enum PaymentMethod {
 | `id` | `String` | `AppIds.newId('d')` (collision-free) |
 | `storeId` | `String` | The debt's store (default `'st1'` — Phase 2) |
 | `personName` | `String` | Customer (or supplier) name |
-| `amount` | `double` | `@Assert('amount >= 0')` |
+| `amount` | `int` | `@Assert('amount >= 0')` — in **cents** (W4) |
 | `dueDate` | `DateTime` | Due date |
 | `isCustomerDebt` | `bool` | `true` = receivable (customer); `false` = payable (supplier) |
 | `isPaid` | `bool` | Default `false` — settled or not |
@@ -82,7 +100,7 @@ enum TransactionStatus { paid('Pago'), pending('Pendente') }
 | `id` | `String` | `AppIds.newId('t')` (collision-free) |
 | `storeId` | `String` | The movement's store (default `'st1'` — Phase 2) |
 | `description` | `String` | E.g.: "Venda M-Pesa", "Aluguel da loja" |
-| `amount` | `double` | **Always a positive magnitude**; direction comes from `type` |
+| `amount` | `int` | **Always a positive magnitude** (in **cents**, W4); direction comes from `type` |
 | `type` | `TransactionType` | Income or expense |
 | `category` | `String` | E.g.: "Vendas", "Contas", "Compras", "Fiado" |
 | `date` | `DateTime` | Movement date (receipt date in the case of a settlement) |
@@ -115,6 +133,7 @@ They live in `lib/domain/repositories/`. They declare **what** the system needs,
 | `IFinancialTransactionRepository` | `getByPeriod(storeId, start, end)`, `getAll(storeId)`, `add(transaction)`, `markAsPaid(id)` |
 | `ICustomerRepository` | `getAll(storeId)`, `add(customer)` |
 | `IPurchaseRepository` | `getAll(storeId)`, `add(purchase)` |
+| `IStockLotRepository` | `getByStore(storeId)`, `getByProduct(storeId, productId)`, `add(lot)`, `updateQuantity(lotId, storeId, newQuantity)` |
 | `IAuthRepository` | `signUp(...)`, `signIn(...)`, `signOut()`, `authStateChanges` (Stream) |
 | `IUnitOfWork` | `run<T>(action)` — runs an action in an atomic transaction |
 
@@ -136,6 +155,13 @@ Rules documented in the contracts:
 | `GetProductsUseCase` | `getAll(storeId)` of the repository. |
 | `AddProductUseCase` | Validates `salePrice >= purchasePrice`; throws `InvalidPriceException` (nothing is persisted) before `add`. |
 | `UpdateProductStockUseCase` | **The only entry point for mutating stock.** `ensureSufficientStock(productId, qty)` (pre-validation without mutation) and `decrease(productId, qty)` (revalidates and persists the **absolute value** `stock − qty`). Throws `ProductNotFoundException` / `InsufficientStockException`. |
+
+### Stock (FIFO, W11)
+
+| Use case | Behavior |
+| -------- | -------- |
+| `FifoStockUseCase` | **FIFO decrease:** pre-validates the sum of active lots **before** any mutation (`InsufficientStockException`), then consumes lots ordered by `expiry ASC → entryDate ASC → id` (nearest expiry first; the surplus passes to the next lot). `increase` creates a new lot (stock-in) **after** validating the product exists — no orphan lots. |
+| `GetStockLotsUseCase` | `getByStore(storeId)` / `getByProduct(...)` of the repository — feeds the expiry alerts. |
 
 ### Sales
 
@@ -183,6 +209,7 @@ Rules documented in the contracts:
 | `InvalidDebtAmountException` | `AddDebtUseCase` | Amount ≤ 0 |
 | `PendingEntryRegistrationException` | `AddDebtUseCase` | Credit recorded, pending entry failed |
 | `DebtNotFoundException` | `SettleDebtUseCase` | Debt does not exist |
+| `InsufficientStockException` | `FifoStockUseCase.decrease` | Sum of active lots < requested quantity (pre-validation, no partial decrease) |
 
 The screens catch these exceptions and show friendly messages; no infrastructure exception reaches the UI.
 

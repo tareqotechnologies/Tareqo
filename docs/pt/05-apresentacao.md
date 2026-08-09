@@ -20,6 +20,7 @@ A camada `lib/presentation/` contém tudo que o usuário vê e interage: **provi
 | `sales_providers.dart` | `salesRepositoryProvider`, `processSaleUseCaseProvider`, **`salesListProvider`** (ordenado por data desc) |
 | `finance_providers.dart` | `financeRepositoryProvider`, `getCashFlowUseCaseProvider`, `addTransactionUseCaseProvider`, `markTransactionAsPaidUseCaseProvider`, **`cashFlowPeriodProvider`** (enum `CashFlowPeriod`: today/week/month/all), **`cashFlowProvider`** (reconstrói quando o período muda), **`transactionsProvider`** |
 | `debts_providers.dart` | `debtsRepositoryProvider`, `getPendingDebtsUseCaseProvider`, `addDebtUseCaseProvider`, `getSettledDebtsUseCaseProvider`, `settleDebtUseCaseProvider`, **`pendingDebtsProvider`** (por vencimento), **`settledDebtsProvider`** (por `paidAt` desc) |
+| `expiry_alerts_provider.dart` | `getStockLotsUseCaseProvider`, **`expiryAlertsProvider`** (`AsyncNotifier<List<ExpiryAlert>>`) — alertas de validade por lote (W11) |
 
 **Detalhes relevantes:**
 
@@ -82,24 +83,28 @@ authStateProvider.when:
   - A receber (fiado) — soma das pendências;
   - Estoque em produtos (soma das quantidades);
 - **Ações rápidas:** Nova venda, Adicionar produto, Registrar transação, Registrar fiado (navegam via `shellIndexProvider`);
-- **Vendas recentes** (3 últimas) e alerta de **estoque baixo** (`stockQuantity < 5`).
+- **Vendas recentes** (3 últimas) e alerta de **estoque baixo** (`stockQuantity < 5000` milésimos = 5 unidades, via `Quantity.lowStockThresholdUnits`);
+- **Alertas de validade (W11)** via `expiryAlertsProvider`: **vermelho** para lotes **vencidos** com estoque e **amarelo** para vencimento em **menos de 30 dias** (`expiryWarningDays`), ordenados por urgência (vencidos primeiro).
 
 ### 2. `ProductListScreen` (Produtos)
 
 - Busca local (nome e descrição), pull-to-refresh, FAB "Novo produto";
-- Cards com preço de compra/venda e chip de estoque (amarelo se `< 5`);
-- Cadastro via **`_AddProductSheet`** (bottom sheet): nome, descrição, preços, estoque — captura `InvalidPriceException` e mostra a mensagem;
+- Cards com preço de compra/venda e chip de estoque (amarelo se `< 5` unidades = `< 5000` milésimos);
+- Cadastro via **`_AddProductSheet`** (bottom sheet): nome, descrição, preços, estoque, **código/PLU da balança** (opcional), switch **"Venda por peso"** (`vendaPorFracao` — habilita frações decimais) e **unidade de venda** (`kg`/`un`) — captura `InvalidPriceException` e mostra a mensagem;
+- Estoque exibido com **fração e unidade** para produtos por peso (ex.: `1,75 kg`).
 - `EmptyState` para lista vazia e para busca sem resultado.
 
 ### 3. `SalesScreen` + `NewSaleSheet` + `SaleDetailScreen` (Vendas)
 
 - **Lista:** cards com nº de itens, forma de pagamento, dia e total; toque abre o **detalhe**;
 - **`NewSaleSheet`** (carrinho):
-  - Busca e adiciona produtos com **steppers** (+/−) limitados ao estoque (`soldOut` desabilita);
+  - Busca e adiciona produtos com **steppers** (+/−) limitados ao estoque (`soldOut` desabilita); produtos por peso usam **passos de 0,1** e abrem **diálogo de quantidade decimal** (ex.: `1,75` kg);
+  - **Campo de código de barras** (scanners USB tipo teclado disparam a busca no `onSubmitted`) + **leitura por câmera** via `BarcodeScanSheet` (`mobile_scanner`, onde suportado);
+  - Intercepta o padrão de **balanças etiquetadoras `20PPPPPWWWWW`** (`ScaleBarcode`): extrai o PLU, deriva a fração pela pesagem (valor ÷ preço — nunca cobra a mais) e só interpreta como balança se o produto for `vendaPorFracao` — EAN-12 que comece com `20` cai no fallback normal; PLUs são normalizados (zeros à esquerda: `123` ≡ `00123`);
   - Forma de pagamento via `ChoiceChip`s (`PaymentMethod.values`);
-  - Confirma via **`ProcessSaleUseCase`** → registra venda + baixa estoque + entrada no caixa;
+  - Confirma via **`ProcessSaleUseCase`** → registra venda + **baixa FIFO do estoque (lotes)** + entrada no caixa;
   - Captura `InsufficientStockException` (mostra produto e disponível) e `ProductNotFoundException`;
-  - Após sucesso, invalida `productsProvider`, `salesListProvider`, `transactionsProvider`, `cashFlowProvider`;
+  - Após sucesso, invalida `productsProvider`, `salesListProvider`, `transactionsProvider`, `cashFlowProvider`, `expiryAlertsProvider`;
 - **`SaleDetailScreen`:** resumo (id, data, pagamento, total), itens com `quantidade × preço` e subtotal, e aviso "Preços congelados no momento da venda".
 
 ### 4. `FinancialScreen` + `AddTransactionSheet` (Financeiro)
@@ -120,8 +125,8 @@ authStateProvider.when:
 ### 5c. `PurchasesScreen` + `AddPurchaseSheet` (Compras)
 
 - Lista de compras (fornecedor, nº de itens, dia e total);
-- **`AddPurchaseSheet`**: fornecedor, busca de produtos com steppers e total (preço de compra) → **`ProcessPurchaseUseCase`** registra a compra, **aumenta o estoque** e lança a **saída no caixa** (categoria "Compras"); captura `ProductNotFoundException`;
-- Após sucesso, invalida compras, produtos, movimentações e caixa.
+- **`AddPurchaseSheet`**: fornecedor, busca de produtos com steppers e total (preço de compra); produtos por peso aceitam **fração decimal** e cada item pode receber **data de validade** (opcional — alimenta o lote FIFO da entrada) → **`ProcessPurchaseUseCase`** registra a compra, **aumenta o estoque criando lotes** e lança a **saída no caixa** (categoria "Compras"); captura `ProductNotFoundException`;
+- Após sucesso, invalida compras, produtos, movimentações, caixa e alertas de validade.
 
 ### 5d. `ReportsScreen` (Relatórios)
 
@@ -149,6 +154,7 @@ authStateProvider.when:
 | `ErrorView` | Estado de erro: mensagem + detalhe técnico + botão "Tentar novamente" |
 | `SearchField` | Campo de busca preenchido e arredondado (sem contorno) |
 | `SectionHeader` | Título de seção com ação opcional à direita |
+| `BarcodeScanSheet` | Leitor de código de barras por câmera (`mobile_scanner`) usado no PDV (W11) |
 
 ---
 
@@ -160,7 +166,7 @@ authStateProvider.when:
 - **Cores semânticas (`AppColors`):** `income` verde `#189A5E`, `expense` vermelho `#D64550`, `warning` laranja `#E08F2B`;
 - **Diretrizes visuais:** superfícies neutras, cards com borda sutil sem sombra pesada (`elevation: 0`), cantos arredondados (14–20px), campos **preenchidos sem contorno**, botões `FilledButton` com altura 52;
 - **Navegação:** `NavigationBar` (altura 68, indicador `primaryContainer`) e `NavigationRail` (`groupAlignment: -0.9`);
-- **Tipografia:** pesos altos (w700/w800), letter-spacing negativo, `headlineMedium` 28px;
+- **Tipografia:** escala modular (Apple HIG/Material): **34** (Large Title — login/boas-vindas) → **28** (títulos de página) → **22** (cartões/modais/AppBar) → **20** (subtítulos/seções) → **17/15/13/11** (corpo destacado/corpo/nota/caption); contraste por peso (w400 texto, w600+ valores) em vez de muitos tamanhos, e **`tabularFigures`** nos estilos numéricos para preços (MZN) e quantidades (kg/un) alinharem dígito a dígito; a decisão completa (com a tabela da escala, papéis Material e regras de ouro) está no [capítulo 12 — Decisões de Arquitetura](12-decisoes-de-arquitetura.md);
 - **SnackBars flutuantes** com tema invertido (escuro no tema claro e vice-versa).
 
 O tema é aplicado em `app.dart`:
@@ -181,7 +187,7 @@ MaterialApp(
 
 `lib/core/utils/formatters.dart`:
 
-- `currency(double)` → `R$ 1.234,56` (com agrupamento de milhares e sinal negativo);
+- `currency(int cents)` → `1.234,56` com símbolo do tenant (default `R$`, tenants em Moçambique usam `MTn`) — desde a W4, dinheiro é centavos inteiros;
 - `date(DateTime)` → `04/08/2026`;
 - `dateTime(DateTime)` → `04/08/2026 14:30`;
 - `day(DateTime)` → `Hoje`, `Ontem` ou `04/08`.

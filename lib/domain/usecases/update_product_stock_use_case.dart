@@ -51,6 +51,17 @@ class UpdateProductStockUseCase {
     return product;
   }
 
+  /// Garante que o produto [productId] EXISTE na loja [storeId], lançando
+  /// [ProductNotFoundException] caso contrário. Usado pelo
+  /// [FifoStockUseCase] para preservar a semântica de "produto inexistente"
+  /// antes da checagem de lotes.
+  Future<void> requireProduct(
+    String productId, {
+    required String storeId,
+  }) async {
+    await _requireProduct(productId, storeId);
+  }
+
   /// Garante que há [quantity] unidades de [productId] em estoque na loja
   /// [storeId].
   ///

@@ -1,18 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import 'package:dumbhanengue/core/utils/quantity.dart';
 import 'package:dumbhanengue/data/datasources/local/financial_transaction_sqlite_data_source_impl.dart';
 import 'package:dumbhanengue/data/datasources/local/product_sqlite_data_source_impl.dart';
 import 'package:dumbhanengue/data/datasources/local/sale_sqlite_data_source_impl.dart';
 import 'package:dumbhanengue/data/datasources/local/sqlite_unit_of_work.dart';
+import 'package:dumbhanengue/data/datasources/local/stock_lot_sqlite_data_source_impl.dart';
 import 'package:dumbhanengue/data/repositories/financial_transaction_repository_impl.dart';
 import 'package:dumbhanengue/data/repositories/product_repository_impl.dart';
 import 'package:dumbhanengue/data/repositories/sale_repository_impl.dart';
+import 'package:dumbhanengue/data/repositories/stock_lot_repository_impl.dart';
 import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/sale.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
+import 'package:dumbhanengue/domain/entities/stock_lot.dart';
 import 'package:dumbhanengue/domain/repositories/i_financial_transaction_repository.dart';
+import 'package:dumbhanengue/domain/usecases/fifo_stock_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/process_sale_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/update_product_stock_use_case.dart';
 
@@ -57,11 +62,46 @@ void main() {
     final productDs = ProductSqliteDataSourceImpl(database);
     final saleDs = SaleSqliteDataSourceImpl(database);
     final transactionDs = FinancialTransactionSqliteDataSourceImpl(database);
+    final lotDs = StockLotSqliteDataSourceImpl(database);
     return ProcessSaleUseCase(
       SaleRepositoryImpl(saleDs),
-      UpdateProductStockUseCase(ProductRepositoryImpl(productDs)),
+      FifoStockUseCase(
+        StockLotRepositoryImpl(lotDs),
+        UpdateProductStockUseCase(ProductRepositoryImpl(productDs)),
+      ),
       FinancialTransactionRepositoryImpl(transactionDs),
       SqliteUnitOfWork(database),
+    );
+  }
+
+  /// Adiciona o produto + o lote que cobre o estoque (invariante W11).
+  Future<void> seedProductWithLot(
+    Database database,
+    String id, {
+    int stockUnits = 10,
+    String storeId = 'st1',
+  }) async {
+    await ProductSqliteDataSourceImpl(database).add(
+      Product(
+        id: id,
+        storeId: storeId,
+        name: 'Caneta',
+        purchasePriceCents: 100,
+        salePriceCents: 200,
+        stockQuantity: Quantity.fromUnits(stockUnits),
+      ),
+    );
+    await StockLotSqliteDataSourceImpl(database).add(
+      StockLot(
+        id: 'lot-$id',
+        storeId: storeId,
+        productId: id,
+        entryDate: DateTime.utc(2026, 8, 1),
+        expiryDate: null,
+        initialQuantity: Quantity.fromUnits(stockUnits),
+        currentQuantity: Quantity.fromUnits(stockUnits),
+        costPriceCents: 100,
+      ),
     );
   }
 
@@ -71,7 +111,7 @@ void main() {
           SaleItem(
             productId: 'p1',
             productName: 'Caneta',
-            quantity: 2,
+            quantity: 2000, // 2 unidades em MILÉSIMOS (W11)
             unitPriceCents: 200,
           ),
         ],
@@ -81,15 +121,7 @@ void main() {
       );
 
   test('venda + estoque + caixa são gravados juntos no sucesso', () async {
-    await ProductSqliteDataSourceImpl(db).add(
-      const Product(
-        id: 'p1',
-        name: 'Caneta',
-        purchasePriceCents: 100,
-        salePriceCents: 200,
-        stockQuantity: 10,
-      ),
-    );
+    await seedProductWithLot(db, 'p1');
 
     await buildUseCase(db)(buildSale());
 
@@ -99,12 +131,20 @@ void main() {
     expect(sales.first.totalAmountCents, 400);
     expect(sales.first.items, hasLength(1));
 
-    // Estoque baixado.
+    // Estoque baixado (W11: 10000 - 2000 = 8000 milésimos).
     expect(
       (await ProductSqliteDataSourceImpl(db).getById('p1', storeId: 'st1'))
           ?.stockQuantity,
-      8,
+      8000,
     );
+
+    // Lote abatido em FIFO (mesma quantidade).
+    final lots =
+        await StockLotSqliteDataSourceImpl(db).getActiveByProduct(
+      'p1',
+      storeId: 'st1',
+    );
+    expect(lots.single.currentQuantity, 8000);
 
     // Entrada no caixa registrada.
     final transactions =
@@ -116,21 +156,12 @@ void main() {
   });
 
   test('venda da loja st2 não alcança o estoque da loja st1', () async {
-    // Produto cadastrado APENAS na loja st1.
-    await ProductSqliteDataSourceImpl(db).add(
-      const Product(
-        id: 'p1',
-        storeId: 'st1',
-        name: 'Caneta',
-        purchasePriceCents: 100,
-        salePriceCents: 200,
-        stockQuantity: 10,
-      ),
-    );
+    // Produto cadastrado APENAS na loja st1 (com lote).
+    await seedProductWithLot(db, 'p1');
 
     // Venda na loja st2 referenciando o produto de st1: a guarda por loja
-    // faz o estoque de st1 ficar invisível → ProductNotFoundException, e
-    // NADA é persistido.
+    // faz o produto/lotes de st1 ficarem invisíveis →
+    // ProductNotFoundException, e NADA é persistido.
     await expectLater(
       buildUseCase(db)(
         buildSale().copyWith(storeId: 'st2'),
@@ -139,11 +170,11 @@ void main() {
     );
 
     expect(await SaleSqliteDataSourceImpl(db).getAll(storeId: 'st2'), isEmpty);
-    // O estoque de st1 permanece intocado.
+    // O estoque e o lote de st1 permanecem intocados.
     expect(
       (await ProductSqliteDataSourceImpl(db).getById('p1', storeId: 'st1'))
           ?.stockQuantity,
-      10,
+      10000,
     );
     expect(
       await FinancialTransactionSqliteDataSourceImpl(db)
@@ -152,16 +183,9 @@ void main() {
     );
   });
 
-  test('falha no caixa desfaz a venda e o estoque (ROLLBACK total)', () async {
-    await ProductSqliteDataSourceImpl(db).add(
-      const Product(
-        id: 'p1',
-        name: 'Caneta',
-        purchasePriceCents: 100,
-        salePriceCents: 200,
-        stockQuantity: 10,
-      ),
-    );
+  test('falha no caixa desfaz a venda, o estoque e o LOTE (ROLLBACK total)',
+      () async {
+    await seedProductWithLot(db, 'p1');
 
     final failingTransactions = _ThrowingTransactionRepository(
       FinancialTransactionRepositoryImpl(
@@ -170,8 +194,11 @@ void main() {
     );
     final useCase = ProcessSaleUseCase(
       SaleRepositoryImpl(SaleSqliteDataSourceImpl(db)),
-      UpdateProductStockUseCase(
-        ProductRepositoryImpl(ProductSqliteDataSourceImpl(db)),
+      FifoStockUseCase(
+        StockLotRepositoryImpl(StockLotSqliteDataSourceImpl(db)),
+        UpdateProductStockUseCase(
+          ProductRepositoryImpl(ProductSqliteDataSourceImpl(db)),
+        ),
       ),
       failingTransactions,
       SqliteUnitOfWork(db),
@@ -182,7 +209,7 @@ void main() {
       throwsA(isA<StateError>()),
     );
 
-    // NADA foi gravado: a venda e o estoque foram desfeitos pelo rollback.
+    // NADA foi gravado: venda, estoque e lote foram desfeitos pelo rollback.
     expect(
       await SaleSqliteDataSourceImpl(db).getAll(storeId: 'st1'),
       isEmpty,
@@ -190,8 +217,14 @@ void main() {
     expect(
       (await ProductSqliteDataSourceImpl(db).getById('p1', storeId: 'st1'))
           ?.stockQuantity,
-      10,
+      10000,
     );
+    final lots =
+        await StockLotSqliteDataSourceImpl(db).getActiveByProduct(
+      'p1',
+      storeId: 'st1',
+    );
+    expect(lots.single.currentQuantity, 10000);
     expect(
       await FinancialTransactionSqliteDataSourceImpl(db)
           .getAll(storeId: 'st1'),

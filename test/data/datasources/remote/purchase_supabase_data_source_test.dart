@@ -54,12 +54,15 @@ void main() {
             'product_name': 'Arroz',
             'quantity': 10,
             'unit_price': 2800,
+            // W11: validade opcional do lote FIFO (null = sem validade).
+            'expiry_date': null,
           },
           {
             'product_id': 'p3',
             'product_name': 'Óleo',
             'quantity': 5,
             'unit_price': 1500,
+            'expiry_date': null,
           },
         ]);
         return null;

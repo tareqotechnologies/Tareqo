@@ -4,7 +4,7 @@
 
 **Dumbhanengue ERP** is a business management system aimed at **small merchants**. It brings together the day-to-day operations of a store in a single app:
 
-- 🏷️ **Inventory** — product registration and control (purchase, sale, available quantity);
+- 🏷️ **Inventory** — product registration and control with **FIFO lots and expiry** (purchase, sale, available quantity, expiry);
 - 💰 **Sales** — sale registration with a cart, payment method and automatic stock deduction;
 - 📊 **Finance** — cash flow (income × expenses), transactions and pending entries;
 - 🧾 **Credit ("fiado")** — tracking who owes the merchant, when it's due and the settlement history.
@@ -34,9 +34,10 @@
 | ------ | -------- |
 | **Authentication** | Sign up and sign in with email/password (Supabase), persistent session restored on boot, sign out |
 | **Home (Dashboard)** | KPIs (total sales, cash balance, credit receivables, inventory), quick actions, recent sales, low-stock alert |
-| **Products** | Listing with local search, registration via bottom sheet (with price validation), pull-to-refresh, low-stock chip |
-| **Sales** | Sales history, new sale cart (quantity steppers), 5 payment methods, sale detail with price snapshots |
-| **Purchases** | Merchandise intake from suppliers: cart with steppers, **increases stock** and records the cash expense ("Compras" category) |
+| **Products** | Listing with local search, registration via bottom sheet (with price validation), **scale barcode/PLU and weight-based sales** (W11), pull-to-refresh, low-stock chip |
+| **Stock (FIFO, W11)** | **Lots per stock-in** with quantity, expiry and acquisition cost; FIFO decrease at the POS (nearest expiry first); expiry alerts on the dashboard (**red** = expired, **yellow** = < 30 days) |
+| **Sales** | Sales history, new sale cart (quantity steppers and **decimal fractions** for weight products), **scale-label barcode reading (`20PPPPPWWWWW`)**, 6 payment methods, sale detail with price snapshots |
+| **Purchases** | Merchandise intake from suppliers: cart with steppers, **optional expiry per item** (creates the entry's lots), **increases stock** and records the cash expense ("Compras" category) |
 | **Finance** | Cash flow by period (Today / 7 days / This month / All), income/expenses/balance, transaction registration, pending entries with "Receive" button |
 | **Credit ("fiado")** | Total receivables, debts by due date (late chips), credit registration **optionally linked to a customer**, settlement with confirmation, settlement history tab |
 | **Customers** | Registration (name, phone, email), search, pending credit total per customer on the card |
@@ -72,6 +73,7 @@
 | `supabase_flutter` ^2.16.0 | SaaS authentication and future backend (Postgres/RLS) | data |
 | `flutter_secure_storage` ^10.3.1 | Encrypted persistence (Keychain/Keystore) | core |
 | `sqlite3` + `sqlite3_flutter_libs` | Local relational persistence (parameterized SQL) | data |
+| `mobile_scanner` | Camera barcode reading in the POS (scales/PLU, W11) | presentation |
 | `path_provider` + `path` | Database file location | core/data |
 | `sentry_flutter` ^9.26.0 | Crash reporting (Sentry, DSN via `--dart-define=SENTRY_DSN`) | core |
 | `flutter_localizations` + `intl` | i18n (pt/en) and currency/date formatting | core |
@@ -82,7 +84,7 @@
 
 ## Current state and next steps
 
-The app is fully functional end-to-end. With Supabase configured (default), the business modules **sync to Postgres per tenant and per store** — products, sales, finance, credit, customers and purchases — with RLS + isolation triggers (schema in `supabase/schema.sql`), and the **money flows (sale, purchase, debt, settlement) run as atomic `SECURITY DEFINER` RPCs** in a single DB transaction. Without Supabase configured, persistence falls back to **SQLite (native)** or **in-memory (web)**.
+The app is fully functional end-to-end. With Supabase configured (default), the business modules **sync to Postgres per tenant and per store** — products, sales, finance, credit, customers and purchases — with RLS + isolation triggers (schema in `supabase/schema.sql`), and the **money flows (sale, purchase, debt, settlement) run as atomic `SECURITY DEFINER` RPCs** in a single DB transaction — including the **FIFO lot decrease** on sales and **lot creation** on purchases (W11). Without Supabase configured, persistence falls back to **SQLite (native)** or **in-memory (web)**.
 
 Remaining roadmap:
 

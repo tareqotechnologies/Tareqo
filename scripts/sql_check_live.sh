@@ -495,6 +495,131 @@ SELECT COALESCE(
      AND schemaname = 'public' AND tablename = 'store_employees'),
   '(publicacao supabase_realtime ausente ou store_employees nao publicada — Realtime do bloqueio de funcionarios inativo)'
 ) AS realtime_store_employees;
+
+\echo '== 25. W11: colunas novas em products (Parte 22.1) =='
+DO $$
+DECLARE
+  v_code text;
+  v_frac text;
+  v_unit text;
+BEGIN
+  SELECT data_type INTO v_code
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'code';
+  SELECT data_type INTO v_frac
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'venda_por_fracao';
+  SELECT data_type INTO v_unit
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'unit_label';
+  IF v_code IS NULL OR v_code <> 'text' THEN
+    RAISE EXCEPTION 'FAIL: products.code deveria ser text (atual: %)', v_code;
+  END IF;
+  IF v_frac IS NULL OR v_frac <> 'boolean' THEN
+    RAISE EXCEPTION 'FAIL: products.venda_por_fracao deveria ser boolean (atual: %)', v_frac;
+  END IF;
+  IF v_unit IS NULL OR v_unit <> 'text' THEN
+    RAISE EXCEPTION 'FAIL: products.unit_label deveria ser text (atual: %)', v_unit;
+  END IF;
+  RAISE NOTICE 'PASS: products.code / venda_por_fracao / unit_label OK';
+END $$;
+
+\echo '== 26. W11: purchase_items.expiry_date (validade opcional por item, Parte 22.1) =='
+DO $$
+DECLARE
+  v_type text;
+BEGIN
+  SELECT data_type INTO v_type
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'purchase_items'
+    AND column_name = 'expiry_date';
+  IF v_type IS NULL THEN
+    RAISE EXCEPTION 'FAIL: coluna purchase_items.expiry_date ausente (upgrade.sql Parte 22 nao aplicado?)';
+  END IF;
+  RAISE NOTICE 'PASS: purchase_items.expiry_date OK';
+END $$;
+
+\echo '== 27. W11: tabela stock_lots + RLS ON (Parte 22.2/22.4) =='
+DO $$
+BEGIN
+  IF to_regclass('public.stock_lots') IS NULL THEN
+    RAISE EXCEPTION 'FAIL: tabela public.stock_lots NAO existe (upgrade.sql Parte 22.2 nao aplicado?)';
+  END IF;
+  IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.stock_lots'::regclass) THEN
+    RAISE EXCEPTION 'FAIL: public.stock_lots com RLS desabilitado';
+  END IF;
+  -- Índice de consumo FIFO por produto/loja (a baixa do process_sale usa).
+  IF to_regclass('public.idx_stock_lots_product') IS NULL THEN
+    RAISE EXCEPTION 'FAIL: index idx_stock_lots_product ausente';
+  END IF;
+  RAISE NOTICE 'PASS: stock_lots existe, RLS ON, index FIFO presente';
+END $$;
+
+\echo '== 28. W11: RPC process_sale faz baixa FIFO por lotes (Parte 22.5) =='
+DO $$
+DECLARE
+  v_oid oid := to_regprocedure('public.process_sale(jsonb,jsonb)');
+  v_def text;
+BEGIN
+  IF v_oid IS NULL THEN RAISE EXCEPTION 'FAIL: process_sale ausente'; END IF;
+  SELECT pg_get_functiondef(v_oid) INTO v_def;
+  -- FIFO = o corpo consome stock_lots ordenado por validade/entrada.
+  IF position('stock_lots' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: process_sale nao referencia stock_lots (versao pre-W11 ainda no ar?)';
+  END IF;
+  IF position('expiry_date' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: process_sale sem ordenacao FIFO por expiry_date';
+  END IF;
+  -- Total em milésimos: qtd × preço / 1000 (mesmo contrato do cliente).
+  IF position('/ 1000' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: process_sale sem matematica de milésimos (/ 1000)';
+  END IF;
+  RAISE NOTICE 'PASS: process_sale com baixa FIFO por lotes em milésimos';
+END $$;
+
+\echo '== 29. W11: RPC process_purchase cria lotes FIFO (Parte 22.6) =='
+DO $$
+DECLARE
+  v_oid oid := to_regprocedure('public.process_purchase(jsonb,jsonb)');
+  v_def text;
+BEGIN
+  IF v_oid IS NULL THEN RAISE EXCEPTION 'FAIL: process_purchase ausente'; END IF;
+  SELECT pg_get_functiondef(v_oid) INTO v_def;
+  IF position('stock_lots' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: process_purchase nao cria stock_lots (versao pre-W11 ainda no ar?)';
+  END IF;
+  RAISE NOTICE 'PASS: process_purchase cria lotes FIFO na entrada';
+END $$;
+
+\echo '== 30. W11: get_sales_report com matemática de milésimos (Parte 22.7) =='
+DO $$
+DECLARE
+  v_oid oid := to_regprocedure('public.get_sales_report(text,timestamptz,timestamptz,int)');
+  v_def text;
+BEGIN
+  IF v_oid IS NULL THEN RAISE EXCEPTION 'FAIL: get_sales_report ausente'; END IF;
+  SELECT pg_get_functiondef(v_oid) INTO v_def;
+  IF position('/ 1000' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: get_sales_report sem divisao por 1000 (milésimos — versao pre-W11?)';
+  END IF;
+  RAISE NOTICE 'PASS: get_sales_report em milésimos';
+END $$;
+
+\echo '== 31. W11: invariante stock = Σ lotes ativos (informativo) =='
+-- A invariante central do módulo: o estoque do produto É a soma das
+-- quantidades atuais dos lotes ATIVOS (current_quantity > 0). Após a
+-- migração, todo produto com estoque tem lote inicial (backfill da Parte
+-- 22.3) e as RPCs mantêm a soma em sincronia. Um produto onde a soma dos
+-- lotes DIFERE do stock_quantity aponta escrita fora do process_sale /
+-- process_purchase (ex.: inserts/updates manuais) — vale investigar.
+SELECT count(*) AS produtos_com_estoque_fora_da_soma_dos_lotes
+FROM public.products p
+WHERE p.stock_quantity > 0
+  AND COALESCE((
+    SELECT SUM(l.current_quantity) FROM public.stock_lots l
+    WHERE l.product_id = p.id AND l.store_id = p.store_id
+      AND l.current_quantity > 0
+  ), 0) <> p.stock_quantity;
 SQL
 
 # ── Executor: psql local ou container postgres:16 ───────────────────────

@@ -1094,6 +1094,12 @@ abstract class AppLocalizations {
   /// **'Cancelar'**
   String get commonCancel;
 
+  /// No description provided for @commonConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar'**
+  String get commonConfirm;
+
   /// No description provided for @commonDescription.
   ///
   /// In pt, this message translates to:
@@ -2461,6 +2467,150 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Atual'**
   String get adminPlanCurrent;
+
+  /// No description provided for @productsCodeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de barras (PLU)'**
+  String get productsCodeLabel;
+
+  /// No description provided for @productsCodeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código usado pelas balanças etiquetadoras (ex.: 12345)'**
+  String get productsCodeHint;
+
+  /// No description provided for @productsCodeError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código inválido: use até 5 dígitos.'**
+  String get productsCodeError;
+
+  /// No description provided for @productsWeighLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Venda por peso (fração)'**
+  String get productsWeighLabel;
+
+  /// No description provided for @productsWeighHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aceita quantidades decimais (ex.: 1,75 kg)'**
+  String get productsWeighHint;
+
+  /// No description provided for @productsUnitLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Unidade de venda'**
+  String get productsUnitLabel;
+
+  /// No description provided for @productsStockWeightHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em unidades da venda (ex.: 1,75)'**
+  String get productsStockWeightHint;
+
+  /// No description provided for @productsExpiryLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Validade'**
+  String get productsExpiryLabel;
+
+  /// No description provided for @productsExpiryAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir validade'**
+  String get productsExpiryAdd;
+
+  /// No description provided for @productsExpiryHelp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data de validade do produto'**
+  String get productsExpiryHelp;
+
+  /// No description provided for @productsExpiryClear.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover validade'**
+  String get productsExpiryClear;
+
+  /// No description provided for @salesBarcodeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de barras'**
+  String get salesBarcodeLabel;
+
+  /// No description provided for @salesBarcodeScan.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ler com a câmera'**
+  String get salesBarcodeScan;
+
+  /// No description provided for @salesBarcodeNotFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto não encontrado para este código.'**
+  String get salesBarcodeNotFound;
+
+  /// No description provided for @salesBarcodeInvalid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de balança inválido.'**
+  String get salesBarcodeInvalid;
+
+  /// Erro ao adicionar mais do que o estoque disponível
+  ///
+  /// In pt, this message translates to:
+  /// **'Limite de estoque atingido para {product}.'**
+  String salesStockLimit(String product);
+
+  /// No description provided for @salesQuantityLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantidade'**
+  String get salesQuantityLabel;
+
+  /// No description provided for @salesQuantityHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantidade (ex.: 1,75)'**
+  String get salesQuantityHint;
+
+  /// No description provided for @purchasesExpiryLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Validade'**
+  String get purchasesExpiryLabel;
+
+  /// No description provided for @purchasesExpiryAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir validade'**
+  String get purchasesExpiryAdd;
+
+  /// No description provided for @purchasesExpiryHelp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data de validade do lote'**
+  String get purchasesExpiryHelp;
+
+  /// No description provided for @dashboardExpiryAlerts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Validade'**
+  String get dashboardExpiryAlerts;
+
+  /// Lote vencido — dias desde o vencimento
+  ///
+  /// In pt, this message translates to:
+  /// **'Venceu há {days} dia(s)'**
+  String dashboardExpiredIn(int days);
+
+  /// Lote a expirar — dias restantes
+  ///
+  /// In pt, this message translates to:
+  /// **'Vence em {days} dia(s)'**
+  String dashboardExpiresIn(int days);
 }
 
 class _AppLocalizationsDelegate

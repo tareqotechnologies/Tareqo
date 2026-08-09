@@ -46,7 +46,14 @@ CREATE TABLE IF NOT EXISTS public.products (
   -- W4: dinheiro em CENTAVOS inteiros (BIGINT) — sem fração de double.
   purchase_price BIGINT NOT NULL CHECK (purchase_price >= 0),
   sale_price     BIGINT NOT NULL CHECK (sale_price >= 0),
-  stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0)
+  -- W11: estoque em MILÉSIMOS de unidade (1000 = 1 unidade/kg) — inteiro
+  -- exato, mesma filosofia dos centavos (W4).
+  stock_quantity BIGINT NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+  -- W11: código de barras/PLU (até 5 dígitos, opcional) das balanças
+  -- etiquetadoras; venda por PESO (fração) e unidade de venda.
+  code TEXT,
+  venda_por_fracao BOOLEAN NOT NULL DEFAULT FALSE,
+  unit_label TEXT NOT NULL DEFAULT 'un'
 );
 
 -- Vendas (espelha a entidade Sale) — store_id: histórico por loja.
@@ -159,10 +166,41 @@ CREATE TABLE IF NOT EXISTS public.purchase_items (
   user_id      UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   product_id   TEXT NOT NULL,
   product_name TEXT NOT NULL,
+  -- W11: quantidade em MILÉSIMOS de unidade (1000 = 1 unidade/kg).
   quantity     INTEGER NOT NULL CHECK (quantity > 0),
   unit_price   BIGINT NOT NULL CHECK (unit_price >= 0),
+  -- W11: data de VALIDADE do lote criado por este item (NULL = sem
+  -- validade — FIFO por data de entrada).
+  expiry_date  TIMESTAMPTZ,
   UNIQUE (purchase_id, product_id)
 );
+
+-- Lotes FIFO (W11 — espelha a entidade StockLot). Cada entrada de
+-- mercadoria cria um lote; a baixa no PDV consome em ordem de validade
+-- (mais próxima primeiro) e, sem validade, por data de entrada. A
+-- `stock_quantity` do produto é SEMPRE a soma das `current_quantity` dos
+-- lotes ativos (invariante do módulo). `user_id` = dono do tenant;
+-- `store_id` = loja dona do lote (Fase 2 do multi-tenancy).
+CREATE TABLE IF NOT EXISTS public.stock_lots (
+  id                TEXT PRIMARY KEY,
+  user_id           UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  store_id          TEXT NOT NULL DEFAULT 'st1',
+  product_id        TEXT NOT NULL,
+  -- data_entrada: data da compra que originou o lote (FIFO sem validade).
+  entry_date        TIMESTAMPTZ NOT NULL,
+  -- data_validade: NULL para produtos sem validade (não perecíveis).
+  expiry_date       TIMESTAMPTZ,
+  -- quantidade_inicial recebida (milésimos) — referência histórica.
+  initial_quantity  BIGINT NOT NULL CHECK (initial_quantity >= 0),
+  -- quantidade_atual disponível (milésimos) — diminui a cada baixa FIFO.
+  current_quantity  BIGINT NOT NULL CHECK (current_quantity >= 0),
+  -- custo_aquisicao em CENTAVOS inteiros (W4) — custo do lote na compra.
+  cost_price        BIGINT NOT NULL CHECK (cost_price >= 0)
+);
+CREATE INDEX IF NOT EXISTS idx_stock_lots_product
+  ON public.stock_lots (product_id, store_id);
+CREATE INDEX IF NOT EXISTS idx_stock_lots_expiry
+  ON public.stock_lots (expiry_date) WHERE current_quantity > 0;
 
 -- ---------------------------------------------------------------
 -- 1.1b Camada de Contas: planos, tenants, lojas, funcionários, upgrades
@@ -266,6 +304,7 @@ ALTER TABLE public.debts                  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customers              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.purchases              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.purchase_items         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.stock_lots             ENABLE ROW LEVEL SECURITY;
 
 -- ---------------------------------------------------------------
 -- 1.2b Helpers de acesso (definidos AQUI, ANTES das políticas 1.3 que os
@@ -399,6 +438,22 @@ DROP POLICY IF EXISTS products_delete ON public.products;
 -- impacto) e impede um cliente direto de destruir registros de
 -- outro usuário da loja (endurecimento pós-auditoria C2).
 CREATE POLICY products_delete ON public.products
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- stock_lots (W11) — leitura/escrita para dono e funcionários da loja
+-- (mesmo padrão de products); DELETE só de registros PRÓPRIOS.
+DROP POLICY IF EXISTS stock_lots_select ON public.stock_lots;
+CREATE POLICY stock_lots_select ON public.stock_lots
+  FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
+DROP POLICY IF EXISTS stock_lots_insert ON public.stock_lots;
+CREATE POLICY stock_lots_insert ON public.stock_lots
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+DROP POLICY IF EXISTS stock_lots_update ON public.stock_lots;
+CREATE POLICY stock_lots_update ON public.stock_lots
+  FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
+  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+DROP POLICY IF EXISTS stock_lots_delete ON public.stock_lots;
+CREATE POLICY stock_lots_delete ON public.stock_lots
   FOR DELETE USING (auth.uid() = user_id);
 
 -- sales
@@ -697,6 +752,11 @@ CREATE TRIGGER trg_purchase_items_user_id
   BEFORE INSERT ON public.purchase_items
   FOR EACH ROW EXECUTE FUNCTION public.set_tenant_user_id();
 
+DROP TRIGGER IF EXISTS trg_stock_lots_user_id ON public.stock_lots;
+CREATE TRIGGER trg_stock_lots_user_id
+  BEFORE INSERT ON public.stock_lots
+  FOR EACH ROW EXECUTE FUNCTION public.set_tenant_user_id();
+
 -- ---------------------------------------------------------------
 -- 1.5b Trigger de loja: store_id = loja do usuário em todo INSERT
 -- ---------------------------------------------------------------
@@ -768,6 +828,11 @@ CREATE TRIGGER trg_customers_store_id
 DROP TRIGGER IF EXISTS trg_purchases_store_id ON public.purchases;
 CREATE TRIGGER trg_purchases_store_id
   BEFORE INSERT ON public.purchases
+  FOR EACH ROW EXECUTE FUNCTION public.set_record_store_id();
+
+DROP TRIGGER IF EXISTS trg_stock_lots_store_id ON public.stock_lots;
+CREATE TRIGGER trg_stock_lots_store_id
+  BEFORE INSERT ON public.stock_lots
   FOR EACH ROW EXECUTE FUNCTION public.set_record_store_id();
 
 
@@ -1047,10 +1112,10 @@ BEGIN
   WHERE s.store_id = p_store_id
     AND s.date_time >= p_start AND s.date_time <= p_end;
 
-  -- Lucro bruto: Σ quantity × (unit_price − purchase_price ATUAL do
-  -- catálogo; 0 para produtos que não existem mais) — mesma semântica
-  -- client-side.
-  SELECT COALESCE(SUM(si.quantity * (si.unit_price - COALESCE(pr.purchase_price, 0))), 0)::bigint
+  -- Lucro bruto: Σ quantity (MILÉSIMOS — W11) × (unit_price −
+  -- purchase_price ATUAL do catálogo; 0 para produtos que não existem
+  -- mais) / 1000 — divisão inteira por item, mesma semântica client-side.
+  SELECT COALESCE(SUM(si.quantity * (si.unit_price - COALESCE(pr.purchase_price, 0)) / 1000), 0)::bigint
   INTO v_profit
   FROM public.sale_items si
   JOIN public.sales s ON s.id = si.sale_id
@@ -1065,7 +1130,7 @@ BEGIN
   FROM (
     SELECT si.product_id, si.product_name,
            SUM(si.quantity)::bigint AS quantity,
-           SUM(si.quantity * si.unit_price)::bigint AS revenue_cents
+           SUM(si.quantity * si.unit_price / 1000)::bigint AS revenue_cents
     FROM public.sale_items si
     JOIN public.sales s ON s.id = si.sale_id
     WHERE s.store_id = p_store_id
@@ -1589,6 +1654,11 @@ DECLARE
   v_lang text;
   -- Número SEQUENCIAL da venda na loja (sale_number).
   v_sale_number bigint;
+  -- W11 (FIFO por lotes): iteração sobre os itens e consumo dos lotes.
+  v_item jsonb;
+  v_remaining bigint;
+  v_lot record;
+  v_take bigint;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a venda.';
@@ -1616,9 +1686,10 @@ BEGIN
     RAISE EXCEPTION 'A venda deve conter ao menos um item.';
   END IF;
 
-  -- Total deve corresponder aos itens — tudo em CENTAVOS inteiros (W4),
-  -- comparação exata sem arredondamento.
-  IF (SELECT SUM((x->>'quantity')::bigint * (x->>'unit_price')::bigint)
+  -- Total deve corresponder aos itens — tudo em CENTAVOS inteiros (W4 +
+  -- W11): quantidade em MILÉSIMOS × preço unitário / 1000, divisão inteira
+  -- por item (mesmo cálculo do cliente). Comparação exata.
+  IF (SELECT SUM((x->>'quantity')::bigint * (x->>'unit_price')::bigint / 1000)
       FROM jsonb_array_elements(p_items) x)
      <> v_total THEN
     RAISE EXCEPTION 'O total da venda não corresponde aos itens.';
@@ -1647,11 +1718,42 @@ BEGIN
          (x->>'quantity')::int, (x->>'unit_price')::bigint
   FROM jsonb_array_elements(p_items) x;
 
-  -- Baixa do estoque (valor atômico no banco — sem leitura/escrita cega).
-  UPDATE public.products p
-  SET stock_quantity = p.stock_quantity - (x->>'quantity')::int
-  FROM jsonb_array_elements(p_items) x
-  WHERE p.id = (x->>'product_id') AND p.store_id = v_store;
+  -- Baixa do estoque em FIFO por lotes (W11): para cada item, consome os
+  -- lotes ativos em ordem de VALIDADE (mais próxima primeiro; sem validade
+  -- no fim, por data de entrada — e id como desempate estável). Os lotes
+  -- são travados com FOR UPDATE (fecha TOCTOU entre vendas concorrentes);
+  -- o total do produto (stock_quantity) cai na quantidade vendida, na
+  -- mesma transação — a invariante `stock = Σ lotes` nunca quebra.
+  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items) LOOP
+    v_remaining := (v_item->>'quantity')::bigint;
+    FOR v_lot IN
+      SELECT l.id, l.current_quantity
+      FROM public.stock_lots l
+      WHERE l.product_id = (v_item->>'product_id')
+        AND l.store_id = v_store
+        AND l.current_quantity > 0
+      ORDER BY CASE WHEN l.expiry_date IS NULL THEN 1 ELSE 0 END,
+               l.expiry_date ASC, l.entry_date ASC, l.id ASC
+      FOR UPDATE
+    LOOP
+      IF v_remaining <= 0 THEN EXIT; END IF;
+      v_take := LEAST(v_lot.current_quantity, v_remaining);
+      UPDATE public.stock_lots
+        SET current_quantity = current_quantity - v_take
+        WHERE id = v_lot.id;
+      v_remaining := v_remaining - v_take;
+    END LOOP;
+    IF v_remaining > 0 THEN
+      -- Defesa em profundidade (o lock_products_or_raise acima já validou
+      -- pelo total do produto): os lotes não cobrem a venda — o estoque
+      -- nunca fica negativo por esta RPC.
+      RAISE EXCEPTION 'Estoque insuficiente para o produto % (loja %).',
+        v_item->>'product_id', v_store;
+    END IF;
+    UPDATE public.products
+      SET stock_quantity = stock_quantity - (v_item->>'quantity')::bigint
+      WHERE id = (v_item->>'product_id') AND store_id = v_store;
+  END LOOP;
 
   -- Entrada no caixa (mesma transação).
   INSERT INTO public.financial_transactions
@@ -1836,6 +1938,9 @@ DECLARE
   v_lang text;
   -- Número SEQUENCIAL da compra na loja (purchase_number).
   v_purchase_number bigint;
+  -- W11 (lotes FIFO): iteração sobre os itens para criar os lotes.
+  v_item jsonb;
+  v_expiry timestamptz;
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a compra.';
@@ -1862,7 +1967,7 @@ BEGIN
     RAISE EXCEPTION 'A compra deve conter ao menos um item.';
   END IF;
 
-  IF (SELECT SUM((x->>'quantity')::bigint * (x->>'unit_price')::bigint)
+  IF (SELECT SUM((x->>'quantity')::bigint * (x->>'unit_price')::bigint / 1000)
       FROM jsonb_array_elements(p_items) x)
      <> v_total THEN
     RAISE EXCEPTION 'O total da compra não corresponde aos itens.';
@@ -1892,14 +1997,34 @@ BEGIN
           (p_purchase->>'date_time')::timestamptz);
 
   INSERT INTO public.purchase_items
-    (purchase_id, user_id, product_id, product_name, quantity, unit_price)
+    (purchase_id, user_id, product_id, product_name, quantity, unit_price,
+     expiry_date)
   SELECT p_purchase->>'id', v_uid, (x->>'product_id'), (x->>'product_name'),
-         (x->>'quantity')::int, (x->>'unit_price')::bigint
+         (x->>'quantity')::int, (x->>'unit_price')::bigint,
+         NULLIF(x->>'expiry_date', '')::timestamptz
   FROM jsonb_array_elements(p_items) x;
+
+  -- Lotes FIFO (W11): cada item da compra cria um LOTE com data de entrada
+  -- = data da compra, validade opcional (NULL = sem validade) e custo de
+  -- aquisição = preço unitário da compra. O id do lote deriva do id da
+  -- compra (idempotente — a compra já não existe em retries).
+  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items) LOOP
+    v_expiry := NULLIF(v_item->>'expiry_date', '')::timestamptz;
+    INSERT INTO public.stock_lots
+      (id, user_id, store_id, product_id, entry_date, expiry_date,
+       initial_quantity, current_quantity, cost_price)
+    VALUES
+      ('lot-' || (p_purchase->>'id') || '-' || (v_item->>'product_id'),
+       v_uid, v_store, (v_item->>'product_id'),
+       (p_purchase->>'date_time')::timestamptz,
+       v_expiry,
+       (v_item->>'quantity')::bigint, (v_item->>'quantity')::bigint,
+       (v_item->>'unit_price')::bigint);
+  END LOOP;
 
   -- Entrada de estoque (produtos já validados acima).
   UPDATE public.products p
-  SET stock_quantity = p.stock_quantity + (x->>'quantity')::int
+  SET stock_quantity = p.stock_quantity + (x->>'quantity')::bigint
   FROM jsonb_array_elements(p_items) x
   WHERE p.id = (x->>'product_id') AND p.store_id = v_store;
 

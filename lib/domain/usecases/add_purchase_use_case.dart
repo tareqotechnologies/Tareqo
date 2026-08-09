@@ -1,13 +1,14 @@
 import '../../core/i18n/transaction_descriptions.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/ids.dart';
+import '../../core/utils/quantity.dart';
 import '../entities/financial_transaction.dart';
 import '../entities/purchase.dart';
 import '../repositories/i_financial_transaction_repository.dart';
 import '../repositories/i_purchase_processor.dart';
 import '../repositories/i_purchase_repository.dart';
 import '../repositories/i_unit_of_work.dart';
-import 'update_product_stock_use_case.dart';
+import 'fifo_stock_use_case.dart';
 
 /// Exceção de domínio: compra inválida (sem itens ou total divergente).
 final class InvalidPurchaseException implements Exception {
@@ -21,25 +22,26 @@ final class InvalidPurchaseException implements Exception {
 
 /// Caso de uso: processar uma compra (registrar + aumentar estoque + caixa).
 ///
-/// Orquestra [IPurchaseRepository], [UpdateProductStockUseCase],
+/// Orquestra [IPurchaseRepository], [FifoStockUseCase],
 /// [IFinancialTransactionRepository] e [IUnitOfWork] — depende apenas de
 /// abstrações, nunca de implementações concretas.
 ///
 /// Quando [processor] é fornecido (Supabase), a compra inteira é delegada
-/// a ele — o servidor executa tudo em UMA transação (RPC `process_purchase`).
-/// Sem processor (SQLite/memória), usa o caminho composto com o
-/// [IUnitOfWork]. Em ambos os casos a validação de negócio roda aqui.
+/// a ele — o servidor executa tudo em UMA transação (RPC `process_purchase`,
+/// que também cria os lotes FIFO). Sem processor (SQLite/memória), usa o
+/// caminho composto com o [IUnitOfWork]. Em ambos os casos a validação de
+/// negócio roda aqui.
 class ProcessPurchaseUseCase {
   const ProcessPurchaseUseCase(
     this._purchaseRepository,
-    this._updateStockUseCase,
+    this._fifoStock,
     this._transactionRepository,
     this._unitOfWork, {
     this.processor,
   });
 
   final IPurchaseRepository _purchaseRepository;
-  final UpdateProductStockUseCase _updateStockUseCase;
+  final FifoStockUseCase _fifoStock;
   final IFinancialTransactionRepository _transactionRepository;
   final IUnitOfWork _unitOfWork;
 
@@ -54,8 +56,10 @@ class ProcessPurchaseUseCase {
   /// 1. **Validação da compra** — itens não vazios e total consistente
   ///    (`totalAmount == Σ(quantidade × preço unitário)`);
   /// 2. **Registro** da compra (compra + itens);
-  /// 3. **Entrada no estoque** de cada item (`increase` — o produto deve
-  ///    existir; lança [ProductNotFoundException]);
+  /// 3. **Entrada no estoque** de cada item ([FifoStockUseCase.increase] —
+  ///    cria o LOTE FIFO do item, com validade opcional e custo de
+  ///    aquisição; o produto deve existir; lança
+  ///    [ProductNotFoundException]);
   /// 4. **Saída no caixa** — compra vira um movimento de saída
   ///    [TransactionStatus.paid] na categoria "Compras".
   Future<void> call(Purchase purchase) async {
@@ -72,12 +76,16 @@ class ProcessPurchaseUseCase {
       // 2. Registra a compra.
       await _purchaseRepository.add(purchase);
 
-      // 3. Aumenta o estoque de cada item comprado (na loja da compra).
+      // 3. Cria o lote FIFO de cada item comprado (na loja da compra) e
+      //    aumenta o total do produto.
       for (final item in purchase.items) {
-        await _updateStockUseCase.increase(
+        await _fifoStock.increase(
           item.productId,
           item.quantity,
           storeId: purchase.storeId,
+          expiryDate: item.expiryDate,
+          entryDate: purchase.dateTime,
+          costPriceCents: item.unitPriceCents,
         );
       }
 
@@ -111,11 +119,13 @@ class ProcessPurchaseUseCase {
       );
     }
 
-    // Soma em CENTAVOS inteiros (W4): int é exato — sem arredondamento
-    // de fronteira (mesma técnica do ProcessSaleUseCase).
+    // Soma em CENTAVOS inteiros (W4 + W11): cada item é
+    // `qtd(milésimos) × preço_unitário ~/ 1000` — divisão inteira exata
+    // (mesma técnica do ProcessSaleUseCase).
     final itemsTotalCents = purchase.items.fold<int>(
       0,
-      (sum, item) => sum + item.quantity * item.unitPriceCents,
+      (sum, item) =>
+          sum + Quantity.lineTotal(item.quantity, item.unitPriceCents),
     );
     if (itemsTotalCents != purchase.totalAmountCents) {
       throw InvalidPurchaseException(

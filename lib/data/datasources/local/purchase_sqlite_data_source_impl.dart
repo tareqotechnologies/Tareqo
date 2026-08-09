@@ -43,7 +43,7 @@ final class PurchaseSqliteDataSourceImpl implements PurchaseLocalDataSource {
 
   List<PurchaseItem> _itemsOf(String purchaseId) {
     final rows = _db.select(
-      'SELECT product_id, product_name, quantity, unit_price '
+      'SELECT product_id, product_name, quantity, unit_price, expiry_date '
       'FROM purchase_items WHERE purchase_id = ? ORDER BY id',
       [purchaseId],
     );
@@ -54,6 +54,9 @@ final class PurchaseSqliteDataSourceImpl implements PurchaseLocalDataSource {
           productName: row['product_name'] as String,
           quantity: row['quantity'] as int,
           unitPriceCents: (row['unit_price'] as num).toInt(),
+          expiryDate: row['expiry_date'] == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(row['expiry_date'] as int),
         ),
     ];
   }
@@ -88,14 +91,15 @@ final class PurchaseSqliteDataSourceImpl implements PurchaseLocalDataSource {
       for (final item in purchase.items) {
         _db.execute(
           'INSERT INTO purchase_items '
-          '(purchase_id, product_id, product_name, quantity, unit_price) '
-          'VALUES (?, ?, ?, ?, ?)',
+          '(purchase_id, product_id, product_name, quantity, unit_price, '
+          'expiry_date) VALUES (?, ?, ?, ?, ?, ?)',
           [
             purchase.id,
             item.productId,
             item.productName,
             item.quantity,
             item.unitPriceCents,
+            item.expiryDate?.millisecondsSinceEpoch,
           ],
         );
       }

@@ -60,14 +60,21 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
       (sum, debt) => sum + debt.amountCents,
     );
 
+    // CTA único: sem NENHUM fiado na loja (pendente OU quitado), o FAB
+    // some e o estado vazio da aba Pendentes traz o botão "Registrar
+    // fiado" centralizado. Com histórico, o FAB volta.
+    final hasDebtActivity = debts.isNotEmpty || settled.isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.debtsTitle)),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab-credit',
-        onPressed: () => _openAddDebt(context),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.debtsAddDebt),
-      ),
+      floatingActionButton: hasDebtActivity
+          ? FloatingActionButton.extended(
+              heroTag: 'fab-credit',
+              onPressed: () => _openAddDebt(context),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.debtsAddDebt),
+            )
+          : null,
       body: RefreshIndicator(
         // W8: puxar para atualizar — recarrega fiado (pendente e histórico).
         onRefresh: () async {
@@ -133,6 +140,12 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                       icon: Icons.celebration_outlined,
                       title: l10n.debtsEmptyPendingTitle,
                       subtitle: l10n.debtsEmptyPendingSubtitle,
+                      // CTA único no estado vazio (o FAB some quando a loja
+                      // não tem nenhum fiado pendente nem quitado).
+                      actionLabel: hasDebtActivity ? null : l10n.debtsAddDebt,
+                      onAction: hasDebtActivity
+                          ? null
+                          : () => _openAddDebt(context),
                     );
                   }
                   return Column(
@@ -425,14 +438,21 @@ class _DebtCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Flexible: valores altos (ou escala de texto alta) encolhem
-                // com ellipsis em vez de estourar o card.
+                // Valor MINIMALISTA (15px Medium, sem bold) + FittedBox:
+                // ENCOLHE para caber — nunca trunca ("MTn 1.500,...") e
+                // fica sempre visível ao lado do chip de vencimento.
                 Flexible(
-                  child: Text(
-                    Formatters.currency(debt.amountCents),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      Formatters.currency(debt.amountCents),
+                      maxLines: 1,
+                      textAlign: TextAlign.end,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -520,12 +540,20 @@ class _SettledDebtCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
+            // Valor MINIMALISTA (15px Medium, sem bold) + FittedBox:
+            // ENCOLHE para caber — nunca trunca; visível no histórico.
             Flexible(
-              child: Text(
-                Formatters.currency(debt.amountCents),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  Formatters.currency(debt.amountCents),
+                  maxLines: 1,
+                  textAlign: TextAlign.end,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
             ),
           ],

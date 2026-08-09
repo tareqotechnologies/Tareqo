@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SaleItem {
 
- String get productId; String get productName; int get quantity;// Preço unitário cobrado em CENTAVOS inteiros (W4).
+ String get productId; String get productName;// Quantidade em MILÉSIMOS de unidade (W11): 1000 = 1 unidade/kg.
+ int get quantity;// Preço unitário cobrado em CENTAVOS inteiros (W4).
  int get unitPriceCents;
 /// Create a copy of SaleItem
 /// with the given fields replaced by the non-null parameter values.
@@ -218,6 +219,7 @@ class _SaleItem implements SaleItem {
 
 @override final  String productId;
 @override final  String productName;
+// Quantidade em MILÉSIMOS de unidade (W11): 1000 = 1 unidade/kg.
 @override final  int quantity;
 // Preço unitário cobrado em CENTAVOS inteiros (W4).
 @override final  int unitPriceCents;

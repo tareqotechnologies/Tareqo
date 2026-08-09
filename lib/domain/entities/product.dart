@@ -22,7 +22,23 @@ abstract class Product with _$Product {
     // centavos; o banco persiste BIGINT/INTEGER).
     required int purchasePriceCents,
     required int salePriceCents,
+    // Estoque em MILÉSIMOS de unidade (W11): 1000 = 1 unidade (produtos
+    // normais) ou 1 kg/litro (produtos por peso). Inteiro exato — mesma
+    // filosofia dos centavos (W4).
     @Default(0) int stockQuantity,
+    // Código de barras/PLU do produto (opcional, até 5 dígitos): usado
+    // pelas balanças etiquetadoras (formato 20PPPPPWWWWW) e pelo campo de
+    // código de barras do PDV. Os ids internos são alfanuméricos longos;
+    // o PLU é o código numérico impresso nas etiquetas.
+    @Default('') String code,
+    // Venda por FRAÇÃO (peso/granel): quando verdadeiro, o PDV aceita
+    // quantidades decimais (ex.: 1,75 kg) e o código de barras de balança
+    // é interpretado. O preço unitário é por UNIDADE da [unitLabel]
+    // (ex.: por kg).
+    @Default(false) bool vendaPorFracao,
+    // Unidade de venda dos produtos por peso (kg, g, l, ml...). 'un'
+    // (padrão) = unidade inteira normal.
+    @Default('un') String unitLabel,
   }) = _Product;
 
   factory Product.fromJson(Map<String, dynamic> json) =>

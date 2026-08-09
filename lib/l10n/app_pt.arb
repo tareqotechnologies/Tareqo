@@ -237,6 +237,7 @@
   "upgradeError": "Não foi possível enviar o pedido. Tente novamente.",
   "upgradeSubmit": "Solicitar upgrade",
   "commonCancel": "Cancelar",
+  "commonConfirm": "Confirmar",
   "commonDescription": "Descrição",
   "commonNoResults": "Nenhum resultado",
   "commonNoResultsHint": "Tente buscar por outro termo.",
@@ -719,5 +720,53 @@
   "adminUpgradeRejected": "Upgrade rejeitado.",
   "adminUpgradeProcessError": "Não foi possível processar o pedido.",
   "adminPlanRequested": "Solicitado",
-  "adminPlanCurrent": "Atual"
+  "adminPlanCurrent": "Atual",
+  "productsCodeLabel": "Código de barras (PLU)",
+  "productsCodeHint": "Código usado pelas balanças etiquetadoras (ex.: 12345)",
+  "productsCodeError": "Código inválido: use até 5 dígitos.",
+  "productsWeighLabel": "Venda por peso (fração)",
+  "productsWeighHint": "Aceita quantidades decimais (ex.: 1,75 kg)",
+  "productsUnitLabel": "Unidade de venda",
+  "productsStockWeightHint": "Em unidades da venda (ex.: 1,75)",
+  "productsExpiryLabel": "Validade",
+  "productsExpiryAdd": "Definir validade",
+  "productsExpiryHelp": "Data de validade do produto",
+  "productsExpiryClear": "Remover validade",
+  "salesBarcodeLabel": "Código de barras",
+  "salesBarcodeScan": "Ler com a câmera",
+  "salesBarcodeNotFound": "Produto não encontrado para este código.",
+  "salesBarcodeInvalid": "Código de balança inválido.",
+  "salesStockLimit": "Limite de estoque atingido para {product}.",
+  "@salesStockLimit": {
+    "description": "Erro ao adicionar mais do que o estoque disponível",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "salesQuantityLabel": "Quantidade",
+  "salesQuantityHint": "Quantidade (ex.: 1,75)",
+  "purchasesExpiryLabel": "Validade",
+  "purchasesExpiryAdd": "Definir validade",
+  "purchasesExpiryHelp": "Data de validade do lote",
+  "dashboardExpiryAlerts": "Validade",
+  "dashboardExpiredIn": "Venceu há {days} dia(s)",
+  "@dashboardExpiredIn": {
+    "description": "Lote vencido — dias desde o vencimento",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardExpiresIn": "Vence em {days} dia(s)",
+  "@dashboardExpiresIn": {
+    "description": "Lote a expirar — dias restantes",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  }
 }

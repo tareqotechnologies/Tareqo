@@ -128,6 +128,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nenhum fiado pendente 🎉'), findsOneWidget);
+    // CTA ÚNICO: no estado vazio o FAB some e o EmptyState traz o botão.
+    expect(find.text('Registrar fiado'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
   });
 
   testWidgets('quitar dívida confirma, chama o use case e a dívida some', (

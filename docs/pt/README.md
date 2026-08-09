@@ -27,6 +27,7 @@ Este diretório reúne todos os documentos do app: do que ele faz até como cada
 | 13 | [Build e publicação por plataforma](13-build-e-publicacao.md) | Como compilar o app em Android, iOS, Windows e Web, requisitos, assinatura, deploy e checklist de publicação |
 | 14 | [Go-Live: operações externas](14-go-live-ops.md) | Checklist manual das consolas (Play, Apple, Supabase) e secrets do CI para o primeiro release |
 | 15 | [Migração W4 + H2 no live](15-migracao-w4-h2.md) | Runbook passo a passo para aplicar `supabase/upgrade.sql` no projeto de produção + verificação pós-migração |
+| 16 | [Migração W11 no live](16-migracao-w11.md) | Runbook da Parte 22 (FIFO por lotes + validade + vendas por peso): milésimos, backfill de lotes, verificação pós-migração e janela de publicação |
 
 ---
 

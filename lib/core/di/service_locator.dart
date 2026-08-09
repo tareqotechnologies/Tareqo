@@ -23,6 +23,8 @@ import '../../data/datasources/local/purchase_local_data_source.dart';
 import '../../data/datasources/local/purchase_local_data_source_impl.dart';
 import '../../data/datasources/local/sale_local_data_source.dart';
 import '../../data/datasources/local/sale_local_data_source_impl.dart';
+import '../../data/datasources/local/stock_lot_local_data_source.dart';
+import '../../data/datasources/local/stock_lot_local_data_source_impl.dart';
 import '../../data/datasources/local/store_local_data_source.dart';
 import '../../data/datasources/local/store_local_data_source_impl.dart';
 import '../../data/datasources/local/tenant_local_data_source.dart';
@@ -36,6 +38,7 @@ import '../../data/datasources/remote/supabase_plan_request_data_source.dart';
 import '../../data/datasources/remote/supabase_product_data_source.dart';
 import '../../data/datasources/remote/supabase_purchase_data_source.dart';
 import '../../data/datasources/remote/supabase_sale_data_source.dart';
+import '../../data/datasources/remote/supabase_stock_lot_data_source.dart';
 import '../../data/datasources/remote/supabase_store_data_source.dart';
 import '../../data/datasources/remote/supabase_tenant_data_source.dart';
 import '../../data/repositories/admin_repository_impl.dart';
@@ -49,6 +52,7 @@ import '../../data/repositories/plan_request_repository_impl.dart';
 import '../../data/repositories/product_repository_impl.dart';
 import '../../data/repositories/purchase_repository_impl.dart';
 import '../../data/repositories/sale_repository_impl.dart';
+import '../../data/repositories/stock_lot_repository_impl.dart';
 import '../../data/repositories/store_repository_impl.dart';
 import '../../data/repositories/supabase_cash_flow_repository.dart';
 import '../../data/repositories/supabase_dashboard_kpis_repository.dart';
@@ -82,6 +86,7 @@ import '../../domain/repositories/i_purchase_processor.dart';
 import '../../domain/repositories/i_purchase_repository.dart';
 import '../../domain/repositories/i_sale_processor.dart';
 import '../../domain/repositories/i_sale_repository.dart';
+import '../../domain/repositories/i_stock_lot_repository.dart';
 import '../../domain/repositories/i_store_repository.dart';
 import '../../domain/repositories/i_tenant_repository.dart';
 import '../../domain/repositories/i_unit_of_work.dart';
@@ -112,7 +117,9 @@ import '../../domain/usecases/get_purchases_use_case.dart';
 import '../../domain/usecases/get_sales_report_use_case.dart';
 import '../../domain/usecases/get_settled_debts_use_case.dart';
 import '../../domain/usecases/get_stores_use_case.dart';
+import '../../domain/usecases/get_stock_lots_use_case.dart';
 import '../../domain/usecases/get_products_use_case.dart';
+import '../../domain/usecases/fifo_stock_use_case.dart';
 import '../../domain/usecases/mark_transaction_as_paid_use_case.dart';
 import '../../domain/usecases/process_sale_use_case.dart';
 import '../../domain/usecases/reject_tenant_use_case.dart';
@@ -220,6 +227,9 @@ final class ServiceLocator {
       ..registerLazySingleton<PurchaseLocalDataSource>(
         () => PurchaseSupabaseDataSourceImpl(),
       )
+      ..registerLazySingleton<StockLotLocalDataSource>(
+        () => const StockLotSupabaseDataSourceImpl(),
+      )
       // Camada de Contas (planos, tenants, lojas, funcionários, upgrades).
       ..registerLazySingleton<PlanLocalDataSource>(
         () => const PlanSupabaseDataSourceImpl(),
@@ -322,6 +332,9 @@ final class ServiceLocator {
       ..registerLazySingleton<PurchaseLocalDataSource>(
         () => PurchaseLocalDataSourceImpl(),
       )
+      ..registerLazySingleton<StockLotLocalDataSource>(
+        () => StockLotLocalDataSourceImpl(),
+      )
       // Camada de Contas em memória — catálogo real de planos; tenant,
       // lojas, funcionários e upgrades nascem vazios (fluxo real).
       ..registerLazySingleton<PlanLocalDataSource>(
@@ -367,6 +380,9 @@ final class ServiceLocator {
       )
       ..registerLazySingleton<IPurchaseRepository>(
         () => PurchaseRepositoryImpl(instance<PurchaseLocalDataSource>()),
+      )
+      ..registerLazySingleton<IStockLotRepository>(
+        () => StockLotRepositoryImpl(instance<StockLotLocalDataSource>()),
       )
       // Camada de Contas — repositórios.
       ..registerLazySingleton<IPlanRepository>(
@@ -477,19 +493,35 @@ final class ServiceLocator {
         () => GetProductsUseCase(instance<IProductRepository>()),
       )
       ..registerLazySingleton<AddProductUseCase>(
-        () => AddProductUseCase(instance<IProductRepository>()),
+        () => AddProductUseCase(
+          instance<IProductRepository>(),
+          instance<IStockLotRepository>(),
+          instance<IUnitOfWork>(),
+        ),
       )
       ..registerLazySingleton<UpdateProductStockUseCase>(
         () => UpdateProductStockUseCase(instance<IProductRepository>()),
       )
+      // W11 (FIFO): porta única para mutar estoque + lotes — usado por
+      // vendas (baixa FIFO) e compras (cria lotes).
+      ..registerLazySingleton<FifoStockUseCase>(
+        () => FifoStockUseCase(
+          instance<IStockLotRepository>(),
+          instance<UpdateProductStockUseCase>(),
+        ),
+      )
+      ..registerLazySingleton<GetStockLotsUseCase>(
+        () => GetStockLotsUseCase(instance<IStockLotRepository>()),
+      )
       ..registerLazySingleton<ProcessSaleUseCase>(
         () => ProcessSaleUseCase(
           instance<ISaleRepository>(),
-          instance<UpdateProductStockUseCase>(),
+          instance<FifoStockUseCase>(),
           instance<IFinancialTransactionRepository>(),
           instance<IUnitOfWork>(),
           // Supabase: delega à RPC `process_sale` (transação única no
-          // servidor). Registrado apenas no modo remoto.
+          // servidor — baixa FIFO incluída). Registrado apenas no modo
+          // remoto.
           processor: instance.isRegistered<ISaleAtomicProcessor>()
               ? instance<ISaleAtomicProcessor>()
               : null,
@@ -556,11 +588,12 @@ final class ServiceLocator {
       ..registerLazySingleton<ProcessPurchaseUseCase>(
         () => ProcessPurchaseUseCase(
           instance<IPurchaseRepository>(),
-          instance<UpdateProductStockUseCase>(),
+          instance<FifoStockUseCase>(),
           instance<IFinancialTransactionRepository>(),
           instance<IUnitOfWork>(),
           // Supabase: delega à RPC `process_purchase` (transação única no
-          // servidor). Registrado apenas no modo remoto.
+          // servidor — criação dos lotes FIFO incluída). Registrado apenas
+          // no modo remoto.
           processor: instance.isRegistered<IPurchaseAtomicProcessor>()
               ? instance<IPurchaseAtomicProcessor>()
               : null,

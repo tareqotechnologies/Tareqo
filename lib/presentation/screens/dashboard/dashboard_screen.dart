@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/quantity.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/purchase.dart';
@@ -13,6 +14,7 @@ import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/dashboard_providers.dart';
+import '../../controllers/expiry_alerts_provider.dart';
 import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/purchases_providers.dart';
@@ -28,10 +30,9 @@ import '../reports/reports_screen.dart';
 import '../shell/app_shell.dart';
 import '../stores/stores_screen.dart';
 
-/// Limiar de "stock baixo" (W8): produtos com quantidade inferior a este
-/// valor entram no alerta do dashboard. Constante nomeada para permitir
-/// ajuste central sem literais espalhados.
-const int lowStockThreshold = 5;
+/// Limiar de "stock baixo" (W8 + W11): produtos com estoque inferior a
+/// [Quantity.lowStockThresholdUnits] UNIDADES entram no alerta do
+/// dashboard (o estoque vive em milésimos — a comparação usa ×1000).
 
 /// Tela inicial do ERP — visão geral do negócio: indicadores (KPIs),
 /// ações rápidas, vendas recentes e alertas de estoque.
@@ -82,8 +83,16 @@ class DashboardScreen extends ConsumerWidget {
 
     final products = productsAsync.value ?? const <Product>[];
     final lowStock = products
-        .where((product) => product.stockQuantity < lowStockThreshold)
+        .where(
+          (product) =>
+              product.stockQuantity <
+              Quantity.lowStockThresholdUnits * Quantity.milliFactor,
+        )
         .toList();
+    // Alertas de validade (W11): vermelho = lote vencido com estoque;
+    // amarelo = vence em menos de 30 dias.
+    final expiryAlertsAsync = ref.watch(expiryAlertsProvider);
+    final expiryAlerts = expiryAlertsAsync.value ?? const <ExpiryAlert>[];
     final recentSales = (salesAsync.value ?? const <Sale>[]).take(3).toList();
     final recentPurchases =
         (purchasesAsync.value ?? const <Purchase>[]).take(3).toList();
@@ -115,6 +124,7 @@ class DashboardScreen extends ConsumerWidget {
             ref.invalidate(productsProvider);
             ref.invalidate(salesListProvider);
             ref.invalidate(purchasesProvider);
+            ref.invalidate(expiryAlertsProvider);
             await Future.wait<void>([
               ref
                   .read(dashboardKpisProvider.future)
@@ -127,6 +137,9 @@ class DashboardScreen extends ConsumerWidget {
                   .then<void>((_) {}, onError: (_) {}),
               ref
                   .read(purchasesProvider.future)
+                  .then<void>((_) {}, onError: (_) {}),
+              ref
+                  .read(expiryAlertsProvider.future)
                   .then<void>((_) {}, onError: (_) {}),
             ]);
           },
@@ -221,7 +234,9 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   KpiCard(
                     label: l10n.dashboardStockLabel,
-                    value: '${kpis?.stockTotal ?? 0} ${l10n.commonUnits}',
+                    // W11: o KPI soma milésimos — exibe em unidades.
+                    value:
+                        '${Quantity.format(kpis?.stockTotal ?? 0)} ${l10n.commonUnits}',
                     icon: Icons.inventory_2_outlined,
                     loading: kpisAsync.isLoading,
                   ),
@@ -381,6 +396,15 @@ class DashboardScreen extends ConsumerWidget {
                     PurchaseCard(purchase: purchase),
                     const SizedBox(height: 8),
                   ],
+              ],
+              if (expiryAlerts.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                SectionHeader(title: l10n.dashboardExpiryAlerts),
+                const SizedBox(height: 12),
+                for (final alert in expiryAlerts) ...[
+                  _ExpiryAlertCard(alert: alert),
+                  const SizedBox(height: 8),
+                ],
               ],
               if (lowStock.isNotEmpty) ...[
                 const SizedBox(height: 16),
@@ -585,8 +609,82 @@ class _LowStockCard extends StatelessWidget {
             // ou estoque grande, em vez de estourar o card.
             Flexible(
               child: StatusChip(
-                label: '${product.stockQuantity} ${context.l10n.commonUnits}',
+                label:
+                    '${Quantity.format(product.stockQuantity, unitLabel: product.vendaPorFracao ? product.unitLabel : null, language: Formatters.currentLanguage)}'
+                    '${product.vendaPorFracao ? '' : ' ${context.l10n.commonUnits}'}',
                 color: theme.warning,
+                icon: Icons.inventory_2_outlined,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Alerta de VALIDADE (W11): vermelho para lotes VENCIDOS com estoque,
+/// amarelo para lotes que vencem em menos de [expiryWarningDays] dias.
+class _ExpiryAlertCard extends StatelessWidget {
+  const _ExpiryAlertCard({required this.alert});
+
+  final ExpiryAlert alert;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final expired = alert.isExpired;
+    final color = expired ? theme.colorScheme.error : theme.warning;
+    final product = alert.product;
+    final label = expired
+        ? l10n.dashboardExpiredIn(-alert.daysRemaining)
+        : l10n.dashboardExpiresIn(alert.daysRemaining);
+
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              expired ? Icons.dangerous_outlined : Icons.hourglass_top_rounded,
+              color: color,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$label · ${Formatters.date(alert.lot.expiryDate!)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(color: color),
+                  ),
+                ],
+              ),
+            ),
+            Flexible(
+              child: StatusChip(
+                label: Quantity.format(
+                  alert.lot.currentQuantity,
+                  unitLabel: product.vendaPorFracao ? product.unitLabel : null,
+                  language: Formatters.currentLanguage,
+                ),
+                color: color,
                 icon: Icons.inventory_2_outlined,
               ),
             ),

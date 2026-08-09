@@ -66,12 +66,16 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.appNavCustomers)),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab-customers',
-        onPressed: _openAddSheet,
-        icon: const Icon(Icons.person_add_alt),
-        label: Text(l10n.customersAddNew),
-      ),
+      // CTA único: sem clientes, o FAB some — o estado vazio traz o botão
+      // "Novo cliente" centralizado.
+      floatingActionButton: customersAsync.value?.isNotEmpty ?? false
+          ? FloatingActionButton.extended(
+              heroTag: 'fab-customers',
+              onPressed: _openAddSheet,
+              icon: const Icon(Icons.person_add_alt),
+              label: Text(l10n.customersAddNew),
+            )
+          : null,
       body: Column(
         children: [
           Padding(
@@ -96,6 +100,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                     icon: Icons.people_outline,
                     title: l10n.customersEmptyTitle,
                     subtitle: l10n.customersEmptySubtitle,
+                    // CTA único no estado vazio (o FAB some).
+                    actionLabel: l10n.customersAddNew,
+                    onAction: _openAddSheet,
                   );
                 }
 

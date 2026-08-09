@@ -7,6 +7,9 @@ part 'purchase.g.dart';
 
 /// Item de compra: "fotografia" do produto no momento da compra.
 ///
+/// [quantity] está em MILÉSIMOS de unidade (W11 — mesma convenção da
+/// [SaleItem]); [expiryDate] alimenta o lote FIFO criado na entrada.
+///
 /// Guarda [productName] e [unitPriceCents] (preço de compra) na data da
 /// compra — mesmo padrão de snapshot do [SaleItem], preservando o
 /// histórico.
@@ -15,9 +18,14 @@ abstract class PurchaseItem with _$PurchaseItem {
   const factory PurchaseItem({
     required String productId,
     required String productName,
+    // Quantidade em MILÉSIMOS de unidade (W11): 1000 = 1 unidade/kg.
     required int quantity,
     // Preço unitário de compra em CENTAVOS inteiros (W4).
     required int unitPriceCents,
+    // Data de VALIDADE do lote criado por este item (W11 — FIFO).
+    // `null` para produtos sem validade (não perecíveis): o lote entra no
+    // FIFO pela data de ENTRADA.
+    DateTime? expiryDate,
   }) = _PurchaseItem;
 
   factory PurchaseItem.fromJson(Map<String, dynamic> json) =>

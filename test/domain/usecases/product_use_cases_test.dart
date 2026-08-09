@@ -1,10 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:dumbhanengue/core/utils/quantity.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
+import 'package:dumbhanengue/domain/repositories/i_unit_of_work.dart';
 import 'package:dumbhanengue/domain/usecases/add_product_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/update_product_stock_use_case.dart';
+
+import '../../helpers/fake_stock_lot_repository.dart';
 
 /// Fake em memória do [IProductRepository] — sem rede nem banco,
 /// demonstrando a testabilidade que os contratos garantem.
@@ -47,20 +51,36 @@ Product _product({
   String name = 'Caneta',
   int purchasePriceCents = 100,
   int salePriceCents = 200,
+  int stockUnits = 0,
 }) {
   return Product(
     id: '1',
     name: name,
     purchasePriceCents: purchasePriceCents,
     salePriceCents: salePriceCents,
+    // W11: estoque em MILÉSIMOS.
+    stockQuantity: Quantity.fromUnits(stockUnits),
   );
+}
+
+/// Unit of work no-op (o caminho composto é coberto pelos testes SQLite).
+class _DirectUnitOfWork implements IUnitOfWork {
+  const _DirectUnitOfWork();
+
+  @override
+  Future<T> run<T>(Future<T> Function() action) => action();
 }
 
 void main() {
   group('AddProductUseCase', () {
     test('adiciona o produto quando salePrice >= purchasePrice', () async {
       final repository = _FakeProductRepository();
-      final useCase = AddProductUseCase(repository);
+      final lots = FakeStockLotRepository();
+      final useCase = AddProductUseCase(
+        repository,
+        lots,
+        const _DirectUnitOfWork(),
+      );
 
       await useCase(_product());
 
@@ -71,10 +91,56 @@ void main() {
       );
     });
 
+    test('cria lote inicial quando o cadastro informa estoque', () async {
+      final repository = _FakeProductRepository();
+      final lots = FakeStockLotRepository();
+      final useCase = AddProductUseCase(
+        repository,
+        lots,
+        const _DirectUnitOfWork(),
+      );
+
+      await useCase(_product(stockUnits: 5));
+
+      // Lote criado sem validade, com a quantidade e o custo do cadastro
+      // (invariante W11: estoque do produto = Σ lotes).
+      final lotList = await lots.getByStore(storeId: 'st1');
+      expect(lotList, hasLength(1));
+      expect(lotList.first.currentQuantity, 5000);
+      expect(lotList.first.expiryDate, isNull);
+      expect(lotList.first.costPriceCents, 100);
+    });
+
+    test('carimba a validade no lote inicial quando informada', () async {
+      final repository = _FakeProductRepository();
+      final lots = FakeStockLotRepository();
+      final useCase = AddProductUseCase(
+        repository,
+        lots,
+        const _DirectUnitOfWork(),
+      );
+
+      final expiry = DateTime(2026, 12, 31);
+      await useCase(_product(stockUnits: 5), expiryDate: expiry);
+
+      // O lote inicial nasce com a validade do cadastro — é ela que
+      // alimenta os alertas do dashboard (Vermelho: vencido; Amarelo:
+      // vence em < 30 dias).
+      final lotList = await lots.getByStore(storeId: 'st1');
+      expect(lotList, hasLength(1));
+      expect(lotList.first.currentQuantity, 5000);
+      expect(lotList.first.expiryDate, expiry);
+    });
+
     test('lança InvalidPriceException quando salePrice < purchasePrice',
         () async {
       final repository = _FakeProductRepository();
-      final useCase = AddProductUseCase(repository);
+      final lots = FakeStockLotRepository();
+      final useCase = AddProductUseCase(
+        repository,
+        lots,
+        const _DirectUnitOfWork(),
+      );
 
       await expectLater(
         useCase(_product(purchasePriceCents: 300, salePriceCents: 200)),
@@ -87,7 +153,12 @@ void main() {
 
     test('aceita preços iguais (venda = compra)', () async {
       final repository = _FakeProductRepository();
-      final useCase = AddProductUseCase(repository);
+      final lots = FakeStockLotRepository();
+      final useCase = AddProductUseCase(
+        repository,
+        lots,
+        const _DirectUnitOfWork(),
+      );
 
       await useCase(_product(purchasePriceCents: 200, salePriceCents: 200));
 

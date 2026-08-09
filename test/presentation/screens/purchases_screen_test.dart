@@ -85,13 +85,13 @@ List<Purchase> get _purchases => [
           PurchaseItem(
             productId: 'p1',
             productName: 'Caneta',
-            quantity: 50,
+            quantity: 50000, // 50 unidades em MILÉSIMOS (W11)
             unitPriceCents: 50,
           ),
           PurchaseItem(
             productId: 'p2',
             productName: 'Caderno',
-            quantity: 20,
+            quantity: 20000,
             unitPriceCents: 300,
           ),
         ],
@@ -105,7 +105,7 @@ List<Purchase> get _purchases => [
           PurchaseItem(
             productId: 'p3',
             productName: 'Borracha',
-            quantity: 100,
+            quantity: 100000,
             unitPriceCents: 20,
           ),
         ],
@@ -147,8 +147,40 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nenhuma compra registrada'), findsOneWidget);
-    // O botão de ação aparece no EmptyState e no FAB.
-    expect(find.text('Nova compra'), findsNWidgets(2));
+    // CTA ÚNICO: no estado vazio o FAB some e o botão do EmptyState é o
+    // único "Nova compra" (sem duplicação).
+    expect(find.text('Nova compra'), findsOneWidget);
+  });
+
+  // Transição do CTA (regressão do padrão "FAB some no estado vazio"):
+  // sem compras, o botão fica no EmptyState e o FAB some; quando a
+  // primeira compra chega (pull-to-refresh), o estado vazio sai e o FAB
+  // VOLTA como ação rápida — sempre um único "Nova compra".
+  testWidgets('FAB volta quando chegam dados (estado vazio → com compras)',
+      (tester) async {
+    final list = <Purchase>[];
+    await tester.pumpWidget(_buildApp(_FakeGetPurchasesUseCase(list)));
+    await tester.pumpAndSettle();
+
+    // Estado vazio: CTA único no EmptyState, sem FAB.
+    expect(find.text('Nenhuma compra registrada'), findsOneWidget);
+    expect(find.text('Nova compra'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
+
+    // Chega a primeira compra → o refresh traz os dados.
+    list.add(_purchase(id: 'c1', number: 1, supplierName: 'Fornecedor Teste'));
+    await tester.fling(
+      find.byType(CustomScrollView),
+      const Offset(0, 300),
+      1000,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fornecedor Teste'), findsOneWidget);
+    expect(find.text('Nenhuma compra registrada'), findsNothing);
+    // FAB visível com dados; o botão do EmptyState não existe mais.
+    expect(find.text('Nova compra'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
   testWidgets('exibe erro e permite tentar novamente', (tester) async {

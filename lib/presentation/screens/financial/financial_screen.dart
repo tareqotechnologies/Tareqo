@@ -33,12 +33,16 @@ class FinancialScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.financialTitle)),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab-financial',
-        onPressed: () => _openAddTransaction(context, ref),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.financialRegister),
-      ),
+      // CTA único: sem movimentações, o FAB some — o estado vazio já traz
+      // o botão "Registrar" centralizado (sem duplicação).
+      floatingActionButton: transactionsAsync.value?.isNotEmpty ?? false
+          ? FloatingActionButton.extended(
+              heroTag: 'fab-financial',
+              onPressed: () => _openAddTransaction(context, ref),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.financialRegister),
+            )
+          : null,
       body: RefreshIndicator(
         // W8: puxar para atualizar — recarrega caixa e movimentações.
         onRefresh: () async {

@@ -7,7 +7,7 @@ The project has **test coverage in every layer**, following the testability that
 ## How to run
 
 ```bash
-# All tests (290+ green — Aug 6)
+# All tests (440+ green — Aug 9)
 flutter test
 
 # A specific file
@@ -28,7 +28,9 @@ flutter test --coverage
 ```text
 test/
 ├── core/
-│   ├── database/app_database_test.dart          # Schema, re-entrant transactions, migrations
+│   ├── database/app_database_test.dart          # Schema, re-entrant transactions, migrations W4/W11
+│   ├── utils/quantity_test.dart                 # Milli-units ↔ units (W11)
+│   ├── utils/scale_barcode_test.dart            # 20PPPPPWWWWW parser + PLU normalization (W11)
 │   └── security/
 │       ├── secure_storage_service_test.dart           # In-memory backend
 │       └── secure_supabase_local_storage_test.dart    # Secure session + PKCE storage (S1, Aug 6)
@@ -36,6 +38,8 @@ test/
 │   ├── datasources/local/
 │   │   ├── product_sqlite_data_source_test.dart
 │   │   ├── sale_sqlite_data_source_test.dart
+│   │   ├── stock_lot_sqlite_data_source_test.dart  # FIFO order + store scope (W11)
+│   │   ├── purchase_sqlite_data_source_test.dart   # Purchases with expiry/lot (W11)
 │   │   ├── financial_transaction_sqlite_data_source_test.dart
 │   │   ├── debt_sqlite_data_source_test.dart
 │   │   └── sqlite_unit_of_work_test.dart
@@ -56,9 +60,12 @@ test/
 │       ├── product_use_cases_test.dart
 │       ├── settle_debt_use_case_test.dart
 │       ├── process_sale_use_case_test.dart       # with fakes
-│       └── process_sale_use_case_sqlite_test.dart # with a real in-memory database
+│       ├── process_sale_use_case_sqlite_test.dart # with a real in-memory database
+│       ├── fifo_stock_use_case_test.dart         # FIFO lot decrease (W11)
+│       └── add_purchase_use_case_test.dart       # Stock-in with expiry (W11)
 ├── helpers/test_sqlite.dart                      # openTestDatabase(): sqlite in-memory + schema
 ├── presentation/
+│   ├── controllers/expiry_alerts_provider_test.dart  # Red/yellow alerts (W11)
 │   └── screens/
 │       ├── login_screen_test.dart
 │       ├── app_shell_test.dart
@@ -80,7 +87,8 @@ test/
 
 - **Contract fakes** (`IProductRepository`, `ISaleRepository`, `IDebtRepository`, `IFinancialTransactionRepository`, `IUnitOfWork`) — no server, no database;
 - Covers every domain exception (`InvalidPriceException`, `InsufficientStockException`, `InvalidPeriodException`, `DebtNotFoundException`, settlement idempotence...);
-- **`process_sale_use_case_sqlite_test.dart`** tests the real flow with `openTestDatabase()` (in-memory database with the app schema) — validating atomicity (rollback on failure) and integrity.
+- **`process_sale_use_case_sqlite_test.dart`** tests the real flow with `openTestDatabase()` (in-memory database with the app schema) — validating atomicity (rollback on failure) and integrity;
+- **`fifo_stock_use_case_test.dart`** covers the **FIFO decrease** (nearest-expiry lot first, surplus passing to the next lot, no expiry → by entry date), `increase` creating lots and the **stock pre-validation before any mutation** (no partial decrease).
 
 ### Data (SQLite datasources/repositories)
 
@@ -94,13 +102,15 @@ test/
     return db;
   }
   ```
-- Test SQL, row mapping (enums by name, dates as epoch millis, bool 0/1), schema `CHECK`s and `SqliteUnitOfWork` (BEGIN/COMMIT/ROLLBACK, FIFO queue).
+- Test SQL, row mapping (enums by name, dates as epoch millis, bool 0/1), schema `CHECK`s and `SqliteUnitOfWork` (BEGIN/COMMIT/ROLLBACK, FIFO queue);
+- `stock_lot_sqlite_data_source_test.dart` validates the **query FIFO order** (expiry ASC → entry ASC), the per-store scope and the atomic `current_quantity` update; `quantity_test.dart` and `scale_barcode_test.dart` cover the milli-unit math and the `20PPPPPWWWWW` parser (incl. PLU normalization).
 
 ### Presentation (screens)
 
 - **Overridden providers** via `ProviderScope(overrides: [...])` — without touching GetIt or datasources;
 - Example (`test/widget_test.dart`): simulates an active session (`authStateProvider.overrideWith(Stream.value(AppUser(...)))`), use case fakes and verifies KPIs + shell navigation;
-- Pattern: `await tester.pumpAndSettle()` + `expect(find.text(...), findsOneWidget)`.
+- Pattern: `await tester.pumpAndSettle()` + `expect(find.text(...), findsOneWidget)`;
+- `expiry_alerts_provider_test.dart` validates the alert classification (expired = red, < 30 days = yellow) and the urgency ordering.
 
 ---
 
@@ -124,7 +134,9 @@ Runs `sqlcheck_stub.sql` (auth stubs) + `supabase/schema.sql` against a throwawa
 2. super-admin role resolves via the `public.super_admins` table (C3 — never JWT email);
 3. RLS isolates by `auth.uid()` with anti-forgery triggers;
 4. employee access is scoped by **store** (`is_my_store`, C2);
-5. the atomic money RPCs **execute for real** (`process_sale`, `register_debt`, `settle_debt`, `process_purchase`) with effects verified — including the **realization date** stamped on settlement (Aug 6) and negative cases (insufficient stock).
+5. the atomic money RPCs **execute for real** (`process_sale`, `register_debt`, `settle_debt`, `process_purchase`) with effects verified — including the **realization date** stamped on settlement (Aug 6), negative cases (insufficient stock) and the W11 additions: **FIFO lot decrease** (nearest expiry first), **lot creation on purchase** (with optional expiry) and the **`stock = Σ lots` invariant**.
+
+Additionally, **`scripts/sql_check_live.sh`** is the **read-only** live verification (31 checks, 7 of them W11: columns, `stock_lots`/RLS/indexes, RPC bodies and the lots invariant) — used by the [W11 migration runbook](18-migracao-w11.md).
 
 Run locally (Docker): `PGPASSWORD=... bash scripts/sql_check.sh [PGHOST] [PGUSER] [PGDATABASE]` (⚠️ destructive — throwaway DB only).
 

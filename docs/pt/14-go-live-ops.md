@@ -43,6 +43,10 @@
    → **Runbook completo (W4 centavos + H2 RPCs): [capítulo 15](15-migracao-w4-h2.md)**
    — backup, pré-flight, aplicação em transação única, verificação
    `sql_check_live.sh` 14/14 e rollback.
+   → **Runbook W11 (FIFO por lotes + validade + vendas por peso):
+   [capítulo 16](16-migracao-w11.md)** — mesma mecânica (backup, transação
+   única `-1`, `sql_check_live.sh` com os checks 25–31) + a janela de
+   publicação do app W11 logo após a migração.
 5. **Rate limits de e-mail (dev):** deixar os padrões. No plano free o envio é
    limitado (~2 e-mails/hora) — quando a cota esgota, o GoTrue responde
    **429 "email rate limit exceeded"** e o app mostra a mensagem específica

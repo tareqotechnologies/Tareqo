@@ -5,7 +5,6 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/network/deep_link_handler.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../domain/entities/app_user.dart';
-import '../../../domain/entities/store_employee.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/admin_providers.dart';
@@ -136,17 +135,42 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         // via is_my_store exigindo vínculo ativo). O dono nunca passa aqui.
         if (tenant.status == TenantStatus.approved &&
             tenant.ownerUserId != user.id) {
-          final employees =
-              ref.watch(employeesProvider(tenant.id)).value ??
-              const <StoreEmployee>[];
-          final myLinks = employees
-              .where((employee) => employee.userId == user.id)
-              .toList();
-          // Sem vínculo OU todos os vínculos desativados → conta suspensa.
-          if (myLinks.isEmpty || myLinks.every((link) => !link.isActive)) {
-            return _BlockedEmployeeScreen(
-              onSignOut: () => ref.read(signOutUseCaseProvider).call(),
-            );
+          final employeesAsync = ref.watch(employeesProvider(tenant.id));
+          // Enquanto a PRIMEIRA busca dos vínculos não termina, `value` é
+          // null — NÃO decidir bloqueio (senão todo funcionário válido veria
+          // "Acesso suspenso" por um instante até a lista chegar). Mantém o
+          // splash; a decisão só acontece com dados reais. Num REFRESH
+          // (poll de 30s) o Riverpod mantém o valor anterior, então
+          // `value != null` e não há flash a cada poll.
+          if (employeesAsync.isLoading && employeesAsync.value == null) {
+            return const _SplashScreen();
+          }
+          final employees = employeesAsync.value;
+          if (employees != null) {
+            final myLinks = employees
+                .where((employee) => employee.userId == user.id)
+                .toList();
+            // Sem vínculo OU todos os vínculos desativados → conta suspensa.
+            if (myLinks.isEmpty || myLinks.every((link) => !link.isActive)) {
+              return _BlockedEmployeeScreen(
+                onSignOut: () => ref.read(signOutUseCaseProvider).call(),
+              );
+            }
+          } else if (employeesAsync.hasError) {
+            // Falha transitória (ex.: rede) ao buscar os vínculos: fail-open
+            // — deixa seguir para o fluxo normal abaixo. O servidor
+            // permanece autoritativo (RLS/RPCs negam quem está realmente
+            // suspenso) e o polling central reavalia em breve. Sem dados de
+            // vínculo, nunca decidir um bloqueio: seria um falso positivo.
+            final error = employeesAsync.error;
+            final stackTrace = employeesAsync.stackTrace;
+            if (error != null && stackTrace != null) {
+              CrashReporting.capture(
+                error,
+                stackTrace,
+                hint: 'AuthGate: erro ao buscar vínculos do funcionário',
+              );
+            }
           }
         }
         return switch (tenant.status) {

@@ -552,6 +552,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonCancel => 'Cancel';
 
   @override
+  String get commonConfirm => 'Confirm';
+
+  @override
   String get commonDescription => 'Description';
 
   @override
@@ -1345,4 +1348,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminPlanCurrent => 'Current';
+
+  @override
+  String get productsCodeLabel => 'Barcode (PLU)';
+
+  @override
+  String get productsCodeHint => 'Code used by label scales (e.g. 12345)';
+
+  @override
+  String get productsCodeError => 'Invalid code: use up to 5 digits.';
+
+  @override
+  String get productsWeighLabel => 'Sell by weight (fraction)';
+
+  @override
+  String get productsWeighHint => 'Accepts decimal quantities (e.g. 1.75 kg)';
+
+  @override
+  String get productsUnitLabel => 'Sale unit';
+
+  @override
+  String get productsStockWeightHint => 'In sale units (e.g. 1.75)';
+
+  @override
+  String get productsExpiryLabel => 'Expiry';
+
+  @override
+  String get productsExpiryAdd => 'Set expiry date';
+
+  @override
+  String get productsExpiryHelp => 'Product expiry date';
+
+  @override
+  String get productsExpiryClear => 'Clear expiry date';
+
+  @override
+  String get salesBarcodeLabel => 'Barcode';
+
+  @override
+  String get salesBarcodeScan => 'Scan with camera';
+
+  @override
+  String get salesBarcodeNotFound => 'No product found for this code.';
+
+  @override
+  String get salesBarcodeInvalid => 'Invalid scale barcode.';
+
+  @override
+  String salesStockLimit(String product) {
+    return 'Stock limit reached for $product.';
+  }
+
+  @override
+  String get salesQuantityLabel => 'Quantity';
+
+  @override
+  String get salesQuantityHint => 'Quantity (e.g. 1.75)';
+
+  @override
+  String get purchasesExpiryLabel => 'Expiry';
+
+  @override
+  String get purchasesExpiryAdd => 'Set expiry date';
+
+  @override
+  String get purchasesExpiryHelp => 'Lot expiry date';
+
+  @override
+  String get dashboardExpiryAlerts => 'Expiry';
+
+  @override
+  String dashboardExpiredIn(int days) {
+    return 'Expired $days day(s) ago';
+  }
+
+  @override
+  String dashboardExpiresIn(int days) {
+    return 'Expires in $days day(s)';
+  }
 }

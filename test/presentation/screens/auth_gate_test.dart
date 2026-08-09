@@ -144,6 +144,28 @@ class _InactiveEmployeeLink implements GetEmployeesUseCase {
       ];
 }
 
+/// Vínculos com CARREGAMENTO LENTO (nunca completam até o teste liberar) —
+/// simula a janela em que o tenant já resolveu mas a busca dos vínculos
+/// ainda está em andamento. Antes do fix, o AuthGate via `value == null` →
+/// lista vazia → bloqueava um funcionário VÁLIDO com "Acesso suspenso".
+class _DelayedEmployeeLink implements GetEmployeesUseCase {
+  final Completer<List<StoreEmployee>> completer = Completer();
+
+  @override
+  Future<List<StoreEmployee>> call(String tenantId) => completer.future;
+}
+
+/// Busca de vínculos com FALHA transitória (rede) — o AuthGate deve ser
+/// fail-open (o servidor segue autoritativo; RLS/RPCs negam quem está
+/// realmente suspenso), nunca bloquear um funcionário válido por um erro.
+class _ThrowingEmployeeLink implements GetEmployeesUseCase {
+  const _ThrowingEmployeeLink();
+
+  @override
+  Future<List<StoreEmployee>> call(String tenantId) async =>
+      throw StateError('falha de rede simulada');
+}
+
 /// Estoque MUTÁVEL de vínculos — simula a mudança feita pelo DONO em
 /// OUTRO dispositivo (o próximo poll do AuthGate re-busca e reavalia).
 class _MutableEmployeeLink implements GetEmployeesUseCase {
@@ -296,6 +318,110 @@ void main() {
     expect(find.textContaining('desativada pelo dono'), findsOneWidget);
     // NÃO cai no AppShell (bloqueio total).
     expect(find.byType(AppShell), findsNothing);
+  });
+
+  testWidgets('funcionário ATIVO não vê "Acesso suspenso" enquanto os '
+      'vínculos ainda carregam (falso positivo fixo)', (tester) async {
+    final links = _DelayedEmployeeLink();
+    await tester.pumpWidget(
+      _buildApp(
+        authStream: Stream.value(
+          AppUser(id: 'u1', email: 'carlos@loja.com'),
+        ),
+        adminRepository: const FakeAdminRepository(),
+        // Tenant aprovado de OUTRO dono — funcionário legítimo cujo
+        // vínculo ainda não chegou do servidor.
+        getMyTenant: FakeGetMyTenantUseCase(
+          approvedTenant(ownerUserId: '9'),
+        ),
+        getEmployees: links,
+      ),
+    );
+    // Tenant resolveu, vínculos ainda carregando: NÃO bloquear — a tela
+    // fica no splash (nada de "Acesso suspenso" por um instante).
+    // pump() em vez de pumpAndSettle(): o splash tem um spinner infinito
+    // (CircularProgressIndicator) e o vínculo está pendente — pumpAndSettle
+    // nunca assentaria; avançamos frames manualmente.
+    await tester.pump(); // emite o stream de auth
+    await tester.pump(); // resolve papel (admin) + tenant (futures)
+    await tester.pump(const Duration(milliseconds: 50)); // frame do splash
+    expect(find.text('Acesso suspenso'), findsNothing);
+    expect(find.byType(AppShell), findsNothing);
+    // Ainda no splash aguardando os vínculos.
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    // O vínculo ATIVO chega → acesso normal, nunca bloqueado.
+    links.completer.complete(const [
+      StoreEmployee(
+        id: 'e1',
+        tenantId: 'tn1',
+        storeId: 'st1',
+        userId: 'u1',
+        fullName: 'Carlos',
+        email: 'carlos@loja.com',
+        role: EmployeeRole.employee,
+        isActive: true,
+      ),
+    ]);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppShell), findsOneWidget);
+    expect(find.text('Acesso suspenso'), findsNothing);
+  });
+
+  testWidgets('refresh do poll NÃO pisca o splash para funcionário ativo '
+      '(Riverpod mantém o valor anterior durante o refresh)', (tester) async {
+    final links = _MutableEmployeeLink(isActive: true);
+    await tester.pumpWidget(
+      _buildApp(
+        authStream: Stream.value(
+          AppUser(id: 'u1', email: 'carlos@loja.com'),
+        ),
+        adminRepository: const FakeAdminRepository(),
+        getMyTenant: FakeGetMyTenantUseCase(
+          approvedTenant(ownerUserId: '9'),
+        ),
+        getEmployees: links,
+        pollInterval: const Duration(seconds: 2),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(AppShell), findsOneWidget);
+
+    // Dispara um tick do poll (2s): o refresh re-busca os vínculos — como
+    // o Riverpod mantém o valor anterior durante o refresh, o AppShell
+    // CONTINUA visível e o splash NÃO aparece (sem flash a cada 30s em
+    // produção). Se o refresh descartasse o valor, o splash piscaria aqui.
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byType(AppShell), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.text('Acesso suspenso'), findsNothing);
+  });
+
+  testWidgets('falha transitória na busca dos vínculos NÃO bloqueia o '
+      'funcionário (fail-open; o servidor segue autoritativo)',
+      (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        authStream: Stream.value(
+          AppUser(id: 'u1', email: 'carlos@loja.com'),
+        ),
+        adminRepository: const FakeAdminRepository(),
+        getMyTenant: FakeGetMyTenantUseCase(
+          approvedTenant(ownerUserId: '9'),
+        ),
+        getEmployees: const _ThrowingEmployeeLink(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Sem dados de vínculo, um erro de rede não pode decidir um bloqueio:
+    // o acesso segue (o servidor negaria operações se o usuário estivesse
+    // realmente suspenso; o polling reavalia em seguida).
+    expect(find.text('Acesso suspenso'), findsNothing);
+    expect(find.byType(AppShell), findsOneWidget);
   });
 
   testWidgets('funcionário é bloqueado REATIVAMENTE quando o dono desativa '

@@ -127,7 +127,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nenhuma venda registrada'), findsOneWidget);
-    expect(find.text('Nova venda'), findsNWidgets(2)); // FAB + ação do estado.
+    // CTA ÚNICO: no estado vazio o FAB some e o botão do EmptyState é o
+    // único "Nova venda" (sem duplicação).
+    expect(find.text('Nova venda'), findsOneWidget);
   });
 
   testWidgets('tocar no card abre a tela de detalhes da venda', (tester) async {
@@ -139,7 +141,7 @@ void main() {
               SaleItem(
                 productId: 'p1',
                 productName: 'Caneta',
-                quantity: 2,
+                quantity: 2000, // 2 unidades em MILÉSIMOS (W11)
                 unitPriceCents: 200,
               ),
             ],
@@ -174,7 +176,7 @@ void main() {
               SaleItem(
                 productId: 'p1',
                 productName: 'Caneta',
-                quantity: 2,
+                quantity: 2000,
                 unitPriceCents: 200,
               ),
             ],

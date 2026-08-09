@@ -86,14 +86,19 @@ class TransactionCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Pendências ganham o chip de status. Flexible: encolhe
-                // (ellipsis interno) em telas estreitas com escala alta.
+                // Pendências ganham o chip de status. Align + Flexible: o
+                // chip fica ANCORADO à direita do card (não flutuando colado
+                // ao texto) e encolhe (ellipsis interno) em telas estreitas
+                // com escala alta.
                 if (pending)
                   Flexible(
-                    child: StatusChip(
-                      label: context.l10n.statusPending,
-                      color: theme.warning,
-                      icon: Icons.schedule,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: StatusChip(
+                        label: context.l10n.statusPending,
+                        color: theme.warning,
+                        icon: Icons.schedule,
+                      ),
                     ),
                   ),
               ],
@@ -116,18 +121,23 @@ class TransactionCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Flexible: valor alto (ou escala de texto alta) encolhe
-                // com ellipsis em vez de estourar o card.
+                // Valor MINIMALISTA (15px Medium — regra de ouro da escala:
+                // colunas de preços MZN em tamanho médio com peso Medium, sem
+                // bold). FittedBox + Align: o valor fica ANCORADO à direita
+                // do card e ENCOLHE para caber — nunca trunca ("MTn 600....")
+                // e fica sempre visível ao lado da data.
                 Flexible(
-                  child: Text(
-                    '$sign ${Formatters.currency(transaction.amountCents)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.2,
-                      color: color,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '$sign ${Formatters.currency(transaction.amountCents)}',
+                      maxLines: 1,
+                      textAlign: TextAlign.end,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: color,
+                      ),
                     ),
                   ),
                 ),

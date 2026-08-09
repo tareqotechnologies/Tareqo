@@ -68,15 +68,21 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
   Widget build(BuildContext context) {
     final purchasesAsync = ref.watch(purchasesProvider);
     final l10n = context.l10n;
+    // Sem nenhuma compra na loja, o FAB some: o estado vazio já traz o
+    // botão primário centralizado ("Nova compra") — sem CTA duplicado.
+    // Com dados, o FAB volta como ação rápida persistente.
+    final hasPurchases = purchasesAsync.value?.isNotEmpty ?? false;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.purchasesTitle)),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab-purchases',
-        onPressed: _openNewPurchase,
-        icon: const Icon(Icons.add),
-        label: Text(l10n.purchasesAddNew),
-      ),
+      floatingActionButton: hasPurchases
+          ? FloatingActionButton.extended(
+              heroTag: 'fab-purchases',
+              onPressed: _openNewPurchase,
+              icon: const Icon(Icons.add),
+              label: Text(l10n.purchasesAddNew),
+            )
+          : null,
       // A tela é empurrada por cima do AppShell (fora da casca): o seletor
       // de loja ativa é re-adicionado para o usuário ver/trocar a loja e
       // as compras da loja selecionada.
@@ -236,7 +242,7 @@ class _PurchasesBody extends StatelessWidget {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 112),
               sliver: SliverList.separated(
                 itemCount: filtered.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),

@@ -20,6 +20,7 @@ The `lib/presentation/` layer contains everything the user sees and interacts wi
 | `sales_providers.dart` | `salesRepositoryProvider`, `processSaleUseCaseProvider`, **`salesListProvider`** (sorted by date desc) |
 | `finance_providers.dart` | `financeRepositoryProvider`, `getCashFlowUseCaseProvider`, `addTransactionUseCaseProvider`, `markTransactionAsPaidUseCaseProvider`, **`cashFlowPeriodProvider`** (enum `CashFlowPeriod`: today/week/month/all), **`cashFlowProvider`** (rebuilds when the period changes), **`transactionsProvider`** |
 | `debts_providers.dart` | `debtsRepositoryProvider`, `getPendingDebtsUseCaseProvider`, `addDebtUseCaseProvider`, `getSettledDebtsUseCaseProvider`, `settleDebtUseCaseProvider`, **`pendingDebtsProvider`** (by due date), **`settledDebtsProvider`** (by `paidAt` desc) |
+| `expiry_alerts_provider.dart` | `getStockLotsUseCaseProvider`, **`expiryAlertsProvider`** (`AsyncNotifier<List<ExpiryAlert>>`) — per-lot expiry alerts (W11) |
 
 **Relevant details:**
 
@@ -82,24 +83,28 @@ authStateProvider.when:
   - Credit receivables — sum of pending entries;
   - Inventory in products (sum of quantities);
 - **Quick actions:** New sale, Add product, Register transaction, Register credit (navigate via `shellIndexProvider`);
-- **Recent sales** (last 3) and **low-stock** alert (`stockQuantity < 5`).
+- **Recent sales** (last 3) and **low-stock** alert (`stockQuantity < 5000` milli-units = 5 units, via `Quantity.lowStockThresholdUnits`);
+- **Expiry alerts (W11)** via `expiryAlertsProvider`: **red** for **expired** lots with stock and **yellow** for lots expiring in **< 30 days** (`expiryWarningDays`), sorted by urgency (expired first).
 
 ### 2. `ProductListScreen` (Products)
 
 - Local search (name and description), pull-to-refresh, "New product" FAB;
-- Cards with purchase/sale price and stock chip (yellow if `< 5`);
-- Registration via **`_AddProductSheet`** (bottom sheet): name, description, prices, stock — catches `InvalidPriceException` and shows the message;
+- Cards with purchase/sale price and stock chip (yellow if `< 5` units = `< 5000` milli-units);
+- Registration via **`_AddProductSheet`** (bottom sheet): name, description, prices, stock, **scale barcode/PLU** (optional), **"Sold by weight"** switch (`vendaPorFracao` — enables fractions) and **sale unit** (`kg`/`un`) — catches `InvalidPriceException` and shows the message;
+- Stock shown with **fraction and unit** for weight-based products (e.g., `1.75 kg`).
 - `EmptyState` for empty list and for search without results.
 
 ### 3. `SalesScreen` + `NewSaleSheet` + `SaleDetailScreen` (Sales)
 
 - **List:** cards with item count, payment method, day and total; tapping opens the **detail**;
 - **`NewSaleSheet`** (cart):
-  - Searches and adds products with **steppers** (+/−) limited to stock (`soldOut` disables);
+  - Searches and adds products with **steppers** (+/−) limited to stock (`soldOut` disables); weight-based products use **0.1 steps** and open a **decimal quantity dialog** (e.g., `1.75` kg);
+  - **Barcode field** (USB keyboard-style scanners trigger the lookup on `onSubmitted`) + **camera reading** via `BarcodeScanSheet` (`mobile_scanner`, where supported);
+  - Intercepts the **scale-label pattern `20PPPPPWWWWW`** (`ScaleBarcode`): extracts the PLU, derives the fraction from the weighing (value ÷ price — never overcharges) and only treats it as a scale code when the product is `vendaPorFracao` — EAN-12 codes starting with `20` fall back to the normal lookup; PLUs are normalized (leading zeros: `123` ≡ `00123`);
   - Payment method via `ChoiceChip`s (`PaymentMethod.values`);
-  - Confirms via **`ProcessSaleUseCase`** → records the sale + deducts stock + cash income;
+  - Confirms via **`ProcessSaleUseCase`** → records the sale + **FIFO stock deduction (lots)** + cash income;
   - Catches `InsufficientStockException` (shows the product and available amount) and `ProductNotFoundException`;
-  - After success, invalidates `productsProvider`, `salesListProvider`, `transactionsProvider`, `cashFlowProvider`;
+  - After success, invalidates `productsProvider`, `salesListProvider`, `transactionsProvider`, `cashFlowProvider`, `expiryAlertsProvider`;
 - **`SaleDetailScreen`:** summary (id, date, payment, total), items with `quantity × price` and subtotal, and the note "Preços congelados no momento da venda" (prices frozen at the time of sale).
 
 ### 4. `FinancialScreen` + `AddTransactionSheet` (Finance)
@@ -120,8 +125,8 @@ authStateProvider.when:
 ### 5c. `PurchasesScreen` + `AddPurchaseSheet` (Purchases)
 
 - Purchases list (supplier, item count, day and total);
-- **`AddPurchaseSheet`**: supplier, product search with steppers and total (purchase price) → **`ProcessPurchaseUseCase`** records the purchase, **increases stock** and records the **cash expense** ("Compras" category); catches `ProductNotFoundException`;
-- After success, invalidates purchases, products, transactions and cash.
+- **`AddPurchaseSheet`**: supplier, product search with steppers and total (purchase price); weight-based products accept **decimal fractions** and each item can get an **expiry date** (optional — feeds the lot created for the entry) → **`ProcessPurchaseUseCase`** records the purchase, **increases stock creating lots** and records the **cash expense** ("Compras" category); catches `ProductNotFoundException`;
+- After success, invalidates purchases, products, transactions, cash and expiry alerts.
 
 ### 5d. `ReportsScreen` (Reports)
 
@@ -149,6 +154,7 @@ authStateProvider.when:
 | `ErrorView` | Error state: message + technical detail + "Try again" button |
 | `SearchField` | Filled, rounded search field (no outline) |
 | `SectionHeader` | Section title with optional action on the right |
+| `BarcodeScanSheet` | Camera barcode reader (`mobile_scanner`) used in the POS (W11) |
 
 ---
 
@@ -160,7 +166,7 @@ authStateProvider.when:
 - **Semantic colors (`AppColors`):** `income` green `#189A5E`, `expense` red `#D64550`, `warning` orange `#E08F2B`;
 - **Visual guidelines:** neutral surfaces, cards with subtle border without heavy shadow (`elevation: 0`), rounded corners (14–20px), **filled fields without outline**, `FilledButton`s 52px tall;
 - **Navigation:** `NavigationBar` (68px height, `primaryContainer` indicator) and `NavigationRail` (`groupAlignment: -0.9`);
-- **Typography:** high weights (w700/w800), negative letter-spacing, `headlineMedium` 28px;
+- **Typography:** modular scale (Apple HIG/Material): **34** (Large Title — login/welcome) → **28** (page titles) → **22** (cards/modals/AppBar) → **20** (subtitles/sections) → **17/15/13/11** (body large/body/footnote/caption); weight contrast (w400 text, w600+ values) instead of many sizes, plus **`tabularFigures`** on the numeric styles so prices (MZN) and quantities (kg/un) align digit by digit; the full decision (with the complete scale table, Material roles and golden rules) is in [chapter 12 — Architecture Decisions](12-architecture-decisions.md);
 - **Floating snackbars** with inverted theme (dark on light theme and vice versa).
 
 The theme is applied in `app.dart`:
@@ -181,7 +187,7 @@ MaterialApp(
 
 `lib/core/utils/formatters.dart`:
 
-- `currency(double)` → `R$ 1.234,56` (with thousands grouping and negative sign);
+- `currency(int cents)` → `1.234,56` with the tenant's symbol (default `R$`, Mozambique tenants use `MTn`) — since W4, money is integer cents;
 - `date(DateTime)` → `04/08/2026`;
 - `dateTime(DateTime)` → `04/08/2026 14:30`;
 - `day(DateTime)` → `Hoje`, `Ontem` or `04/08`.

@@ -558,6 +558,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get commonCancel => 'Cancelar';
 
   @override
+  String get commonConfirm => 'Confirmar';
+
+  @override
   String get commonDescription => 'Descrição';
 
   @override
@@ -1367,4 +1370,83 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get adminPlanCurrent => 'Atual';
+
+  @override
+  String get productsCodeLabel => 'Código de barras (PLU)';
+
+  @override
+  String get productsCodeHint =>
+      'Código usado pelas balanças etiquetadoras (ex.: 12345)';
+
+  @override
+  String get productsCodeError => 'Código inválido: use até 5 dígitos.';
+
+  @override
+  String get productsWeighLabel => 'Venda por peso (fração)';
+
+  @override
+  String get productsWeighHint => 'Aceita quantidades decimais (ex.: 1,75 kg)';
+
+  @override
+  String get productsUnitLabel => 'Unidade de venda';
+
+  @override
+  String get productsStockWeightHint => 'Em unidades da venda (ex.: 1,75)';
+
+  @override
+  String get productsExpiryLabel => 'Validade';
+
+  @override
+  String get productsExpiryAdd => 'Definir validade';
+
+  @override
+  String get productsExpiryHelp => 'Data de validade do produto';
+
+  @override
+  String get productsExpiryClear => 'Remover validade';
+
+  @override
+  String get salesBarcodeLabel => 'Código de barras';
+
+  @override
+  String get salesBarcodeScan => 'Ler com a câmera';
+
+  @override
+  String get salesBarcodeNotFound => 'Produto não encontrado para este código.';
+
+  @override
+  String get salesBarcodeInvalid => 'Código de balança inválido.';
+
+  @override
+  String salesStockLimit(String product) {
+    return 'Limite de estoque atingido para $product.';
+  }
+
+  @override
+  String get salesQuantityLabel => 'Quantidade';
+
+  @override
+  String get salesQuantityHint => 'Quantidade (ex.: 1,75)';
+
+  @override
+  String get purchasesExpiryLabel => 'Validade';
+
+  @override
+  String get purchasesExpiryAdd => 'Definir validade';
+
+  @override
+  String get purchasesExpiryHelp => 'Data de validade do lote';
+
+  @override
+  String get dashboardExpiryAlerts => 'Validade';
+
+  @override
+  String dashboardExpiredIn(int days) {
+    return 'Venceu há $days dia(s)';
+  }
+
+  @override
+  String dashboardExpiresIn(int days) {
+    return 'Vence em $days dia(s)';
+  }
 }

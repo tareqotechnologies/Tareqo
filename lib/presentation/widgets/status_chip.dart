@@ -44,6 +44,9 @@ class StatusChip extends StatelessWidget {
                 color: scheme.brightness == Brightness.dark
                     ? color.withValues(alpha: 0.9)
                     : color,
+                // Chips carregam quantidades/valores/datas — dígitos
+                // alinhados em colunas de chips.
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
           ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/i18n/l10n_ext.dart';
 import '../../core/i18n/payment_method_l10n.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/quantity.dart';
 import '../../domain/entities/purchase.dart';
 import 'method_badge.dart';
 import 'payment_filter.dart' show PaymentMethodAccent, PaymentMethodIcon;
@@ -28,11 +29,11 @@ class PurchaseCard extends StatelessWidget {
     // Cor de destaque da forma de pagamento — identidade visual por método.
     final accent = purchase.paymentMethod.accent(theme);
     final itemsLabel = l10n.dashboardSaleItems(purchase.items.length);
-    // Total de UNIDADES adicionadas ao estoque (soma das quantidades).
-    final units = purchase.items.fold<int>(
-      0,
-      (sum, item) => sum + item.quantity,
-    );
+    // Total de UNIDADES adicionadas ao estoque (W11: quantidades em
+    // MILÉSIMOS — converte para unidades inteiras na exibição).
+    final units = Quantity.toUnits(
+      purchase.items.fold<int>(0, (sum, item) => sum + item.quantity),
+    ).round();
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -77,12 +78,20 @@ class PurchaseCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 // Chip: unidades adicionadas ao estoque (informação
                 // derivada das quantidades dos itens — sem modelo novo).
-                // Flexible: encolhe (ellipsis interno) em telas estreitas.
+                // Align + Flexible: o chip fica ANCORADO à direita do card
+                // (não flutuando colado ao texto) e encolhe (ellipsis
+                // interno) em telas estreitas.
                 Flexible(
-                  child: StatusChip(
-                    label: l10n.purchasesStockAdded(units, l10n.commonUnits),
-                    color: theme.colorScheme.primary,
-                    icon: Icons.inventory_2_outlined,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: StatusChip(
+                      label: l10n.purchasesStockAdded(
+                        units,
+                        l10n.commonUnits,
+                      ),
+                      color: theme.colorScheme.primary,
+                      icon: Icons.inventory_2_outlined,
+                    ),
                   ),
                 ),
               ],
@@ -109,17 +118,21 @@ class PurchaseCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Flexible: valores altos (ou escala de texto alta)
-                // encolhem com ellipsis em vez de estourar o card.
+                // Valor MINIMALISTA (15px Medium, sem bold — regra de ouro
+                // da escala: valores em colunas com peso médio). FittedBox:
+                // valor ANCORADO à direita e que ENCOLHE para caber — nunca
+                // trunca e fica sempre visível ao lado da data.
                 Flexible(
-                  child: Text(
-                    Formatters.currency(purchase.totalAmountCents),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.2,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      Formatters.currency(purchase.totalAmountCents),
+                      maxLines: 1,
+                      textAlign: TextAlign.end,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),

@@ -64,6 +64,8 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
               'product_name': item.productName,
               'quantity': item.quantity,
               'unit_price': item.unitPriceCents,
+              // W11: validade opcional do lote FIFO criado no servidor.
+              'expiry_date': item.expiryDate?.toUtc().toIso8601String(),
             },
         ],
       },
@@ -116,6 +118,7 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
             'product_name': item.productName,
             'quantity': item.quantity,
             'unit_price': item.unitPriceCents,
+            'expiry_date': item.expiryDate?.toUtc().toIso8601String(),
           },
       ],
     }, defaultToNull: false);
@@ -133,6 +136,9 @@ final class PurchaseSupabaseDataSourceImpl implements PurchaseLocalDataSource {
           productName: item['product_name'] as String,
           quantity: (item['quantity'] as num).toInt(),
           unitPriceCents: (item['unit_price'] as num).toInt(),
+          expiryDate: item['expiry_date'] == null
+              ? null
+              : DateTime.parse(item['expiry_date'] as String).toLocal(),
         ),
     ],
     totalAmountCents: (row['total_amount'] as num).toInt(),

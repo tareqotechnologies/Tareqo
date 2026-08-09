@@ -1402,3 +1402,427 @@ VALUES
   ('pl2', 'Profissional', 'Para crescer: 3 lojas e até 10 funcionários.', 100000, 3, 10, TRUE),
   ('pl3', 'Empresa', 'Para expandir: 10 lojas e até 50 funcionários.', 200000, 10, 50, TRUE)
 ON CONFLICT (id) DO NOTHING;
+-- ============================================================================
+-- 22. W11 — FIFO, validade por lotes e vendas por peso (milésimos)
+-- ============================================================================
+-- Módulo de controle de validade (lotes FIFO) + vendas por fração/peso:
+--   * NOVAS colunas em products (code/venda_por_fracao/unit_label) e
+--     purchase_items (expiry_date);
+--   * NOVA tabela stock_lots (lote = entrada de mercadoria; baixa no PDV em
+--     ordem de validade / data de entrada);
+--   * TODAS as quantidades convertidas de unidades inteiras para MILÉSIMOS
+--     (×1000) — produtos, itens de venda e itens de compra; cada produto com
+--     estoque ganha um lote inicial (sem validade) para a invariante
+--     `stock = Σ lotes` valer desde o primeiro dia;
+--   * RPCs process_sale (baixa FIFO) / process_purchase (cria lotes) /
+--     get_sales_report (matemática em milésimos) recriadas.
+--
+-- 100% idempotente: colunas usam ADD COLUMN IF NOT EXISTS, a tabela usa
+-- CREATE TABLE IF NOT EXISTS, funções usam CREATE OR REPLACE, e a migração
+-- ×1000 + backfill roda apenas quando stock_lots está VAZIO (primeira
+-- execução — reexecutar é um no-op).
+-- ============================================================================
+
+-- 22.1 Colunas novas (idempotente — bancos novos já as criam no schema.sql)
+ALTER TABLE public.products
+  ADD COLUMN IF NOT EXISTS code TEXT,
+  ADD COLUMN IF NOT EXISTS venda_por_fracao BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS unit_label TEXT NOT NULL DEFAULT 'un';
+
+-- Validade opcional por item de compra (lote FIFO correspondente).
+ALTER TABLE public.purchase_items
+  ADD COLUMN IF NOT EXISTS expiry_date TIMESTAMPTZ;
+
+-- 22.2 Tabela de lotes (espelha a entidade StockLot) + índices
+CREATE TABLE IF NOT EXISTS public.stock_lots (
+  id                TEXT PRIMARY KEY,
+  user_id           UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  store_id          TEXT NOT NULL DEFAULT 'st1',
+  product_id        TEXT NOT NULL,
+  -- data_entrada: data da compra que originou o lote (FIFO sem validade).
+  entry_date        TIMESTAMPTZ NOT NULL,
+  -- data_validade: NULL para produtos sem validade (não perecíveis).
+  expiry_date       TIMESTAMPTZ,
+  -- quantidade_inicial recebida (milésimos) — referência histórica.
+  initial_quantity  BIGINT NOT NULL CHECK (initial_quantity >= 0),
+  -- quantidade_atual disponível (milésimos) — diminui a cada baixa FIFO.
+  current_quantity  BIGINT NOT NULL CHECK (current_quantity >= 0),
+  -- custo_aquisicao em CENTAVOS inteiros (W4) — custo do lote na compra.
+  cost_price        BIGINT NOT NULL CHECK (cost_price >= 0)
+);
+CREATE INDEX IF NOT EXISTS idx_stock_lots_product
+  ON public.stock_lots (product_id, store_id);
+CREATE INDEX IF NOT EXISTS idx_stock_lots_expiry
+  ON public.stock_lots (expiry_date) WHERE current_quantity > 0;
+
+-- 22.3 Migração para MILÉSIMOS + backfill de lotes iniciais
+-- Guarda: roda apenas quando stock_lots está VAZIO (primeira execução);
+-- reexecutar o upgrade é um no-op. Produtos com estoque ganham um lote
+-- inicial sem validade (custo = preço de compra atual).
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM public.stock_lots LIMIT 1) THEN
+    UPDATE public.products SET stock_quantity = stock_quantity * 1000;
+    UPDATE public.sale_items SET quantity = quantity * 1000;
+    UPDATE public.purchase_items SET quantity = quantity * 1000;
+
+    INSERT INTO public.stock_lots
+      (id, user_id, store_id, product_id, entry_date, expiry_date,
+       initial_quantity, current_quantity, cost_price)
+    SELECT 'lot-mig-' || id, user_id, store_id, id, now(), NULL,
+           stock_quantity, stock_quantity, purchase_price
+    FROM public.products
+    WHERE stock_quantity > 0;
+  END IF;
+END $$;
+
+-- 22.4 RLS + políticas + triggers da tabela de lotes
+ALTER TABLE public.stock_lots ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS stock_lots_select ON public.stock_lots;
+CREATE POLICY stock_lots_select ON public.stock_lots
+  FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
+DROP POLICY IF EXISTS stock_lots_insert ON public.stock_lots;
+CREATE POLICY stock_lots_insert ON public.stock_lots
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+DROP POLICY IF EXISTS stock_lots_update ON public.stock_lots;
+CREATE POLICY stock_lots_update ON public.stock_lots
+  FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
+  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+DROP POLICY IF EXISTS stock_lots_delete ON public.stock_lots;
+CREATE POLICY stock_lots_delete ON public.stock_lots
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- user_id = auth.uid() em todo INSERT (defesa em profundidade).
+DROP TRIGGER IF EXISTS trg_stock_lots_user_id ON public.stock_lots;
+CREATE TRIGGER trg_stock_lots_user_id
+  BEFORE INSERT ON public.stock_lots
+  FOR EACH ROW EXECUTE FUNCTION public.set_tenant_user_id();
+
+-- store_id = loja do usuário quando o valor enviado não pertence a ele.
+DROP TRIGGER IF EXISTS trg_stock_lots_store_id ON public.stock_lots;
+CREATE TRIGGER trg_stock_lots_store_id
+  BEFORE INSERT ON public.stock_lots
+  FOR EACH ROW EXECUTE FUNCTION public.set_record_store_id();
+
+-- 22.5 RPC process_sale — baixa do estoque em FIFO por lotes (W11)
+CREATE OR REPLACE FUNCTION public.process_sale(p_sale jsonb, p_items jsonb)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_store text := p_sale->>'store_id';
+  -- W4: total em CENTAVOS inteiros (BIGINT) — comparação exata.
+  v_total bigint := (p_sale->>'total_amount')::bigint;
+  v_lang text;
+  -- Número SEQUENCIAL da venda na loja (sale_number).
+  v_sale_number bigint;
+  -- W11 (FIFO por lotes): iteração sobre os itens e consumo dos lotes.
+  v_item jsonb;
+  v_remaining bigint;
+  v_lot record;
+  v_take bigint;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Sessão necessária para registrar a venda.';
+  END IF;
+  -- Guarda de acesso: a loja precisa pertencer ao usuário (dono do tenant
+  -- ou funcionário vinculado). Substitui o RLS dentro do SECURITY DEFINER.
+  IF NOT public.is_my_store(v_store) THEN
+    RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', v_store;
+  END IF;
+  -- Idioma do tenant (escolha do dono) — define a descrição/categoria
+  -- gravadas na entrada do caixa (padrão pt).
+  SELECT t.language INTO v_lang
+  FROM public.stores s
+  JOIN public.tenants t ON t.id = s.tenant_id
+  WHERE s.id = v_store;
+  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en') THEN
+    v_lang := 'pt';
+  END IF;
+  -- Idempotência: o id da venda é a chave de idempotência — um retry após
+  -- sucesso (ex.: timeout no cliente) não duplica nada.
+  IF EXISTS (SELECT 1 FROM public.sales WHERE id = p_sale->>'id' AND store_id = v_store) THEN
+    RETURN;
+  END IF;
+  IF jsonb_array_length(p_items) = 0 THEN
+    RAISE EXCEPTION 'A venda deve conter ao menos um item.';
+  END IF;
+
+  -- Total deve corresponder aos itens — tudo em CENTAVOS inteiros (W4 +
+  -- W11): quantidade em MILÉSIMOS × preço unitário / 1000, divisão inteira
+  -- por item (mesmo cálculo do cliente). Comparação exata.
+  IF (SELECT SUM((x->>'quantity')::bigint * (x->>'unit_price')::bigint / 1000)
+      FROM jsonb_array_elements(p_items) x)
+     <> v_total THEN
+    RAISE EXCEPTION 'O total da venda não corresponde aos itens.';
+  END IF;
+
+  -- Trava e valida o estoque de TODOS os itens (fecha TOCTOU).
+  PERFORM public.lock_products_or_raise(p_items, v_store, TRUE);
+
+  -- Número SEQUENCIAL da venda na loja: atribuído AQUI no servidor, dentro
+  -- da mesma transação, sob uma advisory lock por loja — duas vendas
+  -- concorrentes na mesma loja nunca recebem o mesmo número. O id continua
+  -- sendo a chave de idempotência (o RETURN acima não consome número).
+  PERFORM pg_advisory_xact_lock(hashtextextended('sale_number:' || v_store, 0));
+  SELECT COALESCE(MAX(sale_number), 0) + 1 INTO v_sale_number
+  FROM public.sales WHERE store_id = v_store;
+
+  -- Venda + itens (snapshot de nome/preço).
+  INSERT INTO public.sales
+    (id, user_id, store_id, sale_number, total_amount, payment_method, date_time)
+  VALUES (p_sale->>'id', v_uid, v_store, v_sale_number, v_total,
+          p_sale->>'payment_method', (p_sale->>'date_time')::timestamptz);
+
+  INSERT INTO public.sale_items
+    (sale_id, user_id, product_id, product_name, quantity, unit_price)
+  SELECT p_sale->>'id', v_uid, (x->>'product_id'), (x->>'product_name'),
+         (x->>'quantity')::int, (x->>'unit_price')::bigint
+  FROM jsonb_array_elements(p_items) x;
+
+  -- Baixa do estoque em FIFO por lotes (W11): para cada item, consome os
+  -- lotes ativos em ordem de VALIDADE (mais próxima primeiro; sem validade
+  -- no fim, por data de entrada — e id como desempate estável). Os lotes
+  -- são travados com FOR UPDATE (fecha TOCTOU entre vendas concorrentes);
+  -- o total do produto (stock_quantity) cai na quantidade vendida, na
+  -- mesma transação — a invariante `stock = Σ lotes` nunca quebra.
+  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items) LOOP
+    v_remaining := (v_item->>'quantity')::bigint;
+    FOR v_lot IN
+      SELECT l.id, l.current_quantity
+      FROM public.stock_lots l
+      WHERE l.product_id = (v_item->>'product_id')
+        AND l.store_id = v_store
+        AND l.current_quantity > 0
+      ORDER BY CASE WHEN l.expiry_date IS NULL THEN 1 ELSE 0 END,
+               l.expiry_date ASC, l.entry_date ASC, l.id ASC
+      FOR UPDATE
+    LOOP
+      IF v_remaining <= 0 THEN EXIT; END IF;
+      v_take := LEAST(v_lot.current_quantity, v_remaining);
+      UPDATE public.stock_lots
+        SET current_quantity = current_quantity - v_take
+        WHERE id = v_lot.id;
+      v_remaining := v_remaining - v_take;
+    END LOOP;
+    IF v_remaining > 0 THEN
+      -- Defesa em profundidade (o lock_products_or_raise acima já validou
+      -- pelo total do produto): os lotes não cobrem a venda — o estoque
+      -- nunca fica negativo por esta RPC.
+      RAISE EXCEPTION 'Estoque insuficiente para o produto % (loja %).',
+        v_item->>'product_id', v_store;
+    END IF;
+    UPDATE public.products
+      SET stock_quantity = stock_quantity - (v_item->>'quantity')::bigint
+      WHERE id = (v_item->>'product_id') AND store_id = v_store;
+  END LOOP;
+
+  -- Entrada no caixa (mesma transação).
+  INSERT INTO public.financial_transactions
+    (id, user_id, store_id, description, amount, type, category, date, status)
+  VALUES ('t' || (p_sale->>'id'), v_uid, v_store,
+          CASE WHEN v_lang = 'en' THEN 'Sale — ' ELSE 'Venda ' END
+            || public.payment_method_label(p_sale->>'payment_method', v_lang),
+          v_total, 'income',
+          CASE WHEN v_lang = 'en' THEN 'Sales' ELSE 'Vendas' END,
+          (p_sale->>'date_time')::timestamptz, 'paid');
+END;
+$$;
+
+-- 22.6 RPC process_purchase — cria os LOTES FIFO na entrada (W11)
+CREATE OR REPLACE FUNCTION public.process_purchase(p_purchase jsonb, p_items jsonb)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_store text := p_purchase->>'store_id';
+  -- W4: total em CENTAVOS inteiros (BIGINT) — comparação exata.
+  v_total bigint := (p_purchase->>'total_amount')::bigint;
+  v_lang text;
+  -- Número SEQUENCIAL da compra na loja (purchase_number).
+  v_purchase_number bigint;
+  -- W11 (lotes FIFO): iteração sobre os itens para criar os lotes.
+  v_item jsonb;
+  v_expiry timestamptz;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Sessão necessária para registrar a compra.';
+  END IF;
+  -- Guarda de nível gerencial (matriz de acesso Aug 6): compras exigem
+  -- DONO ou GERENTE da loja — o funcionário comum opera vendas/estoque,
+  -- mas NÃO registra compras. Substitui o RLS dentro do SECURITY DEFINER
+  -- (e o RLS de purchases também exige is_manager_of_store).
+  IF NOT public.is_manager_of_store(v_store) THEN
+    RAISE EXCEPTION 'Apenas o dono ou um gerente podem registrar compras na loja %.', v_store;
+  END IF;
+  SELECT t.language INTO v_lang
+  FROM public.stores s
+  JOIN public.tenants t ON t.id = s.tenant_id
+  WHERE s.id = v_store;
+  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en') THEN
+    v_lang := 'pt';
+  END IF;
+  -- Idempotência: o id da compra é a chave de idempotência.
+  IF EXISTS (SELECT 1 FROM public.purchases WHERE id = p_purchase->>'id' AND store_id = v_store) THEN
+    RETURN;
+  END IF;
+  IF jsonb_array_length(p_items) = 0 THEN
+    RAISE EXCEPTION 'A compra deve conter ao menos um item.';
+  END IF;
+
+  IF (SELECT SUM((x->>'quantity')::bigint * (x->>'unit_price')::bigint / 1000)
+      FROM jsonb_array_elements(p_items) x)
+     <> v_total THEN
+    RAISE EXCEPTION 'O total da compra não corresponde aos itens.';
+  END IF;
+
+  -- Valida e trava a existência de TODOS os produtos ANTES de mutar
+  -- (mesmo padrão do process_sale; fecha corrida com exclusão).
+  PERFORM public.lock_products_or_raise(p_items, v_store, FALSE);
+
+  -- Número SEQUENCIAL da compra na loja: atribuído AQUI no servidor,
+  -- dentro da mesma transação, sob uma advisory lock por loja — duas
+  -- compras concorrentes na mesma loja nunca recebem o mesmo número.
+  -- O id continua sendo a chave de idempotência (o RETURN acima não
+  -- consome número).
+  PERFORM pg_advisory_xact_lock(
+    hashtextextended('purchase_number:' || v_store, 0));
+  SELECT COALESCE(MAX(purchase_number), 0) + 1 INTO v_purchase_number
+  FROM public.purchases WHERE store_id = v_store;
+
+  -- Compra + itens. payment_method vem no payload (mesmo enum de vendas);
+  -- clientes antigos sem o campo caem em 'cash' (compra à vista).
+  INSERT INTO public.purchases
+    (id, user_id, store_id, purchase_number, supplier_name, total_amount, payment_method, date_time)
+  VALUES (p_purchase->>'id', v_uid, v_store, v_purchase_number,
+          p_purchase->>'supplier_name',
+          v_total, COALESCE(p_purchase->>'payment_method', 'cash'),
+          (p_purchase->>'date_time')::timestamptz);
+
+  INSERT INTO public.purchase_items
+    (purchase_id, user_id, product_id, product_name, quantity, unit_price,
+     expiry_date)
+  SELECT p_purchase->>'id', v_uid, (x->>'product_id'), (x->>'product_name'),
+         (x->>'quantity')::int, (x->>'unit_price')::bigint,
+         NULLIF(x->>'expiry_date', '')::timestamptz
+  FROM jsonb_array_elements(p_items) x;
+
+  -- Lotes FIFO (W11): cada item da compra cria um LOTE com data de entrada
+  -- = data da compra, validade opcional (NULL = sem validade) e custo de
+  -- aquisição = preço unitário da compra. O id do lote deriva do id da
+  -- compra (idempotente — a compra já não existe em retries).
+  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items) LOOP
+    v_expiry := NULLIF(v_item->>'expiry_date', '')::timestamptz;
+    INSERT INTO public.stock_lots
+      (id, user_id, store_id, product_id, entry_date, expiry_date,
+       initial_quantity, current_quantity, cost_price)
+    VALUES
+      ('lot-' || (p_purchase->>'id') || '-' || (v_item->>'product_id'),
+       v_uid, v_store, (v_item->>'product_id'),
+       (p_purchase->>'date_time')::timestamptz,
+       v_expiry,
+       (v_item->>'quantity')::bigint, (v_item->>'quantity')::bigint,
+       (v_item->>'unit_price')::bigint);
+  END LOOP;
+
+  -- Entrada de estoque (produtos já validados acima).
+  UPDATE public.products p
+  SET stock_quantity = p.stock_quantity + (x->>'quantity')::bigint
+  FROM jsonb_array_elements(p_items) x
+  WHERE p.id = (x->>'product_id') AND p.store_id = v_store;
+
+  -- Saída no caixa (mesma transação).
+  INSERT INTO public.financial_transactions
+    (id, user_id, store_id, description, amount, type, category, date, status)
+  VALUES ('t' || (p_purchase->>'id'), v_uid, v_store,
+          CASE WHEN v_lang = 'en'
+               THEN 'Purchase — ' || (p_purchase->>'supplier_name')
+               ELSE 'Compra — ' || (p_purchase->>'supplier_name') END,
+          v_total, 'expense',
+          CASE WHEN v_lang = 'en' THEN 'Purchases' ELSE 'Compras' END,
+          (p_purchase->>'date_time')::timestamptz, 'paid');
+END;
+$$;
+
+-- 22.7 RPC get_sales_report — matemática em MILÉSIMOS (W11)
+CREATE OR REPLACE FUNCTION public.get_sales_report(
+  p_store_id TEXT,
+  p_start TIMESTAMPTZ,
+  p_end TIMESTAMPTZ,
+  p_tz_offset_minutes INT DEFAULT 0
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+DECLARE
+  v_revenue BIGINT;
+  v_profit  BIGINT;
+  v_best    JSONB;
+  v_daily   JSONB;
+BEGIN
+  IF NOT public.is_my_store(p_store_id) THEN
+    RAISE EXCEPTION 'Acesso negado a esta loja.';
+  END IF;
+
+  -- Faturamento: soma dos totais das vendas no período.
+  SELECT COALESCE(SUM(s.total_amount), 0)::bigint INTO v_revenue
+  FROM public.sales s
+  WHERE s.store_id = p_store_id
+    AND s.date_time >= p_start AND s.date_time <= p_end;
+
+  -- Lucro bruto: Σ quantity (MILÉSIMOS — W11) × (unit_price −
+  -- purchase_price ATUAL do catálogo; 0 para produtos que não existem
+  -- mais) / 1000 — divisão inteira por item, mesma semântica client-side.
+  SELECT COALESCE(SUM(si.quantity * (si.unit_price - COALESCE(pr.purchase_price, 0)) / 1000), 0)::bigint
+  INTO v_profit
+  FROM public.sale_items si
+  JOIN public.sales s ON s.id = si.sale_id
+  LEFT JOIN public.products pr
+         ON pr.id = si.product_id AND pr.store_id = p_store_id
+  WHERE s.store_id = p_store_id
+    AND s.date_time >= p_start AND s.date_time <= p_end;
+
+  -- Mais vendidos (top 5 por quantidade) com receita por produto.
+  SELECT COALESCE(jsonb_agg(row ORDER BY row.quantity DESC), '[]'::jsonb)
+  INTO v_best
+  FROM (
+    SELECT si.product_id, si.product_name,
+           SUM(si.quantity)::bigint AS quantity,
+           SUM(si.quantity * si.unit_price / 1000)::bigint AS revenue_cents
+    FROM public.sale_items si
+    JOIN public.sales s ON s.id = si.sale_id
+    WHERE s.store_id = p_store_id
+      AND s.date_time >= p_start AND s.date_time <= p_end
+    GROUP BY si.product_id, si.product_name
+    ORDER BY quantity DESC
+    LIMIT 5
+  ) row;
+
+  -- Vendas por dia (fuso local do cliente via offset em minutos).
+  SELECT COALESCE(jsonb_agg(d ORDER BY d.day), '[]'::jsonb)
+  INTO v_daily
+  FROM (
+    SELECT ((s.date_time + make_interval(mins => p_tz_offset_minutes)) AT TIME ZONE 'UTC')::date AS day,
+           SUM(s.total_amount)::bigint AS total_cents
+    FROM public.sales s
+    WHERE s.store_id = p_store_id
+      AND s.date_time >= p_start AND s.date_time <= p_end
+    GROUP BY 1
+  ) d;
+
+  RETURN jsonb_build_object(
+    'total_revenue_cents', v_revenue,
+    'total_profit_cents', v_profit,
+    'best_sellers', v_best,
+    'per_day', v_daily
+  );
+END $$;

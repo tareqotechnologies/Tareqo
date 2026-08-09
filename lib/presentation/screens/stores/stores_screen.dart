@@ -509,7 +509,7 @@ class _PlanCard extends StatelessWidget {
                 child: Text(
                   plan?.name ?? l10n.planCardTitle,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: scheme.onPrimaryContainer,
                   ),
                 ),

@@ -17,6 +17,8 @@ import '../../data/datasources/local/purchase_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/sale_local_data_source.dart';
 import '../../data/datasources/local/sale_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/sqlite_unit_of_work.dart';
+import '../../data/datasources/local/stock_lot_local_data_source.dart';
+import '../../data/datasources/local/stock_lot_sqlite_data_source_impl.dart';
 import '../../domain/repositories/i_unit_of_work.dart';
 
 /// Implementação nativa do bootstrap SQLite (usada em Android/iOS/desktop;
@@ -85,6 +87,9 @@ abstract final class AppDatabase {
       )
       ..registerLazySingleton<PurchaseLocalDataSource>(
         () => PurchaseSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<StockLotLocalDataSource>(
+        () => StockLotSqliteDataSourceImpl(db),
       );
   }
 
@@ -206,8 +211,14 @@ abstract final class AppDatabase {
         description TEXT NOT NULL DEFAULT '',
         purchase_price INTEGER NOT NULL CHECK (purchase_price >= 0),
         sale_price INTEGER NOT NULL CHECK (sale_price >= 0),
+        -- W11: estoque em MILÉSIMOS de unidade (1000 = 1 unidade/kg).
         stock_quantity INTEGER NOT NULL DEFAULT 0
-          CHECK (stock_quantity >= 0)
+          CHECK (stock_quantity >= 0),
+        -- W11: código de barras/PLU (5 dígitos, opcional) das balanças
+        -- etiquetadoras; venda por peso (fração) e unidade de venda.
+        code TEXT,
+        venda_por_fracao INTEGER NOT NULL DEFAULT 0,
+        unit_label TEXT NOT NULL DEFAULT 'un'
       );
     ''');
     db.execute('''
@@ -302,10 +313,33 @@ abstract final class AppDatabase {
         product_name TEXT NOT NULL,
         quantity INTEGER NOT NULL CHECK (quantity > 0),
         unit_price INTEGER NOT NULL CHECK (unit_price >= 0),
+        -- W11: data de validade do lote criado por este item (NULL = sem
+        -- validade — FIFO por data de entrada).
+        expiry_date INTEGER,
         UNIQUE (purchase_id, product_id)
       );
       CREATE INDEX IF NOT EXISTS idx_purchase_items_purchase_id
         ON purchase_items(purchase_id);
+    ''');
+    // W11 — Lotes FIFO: cada entrada de mercadoria cria um lote; a baixa
+    // no PDV consome em ordem de validade (mais próximo primeiro) e, sem
+    // validade, por data de entrada. `current_quantity` = quantidade ATUAL
+    // (milésimos); `cost_price` = custo de aquisição (centavos).
+    db.execute('''
+      CREATE TABLE IF NOT EXISTS stock_lots (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL DEFAULT 'st1',
+        product_id TEXT NOT NULL,
+        entry_date INTEGER NOT NULL,
+        expiry_date INTEGER,
+        initial_quantity INTEGER NOT NULL CHECK (initial_quantity >= 0),
+        current_quantity INTEGER NOT NULL CHECK (current_quantity >= 0),
+        cost_price INTEGER NOT NULL CHECK (cost_price >= 0)
+      );
+      CREATE INDEX IF NOT EXISTS idx_stock_lots_product
+        ON stock_lots(product_id, store_id);
+      CREATE INDEX IF NOT EXISTS idx_stock_lots_expiry
+        ON stock_lots(expiry_date) WHERE current_quantity > 0;
     ''');
 
     // Migração leve: bancos criados antes do `sale_number` (numeração
@@ -404,6 +438,52 @@ abstract final class AppDatabase {
       }
       db.execute('CREATE INDEX IF NOT EXISTS ${entry.value} '
           'ON ${entry.key}(store_id)');
+    }
+
+    // Migração W11 (FIFO + validade + milésimos): bancos criados antes
+    // do módulo recebem as colunas novas e têm TODAS as quantidades
+    // convertidas de unidades inteiras para MILÉSIMOS (×1000) — produtos,
+    // itens de venda e itens de compra. Depois, cada produto com estoque
+    // ganha um lote inicial (sem validade, custo = preço de compra) para
+    // a invariante `stock = Σ lotes` valer desde o primeiro dia. Idempotente:
+    // bancos novos já criam as colunas no CREATE TABLE (o guard abaixo não
+    // dispara) e a reconversão ×1000 nunca reexecuta (ligada à presença da
+    // coluna `code` — adicionada apenas nesta migração).
+    final productColumns = db.select('PRAGMA table_info(products)');
+    final hasW11Columns = productColumns.any((row) => row['name'] == 'code');
+    if (!hasW11Columns) {
+      db.execute("ALTER TABLE products ADD COLUMN code TEXT");
+      db.execute(
+        'ALTER TABLE products ADD COLUMN venda_por_fracao '
+        'INTEGER NOT NULL DEFAULT 0',
+      );
+      db.execute(
+        "ALTER TABLE products ADD COLUMN unit_label TEXT NOT NULL "
+        "DEFAULT 'un'",
+      );
+      // Conversão para MILÉSIMOS (W11) — roda apenas nesta migração.
+      db.execute('UPDATE products SET stock_quantity = stock_quantity * 1000');
+      db.execute('UPDATE sale_items SET quantity = quantity * 1000');
+      db.execute('UPDATE purchase_items SET quantity = quantity * 1000');
+      // Lote inicial de cada produto com estoque (FIFO sem validade).
+      db.execute('''
+        INSERT INTO stock_lots
+          (id, store_id, product_id, entry_date, expiry_date,
+           initial_quantity, current_quantity, cost_price)
+        SELECT 'lot-mig-' || id, store_id, id,
+               CAST(strftime('%s','now') AS INTEGER) * 1000,
+               NULL, stock_quantity, stock_quantity, purchase_price
+        FROM products
+        WHERE stock_quantity > 0
+      ''');
+    }
+
+    // Migração leve W11: bancos criados antes do `expiry_date` (validade
+    // opcional por item de compra) recebem a coluna NULL. Idempotente.
+    final purchaseItemColumns = db.select('PRAGMA table_info(purchase_items)');
+    final hasExpiry = purchaseItemColumns.any((row) => row['name'] == 'expiry_date');
+    if (!hasExpiry) {
+      db.execute('ALTER TABLE purchase_items ADD COLUMN expiry_date INTEGER');
     }
 
     // Migração leve (NUMERAÇÃO SEQUENCIAL): roda DEPOIS da migração de

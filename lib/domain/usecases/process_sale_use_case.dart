@@ -1,13 +1,14 @@
 import '../../core/i18n/transaction_descriptions.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/ids.dart';
+import '../../core/utils/quantity.dart';
 import '../entities/financial_transaction.dart';
 import '../entities/sale.dart';
 import '../repositories/i_financial_transaction_repository.dart';
 import '../repositories/i_sale_processor.dart';
 import '../repositories/i_sale_repository.dart';
 import '../repositories/i_unit_of_work.dart';
-import 'update_product_stock_use_case.dart';
+import 'fifo_stock_use_case.dart';
 
 /// Exceção de domínio: venda inválida (sem itens ou total divergente).
 final class InvalidSaleException implements Exception {
@@ -21,25 +22,26 @@ final class InvalidSaleException implements Exception {
 
 /// Caso de uso: processar uma venda (registrar + baixar estoque + caixa).
 ///
-/// Orquestra [ISaleRepository], [UpdateProductStockUseCase],
+/// Orquestra [ISaleRepository], [FifoStockUseCase],
 /// [IFinancialTransactionRepository] e [IUnitOfWork] — depende apenas de
 /// abstrações, nunca de implementações concretas.
 ///
 /// Quando [processor] é fornecido (Supabase), a venda inteira é delegada a
-/// ele — o servidor executa tudo em UMA transação (RPC `process_sale`).
-/// Sem processor (SQLite/memória), usa o caminho composto com o
-/// [IUnitOfWork]. Em ambos os casos a validação de negócio roda aqui.
+/// ele — o servidor executa tudo em UMA transação (RPC `process_sale`, que
+/// também baixa os lotes em FIFO). Sem processor (SQLite/memória), usa o
+/// caminho composto com o [IUnitOfWork]. Em ambos os casos a validação de
+/// negócio roda aqui.
 class ProcessSaleUseCase {
   const ProcessSaleUseCase(
     this._saleRepository,
-    this._updateStockUseCase,
+    this._fifoStock,
     this._transactionRepository,
     this._unitOfWork, {
     this.processor,
   });
 
   final ISaleRepository _saleRepository;
-  final UpdateProductStockUseCase _updateStockUseCase;
+  final FifoStockUseCase _fifoStock;
   final IFinancialTransactionRepository _transactionRepository;
   final IUnitOfWork _unitOfWork;
 
@@ -53,10 +55,11 @@ class ProcessSaleUseCase {
   /// Ordem dentro da transação:
   /// 1. **Validação da venda** — itens não vazios e total consistente
   ///    (`totalAmount == Σ(quantidade × preço unitário)`);
-  /// 2. **Pré-validação de estoque** de TODOS os itens (sem mutação);
+  /// 2. **Pré-validação de estoque** de TODOS os itens (sem mutação — soma
+  ///    dos lotes ativos via [FifoStockUseCase.ensureSufficientStock]);
   /// 3. **Registro** da venda;
-  /// 4. **Baixa** do estoque de cada item (o [UpdateProductStockUseCase]
-  ///    revalida internamente como defesa contra chamadas diretas);
+  /// 4. **Baixa** do estoque de cada item em FIFO por lotes
+  ///    ([FifoStockUseCase.decrease] — validade mais próxima primeiro);
   /// 5. **Entrada no caixa** — venda vira um movimento de entrada
   ///    [TransactionStatus.paid] na categoria "Vendas".
   ///
@@ -79,7 +82,7 @@ class ProcessSaleUseCase {
     await _unitOfWork.run(() async {
       // 2. Pré-validação de estoque (dentro da transação).
       for (final item in sale.items) {
-        await _updateStockUseCase.ensureSufficientStock(
+        await _fifoStock.ensureSufficientStock(
           item.productId,
           item.quantity,
           // O estoque é baixado na MESMA loja da venda.
@@ -90,9 +93,9 @@ class ProcessSaleUseCase {
       // 3. Registra a venda.
       await _saleRepository.registerSale(sale);
 
-      // 4. Baixa o estoque de cada item vendido (na loja da venda).
+      // 4. Baixa o estoque de cada item vendido em FIFO (na loja da venda).
       for (final item in sale.items) {
-        await _updateStockUseCase.decrease(
+        await _fifoStock.decrease(
           item.productId,
           item.quantity,
           storeId: sale.storeId,
@@ -129,11 +132,13 @@ class ProcessSaleUseCase {
       );
     }
 
-    // Soma em CENTAVOS inteiros (W4): int é exato — sem arredondamento
-    // de fronteira (antes: 2 × 9.9 + 9.9 acumulava 29.700000000000003).
+    // Soma em CENTAVOS inteiros (W4 + W11): cada item é
+    // `qtd(milésimos) × preço_unitário ~/ 1000` — divisão inteira exata,
+    // mesmo contrato das RPCs do servidor.
     final itemsTotalCents = sale.items.fold<int>(
       0,
-      (sum, item) => sum + item.quantity * item.unitPriceCents,
+      (sum, item) =>
+          sum + Quantity.lineTotal(item.quantity, item.unitPriceCents),
     );
     if (itemsTotalCents != sale.totalAmountCents) {
       throw InvalidSaleException(

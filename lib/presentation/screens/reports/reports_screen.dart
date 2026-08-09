@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/quantity.dart';
 import '../../controllers/reports_providers.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
@@ -195,6 +196,8 @@ class _BestSellerRow extends StatelessWidget {
                 style: TextStyle(
                   color: theme.colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.w700,
+                  // Ranks (1..N) na coluna de posição — alinhados.
+                  fontFeatures: [FontFeature.tabularFigures()],
                 ),
               ),
             ),
@@ -222,7 +225,9 @@ class _BestSellerRow extends StatelessWidget {
               ),
             ),
             StatusChip(
-              label: '$quantity ${l10n.commonUnits}',
+              // W11: quantidade em MILÉSIMOS — exibe em unidades.
+              label:
+                  '${Quantity.format(quantity, language: Formatters.currentLanguage)} ${l10n.commonUnits}',
               color: theme.colorScheme.primary,
               icon: Icons.shopping_bag_outlined,
             ),

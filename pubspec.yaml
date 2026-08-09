@@ -67,6 +67,7 @@ dependencies:
   # para o v10 estável (~fim de ago/meio de set 2026, bloqueada no jni).
   # Quando o v10 sair: subir para ^10.0.0 — o aviso desaparece sozinho.
   sentry_flutter: ^9.26.0
+  mobile_scanner: ^7.4.0
 
 dev_dependencies:
   flutter_test:

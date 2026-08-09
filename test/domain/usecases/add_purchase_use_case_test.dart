@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:dumbhanengue/core/utils/quantity.dart';
 import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/purchase.dart';
@@ -10,7 +11,10 @@ import 'package:dumbhanengue/domain/repositories/i_purchase_processor.dart';
 import 'package:dumbhanengue/domain/repositories/i_purchase_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_unit_of_work.dart';
 import 'package:dumbhanengue/domain/usecases/add_purchase_use_case.dart';
+import 'package:dumbhanengue/domain/usecases/fifo_stock_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/update_product_stock_use_case.dart';
+
+import '../../helpers/fake_stock_lot_repository.dart';
 
 class _FakePurchaseRepository implements IPurchaseRepository {
   final List<Purchase> _purchases = [];
@@ -108,24 +112,30 @@ void main() {
   late _FakePurchaseRepository purchaseRepository;
   late _FakeTransactionRepository transactionRepository;
   late _RecordingUnitOfWork unitOfWork;
+  late FakeStockLotRepository lotRepository;
   late ProcessPurchaseUseCase useCase;
 
   setUp(() {
+    // W11: estoque em MILÉSIMOS (10 unidades = 10000).
     productRepository = _FakeProductRepository([
       const Product(
         id: 'p1',
         name: 'Caneta',
         purchasePriceCents: 100,
         salePriceCents: 200,
-        stockQuantity: 10,
+        stockQuantity: 10000,
       ),
     ]);
     purchaseRepository = _FakePurchaseRepository();
     transactionRepository = _FakeTransactionRepository();
     unitOfWork = _RecordingUnitOfWork();
+    lotRepository = FakeStockLotRepository();
     useCase = ProcessPurchaseUseCase(
       purchaseRepository,
-      UpdateProductStockUseCase(productRepository),
+      FifoStockUseCase(
+        lotRepository,
+        UpdateProductStockUseCase(productRepository),
+      ),
       transactionRepository,
       unitOfWork,
     );
@@ -142,7 +152,7 @@ void main() {
           PurchaseItem(
             productId: 'p1',
             productName: 'Caneta',
-            quantity: 5,
+            quantity: 5000, // 5 unidades em MILÉSIMOS (W11)
             unitPriceCents: 100,
           ),
         ];
@@ -152,7 +162,8 @@ void main() {
       items: effectiveItems,
       totalAmountCents: totalAmountCents ?? effectiveItems.fold<int>(
         0,
-        (sum, item) => sum + item.quantity * item.unitPriceCents,
+        (sum, item) =>
+            sum + Quantity.lineTotal(item.quantity, item.unitPriceCents),
       ),
       paymentMethod: paymentMethod,
       dateTime: DateTime(2026, 8, 4, 10),
@@ -168,11 +179,17 @@ void main() {
       completion(hasLength(1)),
     );
 
-    // Estoque aumentou (10 + 5).
+    // Estoque aumentou (W11: 10000 + 5000 = 15000 milésimos = 15 unidades).
     expect(
       (await productRepository.getById('p1', storeId: 'st1'))?.stockQuantity,
-      15,
+      15000,
     );
+
+    // Lote FIFO criado com a quantidade e o custo da compra.
+    final lots = await lotRepository.getActiveByProduct('p1', storeId: 'st1');
+    expect(lots, hasLength(1));
+    expect(lots.first.currentQuantity, 5000);
+    expect(lots.first.costPriceCents, 100);
 
     // Saída no caixa (categoria Compras, paga).
     final transactions = await transactionRepository.getAll(storeId: 'st1');
@@ -222,7 +239,7 @@ void main() {
             PurchaseItem(
               productId: 'nope',
               productName: 'Inexistente',
-              quantity: 1,
+              quantity: 1000,
               unitPriceCents: 100,
             ),
           ],
@@ -237,7 +254,10 @@ void main() {
     final processor = _FakePurchaseProcessor();
     final atomicUseCase = ProcessPurchaseUseCase(
       purchaseRepository,
-      UpdateProductStockUseCase(productRepository),
+      FifoStockUseCase(
+        lotRepository,
+        UpdateProductStockUseCase(productRepository),
+      ),
       transactionRepository,
       unitOfWork,
       processor: processor,
@@ -262,7 +282,10 @@ void main() {
     final processor = _FakePurchaseProcessor();
     final atomicUseCase = ProcessPurchaseUseCase(
       purchaseRepository,
-      UpdateProductStockUseCase(productRepository),
+      FifoStockUseCase(
+        lotRepository,
+        UpdateProductStockUseCase(productRepository),
+      ),
       transactionRepository,
       unitOfWork,
       processor: processor,

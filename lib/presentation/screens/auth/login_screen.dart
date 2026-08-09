@@ -198,7 +198,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Text(
                     'Dumbhanengue',
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium,
+                    // Large Title (34) — identidade no ecrã de login.
+                    style: theme.textTheme.displaySmall,
                   ),
                   const SizedBox(height: 6),
                   Text(

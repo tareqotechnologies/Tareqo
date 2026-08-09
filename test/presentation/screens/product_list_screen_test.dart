@@ -129,6 +129,88 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nenhum produto cadastrado'), findsOneWidget);
+    // CTA ÚNICO: no estado vazio o FAB some e o EmptyState traz o botão.
+    expect(find.text('Novo produto'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
+  });
+
+  // Regressão (W11): ativar "Venda por peso" renderizava o dropdown de
+  // unidade com o valor padrão 'un' — que não existe na lista de itens
+  // (kg/g/l/ml) — e o DropdownButtonFormField lançava a asserção "exactly
+  // one item with value 'un'" (crash reportado em produção).
+  testWidgets('ativar venda por peso não quebra o dropdown de unidade',
+      (tester) async {
+    await tester.pumpWidget(_buildApp(_FakeGetProductsUseCase(const [])));
+    await tester.pumpAndSettle();
+
+    // Abre o cadastro pelo CTA único do estado vazio.
+    await tester.tap(find.text('Novo produto'));
+    await tester.pumpAndSettle();
+
+    // Antes do toggle: sem dropdown de unidade.
+    expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+
+    // Ativa "Venda por peso" — o bug lançava asserção aqui.
+    await tester.tap(find.textContaining('Venda por peso'));
+    await tester.pumpAndSettle();
+
+    // Sem crash; o dropdown aparece com 'kg' (unidade padrão válida).
+    expect(tester.takeException(), isNull);
+    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+
+    // A sheet é rolável e o viewport de teste é curto — garante que o
+    // dropdown fique visível antes de interagir com ele.
+    await tester.ensureVisible(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    expect(find.text('kg'), findsOneWidget);
+
+    // Trocando a unidade para 'g' também funciona.
+    await tester.tap(find.text('kg'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('g').last);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    // Desativa: dropdown some e nada quebra.
+    await tester.tap(find.textContaining('Venda por peso'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+  });
+
+  // W11: o cadastro de produto aceita validade — o lote inicial do
+  // estoque de abertura nasce com ela e o dashboard passa a alertar
+  // (vermelho = vencido; amarelo = vence em < 30 dias).
+  testWidgets('cadastro de produto permite definir a validade',
+      (tester) async {
+    await tester.pumpWidget(_buildApp(_FakeGetProductsUseCase(const [])));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Novo produto'));
+    await tester.pumpAndSettle();
+
+    // Sem validade: botão "Definir validade" visível (a sheet é rolável
+    // e o viewport de teste é curto — garante visibilidade primeiro).
+    await tester.ensureVisible(find.text('Definir validade'));
+    await tester.pumpAndSettle();
+    expect(find.text('Definir validade'), findsOneWidget);
+
+    // Abre o date picker e confirma a data sugerida (hoje + 30 dias).
+    await tester.tap(find.text('Definir validade'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    // A data escolhida aparece no botão e o botão de limpar surge.
+    expect(find.textContaining('Validade ·'), findsOneWidget);
+    expect(find.byTooltip('Remover validade'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Limpar volta ao estado inicial.
+    await tester.tap(find.byTooltip('Remover validade'));
+    await tester.pumpAndSettle();
+    expect(find.text('Definir validade'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('exibe erro e permite tentar novamente', (tester) async {

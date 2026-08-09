@@ -84,8 +84,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nenhum cliente cadastrado'), findsOneWidget);
-    // O EmptyState não tem ação — o botão "Novo cliente" é o FAB.
+    // CTA ÚNICO: no estado vazio o FAB some e o EmptyState traz o botão.
     expect(find.text('Novo cliente'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
   });
 
   testWidgets('exibe o total pendente de fiado por cliente', (tester) async {

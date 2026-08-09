@@ -87,7 +87,8 @@ abstract final class AppTheme {
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          fontSize: 20,
+          // Título 2 da escala (22) — cabeçalhos de páginas.
+          fontSize: 22,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.3,
           color: scheme.onSurface,
@@ -204,6 +205,19 @@ abstract final class AppTheme {
 
       dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
 
+      dialogTheme: DialogThemeData(
+        // Título 2 da escala (22) — diálogos de confirmação e de
+        // quantidade (AlertDialog) seguem o mesmo papel das sheets.
+        titleTextStyle: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.3,
+          height: 1.3,
+          color: scheme.onSurface,
+          fontFeatures: [FontFeature.tabularFigures()],
+        ),
+      ),
+
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -216,52 +230,80 @@ abstract final class AppTheme {
       ),
 
       textTheme: TextTheme(
-        // Inter é desenhada com tracking negativo em corpo de título — a
-        // hierarquia abaixo segue a escala Material 3 com ajustes finos.
+        // Escala tipográfica modular (Apple HIG / Google Material) adaptada
+        // ao ERP: 34/28/22/20/17/15/13/11. Em vez de exagerar na variedade
+        // de tamanhos, a hierarquia combina tamanhos médios com variações
+        // de peso (w400 texto comum, w600+ valores/rótulos importantes).
+        // Estilos que carregam NÚMEROS (preços em MZN, quantidades kg/un)
+        // usam `tabularFigures` para as colunas alinharem dígito a dígito.
+        displaySmall: TextStyle(
+          // Large Title (34) — login, boas-vindas, fecho de caixa.
+          fontSize: 34,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.8,
+          height: 1.15,
+          fontFeatures: [FontFeature.tabularFigures()],
+        ),
         headlineMedium: TextStyle(
+          // Título 1 (28) — cabeçalhos de páginas e seções principais.
           fontSize: 28,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           letterSpacing: -0.6,
           height: 1.2,
+          fontFeatures: [FontFeature.tabularFigures()],
         ),
         headlineSmall: TextStyle(
+          // Título 1.5 (24) — valores de KPIs e totais em destaque.
           fontSize: 24,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.4,
           height: 1.25,
+          fontFeatures: [FontFeature.tabularFigures()],
         ),
         titleLarge: TextStyle(
-          fontSize: 20,
+          // Título 2 (22) — cartões de resumo, cabeçalhos de modais.
+          fontSize: 22,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.3,
           height: 1.3,
+          fontFeatures: [FontFeature.tabularFigures()],
         ),
         titleMedium: TextStyle(
-          fontSize: 16,
+          // Título 3 (20) — subtítulos, cabeçalhos de seções e totais
+          // em colunas (recebe tabular figures: carrega valores em MZN).
+          fontSize: 20,
           fontWeight: FontWeight.w600,
           letterSpacing: -0.2,
           height: 1.35,
+          fontFeatures: [FontFeature.tabularFigures()],
         ),
         titleSmall: TextStyle(
+          // Destaques de linha (14) — nomes em cards de vendas/compras.
           fontSize: 14,
           fontWeight: FontWeight.w600,
           letterSpacing: -0.1,
           height: 1.4,
         ),
         bodyLarge: TextStyle(
-          fontSize: 16,
+          // Corpo destacado (17) — textos principais de formulários.
+          fontSize: 17,
           fontWeight: FontWeight.w400,
           height: 1.5,
+          fontFeatures: [FontFeature.tabularFigures()],
         ),
         bodyMedium: TextStyle(
-          fontSize: 14,
+          // Corpo padrão (15) — descrições e valores de linhas.
+          fontSize: 15,
           fontWeight: FontWeight.w400,
           height: 1.45,
+          fontFeatures: [FontFeature.tabularFigures()],
         ),
         bodySmall: TextStyle(
+          // Nota (13) — validades FIFO, códigos de barras, rodapés.
           fontSize: 13,
           fontWeight: FontWeight.w400,
           height: 1.4,
+          fontFeatures: [FontFeature.tabularFigures()],
         ),
         labelLarge: TextStyle(
           fontSize: 14,
@@ -274,6 +316,7 @@ abstract final class AppTheme {
           height: 1.3,
         ),
         labelSmall: TextStyle(
+          // Caption/badges (11) — etiquetas de estado e indicadores.
           fontSize: 11,
           fontWeight: FontWeight.w500,
           height: 1.3,

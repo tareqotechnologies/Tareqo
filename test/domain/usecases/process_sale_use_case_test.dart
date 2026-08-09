@@ -1,17 +1,22 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dumbhanengue/core/utils/formatters.dart';
+import 'package:dumbhanengue/core/utils/quantity.dart';
 import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/sale.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
+import 'package:dumbhanengue/domain/entities/stock_lot.dart';
 import 'package:dumbhanengue/domain/repositories/i_financial_transaction_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_processor.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_unit_of_work.dart';
+import 'package:dumbhanengue/domain/usecases/fifo_stock_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/process_sale_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/update_product_stock_use_case.dart';
+
+import '../../helpers/fake_stock_lot_repository.dart';
 
 /// Fake do repositório de vendas.
 class _FakeSaleRepository implements ISaleRepository {
@@ -87,22 +92,46 @@ class _FakeTransactionRepository implements IFinancialTransactionRepository {
   }
 }
 
-Product _product(String id, {int stock = 10}) => Product(
+/// Estoque em UNIDADES (W11): convertido para MILÉSIMOS internamente.
+Product _product(String id, {int stockUnits = 10}) => Product(
       id: id,
       name: 'Produto $id',
       purchasePriceCents: 500,
       salePriceCents: 990,
-      stockQuantity: stock,
+      stockQuantity: Quantity.fromUnits(stockUnits),
     );
+
+/// Semeia o produto + o LOTE correspondente (a invariante W11 exige que
+/// o estoque do produto esteja coberto por lotes — o FIFO consome lotes).
+void _seedProductWithLot(
+  _FakeProductRepository products,
+  FakeStockLotRepository lots,
+  String id, {
+  int stockUnits = 10,
+}) {
+  products.add(_product(id, stockUnits: stockUnits));
+  lots.add(
+    StockLot(
+      id: 'lot-$id',
+      productId: id,
+      entryDate: DateTime.utc(2026, 8, 1),
+      expiryDate: null,
+      initialQuantity: Quantity.fromUnits(stockUnits),
+      currentQuantity: Quantity.fromUnits(stockUnits),
+      costPriceCents: 500,
+    ),
+  );
+}
 
 Sale _sale(List<SaleItem> items, {int? totalAmountCents}) => Sale(
       id: 'VENDA-1',
       items: items,
-      // Total consistente com os itens (quantidade × preço unitário).
+      // Total consistente com os itens (W11: qtd milésimos × preço ~/ 1000).
       totalAmountCents: totalAmountCents ??
           items.fold<int>(
             0,
-            (sum, item) => sum + item.quantity * item.unitPriceCents,
+            (sum, item) =>
+                sum + Quantity.lineTotal(item.quantity, item.unitPriceCents),
           ),
       paymentMethod: PaymentMethod.mPesa,
       dateTime: DateTime.utc(2026, 8, 3),
@@ -133,11 +162,15 @@ class _FakeSaleProcessor implements ISaleAtomicProcessor {
 ProcessSaleUseCase _buildUseCase(
   _FakeSaleRepository saleRepository,
   _FakeProductRepository productRepository,
+  FakeStockLotRepository lotRepository,
   _FakeTransactionRepository transactionRepository,
 ) {
   return ProcessSaleUseCase(
     saleRepository,
-    UpdateProductStockUseCase(productRepository),
+    FifoStockUseCase(
+      lotRepository,
+      UpdateProductStockUseCase(productRepository),
+    ),
     transactionRepository,
     const _DirectUnitOfWork(),
   );
@@ -146,34 +179,44 @@ ProcessSaleUseCase _buildUseCase(
 void main() {
   late _FakeSaleRepository saleRepository;
   late _FakeProductRepository productRepository;
+  late FakeStockLotRepository lotRepository;
   late _FakeTransactionRepository transactionRepository;
 
   setUp(() {
     saleRepository = _FakeSaleRepository();
     productRepository = _FakeProductRepository();
+    lotRepository = FakeStockLotRepository();
     transactionRepository = _FakeTransactionRepository();
   });
 
-  test('registra a venda, baixa o estoque e lança a entrada no caixa',
+  test('registra a venda, baixa o estoque em FIFO e lança a entrada no caixa',
       () async {
-    productRepository
-      ..add(_product('1', stock: 10))
-      ..add(_product('2', stock: 5));
-    final useCase =
-        _buildUseCase(saleRepository, productRepository, transactionRepository);
+    _seedProductWithLot(productRepository, lotRepository, '1', stockUnits: 10);
+    _seedProductWithLot(productRepository, lotRepository, '2', stockUnits: 5);
+    final useCase = _buildUseCase(
+      saleRepository,
+      productRepository,
+      lotRepository,
+      transactionRepository,
+    );
 
     await useCase(_sale(const [
       SaleItem(
-          productId: '1', productName: 'Produto 1', quantity: 2, unitPriceCents: 990),
+          productId: '1', productName: 'Produto 1', quantity: 2000, unitPriceCents: 990),
       SaleItem(
-          productId: '2', productName: 'Produto 2', quantity: 1, unitPriceCents: 990),
+          productId: '2', productName: 'Produto 2', quantity: 1000, unitPriceCents: 990),
     ]));
 
     expect(saleRepository.registerCalled, isTrue);
     expect(saleRepository.sales, hasLength(1));
-    expect(productRepository.products['1']!.stockQuantity, 8); // 10 - 2
-    expect(productRepository.products['2']!.stockQuantity, 4); // 5 - 1
+    // W11: estoque em MILÉSIMOS (10 - 2 = 8 unidades = 8000 milésimos).
+    expect(productRepository.products['1']!.stockQuantity, 8000);
+    expect(productRepository.products['2']!.stockQuantity, 4000);
     expect(productRepository.updateStockCalls, 2);
+    // Lotes zerados (baixa FIFO completa).
+    final lots1 =
+        await lotRepository.getActiveByProduct('1', storeId: 'st1');
+    expect(lots1.first.currentQuantity, 8000);
 
     // Entrada no caixa: valor exato da venda, categoria Vendas, paga.
     expect(transactionRepository.transactions, hasLength(1));
@@ -187,20 +230,24 @@ void main() {
   });
 
   test('lança InsufficientStockException e NÃO registra a venda', () async {
-    productRepository.add(_product('1', stock: 1));
-    final useCase =
-        _buildUseCase(saleRepository, productRepository, transactionRepository);
+    _seedProductWithLot(productRepository, lotRepository, '1', stockUnits: 1);
+    final useCase = _buildUseCase(
+      saleRepository,
+      productRepository,
+      lotRepository,
+      transactionRepository,
+    );
 
     await expectLater(
       useCase(_sale(const [
         SaleItem(
-            productId: '1', productName: 'Produto 1', quantity: 5, unitPriceCents: 990),
+            productId: '1', productName: 'Produto 1', quantity: 5000, unitPriceCents: 990),
       ])),
       throwsA(
         isA<InsufficientStockException>()
             .having((e) => e.productId, 'productId', '1')
-            .having((e) => e.available, 'available', 1)
-            .having((e) => e.requested, 'requested', 5),
+            .having((e) => e.available, 'available', 1000)
+            .having((e) => e.requested, 'requested', 5000),
       ),
     );
 
@@ -208,20 +255,24 @@ void main() {
     // houve entrada no caixa.
     expect(saleRepository.registerCalled, isFalse);
     expect(saleRepository.sales, isEmpty);
-    expect(productRepository.products['1']!.stockQuantity, 1);
+    expect(productRepository.products['1']!.stockQuantity, 1000);
     expect(productRepository.updateStockCalls, 0);
     expect(transactionRepository.transactions, isEmpty);
   });
 
   test('lança ProductNotFoundException quando o produto não existe', () async {
     // Nenhum produto cadastrado.
-    final useCase =
-        _buildUseCase(saleRepository, productRepository, transactionRepository);
+    final useCase = _buildUseCase(
+      saleRepository,
+      productRepository,
+      lotRepository,
+      transactionRepository,
+    );
 
     await expectLater(
       useCase(_sale(const [
         SaleItem(
-            productId: 'X', productName: 'Fantasma', quantity: 1, unitPriceCents: 990),
+            productId: 'X', productName: 'Fantasma', quantity: 1000, unitPriceCents: 990),
       ])),
       throwsA(isA<ProductNotFoundException>()),
     );
@@ -231,9 +282,13 @@ void main() {
   });
 
   test('rejeita venda sem itens e NÃO persiste nada', () async {
-    productRepository.add(_product('1'));
-    final useCase =
-        _buildUseCase(saleRepository, productRepository, transactionRepository);
+    _seedProductWithLot(productRepository, lotRepository, '1');
+    final useCase = _buildUseCase(
+      saleRepository,
+      productRepository,
+      lotRepository,
+      transactionRepository,
+    );
 
     await expectLater(
       useCase(_sale(const [])),
@@ -246,15 +301,19 @@ void main() {
   });
 
   test('rejeita venda com total divergente dos itens', () async {
-    productRepository.add(_product('1', stock: 10));
-    final useCase =
-        _buildUseCase(saleRepository, productRepository, transactionRepository);
+    _seedProductWithLot(productRepository, lotRepository, '1');
+    final useCase = _buildUseCase(
+      saleRepository,
+      productRepository,
+      lotRepository,
+      transactionRepository,
+    );
 
     // Itens somam 9.9, mas o total informado é 99.0 — inconsistente.
     await expectLater(
       useCase(_sale(const [
         SaleItem(
-            productId: '1', productName: 'Produto 1', quantity: 1, unitPriceCents: 990),
+            productId: '1', productName: 'Produto 1', quantity: 1000, unitPriceCents: 990),
       ], totalAmountCents: 9900)),
       throwsA(isA<InvalidSaleException>()),
     );
@@ -266,14 +325,18 @@ void main() {
 
   test('validação falha antes de abrir a transação (nada é persistido)',
       () async {
-    productRepository.add(_product('1'));
-    final useCase =
-        _buildUseCase(saleRepository, productRepository, transactionRepository);
+    _seedProductWithLot(productRepository, lotRepository, '1');
+    final useCase = _buildUseCase(
+      saleRepository,
+      productRepository,
+      lotRepository,
+      transactionRepository,
+    );
 
     await expectLater(
       useCase(_sale(const [
         SaleItem(
-            productId: '1', productName: 'Produto 1', quantity: 1, unitPriceCents: 990),
+            productId: '1', productName: 'Produto 1', quantity: 1000, unitPriceCents: 990),
       ], totalAmountCents: 9900)),
       throwsA(isA<InvalidSaleException>()),
     );
@@ -290,15 +353,19 @@ void main() {
       () => Formatters.applySettings(currencyCode: 'BRL', language: 'pt'),
     );
 
-    productRepository.add(_product('1', stock: 10));
-    final useCase =
-        _buildUseCase(saleRepository, productRepository, transactionRepository);
+    _seedProductWithLot(productRepository, lotRepository, '1');
+    final useCase = _buildUseCase(
+      saleRepository,
+      productRepository,
+      lotRepository,
+      transactionRepository,
+    );
 
     await useCase(_sale(const [
       SaleItem(
           productId: '1',
           productName: 'Produto 1',
-          quantity: 1,
+          quantity: 1000,
           unitPriceCents: 990),
     ]));
 
@@ -312,7 +379,10 @@ void main() {
     final processor = _FakeSaleProcessor();
     final useCase = ProcessSaleUseCase(
       saleRepository,
-      UpdateProductStockUseCase(productRepository),
+      FifoStockUseCase(
+        lotRepository,
+        UpdateProductStockUseCase(productRepository),
+      ),
       transactionRepository,
       const _DirectUnitOfWork(),
       processor: processor,
@@ -320,7 +390,7 @@ void main() {
 
     final sale = _sale(const [
       SaleItem(
-          productId: '1', productName: 'Produto 1', quantity: 1, unitPriceCents: 990),
+          productId: '1', productName: 'Produto 1', quantity: 1000, unitPriceCents: 990),
     ]);
     await useCase(sale);
 
@@ -336,7 +406,10 @@ void main() {
     final processor = _FakeSaleProcessor();
     final useCase = ProcessSaleUseCase(
       saleRepository,
-      UpdateProductStockUseCase(productRepository),
+      FifoStockUseCase(
+        lotRepository,
+        UpdateProductStockUseCase(productRepository),
+      ),
       transactionRepository,
       const _DirectUnitOfWork(),
       processor: processor,
@@ -346,7 +419,7 @@ void main() {
     await expectLater(
       useCase(_sale(const [
         SaleItem(
-            productId: '1', productName: 'Produto 1', quantity: 1, unitPriceCents: 990),
+            productId: '1', productName: 'Produto 1', quantity: 1000, unitPriceCents: 990),
       ], totalAmountCents: 9900)),
       throwsA(isA<InvalidSaleException>()),
     );

@@ -17,6 +17,11 @@ flutter test test/domain/usecases/process_sale_use_case_sqlite_test.dart
 flutter test --coverage
 ```
 
+### Testes de schema SQL (Postgres)
+
+- **`scripts/sql_check.sh`** — smoke test **end-to-end** contra um Postgres real (Docker/local): aplica `schema.sql` + `upgrade.sql` (confirmando idempotência), executa vendas/compras pelas RPCs e valida dinheiro (centavos), **FIFO por lotes** e a invariante `stock = Σ lotes`;
+- **`scripts/sql_check_live.sh`** — verificação **read-only** do banco ao vivo (31 checks, incluindo os 7 W11: colunas, `stock_lots`/RLS/índices, corpo das RPCs e a invariante de lotes) — usado no [runbook de migração](16-migracao-w11.md).
+
 > **SQLite na VM Windows:** o loader de `package:sqlite3` cai automaticamente para a `winsqlite3.dll` do sistema (via `AppDatabase.configureLoader` — probe defensivo em `test/helpers/test_sqlite.dart`). Nenhum setup manual é necessário.
 
 ---
@@ -26,12 +31,16 @@ flutter test --coverage
 ```text
 test/
 ├── core/
-│   ├── database/app_database_test.dart          # Schema, transações re-entrantes, migrações
+│   ├── database/app_database_test.dart          # Schema, transações re-entrantes, migrações W4/W11
+│   ├── utils/quantity_test.dart                 # Milésimos ↔ unidades (W11)
+│   ├── utils/scale_barcode_test.dart            # Parser 20PPPPPWWWWW + normalização de PLU (W11)
 │   └── security/secure_storage_service_test.dart # Backend em memória
 ├── data/
 │   ├── datasources/local/
 │   │   ├── product_sqlite_data_source_test.dart
 │   │   ├── sale_sqlite_data_source_test.dart
+│   │   ├── stock_lot_sqlite_data_source_test.dart  # Ordem FIFO + escopo por loja (W11)
+│   │   ├── purchase_sqlite_data_source_test.dart   # Compras com validade/lote (W11)
 │   │   ├── financial_transaction_sqlite_data_source_test.dart
 │   │   ├── debt_sqlite_data_source_test.dart
 │   │   └── sqlite_unit_of_work_test.dart
@@ -52,9 +61,12 @@ test/
 │       ├── product_use_cases_test.dart
 │       ├── settle_debt_use_case_test.dart
 │       ├── process_sale_use_case_test.dart       # com fakes
-│       └── process_sale_use_case_sqlite_test.dart # com banco real em memória
+│       ├── process_sale_use_case_sqlite_test.dart # com banco real em memória
+│       ├── fifo_stock_use_case_test.dart         # Baixa FIFO por lotes (W11)
+│       └── add_purchase_use_case_test.dart       # Entradas com validade (W11)
 ├── helpers/test_sqlite.dart                      # openTestDatabase(): sqlite in-memory + schema
 ├── presentation/
+│   ├── controllers/expiry_alerts_provider_test.dart  # Alertas vermelho/amarelo (W11)
 │   └── screens/
 │       ├── login_screen_test.dart
 │       ├── app_shell_test.dart
@@ -76,7 +88,8 @@ test/
 
 - **Fakes dos contratos** (`IProductRepository`, `ISaleRepository`, `IDebtRepository`, `IFinancialTransactionRepository`, `IUnitOfWork`) — sem servidor, sem banco;
 - Cobre cada exceção de domínio (`InvalidPriceException`, `InsufficientStockException`, `InvalidPeriodException`, `DebtNotFoundException`, idempotência da baixa...);
-- **`process_sale_use_case_sqlite_test.dart`** testa o fluxo real com `openTestDatabase()` (banco em memória com schema do app) — valida atomicidade (rollback em falha) e integridade.
+- **`process_sale_use_case_sqlite_test.dart`** testa o fluxo real com `openTestDatabase()` (banco em memória com schema do app) — valida atomicidade (rollback em falha) e integridade;
+- **`fifo_stock_use_case_test.dart`** cobre a **baixa FIFO** (lote de validade mais próxima primeiro, excedente passando ao lote seguinte, sem validade por data de entrada), o `increase` criando lotes e a **pré-validação de estoque antes de qualquer mutação** (sem baixa parcial).
 
 ### Dados (datasources/repositórios SQLite)
 
@@ -90,13 +103,15 @@ test/
     return db;
   }
   ```
-- Testam SQL, mapeamento de linhas (enum por nome, datas em epoch millis, bool 0/1), `CHECK` do schema e o `SqliteUnitOfWork` (BEGIN/COMMIT/ROLLBACK, fila FIFO).
+- Testam SQL, mapeamento de linhas (enum por nome, datas em epoch millis, bool 0/1), `CHECK` do schema e o `SqliteUnitOfWork` (BEGIN/COMMIT/ROLLBACK, fila FIFO);
+- `stock_lot_sqlite_data_source_test.dart` valida a **ordem FIFO da query** (validade ASC → entrada ASC), o escopo por loja e a atualização atômica de `current_quantity`; `quantity_test.dart` e `scale_barcode_test.dart` cobrem a matemática de milésimos e o parser `20PPPPPWWWWW` (incl. normalização de PLU com zeros à esquerda).
 
 ### Apresentação (telas)
 
 - **Providers sobrescritos** via `ProviderScope(overrides: [...])` — sem tocar no GetIt nem em datasources;
 - Exemplo (`test/widget_test.dart`): simula sessão ativa (`authStateProvider.overrideWith(Stream.value(AppUser(...)))`), fakes de casos de uso e verifica KPIs + navegação do shell;
-- Padrão: `await tester.pumpAndSettle()` + `expect(find.text(...), findsOneWidget)`.
+- Padrão: `await tester.pumpAndSettle()` + `expect(find.text(...), findsOneWidget)`;
+- `expiry_alerts_provider_test.dart` valida a classificação dos alertas (vencido = vermelho, vencimento < 30 dias = amarelo) e a ordenação por urgência.
 
 ---
 

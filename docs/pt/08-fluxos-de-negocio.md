@@ -115,12 +115,66 @@ Separar evita campos vazios e regras incoerentes (despesas não têm item/estoqu
 
 ## 4. Controle de estoque
 
-- **`UpdateProductStockUseCase`** é a **única porta de entrada** para mutar estoque:
+### 4.1 Total do produto (camada histórica)
+
+- **`UpdateProductStockUseCase`** é a porta que muta o **total** `stock_quantity` do produto:
   - `ensureSufficientStock(productId, quantity)` — pré-validação sem mutação;
-  - `decrease(productId, quantity)` — revalida e grava **valor absoluto**;
+  - `increase`/`decrease` — revalidam e gravam **valor absoluto**;
 - **`IProductRepository.updateStock`** recebe **valor absoluto** (não delta) — duas camadas de proteção;
 - **`CHECK (stock_quantity >= 0)`** no SQLite é a salvaguarda final;
 - A UI bloqueia adicionar ao carrinho além do estoque (`soldOut`) e sinaliza estoque baixo (`< 5` un.) no dashboard e na listagem.
+
+### 4.2 FIFO por lotes + validade (W11)
+
+Desde o **W11**, o estoque tem camada de **lotes**: cada entrada de mercadoria cria um `StockLot` (validade opcional, custo de aquisição, quantidade inicial/atual) e o total do produto é a **soma dos lotes ativos** (`stock = Σ lotes`). O `FifoStockUseCase` é a porta única que orquestra os dois:
+
+```text
+Entrada (compra)
+  └─ increase: valida produto → cria LOTE novo (validade opcional, custo)
+     └─ aumenta o total do produto (mesma quantidade)
+
+Baixa (venda)
+  └─ decrease: pré-valida a SOMA dos lotes (nada é mutado se faltar)
+     └─ consome os lotes em ordem FIFO:
+        1º data_validade ASC (mais próximo do vencimento primeiro)
+        2º sem validade no fim — por data_entrada ASC
+     └─ se um lote não cobre, o excedente abate do lote SEGUINTE
+     └─ reduz o total do produto na mesma quantidade
+```
+
+**Por que FIFO por validade?** O lote que vence primeiro deve sair primeiro — evita prejuízo por mercadoria vencida parada no estoque e é o comportamento esperado pelo comerciante (e pela fiscalização sanitária). Lotes sem validade (não perecíveis) são consumidos por antiguidade de entrada.
+
+**Alertas no dashboard:** lotes ativos com `expiryDate` são classificados por urgência — **vermelho** para já vencidos (com estoque) e **amarelo** para vencimento em menos de 30 dias (`expiryAlertsProvider`, janela `expiryWarningDays = 30`). O comerciante sabe o que precisa sair (promoção/descarte) antes de vencer.
+
+> **Em Supabase**, a baixa FIFO roda na **RPC `process_sale`** (lotes travados com `FOR UPDATE`, ordem FIFO idêntica) e a entrada cria lotes na **RPC `process_purchase`** — mesmo contrato do caminho local, validado pelo `sql_check.sh`.
+
+### 4.3 Vendas por peso / balanças etiquetadoras (W11)
+
+Produtos marcados com **`vendaPorFracao: true`** (ex.: arroz, feijão, queijo — unidade `kg`) aceitam **quantidades decimais** no PDV (ex.: 1,75 kg). Além do stepper de 0,1 e da edição manual, o PDV intercepta leituras de **balanças etiquetadoras** no formato `20PPPPPWWWWW`:
+
+```text
+20 PP PPP P WW WWW
+│  └────┬──┘  └─┬──┘
+pref  código   valor total
+'20'  produto  da pesagem (5 dígitos, em CENTAVOS)
+```
+
+O fluxo no PDV (`_handleBarcode`):
+
+```text
+leitura → 20 + 5 + 5 dígitos?
+  ├─ NÃO → busca pelo code/PLU normal (adiciona 1 unidade)
+  └─ SIM → busca o produto pelo PLU (normalizando zeros à esquerda:
+           "00123" ≡ "123")
+      ├─ produto não é venda_por_fracao? → NÃO intercepta (cai no
+      │   fluxo normal — evita confundir EAN-12 que comece com "20")
+      └─ é por peso → deriva a QUANTIDADE:
+           qtd(milésimos) = valor_total_centavos × 1000 ~/ preço_unitário
+           (divisão inteira — nunca cobra a mais por arredondamento)
+         e adiciona ao carrinho (limitada ao estoque)
+```
+
+> A balança imprime o **valor total** da pesagem (não o peso); a fração de peso é derivada matematicamente de `valor ÷ preço unitário` — ex.: etiqueta de 200,00 a 80,00/kg → 2,5 kg → 2500 milésimos.
 
 ---
 

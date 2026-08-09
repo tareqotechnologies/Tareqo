@@ -12,6 +12,9 @@ _PurchaseItem _$PurchaseItemFromJson(Map<String, dynamic> json) =>
       productName: json['productName'] as String,
       quantity: (json['quantity'] as num).toInt(),
       unitPriceCents: (json['unitPriceCents'] as num).toInt(),
+      expiryDate: json['expiryDate'] == null
+          ? null
+          : DateTime.parse(json['expiryDate'] as String),
     );
 
 Map<String, dynamic> _$PurchaseItemToJson(_PurchaseItem instance) =>
@@ -20,6 +23,7 @@ Map<String, dynamic> _$PurchaseItemToJson(_PurchaseItem instance) =>
       'productName': instance.productName,
       'quantity': instance.quantity,
       'unitPriceCents': instance.unitPriceCents,
+      'expiryDate': instance.expiryDate?.toIso8601String(),
     };
 
 _Purchase _$PurchaseFromJson(Map<String, dynamic> json) => _Purchase(

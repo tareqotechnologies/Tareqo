@@ -69,7 +69,7 @@ void main() {
           SaleItem(
             productId: 'p1',
             productName: 'Caneta',
-            quantity: 2,
+            quantity: 2000, // 2 unidades em MILÉSIMOS (W11)
             unitPriceCents: 300, // custo atual 1.0 → lucro 2.0 por unidade
           ),
         ],
@@ -83,13 +83,13 @@ void main() {
           SaleItem(
             productId: 'p1',
             productName: 'Caneta',
-            quantity: 1,
+            quantity: 1000,
             unitPriceCents: 300,
           ),
           SaleItem(
             productId: 'p2',
             productName: 'Caderno',
-            quantity: 1,
+            quantity: 1000,
             unitPriceCents: 1000, // custo atual 5.0 → lucro 5.0
           ),
         ],
@@ -104,7 +104,7 @@ void main() {
           SaleItem(
             productId: 'p1',
             productName: 'Caneta',
-            quantity: 10,
+            quantity: 10000,
             unitPriceCents: 300,
           ),
         ],
@@ -138,7 +138,8 @@ void main() {
     // Mais vendidos: p1 (3 un.) à frente de p2 (1 un.).
     expect(report.bestSellers, hasLength(2));
     expect(report.bestSellers.first.productId, 'p1');
-    expect(report.bestSellers.first.quantity, 3);
+    // W11: quantidade em MILÉSIMOS (3 unidades = 3000).
+    expect(report.bestSellers.first.quantity, 3000);
     expect(report.bestSellers.first.revenueCents, 900);
 
     // Vendas por dia: 03/08 (6.0) e 04/08 (13.0).
@@ -205,7 +206,7 @@ void main() {
             SaleItem(
               productId: 'antigo',
               productName: 'Produto antigo',
-              quantity: 1,
+              quantity: 1000,
               unitPriceCents: 1000,
             ),
           ],
@@ -239,7 +240,7 @@ void main() {
             SaleItem(
               productId: 'p1',
               productName: 'Caneta',
-              quantity: 1,
+              quantity: 1000,
               unitPriceCents: 990,
             ),
           ],

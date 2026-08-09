@@ -15,8 +15,12 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PurchaseItem {
 
- String get productId; String get productName; int get quantity;// Preço unitário de compra em CENTAVOS inteiros (W4).
- int get unitPriceCents;
+ String get productId; String get productName;// Quantidade em MILÉSIMOS de unidade (W11): 1000 = 1 unidade/kg.
+ int get quantity;// Preço unitário de compra em CENTAVOS inteiros (W4).
+ int get unitPriceCents;// Data de VALIDADE do lote criado por este item (W11 — FIFO).
+// `null` para produtos sem validade (não perecíveis): o lote entra no
+// FIFO pela data de ENTRADA.
+ DateTime? get expiryDate;
 /// Create a copy of PurchaseItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +33,16 @@ $PurchaseItemCopyWith<PurchaseItem> get copyWith => _$PurchaseItemCopyWithImpl<P
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PurchaseItem&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitPriceCents, unitPriceCents) || other.unitPriceCents == unitPriceCents));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PurchaseItem&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitPriceCents, unitPriceCents) || other.unitPriceCents == unitPriceCents)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,productId,productName,quantity,unitPriceCents);
+int get hashCode => Object.hash(runtimeType,productId,productName,quantity,unitPriceCents,expiryDate);
 
 @override
 String toString() {
-  return 'PurchaseItem(productId: $productId, productName: $productName, quantity: $quantity, unitPriceCents: $unitPriceCents)';
+  return 'PurchaseItem(productId: $productId, productName: $productName, quantity: $quantity, unitPriceCents: $unitPriceCents, expiryDate: $expiryDate)';
 }
 
 
@@ -49,7 +53,7 @@ abstract mixin class $PurchaseItemCopyWith<$Res>  {
   factory $PurchaseItemCopyWith(PurchaseItem value, $Res Function(PurchaseItem) _then) = _$PurchaseItemCopyWithImpl;
 @useResult
 $Res call({
- String productId, String productName, int quantity, int unitPriceCents
+ String productId, String productName, int quantity, int unitPriceCents, DateTime? expiryDate
 });
 
 
@@ -66,13 +70,14 @@ class _$PurchaseItemCopyWithImpl<$Res>
 
 /// Create a copy of PurchaseItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? productId = null,Object? productName = null,Object? quantity = null,Object? unitPriceCents = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? productId = null,Object? productName = null,Object? quantity = null,Object? unitPriceCents = null,Object? expiryDate = freezed,}) {
   return _then(_self.copyWith(
 productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,productName: null == productName ? _self.productName : productName // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,unitPriceCents: null == unitPriceCents ? _self.unitPriceCents : unitPriceCents // ignore: cast_nullable_to_non_nullable
-as int,
+as int,expiryDate: freezed == expiryDate ? _self.expiryDate : expiryDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 
@@ -157,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String productId,  String productName,  int quantity,  int unitPriceCents)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String productId,  String productName,  int quantity,  int unitPriceCents,  DateTime? expiryDate)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PurchaseItem() when $default != null:
-return $default(_that.productId,_that.productName,_that.quantity,_that.unitPriceCents);case _:
+return $default(_that.productId,_that.productName,_that.quantity,_that.unitPriceCents,_that.expiryDate);case _:
   return orElse();
 
 }
@@ -178,10 +183,10 @@ return $default(_that.productId,_that.productName,_that.quantity,_that.unitPrice
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String productId,  String productName,  int quantity,  int unitPriceCents)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String productId,  String productName,  int quantity,  int unitPriceCents,  DateTime? expiryDate)  $default,) {final _that = this;
 switch (_that) {
 case _PurchaseItem():
-return $default(_that.productId,_that.productName,_that.quantity,_that.unitPriceCents);case _:
+return $default(_that.productId,_that.productName,_that.quantity,_that.unitPriceCents,_that.expiryDate);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +203,10 @@ return $default(_that.productId,_that.productName,_that.quantity,_that.unitPrice
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String productId,  String productName,  int quantity,  int unitPriceCents)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String productId,  String productName,  int quantity,  int unitPriceCents,  DateTime? expiryDate)?  $default,) {final _that = this;
 switch (_that) {
 case _PurchaseItem() when $default != null:
-return $default(_that.productId,_that.productName,_that.quantity,_that.unitPriceCents);case _:
+return $default(_that.productId,_that.productName,_that.quantity,_that.unitPriceCents,_that.expiryDate);case _:
   return null;
 
 }
@@ -213,14 +218,19 @@ return $default(_that.productId,_that.productName,_that.quantity,_that.unitPrice
 @JsonSerializable()
 
 class _PurchaseItem implements PurchaseItem {
-  const _PurchaseItem({required this.productId, required this.productName, required this.quantity, required this.unitPriceCents});
+  const _PurchaseItem({required this.productId, required this.productName, required this.quantity, required this.unitPriceCents, this.expiryDate});
   factory _PurchaseItem.fromJson(Map<String, dynamic> json) => _$PurchaseItemFromJson(json);
 
 @override final  String productId;
 @override final  String productName;
+// Quantidade em MILÉSIMOS de unidade (W11): 1000 = 1 unidade/kg.
 @override final  int quantity;
 // Preço unitário de compra em CENTAVOS inteiros (W4).
 @override final  int unitPriceCents;
+// Data de VALIDADE do lote criado por este item (W11 — FIFO).
+// `null` para produtos sem validade (não perecíveis): o lote entra no
+// FIFO pela data de ENTRADA.
+@override final  DateTime? expiryDate;
 
 /// Create a copy of PurchaseItem
 /// with the given fields replaced by the non-null parameter values.
@@ -235,16 +245,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PurchaseItem&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitPriceCents, unitPriceCents) || other.unitPriceCents == unitPriceCents));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PurchaseItem&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitPriceCents, unitPriceCents) || other.unitPriceCents == unitPriceCents)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,productId,productName,quantity,unitPriceCents);
+int get hashCode => Object.hash(runtimeType,productId,productName,quantity,unitPriceCents,expiryDate);
 
 @override
 String toString() {
-  return 'PurchaseItem(productId: $productId, productName: $productName, quantity: $quantity, unitPriceCents: $unitPriceCents)';
+  return 'PurchaseItem(productId: $productId, productName: $productName, quantity: $quantity, unitPriceCents: $unitPriceCents, expiryDate: $expiryDate)';
 }
 
 
@@ -255,7 +265,7 @@ abstract mixin class _$PurchaseItemCopyWith<$Res> implements $PurchaseItemCopyWi
   factory _$PurchaseItemCopyWith(_PurchaseItem value, $Res Function(_PurchaseItem) _then) = __$PurchaseItemCopyWithImpl;
 @override @useResult
 $Res call({
- String productId, String productName, int quantity, int unitPriceCents
+ String productId, String productName, int quantity, int unitPriceCents, DateTime? expiryDate
 });
 
 
@@ -272,13 +282,14 @@ class __$PurchaseItemCopyWithImpl<$Res>
 
 /// Create a copy of PurchaseItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? productId = null,Object? productName = null,Object? quantity = null,Object? unitPriceCents = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? productId = null,Object? productName = null,Object? quantity = null,Object? unitPriceCents = null,Object? expiryDate = freezed,}) {
   return _then(_PurchaseItem(
 productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,productName: null == productName ? _self.productName : productName // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,unitPriceCents: null == unitPriceCents ? _self.unitPriceCents : unitPriceCents // ignore: cast_nullable_to_non_nullable
-as int,
+as int,expiryDate: freezed == expiryDate ? _self.expiryDate : expiryDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 

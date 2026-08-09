@@ -162,12 +162,16 @@ class _DeltaPill extends StatelessWidget {
           Flexible(
             child: Text(
               text,
-              maxLines: 1,
+              // Quebra em até 2 linhas em telas estreitas em vez de
+              // truncar ("-100% vs ontem" precisa ser legível completo).
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: color,
+                // Percentuais (+25% / -10%) alinhados dígito a dígito.
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
           ),

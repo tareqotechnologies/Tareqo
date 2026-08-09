@@ -128,6 +128,18 @@ Separating them avoids empty fields and incoherent rules (expenses have no item/
 - **`CHECK (stock_quantity >= 0)`** in SQLite is the last line of defense;
 - The UI blocks adding to the cart beyond stock (`soldOut`) and flags low stock (`< 5` units) on the dashboard and the listing.
 
+### 4.1 FIFO lots and expiry (W11)
+
+- Every **stock-in creates a `StockLot`** (initial/current quantity in **milli-units**, optional expiry, acquisition cost in cents). Purchases record an optional **expiry per item** (`purchase_items.expiry_date`) — it becomes the lot's expiry;
+- The **POS decrease** consumes lots in FIFO order — nearest expiry first; without expiry, by entry date (`FifoStockUseCase` locally, `process_sale` on Supabase). The surplus passes to the next lot, and the sum of lots is **pre-validated before any mutation** (never a partial decrease);
+- **Invariant:** `products.stock_quantity = Σ current_quantity of active lots` — verified by `sql_check.sh` (test) and by the read-only query in `sql_check_live.sh` (live);
+- **Expiry alerts** on the dashboard: **red** for expired lots with stock, **yellow** for lots expiring in < 30 days (`expiryWarningDays`), sorted by urgency.
+
+### 4.2 Weight-based sales (scales, W11)
+
+- Products with `vendaPorFracao` accept **decimal quantities** in the POS (e.g., 1.75 kg) — quantities are **milli-units** (`1000` = 1 unit/kg), exact integer math in Dart and SQL;
+- **Scale-label barcodes `20PPPPPWWWWW`** are intercepted in the POS: `ScaleBarcode` extracts the PLU (5 digits) and the weighed value, deriving the fraction as `value ÷ price` (never overcharges). Only interpreted as a scale code when the product exists and is `vendaPorFracao` — EAN-12 codes starting with `20` fall back to the normal lookup; PLUs are normalized (leading zeros).
+
 ---
 
 ## Related documents

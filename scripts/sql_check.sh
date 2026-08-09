@@ -148,8 +148,15 @@ INSERT INTO public.stores (id, name) VALUES ('st_smoke', 'Loja Smoke')
 ON CONFLICT (id) DO NOTHING;
 -- store_id explícito ('st_smoke' É loja do dono — o trigger anti-forja
 -- preserva; sem isso o produto cairia na primeira loja do usuário).
+-- W11: estoque em MILÉSIMOS (5000 = 5 unidades) + lote inicial (invariante
+-- `stock = Σ lotes` — a baixa FIFO do process_sale consome os lotes).
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('smoke1', 'Produto do dono', 'st_smoke', 100, 200, 5)
+VALUES ('smoke1', 'Produto do dono', 'st_smoke', 100, 200, 5000)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.stock_lots
+  (id, store_id, product_id, entry_date, expiry_date, initial_quantity,
+   current_quantity, cost_price)
+VALUES ('lot_smoke1', 'st_smoke', 'smoke1', now(), NULL, 5000, 5000, 100)
 ON CONFLICT (id) DO NOTHING;
 SQL
 
@@ -222,9 +229,15 @@ VALUES ('e_smoke', 'st_smoke', '22222222-2222-2222-2222-222222222222',
         'Funcionária', 'funcionario@loja.com', 'employee')
 ON CONFLICT (id) DO NOTHING;
 -- Produto próprio da loja para a venda do funcionário (não interfere no
--- estoque do smoke1 usado pelo passo [5/5]).
+-- estoque do smoke1 usado pelo passo [5/5]). W11: estoque em MILÉSIMOS
+-- + lote inicial (invariante `stock = Σ lotes`).
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('smoke2', 'Produto do funcionário', 'st_smoke', 100, 200, 5)
+VALUES ('smoke2', 'Produto do funcionário', 'st_smoke', 100, 200, 5000)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.stock_lots
+  (id, store_id, product_id, entry_date, expiry_date, initial_quantity,
+   current_quantity, cost_price)
+VALUES ('lot_smoke2', 'st_smoke', 'smoke2', now(), NULL, 5000, 5000, 100)
 ON CONFLICT (id) DO NOTHING;
 SQL
 
@@ -254,7 +267,8 @@ psql_app -v ON_ERROR_STOP=1 <<SQL
 SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
 SELECT public.process_sale(
   ('{"id":"s_emp","store_id":"st_smoke","total_amount":400,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":2,"unit_price":200}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (2000 = 2 unidades).
+  '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":2000,"unit_price":200}]'::jsonb
 );
 SQL
 
@@ -279,7 +293,8 @@ BEGIN
   BEGIN
     PERFORM public.process_sale(
       ('{"id":"s_bad2","store_id":"st1","total_amount":100,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
-      '[{"product_id":"p1","product_name":"X","quantity":1,"unit_price":100}]'::jsonb
+      -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+      '[{"product_id":"p1","product_name":"X","quantity":1000,"unit_price":100}]'::jsonb
     );
     RAISE EXCEPTION 'SENTINELA: venda em loja de outro tenant deveria ter sido rejeitada';
   EXCEPTION WHEN raise_exception THEN
@@ -306,7 +321,8 @@ psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.process_sale(
   ('{"id":"s_smoke","store_id":"st_smoke","total_amount":400,"payment_method":"mPesa","date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"smoke1","product_name":"Produto do dono","quantity":2,"unit_price":200}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (2000 = 2 unidades).
+  '[{"product_id":"smoke1","product_name":"Produto do dono","quantity":2000,"unit_price":200}]'::jsonb
 );
 SQL
 
@@ -316,15 +332,22 @@ sale_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\
   exit 1
 }
 
-item_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sale_items WHERE sale_id = 's_smoke' AND quantity = 2;" | tail -n 1)"
+item_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sale_items WHERE sale_id = 's_smoke' AND quantity = 2000;" | tail -n 1)"
 [ "$item_ok" = "1" ] || {
   echo "FALHA: itens da venda não gravados (obtido: '$item_ok')"
   exit 1
 }
 
+# W11: estoque em MILÉSIMOS (5000-2000=3000; o lote lot_smoke1 também cai
+# para 3000 — a invariante stock = Σ lotes nunca quebra).
 stock_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke1';" | tail -n 1)"
-[ "$stock_ok" = "3" ] || {
-  echo "FALHA: estoque não baixado (5-2), obtido: '$stock_ok'"
+[ "$stock_ok" = "3000" ] || {
+  echo "FALHA: estoque não baixado (5000-2000), obtido: '$stock_ok'"
+  exit 1
+}
+stock_lot_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT current_quantity FROM public.stock_lots WHERE id = 'lot_smoke1';" | tail -n 1)"
+[ "$stock_lot_ok" = "3000" ] || {
+  echo "FALHA: lote não baixado junto com o produto (obtido: '$stock_lot_ok')"
   exit 1
 }
 
@@ -390,7 +413,8 @@ BEGIN
   BEGIN
     PERFORM public.process_sale(
       ('{"id":"s_bad","store_id":"st_smoke","total_amount":9900,"payment_method":"mPesa","date_time":"' || now()::text || '"}')::jsonb,
-      '[{"product_id":"smoke1","product_name":"X","quantity":99,"unit_price":100}]'::jsonb
+      -- W11: 99000 milésimos = 99 unidades >> estoque (3000 restantes).
+      '[{"product_id":"smoke1","product_name":"X","quantity":99000,"unit_price":100}]'::jsonb
     );
     RAISE EXCEPTION 'SENTINELA: venda com estoque insuficiente deveria ter sido rejeitada';
   EXCEPTION WHEN raise_exception THEN
@@ -687,7 +711,8 @@ BEGIN
   BEGIN
     PERFORM public.process_purchase(
       ('{"id":"p_emp","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":200,"date_time":"' || now()::text || '"}')::jsonb,
-      '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1,"unit_price":200}]'::jsonb
+      -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+      '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1000,"unit_price":200}]'::jsonb
     );
     RAISE EXCEPTION 'SENTINELA: funcionário deveria ter sido bloqueado ao registrar compra';
   EXCEPTION WHEN raise_exception THEN
@@ -715,7 +740,8 @@ emp_read_purch="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "33333333-3333-3333-3333-333333333333"}';
 SELECT public.process_purchase(      ('{"id":"p_mgr","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":200,"payment_method":"mPesa","date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1,"unit_price":200}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade) — cria lote novo.
+  '[{"product_id":"smoke2","product_name":"Produto do funcionário","quantity":1000,"unit_price":200}]'::jsonb
 );
 SQL
 
@@ -725,11 +751,19 @@ mgr_purch_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_
   exit 1
 }
 mgr_stock_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke2';" | tail -n 1)"
-# smoke2: 5 (criado no passo 4) - 2 (venda do funcionário, passo 4.4)
-#        + 1 (compra do gerente, passo 8.4) = 4. Acoplado à ordem dos passos:
-# se reordenar, recalcular a derivação.
-[ "$mgr_stock_ok" = "4" ] || {
-  echo "FALHA: estoque não atualizado pela compra do gerente (5-2+1=4, obtido: '$mgr_stock_ok')"
+# W11 (milésimos): smoke2 = 5000 (passo 4) - 2000 (venda do funcionário,
+# passo 4.4) + 1000 (compra do gerente, passo 8.4) = 4000. A compra cria
+# um lote novo (id 'lot-p_mgr-smoke2' — deriva da compra+produto): a
+# invariante stock = Σ lotes vale (3000 restantes do lote original + 1000
+# do lote novo = 4000). Acoplado à ordem dos passos: se reordenar,
+# recalcular a derivação.
+[ "$mgr_stock_ok" = "4000" ] || {
+  echo "FALHA: estoque não atualizado pela compra do gerente (5000-2000+1000=4000, obtido: '$mgr_stock_ok')"
+  exit 1
+}
+mgr_lots_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT COALESCE(SUM(current_quantity), 0) FROM public.stock_lots WHERE product_id = 'smoke2' AND store_id = 'st_smoke';" | tail -n 1)"
+[ "$mgr_lots_ok" = "4000" ] || {
+  echo "FALHA: invariante stock = Σ lotes quebrada após a compra do gerente (obtido: '$mgr_lots_ok')"
   exit 1
 }
 
@@ -791,7 +825,13 @@ kpi_base="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('p_kpi', 'Produto KPI', 'st_smoke', 100, 200, 5)
+VALUES ('p_kpi', 'Produto KPI', 'st_smoke', 100, 200, 5000)
+ON CONFLICT (id) DO NOTHING;
+-- W11: lote inicial (invariante stock = Σ lotes; estoque em milésimos).
+INSERT INTO public.stock_lots
+  (id, store_id, product_id, entry_date, expiry_date, initial_quantity,
+   current_quantity, cost_price)
+VALUES ('lot_p_kpi', 'st_smoke', 'p_kpi', now(), NULL, 5000, 5000, 100)
 ON CONFLICT (id) DO NOTHING;  -- A venda direta (fora da RPC) também precisa do sale_number NOT NULL —
   -- numeração é do servidor; aqui calcula o próximo da loja.
   INSERT INTO public.sales (id, store_id, sale_number, total_amount, payment_method, date_time)
@@ -827,14 +867,15 @@ ON CONFLICT (id) DO NOTHING;
 SQL
 
 # Delta esperado: venda +2550 | entradas +10000 | saídas +4000 (a
-# pendente NÃO sai) | a receber +1500 (quitada/fornecedor fora) | stock +5.
+# pendente NÃO sai) | a receber +1500 (quitada/fornecedor fora) | stock
+# +5000 (W11: p_kpi com 5000 milésimos = 5 unidades).
 kpi_after="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT total_sales::text || '|' || cash_income::text || '|' || cash_expense::text || '|' || pending_total::text || '|' || stock_total::text FROM public.get_dashboard_kpis('st_smoke', now() - interval '1 day', now() + interval '1 day');" | tail -n 1)"
 
 # Soma o delta ao baseline e compara com o after (awk puro, sem bc).
 kpi_ok="$(awk -v base="$kpi_base" -v after="$kpi_after" 'BEGIN {
   split(base, b, "|"); split(after, a, "|");
   ok = (a[1] == b[1] + 2550) && (a[2] == b[2] + 10000) &&
-       (a[3] == b[3] + 4000) && (a[4] == b[4] + 1500) && (a[5] == b[5] + 5);
+       (a[3] == b[3] + 4000) && (a[4] == b[4] + 1500) && (a[5] == b[5] + 5000);
   print ok ? "1" : "0";
 }')"
 [ "$kpi_ok" = "1" ] || {
@@ -998,11 +1039,21 @@ echo "==> [13/13] Numeração SEQUENCIAL de venda por loja (sale_number)"
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('smoke3', 'Produto numeração', 'st_smoke', 50, 100, 10)
+VALUES ('smoke3', 'Produto numeração', 'st_smoke', 50, 100, 10000)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.stock_lots
+  (id, store_id, product_id, entry_date, expiry_date, initial_quantity,
+   current_quantity, cost_price)
+VALUES ('lot_smoke3', 'st_smoke', 'smoke3', now(), NULL, 10000, 10000, 50)
 ON CONFLICT (id) DO NOTHING;
 -- Produto na loja dedicada st_emp (não tem vendas — a primeira deve ser 1).
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('emp_p1', 'Produto da loja emp', 'st_emp', 50, 100, 5)
+VALUES ('emp_p1', 'Produto da loja emp', 'st_emp', 50, 100, 5000)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.stock_lots
+  (id, store_id, product_id, entry_date, expiry_date, initial_quantity,
+   current_quantity, cost_price)
+VALUES ('lot_emp_p1', 'st_emp', 'emp_p1', now(), NULL, 5000, 5000, 50)
 ON CONFLICT (id) DO NOTHING;
 SQL
 
@@ -1011,11 +1062,13 @@ psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.process_sale(
   ('{"id":"s_num1","store_id":"st_smoke","total_amount":100,"payment_method":"mPesa","date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"smoke3","product_name":"Produto numeração","quantity":1,"unit_price":100}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+  '[{"product_id":"smoke3","product_name":"Produto numeração","quantity":1000,"unit_price":100}]'::jsonb
 );
 SELECT public.process_sale(
   ('{"id":"s_num2","store_id":"st_smoke","total_amount":100,"payment_method":"mPesa","date_time":"' || (now() + interval '1 minute')::text || '"}')::jsonb,
-  '[{"product_id":"smoke3","product_name":"Produto numeração","quantity":1,"unit_price":100}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+  '[{"product_id":"smoke3","product_name":"Produto numeração","quantity":1000,"unit_price":100}]'::jsonb
 );
 SQL
 
@@ -1031,7 +1084,8 @@ psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.process_sale(
   ('{"id":"s_emp_num","store_id":"st_emp","total_amount":100,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"emp_p1","product_name":"Produto da loja emp","quantity":1,"unit_price":100}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+  '[{"product_id":"emp_p1","product_name":"Produto da loja emp","quantity":1000,"unit_price":100}]'::jsonb
 );
 SQL
 emp_num="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT sale_number FROM public.sales WHERE id = 's_emp_num';" | tail -n 1)"
@@ -1045,7 +1099,8 @@ psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.process_sale(
   ('{"id":"s_num1","store_id":"st_smoke","total_amount":100,"payment_method":"mPesa","date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"smoke3","product_name":"Produto numeração","quantity":1,"unit_price":100}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+  '[{"product_id":"smoke3","product_name":"Produto numeração","quantity":1000,"unit_price":100}]'::jsonb
 );
 SQL
 num1_retry="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT sale_number FROM public.sales WHERE id = 's_num1';" | tail -n 1)"
@@ -1071,11 +1126,21 @@ echo "==> [14/15] Numeração SEQUENCIAL de compra por loja (purchase_number)"
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('smoke4', 'Produto compras', 'st_smoke', 50, 100, 10)
+VALUES ('smoke4', 'Produto compras', 'st_smoke', 50, 100, 10000)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.stock_lots
+  (id, store_id, product_id, entry_date, expiry_date, initial_quantity,
+   current_quantity, cost_price)
+VALUES ('lot_smoke4', 'st_smoke', 'smoke4', now(), NULL, 10000, 10000, 50)
 ON CONFLICT (id) DO NOTHING;
 -- Produto na loja dedicada st_emp (não tem compras — a primeira deve ser 1).
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('emp_p2', 'Produto compras emp', 'st_emp', 50, 100, 5)
+VALUES ('emp_p2', 'Produto compras emp', 'st_emp', 50, 100, 5000)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.stock_lots
+  (id, store_id, product_id, entry_date, expiry_date, initial_quantity,
+   current_quantity, cost_price)
+VALUES ('lot_emp_p2', 'st_emp', 'emp_p2', now(), NULL, 5000, 5000, 50)
 ON CONFLICT (id) DO NOTHING;
 SQL
 
@@ -1084,11 +1149,13 @@ psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.process_purchase(
   ('{"id":"pc_num1","store_id":"st_smoke","supplier_name":"Fornecedor A","total_amount":100,"payment_method":"eMola","date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"smoke4","product_name":"Produto compras","quantity":1,"unit_price":100}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+  '[{"product_id":"smoke4","product_name":"Produto compras","quantity":1000,"unit_price":100}]'::jsonb
 );
 SELECT public.process_purchase(
   ('{"id":"pc_num2","store_id":"st_smoke","supplier_name":"Fornecedor B","total_amount":100,"date_time":"' || (now() + interval '1 minute')::text || '"}')::jsonb,
-  '[{"product_id":"smoke4","product_name":"Produto compras","quantity":1,"unit_price":100}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+  '[{"product_id":"smoke4","product_name":"Produto compras","quantity":1000,"unit_price":100}]'::jsonb
 );
 SQL
 
@@ -1111,7 +1178,8 @@ psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.process_purchase(
   ('{"id":"pc_emp_num","store_id":"st_emp","supplier_name":"Fornecedor C","total_amount":100,"date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"emp_p2","product_name":"Produto compras emp","quantity":1,"unit_price":100}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+  '[{"product_id":"emp_p2","product_name":"Produto compras emp","quantity":1000,"unit_price":100}]'::jsonb
 );
 SQL
 pc_emp_num="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT purchase_number FROM public.purchases WHERE id = 'pc_emp_num';" | tail -n 1)"
@@ -1125,7 +1193,8 @@ psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.process_purchase(
   ('{"id":"pc_num1","store_id":"st_smoke","supplier_name":"Fornecedor A","total_amount":100,"payment_method":"eMola","date_time":"' || now()::text || '"}')::jsonb,
-  '[{"product_id":"smoke4","product_name":"Produto compras","quantity":1,"unit_price":100}]'::jsonb
+  -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+  '[{"product_id":"smoke4","product_name":"Produto compras","quantity":1000,"unit_price":100}]'::jsonb
 );
 SQL
 pc_num1_retry="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT purchase_number FROM public.purchases WHERE id = 'pc_num1';" | tail -n 1)"

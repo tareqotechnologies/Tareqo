@@ -4,7 +4,7 @@
 
 O **Dumbhanengue ERP** é um sistema de gestão empresarial voltado para **pequenos comerciantes**. Ele concentra em um único aplicativo as operações do dia a dia de uma loja:
 
-- 🏷️ **Estoque** — cadastro e controle de produtos (compra, venda, quantidade disponível);
+- 🏷️ **Estoque** — cadastro e controle de produtos com **lotes FIFO e validade** (compra, venda, quantidade disponível, vencimento);
 - 💰 **Vendas** — registro de vendas com carrinho, forma de pagamento e baixa automática de estoque;
 - 📊 **Financeiro** — fluxo de caixa (entradas × saídas), movimentações e pendências;
 - 🧾 **Crédito ("fiado")** — controle de quem deve ao comerciante, quando vence e histórico de quitações.
@@ -34,9 +34,10 @@ O nome *Dumbhanengue* é o apelido do projeto; o produto em si é um ERP enxuto,
 | ------ | --------------- |
 | **Autenticação** | Cadastro e login com e-mail/senha (Supabase), sessão persistente e restaurada no boot, logout |
 | **Início (Dashboard)** | KPIs (total de vendas, saldo em caixa, a receber de fiado, estoque), ações rápidas, vendas recentes, alerta de estoque baixo |
-| **Produtos** | Listagem com busca local, cadastro via bottom sheet (com validação de preço), pull-to-refresh, chip de estoque baixo |
-| **Vendas** | Histórico de vendas, carrinho de nova venda (steppers de quantidade), 5 formas de pagamento, detalhe da venda com snapshot de preços |
-| **Compras** | Entrada de mercadorias de fornecedores: carrinho com steppers, **aumenta o estoque** e lança a saída no caixa (categoria "Compras") |
+| **Produtos** | Listagem com busca local, cadastro via bottom sheet (com validação de preço), **código/PLU de balança e venda por peso** (W11), pull-to-refresh, chip de estoque baixo |
+| **Estoque (FIFO, W11)** | **Lotes por entrada** com quantidade, validade e custo de aquisição; baixa no PDV em ordem **FIFO** (validade mais próxima primeiro); alertas de vencimento no dashboard (**vermelho** = vencido, **amarelo** = < 30 dias) |
+| **Vendas** | Histórico de vendas, carrinho de nova venda (steppers de quantidade e **frações decimais** para produtos por peso), **leitura de código de barras de balanças etiquetadoras (`20PPPPPWWWWW`)** e 6 formas de pagamento, detalhe da venda com snapshot de preços |
+| **Compras** | Entrada de mercadorias de fornecedores: carrinho com steppers, **validade opcional por item** (cria os lotes da entrada), **aumenta o estoque** e lança a saída no caixa (categoria "Compras") |
 | **Financeiro** | Fluxo de caixa por período (Hoje / 7 dias / Este mês / Tudo), entradas/saídas/saldo, registro de movimentações, pendências com botão "Receber" |
 | **Crédito (fiado)** | Total a receber, dívidas por vencimento (chips de atraso), registro de fiado **com vínculo opcional a um cliente**, baixa com confirmação, aba de histórico de quitações |
 | **Clientes** | Cadastro (nome, telefone, e-mail), busca, total de fiado pendente por cliente no card |
@@ -74,6 +75,7 @@ O nome *Dumbhanengue* é o apelido do projeto; o produto em si é um ERP enxuto,
 | `sqlite3` + `sqlite3_flutter_libs` | Persistência local relacional (SQL parametrizado) | data |
 | `path_provider` + `path` | Localização do arquivo do banco | core/data |
 | `dio` ^5.11.0 | Cliente HTTP (reservado para APIs REST futuras) | data |
+| `mobile_scanner` | Leitura de código de barras por câmera no PDV (balanças/PLU, W11) | presentation |
 
 > SDK Dart `^3.12.2` (Flutter 3.x recente).
 
@@ -81,15 +83,14 @@ O nome *Dumbhanengue* é o apelido do projeto; o produto em si é um ERP enxuto,
 
 ## Estado atual e próximos passos
 
-O app está funcional de ponta a ponta. Com o Supabase configurado (padrão), os módulos de negócio **sincronizam no Postgres por tenant e por loja** — produtos, vendas, financeiro, fiado, clientes e compras — com RLS + triggers de isolamento (schema em `supabase/schema.sql`). Sem Supabase configurado, a persistência cai para **SQLite (nativas)** ou **memória (web)**.
+O app está funcional de ponta a ponta. Com o Supabase configurado (padrão), os módulos de negócio **sincronizam no Postgres por tenant e por loja** — produtos, vendas, financeiro, fiado, clientes e compras — com RLS + triggers de isolamento (schema em `supabase/schema.sql`). A atomicidade cross-tabela (venda/compra + estoque + caixa) e a **baixa FIFO por lotes** rodam nas RPCs `SECURITY DEFINER` (`process_sale`, `process_purchase`) do servidor. Sem Supabase configurado, a persistência cai para **SQLite (nativas)** ou **memória (web)**.
 
 Próximos passos:
 
-1. Atomicidade cross-tabela no fluxo de venda via RPC `SECURITY DEFINER` (hoje cada chamada REST é uma transação isolada);
-2. Recorrência de despesas fixas (agendamento de aluguel/luz);
-3. Ação "Pagar" para saídas pendentes no Financeiro (hoje só entradas têm "Receber");
-4. Cache offline (leitura local + sincronização) para uso sem conexão;
-5. Aplicação dos limites de plano no servidor (triggers/RPC no Postgres — hoje validados no app).
+1. Recorrência de despesas fixas (agendamento de aluguel/luz);
+2. Ação "Pagar" para saídas pendentes no Financeiro (hoje só entradas têm "Receber");
+3. Cache offline (leitura local + sincronização) para uso sem conexão;
+4. Aplicação dos limites de plano no servidor (triggers/RPC no Postgres — hoje validados no app).
 
 ---
 

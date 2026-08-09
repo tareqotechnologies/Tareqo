@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/quantity.dart';
 import '../../../domain/entities/sale.dart';
 import '../../../domain/entities/sale_item.dart';
 import '../../widgets/section_header.dart';
@@ -166,7 +167,8 @@ class _ItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final subtotal = item.quantity * item.unitPriceCents;
+    // W11: quantidade em milésimos — subtotal com divisão inteira exata.
+    final subtotal = Quantity.lineTotal(item.quantity, item.unitPriceCents);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -186,7 +188,7 @@ class _ItemRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${item.quantity} × '
+                  '${Quantity.format(item.quantity, language: Formatters.currentLanguage)} × '
                   '${Formatters.currency(item.unitPriceCents)}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,

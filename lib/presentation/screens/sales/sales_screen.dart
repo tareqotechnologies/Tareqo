@@ -58,15 +58,21 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
   Widget build(BuildContext context) {
     final salesAsync = ref.watch(salesListProvider);
     final l10n = context.l10n;
+    // Sem nenhuma venda na loja, o FAB some: o estado vazio já traz o
+    // botão primário centralizado ("Nova venda") — sem CTA duplicado.
+    // Com dados, o FAB volta como ação rápida persistente.
+    final hasSales = salesAsync.value?.isNotEmpty ?? false;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.salesTitle)),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab-sales',
-        onPressed: _openNewSale,
-        icon: const Icon(Icons.add),
-        label: Text(l10n.salesNewSale),
-      ),
+      floatingActionButton: hasSales
+          ? FloatingActionButton.extended(
+              heroTag: 'fab-sales',
+              onPressed: _openNewSale,
+              icon: const Icon(Icons.add),
+              label: Text(l10n.salesNewSale),
+            )
+          : null,
       body: salesAsync.when(
         // Skeleton loading no primeiro carregamento (o pull-to-refresh usa o
         // próprio indicador e mantém a lista visível).
@@ -217,7 +223,7 @@ class _SalesBody extends StatelessWidget {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 112),
               sliver: SliverList.separated(
                 itemCount: filtered.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),

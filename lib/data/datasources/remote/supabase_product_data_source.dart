@@ -27,7 +27,7 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
           .from(_table)
           .select(
             'id, store_id, name, description, purchase_price, sale_price, '
-            'stock_quantity',
+            'stock_quantity, code, venda_por_fracao, unit_label',
           )
           .eq('store_id', storeId),
     )..sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
@@ -43,7 +43,7 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
         .from(_table)
         .select(
           'id, store_id, name, description, purchase_price, sale_price, '
-          'stock_quantity',
+          'stock_quantity, code, venda_por_fracao, unit_label',
         )
         .eq('id', id)
         .eq('store_id', storeId)
@@ -62,6 +62,9 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
       'purchase_price': product.purchasePriceCents,
       'sale_price': product.salePriceCents,
       'stock_quantity': product.stockQuantity,
+      'code': product.code.isEmpty ? null : product.code,
+      'venda_por_fracao': product.vendaPorFracao,
+      'unit_label': product.unitLabel,
     });
   }
 
@@ -94,5 +97,8 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
     purchasePriceCents: (row['purchase_price'] as num).toInt(),
     salePriceCents: (row['sale_price'] as num).toInt(),
     stockQuantity: (row['stock_quantity'] as num).toInt(),
+    code: (row['code'] as String?) ?? '',
+    vendaPorFracao: row['venda_por_fracao'] as bool? ?? false,
+    unitLabel: (row['unit_label'] as String?) ?? 'un',
   );
 }

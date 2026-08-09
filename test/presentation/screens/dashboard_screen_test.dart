@@ -125,7 +125,7 @@ Purchase _purchase({
     PurchaseItem(
       productId: 'p1',
       productName: 'Caneta',
-      quantity: 1,
+      quantity: 1000, // 1 unidade em MILÉSIMOS (W11)
       unitPriceCents: 100,
     ),
   ],
@@ -364,14 +364,14 @@ void main() {
               name: 'Caneta',
               purchasePriceCents: 100,
               salePriceCents: 200,
-              stockQuantity: 2,
+              stockQuantity: 2000, // 2 unidades em MILÉSIMOS (W11)
             ),
             Product(
               id: 'p2',
               name: 'Caderno',
               purchasePriceCents: 300,
               salePriceCents: 600,
-              stockQuantity: 10,
+              stockQuantity: 10000,
             ),
           ],
           sales: [],

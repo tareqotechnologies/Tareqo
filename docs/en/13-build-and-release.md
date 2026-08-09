@@ -16,7 +16,7 @@ flutter pub get
 
 - **App version:** `version: 1.0.0+1` in `pubspec.yaml` (applied automatically to `versionCode`/`versionName` on Android and `CFBundleVersion` on iOS).
 
-> ⚠️ **SaaS vs. local mode (flavors dev/prod):** credentials are supplied via `--dart-define-from-file` — `env/dev.env` (committed, dev project) and `env/prod.env` (**never** versioned; model in `env/prod.env.example`). `FLUTTER_APP_FLAVOR` is a **reserved define** injected from `--flavor`. A **release** build without `--flavor prod` (or with the embedded dev defaults) **throws at startup** (fail-fast S2); the Gradle config also **fails `prodRelease` without `android/key.properties`**. The anon key is public by design — real security comes from RLS; **never** embed the service role key:
+> ⚠️ **SaaS vs. local mode (flavors dev/prod):** credentials are supplied via `--dart-define-from-file` — `env/dev.env` (committed, dev project) and `env/prod.env` (**never** versioned; model in `env/prod.env.example`). `FLUTTER_APP_FLAVOR` is a **reserved define** injected from `--flavor`. A **release** build without `--flavor prod` **throws at startup** (`main.dart` fail-fast); additionally `SupabaseBootstrap` throws in a NON-prod release with the embedded dev defaults (fail-fast S2 — **adjusted Aug 9**: the deployment uses a SINGLE Supabase project `dotklbpqmlnhcdifiukd` shared by dev/prod, so a `prod` release with the project's own credentials is legitimate); the Gradle config also **fails `prodRelease` without `android/key.properties`**. The anon key is public by design — real security comes from RLS; **never** embed the service role key:
 
 ```bash
 # Development (debug/hot reload)

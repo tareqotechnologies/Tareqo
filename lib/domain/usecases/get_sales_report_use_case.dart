@@ -1,3 +1,4 @@
+import '../../core/utils/quantity.dart';
 import '../repositories/i_product_repository.dart';
 import '../repositories/i_sale_repository.dart';
 import '../repositories/i_sales_report_repository.dart';
@@ -128,15 +129,19 @@ class GetSalesReportUseCase {
 
       for (final item in sale.items) {
         final costCents = purchasePriceCentsById[item.productId] ?? 0;
-        // Lucro por item: quantidade × (preço de venda − custo), tudo em
-        // centavos inteiros.
-        profitCents += item.quantity * (item.unitPriceCents - costCents);
+        // Lucro por item: quantidade (MILÉSIMOS) × (preço de venda −
+        // custo) ~/ 1000 — divisão inteira exata (W4 + W11), mesmo
+        // contrato das RPCs do servidor.
+        profitCents += Quantity.lineTotal(
+          item.quantity,
+          item.unitPriceCents - costCents,
+        );
 
         quantityById[item.productId] =
             (quantityById[item.productId] ?? 0) + item.quantity;
         revenueById[item.productId] =
             (revenueById[item.productId] ?? 0) +
-            item.quantity * item.unitPriceCents;
+            Quantity.lineTotal(item.quantity, item.unitPriceCents);
         // Último snapshot de nome vence (produtos renomeados no catálogo).
         nameById[item.productId] = item.productName;
       }

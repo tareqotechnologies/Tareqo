@@ -77,5 +77,8 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Leitura de código de barras por câmera no PDV (mobile_scanner). -->
+	<key>NSCameraUsageDescription</key>
+	<string>Ler códigos de barras de produtos e balanças no PDV.</string>
 </dict>
 </plist>

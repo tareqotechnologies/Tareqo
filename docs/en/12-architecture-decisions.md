@@ -161,6 +161,61 @@ Everything runs inside a **`IUnitOfWork`** (unit of work): sale + items, stock d
 
 `ProcessSaleUseCase` depends **only on abstractions**: the `ISaleRepository` contract and `UpdateProductStockUseCase` (which depends on the `IProductRepository` contract). None of them know about datasources or SQLite. Composition happens in the **wiring** (ServiceLocator/GetIt), never inside business rules.
 
+## Why MILLI-UNIT integer quantities (W11)?
+
+W4 removed `double` from money (integer cents); W11 does the same for **quantities**: `1000` = 1 unit/kg, all `int`.
+
+1. **Same philosophy as cents.** Scales and weight POS produce fractions (1.75 kg); `double` accumulates rounding errors in long sums (cart, reports, FIFO decreases). Integer milli-units make the arithmetic **exact** in every layer.
+2. **Dart ↔ SQL parity.** There is a single contract: `quantity × price ~/ 1000` (integer division) in Dart **and** in the server RPCs — cart totals, cash and reports match byte for byte.
+3. **Conversion boundary concentrated.** `Quantity` (`lib/core/utils/quantity.dart`) holds the conversions and formatting ("1.75 kg"); the rest of the app only sees `int`.
+
+## Why FIFO lots with expiry?
+
+Perishables and expiry are the daily reality of a grocery store: stock must leave in the right order, or the merchant sells expired merchandise (loss + health risk).
+
+1. **The lot is the traceability unit.** Every stock-in creates a `StockLot` (initial/current quantity, expiry, acquisition cost) — you can tell how much is left from each entry and which one expires first.
+2. **Deterministic FIFO decrease.** `FifoStockUseCase` (and `process_sale` on the server) consumes lots ordered by `expiry ASC → entry ASC → id`; the surplus passes to the next lot; the sum of lots is **pre-validated before any mutation** (no partial decrease).
+3. **Invariant `stock = Σ lots`.** `products.stock_quantity` is always the sum of the active lots — verified by a test (`sql_check.sh`) and by the read-only query in `sql_check_live.sh`. The W11 migration creates an initial lot (`lot-mig-…`) for every product with stock, so the invariant holds from day one.
+4. **Expiry alerts.** The dashboard shows **red** (expired lot with stock) and **yellow** (expires in < 30 days) — preventive action before the loss.
+
+## Why the scale format `20PPPPPWWWWW`?
+
+It is the market-standard label format for pricing scales: prefix `20`, 5 product digits (PLU) and 5 digits for the weighed value.
+
+1. **Zero configuration in the POS.** The reading (USB scanner or camera) lands in the barcode field; `ScaleBarcode` recognizes the pattern, extracts the PLU and **derives the fraction** `weight = value ÷ price` — never overcharges, even when the scale stores a monetary value.
+2. **Safe fallback.** It is only treated as a scale code when the product exists and is `vendaPorFracao`; EAN-12 codes starting with `20` (regular barcodes) fall back to the common lookup. PLUs are normalized (leading zeros) in the search.
+3. **Milli-units end to end.** The fraction enters the cart in milli-units, so the total, the FIFO decrease and the reports all use the same integer arithmetic.
+
+## Why does the typography scale follow Apple HIG and Material (34/28/22/20/17/15/13/11)?
+
+The app's `TextTheme` is not a set of arbitrary sizes: it follows a **modular scale** inspired by the Apple Human Interface Guidelines and Google Material Design, adapted to a counter-top ERP/POS — where tablets sit a few centimeters from the eyes and hierarchy must be readable at a glance.
+
+### The complete scale (8 tiers, mapped to Material roles)
+
+| Tier | Flutter role | Size (sp) | Weight | Where it is used in the ERP | `tabularFigures` |
+| --- | --- | --- | --- | --- | --- |
+| **Large Title** | `displaySmall` | **34** | w700 | Login screen, welcome/onboarding screens, consolidated cash-closing reports | ✓ |
+| **Title 1 (Headline)** | `headlineMedium` | **28** | w700 | Main section titles, page headers (e.g. "Stock Management") | ✓ |
+| — intermediate | `headlineSmall` | 24 | w700 | KPI values and highlighted totals on the dashboard | ✓ |
+| **Title 2** | `titleLarge` | **22** | w700 | Summary-card titles, module names, modal headers, AppBar title | ✓ |
+| **Title 3** | `titleMedium` | **20** | w600 | Subtitles, section headers, featured product names in the sales listing | ✓ |
+| — intermediate | `titleSmall` | 14 | w600 | Row highlights, product names inside sale/purchase cards | ✗ |
+| **Body Large (Headline)** | `bodyLarge` | **17** | w400 | Primary form text, input fields, important list items | ✓ |
+| **Body (Callout)** | `bodyMedium` | **15** | w400 | Secondary descriptions, customer notes, lot details, row prices and quantities | ✓ |
+| **Footnote** | `bodySmall` | **13** | w400 | Expiry dates (FIFO), barcodes, units of measure, table footers | ✓ |
+| — buttons/chips | `labelLarge` / `labelMedium` | 14 / 12 | w600 | Buttons, chips and contextual actions | ✗ |
+| **Caption** | `labelSmall` | **11** | w500 | Status labels ("In stock", "Out of date"), unit prices, small indicators | ✗ |
+
+The **bolded** tiers are the eight levels of the Apple/Google scale; the remaining rows are Material roles that fill the gaps between tiers (KPI values at 24, row labels and buttons at 14/12). The ERP deliberately renders titles **one weight heavier** than the suggested table (w700 on Title 1/2 instead of w600) — a trade-off chosen for counter-top readability, where the hierarchy must be caught at a glance while the eyes are on the customer. `tabularFigures` is applied to every style that carries numbers (✓) and deliberately **omitted** from label styles (✗).
+
+### Golden rules applied
+
+1. **Hierarchy through proportion, not size proliferation.** The scale defines clear tiers — Large Title 34 → Caption 11 — so the eye can instantly find the level it needs (screen title, card title, row value, badge) without scanning a dozen sizes.
+2. **Weight contrast instead of more sizes.** Body text stays in three sizes (17/15/13); what distinguishes a description from a value is the **weight** (w400 for text, w600 for values and important labels), the Apple/Google golden rule. The old theme topped out at w800; the new one caps at w700 so bold still reads as *emphasis*, not shouting.
+3. **Numeric alignment (`tabularFigures`).** Prices (MZN) and quantities (kg/units) appear in columns — reports, cart, status chips. `FontFeature.tabularFigures()` gives **every digit the same width** (tabular width), so value columns align digit-by-digit, spreadsheet-style. It is applied to the **numeric** styles (`displaySmall`, `headlineMedium/Small`, `titleLarge/Medium`, `bodyLarge/Medium/Small`) and deliberately **not** to label styles (`titleSmall`, `labelLarge/Medium/Small`), which carry no numbers — and to the inline styles that carry numbers (`StatusChip` labels, report rank avatars, the day-over-day comparison pill), so chips and columns align too.
+4. **Readability on any screen.** `sp` is *scale-independent pixels*: it respects the OS accessibility text scale. The suite validates up to 2.0× font scale with no overflow — on both counter-top tablets and phones.
+5. **Scale locked by tests.** `typography_scale_test.dart` audits size, weight, and presence/absence of `tabularFigures` on every typographic role (light and dark), plus the surfaces that follow the scale: AppBar (22/w700), chips (13/w600) and the primary button (15/w600) — any scale regression fails the test deliberately.
+
 ## Why a financial entity separate from the sale?
 
 `FinancialTransaction` (cash in/out) is a **financial** concept; `Sale` is an **operational** event. Separating them is deliberate:
@@ -262,6 +317,7 @@ The **Supabase session** is persisted by `supabase_flutter` through the **same s
 | `supabase_flutter` | SaaS authentication, database and realtime | data |
 | `flutter_secure_storage` | Encrypted persistence of tokens and keys | core |
 | `sqlite3` + `sqlite3_flutter_libs` | Relational local persistence | data |
+| `mobile_scanner` | Camera barcode reading in the POS (scales/PLU, W11) | presentation |
 | `path_provider` | Documents directory path | data/core |
 
 ### Code generation (Freezed)

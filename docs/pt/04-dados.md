@@ -21,6 +21,7 @@ lib/data/
 │   │   ├── supabase_datasource_helpers.dart          # Cliente + user_id da sessão
 │   │   ├── supabase_product_data_source.dart         # Produtos (Supabase)
 │   │   ├── supabase_sale_data_source.dart            # Vendas (insert aninhado sale + items)
+│   │   ├── supabase_stock_lot_data_source.dart       # Lotes FIFO (Supabase)
 │   │   ├── supabase_financial_transaction_data_source.dart  # Movimentações (Supabase)
 │   │   ├── supabase_debt_data_source.dart            # Dívidas/fiado (Supabase)
 │   │   ├── supabase_plan_data_source.dart            # Planos (Supabase)
@@ -32,6 +33,7 @@ lib/data/
 │       ├── product_local_data_source.dart            # Contrato
 │       ├── product_local_data_source_impl.dart       # Memória
 │       ├── product_sqlite_data_source_impl.dart      # SQLite
+│       ├── stock_lot_local_data_source.dart / _impl / _sqlite  # Lotes FIFO (contrato + memória + SQLite)
 │       ├── sale_local_data_source.dart / _impl / _sqlite
 │       ├── financial_transaction_local_data_source.dart / _impl / _sqlite
 │       ├── debt_local_data_source.dart / _impl / _sqlite
@@ -62,6 +64,7 @@ Cada `XxxLocalDataSource` é uma **interface**; há duas implementações:
 | Contrato | Memória (`*_impl.dart`) | SQLite (`*_sqlite_impl.dart`) |
 | -------- | ----------------------- | ----------------------------- |
 | `ProductLocalDataSource` | `List<Product>` + seed | Tabela `products` |
+| `StockLotLocalDataSource` | `List<StockLot>` + seed | Tabela `stock_lots` (ordem FIFO garantida na query) |
 | `SaleLocalDataSource` | `List<Sale>` + seed | Tabelas `sales` + `sale_items` (transação única) |
 | `FinancialTransactionLocalDataSource` | `List<FinancialTransaction>` + seed | Tabela `financial_transactions` |
 | `DebtLocalDataSource` | `List<Debt>` + seed | Tabela `debts` |
@@ -91,10 +94,10 @@ Implementam **os mesmos contratos** (`ProductLocalDataSource`, `SaleLocalDataSou
 - **Tenant isolation:** todo INSERT grava `user_id` (da sessão — `requireCurrentUserId()`); o **RLS** (`auth.uid() = user_id`) filtra no banco e o **trigger** `set_tenant_user_id()` no schema reforça o valor no servidor (à prova de forja);
 - **Enums** persistidos pelo nome; **datas** como TIMESTAMPTZ (ISO 8601); **booleanos** como BOOLEAN;
 - **Vendas:** a `Sale` + `SaleItem`s são gravadas em **uma única requisição** via insert aninhado do PostgREST (FK `sale_items.sale_id → sales.id`), com `defaultToNull: false`; a leitura usa embedded resource `select('*, sale_items(*)')`;
-- **Unit of Work:** no-op (cada chamada REST é uma transação própria no banco) — a atomicidade cross-tabela completa (venda + estoque + caixa) é o próximo passo via RPC `SECURITY DEFINER`;
+- **Unit of Work:** no-op (cada chamada REST é uma transação própria no banco) — a atomicidade cross-tabela (venda + estoque + caixa) fica a cargo das RPCs `SECURITY DEFINER` (`process_sale`, `process_purchase`), que rodam em transação única no servidor e aplicam a baixa FIFO por lotes (W11);
 - **Sem sessão:** os datasources lançam `StateError` — as telas de dados só são acessíveis após o login (`AuthGate`).
 
-O schema (tabelas, RLS, políticas, índices, triggers e seed) está em [`supabase/schema.sql`](../../supabase/schema.sql), validado em PostgreSQL 14.
+O schema (tabelas, RLS, políticas, índices, triggers e seed) está em [`supabase/schema.sql`](../../supabase/schema.sql), validado em PostgreSQL 16 (CI e `sql_check.sh` rodam contra Postgres 16 em Docker).
 
 ---
 
@@ -108,20 +111,27 @@ O schema (tabelas, RLS, políticas, índices, triggers e seed) está em [`supaba
 
 ### Schema do banco
 
+Desde a W4, dinheiro é **INTEGER em centavos**; desde a W11, quantidades são **INTEGER em milésimos** (1000 = 1 unidade/kg) — mesma filosofia dos centavos, sem ponto flutuante no dinheiro nem na quantidade.
+
 ```sql
 CREATE TABLE products (
   id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
   name TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
-  purchase_price REAL NOT NULL CHECK (purchase_price >= 0),
-  sale_price REAL NOT NULL CHECK (sale_price >= 0),
-  stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0)
+  purchase_price INTEGER NOT NULL CHECK (purchase_price >= 0),  -- centavos (W4)
+  sale_price INTEGER NOT NULL CHECK (sale_price >= 0),          -- centavos (W4)
+  stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),  -- milésimos (W11)
+  code TEXT,                 -- PLU/código de balança etiquetadora (W11, opcional)
+  venda_por_fracao INTEGER NOT NULL DEFAULT 0,  -- 0/1: venda por peso (W11)
+  unit_label TEXT NOT NULL DEFAULT 'un'         -- kg | un (W11)
 );
 
 CREATE TABLE sales (
   id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
   sale_number INTEGER NOT NULL DEFAULT 0,  -- sequencial por loja (S-00001)
-  total_amount REAL NOT NULL CHECK (total_amount >= 0),
+  total_amount INTEGER NOT NULL CHECK (total_amount >= 0),  -- centavos
   payment_method TEXT NOT NULL,          -- nome do enum (estável)
   date_time INTEGER NOT NULL             -- epoch millis
 );
@@ -131,15 +141,16 @@ CREATE TABLE sale_items (
   sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
   product_id TEXT NOT NULL,
   product_name TEXT NOT NULL,            -- snapshot
-  quantity INTEGER NOT NULL CHECK (quantity > 0),
-  unit_price REAL NOT NULL CHECK (unit_price >= 0)
+  quantity INTEGER NOT NULL CHECK (quantity > 0),    -- milésimos (W11)
+  unit_price INTEGER NOT NULL CHECK (unit_price >= 0) -- centavos
 );
 CREATE INDEX idx_sale_items_sale_id ON sale_items(sale_id);
 
 CREATE TABLE financial_transactions (
   id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
   description TEXT NOT NULL,
-  amount REAL NOT NULL CHECK (amount >= 0),
+  amount INTEGER NOT NULL CHECK (amount >= 0),  -- centavos
   type TEXT NOT NULL,                    -- income | expense
   category TEXT NOT NULL,
   date INTEGER NOT NULL,                 -- epoch millis
@@ -149,17 +160,63 @@ CREATE TABLE financial_transactions (
 
 CREATE TABLE debts (
   id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
   debt_number INTEGER NOT NULL DEFAULT 0,  -- sequencial por loja (D-00001)
   person_name TEXT NOT NULL,
-  amount REAL NOT NULL CHECK (amount >= 0),
+  amount INTEGER NOT NULL CHECK (amount >= 0),  -- centavos
   due_date INTEGER NOT NULL,             -- epoch millis
   is_customer_debt INTEGER NOT NULL,     -- 0/1
   is_paid INTEGER NOT NULL DEFAULT 0,    -- 0/1
-  paid_at INTEGER                        -- epoch millis (data da baixa)
+  paid_at INTEGER,                       -- epoch millis (data da baixa)
+  customer_id TEXT                       -- vínculo com customers
 );
-```
 
-(`purchases` também tem `purchase_number INTEGER NOT NULL DEFAULT 0` para o número sequencial por loja C-00001 e `payment_method TEXT NOT NULL DEFAULT 'cash'` — a forma de pagamento do fornecedor, mesmo enum de vendas, backfill como à vista para compras antigas.)
+CREATE TABLE customers (
+  id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL DEFAULT '',
+  email TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE purchases (
+  id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
+  purchase_number INTEGER NOT NULL DEFAULT 0,  -- sequencial por loja (C-00001)
+  supplier_name TEXT NOT NULL,
+  total_amount INTEGER NOT NULL CHECK (total_amount >= 0),  -- centavos
+  payment_method TEXT NOT NULL DEFAULT 'cash',  -- forma de pagamento do fornecedor
+  date_time INTEGER NOT NULL
+);
+
+CREATE TABLE purchase_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  purchase_id TEXT NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
+  product_id TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  quantity INTEGER NOT NULL CHECK (quantity > 0),    -- milésimos (W11)
+  unit_price INTEGER NOT NULL CHECK (unit_price >= 0),  -- centavos
+  expiry_date INTEGER,             -- validade do lote criado por este item (W11)
+  UNIQUE (purchase_id, product_id)
+);
+CREATE INDEX idx_purchase_items_purchase_id ON purchase_items(purchase_id);
+
+-- W11 — Lotes FIFO: cada entrada de mercadoria cria um lote; a baixa no PDV
+-- consome em ordem de validade (mais próximo primeiro) e, sem validade, por
+-- data de entrada. current_quantity = quantidade ATUAL em milésimos.
+CREATE TABLE stock_lots (
+  id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
+  product_id TEXT NOT NULL,
+  entry_date INTEGER NOT NULL,             -- epoch millis (data de entrada)
+  expiry_date INTEGER,                     -- validade (opcional, NULL = sem)
+  initial_quantity INTEGER NOT NULL CHECK (initial_quantity >= 0),  -- milésimos
+  current_quantity INTEGER NOT NULL CHECK (current_quantity >= 0),  -- milésimos
+  cost_price INTEGER NOT NULL CHECK (cost_price >= 0)               -- centavos
+);
+CREATE INDEX idx_stock_lots_product ON stock_lots(product_id, store_id);
+CREATE INDEX idx_stock_lots_expiry ON stock_lots(expiry_date) WHERE current_quantity > 0;
+```
 
 **Convenções de serialização:**
 
@@ -168,7 +225,8 @@ CREATE TABLE debts (
 | Enum | **Nome** (`payment_method`, `type`, `status`) — estável na serialização |
 | `DateTime` | Epoch millis (`int`) |
 | `bool` | `0`/`1` |
-| `double` | `REAL` |
+| Dinheiro | `INTEGER` — **centavos** (W4) |
+| Quantidade | `INTEGER` — **milésimos** (W11: `1000` = 1 unidade/kg) |
 
 Os `CHECK` (`stock_quantity >= 0`, `amount >= 0`, `quantity > 0`) são a **salvaguarda final** do banco; as regras de negócio continuam no domínio.
 
@@ -183,13 +241,14 @@ Os `CHECK` (`stock_quantity >= 0`, `amount >= 0`, `quantity > 0`) são a **salva
 5. **`sales.sale_number`** — sequencial por loja (S-00001…), backfill em ordem de data; único `(store_id, sale_number)`;
 6. **`purchases.purchase_number`** — sequencial por loja (C-00001…), backfill em ordem de data; único `(store_id, purchase_number)`;
 7. **`debts.debt_number`** — sequencial por loja (D-00001…), backfill em ordem de vencimento; único `(store_id, debt_number)`;
-8. **`purchases.payment_method`** — forma de pagamento do fornecedor (mesmo enum de vendas), adicionada como `'cash'` (compras antigas eram despesas imediatas à vista).
+8. **`purchases.payment_method`** — forma de pagamento do fornecedor (mesmo enum de vendas), adicionada como `'cash'` (compras antigas eram despesas imediatas à vista);
+9. **W11 (FIFO + validade + milésimos)** — bancos antigos recebem as colunas `code`/`venda_por_fracao`/`unit_label` (products) e `expiry_date` (purchase_items); **todas as quantidades** (products, sale_items, purchase_items) são convertidas de unidades inteiras para **milésimos (×1000)**; e cada produto com estoque ganha um **lote inicial** (`lot-mig-…`, sem validade, custo = preço de compra) para a invariante `stock = Σ lotes` valer desde o primeiro dia. Guard idempotente: presença da coluna `code` (adicionada só nesta migração) — a reconversão ×1000 nunca reexecuta.
 
 As migrações de numeração rodam **depois** da de `store_id` (os backfills referenciam `store_id`). Todas usam `PRAGMA table_info` para verificar a coluna antes — **seguras para re-execução** (bancos novos já criam as colunas no `CREATE TABLE`).
 
 ### Sem seed automático
 
-O banco **não semeia dados de demonstração**: `AppDatabase.initialize` apenas cria o schema e migra dinheiro para centavos (W4) — produtos, vendas, caixa, fiado, clientes e compras nascem **vazios** e só registram dados reais criados pelo usuário.
+O banco **não semeia dados de demonstração**: `AppDatabase.initialize` apenas cria o schema e migra dinheiro para centavos (W4) e quantidades para milésimos (W11) — produtos, vendas, caixa, fiado, clientes e compras nascem **vazios** e só registram dados reais criados pelo usuário.
 
 ---
 

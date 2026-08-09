@@ -23,11 +23,31 @@ Todas as entidades são classes `@freezed` (imutáveis, com `copyWith`, `==`/`ha
 | `storeId` | `String` | Loja a que pertence (default `'st1'` — Fase 2) |
 | `name` | `String` | Obrigatório |
 | `description` | `String` | Default `''` |
-| `purchasePrice` | `double` | Preço de compra |
-| `salePrice` | `double` | Preço de venda |
-| `stockQuantity` | `int` | Default `0` |
+| `purchasePriceCents` | `int` | Preço de compra em CENTAVOS inteiros (W4) |
+| `salePriceCents` | `int` | Preço de venda em CENTAVOS inteiros (W4) |
+| `stockQuantity` | `int` | Estoque em MILÉSIMOS de unidade (W11): `1000` = 1 unidade ou 1 kg. Default `0` |
+| `code` | `String` | Código de barras/PLU do produto (opcional, numérico, até 5 dígitos) — usado pelas balanças etiquetadoras e pelo campo de código do PDV. Default `''` |
+| `vendaPorFracao` | `bool` | Venda por FRAÇÃO (peso/granel): quando `true`, o PDV aceita decimais (ex.: 1,75 kg) e intercepta códigos de balança. Default `false` |
+| `unitLabel` | `String` | Unidade dos produtos por peso (`kg`, `g`, `l`, `ml`…). `'un'` (padrão) = unidade inteira normal |
 
-**Regra de negócio associada:** `salePrice >= purchasePrice` — validada no `AddProductUseCase`.
+**Regra de negócio associada:** `salePriceCents >= purchasePriceCents` — validada no `AddProductUseCase`. O estoque em milésimos segue a mesma filosofia dos centavos (W4): `int` exato, sem artefatos de `double` em somas, baixa FIFO e comparações.
+
+### `StockLot` (lote FIFO — W11)
+
+Cada **entrada de mercadoria cria um lote** associado ao produto — a base do controlo de validade e da baixa FIFO no PDV:
+
+| Campo | Tipo | Observação |
+| ----- | ---- | ---------- |
+| `id` | `String` | `lot<microsecondsSinceEpoch>` (Dart) / `lot-<compra>-<produto>` (RPC) |
+| `storeId` | `String` | Loja dona do lote (default `'st1'` — Fase 2) |
+| `productId` | `String` | Produto do lote |
+| `entryDate` | `DateTime` | Data de ENTRADA (data da compra) — critério FIFO quando não há validade |
+| `expiryDate` | `DateTime?` | Data de VALIDADE — `null` para não perecíveis |
+| `initialQuantity` | `int` | Quantidade INICIAL recebida (milésimos) — referência histórica |
+| `currentQuantity` | `int` | Quantidade ATUAL disponível (milésimos) — diminui a cada baixa FIFO |
+| `costPriceCents` | `int` | Custo de aquisição em CENTAVOS inteiros (W4) |
+
+**Invariante central do módulo:** `product.stockQuantity = Σ lotes ativos` (soma de `currentQuantity` dos lotes com estoque). Ela nasce do backfill da migração W11 e é mantida pelas RPCs/use cases — nunca diverge.
 
 ### `Sale` (venda) + `SaleItem` (item)
 
@@ -44,7 +64,7 @@ enum PaymentMethod {
 | `id` | `String` | `s<microsecondsSinceEpoch>` |
 | `storeId` | `String` | Loja da venda (default `'st1'` — Fase 2) |
 | `items` | `List<SaleItem>` | Snapshot dos itens vendidos |
-| `totalAmount` | `double` | Soma dos itens no momento da venda |
+| `totalAmountCents` | `int` | Soma dos itens no momento da venda, em CENTAVOS (W4) |
 | `paymentMethod` | `PaymentMethod` | Forma de pagamento |
 | `dateTime` | `DateTime` | Momento da venda |
 
@@ -52,8 +72,8 @@ enum PaymentMethod {
 | ---------- | ---- | ---------- |
 | `productId` | `String` | Apenas rastreabilidade |
 | `productName` | `String` | **Snapshot** do nome na data da venda |
-| `quantity` | `int` | Quantidade |
-| `unitPrice` | `double` | **Snapshot** do preço na data da venda |
+| `quantity` | `int` | Quantidade em MILÉSIMOS (W11) — 1000 = 1 unidade/kg; decimais possíveis para produtos por peso |
+| `unitPriceCents` | `int` | **Snapshot** do preço unitário em CENTAVOS na data da venda (W4) |
 
 > **Por que snapshot?** Alterações futuras de preço/nome no catálogo não podem corromper o histórico: relatórios e auditoria usam o valor cobrado **na época**, não o atual. Ver [Fluxos de negócio](08-fluxos-de-negocio.md).
 
@@ -64,7 +84,7 @@ enum PaymentMethod {
 | `id` | `String` | `d<microsecondsSinceEpoch>` |
 | `storeId` | `String` | Loja da dívida (default `'st1'` — Fase 2) |
 | `personName` | `String` | Nome do cliente (ou fornecedor) |
-| `amount` | `double` | `@Assert('amount >= 0')` |
+| `amount` | `int` | `@Assert('amount >= 0')` — em CENTAVOS (W4) |
 | `dueDate` | `DateTime` | Vencimento |
 | `isCustomerDebt` | `bool` | `true` = a receber (cliente); `false` = a pagar (fornecedor) |
 | `isPaid` | `bool` | Default `false` — quitada ou não |
@@ -82,7 +102,7 @@ enum TransactionStatus { paid('Pago'), pending('Pendente') }
 | `id` | `String` | `t<microsecondsSinceEpoch>` |
 | `storeId` | `String` | Loja do movimento (default `'st1'` — Fase 2) |
 | `description` | `String` | Ex.: "Venda M-Pesa", "Aluguel da loja" |
-| `amount` | `double` | **Sempre magnitude positiva**; direção vem de `type` |
+| `amount` | `int` | **Sempre magnitude positiva** (em CENTAVOS, W4); direção vem de `type` |
 | `type` | `TransactionType` | Entrada ou saída |
 | `category` | `String` | Ex.: "Vendas", "Contas", "Compras", "Fiado" |
 | `date` | `DateTime` | Data do movimento (recebimento no caso de baixa) |
@@ -110,6 +130,7 @@ Vivem em `lib/domain/repositories/`. Declaram **o que** o sistema precisa, nunca
 | Contrato | Métodos |
 | -------- | ------- |
 | `IProductRepository` | `getAll(storeId)`, `getById(id)`, `add(product)`, `updateStock(id, newQuantity)` |
+| `IStockLotRepository` | `getActiveByProduct(productId, storeId)` (ordem FIFO), `getByStore(storeId)` (alertas de validade), `add(lot)`, `updateQuantity(lotId, newQuantity, storeId)` |
 | `ISaleRepository` | `registerSale(sale)`, `getAll(storeId)` |
 | `IDebtRepository` | `getAll(storeId)`, `add(debt)`, `markAsPaid(id)` |
 | `IFinancialTransactionRepository` | `getByPeriod(storeId, start, end)`, `getAll(storeId)`, `add(transaction)`, `markAsPaid(id)` |
@@ -134,14 +155,16 @@ Regras documentadas nos contratos:
 | Caso de uso | Comportamento |
 | ----------- | ------------- |
 | `GetProductsUseCase` | `getAll(storeId)` do repositório. |
-| `AddProductUseCase` | Valida `salePrice >= purchasePrice`; lança `InvalidPriceException` (nada é persistido) antes de `add`. |
-| `UpdateProductStockUseCase` | **Única porta de entrada para mutar estoque.** `ensureSufficientStock(productId, qty)` (pré-validação sem mutação) e `decrease(productId, qty)` (revalida e grava **valor absoluto** `estoque − qty`). Lança `ProductNotFoundException` / `InsufficientStockException`. |
+| `AddProductUseCase` | Valida `salePriceCents >= purchasePriceCents`; lança `InvalidPriceException` (nada é persistido) antes de `add`. Quando há **estoque inicial**, cria também o **lote inicial** correspondente (invariante `stock = Σ lotes`). |
+| `UpdateProductStockUseCase` | **Única porta de entrada para mutar o total do estoque** (agora por baixo do `FifoStockUseCase`). `ensureSufficientStock`, `increase`/`decrease` (revalidam e gravam **valor absoluto**). Lança `ProductNotFoundException` / `InsufficientStockException`. |
+| `FifoStockUseCase` | **Orquestra estoque + lotes (W11).** `increase(productId, qty)` — cria lote novo (validade opcional + custo) e aumenta o total; `decrease(productId, qty)` — pré-valida a soma dos lotes, abate em ordem FIFO (`data_validade` mais próxima primeiro; sem validade por `data_entrada`) e reduz o total; `ensureSufficientStock` — pré-validação pela soma dos lotes. Lança `ProductNotFoundException` / `InsufficientStockException` (com a quantidade REAL disponível). |
+| `GetStockLotsUseCase` | Leitura dos lotes ativos da loja (ordem FIFO) — alimenta os **alertas de validade** do dashboard (vencidos / < 30 dias). |
 
 ### Vendas
 
 | Caso de uso | Comportamento |
 | ----------- | ------------- |
-| `ProcessSaleUseCase` | Fluxo atômico completo (ver [Fluxos](08-fluxos-de-negocio.md#processamento-de-venda)): valida venda → pré-valida estoque → registra venda → baixa estoque → entrada no caixa, tudo dentro de `IUnitOfWork`. Lança `InvalidSaleException`, `InsufficientStockException`, `ProductNotFoundException`. |
+| `ProcessSaleUseCase` | Fluxo atômico completo (ver [Fluxos](08-fluxos-de-negocio.md#processamento-de-venda)): valida venda → pré-valida estoque (soma dos lotes) → registra venda → **baixa FIFO dos lotes** → entrada no caixa, tudo dentro de `IUnitOfWork`. Lança `InvalidSaleException`, `InsufficientStockException`, `ProductNotFoundException`. |
 
 ### Financeiro
 
@@ -176,8 +199,8 @@ Regras documentadas nos contratos:
 | ------- | ----------- | ------ |
 | `InvalidPriceException` | `AddProductUseCase` | Preço de venda < preço de compra |
 | `InvalidSaleException` | `ProcessSaleUseCase` | Venda sem itens ou total divergente |
-| `ProductNotFoundException` | `UpdateProductStockUseCase` | Produto inexistente |
-| `InsufficientStockException` | `UpdateProductStockUseCase` | Estoque insuficiente (com `available`/`requested`) |
+| `ProductNotFoundException` | `UpdateProductStockUseCase` / `FifoStockUseCase` | Produto inexistente |
+| `InsufficientStockException` | `UpdateProductStockUseCase` / `FifoStockUseCase` | Estoque insuficiente (com `available`/`requested` — a soma real dos lotes) |
 | `InvalidAmountException` | `AddFinancialTransactionUseCase` | Valor ≤ 0 |
 | `InvalidPeriodException` | `GetCashFlowUseCase` | Período invertido |
 | `InvalidDebtAmountException` | `AddDebtUseCase` | Valor ≤ 0 |

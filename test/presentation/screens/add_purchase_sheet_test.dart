@@ -123,7 +123,8 @@ void main() {
     expect(processPurchase.calls, 1);
     expect(processPurchase.lastPurchase?.supplierName, 'Distribuidora Central');
     expect(processPurchase.lastPurchase?.items.length, 1);
-    expect(processPurchase.lastPurchase?.items.first.quantity, 2);
+    // W11: 2 unidades em MILÉSIMOS.
+    expect(processPurchase.lastPurchase?.items.first.quantity, 2000);
     expect(processPurchase.lastPurchase?.totalAmountCents, 100);
     // Forma de pagamento padrão: M-Pesa (mesmo padrão do carrinho de vendas).
     expect(processPurchase.lastPurchase?.paymentMethod, PaymentMethod.mPesa);

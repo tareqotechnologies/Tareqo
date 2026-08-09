@@ -15,7 +15,7 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
 
   static const _columns =
       'id, store_id, name, description, purchase_price, sale_price, '
-      'stock_quantity';
+      'stock_quantity, code, venda_por_fracao, unit_label';
 
   @override
   Future<List<Product>> getAll({required String storeId}) async {
@@ -40,7 +40,7 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
   @override
   Future<void> add(Product product) async {
     _db.execute(
-      'INSERT INTO products ($_columns) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO products ($_columns) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         product.id,
         product.storeId,
@@ -49,6 +49,9 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
         product.purchasePriceCents,
         product.salePriceCents,
         product.stockQuantity,
+        product.code.isEmpty ? null : product.code,
+        product.vendaPorFracao ? 1 : 0,
+        product.unitLabel,
       ],
     );
   }
@@ -78,5 +81,8 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
         purchasePriceCents: (row['purchase_price'] as num).toInt(),
         salePriceCents: (row['sale_price'] as num).toInt(),
         stockQuantity: row['stock_quantity'] as int,
+        code: (row['code'] as String?) ?? '',
+        vendaPorFracao: (row['venda_por_fracao'] as int) == 1,
+        unitLabel: (row['unit_label'] as String?) ?? 'un',
       );
 }

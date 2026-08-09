@@ -17,13 +17,13 @@ void main() {
         SaleItem(
           productId: 'p1',
           productName: 'Caneta',
-          quantity: 2,
+          quantity: 2000, // 2 unidades em MILÉSIMOS (W11)
           unitPriceCents: 200,
         ),
         SaleItem(
           productId: 'p2',
           productName: 'Caderno',
-          quantity: 1,
+          quantity: 1000,
           unitPriceCents: 990,
         ),
       ],

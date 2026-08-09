@@ -47,13 +47,13 @@ const _bestSellers = [
   BestSeller(
     productId: 'p1',
     productName: 'Caneta',
-    quantity: 12,
+    quantity: 12000, // 12 unidades em MILÉSIMOS (W11)
     revenueCents: 2400,
   ),
   BestSeller(
     productId: 'p2',
     productName: 'Caderno',
-    quantity: 5,
+    quantity: 5000,
     revenueCents: 3000,
   ),
 ];
