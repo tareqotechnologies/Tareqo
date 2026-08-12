@@ -15,6 +15,11 @@
 #    web/icons/favicon.svg — vetor nítido em qualquer tamanho, com o mesmo
 #    gradiente e as mesmas proporções do anexo.
 #
+# Nota: o MESTRE preserva TUDO do anexo (incluindo as 4 fendas brancas
+# finas no corpo superior — resíduos de anti-aliasing do anexo original);
+# o favicon SVG ignora esses resíduos (< 5000 px) para manter o vetor
+# limpo — invisíveis no tamanho de favicon de qualquer forma.
+#
 # Depois (pipeline nativo):
 #   flutter test tool/generate_icons_test.dart
 #   dart run flutter_launcher_icons
