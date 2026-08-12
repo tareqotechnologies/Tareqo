@@ -64,6 +64,71 @@ void main() {
     );
   });
 
+  test('update persiste os campos editáveis e PRESERVA o estoque', () async {
+    final dataSource = ProductSqliteDataSourceImpl(db);
+    await dataSource.add(buildProduct('p1'));
+
+    await dataSource.update(
+      (await dataSource.getById('p1', storeId: 'st1'))!.copyWith(
+        name: 'Caneta Premium',
+        description: 'Azul metalizada',
+        salePriceCents: 250,
+        code: '12345',
+        vendaPorFracao: true,
+        unitLabel: 'kg',
+        // O stock_quantity NÃO entra no UPDATE (invariante stock = Σ lotes).
+        stockQuantity: 99999,
+      ),
+    );
+
+    final updated = await dataSource.getById('p1', storeId: 'st1');
+    expect(updated?.name, 'Caneta Premium');
+    expect(updated?.description, 'Azul metalizada');
+    expect(updated?.salePriceCents, 250);
+    expect(updated?.code, '12345');
+    expect(updated?.vendaPorFracao, isTrue);
+    expect(updated?.unitLabel, 'kg');
+    // Estoque preservado apesar do valor divergente no objeto.
+    expect(updated?.stockQuantity, 10);
+  });
+
+  test('update muda o status ativo (desativar/reativar)', () async {
+    final dataSource = ProductSqliteDataSourceImpl(db);
+    await dataSource.add(buildProduct('p1'));
+    expect((await dataSource.getById('p1', storeId: 'st1'))?.isActive, isTrue);
+
+    await dataSource.update(
+      (await dataSource.getById('p1', storeId: 'st1'))!
+          .copyWith(isActive: false),
+    );
+    expect((await dataSource.getById('p1', storeId: 'st1'))?.isActive, isFalse);
+
+    await dataSource.update(
+      (await dataSource.getById('p1', storeId: 'st1'))!
+          .copyWith(isActive: true),
+    );
+    expect((await dataSource.getById('p1', storeId: 'st1'))?.isActive, isTrue);
+  });
+
+  test('update lança StateError para produto inexistente ou de outra loja',
+      () async {
+    final dataSource = ProductSqliteDataSourceImpl(db);
+    await dataSource.add(buildProduct('p1'));
+
+    // Produto que não existe na loja.
+    expect(
+      () => dataSource.update(buildProduct('fantasma')),
+      throwsStateError,
+    );
+    // Mesmo id em OUTRA loja não é alcançável (escopo por loja).
+    expect(
+      () => dataSource.update(
+        buildProduct('p1').copyWith(storeId: 'st2', name: 'Outra loja'),
+      ),
+      throwsStateError,
+    );
+  });
+
   test('CHECK do banco rejeita estoque negativo (salvaguarda final)',
       () async {
     // A regra de negócio vive no domínio; o CHECK protege contra bugs.

@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../widgets/app_card.dart';
+
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/observability/crash_reporting.dart';
+import '../../../core/share/report_exporter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
+import '../../../domain/entities/store.dart';
+import '../../../domain/usecases/get_sales_report_use_case.dart';
+import '../../../l10n/generated/app_localizations.dart';
+import '../../controllers/account_providers.dart';
+import '../../controllers/auth_providers.dart';
 import '../../controllers/reports_providers.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
@@ -27,8 +36,55 @@ class ReportsScreen extends ConsumerWidget {
     final report = reportAsync.value;
     final theme = Theme.of(context);
 
+    // Nome da loja ativa — vai no cabeçalho do arquivo exportado (CSV/PDF).
+    final user = ref.watch(authStateProvider).value;
+    final tenant = user == null
+        ? null
+        : ref.watch(myTenantProvider(user.id)).value;
+    final activeStoreId = user == null
+        ? null
+        : ref.watch(activeStoreIdProvider(user.id));
+    final stores = tenant == null
+        ? const <Store>[]
+        : ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
+    final storeName =
+        stores.where((s) => s.id == activeStoreId).firstOrNull?.name ?? '';
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.reportsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.reportsTitle),
+        // Exportação do relatório (CSV/PDF) — só com dados carregados; o
+        // relatório é o que está na tela (período selecionado + loja ativa).
+        // `!reportAsync.hasError`: em erro o `.value` do Riverpod devolve o
+        // ÚLTIMO valor (o report vazio do build inicial) — sem o gate, o
+        // menu apareceria mesmo na tela de erro.
+        actions: [
+          if (report != null && !reportAsync.hasError)
+            PopupMenuButton<_ExportFormat>(
+              tooltip: l10n.reportsExport,
+              icon: const Icon(Icons.ios_share),
+              onSelected: (format) => _exportReport(
+                context,
+                ref,
+                format,
+                report,
+                storeName: storeName,
+                periodLabel: period.label(l10n),
+                l10n: l10n,
+              ),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: _ExportFormat.csv,
+                  child: Text(l10n.reportsExportCsv),
+                ),
+                PopupMenuItem(
+                  value: _ExportFormat.pdf,
+                  child: Text(l10n.reportsExportPdf),
+                ),
+              ],
+            ),
+        ],
+      ),
       // A tela é empurrada por cima do AppShell (fora da casca): o seletor
       // de loja ativa é re-adicionado e o relatório reflete a loja
       // selecionada.
@@ -65,9 +121,7 @@ class ReportsScreen extends ConsumerWidget {
                   Expanded(
                     child: KpiCard(
                       label: l10n.reportsRevenue,
-                      value: Formatters.currency(
-                        report?.totalRevenueCents ?? 0,
-                      ),
+                      amountCents: report?.totalRevenueCents ?? 0,
                       icon: Icons.point_of_sale_outlined,
                       loading: reportAsync.isLoading,
                     ),
@@ -76,7 +130,7 @@ class ReportsScreen extends ConsumerWidget {
                   Expanded(
                     child: KpiCard(
                       label: l10n.reportsProfit,
-                      value: Formatters.currency(report?.totalProfitCents ?? 0),
+                      amountCents: report?.totalProfitCents ?? 0,
                       icon: Icons.trending_up,
                       iconBackground: theme.income.withValues(alpha: 0.14),
                       iconColor: theme.income,
@@ -140,7 +194,8 @@ class ReportsScreen extends ConsumerWidget {
                 error: (_, _) => const SizedBox.shrink(),
                 data: (data) {
                   if (data.perDay.isEmpty) return const SizedBox.shrink();
-                  return Card(
+                  return AppCard(
+                    padding: EdgeInsets.zero,
                     child: Column(
                       children: [
                         for (var i = 0; i < data.perDay.length; i++) ...[
@@ -164,6 +219,81 @@ class ReportsScreen extends ConsumerWidget {
   }
 }
 
+/// Formato de exportação escolhido no menu.
+enum _ExportFormat { csv, pdf }
+
+/// Exporta o relatório atual ([report]) em CSV ou PDF via share sheet.
+///
+/// Os rótulos do arquivo são localizados ([l10n]); o nome da loja ativa e o
+/// período selecionado vão no cabeçalho. Falhas (rede/share) mostram a
+/// mensagem de erro e caem no CrashReporting — sem derrubar a tela.
+Future<void> _exportReport(
+  BuildContext context,
+  WidgetRef ref,
+  _ExportFormat format,
+  SalesReport report, {
+  required String storeName,
+  required String periodLabel,
+  required AppLocalizations l10n,
+}) async {
+  final labels = ReportExportLabels(
+    title: l10n.reportsExportTitle,
+    store: l10n.reportsExportStore,
+    period: l10n.reportsExportPeriod,
+    generatedAt: l10n.reportsExportGeneratedAt,
+    summary: l10n.reportsExportSummary,
+    revenueKpi: l10n.reportsRevenue,
+    profitKpi: l10n.reportsProfit,
+    marginKpi: l10n.reportsMargin,
+    bestSellers: l10n.reportsBestSellers,
+    rank: l10n.reportsExportRank,
+    product: l10n.reportsExportProduct,
+    quantity: l10n.reportsExportQuantity,
+    revenue: l10n.reportsExportRevenue,
+    perDay: l10n.reportsSalesPerDay,
+    day: l10n.reportsExportDay,
+    total: l10n.reportsExportTotal,
+    units: l10n.commonUnits,
+    fileNameBase: l10n.reportsExportFileName,
+  );
+
+  final exporter = ref.read(reportExporterProvider);
+  final generatedAt = DateTime.now();
+  try {
+    if (format == _ExportFormat.csv) {
+      await exporter.shareCsv(
+        report: report,
+        labels: labels,
+        storeName: storeName,
+        periodLabel: periodLabel,
+        generatedAt: generatedAt,
+      );
+    } else {
+      await exporter.sharePdf(
+        report: report,
+        labels: labels,
+        storeName: storeName,
+        periodLabel: periodLabel,
+        generatedAt: generatedAt,
+      );
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.reportsExportDone)));
+  } catch (error, stackTrace) {
+    CrashReporting.capture(
+      error,
+      stackTrace,
+      hint: 'Erro ao exportar relatório',
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.reportsExportError)));
+  }
+}
+
 /// Linha de produto mais vendido: posição, nome, quantidade e receita.
 class _BestSellerRow extends StatelessWidget {
   const _BestSellerRow({
@@ -183,10 +313,10 @@ class _BestSellerRow extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat.
+    return AppCard(
+      padding: const EdgeInsets.all(12),
+      child: Row(
           children: [
             CircleAvatar(
               radius: 16,
@@ -206,10 +336,10 @@ class _BestSellerRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Nome COMPLETO do vendedor — quebra em linhas quando
+                  // necessário (nada de truncar nomes nos cards).
                   Text(
                     name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -231,8 +361,7 @@ class _BestSellerRow extends StatelessWidget {
               color: theme.colorScheme.primary,
               icon: Icons.shopping_bag_outlined,
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

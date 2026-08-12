@@ -126,9 +126,9 @@ void main() {
     expect(find.text('1/3'), findsOneWidget); // lojas usadas/máx
     expect(find.text('1/10'), findsOneWidget); // funcionários usados/máx
 
-    // Aba Lojas ativa: FAB de nova loja visível (regressão do
-    // DefaultTabController — antes quebrava em runtime).
-    expect(find.text('Nova loja'), findsOneWidget);
+    // Aba Lojas ativa: FAB circular visível com tooltip de nova loja
+    // (regressão do DefaultTabController — antes quebrava em runtime).
+    expect(find.byTooltip('Nova loja'), findsOneWidget);
     expect(find.text('Loja Centro'), findsOneWidget);
   });
 
@@ -141,7 +141,7 @@ void main() {
     await tester.tap(find.byType(Tab).at(1));
     await tester.pumpAndSettle();
 
-    expect(find.text('Novo funcionário'), findsOneWidget);
+    expect(find.byTooltip('Novo funcionário'), findsOneWidget);
     expect(find.text('Carlos'), findsOneWidget);
 
     // Aba Upgrades: FAB escondido.
@@ -161,7 +161,8 @@ void main() {
     // Abre a sheet de novo funcionário.
     await tester.tap(find.byType(Tab).at(1));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Novo funcionário'));
+    // Abre a sheet pelo FAB circular (sem label — tooltip).
+    await tester.tap(find.byTooltip('Novo funcionário'));
     await tester.pumpAndSettle();
 
     // Preenche nome, e-mail e senha CURTA (6 caracteres) e submete.
@@ -192,13 +193,17 @@ void main() {
     await tester.tap(find.byType(Tab).at(1));
     await tester.pumpAndSettle();
 
-    // O card mostra o cargo (Gerente) e o interruptor do DONO.
+    // O card mostra o cargo (Gerente) e o interruptor FINO do DONO (o
+    // Switch M3 grosso foi substituído pelo _ThinToggle do design system).
     expect(find.text('Carlos'), findsOneWidget);
     expect(find.text('Gerente'), findsOneWidget);
-    expect(find.byType(Switch), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('employee-toggle-e1')),
+      findsOneWidget,
+    );
 
     // Desativa: confirma o diálogo (botão de ação = "Desativar").
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byKey(const ValueKey('employee-toggle-e1')));
     await tester.pumpAndSettle();
     expect(
       find.textContaining('Desativar Carlos?'),
@@ -211,5 +216,68 @@ void main() {
     expect(setActiveUseCase.lastEmployeeId, 'e1');
     expect(setActiveUseCase.lastIsActive, isFalse);
     expect(find.text('Funcionário desativado.'), findsOneWidget); // snack
+  });
+
+  testWidgets(
+      'Funcionário inativo: chip Inativo + interruptor fino desligado',
+      (tester) async {
+    final inactive = _FakeGetEmployeesUseCase(
+      employees: const [
+        StoreEmployee(
+          id: 'e9',
+          tenantId: 'tn1',
+          storeId: 'st1',
+          userId: 'u9',
+          fullName: 'Berto Longo',
+          email: 'berto.longo@teste.pt',
+          role: EmployeeRole.employee,
+          isActive: false,
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authStateProvider.overrideWith(
+            (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+          ),
+          getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
+          getStoresUseCaseProvider.overrideWithValue(_FakeGetStoresUseCase()),
+          getEmployeesUseCaseProvider.overrideWithValue(inactive),
+          setEmployeeActiveUseCaseProvider.overrideWithValue(
+            _FakeSetEmployeeActiveUseCase(),
+          ),
+          getMyPlanRequestsUseCaseProvider
+              .overrideWithValue(_FakeGetMyPlanRequestsUseCase()),
+        ],
+        child: testApp(home: StoresScreen(tenant: tenant)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pumpAndSettle();
+
+    // Chip "Inativo" + interruptor fino presente.
+    expect(find.text('Inativo'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('employee-toggle-e9')),
+      findsOneWidget,
+    );
+    // O toggle fino reflete o estado DESLIGADO: a semântica anota toggled
+    // = false e o thumb fica ancorado à ESQUERDA (AnimatedAlign centerLeft).
+    final semanticsWidget = tester.widget<Semantics>(
+      find.descendant(
+        of: find.byKey(const ValueKey('employee-toggle-e9')),
+        matching: find.byType(Semantics),
+      ),
+    );
+    expect(semanticsWidget.properties.toggled, isFalse);
+    final align = tester.widget<AnimatedAlign>(
+      find.descendant(
+        of: find.byKey(const ValueKey('employee-toggle-e9')),
+        matching: find.byType(AnimatedAlign),
+      ),
+    );
+    expect(align.alignment, Alignment.centerLeft);
   });
 }

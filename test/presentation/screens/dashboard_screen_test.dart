@@ -11,6 +11,7 @@ import 'package:dumbhanengue/domain/entities/debt.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/purchase.dart';
 import 'package:dumbhanengue/domain/entities/sale.dart';
+import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
 import 'package:dumbhanengue/domain/entities/store.dart';
 import 'package:dumbhanengue/domain/entities/store_employee.dart';
@@ -47,6 +48,30 @@ class _FakeSalesRepository implements ISaleRepository {
 
   @override
   Future<void> registerSale(Sale sale) async {}
+
+  @override
+  Future<Sale?> getById(String id, {required String storeId}) async {
+    for (final sale in _sales) {
+      if (sale.id == id) return sale;
+    }
+    return null;
+  }
+
+  @override
+  Future<void> markCancelled(String id, {required String storeId}) async {}
+
+  @override
+  Future<List<LotConsumption>> getLotConsumption(
+    String saleId, {
+    required String storeId,
+  }) async => const [];
+
+  @override
+  Future<void> registerLotConsumption(
+    String saleId,
+    String storeId,
+    List<LotConsumption> consumption,
+  ) async {}
 
   @override
   Future<List<Sale>> getAll({required String storeId}) async => _sales;
@@ -592,5 +617,45 @@ void main() {
     expect(find.text('M-Pesa'), findsNWidgets(2));
     expect(find.text('Pago'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
+  });
+
+  // Regressão (uniformidade + uma linha): os rótulos dos quick actions
+  // NÃO encolhem via FittedBox scaleDown nem quebram em 2 linhas — todos
+  // usam o MESMO Text com fonte fixa pequena (8px) e maxLines 1, para o
+  // rótulo mais longo ('Registrar transação') caber numa linha.
+  testWidgets('quick actions: rótulos uniformes e numa única linha',
+      (tester) async {
+    await pumpDashboard(
+      tester,
+      _buildApp(
+        products: const [],
+        sales: const [],
+        cashFlow: const CashFlow(incomeCents: 0, expenseCents: 0),
+        debts: const [],
+      ),
+    );
+
+    const labels = [
+      'Nova venda',
+      'Adicionar produto',
+      'Registrar transação',
+      'Registrar fiado',
+    ];
+
+    for (final label in labels) {
+      // Sem FittedBox (o scaleDown encolhia os longos), numa única linha
+      // centralizada e com a MESMA fonte fixa (8px) para todos.
+      expect(
+        find.ancestor(of: find.text(label), matching: find.byType(FittedBox)),
+        findsNothing,
+        reason: 'rótulo "$label" não pode estar em FittedBox',
+      );
+      expect(tester.widget<Text>(find.text(label)).maxLines, 1);
+      expect(
+        tester.widget<Text>(find.text(label)).textAlign,
+        TextAlign.center,
+      );
+      expect(tester.widget<Text>(find.text(label)).style?.fontSize, 8);
+    }
   });
 }

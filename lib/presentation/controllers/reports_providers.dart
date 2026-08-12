@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
+import '../../core/share/report_exporter.dart';
 import '../../core/utils/period_utils.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../domain/usecases/get_sales_report_use_case.dart';
@@ -35,6 +36,13 @@ class ReportPeriodNotifier extends Notifier<ReportPeriod> {
 /// Ponte com o ServiceLocator (GetIt).
 final getSalesReportUseCaseProvider = Provider<GetSalesReportUseCase>(
   (ref) => ServiceLocator.instance<GetSalesReportUseCase>(),
+);
+
+/// Exportador do relatório (CSV/PDF) — mesma porta de saída do
+/// [ReceiptSharer] ([receiptSharerProvider]): provider simples, substituível
+/// por um fake nos testes de widget.
+final reportExporterProvider = Provider<ReportExporter>(
+  (ref) => const ReportExporter(),
 );
 
 /// Estado do relatório de vendas — reconstrói automaticamente quando o

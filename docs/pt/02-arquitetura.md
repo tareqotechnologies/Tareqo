@@ -12,7 +12,9 @@ lib/
 │   ├── config/                  # Configurações (Supabase URL/anon key via --dart-define)
 │   ├── database/                # Facade SQLite (import condicional io × stub)
 │   ├── di/                      # Service Locator (GetIt) — registro central de dependências
-│   ├── errors/                  # Hierarquia de Failure (ServerFailure, NetworkFailure, CacheFailure)
+│   ├── errors/                  # (vazio — exceções de domínio substituem a antiga hierarquia Failure)
+│   ├── i18n/                    # Helpers de L10n + strings de descrição de transações
+│   ├── observability/           # Crash reporting (Sentry) — CrashReporting
 │   ├── network/                 # Bootstrap do Supabase
 │   ├── security/                # Armazenamento seguro (Keychain/Keystore)
 │   ├── theme/                   # Tema Material 3 (AppTheme, AppColors)
@@ -130,16 +132,57 @@ export 'app_database_stub.dart' if (dart.library.io) 'app_database_io.dart';
 
 ---
 
-## Padrão de erro: `Failure`
+## Agregações server-side (H2): a prévia do Z-report
 
-`lib/core/errors/failure.dart` define uma hierarquia **sealed**:
+Desde a **H2** (escala), o app não carrega o histórico inteiro para calcular totais: as agregações pesadas rodam **no Postgres** (RPCs `SECURITY DEFINER`), em **UMA chamada** — o dispositivo recebe só o número. Esse padrão cobre o fluxo de caixa (`get_cash_flow`), o relatório de vendas (`get_sales_report`), os KPIs do dashboard (`get_dashboard_kpis`) e a **prévia do fecho de caixa diário (Z-report)** — `get_cash_closing_summary` — o foco desta seção.
 
-- `Failure(message)` — base;
-- `ServerFailure` — erro HTTP (4xx/5xx);
-- `NetworkFailure` — conectividade;
-- `CacheFailure` — persistência local.
+### O problema que a H2 resolve
 
-As camadas convertem exceções de infraestrutura em `Failure` antes de expor à UI, mantendo o desacoplamento. (As exceções de **domínio** — `InvalidSaleException`, `InsufficientStockException`, etc. — são lançadas pelos casos de uso e capturadas pelas telas; ver [Domínio](03-dominio.md).)
+A prévia do Z-report precisa do resumo do dia da loja: **total de vendas ativas**, o **esperado na gaveta** (só vendas em **dinheiro**) e a **abertura por forma de pagamento**, além do fecho já registrado (se houver). No modo local, o `GetCashClosingSummaryUseCase` lista **todas** as vendas e soma client-side (`aggregateCashClosingDay`). Para lojas com histórico grande (10k+ linhas), isso significa baixar e processar tudo no dispositivo a cada abertura da tela — latência e memória desnecessárias.
+
+### O fluxo no modo Supabase (H2)
+
+```text
+CashClosingSheet (Financeiro → Fecho de caixa)
+      │  ref.watch
+      ▼
+cashClosingSummaryProvider (Riverpod — FutureProvider.autoDispose)
+      │  resolve storeId ativo + day = hoje
+      ▼
+GetCashClosingSummaryUseCase  (domínio)
+      │  serverRepository != null (registrado só no modo Supabase)
+      ▼
+SupabaseCashClosingSummaryRepository  (data)
+      │  UMA chamada RPC — o cliente nunca lista vendas
+      ▼
+supabaseClient.rpc('get_cash_closing_summary', {p_store_id, p_day})
+      │  PostgREST → Postgres
+      ▼
+get_cash_closing_summary (SECURITY DEFINER + guarda is_my_store)
+      ├─ Σ total das vendas ATIVAS do dia (todas as formas)
+      ├─ Σ esperado na gaveta (só payment_method = 'cash')
+      ├─ jsonb_object_agg por forma → abertura (JSONB)
+      └─ fecho já registrado em cash_closings (se houver)
+      │  devolve JSONB
+      ▼
+CashClosingSummary (day, total, esperado, abertura, fecho existente)  → UI
+```
+
+### Decisões de arquitetura
+
+- **Agregar onde os dados moram:** a RPC soma no banco (`SUM(total_amount)` com `status = 'active'` na janela do dia) — o payload de rede é **sempre pequeno e constante**, independente do histórico (escala H2).
+- **Guardas no servidor, não na UI:** `SECURITY DEFINER` + `SET search_path` + a guarda **`is_my_store(p_store_id)`** — a prévia é leitura para dono **e funcionários** da loja; a *confirmação* (fechar) é gerencial (`is_manager_of_store` na RPC `close_cash_register`). Mesmo um cliente modificado chamando o PostgREST direto é bloqueado.
+- **O cliente envia só os parâmetros:** `p_store_id` e `p_day` (início do dia **local** convertido a UTC — mesma semântica do `close_cash_register`, janela `[p_day, p_day + 1 dia)`). Nenhum valor calculado sai do dispositivo.
+- **Mesmo critério, dois lugares:** o modo local usa `aggregateCashClosingDay` (client-side) com **exatamente o mesmo critério** da RPC (vendas ativas; anuladas ficam de fora) — critério único compartilhado também com o `CloseCashRegisterUseCase`, para a prévia e a confirmação nunca divergirem.
+- **Injeção opcional (DIP):** o `GetCashClosingSummaryUseCase` recebe `serverRepository` opcional (`instance.isRegistered<ICashClosingSummaryRepository>()`). Supabase → `SupabaseCashClosingSummaryRepository` (RPC); local/testes → `null` (fallback client-side). O domínio e a UI não mudam de um modo para o outro — apenas a fiação no ServiceLocator, como em toda troca de persistência deste projeto.
+
+> **Verificação:** o `sql_check.sh` (19.6) e o `sql_check_live.sh` (35/35) validam a RPC contra Postgres 16/17 (SECURITY DEFINER, guarda, agregação server-side); o E2E `integration_test/cash_closing_summary_live_test.dart` comprova o **payload real** (`{p_store_id, p_day}` com o dia local em UTC) contra o Supabase de verdade.
+
+---
+
+## Padrão de erro: exceções de domínio + `CrashReporting`
+
+O app **não** usa hierarquia `Failure`. Erros de negócio são **exceções de domínio** (ex.: `InvalidSaleException`, `InsufficientStockException`) lançadas pelos casos de uso e capturadas pelas telas, que as traduzem em mensagens amigáveis. Erros inesperados (e qualquer exceção capturada) são roteados para **`CrashReporting.capture`** — `debugPrint` em debug, **Sentry** em release quando `SENTRY_DSN` está presente (ver `lib/core/observability/crash_reporting.dart`).
 
 ---
 
@@ -148,3 +191,4 @@ As camadas convertem exceções de infraestrutura em `Failure` antes de expor à
 - [Domínio](03-dominio.md) — entidades, contratos e casos de uso.
 - [Camada de dados](04-dados.md) — datasources, SQLite e Unit of Work.
 - [Apresentação](05-apresentacao.md) — providers, telas e widgets.
+- [Migração do fecho de caixa](17-migracao-fecho-caixa.md) — runbook da Parte 25/26 (tabela `cash_closings` + RPCs `close_cash_register`/`get_cash_closing_summary`) aplicada no live.

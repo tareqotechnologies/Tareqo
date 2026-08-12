@@ -132,6 +132,54 @@ export 'app_database_stub.dart' if (dart.library.io) 'app_database_io.dart';
 
 ---
 
+## Server-side aggregations (H2): the Z-report preview
+
+Since **H2** (scale), the app does not download the whole history to compute totals: heavy aggregations run **in Postgres** (`SECURITY DEFINER` RPCs) in **ONE call** — the device only receives the numbers. This pattern covers the cash flow (`get_cash_flow`), the sales report (`get_sales_report`), the dashboard KPIs (`get_dashboard_kpis`) and the **daily cash-closing preview (Z-report)** — `get_cash_closing_summary` — the focus of this section.
+
+### The problem H2 solves
+
+The Z-report preview needs the store's day summary: **total active sales**, the **expected cash in the drawer** (cash sales only) and the **breakdown by payment method**, plus the already-registered closing (if any). In local mode, `GetCashClosingSummaryUseCase` lists **all** sales and sums client-side (`aggregateCashClosingDay`). For stores with a large history (10k+ rows), that means downloading and processing everything on the device every time the screen opens — needless latency and memory.
+
+### The flow in Supabase mode (H2)
+
+```text
+CashClosingSheet (Financial → Cash closing)
+      │  ref.watch
+      ▼
+cashClosingSummaryProvider (Riverpod — FutureProvider.autoDispose)
+      │  resolves active storeId + day = today
+      ▼
+GetCashClosingSummaryUseCase  (domain)
+      │  serverRepository != null (registered only in Supabase mode)
+      ▼
+SupabaseCashClosingSummaryRepository  (data)
+      │  ONE RPC call — the client never lists sales
+      ▼
+supabaseClient.rpc('get_cash_closing_summary', {p_store_id, p_day})
+      │  PostgREST → Postgres
+      ▼
+get_cash_closing_summary (SECURITY DEFINER + is_my_store guard)
+      ├─ Σ total of the day's ACTIVE sales (all methods)
+      ├─ Σ expected in the drawer (only payment_method = 'cash')
+      ├─ jsonb_object_agg by method → breakdown (JSONB)
+      └─ already-registered closing in cash_closings (if any)
+      │  returns JSONB
+      ▼
+CashClosingSummary (day, total, expected, breakdown, existing closing)  → UI
+```
+
+### Architecture decisions
+
+- **Aggregate where the data lives:** the RPC sums in the database (`SUM(total_amount)` with `status = 'active'` over the day window) — the network payload is **always small and constant**, regardless of history (H2 scale).
+- **Guards on the server, not in the UI:** `SECURITY DEFINER` + `SET search_path` + the **`is_my_store(p_store_id)`** guard — the preview is readable by the store's owner **and employees**; the *confirmation* (closing) is managerial (`is_manager_of_store` in the `close_cash_register` RPC). Even a tampered client calling PostgREST directly is blocked.
+- **The client sends only parameters:** `p_store_id` and `p_day` (start of the **local** day converted to UTC — same semantics as `close_cash_register`, window `[p_day, p_day + 1 day)`). No computed value leaves the device.
+- **Same criteria, two places:** local mode uses `aggregateCashClosingDay` (client-side) with **exactly the same criteria** as the RPC (active sales only; cancelled ones stay out) — a single criteria shared with `CloseCashRegisterUseCase`, so the preview and the confirmation never diverge.
+- **Optional injection (DIP):** `GetCashClosingSummaryUseCase` receives an optional `serverRepository` (`instance.isRegistered<ICashClosingSummaryRepository>()`). Supabase → `SupabaseCashClosingSummaryRepository` (RPC); local/tests → `null` (client-side fallback). The domain and the UI do not change between modes — only the ServiceLocator wiring does, like any persistence swap in this project.
+
+> **Verification:** `sql_check.sh` (19.6) and `sql_check_live.sh` (35/35) validate the RPC against Postgres 16/17 (SECURITY DEFINER, guard, server-side aggregation); the E2E `integration_test/cash_closing_summary_live_test.dart` proves the **real payload** (`{p_store_id, p_day}` with the local day in UTC) against the real Supabase.
+
+---
+
 ## Error pattern: domain exceptions + `CrashReporting`
 
 The app does **not** use a `Failure` hierarchy. Business errors are **domain exceptions** (e.g. `InvalidSaleException`, `InsufficientStockException`) thrown by use cases and caught by the screens, which translate them into friendly messages. Unexpected errors (and any caught exception) are routed to **`CrashReporting.capture`** — `debugPrint` in debug, **Sentry** in release when `SENTRY_DSN` is present (see `lib/core/observability/crash_reporting.dart`).
@@ -143,3 +191,4 @@ The app does **not** use a `Failure` hierarchy. Business errors are **domain exc
 - [Domain](03-domain.md) — entities, contracts and use cases.
 - [Data layer](04-data.md) — datasources, SQLite and Unit of Work.
 - [Presentation](05-presentation.md) — providers, screens and widgets.
+- [Cash-closing migration runbook](19-migracao-cash-closing.md) — runbook of Part 25/26 (`cash_closings` table + `close_cash_register`/`get_cash_closing_summary` RPCs) applied live.

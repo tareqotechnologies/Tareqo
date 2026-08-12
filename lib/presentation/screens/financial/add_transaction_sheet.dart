@@ -9,7 +9,9 @@ import '../../../domain/usecases/add_financial_transaction_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/finance_providers.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
+import '../../widgets/app_text_field.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Bottom sheet para registrar uma transação financeira
@@ -130,34 +132,30 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                   setState(() => _type = selection.first),
             ),
             const SizedBox(height: 14),
-            TextFormField(
+            // AppTextField (design system ultra-clean): minimalista, borda
+            // sutil que acende no foco — padrão dos formulários do app.
+            AppTextField(
               controller: _descriptionController,
+              label: l10n.financialDescriptionLabel,
+              prefixIcon: Icons.notes_outlined,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.financialDescriptionLabel,
-                prefixIcon: const Icon(Icons.notes_outlined),
-              ),
               validator: (value) => (value == null || value.trim().isEmpty)
                   ? l10n.financialDescriptionError
                   : null,
             ),
             const SizedBox(height: 14),
-            TextFormField(
+            AppTextField(
               controller: _categoryController,
+              label: l10n.financialCategoryLabel,
+              prefixIcon: Icons.category_outlined,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.financialCategoryLabel,
-                prefixIcon: const Icon(Icons.category_outlined),
-              ),
             ),
             const SizedBox(height: 14),
-            TextFormField(
+            AppTextField(
               controller: _amountController,
+              label: l10n.financialAmountLabel,
+              prefixIcon: Icons.attach_money,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: l10n.financialAmountLabel,
-                prefixIcon: const Icon(Icons.attach_money),
-              ),
               validator: (value) => _parseAmount(value ?? '') <= 0
                   ? l10n.financialAmountError
                   : null,
@@ -195,15 +193,18 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               ),
             ],
             const SizedBox(height: 12),
-            FilledButton(
+            // AppButton (design system ultra-clean): altura 48, cantos 12,
+            // cores sólidas — o spinner substitui o ícone durante o envio.
+            AppButton.primary(
               onPressed: _isSubmitting ? null : _submit,
-              child: _isSubmitting
+              label: l10n.financialRegister,
+              icon: _isSubmitting
                   ? const SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(l10n.financialRegister),
+                  : null,
             ),
           ],
         ),

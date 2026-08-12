@@ -5,6 +5,7 @@ import 'package:dumbhanengue/core/utils/quantity.dart';
 import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/sale.dart';
+import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
 import 'package:dumbhanengue/domain/entities/stock_lot.dart';
 import 'package:dumbhanengue/domain/repositories/i_financial_transaction_repository.dart';
@@ -22,11 +23,38 @@ import '../../helpers/fake_stock_lot_repository.dart';
 class _FakeSaleRepository implements ISaleRepository {
   final List<Sale> sales = [];
   bool registerCalled = false;
+  final List<LotConsumption> registeredConsumption = [];
 
   @override
   Future<void> registerSale(Sale sale) async {
     registerCalled = true;
     sales.add(sale);
+  }
+
+  @override
+  Future<Sale?> getById(String id, {required String storeId}) async {
+    for (final sale in sales) {
+      if (sale.id == id) return sale;
+    }
+    return null;
+  }
+
+  @override
+  Future<void> markCancelled(String id, {required String storeId}) async {}
+
+  @override
+  Future<List<LotConsumption>> getLotConsumption(
+    String saleId, {
+    required String storeId,
+  }) async => const [];
+
+  @override
+  Future<void> registerLotConsumption(
+    String saleId,
+    String storeId,
+    List<LotConsumption> consumption,
+  ) async {
+    registeredConsumption.addAll(consumption);
   }
 
   @override
@@ -50,6 +78,22 @@ class _FakeProductRepository implements IProductRepository {
   @override
   Future<void> add(Product product) async {
     products[product.id] = product;
+  }
+
+  @override
+  Future<void> update(Product product) async {
+    final current = products[product.id]!;
+    // Preserva o estoque (a mutação de quantidade passa pelo FIFO).
+    products[product.id] = current.copyWith(
+      name: product.name,
+      description: product.description,
+      purchasePriceCents: product.purchasePriceCents,
+      salePriceCents: product.salePriceCents,
+      code: product.code,
+      vendaPorFracao: product.vendaPorFracao,
+      unitLabel: product.unitLabel,
+      isActive: product.isActive,
+    );
   }
 
   @override
@@ -256,6 +300,38 @@ void main() {
     expect(saleRepository.registerCalled, isFalse);
     expect(saleRepository.sales, isEmpty);
     expect(productRepository.products['1']!.stockQuantity, 1000);
+    expect(productRepository.updateStockCalls, 0);
+    expect(transactionRepository.transactions, isEmpty);
+  });
+
+  test('lança InactiveProductException para produto DESATIVADO (nada muda)',
+      () async {
+    _seedProductWithLot(productRepository, lotRepository, '1', stockUnits: 10);
+    productRepository.products['1'] =
+        productRepository.products['1']!.copyWith(isActive: false);
+    final useCase = _buildUseCase(
+      saleRepository,
+      productRepository,
+      lotRepository,
+      transactionRepository,
+    );
+
+    await expectLater(
+      useCase(_sale(const [
+        SaleItem(
+            productId: '1',
+            productName: 'Produto 1',
+            quantity: 1000,
+            unitPriceCents: 990),
+      ])),
+      throwsA(
+        isA<InactiveProductException>()
+            .having((e) => e.productId, 'productId', '1'),
+      ),
+    );
+
+    // Integridade: nada foi persistido nem baixado.
+    expect(saleRepository.registerCalled, isFalse);
     expect(productRepository.updateStockCalls, 0);
     expect(transactionRepository.transactions, isEmpty);
   });

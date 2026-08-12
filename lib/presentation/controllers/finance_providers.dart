@@ -4,10 +4,14 @@ import '../../core/di/service_locator.dart';
 import '../../core/utils/period_utils.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/financial_transaction.dart';
+import '../../domain/repositories/i_cash_closing_repository.dart';
 import '../../domain/repositories/i_financial_transaction_repository.dart';
 import '../../domain/usecases/add_financial_transaction_use_case.dart';
+import '../../domain/usecases/close_cash_register_use_case.dart';
+import '../../domain/usecases/get_cash_closing_summary_use_case.dart';
 import '../../domain/usecases/get_cash_flow_use_case.dart';
 import '../../domain/usecases/mark_transaction_as_paid_use_case.dart';
+import '../../domain/entities/cash_closing.dart';
 import 'account_providers.dart';
 import 'auth_providers.dart';
 
@@ -54,6 +58,53 @@ final markTransactionAsPaidUseCaseProvider =
     Provider<MarkTransactionAsPaidUseCase>(
   (ref) => ServiceLocator.instance<MarkTransactionAsPaidUseCase>(),
 );
+
+/// Ponte com o ServiceLocator: use cases do fecho de caixa (Z-report).
+/// O repositório também ganha um bridge (padrão do financeRepositoryProvider)
+/// — o histórico o usa via `ref.watch`, permitindo override em testes.
+final cashClosingRepositoryProvider = Provider<ICashClosingRepository>(
+  (ref) => ServiceLocator.instance<ICashClosingRepository>(),
+);
+
+final getCashClosingSummaryUseCaseProvider = Provider<GetCashClosingSummaryUseCase>(
+  (ref) => ServiceLocator.instance<GetCashClosingSummaryUseCase>(),
+);
+
+final closeCashRegisterUseCaseProvider = Provider<CloseCashRegisterUseCase>(
+  (ref) => ServiceLocator.instance<CloseCashRegisterUseCase>(),
+);
+
+/// Fecho de caixa é operação GERENCIAL (dono/gerente) — mesma matriz da
+/// anulação de venda e das compras. O servidor (RPC close_cash_register)
+/// é a autoridade; este provider só orienta a navegação/UX.
+final canCloseCashRegisterProvider = Provider<bool>((ref) {
+  final access = ref.watch(currentAccessLevelProvider);
+  return access == UserAccessLevel.owner || access == UserAccessLevel.manager;
+});
+
+/// Fecho de caixa do DIA atual da loja ativa: resumo do dia (vendas por
+/// forma, total, esperado na gaveta) + fecho já registrado (se houver).
+/// `null` enquanto a loja não estiver resolvida.
+final cashClosingSummaryProvider =
+    FutureProvider.autoDispose<CashClosingSummary?>((ref) async {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return null;
+  final storeId = ref.watch(activeStoreIdProvider(user.id));
+  if (storeId == null) return null;
+  return ref
+      .read(getCashClosingSummaryUseCaseProvider)
+      .call(storeId: storeId, day: DateTime.now());
+});
+
+/// Histórico de fechos da loja ativa (mais recentes primeiro).
+final cashClosingHistoryProvider =
+    FutureProvider.autoDispose<List<CashClosing>?>((ref) async {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return null;
+  final storeId = ref.watch(activeStoreIdProvider(user.id));
+  if (storeId == null) return null;
+  return ref.read(cashClosingRepositoryProvider).getAll(storeId: storeId);
+});
 
 /// Estado do fluxo de caixa (entradas, saídas e saldo) para o período
 /// selecionado — reconstrói automaticamente quando o período muda.

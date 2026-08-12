@@ -1,6 +1,6 @@
 # Release — passo final antes da publicação (auditoria 2.4).
 #
-# Disparado por tag `v*` (ex.: `git tag v1.0.0 && git push --tags`):
+# Disparado por tag `v*` (ex.: `git tag v1.1.0 && git push --tags`):
 #   1. test  — valida a suíte completa (flutter analyze + flutter test);
 #   2. deploy — Fastlane: builda o AAB de PRODUÇÃO (--flavor prod, ofuscado,
 #               assinado com o upload keystore) e faz upload para o track

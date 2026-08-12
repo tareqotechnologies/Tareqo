@@ -54,6 +54,21 @@ abstract final class TransactionDescriptions {
     return '$prefix$supplierName';
   }
 
+  /// `Estorno de venda — Dinheiro` (pt) / `Sale reversal — Cash` (en).
+  ///
+  /// Movimento de SAÍDA criado na anulação de uma venda — compensa a
+  /// entrada original no caixa (a categoria continua a mesma de vendas,
+  /// então o subtotal por categoria fecha em zero).
+  static String saleReversal({
+    required String language,
+    required PaymentMethod paymentMethod,
+  }) {
+    final method = paymentMethodName(language, paymentMethod);
+    return language == 'en'
+        ? 'Sale reversal — $method'
+        : 'Estorno de venda — $method';
+  }
+
   /// Nome localizado da forma de pagamento (espelha a extensão
   /// `PaymentMethodL10n.labelFor`, sem depender de AppLocalizations — o
   /// domínio não pode importar a UI).

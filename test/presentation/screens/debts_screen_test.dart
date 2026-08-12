@@ -113,7 +113,8 @@ void main() {
     // Número SEQUENCIAL do fiado na loja ao lado do chip de vencimento.
     expect(find.text('D-00001'), findsOneWidget); // d1 (João)
     expect(find.text('D-00002'), findsOneWidget); // d2 (Maria Souza)
-    expect(find.text('Registrar fiado'), findsOneWidget);
+    // FAB circular com dados (sem label — tooltip, igual ao Novo produto).
+    expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.text('Quitar dívida'), findsNWidgets(2));
   });
 
@@ -352,7 +353,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Resumo e card seguem renderizados, sem overflow.
-    expect(find.text('Registrar fiado'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

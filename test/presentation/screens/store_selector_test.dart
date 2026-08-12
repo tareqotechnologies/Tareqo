@@ -7,6 +7,7 @@ import '../../helpers/test_app.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/purchase.dart';
 import 'package:dumbhanengue/domain/entities/sale.dart';
+import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
 import 'package:dumbhanengue/domain/entities/store.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
@@ -22,8 +23,9 @@ import 'package:dumbhanengue/presentation/screens/shell/app_shell.dart';
 
 import '../../helpers/store_context.dart';
 
-/// Fake que retorna produtos DIFERENTES por loja — permite verificar que o
-/// seletor realmente troca o escopo dos dados exibidos.
+/// Fake que retorna produtos DIFERENTES por loja — permite verificar que a
+/// troca de loja (agora em Lojas → Ajustes) realmente muda o escopo dos
+/// dados exibidos.
 class _StoreScopedGetProductsUseCase implements GetProductsUseCase {
   @override
   Future<List<Product>> call({required String storeId}) async => [
@@ -38,8 +40,8 @@ class _StoreScopedGetProductsUseCase implements GetProductsUseCase {
       ];
 }
 
-/// Fake de compras por loja — usado para verificar que o seletor também
-/// funciona nas telas EMPURRADAS por cima do AppShell (fora da casca).
+/// Fake de compras por loja — usado para verificar que as telas EMPURRADAS
+/// por cima do AppShell exibem os dados da loja ativa (sem banner).
 class _StoreScopedGetPurchasesUseCase implements GetPurchasesUseCase {
   @override
   Future<List<Purchase>> call({required String storeId}) async => [
@@ -63,6 +65,25 @@ class _EmptySalesRepository implements ISaleRepository {
   Future<void> registerSale(Sale sale) async {}
 
   @override
+  Future<Sale?> getById(String id, {required String storeId}) async => null;
+
+  @override
+  Future<void> markCancelled(String id, {required String storeId}) async {}
+
+  @override
+  Future<List<LotConsumption>> getLotConsumption(
+    String saleId, {
+    required String storeId,
+  }) async => const [];
+
+  @override
+  Future<void> registerLotConsumption(
+    String saleId,
+    String storeId,
+    List<LotConsumption> consumption,
+  ) async {}
+
+  @override
   Future<List<Sale>> getAll({required String storeId}) async => const [];
 }
 
@@ -80,8 +101,11 @@ class _ZeroCashFlowUseCase implements GetCashFlowUseCase {
 }
 
 void main() {
-  testWidgets('seletor de loja aparece com 2+ lojas e troca a loja ativa',
-      (tester) async {
+  // Regressão: o banner de seleção de loja NÃO existe mais no topo das
+  // telas (migrado para Lojas → Ajustes). O dashboard continua exibindo a
+  // loja ativa e os dados dela.
+  testWidgets('banner de loja removido do topo (AppShell) — dados da loja '
+      'ativa seguem no dashboard', (tester) async {
     // Viewport alto: o dashboard usa ListView preguiçoso e o card de
     // estoque baixo (que exibe o nome do produto) fica abaixo da dobra.
     tester.view.physicalSize = const Size(800, 2600);
@@ -107,24 +131,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Seletor visível com as duas lojas (chips).
-    expect(find.widgetWithText(ChoiceChip, 'Loja Centro'), findsOneWidget);
-    expect(find.widgetWithText(ChoiceChip, 'Loja Shopping'), findsOneWidget);
+    // SEM banner no topo: nenhum ChoiceChip de loja no shell.
+    expect(find.widgetWithText(ChoiceChip, 'Loja Centro'), findsNothing);
+    expect(find.widgetWithText(ChoiceChip, 'Loja Shopping'), findsNothing);
 
-    // Dashboard mostra a loja ativa (primeira loja = Loja Centro) e o
-    // produto dela.
+    // O dashboard mostra os dados da loja ativa (primeira = Loja Centro).
     expect(find.text('Produto Loja Centro'), findsOneWidget);
-
-    // Troca para a Loja Shopping pelo seletor.
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Loja Shopping'));
-    await tester.pumpAndSettle();
-
-    // O dashboard reflete a nova loja ativa e os dados dela.
-    expect(find.text('Produto Loja Shopping'), findsOneWidget);
-    expect(find.text('Produto Loja Centro'), findsNothing);
   });
 
-  testWidgets('seletor de loja aparece também em tela empurrada (Compras)',
+  testWidgets('banner de loja também removido de tela empurrada (Compras)',
       (tester) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -143,22 +158,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // A barra do seletor existe na tela empurrada, com as duas lojas.
-    expect(find.widgetWithText(ChoiceChip, 'Loja Centro'), findsOneWidget);
-    expect(find.widgetWithText(ChoiceChip, 'Loja Shopping'), findsOneWidget);
-
-    // Dados da loja ativa (primeira = Loja Centro).
+    // Sem banner na tela empurrada; os dados são da loja ativa.
+    expect(find.widgetWithText(ChoiceChip, 'Loja Centro'), findsNothing);
+    expect(find.widgetWithText(ChoiceChip, 'Loja Shopping'), findsNothing);
     expect(find.text('Fornecedor Centro'), findsOneWidget);
-
-    // Troca a loja pelo seletor na própria tela empurrada.
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Loja Shopping'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Fornecedor Shopping'), findsOneWidget);
-    expect(find.text('Fornecedor Centro'), findsNothing);
   });
 
-  testWidgets('seletor de loja NÃO aparece com uma única loja', (tester) async {
+  testWidgets('com uma única loja não há seletor nem banner', (tester) async {
     // Viewport alto (mesmo motivo do teste anterior).
     tester.view.physicalSize = const Size(800, 2600);
     tester.view.devicePixelRatio = 1.0;
@@ -178,7 +184,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Sem barra de seleção (nada a selecionar) e a loja única é a ativa.
+    // Sem ChoiceChip no shell (nada a selecionar) e a loja única é a ativa.
     expect(find.byType(ChoiceChip), findsNothing);
     expect(find.text('Produto Loja Centro'), findsOneWidget);
   });

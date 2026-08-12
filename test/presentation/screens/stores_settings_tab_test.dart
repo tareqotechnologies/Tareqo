@@ -37,10 +37,14 @@ class _FakeGetPlansUseCase implements GetPlansUseCase {
 }
 
 class _FakeGetStoresUseCase implements GetStoresUseCase {
+  _FakeGetStoresUseCase({this.stores = const [
+    Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
+  ]});
+
+  final List<Store> stores;
+
   @override
-  Future<List<Store>> call(String tenantId) async => const [
-        Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
-      ];
+  Future<List<Store>> call(String tenantId) async => List.unmodifiable(stores);
 }
 
 class _FakeGetEmployeesUseCase implements GetEmployeesUseCase {
@@ -100,10 +104,17 @@ void main() {
     currencyCode: 'BRL',
   );
 
-  Widget build(_CapturingUpdateTenantSettings settings) => ProviderScope(
+  Widget build(
+    _CapturingUpdateTenantSettings settings, {
+    List<Store> stores = const [
+      Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
+    ],
+  }) =>
+      ProviderScope(
         overrides: [
           getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
-          getStoresUseCaseProvider.overrideWithValue(_FakeGetStoresUseCase()),
+          getStoresUseCaseProvider
+              .overrideWithValue(_FakeGetStoresUseCase(stores: stores)),
           getEmployeesUseCaseProvider
               .overrideWithValue(_FakeGetEmployeesUseCase()),
           getMyPlanRequestsUseCaseProvider
@@ -181,6 +192,40 @@ void main() {
     );
     expect(find.text('Ajustes salvos!'), findsNothing);
     expect(settings.language, isNull);
+  });
+
+  testWidgets('aba Ajustes: seção Loja ativa aparece com 2+ lojas e troca '
+      'a loja ativa', (tester) async {
+    final stores = const [
+      Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
+      Store(id: 'st2', tenantId: 'tn1', name: 'Loja Shopping'),
+    ];
+    await tester.pumpWidget(build(_CapturingUpdateTenantSettings(), stores: stores));
+    await tester.pumpAndSettle();
+    await openSettingsTab(tester);
+
+    // Seção "Loja ativa" com as duas lojas — a primeira é a ativa.
+    expect(find.text('Loja ativa'), findsOneWidget);
+    expect(_chipSelected(tester, 'Loja Centro'), isTrue);
+    expect(_chipSelected(tester, 'Loja Shopping'), isFalse);
+
+    // Tocar na Loja Shopping troca a loja ativa.
+    await tester.tap(find.text('Loja Shopping'));
+    await tester.pumpAndSettle();
+
+    expect(_chipSelected(tester, 'Loja Centro'), isFalse);
+    expect(_chipSelected(tester, 'Loja Shopping'), isTrue);
+  });
+
+  testWidgets('aba Ajustes: sem seção Loja ativa com uma única loja',
+      (tester) async {
+    final settings = _CapturingUpdateTenantSettings();
+    await tester.pumpWidget(build(settings)); // 1 loja (fake padrão)
+    await tester.pumpAndSettle();
+    await openSettingsTab(tester);
+
+    expect(find.text('Loja ativa'), findsNothing);
+    expect(find.text('Idioma'), findsOneWidget);
   });
 
   // Rotação (UI): a tela Lojas (pushed) tem TabBar com 4 abas — em

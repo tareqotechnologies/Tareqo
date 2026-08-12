@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/sale.dart';
+import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
 import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
@@ -15,6 +16,25 @@ class _FakeSaleRepository implements ISaleRepository {
 
   @override
   Future<void> registerSale(Sale sale) async {}
+
+  @override
+  Future<Sale?> getById(String id, {required String storeId}) async => null;
+
+  @override
+  Future<void> markCancelled(String id, {required String storeId}) async {}
+
+  @override
+  Future<List<LotConsumption>> getLotConsumption(
+    String saleId, {
+    required String storeId,
+  }) async => const [];
+
+  @override
+  Future<void> registerLotConsumption(
+    String saleId,
+    String storeId,
+    List<LotConsumption> consumption,
+  ) async {}
 
   @override
   Future<List<Sale>> getAll({required String storeId}) async =>
@@ -51,6 +71,9 @@ class _FakeProductRepository implements IProductRepository {
 
   @override
   Future<void> add(Product product) async {}
+
+  @override
+  Future<void> update(Product product) async {}
 
   @override
   Future<void> updateStock(
@@ -261,5 +284,60 @@ void main() {
     expect(report.totalProfitCents, closeTo(1470, 0.0000001)); // 3 × 4.9
     expect(report.perDay.first.totalCents, 2970);
     expect(report.bestSellers.first.revenueCents, 2970);
+  });
+
+  test('venda ANULADA sai do relatório (faturamento, lucro, top e por dia)',
+      () async {
+    // (Lista NÃO-const: `cancelledAt` usa DateTime — sem construtor const.)
+    final sales = [
+      // Ativa — entra no relatório.
+      Sale(
+        id: 's1',
+        items: [
+          SaleItem(
+            productId: 'p1',
+            productName: 'Caneta',
+            quantity: 1000,
+            unitPriceCents: 300,
+          ),
+        ],
+        totalAmountCents: 300,
+        paymentMethod: PaymentMethod.cash,
+        dateTime: DateTime(2026, 8, 3, 10),
+      ),
+      // Anulada — NÃO deve contar (mesmo critério da RPC get_sales_report).
+      Sale(
+        id: 's2',
+        items: [
+          SaleItem(
+            productId: 'p1',
+            productName: 'Caneta',
+            quantity: 1000,
+            unitPriceCents: 300,
+          ),
+        ],
+        totalAmountCents: 300,
+        paymentMethod: PaymentMethod.mPesa,
+        dateTime: DateTime(2026, 8, 3, 11),
+        status: SaleStatus.cancelled,
+        cancelledAt: DateTime(2026, 8, 3, 12),
+      ),
+    ];
+
+    const products = [
+      Product(id: 'p1', name: 'Caneta', purchasePriceCents: 100, salePriceCents: 300),
+    ];
+
+    final report = await GetSalesReportUseCase(
+      _FakeSaleRepository(sales),
+      _FakeProductRepository(products),
+    )(storeId: 'st1', start: DateTime(2026, 8, 1), end: DateTime(2026, 8, 31));
+
+    expect(report.totalRevenueCents, 300); // só a ativa (3.0)
+    expect(report.totalProfitCents, 200);
+    expect(report.bestSellers, hasLength(1));
+    expect(report.bestSellers.first.quantity, 1000);
+    expect(report.perDay, hasLength(1));
+    expect(report.perDay.first.totalCents, 300);
   });
 }

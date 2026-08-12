@@ -76,11 +76,13 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.purchasesTitle)),
       floatingActionButton: hasPurchases
-          ? FloatingActionButton.extended(
+          // FAB circular (design system — igual ao "Novo produto"): só o
+          // sinal de +, com tooltip — o rótulo nunca é cortado pelo círculo.
+          ? FloatingActionButton(
               heroTag: 'fab-purchases',
               onPressed: _openNewPurchase,
-              icon: const Icon(Icons.add),
-              label: Text(l10n.purchasesAddNew),
+              tooltip: l10n.purchasesAddNew,
+              child: const Icon(Icons.add),
             )
           : null,
       // A tela é empurrada por cima do AppShell (fora da casca): o seletor

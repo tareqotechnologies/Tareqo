@@ -42,15 +42,21 @@ class AppSheetHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 12, 8),
+      padding: const EdgeInsets.fromLTRB(24, 12, 12, 6),
       child: Row(
         children: [
           Expanded(
             child: Text(title, style: theme.textTheme.titleLarge),
           ),
+          // Botão de fechar CIRCULAR (design system 2026): fundo escuro com
+          // o X em verde — igual ao app de referência.
           IconButton(
             tooltip: context.l10n.appSheetClose,
-            icon: const Icon(Icons.close),
+            style: IconButton.styleFrom(
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              foregroundColor: theme.colorScheme.primary,
+            ),
+            icon: const Icon(Icons.close, size: 18),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],

@@ -114,7 +114,9 @@ psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
 
 ## Passo 4 — Verificação pós-migração (read-only)
 
-**4.1 Rodar o script de verificação live** (read-only, **31 checks**):
+**4.1 Rodar o script de verificação live** (read-only; na época da W11 eram
+**31 checks** — o script evoluiu e hoje tem 35, os novos 32–35 do fecho de
+caixa (32–34 + a prévia server-side 35) somam-se sem afetar estes):
 
 ```bash
 SUPABASE_DB_URL="$SUPABASE_DB_URL" bash scripts/sql_check_live.sh

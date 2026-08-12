@@ -24,6 +24,24 @@ enum PaymentMethod {
   final String label;
 }
 
+/// Situação de uma venda no histórico.
+///
+/// Toda venda nasce [SaleStatus.active]; ao ser anulada (operação de
+/// nível gerencial — dono/gerente), passa a [SaleStatus.cancelled] com
+/// [Sale.cancelledAt] preenchido. Vendas anuladas permanecem no histórico
+/// (trilha de auditoria), mas são ignoradas por relatórios, KPIs e pelo
+/// resumo do dia — o estoque dos itens volta aos lotes exatos e a entrada
+/// no caixa é estornada com um movimento de saída.
+enum SaleStatus {
+  active('Ativa'),
+  cancelled('Anulada');
+
+  const SaleStatus(this.label);
+
+  /// Rótulo exibido na UI (a serialização JSON usa o nome do enum).
+  final String label;
+}
+
 /// Entidade de domínio que representa uma venda registrada.
 @freezed
 abstract class Sale with _$Sale {
@@ -43,6 +61,13 @@ abstract class Sale with _$Sale {
     required int totalAmountCents,
     required PaymentMethod paymentMethod,
     required DateTime dateTime,
+    // Situação no histórico: [SaleStatus.active] ao registrar; ao ser
+    // anulada, [SaleStatus.cancelled] + [cancelledAt] preenchido. Default
+    // 'active' preserva a leitura de vendas antigas (bancos sem a coluna
+    // de status) e os testes existentes.
+    @Default(SaleStatus.active) SaleStatus status,
+    // Momento em que a venda foi anulada (null enquanto ativa).
+    DateTime? cancelledAt,
   }) = _Sale;
 
   factory Sale.fromJson(Map<String, dynamic> json) => _$SaleFromJson(json);

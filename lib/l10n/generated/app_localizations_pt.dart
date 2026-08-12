@@ -94,6 +94,41 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível salvar os ajustes. Tente novamente.';
 
   @override
+  String get settingsSupportSection => 'Suporte';
+
+  @override
+  String get settingsSupportEntry => 'Ajuda e documentação';
+
+  @override
+  String get settingsSupportEntryHint =>
+      'Guia do Usuário e Troubleshooting — leitura sem internet';
+
+  @override
+  String get supportTitle => 'Ajuda';
+
+  @override
+  String get supportSubtitle =>
+      'Tudo o que precisa para tirar o máximo do app: o guia completo do usuário e a resolução dos problemas mais comuns.';
+
+  @override
+  String get supportUserGuide => 'Guia do Usuário';
+
+  @override
+  String get supportUserGuideHint =>
+      'Manual simples e completo: login, lojas, produtos (com foto), vendas, fiado, financeiro, fecho de caixa, relatórios e FAQ';
+
+  @override
+  String get supportTroubleshooting => 'Troubleshooting';
+
+  @override
+  String get supportTroubleshootingHint =>
+      'Resolução de problemas comuns: login, fotos, vendas, estoque, caixa, conexão e mensagens de erro';
+
+  @override
+  String get supportReadingError =>
+      'Não foi possível abrir o documento. Tente novamente.';
+
+  @override
   String get commonSearch => 'Buscar...';
 
   @override
@@ -106,7 +141,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get appSheetClose => 'Fechar';
 
   @override
-  String get storeSelectorActiveTooltip => 'Loja ativa';
+  String get storeSelectorSectionTitle => 'Loja ativa';
+
+  @override
+  String get storeSelectorSectionHint =>
+      'Escolha a loja cujos dados aparecem nos módulos (vendas, estoque, financeiro).';
 
   @override
   String get tenantPendingTitle => 'Aguardando aprovação';
@@ -609,6 +648,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get purchasesSearchHint => 'Buscar compra...';
 
   @override
+  String get productsFilterTooltip => 'Filtrar produtos';
+
+  @override
   String get productsSearchHint => 'Buscar produto...';
 
   @override
@@ -630,6 +672,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productsAdded => 'Produto adicionado!';
+
+  @override
+  String get productsAddedNoPhoto =>
+      'Produto adicionado! (foto não enviada — sem permissão de armazenamento)';
 
   @override
   String get productsAddError =>
@@ -661,6 +707,61 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productsAddSubmit => 'Adicionar produto';
+
+  @override
+  String get productsEditTitle => 'Editar produto';
+
+  @override
+  String get productsEditSubmit => 'Salvar alterações';
+
+  @override
+  String get productsEditSaved => 'Produto atualizado!';
+
+  @override
+  String get productsEditSavedNoPhoto =>
+      'Produto atualizado! (foto não enviada — sem permissão de armazenamento)';
+
+  @override
+  String get productsEditError =>
+      'Não foi possível atualizar o produto. Tente novamente.';
+
+  @override
+  String get productsPhotoLabel => 'Foto do produto';
+
+  @override
+  String get productsPhotoTake => 'Tirar foto';
+
+  @override
+  String get productsPhotoGallery => 'Da galeria';
+
+  @override
+  String get productsPhotoRemove => 'Remover foto';
+
+  @override
+  String get productsInactive => 'Inativo';
+
+  @override
+  String get productsActiveLabel => 'Produto ativo';
+
+  @override
+  String get productsActiveHint =>
+      'Desative para tirar o produto do PDV e das compras (o estoque é preservado).';
+
+  @override
+  String get productsStockAdjustHint =>
+      'Ajuste manual: define o estoque exato, criando/consumindo lotes FIFO.';
+
+  @override
+  String get productsSectionInfo => 'Informações';
+
+  @override
+  String get productsSectionPricing => 'Preços';
+
+  @override
+  String get productsSectionStock => 'Estoque';
+
+  @override
+  String get productsSectionStatus => 'Status';
 
   @override
   String get customersSearchHint => 'Buscar cliente...';
@@ -821,6 +922,58 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get reportsExport => 'Exportar';
+
+  @override
+  String get reportsExportCsv => 'Exportar CSV';
+
+  @override
+  String get reportsExportPdf => 'Exportar PDF';
+
+  @override
+  String get reportsExportDone => 'Relatório exportado!';
+
+  @override
+  String get reportsExportError =>
+      'Não foi possível exportar o relatório. Tente novamente.';
+
+  @override
+  String get reportsExportTitle => 'Relatório de vendas';
+
+  @override
+  String get reportsExportFileName => 'relatorio_vendas';
+
+  @override
+  String get reportsExportStore => 'Loja';
+
+  @override
+  String get reportsExportPeriod => 'Período';
+
+  @override
+  String get reportsExportGeneratedAt => 'Gerado em';
+
+  @override
+  String get reportsExportSummary => 'Resumo';
+
+  @override
+  String get reportsExportRank => 'Posição';
+
+  @override
+  String get reportsExportProduct => 'Produto';
+
+  @override
+  String get reportsExportQuantity => 'Quantidade';
+
+  @override
+  String get reportsExportRevenue => 'Receita';
+
+  @override
+  String get reportsExportDay => 'Dia';
+
+  @override
+  String get reportsExportTotal => 'Total';
+
+  @override
   String get financialTitle => 'Financeiro';
 
   @override
@@ -868,6 +1021,24 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível receber a pendência. Tente novamente.';
 
   @override
+  String get financialPay => 'Pagar';
+
+  @override
+  String get financialPayPendingTitle => 'Pagar pendência?';
+
+  @override
+  String financialPayPendingBody(String amount) {
+    return 'Confirmar o pagamento de $amount? A movimentação passa a contar no caixa realizado.';
+  }
+
+  @override
+  String get financialPaid => 'Saída paga!';
+
+  @override
+  String get financialPayError =>
+      'Não foi possível pagar a pendência. Tente novamente.';
+
+  @override
   String get financialAddTitle => 'Registrar movimentação';
 
   @override
@@ -910,6 +1081,79 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get financialDefaultCategoryExpense => 'Despesas';
+
+  @override
+  String get cashClosingAction => 'Fecho de caixa';
+
+  @override
+  String get cashClosingTitle => 'Fecho de caixa do dia';
+
+  @override
+  String get cashClosingDaySummary => 'Resumo do dia';
+
+  @override
+  String get cashClosingTotalSales => 'Vendas do dia';
+
+  @override
+  String get cashClosingExpectedCash => 'Esperado na gaveta';
+
+  @override
+  String get cashClosingExpectedCashHint =>
+      'Só vendas em dinheiro — cartão, M-Pesa, E-Mola e transferência não passam pela gaveta física.';
+
+  @override
+  String get cashClosingByMethod => 'Por forma de pagamento';
+
+  @override
+  String get cashClosingCountedCash => 'Dinheiro contado';
+
+  @override
+  String get cashClosingCountedCashHint =>
+      'Conte o dinheiro físico da gaveta e informe aqui.';
+
+  @override
+  String get cashClosingDifference => 'Diferença';
+
+  @override
+  String get cashClosingConfers => 'Caixa confere';
+
+  @override
+  String cashClosingSurplus(String amount) {
+    return 'Sobra de $amount';
+  }
+
+  @override
+  String cashClosingShortage(String amount) {
+    return 'Falta de $amount';
+  }
+
+  @override
+  String get cashClosingConfirm => 'Confirmar fecho';
+
+  @override
+  String get cashClosingUpdate => 'Atualizar fecho';
+
+  @override
+  String get cashClosingClosedAt => 'Fechado em';
+
+  @override
+  String get cashClosingSuccess => 'Caixa fechado!';
+
+  @override
+  String get cashClosingUpdated => 'Fecho atualizado!';
+
+  @override
+  String get cashClosingError =>
+      'Não foi possível fechar o caixa. Tente novamente.';
+
+  @override
+  String get cashClosingEmpty => 'Nenhuma venda registrada neste dia.';
+
+  @override
+  String get cashClosingHistory => 'Histórico de fechos';
+
+  @override
+  String get cashClosingHistoryEmpty => 'Nenhum fecho registrado ainda.';
 
   @override
   String get debtsTitle => 'Crédito (fiado)';
@@ -1115,6 +1359,17 @@ class AppLocalizationsPt extends AppLocalizations {
   String get salesClearFilters => 'Limpar filtros';
 
   @override
+  String salesFilteredSummary(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vendas',
+      one: '1 venda',
+    );
+    return '$_temp0 · Total $total';
+  }
+
+  @override
   String get salesItemUnavailable =>
       'Um item do carrinho não está mais disponível. Tente novamente.';
 
@@ -1174,6 +1429,68 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get saleDetailSnapshot => 'Preços congelados no momento da venda.';
+
+  @override
+  String get salesStatusCancelled => 'Anulada';
+
+  @override
+  String get saleDetailCancelAction => 'Anular venda';
+
+  @override
+  String get saleDetailCancelConfirmTitle => 'Anular esta venda?';
+
+  @override
+  String saleDetailCancelConfirmBody(String amount) {
+    return 'O estoque dos itens será devolvido e a entrada no caixa estornada ($amount). Esta ação não pode ser desfeita.';
+  }
+
+  @override
+  String get saleDetailCancelConfirm => 'Sim, anular';
+
+  @override
+  String get saleDetailCancelledAt => 'Anulada em';
+
+  @override
+  String get saleCancelledSuccess => 'Venda anulada.';
+
+  @override
+  String get saleNotFoundError => 'Esta venda não existe mais.';
+
+  @override
+  String get saleCancelError =>
+      'Não foi possível anular a venda. Tente novamente.';
+
+  @override
+  String get saleDetailShareAction => 'Partilhar recibo';
+
+  @override
+  String get saleDetailShareTitle => 'Partilhar recibo';
+
+  @override
+  String get saleDetailShareImage => 'Partilhar como imagem';
+
+  @override
+  String get saleDetailShareWhatsApp => 'WhatsApp';
+
+  @override
+  String get saleDetailShareError =>
+      'Não foi possível partilhar o recibo. Tente novamente.';
+
+  @override
+  String get saleDetailShareWhatsAppError =>
+      'Não foi possível abrir o WhatsApp. Tente novamente.';
+
+  @override
+  String get saleDetailReceiptTitle => 'RECIBO DE VENDA';
+
+  @override
+  String get saleDetailReceiptTitleCancelled => 'RECIBO DE VENDA (ANULADA)';
+
+  @override
+  String get saleDetailReceiptPayment => 'Pagamento';
+
+  @override
+  String get saleDetailReceiptThanks => 'Obrigado pela preferência!';
 
   @override
   String get adminTitle => 'Painel do Super Admin';
@@ -1375,8 +1692,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsCodeLabel => 'Código de barras (PLU)';
 
   @override
-  String get productsCodeHint =>
-      'Código usado pelas balanças etiquetadoras (ex.: 12345)';
+  String get productsCodeHint => 'Balanças etiquetadoras (ex.: 12345)';
 
   @override
   String get productsCodeError => 'Código inválido: use até 5 dígitos.';

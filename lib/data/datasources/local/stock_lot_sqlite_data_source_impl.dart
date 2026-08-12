@@ -85,6 +85,24 @@ final class StockLotSqliteDataSourceImpl implements StockLotLocalDataSource {
     }
   }
 
+  @override
+  Future<void> increaseQuantity(
+    String lotId,
+    int quantity, {
+    required String storeId,
+  }) async {
+    // Acréscimo atômico no banco (a quantidade de um lote só diminui nas
+    // baixas — devolver nunca excede o lote). Escopo por loja.
+    _db.execute(
+      'UPDATE stock_lots SET current_quantity = current_quantity + ? '
+      'WHERE id = ? AND store_id = ?',
+      [quantity, lotId, storeId],
+    );
+    if (_db.updatedRows == 0) {
+      throw StateError('Lote $lotId não encontrado para atualização.');
+    }
+  }
+
   StockLot _map(Row row) => StockLot(
     id: row['id'] as String,
     storeId: row['store_id'] as String,

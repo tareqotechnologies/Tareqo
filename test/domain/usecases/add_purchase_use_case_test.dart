@@ -48,6 +48,25 @@ class _FakeProductRepository implements IProductRepository {
   Future<void> add(Product product) async => _products.add(product);
 
   @override
+  Future<void> update(Product product) async {
+    final index = _products.indexWhere(
+      (p) => p.id == product.id && p.storeId == product.storeId,
+    );
+    final current = _products[index];
+    // Preserva o estoque (a mutação de quantidade passa pelo FIFO).
+    _products[index] = current.copyWith(
+      name: product.name,
+      description: product.description,
+      purchasePriceCents: product.purchasePriceCents,
+      salePriceCents: product.salePriceCents,
+      code: product.code,
+      vendaPorFracao: product.vendaPorFracao,
+      unitLabel: product.unitLabel,
+      isActive: product.isActive,
+    );
+  }
+
+  @override
   Future<void> updateStock(
     String id,
     int newQuantity, {
@@ -219,6 +238,29 @@ void main() {
     await expectLater(
       useCase(buildPurchase(totalAmountCents: 9900)),
       throwsA(isA<InvalidPurchaseException>()),
+    );
+
+    expect(
+      purchaseRepository.getAll(storeId: 'st1'),
+      completion(isEmpty),
+    );
+    expect(
+      transactionRepository.getAll(storeId: 'st1'),
+      completion(isEmpty),
+    );
+  });
+
+  test('lança InactiveProductException para produto DESATIVADO (nada muda)',
+      () async {
+    productRepository._products[0] =
+        productRepository._products[0].copyWith(isActive: false);
+
+    await expectLater(
+      useCase(buildPurchase()),
+      throwsA(
+        isA<InactiveProductException>()
+            .having((e) => e.productId, 'productId', 'p1'),
+      ),
     );
 
     expect(

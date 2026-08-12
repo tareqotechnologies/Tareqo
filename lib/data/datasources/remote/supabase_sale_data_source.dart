@@ -1,5 +1,6 @@
 import '../../../domain/entities/sale.dart';
 import '../../../domain/entities/sale_item.dart';
+import '../../../domain/entities/sale_lot_consumption.dart';
 import '../local/sale_local_data_source.dart';
 import 'supabase_datasource_helpers.dart';
 
@@ -71,6 +72,15 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
     );
   }
 
+  /// Anula a venda [saleId] da loja [storeId] atomicamente no servidor
+  /// (RPC `cancel_sale`): estorna o estoque aos lotes exatos, cria o
+  /// estorno de caixa e marca a venda como `cancelled` — tudo em UMA
+  /// transação, com a guarda gerencial `is_manager_of_store` no servidor.
+  Future<void> cancelSale(String saleId, {required String storeId}) async {
+    _requireSessionOrTest();
+    await _rpc('cancel_sale', {'p_sale_id': saleId, 'p_store_id': storeId});
+  }
+
   @override
   Future<List<Sale>> getAll({required String storeId}) async {
     // Embedded resource: itens vêm junto na mesma resposta. Paginação
@@ -83,6 +93,68 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
           .eq('store_id', storeId),
     );
     return List.unmodifiable([for (final row in rows) _map(row)]);
+  }
+
+  @override
+  Future<Sale?> getById(String id, {required String storeId}) async {
+    final rows = await supabaseClient
+        .from(_table)
+        .select('*, sale_items(*)')
+        .eq('id', id)
+        .eq('store_id', storeId);
+    if (rows.isEmpty) return null;
+    return _map(rows.first);
+  }
+
+  @override
+  Future<void> markCancelled(String id, {required String storeId}) async {
+    // ⚠️ Fallback REST (não usado pelo app no modo SaaS — a anulação vai
+    // pela RPC cancel_sale, que marca o status no servidor). Melhor
+    // esforço para o caminho composto.
+    await supabaseClient
+        .from(_table)
+        .update({'status': 'cancelled', 'cancelled_at': DateTime.now().toUtc().toIso8601String()})
+        .eq('id', id)
+        .eq('store_id', storeId);
+  }
+
+  @override
+  Future<List<LotConsumption>> getLotConsumption(
+    String saleId, {
+    required String storeId,
+  }) async {
+    final rows = await supabaseClient
+        .from('sale_lot_consumption')
+        .select('lot_id, product_id, quantity')
+        .eq('sale_id', saleId);
+    return [
+      for (final row in rows)
+        LotConsumption(
+          lotId: row['lot_id'] as String,
+          productId: row['product_id'] as String,
+          quantity: (row['quantity'] as num).toInt(),
+        ),
+    ];
+  }
+
+  @override
+  Future<void> registerLotConsumption(
+    String saleId,
+    String storeId,
+    List<LotConsumption> consumption,
+  ) async {
+    // ⚠️ Fallback REST (o caminho SaaS grava o consumo DENTRO da RPC
+    // process_sale, na mesma transação). Melhor esforço: insert simples.
+    if (consumption.isEmpty) return;
+    await supabaseClient.from('sale_lot_consumption').insert([
+      for (final consumed in consumption)
+        {
+          'sale_id': saleId,
+          'lot_id': consumed.lotId,
+          'product_id': consumed.productId,
+          'quantity': consumed.quantity,
+        },
+    ]);
   }
 
   @override
@@ -131,6 +203,12 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
     totalAmountCents: (row['total_amount'] as num).toInt(),
     paymentMethod: PaymentMethod.values.byName(row['payment_method'] as String),
     dateTime: DateTime.parse(row['date_time'] as String).toLocal(),
+    status: row['status'] == null
+        ? SaleStatus.active
+        : SaleStatus.values.byName(row['status'] as String),
+    cancelledAt: row['cancelled_at'] == null
+        ? null
+        : DateTime.parse(row['cancelled_at'] as String).toLocal(),
   );
 
   SaleItem _mapItem(Map<String, dynamic> row) => SaleItem(

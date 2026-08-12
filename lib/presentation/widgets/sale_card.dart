@@ -6,7 +6,9 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../domain/entities/sale.dart';
 import '../screens/sales/sale_detail_screen.dart';
+import 'app_card.dart';
 import 'method_badge.dart';
+import 'smart_amount.dart';
 import 'payment_filter.dart' show PaymentMethodAccent, PaymentMethodIcon;
 import 'status_chip.dart';
 
@@ -15,9 +17,10 @@ import 'status_chip.dart';
 /// método (cash/cartão/M-Pesa/E-Mola/transferência), número sequencial,
 /// itens, dia/hora inteligente, status "Pago" e valor em destaque.
 ///
-/// Estrutura em duas faixas separadas por um filete fino: a faixa de cima
-/// identifica a venda (método + número + status) e a de baixo traz o tempo
-/// e o valor. No desktop/web o hover realça a borda e muda o cursor.
+/// Layout COMPACTO em linha única (design system 2026, igual ao app de
+/// referência): selo do método à esquerda, identificação no meio e o par
+/// (valor + status) ancorado à direita. No desktop/web o hover realça a
+/// borda e muda o cursor.
 class SalesCard extends StatefulWidget {
   const SalesCard({super.key, required this.sale, this.onTap});
 
@@ -46,134 +49,95 @@ class _SalesCardState extends State<SalesCard> {
     final accent = _sale.paymentMethod.accent(theme);
     final itemsLabel = l10n.dashboardSaleItems(_sale.items.length);
 
-    // Mesmo raio do card do tema (cards compartilhados: Vendas, dashboard).
-    final baseShape = theme.cardTheme.shape;
-    final radius = baseShape is RoundedRectangleBorder
-        ? baseShape.borderRadius
-        : BorderRadius.circular(20);
-
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat —
+    // o hover (web/desktop) realça a BORDA via borderColor, sem mudar o
+    // restante do padrão.
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: BorderSide(
-            color: _hovered
-                ? scheme.primary.withValues(alpha: 0.55)
-                : (theme.dividerTheme.color ?? scheme.outlineVariant),
-          ),
-        ),
-        child: InkWell(
-          onTap: _onTap ?? () => _openDetails(context),
-          hoverColor: scheme.primary.withValues(alpha: 0.05),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: AppCard(
+        padding: const EdgeInsets.all(14),
+        onTap: _onTap ?? () => _openDetails(context),
+        borderColor: _hovered
+            ? scheme.primary.withValues(alpha: 0.55)
+            : null,
+        child: Row(
               children: [
-                Row(
-                  children: [
-                    PaymentMethodBadge(
-                      accent: accent,
-                      icon: _sale.paymentMethod.icon,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _sale.paymentMethod.labelFor(l10n),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${Formatters.saleLabel(_sale.number)} · '
-                            '$itemsLabel',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Status "Pago": toda venda é registrada paga (não há
-                    // devoluções no ERP) — rótulo derivado, sem modelo novo.
-                    // Align + Flexible: o chip fica ANCORADO à direita do
-                    // card (não flutuando colado ao texto) e encolhe
-                    // (ellipsis interno) em telas estreitas com escala alta.
-                    Flexible(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: StatusChip(
-                          label: l10n.salesStatusPaid,
-                          color: theme.income,
-                          icon: Icons.check_circle_outline,
+                PaymentMethodBadge(
+                  accent: accent,
+                  icon: _sale.paymentMethod.icon,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Nome da forma de pagamento COMPLETO — quebra em
+                      // linhas quando necessário (nada de truncar).
+                      Text(
+                        _sale.paymentMethod.labelFor(l10n),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Filete fino: estrutura o card em "identidade + valor".
-                const Divider(height: 1),
-                const SizedBox(height: 12),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.schedule,
-                      size: 14,
-                      color: scheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: Text(
-                        // Data inteligente: 'Hoje/Ontem/04/08' + hora, sem
-                        // repetir a data completa ao lado.
-                        '${Formatters.day(_sale.dateTime)} • '
-                        '${Formatters.time(_sale.dateTime)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                      const SizedBox(height: 2),
+                      Text(
+                        '${Formatters.saleLabel(_sale.number)} · '
+                        '$itemsLabel',
+                        style: theme.textTheme.labelSmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Valor MINIMALISTA (15px Medium, sem bold — regra de
-                    // ouro da escala: valores em colunas com peso médio).
-                    // FittedBox: valores altos ENCOLHEM para caber — nunca
-                    // truncam; o valor completo fica sempre visível.
-                    Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          Formatters.currency(_sale.totalAmountCents),
-                          maxLines: 1,
-                          textAlign: TextAlign.end,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                      const SizedBox(height: 2),
+                      Text(
+                        // Data inteligente: 'Hoje/Ontem/04/08' + hora.
+                        '${Formatters.day(_sale.dateTime)} • '
+                        '${Formatters.time(_sale.dateTime)}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.outline,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
+                const SizedBox(width: 8),
+                // Coluna direita: valor + status, ANCORADA à borda.
+                // Align + Flexible: encolhe (ellipsis interno) em telas
+                // estreitas com escala alta — nunca estoura o Row.
+                Flexible(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // SmartAmount (design system ultra-clean): auto-size
+                        // do valor — encolhe em vez de estourar/truncar.
+                        SmartAmount(
+                          cents: _sale.totalAmountCents,
+                          alignment: Alignment.centerRight,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        StatusChip(
+                          label: _sale.status == SaleStatus.cancelled
+                              ? l10n.salesStatusCancelled
+                              : l10n.salesStatusPaid,
+                          color: _sale.status == SaleStatus.cancelled
+                              ? theme.expense
+                              : theme.income,
+                          icon: _sale.status == SaleStatus.cancelled
+                              ? Icons.block
+                              : Icons.check_circle_outline,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
         ),
       ),
     );

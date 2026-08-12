@@ -28,4 +28,13 @@ abstract interface class StockLotLocalDataSource {
     int newQuantity, {
     required String storeId,
   });
+
+  /// ACRESCENTA [quantity] milésimos à quantidade atual do lote [lotId]
+  /// da loja [storeId] (anulação de venda — devolve ao lote exato
+  /// consumido). Escopado pela loja.
+  Future<void> increaseQuantity(
+    String lotId,
+    int quantity, {
+    required String storeId,
+  });
 }

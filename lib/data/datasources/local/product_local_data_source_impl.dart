@@ -45,6 +45,32 @@ final class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   }
 
   @override
+  Future<void> update(Product product) async {
+    // Escopo por loja: só o produto da loja informada é mutável.
+    final index = _products.indexWhere(
+      (p) => p.id == product.id && p.storeId == product.storeId,
+    );
+    if (index == -1) {
+      throw StateError('Produto ${product.id} não encontrado para atualização.');
+    }
+    // Atualiza apenas os campos EDITÁVEIS do catálogo — preserva o
+    // estoque atual (a mutação de quantidade passa pelo FifoStockUseCase,
+    // que mantém a invariante `stock = Σ lotes`).
+    final current = _products[index];
+    _products[index] = current.copyWith(
+      name: product.name,
+      description: product.description,
+      imagePath: product.imagePath,
+      purchasePriceCents: product.purchasePriceCents,
+      salePriceCents: product.salePriceCents,
+      code: product.code,
+      vendaPorFracao: product.vendaPorFracao,
+      unitLabel: product.unitLabel,
+      isActive: product.isActive,
+    );
+  }
+
+  @override
   Future<void> updateStock(
     String id,
     int newQuantity, {

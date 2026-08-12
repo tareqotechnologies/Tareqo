@@ -36,6 +36,7 @@ lib/data/
 │       ├── stock_lot_local_data_source.dart / _impl / _sqlite  # Lotes FIFO (contrato + memória + SQLite)
 │       ├── sale_local_data_source.dart / _impl / _sqlite
 │       ├── financial_transaction_local_data_source.dart / _impl / _sqlite
+│       ├── cash_closing_local_data_source.dart / _impl / _sqlite   # Fecho de caixa (Z-report)
 │       ├── debt_local_data_source.dart / _impl / _sqlite
 │       ├── plan_local_data_source.dart / _impl       # Contrato + memória (Contas)
 │       ├── tenant_local_data_source.dart / _impl     # Tenants (Contas)
@@ -65,8 +66,9 @@ Cada `XxxLocalDataSource` é uma **interface**; há duas implementações:
 | -------- | ----------------------- | ----------------------------- |
 | `ProductLocalDataSource` | `List<Product>` + seed | Tabela `products` |
 | `StockLotLocalDataSource` | `List<StockLot>` + seed | Tabela `stock_lots` (ordem FIFO garantida na query) |
-| `SaleLocalDataSource` | `List<Sale>` + seed | Tabelas `sales` + `sale_items` (transação única) |
+| `SaleLocalDataSource` | `List<Sale>` + seed | Tabelas `sales` + `sale_items` + `sale_lot_consumption` (transação única) |
 | `FinancialTransactionLocalDataSource` | `List<FinancialTransaction>` + seed | Tabela `financial_transactions` |
+| `CashClosingLocalDataSource` | `List<CashClosing>` + seed | Tabela `cash_closings` (UPSERT por loja + dia) |
 | `DebtLocalDataSource` | `List<Debt>` + seed | Tabela `debts` |
 
 **Quem escolhe qual usar?** O `ServiceLocator`, por precedência:
@@ -96,6 +98,23 @@ Implementam **os mesmos contratos** (`ProductLocalDataSource`, `SaleLocalDataSou
 - **Vendas:** a `Sale` + `SaleItem`s são gravadas em **uma única requisição** via insert aninhado do PostgREST (FK `sale_items.sale_id → sales.id`), com `defaultToNull: false`; a leitura usa embedded resource `select('*, sale_items(*)')`;
 - **Unit of Work:** no-op (cada chamada REST é uma transação própria no banco) — a atomicidade cross-tabela (venda + estoque + caixa) fica a cargo das RPCs `SECURITY DEFINER` (`process_sale`, `process_purchase`), que rodam em transação única no servidor e aplicam a baixa FIFO por lotes (W11);
 - **Sem sessão:** os datasources lançam `StateError` — as telas de dados só são acessíveis após o login (`AuthGate`).
+
+### Agregações server-side (W5/H2)
+
+Para **escala**, o app não baixa o histórico inteiro para somar no cliente: as agregações pesadas rodam **no Postgres** em RPCs `SECURITY DEFINER` (guarda `is_my_store`, valores em BIGINT/centavos), e o dispositivo recebe só os números — **UMA chamada**, payload constante. O padrão cobre quatro frentes:
+
+| RPC | Repositório | Agrega |
+| --- | ----------- | ------ |
+| `get_dashboard_kpis` (W5) | `SupabaseDashboardKpisRepository` | KPIs do dashboard — faturamento, ticket, contagens — em vez de 4 listagens somadas no cliente (`GetDashboardKpisUseCase`) |
+| `get_cash_flow` (H2) | `SupabaseCashFlowRepository` | entradas/saídas **paid** do período + saldo (`GetCashFlowUseCase`) |
+| `get_sales_report` (H2) | `SupabaseSalesReportRepository` | faturamento, lucro bruto, top 5 vendidos e vendas por dia no fuso do dispositivo (`GetSalesReportUseCase`) |
+| `get_cash_closing_summary` (H2) | `SupabaseCashClosingSummaryRepository` | prévia do Z-report: total/esperado na gaveta/abertura por forma + fecho já registrado (`GetCashClosingSummaryUseCase`) |
+
+**Como a fiação funciona (DIP):** os casos de uso recebem um `serverRepository` **opcional** — registrado **só no modo Supabase** via `instance.isRegistered<I…Repository>()` no ServiceLocator (ex.: `ICashClosingSummaryRepository`, `ICashFlowRepository`); local/testes recebem `null` e caem no **fallback client-side** com o **mesmo critério** da RPC (ex.: `aggregateCashClosingDay` espelha `close_cash_register`/`get_cash_closing_summary`). O domínio e a UI não mudam de um modo para o outro — apenas a fiação, como em toda troca de persistência deste projeto.
+
+**Leituras de listagem (H2):** o complemento das agregações é a **paginação keyset** (`fetchAllKeyset` — cursor estável no `id`, lotes de `SupabaseQueryLimits.pageSize`), que substitui o antigo `.limit(1000)` em todos os `getAll` remotos — resposta pequena e constante mesmo para lojas com 10k+ linhas.
+
+> Ver o padrão completo, com diagrama do fluxo da prévia do Z-report, em [Arquitetura — Agregações server-side (H2)](02-arquitetura.md); os fluxos de negócio (fecho de caixa) em [Fluxos de negócio](08-fluxos-de-negocio.md).
 
 O schema (tabelas, RLS, políticas, índices, triggers e seed) está em [`supabase/schema.sql`](../../supabase/schema.sql), validado em PostgreSQL 16 (CI e `sql_check.sh` rodam contra Postgres 16 em Docker).
 
@@ -133,7 +152,9 @@ CREATE TABLE sales (
   sale_number INTEGER NOT NULL DEFAULT 0,  -- sequencial por loja (S-00001)
   total_amount INTEGER NOT NULL CHECK (total_amount >= 0),  -- centavos
   payment_method TEXT NOT NULL,          -- nome do enum (estável)
-  date_time INTEGER NOT NULL             -- epoch millis
+  date_time INTEGER NOT NULL,            -- epoch millis
+  status TEXT NOT NULL DEFAULT 'active', -- active | cancelled (anulação)
+  cancelled_at INTEGER                   -- momento da anulação (NULL se ativa)
 );
 
 CREATE TABLE sale_items (
@@ -145,6 +166,18 @@ CREATE TABLE sale_items (
   unit_price INTEGER NOT NULL CHECK (unit_price >= 0) -- centavos
 );
 CREATE INDEX idx_sale_items_sale_id ON sale_items(sale_id);
+
+-- Consumo de LOTES por venda — gravado na MESMA transação da venda. Permite
+-- à anulação devolver o estoque aos lotes EXATOS consumidos (preservando
+-- validade e custo de cada lote).
+CREATE TABLE sale_lot_consumption (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+  lot_id TEXT NOT NULL,
+  product_id TEXT NOT NULL,
+  quantity INTEGER NOT NULL CHECK (quantity > 0)    -- milésimos (W11)
+);
+CREATE INDEX idx_sale_lot_consumption_sale ON sale_lot_consumption(sale_id);
 
 CREATE TABLE financial_transactions (
   id TEXT PRIMARY KEY,
@@ -216,6 +249,23 @@ CREATE TABLE stock_lots (
 );
 CREATE INDEX idx_stock_lots_product ON stock_lots(product_id, store_id);
 CREATE INDEX idx_stock_lots_expiry ON stock_lots(expiry_date) WHERE current_quantity > 0;
+
+-- Fecho de caixa diário (Z-report) — um fecho por loja por dia. closing_date
+-- = início do dia local em ms (época); expected_cash = o que deveria estar na
+-- gaveta (Σ vendas ATIVAS em DINHEIRO do dia); counted_cash = dinheiro físico
+-- contado na conferência; sales_by_method = abertura por forma (JSON).
+CREATE TABLE cash_closings (
+  id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
+  closing_date INTEGER NOT NULL,             -- epoch millis (início do dia local)
+  total_sales INTEGER NOT NULL CHECK (total_sales >= 0),   -- centavos
+  expected_cash INTEGER NOT NULL CHECK (expected_cash >= 0), -- centavos
+  counted_cash INTEGER NOT NULL CHECK (counted_cash >= 0), -- centavos
+  sales_by_method TEXT NOT NULL DEFAULT '{}', -- JSON (method.name → centavos)
+  closed_at INTEGER NOT NULL                  -- epoch millis
+);
+CREATE UNIQUE INDEX uq_cash_closings_store_day ON cash_closings(store_id, closing_date);
+CREATE INDEX idx_cash_closings_store ON cash_closings(store_id);
 ```
 
 **Convenções de serialização:**
@@ -242,7 +292,8 @@ Os `CHECK` (`stock_quantity >= 0`, `amount >= 0`, `quantity > 0`) são a **salva
 6. **`purchases.purchase_number`** — sequencial por loja (C-00001…), backfill em ordem de data; único `(store_id, purchase_number)`;
 7. **`debts.debt_number`** — sequencial por loja (D-00001…), backfill em ordem de vencimento; único `(store_id, debt_number)`;
 8. **`purchases.payment_method`** — forma de pagamento do fornecedor (mesmo enum de vendas), adicionada como `'cash'` (compras antigas eram despesas imediatas à vista);
-9. **W11 (FIFO + validade + milésimos)** — bancos antigos recebem as colunas `code`/`venda_por_fracao`/`unit_label` (products) e `expiry_date` (purchase_items); **todas as quantidades** (products, sale_items, purchase_items) são convertidas de unidades inteiras para **milésimos (×1000)**; e cada produto com estoque ganha um **lote inicial** (`lot-mig-…`, sem validade, custo = preço de compra) para a invariante `stock = Σ lotes` valer desde o primeiro dia. Guard idempotente: presença da coluna `code` (adicionada só nesta migração) — a reconversão ×1000 nunca reexecuta.
+9. **`sales.status` + `sales.cancelled_at`** (anulação de venda) — `status` com `DEFAULT 'active'` (todas as vendas existentes são ativas — nunca foram anuladas) e `cancelled_at` NULL. Guard idempotente: presença da coluna `status`;
+10. **W11 (FIFO + validade + milésimos)** — bancos antigos recebem as colunas `code`/`venda_por_fracao`/`unit_label` (products) e `expiry_date` (purchase_items); **todas as quantidades** (products, sale_items, purchase_items) são convertidas de unidades inteiras para **milésimos (×1000)**; e cada produto com estoque ganha um **lote inicial** (`lot-mig-…`, sem validade, custo = preço de compra) para a invariante `stock = Σ lotes` valer desde o primeiro dia. Guard idempotente: presença da coluna `code` (adicionada só nesta migração) — a reconversão ×1000 nunca reexecuta.
 
 As migrações de numeração rodam **depois** da de `store_id` (os backfills referenciam `store_id`). Todas usam `PRAGMA table_info` para verificar a coluna antes — **seguras para re-execução** (bancos novos já criam as colunas no `CREATE TABLE`).
 

@@ -26,6 +26,23 @@ class _FakeProductRepository implements IProductRepository {
   Future<void> add(Product product) async => _products[product.id] = product;
 
   @override
+  Future<void> update(Product product) async {
+    final current = _products[product.id];
+    if (current == null) throw StateError('Produto ${product.id} não existe.');
+    // Preserva o estoque (a mutação de quantidade passa pelo FIFO).
+    _products[product.id] = current.copyWith(
+      name: product.name,
+      description: product.description,
+      purchasePriceCents: product.purchasePriceCents,
+      salePriceCents: product.salePriceCents,
+      code: product.code,
+      vendaPorFracao: product.vendaPorFracao,
+      unitLabel: product.unitLabel,
+      isActive: product.isActive,
+    );
+  }
+
+  @override
   Future<void> updateStock(
     String id,
     int newQuantity, {

@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/auth_providers.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
 
 /// Tela exibida ao dono quando a solicitação de acesso foi rejeitada pelo
 /// super admin (com o motivo informado).
@@ -56,39 +58,37 @@ class TenantRejectedScreen extends ConsumerWidget {
                 if (tenant.rejectionReason != null &&
                     tenant.rejectionReason!.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Card(
+                  AppCard(
                     color: scheme.errorContainer.withValues(alpha: 0.5),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 18,
-                            color: scheme.onErrorContainer,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              tenant.rejectionReason!,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: scheme.onErrorContainer,
-                              ),
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 18,
+                          color: scheme.onErrorContainer,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            tenant.rejectionReason!,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: scheme.onErrorContainer,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
                 const SizedBox(height: 28),
-                OutlinedButton.icon(
+                AppButton.secondary(
                   onPressed: () async {
                     await ref.read(signOutUseCaseProvider).call();
                   },
                   icon: const Icon(Icons.logout),
-                  label: Text(l10n.commonSignOut),
+                  label: l10n.commonSignOut,
                 ),
               ],
             ),

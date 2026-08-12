@@ -4,6 +4,7 @@ import '../../core/utils/ids.dart';
 import '../../core/utils/quantity.dart';
 import '../entities/financial_transaction.dart';
 import '../entities/sale.dart';
+import '../entities/sale_lot_consumption.dart';
 import '../repositories/i_financial_transaction_repository.dart';
 import '../repositories/i_sale_processor.dart';
 import '../repositories/i_sale_repository.dart';
@@ -55,8 +56,10 @@ class ProcessSaleUseCase {
   /// Ordem dentro da transação:
   /// 1. **Validação da venda** — itens não vazios e total consistente
   ///    (`totalAmount == Σ(quantidade × preço unitário)`);
-  /// 2. **Pré-validação de estoque** de TODOS os itens (sem mutação — soma
-  ///    dos lotes ativos via [FifoStockUseCase.ensureSufficientStock]);
+  /// 2. **Pré-validação** de TODOS os itens (sem mutação): produto ATIVO
+  ///    (desativado não vende — espelha a guarda do `lock_products_or_raise`)
+  ///    e estoque suficiente (soma dos lotes ativos via
+  ///    [FifoStockUseCase.ensureSufficientStock]);
   /// 3. **Registro** da venda;
   /// 4. **Baixa** do estoque de cada item em FIFO por lotes
   ///    ([FifoStockUseCase.decrease] — validade mais próxima primeiro);
@@ -80,8 +83,14 @@ class ProcessSaleUseCase {
     }
 
     await _unitOfWork.run(() async {
-      // 2. Pré-validação de estoque (dentro da transação).
+      // 2. Pré-validação (dentro da transação): produto ATIVO (espelha a
+      // guarda do lock_products_or_raise — desativado não vende) e
+      // estoque suficiente.
       for (final item in sale.items) {
+        await _fifoStock.requireActive(
+          item.productId,
+          storeId: sale.storeId,
+        );
         await _fifoStock.ensureSufficientStock(
           item.productId,
           item.quantity,
@@ -94,11 +103,24 @@ class ProcessSaleUseCase {
       await _saleRepository.registerSale(sale);
 
       // 4. Baixa o estoque de cada item vendido em FIFO (na loja da venda).
+      //    A baixa devolve QUAIS lotes foram consumidos — registrados na
+      //    MESMA transação para a anulação devolver o estoque aos lotes
+      //    exatos depois.
+      final consumption = <LotConsumption>[];
       for (final item in sale.items) {
-        await _fifoStock.decrease(
-          item.productId,
-          item.quantity,
-          storeId: sale.storeId,
+        consumption.addAll(
+          await _fifoStock.decrease(
+            item.productId,
+            item.quantity,
+            storeId: sale.storeId,
+          ),
+        );
+      }
+      if (consumption.isNotEmpty) {
+        await _saleRepository.registerLotConsumption(
+          sale.id,
+          sale.storeId,
+          consumption,
         );
       }
 

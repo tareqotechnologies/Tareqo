@@ -17,6 +17,14 @@ abstract interface class ProductLocalDataSource {
   /// Adiciona um produto ao armazenamento local.
   Future<void> add(Product product);
 
+  /// Atualiza os campos EDITÁVEIS do catálogo de [product] (nome,
+  /// descrição, preços, código/PLU, venda por fração e status ativo) — o
+  /// estoque NÃO é tocado aqui (a mutação de quantidade passa pelo
+  /// [FifoStockUseCase], que mantém a invariante `stock = Σ lotes`).
+  /// Escopado pela loja ([Product.storeId]); lança [StateError] se o
+  /// produto não existir lá.
+  Future<void> update(Product product);
+
   /// Define a quantidade em estoque do produto [id] da loja [storeId]
   /// (valor absoluto) — escopado pela loja.
   Future<void> updateStock(

@@ -157,8 +157,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.add).first);
     await tester.pumpAndSettle();
 
-    // Troca o padrão (M-Pesa) para Dinheiro.
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Dinheiro'));
+    // Troca o padrão (M-Pesa) para Dinheiro (aba segmentada do seletor
+    // compartilhado — design system 2026).
+    await tester.tap(find.text('Dinheiro'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(FilledButton, 'Confirmar compra'));

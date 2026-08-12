@@ -27,6 +27,9 @@ final class ProductRepositoryImpl implements IProductRepository {
   Future<void> add(Product product) => _localDataSource.add(product);
 
   @override
+  Future<void> update(Product product) => _localDataSource.update(product);
+
+  @override
   Future<void> updateStock(
     String id,
     int newQuantity, {

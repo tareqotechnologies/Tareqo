@@ -4,6 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../controllers/auth_providers.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
+import '../../widgets/app_text_field.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Tela de autenticação: login e cadastro em um único formulário.
@@ -212,162 +215,149 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (_isSignUpMode) ...[
-                              TextFormField(
-                                controller: _nameController,
-                                textInputAction: TextInputAction.next,
-                                autofillHints: const [AutofillHints.name],
-                                decoration: InputDecoration(
-                                  labelText: l10n.loginNameLabel,
-                                  prefixIcon: const Icon(Icons.person_outline),
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                            ],
-                            TextFormField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
+                  AppCard(
+                    padding: const EdgeInsets.all(20),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (_isSignUpMode) ...[
+                            AppTextField(
+                              controller: _nameController,
                               textInputAction: TextInputAction.next,
-                              autofillHints: const [AutofillHints.email],
-                              decoration: InputDecoration(
-                                labelText: l10n.loginEmailLabel,
-                                prefixIcon: const Icon(Icons.mail_outline),
-                              ),
-                              validator: (value) {
-                                final email = value?.trim() ?? '';
-                                if (email.isEmpty ||
-                                    !_emailRegExp.hasMatch(email)) {
-                                  return l10n.loginEmailError;
-                                }
-                                return null;
-                              },
+                              autofillHints: const [AutofillHints.name],
+                              label: l10n.loginNameLabel,
+                              prefixIcon: Icons.person_outline,
                             ),
                             const SizedBox(height: 14),
-                            TextFormField(
-                              controller: _passwordController,
-                              obscureText: _obscurePassword,
-                              textInputAction: _isSignUpMode
-                                  ? TextInputAction.next
-                                  : TextInputAction.done,
-                              onFieldSubmitted: (_) {
-                                if (!_isSignUpMode) _submit();
-                              },
-                              autofillHints: [
-                                _isSignUpMode
-                                    ? AutofillHints.newPassword
-                                    : AutofillHints.password,
-                              ],
-                              decoration: InputDecoration(
-                                labelText: l10n.loginPasswordLabel,
-                                prefixIcon: const Icon(Icons.lock_outline),
-                                helperText: _isSignUpMode
-                                    ? l10n.loginPasswordHint
-                                    : null,
-                                suffixIcon: IconButton(
-                                  tooltip: _obscurePassword
-                                      ? l10n.loginShowPassword
-                                      : l10n.loginHidePassword,
-                                  icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
-                                  ),
-                                  onPressed: () => setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  }),
+                          ],
+                          AppTextField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            autofillHints: const [AutofillHints.email],
+                            label: l10n.loginEmailLabel,
+                            prefixIcon: Icons.mail_outline,
+                            validator: (value) {
+                              final email = value?.trim() ?? '';
+                              if (email.isEmpty ||
+                                  !_emailRegExp.hasMatch(email)) {
+                                return l10n.loginEmailError;
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                          AppTextField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            textInputAction: _isSignUpMode
+                                ? TextInputAction.next
+                                : TextInputAction.done,
+                            onSubmitted: (_) {
+                              if (!_isSignUpMode) _submit();
+                            },
+                            autofillHints: [
+                              _isSignUpMode
+                                  ? AutofillHints.newPassword
+                                  : AutofillHints.password,
+                            ],
+                            label: l10n.loginPasswordLabel,
+                            prefixIcon: Icons.lock_outline,
+                            helperText: _isSignUpMode
+                                ? l10n.loginPasswordHint
+                                : null,
+                            suffixIcon: IconButton(
+                              tooltip: _obscurePassword
+                                  ? l10n.loginShowPassword
+                                  : l10n.loginHidePassword,
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                              onPressed: () => setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              }),
+                            ),
+                            validator: (value) {
+                              final password = value ?? '';
+                              if (password.length < 8) {
+                                return l10n.loginPasswordError;
+                              }
+                              if (_isSignUpMode &&
+                                  !_isStrongPassword(password)) {
+                                return l10n.loginWeakPasswordError;
+                              }
+                              return null;
+                            },
+                          ),
+                          if (_isSignUpMode) ...[
+                            const SizedBox(height: 14),
+                            AppTextField(
+                              controller: _confirmController,
+                              obscureText: _obscureConfirm,
+                              textInputAction: TextInputAction.done,
+                              onSubmitted: (_) => _submit(),
+                              autofillHints: const [AutofillHints.newPassword],
+                              label: l10n.loginConfirmLabel,
+                              prefixIcon: Icons.lock_outline,
+                              suffixIcon: IconButton(
+                                tooltip: _obscureConfirm
+                                    ? l10n.loginShowPassword
+                                    : l10n.loginHidePassword,
+                                icon: Icon(
+                                  _obscureConfirm
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
                                 ),
+                                onPressed: () => setState(() {
+                                  _obscureConfirm = !_obscureConfirm;
+                                }),
                               ),
                               validator: (value) {
-                                final password = value ?? '';
-                                if (password.length < 8) {
-                                  return l10n.loginPasswordError;
-                                }
-                                if (_isSignUpMode &&
-                                    !_isStrongPassword(password)) {
-                                  return l10n.loginWeakPasswordError;
+                                if (value != _passwordController.text) {
+                                  return l10n.loginConfirmError;
                                 }
                                 return null;
                               },
                             ),
-                            if (_isSignUpMode) ...[
-                              const SizedBox(height: 14),
-                              TextFormField(
-                                controller: _confirmController,
-                                obscureText: _obscureConfirm,
-                                textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (_) => _submit(),
-                                autofillHints: const [
-                                  AutofillHints.newPassword,
-                                ],
-                                decoration: InputDecoration(
-                                  labelText: l10n.loginConfirmLabel,
-                                  prefixIcon: const Icon(Icons.lock_outline),
-                                  suffixIcon: IconButton(
-                                    tooltip: _obscureConfirm
-                                        ? l10n.loginShowPassword
-                                        : l10n.loginHidePassword,
-                                    icon: Icon(
-                                      _obscureConfirm
-                                          ? Icons.visibility_outlined
-                                          : Icons.visibility_off_outlined,
-                                    ),
-                                    onPressed: () => setState(() {
-                                      _obscureConfirm = !_obscureConfirm;
-                                    }),
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value != _passwordController.text) {
-                                    return l10n.loginConfirmError;
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
-                            const SizedBox(height: 20),
-                            FilledButton(
-                              onPressed: _isSubmitting ? null : _submit,
-                              child: _isSubmitting
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Text(
-                                      _isSignUpMode
-                                          ? l10n.loginSignUp
-                                          : l10n.loginSignIn,
-                                    ),
-                            ),
-                            const SizedBox(height: 4),
-                            TextButton(
-                              onPressed: _isSubmitting
-                                  ? null
-                                  : () => setState(() {
-                                      _isSignUpMode = !_isSignUpMode;
-                                      // Limpa o campo de confirmação ao
-                                      // trocar de modo.
-                                      _confirmController.clear();
-                                    }),
-                              child: Text(
-                                _isSignUpMode
-                                    ? l10n.loginSwitchToSignIn
-                                    : l10n.loginSwitchToSignUp,
-                              ),
-                            ),
                           ],
-                        ),
+                          const SizedBox(height: 20),
+                          AppButton.primary(
+                            onPressed: _isSubmitting ? null : _submit,
+                            icon: _isSubmitting
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : null,
+                            label: _isSignUpMode
+                                ? l10n.loginSignUp
+                                : l10n.loginSignIn,
+                          ),
+                          const SizedBox(height: 4),
+                          TextButton(
+                            onPressed: _isSubmitting
+                                ? null
+                                : () => setState(() {
+                                    _isSignUpMode = !_isSignUpMode;
+                                    // Limpa o campo de confirmação ao
+                                    // trocar de modo.
+                                    _confirmController.clear();
+                                  }),
+                            child: Text(
+                              _isSignUpMode
+                                  ? l10n.loginSwitchToSignIn
+                                  : l10n.loginSwitchToSignUp,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

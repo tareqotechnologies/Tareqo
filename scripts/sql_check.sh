@@ -1298,4 +1298,445 @@ catalog_ok="$(psql -q -tAc "SELECT count(*) FROM public.plans WHERE id IN ('pl1'
 }
 echo "OK: upgrade.sql reaplicado 2x no cenário Supabase (publicação + tabela membro) SEM 42710; store_employees segue publicada; catálogo pl1/pl2/pl3 presente"
 
-echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001, níveis de acesso (compras só dono/gerente), audit log (só super admin), KPIs agregadas server-side (get_dashboard_kpis), agregações H2 (get_cash_flow / get_sales_report), upgrade.sql idempotente, migração W4 NUMERIC→centavos (×100, sem dupla aplicação), numeração sequencial por loja (vendas S-00001..., compras C-00001..., fiado D-00001...), Realtime sem 42710 no cenário Supabase e catálogo de planos pl1/pl2/pl3 presente conforme esperado."
+echo "==> [17/17] Anulação de venda (cancel_sale: estorno de estoque + caixa + status gerencial)"
+# Anular venda é operação GERENCIAL (dono/gerente — matriz de acesso): o
+# estoque volta aos lotes EXATOS consumidos (sale_lot_consumption gravado
+# pelo process_sale), o caixa recebe um estorno (saída) e a venda fica
+# marcada 'cancelled' no histórico (sai de relatórios/KPIs).
+
+# 17.1 O process_sale gravou o consumo de lotes (s_smoke abateu 2000 do
+# lote lot_smoke1 — passos anteriores).
+cons_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sale_lot_consumption WHERE sale_id = 's_smoke' AND lot_id = 'lot_smoke1' AND quantity = 2000;" | tail -n 1)"
+[ "$cons_ok" = "1" ] || {
+  echo "FALHA: consumo de lote da venda não gravado (obtido: '$cons_ok')"
+  exit 1
+}
+
+# Estado antes da anulação (para o delta do KPI/relatório).
+kpi_before="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT total_sales FROM public.get_dashboard_kpis('st_smoke', now() - interval '1 day', now() + interval '1 day');" | tail -n 1)"
+rep_before="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT (public.get_sales_report('st_smoke', now() - interval '1 day', now() + interval '1 day', 0))->>'total_revenue_cents';" | tail -n 1)"
+
+# 17.2 Dono anula a venda s_smoke (RPC cancel_sale).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.cancel_sale('s_smoke', 'st_smoke');
+SQL
+
+sale_status="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT status FROM public.sales WHERE id = 's_smoke';" | tail -n 1)"
+[ "$sale_status" = "cancelled" ] || {
+  echo "FALHA: venda não marcada como cancelled (obtido: '$sale_status')"
+  exit 1
+}
+sale_cancelled_at="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT (cancelled_at IS NOT NULL) FROM public.sales WHERE id = 's_smoke';" | tail -n 1)"
+[ "$sale_cancelled_at" = "t" ] || {
+  echo "FALHA: cancelled_at não preenchido na anulação (obtido: '$sale_cancelled_at')"
+  exit 1
+}
+# Estoque voltou ao LOTE EXATO (3000 -> 5000) e ao total do produto.
+lot_back="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT current_quantity FROM public.stock_lots WHERE id = 'lot_smoke1';" | tail -n 1)"
+[ "$lot_back" = "5000" ] || {
+  echo "FALHA: lote não restaurado para 5000 após anulação (obtido: '$lot_back')"
+  exit 1
+}
+prod_back="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke1';" | tail -n 1)"
+[ "$prod_back" = "5000" ] || {
+  echo "FALHA: estoque do produto não restaurado para 5000 após anulação (obtido: '$prod_back')"
+  exit 1
+}
+# Estorno no caixa: saída de 40000 centavos (R$ 400 — o passo 12/12 W4 já
+# converteu o dinheiro ×100) na MESMA categoria da entrada original (o stub
+# é language='en' → 'Sales'; a comparação espelha a entrada, não assume idioma).
+rev_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.financial_transactions WHERE id = 'ts_smoke_rev' AND amount = 40000 AND type = 'expense' AND status = 'paid' AND category = (SELECT category FROM public.financial_transactions WHERE id = 'ts_smoke');" | tail -n 1)"
+[ "$rev_ok" = "1" ] || {
+  echo "FALHA: estorno de caixa ausente/incorreto (obtido: '$rev_ok')"
+  exit 1
+}
+inc_still="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.financial_transactions WHERE id = 'ts_smoke' AND type = 'income';" | tail -n 1)"
+[ "$inc_still" = "1" ] || {
+  echo "FALHA: entrada original deveria permanecer (trilha completa) (obtido: '$inc_still')"
+  exit 1
+}
+
+# 17.3 Anular de novo é no-op: sem novo estorno, status/estoque intactos.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.cancel_sale('s_smoke', 'st_smoke');
+SQL
+rev_twice="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.financial_transactions WHERE id = 'ts_smoke_rev';" | tail -n 1)"
+[ "$rev_twice" = "1" ] || {
+  echo "FALHA: segunda anulação criou estorno duplicado (obtido: '$rev_twice')"
+  exit 1
+}
+
+# 17.4 Venda anulada SAI do KPI e do relatório de vendas (delta = 40000 centavos = R$ 400).
+kpi_after="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT total_sales FROM public.get_dashboard_kpis('st_smoke', now() - interval '1 day', now() + interval '1 day');" | tail -n 1)"
+[ "$((kpi_before - kpi_after))" = "40000" ] || {
+  echo "FALHA: KPI total_sales deveria cair 40000 centavos com a anulação (antes $kpi_before, depois $kpi_after)"
+  exit 1
+}
+rep_after="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT (public.get_sales_report('st_smoke', now() - interval '1 day', now() + interval '1 day', 0))->>'total_revenue_cents';" | tail -n 1)"
+[ "$((rep_before - rep_after))" = "40000" ] || {
+  echo "FALHA: relatório deveria excluir a venda anulada (antes $rep_before, depois $rep_after)"
+  exit 1
+}
+
+# 17.5 FUNCIONÁRIO (não-gerente) NÃO anula: RPC rejeita e nada muda.
+# Cria uma venda NOVA (ativa) para o teste do bloqueio gerencial (id
+# 's_emp2' — 's_emp' já existe no passo 4).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.process_sale(
+  ('{"id":"s_emp2","store_id":"st_smoke","total_amount":200,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+  -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade de smoke1).
+  '[{"product_id":"smoke1","product_name":"Produto do dono","quantity":1000,"unit_price":200}]'::jsonb
+);
+SQL
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.cancel_sale('s_emp2', 'st_smoke');
+    RAISE EXCEPTION 'SENTINELA: funcionário deveria ter sido bloqueado ao anular venda';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: funcionário deveria ter sido bloqueado ao anular venda' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+emp_status="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT status FROM public.sales WHERE id = 's_emp2';" | tail -n 1)"
+[ "$emp_status" = "active" ] || {
+  echo "FALHA: venda deveria seguir ativa após bloqueio do funcionário (obtido: '$emp_status')"
+  exit 1
+}
+emp_rev="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.financial_transactions WHERE id = 'ts_emp2_rev';" | tail -n 1)"
+[ "$emp_rev" = "0" ] || {
+  echo "FALHA: bloqueio do funcionário não deveria criar estorno (obtido: '$emp_rev')"
+  exit 1
+}
+emp_stock="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke1';" | tail -n 1)"
+[ "$emp_stock" = "4000" ] || {
+  echo "FALHA: estoque não deveria mudar com anulação bloqueada (5000-1000=4000, obtido: '$emp_stock')"
+  exit 1
+}
+
+# 17.6 GERENTE anula na loja (guarda is_manager_of_store libera manager).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "33333333-3333-3333-3333-333333333333"}';
+SELECT public.cancel_sale('s_emp2', 'st_smoke');
+SQL
+mgr_status="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT status FROM public.sales WHERE id = 's_emp2';" | tail -n 1)"
+[ "$mgr_status" = "cancelled" ] || {
+  echo "FALHA: gerente deveria conseguir anular a venda (obtido: '$mgr_status')"
+  exit 1
+}
+echo "OK: cancel_sale estorna estoque aos lotes exatos, cria estorno de caixa, marca cancelled, é no-op na repetição, sai de KPIs/relatório, e é bloqueada para funcionário (só dono/gerente)"
+
+echo "==> [18/18] Edição de produto: is_active + ajuste manual de estoque (adjust_product_stock)"
+# W12 — edição de produto: (a) coluna products.is_active existe (bases
+# novas criam no CREATE TABLE; bases legadas ganham na Parte 24.1);
+# (b) a RPC adjust_product_stock define a quantidade ABSOLUTA criando
+# lote novo no aumento e consumindo em ordem FIFO na redução (a
+# invariante stock = Σ lotes nunca quebra), com guarda GERENCIAL
+# (funcionário NÃO ajusta); (c) o lock_products_or_raise recriado na
+# Parte 24.2 nega VENDA e COMPRA de produto desativado.
+
+# 18.1 A coluna is_active existe (criada pelo schema.sql; upgrade.sql
+# recria em bases legadas via Parte 24.1 — idempotente).
+is_active_col="$(psql -q -tAc "SELECT count(*) FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'is_active';" | tail -n 1)"
+[ "$is_active_col" = "1" ] || {
+  echo "FALHA: products.is_active não existe (obtido: '$is_active_col')"
+  exit 1
+}
+
+# 18.2 Produto dedicado (smoke3) com lote inicial — ajuste para CIMA cria
+# lote novo e o total do produto acompanha (invariante stock = Σ lotes).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
+VALUES ('smoke3', 'Produto ajustável', 'st_smoke', 100, 200, 2000)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.stock_lots
+  (id, store_id, product_id, entry_date, expiry_date, initial_quantity,
+   current_quantity, cost_price)
+VALUES ('lot_smoke3', 'st_smoke', 'smoke3', now(), NULL, 2000, 2000, 100)
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+# Aumento: 2000 → 5000 (milésimos). Cria lote novo; stock = Σ lotes.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.adjust_product_stock('smoke3', 'st_smoke', 5000);
+SQL
+adj_up="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke3';" | tail -n 1)"
+[ "$adj_up" = "5000" ] || {
+  echo "FALHA: ajuste para cima não definiu o estoque (2000→5000, obtido: '$adj_up')"
+  exit 1
+}
+adj_up_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT COALESCE(SUM(current_quantity), 0) FROM public.stock_lots WHERE product_id = 'smoke3' AND store_id = 'st_smoke';" | tail -n 1)"
+[ "$adj_up_lots" = "5000" ] || {
+  echo "FALHA: ajuste para cima não criou lote (stock = Σ lotes, obtido: '$adj_up_lots')"
+  exit 1
+}
+
+# Redução: 5000 → 3000 (consome lotes em ordem FIFO; total acompanha).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.adjust_product_stock('smoke3', 'st_smoke', 3000);
+SQL
+adj_down="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke3';" | tail -n 1)"
+[ "$adj_down" = "3000" ] || {
+  echo "FALHA: ajuste para baixo não definiu o estoque (5000→3000, obtido: '$adj_down')"
+  exit 1
+}
+adj_down_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT COALESCE(SUM(current_quantity), 0) FROM public.stock_lots WHERE product_id = 'smoke3' AND store_id = 'st_smoke';" | tail -n 1)"
+[ "$adj_down_lots" = "3000" ] || {
+  echo "FALHA: redução não consumiu os lotes (stock = Σ lotes, obtido: '$adj_down_lots')"
+  exit 1
+}
+
+# Idempotência: ajustar para o MESMO valor é no-op (nada muda).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.adjust_product_stock('smoke3', 'st_smoke', 3000);
+SQL
+adj_idem_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.stock_lots WHERE product_id = 'smoke3' AND store_id = 'st_smoke';" | tail -n 1)"
+[ "$adj_idem_lots" = "2" ] || {
+  echo "FALHA: ajuste repetido deveria ser no-op (sem lote novo, obtido: '$adj_idem_lots')"
+  exit 1
+}
+
+# Negativo é rejeitado (nada muda).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.adjust_product_stock('smoke3', 'st_smoke', -100);
+    RAISE EXCEPTION 'SENTINELA: estoque negativo deveria ter sido rejeitado';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: estoque negativo deveria ter sido rejeitado' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+
+# FUNCIONÁRIO (não-gerente) NÃO ajusta estoque (guarda gerencial).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.adjust_product_stock('smoke3', 'st_smoke', 9000);
+    RAISE EXCEPTION 'SENTINELA: funcionário deveria ter sido bloqueado no ajuste de estoque';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: funcionário deveria ter sido bloqueado no ajuste de estoque' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+adj_emp="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke3';" | tail -n 1)"
+[ "$adj_emp" = "3000" ] || {
+  echo "FALHA: bloqueio do funcionário não deveria mudar o estoque (obtido: '$adj_emp')"
+  exit 1
+}
+
+# 18.3 Produto DESATIVADO não é vendido nem reposto (lock_products_or_raise).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+UPDATE public.products SET is_active = FALSE WHERE id = 'smoke3' AND store_id = 'st_smoke';
+SQL
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.process_sale(
+      ('{"id":"s_inactive","store_id":"st_smoke","total_amount":200,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+      -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+      '[{"product_id":"smoke3","product_name":"Produto desativado","quantity":1000,"unit_price":200}]'::jsonb
+    );
+    RAISE EXCEPTION 'SENTINELA: venda de produto desativado deveria ter sido rejeitada';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: venda de produto desativado deveria ter sido rejeitada' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+sale_inactive="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sales WHERE id = 's_inactive';" | tail -n 1)"
+[ "$sale_inactive" = "0" ] || {
+  echo "FALHA: venda de produto desativado não deveria existir (obtido: '$sale_inactive')"
+  exit 1
+}
+
+# COMPRA (reposição) de produto desativado também é rejeitada.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.process_purchase(
+      ('{"id":"p_inactive","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":200,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+      -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
+      '[{"product_id":"smoke3","product_name":"Produto desativado","quantity":1000,"unit_price":200}]'::jsonb
+    );
+    RAISE EXCEPTION 'SENTINELA: compra de produto desativado deveria ter sido rejeitada';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: compra de produto desativado deveria ter sido rejeitada' THEN
+      RAISE;
+    END IF;
+  END;
+END $$;
+SQL
+purch_inactive="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.purchases WHERE id = 'p_inactive';" | tail -n 1)"
+[ "$purch_inactive" = "0" ] || {
+  echo "FALHA: compra de produto desativado não deveria existir (obtido: '$purch_inactive')"
+  exit 1
+}
+
+# Reativação devolve a venda (e o ajuste continua funcionando).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+UPDATE public.products SET is_active = TRUE WHERE id = 'smoke3' AND store_id = 'st_smoke';
+SQL
+react_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT is_active FROM public.products WHERE id = 'smoke3';" | tail -n 1)"
+[ "$react_ok" = "t" ] || {
+  echo "FALHA: reativação deveria restaurar is_active (obtido: '$react_ok')"
+  exit 1
+}
+echo "OK: products.is_active presente, adjust_product_stock (aumento cria lote / redução consome FIFO / idempotente / negativo e funcionário rejeitados, stock = Σ lotes) e bloqueio de produto desativado em venda e compra"
+
+echo "==> [19/19] Fecho de caixa diário (close_cash_register — Z-report gerencial)"
+# Fecho de caixa: (a) a tabela cash_closings existe (bases novas criam no
+# schema.sql; bases legadas ganham na Parte 25.1); (b) a RPC
+# close_cash_register calcula NO SERVIDOR o total do dia (vendas ATIVAS,
+# todas as formas) e o ESPERADO na gaveta (só vendas em DINHEIRO —
+# cartão/M-Pesa/E-Mola/transferência não passam pela gaveta física),
+# com abertura por forma de pagamento (JSONB); (c) UPSERT por
+# (store_id, closing_date): refazer o fecho do dia atualiza a contagem,
+# nunca duplica; (d) guarda GERENCIAL (funcionário NÃO fecha o caixa).
+
+# 19.1 A tabela cash_closings existe.
+cc_table="$(psql -q -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'cash_closings';" | tail -n 1)"
+[ "$cc_table" = "1" ] || {
+  echo "FALHA: tabela cash_closings não existe (obtido: '$cc_table')"
+  exit 1
+}
+
+# 19.2 Venda dedicada em DINHEIRO no dia do fecho (s_close_cash, 700
+# centavos — além das demais vendas ativas do dia em st_smoke). O
+# esperado na gaveta é calculado NO SERVIDOR com o MESMO critério do RPC:
+# Σ das vendas ATIVAS em dinheiro do dia — por isso os valores abaixo são
+# derivados da própria tabela (não chutados), e as anuladas dos passos
+# anteriores (s_smoke/s_emp2) ficam automaticamente de fora.
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+INSERT INTO public.sales
+  (id, store_id, sale_number, total_amount, payment_method, date_time)
+VALUES ('s_close_cash', 'st_smoke', 9001, 700, 'cash', now())
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+# Referências: esperado (cash ativo) e total (todas as formas ativas).
+exp_ref="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT COALESCE(SUM(total_amount), 0) FROM public.sales WHERE store_id = 'st_smoke' AND status = 'active' AND payment_method = 'cash' AND date_time >= date_trunc('day', now()) AND date_time < date_trunc('day', now()) + interval '1 day';" | tail -n 1)"
+tot_ref="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT COALESCE(SUM(total_amount), 0) FROM public.sales WHERE store_id = 'st_smoke' AND status = 'active' AND date_time >= date_trunc('day', now()) AND date_time < date_trunc('day', now()) + interval '1 day';" | tail -n 1)"
+[ -n "$exp_ref" ] && [ "$exp_ref" -gt 0 ] || {
+  echo "FALHA: não há vendas em dinheiro ativas para o fecho (referência: '$exp_ref')"
+  exit 1
+}
+
+# 19.3 Dono fecha o caixa de HOJE com contagem física = esperado (confere).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.close_cash_register('st_smoke', date_trunc('day', now()), ${exp_ref});
+SQL
+
+cc_expected="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT expected_cash FROM public.cash_closings WHERE store_id = 'st_smoke' AND closing_date = date_trunc('day', now());" | tail -n 1)"
+[ "$cc_expected" = "$exp_ref" ] || {
+  echo "FALHA: esperado na gaveta deveria ser $exp_ref (só dinheiro; obtido: '$cc_expected')"
+  exit 1
+}
+cc_total="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT total_sales FROM public.cash_closings WHERE store_id = 'st_smoke' AND closing_date = date_trunc('day', now());" | tail -n 1)"
+[ "$cc_total" = "$tot_ref" ] || {
+  echo "FALHA: total do dia deveria ser $tot_ref (todas as formas; obtido: '$cc_total')"
+  exit 1
+}
+cc_counted="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT counted_cash FROM public.cash_closings WHERE store_id = 'st_smoke' AND closing_date = date_trunc('day', now());" | tail -n 1)"
+[ "$cc_counted" = "$exp_ref" ] || {
+  echo "FALHA: contagem física não persistida (obtido: '$cc_counted')"
+  exit 1
+}
+# Abertura por forma: o valor cash do JSONB bate com o esperado.
+cc_by_method="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT (sales_by_method->>'cash')::bigint FROM public.cash_closings WHERE store_id = 'st_smoke' AND closing_date = date_trunc('day', now());" | tail -n 1)"
+[ "$cc_by_method" = "$exp_ref" ] || {
+  echo "FALHA: abertura cash do Z deveria ser $exp_ref (obtido: '$cc_by_method')"
+  exit 1
+}
+
+# 19.4 UPSERT: refazer o fecho do mesmo dia com contagem corrigida
+# (esperado + 100) atualiza o registro (1 linha, sem duplicar).
+cc_corrected="$((exp_ref + 100))"
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+SELECT public.close_cash_register('st_smoke', date_trunc('day', now()), ${cc_corrected});
+SQL
+cc_rows="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.cash_closings WHERE store_id = 'st_smoke' AND closing_date = date_trunc('day', now());" | tail -n 1)"
+[ "$cc_rows" = "1" ] || {
+  echo "FALHA: refazer o fecho duplicou o registro (obtido: '$cc_rows')"
+  exit 1
+}
+cc_updated="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT counted_cash FROM public.cash_closings WHERE store_id = 'st_smoke' AND closing_date = date_trunc('day', now());" | tail -n 1)"
+[ "$cc_updated" = "$cc_corrected" ] || {
+  echo "FALHA: refazer o fecho não atualizou a contagem (obtido: '$cc_updated')"
+  exit 1
+}
+
+# 19.5 Guarda GERENCIAL: funcionário comum NÃO fecha o caixa (RPC rejeita).
+emp_closed="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT public.close_cash_register('st_smoke', date_trunc('day', now()), $exp_ref);" | tail -n 1)"
+case "$emp_closed" in
+  *"Apenas o dono ou um gerente"*) : ;;  # erro esperado (guarda gerencial)
+  *)
+    echo "FALHA: funcionário não deveria fechar o caixa (obtido: '$emp_closed')"
+    exit 1
+    ;;
+esac
+
+# 19.6 PRÉVIA server-side (H2): a RPC get_cash_closing_summary devolve o
+# MESMO total/esperado/abertura que o close_cash_register calculou (19.3),
+# sem carregar vendas no cliente — e o fecho JÁ REGISTRADO do dia aparece
+# com a contagem corrigida do 19.4. Funcionário comum LÊ a prévia
+# (is_my_store libera leitura; FECHAR é que é gerencial — 19.5).
+ccs_claims="SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}';"
+ccs_expr="public.get_cash_closing_summary('st_smoke', date_trunc('day', now()))"
+ccs_exp="$(psql_app -q -tAc "$ccs_claims SELECT ($ccs_expr->>'expected_cash_cents')::bigint;" | tail -n 1)"
+[ "$ccs_exp" = "$exp_ref" ] || {
+  echo "FALHA: prévia deveria esperar $exp_ref na gaveta (obtido: '$ccs_exp')"
+  exit 1
+}
+ccs_tot="$(psql_app -q -tAc "$ccs_claims SELECT ($ccs_expr->>'total_sales_cents')::bigint;" | tail -n 1)"
+[ "$ccs_tot" = "$tot_ref" ] || {
+  echo "FALHA: prévia deveria somar $tot_ref no dia (obtido: '$ccs_tot')"
+  exit 1
+}
+ccs_cash="$(psql_app -q -tAc "$ccs_claims SELECT ($ccs_expr->'sales_by_method_cents'->>'cash')::bigint;" | tail -n 1)"
+[ "$ccs_cash" = "$exp_ref" ] || {
+  echo "FALHA: prévia deveria abrir cash em $exp_ref (obtido: '$ccs_cash')"
+  exit 1
+}
+ccs_counted="$(psql_app -q -tAc "$ccs_claims SELECT ($ccs_expr->'existing_closing'->>'counted_cash')::bigint;" | tail -n 1)"
+[ "$ccs_counted" = "$cc_corrected" ] || {
+  echo "FALHA: prévia deveria mostrar a contagem $cc_corrected do fecho do dia (obtido: '$ccs_counted')"
+  exit 1
+}
+emp_summary="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT (public.get_cash_closing_summary('st_smoke', date_trunc('day', now()))->>'expected_cash_cents')::bigint;" | tail -n 1)"
+[ "$emp_summary" = "$exp_ref" ] || {
+  echo "FALHA: funcionário deveria ler a prévia (obtido: '$emp_summary')"
+  exit 1
+}
+echo "OK: close_cash_register calcula no servidor o total do dia ($tot_ref) e o esperado na gaveta (só dinheiro, $exp_ref), persiste a abertura por forma no Z, refazer o fecho atualiza sem duplicar (UPSERT), funcionário é rejeitado ao FECHAR mas LÊ a prévia (get_cash_closing_summary, $ccs_exp/$ccs_tot/cash $ccs_cash/fecho $ccs_counted)"
+
+echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001, níveis de acesso (compras só dono/gerente), audit log (só super admin), KPIs agregadas server-side (get_dashboard_kpis), agregações H2 (get_cash_flow / get_sales_report / get_cash_closing_summary), upgrade.sql idempotente, migração W4 NUMERIC→centavos (×100, sem dupla aplicação), numeração sequencial por loja (vendas S-00001..., compras C-00001..., fiado D-00001...), Realtime sem 42710 no cenário Supabase, catálogo de planos pl1/pl2/pl3 presente, anulação de venda (cancel_sale — estorno de estoque/caixa + status gerencial), edição de produto (is_active + adjust_product_stock com lotes FIFO + bloqueio de desativados em venda/compra) e fecho de caixa diário (close_cash_register + prévia get_cash_closing_summary — Z-report: esperado na gaveta só com vendas em dinheiro, abertura por forma, UPSERT por loja/dia, guarda gerencial e leitura da prévia para a equipe) conforme esperado."

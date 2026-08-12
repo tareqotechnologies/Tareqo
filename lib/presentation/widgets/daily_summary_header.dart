@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
+import 'app_card.dart';
 
 /// Cabeçalho-resumo diário compartilhado (Vendas/Compras): ícone, rótulo,
 /// valor em destaque, subtítulo (ex.: contagem) e comparativo OPCIONAL vs
@@ -43,10 +44,11 @@ class DailySummaryHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat —
+    // o resumo do dia compartilhado (Vendas/Compras) segue o padrão.
+    return AppCard(
+      padding: const EdgeInsets.all(20),
+      child: Row(
           children: [
             Container(
               width: 44,
@@ -110,8 +112,7 @@ class DailySummaryHeader extends StatelessWidget {
                 ),
               ),
             ],
-          ],
-        ),
+        ],
       ),
     );
   }

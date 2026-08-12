@@ -88,3 +88,68 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO auth.users (id, email) VALUES
   ('33333333-3333-3333-3333-333333333333', 'gerente@loja.com')
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================================
+-- Stub do schema STORAGE do Supabase (secção "FOTOS DE PRODUTO" do
+-- schema.sql — bucket product-images + políticas is_my_store).
+-- ============================================================================
+-- Em um PostgreSQL PURO (Docker) não existem nem o schema `storage` nem os
+-- papéis `anon`/`authenticated` do Supabase. Sem estes stubs, a secção de
+-- fotos do schema.sql falha com "role \"authenticated\" does not exist" ao
+-- criar as políticas de escrita (regressão achada Aug 12).
+--
+-- O stub espelha o MÍNIMO que o schema.sql/upgrade.sql usam:
+--   * papéis anon/authenticated (políticas `FOR ... TO authenticated`);
+--   * storage.buckets (id, name, public) e storage.objects (id, bucket_id,
+--     name) — as políticas referenciam apenas bucket_id + name;
+--   * storage.foldername(name) — devolve os segmentos do caminho; a
+--     política de escrita valida is_my_store((foldername(name))[1]).
+--
+-- ⚠️ O primeiro segmento do caminho de um objeto É o store_id (convenção
+-- do produto — ver schema.sql); qualquer teste de política que simule um
+-- upload deve usar paths como 'st1/produto.jpg'.
+-- ============================================================================
+
+-- Papéis do Supabase (PostgreSQL não tem CREATE ROLE IF NOT EXISTS).
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'anon') THEN
+    CREATE ROLE anon NOLOGIN;
+  END IF;
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticated') THEN
+    CREATE ROLE authenticated NOLOGIN;
+  END IF;
+END
+$$;
+
+CREATE SCHEMA IF NOT EXISTS storage;
+
+CREATE TABLE IF NOT EXISTS storage.buckets (
+  id     TEXT PRIMARY KEY,
+  name   TEXT,
+  public BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS storage.objects (
+  id        TEXT PRIMARY KEY,
+  bucket_id TEXT,
+  name      TEXT
+);
+
+-- Segmentos do caminho do objeto: storage.foldername('st1/prod.jpg') =
+-- {st1, prod.jpg}. Mesma assinatura do Supabase (que também aceita a
+-- versão com depth).
+CREATE OR REPLACE FUNCTION storage.foldername(name TEXT)
+RETURNS TEXT[]
+LANGUAGE sql
+IMMUTABLE
+AS $$
+  SELECT string_to_array(name, '/');
+$$;
+
+-- Permissões mínimas: as políticas de escrita valem TO authenticated;
+-- grants de leitura no bucket/objetos são irrelevantes no stub (a RLS das
+-- tabelas public não toca o storage).
+GRANT USAGE ON SCHEMA storage TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON storage.buckets, storage.objects
+  TO anon, authenticated;

@@ -55,12 +55,15 @@ class ProcessPurchaseUseCase {
   /// Ordem dentro da transação:
   /// 1. **Validação da compra** — itens não vazios e total consistente
   ///    (`totalAmount == Σ(quantidade × preço unitário)`);
-  /// 2. **Registro** da compra (compra + itens);
-  /// 3. **Entrada no estoque** de cada item ([FifoStockUseCase.increase] —
+  /// 2. **Validação dos produtos** de TODOS os itens (existem e estão
+  ///    ATIVOS — produto desativado não pode ser reposto; espelha o
+  ///    `lock_products_or_raise` do servidor, que valida ANTES de mutar);
+  /// 3. **Registro** da compra (compra + itens);
+  /// 4. **Entrada no estoque** de cada item ([FifoStockUseCase.increase] —
   ///    cria o LOTE FIFO do item, com validade opcional e custo de
   ///    aquisição; o produto deve existir; lança
   ///    [ProductNotFoundException]);
-  /// 4. **Saída no caixa** — compra vira um movimento de saída
+  /// 5. **Saída no caixa** — compra vira um movimento de saída
   ///    [TransactionStatus.paid] na categoria "Compras".
   Future<void> call(Purchase purchase) async {
     _validate(purchase);
@@ -73,10 +76,20 @@ class ProcessPurchaseUseCase {
     }
 
     await _unitOfWork.run(() async {
-      // 2. Registra a compra.
+      // 2. Valida TODOS os produtos ANTES de mutar (espelha o
+      //    lock_products_or_raise do servidor): existem e estão ATIVOS —
+      //    produto desativado não pode ser reposto.
+      for (final item in purchase.items) {
+        await _fifoStock.requireActive(
+          item.productId,
+          storeId: purchase.storeId,
+        );
+      }
+
+      // 3. Registra a compra.
       await _purchaseRepository.add(purchase);
 
-      // 3. Cria o lote FIFO de cada item comprado (na loja da compra) e
+      // 4. Cria o lote FIFO de cada item comprado (na loja da compra) e
       //    aumenta o total do produto.
       for (final item in purchase.items) {
         await _fifoStock.increase(
@@ -89,7 +102,7 @@ class ProcessPurchaseUseCase {
         );
       }
 
-      // 4. Saída no caixa (despesa de mercadoria).
+      // 5. Saída no caixa (despesa de mercadoria).
       await _transactionRepository.add(
         FinancialTransaction(
           id: AppIds.newId('t'),

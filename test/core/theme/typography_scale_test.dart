@@ -15,31 +15,31 @@ void main() {
   // (nome, papel do TextTheme, tamanho, peso, usa tabular figures?)
   final cases = <_Case>[
     (
-      name: 'displaySmall — Large Title (34)',
+      name: 'displaySmall — Large Title (34) — LIGHT w300',
       style: _displaySmall,
       size: 34,
-      weight: FontWeight.w700,
+      weight: FontWeight.w300,
       tabular: true,
     ),
     (
-      name: 'headlineMedium — Título 1 (28)',
+      name: 'headlineMedium — Título 1 (28) — LIGHT w300',
       style: _headlineMedium,
       size: 28,
-      weight: FontWeight.w700,
+      weight: FontWeight.w300,
       tabular: true,
     ),
     (
       name: 'headlineSmall — Título 1.5 (24)',
       style: _headlineSmall,
       size: 24,
-      weight: FontWeight.w700,
+      weight: FontWeight.w600,
       tabular: true,
     ),
     (
       name: 'titleLarge — Título 2 (22)',
       style: _titleLarge,
       size: 22,
-      weight: FontWeight.w700,
+      weight: FontWeight.w600,
       tabular: true,
     ),
     (
@@ -148,19 +148,42 @@ void main() {
     for (final theme in [AppTheme.light, AppTheme.dark]) {
       final appBar = theme.appBarTheme.titleTextStyle!;
       expect(appBar.fontSize, 22, reason: 'AppBar — Título 2 da escala');
-      expect(appBar.fontWeight, FontWeight.w700);
+      expect(appBar.fontWeight, FontWeight.w600);
 
       final dialog = theme.dialogTheme.titleTextStyle!;
       expect(dialog.fontSize, 22, reason: 'diálogo — Título 2 da escala');
-      expect(dialog.fontWeight, FontWeight.w700);
+      expect(dialog.fontWeight, FontWeight.w600);
 
       final chip = theme.chipTheme.labelStyle!;
       expect(chip.fontSize, 13, reason: 'chip — corpo/nota da escala');
       expect(chip.fontWeight, FontWeight.w600);
+
+      // Rótulos/hints dos CAMPOS (InputDecorationTheme): discretos e
+      // MENORES que o texto digitado (bodyLarge 17) — sem fontSize, o
+      // label herdava o 17 e truncava em campos estreitos ('Purchase
+      // pr...', 'Stock quan...' — formulário de produto). floatingLabel
+      // fixa o mesmo 13 quando o rótulo sobe para a borda do campo.
+      final input = theme.inputDecorationTheme;
+      expect(
+        input.labelStyle!.fontSize,
+        13,
+        reason: 'label do campo — rótulo discreto (13)',
+      );
+      expect(input.labelStyle!.fontWeight, FontWeight.w400);
+      expect(
+        input.floatingLabelStyle!.fontSize,
+        13,
+        reason: 'label flutuante — mesmo 13 na borda (sem encolher p/ 0.75×)',
+      );
+      expect(
+        input.hintStyle!.fontSize,
+        14,
+        reason: 'hint do campo — nota discreta (14), abaixo do texto 17',
+      );
     }
   });
 
-  testWidgets('título de AlertDialog renderiza com 22/w700 (Título 2)',
+  testWidgets('título de AlertDialog renderiza com 22/w600 (Título 2)',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -182,10 +205,10 @@ void main() {
     final effective =
         DefaultTextStyle.of(tester.element(find.text('Confirmar'))).style;
     expect(effective.fontSize, 22, reason: 'título do diálogo — Título 2');
-    expect(effective.fontWeight, FontWeight.w700);
+    expect(effective.fontWeight, FontWeight.w600);
   });
 
-  testWidgets('botão primário renderiza com 15/w600 (escala de corpo)',
+  testWidgets('botão primário renderiza com 15/w400 (ultra-clean)',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -202,7 +225,7 @@ void main() {
     final effective =
         DefaultTextStyle.of(tester.element(find.text('Ok'))).style;
     expect(effective.fontSize, 15);
-    expect(effective.fontWeight, FontWeight.w600);
+    expect(effective.fontWeight, FontWeight.w400);
   });
 }
 

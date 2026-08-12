@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,6 +7,7 @@ import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 import '../../helpers/store_context.dart';
 
+import 'package:dumbhanengue/core/share/report_exporter.dart';
 import 'package:dumbhanengue/domain/repositories/i_sales_report_repository.dart';
 import 'package:dumbhanengue/domain/usecases/get_sales_report_use_case.dart';
 import 'package:dumbhanengue/presentation/controllers/reports_providers.dart';
@@ -24,8 +26,7 @@ class _FakeGetSalesReportUseCase implements GetSalesReportUseCase {
     required String storeId,
     required DateTime start,
     required DateTime end,
-  }) async =>
-      _report;
+  }) async => _report;
 }
 
 class _ThrowingGetSalesReportUseCase implements GetSalesReportUseCase {
@@ -37,8 +38,7 @@ class _ThrowingGetSalesReportUseCase implements GetSalesReportUseCase {
     required String storeId,
     required DateTime start,
     required DateTime end,
-  }) async =>
-      throw Exception('falha de rede simulada');
+  }) async => throw Exception('falha de rede simulada');
 }
 
 // A tela depende de SalesReport (que usa GetSalesReportUseCase). O fake
@@ -74,11 +74,70 @@ SalesReport _report() => SalesReport(
   ],
 );
 
-Widget _buildApp(GetSalesReportUseCase useCase) {
+/// Fake do exportador — registra as chamadas (sem partilhar de verdade).
+/// Com [throwOnShare] simula falha da partilha (caminho de erro da tela).
+class _FakeReportExporter implements ReportExporter {
+  _FakeReportExporter({this.throwOnShare = false});
+
+  final bool throwOnShare;
+  int csvCalls = 0;
+  int pdfCalls = 0;
+  SalesReport? lastReport;
+
+  @override
+  Future<void> shareCsv({
+    required SalesReport report,
+    required ReportExportLabels labels,
+    required String storeName,
+    required String periodLabel,
+    required DateTime generatedAt,
+  }) async {
+    if (throwOnShare) throw Exception('falha simulada na partilha');
+    csvCalls++;
+    lastReport = report;
+  }
+
+  @override
+  Future<void> sharePdf({
+    required SalesReport report,
+    required ReportExportLabels labels,
+    required String storeName,
+    required String periodLabel,
+    required DateTime generatedAt,
+  }) async {
+    if (throwOnShare) throw Exception('falha simulada na partilha');
+    pdfCalls++;
+    lastReport = report;
+  }
+
+  @override
+  String buildCsv({
+    required SalesReport report,
+    required ReportExportLabels labels,
+    required String storeName,
+    required String periodLabel,
+    required DateTime generatedAt,
+  }) => '';
+
+  @override
+  Future<Uint8List> buildPdf({
+    required SalesReport report,
+    required ReportExportLabels labels,
+    required String storeName,
+    required String periodLabel,
+    required DateTime generatedAt,
+  }) async => Uint8List(0);
+}
+
+Widget _buildApp(
+  GetSalesReportUseCase useCase, {
+  _FakeReportExporter? exporter,
+}) {
   return ProviderScope(
     overrides: [
       ...storeContextOverrides(),
       getSalesReportUseCaseProvider.overrideWithValue(useCase),
+      if (exporter != null) reportExporterProvider.overrideWithValue(exporter),
     ],
     child: testApp(home: const ReportsScreen()),
   );
@@ -115,8 +174,9 @@ void main() {
     expect(find.text('R\$ 34,00'), findsOneWidget);
   });
 
-  testWidgets('mostra estado vazio quando não há mais vendidos',
-      (tester) async {
+  testWidgets('mostra estado vazio quando não há mais vendidos', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _buildApp(
         _FakeGetSalesReportUseCase(
@@ -135,9 +195,7 @@ void main() {
   });
 
   testWidgets('mostra erro com retry quando a carga falha', (tester) async {
-    await tester.pumpWidget(
-      _buildApp(_ThrowingGetSalesReportUseCase()),
-    );
+    await tester.pumpWidget(_buildApp(_ThrowingGetSalesReportUseCase()));
     await tester.pumpAndSettle();
 
     expect(find.text('Não foi possível carregar o relatório.'), findsOneWidget);
@@ -161,8 +219,75 @@ void main() {
   // com os Expanded. Overflows de RenderFlex falham o teste via
   // takeException; trocar de período após o giro prova que o seletor
   // continua funcional.
-  testWidgets('KPIs e seletor de período sobrevivem à rotação para paisagem',
-      (tester) async {
+  testWidgets(
+    'menu de exportação aparece com dados e chama o exporter (CSV/PDF)',
+    (tester) async {
+      final exporter = _FakeReportExporter();
+      await tester.pumpWidget(
+        _buildApp(_FakeGetSalesReportUseCase(_report()), exporter: exporter),
+      );
+      await tester.pumpAndSettle();
+
+      // Menu de exportação no AppBar (tooltip 'Exportar').
+      expect(find.byTooltip('Exportar'), findsOneWidget);
+
+      // Abre o menu: CSV e PDF.
+      await tester.tap(find.byTooltip('Exportar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Exportar CSV'), findsOneWidget);
+      expect(find.text('Exportar PDF'), findsOneWidget);
+
+      // CSV: chama o exporter com o relatório atual e mostra o sucesso.
+      await tester.tap(find.text('Exportar CSV'));
+      await tester.pumpAndSettle();
+      expect(exporter.csvCalls, 1);
+      expect(exporter.pdfCalls, 0);
+      expect(exporter.lastReport?.totalRevenueCents, 5400);
+      expect(find.text('Relatório exportado!'), findsOneWidget);
+
+      // PDF: chama o exporter de novo.
+      await tester.tap(find.byTooltip('Exportar'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Exportar PDF'));
+      await tester.pumpAndSettle();
+      expect(exporter.pdfCalls, 1);
+      expect(exporter.csvCalls, 1);
+    },
+  );
+
+  testWidgets('falha na partilha mostra o snackbar de erro', (tester) async {
+    final exporter = _FakeReportExporter(throwOnShare: true);
+    await tester.pumpWidget(
+      _buildApp(_FakeGetSalesReportUseCase(_report()), exporter: exporter),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Exportar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Exportar CSV'));
+    await tester.pumpAndSettle();
+
+    // Nenhuma chamada "bem-sucedida" registrada e o erro é exibido.
+    expect(exporter.csvCalls, 0);
+    expect(
+      find.text('Não foi possível exportar o relatório. Tente novamente.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('sem dados (erro na carga) o menu de exportação não aparece', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildApp(_ThrowingGetSalesReportUseCase()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Não foi possível carregar o relatório.'), findsOneWidget);
+    expect(find.byIcon(Icons.ios_share), findsNothing);
+  });
+
+  testWidgets('KPIs e seletor de período sobrevivem à rotação para paisagem', (
+    tester,
+  ) async {
     usePortraitViewport(tester);
 
     await tester.pumpWidget(_buildApp(_FakeGetSalesReportUseCase(_report())));

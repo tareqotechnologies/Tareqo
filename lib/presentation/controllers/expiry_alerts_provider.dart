@@ -81,10 +81,12 @@ class ExpiryAlertsNotifier extends AsyncNotifier<List<ExpiryAlert>> {
         expiry.month,
         expiry.day,
       ).difference(today).inDays;
-      // Vencido OU vencendo em menos de expiryWarningDays dias.
+      // Vencido OU vencendo em menos de expiryWarningDays dias. Produto
+      // DESATIVADO não alerta (não vende — o estoque dele não está em
+      // rotação; alertar seria ruído).
       if (days < 0 || days < expiryWarningDays) {
         final product = productsById[lot.productId];
-        if (product == null) continue;
+        if (product == null || !product.isActive) continue;
         alerts.add(
           ExpiryAlert(product: product, lot: lot, daysRemaining: days),
         );

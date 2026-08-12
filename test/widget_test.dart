@@ -7,6 +7,7 @@ import 'package:dumbhanengue/domain/entities/debt.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/purchase.dart';
 import 'package:dumbhanengue/domain/entities/sale.dart';
+import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
 import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
@@ -41,6 +42,25 @@ class _FakeGetProductsUseCase implements GetProductsUseCase {
 class _FakeSalesRepository implements ISaleRepository {
   @override
   Future<void> registerSale(Sale sale) async {}
+
+  @override
+  Future<Sale?> getById(String id, {required String storeId}) async => null;
+
+  @override
+  Future<void> markCancelled(String id, {required String storeId}) async {}
+
+  @override
+  Future<List<LotConsumption>> getLotConsumption(
+    String saleId, {
+    required String storeId,
+  }) async => const [];
+
+  @override
+  Future<void> registerLotConsumption(
+    String saleId,
+    String storeId,
+    List<LotConsumption> consumption,
+  ) async {}
 
   @override
   Future<List<Sale>> getAll({required String storeId}) async => [

@@ -4,6 +4,8 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import '../../data/datasources/local/cash_closing_local_data_source.dart';
+import '../../data/datasources/local/cash_closing_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/customer_local_data_source.dart';
 import '../../data/datasources/local/customer_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/debt_local_data_source.dart';
@@ -90,6 +92,9 @@ abstract final class AppDatabase {
       )
       ..registerLazySingleton<StockLotLocalDataSource>(
         () => StockLotSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<CashClosingLocalDataSource>(
+        () => CashClosingSqliteDataSourceImpl(db),
       );
   }
 
@@ -218,7 +223,14 @@ abstract final class AppDatabase {
         -- etiquetadoras; venda por peso (fração) e unidade de venda.
         code TEXT,
         venda_por_fracao INTEGER NOT NULL DEFAULT 0,
-        unit_label TEXT NOT NULL DEFAULT 'un'
+        unit_label TEXT NOT NULL DEFAULT 'un',
+        -- Produto ATIVO no catálogo (padrão). Desativado, some do PDV e
+        -- das compras, mas permanece na lista com o selo "Inativo" — o
+        -- estoque é preservado para a reativação.
+        is_active INTEGER NOT NULL DEFAULT 1,
+        -- Foto do produto (opcional): caminho de arquivo local (modo
+        -- SQLite) ou URL do Supabase Storage (modo SaaS). Vazio = sem foto.
+        image_path TEXT
       );
     ''');
     db.execute('''
@@ -232,7 +244,11 @@ abstract final class AppDatabase {
         sale_number INTEGER NOT NULL DEFAULT 0,
         total_amount INTEGER NOT NULL CHECK (total_amount >= 0),
         payment_method TEXT NOT NULL,
-        date_time INTEGER NOT NULL
+        date_time INTEGER NOT NULL,
+        -- Anulação de venda: status ('active'|'cancelled') + momento da
+        -- anulação. DEFAULT 'active' preserva a leitura de vendas antigas.
+        status TEXT NOT NULL DEFAULT 'active',
+        cancelled_at INTEGER
       );
     ''');
     db.execute('''
@@ -246,6 +262,20 @@ abstract final class AppDatabase {
       );
       CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id
         ON sale_items(sale_id);
+    ''');
+    // Consumo de LOTES por venda — registrado na MESMA transação da venda
+    // (caminho composto local). Permite à anulação devolver o estoque aos
+    // lotes EXATOS consumidos (preservando validade e custo de cada lote).
+    db.execute('''
+      CREATE TABLE IF NOT EXISTS sale_lot_consumption (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+        lot_id TEXT NOT NULL,
+        product_id TEXT NOT NULL,
+        quantity INTEGER NOT NULL CHECK (quantity > 0)
+      );
+      CREATE INDEX IF NOT EXISTS idx_sale_lot_consumption_sale
+        ON sale_lot_consumption(sale_id);
     ''');
     db.execute('''
       CREATE TABLE IF NOT EXISTS financial_transactions (
@@ -341,6 +371,27 @@ abstract final class AppDatabase {
       CREATE INDEX IF NOT EXISTS idx_stock_lots_expiry
         ON stock_lots(expiry_date) WHERE current_quantity > 0;
     ''');
+    // Fecho de caixa diário (Z-report) — um fecho por loja por dia.
+    // `closing_date` = início do dia local em ms (época); `expected_cash` =
+    // o que deveria estar na gaveta (Σ vendas ativas em DINHEIRO do dia);
+    // `counted_cash` = dinheiro físico contado na conferência;
+    // `sales_by_method` = abertura por forma de pagamento (JSON).
+    db.execute('''
+      CREATE TABLE IF NOT EXISTS cash_closings (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL DEFAULT 'st1',
+        closing_date INTEGER NOT NULL,
+        total_sales INTEGER NOT NULL CHECK (total_sales >= 0),
+        expected_cash INTEGER NOT NULL CHECK (expected_cash >= 0),
+        counted_cash INTEGER NOT NULL CHECK (counted_cash >= 0),
+        sales_by_method TEXT NOT NULL DEFAULT '{}',
+        closed_at INTEGER NOT NULL
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_cash_closings_store_day
+        ON cash_closings(store_id, closing_date);
+      CREATE INDEX IF NOT EXISTS idx_cash_closings_store
+        ON cash_closings(store_id);
+    ''');
 
     // Migração leve: bancos criados antes do `sale_number` (numeração
     // sequencial por loja) recebem a coluna com DEFAULT 0 e são re-numerados
@@ -370,6 +421,19 @@ abstract final class AppDatabase {
       'ON sales(store_id, sale_number)',
     );
 
+    // Migração leve (anulação de vendas): bancos criados antes do status
+    // recebem `status` DEFAULT 'active' (todas as vendas existentes são
+    // ativas — nunca foram anuladas) e `cancelled_at` NULL. Idempotente
+    // para bancos novos, que já criam as colunas no CREATE TABLE acima.
+    final salesStatusColumns = db.select('PRAGMA table_info(sales)');
+    final hasStatus =
+        salesStatusColumns.any((row) => row['name'] == 'status');
+    if (!hasStatus) {
+      db.execute(
+        "ALTER TABLE sales ADD COLUMN status TEXT NOT NULL DEFAULT 'active'",
+      );
+      db.execute('ALTER TABLE sales ADD COLUMN cancelled_at INTEGER');
+    }
 
     // Migração leve: bancos criados antes da coluna `is_paid` (baixa de
     // fiado) recebem a coluna com DEFAULT 0 (tudo pendente). Idempotente
@@ -476,6 +540,32 @@ abstract final class AppDatabase {
         FROM products
         WHERE stock_quantity > 0
       ''');
+    }
+
+    // Migração leve (produto inativo): bancos criados antes do campo
+    // `is_active` recebem a coluna com DEFAULT 1 — todos os produtos
+    // existentes permanecem ATIVOS (nunca foram desativados). Idempotente
+    // para bancos novos, que já criam a coluna no CREATE TABLE acima.
+    final productActiveColumns = db.select('PRAGMA table_info(products)');
+    final hasIsActive = productActiveColumns.any(
+      (row) => row['name'] == 'is_active',
+    );
+    if (!hasIsActive) {
+      db.execute(
+        'ALTER TABLE products ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1',
+      );
+    }
+
+    // Migração leve (FOTO do produto): bancos criados antes do `image_path`
+    // recebem a coluna NULL — produtos existentes ficam sem foto (a UI
+    // mostra o ícone padrão). Idempotente para bancos novos, que já criam
+    // a coluna no CREATE TABLE acima.
+    final productImageColumns = db.select('PRAGMA table_info(products)');
+    final hasImagePath = productImageColumns.any(
+      (row) => row['name'] == 'image_path',
+    );
+    if (!hasImagePath) {
+      db.execute('ALTER TABLE products ADD COLUMN image_path TEXT');
     }
 
     // Migração leve W11: bancos criados antes do `expiry_date` (validade

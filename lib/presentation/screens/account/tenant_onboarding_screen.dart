@@ -9,6 +9,9 @@ import '../../../domain/entities/app_user.dart';
 import '../../../domain/entities/plan.dart';
 import '../../../domain/usecases/request_tenant_access_use_case.dart';
 import '../../controllers/account_providers.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
+import '../../widgets/app_text_field.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Onboarding do dono: escolhe o plano, o nome do negócio, a **moeda** e o
@@ -130,131 +133,126 @@ class _TenantOnboardingScreenState
                   ),
                 ),
                 const SizedBox(height: 24),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          TextFormField(
-                            controller: _businessController,
-                            textInputAction: TextInputAction.next,
-                            decoration: InputDecoration(
-                              labelText: l10n.onboardingBusinessLabel,
-                              prefixIcon: const Icon(Icons.business_outlined),
+                AppCard(
+                  padding: const EdgeInsets.all(20),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AppTextField(
+                          controller: _businessController,
+                          textInputAction: TextInputAction.next,
+                          label: l10n.onboardingBusinessLabel,
+                          prefixIcon: Icons.business_outlined,
+                          validator: (value) =>
+                              (value == null || value.trim().isEmpty)
+                              ? l10n.onboardingBusinessError
+                              : null,
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          l10n.onboardingLanguageLabel,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            _ChoiceChip(
+                              label: l10n.languagePortuguese,
+                              icon: Icons.language,
+                              selected: _language == 'pt',
+                              onSelected: (_) =>
+                                  setState(() => _language = 'pt'),
                             ),
-                            validator: (value) =>
-                                (value == null || value.trim().isEmpty)
-                                ? l10n.onboardingBusinessError
-                                : null,
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            l10n.onboardingLanguageLabel,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            children: [
-                              _ChoiceChip(
-                                label: l10n.languagePortuguese,
-                                icon: Icons.language,
-                                selected: _language == 'pt',
-                                onSelected: (_) =>
-                                    setState(() => _language = 'pt'),
-                              ),
-                              _ChoiceChip(
-                                label: l10n.languageEnglish,
-                                icon: Icons.translate,
-                                selected: _language == 'en',
-                                onSelected: (_) =>
-                                    setState(() => _language = 'en'),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            l10n.onboardingCurrencyLabel,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              for (final code
-                                  in AppSettings.supportedCurrencies)
-                                _ChoiceChip(
-                                  label: _currencyLabel(l10n, code),
-                                  icon: Icons.attach_money,
-                                  selected: _currencyCode == code,
-                                  onSelected: (_) =>
-                                      setState(() => _currencyCode = code),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            l10n.onboardingPlanLabel,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 10),
-                          plansAsync.when(
-                            loading: () => const Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Center(child: CircularProgressIndicator()),
-                            ),
-                            error: (error, _) => Text(
-                              l10n.onboardingPlansError,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.error,
-                              ),
-                            ),
-                            data: (plans) => Column(
-                              children: [
-                                for (final plan in plans) ...[
-                                  _PlanCard(
-                                    plan: plan,
-                                    currencyCode: _currencyCode,
-                                    language: _language,
-                                    selected: _selectedPlan?.id == plan.id,
-                                    onTap: () =>
-                                        setState(() => _selectedPlan = plan),
-                                  ),
-                                  const SizedBox(height: 10),
-                                ],
-                              ],
-                            ),
-                          ),
-                          if (_formError != null) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              _formError!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.error,
-                              ),
+                            _ChoiceChip(
+                              label: l10n.languageEnglish,
+                              icon: Icons.translate,
+                              selected: _language == 'en',
+                              onSelected: (_) =>
+                                  setState(() => _language = 'en'),
                             ),
                           ],
-                          const SizedBox(height: 16),
-                          FilledButton.icon(
-                            onPressed: _isSubmitting ? null : _submit,
-                            icon: _isSubmitting
-                                ? const SizedBox(
-                                    height: 18,
-                                    width: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Icon(Icons.send_outlined),
-                            label: Text(l10n.onboardingSubmit),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          l10n.onboardingCurrencyLabel,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final code in AppSettings.supportedCurrencies)
+                              _ChoiceChip(
+                                label: _currencyLabel(l10n, code),
+                                icon: Icons.attach_money,
+                                selected: _currencyCode == code,
+                                onSelected: (_) =>
+                                    setState(() => _currencyCode = code),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          l10n.onboardingPlanLabel,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 10),
+                        plansAsync.when(
+                          loading: () => const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          error: (error, _) => Text(
+                            l10n.onboardingPlansError,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.error,
+                            ),
+                          ),
+                          data: (plans) => Column(
+                            children: [
+                              for (final plan in plans) ...[
+                                _PlanCard(
+                                  plan: plan,
+                                  currencyCode: _currencyCode,
+                                  language: _language,
+                                  selected: _selectedPlan?.id == plan.id,
+                                  onTap: () =>
+                                      setState(() => _selectedPlan = plan),
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                            ],
+                          ),
+                        ),
+                        if (_formError != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            _formError!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.error,
+                            ),
                           ),
                         ],
-                      ),
+                        const SizedBox(height: 16),
+                        AppButton.primary(
+                          onPressed: _isSubmitting ? null : _submit,
+                          icon: _isSubmitting
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.send_outlined),
+                          label: l10n.onboardingSubmit,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -338,66 +336,56 @@ class _PlanCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
 
-    return InkWell(
+    return AppCard(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: selected ? scheme.primary : scheme.outlineVariant,
-            width: selected ? 2 : 1,
+      padding: const EdgeInsets.all(14),
+      // Seleção: borda no acento + fundo em primaryContainer; em repouso
+      // segue a borda sutil (0.5px) e o fundo da superfície do design system.
+      borderColor: selected ? scheme.primary : null,
+      color: selected
+          ? scheme.primaryContainer.withValues(alpha: 0.4)
+          : scheme.surfaceContainerLow,
+      child: Row(
+        children: [
+          Icon(
+            selected
+                ? Icons.radio_button_checked
+                : Icons.radio_button_unchecked,
+            color: selected ? scheme.primary : scheme.outline,
           ),
-          color: selected
-              ? scheme.primaryContainer.withValues(alpha: 0.4)
-              : scheme.surfaceContainerLow,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              selected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: selected ? scheme.primary : scheme.outline,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    plan.name,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  plan.name,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.onboardingPlanDetails(plan.maxStores, plan.maxEmployees),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    l10n.onboardingPlanDetails(
-                      plan.maxStores,
-                      plan.maxEmployees,
-                    ),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Text(
-              Formatters.currencyFor(
-                currencyCode,
-                plan.priceMonthlyCents,
-                language: language,
-              ),
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: scheme.primary,
-              ),
+          ),
+          Text(
+            Formatters.currencyFor(
+              currencyCode,
+              plan.priceMonthlyCents,
+              language: language,
             ),
-          ],
-        ),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: scheme.primary,
+            ),
+          ),
+        ],
       ),
     );
   }

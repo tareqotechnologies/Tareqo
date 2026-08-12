@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../../core/utils/ids.dart';
+import '../entities/sale_lot_consumption.dart';
 import '../entities/stock_lot.dart';
 import '../repositories/i_stock_lot_repository.dart';
 import 'update_product_stock_use_case.dart';
@@ -11,7 +12,10 @@ import 'update_product_stock_use_case.dart';
 /// - [increase] (compra) — cria um lote novo e aumenta o total do produto;
 /// - [decrease] (venda) — abate a quantidade vendida dos lotes em ordem
 ///   FIFO (`data_validade` ascendente, sem validade no fim por
-///   `data_entrada`) e reduz o total do produto;
+///   `data_entrada`) e reduz o total do produto; retorna QUAIS lotes foram
+///   consumidos ([LotConsumption]) para permitir a anulação exata da venda;
+/// - [restoreLot] (anulação) — devolve a quantidade ao lote EXATO
+///   consumido e aumenta o total do produto;
 /// - [ensureSufficientStock] — pré-validação pela soma dos lotes ativos.
 ///
 /// Mantém a INVARIANTE central do módulo: `product.stock_quantity` é a soma
@@ -50,6 +54,19 @@ class FifoStockUseCase {
     }
   }
 
+  /// Garante que o produto [productId] EXISTE e está ATIVO na loja
+  /// [storeId] — espelha a guarda do `lock_products_or_raise` do servidor
+  /// (produto desativado não pode ser vendido nem reposto). Chamado pelas
+  /// vendas/compras do caminho composto ANTES da mutação de estoque (a
+  /// anulação e o ajuste manual NÃO usam — o estoque de um produto
+  /// desativado continua sendo restaurado/ajustado).
+  Future<void> requireActive(
+    String productId, {
+    required String storeId,
+  }) async {
+    await _productStock.requireActive(productId, storeId: storeId);
+  }
+
   /// Abate [quantity] milésimos do estoque de [productId] da loja
   /// [storeId], consumindo os lotes em **ordem FIFO**.
   ///
@@ -67,10 +84,15 @@ class FifoStockUseCase {
   /// 4. Ao final, reduz o total do produto na mesma quantidade ([UpdateProductStockUseCase]
   ///    revalida como defesa em profundidade).
   ///
+  /// Retorna a lista de [LotConsumption] — cada lote abatido e a
+  /// quantidade tirada dele. O chamador (venda) deve persistir este
+  /// registro na mesma transação; é ele que permite à anulação devolver o
+  /// estoque aos lotes EXATOS.
+  ///
   /// Deve rodar DENTRO da transação do chamador ([IUnitOfWork] no caminho
   /// composto; RPC `process_sale` no Supabase) — lotes e total do produto
   /// são gravados atomicamente.
-  Future<void> decrease(
+  Future<List<LotConsumption>> decrease(
     String productId,
     int quantity, {
     required String storeId,
@@ -85,6 +107,7 @@ class FifoStockUseCase {
       storeId: storeId,
     );
 
+    final consumption = <LotConsumption>[];
     var remaining = quantity;
     for (final lot in lots) {
       if (remaining <= 0) break;
@@ -93,6 +116,9 @@ class FifoStockUseCase {
         lot.id,
         lot.currentQuantity - take,
         storeId: storeId,
+      );
+      consumption.add(
+        LotConsumption(lotId: lot.id, productId: productId, quantity: take),
       );
       remaining -= take;
     }
@@ -110,6 +136,26 @@ class FifoStockUseCase {
     }
 
     await _productStock.decrease(productId, quantity, storeId: storeId);
+    return consumption;
+  }
+
+  /// Devolve [quantity] milésimos ao lote EXATO [lotId] (que foi
+  /// consumido por uma venda agora anulada) e aumenta o total do produto
+  /// [productId] na mesma quantidade.
+  ///
+  /// Diferente do [increase], que cria um lote NOVO, esta operação
+  /// restaura o lote original — preservando a data de validade e o custo
+  /// do lote que de fato saiu do estoque. A quantidade de um lote ativo
+  /// só diminui nas baixas, então devolver nunca ultrapassa a capacidade
+  /// do lote. Deve rodar dentro da transação do chamador (anulação).
+  Future<void> restoreLot(
+    String lotId,
+    String productId,
+    int quantity, {
+    required String storeId,
+  }) async {
+    await _lotRepository.increaseQuantity(lotId, quantity, storeId: storeId);
+    await _productStock.increase(productId, quantity, storeId: storeId);
   }
 
   /// Entrada de mercadoria: cria um NOVO lote ([expiryDate] opcional —

@@ -7,6 +7,8 @@ import '../../../domain/entities/plan_request.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/admin_providers.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/status_chip.dart';
@@ -127,81 +129,79 @@ class _RequestCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    tenantName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+    return AppCard(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  tenantName,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                StatusChip(
-                  label: l10n.statusPending,
-                  color: scheme.tertiary,
-                  icon: Icons.hourglass_top,
+              ),
+              StatusChip(
+                label: l10n.statusPending,
+                color: scheme.tertiary,
+                icon: Icons.hourglass_top,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _PlanBadge(
+                  label: currentPlan,
+                  isUpgrade: false,
+                  l10n: l10n,
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _PlanBadge(
-                    label: currentPlan,
-                    isUpgrade: false,
-                    l10n: l10n,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Icon(
+                  Icons.arrow_forward,
+                  size: 18,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              Expanded(
+                child: _PlanBadge(
+                  label: requestedPlan,
+                  isUpgrade: true,
+                  l10n: l10n,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: AppButton.primary(
+                  onPressed: () => onDecide(true),
+                  icon: const Icon(Icons.check),
+                  label: l10n.adminApprove,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: AppButton.secondary(
+                  onPressed: () => onDecide(false),
+                  icon: const Icon(Icons.close),
+                  label: l10n.adminReject,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: scheme.error,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Icon(
-                    Icons.arrow_forward,
-                    size: 18,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                Expanded(
-                  child: _PlanBadge(
-                    label: requestedPlan,
-                    isUpgrade: true,
-                    l10n: l10n,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () => onDecide(true),
-                    icon: const Icon(Icons.check),
-                    label: Text(l10n.adminApprove),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => onDecide(false),
-                    icon: const Icon(Icons.close),
-                    label: Text(l10n.adminReject),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: scheme.error,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

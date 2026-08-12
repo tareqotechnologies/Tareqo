@@ -25,19 +25,20 @@ class StatusChip extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        // Ícone verticalmente CENTRALIZADO mesmo quando o rótulo quebra em
+        // 2+ linhas (âncoras com valores longos).
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (icon != null) ...[
             Icon(icon, size: 12, color: color),
             const SizedBox(width: 4),
           ],
-          // Flexible + ellipsis: com escala de texto alta ou rótulos
-          // longos (ex.: 'Fiado R\$ 1.234.567,89'), o chip encolhe em vez
-          // de estourar o Row que o contém.
+          // Flexible SEM ellipsis: rótulos longos (ex.: 'Fiado
+          // R\$ 1.234.567,89') quebram em linhas quando o espaço aperta —
+          // o texto da âncora fica SEMPRE completo, nunca truncado.
           Flexible(
             child: Text(
               label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

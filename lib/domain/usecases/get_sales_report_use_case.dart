@@ -1,4 +1,5 @@
 import '../../core/utils/quantity.dart';
+import '../entities/sale.dart';
 import '../repositories/i_product_repository.dart';
 import '../repositories/i_sale_repository.dart';
 import '../repositories/i_sales_report_repository.dart';
@@ -99,7 +100,11 @@ class GetSalesReportUseCase {
     final sales = (await _saleRepository.getAll(storeId: storeId))
         .where(
           (sale) =>
-              !sale.dateTime.isBefore(start) && !sale.dateTime.isAfter(end),
+              // Vendas ANULADAS saem do relatório (mesmo critério da RPC
+              // get_sales_report: só status 'active').
+              sale.status == SaleStatus.active &&
+              !sale.dateTime.isBefore(start) &&
+              !sale.dateTime.isAfter(end),
         )
         .toList();
 

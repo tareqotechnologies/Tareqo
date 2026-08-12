@@ -9,13 +9,21 @@ import 'package:dumbhanengue/domain/entities/app_user.dart';
 import 'package:dumbhanengue/domain/entities/product.dart';
 import 'package:dumbhanengue/domain/entities/store.dart';
 import 'package:dumbhanengue/domain/entities/store_employee.dart';
+import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
+import 'package:dumbhanengue/domain/repositories/i_unit_of_work.dart';
+import 'package:dumbhanengue/domain/usecases/fifo_stock_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_employees_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
+import 'package:dumbhanengue/domain/usecases/update_product_stock_use_case.dart';
+import 'package:dumbhanengue/domain/usecases/update_product_use_case.dart';
 import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
+import 'package:dumbhanengue/data/services/product_image_store_noop.dart';
 import 'package:dumbhanengue/presentation/controllers/products_providers.dart';
 import 'package:dumbhanengue/presentation/screens/products/product_list_screen.dart';
+import 'package:dumbhanengue/presentation/widgets/list_skeleton.dart';
 
+import '../../helpers/fake_stock_lot_repository.dart';
 import '../../helpers/store_context.dart';
 
 /// Fake do [GetProductsUseCase] — a tela nunca toca em GetIt nem em
@@ -29,6 +37,76 @@ class _FakeGetProductsUseCase implements GetProductsUseCase {
   Future<List<Product>> call({required String storeId}) async => _products;
 }
 
+/// Repositório de produtos em memória (edição real sem GetIt).
+class _InMemoryProductRepository implements IProductRepository {
+  final List<Product> products = [];
+
+  @override
+  Future<List<Product>> getAll({required String storeId}) async =>
+      List.unmodifiable(products);
+
+  @override
+  Future<Product?> getById(String id, {required String storeId}) async {
+    for (final product in products) {
+      if (product.id == id && product.storeId == storeId) return product;
+    }
+    return null;
+  }
+
+  @override
+  Future<void> add(Product product) async => products.add(product);
+
+  @override
+  Future<void> update(Product product) async {
+    final index = products.indexWhere(
+      (p) => p.id == product.id && p.storeId == product.storeId,
+    );
+    final current = products[index];
+    products[index] = current.copyWith(
+      name: product.name,
+      description: product.description,
+      purchasePriceCents: product.purchasePriceCents,
+      salePriceCents: product.salePriceCents,
+      code: product.code,
+      vendaPorFracao: product.vendaPorFracao,
+      unitLabel: product.unitLabel,
+      isActive: product.isActive,
+    );
+  }
+
+  @override
+  Future<void> updateStock(
+    String id,
+    int newQuantity, {
+    required String storeId,
+  }) async {
+    final index = products.indexWhere(
+      (p) => p.id == id && p.storeId == storeId,
+    );
+    products[index] = products[index].copyWith(stockQuantity: newQuantity);
+  }
+}
+
+/// Unit of work no-op para o caminho composto da edição.
+class _DirectUnitOfWork implements IUnitOfWork {
+  const _DirectUnitOfWork();
+
+  @override
+  Future<T> run<T>(Future<T> Function() action) => action();
+}
+
+/// Constrói o [UpdateProductUseCase] real sobre o repositório em memória.
+UpdateProductUseCase _updateUseCase(_InMemoryProductRepository repository) {
+  return UpdateProductUseCase(
+    repository,
+    FifoStockUseCase(
+      FakeStockLotRepository(),
+      UpdateProductStockUseCase(repository),
+    ),
+    const _DirectUnitOfWork(),
+  );
+}
+
 /// Fake que sempre falha, para exercitar o estado de erro.
 class _ThrowingGetProductsUseCase implements GetProductsUseCase {
   @override
@@ -36,12 +114,25 @@ class _ThrowingGetProductsUseCase implements GetProductsUseCase {
       throw Exception('falha simulada ao buscar produtos');
 }
 
-Widget _buildApp(GetProductsUseCase useCase) {
+Widget _buildApp(
+  GetProductsUseCase useCase, {
+  UpdateProductUseCase? updateUseCase,
+}) {
   return ProviderScope(
     overrides: [
       // Contexto de loja — a lista de produtos escopa pela loja ativa.
       ...storeContextOverrides(),
       getProductsUseCaseProvider.overrideWithValue(useCase),
+      // Edição: use case real sobre fakes em memória (a tela nunca toca
+      // em GetIt — o provider é sobrescrito no ProviderScope).
+      updateProductUseCaseProvider.overrideWithValue(
+        updateUseCase ?? _updateUseCase(_InMemoryProductRepository()),
+      ),
+      // Fotos: no-op em testes (sem disco/Storage — a UI cai no fallback
+      // de ícone; sem override, o provider chamaria o GetIt não configurado).
+      productImageStoreProvider.overrideWithValue(
+        const ProductImageStoreNoop(),
+      ),
     ],
     child: testApp(home: ProductListScreen()),
   );
@@ -68,9 +159,7 @@ Widget _buildAppAsEmployee(GetProductsUseCase useCase) {
           Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
         ]),
       ),
-      getEmployeesUseCaseProvider.overrideWithValue(
-        _FakeGetEmployeesUseCase(),
-      ),
+      getEmployeesUseCaseProvider.overrideWithValue(_FakeGetEmployeesUseCase()),
       getProductsUseCaseProvider.overrideWithValue(useCase),
     ],
     child: testApp(home: ProductListScreen()),
@@ -80,16 +169,16 @@ Widget _buildAppAsEmployee(GetProductsUseCase useCase) {
 class _FakeGetEmployeesUseCase implements GetEmployeesUseCase {
   @override
   Future<List<StoreEmployee>> call(String tenantId) async => const [
-        StoreEmployee(
-          id: 'e1',
-          tenantId: 'tn1',
-          storeId: 'st1',
-          userId: 'u1',
-          fullName: 'Funcionária',
-          email: 'func@loja.com',
-          role: EmployeeRole.employee,
-        ),
-      ];
+    StoreEmployee(
+      id: 'e1',
+      tenantId: 'tn1',
+      storeId: 'st1',
+      userId: 'u1',
+      fullName: 'Funcionária',
+      email: 'func@loja.com',
+      role: EmployeeRole.employee,
+    ),
+  ];
 }
 
 void main() {
@@ -113,8 +202,8 @@ void main() {
       ),
     );
 
-    // Estado inicial: carregando.
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    // Estado inicial: carregando — skeleton da lista (padrão das telas).
+    expect(find.byType(ListSkeleton), findsOneWidget);
 
     await tester.pumpAndSettle();
 
@@ -138,8 +227,9 @@ void main() {
   // unidade com o valor padrão 'un' — que não existe na lista de itens
   // (kg/g/l/ml) — e o DropdownButtonFormField lançava a asserção "exactly
   // one item with value 'un'" (crash reportado em produção).
-  testWidgets('ativar venda por peso não quebra o dropdown de unidade',
-      (tester) async {
+  testWidgets('ativar venda por peso não quebra o dropdown de unidade', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildApp(_FakeGetProductsUseCase(const [])));
     await tester.pumpAndSettle();
 
@@ -149,6 +239,11 @@ void main() {
 
     // Antes do toggle: sem dropdown de unidade.
     expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+
+    // O seletor de foto adicionou altura no topo da sheet — garante que
+    // o toggle fique visível no viewport curto do teste antes do tap.
+    await tester.ensureVisible(find.textContaining('Venda por peso'));
+    await tester.pumpAndSettle();
 
     // Ativa "Venda por peso" — o bug lançava asserção aqui.
     await tester.tap(find.textContaining('Venda por peso'));
@@ -181,8 +276,7 @@ void main() {
   // W11: o cadastro de produto aceita validade — o lote inicial do
   // estoque de abertura nasce com ela e o dashboard passa a alertar
   // (vermelho = vencido; amarelo = vence em < 30 dias).
-  testWidgets('cadastro de produto permite definir a validade',
-      (tester) async {
+  testWidgets('cadastro de produto permite definir a validade', (tester) async {
     await tester.pumpWidget(_buildApp(_FakeGetProductsUseCase(const [])));
     await tester.pumpAndSettle();
 
@@ -211,6 +305,144 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Definir validade'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tocar no produto abre a edição (dono/gerente)', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetProductsUseCase(const [
+          Product(
+            id: '1',
+            name: 'Caneta',
+            purchasePriceCents: 100,
+            salePriceCents: 200,
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Toca no tile do produto → a sheet de edição abre pré-preenchida.
+    await tester.tap(find.text('Caneta'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Editar produto'), findsOneWidget);
+    expect(find.text('Salvar alterações'), findsOneWidget);
+    // Pré-preenchido com os valores atuais.
+    expect(find.widgetWithText(TextFormField, 'Caneta'), findsOneWidget);
+    expect(find.text('2.00'), findsOneWidget); // preço de venda pré-preenchido
+  });
+
+  testWidgets('editar nome e preço salva as alterações', (tester) async {
+    final repository = _InMemoryProductRepository()
+      ..add(
+        const Product(
+          id: '1',
+          name: 'Caneta',
+          purchasePriceCents: 100,
+          salePriceCents: 200,
+        ),
+      );
+
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetProductsUseCase(const [
+          Product(
+            id: '1',
+            name: 'Caneta',
+            purchasePriceCents: 100,
+            salePriceCents: 200,
+          ),
+        ]),
+        updateUseCase: _updateUseCase(repository),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Caneta'));
+    await tester.pumpAndSettle();
+
+    // Altera o nome e o preço de venda.
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Caneta'),
+      'Caneta Azul',
+    );
+    await tester.enterText(find.widgetWithText(TextFormField, '2.00'), '2.50');
+    await tester.ensureVisible(find.text('Salvar alterações'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Salvar alterações'));
+    await tester.pumpAndSettle();
+
+    // Snackbar de sucesso + persistência no repositório (estoque intacto).
+    expect(find.text('Produto atualizado!'), findsOneWidget);
+    expect(repository.products.single.name, 'Caneta Azul');
+    expect(repository.products.single.salePriceCents, 250);
+    expect(repository.products.single.stockQuantity, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('desativar produto marca Inativo e salva', (tester) async {
+    final repository = _InMemoryProductRepository()
+      ..add(
+        const Product(
+          id: '1',
+          name: 'Caneta',
+          purchasePriceCents: 100,
+          salePriceCents: 200,
+        ),
+      );
+
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetProductsUseCase(const [
+          Product(
+            id: '1',
+            name: 'Caneta',
+            purchasePriceCents: 100,
+            salePriceCents: 200,
+          ),
+        ]),
+        updateUseCase: _updateUseCase(repository),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Caneta'));
+    await tester.pumpAndSettle();
+
+    // Desativa o produto (switch "Produto ativo" → off) e salva.
+    await tester.ensureVisible(find.text('Produto ativo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Switch).last);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Salvar alterações'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Salvar alterações'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Produto atualizado!'), findsOneWidget);
+    expect(repository.products.single.isActive, isFalse);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('produto INATIVO exibe o selo no tile', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetProductsUseCase(const [
+          Product(
+            id: '1',
+            name: 'Caneta',
+            purchasePriceCents: 100,
+            salePriceCents: 200,
+            isActive: false,
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Selo "Inativo" visível (produto permanece no histórico da loja).
+    expect(find.text('Inativo'), findsOneWidget);
   });
 
   testWidgets('exibe erro e permite tentar novamente', (tester) async {
@@ -314,8 +546,9 @@ void main() {
     expect(find.text('Caderno'), findsOneWidget);
   });
 
-  testWidgets('funcionário comum NÃO vê o botão de novo produto (só vende)',
-      (tester) async {
+  testWidgets('funcionário comum NÃO vê o botão de novo produto (só vende)', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _buildAppAsEmployee(
         _FakeGetProductsUseCase(const [

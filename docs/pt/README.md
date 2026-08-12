@@ -28,12 +28,24 @@ Este diretório reúne todos os documentos do app: do que ele faz até como cada
 | 14 | [Go-Live: operações externas](14-go-live-ops.md) | Checklist manual das consolas (Play, Apple, Supabase) e secrets do CI para o primeiro release |
 | 15 | [Migração W4 + H2 no live](15-migracao-w4-h2.md) | Runbook passo a passo para aplicar `supabase/upgrade.sql` no projeto de produção + verificação pós-migração |
 | 16 | [Migração W11 no live](16-migracao-w11.md) | Runbook da Parte 22 (FIFO por lotes + validade + vendas por peso): milésimos, backfill de lotes, verificação pós-migração e janela de publicação |
+| 17 | [Migração do fecho de caixa no live](17-migracao-fecho-caixa.md) | Runbook da Parte 25 (Z-report): tabela `cash_closings` + RPC `close_cash_register` (cálculo server-side + guarda gerencial), verificação pós-migração (checks 32–34) e publicação |
+
+---
+
+## Para utilizadores finais
+
+| Documento | O que é |
+| --------- | ------- |
+| [Guia do Usuário](GUIA_DO_USUARIO.md) | Manual simples e completo do app: login, lojas (loja ativa), produtos (com foto), vendas, compras, fiado, financeiro, fecho de caixa, relatórios e **FAQ** |
+| [Troubleshooting](TROUBLESHOOTING.md) | Resolução de problemas comuns: entrada e conta, fotos, vendas, estoque, caixa, conexão, mensagens de erro e quando contactar o suporte |
+| **Versões PDF (imprimir)** | [Guia do Usuário PDF](pdf/pt/GUIA_DO_USUARIO.pdf) · [Troubleshooting PDF](pdf/pt/TROUBLESHOOTING.pdf) — com capa e índice, prontos a entregar/ imprimir |
 
 ---
 
 ## Comece por aqui
 
 - **Não conhece o app?** → [Visão geral](01-visao-geral.md)
+- **É utilizador final (dono/gerente/funcionário)?** → [Guia do Usuário](GUIA_DO_USUARIO.md) · [Troubleshooting](TROUBLESHOOTING.md)
 - **Quer entender como o código está organizado?** → [Arquitetura](02-arquitetura.md)
 - **Quer rodar o projeto e mexer no código?** → [Guia do desenvolvedor](10-guia-desenvolvedor.md)
 

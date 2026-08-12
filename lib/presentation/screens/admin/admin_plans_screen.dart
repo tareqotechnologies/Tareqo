@@ -10,6 +10,9 @@ import '../../../domain/entities/plan.dart';
 import '../../../domain/usecases/add_plan_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/admin_providers.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
+import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/status_chip.dart';
@@ -98,7 +101,8 @@ class _PlanTile extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    return Card(
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: ListTile(
         onTap: onEdit,
         leading: CircleAvatar(
@@ -277,56 +281,46 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
                 ],
               ),
             ),
-            TextFormField(
+            AppTextField(
               controller: _nameController,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.adminPlanNameLabel,
-                prefixIcon: const Icon(Icons.workspaces_outline),
-              ),
+              label: l10n.adminPlanNameLabel,
+              prefixIcon: Icons.workspaces_outline,
             ),
             const SizedBox(height: 14),
-            TextFormField(
+            AppTextField(
               controller: _descriptionController,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.commonDescription,
-                prefixIcon: const Icon(Icons.notes_outlined),
-              ),
+              label: l10n.commonDescription,
+              prefixIcon: Icons.notes_outlined,
             ),
             const SizedBox(height: 14),
-            TextFormField(
+            AppTextField(
               controller: _priceController,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: InputDecoration(
-                labelText: l10n.adminPlanPriceLabel,
-                prefixIcon: const Icon(Icons.attach_money),
-              ),
+              label: l10n.adminPlanPriceLabel,
+              prefixIcon: Icons.attach_money,
             ),
             const SizedBox(height: 14),
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
+                  child: AppTextField(
                     controller: _maxStoresController,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: l10n.adminPlanMaxStores,
-                      prefixIcon: const Icon(Icons.store_outlined),
-                    ),
+                    label: l10n.adminPlanMaxStores,
+                    prefixIcon: Icons.store_outlined,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: TextFormField(
+                  child: AppTextField(
                     controller: _maxEmployeesController,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: l10n.adminPlanMaxEmployees,
-                      prefixIcon: const Icon(Icons.badge_outlined),
-                    ),
+                    label: l10n.adminPlanMaxEmployees,
+                    prefixIcon: Icons.badge_outlined,
                   ),
                 ),
               ],
@@ -349,19 +343,18 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
               ),
             ],
             const SizedBox(height: 20),
-            FilledButton(
+            AppButton.primary(
               onPressed: _isSubmitting ? null : _submit,
-              child: _isSubmitting
+              icon: _isSubmitting
                   ? const SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(
-                      widget.plan == null
-                          ? l10n.adminPlanCreate
-                          : l10n.commonSave,
-                    ),
+                  : null,
+              label: widget.plan == null
+                  ? l10n.adminPlanCreate
+                  : l10n.commonSave,
             ),
           ],
         ),

@@ -36,6 +36,7 @@ lib/data/
 │       ├── stock_lot_local_data_source.dart / _impl / _sqlite  # FIFO lots (contract + memory + SQLite)
 │       ├── sale_local_data_source.dart / _impl / _sqlite
 │       ├── financial_transaction_local_data_source.dart / _impl / _sqlite
+│       ├── cash_closing_local_data_source.dart / _impl / _sqlite   # Cash closing (Z-report)
 │       ├── debt_local_data_source.dart / _impl / _sqlite
 │       ├── plan_local_data_source.dart / _impl       # Contract + in-memory (Accounts)
 │       ├── tenant_local_data_source.dart / _impl     # Tenants (Accounts)
@@ -65,8 +66,9 @@ Each `XxxLocalDataSource` is an **interface**; there are two implementations:
 | -------- | ------------------------- | ----------------------------- |
 | `ProductLocalDataSource` | `List<Product>` + seed | `products` table |
 | `StockLotLocalDataSource` | `List<StockLot>` + seed | `stock_lots` table (FIFO order guaranteed in the query) |
-| `SaleLocalDataSource` | `List<Sale>` + seed | `sales` + `sale_items` tables (single transaction) |
+| `SaleLocalDataSource` | `List<Sale>` + seed | `sales` + `sale_items` + `sale_lot_consumption` tables (single transaction) |
 | `FinancialTransactionLocalDataSource` | `List<FinancialTransaction>` + seed | `financial_transactions` table |
+| `CashClosingLocalDataSource` | `List<CashClosing>` + seed | `cash_closings` table (UPSERT per store + day) |
 | `DebtLocalDataSource` | `List<Debt>` + seed | `debts` table |
 
 **Who chooses which one?** The `ServiceLocator`, by precedence:
@@ -96,6 +98,23 @@ They implement **the same contracts** (`ProductLocalDataSource`, `SaleLocalDataS
 - **Atomic money flows:** the sale/purchase use cases **delegate to `SECURITY DEFINER` RPCs** (`process_sale`, `process_purchase`, `register_debt`, `settle_debt`) that run the whole operation in **one DB transaction** (sale + items + **FIFO stock lots** + cash, or debt + pending entry, or settlement + resolution) with idempotency keys and `FOR UPDATE` stock locking. `process_sale` consumes lots in FIFO order; `process_purchase` **creates the lots** of the entry (with optional expiry). The PostgREST nested insert (sale + items in one request) remains as the fallback `add` for the contract;
 - **Unit of Work:** no-op in Supabase mode (each REST call is its own transaction) — that is why the atomic RPCs exist;
 - **No session:** the datasources throw `StateError` — data screens are only reachable after sign-in (`AuthGate`).
+
+### Server-side aggregations (W5/H2)
+
+For **scale**, the app does not download the whole history to sum on the client: heavy aggregations run **in Postgres** as `SECURITY DEFINER` RPCs (`is_my_store` guard, BIGINT/cents values), and the device only receives the numbers — **ONE call**, constant payload. The pattern covers four fronts:
+
+| RPC | Repository | Aggregates |
+| --- | ---------- | ---------- |
+| `get_dashboard_kpis` (W5) | `SupabaseDashboardKpisRepository` | dashboard KPIs — revenue, ticket, counts — instead of summing 4 client-side listings (`GetDashboardKpisUseCase`) |
+| `get_cash_flow` (H2) | `SupabaseCashFlowRepository` | **paid** income/expenses of the period + balance (`GetCashFlowUseCase`) |
+| `get_sales_report` (H2) | `SupabaseSalesReportRepository` | revenue, gross profit, top-5 sellers and sales per day in the device timezone (`GetSalesReportUseCase`) |
+| `get_cash_closing_summary` (H2) | `SupabaseCashClosingSummaryRepository` | Z-report preview: total/expected in the drawer/breakdown by method + already-registered closing (`GetCashClosingSummaryUseCase`) |
+
+**How the wiring works (DIP):** the use cases receive an optional `serverRepository` — registered **only in Supabase mode** via `instance.isRegistered<I…Repository>()` in the ServiceLocator (e.g., `ICashClosingSummaryRepository`, `ICashFlowRepository`); local/tests receive `null` and fall back to the **client-side computation** with the **same criteria** as the RPC (e.g., `aggregateCashClosingDay` mirrors `close_cash_register`/`get_cash_closing_summary`). The domain and the UI do not change between modes — only the wiring does, like any persistence swap in this project.
+
+**Listing reads (H2):** the complement to aggregations is **keyset pagination** (`fetchAllKeyset` — stable `id` cursor, `SupabaseQueryLimits.pageSize` batches), which replaced the old `.limit(1000)` on every remote `getAll` — small, constant responses even for stores with 10k+ rows.
+
+> See the full pattern, with the Z-report preview flow diagram, in [Architecture — Server-side aggregations (H2)](02-architecture.md); the business flows (cash closing) in [Business flows](08-business-flows.md).
 
 The schema (tables, RLS, policies, indexes, triggers, functions and seed) lives in [`supabase/schema.sql`](../../supabase/schema.sql), validated by `scripts/sql_check.sh` against PostgreSQL 16 (see [Testing](09-testing.md)).
 
@@ -133,7 +152,9 @@ CREATE TABLE sales (
   sale_number INTEGER NOT NULL DEFAULT 0,  -- sequential per store (S-00001)
   total_amount INTEGER NOT NULL CHECK (total_amount >= 0),  -- cents
   payment_method TEXT NOT NULL,          -- enum name (stable)
-  date_time INTEGER NOT NULL             -- epoch millis
+  date_time INTEGER NOT NULL,            -- epoch millis
+  status TEXT NOT NULL DEFAULT 'active', -- active | cancelled (reversal)
+  cancelled_at INTEGER                   -- reversal moment (NULL while active)
 );
 
 CREATE TABLE sale_items (
@@ -145,6 +166,18 @@ CREATE TABLE sale_items (
   unit_price INTEGER NOT NULL CHECK (unit_price >= 0) -- cents
 );
 CREATE INDEX idx_sale_items_sale_id ON sale_items(sale_id);
+
+-- Per-sale LOT consumption — written in the SAME transaction as the sale.
+-- It lets the reversal return stock to the EXACT lots consumed (preserving
+-- each lot's expiry and cost).
+CREATE TABLE sale_lot_consumption (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+  lot_id TEXT NOT NULL,
+  product_id TEXT NOT NULL,
+  quantity INTEGER NOT NULL CHECK (quantity > 0)    -- milli-units (W11)
+);
+CREATE INDEX idx_sale_lot_consumption_sale ON sale_lot_consumption(sale_id);
 
 CREATE TABLE financial_transactions (
   id TEXT PRIMARY KEY,
@@ -215,6 +248,23 @@ CREATE TABLE stock_lots (
 );
 CREATE INDEX idx_stock_lots_product ON stock_lots(product_id, store_id);
 CREATE INDEX idx_stock_lots_expiry ON stock_lots(expiry_date) WHERE current_quantity > 0;
+
+-- Daily cash closing (Z-report) — one closing per store per day. closing_date
+-- = start of the local day in ms (epoch); expected_cash = what should be in
+-- the drawer (Σ ACTIVE CASH sales of the day); counted_cash = physical cash
+-- counted in the reconciliation; sales_by_method = breakdown by method (JSON).
+CREATE TABLE cash_closings (
+  id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL DEFAULT 'st1',
+  closing_date INTEGER NOT NULL,             -- epoch millis (start of local day)
+  total_sales INTEGER NOT NULL CHECK (total_sales >= 0),   -- cents
+  expected_cash INTEGER NOT NULL CHECK (expected_cash >= 0), -- cents
+  counted_cash INTEGER NOT NULL CHECK (counted_cash >= 0), -- cents
+  sales_by_method TEXT NOT NULL DEFAULT '{}', -- JSON (method.name → cents)
+  closed_at INTEGER NOT NULL                  -- epoch millis
+);
+CREATE UNIQUE INDEX uq_cash_closings_store_day ON cash_closings(store_id, closing_date);
+CREATE INDEX idx_cash_closings_store ON cash_closings(store_id);
 ```
 
 **Serialization conventions:**
@@ -241,7 +291,8 @@ The `CHECK` constraints (`stock_quantity >= 0`, `amount >= 0`, `quantity > 0`) a
 6. **`purchases.purchase_number`** — sequential per store (C-00001…), backfilled by date order; unique `(store_id, purchase_number)`;
 7. **`debts.debt_number`** — sequential per store (D-00001…), backfilled by due date order; unique `(store_id, debt_number)`;
 8. **`purchases.payment_method`** — supplier payment method (same enum as sales), added as `'cash'` (legacy purchases were immediate cash expenses);
-9. **W11 (FIFO + expiry + milli-units)** — legacy databases get the `code`/`venda_por_fracao`/`unit_label` (products) and `expiry_date` (purchase_items) columns; **all quantities** (products, sale_items, purchase_items) are converted from whole units to **milli-units (×1000)**; and every product with stock gets an **initial lot** (`lot-mig-…`, no expiry, cost = purchase price) so the `stock = Σ lots` invariant holds from day one. Idempotent guard: presence of the `code` column (added only in this migration) — the ×1000 conversion never re-runs.
+9. **`sales.status` + `sales.cancelled_at`** (sale reversal) — `status` with `DEFAULT 'active'` (all existing sales are active — never reversed) and `cancelled_at` NULL. Idempotent guard: presence of the `status` column;
+10. **W11 (FIFO + expiry + milli-units)** — legacy databases get the `code`/`venda_por_fracao`/`unit_label` (products) and `expiry_date` (purchase_items) columns; **all quantities** (products, sale_items, purchase_items) are converted from whole units to **milli-units (×1000)**; and every product with stock gets an **initial lot** (`lot-mig-…`, no expiry, cost = purchase price) so the `stock = Σ lots` invariant holds from day one. Idempotent guard: presence of the `code` column (added only in this migration) — the ×1000 conversion never re-runs.
 
 The numbering migrations run **after** the `store_id` migration (the backfills reference `store_id`). All of them use `PRAGMA table_info` to check the column first — **safe for re-execution** (new databases already create the columns in `CREATE TABLE`).
 

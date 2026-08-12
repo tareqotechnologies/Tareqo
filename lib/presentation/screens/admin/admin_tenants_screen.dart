@@ -5,6 +5,9 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/admin_providers.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
+import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/status_chip.dart';
@@ -145,7 +148,8 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
               TenantStatus.approved => (scheme.primary, l10n.statusApproved),
               TenantStatus.rejected => (scheme.error, l10n.statusRejected),
             };
-            return Card(
+            return AppCard(
+              padding: EdgeInsets.zero,
               child: ListTile(
                 leading: const Icon(Icons.business_outlined),
                 title: Text(tenant.businessName),
@@ -216,23 +220,21 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.adminRejectTitle(businessName)),
-        content: TextField(
+        content: AppTextField(
           controller: controller,
           maxLines: 3,
           autofocus: true,
-          decoration: InputDecoration(
-            labelText: l10n.adminRejectReasonLabel,
-            hintText: l10n.adminRejectReasonHint,
-          ),
+          label: l10n.adminRejectReasonLabel,
+          hintText: l10n.adminRejectReasonHint,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.commonCancel),
           ),
-          FilledButton(
+          AppButton.primary(
             onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-            child: Text(l10n.adminReject),
+            label: l10n.adminReject,
           ),
         ],
       ),
@@ -259,61 +261,59 @@ class _PendingTenantCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    tenant.businessName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+    return AppCard(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  tenant.businessName,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                StatusChip(
-                  label: l10n.statusPending,
-                  color: scheme.tertiary,
-                  icon: Icons.hourglass_top,
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              l10n.adminPlanLabel(planName),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
               ),
+              StatusChip(
+                label: l10n.statusPending,
+                color: scheme.tertiary,
+                icon: Icons.hourglass_top,
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.adminPlanLabel(planName),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onApprove,
-                    icon: const Icon(Icons.check),
-                    label: Text(l10n.adminApprove),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: AppButton.primary(
+                  onPressed: onApprove,
+                  icon: const Icon(Icons.check),
+                  label: l10n.adminApprove,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: AppButton.secondary(
+                  onPressed: onReject,
+                  icon: const Icon(Icons.close),
+                  label: l10n.adminReject,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: scheme.error,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onReject,
-                    icon: const Icon(Icons.close),
-                    label: Text(l10n.adminReject),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: scheme.error,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

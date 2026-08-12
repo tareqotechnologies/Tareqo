@@ -88,9 +88,9 @@ O app está funcional de ponta a ponta. Com o Supabase configurado (padrão), os
 Próximos passos:
 
 1. Recorrência de despesas fixas (agendamento de aluguel/luz);
-2. Ação "Pagar" para saídas pendentes no Financeiro (hoje só entradas têm "Receber");
+2. ~~Ação "Pagar" para saídas pendentes no Financeiro~~ ✅ **FEITO** — saídas pendentes (contas a pagar) ganham o botão "Pagar" (mesmo ciclo `pending → paid` das entradas, via `_settlePending` unificado);
 3. Cache offline (leitura local + sincronização) para uso sem conexão;
-4. Aplicação dos limites de plano no servidor (triggers/RPC no Postgres — hoje validados no app).
+4. ~~Aplicação dos limites de plano no servidor~~ ✅ **FEITO** — triggers `enforce_store_limit`/`enforce_employee_limit` no Postgres (ver 1.4 do checklist).
 
 ---
 

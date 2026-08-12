@@ -14,7 +14,9 @@ import '../../controllers/customers_providers.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/debts_providers.dart';
 import '../../controllers/finance_providers.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
+import '../../widgets/app_text_field.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Bottom sheet para registrar uma dívida ("fiado") de cliente.
@@ -197,25 +199,23 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
                       ],
                     ),
             ),
-            TextFormField(
+            // AppTextField (design system ultra-clean): minimalista, borda
+            // sutil que acende no foco — padrão dos formulários do app.
+            AppTextField(
               controller: _nameController,
+              label: l10n.debtsCustomerNameLabel,
+              prefixIcon: Icons.person_outline,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.debtsCustomerNameLabel,
-                prefixIcon: const Icon(Icons.person_outline),
-              ),
               validator: (value) => (value == null || value.trim().isEmpty)
                   ? l10n.debtsCustomerNameError
                   : null,
             ),
             const SizedBox(height: 14),
-            TextFormField(
+            AppTextField(
               controller: _amountController,
+              label: l10n.financialAmountLabel,
+              prefixIcon: Icons.attach_money,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: l10n.financialAmountLabel,
-                prefixIcon: const Icon(Icons.attach_money),
-              ),
               validator: (value) => _parseAmount(value ?? '') <= 0
                   ? l10n.financialAmountError
                   : null,
@@ -251,15 +251,18 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
               ),
             ],
             const SizedBox(height: 12),
-            FilledButton(
+            // AppButton (design system ultra-clean): altura 48, cantos 12,
+            // cores sólidas — o spinner substitui o ícone durante o envio.
+            AppButton.primary(
               onPressed: _isSubmitting ? null : _submit,
-              child: _isSubmitting
+              label: l10n.debtsAddDebt,
+              icon: _isSubmitting
                   ? const SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(l10n.debtsAddDebt),
+                  : null,
             ),
           ],
         ),

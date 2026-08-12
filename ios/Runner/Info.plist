@@ -80,5 +80,8 @@
 	<!-- Leitura de código de barras por câmera no PDV (mobile_scanner). -->
 	<key>NSCameraUsageDescription</key>
 	<string>Ler códigos de barras de produtos e balanças no PDV.</string>
+	<!-- Captura de foto de produto (image_picker) — câmera e galeria. -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Escolher a foto do produto a partir da galeria.</string>
 </dict>
 </plist>

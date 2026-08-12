@@ -161,6 +161,19 @@ void main() {
     // 1 UNIDADE (não uma pesagem).
     await _scan(tester, '201234567890');
 
+    // O rodapé do design system 2026 (seletor de pagamento + total +
+    // confirmar) encolheu o catálogo no viewport de teste — o Biscoito
+    // (2º item) nasce fora da área visível e só é construído ao rolar.
+    await tester.scrollUntilVisible(
+      find.text('Biscoito'),
+      100,
+      scrollable: find.descendant(
+        of: find.byType(ListView),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pumpAndSettle();
+
     // Stepper do Biscoito em unidades inteiras (escopado à linha para não
     // colidir com outros textos "1" que possam surgir na UI).
     expect(

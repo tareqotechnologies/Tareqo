@@ -1,0 +1,93 @@
+import 'package:flutter/material.dart';
+
+/// Campo de texto padrão do design system ultra-clean — minimalista, sem
+/// rótulo pesado: borda sutil em repouso (`#222E35`) que muda para o acento
+/// suavemente no foco (o [InputDecorationTheme] global anima a cor da borda
+/// — o InputDecorator interpola os estados). Sem contorno pesado, com fundo
+/// preenchido discreto.
+///
+/// Envolve um [TextFormField] — `validator` incluso para formulários.
+class AppTextField extends StatelessWidget {
+  const AppTextField({
+    super.key,
+    this.label,
+    this.controller,
+    this.onChanged,
+    this.onSubmitted,
+    this.keyboardType,
+    this.textInputAction,
+    this.obscureText = false,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.helperText,
+    this.errorText,
+    this.validator,
+    this.autofocus = false,
+    this.maxLength,
+    this.maxLines,
+    this.autofillHints,
+    this.hintText,
+    this.suffixText,
+    this.isDense = false,
+  });
+
+  /// Rótulo do campo (estilo leve — sem peso visual). Nulo para campos
+  /// sem rótulo (ex.: busca, que usa apenas o [hintText]).
+  final String? label;
+
+  final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final bool obscureText;
+  final IconData? prefixIcon;
+  final Widget? suffixIcon;
+  final String? helperText;
+  final String? errorText;
+  final FormFieldValidator<String>? validator;
+  final bool autofocus;
+  final int? maxLength;
+
+  /// Máximo de linhas (ex.: motivo de rejeição com 3 linhas). `null` =
+  /// linha única (padrão do TextFormField).
+  final int? maxLines;
+
+  /// Sugestões de preenchimento automático do SO (ex.: email, senha).
+  final Iterable<String>? autofillHints;
+  final String? hintText;
+
+  /// Texto fixo ao fim do campo (ex.: unidade `kg` no diálogo de
+  /// quantidade decimal).
+  final String? suffixText;
+  final bool isDense;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      onChanged: onChanged,
+      onFieldSubmitted: onSubmitted,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      obscureText: obscureText,
+      autofocus: autofocus,
+      maxLength: maxLength,
+      // `?? 1` explícito: o TextFormField faz `assert(!obscureText ||
+      // maxLines == 1)` e `null` quebra a asserção em campos de senha.
+      maxLines: maxLines ?? 1,
+      autofillHints: autofillHints,
+      validator: validator,
+      decoration: InputDecoration(
+        isDense: isDense,
+        labelText: label,
+        hintText: hintText,
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+        suffixIcon: suffixIcon,
+        suffixText: suffixText,
+        helperText: helperText,
+        errorText: errorText,
+      ),
+    );
+  }
+}

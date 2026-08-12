@@ -64,4 +64,34 @@ void main() {
 
     expect((await repository.getById('1', storeId: 'st1'))?.stockQuantity, 7);
   });
+
+  test('update persiste os campos editáveis (escopado pela loja)', () async {
+    await repository.add(buildProduct('1', 'Caneta'));
+
+    await repository.update(
+      (await repository.getById('1', storeId: 'st1'))!.copyWith(
+        name: 'Caneta Azul',
+        salePriceCents: 250,
+        isActive: false,
+      ),
+    );
+
+    final updated = await repository.getById('1', storeId: 'st1');
+    expect(updated?.name, 'Caneta Azul');
+    expect(updated?.salePriceCents, 250);
+    expect(updated?.isActive, isFalse);
+    // Estoque preservado (a mutação de quantidade passa pelo FIFO).
+    expect(updated?.stockQuantity, 0);
+  });
+
+  test('update lança StateError para produto de outra loja', () async {
+    await repository.add(buildProduct('1', 'Caneta'));
+
+    expect(
+      () => repository.update(
+        buildProduct('1', 'Caneta').copyWith(storeId: 'st2'),
+      ),
+      throwsStateError,
+    );
+  });
 }

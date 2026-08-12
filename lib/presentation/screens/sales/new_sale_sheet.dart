@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
-import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/quantity.dart';
@@ -22,10 +21,16 @@ import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/sales_providers.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
+import '../../widgets/app_text_field.dart';
 import '../../widgets/barcode_scan_sheet.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/payment_method_picker.dart';
+import '../../widgets/product_image.dart';
 import '../../widgets/search_field.dart';
+import '../../widgets/smart_amount.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Carrinho de nova venda: seleciona produtos, define quantidades
@@ -142,15 +147,13 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(product.name),
-        content: TextField(
+        content: AppTextField(
           controller: controller,
           autofocus: true,
+          label: l10n.salesQuantityLabel,
+          hintText: l10n.salesQuantityHint,
+          suffixText: product.unitLabel,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(
-            labelText: l10n.salesQuantityLabel,
-            hintText: l10n.salesQuantityHint,
-            suffixText: product.unitLabel,
-          ),
           onSubmitted: (value) => Navigator.of(context).pop(value),
         ),
         actions: [
@@ -158,9 +161,11 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.commonCancel),
           ),
-          FilledButton(
+          // AppButton (design system ultra-clean): altura 48, cantos 12,
+          // texto w400 — a confirmação segue o padrão dos diálogos.
+          AppButton.primary(
             onPressed: () => Navigator.of(context).pop(controller.text),
-            child: Text(l10n.commonConfirm),
+            label: l10n.commonConfirm,
           ),
         ],
       ),
@@ -181,7 +186,12 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     final digits = raw.trim().replaceAll(RegExp(r'\D'), '');
     if (digits.isEmpty) return;
 
-    final products = ref.read(productsProvider).value ?? const <Product>[];
+    // Só produtos ATIVOS são vendáveis (desativado some do PDV — o
+    // servidor também nega via lock_products_or_raise).
+    final products =
+        (ref.read(productsProvider).value ?? const <Product>[])
+            .where((product) => product.isActive)
+            .toList();
 
     // 1) Formato de balança: 20 + 5 dígitos do produto + 5 dígitos do valor.
     final scale = ScaleBarcode.tryParse(digits);
@@ -394,17 +404,15 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: AppTextField(
                     controller: _barcodeController,
                     textInputAction: TextInputAction.done,
                     onSubmitted: _handleBarcode,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      labelText: l10n.salesBarcodeLabel,
-                      hintText: '20 12345 00175',
-                      prefixIcon: const Icon(Icons.qr_code_scanner, size: 20),
-                      errorText: _barcodeError,
-                    ),
+                    isDense: true,
+                    label: l10n.salesBarcodeLabel,
+                    hintText: '20 12345 00175',
+                    prefixIcon: Icons.qr_code_scanner,
+                    errorText: _barcodeError,
                   ),
                 ),
                 if (_supportsCameraScan) ...[
@@ -428,9 +436,14 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                 ),
               ),
               data: (all) {
+                // Só produtos ATIVOS (desativado não pode ser vendido — o
+                // servidor também nega via lock_products_or_raise).
+                final active = all
+                    .where((product) => product.isActive)
+                    .toList();
                 final filtered = _query.isEmpty
-                    ? all
-                    : all
+                    ? active
+                    : active
                           .where(
                             (product) =>
                                 product.name.toLowerCase().contains(_query) ||
@@ -472,24 +485,21 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                 top: BorderSide(color: theme.colorScheme.outlineVariant),
               ),
             ),
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+            padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
+            // O rodapé é COMPACTO (alturas calibradas) para caber junto com
+            // o catálogo mesmo em sheets baixos/paisagem — o Expanded do
+            // catálogo é o que encolhe primeiro.
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final method in PaymentMethod.values)
-                      ChoiceChip(
-                        label: Text(method.labelFor(context.l10n)),
-                        selected: _paymentMethod == method,
-                        onSelected: (_) =>
-                            setState(() => _paymentMethod = method),
-                      ),
-                  ],
+                // Forma de pagamento: abas segmentadas + lista com radio
+                // (design system 2026 — igual ao app de referência).
+                PaymentMethodPicker(
+                  value: _paymentMethod,
+                  onChanged: (method) =>
+                      setState(() => _paymentMethod = method),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
@@ -500,25 +510,23 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                         ),
                       ),
                     ),
-                    // Total do carrinho em destaque (22) — FittedBox
+                    // Total do carrinho em destaque VERDE (22) — FittedBox
                     // defensivo: valores extremos ENCOLHEM para caber em vez
                     // de truncar/estourar o rodapé em telas estreitas.
+                    // SmartAmount: o valor encolhe para SEMPRE caber.
                     Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
+                      child: SmartAmount(
+                        cents: _totalCents,
                         alignment: Alignment.centerRight,
-                        child: Text(
-                          Formatters.currency(_totalCents),
-                          maxLines: 1,
-                          textAlign: TextAlign.end,
-                          style: theme.textTheme.titleLarge,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                     ),
                   ],
                 ),
                 if (_error != null) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     _error!,
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -526,8 +534,10 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 12),
-                FilledButton.icon(
+                const SizedBox(height: 8),
+                // AppButton ultra-clean: altura 48, cantos 12, texto w400.
+                AppButton.primary(
+                  label: l10n.salesConfirm,
                   onPressed: _cart.isEmpty || _isSubmitting ? null : _confirm,
                   icon: _isSubmitting
                       ? const SizedBox(
@@ -535,8 +545,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                           width: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.check),
-                  label: Text(l10n.salesConfirm),
+                      : const Icon(Icons.check, size: 20),
                 ),
               ],
             ),
@@ -582,22 +591,27 @@ class _CartProductRow extends StatelessWidget {
     final soldOut = quantity >= product.stockQuantity;
     final isWeight = product.vendaPorFracao;
 
-    return Card(
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat —
+    // o esgotado recebe fundo esmaecido via `color` (estado especial).
+    return AppCard(
       color: outOfStock
           ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4)
           : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
           children: [
+            // Foto do produto (fallback: ícone) — imagem cadastrada,
+            // URL do Supabase Storage ou arquivo local.
+            ProductImage(imagePath: product.imagePath),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Nome COMPLETO do produto no carrinho — quebra em
+                  // linhas quando necessário (nada de truncar nomes).
                   Text(
                     product.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: outOfStock ? theme.colorScheme.outline : null,
@@ -610,8 +624,6 @@ class _CartProductRow extends StatelessWidget {
                         : '${Formatters.currency(product.salePriceCents)} · '
                               '${Quantity.format(product.stockQuantity, unitLabel: isWeight ? product.unitLabel : null, language: Formatters.currentLanguage)}'
                               '${isWeight ? '' : ' ${l10n.commonUnits}'}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -659,9 +671,8 @@ class _CartProductRow extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

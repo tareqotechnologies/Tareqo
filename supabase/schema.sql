@@ -53,7 +53,14 @@ CREATE TABLE IF NOT EXISTS public.products (
   -- etiquetadoras; venda por PESO (fração) e unidade de venda.
   code TEXT,
   venda_por_fracao BOOLEAN NOT NULL DEFAULT FALSE,
-  unit_label TEXT NOT NULL DEFAULT 'un'
+  unit_label TEXT NOT NULL DEFAULT 'un',
+  -- Produto ATIVO no catálogo (padrão). Desativado, some do PDV e das
+  -- compras (lock_products_or_raise nega), mas permanece no histórico com
+  -- o estoque preservado para a reativação.
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  -- Foto do produto (opcional): URL pública do Supabase Storage (modo
+  -- SaaS) ou caminho de arquivo local (modo SQLite). Vazio = sem foto.
+  image_path TEXT
 );
 
 -- Vendas (espelha a entidade Sale) — store_id: histórico por loja.
@@ -71,8 +78,22 @@ CREATE TABLE IF NOT EXISTS public.sales (
   -- M-Pesa/E-Mola no lugar do Pix BR). O nome do enum é o valor gravado.
   payment_method TEXT NOT NULL CHECK (payment_method IN
     ('cash', 'debitCard', 'creditCard', 'mPesa', 'eMola', 'transfer')),
-  date_time      TIMESTAMPTZ NOT NULL
+  date_time      TIMESTAMPTZ NOT NULL,
+  -- Anulação de venda (nível gerencial — dono/gerente): 'active' =
+  -- venda normal; 'cancelled' = anulada (permanece no histórico como
+  -- trilha, mas sai de relatórios/KPIs; o estoque volta aos lotes exatos
+  -- e o caixa recebe um estorno). DEFAULT 'active' preserva vendas de
+  -- bancos antigos (a coluna é adicionada via ALTER abaixo).
+  status         TEXT NOT NULL DEFAULT 'active' CHECK (status IN
+    ('active', 'cancelled')),
+  cancelled_at   TIMESTAMPTZ
 );
+-- Migração idempotente para bancos já criados (CREATE TABLE IF NOT EXISTS
+-- não altera tabelas existentes): adiciona as colunas com defaults.
+ALTER TABLE IF EXISTS public.sales
+  ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+ALTER TABLE IF EXISTS public.sales
+  ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ;
 
 -- Itens de venda (espelha a entidade SaleItem — snapshot de nome/preço)
 CREATE TABLE IF NOT EXISTS public.sale_items (
@@ -84,6 +105,21 @@ CREATE TABLE IF NOT EXISTS public.sale_items (
   quantity     INTEGER NOT NULL CHECK (quantity > 0),
   unit_price   BIGINT NOT NULL CHECK (unit_price >= 0),
   UNIQUE (sale_id, product_id)
+);
+
+-- Consumo de LOTES por venda — registrado na MESMA transação do
+-- process_sale (a baixa FIFO grava cada lote abatido e a quantidade).
+-- Permite à anulação (cancel_sale) devolver o estoque aos lotes EXATOS
+-- consumidos, preservando data de validade e custo de cada lote.
+CREATE TABLE IF NOT EXISTS public.sale_lot_consumption (
+  id         BIGSERIAL PRIMARY KEY,
+  sale_id    TEXT NOT NULL REFERENCES public.sales (id) ON DELETE CASCADE,
+  user_id    UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  lot_id     TEXT NOT NULL,
+  product_id TEXT NOT NULL,
+  -- Quantidade abatida do lote, em MILÉSIMOS de unidade (W11).
+  quantity   INTEGER NOT NULL CHECK (quantity > 0),
+  UNIQUE (sale_id, lot_id)
 );
 
 -- Movimentações financeiras (espelha a entidade FinancialTransaction) —
@@ -99,6 +135,29 @@ CREATE TABLE IF NOT EXISTS public.financial_transactions (
   date        TIMESTAMPTZ NOT NULL,
   status      TEXT NOT NULL DEFAULT 'paid' CHECK (status IN ('paid', 'pending')),
   debt_id     TEXT
+);
+
+-- Fechos de caixa DIÁRIOS (Z-report — espelha a entidade CashClosing):
+-- um fecho por loja por dia (unicidade store_id + closing_date). O
+-- `expected_cash` é o que DEVERIA estar na gaveta — Σ das vendas ATIVAS
+-- pagas em DINHEIRO no dia (cartão/M-Pesa/E-Mola/transferência não passam
+-- pela gaveta física); o `counted_cash` é a contagem física do usuário; a
+-- diferença (sobra/falta) é calculada na UI. `sales_by_method` guarda a
+-- abertura por forma de pagamento (JSONB) para o relatório Z. Fecho é
+-- operação GERENCIAL (dono/gerente) — o RPC close_cash_register valida
+-- is_manager_of_store; as políticas de escrita permitem apenas INSERT do
+-- próprio usuário/dono (o RPC SECURITY DEFINER persiste por fora do RLS).
+CREATE TABLE IF NOT EXISTS public.cash_closings (
+  id               TEXT PRIMARY KEY,
+  user_id          UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  store_id         TEXT NOT NULL DEFAULT 'st1',
+  closing_date     TIMESTAMPTZ NOT NULL,
+  total_sales      BIGINT NOT NULL CHECK (total_sales >= 0),
+  expected_cash    BIGINT NOT NULL CHECK (expected_cash >= 0),
+  counted_cash     BIGINT NOT NULL CHECK (counted_cash >= 0),
+  sales_by_method  JSONB NOT NULL DEFAULT '{}'::jsonb,
+  closed_at        TIMESTAMPTZ NOT NULL,
+  UNIQUE (store_id, closing_date)
 );
 
 -- Dívidas / "fiado" (espelha a entidade Debt)
@@ -299,7 +358,9 @@ CREATE TABLE IF NOT EXISTS public.plan_requests (
 ALTER TABLE public.products               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sales                  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sale_items             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sale_lot_consumption   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.financial_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cash_closings           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.debts                  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customers              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.purchases              ENABLE ROW LEVEL SECURITY;
@@ -515,6 +576,52 @@ DROP POLICY IF EXISTS sale_items_delete ON public.sale_items;
 CREATE POLICY sale_items_delete ON public.sale_items
   FOR DELETE USING (auth.uid() = user_id);
 
+-- sale_lot_consumption: idem sale_items — sem store_id; o acesso vem do
+-- pai (`sales.store_id`) via subconsulta. Escrita direta é usada apenas
+-- pelas RPCs (SECURITY DEFINER — o RLS não se aplica dentro delas); as
+-- políticas são defesa para acesso direto ao PostgREST.
+DROP POLICY IF EXISTS sale_lot_consumption_select ON public.sale_lot_consumption;
+CREATE POLICY sale_lot_consumption_select ON public.sale_lot_consumption
+  FOR SELECT USING (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.sales s
+      WHERE s.id = sale_lot_consumption.sale_id
+        AND public.is_my_store(s.store_id)
+    )
+  );
+DROP POLICY IF EXISTS sale_lot_consumption_insert ON public.sale_lot_consumption;
+CREATE POLICY sale_lot_consumption_insert ON public.sale_lot_consumption
+  FOR INSERT WITH CHECK (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.sales s
+      WHERE s.id = sale_lot_consumption.sale_id
+        AND public.is_my_store(s.store_id)
+    )
+  );
+DROP POLICY IF EXISTS sale_lot_consumption_update ON public.sale_lot_consumption;
+CREATE POLICY sale_lot_consumption_update ON public.sale_lot_consumption
+  FOR UPDATE USING (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.sales s
+      WHERE s.id = sale_lot_consumption.sale_id
+        AND public.is_my_store(s.store_id)
+    )
+  ) WITH CHECK (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.sales s
+      WHERE s.id = sale_lot_consumption.sale_id
+        AND public.is_my_store(s.store_id)
+    )
+  );
+DROP POLICY IF EXISTS sale_lot_consumption_delete ON public.sale_lot_consumption;
+-- DELETE só de registros PRÓPRIOS (o app não exclui nada).
+CREATE POLICY sale_lot_consumption_delete ON public.sale_lot_consumption
+  FOR DELETE USING (auth.uid() = user_id);
+
 -- financial_transactions
 DROP POLICY IF EXISTS financial_transactions_select ON public.financial_transactions;
 CREATE POLICY financial_transactions_select ON public.financial_transactions
@@ -531,6 +638,25 @@ DROP POLICY IF EXISTS financial_transactions_delete ON public.financial_transact
 -- impacto) e impede um cliente direto de destruir registros de
 -- outro usuário da loja (endurecimento pós-auditoria C2).
 CREATE POLICY financial_transactions_delete ON public.financial_transactions
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- cash_closings — leitura para dono/funcionários da loja (histórico de
+-- fechos); escrita via RPC (SECURITY DEFINER, guarda gerencial). A política
+-- de INSERT exige loja própria (defesa em profundidade — o app no modo
+-- SaaS nunca insere direto, mas um cliente direto também não pode forjar
+-- um fecho de outra loja); UPDATE/DELETE só de registros PRÓPRIOS.
+DROP POLICY IF EXISTS cash_closings_select ON public.cash_closings;
+CREATE POLICY cash_closings_select ON public.cash_closings
+  FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
+DROP POLICY IF EXISTS cash_closings_insert ON public.cash_closings;
+CREATE POLICY cash_closings_insert ON public.cash_closings
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+DROP POLICY IF EXISTS cash_closings_update ON public.cash_closings;
+CREATE POLICY cash_closings_update ON public.cash_closings
+  FOR UPDATE USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS cash_closings_delete ON public.cash_closings;
+CREATE POLICY cash_closings_delete ON public.cash_closings
   FOR DELETE USING (auth.uid() = user_id);
 
 -- debts
@@ -659,6 +785,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_store_number
   ON public.sales (store_id, sale_number);
 CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id
   ON public.sale_items (sale_id);
+CREATE INDEX IF NOT EXISTS idx_sale_lot_consumption_sale
+  ON public.sale_lot_consumption (sale_id);
 CREATE INDEX IF NOT EXISTS idx_financial_transactions_user_date
   ON public.financial_transactions (user_id, date);
 CREATE INDEX IF NOT EXISTS idx_financial_transactions_store
@@ -666,6 +794,10 @@ CREATE INDEX IF NOT EXISTS idx_financial_transactions_store
 -- Resolução de pendências vinculadas (settle_debt/register_debt).
 CREATE INDEX IF NOT EXISTS idx_financial_transactions_debt
   ON public.financial_transactions (debt_id);
+-- Fechos de caixa: consulta por loja (histórico) — a unicidade
+-- (store_id, closing_date) é o índice único declarado na tabela.
+CREATE INDEX IF NOT EXISTS idx_cash_closings_store
+  ON public.cash_closings (store_id);
 CREATE INDEX IF NOT EXISTS idx_debts_user_due
   ON public.debts (user_id, due_date);
 CREATE INDEX IF NOT EXISTS idx_debts_store
@@ -726,10 +858,21 @@ CREATE TRIGGER trg_sale_items_user_id
   BEFORE INSERT ON public.sale_items
   FOR EACH ROW EXECUTE FUNCTION public.set_tenant_user_id();
 
+DROP TRIGGER IF EXISTS trg_sale_lot_consumption_user_id
+  ON public.sale_lot_consumption;
+CREATE TRIGGER trg_sale_lot_consumption_user_id
+  BEFORE INSERT ON public.sale_lot_consumption
+  FOR EACH ROW EXECUTE FUNCTION public.set_tenant_user_id();
+
 DROP TRIGGER IF EXISTS trg_financial_transactions_user_id
   ON public.financial_transactions;
 CREATE TRIGGER trg_financial_transactions_user_id
   BEFORE INSERT ON public.financial_transactions
+  FOR EACH ROW EXECUTE FUNCTION public.set_tenant_user_id();
+
+DROP TRIGGER IF EXISTS trg_cash_closings_user_id ON public.cash_closings;
+CREATE TRIGGER trg_cash_closings_user_id
+  BEFORE INSERT ON public.cash_closings
   FOR EACH ROW EXECUTE FUNCTION public.set_tenant_user_id();
 
 DROP TRIGGER IF EXISTS trg_debts_user_id ON public.debts;
@@ -813,6 +956,11 @@ DROP TRIGGER IF EXISTS trg_financial_transactions_store_id
   ON public.financial_transactions;
 CREATE TRIGGER trg_financial_transactions_store_id
   BEFORE INSERT ON public.financial_transactions
+  FOR EACH ROW EXECUTE FUNCTION public.set_record_store_id();
+
+DROP TRIGGER IF EXISTS trg_cash_closings_store_id ON public.cash_closings;
+CREATE TRIGGER trg_cash_closings_store_id
+  BEFORE INSERT ON public.cash_closings
   FOR EACH ROW EXECUTE FUNCTION public.set_record_store_id();
 
 DROP TRIGGER IF EXISTS trg_debts_store_id ON public.debts;
@@ -1029,8 +1177,10 @@ BEGIN
 
   RETURN QUERY
   SELECT
+    -- Apenas vendas ATIVAS: anuladas saem do KPI (o caixa é ajustado
+    -- pelo estorno em financial_transactions, que já não as inclui).
     COALESCE((SELECT SUM(s.total_amount) FROM public.sales s
-              WHERE s.store_id = p_store_id), 0)::bigint,
+              WHERE s.store_id = p_store_id AND s.status = 'active'), 0)::bigint,
     COALESCE((SELECT SUM(t.amount) FROM public.financial_transactions t
               WHERE t.store_id = p_store_id AND t.type = 'income'
                 AND t.status = 'paid'
@@ -1106,10 +1256,12 @@ BEGIN
     RAISE EXCEPTION 'Acesso negado a esta loja.';
   END IF;
 
-  -- Faturamento: soma dos totais das vendas no período.
+  -- Faturamento: soma dos totais das vendas ATIVAS no período (anuladas
+  -- saem do relatório — o estorno já ajustou o caixa).
   SELECT COALESCE(SUM(s.total_amount), 0)::bigint INTO v_revenue
   FROM public.sales s
   WHERE s.store_id = p_store_id
+    AND s.status = 'active'
     AND s.date_time >= p_start AND s.date_time <= p_end;
 
   -- Lucro bruto: Σ quantity (MILÉSIMOS — W11) × (unit_price −
@@ -1122,6 +1274,7 @@ BEGIN
   LEFT JOIN public.products pr
          ON pr.id = si.product_id AND pr.store_id = p_store_id
   WHERE s.store_id = p_store_id
+    AND s.status = 'active'
     AND s.date_time >= p_start AND s.date_time <= p_end;
 
   -- Mais vendidos (top 5 por quantidade) com receita por produto.
@@ -1134,6 +1287,7 @@ BEGIN
     FROM public.sale_items si
     JOIN public.sales s ON s.id = si.sale_id
     WHERE s.store_id = p_store_id
+      AND s.status = 'active'
       AND s.date_time >= p_start AND s.date_time <= p_end
     GROUP BY si.product_id, si.product_name
     ORDER BY quantity DESC
@@ -1148,6 +1302,7 @@ BEGIN
            SUM(s.total_amount)::bigint AS total_cents
     FROM public.sales s
     WHERE s.store_id = p_store_id
+      AND s.status = 'active'
       AND s.date_time >= p_start AND s.date_time <= p_end
     GROUP BY 1
   ) d;
@@ -1618,25 +1773,137 @@ DECLARE
   v_item jsonb;
 BEGIN
   FOR v_item IN SELECT * FROM jsonb_array_elements(p_items) LOOP
+    -- Existe? (trava a linha — fecha corrida com exclusão/edição)
+    PERFORM 1 FROM public.products
+      WHERE id = (v_item->>'product_id') AND store_id = p_store
+      FOR UPDATE;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Produto % não existe no catálogo da loja %.',
+        v_item->>'product_id', p_store;
+    END IF;
+    -- Produto DESATIVADO não pode ser vendido nem reposto (a reativação
+    -- passa pelo dono/gerente no app).
+    PERFORM 1 FROM public.products
+      WHERE id = (v_item->>'product_id') AND store_id = p_store
+        AND is_active;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'O produto % está desativado na loja %.',
+        v_item->>'product_id', p_store;
+    END IF;
+    -- Estoque suficiente (apenas quando a operação baixa estoque).
     IF p_require_stock THEN
       PERFORM 1 FROM public.products
         WHERE id = (v_item->>'product_id') AND store_id = p_store
-          AND stock_quantity >= (v_item->>'quantity')::int
-        FOR UPDATE;
+          AND stock_quantity >= (v_item->>'quantity')::int;
       IF NOT FOUND THEN
         RAISE EXCEPTION 'Estoque insuficiente para o produto % (loja %).',
           v_item->>'product_id', p_store;
       END IF;
-    ELSE
-      PERFORM 1 FROM public.products
-        WHERE id = (v_item->>'product_id') AND store_id = p_store
-        FOR UPDATE;
-      IF NOT FOUND THEN
-        RAISE EXCEPTION 'Produto % não existe no catálogo da loja %.',
-          v_item->>'product_id', p_store;
-      END IF;
     END IF;
   END LOOP;
+END;
+$$;
+
+-- Ajuste MANUAL de estoque (W12 — edição de produto): define a quantidade
+-- absoluta do produto criando/consumindo LOTES FIFO em UMA transação. A
+-- invariante `stock = Σ lotes` nunca quebra.
+--
+--   * AUMENTO (p_new_quantity > atual): cria um lote novo (sem validade —
+--     FIFO por data de entrada; custo = preço de compra atual do catálogo);
+--   * REDUÇÃO: abate dos lotes em ordem FIFO (validade mais próxima
+--     primeiro; sem validade por entrada) — mesma mecânica do process_sale;
+--   * IGUAL: no-op (idempotente — retry após sucesso não duplica nada).
+--
+-- Guarda GERENCIAL (matriz de acesso Aug 6): ajustar estoque é operação de
+-- gestão — DONO ou GERENTE. O funcionário comum NÃO ajusta, mesmo por fora
+-- do app (o servidor é a autoridade). SECURITY DEFINER + search_path fixo
+-- + escopo por loja em todos os acessos (mesma mecânica das demais RPCs).
+CREATE OR REPLACE FUNCTION public.adjust_product_stock(
+  p_product_id TEXT,
+  p_store_id TEXT,
+  p_new_quantity BIGINT
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_current bigint;
+  v_cost bigint;
+  v_delta bigint;
+  v_remaining bigint;
+  v_lot record;
+  v_take bigint;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Sessão necessária para ajustar o estoque.';
+  END IF;
+  IF NOT public.is_manager_of_store(p_store_id) THEN
+    RAISE EXCEPTION 'Apenas o dono ou um gerente podem ajustar o estoque na loja %.',
+      p_store_id;
+  END IF;
+  IF p_new_quantity < 0 THEN
+    RAISE EXCEPTION 'O estoque não pode ficar negativo.';
+  END IF;
+
+  -- Trava o produto (fecha corrida) e lê estoque atual + custo do catálogo.
+  SELECT stock_quantity, purchase_price INTO v_current, v_cost
+  FROM public.products
+  WHERE id = p_product_id AND store_id = p_store_id
+  FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Produto % não existe no catálogo da loja %.',
+      p_product_id, p_store_id;
+  END IF;
+
+  v_delta := p_new_quantity - v_current;
+  IF v_delta = 0 THEN
+    RETURN; -- idempotente: retry após sucesso é no-op
+  END IF;
+
+  IF v_delta > 0 THEN
+    -- Ajuste para CIMA: lote novo (sem validade — FIFO por data de
+    -- entrada; custo = preço de compra atual do catálogo).
+    INSERT INTO public.stock_lots
+      (id, store_id, product_id, entry_date, expiry_date,
+       initial_quantity, current_quantity, cost_price)
+    VALUES ('lot-adjust-' || p_product_id || '-' || gen_random_uuid()::text,
+            p_store_id, p_product_id, now(), NULL,
+            v_delta, v_delta, v_cost);
+  ELSE
+    -- Ajuste para BAIXO: abate dos lotes em ordem FIFO (validade mais
+    -- próxima primeiro; sem validade por data de entrada). Cada lote é
+    -- travado FOR UPDATE — a invariante `stock = Σ lotes` nunca quebra.
+    v_remaining := -v_delta;
+    FOR v_lot IN
+      SELECT l.id, l.current_quantity
+      FROM public.stock_lots l
+      WHERE l.product_id = p_product_id AND l.store_id = p_store_id
+        AND l.current_quantity > 0
+      ORDER BY l.expiry_date ASC NULLS LAST, l.entry_date ASC, l.id ASC
+      FOR UPDATE
+    LOOP
+      IF v_remaining <= 0 THEN EXIT; END IF;
+      v_take := LEAST(v_lot.current_quantity, v_remaining);
+      UPDATE public.stock_lots
+        SET current_quantity = current_quantity - v_take
+        WHERE id = v_lot.id AND store_id = p_store_id;
+      v_remaining := v_remaining - v_take;
+    END LOOP;
+    IF v_remaining > 0 THEN
+      -- Defesa em profundidade: os lotes não cobrem o ajuste — a
+      -- invariante foi quebrada por fora; aborta sem mutar nada.
+      RAISE EXCEPTION 'Estoque insuficiente para ajustar o produto % (loja %).',
+        p_product_id, p_store_id;
+    END IF;
+  END IF;
+
+  -- Define a quantidade ABSOLUTA nova (produto + lotes na mesma transação).
+  UPDATE public.products
+    SET stock_quantity = p_new_quantity
+    WHERE id = p_product_id AND store_id = p_store_id;
 END;
 $$;
 
@@ -1741,6 +2008,13 @@ BEGIN
       UPDATE public.stock_lots
         SET current_quantity = current_quantity - v_take
         WHERE id = v_lot.id;
+      -- Registra o consumo do lote (MESMA transação): é o que permite à
+      -- anulação (cancel_sale) devolver o estoque aos lotes EXATOS.
+      -- v_take é bigint; a coluna quantity é INTEGER — cast explícito
+      -- (mesmo padrão do process_purchase).
+      INSERT INTO public.sale_lot_consumption
+        (sale_id, user_id, lot_id, product_id, quantity)
+      VALUES (p_sale->>'id', v_uid, v_lot.id, (v_item->>'product_id'), v_take::int);
       v_remaining := v_remaining - v_take;
     END LOOP;
     IF v_remaining > 0 THEN
@@ -1764,6 +2038,311 @@ BEGIN
           v_total, 'income',
           CASE WHEN v_lang = 'en' THEN 'Sales' ELSE 'Vendas' END,
           (p_sale->>'date_time')::timestamptz, 'paid');
+END;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- cancel_sale — ANULAÇÃO de venda (nível GERENCIAL: dono ou gerente)
+-- ---------------------------------------------------------------------------
+-- Estorno completo em UMA transação:
+--   1. Guarda `is_manager_of_store` (matriz de acesso Aug 6 — anular é
+--      operação de gestão, como compras; funcionário comum não anula);
+--   2. Lê a venda FOR UPDATE e garante que existe e ainda está ativa
+--      (anular duas vezes é um no-op);
+--   3. Devolve o estoque aos lotes EXATOS consumidos (sale_lot_consumption
+--      gravado pelo process_sale) — validade e custo de cada lote são
+--      preservados; o total do produto (stock_quantity) sobe junto;
+--   4. Cria o ESTORNO no caixa: movimento de SAÍDA no valor da venda,
+--      categoria de vendas, status pago — o par (entrada original +
+--      estorno) fecha o caixa em zero;
+--   5. Marca a venda como 'cancelled' com cancelled_at (permanece no
+--      histórico — trilha de auditoria; sai de relatórios/KPIs via filtros
+--      por status nos agregados).
+--
+-- Mesma mecânica de segurança dos demais RPCs: SECURITY DEFINER +
+-- search_path fixo + guarda explícita (o RLS não se aplica dentro da
+-- função) + escopo por loja em todos os acessos.
+CREATE OR REPLACE FUNCTION public.cancel_sale(p_sale_id text, p_store_id text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_total bigint;
+  v_method text;
+  v_status text;
+  v_lang text;
+  v_consumption record;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Sessão necessária para anular a venda.';
+  END IF;
+  -- Guarda GERENCIAL (matriz de acesso): anular venda é operação de
+  -- gestão — dono ou gerente. O funcionário comum NÃO anula, mesmo por
+  -- fora do app (o servidor é a autoridade).
+  IF NOT public.is_manager_of_store(p_store_id) THEN
+    RAISE EXCEPTION 'Apenas o dono ou um gerente podem anular vendas na loja %.',
+      p_store_id;
+  END IF;
+  -- Idioma do tenant (descrição/categoria do estorno — padrão pt).
+  SELECT t.language INTO v_lang
+  FROM public.stores s
+  JOIN public.tenants t ON t.id = s.tenant_id
+  WHERE s.id = p_store_id;
+  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en') THEN
+    v_lang := 'pt';
+  END IF;
+  -- Lê e trava a venda (escopo por loja). Idempotência: venda já anulada
+  -- ou inexistente é no-op.
+  SELECT total_amount, payment_method, status INTO v_total, v_method, v_status
+  FROM public.sales
+  WHERE id = p_sale_id AND store_id = p_store_id
+  FOR UPDATE;
+  IF NOT FOUND OR v_total IS NULL THEN
+    RETURN;
+  END IF;
+  IF v_status = 'cancelled' THEN
+    RETURN;
+  END IF;
+
+  -- Devolve o estoque aos lotes EXATOS consumidos pela venda. Cada lote é
+  -- travado FOR UPDATE (fecha corrida com outras operações) e o total do
+  -- produto (stock_quantity) sobe na quantidade devolvida — a invariante
+  -- `stock = Σ lotes` nunca quebra. A quantidade de um lote só diminui nas
+  -- baixas, então devolver nunca excede o lote.
+  FOR v_consumption IN
+    SELECT c.lot_id, c.product_id, c.quantity
+    FROM public.sale_lot_consumption c
+    WHERE c.sale_id = p_sale_id
+    ORDER BY c.id
+    FOR UPDATE
+  LOOP
+    UPDATE public.stock_lots
+      SET current_quantity = current_quantity + v_consumption.quantity
+      WHERE id = v_consumption.lot_id AND store_id = p_store_id;
+    UPDATE public.products
+      SET stock_quantity = stock_quantity + v_consumption.quantity
+      WHERE id = v_consumption.product_id AND store_id = p_store_id;
+  END LOOP;
+
+  -- Estorno no caixa: saída no valor da venda, categoria de vendas — o
+  -- par (entrada original + estorno) fecha o caixa em zero. Mesma
+  -- tradução do helper Dart TransactionDescriptions.saleReversal.
+  INSERT INTO public.financial_transactions
+    (id, user_id, store_id, description, amount, type, category, date, status)
+  VALUES ('t' || p_sale_id || '_rev', v_uid, p_store_id,
+          CASE WHEN v_lang = 'en' THEN 'Sale reversal — ' ELSE 'Estorno de venda — ' END
+            || public.payment_method_label(v_method, v_lang),
+          v_total, 'expense',
+          CASE WHEN v_lang = 'en' THEN 'Sales' ELSE 'Vendas' END,
+          now(), 'paid');
+
+  -- Marca a venda como anulada (permanece no histórico).
+  UPDATE public.sales
+     SET status = 'cancelled', cancelled_at = now()
+   WHERE id = p_sale_id AND store_id = p_store_id;
+END;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- close_cash_register — FECHO DE CAIXA DIÁRIO (Z-report, nível GERENCIAL)
+-- ---------------------------------------------------------------------------
+-- Registra (ou refaz) o fecho do dia da loja em UMA transação:
+--   1. Guarda `is_manager_of_store` (matriz de acesso — fecho é operação
+--      de gestão, como compras e anulação; funcionário comum não fecha);
+--   2. Calcula NO SERVIDOR o ESPERADO na gaveta: Σ das vendas ATIVAS
+--      pagas em DINHEIRO no dia [p_day, p_day+1) — cartão/M-Pesa/E-Mola/
+--      transferência não passam pela gaveta física (o cliente NUNCA
+--      envia valores calculados — o servidor é a autoridade);
+--   3. Calcula o total do dia (todas as formas) e a abertura por forma
+--      de pagamento (JSONB) para o relatório Z;
+--   4. UPSERT em cash_closings (unicidade store_id + closing_date) —
+--      refazer o fecho do mesmo dia ATUALIZA a contagem física, sem
+--      duplicar;
+--   5. Devolve o fecho registrado (JSONB) para a UI exibir o resultado.
+--
+-- Mesma mecânica de segurança dos demais RPCs: SECURITY DEFINER +
+-- search_path fixo + guarda explícita + escopo por loja em todos os
+-- acessos.
+CREATE OR REPLACE FUNCTION public.close_cash_register(
+  p_store_id TEXT,
+  p_day TIMESTAMPTZ,
+  p_counted_cash_cents BIGINT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_day_start timestamptz;
+  v_day_end timestamptz;
+  v_total_sales bigint;
+  v_expected_cash bigint;
+  v_by_method jsonb;
+  v_id text;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Sessão necessária para fechar o caixa.';
+  END IF;
+  IF NOT public.is_manager_of_store(p_store_id) THEN
+    RAISE EXCEPTION 'Apenas o dono ou um gerente podem fechar o caixa da loja %.', p_store_id;
+  END IF;
+  IF p_counted_cash_cents < 0 THEN
+    RAISE EXCEPTION 'A contagem física não pode ser negativa.';
+  END IF;
+
+  -- Janela do dia no fuso local do cliente (p_day chega como início do
+  -- dia LOCAL em UTC). Vendas anuladas ficam de fora (o estorno já
+  -- ajustou o caixa — mesmo critério dos relatórios e KPIs).
+  v_day_start := p_day;
+  v_day_end := p_day + interval '1 day';
+
+  SELECT COALESCE(SUM(s.total_amount), 0)::bigint
+  INTO v_total_sales
+  FROM public.sales s
+  WHERE s.store_id = p_store_id
+    AND s.status = 'active'
+    AND s.date_time >= v_day_start AND s.date_time < v_day_end;
+
+  SELECT COALESCE(SUM(s.total_amount), 0)::bigint
+  INTO v_expected_cash
+  FROM public.sales s
+  WHERE s.store_id = p_store_id
+    AND s.status = 'active'
+    AND s.payment_method = 'cash'
+    AND s.date_time >= v_day_start AND s.date_time < v_day_end;
+
+  -- Abertura por forma de pagamento (relatório Z).
+  SELECT COALESCE(jsonb_object_agg(s.payment_method, s.total), '{}'::jsonb)
+  INTO v_by_method
+  FROM (
+    SELECT s.payment_method, SUM(s.total_amount)::bigint AS total
+    FROM public.sales s
+    WHERE s.store_id = p_store_id
+      AND s.status = 'active'
+      AND s.date_time >= v_day_start AND s.date_time < v_day_end
+    GROUP BY s.payment_method
+  ) s;
+
+  -- UPSERT por (store_id, closing_date): refazer o fecho do dia atualiza
+  -- a contagem física (e os snapshots), sem duplicar.
+  v_id := 'cc-' || p_store_id || '-' || to_char(v_day_start, 'YYYYMMDD');
+  INSERT INTO public.cash_closings
+    (id, user_id, store_id, closing_date, total_sales, expected_cash,
+     counted_cash, sales_by_method, closed_at)
+  VALUES
+    (v_id, v_uid, p_store_id, v_day_start, v_total_sales, v_expected_cash,
+     p_counted_cash_cents, v_by_method, now())
+  ON CONFLICT (store_id, closing_date) DO UPDATE SET
+    id = EXCLUDED.id,
+    total_sales = EXCLUDED.total_sales,
+    expected_cash = EXCLUDED.expected_cash,
+    counted_cash = EXCLUDED.counted_cash,
+    sales_by_method = EXCLUDED.sales_by_method,
+    closed_at = EXCLUDED.closed_at;
+
+  RETURN jsonb_build_object(
+    'id', v_id,
+    'store_id', p_store_id,
+    'closing_date', v_day_start,
+    'total_sales', v_total_sales,
+    'expected_cash', v_expected_cash,
+    'counted_cash', p_counted_cash_cents,
+    'sales_by_method', v_by_method,
+    'closed_at', now()
+  );
+END;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- get_cash_closing_summary — PRÉVIA do Z-report agregada NO SERVIDOR (H2)
+-- ---------------------------------------------------------------------------
+-- Mesmo critério do close_cash_register, só de LEITURA: calcula em UMA
+-- chamada o resumo do dia para a pré-visualização do fecho — total de
+-- vendas ATIVAS do dia (todas as formas), o ESPERADO na gaveta (só
+-- vendas em DINHEIRO) e a abertura por forma de pagamento (JSONB) — além
+-- do fecho JÁ REGISTRADO do dia (se houver), evitando carregar o
+-- histórico inteiro de vendas no cliente (escala H2, mesmo padrão do
+-- get_cash_flow/get_sales_report).
+--
+-- Guarda is_my_store (leitura para dono/funcionários da loja — a PRÉVIA
+-- não é operação gerencial; fechar é). O dia chega como início do dia
+-- LOCAL em UTC (mesma semântica do close_cash_register).
+CREATE OR REPLACE FUNCTION public.get_cash_closing_summary(
+  p_store_id TEXT,
+  p_day TIMESTAMPTZ
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+DECLARE
+  v_day_start timestamptz;
+  v_day_end timestamptz;
+  v_total_sales bigint;
+  v_expected_cash bigint;
+  v_by_method jsonb;
+  v_existing jsonb;
+BEGIN
+  IF NOT public.is_my_store(p_store_id) THEN
+    RAISE EXCEPTION 'Acesso negado a esta loja.';
+  END IF;
+
+  v_day_start := p_day;
+  v_day_end := p_day + interval '1 day';
+
+  SELECT COALESCE(SUM(s.total_amount), 0)::bigint
+  INTO v_total_sales
+  FROM public.sales s
+  WHERE s.store_id = p_store_id
+    AND s.status = 'active'
+    AND s.date_time >= v_day_start AND s.date_time < v_day_end;
+
+  SELECT COALESCE(SUM(s.total_amount), 0)::bigint
+  INTO v_expected_cash
+  FROM public.sales s
+  WHERE s.store_id = p_store_id
+    AND s.status = 'active'
+    AND s.payment_method = 'cash'
+    AND s.date_time >= v_day_start AND s.date_time < v_day_end;
+
+  SELECT COALESCE(jsonb_object_agg(s.payment_method, s.total), '{}'::jsonb)
+  INTO v_by_method
+  FROM (
+    SELECT s.payment_method, SUM(s.total_amount)::bigint AS total
+    FROM public.sales s
+    WHERE s.store_id = p_store_id
+      AND s.status = 'active'
+      AND s.date_time >= v_day_start AND s.date_time < v_day_end
+    GROUP BY s.payment_method
+  ) s;
+
+  -- Fecho já registrado do dia (null = dia ainda aberto).
+  SELECT jsonb_build_object(
+    'id', c.id,
+    'closing_date', c.closing_date,
+    'total_sales', c.total_sales,
+    'expected_cash', c.expected_cash,
+    'counted_cash', c.counted_cash,
+    'sales_by_method', c.sales_by_method,
+    'closed_at', c.closed_at
+  )
+  INTO v_existing
+  FROM public.cash_closings c
+  WHERE c.store_id = p_store_id AND c.closing_date = v_day_start;
+
+  RETURN jsonb_build_object(
+    'day', v_day_start,
+    'total_sales_cents', v_total_sales,
+    'expected_cash_cents', v_expected_cash,
+    'sales_by_method_cents', v_by_method,
+    'existing_closing', v_existing
+  );
 END;
 $$;
 
@@ -2302,6 +2881,54 @@ BEGIN
   WHERE id = p_employee_id;
 END;
 $$;
+
+-- ============================================================================
+-- FOTOS DE PRODUTO — Supabase Storage
+-- ============================================================================
+-- Bucket PÚBLICO com as imagens dos produtos. O app sobe a foto com o JWT
+-- do usuário (storage.objects policies abaixo) e grava a URL pública em
+-- products.image_path — o banco relacional nunca guarda o blob.
+--
+-- ⚠️ CONVENÇÃO DE CAMINHO: `<storeId>/<productId>.jpg` — o PRIMEIRO
+-- segmento É o store_id, pois as políticas de escrita validam
+-- `is_my_store((storage.foldername(name))[1])`. O cliente (IProductImageStore
+-- modo Supabase) obedece a esta convenção; nunca troque o primeiro segmento
+-- por um prefixo fixo (ex.: `products/...`) sem ajustar as políticas abaixo.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('product-images', 'product-images', TRUE)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS product_images_public_read ON storage.objects;
+CREATE POLICY product_images_public_read ON storage.objects
+  FOR SELECT USING (bucket_id = 'product-images');
+
+-- Escrita SÓ na loja do usuário: o path é `<storeId>/<prod>.jpg` —
+-- (foldername(name))[1] = storeId, a MESMA guarda is_my_store das RPCs
+-- (o servidor é a autoridade; um cliente adulterado não sobe foto em
+-- pasta de outra loja). A leitura é pública (URL pública via CDN).
+DROP POLICY IF EXISTS product_images_auth_insert ON storage.objects;
+CREATE POLICY product_images_auth_insert ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    bucket_id = 'product-images'
+    AND public.is_my_store((storage.foldername(name))[1])
+  );
+
+DROP POLICY IF EXISTS product_images_auth_update ON storage.objects;
+CREATE POLICY product_images_auth_update ON storage.objects
+  FOR UPDATE TO authenticated
+  USING (
+    bucket_id = 'product-images'
+    AND public.is_my_store((storage.foldername(name))[1])
+  );
+
+DROP POLICY IF EXISTS product_images_auth_delete ON storage.objects;
+CREATE POLICY product_images_auth_delete ON storage.objects
+  FOR DELETE TO authenticated
+  USING (
+    bucket_id = 'product-images'
+    AND public.is_my_store((storage.foldername(name))[1])
+  );
 
 -- ============================================================================
 -- PARTE 2 — CATÁLOGO DE PLANOS DE ASSINATURA (dados reais, não demo)

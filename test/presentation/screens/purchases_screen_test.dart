@@ -178,8 +178,9 @@ void main() {
 
     expect(find.text('Fornecedor Teste'), findsOneWidget);
     expect(find.text('Nenhuma compra registrada'), findsNothing);
-    // FAB visível com dados; o botão do EmptyState não existe mais.
-    expect(find.text('Nova compra'), findsOneWidget);
+    // FAB circular visível com dados (sem label — tooltip, igual ao Novo
+    // produto); o botão do EmptyState não existe mais.
+    expect(find.text('Nova compra'), findsNothing);
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
@@ -456,7 +457,7 @@ void main() {
     await tester.pumpWidget(_buildApp(_FakeGetPurchasesUseCase(_purchases)));
     await tester.pumpAndSettle();
 
-    expect(find.text('Nova compra'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

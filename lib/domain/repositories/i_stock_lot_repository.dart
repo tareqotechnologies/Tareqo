@@ -32,4 +32,15 @@ abstract interface class IStockLotRepository {
     int newQuantity, {
     required String storeId,
   });
+
+  /// ACRESCENTA [quantity] milésimos à quantidade ATUAL do lote [lotId]
+  /// da loja [storeId] — usado pela anulação de venda para devolver o
+  /// estoque ao lote EXATO que foi consumido (a quantidade de um lote só
+  /// diminui nas baixas, então devolver nunca excede o lote). Escopado
+  /// pela loja.
+  Future<void> increaseQuantity(
+    String lotId,
+    int quantity, {
+    required String storeId,
+  });
 }

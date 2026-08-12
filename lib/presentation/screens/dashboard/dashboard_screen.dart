@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../widgets/app_card.dart';
+
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
@@ -82,20 +84,30 @@ class DashboardScreen extends ConsumerWidget {
     final kpis = kpisAsync.value;
 
     final products = productsAsync.value ?? const <Product>[];
+    // Alerta de estoque baixo: apenas produtos ATIVOS (desativado não
+    // vende — não precisa de reabastecimento urgente).
     final lowStock = products
         .where(
           (product) =>
+              product.isActive &&
               product.stockQuantity <
-              Quantity.lowStockThresholdUnits * Quantity.milliFactor,
+                  Quantity.lowStockThresholdUnits * Quantity.milliFactor,
         )
         .toList();
     // Alertas de validade (W11): vermelho = lote vencido com estoque;
     // amarelo = vence em menos de 30 dias.
     final expiryAlertsAsync = ref.watch(expiryAlertsProvider);
     final expiryAlerts = expiryAlertsAsync.value ?? const <ExpiryAlert>[];
-    final recentSales = (salesAsync.value ?? const <Sale>[]).take(3).toList();
-    final recentPurchases =
-        (purchasesAsync.value ?? const <Purchase>[]).take(3).toList();
+    // Vendas recentes: apenas ATIVAS — anuladas não aparecem no dashboard
+    // (o estorno já as removeu do caixa; o selo "Anulada" fica no
+    // histórico de Vendas).
+    final recentSales = (salesAsync.value ?? const <Sale>[])
+        .where((sale) => sale.status == SaleStatus.active)
+        .take(3)
+        .toList();
+    final recentPurchases = (purchasesAsync.value ?? const <Purchase>[])
+        .take(3)
+        .toList();
 
     final displayName = (user?.fullName.isNotEmpty ?? false)
         ? user!.fullName.split(' ').first
@@ -198,10 +210,53 @@ class DashboardScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  IconButton(
+                  // Avatar circular com iniciais do usuário (design system
+                  // 2026 — igual ao app de referência). Tocar abre um menu
+                  // com a ação de sair da conta (mantém a funcionalidade
+                  // que antes era um ícone de logout).
+                  PopupMenuButton<String>(
                     tooltip: l10n.dashboardSignOutTooltip,
-                    icon: const Icon(Icons.logout),
-                    onPressed: () => ref.read(signOutUseCaseProvider).call(),
+                    onSelected: (value) {
+                      if (value == 'signOut') {
+                        ref.read(signOutUseCaseProvider).call();
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem<String>(
+                        value: 'signOut',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.logout,
+                              size: 18,
+                              color: theme.colorScheme.error,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(l10n.commonSignOut),
+                          ],
+                        ),
+                      ),
+                    ],
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: theme.colorScheme.primaryContainer,
+                        border: Border.all(
+                          color: theme.colorScheme.primary,
+                          width: 2,
+                        ),
+                      ),
+                      child: Text(
+                        _initials(displayName),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -210,14 +265,14 @@ class DashboardScreen extends ConsumerWidget {
                 cards: [
                   KpiCard(
                     label: l10n.dashboardTotalSales,
-                    value: Formatters.currency(kpis?.totalSalesCents ?? 0),
+                    amountCents: kpis?.totalSalesCents ?? 0,
                     caption: l10n.dashboardAllTime,
                     icon: Icons.point_of_sale_outlined,
                     loading: kpisAsync.isLoading,
                   ),
                   KpiCard(
                     label: l10n.dashboardCashBalance,
-                    value: Formatters.currency(kpis?.cashBalanceCents ?? 0),
+                    amountCents: kpis?.cashBalanceCents ?? 0,
                     caption: cashFlowPeriod.label(context.l10n),
                     icon: Icons.account_balance_wallet_outlined,
                     iconBackground: theme.income.withValues(alpha: 0.14),
@@ -226,7 +281,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   KpiCard(
                     label: l10n.dashboardReceivables,
-                    value: Formatters.currency(kpis?.pendingTotalCents ?? 0),
+                    amountCents: kpis?.pendingTotalCents ?? 0,
                     icon: Icons.receipt_long_outlined,
                     iconBackground: theme.warning.withValues(alpha: 0.14),
                     iconColor: theme.warning,
@@ -335,8 +390,10 @@ class DashboardScreen extends ConsumerWidget {
                       icon: Icons.storefront_outlined,
                       label: l10n.dashboardModuleStores,
                       onTap: () {
-                        // Dados frescos + seletor reage a novas lojas ao
-                        // voltar (activeStoreIdProvider observa storesProvider).
+                        // Dados frescos ao voltar: a loja ativa (escolhida
+                        // em Lojas → Ajustes) observa storesProvider e se
+                        // uma loja nova foi criada, a seleção volta à
+                        // primeira (nunca aponta para loja inexistente).
                         ref.invalidate(storesProvider(tenant.id));
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
@@ -432,6 +489,19 @@ class DashboardScreen extends ConsumerWidget {
         DateTime.saturday => l10n.weekdaySaturday,
         _ => l10n.weekdaySunday,
       };
+
+  /// Iniciais para o avatar circular: até 2 letras (primeiro + último nome).
+  static String _initials(String name) {
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
+        .toUpperCase();
+  }
 }
 
 /// Grade responsiva de KPIs — sem altura fixa por célula.
@@ -499,13 +569,12 @@ class _ModuleCard extends StatelessWidget {
 
     return SizedBox(
       width: 148,
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
+      // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat —
+      // o toque (ripple) vem do próprio AppCard.
+      child: AppCard(
+        onTap: onTap,
+        padding: const EdgeInsets.all(14),
+        child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
@@ -527,16 +596,17 @@ class _ModuleCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.labelLarge,
                 ),
-              ],
-            ),
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// Ação rápida — pílula com ícone e rótulo.
+/// Ação rápida — botão CIRCULAR com ícone + rótulo abaixo (design system
+/// 2026, igual ao app de referência): círculo com borda verde e ícone
+/// verde, label esmaecido por baixo. O Wrap do dashboard já quebra linha
+/// em telas estreitas / escala de texto alta.
 class _QuickAction extends StatelessWidget {
   const _QuickAction({
     required this.icon,
@@ -552,34 +622,54 @@ class _QuickAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Material(
-      color: theme.colorScheme.primaryContainer,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 18, color: theme.colorScheme.onPrimaryContainer),
-              const SizedBox(width: 8),
-              // Flexible + ellipsis: rótulos longos ('Adicionar transação')
-              // encolhem com escala de texto alta em vez de estourar a pílula.
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer,
+    return SizedBox(
+      width: 76,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Material(
+            color: theme.colorScheme.primaryContainer,
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onTap,
+              child: Container(
+                width: 52,
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                    width: 1.5,
                   ),
                 ),
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: theme.colorScheme.primary,
+                ),
               ),
-            ],
+            ),
           ),
-        ),
+          const SizedBox(height: 8),
+          // Texto UNIFORME E NUMA LINHA: fonte fixa reduzida (8px) — o
+          // rótulo mais longo ('Registrar transação' ≈ 74px) cabe nos 76px
+          // do botão sem quebrar linha nem encolher (o FittedBox scaleDown
+          // antigo deixava os rótulos longos com fonte menor; o maxLines 2
+          // quebrava a linha). Com escala de texto alta, o ellipsis corta
+          // o excedente sem estourar o layout.
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontSize: 8,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -595,29 +685,53 @@ class _LowStockCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: theme.warning),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(product.name, style: theme.textTheme.bodyMedium),
-            ),
-            // Flexible: o chip encolhe (ellipsis) com escala de texto alta
-            // ou estoque grande, em vez de estourar o card.
-            Flexible(
-              child: StatusChip(
-                label:
-                    '${Quantity.format(product.stockQuantity, unitLabel: product.vendaPorFracao ? product.unitLabel : null, language: Formatters.currentLanguage)}'
-                    '${product.vendaPorFracao ? '' : ' ${context.l10n.commonUnits}'}',
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat.
+    return AppCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        children: [
+            // Ícone em container tingido — mesma hierarquia visual dos
+            // demais cards (produto, resumo diário): o ícone não "flutua"
+            // solto; a âncora (chip de estoque) fica à direita do card.
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.warning.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.warning_amber_rounded,
+                size: 18,
                 color: theme.warning,
-                icon: Icons.inventory_2_outlined,
               ),
             ),
-          ],
-        ),
+            const SizedBox(width: 12),
+            Expanded(
+              // Texto COMPLETO do produto — quebra em linhas quando
+              // necessário (nada de truncar nomes nos cards de alerta).
+              child: Text(
+                product.name,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Align + Flexible: o chip fica ANCORADO à direita do card e
+            // encolhe (ellipsis) com escala de texto alta ou estoque grande.
+            Flexible(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: StatusChip(
+                  label:
+                      '${Quantity.format(product.stockQuantity, unitLabel: product.vendaPorFracao ? product.unitLabel : null, language: Formatters.currentLanguage)}'
+                      '${product.vendaPorFracao ? '' : ' ${context.l10n.commonUnits}'}',
+                  color: theme.warning,
+                  icon: Icons.inventory_2_outlined,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -641,55 +755,72 @@ class _ExpiryAlertCard extends StatelessWidget {
         ? l10n.dashboardExpiredIn(-alert.daysRemaining)
         : l10n.dashboardExpiresIn(alert.daysRemaining);
 
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: color.withValues(alpha: 0.5)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Row(
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px — a cor
+    // do alerta (vencido/vencendo) tinge a borda, o padrão permanece.
+    return AppCard(
+      borderColor: color.withValues(alpha: 0.5),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
           children: [
-            Icon(
-              expired ? Icons.dangerous_outlined : Icons.hourglass_top_rounded,
-              color: color,
+            // Ícone em container tingido na cor do alerta (igual aos demais
+            // cards do dashboard — hierarquia consistente).
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                expired
+                    ? Icons.dangerous_outlined
+                    : Icons.hourglass_top_rounded,
+                size: 18,
+                color: color,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Texto COMPLETO do produto — quebra em linhas quando
+                  // necessário (nada de truncar nomes nos cards de alerta).
                   Text(
                     product.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 2),
+                  // Alerta ("Vence em 12 dias · 12/08/2026") também
+                  // completo — quebra se o texto for longo.
                   Text(
                     '$label · ${Formatters.date(alert.lot.expiryDate!)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(color: color),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
+            // Align + Flexible: a âncora (chip de quantidade) fica colada à
+            // BORDA DIREITA do card, como nos demais cards do app.
             Flexible(
-              child: StatusChip(
-                label: Quantity.format(
-                  alert.lot.currentQuantity,
-                  unitLabel: product.vendaPorFracao ? product.unitLabel : null,
-                  language: Formatters.currentLanguage,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: StatusChip(
+                  label: Quantity.format(
+                    alert.lot.currentQuantity,
+                    unitLabel: product.vendaPorFracao
+                        ? product.unitLabel
+                        : null,
+                    language: Formatters.currentLanguage,
+                  ),
+                  color: color,
+                  icon: Icons.inventory_2_outlined,
                 ),
-                color: color,
-                icon: Icons.inventory_2_outlined,
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -705,22 +836,19 @@ class _InlineEmpty extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
+    // AppCard (design system ultra-clean): fundo transparente + borda
+    // sutil — o estado vazio inline segue o padrão dos demais cards.
+    return AppCard(
       color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.outlineVariant),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
+      borderColor: theme.colorScheme.outlineVariant,
+      padding: const EdgeInsets.all(16),
+      child: Text(
           message,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-      ),
     );
   }
 }

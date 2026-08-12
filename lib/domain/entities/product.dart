@@ -18,6 +18,10 @@ abstract class Product with _$Product {
     @Default('st1') String storeId,
     required String name,
     @Default('') String description,
+    // Foto do produto (opcional): referência da imagem — URL pública do
+    // Supabase Storage (modo SaaS) ou caminho de arquivo local (modo
+    // SQLite). Vazio = sem foto (a UI mostra o ícone padrão do produto).
+    @Default('') String imagePath,
     // Preços em CENTAVOS inteiros (W4 — migração de dinheiro para
     // centavos; o banco persiste BIGINT/INTEGER).
     required int purchasePriceCents,
@@ -39,6 +43,12 @@ abstract class Product with _$Product {
     // Unidade de venda dos produtos por peso (kg, g, l, ml...). 'un'
     // (padrão) = unidade inteira normal.
     @Default('un') String unitLabel,
+    // Produto ATIVO no catálogo (padrão). Ao ser desativado, some do PDV
+    // e das compras (não pode ser vendido nem reposto), mas permanece na
+    // lista de Produtos com o selo "Inativo" — o dono/gerente pode
+    // reativá-lo quando quiser. O estoque existente é preservado (volta a
+    // ser vendível na reativação).
+    @Default(true) bool isActive,
   }) = _Product;
 
   factory Product.fromJson(Map<String, dynamic> json) =>

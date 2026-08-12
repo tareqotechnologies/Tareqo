@@ -115,7 +115,10 @@ psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
 
 ## Step 4 — Post-migration verification (read-only)
 
-**4.1 Run the live verification script** (read-only, **31 checks**):
+**4.1 Run the live verification script** (read-only; at the time of W11 it
+was **31 checks** — the script has since grown to 35, with the new 32–35
+cash-closing checks (32–34 plus the server-side preview 35) adding on
+without affecting these):
 
 ```bash
 SUPABASE_DB_URL="$SUPABASE_DB_URL" bash scripts/sql_check_live.sh

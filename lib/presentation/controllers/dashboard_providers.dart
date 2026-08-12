@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
 import '../../core/utils/period_utils.dart';
+import '../../domain/entities/sale.dart';
 import '../../domain/usecases/get_dashboard_kpis_use_case.dart';
 import 'account_providers.dart';
 import 'auth_providers.dart';
@@ -78,10 +79,14 @@ class DashboardKpisNotifier extends AsyncNotifier<DashboardKpis> {
     final debts = await ref.watch(pendingDebtsProvider.future);
 
     // Soma em CENTAVOS inteiros (W4): int é exato — sem Money.sum/round.
+    // Vendas ANULADAS não entram no total (o estorno já ajustou o caixa;
+    // mesmo critério dos relatórios e da RPC get_dashboard_kpis).
     return DashboardKpis(
       totalSalesCents: sales.fold<int>(
         0,
-        (sum, sale) => sum + sale.totalAmountCents,
+        (sum, sale) => sale.status == SaleStatus.cancelled
+            ? sum
+            : sum + sale.totalAmountCents,
       ),
       cashIncomeCents: cashFlow.incomeCents,
       cashExpenseCents: cashFlow.expenseCents,

@@ -1,5 +1,7 @@
 // Helpers compartilhados dos datasources remotos (Supabase).
 
+import 'dart:convert';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Limites de leitura das listagens remotas (auditoria H2).
@@ -49,6 +51,19 @@ Future<List<Map<String, dynamic>>> fetchAllKeyset(
 /// (garantido pelo ServiceLocator: os datasources remotos só são registrados
 /// quando [SupabaseConfig.isConfigured]).
 SupabaseClient get supabaseClient => Supabase.instance.client;
+
+/// Mapeia a abertura por forma de pagamento (JSONB) para `method.name → centavos`.
+///
+/// Aceita os dois formatos que o PostgREST pode entregar para valores jsonb
+/// (Map já decodificado na resposta, ou String JSON) — nunca lança TypeError
+/// na leitura. Usado pela prévia do Z-report (`get_cash_closing_summary`) e
+/// pelo fecho (`close_cash_register`), que persistem o mesmo formato.
+Map<String, int> mapSalesByMethodCents(dynamic raw) {
+  final decoded = raw is String
+      ? jsonDecode(raw) as Map<String, dynamic>
+      : Map<String, dynamic>.from(raw as Map);
+  return decoded.map((key, value) => MapEntry(key, (value as num).toInt()));
+}
 
 /// UUID do usuário autenticado (o *tenant* do modelo multi-tenant).
 ///

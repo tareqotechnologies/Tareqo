@@ -31,6 +31,9 @@ class SalesSummaryHeader extends StatelessWidget {
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     for (final sale in sales) {
+      // Vendas ANULADAS não contam no resumo (o estorno já ajustou o
+      // caixa; o resumo segue o mesmo critério dos relatórios/KPIs).
+      if (sale.status == SaleStatus.cancelled) continue;
       final day =
           DateTime(sale.dateTime.year, sale.dateTime.month, sale.dateTime.day);
       if (day == today) {

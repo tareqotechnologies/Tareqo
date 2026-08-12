@@ -51,8 +51,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
     ref.invalidate(productsProvider);
   }
 
-  Future<void> _refresh() =>
-      ref.read(salesListProvider.notifier).refresh();
+  Future<void> _refresh() => ref.read(salesListProvider.notifier).refresh();
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +65,13 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.salesTitle)),
       floatingActionButton: hasSales
-          ? FloatingActionButton.extended(
+          // FAB circular (design system — igual ao "Novo produto"): só o
+          // sinal de +, com tooltip — o rótulo nunca é cortado pelo círculo.
+          ? FloatingActionButton(
               heroTag: 'fab-sales',
               onPressed: _openNewSale,
-              icon: const Icon(Icons.add),
-              label: Text(l10n.salesNewSale),
+              tooltip: l10n.salesNewSale,
+              child: const Icon(Icons.add),
             )
           : null,
       body: salesAsync.when(
@@ -146,6 +147,7 @@ class _SalesBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final l10n = context.l10n;
     final filtered = [
       for (final sale in sales)
@@ -154,6 +156,22 @@ class _SalesBody extends StatelessWidget {
             _matchesQuery(sale, l10n))
           sale,
     ];
+
+    // Total (centavos) da seleção filtrada — exibido na linha-resumo. As
+    // vendas ANULADAS saem da soma (mesmo critério do resumo do dia e dos
+    // KPIs: o estorno já ajustou o caixa).
+    final filteredTotalCents = filtered.fold<int>(
+      0,
+      (sum, sale) => sale.status == SaleStatus.cancelled
+          ? sum
+          : sum + sale.totalAmountCents,
+    );
+    // Filtro ativo (busca, período ou pagamento): mostra a linha-resumo
+    // "X vendas · Total Y" para o caixa conferir o que está na tela.
+    final isFiltering =
+        query.isNotEmpty ||
+        period != PeriodFilter.all ||
+        payment != PaymentFilter.all;
 
     // Sem nenhuma venda na loja: estado vazio focado na ação principal.
     if (sales.isEmpty) {
@@ -185,9 +203,7 @@ class _SalesBody extends StatelessWidget {
           // Resumo do dia rola junto com o conteúdo.
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-            sliver: SliverToBoxAdapter(
-              child: SalesSummaryHeader(sales: sales),
-            ),
+            sliver: SliverToBoxAdapter(child: SalesSummaryHeader(sales: sales)),
           ),
           // Busca + filtros FIXOS: a lista rola por baixo deles
           // ([PinnedHeader] compartilhado com Compras).
@@ -208,6 +224,34 @@ class _SalesBody extends StatelessWidget {
                   onPaymentChanged: onPaymentChanged,
                 ),
               ],
+            ),
+          ),
+          // Linha-resumo do filtro: "3 vendas · Total R$ 1.234,56" — só
+          // com filtro ativo, com fade sutil ao mudar (AnimatedSwitcher).
+          SliverToBoxAdapter(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: isFiltering && filtered.isNotEmpty
+                  ? Padding(
+                      key: const ValueKey('sales-filtered-summary'),
+                      padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          l10n.salesFilteredSummary(
+                            filtered.length,
+                            Formatters.currency(filteredTotalCents),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(key: ValueKey('sales-filtered-none')),
             ),
           ),
           if (filtered.isEmpty)

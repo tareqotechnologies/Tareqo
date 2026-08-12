@@ -92,6 +92,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsGenericError => 'Could not save the settings. Try again.';
 
   @override
+  String get settingsSupportSection => 'Support';
+
+  @override
+  String get settingsSupportEntry => 'Help and documentation';
+
+  @override
+  String get settingsSupportEntryHint =>
+      'User Guide and Troubleshooting — offline reading';
+
+  @override
+  String get supportTitle => 'Help';
+
+  @override
+  String get supportSubtitle =>
+      'Everything you need to get the most out of the app: the complete user guide and answers to the most common problems.';
+
+  @override
+  String get supportUserGuide => 'User Guide';
+
+  @override
+  String get supportUserGuideHint =>
+      'Simple and complete manual: sign-in, stores, products (with photos), sales, credit, finances, cash closing, reports and FAQ';
+
+  @override
+  String get supportTroubleshooting => 'Troubleshooting';
+
+  @override
+  String get supportTroubleshootingHint =>
+      'Solving common problems: sign-in, photos, sales, stock, cash, connection and error messages';
+
+  @override
+  String get supportReadingError => 'Could not open the document. Try again.';
+
+  @override
   String get commonSearch => 'Search...';
 
   @override
@@ -104,7 +138,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appSheetClose => 'Close';
 
   @override
-  String get storeSelectorActiveTooltip => 'Active store';
+  String get storeSelectorSectionTitle => 'Active store';
+
+  @override
+  String get storeSelectorSectionHint =>
+      'Choose the store whose data appears across modules (sales, stock, financial).';
 
   @override
   String get tenantPendingTitle => 'Waiting for approval';
@@ -603,6 +641,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get purchasesSearchHint => 'Search purchase...';
 
   @override
+  String get productsFilterTooltip => 'Filter products';
+
+  @override
   String get productsSearchHint => 'Search product...';
 
   @override
@@ -624,6 +665,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productsAdded => 'Product added!';
+
+  @override
+  String get productsAddedNoPhoto =>
+      'Product added! (photo not uploaded — storage permission missing)';
 
   @override
   String get productsAddError => 'Could not add the product. Try again.';
@@ -654,6 +699,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productsAddSubmit => 'Add product';
+
+  @override
+  String get productsEditTitle => 'Edit product';
+
+  @override
+  String get productsEditSubmit => 'Save changes';
+
+  @override
+  String get productsEditSaved => 'Product updated!';
+
+  @override
+  String get productsEditSavedNoPhoto =>
+      'Product updated! (photo not uploaded — storage permission missing)';
+
+  @override
+  String get productsEditError => 'Could not update the product. Try again.';
+
+  @override
+  String get productsPhotoLabel => 'Product photo';
+
+  @override
+  String get productsPhotoTake => 'Take photo';
+
+  @override
+  String get productsPhotoGallery => 'From gallery';
+
+  @override
+  String get productsPhotoRemove => 'Remove photo';
+
+  @override
+  String get productsInactive => 'Inactive';
+
+  @override
+  String get productsActiveLabel => 'Active product';
+
+  @override
+  String get productsActiveHint =>
+      'Deactivate to remove the product from the POS and purchases (stock is preserved).';
+
+  @override
+  String get productsStockAdjustHint =>
+      'Manual adjustment: sets the exact stock, creating/consuming FIFO lots.';
+
+  @override
+  String get productsSectionInfo => 'Details';
+
+  @override
+  String get productsSectionPricing => 'Pricing';
+
+  @override
+  String get productsSectionStock => 'Stock';
+
+  @override
+  String get productsSectionStatus => 'Status';
 
   @override
   String get customersSearchHint => 'Search customer...';
@@ -812,6 +911,57 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get reportsExport => 'Export';
+
+  @override
+  String get reportsExportCsv => 'Export CSV';
+
+  @override
+  String get reportsExportPdf => 'Export PDF';
+
+  @override
+  String get reportsExportDone => 'Report exported!';
+
+  @override
+  String get reportsExportError => 'Could not export the report. Try again.';
+
+  @override
+  String get reportsExportTitle => 'Sales report';
+
+  @override
+  String get reportsExportFileName => 'sales_report';
+
+  @override
+  String get reportsExportStore => 'Store';
+
+  @override
+  String get reportsExportPeriod => 'Period';
+
+  @override
+  String get reportsExportGeneratedAt => 'Generated at';
+
+  @override
+  String get reportsExportSummary => 'Summary';
+
+  @override
+  String get reportsExportRank => 'Rank';
+
+  @override
+  String get reportsExportProduct => 'Product';
+
+  @override
+  String get reportsExportQuantity => 'Quantity';
+
+  @override
+  String get reportsExportRevenue => 'Revenue';
+
+  @override
+  String get reportsExportDay => 'Day';
+
+  @override
+  String get reportsExportTotal => 'Total';
+
+  @override
   String get financialTitle => 'Finance';
 
   @override
@@ -858,6 +1008,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not receive the pending amount. Try again.';
 
   @override
+  String get financialPay => 'Pay';
+
+  @override
+  String get financialPayPendingTitle => 'Pay pending amount?';
+
+  @override
+  String financialPayPendingBody(String amount) {
+    return 'Confirm paying $amount? The transaction will count in the realized cash.';
+  }
+
+  @override
+  String get financialPaid => 'Expense paid!';
+
+  @override
+  String get financialPayError =>
+      'Could not pay the pending amount. Try again.';
+
+  @override
   String get financialAddTitle => 'Register transaction';
 
   @override
@@ -900,6 +1068,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get financialDefaultCategoryExpense => 'Expenses';
+
+  @override
+  String get cashClosingAction => 'Cash closing';
+
+  @override
+  String get cashClosingTitle => 'Daily cash closing';
+
+  @override
+  String get cashClosingDaySummary => 'Daily summary';
+
+  @override
+  String get cashClosingTotalSales => 'Day sales';
+
+  @override
+  String get cashClosingExpectedCash => 'Expected in drawer';
+
+  @override
+  String get cashClosingExpectedCashHint =>
+      'Cash sales only — card, M-Pesa, E-Mola and transfer do not go through the physical drawer.';
+
+  @override
+  String get cashClosingByMethod => 'By payment method';
+
+  @override
+  String get cashClosingCountedCash => 'Counted cash';
+
+  @override
+  String get cashClosingCountedCashHint =>
+      'Count the physical cash in the drawer and enter it here.';
+
+  @override
+  String get cashClosingDifference => 'Difference';
+
+  @override
+  String get cashClosingConfers => 'Drawer matches';
+
+  @override
+  String cashClosingSurplus(String amount) {
+    return 'Surplus of $amount';
+  }
+
+  @override
+  String cashClosingShortage(String amount) {
+    return 'Shortage of $amount';
+  }
+
+  @override
+  String get cashClosingConfirm => 'Confirm closing';
+
+  @override
+  String get cashClosingUpdate => 'Update closing';
+
+  @override
+  String get cashClosingClosedAt => 'Closed at';
+
+  @override
+  String get cashClosingSuccess => 'Cash closed!';
+
+  @override
+  String get cashClosingUpdated => 'Closing updated!';
+
+  @override
+  String get cashClosingError =>
+      'Could not close the cash register. Try again.';
+
+  @override
+  String get cashClosingEmpty => 'No sales recorded on this day.';
+
+  @override
+  String get cashClosingHistory => 'Closing history';
+
+  @override
+  String get cashClosingHistoryEmpty => 'No closings recorded yet.';
 
   @override
   String get debtsTitle => 'Credit (credit sales)';
@@ -1102,6 +1343,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get salesClearFilters => 'Clear filters';
 
   @override
+  String salesFilteredSummary(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales',
+      one: '1 sale',
+    );
+    return '$_temp0 · Total $total';
+  }
+
+  @override
   String get salesItemUnavailable =>
       'A cart item is no longer available. Try again.';
 
@@ -1159,6 +1411,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saleDetailSnapshot => 'Prices frozen at the time of the sale.';
+
+  @override
+  String get salesStatusCancelled => 'Cancelled';
+
+  @override
+  String get saleDetailCancelAction => 'Cancel sale';
+
+  @override
+  String get saleDetailCancelConfirmTitle => 'Cancel this sale?';
+
+  @override
+  String saleDetailCancelConfirmBody(String amount) {
+    return 'Item stock will be returned and the cash entry reversed ($amount). This action cannot be undone.';
+  }
+
+  @override
+  String get saleDetailCancelConfirm => 'Yes, cancel';
+
+  @override
+  String get saleDetailCancelledAt => 'Cancelled on';
+
+  @override
+  String get saleCancelledSuccess => 'Sale cancelled.';
+
+  @override
+  String get saleNotFoundError => 'This sale no longer exists.';
+
+  @override
+  String get saleCancelError => 'Could not cancel the sale. Try again.';
+
+  @override
+  String get saleDetailShareAction => 'Share receipt';
+
+  @override
+  String get saleDetailShareTitle => 'Share receipt';
+
+  @override
+  String get saleDetailShareImage => 'Share as image';
+
+  @override
+  String get saleDetailShareWhatsApp => 'WhatsApp';
+
+  @override
+  String get saleDetailShareError => 'Could not share the receipt. Try again.';
+
+  @override
+  String get saleDetailShareWhatsAppError =>
+      'Could not open WhatsApp. Try again.';
+
+  @override
+  String get saleDetailReceiptTitle => 'SALE RECEIPT';
+
+  @override
+  String get saleDetailReceiptTitleCancelled => 'SALE RECEIPT (CANCELLED)';
+
+  @override
+  String get saleDetailReceiptPayment => 'Payment';
+
+  @override
+  String get saleDetailReceiptThanks => 'Thank you for your purchase!';
 
   @override
   String get adminTitle => 'Super Admin Panel';
@@ -1353,7 +1665,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsCodeLabel => 'Barcode (PLU)';
 
   @override
-  String get productsCodeHint => 'Code used by label scales (e.g. 12345)';
+  String get productsCodeHint => 'Label scale code (e.g. 12345)';
 
   @override
   String get productsCodeError => 'Invalid code: use up to 5 digits.';

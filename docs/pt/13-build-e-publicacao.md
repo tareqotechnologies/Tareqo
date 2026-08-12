@@ -14,7 +14,7 @@ flutter doctor -v
 flutter pub get
 ```
 
-- **Versão do app:** `version: 1.0.0+1` em `pubspec.yaml` (aplicada automaticamente ao `versionCode`/`versionName` no Android e ao CFBundleVersion no iOS).
+- **Versão do app:** `version: 1.1.0+2` em `pubspec.yaml` (aplicada automaticamente ao `versionCode`/`versionName` no Android e ao CFBundleVersion no iOS).
 
 > ⚠️ **Modo SaaS vs. local:** o app usa as credenciais do Supabase **embutidas** (`lib/core/config/supabase_config.dart`) apontando para o projeto de DESENVOLVIMENTO — em produção isso é erro de configuração (guarda S2). Desde a auditoria (Aug 5) o projeto tem **flavors `dev`/`prod`** com dart-defines **obrigatórios** fornecidos via `--dart-define-from-file` (o `main.dart` bloqueia release sem `--flavor prod`). **Aug 9:** o deployment usa projeto Supabase **ÚNICO** (`dotklbpqmlnhcdifiukd`) compartilhado dev/prod — a guarda S2 foi ajustada para aceitar release `prod` com as credenciais do próprio projeto (`SupabaseBootstrap` só lança em release NÃO-prod com defaults embutidos):
 
@@ -103,8 +103,8 @@ flutter run --flavor dev --dart-define-from-file=env/dev.env
 O passo final antes de publicar é o workflow **`.github/workflows/release.yml`**, disparado por uma tag `v*`:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.1.0
+git push origin v1.1.0
 ```
 
 O workflow roda `flutter analyze` + `flutter test` e, em seguida, o **Fastlane** (`fastlane/Fastfile`, lane `deploy`), que:

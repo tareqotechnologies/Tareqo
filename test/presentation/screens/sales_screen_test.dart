@@ -7,6 +7,7 @@ import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 
 import 'package:dumbhanengue/domain/entities/sale.dart';
+import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
 import 'package:dumbhanengue/domain/entities/sale_item.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
 import 'package:dumbhanengue/presentation/controllers/sales_providers.dart';
@@ -22,6 +23,30 @@ class _FakeSalesRepository implements ISaleRepository {
 
   @override
   Future<void> registerSale(Sale sale) async {}
+
+  @override
+  Future<Sale?> getById(String id, {required String storeId}) async {
+    for (final sale in _sales) {
+      if (sale.id == id) return sale;
+    }
+    return null;
+  }
+
+  @override
+  Future<void> markCancelled(String id, {required String storeId}) async {}
+
+  @override
+  Future<List<LotConsumption>> getLotConsumption(
+    String saleId, {
+    required String storeId,
+  }) async => const [];
+
+  @override
+  Future<void> registerLotConsumption(
+    String saleId,
+    String storeId,
+    List<LotConsumption> consumption,
+  ) async {}
 
   @override
   Future<List<Sale>> getAll({required String storeId}) async =>
@@ -47,6 +72,7 @@ Sale _pastSale({
   List<SaleItem>? items,
   int totalAmountCents = 400,
   PaymentMethod paymentMethod = PaymentMethod.mPesa,
+  DateTime? dateTime,
 }) {
   return Sale(
     id: id,
@@ -62,7 +88,7 @@ Sale _pastSale({
         ],
     totalAmountCents: totalAmountCents,
     paymentMethod: paymentMethod,
-    dateTime: DateTime(2024, 1, 10, 14, 30),
+    dateTime: dateTime ?? DateTime(2024, 1, 10, 14, 30),
   );
 }
 
@@ -95,7 +121,8 @@ void main() {
     // Resumo do dia presente (venda antiga → hoje ainda zerado).
     expect(find.text('R\$ 0,00'), findsOneWidget);
     expect(find.text('0 transações'), findsOneWidget);
-    expect(find.text('Nova venda'), findsOneWidget);
+    // FAB circular com dados (sem label — tooltip, igual ao Novo produto).
+    expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
   testWidgets('SalesCard com onTap personalizado não navega para detalhes', (
@@ -452,7 +479,47 @@ void main() {
     await tester.pumpAndSettle();
 
     // O card segue renderizado e nenhum overflow foi registrado.
-    expect(find.text('Nova venda'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('venda anulada: selo Anulada no card e fora do resumo do dia', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day, 10);
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeSalesRepository([
+          // Ativa HOJE — entra no resumo e mostra 'Pago'.
+          _pastSale(
+            id: 's-active',
+            totalAmountCents: 400,
+            dateTime: today,
+          ),
+          // Anulada HOJE — NÃO entra no resumo e mostra 'Anulada'.
+          _pastSale(
+            id: 's-cancelled',
+            number: 2,
+            totalAmountCents: 700,
+            paymentMethod: PaymentMethod.cash,
+            dateTime: today,
+          ).copyWith(
+            status: SaleStatus.cancelled,
+            cancelledAt: today.add(const Duration(hours: 1)),
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Cards: ativa 'Pago', anulada 'Anulada'.
+    expect(find.text('Pago'), findsOneWidget);
+    expect(find.text('Anulada'), findsOneWidget);
+    expect(find.text('R\$ 7,00'), findsOneWidget);
+
+    // Resumo do dia: só a ativa conta (R\$ 4,00 no resumo + no card).
+    expect(find.text('R\$ 4,00'), findsNWidgets(2));
+    expect(find.text('R\$ 11,00'), findsNothing); // 400 + 700 NÃO soma
   });
 }

@@ -11,8 +11,11 @@ import '../../controllers/auth_providers.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/debts_providers.dart';
 import '../../controllers/finance_providers.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/smart_amount.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/status_chip.dart';
@@ -68,11 +71,13 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.debtsTitle)),
       floatingActionButton: hasDebtActivity
-          ? FloatingActionButton.extended(
+          // FAB circular (design system — igual ao "Novo produto"): só o
+          // sinal de +, com tooltip — o rótulo nunca é cortado pelo círculo.
+          ? FloatingActionButton(
               heroTag: 'fab-credit',
               onPressed: () => _openAddDebt(context),
-              icon: const Icon(Icons.add),
-              label: Text(l10n.debtsAddDebt),
+              tooltip: l10n.debtsAddDebt,
+              child: const Icon(Icons.add),
             )
           : null,
       body: RefreshIndicator(
@@ -236,9 +241,11 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l10n.commonCancel),
           ),
-          FilledButton(
+          // AppButton (design system ultra-clean): altura 48, cantos 12,
+          // texto w400 — a confirmação segue o padrão dos diálogos.
+          AppButton.primary(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.debtsSettle),
+            label: l10n.debtsSettle,
           ),
         ],
       ),
@@ -305,15 +312,13 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px — o
+    // resumo do fiado usa fundo tingido (color) e borda tingida.
+    return AppCard(
       color: color.withValues(alpha: 0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
+      borderColor: color.withValues(alpha: 0.35),
+      padding: const EdgeInsets.all(20),
+      child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
@@ -352,7 +357,6 @@ class _SummaryCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -383,12 +387,12 @@ class _DebtCard extends StatelessWidget {
         ? (l10n.debtsDueToday, theme.warning)
         : (l10n.debtsDueIn(-daysUntilDue), theme.colorScheme.primary);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat.
+    return AppCard(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
             Row(
               children: [
                 CircleAvatar(
@@ -408,10 +412,10 @@ class _DebtCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Nome COMPLETO do cliente — quebra em linhas quando
+                      // necessário (nada de truncar nomes nos cards).
                       Text(
                         debt.personName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -441,17 +445,15 @@ class _DebtCard extends StatelessWidget {
                 // Valor MINIMALISTA (15px Medium, sem bold) + FittedBox:
                 // ENCOLHE para caber — nunca trunca ("MTn 1.500,...") e
                 // fica sempre visível ao lado do chip de vencimento.
+                // Valor MINIMALISTA (15px Medium, sem bold) — SmartAmount
+                // (design system ultra-clean): ENCOLHE para caber — nunca
+                // trunca; visível ao lado do chip de vencimento.
                 Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
+                  child: SmartAmount(
+                    cents: debt.amountCents,
                     alignment: Alignment.centerRight,
-                    child: Text(
-                      Formatters.currency(debt.amountCents),
-                      maxLines: 1,
-                      textAlign: TextAlign.end,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -463,8 +465,7 @@ class _DebtCard extends StatelessWidget {
               icon: const Icon(Icons.check_circle_outline, size: 18),
               label: Text(context.l10n.debtsSettleAction),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -480,10 +481,10 @@ class _SettledDebtCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat.
+    return AppCard(
+      padding: const EdgeInsets.all(14),
+      child: Row(
           children: [
             CircleAvatar(
               backgroundColor: theme.income.withValues(alpha: 0.14),
@@ -542,22 +543,19 @@ class _SettledDebtCard extends StatelessWidget {
             const SizedBox(width: 8),
             // Valor MINIMALISTA (15px Medium, sem bold) + FittedBox:
             // ENCOLHE para caber — nunca trunca; visível no histórico.
+            // Valor MINIMALISTA (15px Medium, sem bold) — SmartAmount
+            // (design system ultra-clean): ENCOLHE para caber — nunca
+            // trunca; visível no histórico.
             Flexible(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
+              child: SmartAmount(
+                cents: debt.amountCents,
                 alignment: Alignment.centerRight,
-                child: Text(
-                  Formatters.currency(debt.amountCents),
-                  maxLines: 1,
-                  textAlign: TextAlign.end,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

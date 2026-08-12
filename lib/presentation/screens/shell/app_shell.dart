@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../widgets/fade_indexed_stack.dart';
 import '../../widgets/store_scoped_content.dart';
 import '../credit/debts_screen.dart';
 import '../customers/customers_screen.dart';
@@ -65,12 +66,16 @@ class AppShell extends ConsumerWidget {
     void onSelect(int value) =>
         ref.read(shellIndexProvider.notifier).goTo(AppSection.values[value]);
 
-    // Seletor de loja ativa no topo de TODAS as telas (Fase 2 do
-    // multi-tenancy): com mais de uma loja, o usuário troca a loja ativa
-    // e todos os módulos (produtos, vendas, financeiro, fiado, clientes,
-    // compras) reagem escopando pelos dados da loja selecionada.
+    // A escolha da loja ativa mora em Lojas → Ajustes (seção "Loja
+    // ativa"); todos os módulos (produtos, vendas, financeiro, fiado,
+    // clientes, compras) escopam por activeStoreIdProvider e reagem à
+    // troca automaticamente.
+    //
+    // Fase 3 — navegação híbrida: FadeIndexedStack mantém o IndexedStack
+    // (estado de cada aba preservado) e adiciona a transição suave ao
+    // trocar de aba.
     final content = StoreScopedContent(
-      child: IndexedStack(index: index, children: _sections),
+      child: FadeIndexedStack(index: index, children: _sections),
     );
 
     return Scaffold(

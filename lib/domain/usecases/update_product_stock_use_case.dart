@@ -12,6 +12,18 @@ final class ProductNotFoundException implements Exception {
       'ProductNotFoundException: produto $productId não encontrado.';
 }
 
+/// Exceção de domínio: produto DESATIVADO (não pode ser vendido nem
+/// reposto — espelha a guarda do `lock_products_or_raise` no servidor).
+final class InactiveProductException implements Exception {
+  const InactiveProductException(this.productId);
+
+  final String productId;
+
+  @override
+  String toString() =>
+      'InactiveProductException: produto $productId está desativado.';
+}
+
 /// Exceção de domínio: estoque insuficiente para atender a solicitação.
 final class InsufficientStockException implements Exception {
   const InsufficientStockException({
@@ -60,6 +72,19 @@ class UpdateProductStockUseCase {
     required String storeId,
   }) async {
     await _requireProduct(productId, storeId);
+  }
+
+  /// Garante que o produto [productId] EXISTE e está ATIVO na loja
+  /// [storeId] — usado pelas vendas/compras (caminho composto) para
+  /// espelhar a guarda do `lock_products_or_raise` do servidor (produto
+  /// desativado não pode ser vendido nem reposto). Lança
+  /// [ProductNotFoundException] ou [InactiveProductException].
+  Future<void> requireActive(
+    String productId, {
+    required String storeId,
+  }) async {
+    final product = await _requireProduct(productId, storeId);
+    if (!product.isActive) throw InactiveProductException(productId);
   }
 
   /// Garante que há [quantity] unidades de [productId] em estoque na loja

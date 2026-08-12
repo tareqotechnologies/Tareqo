@@ -5,7 +5,9 @@ import '../../core/i18n/payment_method_l10n.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/quantity.dart';
 import '../../domain/entities/purchase.dart';
+import 'app_card.dart';
 import 'method_badge.dart';
+import 'smart_amount.dart';
 import 'payment_filter.dart' show PaymentMethodAccent, PaymentMethodIcon;
 import 'status_chip.dart';
 
@@ -13,9 +15,8 @@ import 'status_chip.dart';
 /// compras recentes do dashboard: forma de pagamento com selo colorido por
 /// método, fornecedor, número sequencial, itens, unidades adicionadas ao
 /// estoque, dia/hora inteligente e valor em destaque. Mesma linguagem
-/// visual do [SalesCard] (duas faixas + filete) — mas estático: a compra
-/// não tem tela de detalhes, então sem hover/ripple (a borda não muda para
-/// não sugerir um toque que não existe).
+/// visual do [SalesCard] (linha única compacta, design system 2026) — mas
+/// estático: a compra não tem tela de detalhes, então sem hover/ripple.
 class PurchaseCard extends StatelessWidget {
   const PurchaseCard({super.key, required this.purchase});
 
@@ -35,111 +36,80 @@ class PurchaseCard extends StatelessWidget {
       purchase.items.fold<int>(0, (sum, item) => sum + item.quantity),
     ).round();
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat —
+    // mesma linguagem do SalesCard (linha única compacta), sem hover/ripple
+    // (a compra não tem tela de detalhes).
+    return AppCard(
+      padding: const EdgeInsets.all(14),
+      child: Row(
           children: [
-            Row(
-              children: [
-                PaymentMethodBadge(
-                  accent: accent,
-                  icon: purchase.paymentMethod.icon,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        purchase.supplierName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${Formatters.purchaseLabel(purchase.number)} · '
-                        '$itemsLabel · '
-                        '${purchase.paymentMethod.labelFor(l10n)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Chip: unidades adicionadas ao estoque (informação
-                // derivada das quantidades dos itens — sem modelo novo).
-                // Align + Flexible: o chip fica ANCORADO à direita do card
-                // (não flutuando colado ao texto) e encolhe (ellipsis
-                // interno) em telas estreitas.
-                Flexible(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: StatusChip(
-                      label: l10n.purchasesStockAdded(
-                        units,
-                        l10n.commonUnits,
-                      ),
-                      color: theme.colorScheme.primary,
-                      icon: Icons.inventory_2_outlined,
+            PaymentMethodBadge(
+              accent: accent,
+              icon: purchase.paymentMethod.icon,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Nome do fornecedor COMPLETO — quebra em linhas quando
+                  // necessário (nada de truncar).
+                  Text(
+                    purchase.supplierName,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Filete fino: estrutura o card em "identidade + valor".
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(Icons.schedule, size: 14, color: scheme.onSurfaceVariant),
-                const SizedBox(width: 5),
-                Expanded(
-                  child: Text(
-                    // Data inteligente: 'Hoje/Ontem/04/08' + hora.
-                    '${Formatters.day(purchase.dateTime)} • '
-                    '${Formatters.time(purchase.dateTime)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
+                  const SizedBox(height: 2),
+                  Text(
+                    '${Formatters.purchaseLabel(purchase.number)} · '
+                    '$itemsLabel · '
+                    '${purchase.paymentMethod.labelFor(l10n)}',
+                    style: theme.textTheme.labelSmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                // Valor MINIMALISTA (15px Medium, sem bold — regra de ouro
-                // da escala: valores em colunas com peso médio). FittedBox:
-                // valor ANCORADO à direita e que ENCOLHE para caber — nunca
-                // trunca e fica sempre visível ao lado da data.
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      Formatters.currency(purchase.totalAmountCents),
-                      maxLines: 1,
-                      textAlign: TextAlign.end,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                  const SizedBox(height: 2),
+                  Text(
+                    // Data inteligente: 'Hoje/Ontem/04/08' + hora.
+                    '${Formatters.day(purchase.dateTime)} • '
+                    '${Formatters.time(purchase.dateTime)}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: scheme.outline,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
-        ),
+            const SizedBox(width: 8),
+            // Coluna direita: unidades adicionadas + valor, ancoradas.
+            Flexible(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // SmartAmount (design system ultra-clean): auto-size
+                    // do valor — encolhe em vez de estourar/truncar.
+                    SmartAmount(
+                      cents: purchase.totalAmountCents,
+                      alignment: Alignment.centerRight,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    StatusChip(
+                      label: l10n.purchasesStockAdded(units, l10n.commonUnits),
+                      color: theme.colorScheme.primary,
+                      icon: Icons.inventory_2_outlined,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

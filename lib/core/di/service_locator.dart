@@ -4,6 +4,8 @@ import '../../core/config/supabase_config.dart';
 import '../../core/database/app_database.dart';
 import '../../core/security/secure_storage_service.dart';
 import '../../data/datasources/auth/supabase_auth_remote_data_source.dart';
+import '../../data/datasources/local/cash_closing_local_data_source.dart';
+import '../../data/datasources/local/cash_closing_local_data_source_impl.dart';
 import '../../data/datasources/local/customer_local_data_source.dart';
 import '../../data/datasources/local/customer_local_data_source_impl.dart';
 import '../../data/datasources/local/debt_local_data_source.dart';
@@ -26,9 +28,13 @@ import '../../data/datasources/local/sale_local_data_source_impl.dart';
 import '../../data/datasources/local/stock_lot_local_data_source.dart';
 import '../../data/datasources/local/stock_lot_local_data_source_impl.dart';
 import '../../data/datasources/local/store_local_data_source.dart';
+import '../../data/services/product_image_store_local.dart';
+import '../../data/services/product_image_store_noop.dart';
+import '../../data/services/product_image_store_supabase.dart';
 import '../../data/datasources/local/store_local_data_source_impl.dart';
 import '../../data/datasources/local/tenant_local_data_source.dart';
 import '../../data/datasources/local/tenant_local_data_source_impl.dart';
+import '../../data/datasources/remote/supabase_cash_closing_data_source.dart';
 import '../../data/datasources/remote/supabase_customer_data_source.dart';
 import '../../data/datasources/remote/supabase_debt_data_source.dart';
 import '../../data/datasources/remote/supabase_employee_data_source.dart';
@@ -43,6 +49,8 @@ import '../../data/datasources/remote/supabase_store_data_source.dart';
 import '../../data/datasources/remote/supabase_tenant_data_source.dart';
 import '../../data/repositories/admin_repository_impl.dart';
 import '../../data/repositories/auth_repository_impl.dart';
+import '../../data/repositories/cash_closing_repository_impl.dart';
+import '../../data/repositories/supabase_cash_closing_summary_repository.dart';
 import '../../data/repositories/customer_repository_impl.dart';
 import '../../data/repositories/debt_repository_impl.dart';
 import '../../data/repositories/employee_repository_impl.dart';
@@ -65,12 +73,19 @@ import '../../data/services/supabase_debt_processor.dart';
 import '../../data/services/supabase_employee_processor.dart';
 import '../../data/services/supabase_employee_realtime_signal_source.dart';
 import '../../data/services/supabase_purchase_processor.dart';
+import '../../data/services/supabase_sale_cancellation_processor.dart';
 import '../../data/services/supabase_sale_processor.dart';
+import '../../data/services/supabase_cash_closing_processor.dart';
+import '../../data/services/supabase_stock_adjustment_processor.dart';
 import '../../domain/repositories/i_admin_repository.dart';
 import '../../domain/repositories/i_employee_account_processor.dart';
+import '../../domain/repositories/i_product_image_store.dart';
 import '../../domain/repositories/i_employee_realtime_signal_source.dart';
 import '../../domain/repositories/i_employee_account_service.dart';
 import '../../domain/repositories/i_auth_repository.dart';
+import '../../domain/repositories/i_cash_closing_processor.dart';
+import '../../domain/repositories/i_cash_closing_repository.dart';
+import '../../domain/repositories/i_cash_closing_summary_repository.dart';
 import '../../domain/repositories/i_customer_repository.dart';
 import '../../domain/repositories/i_debt_processor.dart';
 import '../../domain/repositories/i_debt_repository.dart';
@@ -86,11 +101,14 @@ import '../../domain/repositories/i_purchase_processor.dart';
 import '../../domain/repositories/i_purchase_repository.dart';
 import '../../domain/repositories/i_sale_processor.dart';
 import '../../domain/repositories/i_sale_repository.dart';
+import '../../domain/repositories/i_stock_adjustment_processor.dart';
 import '../../domain/repositories/i_stock_lot_repository.dart';
 import '../../domain/repositories/i_store_repository.dart';
 import '../../domain/repositories/i_tenant_repository.dart';
 import '../../domain/repositories/i_unit_of_work.dart';
 import '../../domain/usecases/add_customer_use_case.dart';
+import '../../domain/usecases/close_cash_register_use_case.dart';
+import '../../domain/usecases/get_cash_closing_summary_use_case.dart';
 import '../../domain/usecases/add_debt_use_case.dart';
 import '../../domain/usecases/add_employee_use_case.dart';
 import '../../domain/usecases/set_employee_active_use_case.dart';
@@ -121,6 +139,7 @@ import '../../domain/usecases/get_stock_lots_use_case.dart';
 import '../../domain/usecases/get_products_use_case.dart';
 import '../../domain/usecases/fifo_stock_use_case.dart';
 import '../../domain/usecases/mark_transaction_as_paid_use_case.dart';
+import '../../domain/usecases/cancel_sale_use_case.dart';
 import '../../domain/usecases/process_sale_use_case.dart';
 import '../../domain/usecases/reject_tenant_use_case.dart';
 import '../../domain/usecases/request_plan_upgrade_use_case.dart';
@@ -129,6 +148,7 @@ import '../../domain/usecases/settle_debt_use_case.dart';
 import '../../domain/usecases/update_tenant_settings_use_case.dart';
 import '../../domain/usecases/update_plan_use_case.dart';
 import '../../domain/usecases/update_product_stock_use_case.dart';
+import '../../domain/usecases/update_product_use_case.dart';
 
 /// Registro central de dependências do aplicativo (Service Locator).
 ///
@@ -177,13 +197,26 @@ final class ServiceLocator {
     //    RLS) — o modelo SaaS do produto;
     // 2. senão SQLite em plataformas nativas;
     // 3. senão memória (web — dart:ffi indisponível — ou falha da lib).
+    //
+    // O armazenamento de FOTOS segue o mesmo modo: Supabase Storage (URL
+    // pública) no SaaS, arquivo local no SQLite e no-op na memória (web /
+    // testes — sem foto).
     if (SupabaseConfig.isConfigured) {
       _registerSupabaseDatasources();
+      instance.registerLazySingleton<IProductImageStore>(
+        () => const ProductImageStoreSupabase(),
+      );
     } else if (await AppDatabase.openAppDatabase()) {
       AppDatabase.registerDatasources(instance);
       _registerLocalAccountDatasources();
+      instance.registerLazySingleton<IProductImageStore>(
+        () => const ProductImageStoreLocal(),
+      );
     } else {
       _registerInMemoryDatasources();
+      instance.registerLazySingleton<IProductImageStore>(
+        () => const ProductImageStoreNoop(),
+      );
     }
 
     _registerRepositoriesAndUseCases();
@@ -203,6 +236,23 @@ final class ServiceLocator {
       ..registerLazySingleton<ISaleAtomicProcessor>(
         () => const SupabaseSaleProcessor(SaleSupabaseDataSourceImpl()),
       )
+      // Anulação de venda (RPC `cancel_sale` — estorno de estoque nos
+      // lotes exatos + estorno de caixa + status, UMA transação, guarda
+      // gerencial is_manager_of_store). Mesmo padrão dos demais.
+      ..registerLazySingleton<ISaleCancellationProcessor>(
+        () => const SupabaseSaleCancellationProcessor(
+          SaleSupabaseDataSourceImpl(),
+        ),
+      )
+      // Ajuste manual de estoque (RPC `adjust_product_stock` — define a
+      // quantidade absoluta criando/consumindo LOTES FIFO em UMA transação
+      // no servidor, guarda gerencial is_manager_of_store). Registrado
+      // apenas no modo remoto.
+      ..registerLazySingleton<IStockAdjustmentProcessor>(
+        () => const SupabaseStockAdjustmentProcessor(
+          ProductSupabaseDataSourceImpl(),
+        ),
+      )
       ..registerLazySingleton<IPurchaseAtomicProcessor>(
         () => const SupabasePurchaseProcessor(PurchaseSupabaseDataSourceImpl()),
       )
@@ -217,6 +267,14 @@ final class ServiceLocator {
       )
       ..registerLazySingleton<FinancialTransactionLocalDataSource>(
         () => FinancialTransactionSupabaseDataSourceImpl(),
+      )
+      ..registerLazySingleton<CashClosingLocalDataSource>(
+        () => const CashClosingSupabaseDataSourceImpl(),
+      )
+      ..registerLazySingleton<ICashClosingProcessor>(
+        () => const SupabaseCashClosingProcessor(
+          CashClosingSupabaseDataSourceImpl(),
+        ),
       )
       ..registerLazySingleton<DebtLocalDataSource>(
         () => DebtSupabaseDataSourceImpl(),
@@ -277,6 +335,13 @@ final class ServiceLocator {
       )
       ..registerLazySingleton<ISalesReportRepository>(
         () => const SupabaseSalesReportRepository(),
+      )
+      // Prévia do fecho de caixa (Z-report) agregada NO SERVIDOR (H2): RPC
+      // get_cash_closing_summary (mesmo padrão get_cash_flow/get_sales_report).
+      // Registrada apenas no modo remoto; no local/testes o use case recebe
+      // `instance.isRegistered` → null → cálculo client-side.
+      ..registerLazySingleton<ICashClosingSummaryRepository>(
+        () => const SupabaseCashClosingSummaryRepository(),
       );
   }
 
@@ -322,6 +387,9 @@ final class ServiceLocator {
       )
       ..registerLazySingleton<FinancialTransactionLocalDataSource>(
         () => FinancialTransactionLocalDataSourceImpl(),
+      )
+      ..registerLazySingleton<CashClosingLocalDataSource>(
+        () => CashClosingLocalDataSourceImpl(),
       )
       ..registerLazySingleton<DebtLocalDataSource>(
         () => DebtLocalDataSourceImpl(),
@@ -370,6 +438,11 @@ final class ServiceLocator {
       ..registerLazySingleton<IFinancialTransactionRepository>(
         () => FinancialTransactionRepositoryImpl(
           instance<FinancialTransactionLocalDataSource>(),
+        ),
+      )
+      ..registerLazySingleton<ICashClosingRepository>(
+        () => CashClosingRepositoryImpl(
+          instance<CashClosingLocalDataSource>(),
         ),
       )
       ..registerLazySingleton<IDebtRepository>(
@@ -502,6 +575,21 @@ final class ServiceLocator {
       ..registerLazySingleton<UpdateProductStockUseCase>(
         () => UpdateProductStockUseCase(instance<IProductRepository>()),
       )
+      // Edição de produto (W12): detalhes do catálogo (nome/preços/status
+      // ativo) + AJUSTE MANUAL de estoque. Supabase: ajuste delega à RPC
+      // `adjust_product_stock` (transação única no servidor); local:
+      // caminho composto (FifoStockUseCase + IUnitOfWork).
+      ..registerLazySingleton<UpdateProductUseCase>(
+        () => UpdateProductUseCase(
+          instance<IProductRepository>(),
+          instance<FifoStockUseCase>(),
+          instance<IUnitOfWork>(),
+          stockAdjustmentProcessor: instance
+                  .isRegistered<IStockAdjustmentProcessor>()
+              ? instance<IStockAdjustmentProcessor>()
+              : null,
+        ),
+      )
       // W11 (FIFO): porta única para mutar estoque + lotes — usado por
       // vendas (baixa FIFO) e compras (cria lotes).
       ..registerLazySingleton<FifoStockUseCase>(
@@ -527,6 +615,20 @@ final class ServiceLocator {
               : null,
         ),
       )
+      ..registerLazySingleton<CancelSaleUseCase>(
+        () => CancelSaleUseCase(
+          instance<ISaleRepository>(),
+          instance<FifoStockUseCase>(),
+          instance<IFinancialTransactionRepository>(),
+          instance<IUnitOfWork>(),
+          // Supabase: delega à RPC `cancel_sale` (estorno de estoque +
+          // caixa + status em UMA transação no servidor, guarda gerencial
+          // is_manager_of_store). Registrado apenas no modo remoto.
+          processor: instance.isRegistered<ISaleCancellationProcessor>()
+              ? instance<ISaleCancellationProcessor>()
+              : null,
+        ),
+      )
       ..registerLazySingleton<MarkTransactionAsPaidUseCase>(
         () => MarkTransactionAsPaidUseCase(
           instance<IFinancialTransactionRepository>(),
@@ -544,6 +646,28 @@ final class ServiceLocator {
       ..registerLazySingleton<AddFinancialTransactionUseCase>(
         () => AddFinancialTransactionUseCase(
           instance<IFinancialTransactionRepository>(),
+        ),
+      )
+      // Fecho de caixa diário (Z-report): resumo do dia + registro do
+      // fecho. Supabase: delega à RPC `close_cash_register` (cálculo +
+      // guarda gerencial + UPSERT em UMA transação no servidor).
+      // Registrado apenas no modo remoto.
+      ..registerLazySingleton<GetCashClosingSummaryUseCase>(
+        () => GetCashClosingSummaryUseCase(
+          instance<ISaleRepository>(),
+          instance<ICashClosingRepository>(),
+          serverRepository: instance.isRegistered<ICashClosingSummaryRepository>()
+              ? instance<ICashClosingSummaryRepository>()
+              : null,
+        ),
+      )
+      ..registerLazySingleton<CloseCashRegisterUseCase>(
+        () => CloseCashRegisterUseCase(
+          instance<ISaleRepository>(),
+          instance<ICashClosingRepository>(),
+          processor: instance.isRegistered<ICashClosingProcessor>()
+              ? instance<ICashClosingProcessor>()
+              : null,
         ),
       )
       ..registerLazySingleton<GetPendingDebtsUseCase>(

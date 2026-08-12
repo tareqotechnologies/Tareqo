@@ -1,6 +1,6 @@
 # iOS — build + TestFlight (W1). Complementa o release.yml (Android).
 #
-# Disparado pela mesma tag `v*` (ex.: `git tag v1.0.0 && git push --tags`):
+# Disparado pela mesma tag `v*` (ex.: `git tag v1.1.0 && git push --tags`):
 #   1. analyze + test (macOS runner);
 #   2. build do IPA de PRODUÇÃO (--flavor prod) e upload para o TestFlight
 #      via Fastlane (`fastlane ios beta` — lane em fastlane/Fastfile).

@@ -104,6 +104,29 @@ final class StockLotSupabaseDataSourceImpl implements StockLotLocalDataSource {
     }
   }
 
+  @override
+  Future<void> increaseQuantity(
+    String lotId,
+    int quantity, {
+    required String storeId,
+  }) async {
+    // ⚠️ Este caminho NÃO roda no modo SaaS (toda mutação de estoque vai
+    // pelas RPCs process_sale/cancel_sale/process_purchase — atômicas no
+    // servidor). É o fallback REST para o caminho composto: o PostgREST
+    // não aceita expressões em UPDATE, então lê o valor atual e soma
+    // (melhor esforço, não atômico). Escopo por loja.
+    final rows = await supabaseClient
+        .from(_table)
+        .select('current_quantity')
+        .eq('id', lotId)
+        .eq('store_id', storeId);
+    if (rows.isEmpty) {
+      throw StateError('Lote $lotId não encontrado para atualização.');
+    }
+    final current = (rows.first['current_quantity'] as num).toInt();
+    await updateQuantity(lotId, current + quantity, storeId: storeId);
+  }
+
   StockLot _map(Map<String, dynamic> row) => StockLot(
     id: row['id'] as String,
     storeId: row['store_id'] as String,

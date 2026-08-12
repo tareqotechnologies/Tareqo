@@ -23,6 +23,10 @@
 #        viola o constraint)
 #   Funcionários → store_employees.is_active + RPC set_employee_active
 #        (Parte 19) e publicação Realtime de store_employees (Parte 20)
+#   Fecho de caixa → tabela cash_closings (Parte 25.1, RLS + UNIQUE
+#        store_id+closing_date), RPC close_cash_register SECURITY DEFINER
+#        com guarda is_manager_of_store (Parte 25.5) e triggers/índice
+#        (Partes 25.3/25.4) — checks 32-34
 #   Migração → quantidade de super_admins registrados (informativo)
 #
 # Uso:
@@ -620,6 +624,105 @@ WHERE p.stock_quantity > 0
     WHERE l.product_id = p.id AND l.store_id = p.store_id
       AND l.current_quantity > 0
   ), 0) <> p.stock_quantity;
+
+\echo '== 32. Fecho de caixa: tabela cash_closings + RLS ON + UNIQUE (store_id, closing_date) =='
+DO $$
+BEGIN
+  IF to_regclass('public.cash_closings') IS NULL THEN
+    RAISE EXCEPTION 'FAIL: tabela public.cash_closings NAO existe (upgrade.sql Parte 25.1 nao aplicado?)';
+  END IF;
+  IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.cash_closings'::regclass) THEN
+    RAISE EXCEPTION 'FAIL: public.cash_closings com RLS desabilitado';
+  END IF;
+  -- Unicidade (store_id, closing_date): refazer o fecho do dia atualiza,
+  -- nunca duplica — é o que o UPSERT da RPC usa no ON CONFLICT.
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.cash_closings'::regclass
+      AND contype = 'u'
+      AND pg_get_constraintdef(oid) LIKE '%(store_id, closing_date)%'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: cash_closings sem UNIQUE (store_id, closing_date)';
+  END IF;
+  RAISE NOTICE 'PASS: cash_closings existe, RLS ON, UNIQUE (store_id, closing_date)';
+END $$;
+
+\echo '== 33. RPC close_cash_register: SECURITY DEFINER + guarda is_manager_of_store =='
+DO $$
+DECLARE
+  v_oid oid := to_regprocedure('public.close_cash_register(text,timestamptz,bigint)');
+  v_def text;
+BEGIN
+  IF v_oid IS NULL THEN
+    RAISE EXCEPTION 'FAIL: close_cash_register ausente (upgrade.sql Parte 25.5 nao aplicado?)';
+  END IF;
+  IF NOT (SELECT prosecdef FROM pg_proc WHERE oid = v_oid) THEN
+    RAISE EXCEPTION 'FAIL: close_cash_register nao e SECURITY DEFINER';
+  END IF;
+  SELECT pg_get_functiondef(v_oid) INTO v_def;
+  -- Guarda gerencial: dono/gerente fecham o caixa; funcionário NÃO.
+  IF position('is_manager_of_store' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: close_cash_register sem guarda is_manager_of_store';
+  END IF;
+  -- Calcula no SERVIDOR (esperado na gaveta = só vendas em dinheiro).
+  IF position('cash' IN v_def) = 0 OR position('sales' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: close_cash_register sem calculo server-side sobre sales';
+  END IF;
+  RAISE NOTICE 'PASS: close_cash_register SECURITY DEFINER + guarda gerencial + calculo server-side';
+END $$;
+
+\echo '== 34. Fecho de caixa: triggers user_id/store_id + indice por loja =='
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger
+    WHERE tgname = 'trg_cash_closings_user_id'
+      AND tgrelid = 'public.cash_closings'::regclass
+  ) THEN
+    RAISE EXCEPTION 'FAIL: trigger trg_cash_closings_user_id ausente (Parte 25.4)';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger
+    WHERE tgname = 'trg_cash_closings_store_id'
+      AND tgrelid = 'public.cash_closings'::regclass
+  ) THEN
+    RAISE EXCEPTION 'FAIL: trigger trg_cash_closings_store_id ausente (Parte 25.4)';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public' AND tablename = 'cash_closings'
+      AND indexname = 'idx_cash_closings_store'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: indice idx_cash_closings_store ausente (Parte 25.3)';
+  END IF;
+  RAISE NOTICE 'PASS: cash_closings com triggers user_id/store_id + indice por loja';
+END $$;
+
+\echo '== 35. RPC get_cash_closing_summary: SECURITY DEFINER + guarda is_my_store (previa H2) =='
+DO $$
+DECLARE
+  v_oid oid := to_regprocedure('public.get_cash_closing_summary(text,timestamptz)');
+  v_def text;
+BEGIN
+  IF v_oid IS NULL THEN
+    RAISE EXCEPTION 'FAIL: get_cash_closing_summary ausente (upgrade.sql Parte 26.1 nao aplicado?)';
+  END IF;
+  IF NOT (SELECT prosecdef FROM pg_proc WHERE oid = v_oid) THEN
+    RAISE EXCEPTION 'FAIL: get_cash_closing_summary nao e SECURITY DEFINER';
+  END IF;
+  SELECT pg_get_functiondef(v_oid) INTO v_def;
+  -- Guarda de LEITURA por loja (dono e funcionários leem a prévia; fechar é gerencial).
+  IF position('is_my_store' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: get_cash_closing_summary sem guarda is_my_store';
+  END IF;
+  -- Agrega NO SERVIDOR (mesmo critério do close_cash_register).
+  IF position('expected_cash_cents' IN v_def) = 0
+     OR position('sales' IN v_def) = 0
+     OR position('cash' IN v_def) = 0 THEN
+    RAISE EXCEPTION 'FAIL: get_cash_closing_summary sem agregacao server-side sobre sales';
+  END IF;
+  RAISE NOTICE 'PASS: get_cash_closing_summary SECURITY DEFINER + guarda is_my_store + agregacao server-side';
+END $$;
 SQL
 
 # ── Executor: psql local ou container postgres:16 ───────────────────────

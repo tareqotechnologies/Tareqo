@@ -17,11 +17,16 @@ import '../../../domain/usecases/set_employee_active_use_case.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
+import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
+import '../../widgets/list_skeleton.dart';
 import '../../widgets/status_chip.dart';
 import '../../widgets/store_scoped_content.dart';
+import '../support/support_screen.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../domain/repositories/i_employee_account_service.dart';
 
@@ -111,9 +116,8 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.storesTitle)),
-      // A tela é empurrada por cima do AppShell (fora da casca): o seletor
-      // de loja ativa aparece no topo, deixando claro qual loja está ativa
-      // ao gerir lojas.
+      // A tela é empurrada por cima do AppShell (fora da casca). A escolha
+      // da loja ativa ficou na aba Ajustes (seção "Loja ativa" abaixo).
       body: StoreScopedContent(
         child: Column(
           children: [
@@ -164,17 +168,17 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
         ),
       ),
       floatingActionButton: showFab
-          ? FloatingActionButton.extended(
+          // FAB circular (design system — igual ao "Novo produto"): só o
+          // sinal de +, com tooltip — o rótulo nunca é cortado pelo círculo.
+          ? FloatingActionButton(
               // Hero tag único: o AppShell mantém as 6 seções vivas num
               // IndexedStack — sem tags distintas, os FABs (mesmo tag
               // padrão) quebravam o Hero em qualquer transição de rota.
               heroTag: 'fab-stores',
               onPressed: index == 0 ? _openAddStore : _openAddEmployee,
-              icon: Icon(
+              tooltip: index == 0 ? l10n.storesAddStore : l10n.storesAddEmployee,
+              child: Icon(
                 index == 0 ? Icons.add_business_outlined : Icons.person_add_alt,
-              ),
-              label: Text(
-                index == 0 ? l10n.storesAddStore : l10n.storesAddEmployee,
               ),
             )
           : null,
@@ -184,7 +188,8 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
   Widget _buildStores(AsyncValue<List<Store>> async) {
     final l10n = context.l10n;
     return async.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      // Skeleton no primeiro carregamento (padrão das listas).
+      loading: () => const ListSkeleton(items: 4),
       error: (error, _) => ErrorView(
         message: l10n.storesLoadError,
         details: error.toString(),
@@ -204,7 +209,11 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
           separatorBuilder: (_, _) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final store = stores[index];
-            return Card(
+            // AppCard (design system ultra-clean): radius 12, borda 0.5px
+            // #222E35, flat — padding zero mantém o espaçamento nativo do
+            // ListTile (16px), o mesmo layout de antes com o novo padrão.
+            return AppCard(
+              padding: EdgeInsets.zero,
               child: ListTile(
                 leading: const Icon(Icons.store_outlined),
                 title: Text(
@@ -228,11 +237,11 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
         ref.watch(storesProvider(widget.tenant.id)).value ?? const <Store>[];
     // Só o DONO do tenant vê o interruptor ativar/desativar.
     final user = ref.watch(authStateProvider).value;
-    final isOwner =
-        user != null && widget.tenant.ownerUserId == user.id;
+    final isOwner = user != null && widget.tenant.ownerUserId == user.id;
 
     return async.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      // Skeleton no primeiro carregamento (padrão das listas).
+      loading: () => const ListSkeleton(items: 4),
       error: (error, _) => ErrorView(
         message: l10n.employeesLoadError,
         details: error.toString(),
@@ -257,72 +266,113 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
             final employee = employees[index];
             final scheme = Theme.of(context).colorScheme;
             final isManager = employee.role == EmployeeRole.manager;
-            return Card(
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: scheme.primaryContainer,
-                  child: Text(
-                    employee.fullName.isEmpty
-                        ? '?'
-                        : employee.fullName.substring(0, 1).toUpperCase(),
-                    style: TextStyle(
-                      color: scheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w700,
+            // AppCard (design system ultra-clean): radius 12, borda 0.5px
+            // #222E35, flat. Layout CUSTOM (sem ListTile): o texto ganha a
+            // largura quase TOTAL (os chips ficam ancorados às linhas de
+            // texto e o interruptor fino à direita) — nomes/e-mails longos
+            // ficam numa linha limpa com ellipsis em vez de quebrarem em 3
+            // linhas desalinhadas (regressão que distorcia o card).
+            return AppCard(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: scheme.primaryContainer,
+                    child: Text(
+                      employee.fullName.isEmpty
+                          ? '?'
+                          : employee.fullName.substring(0, 1).toUpperCase(),
+                      style: TextStyle(
+                        color: scheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
-                title: Text(
-                  employee.fullName,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                subtitle: Text(
-                  '${storeName(employee.storeId)} · ${employee.email}',
-                ),
-                // Desativado: o card inteiro perde o destaque (opacidade +
-                // chip "Inativo" em vermelho) — o funcionário perdeu acesso.
-                isThreeLine: false,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Defensivo: com escala de texto alta, nome/e-mail
-                    // longos no título/subtítulo comprimem o trailing — o
-                    // Column de chips cede (Flexible + ellipsis no chip).
-                    Flexible(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                        StatusChip(
-                          label: isManager
-                              ? l10n.roleManager
-                              : l10n.roleEmployee,
-                          color: isManager
-                              ? scheme.primary
-                              : scheme.outline,
-                          icon: isManager
-                              ? Icons.manage_accounts_outlined
-                              : Icons.person_outline,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Linha 1 — nome (largura total) + chip "Inativo" se
+                        // desativado: nunca mais 2 linhas desalinhadas.
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                employee.fullName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ),
+                            if (!employee.isActive) ...[
+                              const SizedBox(width: 6),
+                              StatusChip(
+                                label: l10n.employeeInactive,
+                                color: scheme.error,
+                                icon: Icons.block,
+                              ),
+                            ],
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        if (!employee.isActive)
-                          StatusChip(
-                            label: l10n.employeeInactive,
-                            color: scheme.error,
-                            icon: Icons.block,
-                          ),
+                        const SizedBox(height: 2),
+                        // Linha 2 — loja · e-mail (largura total) + chip de
+                        // cargo: até 2 linhas completas, ellipsis se exceder.
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${storeName(employee.storeId)} · '
+                                '${employee.email}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                      height: 1.3,
+                                    ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            StatusChip(
+                              label: isManager
+                                  ? l10n.roleManager
+                                  : l10n.roleEmployee,
+                              color: isManager
+                                  ? scheme.primary
+                                  : scheme.outline,
+                              icon: isManager
+                                  ? Icons.manage_accounts_outlined
+                                  : Icons.person_outline,
+                            ),
+                          ],
+                        ),
                       ],
                     ),
+                  ),
+                  // Interruptor FINO (design system): trilho 40×20 com thumb
+                  // 16 — metade da altura do Switch M3 — mantendo a área de
+                  // toque (44×24) e as semânticas de switch. Só o dono vê.
+                  if (isOwner) ...[
+                    const SizedBox(width: 10),
+                    _ThinToggle(
+                      key: ValueKey('employee-toggle-${employee.id}'),
+                      value: employee.isActive,
+                      onChanged: (value) => _toggleEmployee(employee, value),
                     ),
-                    if (isOwner)
-                      Switch(
-                        value: employee.isActive,
-                        onChanged: (value) =>
-                            _toggleEmployee(employee, value),
-                      ),
                   ],
-                ),
+                ],
               ),
             );
           },
@@ -332,30 +382,28 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
   }
 
   /// Confirma e ativa/desativa o funcionário (só o dono chega aqui).
-  Future<void> _toggleEmployee(
-    StoreEmployee employee,
-    bool isActive,
-  ) async {
+  Future<void> _toggleEmployee(StoreEmployee employee, bool isActive) async {
     final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          isActive ? l10n.employeeReactivateConfirm(employee.fullName) :
-          l10n.employeeDeactivateConfirm(employee.fullName),
+          isActive
+              ? l10n.employeeReactivateConfirm(employee.fullName)
+              : l10n.employeeDeactivateConfirm(employee.fullName),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
           ),
-          FilledButton(
+          // AppButton (design system ultra-clean): altura 48, cantos 12,
+          // texto w400 — a confirmação segue o padrão dos demais diálogos.
+          AppButton.primary(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              isActive
-                  ? l10n.employeeReactivateAction
-                  : l10n.employeeDeactivateAction,
-            ),
+            label: isActive
+                ? l10n.employeeReactivateAction
+                : l10n.employeeDeactivateAction,
           ),
         ],
       ),
@@ -363,34 +411,34 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
     if (confirmed != true || !mounted) return;
 
     try {
-      await ref.read(setEmployeeActiveUseCaseProvider).call(
-        tenantId: widget.tenant.id,
-        employeeId: employee.id,
-        isActive: isActive,
-      );
+      await ref
+          .read(setEmployeeActiveUseCaseProvider)
+          .call(
+            tenantId: widget.tenant.id,
+            employeeId: employee.id,
+            isActive: isActive,
+          );
       if (!mounted) return;
       ref.invalidate(employeesProvider(widget.tenant.id));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isActive
-                ? l10n.employeeReactivated
-                : l10n.employeeDeactivated,
+            isActive ? l10n.employeeReactivated : l10n.employeeDeactivated,
           ),
         ),
       );
     } on EmployeeNotFoundException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
     } catch (error) {
       // Supabase: o RPC pode rejeitar (não-dono, rede) — a mensagem já
       // vem amigável do datasource; cai aqui sem derrubar a tela.
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('$error')));
     }
   }
 
@@ -402,7 +450,8 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
         plans.where((plan) => plan.id == id).firstOrNull?.name ?? id;
 
     return async.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      // Skeleton no primeiro carregamento (padrão das listas).
+      loading: () => const ListSkeleton(items: 4),
       error: (error, _) => ErrorView(
         message: l10n.upgradesLoadError,
         details: error.toString(),
@@ -434,7 +483,11 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
               ),
               PlanRequestStatus.rejected => (scheme.error, l10n.statusRejected),
             };
-            return Card(
+            // AppCard (design system ultra-clean): radius 12, borda 0.5px
+            // #222E35, flat — padding zero mantém o espaçamento nativo do
+            // ListTile (16px), o mesmo layout de antes com o novo padrão.
+            return AppCard(
+              padding: EdgeInsets.zero,
               child: ListTile(
                 leading: Icon(Icons.swap_horiz, color: color),
                 title: Text(
@@ -624,6 +677,79 @@ class _LimitMeter extends StatelessWidget {
   }
 }
 
+/// Interruptor fino (design system ultra-clean).
+///
+/// O `Switch` do Material 3 é alto demais (trilho ~32px) para listas
+/// densas — este tem trilho 40×20 com thumb 16 (metade da altura), cantos
+/// totalmente arredondados, animação suave (160ms) e sem sombras (flat).
+/// A área de toque é 44×24 (maior que o visual) e o `Semantics` mantém o
+/// papel de switch para leitores de ecrã.
+class _ThinToggle extends StatelessWidget {
+  const _ThinToggle({super.key, required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  static const double _trackWidth = 40;
+  static const double _trackHeight = 20;
+  static const double _thumbSize = 16;
+  static const double _inset = (_trackHeight - _thumbSize) / 2; // 2
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Semantics(
+      container: true,
+      // `toggled` basta para anunciar ligado/desligado (o enum
+      // `SemanticsRole.switch` não é exportado por este SDK do Flutter).
+      toggled: value,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onChanged(!value),
+        child: SizedBox(
+          width: _trackWidth + 4, // área de toque um pouco maior
+          height: _trackHeight + 4,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOut,
+              width: _trackWidth,
+              height: _trackHeight,
+              padding: const EdgeInsets.all(_inset),
+              decoration: BoxDecoration(
+                color: value ? scheme.primary : scheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(_trackHeight / 2),
+                border: Border.all(
+                  color: value ? scheme.primary : scheme.outlineVariant,
+                  width: 1,
+                ),
+              ),
+              child: AnimatedAlign(
+                duration: const Duration(milliseconds: 160),
+                curve: Curves.easeOut,
+                alignment: value
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: Container(
+                  width: _thumbSize,
+                  height: _thumbSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: value
+                        ? scheme.onPrimary
+                        : scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Sheet de criação de loja.
 class _AddStoreSheet extends ConsumerStatefulWidget {
   const _AddStoreSheet({required this.tenant});
@@ -704,25 +830,23 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppSheetHeader(title: l10n.addStoreTitle),
-            TextFormField(
+            // AppTextField (design system ultra-clean): minimalista, borda
+            // sutil que acende no foco — padrão dos formulários do app.
+            AppTextField(
               controller: _nameController,
+              label: l10n.addStoreNameLabel,
+              prefixIcon: Icons.store_outlined,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.addStoreNameLabel,
-                prefixIcon: const Icon(Icons.store_outlined),
-              ),
               validator: (value) => (value == null || value.trim().isEmpty)
                   ? l10n.addStoreNameError
                   : null,
             ),
             const SizedBox(height: 14),
-            TextFormField(
+            AppTextField(
               controller: _addressController,
+              label: l10n.addStoreAddressLabel,
+              prefixIcon: Icons.place_outlined,
               textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
-                labelText: l10n.addStoreAddressLabel,
-                prefixIcon: const Icon(Icons.place_outlined),
-              ),
             ),
             if (_formError != null) ...[
               const SizedBox(height: 14),
@@ -734,15 +858,18 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
               ),
             ],
             const SizedBox(height: 20),
-            FilledButton(
+            // AppButton (design system ultra-clean): altura 48, cantos 12,
+            // cores sólidas — o spinner substitui o ícone durante o envio.
+            AppButton.primary(
               onPressed: _isSubmitting ? null : _submit,
-              child: _isSubmitting
+              label: l10n.addStoreSubmit,
+              icon: _isSubmitting
                   ? const SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(l10n.addStoreSubmit),
+                  : null,
             ),
           ],
         ),
@@ -799,19 +926,21 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
       // create_employee_account faz os dois em UMA transação (sem contas
       // órfãs se o limite do plano for atingido); no modo local o caso de
       // uso usa um id sintético + repositório.
-      await ref.read(addEmployeeUseCaseProvider).call(
-        StoreEmployee(
-          id: AppIds.newId('e'),
-          tenantId: widget.tenant.id,
-          storeId: _selectedStoreId!,
-          // Preenchido pelo caso de uso com o id real da conta criada.
-          userId: '',
-          fullName: _nameController.text.trim(),
-          email: _emailController.text.trim(),
-          role: _role,
-        ),
-        password: _passwordController.text,
-      );
+      await ref
+          .read(addEmployeeUseCaseProvider)
+          .call(
+            StoreEmployee(
+              id: AppIds.newId('e'),
+              tenantId: widget.tenant.id,
+              storeId: _selectedStoreId!,
+              // Preenchido pelo caso de uso com o id real da conta criada.
+              userId: '',
+              fullName: _nameController.text.trim(),
+              email: _emailController.text.trim(),
+              role: _role,
+            ),
+            password: _passwordController.text,
+          );
 
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -855,26 +984,24 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppSheetHeader(title: l10n.addEmployeeTitle),
-            TextFormField(
+            // AppTextField (design system ultra-clean): minimalista, borda
+            // sutil que acende no foco — padrão dos formulários do app.
+            AppTextField(
               controller: _nameController,
+              label: l10n.addEmployeeNameLabel,
+              prefixIcon: Icons.person_outline,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.addEmployeeNameLabel,
-                prefixIcon: const Icon(Icons.person_outline),
-              ),
               validator: (value) => (value == null || value.trim().isEmpty)
                   ? l10n.addEmployeeNameError
                   : null,
             ),
             const SizedBox(height: 14),
-            TextFormField(
+            AppTextField(
               controller: _emailController,
+              label: l10n.addEmployeeEmailLabel,
+              prefixIcon: Icons.mail_outline,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.addEmployeeEmailLabel,
-                prefixIcon: const Icon(Icons.mail_outline),
-              ),
               validator: (value) {
                 final email = value?.trim() ?? '';
                 if (email.isEmpty || !email.contains('@')) {
@@ -884,14 +1011,12 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
               },
             ),
             const SizedBox(height: 14),
-            TextFormField(
+            AppTextField(
               controller: _passwordController,
+              label: l10n.addEmployeePasswordLabel,
+              prefixIcon: Icons.lock_outline,
               obscureText: true,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.addEmployeePasswordLabel,
-                prefixIcon: const Icon(Icons.lock_outline),
-              ),
               validator: (value) => (value ?? '').length < 8
                   ? l10n.addEmployeePasswordError
                   : null,
@@ -959,15 +1084,18 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
               ),
             ],
             const SizedBox(height: 20),
-            FilledButton(
+            // AppButton (design system ultra-clean): altura 48, cantos 12,
+            // cores sólidas — o spinner substitui o ícone durante o envio.
+            AppButton.primary(
               onPressed: _isSubmitting ? null : _submit,
-              child: _isSubmitting
+              label: l10n.addEmployeeSubmit,
+              icon: _isSubmitting
                   ? const SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(l10n.addEmployeeSubmit),
+                  : null,
             ),
           ],
         ),
@@ -1094,7 +1222,9 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
             ),
           ],
           const SizedBox(height: 16),
-          FilledButton.icon(
+          // AppButton (design system ultra-clean): altura 48, cantos 12,
+          // cores sólidas — o spinner substitui o ícone durante o envio.
+          AppButton.primary(
             onPressed: _isSubmitting ? null : _submit,
             icon: _isSubmitting
                 ? const SizedBox(
@@ -1103,7 +1233,7 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.send_outlined),
-            label: Text(l10n.upgradeSubmit),
+            label: l10n.upgradeSubmit,
           ),
         ],
       ),
@@ -1253,10 +1383,55 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    // Loja ativa: a escolha migrou do banner do topo para AQUI (Lojas →
+    // Ajustes). Todos os módulos (vendas, estoque, financeiro...) escopam
+    // por activeStoreIdProvider — trocar o chip troca os dados na hora.
+    final user = ref.watch(authStateProvider).value;
+    final storesAsync = ref.watch(storesProvider(widget.tenant.id));
+    final stores = storesAsync.value ?? const <Store>[];
+    final activeStoreId = user == null
+        ? null
+        : ref.watch(activeStoreIdProvider(user.id));
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
       children: [
+        // LOJA ATIVA — só com 2+ lojas E usuário logado há o que escolher
+        // (com uma única loja não existe seletor, o mesmo critério do
+        // banner antigo). O guard `user != null` espelha a linha do
+        // `activeStoreId` acima — sem `!` no callback.
+        if (user != null && stores.length > 1) ...[
+          Text(
+            l10n.storeSelectorSectionTitle,
+            style: theme.textTheme.titleSmall,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.storeSelectorSectionHint,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final store in stores)
+                ChoiceChip(
+                  avatar: store.id == activeStoreId
+                      ? const Icon(Icons.check, size: 16)
+                      : null,
+                  label: Text(store.name),
+                  selected: store.id == activeStoreId,
+                  onSelected: (_) => ref
+                      .read(activeStoreIdProvider(user.id).notifier)
+                      .select(store.id),
+                ),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
         Text(l10n.onboardingLanguageLabel, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Wrap(
@@ -1299,7 +1474,9 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
           ),
         ],
         const SizedBox(height: 24),
-        FilledButton.icon(
+        // AppButton (design system ultra-clean): altura 48, cantos 12,
+        // cores sólidas — o spinner substitui o ícone durante o envio.
+        AppButton.primary(
           onPressed: _isSaving ? null : _save,
           icon: _isSaving
               ? const SizedBox(
@@ -1308,7 +1485,53 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.save_outlined),
-          label: Text(l10n.settingsSave),
+          label: l10n.settingsSave,
+        ),
+        // SUPORTE — acesso à documentação embutida (Ajuda → Guia do
+        // Usuário / Troubleshooting). Fica separado do formulário acima
+        // (moeda/idioma) por não ser uma definição do tenant.
+        const SizedBox(height: 32),
+        Text(
+          l10n.settingsSupportSection,
+          style: theme.textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        AppCard(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const SupportScreen()),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.support_agent_outlined,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.settingsSupportEntry,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.settingsSupportEntryHint,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
         ),
       ],
     );

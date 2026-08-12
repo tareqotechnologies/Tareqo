@@ -45,11 +45,22 @@
   "settingsSave": "Salvar ajustes",
   "settingsSaved": "Ajustes salvos!",
   "settingsGenericError": "Não foi possível salvar os ajustes. Tente novamente.",
+  "settingsSupportSection": "Suporte",
+  "settingsSupportEntry": "Ajuda e documentação",
+  "settingsSupportEntryHint": "Guia do Usuário e Troubleshooting — leitura sem internet",
+  "supportTitle": "Ajuda",
+  "supportSubtitle": "Tudo o que precisa para tirar o máximo do app: o guia completo do usuário e a resolução dos problemas mais comuns.",
+  "supportUserGuide": "Guia do Usuário",
+  "supportUserGuideHint": "Manual simples e completo: login, lojas, produtos (com foto), vendas, fiado, financeiro, fecho de caixa, relatórios e FAQ",
+  "supportTroubleshooting": "Troubleshooting",
+  "supportTroubleshootingHint": "Resolução de problemas comuns: login, fotos, vendas, estoque, caixa, conexão e mensagens de erro",
+  "supportReadingError": "Não foi possível abrir o documento. Tente novamente.",
   "commonSearch": "Buscar...",
   "commonRetry": "Tentar novamente",
   "commonSignOut": "Sair da conta",
   "appSheetClose": "Fechar",
-  "storeSelectorActiveTooltip": "Loja ativa",
+  "storeSelectorSectionTitle": "Loja ativa",
+  "storeSelectorSectionHint": "Escolha a loja cujos dados aparecem nos módulos (vendas, estoque, financeiro).",
   "tenantPendingTitle": "Aguardando aprovação",
   "tenantPendingSubtitle": "A solicitação de acesso de \"{business}\" foi enviada com sucesso. O super admin vai analisar e você receberá acesso em até 24h.",
   "@tenantPendingSubtitle": {
@@ -254,6 +265,7 @@
   "paymentMPesa": "M-Pesa",
   "paymentTransfer": "Transferência",
   "purchasesSearchHint": "Buscar compra...",
+  "productsFilterTooltip": "Filtrar produtos",
   "productsSearchHint": "Buscar produto...",
   "productsLoadError": "Não foi possível carregar os produtos.",
   "productsEmptyTitle": "Nenhum produto cadastrado",
@@ -271,6 +283,7 @@
     }
   },
   "productsAdded": "Produto adicionado!",
+  "productsAddedNoPhoto": "Produto adicionado! (foto não enviada — sem permissão de armazenamento)",
   "productsAddError": "Não foi possível adicionar o produto. Tente novamente.",
   "productsNameError": "Informe o nome do produto.",
   "productsDescriptionLabel": "Descrição (opcional)",
@@ -281,6 +294,23 @@
   "productsStockQuantity": "Quantidade em estoque",
   "productsStockError": "Informe uma quantidade válida.",
   "productsAddSubmit": "Adicionar produto",
+  "productsEditTitle": "Editar produto",
+  "productsEditSubmit": "Salvar alterações",
+  "productsEditSaved": "Produto atualizado!",
+  "productsEditSavedNoPhoto": "Produto atualizado! (foto não enviada — sem permissão de armazenamento)",
+  "productsEditError": "Não foi possível atualizar o produto. Tente novamente.",
+  "productsPhotoLabel": "Foto do produto",
+  "productsPhotoTake": "Tirar foto",
+  "productsPhotoGallery": "Da galeria",
+  "productsPhotoRemove": "Remover foto",
+  "productsInactive": "Inativo",
+  "productsActiveLabel": "Produto ativo",
+  "productsActiveHint": "Desative para tirar o produto do PDV e das compras (o estoque é preservado).",
+  "productsStockAdjustHint": "Ajuste manual: define o estoque exato, criando/consumindo lotes FIFO.",
+  "productsSectionInfo": "Informações",
+  "productsSectionPricing": "Preços",
+  "productsSectionStock": "Estoque",
+  "productsSectionStatus": "Status",
   "customersSearchHint": "Buscar cliente...",
   "customersLoadError": "Não foi possível carregar os clientes.",
   "customersEmptyTitle": "Nenhum cliente cadastrado",
@@ -388,6 +418,23 @@
       }
     }
   },
+  "reportsExport": "Exportar",
+  "reportsExportCsv": "Exportar CSV",
+  "reportsExportPdf": "Exportar PDF",
+  "reportsExportDone": "Relatório exportado!",
+  "reportsExportError": "Não foi possível exportar o relatório. Tente novamente.",
+  "reportsExportTitle": "Relatório de vendas",
+  "reportsExportFileName": "relatorio_vendas",
+  "reportsExportStore": "Loja",
+  "reportsExportPeriod": "Período",
+  "reportsExportGeneratedAt": "Gerado em",
+  "reportsExportSummary": "Resumo",
+  "reportsExportRank": "Posição",
+  "reportsExportProduct": "Produto",
+  "reportsExportQuantity": "Quantidade",
+  "reportsExportRevenue": "Receita",
+  "reportsExportDay": "Dia",
+  "reportsExportTotal": "Total",
   "financialTitle": "Financeiro",
   "financialRegister": "Registrar",
   "financialIncome": "Entradas",
@@ -409,6 +456,18 @@
   "financialReceive": "Receber",
   "financialReceived": "Movimentação recebida!",
   "financialReceiveError": "Não foi possível receber a pendência. Tente novamente.",
+  "financialPay": "Pagar",
+  "financialPayPendingTitle": "Pagar pendência?",
+  "financialPayPendingBody": "Confirmar o pagamento de {amount}? A movimentação passa a contar no caixa realizado.",
+  "@financialPayPendingBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financialPaid": "Saída paga!",
+  "financialPayError": "Não foi possível pagar a pendência. Tente novamente.",
   "financialAddTitle": "Registrar movimentação",
   "financialIncomingType": "Entrada",
   "financialOutgoingType": "Saída",
@@ -423,6 +482,42 @@
   "financialRegisterError": "Não foi possível registrar a movimentação. Tente novamente.",
   "financialDefaultCategoryIncome": "Vendas",
   "financialDefaultCategoryExpense": "Despesas",
+  "cashClosingAction": "Fecho de caixa",
+  "cashClosingTitle": "Fecho de caixa do dia",
+  "cashClosingDaySummary": "Resumo do dia",
+  "cashClosingTotalSales": "Vendas do dia",
+  "cashClosingExpectedCash": "Esperado na gaveta",
+  "cashClosingExpectedCashHint": "Só vendas em dinheiro — cartão, M-Pesa, E-Mola e transferência não passam pela gaveta física.",
+  "cashClosingByMethod": "Por forma de pagamento",
+  "cashClosingCountedCash": "Dinheiro contado",
+  "cashClosingCountedCashHint": "Conte o dinheiro físico da gaveta e informe aqui.",
+  "cashClosingDifference": "Diferença",
+  "cashClosingConfers": "Caixa confere",
+  "cashClosingSurplus": "Sobra de {amount}",
+  "@cashClosingSurplus": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashClosingShortage": "Falta de {amount}",
+  "@cashClosingShortage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashClosingConfirm": "Confirmar fecho",
+  "cashClosingUpdate": "Atualizar fecho",
+  "cashClosingClosedAt": "Fechado em",
+  "cashClosingSuccess": "Caixa fechado!",
+  "cashClosingUpdated": "Fecho atualizado!",
+  "cashClosingError": "Não foi possível fechar o caixa. Tente novamente.",
+  "cashClosingEmpty": "Nenhuma venda registrada neste dia.",
+  "cashClosingHistory": "Histórico de fechos",
+  "cashClosingHistoryEmpty": "Nenhum fecho registrado ainda.",
   "debtsTitle": "Crédito (fiado)",
   "debtsAddDebt": "Registrar fiado",
   "debtsTabPending": "Pendentes",
@@ -539,6 +634,18 @@
   "salesEmptyFilteredTitle": "Nenhuma venda encontrada",
   "salesEmptyFilteredSubtitle": "Ajuste a busca ou os filtros.",
   "salesClearFilters": "Limpar filtros",
+  "salesFilteredSummary": "{count, plural, =1{1 venda} other{{count} vendas}} · Total {total}",
+  "@salesFilteredSummary": {
+    "description": "Linha-resumo quando há filtro ativo na lista de vendas",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "salesItemUnavailable": "Um item do carrinho não está mais disponível. Tente novamente.",
   "salesRegistered": "Venda registrada: {amount}!",
   "@salesRegistered": {
@@ -593,6 +700,33 @@
   "saleDetailItems": "Itens",
   "saleDetailTotal": "Total",
   "saleDetailSnapshot": "Preços congelados no momento da venda.",
+  "salesStatusCancelled": "Anulada",
+  "saleDetailCancelAction": "Anular venda",
+  "saleDetailCancelConfirmTitle": "Anular esta venda?",
+  "saleDetailCancelConfirmBody": "O estoque dos itens será devolvido e a entrada no caixa estornada ({amount}). Esta ação não pode ser desfeita.",
+  "@saleDetailCancelConfirmBody": {
+    "description": "Confirmação de anulação de venda — avisa que estoque e caixa serão estornados",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "saleDetailCancelConfirm": "Sim, anular",
+  "saleDetailCancelledAt": "Anulada em",
+  "saleCancelledSuccess": "Venda anulada.",
+  "saleNotFoundError": "Esta venda não existe mais.",
+  "saleCancelError": "Não foi possível anular a venda. Tente novamente.",
+  "saleDetailShareAction": "Partilhar recibo",
+  "saleDetailShareTitle": "Partilhar recibo",
+  "saleDetailShareImage": "Partilhar como imagem",
+  "saleDetailShareWhatsApp": "WhatsApp",
+  "saleDetailShareError": "Não foi possível partilhar o recibo. Tente novamente.",
+  "saleDetailShareWhatsAppError": "Não foi possível abrir o WhatsApp. Tente novamente.",
+  "saleDetailReceiptTitle": "RECIBO DE VENDA",
+  "saleDetailReceiptTitleCancelled": "RECIBO DE VENDA (ANULADA)",
+  "saleDetailReceiptPayment": "Pagamento",
+  "saleDetailReceiptThanks": "Obrigado pela preferência!",
   "adminTitle": "Painel do Super Admin",
   "adminNavRequests": "Solicitações",
   "adminNavPlans": "Planos",
@@ -722,7 +856,7 @@
   "adminPlanRequested": "Solicitado",
   "adminPlanCurrent": "Atual",
   "productsCodeLabel": "Código de barras (PLU)",
-  "productsCodeHint": "Código usado pelas balanças etiquetadoras (ex.: 12345)",
+  "productsCodeHint": "Balanças etiquetadoras (ex.: 12345)",
   "productsCodeError": "Código inválido: use até 5 dígitos.",
   "productsWeighLabel": "Venda por peso (fração)",
   "productsWeighHint": "Aceita quantidades decimais (ex.: 1,75 kg)",

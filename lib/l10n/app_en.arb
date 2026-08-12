@@ -45,11 +45,22 @@
   "settingsSave": "Save settings",
   "settingsSaved": "Settings saved!",
   "settingsGenericError": "Could not save the settings. Try again.",
+  "settingsSupportSection": "Support",
+  "settingsSupportEntry": "Help and documentation",
+  "settingsSupportEntryHint": "User Guide and Troubleshooting — offline reading",
+  "supportTitle": "Help",
+  "supportSubtitle": "Everything you need to get the most out of the app: the complete user guide and answers to the most common problems.",
+  "supportUserGuide": "User Guide",
+  "supportUserGuideHint": "Simple and complete manual: sign-in, stores, products (with photos), sales, credit, finances, cash closing, reports and FAQ",
+  "supportTroubleshooting": "Troubleshooting",
+  "supportTroubleshootingHint": "Solving common problems: sign-in, photos, sales, stock, cash, connection and error messages",
+  "supportReadingError": "Could not open the document. Try again.",
   "commonSearch": "Search...",
   "commonRetry": "Try again",
   "commonSignOut": "Sign out",
   "appSheetClose": "Close",
-  "storeSelectorActiveTooltip": "Active store",
+  "storeSelectorSectionTitle": "Active store",
+  "storeSelectorSectionHint": "Choose the store whose data appears across modules (sales, stock, financial).",
   "tenantPendingTitle": "Waiting for approval",
   "tenantPendingSubtitle": "The access request for \"{business}\" was sent successfully. The super admin will review it and you will get access within 24h.",
   "@tenantPendingSubtitle": {
@@ -254,6 +265,7 @@
   "paymentMPesa": "M-Pesa",
   "paymentTransfer": "Bank transfer",
   "purchasesSearchHint": "Search purchase...",
+  "productsFilterTooltip": "Filter products",
   "productsSearchHint": "Search product...",
   "productsLoadError": "Could not load the products.",
   "productsEmptyTitle": "No products registered",
@@ -271,6 +283,7 @@
     }
   },
   "productsAdded": "Product added!",
+  "productsAddedNoPhoto": "Product added! (photo not uploaded — storage permission missing)",
   "productsAddError": "Could not add the product. Try again.",
   "productsNameError": "Enter the product name.",
   "productsDescriptionLabel": "Description (optional)",
@@ -281,6 +294,23 @@
   "productsStockQuantity": "Stock quantity",
   "productsStockError": "Enter a valid quantity.",
   "productsAddSubmit": "Add product",
+  "productsEditTitle": "Edit product",
+  "productsEditSubmit": "Save changes",
+  "productsEditSaved": "Product updated!",
+  "productsEditSavedNoPhoto": "Product updated! (photo not uploaded — storage permission missing)",
+  "productsEditError": "Could not update the product. Try again.",
+  "productsPhotoLabel": "Product photo",
+  "productsPhotoTake": "Take photo",
+  "productsPhotoGallery": "From gallery",
+  "productsPhotoRemove": "Remove photo",
+  "productsInactive": "Inactive",
+  "productsActiveLabel": "Active product",
+  "productsActiveHint": "Deactivate to remove the product from the POS and purchases (stock is preserved).",
+  "productsStockAdjustHint": "Manual adjustment: sets the exact stock, creating/consuming FIFO lots.",
+  "productsSectionInfo": "Details",
+  "productsSectionPricing": "Pricing",
+  "productsSectionStock": "Stock",
+  "productsSectionStatus": "Status",
   "customersSearchHint": "Search customer...",
   "customersLoadError": "Could not load the customers.",
   "customersEmptyTitle": "No customers registered",
@@ -388,6 +418,23 @@
       }
     }
   },
+  "reportsExport": "Export",
+  "reportsExportCsv": "Export CSV",
+  "reportsExportPdf": "Export PDF",
+  "reportsExportDone": "Report exported!",
+  "reportsExportError": "Could not export the report. Try again.",
+  "reportsExportTitle": "Sales report",
+  "reportsExportFileName": "sales_report",
+  "reportsExportStore": "Store",
+  "reportsExportPeriod": "Period",
+  "reportsExportGeneratedAt": "Generated at",
+  "reportsExportSummary": "Summary",
+  "reportsExportRank": "Rank",
+  "reportsExportProduct": "Product",
+  "reportsExportQuantity": "Quantity",
+  "reportsExportRevenue": "Revenue",
+  "reportsExportDay": "Day",
+  "reportsExportTotal": "Total",
   "financialTitle": "Finance",
   "financialRegister": "Register",
   "financialIncome": "Income",
@@ -409,6 +456,18 @@
   "financialReceive": "Receive",
   "financialReceived": "Transaction received!",
   "financialReceiveError": "Could not receive the pending amount. Try again.",
+  "financialPay": "Pay",
+  "financialPayPendingTitle": "Pay pending amount?",
+  "financialPayPendingBody": "Confirm paying {amount}? The transaction will count in the realized cash.",
+  "@financialPayPendingBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financialPaid": "Expense paid!",
+  "financialPayError": "Could not pay the pending amount. Try again.",
   "financialAddTitle": "Register transaction",
   "financialIncomingType": "Income",
   "financialOutgoingType": "Expense",
@@ -423,6 +482,42 @@
   "financialRegisterError": "Could not register the transaction. Try again.",
   "financialDefaultCategoryIncome": "Sales",
   "financialDefaultCategoryExpense": "Expenses",
+  "cashClosingAction": "Cash closing",
+  "cashClosingTitle": "Daily cash closing",
+  "cashClosingDaySummary": "Daily summary",
+  "cashClosingTotalSales": "Day sales",
+  "cashClosingExpectedCash": "Expected in drawer",
+  "cashClosingExpectedCashHint": "Cash sales only — card, M-Pesa, E-Mola and transfer do not go through the physical drawer.",
+  "cashClosingByMethod": "By payment method",
+  "cashClosingCountedCash": "Counted cash",
+  "cashClosingCountedCashHint": "Count the physical cash in the drawer and enter it here.",
+  "cashClosingDifference": "Difference",
+  "cashClosingConfers": "Drawer matches",
+  "cashClosingSurplus": "Surplus of {amount}",
+  "@cashClosingSurplus": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashClosingShortage": "Shortage of {amount}",
+  "@cashClosingShortage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashClosingConfirm": "Confirm closing",
+  "cashClosingUpdate": "Update closing",
+  "cashClosingClosedAt": "Closed at",
+  "cashClosingSuccess": "Cash closed!",
+  "cashClosingUpdated": "Closing updated!",
+  "cashClosingError": "Could not close the cash register. Try again.",
+  "cashClosingEmpty": "No sales recorded on this day.",
+  "cashClosingHistory": "Closing history",
+  "cashClosingHistoryEmpty": "No closings recorded yet.",
   "debtsTitle": "Credit (credit sales)",
   "debtsAddDebt": "Register credit",
   "debtsTabPending": "Pending",
@@ -539,6 +634,18 @@
   "salesEmptyFilteredTitle": "No sales found",
   "salesEmptyFilteredSubtitle": "Adjust your search or filters.",
   "salesClearFilters": "Clear filters",
+  "salesFilteredSummary": "{count, plural, =1{1 sale} other{{count} sales}} · Total {total}",
+  "@salesFilteredSummary": {
+    "description": "Summary line when a filter is active on the sales list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "salesItemUnavailable": "A cart item is no longer available. Try again.",
   "salesRegistered": "Sale registered: {amount}!",
   "@salesRegistered": {
@@ -593,6 +700,33 @@
   "saleDetailItems": "Items",
   "saleDetailTotal": "Total",
   "saleDetailSnapshot": "Prices frozen at the time of the sale.",
+  "salesStatusCancelled": "Cancelled",
+  "saleDetailCancelAction": "Cancel sale",
+  "saleDetailCancelConfirmTitle": "Cancel this sale?",
+  "saleDetailCancelConfirmBody": "Item stock will be returned and the cash entry reversed ({amount}). This action cannot be undone.",
+  "@saleDetailCancelConfirmBody": {
+    "description": "Sale cancellation confirmation — warns that stock and cash will be reversed",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "saleDetailCancelConfirm": "Yes, cancel",
+  "saleDetailCancelledAt": "Cancelled on",
+  "saleCancelledSuccess": "Sale cancelled.",
+  "saleNotFoundError": "This sale no longer exists.",
+  "saleCancelError": "Could not cancel the sale. Try again.",
+  "saleDetailShareAction": "Share receipt",
+  "saleDetailShareTitle": "Share receipt",
+  "saleDetailShareImage": "Share as image",
+  "saleDetailShareWhatsApp": "WhatsApp",
+  "saleDetailShareError": "Could not share the receipt. Try again.",
+  "saleDetailShareWhatsAppError": "Could not open WhatsApp. Try again.",
+  "saleDetailReceiptTitle": "SALE RECEIPT",
+  "saleDetailReceiptTitleCancelled": "SALE RECEIPT (CANCELLED)",
+  "saleDetailReceiptPayment": "Payment",
+  "saleDetailReceiptThanks": "Thank you for your purchase!",
   "adminTitle": "Super Admin Panel",
   "adminNavRequests": "Requests",
   "adminNavPlans": "Plans",
@@ -722,7 +856,7 @@
   "adminPlanRequested": "Requested",
   "adminPlanCurrent": "Current",
   "productsCodeLabel": "Barcode (PLU)",
-  "productsCodeHint": "Code used by label scales (e.g. 12345)",
+  "productsCodeHint": "Label scale code (e.g. 12345)",
   "productsCodeError": "Invalid code: use up to 5 digits.",
   "productsWeighLabel": "Sell by weight (fraction)",
   "productsWeighHint": "Accepts decimal quantities (e.g. 1.75 kg)",

@@ -71,4 +71,21 @@ final class StockLotLocalDataSourceImpl implements StockLotLocalDataSource {
     }
     _lots[index] = _lots[index].copyWith(currentQuantity: newQuantity);
   }
+
+  @override
+  Future<void> increaseQuantity(
+    String lotId,
+    int quantity, {
+    required String storeId,
+  }) async {
+    final index = _lots.indexWhere(
+      (lot) => lot.id == lotId && lot.storeId == storeId,
+    );
+    if (index == -1) {
+      throw StateError('Lote $lotId não encontrado para atualização.');
+    }
+    _lots[index] = _lots[index].copyWith(
+      currentQuantity: _lots[index].currentQuantity + quantity,
+    );
+  }
 }

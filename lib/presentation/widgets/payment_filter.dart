@@ -29,8 +29,14 @@ extension PaymentMethodIcon on PaymentMethod {
 extension PaymentMethodAccent on PaymentMethod {
   Color accent(ThemeData theme) => switch (this) {
         PaymentMethod.cash => theme.income,
-        PaymentMethod.debitCard || PaymentMethod.creditCard =>
+        // Cartão: no escuro usa um VERDE VIVO dedicado (o primary do tema
+        // é verde-médio para o botão sólido — sobre o selo 22% do card o
+        // contraste do ícone cairia para 2.7:1; calibrado para ≥ 3:1).
+        PaymentMethod.debitCard || PaymentMethod.creditCard => AppColors.of(
+          theme.brightness,
+          const Color(0xFF4ADE80),
           theme.colorScheme.primary,
+        ),
         // Dinheiro móvel de Moçambique: M-Pesa em azul, E-Mola em violeta
         // (distintos entre si e dos demais métodos — escaneabilidade).
         PaymentMethod.mPesa => AppColors.of(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
-import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/quantity.dart';
@@ -15,9 +14,14 @@ import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/purchases_providers.dart';
 import '../../controllers/products_providers.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
+import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/payment_method_picker.dart';
 import '../../widgets/search_field.dart';
+import '../../widgets/smart_amount.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Carrinho de nova compra: fornecedor, produtos com steppers de quantidade
@@ -133,15 +137,13 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(product.name),
-        content: TextField(
+        content: AppTextField(
           controller: controller,
           autofocus: true,
+          label: l10n.salesQuantityLabel,
+          hintText: l10n.salesQuantityHint,
+          suffixText: product.unitLabel,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(
-            labelText: l10n.salesQuantityLabel,
-            hintText: l10n.salesQuantityHint,
-            suffixText: product.unitLabel,
-          ),
           onSubmitted: (value) => Navigator.of(context).pop(value),
         ),
         actions: [
@@ -149,9 +151,11 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.commonCancel),
           ),
-          FilledButton(
+          // AppButton (design system ultra-clean): altura 48, cantos 12,
+          // texto w400 — a confirmação segue o padrão dos diálogos.
+          AppButton.primary(
             onPressed: () => Navigator.of(context).pop(controller.text),
-            child: Text(l10n.commonConfirm),
+            label: l10n.commonConfirm,
           ),
         ],
       ),
@@ -292,18 +296,16 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
         children: [
           AppSheetHeader(title: l10n.purchasesAddNew),
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-            child: TextField(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+            child: AppTextField(
               controller: _supplierController,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.purchasesSupplierLabel,
-                prefixIcon: const Icon(Icons.local_shipping_outlined),
-              ),
+              label: l10n.purchasesSupplierLabel,
+              prefixIcon: Icons.local_shipping_outlined,
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
             child: SearchField(
               controller: _searchController,
               hintText: l10n.productsSearchHint,
@@ -320,9 +322,14 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                 ),
               ),
               data: (all) {
+                // Só produtos ATIVOS (desativado não pode ser reposto — o
+                // servidor também nega via lock_products_or_raise).
+                final active = all
+                    .where((product) => product.isActive)
+                    .toList();
                 final filtered = _query.isEmpty
-                    ? all
-                    : all
+                    ? active
+                    : active
                           .where(
                             (product) =>
                                 product.name.toLowerCase().contains(_query),
@@ -364,25 +371,21 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                 top: BorderSide(color: theme.colorScheme.outlineVariant),
               ),
             ),
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+            padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
+            // O rodapé é COMPACTO (alturas calibradas) para caber junto com
+            // o catálogo mesmo em sheets baixos/paisagem — o Expanded do
+            // catálogo é o que encolhe primeiro.
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Forma de pagamento do fornecedor (mesmo padrão de Vendas).
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final method in PaymentMethod.values)
-                      ChoiceChip(
-                        label: Text(method.labelFor(context.l10n)),
-                        selected: _paymentMethod == method,
-                        onSelected: (_) =>
-                            setState(() => _paymentMethod = method),
-                      ),
-                  ],
+                // Forma de pagamento do fornecedor — MESMO seletor do
+                // carrinho de Vendas (abas segmentadas + lista com radio).
+                PaymentMethodPicker(
+                  value: _paymentMethod,
+                  onChanged: (method) =>
+                      setState(() => _paymentMethod = method),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
@@ -393,25 +396,23 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                         ),
                       ),
                     ),
-                    // Total do carrinho em destaque (22) — FittedBox
+                    // Total do carrinho em destaque VERDE (22) — FittedBox
                     // defensivo: valores extremos ENCOLHEM para caber em vez
                     // de truncar/estourar o rodapé em telas estreitas.
+                    // SmartAmount: o valor encolhe para SEMPRE caber.
                     Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
+                      child: SmartAmount(
+                        cents: _totalCents,
                         alignment: Alignment.centerRight,
-                        child: Text(
-                          Formatters.currency(_totalCents),
-                          maxLines: 1,
-                          textAlign: TextAlign.end,
-                          style: theme.textTheme.titleLarge,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                     ),
                   ],
                 ),
                 if (_error != null) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     _error!,
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -419,8 +420,10 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 12),
-                FilledButton.icon(
+                const SizedBox(height: 8),
+                // AppButton ultra-clean: altura 48, cantos 12, texto w400.
+                AppButton.primary(
+                  label: l10n.purchasesConfirm,
                   onPressed: _cart.isEmpty || _isSubmitting ? null : _confirm,
                   icon: _isSubmitting
                       ? const SizedBox(
@@ -428,8 +431,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                           width: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.check),
-                  label: Text(l10n.purchasesConfirm),
+                      : const Icon(Icons.check, size: 20),
                 ),
               ],
             ),
@@ -471,10 +473,11 @@ class _CartProductRow extends StatelessWidget {
     final l10n = context.l10n;
     final isWeight = product.vendaPorFracao;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
+    // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat —
+    // linha do carrinho de compra segue o padrão dos demais cards.
+    return AppCard(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
           children: [
             Expanded(
               child: Column(
@@ -595,8 +598,7 @@ class _CartProductRow extends StatelessWidget {
                 ),
               ],
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

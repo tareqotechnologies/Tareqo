@@ -165,6 +165,9 @@ void main() {
       find.text('Empresa de Equipamentos Industriais Ltda'),
       findsOneWidget,
     );
+    // Âncora com o valor COMPLETO visível mesmo com escala 2.0 (o chip
+    // quebra em linhas em vez de truncar com '...').
+    expect(find.text('Fiado R\$ 9.999.999,99'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

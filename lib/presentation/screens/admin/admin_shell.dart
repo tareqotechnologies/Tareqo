@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../widgets/fade_indexed_stack.dart';
 import '../../widgets/sign_out_button.dart';
 import 'admin_plan_requests_screen.dart';
 import 'admin_plans_screen.dart';
@@ -42,7 +43,9 @@ class _AdminShellState extends State<AdminShell> {
       (Icons.upgrade_outlined, Icons.upgrade, l10n.adminNavUpgrades),
     ];
 
-    final body = IndexedStack(index: _index, children: _sections);
+    // Fase 3 — navegação híbrida: fade suave ao trocar de seção, com o
+    // estado preservado (IndexedStack interno do FadeIndexedStack).
+    final body = FadeIndexedStack(index: _index, children: _sections);
 
     return Scaffold(
       appBar: AppBar(

@@ -19,6 +19,20 @@ abstract interface class IProductRepository {
   /// Adiciona um novo produto ao repositório.
   Future<void> add(Product product);
 
+  /// Atualiza os campos EDITÁVEIS do catálogo de [product] (nome,
+  /// descrição, preços, código/PLU, venda por fração e status ativo).
+  ///
+  /// ⚠️ O estoque NÃO é alterado aqui: a mutação de quantidade passa
+  /// exclusivamente pelo [FifoStockUseCase] (que mantém a invariante
+  /// `product.stock = Σ lotes`). Chamar `update` com um `stockQuantity`
+  /// diferente é um no-op para o estoque — o valor persistido continua
+  /// sendo o da última operação de estoque.
+  ///
+  /// A atualização é escopada pela loja ([Product.storeId]): um produto de
+  /// outra loja não é alcançável. Lança [StateError] se o produto não
+  /// existir na loja.
+  Future<void> update(Product product);
+
   /// Define a quantidade em estoque do produto [id] da loja [storeId]
   /// (valor absoluto).
   ///

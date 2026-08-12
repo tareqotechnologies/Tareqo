@@ -16,6 +16,12 @@ _Sale _$SaleFromJson(Map<String, dynamic> json) => _Sale(
   totalAmountCents: (json['totalAmountCents'] as num).toInt(),
   paymentMethod: $enumDecode(_$PaymentMethodEnumMap, json['paymentMethod']),
   dateTime: DateTime.parse(json['dateTime'] as String),
+  status:
+      $enumDecodeNullable(_$SaleStatusEnumMap, json['status']) ??
+      SaleStatus.active,
+  cancelledAt: json['cancelledAt'] == null
+      ? null
+      : DateTime.parse(json['cancelledAt'] as String),
 );
 
 Map<String, dynamic> _$SaleToJson(_Sale instance) => <String, dynamic>{
@@ -26,6 +32,8 @@ Map<String, dynamic> _$SaleToJson(_Sale instance) => <String, dynamic>{
   'totalAmountCents': instance.totalAmountCents,
   'paymentMethod': _$PaymentMethodEnumMap[instance.paymentMethod]!,
   'dateTime': instance.dateTime.toIso8601String(),
+  'status': _$SaleStatusEnumMap[instance.status]!,
+  'cancelledAt': instance.cancelledAt?.toIso8601String(),
 };
 
 const _$PaymentMethodEnumMap = {
@@ -35,4 +43,9 @@ const _$PaymentMethodEnumMap = {
   PaymentMethod.mPesa: 'mPesa',
   PaymentMethod.eMola: 'eMola',
   PaymentMethod.transfer: 'transfer',
+};
+
+const _$SaleStatusEnumMap = {
+  SaleStatus.active: 'active',
+  SaleStatus.cancelled: 'cancelled',
 };

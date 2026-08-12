@@ -35,6 +35,25 @@ class _FakeProductRepository implements IProductRepository {
   }
 
   @override
+  Future<void> update(Product product) async {
+    final index = _products.indexWhere(
+      (p) => p.id == product.id && p.storeId == product.storeId,
+    );
+    final current = _products[index];
+    // Preserva o estoque (a mutação de quantidade passa pelo FIFO).
+    _products[index] = current.copyWith(
+      name: product.name,
+      description: product.description,
+      purchasePriceCents: product.purchasePriceCents,
+      salePriceCents: product.salePriceCents,
+      code: product.code,
+      vendaPorFracao: product.vendaPorFracao,
+      unitLabel: product.unitLabel,
+      isActive: product.isActive,
+    );
+  }
+
+  @override
   Future<void> updateStock(
     String id,
     int newQuantity, {

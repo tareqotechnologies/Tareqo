@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../core/i18n/l10n_ext.dart';
+import 'app_text_field.dart';
 
-/// Campo de busca minimalista (preenchido, arredondado, com lupa).
+/// Campo de busca minimalista do design system ultra-clean — construído
+/// sobre [AppTextField] (mesma borda sutil que acende no foco dos demais
+/// campos), com lupa e sem rótulo pesado.
 class SearchField extends StatelessWidget {
   const SearchField({
     super.key,
@@ -19,19 +22,12 @@ class SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return AppTextField(
       controller: controller,
       onChanged: onChanged,
+      hintText: hintText ?? context.l10n.commonSearch,
+      prefixIcon: Icons.search,
       textInputAction: TextInputAction.search,
-      decoration: InputDecoration(
-        hintText: hintText ?? context.l10n.commonSearch,
-        prefixIcon: const Icon(Icons.search),
-        // Sem borda: o tema já deixa o campo preenchido e arredondado.
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-      ),
     );
   }
 }

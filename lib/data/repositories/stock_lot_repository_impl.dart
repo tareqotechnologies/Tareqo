@@ -30,4 +30,12 @@ final class StockLotRepositoryImpl implements IStockLotRepository {
     required String storeId,
   }) =>
       _localDataSource.updateQuantity(lotId, newQuantity, storeId: storeId);
+
+  @override
+  Future<void> increaseQuantity(
+    String lotId,
+    int quantity, {
+    required String storeId,
+  }) =>
+      _localDataSource.increaseQuantity(lotId, quantity, storeId: storeId);
 }

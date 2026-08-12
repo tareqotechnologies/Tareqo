@@ -254,6 +254,66 @@ abstract class AppLocalizations {
   /// **'Não foi possível salvar os ajustes. Tente novamente.'**
   String get settingsGenericError;
 
+  /// No description provided for @settingsSupportSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Suporte'**
+  String get settingsSupportSection;
+
+  /// No description provided for @settingsSupportEntry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajuda e documentação'**
+  String get settingsSupportEntry;
+
+  /// No description provided for @settingsSupportEntryHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Guia do Usuário e Troubleshooting — leitura sem internet'**
+  String get settingsSupportEntryHint;
+
+  /// No description provided for @supportTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajuda'**
+  String get supportTitle;
+
+  /// No description provided for @supportSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo o que precisa para tirar o máximo do app: o guia completo do usuário e a resolução dos problemas mais comuns.'**
+  String get supportSubtitle;
+
+  /// No description provided for @supportUserGuide.
+  ///
+  /// In pt, this message translates to:
+  /// **'Guia do Usuário'**
+  String get supportUserGuide;
+
+  /// No description provided for @supportUserGuideHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manual simples e completo: login, lojas, produtos (com foto), vendas, fiado, financeiro, fecho de caixa, relatórios e FAQ'**
+  String get supportUserGuideHint;
+
+  /// No description provided for @supportTroubleshooting.
+  ///
+  /// In pt, this message translates to:
+  /// **'Troubleshooting'**
+  String get supportTroubleshooting;
+
+  /// No description provided for @supportTroubleshootingHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resolução de problemas comuns: login, fotos, vendas, estoque, caixa, conexão e mensagens de erro'**
+  String get supportTroubleshootingHint;
+
+  /// No description provided for @supportReadingError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível abrir o documento. Tente novamente.'**
+  String get supportReadingError;
+
   /// No description provided for @commonSearch.
   ///
   /// In pt, this message translates to:
@@ -278,11 +338,17 @@ abstract class AppLocalizations {
   /// **'Fechar'**
   String get appSheetClose;
 
-  /// No description provided for @storeSelectorActiveTooltip.
+  /// No description provided for @storeSelectorSectionTitle.
   ///
   /// In pt, this message translates to:
   /// **'Loja ativa'**
-  String get storeSelectorActiveTooltip;
+  String get storeSelectorSectionTitle;
+
+  /// No description provided for @storeSelectorSectionHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha a loja cujos dados aparecem nos módulos (vendas, estoque, financeiro).'**
+  String get storeSelectorSectionHint;
 
   /// No description provided for @tenantPendingTitle.
   ///
@@ -1196,6 +1262,12 @@ abstract class AppLocalizations {
   /// **'Buscar compra...'**
   String get purchasesSearchHint;
 
+  /// No description provided for @productsFilterTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Filtrar produtos'**
+  String get productsFilterTooltip;
+
   /// No description provided for @productsSearchHint.
   ///
   /// In pt, this message translates to:
@@ -1237,6 +1309,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Produto adicionado!'**
   String get productsAdded;
+
+  /// No description provided for @productsAddedNoPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto adicionado! (foto não enviada — sem permissão de armazenamento)'**
+  String get productsAddedNoPhoto;
 
   /// No description provided for @productsAddError.
   ///
@@ -1297,6 +1375,108 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Adicionar produto'**
   String get productsAddSubmit;
+
+  /// No description provided for @productsEditTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar produto'**
+  String get productsEditTitle;
+
+  /// No description provided for @productsEditSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar alterações'**
+  String get productsEditSubmit;
+
+  /// No description provided for @productsEditSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto atualizado!'**
+  String get productsEditSaved;
+
+  /// No description provided for @productsEditSavedNoPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto atualizado! (foto não enviada — sem permissão de armazenamento)'**
+  String get productsEditSavedNoPhoto;
+
+  /// No description provided for @productsEditError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível atualizar o produto. Tente novamente.'**
+  String get productsEditError;
+
+  /// No description provided for @productsPhotoLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto do produto'**
+  String get productsPhotoLabel;
+
+  /// No description provided for @productsPhotoTake.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar foto'**
+  String get productsPhotoTake;
+
+  /// No description provided for @productsPhotoGallery.
+  ///
+  /// In pt, this message translates to:
+  /// **'Da galeria'**
+  String get productsPhotoGallery;
+
+  /// No description provided for @productsPhotoRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover foto'**
+  String get productsPhotoRemove;
+
+  /// No description provided for @productsInactive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inativo'**
+  String get productsInactive;
+
+  /// No description provided for @productsActiveLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto ativo'**
+  String get productsActiveLabel;
+
+  /// No description provided for @productsActiveHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desative para tirar o produto do PDV e das compras (o estoque é preservado).'**
+  String get productsActiveHint;
+
+  /// No description provided for @productsStockAdjustHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajuste manual: define o estoque exato, criando/consumindo lotes FIFO.'**
+  String get productsStockAdjustHint;
+
+  /// No description provided for @productsSectionInfo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações'**
+  String get productsSectionInfo;
+
+  /// No description provided for @productsSectionPricing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preços'**
+  String get productsSectionPricing;
+
+  /// No description provided for @productsSectionStock.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque'**
+  String get productsSectionStock;
+
+  /// No description provided for @productsSectionStatus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Status'**
+  String get productsSectionStatus;
 
   /// No description provided for @customersSearchHint.
   ///
@@ -1556,6 +1736,108 @@ abstract class AppLocalizations {
   /// **'{amount} vendidos'**
   String reportsRevenueLabel(String amount);
 
+  /// No description provided for @reportsExport.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar'**
+  String get reportsExport;
+
+  /// No description provided for @reportsExportCsv.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar CSV'**
+  String get reportsExportCsv;
+
+  /// No description provided for @reportsExportPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar PDF'**
+  String get reportsExportPdf;
+
+  /// No description provided for @reportsExportDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatório exportado!'**
+  String get reportsExportDone;
+
+  /// No description provided for @reportsExportError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível exportar o relatório. Tente novamente.'**
+  String get reportsExportError;
+
+  /// No description provided for @reportsExportTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatório de vendas'**
+  String get reportsExportTitle;
+
+  /// No description provided for @reportsExportFileName.
+  ///
+  /// In pt, this message translates to:
+  /// **'relatorio_vendas'**
+  String get reportsExportFileName;
+
+  /// No description provided for @reportsExportStore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Loja'**
+  String get reportsExportStore;
+
+  /// No description provided for @reportsExportPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Período'**
+  String get reportsExportPeriod;
+
+  /// No description provided for @reportsExportGeneratedAt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerado em'**
+  String get reportsExportGeneratedAt;
+
+  /// No description provided for @reportsExportSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo'**
+  String get reportsExportSummary;
+
+  /// No description provided for @reportsExportRank.
+  ///
+  /// In pt, this message translates to:
+  /// **'Posição'**
+  String get reportsExportRank;
+
+  /// No description provided for @reportsExportProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto'**
+  String get reportsExportProduct;
+
+  /// No description provided for @reportsExportQuantity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantidade'**
+  String get reportsExportQuantity;
+
+  /// No description provided for @reportsExportRevenue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receita'**
+  String get reportsExportRevenue;
+
+  /// No description provided for @reportsExportDay.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dia'**
+  String get reportsExportDay;
+
+  /// No description provided for @reportsExportTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total'**
+  String get reportsExportTotal;
+
   /// No description provided for @financialTitle.
   ///
   /// In pt, this message translates to:
@@ -1640,6 +1922,36 @@ abstract class AppLocalizations {
   /// **'Não foi possível receber a pendência. Tente novamente.'**
   String get financialReceiveError;
 
+  /// No description provided for @financialPay.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagar'**
+  String get financialPay;
+
+  /// No description provided for @financialPayPendingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagar pendência?'**
+  String get financialPayPendingTitle;
+
+  /// No description provided for @financialPayPendingBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar o pagamento de {amount}? A movimentação passa a contar no caixa realizado.'**
+  String financialPayPendingBody(String amount);
+
+  /// No description provided for @financialPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saída paga!'**
+  String get financialPaid;
+
+  /// No description provided for @financialPayError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível pagar a pendência. Tente novamente.'**
+  String get financialPayError;
+
   /// No description provided for @financialAddTitle.
   ///
   /// In pt, this message translates to:
@@ -1723,6 +2035,138 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Despesas'**
   String get financialDefaultCategoryExpense;
+
+  /// No description provided for @cashClosingAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fecho de caixa'**
+  String get cashClosingAction;
+
+  /// No description provided for @cashClosingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fecho de caixa do dia'**
+  String get cashClosingTitle;
+
+  /// No description provided for @cashClosingDaySummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo do dia'**
+  String get cashClosingDaySummary;
+
+  /// No description provided for @cashClosingTotalSales.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vendas do dia'**
+  String get cashClosingTotalSales;
+
+  /// No description provided for @cashClosingExpectedCash.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperado na gaveta'**
+  String get cashClosingExpectedCash;
+
+  /// No description provided for @cashClosingExpectedCashHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só vendas em dinheiro — cartão, M-Pesa, E-Mola e transferência não passam pela gaveta física.'**
+  String get cashClosingExpectedCashHint;
+
+  /// No description provided for @cashClosingByMethod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por forma de pagamento'**
+  String get cashClosingByMethod;
+
+  /// No description provided for @cashClosingCountedCash.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dinheiro contado'**
+  String get cashClosingCountedCash;
+
+  /// No description provided for @cashClosingCountedCashHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conte o dinheiro físico da gaveta e informe aqui.'**
+  String get cashClosingCountedCashHint;
+
+  /// No description provided for @cashClosingDifference.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diferença'**
+  String get cashClosingDifference;
+
+  /// No description provided for @cashClosingConfers.
+  ///
+  /// In pt, this message translates to:
+  /// **'Caixa confere'**
+  String get cashClosingConfers;
+
+  /// No description provided for @cashClosingSurplus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sobra de {amount}'**
+  String cashClosingSurplus(String amount);
+
+  /// No description provided for @cashClosingShortage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta de {amount}'**
+  String cashClosingShortage(String amount);
+
+  /// No description provided for @cashClosingConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar fecho'**
+  String get cashClosingConfirm;
+
+  /// No description provided for @cashClosingUpdate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atualizar fecho'**
+  String get cashClosingUpdate;
+
+  /// No description provided for @cashClosingClosedAt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fechado em'**
+  String get cashClosingClosedAt;
+
+  /// No description provided for @cashClosingSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Caixa fechado!'**
+  String get cashClosingSuccess;
+
+  /// No description provided for @cashClosingUpdated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fecho atualizado!'**
+  String get cashClosingUpdated;
+
+  /// No description provided for @cashClosingError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível fechar o caixa. Tente novamente.'**
+  String get cashClosingError;
+
+  /// No description provided for @cashClosingEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma venda registrada neste dia.'**
+  String get cashClosingEmpty;
+
+  /// No description provided for @cashClosingHistory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico de fechos'**
+  String get cashClosingHistory;
+
+  /// No description provided for @cashClosingHistoryEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum fecho registrado ainda.'**
+  String get cashClosingHistoryEmpty;
 
   /// No description provided for @debtsTitle.
   ///
@@ -2036,6 +2480,12 @@ abstract class AppLocalizations {
   /// **'Limpar filtros'**
   String get salesClearFilters;
 
+  /// Linha-resumo quando há filtro ativo na lista de vendas
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 venda} other{{count} vendas}} · Total {total}'**
+  String salesFilteredSummary(int count, String total);
+
   /// No description provided for @salesItemUnavailable.
   ///
   /// In pt, this message translates to:
@@ -2131,6 +2581,120 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Preços congelados no momento da venda.'**
   String get saleDetailSnapshot;
+
+  /// No description provided for @salesStatusCancelled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anulada'**
+  String get salesStatusCancelled;
+
+  /// No description provided for @saleDetailCancelAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anular venda'**
+  String get saleDetailCancelAction;
+
+  /// No description provided for @saleDetailCancelConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anular esta venda?'**
+  String get saleDetailCancelConfirmTitle;
+
+  /// Confirmação de anulação de venda — avisa que estoque e caixa serão estornados
+  ///
+  /// In pt, this message translates to:
+  /// **'O estoque dos itens será devolvido e a entrada no caixa estornada ({amount}). Esta ação não pode ser desfeita.'**
+  String saleDetailCancelConfirmBody(String amount);
+
+  /// No description provided for @saleDetailCancelConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, anular'**
+  String get saleDetailCancelConfirm;
+
+  /// No description provided for @saleDetailCancelledAt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anulada em'**
+  String get saleDetailCancelledAt;
+
+  /// No description provided for @saleCancelledSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Venda anulada.'**
+  String get saleCancelledSuccess;
+
+  /// No description provided for @saleNotFoundError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta venda não existe mais.'**
+  String get saleNotFoundError;
+
+  /// No description provided for @saleCancelError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível anular a venda. Tente novamente.'**
+  String get saleCancelError;
+
+  /// No description provided for @saleDetailShareAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Partilhar recibo'**
+  String get saleDetailShareAction;
+
+  /// No description provided for @saleDetailShareTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Partilhar recibo'**
+  String get saleDetailShareTitle;
+
+  /// No description provided for @saleDetailShareImage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Partilhar como imagem'**
+  String get saleDetailShareImage;
+
+  /// No description provided for @saleDetailShareWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'WhatsApp'**
+  String get saleDetailShareWhatsApp;
+
+  /// No description provided for @saleDetailShareError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível partilhar o recibo. Tente novamente.'**
+  String get saleDetailShareError;
+
+  /// No description provided for @saleDetailShareWhatsAppError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível abrir o WhatsApp. Tente novamente.'**
+  String get saleDetailShareWhatsAppError;
+
+  /// No description provided for @saleDetailReceiptTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'RECIBO DE VENDA'**
+  String get saleDetailReceiptTitle;
+
+  /// No description provided for @saleDetailReceiptTitleCancelled.
+  ///
+  /// In pt, this message translates to:
+  /// **'RECIBO DE VENDA (ANULADA)'**
+  String get saleDetailReceiptTitleCancelled;
+
+  /// No description provided for @saleDetailReceiptPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento'**
+  String get saleDetailReceiptPayment;
+
+  /// No description provided for @saleDetailReceiptThanks.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado pela preferência!'**
+  String get saleDetailReceiptThanks;
 
   /// No description provided for @adminTitle.
   ///
@@ -2477,7 +3041,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsCodeHint.
   ///
   /// In pt, this message translates to:
-  /// **'Código usado pelas balanças etiquetadoras (ex.: 12345)'**
+  /// **'Balanças etiquetadoras (ex.: 12345)'**
   String get productsCodeHint;
 
   /// No description provided for @productsCodeError.

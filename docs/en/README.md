@@ -4,7 +4,7 @@ Welcome to the complete documentation of **Dumbhanengue ERP** — a business man
 
 > 🌐 **Language:** This is the English version. The Portuguese documentation lives in ([`docs/pt/`](../pt/README.md)).
 >
-> 📌 **Audit docs:** the production-readiness audit reports ([`docs/pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md)) and the live checklist ([`docs/pt/PRODUCTION_CHECKLIST.md`](../pt/PRODUCTION_CHECKLIST.md)) are maintained in Portuguese (the project's primary language) and are the authoritative source for audit status. An English summary of the latest audit status (Update 6 + pending production items) is available in [15-audit-status.md](15-audit-status.md), the W4 + H2 live migration runbook in [16-migracao-w4-h2.md](16-migracao-w4-h2.md), the W11 live migration runbook (FIFO lots + scale/weight sales) in [18-migracao-w11.md](18-migracao-w11.md), and the production readiness checklist in [17-production-checklist.md](17-production-checklist.md). The English chapters were synced with the Aug 5/6 changes (flavors, store-scoped RLS, DB-backed super admin, atomic RPCs, secure session storage, CI/CD, W4/H2/W10, SQL consolidation) — the Portuguese docs remain the primary reference.
+> 📌 **Audit docs:** the production-readiness audit reports ([`docs/pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md)) and the live checklist ([`docs/pt/PRODUCTION_CHECKLIST.md`](../pt/PRODUCTION_CHECKLIST.md)) are maintained in Portuguese (the project's primary language) and are the authoritative source for audit status. An English summary of the latest audit status (Update 6 + pending production items) is available in [15-audit-status.md](15-audit-status.md), the W4 + H2 live migration runbook in [16-migracao-w4-h2.md](16-migracao-w4-h2.md), the W11 live migration runbook (FIFO lots + scale/weight sales) in [18-migracao-w11.md](18-migracao-w11.md), the daily cash closing runbook (Part 25, Z-report) in [19-migracao-cash-closing.md](19-migracao-cash-closing.md), and the production readiness checklist in [17-production-checklist.md](17-production-checklist.md). The English chapters were synced with the Aug 5/6 changes (flavors, store-scoped RLS, DB-backed super admin, atomic RPCs, secure session storage, CI/CD, W4/H2/W10, SQL consolidation) — the Portuguese docs remain the primary reference.
 
 This folder gathers every document about the app: from what it does to how each layer works, with code examples, diagrams and practical guides for developers.
 
@@ -32,12 +32,24 @@ This folder gathers every document about the app: from what it does to how each 
 | 16 | [W4 + H2 live migration runbook](16-migracao-w4-h2.md) | Step-by-step runbook to apply `supabase/upgrade.sql` to the production project (backup, pre-flight, apply, verify, rollback) |
 | 17 | [Production readiness checklist](17-production-checklist.md) | English mirror of the production checklist: data integrity, security, architecture, performance, testing, ops, dependencies and docs status |
 | 18 | [W11 live migration runbook](18-migracao-w11.md) | Step-by-step runbook for Part 22 (FIFO lots + expiry + scale/weight sales): millesimals, lot backfill, post-migration verification and the publish window |
+| 19 | [Daily cash closing migration runbook](19-migracao-cash-closing.md) | Step-by-step runbook for Part 25 (Z-report): `cash_closings` table + `close_cash_register` RPC (server-side calculation + manager guard), post-migration verification (checks 32–34) and publishing |
+
+---
+
+## For end users
+
+| Document | What it is |
+| -------- | ---------- |
+| [User Guide](USER_GUIDE.md) | Simple and complete app manual: sign-in, stores (active store), products (with photos), sales, purchases, credit, finances, cash closing, reports and **FAQ** |
+| [Troubleshooting](TROUBLESHOOTING.md) | Solving common problems: sign-in and account, photos, sales, stock, cash, connection, common error messages and when to contact support |
+| **PDF versions (printable)** | [User Guide PDF](pdf/en/USER_GUIDE.pdf) · [Troubleshooting PDF](pdf/en/TROUBLESHOOTING.pdf) — with cover and table of contents, ready to hand out / print |
 
 ---
 
 ## Start here
 
 - **New to the app?** → [Overview](01-overview.md)
+- **Are you an end user (owner/manager/employee)?** → [User Guide](USER_GUIDE.md) · [Troubleshooting](TROUBLESHOOTING.md)
 - **Want to understand how the code is organized?** → [Architecture](02-architecture.md)
 - **Want to run the project and work on the code?** → [Developer guide](10-developer-guide.md)
 

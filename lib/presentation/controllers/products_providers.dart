@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
 import '../../domain/entities/product.dart';
+import '../../domain/repositories/i_product_image_store.dart';
 import '../../domain/usecases/add_product_use_case.dart';
 import '../../domain/usecases/get_products_use_case.dart';
+import '../../domain/usecases/update_product_use_case.dart';
 import 'account_providers.dart';
 import 'auth_providers.dart';
 
@@ -16,6 +18,18 @@ final getProductsUseCaseProvider = Provider<GetProductsUseCase>(
 
 final addProductUseCaseProvider = Provider<AddProductUseCase>(
   (ref) => ServiceLocator.instance<AddProductUseCase>(),
+);
+
+final updateProductUseCaseProvider = Provider<UpdateProductUseCase>(
+  (ref) => ServiceLocator.instance<UpdateProductUseCase>(),
+);
+
+/// Ponte para o armazenamento de FOTOS de produto (Supabase Storage no
+/// SaaS, arquivo local no SQLite, no-op na memória/web). As sheets de
+/// Novo/Editar produto usam este provider para subir a foto antes de
+/// persistir o produto — substituível em testes via `overrideWithValue`.
+final productImageStoreProvider = Provider<IProductImageStore>(
+  (ref) => ServiceLocator.instance<IProductImageStore>(),
 );
 
 /// Estado da lista de produtos.
