@@ -144,3 +144,9 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/branding/icon_fg.png"
   adaptive_icon_monochrome: "assets/branding/icon_mono.png"
   remove_alpha_ios: true
+  # Windows desktop: gera o app_icon.ico (multi-tamanho) com o ícone oficial
+  # completo (fundo branco + sacola azul + D) — mesmo desenho do Android/iOS.
+  windows:
+    generate: true
+    image_path: "assets/branding/icon_legacy.png"
+    icon_size: 256
