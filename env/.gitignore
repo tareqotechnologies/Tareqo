@@ -1,0 +1,6 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+*
+# O env/dev.env é commitado de propósito (apenas valores públicos do
+# Supabase — URL + anon key; a segurança vem do RLS). Os restantes
+# (prod.env, db.env) continuam ignorados.
+!dev.env
