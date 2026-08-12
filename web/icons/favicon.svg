@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- userSpaceOnUse: a rampa cobre o CANVAS INTEIRO (0–1024), tal como
+         no PNG oficial (o gradiente de redesign_icon.py é desenhado por
+         linha em todo o canvas e só depois recortado pela sacola). -->
+    <linearGradient id="bag" x1="0" y1="0" x2="0" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#54AFFF"/>
+      <stop offset="1" stop-color="#1A48B0"/>
+    </linearGradient>
+    <clipPath id="bodyClip"><rect x="270" y="320" width="484" height="510" rx="96"/></clipPath>
+    <clipPath id="upperHalf"><rect x="0" y="0" width="1024" height="320"/></clipPath>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="1024" height="1024" fill="#FFFFFF"/>
+  <ellipse cx="512" cy="870" rx="212" ry="32" fill="#1E3A6C" opacity="0.10" filter="url(#soft)"/>
+  <g clip-path="url(#upperHalf)" fill="none" stroke="#2E70D4" stroke-width="48">
+    <path d="M 336 320 A 76 76 0 0 1 488 320"/><path d="M 536 320 A 76 76 0 0 1 688 320"/>
+  </g>
+  <ellipse cx="412" cy="322" rx="12" ry="12" fill="#1E4696"/><ellipse cx="612" cy="322" rx="12" ry="12" fill="#1E4696"/>
+  <rect x="270" y="320" width="484" height="510" rx="96" fill="url(#bag)"/>
+  <rect x="270" y="320" width="484" height="150" rx="60" fill="#FFFFFF" opacity="0.24" clip-path="url(#bodyClip)"/>
+  <path d="M645 0H285V168H633Q815 168 934.5 237.5Q1054 307 1113.0 437.0Q1172 567 1172 748Q1172 927 1113.5 1055.5Q1055 1184 939.5 1253.0Q824 1322 651 1322H277V1490H664Q882 1490 1036.5 1401.0Q1191 1312 1273.5 1145.5Q1356 979 1356 748Q1356 515 1273.0 347.5Q1190 180 1031.0 90.0Q872 0 645 0ZM370 1490V0H180V1490Z" fill="#FFFFFF" transform="translate(516 578) scale(0.159864 -0.160403) translate(-768.000000 -745.000000)"/>
+</svg>
