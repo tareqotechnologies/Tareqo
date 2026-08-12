@@ -44,15 +44,18 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # Todos os plugins iOS são Swift Packages (SPM). A integração CocoaPods
-      # legada fica fora de sincronia em runners limpos ("The sandbox is not
-      # in sync with the Podfile.lock"); remove-se a integração e o Flutter
-      # resolve tudo via SPM (recomendação do próprio Flutter no log de build).
+      # Todos os plugins iOS são Swift Packages (SPM) — o projeto foi migrado
+      # para Swift Package Manager puro (Podfile removido do repo). Manter a
+      # integração CocoaPods legada em runners limpos causa o erro "The
+      # sandbox is not in sync with the Podfile.lock" (o Flutter recria o
+      # Podfile e o check de sandbox falha). Garante-se o SPM explícito e
+      # remove-se qualquer resquício local de CocoaPods.
       - name: Remove legacy CocoaPods integration (SPM)
         run: |
+          flutter config --enable-swift-package-manager
           cd ios
-          pod deintegrate 2>/dev/null || true
-          rm -rf Pods Podfile.lock .symlinks
+          rm -f Podfile Podfile.lock
+          rm -rf Pods .symlinks
 
       - name: Build IPA (no codesign)
         run: flutter build ipa --release --no-codesign --dart-define=APP_FLAVOR=prod --obfuscate --split-debug-info=build/symbols
