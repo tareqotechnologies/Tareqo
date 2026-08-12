@@ -71,7 +71,7 @@ jobs:
             echo "IPA gerado pelo flutter: $(ls build/ios/ipa/*.ipa)"
           else
             echo "Sem IPA do flutter — empacotando Runner.app como IPA (Payload)"
-            APP=$(find build/ios -maxdepth 4 -type d -name Runner.app | head -1)
+            APP=$(find build/ios -type d -name Runner.app | head -1)
             [ -n "$APP" ] || { echo "Runner.app não encontrado"; exit 1; }
             APPDIR=$(dirname "$APP")
             mkdir -p build/ios/ipa
