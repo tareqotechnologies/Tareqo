@@ -108,10 +108,11 @@ flutter:
   # Garante que a fonte de ícones Material esteja incluída no aplicativo.
   uses-material-design: true
 
-  # Logotipo oficial da marca (azul/branco, v5) — usada pela tela de
+  # Logotipo oficial da marca (azul/branco) — usada pela tela de
   # abertura in-app (_SplashScreen do AuthGate). Gerada por
   # tool/generate_icons_test.dart a partir de assets/branding/icon_official.png
-  # (que por sua vez é gerado por tool/redesign_icon.py).
+  # (que por sua vez é gerado por tool/apply_official_icon.py a partir do
+  # anexo oficial do utilizador).
   assets:
     - assets/branding/splash_logo.png
     # Guias de suporte embutidos (ecrã Ajuda — Lojas → Ajustes → Suporte):
@@ -130,9 +131,10 @@ flutter:
         - asset: assets/fonts/Inter-Variable.ttf
 
 # Ícones nativos (W7) — gerados por tool/generate_icons_test.dart a partir
-# da imagem-fonte assets/branding/icon_official.png (design OFICIAL v5
-# azul/branco, desenhado por tool/redesign_icon.py). Correr:
-#   python tool/redesign_icon.py
+# da imagem-fonte assets/branding/icon_official.png (design OFICIAL do
+# utilizador: quadrado azul arredondado + arco + "D" branco + ponto azul,
+# aplicado por tool/apply_official_icon.py). Correr:
+#   python tool/apply_official_icon.py
 #   flutter test tool/generate_icons_test.dart && dart run flutter_launcher_icons
 flutter_launcher_icons:
   android: true

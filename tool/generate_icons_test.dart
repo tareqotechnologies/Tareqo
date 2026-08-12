@@ -6,36 +6,36 @@
 //   dart run flutter_launcher_icons        # gera os ícones nativos
 //
 // Processa a IMAGEM-FONTE `assets/branding/icon_official.png`
-// (1024×1024, design OFICIAL v5: fundo branco + sacola azul 3D com
-// gradiente (azul-céu → índigo), letra "D" branca no centro — desenhada
-// com a fonte Inter do app — alças em anel com ilhós, gloss e sombra
-// suave) e grava os PNGs que alimentam o flutter_launcher_icons
-// (Android/iOS) e o web (manifest + favicon).
+// (1024×1024, design OFICIAL do utilizador: fundo branco + quadrado azul
+// arredondado com gradiente (azul-céu → azul pálido), arco no topo, "D"
+// branco recortado (haste + bojo) e ponto azul ao centro) e grava os PNGs
+// que alimentam o flutter_launcher_icons (Android/iOS) e o web (manifest
+// + favicon).
 //
-// ⚠️ O MESTRE é GERADO por script (nível Apple, supersample 4x):
-//   python tool/redesign_icon.py
-//   python tool/icon_preview.py   # contact sheet para revisão visual
+// ⚠️ O MESTRE é GERADO a partir do anexo do utilizador (fiel, escala
+// uniforme + key do fundo branco por inundação):
+//   python tool/apply_official_icon.py   # mestre 1024 + favicon SVG
+//   python tool/icon_preview.py          # contact sheet para revisão visual
 //
-// DESIGN (v5 — sacola premium + "D" em Inter):
-//   - A fonte JÁ É o ícone completo (fundo branco + sacola azul), sem
+// DESIGN (oficial — anexo do utilizador):
+//   - A fonte JÁ É o ícone completo (fundo branco + desenho azul), sem
 //     tile separado — os ícones legacy/iOS/web usam a imagem inteira;
 //   - icon_legacy.png: a imagem inteira (1024, opaca) — Android <8, iOS e web;
-//   - icon_fg.png: a SACOLA em ~92% do canvas transparente — o fundo
-//     (branco + sombra) sai por INUNDAÇÃO a partir das bordas, preservando
-//     o "D" branco e os ilhós (brancos ENCERRADOS pela sacola). Foreground
-//     do adaptativo sobre o fundo branco `adaptive_icon_background`;
-//   - icon_mono.png: silhueta MONOCROMÁTICA da sacola (luminância > 60 —
-//     do azul-céu ao índigo; o fundo já saiu no key) — themed icons do
+//   - icon_fg.png: o DESENHO em ~92% do canvas transparente — o fundo
+//     (branco) sai por INUNDAÇÃO a partir das bordas, preservando o "D"
+//     branco e o interior do arco (brancos ENCERRADOS pelo azul).
+//     Foreground do adaptativo sobre o fundo branco `adaptive_icon_background`;
+//   - icon_mono.png: silhueta MONOCROMÁTICA do desenho (luminância > 60 —
+//     todo o azul do corpo; o fundo já saiu no key) — themed icons do
 //     Android 13+ (só o alpha conta);
-//   - splash_logo.png: a sacola em ~88% do canvas transparente — marca do
+//   - splash_logo.png: o desenho em ~88% do canvas transparente — marca do
 //     SPLASH (tela in-app + web);
 //   - launch_image.png (Android, drawable-nodpi) e LaunchImage 1x/2x/3x
 //     (iOS) — o logotipo para as telas de abertura NATIVAS;
 //   - Web: favicon + manifest a partir da imagem inteira.
 //
-// Key do fundo: o branco (e o cinza da sombra) da fonte vira transparente
-// nos recortes (fg/splash/launch); o azul do logotipo (saturação alta)
-// sobrevive sempre. Medido no .ico oficial (Aug 8).
+// Key do fundo: o branco da fonte vira transparente nos recortes
+// (fg/splash/launch); o azul do desenho (saturação alta) sobrevive sempre.
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -48,10 +48,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// azul/branco, upscaled a partir do `dumbhanengue.ico`).
 const _sourcePath = 'assets/branding/icon_official.png';
 
-/// Fração do canvas ocupada pelo logotipo no foreground adaptativo.
-/// O logo JÁ ocupa ~66% da fonte; desenhá-lo a 92% do canvas devolve o
-/// tamanho "normal" do .ico (logo ~61% do canvas — cabe na safe zone de
-/// 66% com folga nas laterais; a máscara do launcher corta só os cantos).
+/// Fração do canvas ocupada pelo desenho no foreground adaptativo.
+/// O desenho JÁ ocupa ~76%×91% da fonte; desenhá-lo a 92% do canvas deixa
+/// o logotipo com o tamanho "normal" do ícone (a máscara do launcher corta
+/// só os cantos do quadrado azul).
 const _logoCanvasFraction = 0.92;
 
 /// Frações do canvas nos outros recortes (splash, launch, LaunchImage).
@@ -59,18 +59,16 @@ const _splashLogoFraction = 0.88;
 const _androidLaunchFraction = 0.95;
 const _iosLaunchFraction = 1.0;
 
-/// Limiar de luminância (0-255) que separa a sacola azul do fundo
-/// transparente nos themed icons do Android 13+. A sacola (v4.2) vai do
-/// azul-céu (lum ~240) ao índigo escuro (lum ~74); 60 captura tudo e
+/// Limiar de luminância (0-255) que separa o desenho azul do fundo
+/// transparente nos themed icons do Android 13+. O desenho vai do
+/// azul-céu (lum ~240) ao azul pálido (lum ~200); 60 captura tudo e
 /// deixa o fundo (0) de fora.
 const _monoLuminanceThreshold = 60;
 
-/// Limiar de key do fundo: pixel claro com pouca saturação (branco/cinza)
-/// vira transparente — o azul do logotipo tem saturação alta e sobrevive.
-/// (Saturação 30 preserva TODOS os tons do logo, inclusive os azul-claros
-/// do desenho da sacola — um key mais agressivo (60) comia essas partes e
-/// encolhia o logo. A "borda interna" que o usuário via era a margem
-/// branca do logo pequeno, resolvida pelos novos tamanhos acima.)
+/// Limiar de key do fundo: pixel claro com pouca saturação (branco)
+/// vira transparente — o azul do desenho tem saturação alta e sobrevive.
+/// (Saturação 30 preserva TODOS os tons do azul, inclusive os azul-claros
+/// do gradiente do corpo — um key mais agressivo (60) comia essas partes.)
 const _keyMinChannel = 200;
 const _keyMaxSaturation = 30;
 
@@ -108,11 +106,10 @@ Future<ui.Image> _drawImage(
 }
 
 /// Remove o fundo da imagem por INUNDAÇÃO a partir das bordas: os pixels
-/// claros (branco/cinza de baixa saturação) CONECTADOS à borda do canvas
-/// viram transparentes (RGB zerado). Os brancos ENCERRADOS pelo logotipo —
-/// a letra "D" e os ilhós das alças (design v4.2) — são preservados, pois a
-/// inundação nunca os alcança. A sombra cinza sob a sacola (conectada ao
-/// fundo) também sai. Usado nos recortes (fg/splash/launch).
+/// claros (branco de baixa saturação) CONECTADOS à borda do canvas
+/// viram transparentes (RGB zerado). Os brancos ENCERRADOS pelo desenho —
+/// o "D" e o interior do arco — são preservados, pois a inundação nunca
+/// os alcança. Usado nos recortes (fg/splash/launch).
 Future<ui.Image> _keyOutBackground(ui.Image image) async {
   final raw = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
   final pixels = raw!.buffer.asUint8List();
