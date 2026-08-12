@@ -6,16 +6,17 @@
 //   dart run flutter_launcher_icons        # gera os ícones nativos
 //
 // Processa a IMAGEM-FONTE `assets/branding/icon_official.png`
-// (1024×1024, design OFICIAL v4.2: fundo branco + sacola azul 3D com
-// gradiente (azul-céu → índigo), letra "D" branca no centro, alças com
-// ilhós e sombra cinza suave — PNG enviado pelo usuário, redimensionado
-// de 1920 para 1024) e grava os PNGs que alimentam o flutter_launcher_icons
+// (1024×1024, design OFICIAL v5: fundo branco + sacola azul 3D com
+// gradiente (azul-céu → índigo), letra "D" branca no centro — desenhada
+// com a fonte Inter do app — alças em anel com ilhós, gloss e sombra
+// suave) e grava os PNGs que alimentam o flutter_launcher_icons
 // (Android/iOS) e o web (manifest + favicon).
 //
-// ⚠️ REGENERAR O MESTRE (imagem-fonte fora do repo, no Downloads):
-//   python -c "from PIL import Image; Image.open(r'<caminho>/<arquivo>.png').convert('RGBA').resize((1024,1024), Image.LANCZOS).save('assets/branding/icon_official.png')"
+// ⚠️ O MESTRE é GERADO por script (nível Apple, supersample 4x):
+//   python tool/redesign_icon.py
+//   python tool/icon_preview.py   # contact sheet para revisão visual
 //
-// DESIGN (v4.2 — sacola azul 3D + "D" branco, Aug 8):
+// DESIGN (v5 — sacola premium + "D" em Inter):
 //   - A fonte JÁ É o ícone completo (fundo branco + sacola azul), sem
 //     tile separado — os ícones legacy/iOS/web usam a imagem inteira;
 //   - icon_legacy.png: a imagem inteira (1024, opaca) — Android <8, iOS e web;

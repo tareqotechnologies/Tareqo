@@ -126,19 +126,19 @@ class _PrimaryTab extends StatelessWidget {
                     : theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 3),
-              // FittedBox: rótulos ('Cartão de débito') encolhem em telas
-              // estreitas sem quebrar a linha segmentada.
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: selected
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurfaceVariant,
-                  ),
+              // Quebra em até 2 linhas centralizadas em vez de encolher
+              // (FittedBox deixava 'Cartão de débito' ilegível em telas
+              // estreitas) — a aba cresce verticalmente, o texto é completo.
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  height: 1.25,
+                  color: selected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -196,7 +196,8 @@ class _SecondaryTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  maxLines: 1,
+                  // Quebra em até 2 linhas — o nome do método nunca é cortado.
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,

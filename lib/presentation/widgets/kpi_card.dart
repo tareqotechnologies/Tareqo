@@ -82,9 +82,11 @@ class KpiCard extends StatelessWidget {
             const SizedBox(height: 14),
             _Value(loading: loading, value: value, amountCents: amountCents),
             const SizedBox(height: 4),
+            // Rótulo do KPI SEM truncamento: quebra em até 2 linhas quando
+            // o espaço aperta (escala de texto alta / tela estreita).
             Text(
               label,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
@@ -106,10 +108,11 @@ class KpiCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       caption!,
-                      maxLines: 1,
+                      // Quebra em até 2 linhas — o período nunca é cortado.
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.outline,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),

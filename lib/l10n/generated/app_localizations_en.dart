@@ -184,6 +184,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authErrorLoadAccount => 'Could not load your account';
 
   @override
+  String get splashLoading => 'Opening your session…';
+
+  @override
   String get loginSubtitleSignUp => 'Create your account to get started';
 
   @override
@@ -253,6 +256,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginSecurityNote => 'Your data is protected with encryption.';
+
+  @override
+  String get loginForgotPassword => 'Forgot your password?';
+
+  @override
+  String get forgotPasswordTitle => 'Reset password';
+
+  @override
+  String get forgotPasswordHint =>
+      'Enter your account email. We\'ll send a link so you can create a new password.';
+
+  @override
+  String get forgotPasswordSubmit => 'Send link';
+
+  @override
+  String get forgotPasswordSent =>
+      'If an account exists for this email, we\'ve sent a link to reset your password.';
+
+  @override
+  String get forgotPasswordError => 'Could not send the link. Try again.';
+
+  @override
+  String get setNewPasswordTitle => 'Set a new password';
+
+  @override
+  String get setNewPasswordHint =>
+      'Min. 8 characters with lowercase, uppercase, number and symbol.';
+
+  @override
+  String get setNewPasswordSubmit => 'Save new password';
+
+  @override
+  String get setNewPasswordSuccess => 'Password updated!';
+
+  @override
+  String get setNewPasswordError => 'Could not update the password. Try again.';
+
+  @override
+  String get setNewPasswordSignOut => 'Sign out';
+
+  @override
+  String get changePasswordTitle => 'Change password';
+
+  @override
+  String get changePasswordCurrentLabel => 'Current password';
+
+  @override
+  String get changePasswordNewLabel => 'New password';
+
+  @override
+  String get changePasswordConfirmLabel => 'Confirm new password';
+
+  @override
+  String get changePasswordSuccess => 'Password changed successfully!';
+
+  @override
+  String get changePasswordWrongCurrent =>
+      'Current password is incorrect. Try again.';
+
+  @override
+  String get changePasswordSubmit => 'Change password';
+
+  @override
+  String get changePasswordError => 'Could not change the password. Try again.';
+
+  @override
+  String get securitySectionTitle => 'Security';
+
+  @override
+  String get securityChangePassword => 'Change password';
+
+  @override
+  String get securityChangePasswordHint => 'Update your account password';
 
   @override
   String get appNavHome => 'Home';

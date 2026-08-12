@@ -8,8 +8,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../helpers/test_app.dart';
 
 import 'package:dumbhanengue/domain/entities/app_user.dart';
+import 'package:dumbhanengue/domain/entities/auth_event.dart';
 import 'package:dumbhanengue/domain/repositories/i_auth_repository.dart';
 import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
+import 'package:dumbhanengue/presentation/screens/auth/forgot_password_sheet.dart';
 import 'package:dumbhanengue/presentation/screens/auth/login_screen.dart';
 
 class _FakeAuthRepository implements IAuthRepository {
@@ -17,8 +19,11 @@ class _FakeAuthRepository implements IAuthRepository {
 
   String? lastSignInEmail;
   String? lastSignInPassword;
+  String? lastResetEmail;
+  String? lastChangedTo;
   Exception? errorToThrow;
   Exception? signUpErrorToThrow;
+  Exception? resetErrorToThrow;
 
   @override
   Future<AppUser> signUp({
@@ -45,14 +50,32 @@ class _FakeAuthRepository implements IAuthRepository {
   Future<void> signOut() async {}
 
   @override
+  Future<void> resetPassword({required String email}) async {
+    if (resetErrorToThrow != null) throw resetErrorToThrow!;
+    lastResetEmail = email;
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    lastChangedTo = newPassword;
+  }
+
+  @override
+  Future<void> setNewPassword({required String newPassword}) async {}
+
+  @override
   Stream<AppUser?> get authStateChanges => _controller.stream;
+
+  @override
+  Stream<AuthEvent> get authEvents => const Stream.empty();
 }
 
 Widget _buildApp(IAuthRepository repository) {
   return ProviderScope(
-    overrides: [
-      authRepositoryProvider.overrideWithValue(repository),
-    ],
+    overrides: [authRepositoryProvider.overrideWithValue(repository)],
     child: testApp(home: LoginScreen()),
   );
 }
@@ -83,10 +106,7 @@ void main() {
     await tester.tap(find.text('Entrar'));
     await tester.pumpAndSettle();
 
-    expect(
-      find.textContaining('Não foi possível entrar'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('Não foi possível entrar'), findsOneWidget);
   });
 
   testWidgets('valida e-mail e senha antes de submeter', (tester) async {
@@ -96,12 +116,16 @@ void main() {
     await tester.tap(find.text('Entrar'));
     await tester.pumpAndSettle();
 
+    // A validação virou NOTIFICAÇÃO (SnackBar): a primeira regra violada
+    // aparece como aviso — sem texto fixo/truncado sob os campos.
     expect(find.text('Informe um e-mail válido.'), findsOneWidget);
-    expect(find.text('A senha deve ter ao menos 8 caracteres.'), findsOneWidget);
+    expect(find.text('A senha deve ter ao menos 8 caracteres.'), findsNothing);
     expect(repository.lastSignInEmail, isNull);
   });
 
-  testWidgets('valida a força da senha no cadastro (4 classes)', (tester) async {
+  testWidgets('valida a força da senha no cadastro (4 classes)', (
+    tester,
+  ) async {
     final repository = _FakeAuthRepository();
     await tester.pumpWidget(_buildApp(repository));
 
@@ -115,6 +139,9 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(2), 'senha123');
     await tester.enterText(find.byType(TextFormField).at(3), 'senha123');
 
+    // O formulário de cadastro fica num SingleChildScrollView e o botão pode
+    // estar abaixo da viewport de teste (600px) — rola até ele antes de tocar.
+    await tester.ensureVisible(find.text('Cadastrar'));
     await tester.tap(find.text('Cadastrar'));
     await tester.pumpAndSettle();
 
@@ -128,39 +155,98 @@ void main() {
     expect(repository.signUpErrorToThrow, isNull);
   });
 
-  testWidgets('mostra a política de senha quando o servidor rejeita senha fraca',
-      (tester) async {
-    final repository = _FakeAuthRepository()
-      ..signUpErrorToThrow = AuthWeakPasswordException(
-        message: 'Password should contain at least one character of each class',
-        statusCode: '422',
-        reasons: ['characters'],
-      );
-    await tester.pumpWidget(_buildApp(repository));
+  testWidgets(
+    'mostra a política de senha quando o servidor rejeita senha fraca',
+    (tester) async {
+      final repository = _FakeAuthRepository()
+        ..signUpErrorToThrow = AuthWeakPasswordException(
+          message:
+              'Password should contain at least one character of each class',
+          statusCode: '422',
+          reasons: ['characters'],
+        );
+      await tester.pumpWidget(_buildApp(repository));
 
-    // Muda para o modo cadastro.
+      // Muda para o modo cadastro.
+      await tester.tap(find.text('Não tenho conta — cadastrar'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextFormField).at(0), 'Dono Teste');
+      await tester.enterText(find.byType(TextFormField).at(1), 'dono@loja.com');
+      // Senha forte passa na validação local; o servidor (fake) rejeita.
+      await tester.enterText(find.byType(TextFormField).at(2), 'Senha1234!');
+      await tester.enterText(find.byType(TextFormField).at(3), 'Senha1234!');
+
+      await tester.ensureVisible(find.text('Cadastrar'));
+      await tester.tap(find.text('Cadastrar'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'A senha deve conter letras minúsculas, maiúsculas, números e símbolos.',
+        ),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'Esqueceu a senha? envia o link de redefinição (e valida o e-mail)',
+    (tester) async {
+      final repository = _FakeAuthRepository();
+      await tester.pumpWidget(_buildApp(repository));
+
+    // O link só existe no modo login (cadastro não tem redefinição).
+    await tester.ensureVisible(find.text('Não tenho conta — cadastrar'));
     await tester.tap(find.text('Não tenho conta — cadastrar'));
     await tester.pumpAndSettle();
+    expect(find.text('Esqueceu a senha?'), findsNothing);
 
-    await tester.enterText(find.byType(TextFormField).at(0), 'Dono Teste');
-    await tester.enterText(find.byType(TextFormField).at(1), 'dono@loja.com');
-    // Senha forte passa na validação local; o servidor (fake) rejeita.
-    await tester.enterText(find.byType(TextFormField).at(2), 'Senha1234!');
-    await tester.enterText(find.byType(TextFormField).at(3), 'Senha1234!');
-
-    await tester.tap(find.text('Cadastrar'));
+    // De volta ao login: o link aparece e abre a sheet.
+    await tester.ensureVisible(find.text('Já tenho conta — entrar'));
+    await tester.tap(find.text('Já tenho conta — entrar'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Esqueceu a senha?'));
+    await tester.tap(find.text('Esqueceu a senha?'));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.text(
-        'A senha deve conter letras minúsculas, maiúsculas, números e símbolos.',
-      ),
-      findsOneWidget,
-    );
-  });
+      expect(find.byType(ForgotPasswordSheet), findsOneWidget);
 
-  testWidgets('mostra aviso de limite quando o servidor responde 429',
-      (tester) async {
+      // E-mail inválido: bloqueia o envio com a mensagem do campo.
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(ForgotPasswordSheet),
+          matching: find.byType(TextFormField),
+        ),
+        'nao-e-mail',
+      );
+      await tester.tap(find.text('Enviar link'));
+      await tester.pumpAndSettle();
+      expect(find.text('Informe um e-mail válido.'), findsOneWidget);
+      expect(repository.lastResetEmail, isNull);
+
+      // E-mail válido: envia o link e mostra a confirmação.
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(ForgotPasswordSheet),
+          matching: find.byType(TextFormField),
+        ),
+        'dono@loja.com',
+      );
+      await tester.tap(find.text('Enviar link'));
+      await tester.pumpAndSettle();
+
+      expect(repository.lastResetEmail, 'dono@loja.com');
+      expect(
+        find.textContaining('enviamos um link para redefinir a senha'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets('mostra aviso de limite quando o servidor responde 429', (
+    tester,
+  ) async {
     final repository = _FakeAuthRepository()
       ..signUpErrorToThrow = const AuthApiException(
         'email rate limit exceeded',
@@ -177,6 +263,7 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(2), 'Senha1234!');
     await tester.enterText(find.byType(TextFormField).at(3), 'Senha1234!');
 
+    await tester.ensureVisible(find.text('Cadastrar'));
     await tester.tap(find.text('Cadastrar'));
     await tester.pumpAndSettle();
 

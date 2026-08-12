@@ -3,7 +3,13 @@
 Todas as mudanças relevantes do Dumbhanengue ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
-## [1.1.0+2] — Em desenvolvimento
+## [1.1.1+3] — 2026-08-12
+
+### Adicionado (lançamento 1.1.1 — autenticação + marca)
+- **Reset e alteração de password**: "Esqueceu a password?" no login (`forgot_password_sheet`), ecrã de nova password após o link de recuperação (`set_new_password_screen`) e alteração da password atual nas definições (`change_password_sheet`). Política de password partilhada (`password_policy.dart`), eventos de auth (`AuthEvent.passwordRecovery` — o AuthGate roteia para o ecrã de nova password) e reautenticação antes de trocar a password.
+- **Novo ícone do app (nível Apple)**: sacola premium redesenhada programaticamente (`tool/redesign_icon.py`) — gradiente céu→índigo, gloss translúcido, alças com ilhós e letra "D" na fonte Inter (wght 700), imagem-mestre 1024px em supersampling 4×/LANCZOS; pipeline regenerado (legacy/fg/mono/splash/launch/AppIcon iOS/mipmaps Android/web).
+- **Abertura profissional**: splash de restauração de sessão com fade-in sutil (respeita "reduzir movimento"), brilho no logotipo, marca no corte do login e status i18n ("A abrir a sua sessão…").
+- **Tipografia refinada (estilo Apple)**: escala consistente com pesos leves, alturas de linha generosas e legibilidade em telas pequenas — aplicada a cards, formulários e ecrãs principais.
 
 ### Adicionado (Aug 12, 2026 — documentação do utilizador: guia + troubleshooting + Ajuda no app)
 - **Guia do Usuário reescrito (pt/en, + FAQ)**: `docs/pt/GUIA_DO_USUARIO.md` e `docs/en/USER_GUIDE.md` (219 linhas cada, paridade de estrutura) — manual simples e completo cobrindo **todos** os recursos atuais: entrada, tela inicial (KPIs/alertas/ações rápidas), loja ativa em **Lojas → Ajustes** (banner do topo removido), produtos (foto, edição, desativação), vendas (partilha de recibo, anulação), compras, clientes e fiado, financeiro (fecho de caixa, Receber/Pagar), relatórios (exportar CSV/PDF), lojas/funcionários, dicas rápidas e **FAQ com 11 perguntas**. Rótulos verificados contra o l10n real do app.

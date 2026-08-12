@@ -477,12 +477,14 @@ class _SectionLabel extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
+        // Capitalização NATURAL (nunca caixa alta): rótulos de seção
+        // legíveis, sem o grito visual de letras maiúsculas.
         Text(
-          title.toUpperCase(),
+          title,
           style: theme.textTheme.labelSmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w600,
-            letterSpacing: 1.1,
+            letterSpacing: 0.4,
           ),
         ),
       ],
@@ -1357,14 +1359,17 @@ class _ExpiryField extends StatelessWidget {
         onTap: onPick,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          // minHeight (e não altura fixa): com escala de texto alta a data
+          // 'Validade · dd/mm/aaaa' quebra em 2 linhas sem cortar o texto.
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           decoration: BoxDecoration(
             color: scheme.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: scheme.outlineVariant),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 Icons.event_outlined,
@@ -1378,7 +1383,8 @@ class _ExpiryField extends StatelessWidget {
                       ? '${l10n.productsExpiryLabel} · '
                             '${Formatters.date(expiryDate!)}'
                       : l10n.productsExpiryAdd,
-                  maxLines: 1,
+                  // Quebra em até 2 linhas — a data nunca é cortada.
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: hasDate ? scheme.onSurface : scheme.onSurfaceVariant,

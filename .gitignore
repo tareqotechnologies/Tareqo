@@ -33,6 +33,10 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Artefatos de release prontos para upload (APK/EXE/IPA) — vão para a
+# GitHub Release, nunca para o repositório.
+/release/
+
 # Symbolication related
 app.*.symbols
 

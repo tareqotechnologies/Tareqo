@@ -1,9 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// Riverpod 3.x: os providers legados (StateProvider) vivem em `legacy`.
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../core/config/supabase_config.dart';
 import '../../core/di/service_locator.dart';
 import '../../domain/entities/app_user.dart';
+import '../../domain/entities/auth_event.dart';
 import '../../domain/repositories/i_auth_repository.dart';
+import '../../domain/usecases/change_password_use_case.dart';
+import '../../domain/usecases/reset_password_use_case.dart';
+import '../../domain/usecases/set_new_password_use_case.dart';
 import '../../domain/usecases/sign_in_use_case.dart';
 import '../../domain/usecases/sign_out_use_case.dart';
 import '../../domain/usecases/sign_up_use_case.dart';
@@ -26,6 +32,31 @@ final signUpUseCaseProvider = Provider<SignUpUseCase>(
 final signOutUseCaseProvider = Provider<SignOutUseCase>(
   (ref) => SignOutUseCase(ref.watch(authRepositoryProvider)),
 );
+
+final resetPasswordUseCaseProvider = Provider<ResetPasswordUseCase>(
+  (ref) => ResetPasswordUseCase(ref.watch(authRepositoryProvider)),
+);
+
+final changePasswordUseCaseProvider = Provider<ChangePasswordUseCase>(
+  (ref) => ChangePasswordUseCase(ref.watch(authRepositoryProvider)),
+);
+
+final setNewPasswordUseCaseProvider = Provider<SetNewPasswordUseCase>(
+  (ref) => SetNewPasswordUseCase(ref.watch(authRepositoryProvider)),
+);
+
+/// Eventos de autenticação em bruto — o [AuthGate] usa para detectar o
+/// fluxo de RECUPERAÇÃO de senha vindo do link do e-mail.
+final authEventsProvider = StreamProvider<AuthEvent>(
+  (ref) => SupabaseConfig.isConfigured
+      ? ref.watch(authRepositoryProvider).authEvents
+      : Stream.value(AuthEvent.other),
+);
+
+/// Sinaliza que a sessão veio de um link de recuperação de senha: o
+/// [AuthGate] mostra a tela de definir nova senha antes de entrar. É
+/// limpo ao concluir a troca ou ao sair da conta.
+final passwordRecoveryPendingProvider = StateProvider<bool>((ref) => false);
 
 /// Estado da sessão: `null` = deslogado; [AppUser] = logado.
 ///

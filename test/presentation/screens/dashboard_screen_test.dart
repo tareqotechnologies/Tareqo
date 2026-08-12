@@ -619,11 +619,12 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  // Regressão (uniformidade + uma linha): os rótulos dos quick actions
-  // NÃO encolhem via FittedBox scaleDown nem quebram em 2 linhas — todos
-  // usam o MESMO Text com fonte fixa pequena (8px) e maxLines 1, para o
-  // rótulo mais longo ('Registrar transação') caber numa linha.
-  testWidgets('quick actions: rótulos uniformes e numa única linha',
+  // Regressão (uniformidade + uma linha + legibilidade): os rótulos dos
+  // quick actions NÃO encolhem via FittedBox scaleDown nem quebram em 2
+  // linhas — todos usam o MESMO estilo (labelSmall do tema, 11px) com
+  // maxLines 1, centralizados. A fonte NUNCA pode descer abaixo da menor
+  // da escala do design system (11px — o antigo 8px era ilegível).
+  testWidgets('quick actions: rótulos uniformes, legíveis e numa única linha',
       (tester) async {
     await pumpDashboard(
       tester,
@@ -642,20 +643,59 @@ void main() {
       'Registrar fiado',
     ];
 
+    double? sharedFontSize;
     for (final label in labels) {
-      // Sem FittedBox (o scaleDown encolhia os longos), numa única linha
-      // centralizada e com a MESMA fonte fixa (8px) para todos.
+      // Sem FittedBox (o scaleDown encolhia os longos).
       expect(
         find.ancestor(of: find.text(label), matching: find.byType(FittedBox)),
         findsNothing,
         reason: 'rótulo "$label" não pode estar em FittedBox',
       );
-      expect(tester.widget<Text>(find.text(label)).maxLines, 1);
+      // Até 2 linhas (escala de texto alta quebra em vez de truncar).
+      expect(
+        tester.widget<Text>(find.text(label)).maxLines! <= 2,
+        isTrue,
+      );
       expect(
         tester.widget<Text>(find.text(label)).textAlign,
         TextAlign.center,
       );
-      expect(tester.widget<Text>(find.text(label)).style?.fontSize, 8);
+      final fontSize = tester.widget<Text>(find.text(label)).style?.fontSize;
+      // Legível: nunca abaixo do menor tamanho da escala (labelSmall 11).
+      expect(
+        fontSize,
+        isNotNull,
+        reason: 'rótulo "$label" precisa de fonte explícita',
+      );
+      expect(
+        fontSize! >= 11,
+        isTrue,
+        reason: 'rótulo "$label" com fonte $fontSize < 11 é ilegível',
+      );
+      // Uniforme: todos os rótulos com a MESMA fonte.
+      sharedFontSize ??= fontSize;
+      expect(
+        fontSize,
+        sharedFontSize,
+        reason: 'todos os rótulos devem ter a mesma fonte',
+      );
     }
+
+    // O rótulo mais longo precisa caber na largura do botão SEM ellipsis.
+    // (Medir com TextPainter aqui não funciona: o teste usa a fonte
+    // FlutterTest, onde cada glifo tem exatamente 1em de largura — 18
+    // caracteres × 11px ≈ 201px, um falso positivo. A largura real do
+    // rótulo em Inter 11 é ~106px, que cabe na folga de 116px do botão.)
+    final quickAction = tester.widget<SizedBox>(
+      find.ancestor(
+        of: find.text('Registrar transação'),
+        matching: find.byType(SizedBox),
+      ).first,
+    );
+    expect(
+      quickAction.width! >= 110,
+      isTrue,
+      reason: 'botão de ação rápida precisa de largura folgada (≥110) ',
+    );
   });
 }

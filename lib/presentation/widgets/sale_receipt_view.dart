@@ -199,7 +199,8 @@ class _ReceiptItemRow extends StatelessWidget {
                   child: Text(
                     '$qty × $unit',
                     style: _mutedStyle,
-                    maxLines: 1,
+                    // Quebra em até 2 linhas — a quantidade nunca é cortada.
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

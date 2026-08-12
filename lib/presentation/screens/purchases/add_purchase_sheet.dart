@@ -483,10 +483,10 @@ class _CartProductRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Nome COMPLETO do produto — quebra em linhas quando
+                  // necessário (nada de truncar nomes no carrinho).
                   Text(
                     product.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -518,8 +518,8 @@ class _CartProductRow extends StatelessWidget {
                           child: Text(
                             '${l10n.purchasesExpiryLabel} '
                             '${Formatters.date(expiry!)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            // Quebra em até 2 linhas — a data nunca é cortada.
+                            maxLines: 2,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.primary,
                             ),

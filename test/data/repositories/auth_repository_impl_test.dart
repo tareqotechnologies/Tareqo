@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dumbhanengue/data/datasources/auth/auth_remote_data_source.dart';
 import 'package:dumbhanengue/data/repositories/auth_repository_impl.dart';
 import 'package:dumbhanengue/domain/entities/app_user.dart';
+import 'package:dumbhanengue/domain/entities/auth_event.dart';
 
 class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   final _controller = StreamController<AppUser?>.broadcast();
@@ -12,6 +13,9 @@ class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   bool signOutCalled = false;
   String? lastSignInEmail;
   String? lastSignInPassword;
+  String? lastResetEmail;
+  String? lastChangedTo;
+  String? lastSetNew;
 
   @override
   Future<AppUser> signUp({
@@ -38,7 +42,28 @@ class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   }
 
   @override
+  Future<void> resetPassword({required String email}) async {
+    lastResetEmail = email;
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    lastChangedTo = newPassword;
+  }
+
+  @override
+  Future<void> setNewPassword({required String newPassword}) async {
+    lastSetNew = newPassword;
+  }
+
+  @override
   Stream<AppUser?> get authStateChanges => _controller.stream;
+
+  @override
+  Stream<AuthEvent> get authEvents => const Stream.empty();
 
   void emit(AppUser? user) => _controller.add(user);
 
@@ -56,18 +81,21 @@ void main() {
 
   tearDown(() => dataSource.close());
 
-  test('signIn repassa credenciais e retorna o AppUser personalizado', () async {
-    final user = await repository.signIn(
-      email: 'dono@loja.com',
-      password: 'segredo123',
-    );
+  test(
+    'signIn repassa credenciais e retorna o AppUser personalizado',
+    () async {
+      final user = await repository.signIn(
+        email: 'dono@loja.com',
+        password: 'segredo123',
+      );
 
-    expect(dataSource.lastSignInEmail, 'dono@loja.com');
-    expect(dataSource.lastSignInPassword, 'segredo123');
-    // Retorna o objeto de domínio, não o User do provedor.
-    expect(user, isA<AppUser>());
-    expect(user.email, 'dono@loja.com');
-  });
+      expect(dataSource.lastSignInEmail, 'dono@loja.com');
+      expect(dataSource.lastSignInPassword, 'segredo123');
+      // Retorna o objeto de domínio, não o User do provedor.
+      expect(user, isA<AppUser>());
+      expect(user.email, 'dono@loja.com');
+    },
+  );
 
   test('signUp repassa nome e retorna AppUser', () async {
     final user = await repository.signUp(
@@ -84,6 +112,23 @@ void main() {
 
     expect(dataSource.signOutCalled, isTrue);
   });
+
+  test(
+    'resetPassword/changePassword/setNewPassword delegam ao datasource',
+    () async {
+      await repository.resetPassword(email: 'dono@loja.com');
+      expect(dataSource.lastResetEmail, 'dono@loja.com');
+
+      await repository.changePassword(
+        currentPassword: 'atual1!',
+        newPassword: 'nova2@',
+      );
+      expect(dataSource.lastChangedTo, 'nova2@');
+
+      await repository.setNewPassword(newPassword: 'nova2@');
+      expect(dataSource.lastSetNew, 'nova2@');
+    },
+  );
 
   test('authStateChanges repassa o fluxo de sessão', () async {
     final events = <AppUser?>[];

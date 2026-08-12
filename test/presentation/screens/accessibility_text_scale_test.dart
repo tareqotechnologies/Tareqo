@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:dumbhanengue/domain/entities/auth_event.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -34,7 +35,22 @@ class _FakeAuthRepository implements IAuthRepository {
   Future<void> signOut() async {}
 
   @override
+  Future<void> resetPassword({required String email}) async {}
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {}
+
+  @override
+  Future<void> setNewPassword({required String newPassword}) async {}
+
+  @override
   Stream<AppUser?> get authStateChanges => _controller.stream;
+
+  @override
+  Stream<AuthEvent> get authEvents => const Stream.empty();
 }
 
 Widget _buildApp() {
@@ -51,7 +67,9 @@ void main() {
   // o layout — a tela usa SingleChildScrollView e Material 3. Este teste
   // regressa se um Text/Card passar a estourar com textScaler 2.0 (os
   // overflows de RenderFlex falham o teste automaticamente).
-  testWidgets('ecrã de login renderiza com escala de texto 2.0', (tester) async {
+  testWidgets('ecrã de login renderiza com escala de texto 2.0', (
+    tester,
+  ) async {
     tester.platformDispatcher.textScaleFactorTestValue = 2.0;
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 

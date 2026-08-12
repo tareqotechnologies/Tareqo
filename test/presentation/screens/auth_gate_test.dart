@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_app.dart';
 
 import 'package:dumbhanengue/domain/entities/app_user.dart';
+import 'package:dumbhanengue/domain/entities/auth_event.dart';
 import 'package:dumbhanengue/domain/entities/plan.dart';
 import 'package:dumbhanengue/domain/entities/plan_request.dart';
 import 'package:dumbhanengue/domain/entities/store_employee.dart';
@@ -24,6 +25,7 @@ import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
 import 'package:dumbhanengue/presentation/screens/auth/auth_gate.dart';
 import 'package:dumbhanengue/presentation/screens/auth/login_screen.dart';
+import 'package:dumbhanengue/presentation/screens/auth/set_new_password_screen.dart';
 import 'package:dumbhanengue/presentation/screens/shell/app_shell.dart';
 
 import '../../helpers/store_context.dart';
@@ -78,25 +80,27 @@ class _EmptyPendingPlanRequests implements GetPendingPlanRequestsUseCase {
 /// Overrides do painel do super admin (vazios) — o AdminShell precisa de
 /// todos para renderizar as abas sem depender do ServiceLocator.
 List<dynamic> _adminPanelOverrides() => [
-      getPendingTenantsUseCaseProvider
-          .overrideWithValue(const _EmptyPendingTenants()),
-      getAllTenantsUseCaseProvider.overrideWithValue(const _EmptyAllTenants()),
-      getAllPlansUseCaseProvider.overrideWithValue(const _EmptyAllPlans()),
-      getPlansUseCaseProvider.overrideWithValue(const _EmptyPlans()),
-      getPendingPlanRequestsUseCaseProvider
-          .overrideWithValue(const _EmptyPendingPlanRequests()),
-    ];
+  getPendingTenantsUseCaseProvider.overrideWithValue(
+    const _EmptyPendingTenants(),
+  ),
+  getAllTenantsUseCaseProvider.overrideWithValue(const _EmptyAllTenants()),
+  getAllPlansUseCaseProvider.overrideWithValue(const _EmptyAllPlans()),
+  getPlansUseCaseProvider.overrideWithValue(const _EmptyPlans()),
+  getPendingPlanRequestsUseCaseProvider.overrideWithValue(
+    const _EmptyPendingPlanRequests(),
+  ),
+];
 
 /// Tenant PENDING (fluxo do dono aguardando aprovação) — alvo limpo do
 /// caminho "não-admin" (não depende dos providers dos módulos do ERP).
 Tenant _pendingTenant({String ownerUserId = 'u1'}) => Tenant(
-      id: 'tn1',
-      ownerUserId: ownerUserId,
-      businessName: 'Comercial Demo',
-      planId: 'pl2',
-      status: TenantStatus.pending,
-      createdAt: DateTime.now(),
-    );
+  id: 'tn1',
+  ownerUserId: ownerUserId,
+  businessName: 'Comercial Demo',
+  planId: 'pl2',
+  status: TenantStatus.pending,
+  createdAt: DateTime.now(),
+);
 
 Widget _buildApp({
   required Stream<AppUser?> authStream,
@@ -106,10 +110,13 @@ Widget _buildApp({
   // Intervalo do polling CENTRAL (employeePollIntervalProvider) — curto
   // para os testes dispararem o timer com `tester.pump`.
   Duration pollInterval = const Duration(seconds: 2),
+  // Eventos de auth (default: nenhum evento especial — sem recovery).
+  Stream<AuthEvent> authEvents = const Stream.empty(),
 }) {
   return ProviderScope(
     overrides: [
       authStateProvider.overrideWith((ref) => authStream),
+      authEventsProvider.overrideWith((ref) => authEvents),
       adminRepositoryProvider.overrideWithValue(adminRepository),
       employeePollIntervalProvider.overrideWithValue(pollInterval),
       getMyTenantUseCaseProvider.overrideWithValue(
@@ -131,17 +138,17 @@ class _InactiveEmployeeLink implements GetEmployeesUseCase {
 
   @override
   Future<List<StoreEmployee>> call(String tenantId) async => const [
-        StoreEmployee(
-          id: 'e1',
-          tenantId: 'tn1',
-          storeId: 'st1',
-          userId: 'u1',
-          fullName: 'Carlos',
-          email: 'carlos@loja.com',
-          role: EmployeeRole.employee,
-          isActive: false,
-        ),
-      ];
+    StoreEmployee(
+      id: 'e1',
+      tenantId: 'tn1',
+      storeId: 'st1',
+      userId: 'u1',
+      fullName: 'Carlos',
+      email: 'carlos@loja.com',
+      role: EmployeeRole.employee,
+      isActive: false,
+    ),
+  ];
 }
 
 /// Vínculos com CARREGAMENTO LENTO (nunca completam até o teste liberar) —
@@ -272,7 +279,9 @@ void main() {
           AppUser(id: 'admin-1', email: 'admin@dumbhanengue.com'),
         ),
         adminRepository: const FakeAdminRepository(isAdmin: true),
-        getMyTenant: FakeGetMyTenantUseCase(_pendingTenant(ownerUserId: 'admin-1')),
+        getMyTenant: FakeGetMyTenantUseCase(
+          _pendingTenant(ownerUserId: 'admin-1'),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -297,18 +306,15 @@ void main() {
     expect(find.text('Aguardando aprovação'), findsNothing);
   });
 
-  testWidgets('funcionário DESATIVADO vê a tela de acesso suspenso',
-      (tester) async {
+  testWidgets('funcionário DESATIVADO vê a tela de acesso suspenso', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(
-          AppUser(id: 'u1', email: 'carlos@loja.com'),
-        ),
+        authStream: Stream.value(AppUser(id: 'u1', email: 'carlos@loja.com')),
         adminRepository: const FakeAdminRepository(),
         // Tenant APROVADO de OUTRO dono + vínculo inativo → bloqueado.
-        getMyTenant: FakeGetMyTenantUseCase(
-          approvedTenant(ownerUserId: '9'),
-        ),
+        getMyTenant: FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),
         getEmployees: const _InactiveEmployeeLink(),
       ),
     );
@@ -325,15 +331,11 @@ void main() {
     final links = _DelayedEmployeeLink();
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(
-          AppUser(id: 'u1', email: 'carlos@loja.com'),
-        ),
+        authStream: Stream.value(AppUser(id: 'u1', email: 'carlos@loja.com')),
         adminRepository: const FakeAdminRepository(),
         // Tenant aprovado de OUTRO dono — funcionário legítimo cujo
         // vínculo ainda não chegou do servidor.
-        getMyTenant: FakeGetMyTenantUseCase(
-          approvedTenant(ownerUserId: '9'),
-        ),
+        getMyTenant: FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),
         getEmployees: links,
       ),
     );
@@ -374,13 +376,9 @@ void main() {
     final links = _MutableEmployeeLink(isActive: true);
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(
-          AppUser(id: 'u1', email: 'carlos@loja.com'),
-        ),
+        authStream: Stream.value(AppUser(id: 'u1', email: 'carlos@loja.com')),
         adminRepository: const FakeAdminRepository(),
-        getMyTenant: FakeGetMyTenantUseCase(
-          approvedTenant(ownerUserId: '9'),
-        ),
+        getMyTenant: FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),
         getEmployees: links,
         pollInterval: const Duration(seconds: 2),
       ),
@@ -401,17 +399,12 @@ void main() {
   });
 
   testWidgets('falha transitória na busca dos vínculos NÃO bloqueia o '
-      'funcionário (fail-open; o servidor segue autoritativo)',
-      (tester) async {
+      'funcionário (fail-open; o servidor segue autoritativo)', (tester) async {
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(
-          AppUser(id: 'u1', email: 'carlos@loja.com'),
-        ),
+        authStream: Stream.value(AppUser(id: 'u1', email: 'carlos@loja.com')),
         adminRepository: const FakeAdminRepository(),
-        getMyTenant: FakeGetMyTenantUseCase(
-          approvedTenant(ownerUserId: '9'),
-        ),
+        getMyTenant: FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),
         getEmployees: const _ThrowingEmployeeLink(),
       ),
     );
@@ -429,19 +422,16 @@ void main() {
     final links = _MutableEmployeeLink(isActive: true);
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(
-          AppUser(id: 'u1', email: 'carlos@loja.com'),
-        ),
+        authStream: Stream.value(AppUser(id: 'u1', email: 'carlos@loja.com')),
         adminRepository: const FakeAdminRepository(),
         // Tenant aprovado de OUTRO dono + vínculo ATIVO no início.
-        getMyTenant: FakeGetMyTenantUseCase(
-          approvedTenant(ownerUserId: '9'),
-        ),
+        getMyTenant: FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),
         getEmployees: links,
         // Intervalo curto para o teste (produção: 30s).
         pollInterval: const Duration(seconds: 2),
       ),
-    );    await tester.pumpAndSettle();
+    );
+    await tester.pumpAndSettle();
 
     // Começa com acesso normal (AppShell).
     expect(find.byType(AppShell), findsOneWidget);
@@ -474,9 +464,7 @@ void main() {
       _buildApp(
         authStream: auth.stream,
         adminRepository: const FakeAdminRepository(),
-        getMyTenant: FakeGetMyTenantUseCase(
-          approvedTenant(ownerUserId: '9'),
-        ),
+        getMyTenant: FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),
         getEmployees: links,
       ),
     );
@@ -505,5 +493,85 @@ void main() {
 
     expect(links.calls, callsAtSignOut);
     await auth.close();
+  });
+
+  testWidgets('sessão criada por link de RECUPERAÇÃO exige a nova senha '
+      'antes da área de gestão (evento passwordRecovery)', (tester) async {
+    final auth = StreamController<AppUser?>();
+    final events = StreamController<AuthEvent>();
+    await tester.pumpWidget(
+      _buildApp(
+        authStream: auth.stream,
+        authEvents: events.stream,
+        adminRepository: const FakeAdminRepository(),
+        getMyTenant: FakeGetMyTenantUseCase(approvedTenant()),
+      ),
+    );
+
+    // O gotrue emite passwordRecovery ANTES de assentar a sessão do link.
+    events.add(AuthEvent.passwordRecovery);
+    auth.add(AppUser(id: 'u1', email: 'dono@loja.com'));
+    await tester.pump();
+    await tester.pump();
+
+    // NÃO entra no AppShell: a tela de definir nova senha vem primeiro.
+    expect(find.byType(SetNewPasswordScreen), findsOneWidget);
+    expect(find.byType(AppShell), findsNothing);
+
+    // Sessão normal (sem evento de recovery) NÃO mantém o flag — no
+    // próximo login o app segue direto para a gestão.
+    events.add(AuthEvent.other);
+    await tester.pump();
+    auth.add(null); // sign-out limpa o sinal de recovery
+    await tester.pumpAndSettle();
+    expect(find.byType(LoginScreen), findsOneWidget);
+    auth.add(AppUser(id: 'u1', email: 'dono@loja.com'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SetNewPasswordScreen), findsNothing);
+    expect(find.byType(AppShell), findsOneWidget);
+
+    await auth.close();
+    await events.close();
+  });
+
+  testWidgets('sign-out LIMPA o sinal de recovery — reabrir com sessão '
+      'normal não mostra a tela de nova senha', (tester) async {
+    final auth = StreamController<AppUser?>();
+    final events = StreamController<AuthEvent>();
+    await tester.pumpWidget(
+      _buildApp(
+        authStream: auth.stream,
+        authEvents: events.stream,
+        adminRepository: const FakeAdminRepository(),
+        getMyTenant: FakeGetMyTenantUseCase(approvedTenant()),
+      ),
+    );
+
+    // Usuário entra via link de recuperação (flag marcado).
+    events.add(AuthEvent.passwordRecovery);
+    auth.add(AppUser(id: 'u1', email: 'dono@loja.com'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(SetNewPasswordScreen), findsOneWidget);
+
+    // Sai da conta: flag limpo pelo AuthGate no caminho de user == null.
+    auth.add(null);
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(LoginScreen), findsOneWidget);
+
+    // Novo login NORMAL (sem evento de recovery) entra direto na gestão —
+    // o sinal não vazou do sign-out anterior.
+    auth.add(AppUser(id: 'u1', email: 'dono@loja.com'));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(SetNewPasswordScreen), findsNothing);
+    expect(find.byType(AppShell), findsOneWidget);
+
+    await auth.close();
+    await events.close();
   });
 }

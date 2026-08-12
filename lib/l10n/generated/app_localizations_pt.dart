@@ -188,6 +188,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get authErrorLoadAccount => 'Não foi possível carregar sua conta';
 
   @override
+  String get splashLoading => 'A abrir a sua sessão…';
+
+  @override
   String get loginSubtitleSignUp => 'Crie sua conta para começar';
 
   @override
@@ -259,6 +262,82 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get loginSecurityNote =>
       'Seus dados ficam protegidos com criptografia.';
+
+  @override
+  String get loginForgotPassword => 'Esqueceu a senha?';
+
+  @override
+  String get forgotPasswordTitle => 'Redefinir senha';
+
+  @override
+  String get forgotPasswordHint =>
+      'Informe o e-mail da sua conta. Enviamos um link para você criar uma nova senha.';
+
+  @override
+  String get forgotPasswordSubmit => 'Enviar link';
+
+  @override
+  String get forgotPasswordSent =>
+      'Se existir uma conta com este e-mail, enviamos um link para redefinir a senha.';
+
+  @override
+  String get forgotPasswordError =>
+      'Não foi possível enviar o link. Tente novamente.';
+
+  @override
+  String get setNewPasswordTitle => 'Definir nova senha';
+
+  @override
+  String get setNewPasswordHint =>
+      'Mín. 8 caracteres com minúscula, maiúscula, número e símbolo.';
+
+  @override
+  String get setNewPasswordSubmit => 'Salvar nova senha';
+
+  @override
+  String get setNewPasswordSuccess => 'Senha atualizada!';
+
+  @override
+  String get setNewPasswordError =>
+      'Não foi possível atualizar a senha. Tente novamente.';
+
+  @override
+  String get setNewPasswordSignOut => 'Sair da conta';
+
+  @override
+  String get changePasswordTitle => 'Trocar senha';
+
+  @override
+  String get changePasswordCurrentLabel => 'Senha atual';
+
+  @override
+  String get changePasswordNewLabel => 'Nova senha';
+
+  @override
+  String get changePasswordConfirmLabel => 'Confirmar nova senha';
+
+  @override
+  String get changePasswordSuccess => 'Senha alterada com sucesso!';
+
+  @override
+  String get changePasswordWrongCurrent =>
+      'Senha atual incorreta. Tente novamente.';
+
+  @override
+  String get changePasswordSubmit => 'Alterar senha';
+
+  @override
+  String get changePasswordError =>
+      'Não foi possível alterar a senha. Tente novamente.';
+
+  @override
+  String get securitySectionTitle => 'Segurança';
+
+  @override
+  String get securityChangePassword => 'Trocar senha';
+
+  @override
+  String get securityChangePasswordHint => 'Atualize a senha da sua conta';
 
   @override
   String get appNavHome => 'Início';

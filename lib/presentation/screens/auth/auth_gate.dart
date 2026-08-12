@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/network/deep_link_handler.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../domain/entities/app_user.dart';
+import '../../../domain/entities/auth_event.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/admin_providers.dart';
@@ -15,6 +16,7 @@ import '../account/tenant_rejected_screen.dart';
 import '../admin/admin_shell.dart';
 import '../shell/app_shell.dart';
 import 'login_screen.dart';
+import 'set_new_password_screen.dart';
 
 /// Portão de autenticação e de **acesso**: decide a tela raiz com base na
 /// sessão e no papel do usuário logado.
@@ -54,6 +56,23 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
+    // Sessão veio de um link de RECUPERAÇÃO de senha? O gotrue emite o
+    // evento `passwordRecovery` ao trocar o token do e-mail — o AuthGate
+    // então exige definir a nova senha antes de entrar.
+    final recoveryPending = ref.watch(passwordRecoveryPendingProvider);
+    ref.listen(authEventsProvider, (previous, next) {
+      if (next.value == AuthEvent.passwordRecovery) {
+        // Escrita ADIADA para o próximo microtask: o listener pode rodar
+        // DURANTE a construção da árvore (ex.: evento de recovery chegando
+        // junto com o primeiro frame após o deep link) e o Riverpod 3
+        // proíbe modificar um provider nessa fase.
+        Future.microtask(() {
+          if (mounted) {
+            ref.read(passwordRecoveryPendingProvider.notifier).state = true;
+          }
+        });
+      }
+    });
     // POLLING CENTRAL: mantém o provider vivo APENAS com usuário logado —
     // o refresh dos vínculos acontece dentro do provider a cada sinal
     // (timer + Realtime). No sign-out (usuário null) o autoDispose
@@ -80,7 +99,22 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         );
       },
       data: (user) {
-        if (user == null) return const LoginScreen();
+        if (user == null) {
+          // Sessão encerrada: o sinal de recuperação não faz mais sentido.
+          // (Escrita adiada — o branch roda durante o build.)
+          if (ref.read(passwordRecoveryPendingProvider)) {
+            Future.microtask(() {
+              if (mounted) {
+                ref.read(passwordRecoveryPendingProvider.notifier).state =
+                    false;
+              }
+            });
+          }
+          return const LoginScreen();
+        }
+        // Recovery: sessão veio do link do e-mail — definir a nova senha
+        // ANTES de entrar na área de gestão.
+        if (recoveryPending) return const SetNewPasswordScreen();
 
         // Super admin: papel baseado em BANCO (tabela `public.super_admins`
         // no Supabase via RPC `is_super_admin`) — não mais e-mail
@@ -107,8 +141,10 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         );
       },
     );
-  }/// Portão do tenant (dono/funcionário): resolve o tenant do usuário e
-/// decide entre onboarding, pendente, rejeitado ou área de gestão.
+  }
+
+  /// Portão do tenant (dono/funcionário): resolve o tenant do usuário e
+  /// decide entre onboarding, pendente, rejeitado ou área de gestão.
   Widget _tenantGate(WidgetRef ref, AppUser user) {
     final tenantAsync = ref.watch(myTenantProvider(user.id));
     return tenantAsync.when(
@@ -350,16 +386,20 @@ class _TenantErrorScreen extends StatelessWidget {
 
 /// Tela de abertura (restaurando sessão / resolvendo papel e tenant).
 ///
-/// V4 (Aug 8): fundo BRANCO da identidade oficial (o mesmo do .ico) com o
-/// logotipo azul (`assets/branding/splash_logo.png`), o nome da marca em
-/// cinza-escuro e o spinner na cor do logotipo. Espelha o ícone oficial
-/// (tool/generate_icons_test.dart) — abertura sem "flash" (o splash
-/// sistêmico do Android também é branco).
+/// V5: fundo BRANCO da identidade oficial (o mesmo do .ico) com o logotipo
+/// azul em brilho suave, o nome da marca no mesmo corte do login (Large
+/// Title) e um status discreto sob o spinner. A entrada é um fade-in
+/// sutil que respeita "reduzir movimento" do sistema — abertura sem
+/// "flash" (o splash sistêmico do Android também é branco).
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -370,36 +410,84 @@ class _SplashScreen extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Logotipo OFICIAL (azul/branco, v4) — empacotado como asset
-              // do app (assets/branding/splash_logo.png).
-              Image.asset(
-                'assets/branding/splash_logo.png',
-                width: 116,
-                height: 116,
-                fit: BoxFit.contain,
+          // Fade-in + leve subida (400ms) — profissional sem ser chamativo.
+          // Com "reduzir movimento", a entrada é instantânea.
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: reduceMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 400),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) => Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 10 * (1 - value)),
+                child: child,
               ),
-              const SizedBox(height: 18),
-              Text(
-                'Dumbhanengue',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: const Color(0xFF202023),
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.2,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Logotipo OFICIAL (azul/branco, v4) — empacotado como
+                // asset do app (assets/branding/splash_logo.png). O brilho
+                // circular suave dá profundidade sem sombra pesada.
+                Container(
+                  width: 132,
+                  height: 132,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF0076F6).withValues(alpha: 0.12),
+                        blurRadius: 40,
+                        spreadRadius: 6,
+                      ),
+                    ],
+                  ),
+                  child: Image.asset(
+                    'assets/branding/splash_logo.png',
+                    width: 116,
+                    height: 116,
+                    fit: BoxFit.contain,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 30),
-              const SizedBox(
-                height: 22,
-                width: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: Color(0xFF0076F6),
+                const SizedBox(height: 20),
+                // Marca no MESMO corte do login (Large Title — displaySmall)
+                // para a identidade conversar entre abertura e login.
+                // FittedBox scaleDown: como no login, a palavra única nunca
+                // trunca em escala de texto alta.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Dumbhanengue',
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      color: const Color(0xFF202023),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 30),
+                const SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Color(0xFF0076F6),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // Status discreto: informa o que está acontecendo sem
+                // parecer carregamento técnico (i18n pt/en). Cor FIXA
+                // cinza-escura: o splash é sempre branco (identidade
+                // oficial) — o onSurfaceVariant do tema escuro seria
+                // cinza-claro e sumiria sobre o fundo branco.
+                Text(
+                  l10n.splashLoading,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF5F6B64),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

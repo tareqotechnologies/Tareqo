@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../domain/entities/app_user.dart';
+import '../../../domain/entities/auth_event.dart';
 import 'auth_remote_data_source.dart';
 
 /// Implementação [AuthRemoteDataSource] sobre o Supabase (gotrue).
@@ -23,7 +24,11 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     );
     // Se a confirmação por e-mail estiver ativa, o `user` pode ser null
     // (a conta é criada, mas a sessão só vem após confirmar).
-    return _toAppUser(response.user, fallbackEmail: email, fallbackName: fullName);
+    return _toAppUser(
+      response.user,
+      fallbackEmail: email,
+      fallbackName: fullName,
+    );
   }
 
   @override
@@ -46,12 +51,40 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> signOut() => _auth.signOut();
 
   @override
-  Stream<AppUser?> get authStateChanges => _auth.onAuthStateChange.map(
-        (state) {
-          final user = state.session?.user;
-          return user == null ? null : _toAppUser(user);
-        },
-      );
+  Future<void> resetPassword({required String email}) =>
+      _auth.resetPasswordForEmail(email);
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final email = _auth.currentUser?.email;
+    if (email == null) {
+      throw AuthException('Sessão expirada — entre novamente.');
+    }
+    // O GoTrue exige sessão RECENTE para `updateUser`: reautentica com a
+    // senha atual (valida a senha E renova a sessão) antes de gravar a nova.
+    await _auth.signInWithPassword(email: email, password: currentPassword);
+    await _auth.updateUser(UserAttributes(password: newPassword));
+  }
+
+  @override
+  Future<void> setNewPassword({required String newPassword}) =>
+      _auth.updateUser(UserAttributes(password: newPassword));
+
+  @override
+  Stream<AppUser?> get authStateChanges => _auth.onAuthStateChange.map((state) {
+    final user = state.session?.user;
+    return user == null ? null : _toAppUser(user);
+  });
+
+  @override
+  Stream<AuthEvent> get authEvents => _auth.onAuthStateChange.map(
+    (state) => state.event == AuthChangeEvent.passwordRecovery
+        ? AuthEvent.passwordRecovery
+        : AuthEvent.other,
+  );
 
   AppUser _toAppUser(
     User? user, {
@@ -71,7 +104,8 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return AppUser(
       id: user.id,
       email: user.email ?? fallbackEmail ?? '',
-      fullName: (user.userMetadata?['full_name'] as String?) ?? fallbackName ?? '',
+      fullName:
+          (user.userMetadata?['full_name'] as String?) ?? fallbackName ?? '',
     );
   }
 }

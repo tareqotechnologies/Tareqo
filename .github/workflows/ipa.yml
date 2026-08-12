@@ -1,0 +1,50 @@
+# iOS — artefato IPA de PRODUÇÃO (unsigned) anexado à GitHub Release.
+#
+# O build do IPA exige macOS/Xcode, que não existe no ambiente local do
+# desenvolvedor (Windows). Este workflow roda num runner macos-14 quando uma
+# tag v* é empurrada e anexa o IPA gerado à própria Release do GitHub
+# (criada automaticamente se ainda não existir).
+#
+# Notas:
+# - `--no-codesign`: o IPA sai sem assinatura (sem secrets da Apple no repo).
+#   Para TestFlight/App Store é preciso assinar localmente ou via fastlane
+#   (workflow ios.yml, que requer APPLE_ISSUER_ID/APPLE_KEY_ID/...).
+# - Sem `--dart-define-from-file`: o deployment usa um ÚNICO projeto Supabase
+#   (dotklbpqmlnhcdifiukd) partilhado dev/prod, e os defaults embutidos em
+#   `SupabaseConfig` já apontam para ele; o fail-fast S2 aceita release
+#   `prod` com essas credenciais (ver lib/core/network/supabase_bootstrap.dart).
+# - `--flavor prod` injeta FLUTTER_APP_FLAVOR=prod (define reservado) e passa
+#   a guarda de release do main.dart.
+name: iOS IPA (release artifact)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  ipa:
+    name: Build unsigned IPA + attach to release
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build IPA (no codesign)
+        run: flutter build ipa --release --no-codesign --flavor prod --obfuscate --split-debug-info=build/symbols
+
+      - name: Upload IPA to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/ios/ipa/*.ipa
+          generate_release_notes: true

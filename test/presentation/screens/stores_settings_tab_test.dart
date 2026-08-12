@@ -27,19 +27,16 @@ import '../../helpers/store_context.dart';
 class _FakeGetPlansUseCase implements GetPlansUseCase {
   @override
   Future<List<Plan>> call() async => const [
-        Plan(
-          id: 'pl2',
-          name: 'Profissional',
-          maxStores: 3,
-          maxEmployees: 10,
-        ),
-      ];
+    Plan(id: 'pl2', name: 'Profissional', maxStores: 3, maxEmployees: 10),
+  ];
 }
 
 class _FakeGetStoresUseCase implements GetStoresUseCase {
-  _FakeGetStoresUseCase({this.stores = const [
-    Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
-  ]});
+  _FakeGetStoresUseCase({
+    this.stores = const [
+      Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
+    ],
+  });
 
   final List<Store> stores;
 
@@ -109,27 +106,28 @@ void main() {
     List<Store> stores = const [
       Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
     ],
-  }) =>
-      ProviderScope(
-        overrides: [
-          getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
-          getStoresUseCaseProvider
-              .overrideWithValue(_FakeGetStoresUseCase(stores: stores)),
-          getEmployeesUseCaseProvider
-              .overrideWithValue(_FakeGetEmployeesUseCase()),
-          getMyPlanRequestsUseCaseProvider
-              .overrideWithValue(_FakeGetMyPlanRequestsUseCase()),
-          updateTenantSettingsUseCaseProvider.overrideWithValue(settings),
-          // Sessão + tenant: o save invalida o myTenantProvider do usuário
-          // (é assim que o tenantSettingsProvider reage e troca o locale).
-          authStateProvider.overrideWith(
-            (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
-          ),
-          getMyTenantUseCaseProvider
-              .overrideWithValue(FakeGetMyTenantUseCase(tenant)),
-        ],
-        child: testApp(home: StoresScreen(tenant: tenant)),
-      );
+  }) => ProviderScope(
+    overrides: [
+      getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
+      getStoresUseCaseProvider.overrideWithValue(
+        _FakeGetStoresUseCase(stores: stores),
+      ),
+      getEmployeesUseCaseProvider.overrideWithValue(_FakeGetEmployeesUseCase()),
+      getMyPlanRequestsUseCaseProvider.overrideWithValue(
+        _FakeGetMyPlanRequestsUseCase(),
+      ),
+      updateTenantSettingsUseCaseProvider.overrideWithValue(settings),
+      // Sessão + tenant: o save invalida o myTenantProvider do usuário
+      // (é assim que o tenantSettingsProvider reage e troca o locale).
+      authStateProvider.overrideWith(
+        (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+      ),
+      getMyTenantUseCaseProvider.overrideWithValue(
+        FakeGetMyTenantUseCase(tenant),
+      ),
+    ],
+    child: testApp(home: StoresScreen(tenant: tenant)),
+  );
 
   Future<void> openSettingsTab(WidgetTester tester) async {
     // Aba Ajustes = índice 3 do TabBar (Lojas, Funcionários, Upgrades...).
@@ -137,8 +135,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('aba Ajustes exibe idioma/moeda e reflete o estado do tenant',
-      (tester) async {
+  testWidgets('aba Ajustes exibe idioma/moeda e reflete o estado do tenant', (
+    tester,
+  ) async {
     await tester.pumpWidget(build(_CapturingUpdateTenantSettings()));
     await tester.pumpAndSettle();
     await openSettingsTab(tester);
@@ -200,7 +199,9 @@ void main() {
       Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
       Store(id: 'st2', tenantId: 'tn1', name: 'Loja Shopping'),
     ];
-    await tester.pumpWidget(build(_CapturingUpdateTenantSettings(), stores: stores));
+    await tester.pumpWidget(
+      build(_CapturingUpdateTenantSettings(), stores: stores),
+    );
     await tester.pumpAndSettle();
     await openSettingsTab(tester);
 
@@ -217,8 +218,9 @@ void main() {
     expect(_chipSelected(tester, 'Loja Shopping'), isTrue);
   });
 
-  testWidgets('aba Ajustes: sem seção Loja ativa com uma única loja',
-      (tester) async {
+  testWidgets('aba Ajustes: sem seção Loja ativa com uma única loja', (
+    tester,
+  ) async {
     final settings = _CapturingUpdateTenantSettings();
     await tester.pumpWidget(build(settings)); // 1 loja (fake padrão)
     await tester.pumpAndSettle();
@@ -228,12 +230,38 @@ void main() {
     expect(find.text('Idioma'), findsOneWidget);
   });
 
+  testWidgets('aba Ajustes: seção Segurança abre a sheet de troca de senha', (
+    tester,
+  ) async {
+    // Viewport alto: a seção Segurança fica abaixo da dobra padrão (600px).
+    tester.view.physicalSize = const Size(600, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(build(_CapturingUpdateTenantSettings()));
+    await tester.pumpAndSettle();
+    await openSettingsTab(tester);
+
+    // Seção Segurança com a entrada de troca de senha.
+    expect(find.text('Segurança'), findsOneWidget);
+    expect(find.text('Trocar senha'), findsOneWidget);
+    expect(find.text('Atualize a senha da sua conta'), findsOneWidget);
+
+    // Abre a sheet de troca de senha.
+    await tester.tap(find.text('Trocar senha'));
+    await tester.pumpAndSettle();
+    expect(find.text('Senha atual'), findsOneWidget);
+    expect(find.text('Nova senha'), findsOneWidget);
+    expect(find.text('Alterar senha'), findsOneWidget);
+  });
+
   // Rotação (UI): a tela Lojas (pushed) tem TabBar com 4 abas — em
   // paisagem as abas e o conteúdo da aba Ajustes (idioma/moeda) seguem
   // íntegros; voltar para a aba Lojas em paisagem também funciona.
   // Overflows de RenderFlex falham o teste via takeException.
-  testWidgets('Lojas/Ajustes sobrevivem à rotação para paisagem',
-      (tester) async {
+  testWidgets('Lojas/Ajustes sobrevivem à rotação para paisagem', (
+    tester,
+  ) async {
     usePortraitViewport(tester);
 
     await tester.pumpWidget(build(_CapturingUpdateTenantSettings()));

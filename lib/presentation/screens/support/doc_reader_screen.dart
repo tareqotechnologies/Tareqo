@@ -44,8 +44,9 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
   Future<String>? _content;
 
   Future<String> _load(BuildContext context) {
-    final path = widget.document
-        .assetPath(Localizations.localeOf(context).languageCode);
+    final path = widget.document.assetPath(
+      Localizations.localeOf(context).languageCode,
+    );
     if (_cachedPath != path || _content == null) {
       _cachedPath = path;
       _content = rootBundle.loadString(path);
@@ -102,8 +103,8 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                 return;
               }
               final target = switch (href) {
-                'GUIA_DO_USUARIO.md' || 'USER_GUIDE.md' =>
-                  SupportDocument.userGuide,
+                'GUIA_DO_USUARIO.md' ||
+                'USER_GUIDE.md' => SupportDocument.userGuide,
                 'TROUBLESHOOTING.md' => SupportDocument.troubleshooting,
                 _ => null,
               };
@@ -116,43 +117,85 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
               }
             },
             styleSheet: MarkdownStyleSheet(
-              h1: theme.textTheme.headlineMedium,
-              h2: theme.textTheme.titleLarge,
-              h3: theme.textTheme.titleMedium,
-              p: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+              h1: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+              ),
+              h2: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+              h3: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              h4: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              h5: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              h6: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              // Corpo — entrelinha confortável para leitura longa.
+              p: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurface,
+                height: 1.5,
+                letterSpacing: 0.1,
+              ),
+              // Blockquotes (dicas ⚠️/💡/✅): fundo da MARCA com filete à
+              // esquerda — antes usavam o padrão AZUL da biblioteca
+              // (Colors.blue.shade100) que atrapalhava a leitura.
               blockquote: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
+                height: 1.45,
+              ),
+              blockquotePadding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              blockquoteDecoration: BoxDecoration(
+                color: scheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(10),
+                border: Border(
+                  left: BorderSide(color: scheme.primary, width: 3),
+                ),
               ),
               listBullet: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.primary,
               ),
               strong: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+                fontWeight: FontWeight.w700,
               ),
               em: theme.textTheme.bodyMedium?.copyWith(
                 fontStyle: FontStyle.italic,
               ),
+              // Código inline — chip discreto, texto com contraste.
               code: theme.textTheme.bodySmall?.copyWith(
                 fontFamily: 'monospace',
-                color: scheme.primary,
+                fontSize: 13,
+                color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
                 backgroundColor: scheme.surfaceContainerHighest,
               ),
+              codeblockPadding: const EdgeInsets.all(12),
               codeblockDecoration: BoxDecoration(
                 color: scheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
               ),
               tableHead: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: scheme.onSurface,
               ),
               tableBody: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
               tableBorder: TableBorder.all(color: scheme.outlineVariant),
+              // Hiperlinks — cor da marca, sublinhado suave, peso médio.
               a: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.primary,
+                fontWeight: FontWeight.w600,
                 decoration: TextDecoration.underline,
+                decorationColor: scheme.primary.withValues(alpha: 0.55),
+                decorationThickness: 1.2,
               ),
               horizontalRuleDecoration: BoxDecoration(
                 border: Border(

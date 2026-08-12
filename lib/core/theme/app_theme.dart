@@ -76,32 +76,34 @@ abstract final class AppTheme {
 
   static ThemeData _base(Brightness brightness) {
     final isLight = brightness == Brightness.light;
-    final scheme = ColorScheme.fromSeed(
-      seedColor: _seed,
-      brightness: brightness,
-    ).copyWith(
-      // Acento verde explícito (AA garantido pelas duplas abaixo):
-      // no escuro o botão sólido é verde-médio com texto branco; o verde
-      // vivo fica para ícones/bordas via `theme.accent`.
-      primary: isLight ? const Color(0xFF15803D) : const Color(0xFF15803D),
-      onPrimary: isLight ? Colors.white : Colors.white,
-      primaryContainer: isLight
-          ? const Color(0xFFD6F5E0)
-          : const Color(0xFF123F26),
-      onPrimaryContainer: isLight
-          ? const Color(0xFF0B3B1E)
-          : const Color(0xFFB7F0C7),
-      // Superfície dos cards — #161D22 (design system ultra-clean):
-      // carvão azulado frio, quase preto, distinto do fundo #111111.
-      surface: isLight ? Colors.white : const Color(0xFF161D22),
-      onSurface: isLight ? const Color(0xFF1A1C1B) : const Color(0xFFF4F4F5),
-      onSurfaceVariant:
-          isLight ? const Color(0xFF5F6B64) : const Color(0xFFA1A1AA),
-      // Borda sutil dos cards/campos — #222E35 (0.5px nos cards).
-      outlineVariant:
-          isLight ? const Color(0xFFECEFED) : const Color(0xFF222E35),
-      outline: isLight ? const Color(0xFF6B756F) : const Color(0xFF8A8A90),
-    );
+    final scheme =
+        ColorScheme.fromSeed(seedColor: _seed, brightness: brightness).copyWith(
+          // Acento verde explícito (AA garantido pelas duplas abaixo):
+          // no escuro o botão sólido é verde-médio com texto branco; o verde
+          // vivo fica para ícones/bordas via `theme.accent`.
+          primary: isLight ? const Color(0xFF15803D) : const Color(0xFF15803D),
+          onPrimary: isLight ? Colors.white : Colors.white,
+          primaryContainer: isLight
+              ? const Color(0xFFD6F5E0)
+              : const Color(0xFF123F26),
+          onPrimaryContainer: isLight
+              ? const Color(0xFF0B3B1E)
+              : const Color(0xFFB7F0C7),
+          // Superfície dos cards — #161D22 (design system ultra-clean):
+          // carvão azulado frio, quase preto, distinto do fundo #111111.
+          surface: isLight ? Colors.white : const Color(0xFF161D22),
+          onSurface: isLight
+              ? const Color(0xFF1A1C1B)
+              : const Color(0xFFF4F4F5),
+          onSurfaceVariant: isLight
+              ? const Color(0xFF5F6B64)
+              : const Color(0xFFA1A1AA),
+          // Borda sutil dos cards/campos — #222E35 (0.5px nos cards).
+          outlineVariant: isLight
+              ? const Color(0xFFECEFED)
+              : const Color(0xFF222E35),
+          outline: isLight ? const Color(0xFF6B756F) : const Color(0xFF8A8A90),
+        );
 
     final surface = scheme.surface;
     final border = scheme.outlineVariant;
@@ -109,13 +111,18 @@ abstract final class AppTheme {
         ? const Color(0xFFF1F3F2)
         : const Color(0xFF26262A);
     final navBackground = isLight ? Colors.white : const Color(0xFF0D0D0D);
-    final accent = AppColors.of(brightness, AppColors.accent, AppColors.accentLight);
+    final accent = AppColors.of(
+      brightness,
+      AppColors.accent,
+      AppColors.accentLight,
+    );
 
     // Cor do ícone/label selecionado da navegação: verde vivo no escuro,
     // verde-médio no claro (mesmo acento do design system).
     final navSelectedColor = accent;
-    final navIndicator =
-        isLight ? const Color(0xFFD6F5E0) : const Color(0xFF123F26);
+    final navIndicator = isLight
+        ? const Color(0xFFD6F5E0)
+        : const Color(0xFF123F26);
 
     return ThemeData(
       useMaterial3: true,
@@ -131,10 +138,12 @@ abstract final class AppTheme {
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          // Título 2 da escala (22) — cabeçalhos de páginas.
+          // Título 2 da escala (22) — cabeçalhos de páginas. Tracking
+          // alinhado ao titleLarge (-0.35) para a hierarquia conversar.
           fontSize: 22,
           fontWeight: FontWeight.w600,
-          letterSpacing: -0.3,
+          letterSpacing: -0.35,
+          height: 1.25,
           color: scheme.onSurface,
         ),
         iconTheme: IconThemeData(color: scheme.onSurface),
@@ -322,12 +331,13 @@ abstract final class AppTheme {
 
       dialogTheme: DialogThemeData(
         // Título 2 da escala (22) — diálogos de confirmação e de
-        // quantidade (AlertDialog) seguem o mesmo papel das sheets.
+        // quantidade (AlertDialog) seguem o mesmo papel das sheets
+        // (tracking -0.35 e entrelinha 1.27, idênticos ao titleLarge).
         titleTextStyle: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w600,
-          letterSpacing: -0.3,
-          height: 1.3,
+          letterSpacing: -0.35,
+          height: 1.27,
           color: scheme.onSurface,
           fontFeatures: [FontFeature.tabularFigures()],
         ),
@@ -345,29 +355,44 @@ abstract final class AppTheme {
       ),
 
       textTheme: TextTheme(
-        // Escala tipográfica modular (Apple HIG / Google Material) adaptada
-        // ao ERP: 34/28/22/20/17/15/13/11. Em vez de exagerar na variedade
-        // de tamanhos, a hierarquia combina tamanhos médios com variações
-        // de peso (w400 texto comum, w600+ valores/rótulos importantes).
-        // Estilos que carregam NÚMEROS (preços em MZN, quantidades kg/un)
-        // usam `tabularFigures` para as colunas alinharem dígito a dígito.
+        // Escala tipográfica modular (Apple HIG / SF Pro) adaptada ao
+        // ERP: 34/28/24/22/20/17/15/14/13/12/11. Três eixos de precisão
+        // (como um mestre de tipografia ajustaria):
+        //
+        //  1) EIXO ÓPTICO (opsz 14–32): a Inter é VARIÁVEL e carrega o eixo
+        //     de tamanho óptico — o mesmo mecanismo do SF Pro Display vs
+        //     Text. Títulos (≥20px) usam o corte Display (opsz 24–32, mais
+        //     fechado e elegante); o corpo fica no corte Texto (14). Sem
+        //     isso, títulos grandes herdam as contraformas abertas do corte
+        //     de texto.
+        //  2) TRACKING (letterSpacing): negativo nos títulos (SF Pro usa
+        //     ~-0.4 a -0.6), neutro no corpo e ligeiramente positivo nos
+        //     captions — nunca tracking solto em letras grandes.
+        //  3) ENTRETLINHA na razão do SF Pro: ~1.2 nos títulos, ~1.4 no
+        //     corpo (nunca 1.5+ que estica o layout).
+        //
+        // Pesos: w300 display (hierarquia pelo tamanho), w400 corpo,
+        // w600 valores/rótulos. Estilos que carregam NÚMEROS (preços MZN,
+        // quantidades kg/un) usam `tabularFigures` (colunas alinhadas
+        // dígito a dígito).
         displaySmall: TextStyle(
           // Large Title (34) — login, boas-vindas, fecho de caixa.
-          // Ultra-clean: LIGHT (w300) — hierarquia pelo tamanho, não peso.
+          // LIGHT (w300) + corte Display completo (opsz 32): premium.
           fontSize: 34,
-          fontWeight: FontWeight.w300,
-          letterSpacing: -0.8,
-          height: 1.15,
-          fontFeatures: [FontFeature.tabularFigures()],
-        ),
-        headlineMedium: TextStyle(
-          // Título 1 (28) — cabeçalhos de páginas e seções principais.
-          // Ultra-clean: LIGHT (w300), como o display.
-          fontSize: 28,
           fontWeight: FontWeight.w300,
           letterSpacing: -0.6,
           height: 1.2,
           fontFeatures: [FontFeature.tabularFigures()],
+          fontVariations: const [FontVariation('opsz', 32)],
+        ),
+        headlineMedium: TextStyle(
+          // Título 1 (28) — cabeçalhos de páginas e seções principais.
+          fontSize: 28,
+          fontWeight: FontWeight.w300,
+          letterSpacing: -0.5,
+          height: 1.2,
+          fontFeatures: [FontFeature.tabularFigures()],
+          fontVariations: const [FontVariation('opsz', 32)],
         ),
         headlineSmall: TextStyle(
           // Título 1.5 (24) — valores de KPIs e totais em destaque.
@@ -376,67 +401,78 @@ abstract final class AppTheme {
           letterSpacing: -0.4,
           height: 1.25,
           fontFeatures: [FontFeature.tabularFigures()],
+          fontVariations: const [FontVariation('opsz', 32)],
         ),
         titleLarge: TextStyle(
           // Título 2 (22) — cartões de resumo, cabeçalhos de modais.
           fontSize: 22,
           fontWeight: FontWeight.w600,
+          letterSpacing: -0.35,
+          height: 1.27,
+          fontFeatures: [FontFeature.tabularFigures()],
+          fontVariations: const [FontVariation('opsz', 24)],
+        ),
+        titleMedium: TextStyle(
+          // Título 3 (20) — subtítulos, seções e totais em colunas
+          // (tabular figures: carrega valores em MZN).
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
           letterSpacing: -0.3,
           height: 1.3,
           fontFeatures: [FontFeature.tabularFigures()],
-        ),
-        titleMedium: TextStyle(
-          // Título 3 (20) — subtítulos, cabeçalhos de seções e totais
-          // em colunas (recebe tabular figures: carrega valores em MZN).
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.2,
-          height: 1.35,
-          fontFeatures: [FontFeature.tabularFigures()],
+          fontVariations: const [FontVariation('opsz', 24)],
         ),
         titleSmall: TextStyle(
           // Destaques de linha (14) — nomes em cards de vendas/compras.
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          letterSpacing: -0.1,
-          height: 1.4,
+          letterSpacing: -0.15,
+          height: 1.35,
         ),
         bodyLarge: TextStyle(
           // Corpo destacado (17) — textos principais de formulários.
           fontSize: 17,
           fontWeight: FontWeight.w400,
-          height: 1.5,
+          letterSpacing: -0.1,
+          height: 1.4,
           fontFeatures: [FontFeature.tabularFigures()],
         ),
         bodyMedium: TextStyle(
           // Corpo padrão (15) — descrições e valores de linhas.
           fontSize: 15,
           fontWeight: FontWeight.w400,
-          height: 1.45,
+          letterSpacing: -0.1,
+          height: 1.4,
           fontFeatures: [FontFeature.tabularFigures()],
         ),
         bodySmall: TextStyle(
           // Nota (13) — validades FIFO, códigos de barras, rodapés.
           fontSize: 13,
           fontWeight: FontWeight.w400,
-          height: 1.4,
+          letterSpacing: 0,
+          height: 1.35,
           fontFeatures: [FontFeature.tabularFigures()],
         ),
         labelLarge: TextStyle(
+          // Ações (14) — botões de texto e destaques.
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          height: 1.3,
+          letterSpacing: 0,
+          height: 1.25,
         ),
         labelMedium: TextStyle(
+          // Labels de campos e segmentos (12).
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          height: 1.3,
+          letterSpacing: 0,
+          height: 1.25,
         ),
         labelSmall: TextStyle(
-          // Caption/badges (11) — etiquetas de estado e indicadores.
+          // Caption/badges (11) — etiquetas e indicadores; tracking
+          // POSITIVO leve (SF Pro caption) para legibilidade em minúsculo.
           fontSize: 11,
           fontWeight: FontWeight.w500,
-          height: 1.3,
+          height: 1.25,
           letterSpacing: 0.2,
         ),
       ),

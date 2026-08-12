@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_app.dart';
 
 import 'package:dumbhanengue/domain/entities/app_user.dart';
+import 'package:dumbhanengue/domain/entities/auth_event.dart';
 import 'package:dumbhanengue/domain/entities/tenant.dart';
 import 'package:dumbhanengue/domain/repositories/i_auth_repository.dart';
 import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
@@ -21,15 +22,13 @@ class _FakeAuthRepository implements IAuthRepository {
     required String email,
     required String password,
     String? fullName,
-  }) async =>
-      throw UnimplementedError();
+  }) async => throw UnimplementedError();
 
   @override
   Future<AppUser> signIn({
     required String email,
     required String password,
-  }) async =>
-      throw UnimplementedError();
+  }) async => throw UnimplementedError();
 
   @override
   Future<void> signOut() async {
@@ -37,7 +36,22 @@ class _FakeAuthRepository implements IAuthRepository {
   }
 
   @override
+  Future<void> resetPassword({required String email}) async {}
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {}
+
+  @override
+  Future<void> setNewPassword({required String newPassword}) async {}
+
+  @override
   Stream<AppUser?> get authStateChanges => const Stream.empty();
+
+  @override
+  Stream<AuthEvent> get authEvents => const Stream.empty();
 }
 
 Tenant _rejectedTenant({String? reason}) => Tenant(
@@ -52,16 +66,15 @@ Tenant _rejectedTenant({String? reason}) => Tenant(
 
 Widget _buildApp(Tenant tenant, IAuthRepository authRepository) {
   return ProviderScope(
-    overrides: [
-      authRepositoryProvider.overrideWithValue(authRepository),
-    ],
+    overrides: [authRepositoryProvider.overrideWithValue(authRepository)],
     child: testApp(home: TenantRejectedScreen(tenant: tenant)),
   );
 }
 
 void main() {
-  testWidgets('exibe título, nome do negócio e o motivo da rejeição',
-      (tester) async {
+  testWidgets('exibe título, nome do negócio e o motivo da rejeição', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _buildApp(
         _rejectedTenant(reason: 'Dados de identificação incompletos.'),
@@ -72,13 +85,12 @@ void main() {
 
     expect(find.text('Solicitação rejeitada'), findsOneWidget);
     expect(
-      find.text('A solicitação de acesso de "Comercial Demo" não foi aprovada.'),
+      find.text(
+        'A solicitação de acesso de "Comercial Demo" não foi aprovada.',
+      ),
       findsOneWidget,
     );
-    expect(
-      find.text('Dados de identificação incompletos.'),
-      findsOneWidget,
-    );
+    expect(find.text('Dados de identificação incompletos.'), findsOneWidget);
     expect(find.text('Sair da conta'), findsOneWidget);
   });
 
@@ -96,9 +108,7 @@ void main() {
   testWidgets('o botão Sair da conta chama o SignOutUseCase', (tester) async {
     final auth = _FakeAuthRepository();
 
-    await tester.pumpWidget(
-      _buildApp(_rejectedTenant(reason: 'Razão'), auth),
-    );
+    await tester.pumpWidget(_buildApp(_rejectedTenant(reason: 'Razão'), auth));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Sair da conta'));

@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../../core/observability/crash_reporting.dart';
+import 'forgot_password_sheet.dart';
 
 /// Tela de autenticação: login e cadastro em um único formulário.
 ///
@@ -20,28 +23,7 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-/// Validação de e-mail mais rigorosa (exige domínio e TLD) — evita
-/// aceitar 'a@b' como endereço válido.
-final RegExp _emailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-
-/// Classes de caracteres exigidas pela política de senha do provedor
-/// (GoTrue/Supabase): pelo menos uma minúscula, uma maiúscula, um número
-/// e um símbolo — espelha a regra do servidor para validar ANTES do envio.
-final RegExp _lowercaseRegExp = RegExp(r'[a-z]');
-final RegExp _uppercaseRegExp = RegExp(r'[A-Z]');
-final RegExp _digitRegExp = RegExp(r'[0-9]');
-final RegExp _symbolRegExp = RegExp(
-  "[!@#\$%^&*()_+\\-=\\[\\]{};:'\",.?`~<>/\\\\|]",
-);
-
-bool _isStrongPassword(String value) =>
-    _lowercaseRegExp.hasMatch(value) &&
-    _uppercaseRegExp.hasMatch(value) &&
-    _digitRegExp.hasMatch(value) &&
-    _symbolRegExp.hasMatch(value);
-
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -63,17 +45,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+  /// Abre a sheet "Esqueceu a senha?" (envia o link de redefinição).
+  Future<void> _openForgotPassword() async {
+    await showAppSheet<void>(
+      context,
+      builder: (_) => const ForgotPasswordSheet(),
+    );
+  }
 
-    setState(() => _isSubmitting = true);
+  Future<void> _submit() async {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
 
-    try {
-      final email = _emailController.text.trim();
-      final password = _passwordController.text;
+    // Validação manual ANTES do envio: a primeira regra violada bloqueia o
+    // submit e aparece como NOTIFICAÇÃO (SnackBar) — sem texto fixo sob os
+    // campos (o aviso de senha antes ficava sempre visível e truncado em
+    // telas estreitas).
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
 
+    String? validationError;
+    if (email.isEmpty || !emailRegExp.hasMatch(email)) {
+      validationError = l10n.loginEmailError;
+    } else {
+      validationError = switch (passwordIssue(
+        password,
+        requireStrong: _isSignUpMode,
+      )) {
+        PasswordIssue.tooShort => l10n.loginPasswordError,
+        PasswordIssue.weak => l10n.loginWeakPasswordError,
+        null => null,
+      };
+    }
+    if (validationError == null &&
+        _isSignUpMode &&
+        _confirmController.text != password) {
+      validationError = l10n.loginConfirmError;
+    }
+
+    if (validationError != null) {
+      messenger.showSnackBar(SnackBar(content: Text(validationError)));
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
       if (_isSignUpMode) {
         await ref
             .read(signUpUseCaseProvider)
@@ -168,9 +185,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
+              constraints: const BoxConstraints(maxWidth: 460),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -198,11 +215,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Text(
-                    'Dumbhanengue',
-                    textAlign: TextAlign.center,
-                    // Large Title (34) — identidade no ecrã de login.
-                    style: theme.textTheme.displaySmall,
+                  // FittedBox scaleDown: 'Dumbhanengue' é uma única palavra e
+                  // não pode quebrar — em telas estreitas ou escala de texto
+                  // alta ela encolhe para SEMPRE caber (nunca trunca).
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Dumbhanengue',
+                      textAlign: TextAlign.center,
+                      // Large Title (34) — identidade no ecrã de login.
+                      style: theme.textTheme.displaySmall,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -217,132 +240,130 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 28),
                   AppCard(
                     padding: const EdgeInsets.all(20),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (_isSignUpMode) ...[
-                            AppTextField(
-                              controller: _nameController,
-                              textInputAction: TextInputAction.next,
-                              autofillHints: const [AutofillHints.name],
-                              label: l10n.loginNameLabel,
-                              prefixIcon: Icons.person_outline,
-                            ),
-                            const SizedBox(height: 14),
-                          ],
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (_isSignUpMode) ...[
                           AppTextField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
+                            controller: _nameController,
                             textInputAction: TextInputAction.next,
-                            autofillHints: const [AutofillHints.email],
-                            label: l10n.loginEmailLabel,
-                            prefixIcon: Icons.mail_outline,
-                            validator: (value) {
-                              final email = value?.trim() ?? '';
-                              if (email.isEmpty ||
-                                  !_emailRegExp.hasMatch(email)) {
-                                return l10n.loginEmailError;
-                              }
-                              return null;
-                            },
+                            autofillHints: const [AutofillHints.name],
+                            label: l10n.loginNameLabel,
+                            prefixIcon: Icons.person_outline,
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 16),
+                        ],
+                        AppTextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.email],
+                          label: l10n.loginEmailLabel,
+                          prefixIcon: Icons.mail_outline,
+                        ),
+                        const SizedBox(height: 16),
+                        AppTextField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          textInputAction: _isSignUpMode
+                              ? TextInputAction.next
+                              : TextInputAction.done,
+                          onSubmitted: (_) {
+                            if (!_isSignUpMode) _submit();
+                          },
+                          autofillHints: [
+                            _isSignUpMode
+                                ? AutofillHints.newPassword
+                                : AutofillHints.password,
+                          ],
+                          label: l10n.loginPasswordLabel,
+                          prefixIcon: Icons.lock_outline,
+                          suffixIcon: IconButton(
+                            tooltip: _obscurePassword
+                                ? l10n.loginShowPassword
+                                : l10n.loginHidePassword,
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                            onPressed: () => setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            }),
+                          ),
+                        ),
+                        if (_isSignUpMode) ...[
+                          const SizedBox(height: 16),
                           AppTextField(
-                            controller: _passwordController,
-                            obscureText: _obscurePassword,
-                            textInputAction: _isSignUpMode
-                                ? TextInputAction.next
-                                : TextInputAction.done,
-                            onSubmitted: (_) {
-                              if (!_isSignUpMode) _submit();
-                            },
-                            autofillHints: [
-                              _isSignUpMode
-                                  ? AutofillHints.newPassword
-                                  : AutofillHints.password,
-                            ],
-                            label: l10n.loginPasswordLabel,
+                            controller: _confirmController,
+                            obscureText: _obscureConfirm,
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _submit(),
+                            autofillHints: const [AutofillHints.newPassword],
+                            label: l10n.loginConfirmLabel,
                             prefixIcon: Icons.lock_outline,
-                            helperText: _isSignUpMode
-                                ? l10n.loginPasswordHint
-                                : null,
                             suffixIcon: IconButton(
-                              tooltip: _obscurePassword
+                              tooltip: _obscureConfirm
                                   ? l10n.loginShowPassword
                                   : l10n.loginHidePassword,
                               icon: Icon(
-                                _obscurePassword
+                                _obscureConfirm
                                     ? Icons.visibility_outlined
                                     : Icons.visibility_off_outlined,
                               ),
                               onPressed: () => setState(() {
-                                _obscurePassword = !_obscurePassword;
+                                _obscureConfirm = !_obscureConfirm;
                               }),
                             ),
-                            validator: (value) {
-                              final password = value ?? '';
-                              if (password.length < 8) {
-                                return l10n.loginPasswordError;
-                              }
-                              if (_isSignUpMode &&
-                                  !_isStrongPassword(password)) {
-                                return l10n.loginWeakPasswordError;
-                              }
-                              return null;
-                            },
                           ),
-                          if (_isSignUpMode) ...[
-                            const SizedBox(height: 14),
-                            AppTextField(
-                              controller: _confirmController,
-                              obscureText: _obscureConfirm,
-                              textInputAction: TextInputAction.done,
-                              onSubmitted: (_) => _submit(),
-                              autofillHints: const [AutofillHints.newPassword],
-                              label: l10n.loginConfirmLabel,
-                              prefixIcon: Icons.lock_outline,
-                              suffixIcon: IconButton(
-                                tooltip: _obscureConfirm
-                                    ? l10n.loginShowPassword
-                                    : l10n.loginHidePassword,
-                                icon: Icon(
-                                  _obscureConfirm
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                ),
-                                onPressed: () => setState(() {
-                                  _obscureConfirm = !_obscureConfirm;
-                                }),
-                              ),
-                              validator: (value) {
-                                if (value != _passwordController.text) {
-                                  return l10n.loginConfirmError;
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                          const SizedBox(height: 20),
-                          AppButton.primary(
-                            onPressed: _isSubmitting ? null : _submit,
-                            icon: _isSubmitting
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : null,
-                            label: _isSignUpMode
-                                ? l10n.loginSignUp
-                                : l10n.loginSignIn,
-                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        AppButton.primary(
+                          onPressed: _isSubmitting ? null : _submit,
+                          icon: _isSubmitting
+                              ? SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    // Sem cor explícita o spinner usaria o
+                                    // primary (verde) sobre o botão verde —
+                                    // invisível durante o envio.
+                                    color: scheme.onPrimary,
+                                  ),
+                                )
+                              : null,
+                          label: _isSignUpMode
+                              ? l10n.loginSignUp
+                              : l10n.loginSignIn,
+                        ),
+                        // "Esqueceu a senha?" — só no login (o link chega
+                        // por e-mail; o fluxo continua no app pelo deep
+                        // link de recuperação).
+                        if (!_isSignUpMode) ...[
                           const SizedBox(height: 4),
-                          TextButton(
+                          Center(
+                            child: TextButton(
+                              onPressed: _isSubmitting
+                                  ? null
+                                  : _openForgotPassword,
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 10,
+                                ),
+                              ),
+                              child: Text(l10n.loginForgotPassword),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 8),
+                        // Link de troca de modo CENTRALIZADO (antes esticava
+                        // a largura toda do card) — parece um link, não um
+                        // botão de tela cheia. Altura de toque generosa.
+                        Center(
+                          child: TextButton(
                             onPressed: _isSubmitting
                                 ? null
                                 : () => setState(() {
@@ -351,22 +372,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     // trocar de modo.
                                     _confirmController.clear();
                                   }),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                            ),
                             child: Text(
                               _isSignUpMode
                                   ? l10n.loginSwitchToSignIn
                                   : l10n.loginSwitchToSignUp,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
+                  // Nota de segurança: bodySmall (13) em onSurfaceVariant —
+                  // legível, sem competir com o conteúdo (antes: labelSmall
+                  // 11 em outline, pequeno e pálido).
                   Text(
                     l10n.loginSecurityNote,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: scheme.outline,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
                     ),
                   ),
                 ],

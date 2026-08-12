@@ -418,10 +418,10 @@ class _ItemRow extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Nome COMPLETO do produto — quebra em linhas quando
+                // necessário (nada de truncar nomes nos detalhes da venda).
                 Text(
                   item.productName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),

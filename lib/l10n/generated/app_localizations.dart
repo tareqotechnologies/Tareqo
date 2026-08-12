@@ -416,6 +416,12 @@ abstract class AppLocalizations {
   /// **'Não foi possível carregar sua conta'**
   String get authErrorLoadAccount;
 
+  /// No description provided for @splashLoading.
+  ///
+  /// In pt, this message translates to:
+  /// **'A abrir a sua sessão…'**
+  String get splashLoading;
+
   /// No description provided for @loginSubtitleSignUp.
   ///
   /// In pt, this message translates to:
@@ -547,6 +553,144 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Seus dados ficam protegidos com criptografia.'**
   String get loginSecurityNote;
+
+  /// No description provided for @loginForgotPassword.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esqueceu a senha?'**
+  String get loginForgotPassword;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Redefinir senha'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o e-mail da sua conta. Enviamos um link para você criar uma nova senha.'**
+  String get forgotPasswordHint;
+
+  /// No description provided for @forgotPasswordSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar link'**
+  String get forgotPasswordSubmit;
+
+  /// No description provided for @forgotPasswordSent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se existir uma conta com este e-mail, enviamos um link para redefinir a senha.'**
+  String get forgotPasswordSent;
+
+  /// No description provided for @forgotPasswordError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível enviar o link. Tente novamente.'**
+  String get forgotPasswordError;
+
+  /// No description provided for @setNewPasswordTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir nova senha'**
+  String get setNewPasswordTitle;
+
+  /// No description provided for @setNewPasswordHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mín. 8 caracteres com minúscula, maiúscula, número e símbolo.'**
+  String get setNewPasswordHint;
+
+  /// No description provided for @setNewPasswordSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar nova senha'**
+  String get setNewPasswordSubmit;
+
+  /// No description provided for @setNewPasswordSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha atualizada!'**
+  String get setNewPasswordSuccess;
+
+  /// No description provided for @setNewPasswordError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível atualizar a senha. Tente novamente.'**
+  String get setNewPasswordError;
+
+  /// No description provided for @setNewPasswordSignOut.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair da conta'**
+  String get setNewPasswordSignOut;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar senha'**
+  String get changePasswordTitle;
+
+  /// No description provided for @changePasswordCurrentLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha atual'**
+  String get changePasswordCurrentLabel;
+
+  /// No description provided for @changePasswordNewLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova senha'**
+  String get changePasswordNewLabel;
+
+  /// No description provided for @changePasswordConfirmLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar nova senha'**
+  String get changePasswordConfirmLabel;
+
+  /// No description provided for @changePasswordSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha alterada com sucesso!'**
+  String get changePasswordSuccess;
+
+  /// No description provided for @changePasswordWrongCurrent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha atual incorreta. Tente novamente.'**
+  String get changePasswordWrongCurrent;
+
+  /// No description provided for @changePasswordSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar senha'**
+  String get changePasswordSubmit;
+
+  /// No description provided for @changePasswordError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível alterar a senha. Tente novamente.'**
+  String get changePasswordError;
+
+  /// No description provided for @securitySectionTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Segurança'**
+  String get securitySectionTitle;
+
+  /// No description provided for @securityChangePassword.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar senha'**
+  String get securityChangePassword;
+
+  /// No description provided for @securityChangePasswordHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atualize a senha da sua conta'**
+  String get securityChangePasswordHint;
 
   /// No description provided for @appNavHome.
   ///

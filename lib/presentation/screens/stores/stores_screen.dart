@@ -26,6 +26,7 @@ import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../widgets/status_chip.dart';
 import '../../widgets/store_scoped_content.dart';
+import '../auth/change_password_sheet.dart';
 import '../support/support_screen.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../domain/repositories/i_employee_account_service.dart';
@@ -176,7 +177,9 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
               // padrão) quebravam o Hero em qualquer transição de rota.
               heroTag: 'fab-stores',
               onPressed: index == 0 ? _openAddStore : _openAddEmployee,
-              tooltip: index == 0 ? l10n.storesAddStore : l10n.storesAddEmployee,
+              tooltip: index == 0
+                  ? l10n.storesAddStore
+                  : l10n.storesAddEmployee,
               child: Icon(
                 index == 0 ? Icons.add_business_outlined : Icons.person_add_alt,
               ),
@@ -267,16 +270,13 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
             final scheme = Theme.of(context).colorScheme;
             final isManager = employee.role == EmployeeRole.manager;
             // AppCard (design system ultra-clean): radius 12, borda 0.5px
-            // #222E35, flat. Layout CUSTOM (sem ListTile): o texto ganha a
-            // largura quase TOTAL (os chips ficam ancorados às linhas de
-            // texto e o interruptor fino à direita) — nomes/e-mails longos
-            // ficam numa linha limpa com ellipsis em vez de quebrarem em 3
-            // linhas desalinhadas (regressão que distorcia o card).
+            // #222E35, flat. Layout MOBILE-FIRST: o texto (nome + loja ·
+            // e-mail) ocupa TODA a largura restante e quebra em até 2
+            // linhas; os chips (cargo / Inativo) ficam numa coluna âncora
+            // à direita e NUNCA disputam espaço com o texto — em telas
+            // estreitas ou com escala alta o card cresce sem truncar nada.
             return AppCard(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -297,81 +297,72 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Linha 1 — nome (largura total) + chip "Inativo" se
-                        // desativado: nunca mais 2 linhas desalinhadas.
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                employee.fullName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                        // Nome — largura TOTAL restante: quebra em até 2
+                        // linhas e nunca é truncado.
+                        Text(
+                          employee.fullName,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                // Semibold: hierarquia clara, peso leve.
+                                fontWeight: FontWeight.w600,
+                                height: 1.25,
                               ),
-                            ),
-                            if (!employee.isActive) ...[
-                              const SizedBox(width: 6),
-                              StatusChip(
-                                label: l10n.employeeInactive,
-                                color: scheme.error,
-                                icon: Icons.block,
-                              ),
-                            ],
-                          ],
                         ),
                         const SizedBox(height: 2),
-                        // Linha 2 — loja · e-mail (largura total) + chip de
-                        // cargo: até 2 linhas completas, ellipsis se exceder.
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                '${storeName(employee.storeId)} · '
-                                '${employee.email}',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: scheme.onSurfaceVariant,
-                                      height: 1.3,
-                                    ),
+                        // Loja · e-mail — largura TOTAL, até 2 linhas.
+                        Text(
+                          '${storeName(employee.storeId)} · '
+                          '${employee.email}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                height: 1.35,
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            StatusChip(
-                              label: isManager
-                                  ? l10n.roleManager
-                                  : l10n.roleEmployee,
-                              color: isManager
-                                  ? scheme.primary
-                                  : scheme.outline,
-                              icon: isManager
-                                  ? Icons.manage_accounts_outlined
-                                  : Icons.person_outline,
-                            ),
-                          ],
                         ),
                       ],
                     ),
                   ),
-                  // Interruptor FINO (design system): trilho 40×20 com thumb
-                  // 16 — metade da altura do Switch M3 — mantendo a área de
-                  // toque (44×24) e as semânticas de switch. Só o dono vê.
-                  if (isOwner) ...[
-                    const SizedBox(width: 10),
-                    _ThinToggle(
-                      key: ValueKey('employee-toggle-${employee.id}'),
-                      value: employee.isActive,
-                      onChanged: (value) => _toggleEmployee(employee, value),
-                    ),
-                  ],
+                  // Coluna âncora à direita: chips (cargo; "Inativo" se
+                  // desativado) por cima do interruptor fino — o texto
+                  // nunca disputa largura com eles em telas estreitas.
+                  const SizedBox(width: 12),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (!employee.isActive) ...[
+                        StatusChip(
+                          label: l10n.employeeInactive,
+                          color: scheme.error,
+                          icon: Icons.block,
+                        ),
+                        const SizedBox(height: 4),
+                      ],
+                      StatusChip(
+                        label: isManager ? l10n.roleManager : l10n.roleEmployee,
+                        color: isManager ? scheme.primary : scheme.outline,
+                        icon: isManager
+                            ? Icons.manage_accounts_outlined
+                            : Icons.person_outline,
+                      ),
+                      // Interruptor FINO (design system): trilho 40×20 com
+                      // thumb 16 — metade da altura do Switch M3 — área de
+                      // toque (44×24) e semânticas de switch. Só o dono vê.
+                      if (isOwner) ...[
+                        const SizedBox(height: 6),
+                        _ThinToggle(
+                          key: ValueKey('employee-toggle-${employee.id}'),
+                          value: employee.isActive,
+                          onChanged: (value) =>
+                              _toggleEmployee(employee, value),
+                        ),
+                      ],
+                    ],
+                  ),
                 ],
               ),
             );
@@ -641,7 +632,8 @@ class _LimitMeter extends StatelessWidget {
             Flexible(
               child: Text(
                 label,
-                maxLines: 1,
+                // Quebra em até 2 linhas — o rótulo do limite nunca é cortado.
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: scheme.onPrimaryContainer.withValues(alpha: 0.8),
@@ -652,7 +644,7 @@ class _LimitMeter extends StatelessWidget {
             Flexible(
               child: Text(
                 '$used/$max',
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w700,
@@ -728,17 +720,13 @@ class _ThinToggle extends StatelessWidget {
               child: AnimatedAlign(
                 duration: const Duration(milliseconds: 160),
                 curve: Curves.easeOut,
-                alignment: value
-                    ? Alignment.centerRight
-                    : Alignment.centerLeft,
+                alignment: value ? Alignment.centerRight : Alignment.centerLeft,
                 child: Container(
                   width: _thumbSize,
                   height: _thumbSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: value
-                        ? scheme.onPrimary
-                        : scheme.onSurfaceVariant,
+                    color: value ? scheme.onPrimary : scheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -1487,14 +1475,51 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
               : const Icon(Icons.save_outlined),
           label: l10n.settingsSave,
         ),
+        // SEGURANÇA — troca de senha da conta (qualquer utilizador
+        // logado; não é uma definição do tenant).
+        const SizedBox(height: 32),
+        Text(l10n.securitySectionTitle, style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        AppCard(
+          onTap: () => showAppSheet<void>(
+            context,
+            builder: (_) => const ChangePasswordSheet(),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.lock_reset_outlined, color: theme.colorScheme.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.securityChangePassword,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.securityChangePasswordHint,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
         // SUPORTE — acesso à documentação embutida (Ajuda → Guia do
         // Usuário / Troubleshooting). Fica separado do formulário acima
         // (moeda/idioma) por não ser uma definição do tenant.
         const SizedBox(height: 32),
-        Text(
-          l10n.settingsSupportSection,
-          style: theme.textTheme.titleSmall,
-        ),
+        Text(l10n.settingsSupportSection, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         AppCard(
           onTap: () => Navigator.of(context).push(

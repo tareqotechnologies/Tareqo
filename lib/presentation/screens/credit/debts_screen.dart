@@ -503,10 +503,10 @@ class _SettledDebtCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Nome COMPLETO do cliente — quebra em linhas quando
+                  // necessário (nada de truncar nomes no histórico).
                   Text(
                     debt.personName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),

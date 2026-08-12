@@ -2,7 +2,7 @@ name: dumbhanengue
 description: "ERP Dumbhanengue — sistema de gestão empresarial (estoque, vendas, clientes, compras e relatórios) construído em Flutter com Clean Architecture."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.1.0+2
+version: 1.1.1+3
 
 environment:
   sdk: ^3.12.2
@@ -108,9 +108,10 @@ flutter:
   # Garante que a fonte de ícones Material esteja incluída no aplicativo.
   uses-material-design: true
 
-  # Logotipo oficial da marca (azul/branco, Aug 8) — usada pela tela de
+  # Logotipo oficial da marca (azul/branco, v5) — usada pela tela de
   # abertura in-app (_SplashScreen do AuthGate). Gerada por
-  # tool/generate_icons_test.dart a partir de assets/branding/icon_official.png.
+  # tool/generate_icons_test.dart a partir de assets/branding/icon_official.png
+  # (que por sua vez é gerado por tool/redesign_icon.py).
   assets:
     - assets/branding/splash_logo.png
     # Guias de suporte embutidos (ecrã Ajuda — Lojas → Ajustes → Suporte):
@@ -129,9 +130,10 @@ flutter:
         - asset: assets/fonts/Inter-Variable.ttf
 
 # Ícones nativos (W7) — gerados por tool/generate_icons_test.dart a partir
-# da imagem-fonte assets/branding/icon_official.png (design OFICIAL
-# azul/branco, Aug 8 — upscaled do dumbhanengue.ico). Correr:
-# flutter test tool/generate_icons_test.dart && dart run flutter_launcher_icons
+# da imagem-fonte assets/branding/icon_official.png (design OFICIAL v5
+# azul/branco, desenhado por tool/redesign_icon.py). Correr:
+#   python tool/redesign_icon.py
+#   flutter test tool/generate_icons_test.dart && dart run flutter_launcher_icons
 flutter_launcher_icons:
   android: true
   ios: true

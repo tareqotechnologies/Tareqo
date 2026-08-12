@@ -242,7 +242,8 @@ class _PlanBadge extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            maxLines: 1,
+            // Quebra em até 2 linhas — o nome do plano nunca é cortado.
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w700,

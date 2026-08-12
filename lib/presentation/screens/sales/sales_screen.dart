@@ -237,12 +237,16 @@ class _SalesBody extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
                       child: Align(
                         alignment: Alignment.centerRight,
+                        // Sem ellipsis: o total filtrado é informação
+                        // essencial — quebra em linhas se não couber.
                         child: Text(
                           l10n.salesFilteredSummary(
                             filtered.length,
                             Formatters.currency(filteredTotalCents),
                           ),
-                          maxLines: 1,
+                          textAlign: TextAlign.right,
+                          // Quebra em até 2 linhas — o total nunca é cortado.
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,

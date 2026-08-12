@@ -193,14 +193,18 @@ class DashboardScreen extends ConsumerWidget {
                               const SizedBox(width: 4),
                               // Flexible + ellipsis: nomes de loja longos (ou
                               // escala de texto alta) nunca estouram o cabeçalho.
+                              // Tooltip garante o nome COMPLETO com reticências.
                               Flexible(
-                                child: Text(
-                                  activeStore.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.labelLarge?.copyWith(
-                                    color: theme.colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
+                                child: Tooltip(
+                                  message: activeStore.name,
+                                  child: Text(
+                                    activeStore.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.labelLarge?.copyWith(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -623,7 +627,12 @@ class _QuickAction extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      width: 76,
+      // Largura folgada para o rótulo mais longo ('Registrar transação' ≈
+      // 106px em labelSmall 11) caber numa linha — antes a fonte era
+      // forçada a 8px (abaixo da menor da escala, ilegível) para caber em
+      // 76px. 116px × 4 botões + gaps ≈ 480px: cabe no conteúdo (máx. 1040)
+      // e em 2 colunas no mobile.
+      width: 116,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -653,19 +662,15 @@ class _QuickAction extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          // Texto UNIFORME E NUMA LINHA: fonte fixa reduzida (8px) — o
-          // rótulo mais longo ('Registrar transação' ≈ 74px) cabe nos 76px
-          // do botão sem quebrar linha nem encolher (o FittedBox scaleDown
-          // antigo deixava os rótulos longos com fonte menor; o maxLines 2
-          // quebrava a linha). Com escala de texto alta, o ellipsis corta
-          // o excedente sem estourar o layout.
+          // labelSmall do tema (11) — escala legível do design system. Quebra
+          // em até 2 linhas com escala de texto alta — o rótulo nunca perde
+          // informação (ellipsis apenas como último recurso defensivo).
           Text(
             label,
             textAlign: TextAlign.center,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelSmall?.copyWith(
-              fontSize: 8,
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
