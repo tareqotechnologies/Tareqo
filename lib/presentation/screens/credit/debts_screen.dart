@@ -17,7 +17,6 @@ import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/smart_amount.dart';
-import '../../widgets/store_switcher.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/status_chip.dart';
@@ -97,7 +96,6 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.debtsTitle),
-        actions: const [StoreSwitcher()],
       ),
       floatingActionButton: hasDebtActivity
           // FAB circular (design system — igual ao "Novo produto"): só o

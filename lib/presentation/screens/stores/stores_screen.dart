@@ -884,6 +884,10 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  /// Alterna a visibilidade da senha (olho) — UX para senha longa no
+  /// celular (mesmo padrão do login e da troca de senha).
+  bool _obscurePassword = true;
+
   String? _selectedStoreId;
   EmployeeRole _role = EmployeeRole.employee;
 
@@ -1003,8 +1007,20 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
               controller: _passwordController,
               label: l10n.addEmployeePasswordLabel,
               prefixIcon: Icons.lock_outline,
-              obscureText: true,
+              obscureText: _obscurePassword,
               textInputAction: TextInputAction.next,
+              suffixIcon: IconButton(
+                tooltip: _obscurePassword
+                    ? l10n.loginShowPassword
+                    : l10n.loginHidePassword,
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+              ),
               validator: (value) => (value ?? '').length < 8
                   ? l10n.addEmployeePasswordError
                   : null,

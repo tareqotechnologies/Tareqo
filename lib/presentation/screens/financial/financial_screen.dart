@@ -15,7 +15,6 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/kpi_card.dart';
 import '../../widgets/section_header.dart';
-import '../../widgets/store_switcher.dart';
 import '../../widgets/skeleton.dart';
 import 'add_transaction_sheet.dart';
 import 'cash_closing_sheet.dart';
@@ -49,8 +48,6 @@ class FinancialScreen extends ConsumerWidget {
               icon: const Icon(Icons.lock_clock_outlined),
               onPressed: () => _openCashClosing(context, ref),
             ),
-          // Seletor rápido de loja ativa (multi-loja) — mais à direita.
-          const StoreSwitcher(),
         ],
       ),
       // CTA único: sem movimentações, o FAB some — o estado vazio já traz

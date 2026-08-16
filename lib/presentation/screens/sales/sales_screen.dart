@@ -16,7 +16,6 @@ import '../../widgets/period_filter.dart';
 import '../../widgets/pinned_header.dart';
 import '../../widgets/sale_card.dart';
 import '../../widgets/search_field.dart';
-import '../../widgets/store_switcher.dart';
 import '../../widgets/skeleton.dart';
 import 'new_sale_sheet.dart';
 import 'sales_widgets.dart';
@@ -66,7 +65,6 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.salesTitle),
-        actions: const [StoreSwitcher()],
       ),
       floatingActionButton: hasSales
           // FAB circular (design system — igual ao "Novo produto"): só o
