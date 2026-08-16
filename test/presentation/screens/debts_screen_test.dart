@@ -158,9 +158,17 @@ void main() {
       of: find.text('João'),
       matching: find.byType(Card),
     );
-    await tester.tap(
-      find.descendant(of: joaoCard, matching: find.text('Quitar dívida')),
+    // O campo de busca desceu o card — garante o botão visível antes do
+    // toque (a lista rola até ele).
+    final settleButton = find.descendant(
+      of: joaoCard,
+      matching: find.text('Quitar dívida'),
     );
+    await tester.ensureVisible(settleButton);
+    // O salto do ensureVisible só renderiza no próximo frame — sem o pump
+    // o tap miraria a posição antiga (fora da viewport).
+    await tester.pumpAndSettle();
+    await tester.tap(settleButton);
     await tester.pumpAndSettle();
 
     // Diálogo de confirmação aparece com o valor e a pessoa certos.
@@ -264,9 +272,17 @@ void main() {
       of: find.text('João'),
       matching: find.byType(Card),
     );
-    await tester.tap(
-      find.descendant(of: joaoCard, matching: find.text('Quitar dívida')),
+    // O campo de busca desceu o card — garante o botão visível antes do
+    // toque (a lista rola até ele).
+    final settleButton = find.descendant(
+      of: joaoCard,
+      matching: find.text('Quitar dívida'),
     );
+    await tester.ensureVisible(settleButton);
+    // O salto do ensureVisible só renderiza no próximo frame — sem o pump
+    // o tap miraria a posição antiga (fora da viewport).
+    await tester.pumpAndSettle();
+    await tester.tap(settleButton);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Quitar'));
     await tester.pumpAndSettle();
@@ -277,6 +293,103 @@ void main() {
     expect(find.text('João'), findsOneWidget);
     expect(find.text('Quitada em 03/08/2026'), findsOneWidget);
     expect(find.text('Nenhuma quitação ainda'), findsNothing);
+  });
+
+  testWidgets('busca filtra fiado pendente pelo nome do devedor', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        useCase: _FakeGetPendingDebtsUseCase(_debts()),
+        settleUseCase: _FakeSettleDebtUseCase(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Ambos visíveis antes da busca.
+    expect(find.text('João'), findsOneWidget);
+    expect(find.text('Maria Souza'), findsOneWidget);
+    expect(find.text('R\$ 85,00'), findsOneWidget); // resumo (25 + 60)
+
+    // Case-insensitive: 'JO' acha 'João'.
+    await tester.enterText(find.byType(TextField), 'JO');
+    await tester.pumpAndSettle();
+
+    expect(find.text('João'), findsOneWidget);
+    expect(find.text('Maria Souza'), findsNothing);
+    // Resumo reflete o filtro: total (25,00) e contagem (1 cliente).
+    expect(find.text('1 cliente pendente'), findsOneWidget);
+    // 'R\$ 25,00' aparece duas vezes: resumo filtrado + card do João.
+    expect(find.text('R\$ 25,00'), findsNWidgets(2));
+  });
+
+  testWidgets('busca sem resultado mostra o estado próprio (sem CTA)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        useCase: _FakeGetPendingDebtsUseCase(_debts()),
+        settleUseCase: _FakeSettleDebtUseCase(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'zzz');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nenhum resultado'), findsOneWidget);
+    expect(find.text('João'), findsNothing);
+    expect(find.text('Maria Souza'), findsNothing);
+    // Busca vazia NÃO oferece o CTA de registrar fiado (a busca é sobre a
+    // lista carregada, não sobre a loja).
+    expect(find.text('Registrar fiado'), findsNothing);
+    expect(find.byType(FloatingActionButton), findsOneWidget); // FAB segue
+  });
+
+  testWidgets('busca filtra também o histórico de quitações', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        useCase: _FakeGetPendingDebtsUseCase(_debts()),
+        settleUseCase: _FakeSettleDebtUseCase(),
+        settledUseCase: _FakeGetSettledDebtsUseCase([
+          Debt(
+            id: 'd5',
+            number: 1,
+            personName: 'Ana Lima',
+            amountCents: 4000,
+            dueDate: DateTime(2026, 7, 15),
+            isCustomerDebt: true,
+            isPaid: true,
+            paidAt: DateTime(2026, 8, 3),
+          ),
+          Debt(
+            id: 'd6',
+            number: 2,
+            personName: 'Carlos',
+            amountCents: 1500,
+            dueDate: DateTime(2026, 7, 1),
+            isCustomerDebt: true,
+            isPaid: true,
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Quitadas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ana Lima'), findsOneWidget);
+    expect(find.text('Carlos'), findsOneWidget);
+
+    // 'ANA' (maiúsculas) acha 'Ana Lima' e esconde 'Carlos'.
+    await tester.enterText(find.byType(TextField), 'ANA');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ana Lima'), findsOneWidget);
+    expect(find.text('Carlos'), findsNothing);
+    // Total quitado filtrado: só Ana (40,00) — resumo + card.
+    expect(find.text('R\$ 40,00'), findsNWidgets(2));
+    expect(find.text('1 baixa registrada'), findsOneWidget);
   });
 
   testWidgets('aba Quitadas vazia mostra estado sem quitações', (tester) async {
@@ -308,9 +421,17 @@ void main() {
       of: find.text('João'),
       matching: find.byType(Card),
     );
-    await tester.tap(
-      find.descendant(of: joaoCard, matching: find.text('Quitar dívida')),
+    // O campo de busca desceu o card — garante o botão visível antes do
+    // toque (a lista rola até ele).
+    final settleButton = find.descendant(
+      of: joaoCard,
+      matching: find.text('Quitar dívida'),
     );
+    await tester.ensureVisible(settleButton);
+    // O salto do ensureVisible só renderiza no próximo frame — sem o pump
+    // o tap miraria a posição antiga (fora da viewport).
+    await tester.pumpAndSettle();
+    await tester.tap(settleButton);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Cancelar'));

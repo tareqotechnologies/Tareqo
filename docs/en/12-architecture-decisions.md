@@ -268,7 +268,7 @@ Credentials are supplied via **flavors + `--dart-define-from-file`** (`env/dev.e
 
 ### Tenant currency and language (presentation)
 
-The owner chooses the **currency** (BRL, USD, EUR, MZN — **MZN by default**, Mozambican Metical, the target market) and **language** (pt, en) during onboarding and can change them in **Stores → Settings**. Preferences live in the `tenants` table (`currency_code`, `language`) and propagate to the whole app: the `MaterialApp` locale and currency formatting (`Formatters`) follow the `tenantSettingsProvider` — employees inherit the owner's choice. Saving goes through the `update_tenant_settings` RPC (SECURITY DEFINER, `is_tenant_owner` guard): the `tenants_update` RLS policy only lets the super admin change the tenant row, so a direct owner UPDATE was blocked (settings that never saved) — the RPC restricts the UPDATE to the presentation columns.
+The owner chooses the **currency** (BRL, USD, EUR, MZN — **MZN by default**, Mozambican Metical, the target market) and **language** (pt, en, fr) during onboarding and can change them in **Stores → Settings**. Preferences live in the `tenants` table (`currency_code`, `language`) and propagate to the whole app: the `MaterialApp` locale and currency formatting (`Formatters`) follow the `tenantSettingsProvider` — employees inherit the owner's choice. Saving goes through the `update_tenant_settings` RPC (SECURITY DEFINER, `is_tenant_owner` guard): the `tenants_update` RLS policy only lets the super admin change the tenant row, so a direct owner UPDATE was blocked (settings that never saved) — the RPC restricts the UPDATE to the presentation columns.
 
 ## Secure storage: why not use `shared_preferences` for sensitive data?
 

@@ -1,5 +1,6 @@
 // Gerador de PDF para os documentos de suporte ao utilizador final
-// (Guia do Usuário + Troubleshooting, pt/en) — PARTE 1: biblioteca.
+// (Guia do Usuário + Troubleshooting, pt/en/fr + capítulos técnicos) —
+// PARTE 1: biblioteca.
 //
 // Puro Dart (só depende de package:pdf), usado pelo CLI
 // `tool/generate_user_docs_pdf.dart` e pelos testes em
@@ -19,6 +20,7 @@
 //     usando o cmap da Inter (TtfParser.charToGlyphIndexMap) — nunca fica
 //     um quadrado vazio no PDF.
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
@@ -62,7 +64,7 @@ const PdfColor onCover = PdfColor.fromInt(0xFFF4F4F5);
 // Modelo do documento
 // ---------------------------------------------------------------------------
 
-enum MdBlockKind { heading, paragraph, list, quote, table, hr }
+enum MdBlockKind { heading, paragraph, list, quote, table, hr, code }
 
 class MdHeading {
   const MdHeading(this.level, this.text);
@@ -84,7 +86,8 @@ class MdBlock {
       quote = null,
       headers = const [],
       rows = const [],
-      ordered = false;
+      ordered = false,
+      code = null;
   const MdBlock.paragraph(String this.text)
     : kind = MdBlockKind.paragraph,
       heading = null,
@@ -92,14 +95,16 @@ class MdBlock {
       quote = null,
       headers = const [],
       rows = const [],
-      ordered = false;
+      ordered = false,
+      code = null;
   const MdBlock.list({required this.ordered, required this.items})
     : kind = MdBlockKind.list,
       heading = null,
       text = null,
       quote = null,
       headers = const [],
-      rows = const [];
+      rows = const [],
+      code = null;
   const MdBlock.quote(String this.quote)
     : kind = MdBlockKind.quote,
       heading = null,
@@ -107,16 +112,28 @@ class MdBlock {
       items = const [],
       headers = const [],
       rows = const [],
-      ordered = false;
+      ordered = false,
+      code = null;
   const MdBlock.table(this.headers, this.rows)
     : kind = MdBlockKind.table,
       heading = null,
       text = null,
       items = const [],
       quote = null,
-      ordered = false;
+      ordered = false,
+      code = null;
   const MdBlock.hr()
     : kind = MdBlockKind.hr,
+      heading = null,
+      text = null,
+      items = const [],
+      quote = null,
+      headers = const [],
+      rows = const [],
+      ordered = false,
+      code = null;
+  const MdBlock.code(String this.code)
+    : kind = MdBlockKind.code,
       heading = null,
       text = null,
       items = const [],
@@ -133,6 +150,9 @@ class MdBlock {
   final String? quote;
   final List<String> headers;
   final List<List<String>> rows;
+
+  /// Bloco de código fenced (```...```) — texto preservado linha a linha.
+  final String? code;
 }
 
 class DocModel {
@@ -213,6 +233,7 @@ DocModel sanitizeDoc(DocModel doc, String Function(String) f) {
             ],
           ),
           MdBlockKind.hr => const MdBlock.hr(),
+          MdBlockKind.code => MdBlock.code(f(b.code!)),
         },
     ],
   );
@@ -226,6 +247,7 @@ final RegExp _headingRe = RegExp(r'^(#{1,3})\s+(.*)$');
 final RegExp _hrRe = RegExp(r'^(-{3,}|\*{3,}|_{3,})$');
 final RegExp _listBulletRe = RegExp(r'^( *)[-*]\s+(.*)$');
 final RegExp _listOrderedRe = RegExp(r'^( *)\d+\.\s+(.*)$');
+final RegExp _codeFenceRe = RegExp(r'^```');
 
 /// Divide uma linha de tabela `| a | b |` em células (removendo espaços).
 List<String> _splitRow(String line) {
@@ -275,6 +297,19 @@ DocModel parseMarkdown(String source) {
     if (_hrRe.hasMatch(t)) {
       blocks.add(const MdBlock.hr());
       i++;
+      continue;
+    }
+
+    // -- Bloco de código fenced (```lang ... ```) --------------------------
+    if (_codeFenceRe.hasMatch(t)) {
+      i++; // pula a linha de abertura (```sql, ```bash, ...)
+      final code = <String>[];
+      while (i < lines.length && !_codeFenceRe.hasMatch(lines[i].trim())) {
+        code.add(lines[i]); // preserva indentação original
+        i++;
+      }
+      if (i < lines.length) i++; // pula o fence de fechamento
+      blocks.add(MdBlock.code(code.join('\n')));
       continue;
     }
 
@@ -595,11 +630,11 @@ pw.Document buildDoc({
                 tocIndex++;
               }
             case MdBlockKind.paragraph:
-              widgets.add(_paragraph(block.text!));
+              widgets.addAll(_paragraph(block.text!));
             case MdBlockKind.list:
               widgets.add(_list(block));
             case MdBlockKind.quote:
-              widgets.add(_quote(block.quote!));
+              widgets.addAll(_quote(block.quote!));
             case MdBlockKind.table:
               widgets.add(_table(block));
             case MdBlockKind.hr:
@@ -610,6 +645,8 @@ pw.Document buildDoc({
                   margin: const pw.EdgeInsets.symmetric(vertical: 12),
                 ),
               );
+            case MdBlockKind.code:
+              widgets.add(_code(block.code!));
           }
         }
         return widgets;
@@ -784,27 +821,62 @@ pw.Widget _heading3({
   return pw.Outline(name: id, title: heading.text, level: 1, child: child);
 }
 
-pw.Widget _paragraph(String text) {
-  return pw.Padding(
-    padding: const pw.EdgeInsets.only(bottom: 8),
-    child: pw.RichText(
-      text: pw.TextSpan(
-        style: const pw.TextStyle(
-          fontSize: 10.5,
-          color: textColor,
-          lineSpacing: 4,
-        ),
-        children: parseInline(
-          text,
-          base: const pw.TextStyle(
-            fontSize: 10.5,
-            color: textColor,
-            lineSpacing: 4,
+/// Tamanho máximo de TEXTO por widget de parágrafo/citação. Um parágrafo
+/// inteiro é um widget ÚNICO (não-spanning) — mais alto que a página lança
+/// `PdfException` ("Widget won't fit"). Dividimos em blocos que cabem
+/// folgados; cada bloco vira um elemento próprio do MultiPage (quebram
+/// naturalmente entre páginas).
+const int maxTextChunk = 2000;
+
+/// Divide [text] em pedaços de até [maxTextChunk] caracteres, preferindo
+/// quebras de linha (parágrafos) e depois espaços (palavras inteiras).
+List<String> _chunkText(String text, {int max = maxTextChunk}) {
+  if (text.length <= max) return [text];
+  final chunks = <String>[];
+  var start = 0;
+  while (start < text.length) {
+    var end = start + max;
+    if (end >= text.length) {
+      chunks.add(text.substring(start));
+      break;
+    }
+    // Prefere cortar numa quebra de linha dentro da janela.
+    var cut = text.lastIndexOf('\n', end);
+    if (cut <= start) {
+      // Senão, num espaço (palavra inteira).
+      cut = text.lastIndexOf(' ', end);
+    }
+    if (cut <= start) cut = end; // palavra gigante — corta mesmo assim
+    chunks.add(text.substring(start, cut));
+    start = cut;
+  }
+  return chunks;
+}
+
+List<pw.Widget> _paragraph(String text) {
+  return [
+    for (final chunk in _chunkText(text))
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(bottom: 8),
+        child: pw.RichText(
+          text: pw.TextSpan(
+            style: const pw.TextStyle(
+              fontSize: 10.5,
+              color: textColor,
+              lineSpacing: 4,
+            ),
+            children: parseInline(
+              chunk,
+              base: const pw.TextStyle(
+                fontSize: 10.5,
+                color: textColor,
+                lineSpacing: 4,
+              ),
+            ),
           ),
         ),
       ),
-    ),
-  );
+  ];
 }
 
 pw.Widget _list(MdBlock block) {
@@ -862,32 +934,63 @@ pw.Widget _list(MdBlock block) {
   );
 }
 
-pw.Widget _quote(String text) {
-  return pw.Container(
-    margin: const pw.EdgeInsets.only(bottom: 10),
-    padding: const pw.EdgeInsets.fromLTRB(12, 9, 12, 9),
-    // Sem `borderRadius`: o pacote pdf não aceita raio com borda não
-    // uniforme (só a esquerda) — a régua verde + fundo claro bastam.
-    decoration: pw.BoxDecoration(
-      color: quoteBg,
-      border: pw.Border(left: pw.BorderSide(color: accent, width: 3)),
-    ),
-    child: pw.RichText(
-      text: pw.TextSpan(
-        style: const pw.TextStyle(
-          fontSize: 10.5,
-          color: textColor,
-          lineSpacing: 4,
+List<pw.Widget> _quote(String text) {
+  // Mesma proteção do parágrafo: citações longas (intros dos runbooks) são
+  // divididas em blocos independentes do MultiPage.
+  return [
+    for (final chunk in _chunkText(text))
+      pw.Container(
+        margin: const pw.EdgeInsets.only(bottom: 10),
+        padding: const pw.EdgeInsets.fromLTRB(12, 9, 12, 9),
+        // Sem `borderRadius`: o pacote pdf não aceita raio com borda não
+        // uniforme (só a esquerda) — a régua verde + fundo claro bastam.
+        decoration: pw.BoxDecoration(
+          color: quoteBg,
+          border: pw.Border(left: pw.BorderSide(color: accent, width: 3)),
         ),
-        children: parseInline(
-          text,
-          base: const pw.TextStyle(
-            fontSize: 10.5,
-            color: textColor,
-            lineSpacing: 4,
+        child: pw.RichText(
+          text: pw.TextSpan(
+            style: const pw.TextStyle(
+              fontSize: 10.5,
+              color: textColor,
+              lineSpacing: 4,
+            ),
+            children: parseInline(
+              chunk,
+              base: const pw.TextStyle(
+                fontSize: 10.5,
+                color: textColor,
+                lineSpacing: 4,
+              ),
+            ),
           ),
         ),
       ),
+  ];
+}
+
+pw.Widget _code(String code) {
+  final lines = const LineSplitter().convert(code);
+  return pw.Container(
+    margin: const pw.EdgeInsets.only(bottom: 10),
+    padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    decoration: pw.BoxDecoration(
+      color: quoteBg,
+      border: pw.Border.all(color: borderColor, width: 0.5),
+    ),
+    child: pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        for (final line in lines)
+          pw.Text(
+            line.isEmpty ? ' ' : line,
+            style: const pw.TextStyle(
+              fontSize: 8.6,
+              color: textColor,
+              lineSpacing: 1.5,
+            ),
+          ),
+      ],
     ),
   );
 }
@@ -917,12 +1020,30 @@ pw.Widget _table(MdBlock block) {
     );
   }
 
+  // Larguras por CONTEÚDO (sqrt do máximo de caracteres por coluna): a
+  // coluna com mais texto (Notes/Vérification/Ce qu'il explique…) recebe a
+  // maior largura. Com colunas EQUAIS, uma célula longa numa coluna estreita
+  // gera uma linha mais alta que a página — o `pw.Table` não parte UMA linha
+  // entre páginas (o seu spanning só parte entre linhas) e o MultiPage entra
+  // em loop → PdfTooBigPageException.
+  final weights = <double>[];
+  for (var c = 0; c < block.headers.length; c++) {
+    var maxLen = block.headers[c].length;
+    for (final row in block.rows) {
+      if (c < row.length && row[c].length > maxLen) {
+        maxLen = row[c].length;
+      }
+    }
+    weights.add(math.max(1.0, math.sqrt(maxLen)));
+  }
+
   return pw.Container(
     margin: const pw.EdgeInsets.only(bottom: 10),
     child: pw.Table(
       border: pw.TableBorder.all(color: borderColor, width: 0.5),
       columnWidths: {
-        for (var c = 0; c < block.headers.length; c++) c: pw.FlexColumnWidth(),
+        for (var c = 0; c < block.headers.length; c++)
+          c: pw.FlexColumnWidth(weights[c]),
       },
       children: [
         pw.TableRow(

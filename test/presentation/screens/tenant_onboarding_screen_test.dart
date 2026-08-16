@@ -100,11 +100,13 @@ void main() {
 
     expect(find.text('Bem-vindo!'), findsOneWidget);
     expect(find.text('Nome do negócio'), findsOneWidget);
-    // Idioma: padrão Português selecionado.
+    // Idioma: padrão Português selecionado (os 3 idiomas aparecem).
     expect(find.text('Português'), findsOneWidget);
     expect(find.text('English'), findsOneWidget);
+    expect(find.text('Français'), findsOneWidget);
     expect(_chipSelected(tester, 'Português'), isTrue);
     expect(_chipSelected(tester, 'English'), isFalse);
+    expect(_chipSelected(tester, 'Français'), isFalse);
     // Moeda: as 4 opções, padrão Metical (MZN) selecionado (mercado-alvo).
     expect(find.text('Real (BRL)'), findsOneWidget);
     expect(find.text('Dólar (USD)'), findsOneWidget);
@@ -176,8 +178,46 @@ void main() {
     expect(find.text('Business name'), findsOneWidget);
     expect(find.text('Portuguese'), findsOneWidget);
     expect(find.text('English'), findsOneWidget);
+    expect(find.text('Français'), findsOneWidget);
     expect(find.text('Mozambican Metical (MZN)'), findsOneWidget);
     expect(find.text('Choose a plan'), findsOneWidget);
     expect(find.text('Request access'), findsOneWidget);
+  });
+
+  testWidgets('dono escolhe francês e a solicitação captura fr',
+      (tester) async {
+    final request = _CapturingRequestTenantAccess();
+    await tester.pumpWidget(_build(request));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField), 'Marché Central');
+    await _tap(tester, 'Français');
+    await _tap(tester, 'Profissional');
+
+    expect(_chipSelected(tester, 'Français'), isTrue);
+
+    await _tap(tester, 'Solicitar acesso');
+
+    expect(request.ownerUserId, 'u1');
+    expect(request.businessName, 'Marché Central');
+    expect(request.language, 'fr');
+    expect(request.currencyCode, 'MZN');
+  });
+
+  testWidgets('a tela inteira renderiza em francês com o locale fr',
+      (tester) async {
+    await tester.pumpWidget(
+      _build(_CapturingRequestTenantAccess(), locale: const Locale('fr')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bienvenue !'), findsOneWidget);
+    expect(find.text('Nom de l\'entreprise'), findsOneWidget);
+    expect(find.text('Português'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
+    expect(find.text('Français'), findsOneWidget);
+    expect(find.text('Metical (MZN)'), findsOneWidget);
+    expect(find.text('Choisissez le forfait'), findsOneWidget);
+    expect(find.text('Demander l\'accès'), findsOneWidget);
   });
 }

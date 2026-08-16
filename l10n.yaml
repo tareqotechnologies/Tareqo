@@ -1,5 +1,6 @@
-# Configuração do flutter gen-l10n (tradução pt/en).
-# O template (fonte) é o pt; o en é gerado a partir do app_en.arb.
+# Configuração do flutter gen-l10n (tradução pt/en/fr).
+# O template (fonte) é o pt; o en e o fr são gerados a partir dos ARBs
+# correspondentes.
 arb-dir: lib/l10n
 template-arb-file: app_pt.arb
 output-localization-file: app_localizations.dart

@@ -100,6 +100,31 @@ void main() {
       );
     });
 
+    test('bloco de código fenced preserva o conteúdo e as quebras de linha',
+        () {
+      final doc = parseMarkdown('''
+# Título
+
+Código:
+
+```bash
+export SUPABASE_DB_URL='...'
+psql "\$URL" -1 -f supabase/upgrade.sql
+```
+
+Fim.
+''');
+      final code = doc.blocks
+          .where((b) => b.kind == MdBlockKind.code)
+          .toList();
+      expect(code, hasLength(1));
+      expect(code.single.code, contains('export SUPABASE_DB_URL'));
+      expect(code.single.code, contains('\n'));
+      // Sem fence sobrando no texto.
+      expect(code.single.code, isNot(contains('```')));
+      expect(doc.blocks.last.text, 'Fim.');
+    });
+
     test('tabela com cabeçalho e linhas', () {
       final doc = parseMarkdown(_sample);
       final table = doc.blocks.firstWhere((b) => b.kind == MdBlockKind.table);
@@ -197,6 +222,53 @@ void main() {
         '%PDF-',
       );
       expect(pages, greaterThanOrEqualTo(3));
+    });
+
+    test('os 19 capítulos técnicos em francês geram PDFs válidos', () async {
+      // Cobre também os blocos de código fenced (SQL/bash/dart) dos
+      // runbooks e guias técnicos.
+      final jobs = [
+        'docs/fr/01-overview.md',
+        'docs/fr/02-architecture.md',
+        'docs/fr/03-domain.md',
+        'docs/fr/04-data.md',
+        'docs/fr/05-presentation.md',
+        'docs/fr/06-authentication.md',
+        'docs/fr/07-security.md',
+        'docs/fr/08-business-flows.md',
+        'docs/fr/09-testing.md',
+        'docs/fr/10-developer-guide.md',
+        'docs/fr/11-multitenancy.md',
+        'docs/fr/12-architecture-decisions.md',
+        'docs/fr/13-build-and-release.md',
+        'docs/fr/14-go-live-ops.md',
+        'docs/fr/15-audit-status.md',
+        'docs/fr/16-migracao-w4-h2.md',
+        'docs/fr/17-production-checklist.md',
+        'docs/fr/18-migracao-w11.md',
+        'docs/fr/19-migracao-cash-closing.md',
+      ];
+      for (final path in jobs) {
+        final doc = parseMarkdown(await File(path).readAsString());
+        expect(doc.blocks, isNotEmpty, reason: path);
+        expect(doc.toc, isNotEmpty, reason: path);
+        final sanitized = sanitizeDoc(doc, (s) => filterGlyphs(s, _ttf));
+        final (bytes, pages) = await generatePdf(
+          fontData: _fontData,
+          doc: sanitized,
+          docName: path,
+          appName: 'Dumbhanengue ERP',
+          subtitle: sanitized.intro ?? '',
+          metaLine: 'meta',
+          tocTitle: 'Table des matières',
+        );
+        expect(
+          utf8.decode(bytes.take(5).toList(), allowMalformed: true),
+          '%PDF-',
+          reason: path,
+        );
+        expect(pages, greaterThanOrEqualTo(3), reason: path);
+      }
     });
 
     test('os 4 documentos reais geram PDFs válidos', () async {

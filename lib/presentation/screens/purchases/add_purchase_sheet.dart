@@ -23,6 +23,7 @@ import '../../widgets/payment_method_picker.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/smart_amount.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../data/services/offline_sync_service.dart';
 
 /// Carrinho de nova compra: fornecedor, produtos com steppers de quantidade
 /// e VALIDADE OPCIONAL por item (cria o lote FIFO correspondente) e
@@ -259,6 +260,11 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
           ),
         ),
       );
+    } on OfflineEnqueuedException {
+      // Sem conexão: a compra foi ENFILEIRADA (outbox) e será sincronizada.
+      if (!mounted) return;
+      navigator.pop();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.syncOfflineSaved)));
     } on ProductNotFoundException catch (error) {
       setState(() {
         _error = l10n.purchasesProductNotFound(error.productId);
@@ -327,12 +333,16 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                 final active = all
                     .where((product) => product.isActive)
                     .toList();
+                // Query NORMALIZADO para minúsculas (mesmo padrão da busca
+                // de Produtos): sem isso, digitar 'CANETA' não achava o
+                // produto na compra.
+                final query = _query.toLowerCase();
                 final filtered = _query.isEmpty
                     ? active
                     : active
                           .where(
                             (product) =>
-                                product.name.toLowerCase().contains(_query),
+                                product.name.toLowerCase().contains(query),
                           )
                           .toList();
 

@@ -30,6 +30,11 @@ class _FakePlanRepository implements IPlanRepository {
   @override
   Future<void> add(Plan plan) async {
     addCalled = true;
+    // Simula a PRIMARY KEY do banco: inserir um plano com id já existente
+    // é um erro — exatamente o que o Supabase faz (23505 duplicate key).
+    if (_plans.any((p) => p.id == plan.id)) {
+      throw StateError('duplicate key: ${plan.id}');
+    }
     _plans.add(plan);
   }
 
@@ -91,9 +96,11 @@ void main() {
   });
 
   group('UpdatePlanUseCase', () {
-    test('atualiza o plano existente', () async {
+    test('atualiza o plano existente sem chamar add (INSERT)', () async {
       final repository = _FakePlanRepository();
       await repository.add(const Plan(id: 'pl1', name: 'A'));
+      // Reset do flag do setup: o interesse é o que o use case chama.
+      repository.addCalled = false;
 
       final useCase = UpdatePlanUseCase(repository);
       await useCase(const Plan(
@@ -103,9 +110,29 @@ void main() {
         maxEmployees: 10,
       ));
 
+      // O UPDATE não pode inserir (PK duplicada no banco) — só atualizar.
+      expect(repository.addCalled, isFalse);
       expect(repository.updateCalled, isTrue);
       expect((await repository.getById('pl1'))!.name, 'B');
       expect((await repository.getById('pl1'))!.maxStores, 5);
+      // Sem duplicação na lista.
+      expect((await repository.getAllPlans()), hasLength(1));
+    });
+
+    test('lança InvalidPlanException com nome vazio (validação do update)',
+        () async {
+      final repository = _FakePlanRepository();
+      await repository.add(const Plan(id: 'pl1', name: 'A'));
+      repository.addCalled = false;
+      final useCase = UpdatePlanUseCase(repository);
+
+      await expectLater(
+        useCase(const Plan(id: 'pl1', name: '  ')),
+        throwsA(isA<InvalidPlanException>()),
+      );
+      // Nada foi persistido (nem add, nem update).
+      expect(repository.addCalled, isFalse);
+      expect(repository.updateCalled, isFalse);
     });
   });
 

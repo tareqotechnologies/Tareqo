@@ -38,6 +38,7 @@
   "onboardingCurrencyHint": "Currency used for amounts",
   "languagePortuguese": "Portuguese",
   "languageEnglish": "English",
+  "languageFrench": "Français",
   "currencyBrl": "Brazilian Real (BRL)",
   "currencyUsd": "US Dollar (USD)",
   "currencyEur": "Euro (EUR)",
@@ -59,6 +60,7 @@
   "commonRetry": "Try again",
   "commonSignOut": "Sign out",
   "appSheetClose": "Close",
+  "storeSwitcherTooltip": "Switch store",
   "storeSelectorSectionTitle": "Active store",
   "storeSelectorSectionHint": "Choose the store whose data appears across modules (sales, stock, financial).",
   "tenantPendingTitle": "Waiting for approval",
@@ -138,6 +140,25 @@
   "appNavFinancial": "Finance",
   "appNavCredit": "Credit",
   "appNavCustomers": "Customers",
+  "syncPendingCount": "{count, plural, =1{1 operation awaiting sync} other{{count} operations awaiting sync}}",
+  "@syncPendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncNow": "Sync now",
+  "syncOfflineSaved": "No connection. The operation was saved and will sync automatically.",
+  "syncDone": "{count, plural, =1{1 operation synced} other{{count} operations synced}}",
+  "@syncDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncStillOffline": "No connection — operations remain pending.",
   "dashboardGreeting": "Hello, {name} 👋",
   "@dashboardGreeting": {
     "placeholders": {
@@ -544,6 +565,7 @@
   "cashClosingHistoryEmpty": "No closings recorded yet.",
   "debtsTitle": "Credit (credit sales)",
   "debtsAddDebt": "Register credit",
+  "debtsSearchHint": "Search by customer name...",
   "debtsTabPending": "Pending",
   "debtsTabSettled": "Settled",
   "debtsTotalPending": "Total to receive",

@@ -11,7 +11,6 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/purchase.dart';
 import '../../../domain/entities/sale.dart';
-import '../../../domain/entities/store.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
@@ -27,6 +26,7 @@ import '../../widgets/purchase_card.dart';
 import '../../widgets/sale_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/status_chip.dart';
+import '../../widgets/store_switcher.dart';
 import '../purchases/purchases_screen.dart';
 import '../reports/reports_screen.dart';
 import '../shell/app_shell.dart';
@@ -70,16 +70,8 @@ class DashboardScreen extends ConsumerWidget {
     final kpisAsync = ref.watch(dashboardKpisProvider);
     final cashFlowPeriod = ref.watch(cashFlowPeriodProvider);
     // Loja ativa (seletor no topo das telas) — o dashboard mostra os
-    // indicadores da loja selecionada e exibe o nome dela no topo.
-    final activeStoreId = user == null
-        ? null
-        : ref.watch(activeStoreIdProvider(user.id));
-    final stores = tenant == null
-        ? const <Store>[]
-        : ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
-    final activeStore = activeStoreId == null
-        ? null
-        : stores.where((store) => store.id == activeStoreId).firstOrNull;
+    // indicadores da loja selecionada e exibe o nome dela no topo (via
+    // StoreSwitcher, que observa activeStoreIdProvider e storesProvider).
 
     final kpis = kpisAsync.value;
 
@@ -179,38 +171,11 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                         ),
                         // Nome da loja ativa — deixa claro qual loja os
-                        // indicadores abaixo estão exibindo.
-                        if (activeStore != null) ...[
-                          const SizedBox(height: 6),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.storefront_outlined,
-                                size: 15,
-                                color: theme.colorScheme.primary,
-                              ),
-                              const SizedBox(width: 4),
-                              // Flexible + ellipsis: nomes de loja longos (ou
-                              // escala de texto alta) nunca estouram o cabeçalho.
-                              // Tooltip garante o nome COMPLETO com reticências.
-                              Flexible(
-                                child: Tooltip(
-                                  message: activeStore.name,
-                                  child: Text(
-                                    activeStore.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.labelLarge?.copyWith(
-                                      color: theme.colorScheme.primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                        // indicadores abaixo estão exibindo. Com 2+ lojas a
+                        // pílula vira o seletor RÁPIDO (menu com as lojas do
+                        // tenant); com 1 loja fica apenas informativa.
+                        const SizedBox(height: 6),
+                        const StoreSwitcher(hideWhenSingle: false),
                       ],
                     ),
                   ),
@@ -264,6 +229,10 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+              // Banner de sincronização pendente (outbox offline do modo
+              // SaaS) — some sozinho quando a fila esvazia.
+              const SizedBox(height: 14),
+              const _SyncPendingBanner(),
               const SizedBox(height: 20),
               _KpiGrid(
                 cards: [
@@ -854,6 +823,64 @@ class _InlineEmpty extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
+    );
+  }
+}
+
+/// Banner de sincronização pendente (outbox offline do modo SaaS).
+///
+/// Aparece no topo do dashboard quando há operações do caminho de dinheiro
+/// enfileiradas sem conexão ([pendingOpsCountProvider] > 0) e some sozinho
+/// quando a fila esvazia. "Sincronizar" dispara o dreno imediato da fila.
+class _SyncPendingBanner extends ConsumerWidget {
+  const _SyncPendingBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final count = ref.watch(pendingOpsCountProvider).value ?? 0;
+    if (count <= 0) return const SizedBox.shrink();
+
+    return AppCard(
+      color: theme.warning.withValues(alpha: 0.1),
+      borderColor: theme.warning.withValues(alpha: 0.35),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Icon(Icons.cloud_off_outlined, color: theme.warning, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              l10n.syncPendingCount(count),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () => _syncNow(context, ref),
+            child: Text(l10n.syncNow),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _syncNow(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final sync = ref.read(offlineSyncServiceProvider);
+    if (sync == null) return;
+    final synced = await sync.drain();
+    if (!context.mounted) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          synced > 0 ? l10n.syncDone(synced) : l10n.syncStillOffline,
+        ),
+      ),
     );
   }
 }

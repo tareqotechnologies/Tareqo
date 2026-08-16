@@ -2,7 +2,7 @@ name: dumbhanengue
 description: "ERP Dumbhanengue — sistema de gestão empresarial (estoque, vendas, clientes, compras e relatórios) construído em Flutter com Clean Architecture."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.1.1+3
+version: 1.2.0+4
 
 environment:
   sdk: ^3.12.2
@@ -47,8 +47,8 @@ dependencies:
   path_provider: ^2.1.6
   path: ^1.9.1
 
-  # --- Internacionalização (idioma pt/en + formatação de moeda) ---
-  # O dono do tenant escolhe moeda (BRL/USD/EUR/MZN) e idioma (pt/en).
+  # --- Internacionalização (idioma pt/en/fr + formatação de moeda) ---
+  # O dono do tenant escolhe moeda (BRL/USD/EUR/MZN) e idioma (pt/en/fr).
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
@@ -121,6 +121,8 @@ flutter:
     - docs/pt/TROUBLESHOOTING.md
     - docs/en/USER_GUIDE.md
     - docs/en/TROUBLESHOOTING.md
+    - docs/fr/GUIDE_DE_L_UTILISATEUR.md
+    - docs/fr/DEPANNAGE.md
 
   # Fonte tipográfica do ERP: Inter (variável, eixo opsz+wght).
   # Escolhida por legibilidade em telas densas de dados (ERP) e suporte

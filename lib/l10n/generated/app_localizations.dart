@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_fr.dart';
 import 'app_localizations_pt.dart';
 
 // ignore_for_file: type=lint
@@ -95,6 +96,7 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
+    Locale('fr'),
     Locale('pt'),
   ];
 
@@ -211,6 +213,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'English'**
   String get languageEnglish;
+
+  /// No description provided for @languageFrench.
+  ///
+  /// In pt, this message translates to:
+  /// **'Français'**
+  String get languageFrench;
 
   /// No description provided for @currencyBrl.
   ///
@@ -337,6 +345,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Fechar'**
   String get appSheetClose;
+
+  /// No description provided for @storeSwitcherTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar de loja'**
+  String get storeSwitcherTooltip;
 
   /// No description provided for @storeSelectorSectionTitle.
   ///
@@ -727,6 +741,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Clientes'**
   String get appNavCustomers;
+
+  /// No description provided for @syncPendingCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 operação aguardando sincronização} other{{count} operações aguardando sincronização}}'**
+  String syncPendingCount(int count);
+
+  /// No description provided for @syncNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sincronizar'**
+  String get syncNow;
+
+  /// No description provided for @syncOfflineSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem conexão. A operação foi salva e será sincronizada automaticamente.'**
+  String get syncOfflineSaved;
+
+  /// No description provided for @syncDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 operação sincronizada} other{{count} operações sincronizadas}}'**
+  String syncDone(int count);
+
+  /// No description provided for @syncStillOffline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem conexão — as operações continuam pendentes.'**
+  String get syncStillOffline;
 
   /// No description provided for @dashboardGreeting.
   ///
@@ -2324,6 +2368,12 @@ abstract class AppLocalizations {
   /// **'Registrar fiado'**
   String get debtsAddDebt;
 
+  /// No description provided for @debtsSearchHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar por nome do cliente...'**
+  String get debtsSearchHint;
+
   /// No description provided for @debtsTabPending.
   ///
   /// In pt, this message translates to:
@@ -3332,7 +3382,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'pt'].contains(locale.languageCode);
+      <String>['en', 'fr', 'pt'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -3343,6 +3393,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
     case 'pt':
       return AppLocalizationsPt();
   }

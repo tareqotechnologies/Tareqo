@@ -12,15 +12,22 @@ enum SupportDocument {
   userGuide,
   troubleshooting;
 
-  /// Caminho do asset no idioma [languageCode] ('pt' | 'en'); qualquer
-  /// outro idioma cai no português (idioma padrão do produto).
+  /// Caminho do asset no idioma [languageCode] ('pt' | 'en' | 'fr');
+  /// qualquer outro idioma cai no português (idioma padrão do produto).
   String assetPath(String languageCode) {
     final en = languageCode == 'en';
+    final fr = languageCode == 'fr';
     return switch (this) {
-      SupportDocument.userGuide =>
-        en ? 'docs/en/USER_GUIDE.md' : 'docs/pt/GUIA_DO_USUARIO.md',
-      SupportDocument.troubleshooting =>
-        en ? 'docs/en/TROUBLESHOOTING.md' : 'docs/pt/TROUBLESHOOTING.md',
+      SupportDocument.userGuide => en
+          ? 'docs/en/USER_GUIDE.md'
+          : fr
+              ? 'docs/fr/GUIDE_DE_L_UTILISATEUR.md'
+              : 'docs/pt/GUIA_DO_USUARIO.md',
+      SupportDocument.troubleshooting => en
+          ? 'docs/en/TROUBLESHOOTING.md'
+          : fr
+              ? 'docs/fr/DEPANNAGE.md'
+              : 'docs/pt/TROUBLESHOOTING.md',
     };
   }
 }
@@ -104,8 +111,10 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
               }
               final target = switch (href) {
                 'GUIA_DO_USUARIO.md' ||
-                'USER_GUIDE.md' => SupportDocument.userGuide,
-                'TROUBLESHOOTING.md' => SupportDocument.troubleshooting,
+                'USER_GUIDE.md' ||
+                'GUIDE_DE_L_UTILISATEUR.md' => SupportDocument.userGuide,
+                'TROUBLESHOOTING.md' ||
+                'DEPANNAGE.md' => SupportDocument.troubleshooting,
                 _ => null,
               };
               if (target != null && target != widget.document) {

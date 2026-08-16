@@ -311,13 +311,35 @@ void main() {
       await UpdateTenantSettingsUseCase(repository).call(
         tenantId: request.id,
         currencyCode: 'XXX',
+        language: 'xx',
+      );
+
+      final updated = await repository.getById(request.id);
+      // Moeda inválida cai no padrão de novos tenants: MZN (metical);
+      // idioma inválido cai no padrão do produto: pt.
+      expect(updated!.currencyCode, 'MZN');
+      expect(updated.language, 'pt');
+    });
+
+    test('aceita o idioma francês (novo idioma suportado pt/en/fr)', () async {
+      final repository = _FakeTenantRepository();
+      final request = await RequestTenantAccessUseCase(repository)(
+        ownerUserId: 'u1',
+        businessName: 'X',
+        planId: 'pl1',
+        currencyCode: 'BRL',
+        language: 'pt',
+      );
+
+      await UpdateTenantSettingsUseCase(repository).call(
+        tenantId: request.id,
+        currencyCode: 'EUR',
         language: 'fr',
       );
 
       final updated = await repository.getById(request.id);
-      // Moeda inválida cai no padrão de novos tenants: MZN (metical).
-      expect(updated!.currencyCode, 'MZN');
-      expect(updated.language, 'pt');
+      expect(updated!.currencyCode, 'EUR');
+      expect(updated.language, 'fr');
     });
   });
 }

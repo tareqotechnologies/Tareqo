@@ -13,13 +13,13 @@ final class PlanLocalDataSourceImpl implements PlanLocalDataSource {
   @override
   Future<List<Plan>> getActivePlans() async => List.unmodifiable(
         [..._plans.where((plan) => plan.isActive)]
-          ..sort((a, b) => a.priceMonthly.compareTo(b.priceMonthly)),
+          ..sort((a, b) => a.priceMonthlyCents.compareTo(b.priceMonthlyCents)),
       );
 
   @override
   Future<List<Plan>> getAllPlans() async => List.unmodifiable(
         [..._plans]
-          ..sort((a, b) => a.priceMonthly.compareTo(b.priceMonthly)),
+          ..sort((a, b) => a.priceMonthlyCents.compareTo(b.priceMonthlyCents)),
       );
 
   @override
@@ -32,6 +32,12 @@ final class PlanLocalDataSourceImpl implements PlanLocalDataSource {
 
   @override
   Future<void> add(Plan plan) async {
+    // Espelha a PRIMARY KEY do banco (Supabase/SQLite): inserir um plano
+    // com id já existente é um erro, não um no-op silencioso (protege
+    // contra duplicação acidental na lista).
+    if (_plans.any((p) => p.id == plan.id)) {
+      throw StateError('Plano ${plan.id} já existe.');
+    }
     _plans.add(plan);
   }
 

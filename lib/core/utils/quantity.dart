@@ -57,7 +57,11 @@ abstract final class Quantity {
   /// quando o produto tem unidade (kg, g, l, ml); 'un' (padrão) não é
   /// exibido — o rótulo de "unidades" fica a cargo do chamador.
   static String format(int milli, {String? unitLabel, String language = 'pt'}) {
-    final locale = language == 'en' ? 'en_US' : 'pt_BR';
+    final locale = switch (language) {
+      'en' => 'en_US',
+      'fr' => 'fr_FR',
+      _ => 'pt_BR',
+    };
     final units = toUnits(milli);
     final number = units == units.roundToDouble()
         ? NumberFormat('#,##0', locale).format(units.round())

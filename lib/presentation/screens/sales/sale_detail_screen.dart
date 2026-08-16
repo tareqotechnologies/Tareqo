@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../data/services/offline_sync_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
@@ -138,6 +139,12 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       messenger.showSnackBar(SnackBar(content: Text(l10n.saleNotFoundError)));
       ref.invalidate(salesListProvider);
       Navigator.of(context).pop();
+    } on OfflineEnqueuedException {
+      // Sem conexão: a anulação foi ENFILEIRADA (outbox) — a venda segue
+      // ativa até o replay; o banner do dashboard mostra a fila.
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.syncOfflineSaved)));
     } catch (error, stackTrace) {
       CrashReporting.capture(error, stackTrace, hint: 'Erro ao anular venda');
       if (!mounted) return;

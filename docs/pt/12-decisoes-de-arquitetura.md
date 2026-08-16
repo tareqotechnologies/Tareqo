@@ -251,7 +251,7 @@ flutter run --dart-define=SUPABASE_URL=https://seu-projeto.supabase.co --dart-de
 
 ### Moeda e idioma do tenant (apresentação)
 
-O dono escolhe a **moeda** (BRL, USD, EUR, MZN — **padrão MZN**, metical, mercado-alvo Moçambique) e o **idioma** (pt, en) no onboarding e pode alterar em **Lojas → Ajustes**. As preferências vivem na tabela `tenants` (`currency_code`, `language`) e propagam para o app inteiro: o locale do `MaterialApp` e a formatação de moeda (`Formatters`) seguem o `tenantSettingsProvider` — funcionários herdam a escolha do dono. A gravação passa pela RPC `update_tenant_settings` (SECURITY DEFINER, guarda `is_tenant_owner`): a política RLS `tenants_update` só permite o super admin alterar a linha do tenant, então o UPDATE direto do dono era bloqueado (ajustes que não salvavam) — a RPC limita o UPDATE às colunas de apresentação.
+O dono escolhe a **moeda** (BRL, USD, EUR, MZN — **padrão MZN**, metical, mercado-alvo Moçambique) e o **idioma** (pt, en, fr) no onboarding e pode alterar em **Lojas → Ajustes**. As preferências vivem na tabela `tenants` (`currency_code`, `language`) e propagam para o app inteiro: o locale do `MaterialApp` e a formatação de moeda (`Formatters`) seguem o `tenantSettingsProvider` — funcionários herdam a escolha do dono. A gravação passa pela RPC `update_tenant_settings` (SECURITY DEFINER, guarda `is_tenant_owner`): a política RLS `tenants_update` só permite o super admin alterar a linha do tenant, então o UPDATE direto do dono era bloqueado (ajustes que não salvavam) — a RPC limita o UPDATE às colunas de apresentação.
 
 ## Armazenamento seguro: por que não usar `shared_preferences` para dados sensíveis?
 

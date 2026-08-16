@@ -297,13 +297,13 @@ CREATE TABLE IF NOT EXISTS public.tenants (
 
   -- Preferências de apresentação escolhidas pelo DONO no onboarding
   -- (alteráveis em Lojas → Ajustes): moeda dos valores e idioma do app.
-  -- `language` ∈ ('pt', 'en') — o app só usa esses dois valores.
+  -- `language` ∈ ('pt', 'en', 'fr') — o app só usa esses três valores.
   -- Moeda padrão dos novos tenants: MZN (metical — mercado-alvo
   -- Moçambique); o dono altera em Lojas → Ajustes.
   currency_code    TEXT NOT NULL DEFAULT 'MZN'
                     CHECK (currency_code IN ('BRL', 'USD', 'EUR', 'MZN')),
   language         TEXT NOT NULL DEFAULT 'pt'
-                    CHECK (language IN ('pt', 'en'))
+                    CHECK (language IN ('pt', 'en', 'fr'))
 );
 
 -- Migração idempotente para bancos já criados (CREATE TABLE IF NOT EXISTS
@@ -1448,7 +1448,7 @@ AS $$
 DECLARE
   v_currency text := CASE WHEN p_currency_code IN ('BRL','USD','EUR','MZN')
                           THEN p_currency_code ELSE 'MZN' END;
-  v_lang text := CASE WHEN p_language IN ('pt','en')
+  v_lang text := CASE WHEN p_language IN ('pt','en','fr')
                       THEN p_language ELSE 'pt' END;
 BEGIN
   IF NOT public.is_tenant_owner(p_tenant_id) THEN
@@ -1740,11 +1740,17 @@ RETURNS text
 LANGUAGE sql
 STABLE
 AS $$
-  SELECT CASE WHEN p_lang = 'en' THEN
+  SELECT CASE p_lang WHEN 'en' THEN
       CASE p_method
         WHEN 'cash' THEN 'Cash' WHEN 'debitCard' THEN 'Debit card'
         WHEN 'creditCard' THEN 'Credit card' WHEN 'mPesa' THEN 'M-Pesa'
         WHEN 'eMola' THEN 'E-Mola' WHEN 'transfer' THEN 'Bank transfer'
+        ELSE p_method END
+    WHEN 'fr' THEN
+      CASE p_method
+        WHEN 'cash' THEN 'Espèces' WHEN 'debitCard' THEN 'Carte de débit'
+        WHEN 'creditCard' THEN 'Carte de crédit' WHEN 'mPesa' THEN 'M-Pesa'
+        WHEN 'eMola' THEN 'E-Mola' WHEN 'transfer' THEN 'Virement'
         ELSE p_method END
     ELSE
       CASE p_method
@@ -1941,7 +1947,7 @@ BEGIN
   FROM public.stores s
   JOIN public.tenants t ON t.id = s.tenant_id
   WHERE s.id = v_store;
-  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en') THEN
+  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en', 'fr') THEN
     v_lang := 'pt';
   END IF;
   -- Idempotência: o id da venda é a chave de idempotência — um retry após
@@ -2033,10 +2039,12 @@ BEGIN
   INSERT INTO public.financial_transactions
     (id, user_id, store_id, description, amount, type, category, date, status)
   VALUES ('t' || (p_sale->>'id'), v_uid, v_store,
-          CASE WHEN v_lang = 'en' THEN 'Sale — ' ELSE 'Venda ' END
+          CASE v_lang WHEN 'en' THEN 'Sale — ' WHEN 'fr' THEN 'Vente — '
+                      ELSE 'Venda ' END
             || public.payment_method_label(p_sale->>'payment_method', v_lang),
           v_total, 'income',
-          CASE WHEN v_lang = 'en' THEN 'Sales' ELSE 'Vendas' END,
+          CASE v_lang WHEN 'en' THEN 'Sales' WHEN 'fr' THEN 'Ventes'
+                      ELSE 'Vendas' END,
           (p_sale->>'date_time')::timestamptz, 'paid');
 END;
 $$;
@@ -2091,7 +2099,7 @@ BEGIN
   FROM public.stores s
   JOIN public.tenants t ON t.id = s.tenant_id
   WHERE s.id = p_store_id;
-  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en') THEN
+  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en', 'fr') THEN
     v_lang := 'pt';
   END IF;
   -- Lê e trava a venda (escopo por loja). Idempotência: venda já anulada
@@ -2133,10 +2141,13 @@ BEGIN
   INSERT INTO public.financial_transactions
     (id, user_id, store_id, description, amount, type, category, date, status)
   VALUES ('t' || p_sale_id || '_rev', v_uid, p_store_id,
-          CASE WHEN v_lang = 'en' THEN 'Sale reversal — ' ELSE 'Estorno de venda — ' END
+          CASE v_lang WHEN 'en' THEN 'Sale reversal — '
+                      WHEN 'fr' THEN 'Annulation de vente — '
+                      ELSE 'Estorno de venda — ' END
             || public.payment_method_label(v_method, v_lang),
           v_total, 'expense',
-          CASE WHEN v_lang = 'en' THEN 'Sales' ELSE 'Vendas' END,
+          CASE v_lang WHEN 'en' THEN 'Sales' WHEN 'fr' THEN 'Ventes'
+                      ELSE 'Vendas' END,
           now(), 'paid');
 
   -- Marca a venda como anulada (permanece no histórico).
@@ -2370,7 +2381,7 @@ BEGIN
   FROM public.stores s
   JOIN public.tenants t ON t.id = s.tenant_id
   WHERE s.id = v_store;
-  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en') THEN
+  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en', 'fr') THEN
     v_lang := 'pt';
   END IF;
   IF (p_debt->>'amount')::bigint <= 0 THEN
@@ -2401,10 +2412,14 @@ BEGIN
   INSERT INTO public.financial_transactions
     (id, user_id, store_id, description, amount, type, category, date, status, debt_id)
   VALUES ('t' || (p_debt->>'id'), v_uid, v_store,
-          CASE WHEN v_lang = 'en' THEN
+          CASE v_lang WHEN 'en' THEN
             CASE WHEN v_customer_debt
                  THEN 'Credit to receive — ' || (p_debt->>'person_name')
                  ELSE 'Credit to pay — ' || (p_debt->>'person_name') END
+            WHEN 'fr' THEN
+            CASE WHEN v_customer_debt
+                 THEN 'Crédit à recevoir — ' || (p_debt->>'person_name')
+                 ELSE 'Crédit à payer — ' || (p_debt->>'person_name') END
           ELSE
             CASE WHEN v_customer_debt
                  THEN 'Fiado a receber — ' || (p_debt->>'person_name')
@@ -2412,7 +2427,8 @@ BEGIN
           END,
           (p_debt->>'amount')::bigint,
           CASE WHEN v_customer_debt THEN 'income' ELSE 'expense' END,
-          CASE WHEN v_lang = 'en' THEN 'Credit' ELSE 'Fiado' END,
+          CASE v_lang WHEN 'en' THEN 'Credit' WHEN 'fr' THEN 'Crédit'
+                      ELSE 'Fiado' END,
           now(), 'pending', p_debt->>'id');
 END;
 $$;
@@ -2444,7 +2460,7 @@ BEGIN
   FROM public.stores s
   JOIN public.tenants t ON t.id = s.tenant_id
   WHERE s.id = p_store;
-  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en') THEN
+  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en', 'fr') THEN
     v_lang := 'pt';
   END IF;
 
@@ -2493,11 +2509,14 @@ BEGIN
       (id, user_id, store_id, description, amount, type, category,
        date, status, debt_id)
     VALUES ('t' || p_debt_id || '_settle', v_uid, p_store,
-            CASE WHEN v_lang = 'en'
+            CASE v_lang WHEN 'en'
                  THEN 'Credit received — ' || v_debt.person_name
+                 WHEN 'fr'
+                 THEN 'Crédit reçu — ' || v_debt.person_name
                  ELSE 'Recebimento de fiado — ' || v_debt.person_name END,
             v_debt.amount, 'income',
-            CASE WHEN v_lang = 'en' THEN 'Credit' ELSE 'Fiado' END,
+            CASE v_lang WHEN 'en' THEN 'Credit' WHEN 'fr' THEN 'Crédit'
+                        ELSE 'Fiado' END,
             now(), 'paid', p_debt_id);
   END IF;
 END;
@@ -2535,7 +2554,7 @@ BEGIN
   FROM public.stores s
   JOIN public.tenants t ON t.id = s.tenant_id
   WHERE s.id = v_store;
-  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en') THEN
+  IF v_lang IS NULL OR v_lang NOT IN ('pt', 'en', 'fr') THEN
     v_lang := 'pt';
   END IF;
   -- Idempotência: o id da compra é a chave de idempotência.
@@ -2611,11 +2630,14 @@ BEGIN
   INSERT INTO public.financial_transactions
     (id, user_id, store_id, description, amount, type, category, date, status)
   VALUES ('t' || (p_purchase->>'id'), v_uid, v_store,
-          CASE WHEN v_lang = 'en'
+          CASE v_lang WHEN 'en'
                THEN 'Purchase — ' || (p_purchase->>'supplier_name')
+               WHEN 'fr'
+               THEN 'Achat — ' || (p_purchase->>'supplier_name')
                ELSE 'Compra — ' || (p_purchase->>'supplier_name') END,
           v_total, 'expense',
-          CASE WHEN v_lang = 'en' THEN 'Purchases' ELSE 'Compras' END,
+          CASE v_lang WHEN 'en' THEN 'Purchases' WHEN 'fr' THEN 'Achats'
+                      ELSE 'Compras' END,
           (p_purchase->>'date_time')::timestamptz, 'paid');
 END;
 $$;

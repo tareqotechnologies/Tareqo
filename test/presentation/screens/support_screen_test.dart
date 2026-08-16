@@ -50,9 +50,20 @@ void main() {
       );
     });
 
-    test('idioma desconhecido cai no português (padrão do produto)', () {
+    test('fr → documentos em francês', () {
       expect(
         SupportDocument.userGuide.assetPath('fr'),
+        'docs/fr/GUIDE_DE_L_UTILISATEUR.md',
+      );
+      expect(
+        SupportDocument.troubleshooting.assetPath('fr'),
+        'docs/fr/DEPANNAGE.md',
+      );
+    });
+
+    test('idioma desconhecido cai no português (padrão do produto)', () {
+      expect(
+        SupportDocument.userGuide.assetPath('zz'),
         'docs/pt/GUIA_DO_USUARIO.md',
       );
       expect(

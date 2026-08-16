@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
 import '../../core/utils/period_utils.dart';
+import '../../data/services/offline_sync_service.dart';
 import '../../domain/entities/sale.dart';
 import '../../domain/usecases/get_dashboard_kpis_use_case.dart';
 import 'account_providers.dart';
@@ -20,6 +21,30 @@ final getDashboardKpisUseCaseProvider = Provider<GetDashboardKpisUseCase?>(
       ? ServiceLocator.instance<GetDashboardKpisUseCase>()
       : null,
 );
+
+/// Ponte com o ServiceLocator: serviço de sincronização offline — `null`
+/// quando não registrado (modo local/testes), onde não há outbox.
+final offlineSyncServiceProvider = Provider<OfflineSyncService?>(
+  (ref) => ServiceLocator.instance.isRegistered<OfflineSyncService>()
+      ? ServiceLocator.instance<OfflineSyncService>()
+      : null,
+);
+
+/// Operações pendentes de sincronização (outbox offline do modo SaaS) —
+/// alimenta o banner do dashboard.
+///
+/// Emite a contagem ATUAL primeiro e depois as mudanças do
+/// [OfflineSyncService] (enfileiramento/dreno). Sem o serviço registrado
+/// (modo local/testes) vale 0 — o banner simplesmente não aparece.
+final pendingOpsCountProvider = StreamProvider<int>((ref) async* {
+  final sync = ref.watch(offlineSyncServiceProvider);
+  if (sync == null) {
+    yield 0;
+    return;
+  }
+  yield await sync.count();
+  yield* sync.countChanges;
+});
 
 /// KPIs do dashboard (escala W5):
 ///

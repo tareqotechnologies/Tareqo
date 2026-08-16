@@ -174,6 +174,13 @@ class _TenantOnboardingScreenState
                               onSelected: (_) =>
                                   setState(() => _language = 'en'),
                             ),
+                            _ChoiceChip(
+                              label: l10n.languageFrench,
+                              icon: Icons.translate,
+                              selected: _language == 'fr',
+                              onSelected: (_) =>
+                                  setState(() => _language = 'fr'),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 20),

@@ -38,6 +38,7 @@
   "onboardingCurrencyHint": "Moeda usada nos valores",
   "languagePortuguese": "Português",
   "languageEnglish": "English",
+  "languageFrench": "Français",
   "currencyBrl": "Real (BRL)",
   "currencyUsd": "Dólar (USD)",
   "currencyEur": "Euro (EUR)",
@@ -59,6 +60,7 @@
   "commonRetry": "Tentar novamente",
   "commonSignOut": "Sair da conta",
   "appSheetClose": "Fechar",
+  "storeSwitcherTooltip": "Trocar de loja",
   "storeSelectorSectionTitle": "Loja ativa",
   "storeSelectorSectionHint": "Escolha a loja cujos dados aparecem nos módulos (vendas, estoque, financeiro).",
   "tenantPendingTitle": "Aguardando aprovação",
@@ -138,6 +140,25 @@
   "appNavFinancial": "Financeiro",
   "appNavCredit": "Crédito",
   "appNavCustomers": "Clientes",
+  "syncPendingCount": "{count, plural, =1{1 operação aguardando sincronização} other{{count} operações aguardando sincronização}}",
+  "@syncPendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncNow": "Sincronizar",
+  "syncOfflineSaved": "Sem conexão. A operação foi salva e será sincronizada automaticamente.",
+  "syncDone": "{count, plural, =1{1 operação sincronizada} other{{count} operações sincronizadas}}",
+  "@syncDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncStillOffline": "Sem conexão — as operações continuam pendentes.",
   "dashboardGreeting": "Olá, {name} 👋",
   "@dashboardGreeting": {
     "placeholders": {
@@ -544,6 +565,7 @@
   "cashClosingHistoryEmpty": "Nenhum fecho registrado ainda.",
   "debtsTitle": "Crédito (fiado)",
   "debtsAddDebt": "Registrar fiado",
+  "debtsSearchHint": "Buscar por nome do cliente...",
   "debtsTabPending": "Pendentes",
   "debtsTabSettled": "Quitadas",
   "debtsTotalPending": "Total a receber",

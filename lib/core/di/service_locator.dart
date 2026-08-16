@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get_it/get_it.dart';
 
 import '../../core/config/supabase_config.dart';
@@ -21,6 +23,8 @@ import '../../data/datasources/local/plan_request_local_data_source.dart';
 import '../../data/datasources/local/plan_request_local_data_source_impl.dart';
 import '../../data/datasources/local/product_local_data_source.dart';
 import '../../data/datasources/local/product_local_data_source_impl.dart';
+import '../../data/datasources/local/pending_op_queue.dart';
+import '../../data/datasources/local/pending_op_queue_memory_impl.dart';
 import '../../data/datasources/local/purchase_local_data_source.dart';
 import '../../data/datasources/local/purchase_local_data_source_impl.dart';
 import '../../data/datasources/local/sale_local_data_source.dart';
@@ -28,6 +32,8 @@ import '../../data/datasources/local/sale_local_data_source_impl.dart';
 import '../../data/datasources/local/stock_lot_local_data_source.dart';
 import '../../data/datasources/local/stock_lot_local_data_source_impl.dart';
 import '../../data/datasources/local/store_local_data_source.dart';
+import '../../data/services/offline_aware_processors.dart';
+import '../../data/services/offline_sync_service.dart';
 import '../../data/services/product_image_store_local.dart';
 import '../../data/services/product_image_store_noop.dart';
 import '../../data/services/product_image_store_supabase.dart';
@@ -77,6 +83,9 @@ import '../../data/services/supabase_sale_cancellation_processor.dart';
 import '../../data/services/supabase_sale_processor.dart';
 import '../../data/services/supabase_cash_closing_processor.dart';
 import '../../data/services/supabase_stock_adjustment_processor.dart';
+import '../../domain/entities/debt.dart';
+import '../../domain/entities/purchase.dart';
+import '../../domain/entities/sale.dart';
 import '../../domain/repositories/i_admin_repository.dart';
 import '../../domain/repositories/i_employee_account_processor.dart';
 import '../../domain/repositories/i_product_image_store.dart';
@@ -192,6 +201,25 @@ final class ServiceLocator {
       );
     }
 
+    // SQLite é aberto em TODOS os modos nativos: banco principal no modo
+    // LOCAL; no modo SaaS serve a FILA OFFLINE (outbox) — operações do
+    // caminho de dinheiro enfileiradas sem conexão e reenviadas pelo
+    // OfflineSyncService. Na web (dart:ffi indisponível) a fila cai para
+    // memória (não persiste entre sessões — limitação documentada).
+    final sqliteAvailable = await AppDatabase.openAppDatabase();
+    if (sqliteAvailable) {
+      AppDatabase.registerOfflineQueue(instance);
+    } else {
+      instance.registerLazySingleton<IPendingOpQueue>(
+        PendingOpQueueMemoryImpl.new,
+      );
+    }
+    // Serviço de sincronização — registrado em todos os modos (a fila
+    // existe sempre; no local fica vazia, no SaaS é o outbox).
+    instance.registerLazySingleton<OfflineSyncService>(
+      () => OfflineSyncService(instance<IPendingOpQueue>()),
+    );
+
     // Persistência (em ordem de precedência):
     // 1. Supabase configurado → datasources REMOTOS (dados por tenant via
     //    RLS) — o modelo SaaS do produto;
@@ -206,7 +234,12 @@ final class ServiceLocator {
       instance.registerLazySingleton<IProductImageStore>(
         () => const ProductImageStoreSupabase(),
       );
-    } else if (await AppDatabase.openAppDatabase()) {
+      // Dreno do boot: reenvia pendências de sessões offline anteriores.
+      // + dreno automático periódico enquanto o app estiver aberto.
+      final sync = instance<OfflineSyncService>();
+      unawaited(sync.drain());
+      sync.startAutoDrain();
+    } else if (sqliteAvailable) {
       AppDatabase.registerDatasources(instance);
       _registerLocalAccountDatasources();
       instance.registerLazySingleton<IProductImageStore>(
@@ -228,21 +261,74 @@ final class ServiceLocator {
   /// operações multi-tabela críticas (venda/compra) delegam às RPCs
   /// atômicas `process_sale`/`process_purchase` do schema.
   static void _registerSupabaseDatasources() {
+    // Processadores REMOTOS (RPC atômicas) — compartilhados entre o
+    // caminho normal e o replay da fila offline. Os registrados NO GetIt
+    // são os wrappers offline-aware: sem rede, o comando é enfileirado
+    // (outbox) e o OfflineSyncService reenviará; os replayers abaixo
+    // reconstroem a entidade do payload e reexecutam a MESMA RPC
+    // (idempotente por design — o id do registro é a chave).
+    final sync = instance<OfflineSyncService>();
+    final saleProcessor = const SupabaseSaleProcessor(
+      SaleSupabaseDataSourceImpl(),
+    );
+    final purchaseProcessor = const SupabasePurchaseProcessor(
+      PurchaseSupabaseDataSourceImpl(),
+    );
+    final debtProcessor = const SupabaseDebtProcessor(
+      DebtSupabaseDataSourceImpl(),
+    );
+    final cancellationProcessor = const SupabaseSaleCancellationProcessor(
+      SaleSupabaseDataSourceImpl(),
+    );
+
+    sync
+      ..registerReplayer(
+        'process_sale',
+        (payload) => saleProcessor.process(
+          Sale.fromJson(payload['sale'] as Map<String, dynamic>),
+        ),
+      )
+      ..registerReplayer(
+        'process_purchase',
+        (payload) => purchaseProcessor.process(
+          Purchase.fromJson(payload['purchase'] as Map<String, dynamic>),
+        ),
+      )
+      ..registerReplayer(
+        'register_debt',
+        (payload) => debtProcessor.register(
+          Debt.fromJson(payload['debt'] as Map<String, dynamic>),
+        ),
+      )
+      ..registerReplayer(
+        'settle_debt',
+        (payload) => debtProcessor.settle(
+          payload['debtId'] as String,
+          storeId: payload['storeId'] as String,
+        ),
+      )
+      ..registerReplayer(
+        'cancel_sale',
+        (payload) => cancellationProcessor.cancel(
+          payload['saleId'] as String,
+          storeId: payload['storeId'] as String,
+        ),
+      );
+
     instance
       ..registerLazySingleton<IUnitOfWork>(() => const _DirectUnitOfWork())
       // Processadores ATÔMICOS (RPC): venda/compra + itens + estoque +
       // caixa em UMA transação no banco (funções `process_sale`/
-      // `process_purchase` em supabase/schema.sql).
+      // `process_purchase` em supabase/schema.sql). Wrappers offline-aware:
+      // sem conexão o comando é enfileirado e reenviado automaticamente.
       ..registerLazySingleton<ISaleAtomicProcessor>(
-        () => const SupabaseSaleProcessor(SaleSupabaseDataSourceImpl()),
+        () => OfflineAwareSaleProcessor(saleProcessor, sync),
       )
       // Anulação de venda (RPC `cancel_sale` — estorno de estoque nos
       // lotes exatos + estorno de caixa + status, UMA transação, guarda
       // gerencial is_manager_of_store). Mesmo padrão dos demais.
       ..registerLazySingleton<ISaleCancellationProcessor>(
-        () => const SupabaseSaleCancellationProcessor(
-          SaleSupabaseDataSourceImpl(),
-        ),
+        () => OfflineAwareSaleCancellationProcessor(cancellationProcessor, sync),
       )
       // Ajuste manual de estoque (RPC `adjust_product_stock` — define a
       // quantidade absoluta criando/consumindo LOTES FIFO em UMA transação
@@ -254,10 +340,10 @@ final class ServiceLocator {
         ),
       )
       ..registerLazySingleton<IPurchaseAtomicProcessor>(
-        () => const SupabasePurchaseProcessor(PurchaseSupabaseDataSourceImpl()),
+        () => OfflineAwarePurchaseProcessor(purchaseProcessor, sync),
       )
       ..registerLazySingleton<IDebtAtomicProcessor>(
-        () => const SupabaseDebtProcessor(DebtSupabaseDataSourceImpl()),
+        () => OfflineAwareDebtProcessor(debtProcessor, sync),
       )
       ..registerLazySingleton<ProductLocalDataSource>(
         () => ProductSupabaseDataSourceImpl(),

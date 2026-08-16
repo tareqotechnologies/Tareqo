@@ -223,6 +223,117 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
+  testWidgets('busca por nome filtra a lista (case-insensitive)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetProductsUseCase(const [
+          Product(
+            id: '1',
+            name: 'Caneta Azul',
+            purchasePriceCents: 100,
+            salePriceCents: 200,
+          ),
+          Product(
+            id: '2',
+            name: 'Caderno',
+            purchasePriceCents: 500,
+            salePriceCents: 990,
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Caneta Azul'), findsOneWidget);
+    expect(find.text('Caderno'), findsOneWidget);
+
+    // MAIÚSCULAS: o termo digitado é normalizado — 'CANETA' acha
+    // 'Caneta Azul' (regressão: antes o query não era convertido e a
+    // busca com maiúscula não achava nada).
+    await tester.enterText(find.byType(TextField), 'CANETA');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Caneta Azul'), findsOneWidget);
+    expect(find.text('Caderno'), findsNothing);
+
+    // Parte do nome, minúscula — filtra para o outro produto.
+    await tester.enterText(find.byType(TextField), 'cad');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Caderno'), findsOneWidget);
+    expect(find.text('Caneta Azul'), findsNothing);
+  });
+
+  testWidgets('busca sem resultado mostra o estado próprio', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetProductsUseCase(const [
+          Product(
+            id: '1',
+            name: 'Caneta Azul',
+            purchasePriceCents: 100,
+            salePriceCents: 200,
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'zzz');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nenhum resultado'), findsOneWidget);
+    expect(find.text('Caneta Azul'), findsNothing);
+  });
+
+  testWidgets('busca combina com o filtro de estoque baixo', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeGetProductsUseCase(const [
+          // Estoque 0 (milésimos) → abaixo do limiar (5 unidades = 5000):
+          // entra no filtro de estoque baixo.
+          Product(
+            id: '1',
+            name: 'Caneta Azul',
+            purchasePriceCents: 100,
+            salePriceCents: 200,
+          ),
+          // Estoque 10 unidades → fora do filtro.
+          Product(
+            id: '2',
+            name: 'Caderno',
+            purchasePriceCents: 500,
+            salePriceCents: 990,
+            stockQuantity: 10000,
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Ativa o filtro rápido de estoque baixo (menu do AppBar).
+    await tester.tap(find.byIcon(Icons.filter_list));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Estoque baixo'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Caneta Azul'), findsOneWidget);
+    expect(find.text('Caderno'), findsNothing);
+
+    // Buscar um produto fora do filtro → sem resultados.
+    await tester.enterText(find.byType(TextField), 'caderno');
+    await tester.pumpAndSettle();
+    expect(find.text('Nenhum resultado'), findsOneWidget);
+    expect(find.text('Caneta Azul'), findsNothing);
+
+    // Buscar um produto DENTRO do filtro → aparece.
+    await tester.enterText(find.byType(TextField), 'caneta');
+    await tester.pumpAndSettle();
+    expect(find.text('Caneta Azul'), findsOneWidget);
+  });
+
   // Regressão (W11): ativar "Venda por peso" renderizava o dropdown de
   // unidade com o valor padrão 'un' — que não existe na lista de itens
   // (kg/g/l/ml) — e o DropdownButtonFormField lançava a asserção "exactly

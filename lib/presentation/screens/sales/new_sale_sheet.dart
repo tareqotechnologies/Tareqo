@@ -32,6 +32,7 @@ import '../../widgets/product_image.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/smart_amount.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../data/services/offline_sync_service.dart';
 
 /// Carrinho de nova venda: seleciona produtos, define quantidades
 /// (inteiras ou por peso, com decimais), lê códigos de barras (balanças
@@ -343,6 +344,12 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       ref.invalidate(transactionsProvider);
       ref.invalidate(cashFlowProvider);
       ref.invalidate(dashboardKpisProvider);
+    } on OfflineEnqueuedException {
+      // Sem conexão: a venda foi ENFILEIRADA (outbox) — fecha o balcão e
+      // avisa que será sincronizada (o banner do dashboard mostra a fila).
+      if (!mounted) return;
+      navigator.pop();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.syncOfflineSaved)));
     } on InsufficientStockException catch (error) {
       final product = _productById(error.productId);
       setState(() {
@@ -441,13 +448,17 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                 final active = all
                     .where((product) => product.isActive)
                     .toList();
+                // Query NORMALIZADO para minúsculas (mesmo padrão da busca
+                // de Produtos): sem isso, digitar 'CANETA' não achava o
+                // produto no balcão.
+                final query = _query.toLowerCase();
                 final filtered = _query.isEmpty
                     ? active
                     : active
                           .where(
                             (product) =>
-                                product.name.toLowerCase().contains(_query) ||
-                                product.code.contains(_query),
+                                product.name.toLowerCase().contains(query) ||
+                                product.code.toLowerCase().contains(query),
                           )
                           .toList();
 

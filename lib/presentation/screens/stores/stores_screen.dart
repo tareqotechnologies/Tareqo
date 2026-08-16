@@ -1435,6 +1435,11 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
               selected: _language == 'en',
               onSelected: (_) => setState(() => _language = 'en'),
             ),
+            ChoiceChip(
+              label: Text(l10n.languageFrench),
+              selected: _language == 'fr',
+              onSelected: (_) => setState(() => _language = 'fr'),
+            ),
           ],
         ),
         const SizedBox(height: 24),

@@ -4,14 +4,15 @@ import 'add_plan_use_case.dart';
 
 /// Caso de uso: atualizar um plano existente (super admin).
 ///
-/// Reutiliza as mesmas validações do [AddPlanUseCase] antes de persistir.
+/// Aplica as mesmas validações de criação ([validatePlan]) antes de
+/// persistir — sem nunca inserir (o UPDATE não deve chamar o INSERT).
 class UpdatePlanUseCase {
   const UpdatePlanUseCase(this._repository);
 
   final IPlanRepository _repository;
 
   Future<void> call(Plan plan) async {
-    await AddPlanUseCase(_repository).call(plan);
+    validatePlan(plan);
     await _repository.update(plan);
   }
 }

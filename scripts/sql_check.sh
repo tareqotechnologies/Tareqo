@@ -214,6 +214,55 @@ owner_status="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_
 
 EMP_UID="22222222-2222-2222-2222-222222222222"
 
+echo "==> [3c] Planos: RLS — super admin cria/edita, dono comum não (C3)"
+# Regressão do painel de planos: o INSERT/UPDATE/DELETE em `plans` só é
+# permitido ao super admin (política is_super_admin); o catálogo é leitura
+# para qualquer usuário logado (onboarding/upgrade). Sem estas políticas
+# (bancos antigos migrados só pelo upgrade.sql), o RLS nega o INSERT e o
+# super admin não consegue criar/editar planos no painel.
+
+# Super admin INSERE um plano novo (via PostgREST/app_user — RLS ativo).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "99999999-9999-9999-9999-999999999999"}';
+INSERT INTO public.plans
+  (id, name, description, price_monthly, max_stores, max_employees, is_active)
+VALUES ('pl_rls_smoke', 'Plano RLS Smoke', 'teste', 12345, 2, 4, TRUE)
+ON CONFLICT (id) DO NOTHING;
+SQL
+
+plan_admin_insert="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${ADMIN_UID}\"}'; SELECT count(*) FROM public.plans WHERE id = 'pl_rls_smoke';" | tail -n 1)"
+[ "$plan_admin_insert" = "1" ] || {
+  echo "FALHA: super admin deveria criar plano via INSERT direto (obtido: '$plan_admin_insert')"
+  exit 1
+}
+
+# Super admin EDITA o plano (UPDATE direto — o caminho do painel).
+psql_app -v ON_ERROR_STOP=1 <<'SQL'
+SET request.jwt.claims = '{"sub": "99999999-9999-9999-9999-999999999999"}';
+UPDATE public.plans SET name = 'Plano RLS Smoke v2' WHERE id = 'pl_rls_smoke';
+SQL
+
+plan_admin_update="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${ADMIN_UID}\"}'; SELECT name FROM public.plans WHERE id = 'pl_rls_smoke';" | tail -n 1)"
+[ "$plan_admin_update" = "Plano RLS Smoke v2" ] || {
+  echo "FALHA: super admin deveria editar plano via UPDATE direto (obtido: '$plan_admin_update')"
+  exit 1
+}
+
+# DONO comum NÃO cria (RLS nega o INSERT — a política exige super admin).
+plan_owner_insert="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; INSERT INTO public.plans (id, name) VALUES ('pl_rls_deny', 'Negado') RETURNING id;" | tail -n 1)"
+[ -z "$plan_owner_insert" ] || {
+  echo "FALHA: dono comum não deveria criar plano (obtido: '$plan_owner_insert')"
+  exit 1
+}
+
+# Qualquer logado LÊ o catálogo (onboarding/upgrade): dono enxerga os 3
+# planos do seed + o criado pelo admin no teste acima.
+plan_owner_read="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.plans WHERE is_active;" | tail -n 1)"
+[ "$plan_owner_read" -ge 3 ] 2>/dev/null || {
+  echo "FALHA: usuário logado deveria ler o catálogo de planos (obtido: '$plan_owner_read')"
+  exit 1
+}
+
 echo "==> [4/5] Funcionário: acesso por LOJA no modo SaaS (auditoria C2)"
 # Bloqueador C2 da auditoria: funcionários são OUTROS usuários (não o
 # dono), então o RLS antigo (auth.uid() = user_id) os deixava sem NENHUM

@@ -15,12 +15,15 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/search_field.dart';
 import '../../widgets/smart_amount.dart';
+import '../../widgets/store_switcher.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/status_chip.dart';
 import 'add_debt_sheet.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../data/services/offline_sync_service.dart';
 
 /// Aba exibida na tela de crédito.
 enum _DebtView {
@@ -43,6 +46,25 @@ class DebtsScreen extends ConsumerStatefulWidget {
 class _DebtsScreenState extends ConsumerState<DebtsScreen> {
   _DebtView _view = _DebtView.pending;
 
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// Busca local pelo nome do devedor (case-insensitive) — filtra a lista
+  /// do provider; o provider continua entregando TODA a dívida da loja.
+  List<Debt> _filtered(List<Debt> debts) {
+    if (_query.isEmpty) return debts;
+    final query = _query.toLowerCase();
+    return debts
+        .where((debt) => debt.personName.toLowerCase().contains(query))
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -51,14 +73,18 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     final settledAsync = ref.watch(settledDebtsProvider);
 
     final debts = debtsAsync.value ?? const <Debt>[];
+    final settled = settledAsync.value ?? const <Debt>[];
+
+    // Busca local pelo nome: o filtro também afeta os totais/resumos — com
+    // a busca ativa o resumo mostra o quanto AQUELE devedor deve.
+    final visibleDebts = _filtered(debts);
+    final visibleSettled = _filtered(settled);
     // Somas em CENTAVOS inteiros (W4) — int é exato.
-    final pendingTotalCents = debts.fold<int>(
+    final pendingTotalCents = visibleDebts.fold<int>(
       0,
       (sum, debt) => sum + debt.amountCents,
     );
-
-    final settled = settledAsync.value ?? const <Debt>[];
-    final settledTotalCents = settled.fold<int>(
+    final settledTotalCents = visibleSettled.fold<int>(
       0,
       (sum, debt) => sum + debt.amountCents,
     );
@@ -69,7 +95,10 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     final hasDebtActivity = debts.isNotEmpty || settled.isNotEmpty;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.debtsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.debtsTitle),
+        actions: const [StoreSwitcher()],
+      ),
       floatingActionButton: hasDebtActivity
           // FAB circular (design system — igual ao "Novo produto"): só o
           // sinal de +, com tooltip — o rótulo nunca é cortado pelo círculo.
@@ -115,6 +144,12 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+            SearchField(
+              controller: _searchController,
+              hintText: l10n.debtsSearchHint,
+              onChanged: (value) => setState(() => _query = value.trim()),
+            ),
             const SizedBox(height: 16),
             if (_view == _DebtView.pending) ...[
               _SummaryCard(
@@ -122,9 +157,9 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                 icon: Icons.receipt_long,
                 title: l10n.debtsTotalPending,
                 value: Formatters.currency(pendingTotalCents),
-                subtitle: debts.isEmpty
+                subtitle: visibleDebts.isEmpty
                     ? l10n.debtsNoPendingCustomers
-                    : l10n.debtsPendingCustomers(debts.length),
+                    : l10n.debtsPendingCustomers(visibleDebts.length),
               ),
               const SizedBox(height: 24),
               SectionHeader(title: l10n.debtsPendingSection),
@@ -140,7 +175,17 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                   onRetry: () => ref.invalidate(pendingDebtsProvider),
                 ),
                 data: (items) {
-                  if (items.isEmpty) {
+                  final filtered = _filtered(items);
+                  if (filtered.isEmpty) {
+                    // Busca sem resultado: estado próprio (sem CTA — a
+                    // busca é sobre a lista carregada, não sobre a loja).
+                    if (_query.isNotEmpty) {
+                      return EmptyState(
+                        icon: Icons.search_off,
+                        title: l10n.commonNoResults,
+                        subtitle: l10n.commonNoResultsHint,
+                      );
+                    }
                     return EmptyState(
                       icon: Icons.celebration_outlined,
                       title: l10n.debtsEmptyPendingTitle,
@@ -155,7 +200,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                   }
                   return Column(
                     children: [
-                      for (final debt in items) ...[
+                      for (final debt in filtered) ...[
                         _DebtCard(
                           debt: debt,
                           onSettle: () => _settleDebt(context, debt),
@@ -172,7 +217,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                 icon: Icons.history,
                 title: l10n.debtsTotalSettled,
                 value: Formatters.currency(settledTotalCents),
-                subtitle: l10n.debtsSettledCount(settled.length),
+                subtitle: l10n.debtsSettledCount(visibleSettled.length),
               ),
               const SizedBox(height: 24),
               SectionHeader(title: l10n.debtsSettledSection),
@@ -188,7 +233,17 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                   onRetry: () => ref.invalidate(settledDebtsProvider),
                 ),
                 data: (items) {
-                  if (items.isEmpty) {
+                  final filtered = _filtered(items);
+                  if (filtered.isEmpty) {
+                    // Busca sem resultado no histórico (mesmo tratamento
+                    // da aba Pendentes — sem CTA).
+                    if (_query.isNotEmpty) {
+                      return EmptyState(
+                        icon: Icons.search_off,
+                        title: l10n.commonNoResults,
+                        subtitle: l10n.commonNoResultsHint,
+                      );
+                    }
                     return EmptyState(
                       icon: Icons.history_toggle_off,
                       title: l10n.debtsEmptySettledTitle,
@@ -197,7 +252,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                   }
                   return Column(
                     children: [
-                      for (final debt in items) ...[
+                      for (final debt in filtered) ...[
                         _SettledDebtCard(debt: debt),
                         const SizedBox(height: 8),
                       ],
@@ -283,6 +338,11 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
       if (!context.mounted) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.debtsNotFound)));
       ref.invalidate(pendingDebtsProvider);
+    } on OfflineEnqueuedException {
+      // Sem conexão: a baixa foi ENFILEIRADA (outbox) — a dívida segue na
+      // lista pendente até o replay no servidor; o banner mostra a fila.
+      if (!context.mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(l10n.syncOfflineSaved)));
     } catch (error, stackTrace) {
       CrashReporting.capture(error, stackTrace, hint: 'Erro ao quitar fiado');
       if (!context.mounted) return;

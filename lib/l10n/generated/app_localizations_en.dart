@@ -71,6 +71,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageEnglish => 'English';
 
   @override
+  String get languageFrench => 'Français';
+
+  @override
   String get currencyBrl => 'Brazilian Real (BRL)';
 
   @override
@@ -136,6 +139,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appSheetClose => 'Close';
+
+  @override
+  String get storeSwitcherTooltip => 'Switch store';
 
   @override
   String get storeSelectorSectionTitle => 'Active store';
@@ -347,6 +353,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appNavCustomers => 'Customers';
+
+  @override
+  String syncPendingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count operations awaiting sync',
+      one: '1 operation awaiting sync',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncNow => 'Sync now';
+
+  @override
+  String get syncOfflineSaved =>
+      'No connection. The operation was saved and will sync automatically.';
+
+  @override
+  String syncDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count operations synced',
+      one: '1 operation synced',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncStillOffline => 'No connection — operations remain pending.';
 
   @override
   String dashboardGreeting(String name) {
@@ -1223,6 +1261,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get debtsAddDebt => 'Register credit';
+
+  @override
+  String get debtsSearchHint => 'Search by customer name...';
 
   @override
   String get debtsTabPending => 'Pending';

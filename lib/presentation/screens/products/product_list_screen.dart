@@ -28,6 +28,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../widgets/search_field.dart';
+import '../../widgets/store_switcher.dart';
 import '../../widgets/status_chip.dart';
 import '../../../core/observability/crash_reporting.dart';
 
@@ -86,6 +87,9 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       appBar: AppBar(
         title: Text(l10n.appNavProducts),
         actions: [
+          // Seletor rápido de loja ativa (multi-loja) — mais à direita,
+          // junto à borda (a ação mais usada pelo dono com 2+ lojas).
+          const StoreSwitcher(),
           // Filtro rápido (Todos / Estoque baixo / Inativos) — igual ao
           // app de referência, que traz o botão de filtro no cabeçalho.
           PopupMenuButton<_ProductFilter>(
@@ -160,12 +164,16 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   );
                 }
 
+                // Query NORMALIZADO para minúsculas: sem isso, digitar
+                // 'CANETA' não achava 'Caneta Azul' (o nome era convertido,
+                // o termo digitado não).
+                final query = _query.toLowerCase();
                 final filtered = products
                     .where((product) {
                       final matchesQuery =
-                          _query.isEmpty ||
-                          product.name.toLowerCase().contains(_query) ||
-                          product.description.toLowerCase().contains(_query);
+                          query.isEmpty ||
+                          product.name.toLowerCase().contains(query) ||
+                          product.description.toLowerCase().contains(query);
                       final matchesFilter = switch (_filter) {
                         _ProductFilter.all => true,
                         _ProductFilter.lowStock =>

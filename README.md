@@ -1,10 +1,11 @@
 # Dumbhanengue ERP
 
-> Sistema de gestão empresarial multi-tenant (estoque, vendas, compras, financeiro, crédito e relatórios) construído em **Flutter** com **Clean Architecture** — com persistência local (SQLite), SaaS autenticado (Supabase + RLS) e interface **pt/en**.
+> Sistema de gestão empresarial multi-tenant (estoque, vendas, compras, financeiro, crédito e relatórios) construído em **Flutter** com **Clean Architecture** — com persistência local (SQLite), SaaS autenticado (Supabase + RLS) e interface **pt/en/fr**.
 
 <p align="center">
   <a href="docs/pt/README.md"><strong>📚 Documentação (pt)</strong></a> ·
   <a href="docs/en/README.md"><strong>📚 Documentation (en)</strong></a> ·
+  <a href="docs/fr/README.md"><strong>📚 Documentation (fr)</strong></a> ·
   <a href="README.en.md"><strong>🌐 English version</strong></a>
 </p>
 
@@ -12,7 +13,7 @@
 
 ## Visão geral
 
-O **Dumbhanengue ERP** é um aplicativo para pequenos comerciantes administrarem o negócio: controle de **estoque**, **vendas** (com baixa atômica de estoque e entrada no caixa), **compras**, **fluxo de caixa**, **clientes**, **crédito/fiado** e **relatórios**. O dono gerencia **lojas e funcionários** por tenant, escolhe o **idioma (pt/en)** e a **moeda (BRL, USD, EUR, MZN)**, e cada loja tem escopo próprio de dados — tudo isolado por autenticação e *Row Level Security* no servidor.
+O **Dumbhanengue ERP** é um aplicativo para pequenos comerciantes administrarem o negócio: controle de **estoque**, **vendas** (com baixa atômica de estoque e entrada no caixa), **compras**, **fluxo de caixa**, **clientes**, **crédito/fiado** e **relatórios**. O dono gerencia **lojas e funcionários** por tenant, escolhe o **idioma (pt/en/fr)** e a **moeda (BRL, USD, EUR, MZN)**, e cada loja tem escopo próprio de dados — tudo isolado por autenticação e *Row Level Security* no servidor.
 
 ## Funcionalidades
 
@@ -35,7 +36,7 @@ O **Dumbhanengue ERP** é um aplicativo para pequenos comerciantes administrarem
 | **Arquitetura** | Clean Architecture (domain · data · presentation) |
 | **Persistência local** | SQLite (`package:sqlite3`) com fallback em memória para web |
 | **Backend SaaS** | Supabase (auth, Postgres + **RLS**, RPCs atômicas) |
-| **i18n** | `flutter_localizations` (pt/en) + moeda por tenant |
+| **i18n** | `flutter_localizations` (pt/en/fr) + moeda por tenant |
 | **Segurança** | `flutter_secure_storage` (Keychain/Keystore) para segredos |
 
 ## Começando
@@ -68,6 +69,7 @@ O projeto tem **mais de 280 testes** (unitários de domínio, repositórios, pro
 
 - **Português:** [`docs/pt/`](docs/pt/README.md) — visão geral, arquitetura, domínio, dados, apresentação, autenticação, segurança, fluxos de negócio, testes, guia do desenvolvedor, multi-tenancy e [decisões de arquitetura](docs/pt/12-decisoes-de-arquitetura.md).
 - **English:** [`docs/en/`](docs/en/README.md) — same content, in English.
+- **Français:** [`docs/fr/`](docs/fr/README.md) — le même contenu, en français.
 
 ## Licença
 

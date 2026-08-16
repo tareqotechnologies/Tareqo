@@ -19,6 +19,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../widgets/search_field.dart';
+import '../../widgets/store_switcher.dart';
 import '../../widgets/status_chip.dart';
 import '../../../core/observability/crash_reporting.dart';
 
@@ -69,7 +70,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appNavCustomers)),
+      appBar: AppBar(
+        title: Text(l10n.appNavCustomers),
+        actions: const [StoreSwitcher()],
+      ),
       // CTA único: sem clientes, o FAB some — o estado vazio traz o botão
       // "Novo cliente" centralizado.
       floatingActionButton: customersAsync.value?.isNotEmpty ?? false
@@ -113,14 +117,17 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   );
                 }
 
+                // Query NORMALIZADO para minúsculas (mesmo padrão da busca
+                // de Produtos): sem isso, digitar 'ANA' não achava 'ana'.
+                final query = _query.toLowerCase();
                 final filtered = _query.isEmpty
                     ? customers
                     : customers
                           .where(
                             (customer) =>
-                                customer.name.toLowerCase().contains(_query) ||
-                                customer.phone.contains(_query) ||
-                                customer.email.toLowerCase().contains(_query),
+                                customer.name.toLowerCase().contains(query) ||
+                                customer.phone.contains(query) ||
+                                customer.email.toLowerCase().contains(query),
                           )
                           .toList();
 

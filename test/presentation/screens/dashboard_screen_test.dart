@@ -22,8 +22,12 @@ import 'package:dumbhanengue/domain/usecases/get_employees_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_pending_debts_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_purchases_use_case.dart';
+import 'package:dumbhanengue/data/datasources/local/pending_op_queue.dart';
+import 'package:dumbhanengue/data/datasources/local/pending_op_queue_memory_impl.dart';
+import 'package:dumbhanengue/data/services/offline_sync_service.dart';
 import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
+import 'package:dumbhanengue/presentation/controllers/dashboard_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/debts_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/finance_providers.dart';
@@ -164,10 +168,12 @@ Widget _buildApp({
   required CashFlow cashFlow,
   required List<Debt> debts,
   List<Purchase> purchases = const [],
+  List<dynamic> extraOverrides = const [],
 }) {
   return ProviderScope(
     overrides: [
       ...storeContextOverrides(),
+      ...extraOverrides,
       getProductsUseCaseProvider.overrideWithValue(
         _FakeGetProductsUseCase(products),
       ),
@@ -314,6 +320,51 @@ void main() {
     expect(find.text('S-00001 · 1 item'), findsNWidgets(2));
     expect(find.text('M-Pesa'), findsNWidgets(2));
     expect(find.text('Pago'), findsNWidgets(2));
+  });
+
+  testWidgets('banner de sincronização pendente aparece e sincroniza', (
+    tester,
+  ) async {
+    // Outbox offline com 1 operação pendente + replayer que sincroniza.
+    final queue = PendingOpQueueMemoryImpl();
+    await queue.add(
+      PendingOp(
+        opType: 'process_sale',
+        payload: {'sale': {'id': 's1'}},
+        createdAt: DateTime(2026, 8, 16),
+      ),
+    );
+    final sync = OfflineSyncService(queue);
+    sync.registerReplayer('process_sale', (_) async {});
+
+    await pumpDashboard(
+      tester,
+      _buildApp(
+        products: const [],
+        sales: const [],
+        cashFlow: const CashFlow(incomeCents: 0, expenseCents: 0),
+        debts: const [],
+        extraOverrides: [offlineSyncServiceProvider.overrideWithValue(sync)],
+      ),
+    );
+
+    // Banner visível com a contagem.
+    expect(
+      find.text('1 operação aguardando sincronização'),
+      findsOneWidget,
+    );
+    expect(find.byIcon(Icons.cloud_off_outlined), findsOneWidget);
+
+    // "Sincronizar" drena a fila: banner some e o snackbar confirma.
+    await tester.tap(find.text('Sincronizar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 operação sincronizada'), findsOneWidget);
+    expect(await queue.count(), 0);
+    expect(
+      find.textContaining('aguardando sincronização'),
+      findsNothing,
+    );
   });
 
   testWidgets('tocar em uma venda recente abre os detalhes da venda', (

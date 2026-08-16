@@ -50,7 +50,11 @@ abstract final class Formatters {
     String? language,
   }) {
     final symbol = _currencySymbols[currencyCode] ?? '$currencyCode ';
-    final locale = (language ?? _language) == 'en' ? 'en_US' : 'pt_BR';
+    final locale = switch (language ?? _language) {
+      'en' => 'en_US',
+      'fr' => 'fr_FR',
+      _ => 'pt_BR',
+    };
     final value = cents / 100;
     final formatted = NumberFormat('#,##0.00', locale).format(value);
     return '$symbol $formatted';
@@ -146,8 +150,20 @@ abstract final class Formatters {
     final that = DateTime(date.year, date.month, date.day);
     final difference = today.difference(that).inDays;
 
-    if (difference == 0) return _language == 'en' ? 'Today' : 'Hoje';
-    if (difference == 1) return _language == 'en' ? 'Yesterday' : 'Ontem';
+    if (difference == 0) {
+      return switch (_language) {
+        'en' => 'Today',
+        'fr' => "Aujourd'hui",
+        _ => 'Hoje',
+      };
+    }
+    if (difference == 1) {
+      return switch (_language) {
+        'en' => 'Yesterday',
+        'fr' => 'Hier',
+        _ => 'Ontem',
+      };
+    }
     return '${_two(date.day)}/${_two(date.month)}';
   }
 

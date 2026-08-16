@@ -1,0 +1,952 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Dumbhanengue ERP",
+  "onboardingTitle": "Bienvenue !",
+  "onboardingHeading": "Activez votre entreprise dans l'ERP",
+  "onboardingSubtitle": "Choisissez un forfait, indiquez le nom de votre entreprise et définissez la devise et la langue. Votre accès sera libéré après approbation (délai de 24 h).",
+  "onboardingBusinessLabel": "Nom de l'entreprise",
+  "onboardingBusinessError": "Indiquez le nom de votre entreprise.",
+  "onboardingPlanLabel": "Choisissez le forfait",
+  "onboardingPlansError": "Impossible de charger les forfaits.",
+  "onboardingPlanDetails": "{stores} magasin(s) · {employees} employé(s)",
+  "@onboardingPlanDetails": {
+    "description": "Résumé des limites du forfait",
+    "placeholders": {
+      "stores": {
+        "type": "int"
+      },
+      "employees": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSubmit": "Demander l'accès",
+  "onboardingSuccess": "Demande pour {business} envoyée ! Attendez l'approbation (dans les 24 h).",
+  "@onboardingSuccess": {
+    "description": "Retour après l'envoi de la demande d'accès",
+    "placeholders": {
+      "business": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingChoosePlanError": "Choisissez un forfait pour continuer.",
+  "onboardingGenericError": "Impossible d'envoyer la demande. Réessayez.",
+  "onboardingLanguageLabel": "Langue",
+  "onboardingLanguageHint": "Langue de l'application",
+  "onboardingCurrencyLabel": "Devise",
+  "onboardingCurrencyHint": "Devise utilisée pour les montants",
+  "languagePortuguese": "Português",
+  "languageEnglish": "English",
+  "languageFrench": "Français",
+  "currencyBrl": "Réal (BRL)",
+  "currencyUsd": "Dollar américain (USD)",
+  "currencyEur": "Euro (EUR)",
+  "currencyMzn": "Metical (MZN)",
+  "settingsSave": "Enregistrer les réglages",
+  "settingsSaved": "Réglages enregistrés !",
+  "settingsGenericError": "Impossible d'enregistrer les réglages. Réessayez.",
+  "settingsSupportSection": "Assistance",
+  "settingsSupportEntry": "Aide et documentation",
+  "settingsSupportEntryHint": "Guide de l'utilisateur et dépannage — lecture hors ligne",
+  "supportTitle": "Aide",
+  "supportSubtitle": "Tout ce qu'il faut pour tirer le meilleur de l'app : le guide complet de l'utilisateur et la résolution des problèmes les plus courants.",
+  "supportUserGuide": "Guide de l'utilisateur",
+  "supportUserGuideHint": "Manuel simple et complet : connexion, magasins, produits (avec photo), ventes, crédit, finances, clôture de caisse, rapports et FAQ",
+  "supportTroubleshooting": "Dépannage",
+  "supportTroubleshootingHint": "Résolution des problèmes courants : connexion, photos, ventes, stock, caisse, connexion réseau et messages d'erreur",
+  "supportReadingError": "Impossible d'ouvrir le document. Réessayez.",
+  "commonSearch": "Rechercher...",
+  "commonRetry": "Réessayer",
+  "commonSignOut": "Se déconnecter",
+  "appSheetClose": "Fermer",
+  "storeSwitcherTooltip": "Changer de magasin",
+  "storeSelectorSectionTitle": "Magasin actif",
+  "storeSelectorSectionHint": "Choisissez le magasin dont les données apparaissent dans les modules (ventes, stock, finances).",
+  "tenantPendingTitle": "En attente d'approbation",
+  "tenantPendingSubtitle": "La demande d'accès pour \"{business}\" a été envoyée. Le super administrateur va l'examiner et vous recevrez l'accès dans les 24 h.",
+  "@tenantPendingSubtitle": {
+    "placeholders": {
+      "business": {
+        "type": "String"
+      }
+    }
+  },
+  "tenantPendingHint": "Une fois approuvé, vous pourrez créer des magasins, embaucher des employés et commencer à opérer.",
+  "tenantRejectedTitle": "Demande rejetée",
+  "tenantRejectedSubtitle": "La demande d'accès pour \"{business}\" n'a pas été approuvée.",
+  "@tenantRejectedSubtitle": {
+    "placeholders": {
+      "business": {
+        "type": "String"
+      }
+    }
+  },
+  "authBlockedTitle": "Accès suspendu",
+  "authBlockedMessage": "Votre compte d'employé a été désactivé par le propriétaire de l'établissement. En cas de doute, contactez-le.",
+  "authBlockedSignOut": "Se déconnecter",
+  "authErrorRestoreSession": "Impossible de restaurer votre session",
+  "authErrorCheckConnection": "Vérifiez votre connexion et réessayez.",
+  "authErrorLoadAccount": "Impossible de charger votre compte",
+  "splashLoading": "Ouverture de votre session…",
+  "loginSubtitleSignUp": "Créez votre compte pour commencer",
+  "loginSubtitleSignIn": "Une gestion simple pour votre entreprise",
+  "loginNameLabel": "Nom",
+  "loginEmailLabel": "E-mail",
+  "loginEmailError": "Indiquez un e-mail valide.",
+  "loginPasswordLabel": "Mot de passe",
+  "loginPasswordError": "Le mot de passe doit contenir au moins 8 caractères.",
+  "loginPasswordHint": "Min. 8 caractères avec minuscule, majuscule, chiffre et symbole.",
+  "loginWeakPasswordError": "Le mot de passe doit contenir des minuscules, des majuscules, des chiffres et des symboles.",
+  "loginRateLimitError": "Trop de tentatives consécutives. Attendez environ 1 heure et réessayez.",
+  "loginShowPassword": "Afficher le mot de passe",
+  "loginHidePassword": "Masquer le mot de passe",
+  "loginConfirmLabel": "Confirmer le mot de passe",
+  "loginConfirmError": "Les mots de passe ne correspondent pas.",
+  "loginSignUp": "S'inscrire",
+  "loginSignIn": "Se connecter",
+  "loginSwitchToSignIn": "J'ai déjà un compte — se connecter",
+  "loginSwitchToSignUp": "Pas encore de compte — s'inscrire",
+  "loginSignUpSuccess": "Compte créé ! Confirmez votre e-mail pour vous connecter.",
+  "loginSignUpError": "Impossible de créer le compte. Réessayez.",
+  "loginSignInError": "Impossible de se connecter. Vérifiez l'e-mail et le mot de passe.",
+  "loginSecurityNote": "Vos données sont protégées par chiffrement.",
+  "loginForgotPassword": "Mot de passe oublié ?",
+  "forgotPasswordTitle": "Réinitialiser le mot de passe",
+  "forgotPasswordHint": "Indiquez l'e-mail de votre compte. Nous vous envoyons un lien pour créer un nouveau mot de passe.",
+  "forgotPasswordSubmit": "Envoyer le lien",
+  "forgotPasswordSent": "S'il existe un compte avec cet e-mail, nous avons envoyé un lien pour réinitialiser le mot de passe.",
+  "forgotPasswordError": "Impossible d'envoyer le lien. Réessayez.",
+  "setNewPasswordTitle": "Définir un nouveau mot de passe",
+  "setNewPasswordHint": "Min. 8 caractères avec minuscule, majuscule, chiffre et symbole.",
+  "setNewPasswordSubmit": "Enregistrer le nouveau mot de passe",
+  "setNewPasswordSuccess": "Mot de passe mis à jour !",
+  "setNewPasswordError": "Impossible de mettre à jour le mot de passe. Réessayez.",
+  "setNewPasswordSignOut": "Se déconnecter",
+  "changePasswordTitle": "Changer le mot de passe",
+  "changePasswordCurrentLabel": "Mot de passe actuel",
+  "changePasswordNewLabel": "Nouveau mot de passe",
+  "changePasswordConfirmLabel": "Confirmer le nouveau mot de passe",
+  "changePasswordSuccess": "Mot de passe modifié avec succès !",
+  "changePasswordWrongCurrent": "Mot de passe actuel incorrect. Réessayez.",
+  "changePasswordSubmit": "Changer le mot de passe",
+  "changePasswordError": "Impossible de changer le mot de passe. Réessayez.",
+  "securitySectionTitle": "Sécurité",
+  "securityChangePassword": "Changer le mot de passe",
+  "securityChangePasswordHint": "Mettez à jour le mot de passe de votre compte",
+  "appNavHome": "Accueil",
+  "appNavProducts": "Produits",
+  "appNavSales": "Ventes",
+  "appNavFinancial": "Finances",
+  "appNavCredit": "Crédit",
+  "appNavCustomers": "Clients",
+  "syncPendingCount": "{count, plural, =1{1 opération en attente de synchronisation} other{{count} opérations en attente de synchronisation}}",
+  "@syncPendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncNow": "Synchroniser",
+  "syncOfflineSaved": "Pas de connexion. L'opération a été enregistrée et sera synchronisée automatiquement.",
+  "syncDone": "{count, plural, =1{1 opération synchronisée} other{{count} opérations synchronisées}}",
+  "@syncDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncStillOffline": "Pas de connexion — les opérations restent en attente.",
+  "dashboardGreeting": "Bonjour, {name} 👋",
+  "@dashboardGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardSignOutTooltip": "Se déconnecter",
+  "dashboardOwnerFallback": "Propriétaire",
+  "dashboardTotalSales": "Total des ventes",
+  "dashboardAllTime": "Tout l'historique",
+  "dashboardCashBalance": "Solde en caisse",
+  "dashboardReceivables": "À recevoir (crédit)",
+  "dashboardStockLabel": "Stock en produits",
+  "commonUnits": "un.",
+  "dashboardQuickActions": "Actions rapides",
+  "dashboardQuickNewSale": "Nouvelle vente",
+  "dashboardQuickAddProduct": "Ajouter un produit",
+  "dashboardQuickAddTransaction": "Enregistrer une transaction",
+  "dashboardQuickAddDebt": "Enregistrer un crédit",
+  "dashboardModules": "Modules",
+  "dashboardModuleCustomers": "Clients",
+  "dashboardModulePurchases": "Achats",
+  "dashboardModuleReports": "Rapports",
+  "dashboardModuleStores": "Magasins",
+  "dashboardRecentSales": "Ventes récentes",
+  "dashboardViewAll": "Tout voir",
+  "dashboardNoSales": "Aucune vente pour l'instant — enregistrez la première !",
+  "dashboardRecentPurchases": "Achats récents",
+  "dashboardNoPurchases": "Aucun achat pour l'instant — enregistrez le premier !",
+  "dashboardLowStock": "Stock faible",
+  "dashboardSaleItems": "{count, plural, =1{1 article} other{{count} articles}}",
+  "@dashboardSaleItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "weekdayMonday": "Lundi",
+  "weekdayTuesday": "Mardi",
+  "weekdayWednesday": "Mercredi",
+  "weekdayThursday": "Jeudi",
+  "weekdayFriday": "Vendredi",
+  "weekdaySaturday": "Samedi",
+  "weekdaySunday": "Dimanche",
+  "storesTitle": "Magasins",
+  "storesTabStores": "Magasins",
+  "storesTabEmployees": "Employés",
+  "storesTabUpgrades": "Upgrades",
+  "storesTabSettings": "Réglages",
+  "storesAddStore": "Nouveau magasin",
+  "storesAddEmployee": "Nouvel employé",
+  "storesLoadError": "Impossible de charger les magasins.",
+  "storesEmptyTitle": "Aucun magasin créé",
+  "storesEmptySubtitle": "Créez le premier magasin de votre entreprise.",
+  "employeesLoadError": "Impossible de charger les employés.",
+  "employeesEmptyTitle": "Aucun employé lié",
+  "employeesEmptySubtitle": "Créez le compte de l'employé et choisissez le magasin.",
+  "roleManager": "Gérant",
+  "roleEmployee": "Employé",
+  "employeeActive": "Actif",
+  "employeeInactive": "Inactif",
+  "employeeDeactivateConfirm": "Désactiver {name} ? L'employé perd immédiatement l'accès et ne pourra pas vendre jusqu'à sa réactivation.",
+  "employeeReactivateConfirm": "Réactiver {name} ? L'employé retrouve l'accès au magasin.",
+  "employeeDeactivated": "Employé désactivé.",
+  "employeeReactivated": "Employé réactivé.",
+  "employeeDeactivateAction": "Désactiver",
+  "employeeReactivateAction": "Réactiver",
+  "upgradesLoadError": "Impossible de charger les demandes d'évolution de forfait.",
+  "upgradesEmptyTitle": "Aucune demande d'évolution",
+  "upgradesEmptySubtitle": "Demandez un forfait supérieur dans la carte ci-dessus.",
+  "statusPending": "En attente",
+  "statusApproved": "Approuvé",
+  "statusRejected": "Rejeté",
+  "upgradesRequestedOn": "Demandé le {date}",
+  "@upgradesRequestedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planCardTitle": "Forfait",
+  "planCardUpgrade": "Évoluer",
+  "planCardStores": "Magasins",
+  "planCardEmployees": "Employés",
+  "planDetails": "{stores} magasin(s) · {employees} employé(s)",
+  "@planDetails": {
+    "placeholders": {
+      "stores": {
+        "type": "int"
+      },
+      "employees": {
+        "type": "int"
+      }
+    }
+  },
+  "addStoreTitle": "Nouveau magasin",
+  "addStoreNameLabel": "Nom du magasin",
+  "addStoreNameError": "Indiquez le nom du magasin.",
+  "addStoreAddressLabel": "Adresse (facultatif)",
+  "addStoreSuccess": "Magasin {name} créé !",
+  "@addStoreSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addStoreError": "Impossible de créer le magasin. Réessayez.",
+  "addStoreSubmit": "Créer le magasin",
+  "addEmployeeTitle": "Nouvel employé",
+  "addEmployeeNameLabel": "Nom complet",
+  "addEmployeeNameError": "Indiquez le nom de l'employé.",
+  "addEmployeeEmailLabel": "E-mail",
+  "addEmployeeEmailError": "Indiquez un e-mail valide.",
+  "addEmployeePasswordLabel": "Mot de passe d'accès",
+  "addEmployeePasswordError": "Le mot de passe doit contenir au moins 8 caractères.",
+  "addEmployeeStoreLabel": "Magasin",
+  "addEmployeeNoStores": "Créez un magasin avant d'ajouter des employés.",
+  "addEmployeeRoleLabel": "Poste",
+  "addEmployeeSuccess": "Employé enregistré ! Le compte d'accès a été créé.",
+  "addEmployeeError": "Impossible d'enregistrer l'employé. Vérifiez si l'e-mail n'est pas déjà utilisé.",
+  "addEmployeeSubmit": "Enregistrer l'employé",
+  "upgradeTitle": "Évolution de forfait",
+  "upgradeSubtitle": "Choisissez le nouveau forfait. Le super administrateur devra approuver la demande avant le changement.",
+  "upgradeMaxReached": "Vous êtes déjà au forfait maximum disponible.",
+  "upgradeChooseError": "Choisissez le forfait de destination.",
+  "upgradeSuccess": "Demande d'évolution envoyée ! Le super administrateur va l'examiner.",
+  "upgradeError": "Impossible d'envoyer la demande. Réessayez.",
+  "upgradeSubmit": "Demander l'évolution",
+  "commonCancel": "Annuler",
+  "commonConfirm": "Confirmer",
+  "commonDescription": "Description",
+  "commonNoResults": "Aucun résultat",
+  "commonNoResultsHint": "Essayez de chercher un autre terme.",
+  "commonSave": "Enregistrer",
+  "commonSoldOut": "Épuisé",
+  "periodToday": "Aujourd'hui",
+  "periodWeek": "7 jours",
+  "periodMonth": "Ce mois-ci",
+  "periodAll": "Tout",
+  "paymentCash": "Espèces",
+  "paymentDebitCard": "Carte de débit",
+  "paymentCreditCard": "Carte de crédit",
+  "paymentEMola": "E-Mola",
+  "paymentMPesa": "M-Pesa",
+  "paymentTransfer": "Virement",
+  "purchasesSearchHint": "Rechercher un achat...",
+  "productsFilterTooltip": "Filtrer les produits",
+  "productsSearchHint": "Rechercher un produit...",
+  "productsLoadError": "Impossible de charger les produits.",
+  "productsEmptyTitle": "Aucun produit enregistré",
+  "productsEmptySubtitle": "Touchez \"Nouveau produit\" pour commencer.",
+  "productsAddNew": "Nouveau produit",
+  "productsBuySell": "Achat : {buy} · Vente : {sell}",
+  "@productsBuySell": {
+    "placeholders": {
+      "buy": {
+        "type": "String"
+      },
+      "sell": {
+        "type": "String"
+      }
+    }
+  },
+  "productsAdded": "Produit ajouté !",
+  "productsAddedNoPhoto": "Produit ajouté ! (photo non envoyée — autorisation de stockage absente)",
+  "productsAddError": "Impossible d'ajouter le produit. Réessayez.",
+  "productsNameError": "Indiquez le nom du produit.",
+  "productsDescriptionLabel": "Description (facultatif)",
+  "productsPurchasePrice": "Prix d'achat",
+  "productsPurchasePriceError": "Indiquez le prix d'achat.",
+  "productsSalePrice": "Prix de vente",
+  "productsSalePriceError": "Indiquez le prix de vente.",
+  "productsStockQuantity": "Quantité en stock",
+  "productsStockError": "Indiquez une quantité valide.",
+  "productsAddSubmit": "Ajouter le produit",
+  "productsEditTitle": "Modifier le produit",
+  "productsEditSubmit": "Enregistrer les modifications",
+  "productsEditSaved": "Produit mis à jour !",
+  "productsEditSavedNoPhoto": "Produit mis à jour ! (photo non envoyée — autorisation de stockage absente)",
+  "productsEditError": "Impossible de mettre à jour le produit. Réessayez.",
+  "productsPhotoLabel": "Photo du produit",
+  "productsPhotoTake": "Prendre une photo",
+  "productsPhotoGallery": "Depuis la galerie",
+  "productsPhotoRemove": "Retirer la photo",
+  "productsInactive": "Inactif",
+  "productsActiveLabel": "Produit actif",
+  "productsActiveHint": "Désactivez pour retirer le produit du PDV et des achats (le stock est conservé).",
+  "productsStockAdjustHint": "Ajustement manuel : définit le stock exact, en créant/consommant des lots FIFO.",
+  "productsSectionInfo": "Informations",
+  "productsSectionPricing": "Prix",
+  "productsSectionStock": "Stock",
+  "productsSectionStatus": "Statut",
+  "customersSearchHint": "Rechercher un client...",
+  "customersLoadError": "Impossible de charger les clients.",
+  "customersEmptyTitle": "Aucun client enregistré",
+  "customersEmptySubtitle": "Touchez \"Nouveau client\" pour commencer.",
+  "customersAddNew": "Nouveau client",
+  "customersCreditLabel": "Crédit {amount}",
+  "@customersCreditLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "customersAdded": "Client {name} enregistré !",
+  "@customersAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "customersAddError": "Impossible d'enregistrer le client. Réessayez.",
+  "customersNameError": "Indiquez le nom du client.",
+  "customersPhoneLabel": "Téléphone (facultatif)",
+  "customersEmailLabel": "E-mail (facultatif)",
+  "customersAddSubmit": "Enregistrer le client",
+  "purchasesTitle": "Achats",
+  "purchasesAddNew": "Nouvel achat",
+  "purchasesLoadError": "Impossible de charger les achats.",
+  "purchasesEmptyTitle": "Aucun achat enregistré",
+  "purchasesEmptySubtitle": "Touchez \"Nouvel achat\" pour enregistrer l'entrée de marchandise et approvisionner le stock.",
+  "purchasesHeaderCount": "{count, plural, =0{0 achat} =1{1 achat} other{{count} achats}}",
+  "@purchasesHeaderCount": {
+    "description": "Nombre d'achats du jour dans le résumé de l'écran d'achats",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "purchasesHeaderVsYesterday": "vs hier",
+  "purchasesStockAdded": "Stock +{units} {unit}",
+  "@purchasesStockAdded": {
+    "description": "Chip de la carte d'achat : unités ajoutées au stock",
+    "placeholders": {
+      "units": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "purchasesEmptyFilteredTitle": "Aucun achat trouvé",
+  "purchasesEmptyFilteredSubtitle": "Ajustez le filtre de période.",
+  "purchasesClearFilters": "Effacer les filtres",
+  "purchasesSupplierError": "Indiquez le fournisseur de l'achat.",
+  "purchasesCartItemUnavailable": "Un article du panier n'est plus disponible. Réessayez.",
+  "purchasesRegistered": "Achat enregistré : {amount} !",
+  "@purchasesRegistered": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "purchasesProductNotFound": "Produit {id} introuvable dans le catalogue.",
+  "@purchasesProductNotFound": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "purchasesRegisterError": "Impossible d'enregistrer l'achat. Réessayez.",
+  "purchasesSupplierLabel": "Fournisseur",
+  "purchasesNoProductsTitle": "Aucun produit à acheter",
+  "purchasesNoProductsSubtitle": "Enregistrez des produits pour pouvoir faire des achats.",
+  "purchasesConfirm": "Confirmer l'achat",
+  "purchasesStockLabel": "{quantity} {unit} en stock",
+  "@purchasesStockLabel": {
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsTitle": "Rapports",
+  "reportsRevenue": "Chiffre d'affaires",
+  "reportsProfit": "Bénéfice brut",
+  "reportsMargin": "Marge",
+  "reportsBestSellers": "Meilleures ventes",
+  "reportsLoadError": "Impossible de charger le rapport.",
+  "reportsEmptyTitle": "Aucune vente sur la période",
+  "reportsEmptySubtitle": "Enregistrez des ventes pour voir le rapport.",
+  "reportsSalesPerDay": "Ventes par jour",
+  "reportsRevenueLabel": "{amount} vendus",
+  "@reportsRevenueLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsExport": "Exporter",
+  "reportsExportCsv": "Exporter en CSV",
+  "reportsExportPdf": "Exporter en PDF",
+  "reportsExportDone": "Rapport exporté !",
+  "reportsExportError": "Impossible d'exporter le rapport. Réessayez.",
+  "reportsExportTitle": "Rapport de ventes",
+  "reportsExportFileName": "rapport_ventes",
+  "reportsExportStore": "Magasin",
+  "reportsExportPeriod": "Période",
+  "reportsExportGeneratedAt": "Généré le",
+  "reportsExportSummary": "Résumé",
+  "reportsExportRank": "Position",
+  "reportsExportProduct": "Produit",
+  "reportsExportQuantity": "Quantité",
+  "reportsExportRevenue": "Chiffre d'affaires",
+  "reportsExportDay": "Jour",
+  "reportsExportTotal": "Total",
+  "financialTitle": "Finances",
+  "financialRegister": "Enregistrer",
+  "financialIncome": "Entrées",
+  "financialExpense": "Sorties",
+  "financialBalance": "Solde",
+  "financialTransactions": "Transactions",
+  "financialLoadError": "Impossible de charger les transactions.",
+  "financialEmptyTitle": "Aucune transaction",
+  "financialEmptySubtitle": "Enregistrez des entrées et des sorties pour suivre le flux de trésorerie.",
+  "financialReceivePendingTitle": "Recevoir le montant en attente ?",
+  "financialReceivePendingBody": "Confirmer la réception de {amount} ? La transaction comptera dans la caisse réalisée.",
+  "@financialReceivePendingBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financialReceive": "Recevoir",
+  "financialReceived": "Transaction reçue !",
+  "financialReceiveError": "Impossible de recevoir le montant en attente. Réessayez.",
+  "financialPay": "Payer",
+  "financialPayPendingTitle": "Payer le montant en attente ?",
+  "financialPayPendingBody": "Confirmer le paiement de {amount} ? La transaction comptera dans la caisse réalisée.",
+  "@financialPayPendingBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financialPaid": "Sortie payée !",
+  "financialPayError": "Impossible de payer le montant en attente. Réessayez.",
+  "financialAddTitle": "Enregistrer une transaction",
+  "financialIncomingType": "Entrée",
+  "financialOutgoingType": "Sortie",
+  "financialDescriptionLabel": "Description",
+  "financialDescriptionError": "Indiquez la description.",
+  "financialCategoryLabel": "Catégorie (facultatif)",
+  "financialAmountLabel": "Montant",
+  "financialAmountError": "Indiquez un montant supérieur à zéro.",
+  "financialPendingLabel": "En attente (crédit)",
+  "financialPendingHint": "Ne compte pas dans la caisse réalisée tant qu'il n'est pas reçu.",
+  "financialRegistered": "Transaction enregistrée !",
+  "financialRegisterError": "Impossible d'enregistrer la transaction. Réessayez.",
+  "financialDefaultCategoryIncome": "Ventes",
+  "financialDefaultCategoryExpense": "Dépenses",
+  "cashClosingAction": "Clôture de caisse",
+  "cashClosingTitle": "Clôture de caisse du jour",
+  "cashClosingDaySummary": "Résumé du jour",
+  "cashClosingTotalSales": "Ventes du jour",
+  "cashClosingExpectedCash": "Attendu dans le tiroir",
+  "cashClosingExpectedCashHint": "Uniquement les ventes en espèces — carte, M-Pesa, E-Mola et virement ne passent pas par le tiroir physique.",
+  "cashClosingByMethod": "Par moyen de paiement",
+  "cashClosingCountedCash": "Espèces comptées",
+  "cashClosingCountedCashHint": "Comptez l'argent physique du tiroir et indiquez-le ici.",
+  "cashClosingDifference": "Différence",
+  "cashClosingConfers": "Caisse juste",
+  "cashClosingSurplus": "Excédent de {amount}",
+  "@cashClosingSurplus": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashClosingShortage": "Manque de {amount}",
+  "@cashClosingShortage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashClosingConfirm": "Confirmer la clôture",
+  "cashClosingUpdate": "Mettre à jour la clôture",
+  "cashClosingClosedAt": "Fermé à",
+  "cashClosingSuccess": "Caisse fermée !",
+  "cashClosingUpdated": "Clôture mise à jour !",
+  "cashClosingError": "Impossible de fermer la caisse. Réessayez.",
+  "cashClosingEmpty": "Aucune vente enregistrée ce jour.",
+  "cashClosingHistory": "Historique des clôtures",
+  "cashClosingHistoryEmpty": "Aucune clôture enregistrée pour l'instant.",
+  "debtsTitle": "Crédit (fiado)",
+  "debtsAddDebt": "Enregistrer un crédit",
+  "debtsSearchHint": "Rechercher par nom du client...",
+  "debtsTabPending": "En attente",
+  "debtsTabSettled": "Soldées",
+  "debtsTotalPending": "Total à recevoir",
+  "debtsNoPendingCustomers": "Aucun client en attente",
+  "debtsPendingCustomers": "{count, plural, =1{1 client en attente} other{{count} clients en attente}}",
+  "@debtsPendingCustomers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsPendingSection": "Dettes en attente",
+  "debtsLoadError": "Impossible de charger les dettes.",
+  "debtsEmptyPendingTitle": "Aucun crédit en attente 🎉",
+  "debtsEmptyPendingSubtitle": "Aucun client ne doit rien pour le moment.",
+  "debtsTotalSettled": "Total soldé",
+  "debtsSettledCount": "{count, plural, =1{1 règlement enregistré} other{{count} règlements enregistrés}}",
+  "@debtsSettledCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsSettledSection": "Historique des règlements",
+  "debtsHistoryLoadError": "Impossible de charger l'historique.",
+  "debtsEmptySettledTitle": "Aucun règlement pour l'instant",
+  "debtsEmptySettledSubtitle": "Quand un crédit sera soldé, il apparaîtra ici.",
+  "debtsSettleTitle": "Soldé la dette ?",
+  "debtsSettleBody": "Recevoir {amount} de {name} ? Une entrée sera enregistrée en caisse.",
+  "@debtsSettleBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsSettle": "Soldé",
+  "debtsSettled": "Crédit de {name} soldé — {amount} en caisse.",
+  "@debtsSettled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsNotFound": "Cette dette n'est plus en attente.",
+  "debtsSettleError": "Impossible de solder la dette. Réessayez.",
+  "debtsLate": "En retard",
+  "debtsDueToday": "Échoit aujourd'hui",
+  "debtsDueIn": "Dans {days, plural, =1{1 jour} other{{days} jours}}",
+  "@debtsDueIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsSettleAction": "Soldé la dette",
+  "debtsSettledLabel": "Soldée",
+  "debtsSettledOn": "Soldée le {date}",
+  "@debtsSettledOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsDueDateHelp": "Échéance du crédit",
+  "debtsRegisteredFor": "Crédit enregistré pour {name} !",
+  "@debtsRegisteredFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPendingEntryError": "Crédit enregistré, mais la pendance dans Finances n'a pas pu être créée. Vérifiez les transactions.",
+  "debtsRegisterError": "Impossible d'enregistrer le crédit. Réessayez.",
+  "debtsCustomerLinkLabel": "Client lié (facultatif)",
+  "debtsNoCustomer": "Sans lien",
+  "debtsCustomerNameLabel": "Nom du client",
+  "debtsCustomerNameError": "Indiquez le nom du client.",
+  "debtsDueDateLabel": "Échéance",
+  "salesTitle": "Ventes",
+  "salesNewSale": "Nouvelle vente",
+  "salesLoadError": "Impossible de charger les ventes.",
+  "salesEmptyTitle": "Aucune vente enregistrée",
+  "salesEmptySubtitle": "Touchez \"Nouvelle vente\" pour enregistrer la première.",
+  "salesSearchHint": "Rechercher une vente...",
+  "periodYesterday": "Hier",
+  "periodWeek": "Cette semaine",
+  "paymentFilterCard": "Carte",
+  "salesStatusPaid": "Payée",
+  "salesHeaderTransactions": "{count, plural, =0{0 transaction} =1{1 transaction} other{{count} transactions}}",
+  "@salesHeaderTransactions": {
+    "description": "Nombre de transactions du jour dans le résumé de l'écran des ventes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "salesHeaderVsYesterday": "vs hier",
+  "salesEmptyFilteredTitle": "Aucune vente trouvée",
+  "salesEmptyFilteredSubtitle": "Ajustez la recherche ou les filtres.",
+  "salesClearFilters": "Effacer les filtres",
+  "salesFilteredSummary": "{count, plural, =1{1 vente} other{{count} ventes}} · Total {total}",
+  "@salesFilteredSummary": {
+    "description": "Ligne-résumé quand un filtre est actif dans la liste des ventes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "salesItemUnavailable": "Un article du panier n'est plus disponible. Réessayez.",
+  "salesRegistered": "Vente enregistrée : {amount} !",
+  "@salesRegistered": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "salesInsufficientStock": "Stock insuffisant{product}. Disponible : {available}.",
+  "@salesInsufficientStock": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "salesStockFor": "pour {name}",
+  "@salesStockFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "salesProductNotFound": "Produit {id} introuvable dans le stock.",
+  "@salesProductNotFound": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "salesRegisterError": "Impossible d'enregistrer la vente. Réessayez.",
+  "salesSearchProducts": "Rechercher un produit...",
+  "salesNoProductsTitle": "Aucun produit à vendre",
+  "salesNoProductsSubtitle": "Enregistrez des produits pour pouvoir vendre.",
+  "salesConfirm": "Confirmer la vente",
+  "saleDetailTitle": "Détails de la vente",
+  "saleDetailId": "Vente {id}",
+  "@saleDetailId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "saleDetailTotalLabel": "Total de la vente",
+  "saleDetailItems": "Articles",
+  "saleDetailTotal": "Total",
+  "saleDetailSnapshot": "Prix figés au moment de la vente.",
+  "salesStatusCancelled": "Annulée",
+  "saleDetailCancelAction": "Annuler la vente",
+  "saleDetailCancelConfirmTitle": "Annuler cette vente ?",
+  "saleDetailCancelConfirmBody": "Le stock des articles sera restitué et l'entrée en caisse sera annulée ({amount}). Cette action est irréversible.",
+  "@saleDetailCancelConfirmBody": {
+    "description": "Confirmation d'annulation de vente — avertit que le stock et la caisse seront annulés",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "saleDetailCancelConfirm": "Oui, annuler",
+  "saleDetailCancelledAt": "Annulée le",
+  "saleCancelledSuccess": "Vente annulée.",
+  "saleNotFoundError": "Cette vente n'existe plus.",
+  "saleCancelError": "Impossible d'annuler la vente. Réessayez.",
+  "saleDetailShareAction": "Partager le reçu",
+  "saleDetailShareTitle": "Partager le reçu",
+  "saleDetailShareImage": "Partager en image",
+  "saleDetailShareWhatsApp": "WhatsApp",
+  "saleDetailShareError": "Impossible de partager le reçu. Réessayez.",
+  "saleDetailShareWhatsAppError": "Impossible d'ouvrir WhatsApp. Réessayez.",
+  "saleDetailReceiptTitle": "REÇU DE VENTE",
+  "saleDetailReceiptTitleCancelled": "REÇU DE VENTE (ANNULÉE)",
+  "saleDetailReceiptPayment": "Paiement",
+  "saleDetailReceiptThanks": "Merci de votre achat !",
+  "adminTitle": "Panneau du super administrateur",
+  "adminNavRequests": "Demandes",
+  "adminNavPlans": "Forfaits",
+  "adminNavUpgrades": "Évolutions",
+  "adminTenantsTitle": "Tenants",
+  "adminPendingOnly": "En attente",
+  "adminAll": "Tous",
+  "adminAwaitingCount": "{count} en attente d'approbation",
+  "@adminAwaitingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminTenantsEmpty": "Aucun tenant enregistré pour l'instant.",
+  "adminRequestsLoadError": "Impossible de charger les demandes.",
+  "adminNothingPendingTitle": "Rien en attente d'approbation",
+  "adminNothingPendingSubtitle": "Les nouvelles demandes de tenant apparaissent ici.",
+  "adminTenantsLoadError": "Impossible de charger les tenants.",
+  "adminRejectError": "Impossible de rejeter la demande.",
+  "adminApproveError": "Impossible d'approuver la demande.",
+  "adminAccessApproved": "Accès de {name} approuvé !",
+  "@adminAccessApproved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRequestRejected": "Demande de {name} rejetée.",
+  "@adminRequestRejected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRejectTitle": "Rejeter {name}",
+  "@adminRejectTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRejectReasonLabel": "Motif du rejet",
+  "adminRejectReasonHint": "Ex. : informations incomplètes lors de l'inscription",
+  "adminApprove": "Approuver",
+  "adminReject": "Rejeter",
+  "adminPlanLabel": "Forfait : {plan}",
+  "@adminPlanLabel": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlanSolicited": "Forfait : {plan} · Demandé : {date}",
+  "@adminPlanSolicited": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlansTitle": "Forfaits",
+  "adminPlanNewTooltip": "Nouveau forfait",
+  "adminPlansLoadError": "Impossible de charger les forfaits.",
+  "adminPlansEmptyTitle": "Aucun forfait créé",
+  "adminPlansEmptySubtitle": "Créez le premier forfait pour libérer les abonnements.",
+  "adminPlanInactive": "Inactif",
+  "adminPlanDetails": "{price}/mois · {stores} magasin(s) · {employees} employé(s)",
+  "@adminPlanDetails": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "stores": {
+        "type": "int"
+      },
+      "employees": {
+        "type": "int"
+      }
+    }
+  },
+  "adminPlanNameError": "Indiquez le nom du forfait.",
+  "adminPlanPriceError": "Indiquez un prix valide (≥ 0).",
+  "adminPlanStoresError": "Le forfait doit autoriser au moins 1 magasin.",
+  "adminPlanEmployeesError": "Le forfait doit autoriser au moins 1 employé.",
+  "adminPlanCreated": "Forfait {name} créé !",
+  "@adminPlanCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlanUpdated": "Forfait {name} mis à jour !",
+  "@adminPlanUpdated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminPlanSaveError": "Impossible d'enregistrer le forfait. Réessayez.",
+  "adminPlanNewTitle": "Nouveau forfait",
+  "adminPlanEditTitle": "Modifier le forfait",
+  "adminPlanNameLabel": "Nom du forfait",
+  "adminPlanPriceLabel": "Prix mensuel",
+  "adminPlanMaxStores": "Max. magasins",
+  "adminPlanMaxEmployees": "Max. employés",
+  "adminPlanActiveTitle": "Forfait actif",
+  "adminPlanActiveSubtitle": "Désactivez pour empêcher de nouveaux abonnements.",
+  "adminPlanCreate": "Créer le forfait",
+  "adminUpgradesTitle": "Évolutions de forfait",
+  "adminUpgradesLoadError": "Impossible de charger les demandes d'évolution.",
+  "adminUpgradesEmptyTitle": "Aucune évolution en attente",
+  "adminUpgradesEmptySubtitle": "Les demandes de changement de forfait apparaissent ici.",
+  "adminUpgradeApproved": "Évolution approuvée — forfait du tenant mis à jour !",
+  "adminUpgradeRejected": "Évolution rejetée.",
+  "adminUpgradeProcessError": "Impossible de traiter la demande.",
+  "adminPlanRequested": "Demandé",
+  "adminPlanCurrent": "Actuel",
+  "productsCodeLabel": "Code-barres (PLU)",
+  "productsCodeHint": "Balances étiqueteuses (ex. : 12345)",
+  "productsCodeError": "Code invalide : utilisez jusqu'à 5 chiffres.",
+  "productsWeighLabel": "Vente au poids (fraction)",
+  "productsWeighHint": "Accepte les quantités décimales (ex. : 1,75 kg)",
+  "productsUnitLabel": "Unité de vente",
+  "productsStockWeightHint": "En unités de vente (ex. : 1,75)",
+  "productsExpiryLabel": "Date de péremption",
+  "productsExpiryAdd": "Définir la péremption",
+  "productsExpiryHelp": "Date de péremption du produit",
+  "productsExpiryClear": "Retirer la péremption",
+  "salesBarcodeLabel": "Code-barres",
+  "salesBarcodeScan": "Lire avec la caméra",
+  "salesBarcodeNotFound": "Produit introuvable pour ce code.",
+  "salesBarcodeInvalid": "Code de balance invalide.",
+  "salesStockLimit": "Limite de stock atteinte pour {product}.",
+  "@salesStockLimit": {
+    "description": "Erreur lors de l'ajout de plus que le stock disponible",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "salesQuantityLabel": "Quantité",
+  "salesQuantityHint": "Quantité (ex. : 1,75)",
+  "purchasesExpiryLabel": "Date de péremption",
+  "purchasesExpiryAdd": "Définir la péremption",
+  "purchasesExpiryHelp": "Date de péremption du lot",
+  "dashboardExpiryAlerts": "Péremption",
+  "dashboardExpiredIn": "Périmé depuis {days} jour(s)",
+  "@dashboardExpiredIn": {
+    "description": "Lot périmé — jours depuis la péremption",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardExpiresIn": "Expire dans {days} jour(s)",
+  "@dashboardExpiresIn": {
+    "description": "Lot à périmer — jours restants",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  }
+}

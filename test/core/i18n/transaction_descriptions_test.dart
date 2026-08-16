@@ -20,6 +20,20 @@ void main() {
         ),
         'Sale — Debit card',
       );
+      expect(
+        TransactionDescriptions.sale(
+          language: 'fr',
+          paymentMethod: PaymentMethod.cash,
+        ),
+        'Vente — Espèces',
+      );
+      expect(
+        TransactionDescriptions.saleReversal(
+          language: 'fr',
+          paymentMethod: PaymentMethod.transfer,
+        ),
+        'Annulation de vente — Virement',
+      );
     });
 
     test('nome da forma de pagamento', () {
@@ -39,6 +53,18 @@ void main() {
           TransactionDescriptions.paymentMethodName(
               'en', PaymentMethod.transfer),
           'Bank transfer');
+      expect(
+          TransactionDescriptions.paymentMethodName(
+              'fr', PaymentMethod.cash),
+          'Espèces');
+      expect(
+          TransactionDescriptions.paymentMethodName(
+              'fr', PaymentMethod.debitCard),
+          'Carte de débit');
+      expect(
+          TransactionDescriptions.paymentMethodName(
+              'fr', PaymentMethod.transfer),
+          'Virement');
     });
 
     test('fiado (a receber / a pagar)', () {
@@ -74,6 +100,22 @@ void main() {
         ),
         'Credit to pay — Supplier X',
       );
+      expect(
+        TransactionDescriptions.debt(
+          language: 'fr',
+          isCustomerDebt: true,
+          personName: 'João',
+        ),
+        'Crédit à recevoir — João',
+      );
+      expect(
+        TransactionDescriptions.debt(
+          language: 'fr',
+          isCustomerDebt: false,
+          personName: 'Fournisseur X',
+        ),
+        'Crédit à payer — Fournisseur X',
+      );
     });
 
     test('quitação de fiado', () {
@@ -84,6 +126,10 @@ void main() {
       expect(
         TransactionDescriptions.settleDebt(language: 'en', personName: 'João'),
         'Credit received — João',
+      );
+      expect(
+        TransactionDescriptions.settleDebt(language: 'fr', personName: 'João'),
+        'Crédit reçu — João',
       );
     });
 
@@ -98,15 +144,23 @@ void main() {
             language: 'en', supplierName: 'ACME'),
         'Purchase — ACME',
       );
+      expect(
+        TransactionDescriptions.purchase(
+            language: 'fr', supplierName: 'ACME'),
+        'Achat — ACME',
+      );
     });
 
     test('categorias', () {
       expect(TransactionDescriptions.saleCategory('pt'), 'Vendas');
       expect(TransactionDescriptions.saleCategory('en'), 'Sales');
+      expect(TransactionDescriptions.saleCategory('fr'), 'Ventes');
       expect(TransactionDescriptions.debtCategory('pt'), 'Fiado');
       expect(TransactionDescriptions.debtCategory('en'), 'Credit');
+      expect(TransactionDescriptions.debtCategory('fr'), 'Crédit');
       expect(TransactionDescriptions.purchaseCategory('pt'), 'Compras');
       expect(TransactionDescriptions.purchaseCategory('en'), 'Purchases');
+      expect(TransactionDescriptions.purchaseCategory('fr'), 'Achats');
     });
   });
 }

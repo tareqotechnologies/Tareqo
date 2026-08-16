@@ -4,6 +4,8 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import '../../data/datasources/local/pending_op_queue.dart';
+import '../../data/datasources/local/pending_op_queue_sqlite_impl.dart';
 import '../../data/datasources/local/cash_closing_local_data_source.dart';
 import '../../data/datasources/local/cash_closing_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/customer_local_data_source.dart';
@@ -98,18 +100,78 @@ abstract final class AppDatabase {
       );
   }
 
-  /// Cria as tabelas (idempotente) e migra dinheiro para CENTAVOS (W4).
-  /// Nenhum dado é semeado: o banco nasce vazio e só registra dados REAIS
-  /// criados pelo usuário.
-  static void initialize(Database db) {
-    createSchema(db);
-    migrateMoneyToCents(db);
+  /// Registra a fila offline (outbox) sobre o MESMO banco SQLite.
+  ///
+  /// Usada no modo SaaS (onde os datasources de negócio são REMOTOS, mas a
+  /// fila precisa de persistência local) e no modo local (mesmo banco).
+  /// ⚠️ Não registra os datasources de negócio — só a fila.
+  static void registerOfflineQueue(GetIt instance) {
+    final db = _database;
+    if (db == null) return;
+    instance.registerLazySingleton<IPendingOpQueue>(
+      () => PendingOpQueueSqliteImpl(db),
+    );
   }
 
-  /// Migração W4 (centavos inteiros): bancos criados antes da migração
-  /// guardavam dinheiro como REAL (reais com fração); a partir daqui o
-  /// domínio e o schema usam **centavos inteiros**. Detecta o schema
-  /// antigo pela afinidade REAL das colunas de dinheiro (PRAGMA
+  /// Leva o banco à versão atual do schema (migrações versionadas via
+  /// `PRAGMA user_version`). Nenhum dado é semeado: o banco nasce vazio e
+  /// só registra dados REAIS criados pelo usuário.
+  ///
+  /// Bancos NOVOS e LEGADOS (criados antes do versionamento, `user_version`
+  /// = 0) rodam a migração v1 — o schema completo atual, idempotente por
+  /// construção (IF NOT EXISTS + guardas por presença de coluna). Depois
+  /// disso o `user_version` fica em [currentSchemaVersion] e as migrações
+  /// antigas NUNCA reexecutam (startup rápido e determinístico). Mudanças
+  /// futuras de schema entram como NOVAS migrações (v2, v3...) — nunca
+  /// editar a v1.
+  static void initialize(Database db) => _migrate(db);
+
+  /// Versão atual do schema (`PRAGMA user_version`).
+  static const int currentSchemaVersion = 2;
+
+  /// Migrações versionadas, em ordem crescente de versão.
+  ///
+  /// A v1 é o schema COMPLETO atual (tabelas + migrações leves acumuladas
+  /// + W4 centavos) — idempotente para bancos legados. Migrações novas:
+  /// adicionar `_Migration(version: 2, description: ..., up: _migracaoV2)`
+  /// e a função — o [initialize] roda apenas as pendentes.
+  static final List<_Migration> _migrations = [
+    _Migration(
+      version: 1,
+      description: 'schema completo + W4 (centavos) + numerações/backfills',
+      up: _schemaV1,
+    ),
+    _Migration(
+      version: 2,
+      description: 'fila offline (outbox) — tabela pending_ops',
+      up: _schemaV2,
+    ),
+  ];
+
+  /// Lê a versão atual do banco (0 em bancos novos/legados sem versionar).
+  static int _userVersion(Database db) =>
+      db.select('PRAGMA user_version').first['user_version'] as int;
+
+  /// Roda as migrações pendentes (versão > atual), cada uma na própria
+  /// transação com o `user_version` carimbado DENTRO dela — se a migração
+  /// falhar, o rollback desfaz o schema E a versão; o próximo startup
+  /// retenta do ponto exato.
+  static void _migrate(Database db) {
+    final version = _userVersion(db);
+    if (version >= currentSchemaVersion) return;
+    for (final migration in _migrations) {
+      if (migration.version <= version) continue;
+      runInTransaction(db, () {
+        migration.up(db);
+        db.execute('PRAGMA user_version = ${migration.version}');
+      });
+    }
+  }
+
+  /// Parte da migração v1 — W4 (centavos inteiros): bancos criados antes
+  /// da migração guardavam dinheiro como REAL (reais com fração); a partir
+  /// daqui o domínio e o schema usam **centavos inteiros**. Detecta o
+  /// schema antigo pela afinidade REAL das colunas de dinheiro (PRAGMA
   /// table_info — o novo schema declara INTEGER) e multiplica os valores
   /// por 100, arredondando. Idempotente: bancos novos (INTEGER) não são
   /// tocados; bancos já migrados não voltam a ser multiplicados.
@@ -117,7 +179,7 @@ abstract final class AppDatabase {
   /// SQLite é dinamicamente tipado: depois da multiplicação, a coluna
   /// REAL guarda inteiros (lidos como int pelo driver) — não é preciso
   /// rebuild da tabela; bancos NOVOS já nascem com INTEGER.
-  static void migrateMoneyToCents(Database db) {
+  static void _migrateMoneyToCents(Database db) {
     // Colunas de dinheiro por tabela (schema antigo = REAL).
     const moneyColumns = <String, List<String>>{
       'products': ['purchase_price', 'sale_price'],
@@ -202,12 +264,17 @@ abstract final class AppDatabase {
     }
   }
 
-  /// Cria o schema. Os `CHECK` são a salvaguarda final do banco contra
-  /// valores inválidos (estoque/valores nunca negativos) — as regras de
-  /// negócio continuam no domínio.
+  /// Migração v1 — schema COMPLETO atual. Os `CHECK` são a salvaguarda
+  /// final do banco contra valores inválidos (estoque/valores nunca
+  /// negativos) — as regras de negócio continuam no domínio.
   ///
   /// Desde a migração W4, colunas de dinheiro são **INTEGER (centavos)**.
-  static void createSchema(Database db) {
+  ///
+  /// Idempotente por construção (IF NOT EXISTS + guardas por presença de
+  /// coluna): roda igual em bancos NOVOS (cria tudo) e LEGADOS (apenas o
+  /// que falta + backfills). Nunca editar depois do versionamento — a v1
+  /// já foi aplicada nos bancos existentes; mudanças novas vão em v2+.
+  static void _schemaV1(Database db) {
     db.execute('''
       CREATE TABLE IF NOT EXISTS products (
         id TEXT PRIMARY KEY,
@@ -660,6 +727,48 @@ abstract final class AppDatabase {
       "UPDATE sales SET payment_method = 'mPesa' "
       "WHERE payment_method = 'pix'",
     );
+
+    // W4 (centavos) DEPOIS do schema: colunas legadas REAL são convertidas
+    // por afinidade (bancos novos já nascem INTEGER — no-op).
+    _migrateMoneyToCents(db);
   }
 
+  /// Migração v2 — fila offline (outbox): operações do caminho de dinheiro
+  /// gravadas LOCALMENTE quando o modo SaaS está sem conexão, reenviadas
+  /// pelo `OfflineSyncService` assim que a rede volta. `id` AUTOINCREMENT
+  /// É a ordem FIFO de replay; `payload` é o JSON do comando original
+  /// (entidade + parâmetros), reexecutado de forma idempotente nas RPCs.
+  static void _schemaV2(Database db) {
+    db.execute('''
+      CREATE TABLE IF NOT EXISTS pending_ops (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        op_type TEXT NOT NULL,
+        payload TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        attempt_count INTEGER NOT NULL DEFAULT 0,
+        last_error TEXT
+      );
+    ''');
+  }
+
+}
+
+/// Uma migração de schema: versão (`PRAGMA user_version`) + função que
+/// aplica a mudança. Cada migração roda na própria transação; a versão é
+/// carimbada dentro dela (rollback desfaz schema E versão juntos).
+class _Migration {
+  const _Migration({
+    required this.version,
+    required this.description,
+    required this.up,
+  });
+
+  /// Número da versão — deve ser estritamente crescente na lista.
+  final int version;
+
+  /// Descrição curta da mudança (auditoria do histórico de migrações).
+  final String description;
+
+  /// Aplica a migração (SQL idempotente para bancos legados).
+  final void Function(Database db) up;
 }

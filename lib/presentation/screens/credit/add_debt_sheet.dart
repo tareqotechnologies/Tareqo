@@ -18,6 +18,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../data/services/offline_sync_service.dart';
 
 /// Bottom sheet para registrar uma dívida ("fiado") de cliente.
 ///
@@ -117,6 +118,11 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
       ref.invalidate(transactionsProvider);
       ref.invalidate(cashFlowProvider);
       ref.invalidate(dashboardKpisProvider);
+    } on OfflineEnqueuedException {
+      // Sem conexão: o fiado foi ENFILEIRADO (outbox) e será sincronizado.
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      messenger.showSnackBar(SnackBar(content: Text(l10n.syncOfflineSaved)));
     } on InvalidDebtAmountException catch (error) {
       setState(() => _formError = error.message);
     } on PendingEntryRegistrationException catch (error, stackTrace) {

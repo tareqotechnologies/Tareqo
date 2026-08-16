@@ -13,6 +13,6 @@ import 'package:dumbhanengue/core/database/app_database_io.dart';
 Database openTestDatabase() {
   final db = sqlite3.openInMemory();
   db.execute('PRAGMA foreign_keys = ON;');
-  AppDatabase.createSchema(db);
+  AppDatabase.initialize(db);
   return db;
 }

@@ -1,10 +1,11 @@
 # Dumbhanengue ERP
 
-> Multi-tenant business management system (inventory, sales, purchases, finance, credit and reports) built in **Flutter** with **Clean Architecture** — with local persistence (SQLite), authenticated SaaS (Supabase + RLS) and a **pt/en** interface.
+> Multi-tenant business management system (inventory, sales, purchases, finance, credit and reports) built in **Flutter** with **Clean Architecture** — with local persistence (SQLite), authenticated SaaS (Supabase + RLS) and a **pt/en/fr** interface.
 
 <p align="center">
   <a href="docs/en/README.md"><strong>📚 Documentation (en)</strong></a> ·
   <a href="docs/pt/README.md"><strong>📚 Documentação (pt)</strong></a> ·
+  <a href="docs/fr/README.md"><strong>📚 Documentation (fr)</strong></a> ·
   <a href="README.md"><strong>🌐 Versão em português</strong></a>
 </p>
 
@@ -12,7 +13,7 @@
 
 ## Overview
 
-**Dumbhanengue ERP** is an app for small merchants to run their business: **inventory** control, **sales** (with atomic stock decrement and cash inflow), **purchases**, **cash flow**, **customers**, **credit ("fiado")** and **reports**. The owner manages **stores and employees** per tenant, chooses the **language (pt/en)** and **currency (BRL, USD, EUR, MZN)**, and each store has its own data scope — everything isolated by authentication and server-side *Row Level Security*.
+**Dumbhanengue ERP** is an app for small merchants to run their business: **inventory** control, **sales** (with atomic stock decrement and cash inflow), **purchases**, **cash flow**, **customers**, **credit ("fiado")** and **reports**. The owner manages **stores and employees** per tenant, chooses the **language (pt/en/fr)** and **currency (BRL, USD, EUR, MZN)**, and each store has its own data scope — everything isolated by authentication and server-side *Row Level Security*.
 
 ## Features
 
@@ -35,7 +36,7 @@
 | **Architecture** | Clean Architecture (domain · data · presentation) |
 | **Local persistence** | SQLite (`package:sqlite3`) with in-memory fallback for web |
 | **SaaS backend** | Supabase (auth, Postgres + **RLS**, atomic RPCs) |
-| **i18n** | `flutter_localizations` (pt/en) + per-tenant currency |
+| **i18n** | `flutter_localizations` (pt/en/fr) + per-tenant currency |
 | **Security** | `flutter_secure_storage` (Keychain/Keystore) for secrets |
 
 ## Getting started
@@ -62,6 +63,7 @@ The project has **200+ tests** (domain units, repositories, providers and widget
 
 - **English:** [`docs/en/`](docs/en/README.md) — overview, architecture, domain, data, presentation, authentication, security, business flows, testing, developer guide, multi-tenancy and [architecture decisions](docs/en/12-architecture-decisions.md).
 - **Português:** [`docs/pt/`](docs/pt/README.md) — o mesmo conteúdo, em português.
+- **Français:** [`docs/fr/`](docs/fr/README.md) — the same content, in French.
 
 ## License
 

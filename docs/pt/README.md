@@ -1,6 +1,6 @@
 # 📚 Documentação do Dumbhanengue ERP
 
-> 🌐 **Languages / Idiomas:** [English version → `docs/en/`](../en/README.md) · Versão em português (esta página).
+> 🌐 **Languages / Idiomas:** [English version → `docs/en/`](../en/README.md) · [Version française → `docs/fr/`](../fr/README.md) · Versão em português (esta página).
 
 Bem-vindo à documentação completa do **Dumbhanengue ERP** — sistema de gestão empresarial (estoque, vendas, financeiro e controle de crédito/"fiado") construído em Flutter com **Clean Architecture**.
 
@@ -38,7 +38,12 @@ Este diretório reúne todos os documentos do app: do que ele faz até como cada
 | --------- | ------- |
 | [Guia do Usuário](GUIA_DO_USUARIO.md) | Manual simples e completo do app: login, lojas (loja ativa), produtos (com foto), vendas, compras, fiado, financeiro, fecho de caixa, relatórios e **FAQ** |
 | [Troubleshooting](TROUBLESHOOTING.md) | Resolução de problemas comuns: entrada e conta, fotos, vendas, estoque, caixa, conexão, mensagens de erro e quando contactar o suporte |
+| [Glossário pt/en/fr](GLOSSARIO.md) | Termos técnicos nas três línguas — negócio, pagamentos, acessos, autenticação, planos, banco de dados, arquitetura, testes e release |
 | **Versões PDF (imprimir)** | [Guia do Usuário PDF](pdf/pt/GUIA_DO_USUARIO.pdf) · [Troubleshooting PDF](pdf/pt/TROUBLESHOOTING.pdf) — com capa e índice, prontos a entregar/ imprimir |
+
+> 📖 **Glossário trilíngue:** [português](GLOSSARIO.md) · [english](../en/GLOSSARY.md) · [français](../fr/GLOSSAIRE.md)
+
+> 🌐 **Em francês (nouvelle langue):** [Guide de l'utilisateur](GUIA_DO_USUARIO.md) → [`docs/fr/GUIDE_DE_L_UTILISATEUR.md`](../fr/GUIDE_DE_L_UTILISATEUR.md) · [Dépannage](TROUBLESHOOTING.md) → [`docs/fr/DEPANNAGE.md`](../fr/DEPANNAGE.md) — empacotados no app (leitura offline) e em PDF em `docs/pdf/fr/`. Todos os **capítulos técnicos** (01–19) também estão em francês em [`docs/fr/`](../fr/README.md).
 
 ---
 

@@ -20,6 +20,7 @@ import 'package:dumbhanengue/presentation/controllers/purchases_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/sales_providers.dart';
 import 'package:dumbhanengue/presentation/screens/purchases/purchases_screen.dart';
 import 'package:dumbhanengue/presentation/screens/shell/app_shell.dart';
+import 'package:dumbhanengue/presentation/widgets/store_switcher.dart';
 
 import '../../helpers/store_context.dart';
 
@@ -162,6 +163,82 @@ void main() {
     expect(find.widgetWithText(ChoiceChip, 'Loja Centro'), findsNothing);
     expect(find.widgetWithText(ChoiceChip, 'Loja Shopping'), findsNothing);
     expect(find.text('Fornecedor Centro'), findsOneWidget);
+  });
+
+  testWidgets('seletor rápido no app bar troca a loja ativa e re-escopa os '
+      'dados', (tester) async {
+    // Viewport alto: o dashboard usa ListView preguiçoso e o card de
+    // estoque baixo (que exibe o nome do produto) fica abaixo da dobra.
+    tester.view.physicalSize = const Size(800, 2600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ...storeContextOverrides(
+            stores: const [
+              Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
+              Store(id: 'st2', tenantId: 'tn1', name: 'Loja Shopping'),
+            ],
+          ),
+          getProductsUseCaseProvider
+              .overrideWithValue(_StoreScopedGetProductsUseCase()),
+          salesRepositoryProvider.overrideWithValue(_EmptySalesRepository()),
+          getCashFlowUseCaseProvider.overrideWithValue(_ZeroCashFlowUseCase()),
+        ],
+        child: testApp(home: AppShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // A pílula do seletor rápido aparece no cabeçalho com a loja ATIVA
+    // (primeira = Loja Centro) e os dados são dela.
+    final pill = find.byKey(StoreSwitcher.pillKey);
+    expect(pill, findsOneWidget);
+    expect(
+      find.descendant(of: pill, matching: find.text('Loja Centro')),
+      findsOneWidget,
+    );
+    expect(find.text('Produto Loja Centro'), findsOneWidget);
+
+    // Abre o menu: as duas lojas aparecem (check na ativa).
+    await tester.tap(pill);
+    await tester.pumpAndSettle();
+    expect(find.text('Loja Shopping'), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+
+    // Seleciona a segunda loja.
+    await tester.tap(find.text('Loja Shopping'));
+    await tester.pumpAndSettle();
+
+    // A pílula mostra a nova loja e os dados do dashboard re-escopam.
+    expect(
+      find.descendant(of: pill, matching: find.text('Loja Shopping')),
+      findsOneWidget,
+    );
+    expect(find.text('Produto Loja Shopping'), findsOneWidget);
+    expect(find.text('Produto Loja Centro'), findsNothing);
+  });
+
+  testWidgets('com uma única loja o seletor rápido não aparece no app bar',
+      (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [...storeContextOverrides()], // 1 loja (st1) por padrão
+        child: testApp(
+          home: Scaffold(
+            appBar: AppBar(actions: const [StoreSwitcher()]),
+            body: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Sem pílula: com 1 loja não há o que escolher (mesmo critério do
+    // seletor de Lojas → Ajustes).
+    expect(find.byKey(StoreSwitcher.pillKey), findsNothing);
   });
 
   testWidgets('com uma única loja não há seletor nem banner', (tester) async {
