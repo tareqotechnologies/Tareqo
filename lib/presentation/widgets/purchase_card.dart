@@ -56,7 +56,7 @@ class PurchaseCard extends StatelessWidget {
  Text(
  purchase.supplierName,
  style: theme.textTheme.titleSmall?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(height: 2),
@@ -95,7 +95,7 @@ class PurchaseCard extends StatelessWidget {
  cents: purchase.totalAmountCents,
  alignment: Alignment.centerRight,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  fontFeatures: const [FontFeature.tabularFigures()],
  ),
  ),

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
@@ -322,36 +321,31 @@ class _LoginHero extends StatelessWidget {
  final theme = Theme.of(context);
 
  return Column(
- children: [
- // Squircle com glow sutil (estilo iOS): ícone num tile de cantos
- // 22 com sombra suave do acento — a marca flutua sobre o fundo.
- Container(
- width: 68,
- height: 68,
- decoration: BoxDecoration(
- gradient: LinearGradient(
- begin: Alignment.topLeft,
- end: Alignment.bottomRight,
- colors: [
- theme.colorScheme.primary,
- theme.accent,
- ],
- ),
- borderRadius: BorderRadius.circular(22),
- boxShadow: [
- BoxShadow(
- color: theme.colorScheme.primary.withValues(alpha: 0.35),
- blurRadius: 28,
- offset: const Offset(0, 10),
- ),
- ],
- ),
- child: const Icon(
- Icons.storefront_rounded,
- size: 32,
- color: Colors.white,
- ),
- ),
+ children: [    // Logo oficial da marca (sacola azul 3D + "D" branco) —
+    // o squircle com glow sutil (estilo iOS) emoldura a imagem.
+    Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.35),
+            blurRadius: 28,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.asset(
+          'assets/branding/icon_official.png',
+          width: 72,
+          height: 72,
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
  const SizedBox(height: AppSpacing.lg),
  FittedBox(
  fit: BoxFit.scaleDown,
@@ -361,7 +355,7 @@ class _LoginHero extends StatelessWidget {
  // Tipografia apertada (estilo Apple): peso pesado + tracking
  // negativo — a marca tem presença de wordmark.
  style: theme.textTheme.displaySmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -1.0,
  ),
  ),

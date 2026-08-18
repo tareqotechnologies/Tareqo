@@ -15,11 +15,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingTitle => 'Bienvenue !';
 
   @override
-  String get onboardingHeading => 'Activez votre entreprise dans l\'ERP';
+  String get onboardingHeading => 'Configurez votre entreprise';
 
   @override
   String get onboardingSubtitle =>
-      'Choisissez un forfait, indiquez le nom de votre entreprise et définissez la devise et la langue. Votre accès sera libéré après approbation (délai de 24 h).';
+      'Choisissez le forfait, le nom et la devise. Approbation en 24h.';
 
   @override
   String get onboardingBusinessLabel => 'Nom de l\'entreprise';
@@ -43,7 +43,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String onboardingSuccess(String business) {
-    return 'Demande pour $business envoyée ! Attendez l\'approbation (dans les 24 h).';
+    return 'Demande pour $business envoyée ! Agardez l\'approbation (24h).';
   }
 
   @override
@@ -88,14 +88,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get currencyMzn => 'Metical (MZN)';
 
   @override
-  String get settingsSave => 'Enregistrer les réglages';
+  String get settingsSave => 'Enregistrer';
 
   @override
   String get settingsSaved => 'Réglages enregistrés !';
 
   @override
-  String get settingsGenericError =>
-      'Impossible d\'enregistrer les réglages. Réessayez.';
+  String get settingsGenericError => 'Impossible d\'enregistrer. Réessayez.';
 
   @override
   String get settingsSupportSection => 'Assistance';
@@ -104,33 +103,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsSupportEntry => 'Aide et documentation';
 
   @override
-  String get settingsSupportEntryHint =>
-      'Guide de l\'utilisateur et dépannage — lecture hors ligne';
+  String get settingsSupportEntryHint => 'Guide et dépannage — hors ligne';
 
   @override
   String get supportTitle => 'Aide';
 
   @override
-  String get supportSubtitle =>
-      'Tout ce qu\'il faut pour tirer le meilleur de l\'app : le guide complet de l\'utilisateur et la résolution des problèmes les plus courants.';
+  String get supportSubtitle => 'Guide utilisateur et dépannage.';
 
   @override
   String get supportUserGuide => 'Guide de l\'utilisateur';
 
   @override
   String get supportUserGuideHint =>
-      'Manuel simple et complet : connexion, magasins, produits (avec photo), ventes, crédit, finances, clôture de caisse, rapports et FAQ';
+      'Connexion, magasins, produits, ventes, crédit, finances et rapports';
 
   @override
   String get supportTroubleshooting => 'Dépannage';
 
   @override
   String get supportTroubleshootingHint =>
-      'Résolution des problèmes courants : connexion, photos, ventes, stock, caisse, connexion réseau et messages d\'erreur';
+      'Problèmes courants : connexion, ventes, stock et réseau';
 
   @override
-  String get supportReadingError =>
-      'Impossible d\'ouvrir le document. Réessayez.';
+  String get supportReadingError => 'Impossible d\'ouvrir le document.';
 
   @override
   String get commonSearch => 'Rechercher...';
@@ -151,27 +147,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get storeSelectorSectionTitle => 'Magasin actif';
 
   @override
-  String get storeSelectorSectionHint =>
-      'Choisissez le magasin dont les données apparaissent dans les modules (ventes, stock, finances).';
+  String get storeSelectorSectionHint => 'Choisissez le magasin actif.';
 
   @override
   String get tenantPendingTitle => 'En attente d\'approbation';
 
   @override
   String tenantPendingSubtitle(String business) {
-    return 'La demande d\'accès pour \"$business\" a été envoyée. Le super administrateur va l\'examiner et vous recevrez l\'accès dans les 24 h.';
+    return 'Demande pour \"$business\" envoyée. Attendez 24h.';
   }
 
   @override
   String get tenantPendingHint =>
-      'Une fois approuvé, vous pourrez créer des magasins, embaucher des employés et commencer à opérer.';
+      'Une fois approuvé, créez des magasins et commencez.';
 
   @override
   String get tenantRejectedTitle => 'Demande rejetée';
 
   @override
   String tenantRejectedSubtitle(String business) {
-    return 'La demande d\'accès pour \"$business\" n\'a pas été approuvée.';
+    return 'La demande pour \"$business\" n\'a pas été approuvée.';
   }
 
   @override
@@ -179,20 +174,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get authBlockedMessage =>
-      'Votre compte d\'employé a été désactivé par le propriétaire de l\'établissement. En cas de doute, contactez-le.';
+      'Votre compte a été désactivé par le propriétaire.';
 
   @override
   String get authBlockedSignOut => 'Se déconnecter';
 
   @override
-  String get authErrorRestoreSession => 'Impossible de restaurer votre session';
+  String get authErrorRestoreSession => 'Session non restaurée';
 
   @override
   String get authErrorCheckConnection =>
       'Vérifiez votre connexion et réessayez.';
 
   @override
-  String get authErrorLoadAccount => 'Impossible de charger votre compte';
+  String get authErrorLoadAccount => 'Compte non chargé';
 
   @override
   String get splashLoading => 'Ouverture de votre session…';
@@ -225,11 +220,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loginWeakPasswordError =>
-      'Le mot de passe doit contenir des minuscules, des majuscules, des chiffres et des symboles.';
+      'Le mot de passe doit contenir lettres, chiffres et symboles.';
 
   @override
   String get loginRateLimitError =>
-      'Trop de tentatives consécutives. Attendez environ 1 heure et réessayez.';
+      'Trop de tentatives. Attendez 1h et réessayez.';
 
   @override
   String get loginShowPassword => 'Afficher le mot de passe';
@@ -267,7 +262,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible de se connecter. Vérifiez l\'e-mail et le mot de passe.';
 
   @override
-  String get loginSecurityNote => 'Vos données sont protégées par chiffrement.';
+  String get loginSecurityNote => 'Données protégées par chiffrement.';
 
   @override
   String get loginForgotPassword => 'Mot de passe oublié ?';
@@ -277,14 +272,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get forgotPasswordHint =>
-      'Indiquez l\'e-mail de votre compte. Nous vous envoyons un lien pour créer un nouveau mot de passe.';
+      'Indiquez votre e-mail. Nous enverrons un lien.';
 
   @override
   String get forgotPasswordSubmit => 'Envoyer le lien';
 
   @override
   String get forgotPasswordSent =>
-      'S\'il existe un compte avec cet e-mail, nous avons envoyé un lien pour réinitialiser le mot de passe.';
+      'Si un compte existe, nous avons envoyé un lien.';
 
   @override
   String get forgotPasswordError => 'Impossible d\'envoyer le lien. Réessayez.';
@@ -303,8 +298,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get setNewPasswordSuccess => 'Mot de passe mis à jour !';
 
   @override
-  String get setNewPasswordError =>
-      'Impossible de mettre à jour le mot de passe. Réessayez.';
+  String get setNewPasswordError => 'Impossible de mettre à jour. Réessayez.';
 
   @override
   String get setNewPasswordSignOut => 'Se déconnecter';
@@ -407,8 +401,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count opérations en attente de synchronisation',
-      one: '1 opération en attente de synchronisation',
+      other: '$count opérations en attente',
+      one: '1 opération en attente',
     );
     return '$_temp0';
   }
@@ -418,7 +412,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncOfflineSaved =>
-      'Pas de connexion. L\'opération a été enregistrée et sera synchronisée automatiquement.';
+      'Pas de connexion. Enregistré — synchronisé automatiquement.';
 
   @override
   String syncDone(int count) {
@@ -432,8 +426,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get syncStillOffline =>
-      'Pas de connexion — les opérations restent en attente.';
+  String get syncStillOffline => 'Pas de connexion — opérations en attente.';
 
   @override
   String dashboardGreeting(String name) {
@@ -501,15 +494,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardViewAll => 'Tout voir';
 
   @override
-  String get dashboardNoSales =>
-      'Aucune vente pour l\'instant — enregistrez la première !';
+  String get dashboardNoSales => 'Aucune vente — enregistrez la première !';
 
   @override
   String get dashboardRecentPurchases => 'Achats récents';
 
   @override
-  String get dashboardNoPurchases =>
-      'Aucun achat pour l\'instant — enregistrez le premier !';
+  String get dashboardNoPurchases => 'Aucun achat — enregistrez le premier !';
 
   @override
   String get dashboardLowStock => 'Stock faible';
@@ -565,8 +556,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get dashboardActivityEmpty =>
-      'Aucune activité enregistrée pour l\'instant.';
+  String get dashboardActivityEmpty => 'Aucune activité enregistrée.';
 
   @override
   String get dashboardActivitySeeAll => 'Tout voir';
@@ -684,12 +674,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String employeeDeactivateConfirm(Object name) {
-    return 'Désactiver $name ? L\'employé perd immédiatement l\'accès et ne pourra pas vendre jusqu\'à sa réactivation.';
+    return 'Désactiver $name ? Perd l\'accès immédiatement.';
   }
 
   @override
   String employeeReactivateConfirm(Object name) {
-    return 'Réactiver $name ? L\'employé retrouve l\'accès au magasin.';
+    return 'Réactiver $name ? Retrouve l\'accès au magasin.';
   }
 
   @override
@@ -706,14 +696,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get upgradesLoadError =>
-      'Impossible de charger les demandes d\'évolution de forfait.';
+      'Impossible de charger les demandes d\'évolution.';
 
   @override
   String get upgradesEmptyTitle => 'Aucune demande d\'évolution';
 
   @override
   String get upgradesEmptySubtitle =>
-      'Demandez un forfait supérieur dans la carte ci-dessus.';
+      'Demandez un forfait supérieur ci-dessus.';
 
   @override
   String get statusPending => 'En attente';
@@ -802,12 +792,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addEmployeeRoleLabel => 'Poste';
 
   @override
-  String get addEmployeeSuccess =>
-      'Employé enregistré ! Le compte d\'accès a été créé.';
+  String get addEmployeeSuccess => 'Employé enregistré ! Compte d\'accès créé.';
 
   @override
   String get addEmployeeError =>
-      'Impossible d\'enregistrer l\'employé. Vérifiez si l\'e-mail n\'est pas déjà utilisé.';
+      'Impossible d\'enregistrer. Vérifiez l\'e-mail.';
 
   @override
   String get addEmployeeSubmit => 'Enregistrer l\'employé';
@@ -817,18 +806,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get upgradeSubtitle =>
-      'Choisissez le nouveau forfait. Le super administrateur devra approuver la demande avant le changement.';
+      'Choisissez le nouveau forfait. Approuvé par le super admin.';
 
   @override
-  String get upgradeMaxReached =>
-      'Vous êtes déjà au forfait maximum disponible.';
+  String get upgradeMaxReached => 'Vous êtes déjà au forfait maximum.';
 
   @override
   String get upgradeChooseError => 'Choisissez le forfait de destination.';
 
   @override
-  String get upgradeSuccess =>
-      'Demande d\'évolution envoyée ! Le super administrateur va l\'examiner.';
+  String get upgradeSuccess => 'Demande d\'évolution envoyée !';
 
   @override
   String get upgradeError => 'Impossible d\'envoyer la demande. Réessayez.';
@@ -849,7 +836,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commonNoResults => 'Aucun résultat';
 
   @override
-  String get commonNoResultsHint => 'Essayez de chercher un autre terme.';
+  String get commonNoResultsHint => 'Essayez un autre terme.';
 
   @override
   String get commonSave => 'Enregistrer';
@@ -938,7 +925,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productsAddedNoPhoto =>
-      'Produit ajouté ! (photo non envoyée — autorisation de stockage absente)';
+      'Produit ajouté ! (pas de permission de stockage)';
 
   @override
   String get productsAddError => 'Impossible d\'ajouter le produit. Réessayez.';
@@ -981,11 +968,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productsEditSavedNoPhoto =>
-      'Produit mis à jour ! (photo non envoyée — autorisation de stockage absente)';
+      'Produit mis à jour ! (pas de permission de stockage)';
 
   @override
-  String get productsEditError =>
-      'Impossible de mettre à jour le produit. Réessayez.';
+  String get productsEditError => 'Impossible de mettre à jour. Réessayez.';
 
   @override
   String get productsPhotoLabel => 'Photo du produit';
@@ -1010,11 +996,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productsActiveHint =>
-      'Désactivez pour retirer le produit du PDV et des achats (le stock est conservé).';
+      'Désactivez pour retirer du PDV et des achats.';
 
   @override
   String get productsStockAdjustHint =>
-      'Ajustement manuel : définit le stock exact, en créant/consommant des lots FIFO.';
+      'Ajustement manuel : définit le stock exact (FIFO).';
 
   @override
   String get productsSectionInfo => 'Informations';
@@ -1101,7 +1087,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get purchasesEmptySubtitle =>
-      'Touchez \"Nouvel achat\" pour enregistrer l\'entrée de marchandise et approvisionner le stock.';
+      'Touchez \"Nouvel achat\" pour enregistrer.';
 
   @override
   String purchasesHeaderCount(int count) {
@@ -1110,7 +1096,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count achats',
       one: '1 achat',
-      zero: '0 achat',
+      zero: '0 achats',
     );
     return '$_temp0';
   }
@@ -1134,11 +1120,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get purchasesClearFilters => 'Effacer les filtres';
 
   @override
-  String get purchasesSupplierError => 'Indiquez le fournisseur de l\'achat.';
+  String get purchasesSupplierError => 'Indiquez le fournisseur.';
 
   @override
   String get purchasesCartItemUnavailable =>
-      'Un article du panier n\'est plus disponible. Réessayez.';
+      'Article du panier indisponible. Réessayez.';
 
   @override
   String purchasesRegistered(String amount) {
@@ -1162,7 +1148,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get purchasesNoProductsSubtitle =>
-      'Enregistrez des produits pour pouvoir faire des achats.';
+      'Enregistrez des produits pour faire des achats.';
 
   @override
   String get purchasesConfirm => 'Confirmer l\'achat';
@@ -1218,8 +1204,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportsExportDone => 'Rapport exporté !';
 
   @override
-  String get reportsExportError =>
-      'Impossible d\'exporter le rapport. Réessayez.';
+  String get reportsExportError => 'Impossible d\'exporter. Réessayez.';
 
   @override
   String get reportsExportTitle => 'Rapport de ventes';
@@ -1293,14 +1278,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get financialEmptySubtitle =>
-      'Enregistrez des entrées et des sorties pour suivre le flux de trésorerie.';
+      'Enregistrez des entrées et sorties pour suivre le caisse.';
 
   @override
   String get financialReceivePendingTitle => 'Recevoir le montant en attente ?';
 
   @override
   String financialReceivePendingBody(String amount) {
-    return 'Confirmer la réception de $amount ? La transaction comptera dans la caisse réalisée.';
+    return 'Confirmer la réception de $amount ?';
   }
 
   @override
@@ -1310,8 +1295,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financialReceived => 'Transaction reçue !';
 
   @override
-  String get financialReceiveError =>
-      'Impossible de recevoir le montant en attente. Réessayez.';
+  String get financialReceiveError => 'Impossible de recevoir. Réessayez.';
 
   @override
   String get financialPay => 'Payer';
@@ -1321,15 +1305,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String financialPayPendingBody(String amount) {
-    return 'Confirmer le paiement de $amount ? La transaction comptera dans la caisse réalisée.';
+    return 'Confirmer le paiement de $amount ?';
   }
 
   @override
   String get financialPaid => 'Sortie payée !';
 
   @override
-  String get financialPayError =>
-      'Impossible de payer le montant en attente. Réessayez.';
+  String get financialPayError => 'Impossible de payer. Réessayez.';
 
   @override
   String get financialAddTitle => 'Enregistrer une transaction';
@@ -1360,14 +1343,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get financialPendingHint =>
-      'Ne compte pas dans la caisse réalisée tant qu\'il n\'est pas reçu.';
+      'Ne compte pas dans la caisse tant que non reçu.';
 
   @override
   String get financialRegistered => 'Transaction enregistrée !';
 
   @override
-  String get financialRegisterError =>
-      'Impossible d\'enregistrer la transaction. Réessayez.';
+  String get financialRegisterError => 'Impossible d\'enregistrer. Réessayez.';
 
   @override
   String get financialDefaultCategoryIncome => 'Ventes';
@@ -1391,8 +1373,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cashClosingExpectedCash => 'Attendu dans le tiroir';
 
   @override
-  String get cashClosingExpectedCashHint =>
-      'Uniquement les ventes en espèces — carte, M-Pesa, E-Mola et virement ne passent pas par le tiroir physique.';
+  String get cashClosingExpectedCashHint => 'Ventes en espèces uniquement.';
 
   @override
   String get cashClosingByMethod => 'Par moyen de paiement';
@@ -1402,7 +1383,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cashClosingCountedCashHint =>
-      'Comptez l\'argent physique du tiroir et indiquez-le ici.';
+      'Comptez l\'argent du tiroir et indiquez-le ici.';
 
   @override
   String get cashClosingDifference => 'Différence';
@@ -1445,11 +1426,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cashClosingHistory => 'Historique des clôtures';
 
   @override
-  String get cashClosingHistoryEmpty =>
-      'Aucune clôture enregistrée pour l\'instant.';
+  String get cashClosingHistoryEmpty => 'Aucune clôture enregistrée.';
 
   @override
-  String get debtsTitle => 'Crédit (fiado)';
+  String get debtsTitle => 'Crédit';
 
   @override
   String get debtsHeaderSubtitle => 'Crédit à recevoir et à payer';
@@ -1500,7 +1480,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debtsEmptyPendingSubtitle =>
-      'Quand un client achète à crédit, la dette apparaît ici.';
+      'Les crédits en attente apparaîtront ici.';
 
   @override
   String get debtsTotalSettled => 'Total soldé';
@@ -1523,18 +1503,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtsHistoryLoadError => 'Impossible de charger l\'historique.';
 
   @override
-  String get debtsEmptySettledTitle => 'Aucun règlement pour l\'instant';
+  String get debtsEmptySettledTitle => 'Aucun règlement';
 
   @override
   String get debtsEmptySettledSubtitle =>
-      'Quand un crédit sera soldé, il apparaîtra ici.';
+      'Les crédits soldés apparaîtront ici.';
 
   @override
   String get debtsSettleTitle => 'Soldé la dette ?';
 
   @override
   String debtsSettleBody(String amount, String name) {
-    return 'Recevoir $amount de $name ? Une entrée sera enregistrée en caisse.';
+    return 'Recevoir $amount de $name ?';
   }
 
   @override
@@ -1549,7 +1529,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtsNotFound => 'Cette dette n\'est plus en attente.';
 
   @override
-  String get debtsSettleError => 'Impossible de solder la dette. Réessayez.';
+  String get debtsSettleError => 'Impossible de solder. Réessayez.';
 
   @override
   String get debtsLate => 'En retard';
@@ -1603,7 +1583,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debtsPendingEntryError =>
-      'Crédit enregistré, mais la pendance dans Finances n\'a pas pu être créée. Vérifiez les transactions.';
+      'Crédit enregistré, mais la pendance n\'a pas pu être créée.';
 
   @override
   String get debtsRegisterError =>
@@ -1673,7 +1653,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count transactions',
       one: '1 transaction',
-      zero: '0 transaction',
+      zero: '0 transactions',
     );
     return '$_temp0';
   }
@@ -1685,7 +1665,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count ventes',
       one: '1 vente',
-      zero: '0 vente',
+      zero: '0 ventes',
     );
     return '$_temp0';
   }
@@ -1716,7 +1696,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get salesItemUnavailable =>
-      'Un article du panier n\'est plus disponible. Réessayez.';
+      'Article du panier indisponible. Réessayez.';
 
   @override
   String salesRegistered(String amount) {
@@ -1786,7 +1766,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String saleDetailCancelConfirmBody(String amount) {
-    return 'Le stock des articles sera restitué et l\'entrée en caisse sera annulée ($amount). Cette action est irréversible.';
+    return 'Stock restitué et caisse annulée ($amount).';
   }
 
   @override
@@ -1863,17 +1843,17 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get adminTenantsEmpty => 'Aucun tenant enregistré pour l\'instant.';
+  String get adminTenantsEmpty => 'Aucun tenant enregistré.';
 
   @override
   String get adminRequestsLoadError => 'Impossible de charger les demandes.';
 
   @override
-  String get adminNothingPendingTitle => 'Rien en attente d\'approbation';
+  String get adminNothingPendingTitle => 'Rien en attente';
 
   @override
   String get adminNothingPendingSubtitle =>
-      'Les nouvelles demandes de tenant apparaissent ici.';
+      'Les nouvelles demandes apparaîtront ici.';
 
   @override
   String get adminTenantsLoadError => 'Impossible de charger les tenants.';
@@ -1903,8 +1883,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adminRejectReasonLabel => 'Motif du rejet';
 
   @override
-  String get adminRejectReasonHint =>
-      'Ex. : informations incomplètes lors de l\'inscription';
+  String get adminRejectReasonHint => 'Ex. : informations incomplètes';
 
   @override
   String get adminApprove => 'Approuver';
@@ -1936,7 +1915,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminPlansEmptySubtitle =>
-      'Créez le premier forfait pour libérer les abonnements.';
+      'Créez le premier forfait pour les abonnements.';
 
   @override
   String get adminPlanInactive => 'Inactif';
@@ -1997,7 +1976,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminPlanActiveSubtitle =>
-      'Désactivez pour empêcher de nouveaux abonnements.';
+      'Désactivez pour empêcher les nouveaux abonnements.';
 
   @override
   String get adminPlanCreate => 'Créer le forfait';
@@ -2014,11 +1993,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminUpgradesEmptySubtitle =>
-      'Les demandes de changement de forfait apparaissent ici.';
+      'Les demandes de changement apparaissent ici.';
 
   @override
   String get adminUpgradeApproved =>
-      'Évolution approuvée — forfait du tenant mis à jour !';
+      'Évolution approuvée — forfait mis à jour !';
 
   @override
   String get adminUpgradeRejected => 'Évolution rejetée.';

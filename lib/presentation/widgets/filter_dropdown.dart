@@ -64,7 +64,7 @@ class FilterDropdown<T> extends StatelessWidget {
  Text(
  labelOf(option),
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: option == selected ? FontWeight.w700 : null,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ],
@@ -97,7 +97,7 @@ class FilterDropdown<T> extends StatelessWidget {
  color: active
  ? scheme.onPrimaryContainer
  : scheme.onSurfaceVariant,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(width: 2),

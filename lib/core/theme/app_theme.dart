@@ -130,22 +130,20 @@ abstract final class AppTheme {
  ? const Color(0xFFFAFAFA)
  : AppColors.backgroundDark,
  splashFactory: InkRipple.splashFactory,
- visualDensity: VisualDensity.standard,
-
- appBarTheme: AppBarTheme(
- backgroundColor: Colors.transparent,
- scrolledUnderElevation: 0,
- elevation: 0,
- centerTitle: false,
- titleSpacing: AppSpacing.lg,
- toolbarHeight: 56,
- titleTextStyle: TextStyle(
- fontSize: 22,
- fontWeight: FontWeight.w600,
- letterSpacing: -0.35,
- height: 1.25,
- color: scheme.onSurface,
- ),
+ visualDensity: VisualDensity.standard,    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
+      scrolledUnderElevation: 0,
+      elevation: 0,
+      centerTitle: false,
+      titleSpacing: AppSpacing.lg,
+      toolbarHeight: 56,
+      titleTextStyle: TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.w500,
+        letterSpacing: -0.35,
+        height: 1.25,
+        color: scheme.onSurface,
+      ),
  iconTheme: IconThemeData(color: scheme.onSurface, size: 22),
  ),
 
@@ -212,54 +210,50 @@ abstract final class AppTheme {
  letterSpacing: -0.1,
  ),
  ),
- ),
+ ),    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(0, AppSizes.touchTarget),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+        side: BorderSide(color: scheme.outlineVariant),
+        textStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+          letterSpacing: -0.1,
+        ),
+      ),
+    ),
 
- outlinedButtonTheme: OutlinedButtonThemeData(
- style: OutlinedButton.styleFrom(
- minimumSize: const Size(0, AppSizes.touchTarget),
- padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
- shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
- side: BorderSide(color: scheme.outlineVariant),
- textStyle: const TextStyle(
- fontSize: 15,
- fontWeight: FontWeight.w600,
- letterSpacing: -0.1,
- ),
- ),
- ),
-
- textButtonTheme: TextButtonThemeData(
- style: TextButton.styleFrom(
- minimumSize: const Size(0, AppSizes.touchTarget),
- shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
- textStyle: const TextStyle(
- fontSize: 14,
- fontWeight: FontWeight.w600,
- ),
- ),
- ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        minimumSize: const Size(0, AppSizes.touchTarget),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+        textStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ),
 
  iconButtonTheme: IconButtonThemeData(
  style: IconButton.styleFrom(
  minimumSize: const Size(AppSizes.touchTarget, AppSizes.touchTarget),
  shape: RoundedRectangleBorder(borderRadius: AppRadius.smAll),
  ),
- ),
-
- chipTheme: ChipThemeData(
- backgroundColor: fieldFill,
- selectedColor: isLight
- ? const Color(0xFFD1FAE5)
- : const Color(0xFF14532D),
- // Pílula completa (Apple): os chips de filtro viram cápsulas — o
- // mesmo shape StadiumBorder da navegação.
- shape: const StadiumBorder(),
- side: BorderSide.none,
- labelStyle: TextStyle(
- fontSize: 13,
- fontWeight: FontWeight.w600,
- color: scheme.onSurfaceVariant,
- ),
+ ),    chipTheme: ChipThemeData(
+      backgroundColor: fieldFill,
+      selectedColor: isLight
+          ? const Color(0xFFD1FAE5)
+          : const Color(0xFF14532D),
+      // Pílula completa (Apple): os chips de filtro viram cápsulas — o
+      // mesmo shape StadiumBorder da navegação.
+      shape: const StadiumBorder(),
+      side: BorderSide.none,
+      labelStyle: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: scheme.onSurfaceVariant,
+      ),
  padding: const EdgeInsets.symmetric(
  horizontal: AppSpacing.sm + 2,
  vertical: AppSpacing.xs,
@@ -280,37 +274,34 @@ abstract final class AppTheme {
  size: 22,
  color: selected ? navSelectedColor : scheme.onSurfaceVariant,
  );
- }),
- labelTextStyle: WidgetStateProperty.resolveWith((states) {
- final selected = states.contains(WidgetState.selected);
- return TextStyle(
- fontSize: 11,
- fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
- height: 1.15,
- letterSpacing: 0,
- color: selected ? navSelectedColor : scheme.onSurfaceVariant,
- );
- }),
+ }),      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        final selected = states.contains(WidgetState.selected);
+        return TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          height: 1.15,
+          letterSpacing: 0,
+          color: selected ? navSelectedColor : scheme.onSurfaceVariant,
+        );
+      }),
  labelPadding: const EdgeInsets.only(top: 2),
- ),
-
- navigationRailTheme: NavigationRailThemeData(
- backgroundColor: navBackground,
- indicatorColor: navIndicator,
- indicatorShape: const StadiumBorder(),
- minWidth: 72,
- groupAlignment: -0.85,
- selectedLabelTextStyle: TextStyle(
- fontSize: 12,
- fontWeight: FontWeight.w600,
- color: navSelectedColor,
- ),
- unselectedLabelTextStyle: TextStyle(
- fontSize: 12,
- fontWeight: FontWeight.w500,
- color: scheme.onSurfaceVariant,
- ),
- ),
+ ),    navigationRailTheme: NavigationRailThemeData(
+      backgroundColor: navBackground,
+      indicatorColor: navIndicator,
+      indicatorShape: const StadiumBorder(),
+      minWidth: 72,
+      groupAlignment: -0.85,
+      selectedLabelTextStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: navSelectedColor,
+      ),
+      unselectedLabelTextStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+        color: scheme.onSurfaceVariant,
+      ),
+    ),
 
  floatingActionButtonTheme: FloatingActionButtonThemeData(
  backgroundColor: isLight
@@ -326,21 +317,19 @@ abstract final class AppTheme {
  ),
  ),
 
- dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
-
- dialogTheme: DialogThemeData(
- backgroundColor: surface,
- elevation: 8,
- shape: RoundedRectangleBorder(borderRadius: AppRadius.xlAll),
- titleTextStyle: TextStyle(
- fontSize: 22,
- fontWeight: FontWeight.w600,
- letterSpacing: -0.35,
- height: 1.27,
- color: scheme.onSurface,
- fontFeatures: const [FontFeature.tabularFigures()],
- ),
- ),
+ dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),    dialogTheme: DialogThemeData(
+      backgroundColor: surface,
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.xlAll),
+      titleTextStyle: TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.w500,
+        letterSpacing: -0.35,
+        height: 1.27,
+        color: scheme.onSurface,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+    ),
 
  snackBarTheme: SnackBarThemeData(
  behavior: SnackBarBehavior.floating,
@@ -401,41 +390,40 @@ abstract final class AppTheme {
  color: scheme.onSurface,
  fontFeatures: const [FontFeature.tabularFigures()],
  fontVariations: const [FontVariation('opsz', 32)],
- ),
- headlineSmall: TextStyle(
- fontSize: 24,
- fontWeight: FontWeight.w600,
- letterSpacing: -0.4,
- height: 1.25,
- color: scheme.onSurface,
- fontFeatures: const [FontFeature.tabularFigures()],
- fontVariations: const [FontVariation('opsz', 32)],
- ),
- titleLarge: TextStyle(
- fontSize: 22,
- fontWeight: FontWeight.w600,
- letterSpacing: -0.35,
- height: 1.27,
- color: scheme.onSurface,
- fontFeatures: const [FontFeature.tabularFigures()],
- fontVariations: const [FontVariation('opsz', 24)],
- ),
- titleMedium: TextStyle(
- fontSize: 20,
- fontWeight: FontWeight.w600,
- letterSpacing: -0.3,
- height: 1.3,
- color: scheme.onSurface,
- fontFeatures: const [FontFeature.tabularFigures()],
- fontVariations: const [FontVariation('opsz', 24)],
- ),
- titleSmall: TextStyle(
- fontSize: 14,
- fontWeight: FontWeight.w600,
- letterSpacing: -0.15,
- height: 1.35,
- color: scheme.onSurface,
- ),
+ ),    headlineSmall: TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.4,
+      height: 1.25,
+      color: scheme.onSurface,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      fontVariations: const [FontVariation('opsz', 32)],
+    ),
+    titleLarge: TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.35,
+      height: 1.27,
+      color: scheme.onSurface,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      fontVariations: const [FontVariation('opsz', 24)],
+    ),
+    titleMedium: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.3,
+      height: 1.3,
+      color: scheme.onSurface,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      fontVariations: const [FontVariation('opsz', 24)],
+    ),
+    titleSmall: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      letterSpacing: -0.15,
+      height: 1.35,
+      color: scheme.onSurface,
+    ),
  bodyLarge: TextStyle(
  fontSize: 17,
  fontWeight: FontWeight.w400,
@@ -459,21 +447,20 @@ abstract final class AppTheme {
  height: 1.35,
  color: scheme.onSurfaceVariant,
  fontFeatures: const [FontFeature.tabularFigures()],
- ),
- labelLarge: TextStyle(
- fontSize: 14,
- fontWeight: FontWeight.w600,
- letterSpacing: 0,
- height: 1.25,
- color: scheme.onSurface,
- ),
- labelMedium: TextStyle(
- fontSize: 12,
- fontWeight: FontWeight.w600,
- letterSpacing: 0,
- height: 1.25,
- color: scheme.onSurfaceVariant,
- ),
+ ),    labelLarge: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0,
+      height: 1.25,
+      color: scheme.onSurface,
+    ),
+    labelMedium: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0,
+      height: 1.25,
+      color: scheme.onSurfaceVariant,
+    ),
  labelSmall: TextStyle(
  fontSize: 11,
  fontWeight: FontWeight.w500,

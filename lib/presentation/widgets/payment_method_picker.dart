@@ -200,7 +200,7 @@ class _SecondaryTile extends StatelessWidget {
  maxLines: 2,
  overflow: TextOverflow.ellipsis,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ),

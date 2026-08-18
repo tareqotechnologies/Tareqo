@@ -76,7 +76,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
  title: Text(
  l10n.purchasesTitle,
  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),

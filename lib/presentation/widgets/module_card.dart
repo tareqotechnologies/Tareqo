@@ -54,7 +54,7 @@ class ModuleCard extends StatelessWidget {
  overflow: TextOverflow.ellipsis,
  style: theme.textTheme.labelLarge?.copyWith(
  color: scheme.onSurface,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.1,
  ),
  ),

@@ -83,7 +83,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
  Text(
  l10n.appNavCustomers,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -241,7 +241,7 @@ class _CustomerTile extends StatelessWidget {
  _initials(customer.name),
  style: theme.textTheme.labelMedium?.copyWith(
  color: theme.colorScheme.onSurfaceVariant,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ),
@@ -255,7 +255,7 @@ class _CustomerTile extends StatelessWidget {
  Text(
  customer.name,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  if (contacts.isNotEmpty) ...[
@@ -380,44 +380,48 @@ class _AddCustomerSheetState extends ConsumerState<_AddCustomerSheet> {
  child: Column(
  mainAxisSize: MainAxisSize.min,
  crossAxisAlignment: CrossAxisAlignment.stretch,
- children: [
- AppSheetHeader(title: l10n.customersAddNew),
- // AppTextField (design system ultra-clean): minimalista, borda
- // sutil que acende no foco — padrão dos formulários do app.
- AppTextField(
- controller: _nameController,
- label: l10n.loginNameLabel,
- prefixIcon: Icons.person_outline,
- textInputAction: TextInputAction.next,
- validator: (value) => (value == null || value.trim().isEmpty)
- ? l10n.customersNameError
- : null,
- ),
- const SizedBox(height: 14),
- AppTextField(
- controller: _phoneController,
- label: l10n.customersPhoneLabel,
- prefixIcon: Icons.phone_outlined,
- keyboardType: TextInputType.phone,
- textInputAction: TextInputAction.next,
- ),
- const SizedBox(height: 14),
- AppTextField(
- controller: _emailController,
- label: l10n.customersEmailLabel,
- prefixIcon: Icons.mail_outline,
- keyboardType: TextInputType.emailAddress,
- textInputAction: TextInputAction.done,
- // Email OPCIONAL — mas se preenchido, precisa ter formato
- // válido (emails inválidos não entram na base).
- validator: (value) {
- final email = value?.trim() ?? '';
- if (email.isEmpty) return null;
- return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)
- ? null
- : l10n.loginEmailError;
- },
- ),
+ children: [        AppSheetHeader(title: l10n.customersAddNew),
+        // Seção: Dados do cliente — nome, telefone e email.
+        SheetSection(
+          icon: Icons.person_outline,
+          title: l10n.customersAddNew,
+          children: [
+            AppTextField(
+              controller: _nameController,
+              label: l10n.loginNameLabel,
+              prefixIcon: Icons.person_outline,
+              textInputAction: TextInputAction.next,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.customersNameError
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _phoneController,
+              label: l10n.customersPhoneLabel,
+              prefixIcon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _emailController,
+              label: l10n.customersEmailLabel,
+              prefixIcon: Icons.mail_outline,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
+              // Email OPCIONAL — mas se preenchido, precisa ter formato
+              // válido (emails inválidos não entram na base).
+              validator: (value) {
+                final email = value?.trim() ?? '';
+                if (email.isEmpty) return null;
+                return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)
+                    ? null
+                    : l10n.loginEmailError;
+              },
+            ),
+          ],
+        ),
  if (_formError != null) ...[
  const SizedBox(height: 14),
  Text(

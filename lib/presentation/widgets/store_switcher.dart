@@ -61,7 +61,7 @@ class StoreSwitcher extends ConsumerWidget {
  overflow: TextOverflow.ellipsis,
  style: theme.textTheme.labelLarge?.copyWith(
  color: theme.colorScheme.onSurface,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.2,
  ),
  ),

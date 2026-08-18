@@ -66,6 +66,76 @@ Future<T?> showAppSheet<T>(
  );
 }
 
+/// Seção agrupada dentro de uma sheet — container com fundo sutil,
+/// cantos arredondados e padding interno. Inspira-se no card de atividade
+/// do dashboard (surfaceContainerHighest, AppRadius.xl, borda sutil)
+/// para dar hierarquia visual aos formulários.
+///
+/// Use [icon] + [title] para rótulo de seção (opcional), e coloque os
+/// campos do formulário como [children].
+class SheetSection extends StatelessWidget {
+  const SheetSection({
+    super.key,
+    this.icon,
+    this.title,
+    required this.children,
+  });
+
+  final IconData? icon;
+  final String? title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.4),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (title != null) ...[
+            Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 16, color: scheme.primary),
+                  const SizedBox(width: 8),
+                ],
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      title!,
+                      maxLines: 1,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
 class _SheetHandle extends StatelessWidget {
  const _SheetHandle();
 

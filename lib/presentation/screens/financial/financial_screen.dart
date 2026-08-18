@@ -50,7 +50,7 @@ class FinancialScreen extends ConsumerWidget {
  title: Text(
  l10n.financialTitle,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -122,7 +122,7 @@ class FinancialScreen extends ConsumerWidget {
  theme.colorScheme.onPrimaryContainer,
  foregroundColor: theme.colorScheme.onSurfaceVariant,
  textStyle: theme.textTheme.labelLarge?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  segments: [
@@ -393,7 +393,7 @@ class _CashStack extends StatelessWidget {
  currency,
  style: theme.textTheme.labelSmall?.copyWith(
  color: scheme.onSurfaceVariant,
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: 0.4,
  ),
  ),
@@ -410,7 +410,7 @@ class _CashStack extends StatelessWidget {
  maxLines: 1,
  style: theme.textTheme.displaySmall?.copyWith(
  color: balanceColor,
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.8,
  fontFeatures: const [FontFeature.tabularFigures()],
  ),
@@ -499,7 +499,7 @@ class _CashLine extends StatelessWidget {
  maxLines: 1,
  style: theme.textTheme.bodyMedium?.copyWith(
  color: color,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  fontFeatures: const [FontFeature.tabularFigures()],
  ),
  ),

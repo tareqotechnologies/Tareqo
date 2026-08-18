@@ -81,7 +81,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
  title: Text(
  l10n.salesTitle,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -272,7 +272,7 @@ class _SalesBody extends StatelessWidget {
  overflow: TextOverflow.ellipsis,
  style: theme.textTheme.labelSmall?.copyWith(
  color: theme.colorScheme.onSurfaceVariant,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ),

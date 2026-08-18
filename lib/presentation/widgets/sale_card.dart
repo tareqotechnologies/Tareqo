@@ -83,7 +83,7 @@ class _SalesCardState extends State<SalesCard> {
  Text(
  _sale.paymentMethod.labelFor(l10n),
  style: theme.textTheme.titleSmall?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(height: 2),
@@ -123,7 +123,7 @@ class _SalesCardState extends State<SalesCard> {
  cents: _sale.totalAmountCents,
  alignment: Alignment.centerRight,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  fontFeatures: const [FontFeature.tabularFigures()],
  ),
  ),

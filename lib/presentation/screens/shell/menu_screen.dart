@@ -65,7 +65,7 @@ class MenuScreen extends ConsumerWidget {
  title: Text(
  l10n.appNavMenu,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -157,7 +157,7 @@ class MenuScreen extends ConsumerWidget {
  l10n.commonSignOut,
  style: theme.textTheme.bodyMedium?.copyWith(
  color: theme.colorScheme.error,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ],

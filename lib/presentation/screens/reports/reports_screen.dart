@@ -57,7 +57,7 @@ class ReportsScreen extends ConsumerWidget {
  title: Text(
  l10n.reportsTitle,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -128,7 +128,7 @@ class ReportsScreen extends ConsumerWidget {
                     theme.colorScheme.onPrimaryContainer,
                 foregroundColor: theme.colorScheme.onSurfaceVariant,
                 textStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               segments: [
@@ -372,7 +372,7 @@ class _BestSellerRow extends StatelessWidget {
  '$rank',
  style: TextStyle(
  color: theme.colorScheme.onPrimaryContainer,
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  // Ranks (1..N) na coluna de posição — alinhados.
  fontFeatures: [FontFeature.tabularFigures()],
  ),
@@ -388,7 +388,7 @@ class _BestSellerRow extends StatelessWidget {
  Text(
  name,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(height: 2),
@@ -433,7 +433,7 @@ class _DailyRow extends StatelessWidget {
  child: Text(
  Formatters.day(day),
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ),

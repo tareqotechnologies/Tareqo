@@ -161,32 +161,26 @@ class AppShell extends ConsumerWidget {
  ),
  );
  }
-}
-
-/// Marca visual compacta do app (rail desktop).
+}/// Marca visual compacta do app (rail desktop).
 class _BrandMark extends StatelessWidget {
- const _BrandMark({this.compact = false});
+  const _BrandMark({this.compact = false});
 
- final bool compact;
+  final bool compact;
 
- @override
- Widget build(BuildContext context) {
- final theme = Theme.of(context);
+  @override
+  Widget build(BuildContext context) {
+    final size = compact ? 40.0 : 48.0;
 
- return Container(
- width: compact ? 40 : 48,
- height: compact ? 40 : 48,
- decoration: BoxDecoration(
- color: theme.colorScheme.primaryContainer,
- borderRadius: AppRadius.mdAll,
- ),
- child: Icon(
- Icons.storefront_rounded,
- color: theme.accent,
- size: compact ? 22 : 26,
- ),
- );
- }
+    return ClipRRect(
+      borderRadius: AppRadius.mdAll,
+      child: Image.asset(
+        'assets/branding/icon_fg.png',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
 }
 
 /// Menu global de acções (FAB central).

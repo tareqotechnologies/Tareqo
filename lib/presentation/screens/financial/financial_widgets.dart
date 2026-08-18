@@ -83,7 +83,7 @@ class TransactionCard extends StatelessWidget {
  Text(
  transaction.description,
  style: theme.textTheme.titleSmall?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(height: 2),
@@ -115,7 +115,7 @@ class TransactionCard extends StatelessWidget {
  prefix: '$sign ',
  alignment: Alignment.centerRight,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  color: color,
  fontFeatures: const [FontFeature.tabularFigures()],
  ),

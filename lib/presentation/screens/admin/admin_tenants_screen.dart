@@ -39,7 +39,7 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
  title: Text(
  l10n.adminTenantsTitle,
  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -285,7 +285,7 @@ class _PendingTenantCard extends StatelessWidget {
  child: Text(
  tenant.businessName,
  style: theme.textTheme.titleMedium?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ),

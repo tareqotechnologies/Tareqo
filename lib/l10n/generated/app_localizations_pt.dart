@@ -15,11 +15,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingTitle => 'Bem-vindo!';
 
   @override
-  String get onboardingHeading => 'Ative seu negócio no ERP';
+  String get onboardingHeading => 'Configure seu negócio';
 
   @override
   String get onboardingSubtitle =>
-      'Escolha um plano, informe o nome do seu negócio e defina a moeda e o idioma. Seu acesso será liberado após a aprovação (prazo de até 24h).';
+      'Escolha o plano, nome e moeda. Aprovação em até 24h.';
 
   @override
   String get onboardingBusinessLabel => 'Nome do negócio';
@@ -43,7 +43,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String onboardingSuccess(String business) {
-    return 'Solicitação de $business enviada! Aguarde a aprovação (até 24h).';
+    return 'Solicitação de $business enviada! Aguarde aprovação (até 24h).';
   }
 
   @override
@@ -87,14 +87,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get currencyMzn => 'Metical (MZN)';
 
   @override
-  String get settingsSave => 'Salvar ajustes';
+  String get settingsSave => 'Salvar';
 
   @override
   String get settingsSaved => 'Ajustes salvos!';
 
   @override
   String get settingsGenericError =>
-      'Não foi possível salvar os ajustes. Tente novamente.';
+      'Não foi possível salvar. Tente novamente.';
 
   @override
   String get settingsSupportSection => 'Suporte';
@@ -104,32 +104,30 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get settingsSupportEntryHint =>
-      'Guia do Usuário e Troubleshooting — leitura sem internet';
+      'Guia do Usuário e Troubleshooting — offline';
 
   @override
   String get supportTitle => 'Ajuda';
 
   @override
-  String get supportSubtitle =>
-      'Tudo o que precisa para tirar o máximo do app: o guia completo do usuário e a resolução dos problemas mais comuns.';
+  String get supportSubtitle => 'Guia do usuário e solução de problemas.';
 
   @override
   String get supportUserGuide => 'Guia do Usuário';
 
   @override
   String get supportUserGuideHint =>
-      'Manual simples e completo: login, lojas, produtos (com foto), vendas, fiado, financeiro, fecho de caixa, relatórios e FAQ';
+      'Login, lojas, produtos, vendas, fiado, financeiro e relatórios';
 
   @override
   String get supportTroubleshooting => 'Troubleshooting';
 
   @override
   String get supportTroubleshootingHint =>
-      'Resolução de problemas comuns: login, fotos, vendas, estoque, caixa, conexão e mensagens de erro';
+      'Problemas comuns: login, vendas, estoque e conexão';
 
   @override
-  String get supportReadingError =>
-      'Não foi possível abrir o documento. Tente novamente.';
+  String get supportReadingError => 'Não foi possível abrir o documento.';
 
   @override
   String get commonSearch => 'Buscar...';
@@ -150,27 +148,26 @@ class AppLocalizationsPt extends AppLocalizations {
   String get storeSelectorSectionTitle => 'Loja ativa';
 
   @override
-  String get storeSelectorSectionHint =>
-      'Escolha a loja cujos dados aparecem nos módulos (vendas, estoque, financeiro).';
+  String get storeSelectorSectionHint => 'Escolha a loja ativa.';
 
   @override
   String get tenantPendingTitle => 'Aguardando aprovação';
 
   @override
   String tenantPendingSubtitle(String business) {
-    return 'A solicitação de acesso de \"$business\" foi enviada com sucesso. O super admin vai analisar e você receberá acesso em até 24h.';
+    return 'Solicitação de \"$business\" enviada. Aguarde até 24h.';
   }
 
   @override
   String get tenantPendingHint =>
-      'Assim que aprovado, você poderá criar lojas, contratar funcionários e começar a operar.';
+      'Depois da aprovação, crie lojas e comece a operar.';
 
   @override
   String get tenantRejectedTitle => 'Solicitação rejeitada';
 
   @override
   String tenantRejectedSubtitle(String business) {
-    return 'A solicitação de acesso de \"$business\" não foi aprovada.';
+    return 'A solicitação de \"$business\" não foi aprovada.';
   }
 
   @override
@@ -178,20 +175,20 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get authBlockedMessage =>
-      'Sua conta de funcionário foi desativada pelo dono do estabelecimento. Se tiver dúvidas, fale com ele.';
+      'Sua conta foi desativada pelo proprietário.';
 
   @override
   String get authBlockedSignOut => 'Sair';
 
   @override
-  String get authErrorRestoreSession => 'Não foi possível restaurar sua sessão';
+  String get authErrorRestoreSession => 'Sessão não restaurada';
 
   @override
   String get authErrorCheckConnection =>
       'Verifique sua conexão e tente novamente.';
 
   @override
-  String get authErrorLoadAccount => 'Não foi possível carregar sua conta';
+  String get authErrorLoadAccount => 'Conta não carregada';
 
   @override
   String get splashLoading => 'A abrir a sua sessão…';
@@ -223,11 +220,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get loginWeakPasswordError =>
-      'A senha deve conter letras minúsculas, maiúsculas, números e símbolos.';
+      'A senha deve conter letras, números e símbolos.';
 
   @override
   String get loginRateLimitError =>
-      'Muitas tentativas seguidas. Aguarde cerca de 1 hora e tente novamente.';
+      'Muitas tentativas. Aguarde 1 hora e tente novamente.';
 
   @override
   String get loginShowPassword => 'Mostrar senha';
@@ -266,8 +263,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível entrar. Verifique e-mail e senha.';
 
   @override
-  String get loginSecurityNote =>
-      'Seus dados ficam protegidos com criptografia.';
+  String get loginSecurityNote => 'Dados protegidos com criptografia.';
 
   @override
   String get loginForgotPassword => 'Esqueceu a senha?';
@@ -277,14 +273,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get forgotPasswordHint =>
-      'Informe o e-mail da sua conta. Enviamos um link para você criar uma nova senha.';
+      'Informe seu e-mail. Enviaremos um link para redefinir.';
 
   @override
   String get forgotPasswordSubmit => 'Enviar link';
 
   @override
-  String get forgotPasswordSent =>
-      'Se existir uma conta com este e-mail, enviamos um link para redefinir a senha.';
+  String get forgotPasswordSent => 'Se existir uma conta, enviamos um link.';
 
   @override
   String get forgotPasswordError =>
@@ -418,7 +413,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get syncOfflineSaved =>
-      'Sem conexão. A operação foi salva e será sincronizada automaticamente.';
+      'Sem conexão. Operação salva e será sincronizada automaticamente.';
 
   @override
   String syncDone(int count) {
@@ -432,8 +427,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get syncStillOffline =>
-      'Sem conexão — as operações continuam pendentes.';
+  String get syncStillOffline => 'Sem conexão — operações pendentes.';
 
   @override
   String dashboardGreeting(String name) {
@@ -681,12 +675,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String employeeDeactivateConfirm(Object name) {
-    return 'Desativar $name? O funcionário perde o acesso imediatamente e não poderá vender até ser reativado.';
+    return 'Desativar $name? Perde acesso imediatamente.';
   }
 
   @override
   String employeeReactivateConfirm(Object name) {
-    return 'Reativar $name? O funcionário volta a ter acesso à loja.';
+    return 'Reativar $name? Volta a ter acesso à loja.';
   }
 
   @override
@@ -799,11 +793,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addEmployeeSuccess =>
-      'Funcionário cadastrado! A conta de acesso foi criada.';
+      'Funcionário cadastrado! Conta de acesso criada.';
 
   @override
   String get addEmployeeError =>
-      'Não foi possível cadastrar o funcionário. Verifique se o e-mail já não está em uso.';
+      'Não foi possível cadastrar. Verifique o e-mail.';
 
   @override
   String get addEmployeeSubmit => 'Cadastrar funcionário';
@@ -813,17 +807,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get upgradeSubtitle =>
-      'Escolha o novo plano. O super admin precisará aprovar o pedido antes de o plano ser alterado.';
+      'Escolha o novo plano. Aguarda aprovação do super admin.';
 
   @override
-  String get upgradeMaxReached => 'Você já está no plano máximo disponível.';
+  String get upgradeMaxReached => 'Você já está no plano máximo.';
 
   @override
   String get upgradeChooseError => 'Escolha o plano de destino.';
 
   @override
-  String get upgradeSuccess =>
-      'Pedido de upgrade enviado! O super admin vai analisar.';
+  String get upgradeSuccess => 'Pedido de upgrade enviado!';
 
   @override
   String get upgradeError =>
@@ -933,7 +926,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productsAddedNoPhoto =>
-      'Produto adicionado! (foto não enviada — sem permissão de armazenamento)';
+      'Produto adicionado! (sem permissão de armazenamento)';
 
   @override
   String get productsAddError =>
@@ -977,7 +970,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productsEditSavedNoPhoto =>
-      'Produto atualizado! (foto não enviada — sem permissão de armazenamento)';
+      'Produto atualizado! (sem permissão de armazenamento)';
 
   @override
   String get productsEditError =>
@@ -1005,12 +998,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsActiveLabel => 'Produto ativo';
 
   @override
-  String get productsActiveHint =>
-      'Desative para tirar o produto do PDV e das compras (o estoque é preservado).';
+  String get productsActiveHint => 'Desative para tirar do PDV e compras.';
 
   @override
   String get productsStockAdjustHint =>
-      'Ajuste manual: define o estoque exato, criando/consumindo lotes FIFO.';
+      'Ajuste manual: define o estoque exato (FIFO).';
 
   @override
   String get productsSectionInfo => 'Informações';
@@ -1097,7 +1089,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get purchasesEmptySubtitle =>
-      'Toque em \"Nova compra\" para registrar a entrada de mercadoria e abastecer o estoque.';
+      'Toque em \"Nova compra\" para registrar.';
 
   @override
   String purchasesHeaderCount(int count) {
@@ -1133,7 +1125,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get purchasesCartItemUnavailable =>
-      'Um item do carrinho não está mais disponível. Tente novamente.';
+      'Item do carrinho não disponível. Tente novamente.';
 
   @override
   String purchasesRegistered(String amount) {
@@ -1288,14 +1280,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get financialEmptySubtitle =>
-      'Registre entradas e saídas para acompanhar o fluxo de caixa.';
+      'Registre entradas e saídas para acompanhar o caixa.';
 
   @override
   String get financialReceivePendingTitle => 'Receber pendência?';
 
   @override
   String financialReceivePendingBody(String amount) {
-    return 'Confirmar o recebimento de $amount? A movimentação passa a contar no caixa realizado.';
+    return 'Confirmar recebimento de $amount?';
   }
 
   @override
@@ -1306,7 +1298,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get financialReceiveError =>
-      'Não foi possível receber a pendência. Tente novamente.';
+      'Não foi possível receber. Tente novamente.';
 
   @override
   String get financialPay => 'Pagar';
@@ -1316,15 +1308,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String financialPayPendingBody(String amount) {
-    return 'Confirmar o pagamento de $amount? A movimentação passa a contar no caixa realizado.';
+    return 'Confirmar pagamento de $amount?';
   }
 
   @override
   String get financialPaid => 'Saída paga!';
 
   @override
-  String get financialPayError =>
-      'Não foi possível pagar a pendência. Tente novamente.';
+  String get financialPayError => 'Não foi possível pagar. Tente novamente.';
 
   @override
   String get financialAddTitle => 'Registrar movimentação';
@@ -1354,15 +1345,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get financialPendingLabel => 'Pendente (fiado)';
 
   @override
-  String get financialPendingHint =>
-      'Não conta no caixa realizado até ser recebido.';
+  String get financialPendingHint => 'Não conta no caixa até ser recebido.';
 
   @override
   String get financialRegistered => 'Movimentação registrada!';
 
   @override
   String get financialRegisterError =>
-      'Não foi possível registrar a movimentação. Tente novamente.';
+      'Não foi possível registrar. Tente novamente.';
 
   @override
   String get financialDefaultCategoryIncome => 'Vendas';
@@ -1386,8 +1376,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cashClosingExpectedCash => 'Esperado na gaveta';
 
   @override
-  String get cashClosingExpectedCashHint =>
-      'Só vendas em dinheiro — cartão, M-Pesa, E-Mola e transferência não passam pela gaveta física.';
+  String get cashClosingExpectedCashHint => 'Só vendas em dinheiro.';
 
   @override
   String get cashClosingByMethod => 'Por forma de pagamento';
@@ -1397,7 +1386,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get cashClosingCountedCashHint =>
-      'Conte o dinheiro físico da gaveta e informe aqui.';
+      'Conte o dinheiro da gaveta e informe aqui.';
 
   @override
   String get cashClosingDifference => 'Diferença';
@@ -1494,8 +1483,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get debtsEmptyPendingTitle => 'Nenhum fiado pendente';
 
   @override
-  String get debtsEmptyPendingSubtitle =>
-      'Quando um cliente comprar fiado, a dívida aparece aqui.';
+  String get debtsEmptyPendingSubtitle => 'Fiados aparecerão aqui.';
 
   @override
   String get debtsTotalSettled => 'Total quitado';
@@ -1521,15 +1509,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get debtsEmptySettledTitle => 'Nenhuma quitação ainda';
 
   @override
-  String get debtsEmptySettledSubtitle =>
-      'Quando um fiado for quitado, ele aparece aqui.';
+  String get debtsEmptySettledSubtitle => 'Fiados quitados aparecerão aqui.';
 
   @override
   String get debtsSettleTitle => 'Quitar dívida?';
 
   @override
   String debtsSettleBody(String amount, String name) {
-    return 'Receber $amount de $name? Será registrada uma entrada no caixa.';
+    return 'Receber $amount de $name?';
   }
 
   @override
@@ -1544,8 +1531,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get debtsNotFound => 'Esta dívida não está mais pendente.';
 
   @override
-  String get debtsSettleError =>
-      'Não foi possível quitar a dívida. Tente novamente.';
+  String get debtsSettleError => 'Não foi possível quitar. Tente novamente.';
 
   @override
   String get debtsLate => 'Atrasada';
@@ -1599,7 +1585,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get debtsPendingEntryError =>
-      'Fiado registrado, mas a pendência no Financeiro não pôde ser criada. Verifique as movimentações.';
+      'Fiado registrado, mas a pendência não pôde ser criada.';
 
   @override
   String get debtsRegisterError =>
@@ -1711,7 +1697,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get salesItemUnavailable =>
-      'Um item do carrinho não está mais disponível. Tente novamente.';
+      'Item do carrinho não disponível. Tente novamente.';
 
   @override
   String salesRegistered(String amount) {
@@ -1781,7 +1767,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String saleDetailCancelConfirmBody(String amount) {
-    return 'O estoque dos itens será devolvido e a entrada no caixa estornada ($amount). Esta ação não pode ser desfeita.';
+    return 'Estoque será devolvido e caixa estornado ($amount).';
   }
 
   @override
@@ -1866,11 +1852,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível carregar as solicitações.';
 
   @override
-  String get adminNothingPendingTitle => 'Nada aguardando aprovação';
+  String get adminNothingPendingTitle => 'Nada pendente';
 
   @override
-  String get adminNothingPendingSubtitle =>
-      'Novas solicitações de tenant aparecem aqui.';
+  String get adminNothingPendingSubtitle => 'Novas solicitações aparecem aqui.';
 
   @override
   String get adminTenantsLoadError => 'Não foi possível carregar os tenants.';
@@ -1900,8 +1885,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get adminRejectReasonLabel => 'Motivo da rejeição';
 
   @override
-  String get adminRejectReasonHint =>
-      'Ex.: informações incompletas no cadastro';
+  String get adminRejectReasonHint => 'Ex.: informações incompletas';
 
   @override
   String get adminApprove => 'Aprovar';
@@ -2013,8 +1997,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Pedidos de mudança de plano aparecem aqui.';
 
   @override
-  String get adminUpgradeApproved =>
-      'Upgrade aprovado — plano do tenant atualizado!';
+  String get adminUpgradeApproved => 'Upgrade aprovado — plano atualizado!';
 
   @override
   String get adminUpgradeRejected => 'Upgrade rejeitado.';

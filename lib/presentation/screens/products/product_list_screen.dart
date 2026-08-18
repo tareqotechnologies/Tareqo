@@ -93,7 +93,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
  title: Text(
  l10n.appNavProducts,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -102,15 +102,15 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
  // de cadastro centralizado (mantendo a regra canManageProducts).
  // FAB CIRCULAR verde (design system 2026 — igual ao app de
  // referência, que mostra apenas o sinal de +).
- floatingActionButton:
- canManageProducts && (productsAsync.value?.isNotEmpty ?? false)
- ? FloatingActionButton(
- heroTag: 'fab-products',
- onPressed: _openAddSheet,
- tooltip: l10n.productsAddNew,
- child: const Icon(Icons.add),
- )
- : null,
+    floatingActionButton:
+        canManageProducts
+            ? FloatingActionButton(
+                heroTag: 'fab-products',
+                onPressed: _openAddSheet,
+                tooltip: l10n.productsAddNew,
+                child: const Icon(Icons.add),
+              )
+            : null,
  body: Column(
  children: [
  Padding(
@@ -313,7 +313,7 @@ class _FilterChips extends StatelessWidget {
  color: selected
  ? scheme.onPrimaryContainer
  : scheme.onSurfaceVariant,
- fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+ fontWeight: selected ? FontWeight.w500 : FontWeight.w500,
  ),
  ),
  ],
@@ -395,13 +395,15 @@ class _ProductTile extends StatelessWidget {
  children: [
  // Nome COMPLETO do produto — quebra em linhas quando
  // necessário (nada de truncar nomes no rolodex).
- Text(
- product.name,
- style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
- color: inactive ? theme.colorScheme.onSurfaceVariant : null,
- ),
- ),
+                Text(
+                  product.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: inactive ? theme.colorScheme.onSurfaceVariant : null,
+                  ),
+                ),
  if (detail != null) ...[
  const SizedBox(height: 2),
  // Detalhe (código/PLU ou descrição) — trunca com
@@ -447,7 +449,7 @@ class _ProductTile extends StatelessWidget {
  cents: product.salePriceCents,
  alignment: Alignment.centerRight,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  color: inactive
  ? theme.colorScheme.onSurfaceVariant
  : null,
@@ -466,7 +468,7 @@ class _ProductTile extends StatelessWidget {
  color: lowStock
  ? theme.expense
  : theme.colorScheme.onSurfaceVariant,
- fontWeight: lowStock ? FontWeight.w600 : null,
+ fontWeight: lowStock ? FontWeight.w500 : null,
  fontFeatures: const [FontFeature.tabularFigures()],
  ),
  ),
@@ -604,29 +606,37 @@ class _ProductPhotoPicker extends StatelessWidget {
 class _SectionLabel extends StatelessWidget {
  const _SectionLabel({required this.icon, required this.title});
 
- final IconData icon;
- final String title;
+ final IconData icon;  final String title;
 
- @override
- Widget build(BuildContext context) {
- final theme = Theme.of(context);
- return Row(
- children: [
- Icon(icon, size: 16, color: theme.colorScheme.primary),
- const SizedBox(width: 8),
- // Capitalização NATURAL (nunca caixa alta): rótulos de seção
- // legíveis, sem o grito visual de letras maiúsculas.
- Text(
- title,
- style: theme.textTheme.labelSmall?.copyWith(
- color: theme.colorScheme.onSurfaceVariant,
- fontWeight: FontWeight.w600,
- letterSpacing: 0.4,
- ),
- ),
- ],
- );
- }
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: theme.colorScheme.primary),
+        const SizedBox(width: 8),
+        // Capitalização NATURAL (nunca caixa alta): rótulos de seção
+        // legíveis, sem o grito visual de letras maiúsculas.
+        // FittedBox: encolhe em vez de estourar em telas estreitas.
+        Flexible(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title,
+              maxLines: 1,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _AddProductSheet extends ConsumerStatefulWidget {
@@ -988,33 +998,32 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
  }),
  ),
  ),
- if (_vendaPorFracao) ...[
- DropdownButtonFormField<String>(
- initialValue: _unitLabel,
- decoration: InputDecoration(
- labelText: l10n.productsUnitLabel,
- prefixIcon: const Icon(Icons.scale_outlined),
- ),
- items: [
- for (final unit in const ['kg', 'g', 'l', 'ml'])
- DropdownMenuItem(value: unit, child: Text(unit)),
- ],
- onChanged: (value) =>
- setState(() => _unitLabel = value ?? 'kg'),
- ),
- ],
- if (_formError != null) ...[
- const SizedBox(height: 14),
- Text(
- _formError!,
- style: theme.textTheme.bodySmall?.copyWith(
- color: theme.colorScheme.error,
- ),
- ),
- ],
- const SizedBox(height: 20),
- AppButton.primary(
- label: l10n.productsAddSubmit,
+ if (_vendaPorFracao) ...[DropdownButtonFormField<String>(
+                  initialValue: _unitLabel,
+                  decoration: InputDecoration(
+                    labelText: l10n.productsUnitLabel,
+                    prefixIcon: const Icon(Icons.scale_outlined),
+                  ),
+                  items: [
+                    for (final unit in const ['kg', 'g', 'l', 'ml'])
+                      DropdownMenuItem(value: unit, child: Text(unit)),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _unitLabel = value ?? 'kg'),
+                ),
+              ],
+              if (_formError != null) ...[
+                const SizedBox(height: 14),
+                Text(
+                  _formError!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 20),
+              AppButton.primary(
+                label: l10n.productsAddSubmit,
  onPressed: _isSubmitting ? null : _submit,
  icon: _isSubmitting
  ? const SizedBox(
@@ -1402,23 +1411,22 @@ class _EditProductSheetState extends ConsumerState<_EditProductSheet> {
  }),
  ),
  ),
- if (_vendaPorFracao) ...[
- DropdownButtonFormField<String>(
- initialValue: _unitLabel,
- decoration: InputDecoration(
- labelText: l10n.productsUnitLabel,
- prefixIcon: const Icon(Icons.scale_outlined),
- ),
- items: [
- for (final unit in const ['kg', 'g', 'l', 'ml'])
- DropdownMenuItem(value: unit, child: Text(unit)),
- ],
- onChanged: (value) =>
- setState(() => _unitLabel = value ?? 'kg'),
- ),
- ],
- const SizedBox(height: 24),
- // STATUS — ativar/desativar (inativo some do PDV e das
+ if (_vendaPorFracao) ...[DropdownButtonFormField<String>(
+                  initialValue: _unitLabel,
+                  decoration: InputDecoration(
+                    labelText: l10n.productsUnitLabel,
+                    prefixIcon: const Icon(Icons.scale_outlined),
+                  ),
+                  items: [
+                    for (final unit in const ['kg', 'g', 'l', 'ml'])
+                      DropdownMenuItem(value: unit, child: Text(unit)),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _unitLabel = value ?? 'kg'),
+                ),
+              ],
+              const SizedBox(height: 24),
+              // STATUS — ativar/desativar (inativo some do PDV e das
  // compras; o estoque é preservado — a reativação devolve a
  // venda).
  _SectionLabel(
@@ -1529,7 +1537,7 @@ class _ExpiryField extends StatelessWidget {
  overflow: TextOverflow.ellipsis,
  style: theme.textTheme.bodyMedium?.copyWith(
  color: hasDate ? scheme.onSurface : scheme.onSurfaceVariant,
- fontWeight: hasDate ? FontWeight.w600 : null,
+ fontWeight: hasDate ? FontWeight.w500 : null,
  ),
  ),
  ),

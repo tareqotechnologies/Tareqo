@@ -31,7 +31,7 @@ class SectionHeader extends StatelessWidget {
  Text(
  title,
  style: theme.textTheme.titleLarge?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.3,
  ),
  ),

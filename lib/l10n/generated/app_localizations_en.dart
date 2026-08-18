@@ -15,11 +15,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingTitle => 'Welcome!';
 
   @override
-  String get onboardingHeading => 'Activate your business in the ERP';
+  String get onboardingHeading => 'Set up your business';
 
   @override
   String get onboardingSubtitle =>
-      'Choose a plan, enter your business name and set the currency and language. Your access will be granted after approval (within 24h).';
+      'Choose a plan, name and currency. Approval within 24h.';
 
   @override
   String get onboardingBusinessLabel => 'Business name';
@@ -86,13 +86,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currencyMzn => 'Mozambican Metical (MZN)';
 
   @override
-  String get settingsSave => 'Save settings';
+  String get settingsSave => 'Save';
 
   @override
   String get settingsSaved => 'Settings saved!';
 
   @override
-  String get settingsGenericError => 'Could not save the settings. Try again.';
+  String get settingsGenericError => 'Could not save settings. Try again.';
 
   @override
   String get settingsSupportSection => 'Support';
@@ -102,31 +102,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSupportEntryHint =>
-      'User Guide and Troubleshooting — offline reading';
+      'User Guide and Troubleshooting — offline';
 
   @override
   String get supportTitle => 'Help';
 
   @override
-  String get supportSubtitle =>
-      'Everything you need to get the most out of the app: the complete user guide and answers to the most common problems.';
+  String get supportSubtitle => 'User guide and troubleshooting.';
 
   @override
   String get supportUserGuide => 'User Guide';
 
   @override
   String get supportUserGuideHint =>
-      'Simple and complete manual: sign-in, stores, products (with photos), sales, credit, finances, cash closing, reports and FAQ';
+      'Sign-in, stores, products, sales, credit, finance and reports';
 
   @override
   String get supportTroubleshooting => 'Troubleshooting';
 
   @override
   String get supportTroubleshootingHint =>
-      'Solving common problems: sign-in, photos, sales, stock, cash, connection and error messages';
+      'Common issues: sign-in, sales, stock and connection';
 
   @override
-  String get supportReadingError => 'Could not open the document. Try again.';
+  String get supportReadingError => 'Could not open the document.';
 
   @override
   String get commonSearch => 'Search...';
@@ -147,47 +146,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeSelectorSectionTitle => 'Active store';
 
   @override
-  String get storeSelectorSectionHint =>
-      'Choose the store whose data appears across modules (sales, stock, financial).';
+  String get storeSelectorSectionHint => 'Choose the active store.';
 
   @override
   String get tenantPendingTitle => 'Waiting for approval';
 
   @override
   String tenantPendingSubtitle(String business) {
-    return 'The access request for \"$business\" was sent successfully. The super admin will review it and you will get access within 24h.';
+    return 'Request for \"$business\" sent. Wait up to 24h.';
   }
 
   @override
   String get tenantPendingHint =>
-      'Once approved, you will be able to create stores, hire employees and start operating.';
+      'Once approved, create stores and start operating.';
 
   @override
   String get tenantRejectedTitle => 'Request rejected';
 
   @override
   String tenantRejectedSubtitle(String business) {
-    return 'The access request for \"$business\" was not approved.';
+    return 'The request for \"$business\" was not approved.';
   }
 
   @override
   String get authBlockedTitle => 'Access suspended';
 
   @override
-  String get authBlockedMessage =>
-      'Your employee account was deactivated by the business owner. If you have questions, please contact them.';
+  String get authBlockedMessage => 'Your account was deactivated by the owner.';
 
   @override
   String get authBlockedSignOut => 'Sign out';
 
   @override
-  String get authErrorRestoreSession => 'Could not restore your session';
+  String get authErrorRestoreSession => 'Session not restored';
 
   @override
   String get authErrorCheckConnection => 'Check your connection and try again.';
 
   @override
-  String get authErrorLoadAccount => 'Could not load your account';
+  String get authErrorLoadAccount => 'Account not loaded';
 
   @override
   String get splashLoading => 'Opening your session…';
@@ -219,11 +216,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginWeakPasswordError =>
-      'Password must include lowercase, uppercase, numbers and symbols.';
+      'Password must include letters, numbers and symbols.';
 
   @override
   String get loginRateLimitError =>
-      'Too many attempts in a row. Please wait about an hour and try again.';
+      'Too many attempts. Wait 1 hour and try again.';
 
   @override
   String get loginShowPassword => 'Show password';
@@ -261,7 +258,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not sign in. Check your email and password.';
 
   @override
-  String get loginSecurityNote => 'Your data is protected with encryption.';
+  String get loginSecurityNote => 'Data protected with encryption.';
 
   @override
   String get loginForgotPassword => 'Forgot your password?';
@@ -271,14 +268,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get forgotPasswordHint =>
-      'Enter your account email. We\'ll send a link so you can create a new password.';
+      'Enter your email. We\'ll send a reset link.';
 
   @override
   String get forgotPasswordSubmit => 'Send link';
 
   @override
-  String get forgotPasswordSent =>
-      'If an account exists for this email, we\'ve sent a link to reset your password.';
+  String get forgotPasswordSent => 'If an account exists, we\'ve sent a link.';
 
   @override
   String get forgotPasswordError => 'Could not send the link. Try again.';
@@ -409,7 +405,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncOfflineSaved =>
-      'No connection. The operation was saved and will sync automatically.';
+      'No connection. Saved — will sync automatically.';
 
   @override
   String syncDone(int count) {
@@ -423,7 +419,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get syncStillOffline => 'No connection — operations remain pending.';
+  String get syncStillOffline => 'No connection — operations pending.';
 
   @override
   String dashboardGreeting(String name) {
@@ -504,7 +500,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardLowStock => 'Low stock';
 
   @override
-  String get dashboardKpisError => 'Couldn\'t load the indicators.';
+  String get dashboardKpisError => 'Could not load indicators.';
 
   @override
   String get dashboardActivityTitle => 'Today\'s activity';
@@ -671,12 +667,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String employeeDeactivateConfirm(Object name) {
-    return 'Deactivate $name? The employee loses access immediately and cannot sell until reactivated.';
+    return 'Deactivate $name? Loses access immediately.';
   }
 
   @override
   String employeeReactivateConfirm(Object name) {
-    return 'Reactivate $name? The employee gets store access again.';
+    return 'Reactivate $name? Gets store access again.';
   }
 
   @override
@@ -788,11 +784,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addEmployeeSuccess =>
-      'Employee registered! The access account was created.';
+      'Employee registered! Access account created.';
 
   @override
   String get addEmployeeError =>
-      'Could not register the employee. Check if the email is already in use.';
+      'Could not register. Check if the email is in use.';
 
   @override
   String get addEmployeeSubmit => 'Register employee';
@@ -802,18 +798,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get upgradeSubtitle =>
-      'Choose the new plan. The super admin will need to approve the request before the plan changes.';
+      'Choose the new plan. Awaits super admin approval.';
 
   @override
-  String get upgradeMaxReached =>
-      'You are already on the highest available plan.';
+  String get upgradeMaxReached => 'You are already on the highest plan.';
 
   @override
   String get upgradeChooseError => 'Choose the target plan.';
 
   @override
-  String get upgradeSuccess =>
-      'Upgrade request sent! The super admin will review it.';
+  String get upgradeSuccess => 'Upgrade request sent!';
 
   @override
   String get upgradeError => 'Could not send the request. Try again.';
@@ -870,10 +864,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentMPesa => 'M-Pesa';
 
   @override
-  String get paymentTransfer => 'Bank transfer';
+  String get paymentTransfer => 'Transfer';
 
   @override
-  String get purchasesSearchHint => 'Search purchase...';
+  String get purchasesSearchHint => 'Search purchases...';
 
   @override
   String get productsFilterTooltip => 'Filter products';
@@ -904,7 +898,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsLoadError => 'Could not load the products.';
 
   @override
-  String get productsEmptyTitle => 'No products registered';
+  String get productsEmptyTitle => 'No products yet';
 
   @override
   String get productsEmptySubtitle => 'Tap \"New product\" to get started.';
@@ -921,8 +915,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsAdded => 'Product added!';
 
   @override
-  String get productsAddedNoPhoto =>
-      'Product added! (photo not uploaded — storage permission missing)';
+  String get productsAddedNoPhoto => 'Product added! (no storage permission)';
 
   @override
   String get productsAddError => 'Could not add the product. Try again.';
@@ -965,7 +958,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productsEditSavedNoPhoto =>
-      'Product updated! (photo not uploaded — storage permission missing)';
+      'Product updated! (no storage permission)';
 
   @override
   String get productsEditError => 'Could not update the product. Try again.';
@@ -992,15 +985,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsActiveLabel => 'Active product';
 
   @override
-  String get productsActiveHint =>
-      'Deactivate to remove the product from the POS and purchases (stock is preserved).';
+  String get productsActiveHint => 'Disable to remove from POS and purchases.';
 
   @override
   String get productsStockAdjustHint =>
-      'Manual adjustment: sets the exact stock, creating/consuming FIFO lots.';
+      'Manual adjustment: sets exact stock (FIFO).';
 
   @override
-  String get productsSectionInfo => 'Details';
+  String get productsSectionInfo => 'Info';
 
   @override
   String get productsSectionPricing => 'Pricing';
@@ -1035,7 +1027,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customersLoadError => 'Could not load the customers.';
 
   @override
-  String get customersEmptyTitle => 'No customers registered';
+  String get customersEmptyTitle => 'No customers yet';
 
   @override
   String get customersEmptySubtitle => 'Tap \"New customer\" to get started.';
@@ -1078,11 +1070,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get purchasesLoadError => 'Could not load the purchases.';
 
   @override
-  String get purchasesEmptyTitle => 'No purchases registered';
+  String get purchasesEmptyTitle => 'No purchases yet';
 
   @override
-  String get purchasesEmptySubtitle =>
-      'Tap \"New purchase\" to record incoming goods and restock.';
+  String get purchasesEmptySubtitle => 'Tap \"New purchase\" to record.';
 
   @override
   String purchasesHeaderCount(int count) {
@@ -1108,27 +1099,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get purchasesEmptyFilteredTitle => 'No purchases found';
 
   @override
-  String get purchasesEmptyFilteredSubtitle =>
-      'Adjust the search or the filters.';
+  String get purchasesEmptyFilteredSubtitle => 'Adjust the search or filters.';
 
   @override
   String get purchasesClearFilters => 'Clear filters';
 
   @override
-  String get purchasesSupplierError => 'Enter the purchase supplier.';
+  String get purchasesSupplierError => 'Enter the supplier.';
 
   @override
   String get purchasesCartItemUnavailable =>
-      'A cart item is no longer available. Try again.';
+      'Cart item no longer available. Try again.';
 
   @override
   String purchasesRegistered(String amount) {
-    return 'Purchase registered: $amount!';
+    return 'Purchase recorded: $amount!';
   }
 
   @override
   String purchasesProductNotFound(String id) {
-    return 'Product $id not found in the catalog.';
+    return 'Product $id not found in catalog.';
   }
 
   @override
@@ -1271,14 +1261,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get financialEmptySubtitle =>
-      'Record cash income and expenses to track the cash flow.';
+      'Record income and expenses to track cash flow.';
 
   @override
-  String get financialReceivePendingTitle => 'Receive pending amount?';
+  String get financialReceivePendingTitle => 'Receive pending?';
 
   @override
   String financialReceivePendingBody(String amount) {
-    return 'Confirm receiving $amount? The transaction will count in the realized cash.';
+    return 'Confirm receipt of $amount?';
   }
 
   @override
@@ -1288,29 +1278,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialReceived => 'Transaction received!';
 
   @override
-  String get financialReceiveError =>
-      'Could not receive the pending amount. Try again.';
+  String get financialReceiveError => 'Could not receive. Try again.';
 
   @override
   String get financialPay => 'Pay';
 
   @override
-  String get financialPayPendingTitle => 'Pay pending amount?';
+  String get financialPayPendingTitle => 'Pay pending?';
 
   @override
   String financialPayPendingBody(String amount) {
-    return 'Confirm paying $amount? The transaction will count in the realized cash.';
+    return 'Confirm payment of $amount?';
   }
 
   @override
   String get financialPaid => 'Expense paid!';
 
   @override
-  String get financialPayError =>
-      'Could not pay the pending amount. Try again.';
+  String get financialPayError => 'Could not pay. Try again.';
 
   @override
-  String get financialAddTitle => 'Register transaction';
+  String get financialAddTitle => 'Record transaction';
 
   @override
   String get financialIncomingType => 'Income';
@@ -1322,7 +1310,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialDescriptionLabel => 'Description';
 
   @override
-  String get financialDescriptionError => 'Enter a description.';
+  String get financialDescriptionError => 'Enter the description.';
 
   @override
   String get financialCategoryLabel => 'Category (optional)';
@@ -1337,15 +1325,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialPendingLabel => 'Pending (credit)';
 
   @override
-  String get financialPendingHint =>
-      'Does not count in realized cash until received.';
+  String get financialPendingHint => 'Not counted in cash until received.';
 
   @override
-  String get financialRegistered => 'Transaction registered!';
+  String get financialRegistered => 'Transaction recorded!';
 
   @override
-  String get financialRegisterError =>
-      'Could not register the transaction. Try again.';
+  String get financialRegisterError => 'Could not record. Try again.';
 
   @override
   String get financialDefaultCategoryIncome => 'Sales';
@@ -1360,33 +1346,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cashClosingTitle => 'Daily cash closing';
 
   @override
-  String get cashClosingDaySummary => 'Daily summary';
+  String get cashClosingDaySummary => 'Day summary';
 
   @override
-  String get cashClosingTotalSales => 'Day sales';
+  String get cashClosingTotalSales => 'Today\'s sales';
 
   @override
   String get cashClosingExpectedCash => 'Expected in drawer';
 
   @override
-  String get cashClosingExpectedCashHint =>
-      'Cash sales only — card, M-Pesa, E-Mola and transfer do not go through the physical drawer.';
+  String get cashClosingExpectedCashHint => 'Cash sales only.';
 
   @override
   String get cashClosingByMethod => 'By payment method';
 
   @override
-  String get cashClosingCountedCash => 'Counted cash';
+  String get cashClosingCountedCash => 'Cash counted';
 
   @override
   String get cashClosingCountedCashHint =>
-      'Count the physical cash in the drawer and enter it here.';
+      'Count the cash in the drawer and enter here.';
 
   @override
   String get cashClosingDifference => 'Difference';
 
   @override
-  String get cashClosingConfers => 'Drawer matches';
+  String get cashClosingConfers => 'Cash matches';
 
   @override
   String cashClosingSurplus(String amount) {
@@ -1414,11 +1399,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cashClosingUpdated => 'Closing updated!';
 
   @override
-  String get cashClosingError =>
-      'Could not close the cash register. Try again.';
+  String get cashClosingError => 'Could not close the cash. Try again.';
 
   @override
-  String get cashClosingEmpty => 'No sales recorded on this day.';
+  String get cashClosingEmpty => 'No sales recorded this day.';
 
   @override
   String get cashClosingHistory => 'Closing history';
@@ -1427,10 +1411,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cashClosingHistoryEmpty => 'No closings recorded yet.';
 
   @override
-  String get debtsTitle => 'Credit (credit sales)';
+  String get debtsTitle => 'Credit';
 
   @override
-  String get debtsHeaderSubtitle => 'Receivables and payables';
+  String get debtsHeaderSubtitle => 'Credit to receive and pay';
 
   @override
   String get debtsAddDebt => 'Register credit';
@@ -1477,8 +1461,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get debtsEmptyPendingTitle => 'No pending credit';
 
   @override
-  String get debtsEmptyPendingSubtitle =>
-      'When a customer buys on credit, the debt appears here.';
+  String get debtsEmptyPendingSubtitle => 'Pending credit will appear here.';
 
   @override
   String get debtsTotalSettled => 'Total settled';
@@ -1504,15 +1487,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get debtsEmptySettledTitle => 'No settlements yet';
 
   @override
-  String get debtsEmptySettledSubtitle =>
-      'When credit is settled, it appears here.';
+  String get debtsEmptySettledSubtitle => 'Settled credit will appear here.';
 
   @override
   String get debtsSettleTitle => 'Settle debt?';
 
   @override
   String debtsSettleBody(String amount, String name) {
-    return 'Receive $amount from $name? A cash income entry will be recorded.';
+    return 'Receive $amount from $name?';
   }
 
   @override
@@ -1520,17 +1502,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String debtsSettled(String name, String amount) {
-    return '$name\'s credit settled — $amount in cash.';
+    return 'Credit from $name settled — $amount in cash.';
   }
 
   @override
   String get debtsNotFound => 'This debt is no longer pending.';
 
   @override
-  String get debtsSettleError => 'Could not settle the debt. Try again.';
+  String get debtsSettleError => 'Could not settle. Try again.';
 
   @override
-  String get debtsLate => 'Late';
+  String get debtsLate => 'Overdue';
 
   @override
   String get debtsDueToday => 'Due today';
@@ -1551,10 +1533,10 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days days ago',
-      one: '1 day ago',
+      other: '$days days',
+      one: '1 day',
     );
-    return 'Due $_temp0';
+    return 'Overdue by $_temp0';
   }
 
   @override
@@ -1581,7 +1563,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get debtsPendingEntryError =>
-      'Credit registered, but the pending entry in Finance could not be created. Check the transactions.';
+      'Credit registered, but pending transaction could not be created.';
 
   @override
   String get debtsRegisterError => 'Could not register the credit. Try again.';
@@ -1622,10 +1604,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get salesLoadError => 'Could not load the sales.';
 
   @override
-  String get salesEmptyTitle => 'No sales registered';
+  String get salesEmptyTitle => 'No sales yet';
 
   @override
-  String get salesEmptySubtitle => 'Tap \"New sale\" to record your first one.';
+  String get salesEmptySubtitle => 'Tap \"New sale\" to record your first.';
 
   @override
   String get salesSearchHint => 'Search sales...';
@@ -1673,7 +1655,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get salesEmptyFilteredTitle => 'No sales found';
 
   @override
-  String get salesEmptyFilteredSubtitle => 'Adjust your search or filters.';
+  String get salesEmptyFilteredSubtitle => 'Adjust the search or filters.';
 
   @override
   String get salesClearFilters => 'Clear filters';
@@ -1691,11 +1673,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get salesItemUnavailable =>
-      'A cart item is no longer available. Try again.';
+      'Cart item no longer available. Try again.';
 
   @override
   String salesRegistered(String amount) {
-    return 'Sale registered: $amount!';
+    return 'Sale recorded: $amount!';
   }
 
   @override
@@ -1705,7 +1687,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String salesStockFor(String name) {
-    return 'of $name';
+    return 'for $name';
   }
 
   @override
@@ -1746,7 +1728,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saleDetailTotal => 'Total';
 
   @override
-  String get saleDetailSnapshot => 'Prices frozen at the time of the sale.';
+  String get saleDetailSnapshot => 'Prices frozen at time of sale.';
 
   @override
   String get salesStatusCancelled => 'Cancelled';
@@ -1759,14 +1741,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String saleDetailCancelConfirmBody(String amount) {
-    return 'Item stock will be returned and the cash entry reversed ($amount). This action cannot be undone.';
+    return 'Stock will be restored and cash reversed ($amount).';
   }
 
   @override
   String get saleDetailCancelConfirm => 'Yes, cancel';
 
   @override
-  String get saleDetailCancelledAt => 'Cancelled on';
+  String get saleDetailCancelledAt => 'Cancelled at';
 
   @override
   String get saleCancelledSuccess => 'Sale cancelled.';
@@ -1831,7 +1813,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String adminAwaitingCount(int count) {
-    return '$count waiting for approval';
+    return '$count awaiting approval';
   }
 
   @override
@@ -1841,10 +1823,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminRequestsLoadError => 'Could not load the requests.';
 
   @override
-  String get adminNothingPendingTitle => 'Nothing waiting for approval';
+  String get adminNothingPendingTitle => 'Nothing pending';
 
   @override
-  String get adminNothingPendingSubtitle => 'New tenant requests appear here.';
+  String get adminNothingPendingSubtitle => 'New requests will appear here.';
 
   @override
   String get adminTenantsLoadError => 'Could not load the tenants.';
@@ -1857,12 +1839,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String adminAccessApproved(String name) {
-    return 'Access for $name approved!';
+    return '$name\'s access approved!';
   }
 
   @override
   String adminRequestRejected(String name) {
-    return 'Request for $name rejected.';
+    return '$name\'s request rejected.';
   }
 
   @override
@@ -1874,7 +1856,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminRejectReasonLabel => 'Rejection reason';
 
   @override
-  String get adminRejectReasonHint => 'E.g. incomplete registration info';
+  String get adminRejectReasonHint => 'e.g. incomplete registration info';
 
   @override
   String get adminApprove => 'Approve';
@@ -1913,7 +1895,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String adminPlanDetails(String price, int stores, int employees) {
-    return '$price/month · $stores store(s) · $employees employee(s)';
+    return '$price/mo · $stores store(s) · $employees employee(s)';
   }
 
   @override
@@ -1923,11 +1905,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminPlanPriceError => 'Enter a valid price (≥ 0).';
 
   @override
-  String get adminPlanStoresError => 'The plan must allow at least 1 store.';
+  String get adminPlanStoresError => 'Plan must allow at least 1 store.';
 
   @override
-  String get adminPlanEmployeesError =>
-      'The plan must allow at least 1 employee.';
+  String get adminPlanEmployeesError => 'Plan must allow at least 1 employee.';
 
   @override
   String adminPlanCreated(String name) {
@@ -1955,17 +1936,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminPlanPriceLabel => 'Monthly price';
 
   @override
-  String get adminPlanMaxStores => 'Max stores';
+  String get adminPlanMaxStores => 'Max. stores';
 
   @override
-  String get adminPlanMaxEmployees => 'Max employees';
+  String get adminPlanMaxEmployees => 'Max. employees';
 
   @override
   String get adminPlanActiveTitle => 'Active plan';
 
   @override
-  String get adminPlanActiveSubtitle =>
-      'Deactivate to prevent new subscriptions.';
+  String get adminPlanActiveSubtitle => 'Disable to prevent new subscriptions.';
 
   @override
   String get adminPlanCreate => 'Create plan';
@@ -1983,7 +1963,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminUpgradesEmptySubtitle => 'Plan change requests appear here.';
 
   @override
-  String get adminUpgradeApproved => 'Upgrade approved — tenant plan updated!';
+  String get adminUpgradeApproved => 'Upgrade approved — plan updated!';
 
   @override
   String get adminUpgradeRejected => 'Upgrade rejected.';
@@ -2001,7 +1981,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsCodeLabel => 'Barcode (PLU)';
 
   @override
-  String get productsCodeHint => 'Label scale code (e.g. 12345)';
+  String get productsCodeHint => 'Label scales (e.g. 12345)';
 
   @override
   String get productsCodeError => 'Invalid code: use up to 5 digits.';
@@ -2013,7 +1993,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsWeighHint => 'Accepts decimal quantities (e.g. 1.75 kg)';
 
   @override
-  String get productsUnitLabel => 'Sale unit';
+  String get productsUnitLabel => 'Unit of sale';
 
   @override
   String get productsStockWeightHint => 'In sale units (e.g. 1.75)';
@@ -2022,29 +2002,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsExpiryLabel => 'Expiry';
 
   @override
-  String get productsExpiryAdd => 'Set expiry date';
+  String get productsExpiryAdd => 'Set expiry';
 
   @override
   String get productsExpiryHelp => 'Product expiry date';
 
   @override
-  String get productsExpiryClear => 'Clear expiry date';
+  String get productsExpiryClear => 'Remove expiry';
 
   @override
   String get salesBarcodeLabel => 'Barcode';
 
   @override
-  String get salesBarcodeHint =>
-      'Scale labels and PLUs — camera or USB scanner';
+  String get salesBarcodeHint => 'Scale labels and PLUs — camera or USB reader';
 
   @override
   String get salesBarcodeScan => 'Scan with camera';
 
   @override
-  String get salesBarcodeNotFound => 'No product found for this code.';
+  String get salesBarcodeNotFound => 'Product not found for this code.';
 
   @override
-  String get salesBarcodeInvalid => 'Invalid scale barcode.';
+  String get salesBarcodeInvalid => 'Invalid scale code.';
 
   @override
   String salesStockLimit(String product) {
@@ -2061,10 +2040,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get purchasesExpiryLabel => 'Expiry';
 
   @override
-  String get purchasesExpiryAdd => 'Set expiry date';
+  String get purchasesExpiryAdd => 'Set expiry';
 
   @override
-  String get purchasesExpiryHelp => 'Lot expiry date';
+  String get purchasesExpiryHelp => 'Batch expiry date';
 
   @override
   String get dashboardExpiryAlerts => 'Expiry';

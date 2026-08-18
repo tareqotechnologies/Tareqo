@@ -135,7 +135,7 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
  l10n.setNewPasswordTitle,
  textAlign: TextAlign.center,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(height: 6),

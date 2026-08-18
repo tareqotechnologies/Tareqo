@@ -173,7 +173,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
  title: Text(
  l10n.saleDetailTitle,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -444,7 +444,7 @@ class _ItemRow extends ConsumerWidget {
  Text(
  item.productName,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(height: 2),
@@ -462,7 +462,7 @@ class _ItemRow extends ConsumerWidget {
  Text(
  Formatters.currency(subtotal),
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ],

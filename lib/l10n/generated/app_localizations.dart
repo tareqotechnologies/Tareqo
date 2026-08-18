@@ -115,13 +115,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingHeading.
   ///
   /// In pt, this message translates to:
-  /// **'Ative seu negócio no ERP'**
+  /// **'Configure seu negócio'**
   String get onboardingHeading;
 
   /// No description provided for @onboardingSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Escolha um plano, informe o nome do seu negócio e defina a moeda e o idioma. Seu acesso será liberado após a aprovação (prazo de até 24h).'**
+  /// **'Escolha o plano, nome e moeda. Aprovação em até 24h.'**
   String get onboardingSubtitle;
 
   /// No description provided for @onboardingBusinessLabel.
@@ -163,7 +163,7 @@ abstract class AppLocalizations {
   /// Feedback após enviar a solicitação de acesso
   ///
   /// In pt, this message translates to:
-  /// **'Solicitação de {business} enviada! Aguarde a aprovação (até 24h).'**
+  /// **'Solicitação de {business} enviada! Aguarde aprovação (até 24h).'**
   String onboardingSuccess(String business);
 
   /// No description provided for @onboardingChoosePlanError.
@@ -247,7 +247,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsSave.
   ///
   /// In pt, this message translates to:
-  /// **'Salvar ajustes'**
+  /// **'Salvar'**
   String get settingsSave;
 
   /// No description provided for @settingsSaved.
@@ -259,7 +259,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsGenericError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível salvar os ajustes. Tente novamente.'**
+  /// **'Não foi possível salvar. Tente novamente.'**
   String get settingsGenericError;
 
   /// No description provided for @settingsSupportSection.
@@ -277,7 +277,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsSupportEntryHint.
   ///
   /// In pt, this message translates to:
-  /// **'Guia do Usuário e Troubleshooting — leitura sem internet'**
+  /// **'Guia do Usuário e Troubleshooting — offline'**
   String get settingsSupportEntryHint;
 
   /// No description provided for @supportTitle.
@@ -289,7 +289,7 @@ abstract class AppLocalizations {
   /// No description provided for @supportSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Tudo o que precisa para tirar o máximo do app: o guia completo do usuário e a resolução dos problemas mais comuns.'**
+  /// **'Guia do usuário e solução de problemas.'**
   String get supportSubtitle;
 
   /// No description provided for @supportUserGuide.
@@ -301,7 +301,7 @@ abstract class AppLocalizations {
   /// No description provided for @supportUserGuideHint.
   ///
   /// In pt, this message translates to:
-  /// **'Manual simples e completo: login, lojas, produtos (com foto), vendas, fiado, financeiro, fecho de caixa, relatórios e FAQ'**
+  /// **'Login, lojas, produtos, vendas, fiado, financeiro e relatórios'**
   String get supportUserGuideHint;
 
   /// No description provided for @supportTroubleshooting.
@@ -313,13 +313,13 @@ abstract class AppLocalizations {
   /// No description provided for @supportTroubleshootingHint.
   ///
   /// In pt, this message translates to:
-  /// **'Resolução de problemas comuns: login, fotos, vendas, estoque, caixa, conexão e mensagens de erro'**
+  /// **'Problemas comuns: login, vendas, estoque e conexão'**
   String get supportTroubleshootingHint;
 
   /// No description provided for @supportReadingError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível abrir o documento. Tente novamente.'**
+  /// **'Não foi possível abrir o documento.'**
   String get supportReadingError;
 
   /// No description provided for @commonSearch.
@@ -361,7 +361,7 @@ abstract class AppLocalizations {
   /// No description provided for @storeSelectorSectionHint.
   ///
   /// In pt, this message translates to:
-  /// **'Escolha a loja cujos dados aparecem nos módulos (vendas, estoque, financeiro).'**
+  /// **'Escolha a loja ativa.'**
   String get storeSelectorSectionHint;
 
   /// No description provided for @tenantPendingTitle.
@@ -373,13 +373,13 @@ abstract class AppLocalizations {
   /// No description provided for @tenantPendingSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'A solicitação de acesso de \"{business}\" foi enviada com sucesso. O super admin vai analisar e você receberá acesso em até 24h.'**
+  /// **'Solicitação de \"{business}\" enviada. Aguarde até 24h.'**
   String tenantPendingSubtitle(String business);
 
   /// No description provided for @tenantPendingHint.
   ///
   /// In pt, this message translates to:
-  /// **'Assim que aprovado, você poderá criar lojas, contratar funcionários e começar a operar.'**
+  /// **'Depois da aprovação, crie lojas e comece a operar.'**
   String get tenantPendingHint;
 
   /// No description provided for @tenantRejectedTitle.
@@ -391,7 +391,7 @@ abstract class AppLocalizations {
   /// No description provided for @tenantRejectedSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'A solicitação de acesso de \"{business}\" não foi aprovada.'**
+  /// **'A solicitação de \"{business}\" não foi aprovada.'**
   String tenantRejectedSubtitle(String business);
 
   /// No description provided for @authBlockedTitle.
@@ -403,7 +403,7 @@ abstract class AppLocalizations {
   /// No description provided for @authBlockedMessage.
   ///
   /// In pt, this message translates to:
-  /// **'Sua conta de funcionário foi desativada pelo dono do estabelecimento. Se tiver dúvidas, fale com ele.'**
+  /// **'Sua conta foi desativada pelo proprietário.'**
   String get authBlockedMessage;
 
   /// No description provided for @authBlockedSignOut.
@@ -415,7 +415,7 @@ abstract class AppLocalizations {
   /// No description provided for @authErrorRestoreSession.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível restaurar sua sessão'**
+  /// **'Sessão não restaurada'**
   String get authErrorRestoreSession;
 
   /// No description provided for @authErrorCheckConnection.
@@ -427,7 +427,7 @@ abstract class AppLocalizations {
   /// No description provided for @authErrorLoadAccount.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível carregar sua conta'**
+  /// **'Conta não carregada'**
   String get authErrorLoadAccount;
 
   /// No description provided for @splashLoading.
@@ -487,13 +487,13 @@ abstract class AppLocalizations {
   /// No description provided for @loginWeakPasswordError.
   ///
   /// In pt, this message translates to:
-  /// **'A senha deve conter letras minúsculas, maiúsculas, números e símbolos.'**
+  /// **'A senha deve conter letras, números e símbolos.'**
   String get loginWeakPasswordError;
 
   /// No description provided for @loginRateLimitError.
   ///
   /// In pt, this message translates to:
-  /// **'Muitas tentativas seguidas. Aguarde cerca de 1 hora e tente novamente.'**
+  /// **'Muitas tentativas. Aguarde 1 hora e tente novamente.'**
   String get loginRateLimitError;
 
   /// No description provided for @loginShowPassword.
@@ -565,7 +565,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSecurityNote.
   ///
   /// In pt, this message translates to:
-  /// **'Seus dados ficam protegidos com criptografia.'**
+  /// **'Dados protegidos com criptografia.'**
   String get loginSecurityNote;
 
   /// No description provided for @loginForgotPassword.
@@ -583,7 +583,7 @@ abstract class AppLocalizations {
   /// No description provided for @forgotPasswordHint.
   ///
   /// In pt, this message translates to:
-  /// **'Informe o e-mail da sua conta. Enviamos um link para você criar uma nova senha.'**
+  /// **'Informe seu e-mail. Enviaremos um link para redefinir.'**
   String get forgotPasswordHint;
 
   /// No description provided for @forgotPasswordSubmit.
@@ -595,7 +595,7 @@ abstract class AppLocalizations {
   /// No description provided for @forgotPasswordSent.
   ///
   /// In pt, this message translates to:
-  /// **'Se existir uma conta com este e-mail, enviamos um link para redefinir a senha.'**
+  /// **'Se existir uma conta, enviamos um link.'**
   String get forgotPasswordSent;
 
   /// No description provided for @forgotPasswordError.
@@ -835,7 +835,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncOfflineSaved.
   ///
   /// In pt, this message translates to:
-  /// **'Sem conexão. A operação foi salva e será sincronizada automaticamente.'**
+  /// **'Sem conexão. Operação salva e será sincronizada automaticamente.'**
   String get syncOfflineSaved;
 
   /// No description provided for @syncDone.
@@ -847,7 +847,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncStillOffline.
   ///
   /// In pt, this message translates to:
-  /// **'Sem conexão — as operações continuam pendentes.'**
+  /// **'Sem conexão — operações pendentes.'**
   String get syncStillOffline;
 
   /// No description provided for @dashboardGreeting.
@@ -1261,13 +1261,13 @@ abstract class AppLocalizations {
   /// No description provided for @employeeDeactivateConfirm.
   ///
   /// In pt, this message translates to:
-  /// **'Desativar {name}? O funcionário perde o acesso imediatamente e não poderá vender até ser reativado.'**
+  /// **'Desativar {name}? Perde acesso imediatamente.'**
   String employeeDeactivateConfirm(Object name);
 
   /// No description provided for @employeeReactivateConfirm.
   ///
   /// In pt, this message translates to:
-  /// **'Reativar {name}? O funcionário volta a ter acesso à loja.'**
+  /// **'Reativar {name}? Volta a ter acesso à loja.'**
   String employeeReactivateConfirm(Object name);
 
   /// No description provided for @employeeDeactivated.
@@ -1471,13 +1471,13 @@ abstract class AppLocalizations {
   /// No description provided for @addEmployeeSuccess.
   ///
   /// In pt, this message translates to:
-  /// **'Funcionário cadastrado! A conta de acesso foi criada.'**
+  /// **'Funcionário cadastrado! Conta de acesso criada.'**
   String get addEmployeeSuccess;
 
   /// No description provided for @addEmployeeError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível cadastrar o funcionário. Verifique se o e-mail já não está em uso.'**
+  /// **'Não foi possível cadastrar. Verifique o e-mail.'**
   String get addEmployeeError;
 
   /// No description provided for @addEmployeeSubmit.
@@ -1495,13 +1495,13 @@ abstract class AppLocalizations {
   /// No description provided for @upgradeSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Escolha o novo plano. O super admin precisará aprovar o pedido antes de o plano ser alterado.'**
+  /// **'Escolha o novo plano. Aguarda aprovação do super admin.'**
   String get upgradeSubtitle;
 
   /// No description provided for @upgradeMaxReached.
   ///
   /// In pt, this message translates to:
-  /// **'Você já está no plano máximo disponível.'**
+  /// **'Você já está no plano máximo.'**
   String get upgradeMaxReached;
 
   /// No description provided for @upgradeChooseError.
@@ -1513,7 +1513,7 @@ abstract class AppLocalizations {
   /// No description provided for @upgradeSuccess.
   ///
   /// In pt, this message translates to:
-  /// **'Pedido de upgrade enviado! O super admin vai analisar.'**
+  /// **'Pedido de upgrade enviado!'**
   String get upgradeSuccess;
 
   /// No description provided for @upgradeError.
@@ -1717,7 +1717,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsAddedNoPhoto.
   ///
   /// In pt, this message translates to:
-  /// **'Produto adicionado! (foto não enviada — sem permissão de armazenamento)'**
+  /// **'Produto adicionado! (sem permissão de armazenamento)'**
   String get productsAddedNoPhoto;
 
   /// No description provided for @productsAddError.
@@ -1801,7 +1801,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsEditSavedNoPhoto.
   ///
   /// In pt, this message translates to:
-  /// **'Produto atualizado! (foto não enviada — sem permissão de armazenamento)'**
+  /// **'Produto atualizado! (sem permissão de armazenamento)'**
   String get productsEditSavedNoPhoto;
 
   /// No description provided for @productsEditError.
@@ -1855,13 +1855,13 @@ abstract class AppLocalizations {
   /// No description provided for @productsActiveHint.
   ///
   /// In pt, this message translates to:
-  /// **'Desative para tirar o produto do PDV e das compras (o estoque é preservado).'**
+  /// **'Desative para tirar do PDV e compras.'**
   String get productsActiveHint;
 
   /// No description provided for @productsStockAdjustHint.
   ///
   /// In pt, this message translates to:
-  /// **'Ajuste manual: define o estoque exato, criando/consumindo lotes FIFO.'**
+  /// **'Ajuste manual: define o estoque exato (FIFO).'**
   String get productsStockAdjustHint;
 
   /// No description provided for @productsSectionInfo.
@@ -2005,7 +2005,7 @@ abstract class AppLocalizations {
   /// No description provided for @purchasesEmptySubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Toque em \"Nova compra\" para registrar a entrada de mercadoria e abastecer o estoque.'**
+  /// **'Toque em \"Nova compra\" para registrar.'**
   String get purchasesEmptySubtitle;
 
   /// Contagem de compras de hoje no resumo da tela de compras
@@ -2053,7 +2053,7 @@ abstract class AppLocalizations {
   /// No description provided for @purchasesCartItemUnavailable.
   ///
   /// In pt, this message translates to:
-  /// **'Um item do carrinho não está mais disponível. Tente novamente.'**
+  /// **'Item do carrinho não disponível. Tente novamente.'**
   String get purchasesCartItemUnavailable;
 
   /// No description provided for @purchasesRegistered.
@@ -2335,7 +2335,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialEmptySubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Registre entradas e saídas para acompanhar o fluxo de caixa.'**
+  /// **'Registre entradas e saídas para acompanhar o caixa.'**
   String get financialEmptySubtitle;
 
   /// No description provided for @financialReceivePendingTitle.
@@ -2347,7 +2347,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialReceivePendingBody.
   ///
   /// In pt, this message translates to:
-  /// **'Confirmar o recebimento de {amount}? A movimentação passa a contar no caixa realizado.'**
+  /// **'Confirmar recebimento de {amount}?'**
   String financialReceivePendingBody(String amount);
 
   /// No description provided for @financialReceive.
@@ -2365,7 +2365,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialReceiveError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível receber a pendência. Tente novamente.'**
+  /// **'Não foi possível receber. Tente novamente.'**
   String get financialReceiveError;
 
   /// No description provided for @financialPay.
@@ -2383,7 +2383,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialPayPendingBody.
   ///
   /// In pt, this message translates to:
-  /// **'Confirmar o pagamento de {amount}? A movimentação passa a contar no caixa realizado.'**
+  /// **'Confirmar pagamento de {amount}?'**
   String financialPayPendingBody(String amount);
 
   /// No description provided for @financialPaid.
@@ -2395,7 +2395,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialPayError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível pagar a pendência. Tente novamente.'**
+  /// **'Não foi possível pagar. Tente novamente.'**
   String get financialPayError;
 
   /// No description provided for @financialAddTitle.
@@ -2455,7 +2455,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialPendingHint.
   ///
   /// In pt, this message translates to:
-  /// **'Não conta no caixa realizado até ser recebido.'**
+  /// **'Não conta no caixa até ser recebido.'**
   String get financialPendingHint;
 
   /// No description provided for @financialRegistered.
@@ -2467,7 +2467,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialRegisterError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível registrar a movimentação. Tente novamente.'**
+  /// **'Não foi possível registrar. Tente novamente.'**
   String get financialRegisterError;
 
   /// No description provided for @financialDefaultCategoryIncome.
@@ -2515,7 +2515,7 @@ abstract class AppLocalizations {
   /// No description provided for @cashClosingExpectedCashHint.
   ///
   /// In pt, this message translates to:
-  /// **'Só vendas em dinheiro — cartão, M-Pesa, E-Mola e transferência não passam pela gaveta física.'**
+  /// **'Só vendas em dinheiro.'**
   String get cashClosingExpectedCashHint;
 
   /// No description provided for @cashClosingByMethod.
@@ -2533,7 +2533,7 @@ abstract class AppLocalizations {
   /// No description provided for @cashClosingCountedCashHint.
   ///
   /// In pt, this message translates to:
-  /// **'Conte o dinheiro físico da gaveta e informe aqui.'**
+  /// **'Conte o dinheiro da gaveta e informe aqui.'**
   String get cashClosingCountedCashHint;
 
   /// No description provided for @cashClosingDifference.
@@ -2701,7 +2701,7 @@ abstract class AppLocalizations {
   /// No description provided for @debtsEmptyPendingSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Quando um cliente comprar fiado, a dívida aparece aqui.'**
+  /// **'Fiados aparecerão aqui.'**
   String get debtsEmptyPendingSubtitle;
 
   /// No description provided for @debtsTotalSettled.
@@ -2737,7 +2737,7 @@ abstract class AppLocalizations {
   /// No description provided for @debtsEmptySettledSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Quando um fiado for quitado, ele aparece aqui.'**
+  /// **'Fiados quitados aparecerão aqui.'**
   String get debtsEmptySettledSubtitle;
 
   /// No description provided for @debtsSettleTitle.
@@ -2749,7 +2749,7 @@ abstract class AppLocalizations {
   /// No description provided for @debtsSettleBody.
   ///
   /// In pt, this message translates to:
-  /// **'Receber {amount} de {name}? Será registrada uma entrada no caixa.'**
+  /// **'Receber {amount} de {name}?'**
   String debtsSettleBody(String amount, String name);
 
   /// No description provided for @debtsSettle.
@@ -2773,7 +2773,7 @@ abstract class AppLocalizations {
   /// No description provided for @debtsSettleError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível quitar a dívida. Tente novamente.'**
+  /// **'Não foi possível quitar. Tente novamente.'**
   String get debtsSettleError;
 
   /// No description provided for @debtsLate.
@@ -2839,7 +2839,7 @@ abstract class AppLocalizations {
   /// No description provided for @debtsPendingEntryError.
   ///
   /// In pt, this message translates to:
-  /// **'Fiado registrado, mas a pendência no Financeiro não pôde ser criada. Verifique as movimentações.'**
+  /// **'Fiado registrado, mas a pendência não pôde ser criada.'**
   String get debtsPendingEntryError;
 
   /// No description provided for @debtsRegisterError.
@@ -2989,7 +2989,7 @@ abstract class AppLocalizations {
   /// No description provided for @salesItemUnavailable.
   ///
   /// In pt, this message translates to:
-  /// **'Um item do carrinho não está mais disponível. Tente novamente.'**
+  /// **'Item do carrinho não disponível. Tente novamente.'**
   String get salesItemUnavailable;
 
   /// No description provided for @salesRegistered.
@@ -3103,7 +3103,7 @@ abstract class AppLocalizations {
   /// Confirmação de anulação de venda — avisa que estoque e caixa serão estornados
   ///
   /// In pt, this message translates to:
-  /// **'O estoque dos itens será devolvido e a entrada no caixa estornada ({amount}). Esta ação não pode ser desfeita.'**
+  /// **'Estoque será devolvido e caixa estornado ({amount}).'**
   String saleDetailCancelConfirmBody(String amount);
 
   /// No description provided for @saleDetailCancelConfirm.
@@ -3259,13 +3259,13 @@ abstract class AppLocalizations {
   /// No description provided for @adminNothingPendingTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Nada aguardando aprovação'**
+  /// **'Nada pendente'**
   String get adminNothingPendingTitle;
 
   /// No description provided for @adminNothingPendingSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Novas solicitações de tenant aparecem aqui.'**
+  /// **'Novas solicitações aparecem aqui.'**
   String get adminNothingPendingSubtitle;
 
   /// No description provided for @adminTenantsLoadError.
@@ -3313,7 +3313,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminRejectReasonHint.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: informações incompletas no cadastro'**
+  /// **'Ex.: informações incompletas'**
   String get adminRejectReasonHint;
 
   /// No description provided for @adminApprove.
@@ -3505,7 +3505,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminUpgradeApproved.
   ///
   /// In pt, this message translates to:
-  /// **'Upgrade aprovado — plano do tenant atualizado!'**
+  /// **'Upgrade aprovado — plano atualizado!'**
   String get adminUpgradeApproved;
 
   /// No description provided for @adminUpgradeRejected.

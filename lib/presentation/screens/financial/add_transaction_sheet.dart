@@ -119,96 +119,105 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
  child: Column(
  mainAxisSize: MainAxisSize.min,
  crossAxisAlignment: CrossAxisAlignment.stretch,
- children: [
- AppSheetHeader(title: l10n.financialAddTitle),
- // Pílulas estilo Apple — mesmo padrão do Financeiro/Crédito:
- // StadiumBorder com o segmento ativo em primaryContainer.
- SegmentedButton<TransactionType>(
- showSelectedIcon: false,
- style: SegmentedButton.styleFrom(
- visualDensity: VisualDensity.compact,
- padding: const EdgeInsets.symmetric(
- horizontal: 16,
- vertical: 8,
- ),
- shape: const StadiumBorder(),
- side: BorderSide(color: theme.colorScheme.outlineVariant),
- backgroundColor: Colors.transparent,
- selectedBackgroundColor: theme.colorScheme.primaryContainer,
- selectedForegroundColor: theme.colorScheme.onPrimaryContainer,
- foregroundColor: theme.colorScheme.onSurfaceVariant,
- textStyle: theme.textTheme.labelLarge?.copyWith(
- fontWeight: FontWeight.w600,
- ),
- ),
- segments: [
- ButtonSegment(
- value: TransactionType.income,
- label: Text(l10n.financialIncomingType),
- icon: const Icon(Icons.north_east),
- ),
- ButtonSegment(
- value: TransactionType.expense,
- label: Text(l10n.financialOutgoingType),
- icon: const Icon(Icons.south_west),
- ),
- ],
- selected: {_type},
- onSelectionChanged: (selection) =>
- setState(() => _type = selection.first),
- ),
- const SizedBox(height: 14),
- // AppTextField (design system ultra-clean): minimalista, borda
- // sutil que acende no foco — padrão dos formulários do app.
- AppTextField(
- controller: _descriptionController,
- label: l10n.financialDescriptionLabel,
- prefixIcon: Icons.notes_outlined,
- textInputAction: TextInputAction.next,
- validator: (value) => (value == null || value.trim().isEmpty)
- ? l10n.financialDescriptionError
- : null,
- ),
- const SizedBox(height: 14),
- AppTextField(
- controller: _categoryController,
- label: l10n.financialCategoryLabel,
- prefixIcon: Icons.category_outlined,
- textInputAction: TextInputAction.next,
- ),
- const SizedBox(height: 14),
- AppTextField(
- controller: _amountController,
- label: l10n.financialAmountLabel,
- prefixIcon: Icons.attach_money,
- keyboardType: TextInputType.number,
- validator: (value) => _parseAmount(value ?? '') <= 0
- ? l10n.financialAmountError
- : null,
- ),
- const SizedBox(height: 4),
- // Material explícito: o SwitchListTile pinta o fundo e o ink no
- // Material ancestral; dentro do Container colorido do app_sheet
- // (DecoratedBox) o Flutter emite a assertion "ListTile background
- // color or ink splashes may be invisible".
- Material(
- type: MaterialType.transparency,
- child: SwitchListTile(
- contentPadding: EdgeInsets.zero,
- title: Text(
- l10n.financialPendingLabel,
- style: theme.textTheme.bodyMedium,
- ),
- subtitle: Text(
- l10n.financialPendingHint,
- style: theme.textTheme.bodySmall?.copyWith(
- color: theme.colorScheme.onSurfaceVariant,
- ),
- ),
- value: _isPending,
- onChanged: (value) => setState(() => _isPending = value),
- ),
- ),
+ children: [        AppSheetHeader(title: l10n.financialAddTitle),
+        // Seção: Tipo — pílulas estilo Apple.
+        SheetSection(
+          icon: Icons.swap_vert,
+          title: l10n.financialAddTitle,
+          children: [
+            SegmentedButton<TransactionType>(
+              showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                shape: const StadiumBorder(),
+                side: BorderSide(color: theme.colorScheme.outlineVariant),
+                backgroundColor: Colors.transparent,
+                selectedBackgroundColor: theme.colorScheme.primaryContainer,
+                selectedForegroundColor: theme.colorScheme.onPrimaryContainer,
+                foregroundColor: theme.colorScheme.onSurfaceVariant,
+                textStyle: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              segments: [
+                ButtonSegment(
+                  value: TransactionType.income,
+                  label: Text(l10n.financialIncomingType),
+                  icon: const Icon(Icons.north_east),
+                ),
+                ButtonSegment(
+                  value: TransactionType.expense,
+                  label: Text(l10n.financialOutgoingType),
+                  icon: const Icon(Icons.south_west),
+                ),
+              ],
+              selected: {_type},
+              onSelectionChanged: (selection) =>
+                  setState(() => _type = selection.first),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        // Seção: Detalhes — descrição, categoria e valor.
+        SheetSection(
+          icon: Icons.notes_outlined,
+          title: l10n.financialDescriptionLabel,
+          children: [
+            AppTextField(
+              controller: _descriptionController,
+              label: l10n.financialDescriptionLabel,
+              prefixIcon: Icons.notes_outlined,
+              textInputAction: TextInputAction.next,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.financialDescriptionError
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _categoryController,
+              label: l10n.financialCategoryLabel,
+              prefixIcon: Icons.category_outlined,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _amountController,
+              label: l10n.financialAmountLabel,
+              prefixIcon: Icons.attach_money,
+              keyboardType: TextInputType.number,
+              validator: (value) => _parseAmount(value ?? '') <= 0
+                  ? l10n.financialAmountError
+                  : null,
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        // Material explícito: o SwitchListTile pinta o fundo e o ink no
+        // Material ancestral; dentro do Container colorido do app_sheet
+        // (DecoratedBox) o Flutter emite a assertion "ListTile background
+        // color or ink splashes may be invisible".
+        Material(
+          type: MaterialType.transparency,
+          child: SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              l10n.financialPendingLabel,
+              style: theme.textTheme.bodyMedium,
+            ),
+            subtitle: Text(
+              l10n.financialPendingHint,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            value: _isPending,
+            onChanged: (value) => setState(() => _isPending = value),
+          ),
+        ),
  if (_formError != null) ...[
  const SizedBox(height: 8),
  Text(

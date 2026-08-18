@@ -122,7 +122,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  title: Text(
  l10n.storesTitle,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -161,7 +161,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  ),
  ],
  labelStyle: theme.textTheme.labelLarge?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  Expanded(
@@ -223,24 +223,21 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  itemCount: stores.length,
  separatorBuilder: (_, _) => const SizedBox(height: 8),
  itemBuilder: (context, index) {
- final store = stores[index];
- // AppCard premium (estilo Apple): cantos 18, superfície elevada
- // — padding zero mantém o espaçamento nativo do ListTile (16px).
- return AppCard(
- elevated: true,
- borderRadius: BorderRadius.circular(18),
- padding: EdgeInsets.zero,
- child: ListTile(
- leading: const Icon(Icons.store_outlined),
- title: Text(
- store.name,
- style: Theme.of(
- context,
- ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
- ),
- subtitle: store.address.isEmpty ? null : Text(store.address),
- ),
- );
+ final store = stores[index];        return AppCard(
+          borderRadius: BorderRadius.circular(16),
+          padding: EdgeInsets.zero,
+          child: ListTile(
+            leading: const Icon(Icons.store_outlined, size: 20),
+            title: Text(
+              store.name,
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w500),
+            ),
+            subtitle: store.address.isEmpty ? null : Text(store.address),
+            dense: true,
+          ),
+        );
  },
  );
  },
@@ -281,17 +278,9 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  itemBuilder: (context, index) {
  final employee = employees[index];
  final scheme = Theme.of(context).colorScheme;
- final isManager = employee.role == EmployeeRole.manager;
- // AppCard premium (estilo Apple): cantos 18, superfície elevada.
- // Layout MOBILE-FIRST: o texto (nome + loja · e-mail) ocupa
- // TODA a largura restante e quebra em até 2 linhas; os chips
- // (cargo / Inativo) ficam numa coluna âncora à direita e NUNCA
- // disputam espaço com o texto — em telas estreitas ou com
- // escala alta o card cresce sem truncar nada.
- return AppCard(
- elevated: true,
- borderRadius: BorderRadius.circular(18),
- padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+ final isManager = employee.role == EmployeeRole.manager;        return AppCard(
+          borderRadius: BorderRadius.circular(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
  child: Row(
  crossAxisAlignment: CrossAxisAlignment.center,
  children: [
@@ -303,7 +292,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  : employee.fullName.substring(0, 1).toUpperCase(),
  style: TextStyle(
  color: scheme.onPrimaryContainer,
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ),
@@ -311,33 +300,30 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  Expanded(
  child: Column(
  crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- // Nome — largura TOTAL restante: quebra em até 2
- // linhas e nunca é truncado.
- Text(
- employee.fullName,
- maxLines: 2,
- overflow: TextOverflow.ellipsis,
- style: Theme.of(context).textTheme.titleSmall
- ?.copyWith(
- // Semibold: hierarquia clara, peso leve.
- fontWeight: FontWeight.w600,
- height: 1.25,
- ),
- ),
- const SizedBox(height: 2),
- // Loja · e-mail — largura TOTAL, até 2 linhas.
- Text(
- '${storeName(employee.storeId)} · '
- '${employee.email}',
- maxLines: 2,
- overflow: TextOverflow.ellipsis,
- style: Theme.of(context).textTheme.bodySmall
- ?.copyWith(
- color: scheme.onSurfaceVariant,
- height: 1.35,
- ),
- ),
+ children: [          // Nome — largura TOTAL restante: quebra em até 2
+          // linhas e nunca é truncado.
+          Text(
+            employee.fullName,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleSmall
+                ?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  height: 1.25,
+                ),
+          ),
+ const SizedBox(height: 2),          // Loja · e-mail — largura TOTAL, até 2 linhas.
+          Text(
+            '${storeName(employee.storeId)} · '
+            '${employee.email}',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  height: 1.35,
+                ),
+          ),
  ],
  ),
  ),
@@ -491,31 +477,28 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  l10n.statusApproved,
  ),
  PlanRequestStatus.rejected => (scheme.error, l10n.statusRejected),
- };
- // AppCard premium (estilo Apple): cantos 18, superfície elevada
- // — padding zero mantém o espaçamento nativo do ListTile (16px).
- return AppCard(
- elevated: true,
- borderRadius: BorderRadius.circular(18),
- padding: EdgeInsets.zero,
- child: ListTile(
- leading: Icon(Icons.swap_horiz, color: color),
- title: Text(
- '${planName(request.currentPlanId)} → '
- '${planName(request.requestedPlanId)}',
- style: Theme.of(
- context,
- ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
- ),
- subtitle: Text(
- l10n.upgradesRequestedOn(
- '${request.createdAt.day}/${request.createdAt.month}/'
- '${request.createdAt.year}',
- ),
- ),
- trailing: StatusChip(label: label, color: color),
- ),
- );
+ };        return AppCard(
+          borderRadius: BorderRadius.circular(16),
+          padding: EdgeInsets.zero,
+          child: ListTile(
+            leading: Icon(Icons.swap_horiz, size: 20, color: color),
+            title: Text(
+              '${planName(request.currentPlanId)} → '
+              '${planName(request.requestedPlanId)}',
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w500),
+            ),
+            subtitle: Text(
+              l10n.upgradesRequestedOn(
+                '${request.createdAt.day}/${request.createdAt.month}/'
+                '${request.createdAt.year}',
+              ),
+            ),
+            trailing: StatusChip(label: label, color: color),
+            dense: true,
+          ),
+        );
  },
  );
  },
@@ -543,22 +526,15 @@ class _PlanCard extends StatelessWidget {
  Widget build(BuildContext context) {
  final theme = Theme.of(context);
  final scheme = theme.colorScheme;
- final l10n = context.l10n;
-
- return Container(
- width: double.infinity,
- margin: const EdgeInsets.fromLTRB(20, 12, 20, 4),
- padding: const EdgeInsets.all(16),
- decoration: BoxDecoration(
- gradient: LinearGradient(
- colors: [
- scheme.primaryContainer,
- scheme.primaryContainer.withValues(alpha: 0.4),
- ],
- ),
- borderRadius: BorderRadius.circular(18),
- ),
- child: Column(
+ final l10n = context.l10n;    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
  crossAxisAlignment: CrossAxisAlignment.start,
  children: [
  Row(
@@ -572,7 +548,7 @@ class _PlanCard extends StatelessWidget {
  child: Text(
  plan?.name ?? l10n.planCardTitle,
  style: theme.textTheme.titleMedium?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  color: scheme.onPrimaryContainer,
  ),
  ),
@@ -666,7 +642,7 @@ class _LimitMeter extends StatelessWidget {
  maxLines: 2,
  overflow: TextOverflow.ellipsis,
  style: Theme.of(context).textTheme.labelSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  color: reached ? scheme.error : scheme.onPrimaryContainer,
  ),
  ),
@@ -835,26 +811,28 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
  child: Column(
  mainAxisSize: MainAxisSize.min,
  crossAxisAlignment: CrossAxisAlignment.stretch,
- children: [
- AppSheetHeader(title: l10n.addStoreTitle),
- // AppTextField (design system ultra-clean): minimalista, borda
- // sutil que acende no foco — padrão dos formulários do app.
- AppTextField(
- controller: _nameController,
- label: l10n.addStoreNameLabel,
- prefixIcon: Icons.store_outlined,
- textInputAction: TextInputAction.next,
- validator: (value) => (value == null || value.trim().isEmpty)
- ? l10n.addStoreNameError
- : null,
- ),
- const SizedBox(height: 14),
- AppTextField(
- controller: _addressController,
- label: l10n.addStoreAddressLabel,
- prefixIcon: Icons.place_outlined,
- textInputAction: TextInputAction.done,
- ),
+ children: [        AppSheetHeader(title: l10n.addStoreTitle),
+        // Seção: Dados da loja — nome e endereço.
+        SheetSection(
+          icon: Icons.store_outlined,
+          title: l10n.addStoreTitle,
+          children: [
+            AppTextField(
+              controller: _nameController,
+              label: l10n.addStoreNameLabel,
+              textInputAction: TextInputAction.next,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.addStoreNameError
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _addressController,
+              label: l10n.addStoreAddressLabel,
+              textInputAction: TextInputAction.done,
+            ),
+          ],
+        ),
  if (_formError != null) ...[
  const SizedBox(height: 14),
  Text(
@@ -993,110 +971,116 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
  child: Column(
  mainAxisSize: MainAxisSize.min,
  crossAxisAlignment: CrossAxisAlignment.stretch,
- children: [
- AppSheetHeader(title: l10n.addEmployeeTitle),
- // AppTextField (design system ultra-clean): minimalista, borda
- // sutil que acende no foco — padrão dos formulários do app.
- AppTextField(
- controller: _nameController,
- label: l10n.addEmployeeNameLabel,
- prefixIcon: Icons.person_outline,
- textInputAction: TextInputAction.next,
- validator: (value) => (value == null || value.trim().isEmpty)
- ? l10n.addEmployeeNameError
- : null,
- ),
- const SizedBox(height: 14),
- AppTextField(
- controller: _emailController,
- label: l10n.addEmployeeEmailLabel,
- prefixIcon: Icons.mail_outline,
- keyboardType: TextInputType.emailAddress,
- textInputAction: TextInputAction.next,
- validator: (value) {
- final email = value?.trim() ?? '';
- if (email.isEmpty || !email.contains('@')) {
- return l10n.addEmployeeEmailError;
- }
- return null;
- },
- ),
- const SizedBox(height: 14),
- AppTextField(
- controller: _passwordController,
- label: l10n.addEmployeePasswordLabel,
- prefixIcon: Icons.lock_outline,
- obscureText: _obscurePassword,
- textInputAction: TextInputAction.next,
- suffixIcon: IconButton(
- tooltip: _obscurePassword
- ? l10n.loginShowPassword
- : l10n.loginHidePassword,
- icon: Icon(
- _obscurePassword
- ? Icons.visibility_outlined
- : Icons.visibility_off_outlined,
- ),
- onPressed: () =>
- setState(() => _obscurePassword = !_obscurePassword),
- ),
- validator: (value) => (value ?? '').length < 8
- ? l10n.addEmployeePasswordError
- : null,
- ),
- const SizedBox(height: 16),
- Text(l10n.addEmployeeStoreLabel, style: theme.textTheme.titleSmall),
- const SizedBox(height: 8),
- storesAsync.when(
- loading: () => const Center(child: CircularProgressIndicator()),
- error: (_, _) => Text(
- l10n.storesLoadError,
- style: theme.textTheme.bodySmall?.copyWith(
- color: theme.colorScheme.error,
- ),
- ),
- data: (stores) {
- if (stores.isEmpty) {
- return Text(
- l10n.addEmployeeNoStores,
- style: theme.textTheme.bodySmall,
- );
- }
- return Wrap(
- spacing: 8,
- runSpacing: 8,
- children: [
- for (final store in stores)
- ChoiceChip(
- label: Text(store.name),
- selected: _selectedStoreId == store.id,
- onSelected: (_) =>
- setState(() => _selectedStoreId = store.id),
- ),
- ],
- );
- },
- ),
- const SizedBox(height: 16),
- Text(l10n.addEmployeeRoleLabel, style: theme.textTheme.titleSmall),
- const SizedBox(height: 8),
- Wrap(
- spacing: 8,
- children: [
- ChoiceChip(
- label: Text(l10n.roleEmployee),
- selected: _role == EmployeeRole.employee,
- onSelected: (_) =>
- setState(() => _role = EmployeeRole.employee),
- ),
- ChoiceChip(
- label: Text(l10n.roleManager),
- selected: _role == EmployeeRole.manager,
- onSelected: (_) =>
- setState(() => _role = EmployeeRole.manager),
- ),
- ],
- ),
+ children: [        AppSheetHeader(title: l10n.addEmployeeTitle),
+        // Seção: Dados pessoais — nome, email e senha.
+        SheetSection(
+          icon: Icons.person_outline,
+          title: l10n.addEmployeeTitle,
+          children: [
+            AppTextField(
+              controller: _nameController,
+              label: l10n.addEmployeeNameLabel,
+              textInputAction: TextInputAction.next,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.addEmployeeNameError
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _emailController,
+              label: l10n.addEmployeeEmailLabel,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              validator: (value) {
+                final email = value?.trim() ?? '';
+                if (email.isEmpty || !email.contains('@')) {
+                  return l10n.addEmployeeEmailError;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _passwordController,
+              label: l10n.addEmployeePasswordLabel,
+              obscureText: _obscurePassword,
+              textInputAction: TextInputAction.next,
+              suffixIcon: IconButton(
+                tooltip: _obscurePassword
+                    ? l10n.loginShowPassword
+                    : l10n.loginHidePassword,
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+              ),
+              validator: (value) => (value ?? '').length < 8
+                  ? l10n.addEmployeePasswordError
+                  : null,
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        // Seção: Vínculo — loja e cargo.
+        SheetSection(
+          icon: Icons.work_outline,
+          title: l10n.addEmployeeStoreLabel,
+          children: [
+            storesAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, _) => Text(
+                l10n.storesLoadError,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+              data: (stores) {
+                if (stores.isEmpty) {
+                  return Text(
+                    l10n.addEmployeeNoStores,
+                    style: theme.textTheme.bodySmall,
+                  );
+                }
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final store in stores)
+                      ChoiceChip(
+                        label: Text(store.name),
+                        selected: _selectedStoreId == store.id,
+                        onSelected: (_) =>
+                            setState(() => _selectedStoreId = store.id),
+                      ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            Text(l10n.addEmployeeRoleLabel, style: theme.textTheme.titleSmall),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                ChoiceChip(
+                  label: Text(l10n.roleEmployee),
+                  selected: _role == EmployeeRole.employee,
+                  onSelected: (_) =>
+                      setState(() => _role = EmployeeRole.employee),
+                ),
+                ChoiceChip(
+                  label: Text(l10n.roleManager),
+                  selected: _role == EmployeeRole.manager,
+                  onSelected: (_) =>
+                      setState(() => _role = EmployeeRole.manager),
+                ),
+              ],
+            ),
+          ],
+        ),
  if (_formError != null) ...[
  const SizedBox(height: 14),
  Text(
@@ -1278,23 +1262,20 @@ class _UpgradePlanTile extends StatelessWidget {
  @override
  Widget build(BuildContext context) {
  final scheme = Theme.of(context).colorScheme;
- final l10n = context.l10n;
-
- return InkWell(
- onTap: onTap,
- borderRadius: BorderRadius.circular(14),
- child: Container(
- padding: const EdgeInsets.all(14),
- decoration: BoxDecoration(
- borderRadius: BorderRadius.circular(14),
- border: Border.all(
- color: selected ? scheme.primary : scheme.outlineVariant,
- width: selected ? 2 : 1,
- ),
- color: selected
- ? scheme.primaryContainer.withValues(alpha: 0.4)
- : scheme.surfaceContainerLow,
- ),
+ final l10n = context.l10n;    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? scheme.primary : scheme.outlineVariant,
+          ),
+          color: selected
+              ? scheme.primaryContainer.withValues(alpha: 0.3)
+              : null,
+        ),
  child: Row(
  children: [
  Icon(
@@ -1311,7 +1292,7 @@ class _UpgradePlanTile extends StatelessWidget {
  Text(
  plan.name,
  style: Theme.of(context).textTheme.titleSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(height: 2),
@@ -1327,7 +1308,7 @@ class _UpgradePlanTile extends StatelessWidget {
  Text(
  Formatters.currency(plan.priceMonthlyCents),
  style: Theme.of(context).textTheme.titleSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  color: scheme.primary,
  ),
  ),

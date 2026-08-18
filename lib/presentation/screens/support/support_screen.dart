@@ -54,7 +54,7 @@ class SupportScreen extends StatelessWidget {
  Text(
  title,
  style: theme.textTheme.titleSmall?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(height: 2),
@@ -88,7 +88,7 @@ class SupportScreen extends StatelessWidget {
  title: Text(
  l10n.supportTitle,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),

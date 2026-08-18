@@ -182,7 +182,7 @@ class AppListTile extends StatelessWidget {
  maxLines: 1,
  overflow: TextOverflow.ellipsis,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  if (subtitle != null) ...[

@@ -127,23 +127,23 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
  },
  styleSheet: MarkdownStyleSheet(
  h1: theme.textTheme.headlineMedium?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  h2: theme.textTheme.titleLarge?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  h3: theme.textTheme.titleMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  h4: theme.textTheme.bodyLarge?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  h5: theme.textTheme.bodyLarge?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  h6: theme.textTheme.bodyLarge?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  // Corpo — entrelinha confortável para leitura longa.
  p: theme.textTheme.bodyMedium?.copyWith(
@@ -172,7 +172,7 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
  ),
  strong: theme.textTheme.bodyMedium?.copyWith(
  color: scheme.onSurface,
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  em: theme.textTheme.bodyMedium?.copyWith(
  fontStyle: FontStyle.italic,
@@ -191,7 +191,7 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
  borderRadius: BorderRadius.circular(8),
  ),
  tableHead: theme.textTheme.bodySmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  color: scheme.onSurface,
  ),
  tableBody: theme.textTheme.bodySmall?.copyWith(
@@ -201,7 +201,7 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
  // Hiperlinks — cor da marca, sublinhado suave, peso médio.
  a: theme.textTheme.bodyMedium?.copyWith(
  color: scheme.primary,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  decoration: TextDecoration.underline,
  decorationColor: scheme.primary.withValues(alpha: 0.55),
  decorationThickness: 1.2,

@@ -46,7 +46,7 @@ class _AdminPlanRequestsScreenState
  title: Text(
  l10n.adminUpgradesTitle,
  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -153,7 +153,7 @@ class _RequestCard extends StatelessWidget {
  child: Text(
  tenantName,
  style: theme.textTheme.titleMedium?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ),
@@ -261,7 +261,7 @@ class _PlanBadge extends StatelessWidget {
  maxLines: 2,
  overflow: TextOverflow.ellipsis,
  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  color: color,
  ),
  ),

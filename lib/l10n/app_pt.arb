@@ -2,8 +2,8 @@
   "@@locale": "pt",
   "appTitle": "Dumbhanengue ERP",
   "onboardingTitle": "Bem-vindo!",
-  "onboardingHeading": "Ative seu negócio no ERP",
-  "onboardingSubtitle": "Escolha um plano, informe o nome do seu negócio e defina a moeda e o idioma. Seu acesso será liberado após a aprovação (prazo de até 24h).",
+  "onboardingHeading": "Configure seu negócio",
+  "onboardingSubtitle": "Escolha o plano, nome e moeda. Aprovação em até 24h.",
   "onboardingBusinessLabel": "Nome do negócio",
   "onboardingBusinessError": "Informe o nome do seu negócio.",
   "onboardingPlanLabel": "Escolha o plano",
@@ -21,7 +21,7 @@
     }
   },
   "onboardingSubmit": "Solicitar acesso",
-  "onboardingSuccess": "Solicitação de {business} enviada! Aguarde a aprovação (até 24h).",
+  "onboardingSuccess": "Solicitação de {business} enviada! Aguarde aprovação (até 24h).",
   "@onboardingSuccess": {
     "description": "Feedback após enviar a solicitação de acesso",
     "placeholders": {
@@ -43,28 +43,28 @@
   "currencyUsd": "Dólar (USD)",
   "currencyEur": "Euro (EUR)",
   "currencyMzn": "Metical (MZN)",
-  "settingsSave": "Salvar ajustes",
+  "settingsSave": "Salvar",
   "settingsSaved": "Ajustes salvos!",
-  "settingsGenericError": "Não foi possível salvar os ajustes. Tente novamente.",
+  "settingsGenericError": "Não foi possível salvar. Tente novamente.",
   "settingsSupportSection": "Suporte",
   "settingsSupportEntry": "Ajuda e documentação",
-  "settingsSupportEntryHint": "Guia do Usuário e Troubleshooting — leitura sem internet",
+  "settingsSupportEntryHint": "Guia do Usuário e Troubleshooting — offline",
   "supportTitle": "Ajuda",
-  "supportSubtitle": "Tudo o que precisa para tirar o máximo do app: o guia completo do usuário e a resolução dos problemas mais comuns.",
+  "supportSubtitle": "Guia do usuário e solução de problemas.",
   "supportUserGuide": "Guia do Usuário",
-  "supportUserGuideHint": "Manual simples e completo: login, lojas, produtos (com foto), vendas, fiado, financeiro, fecho de caixa, relatórios e FAQ",
+  "supportUserGuideHint": "Login, lojas, produtos, vendas, fiado, financeiro e relatórios",
   "supportTroubleshooting": "Troubleshooting",
-  "supportTroubleshootingHint": "Resolução de problemas comuns: login, fotos, vendas, estoque, caixa, conexão e mensagens de erro",
-  "supportReadingError": "Não foi possível abrir o documento. Tente novamente.",
+  "supportTroubleshootingHint": "Problemas comuns: login, vendas, estoque e conexão",
+  "supportReadingError": "Não foi possível abrir o documento.",
   "commonSearch": "Buscar...",
   "commonRetry": "Tentar novamente",
   "commonSignOut": "Sair da conta",
   "appSheetClose": "Fechar",
   "storeSwitcherTooltip": "Trocar de loja",
   "storeSelectorSectionTitle": "Loja ativa",
-  "storeSelectorSectionHint": "Escolha a loja cujos dados aparecem nos módulos (vendas, estoque, financeiro).",
+  "storeSelectorSectionHint": "Escolha a loja ativa.",
   "tenantPendingTitle": "Aguardando aprovação",
-  "tenantPendingSubtitle": "A solicitação de acesso de \"{business}\" foi enviada com sucesso. O super admin vai analisar e você receberá acesso em até 24h.",
+  "tenantPendingSubtitle": "Solicitação de \"{business}\" enviada. Aguarde até 24h.",
   "@tenantPendingSubtitle": {
     "placeholders": {
       "business": {
@@ -72,9 +72,9 @@
       }
     }
   },
-  "tenantPendingHint": "Assim que aprovado, você poderá criar lojas, contratar funcionários e começar a operar.",
+  "tenantPendingHint": "Depois da aprovação, crie lojas e comece a operar.",
   "tenantRejectedTitle": "Solicitação rejeitada",
-  "tenantRejectedSubtitle": "A solicitação de acesso de \"{business}\" não foi aprovada.",
+  "tenantRejectedSubtitle": "A solicitação de \"{business}\" não foi aprovada.",
   "@tenantRejectedSubtitle": {
     "placeholders": {
       "business": {
@@ -83,11 +83,11 @@
     }
   },
   "authBlockedTitle": "Acesso suspenso",
-  "authBlockedMessage": "Sua conta de funcionário foi desativada pelo dono do estabelecimento. Se tiver dúvidas, fale com ele.",
+  "authBlockedMessage": "Sua conta foi desativada pelo proprietário.",
   "authBlockedSignOut": "Sair",
-  "authErrorRestoreSession": "Não foi possível restaurar sua sessão",
+  "authErrorRestoreSession": "Sessão não restaurada",
   "authErrorCheckConnection": "Verifique sua conexão e tente novamente.",
-  "authErrorLoadAccount": "Não foi possível carregar sua conta",
+  "authErrorLoadAccount": "Conta não carregada",
   "splashLoading": "A abrir a sua sessão…",
   "loginSubtitleSignUp": "Crie sua conta para começar",
   "loginSubtitleSignIn": "Gestão simples para o seu negócio",
@@ -97,8 +97,8 @@
   "loginPasswordLabel": "Senha",
   "loginPasswordError": "A senha deve ter ao menos 8 caracteres.",
   "loginPasswordHint": "Mín. 8 caracteres com minúscula, maiúscula, número e símbolo.",
-  "loginWeakPasswordError": "A senha deve conter letras minúsculas, maiúsculas, números e símbolos.",
-  "loginRateLimitError": "Muitas tentativas seguidas. Aguarde cerca de 1 hora e tente novamente.",
+  "loginWeakPasswordError": "A senha deve conter letras, números e símbolos.",
+  "loginRateLimitError": "Muitas tentativas. Aguarde 1 hora e tente novamente.",
   "loginShowPassword": "Mostrar senha",
   "loginHidePassword": "Ocultar senha",
   "loginConfirmLabel": "Confirmar senha",
@@ -110,12 +110,12 @@
   "loginSignUpSuccess": "Conta criada! Confirme seu e-mail para entrar.",
   "loginSignUpError": "Não foi possível criar a conta. Tente novamente.",
   "loginSignInError": "Não foi possível entrar. Verifique e-mail e senha.",
-  "loginSecurityNote": "Seus dados ficam protegidos com criptografia.",
+  "loginSecurityNote": "Dados protegidos com criptografia.",
   "loginForgotPassword": "Esqueceu a senha?",
   "forgotPasswordTitle": "Redefinir senha",
-  "forgotPasswordHint": "Informe o e-mail da sua conta. Enviamos um link para você criar uma nova senha.",
+  "forgotPasswordHint": "Informe seu e-mail. Enviaremos um link para redefinir.",
   "forgotPasswordSubmit": "Enviar link",
-  "forgotPasswordSent": "Se existir uma conta com este e-mail, enviamos um link para redefinir a senha.",
+  "forgotPasswordSent": "Se existir uma conta, enviamos um link.",
   "forgotPasswordError": "Não foi possível enviar o link. Tente novamente.",
   "setNewPasswordTitle": "Definir nova senha",
   "setNewPasswordHint": "Mín. 8 caracteres com minúscula, maiúscula, número e símbolo.",
@@ -162,7 +162,7 @@
     }
   },
   "syncNow": "Sincronizar",
-  "syncOfflineSaved": "Sem conexão. A operação foi salva e será sincronizada automaticamente.",
+  "syncOfflineSaved": "Sem conexão. Operação salva e será sincronizada automaticamente.",
   "syncDone": "{count, plural, =1{1 operação sincronizada} other{{count} operações sincronizadas}}",
   "@syncDone": {
     "placeholders": {
@@ -171,7 +171,7 @@
       }
     }
   },
-  "syncStillOffline": "Sem conexão — as operações continuam pendentes.",
+  "syncStillOffline": "Sem conexão — operações pendentes.",
   "dashboardGreeting": "Olá, {name}",
   "@dashboardGreeting": {
     "placeholders": {
@@ -295,8 +295,8 @@
   "roleEmployee": "Funcionário",
   "employeeActive": "Ativo",
   "employeeInactive": "Inativo",
-  "employeeDeactivateConfirm": "Desativar {name}? O funcionário perde o acesso imediatamente e não poderá vender até ser reativado.",
-  "employeeReactivateConfirm": "Reativar {name}? O funcionário volta a ter acesso à loja.",
+  "employeeDeactivateConfirm": "Desativar {name}? Perde acesso imediatamente.",
+  "employeeReactivateConfirm": "Reativar {name}? Volta a ter acesso à loja.",
   "employeeDeactivated": "Funcionário desativado.",
   "employeeReactivated": "Funcionário reativado.",
   "employeeDeactivateAction": "Desativar",
@@ -354,14 +354,14 @@
   "addEmployeeStoreLabel": "Loja",
   "addEmployeeNoStores": "Crie uma loja antes de cadastrar funcionários.",
   "addEmployeeRoleLabel": "Cargo",
-  "addEmployeeSuccess": "Funcionário cadastrado! A conta de acesso foi criada.",
-  "addEmployeeError": "Não foi possível cadastrar o funcionário. Verifique se o e-mail já não está em uso.",
+  "addEmployeeSuccess": "Funcionário cadastrado! Conta de acesso criada.",
+  "addEmployeeError": "Não foi possível cadastrar. Verifique o e-mail.",
   "addEmployeeSubmit": "Cadastrar funcionário",
   "upgradeTitle": "Upgrade de plano",
-  "upgradeSubtitle": "Escolha o novo plano. O super admin precisará aprovar o pedido antes de o plano ser alterado.",
-  "upgradeMaxReached": "Você já está no plano máximo disponível.",
+  "upgradeSubtitle": "Escolha o novo plano. Aguarda aprovação do super admin.",
+  "upgradeMaxReached": "Você já está no plano máximo.",
   "upgradeChooseError": "Escolha o plano de destino.",
-  "upgradeSuccess": "Pedido de upgrade enviado! O super admin vai analisar.",
+  "upgradeSuccess": "Pedido de upgrade enviado!",
   "upgradeError": "Não foi possível enviar o pedido. Tente novamente.",
   "upgradeSubmit": "Solicitar upgrade",
   "commonCancel": "Cancelar",
@@ -419,7 +419,7 @@
     }
   },
   "productsAdded": "Produto adicionado!",
-  "productsAddedNoPhoto": "Produto adicionado! (foto não enviada — sem permissão de armazenamento)",
+  "productsAddedNoPhoto": "Produto adicionado! (sem permissão de armazenamento)",
   "productsAddError": "Não foi possível adicionar o produto. Tente novamente.",
   "productsNameError": "Informe o nome do produto.",
   "productsDescriptionLabel": "Descrição (opcional)",
@@ -433,7 +433,7 @@
   "productsEditTitle": "Editar produto",
   "productsEditSubmit": "Salvar alterações",
   "productsEditSaved": "Produto atualizado!",
-  "productsEditSavedNoPhoto": "Produto atualizado! (foto não enviada — sem permissão de armazenamento)",
+  "productsEditSavedNoPhoto": "Produto atualizado! (sem permissão de armazenamento)",
   "productsEditError": "Não foi possível atualizar o produto. Tente novamente.",
   "productsPhotoLabel": "Foto do produto",
   "productsPhotoTake": "Tirar foto",
@@ -442,8 +442,8 @@
   "productsInactive": "Inativo",
   "productsFilterInactive": "Inativos",
   "productsActiveLabel": "Produto ativo",
-  "productsActiveHint": "Desative para tirar o produto do PDV e das compras (o estoque é preservado).",
-  "productsStockAdjustHint": "Ajuste manual: define o estoque exato, criando/consumindo lotes FIFO.",
+  "productsActiveHint": "Desative para tirar do PDV e compras.",
+  "productsStockAdjustHint": "Ajuste manual: define o estoque exato (FIFO).",
   "productsSectionInfo": "Informações",
   "productsSectionPricing": "Preços",
   "productsSectionStock": "Estoque",
@@ -488,7 +488,7 @@
   "purchasesAddNew": "Nova compra",
   "purchasesLoadError": "Não foi possível carregar as compras.",
   "purchasesEmptyTitle": "Nenhuma compra registrada",
-  "purchasesEmptySubtitle": "Toque em \"Nova compra\" para registrar a entrada de mercadoria e abastecer o estoque.",
+  "purchasesEmptySubtitle": "Toque em \"Nova compra\" para registrar.",
   "purchasesHeaderCount": "{count, plural, =0{0 compras} =1{1 compra} other{{count} compras}}",
   "@purchasesHeaderCount": {
     "description": "Contagem de compras de hoje no resumo da tela de compras",
@@ -515,7 +515,7 @@
   "purchasesEmptyFilteredSubtitle": "Ajuste a busca ou os filtros.",
   "purchasesClearFilters": "Limpar filtros",
   "purchasesSupplierError": "Informe o fornecedor da compra.",
-  "purchasesCartItemUnavailable": "Um item do carrinho não está mais disponível. Tente novamente.",
+  "purchasesCartItemUnavailable": "Item do carrinho não disponível. Tente novamente.",
   "purchasesRegistered": "Compra registrada: {amount}!",
   "@purchasesRegistered": {
     "placeholders": {
@@ -593,9 +593,9 @@
   "financialLoadError": "Não foi possível carregar as movimentações.",
   "financialCashFlowError": "Não foi possível carregar o fluxo de caixa.",
   "financialEmptyTitle": "Nenhuma movimentação",
-  "financialEmptySubtitle": "Registre entradas e saídas para acompanhar o fluxo de caixa.",
+  "financialEmptySubtitle": "Registre entradas e saídas para acompanhar o caixa.",
   "financialReceivePendingTitle": "Receber pendência?",
-  "financialReceivePendingBody": "Confirmar o recebimento de {amount}? A movimentação passa a contar no caixa realizado.",
+  "financialReceivePendingBody": "Confirmar recebimento de {amount}?",
   "@financialReceivePendingBody": {
     "placeholders": {
       "amount": {
@@ -605,10 +605,10 @@
   },
   "financialReceive": "Receber",
   "financialReceived": "Movimentação recebida!",
-  "financialReceiveError": "Não foi possível receber a pendência. Tente novamente.",
+  "financialReceiveError": "Não foi possível receber. Tente novamente.",
   "financialPay": "Pagar",
   "financialPayPendingTitle": "Pagar pendência?",
-  "financialPayPendingBody": "Confirmar o pagamento de {amount}? A movimentação passa a contar no caixa realizado.",
+  "financialPayPendingBody": "Confirmar pagamento de {amount}?",
   "@financialPayPendingBody": {
     "placeholders": {
       "amount": {
@@ -617,7 +617,7 @@
     }
   },
   "financialPaid": "Saída paga!",
-  "financialPayError": "Não foi possível pagar a pendência. Tente novamente.",
+  "financialPayError": "Não foi possível pagar. Tente novamente.",
   "financialAddTitle": "Registrar movimentação",
   "financialIncomingType": "Entrada",
   "financialOutgoingType": "Saída",
@@ -627,9 +627,9 @@
   "financialAmountLabel": "Valor",
   "financialAmountError": "Informe um valor maior que zero.",
   "financialPendingLabel": "Pendente (fiado)",
-  "financialPendingHint": "Não conta no caixa realizado até ser recebido.",
+  "financialPendingHint": "Não conta no caixa até ser recebido.",
   "financialRegistered": "Movimentação registrada!",
-  "financialRegisterError": "Não foi possível registrar a movimentação. Tente novamente.",
+  "financialRegisterError": "Não foi possível registrar. Tente novamente.",
   "financialDefaultCategoryIncome": "Vendas",
   "financialDefaultCategoryExpense": "Despesas",
   "cashClosingAction": "Fecho de caixa",
@@ -637,10 +637,10 @@
   "cashClosingDaySummary": "Resumo do dia",
   "cashClosingTotalSales": "Vendas do dia",
   "cashClosingExpectedCash": "Esperado na gaveta",
-  "cashClosingExpectedCashHint": "Só vendas em dinheiro — cartão, M-Pesa, E-Mola e transferência não passam pela gaveta física.",
+  "cashClosingExpectedCashHint": "Só vendas em dinheiro.",
   "cashClosingByMethod": "Por forma de pagamento",
   "cashClosingCountedCash": "Dinheiro contado",
-  "cashClosingCountedCashHint": "Conte o dinheiro físico da gaveta e informe aqui.",
+  "cashClosingCountedCashHint": "Conte o dinheiro da gaveta e informe aqui.",
   "cashClosingDifference": "Diferença",
   "cashClosingConfers": "Caixa confere",
   "cashClosingSurplus": "Sobra de {amount}",
@@ -689,7 +689,7 @@
   "debtsPendingSection": "Dívidas pendentes",
   "debtsLoadError": "Não foi possível carregar as dívidas.",
   "debtsEmptyPendingTitle": "Nenhum fiado pendente",
-  "debtsEmptyPendingSubtitle": "Quando um cliente comprar fiado, a dívida aparece aqui.",
+  "debtsEmptyPendingSubtitle": "Fiados aparecerão aqui.",
   "debtsTotalSettled": "Total quitado",
   "debtsSettledCount": "{count, plural, =1{1 baixa registrada} other{{count} baixas registradas}}",
   "@debtsSettledCount": {
@@ -702,9 +702,9 @@
   "debtsSettledSection": "Histórico de quitações",
   "debtsHistoryLoadError": "Não foi possível carregar o histórico.",
   "debtsEmptySettledTitle": "Nenhuma quitação ainda",
-  "debtsEmptySettledSubtitle": "Quando um fiado for quitado, ele aparece aqui.",
+  "debtsEmptySettledSubtitle": "Fiados quitados aparecerão aqui.",
   "debtsSettleTitle": "Quitar dívida?",
-  "debtsSettleBody": "Receber {amount} de {name}? Será registrada uma entrada no caixa.",
+  "debtsSettleBody": "Receber {amount} de {name}?",
   "@debtsSettleBody": {
     "placeholders": {
       "amount": {
@@ -728,7 +728,7 @@
     }
   },
   "debtsNotFound": "Esta dívida não está mais pendente.",
-  "debtsSettleError": "Não foi possível quitar a dívida. Tente novamente.",
+  "debtsSettleError": "Não foi possível quitar. Tente novamente.",
   "debtsLate": "Atrasada",
   "debtsDueToday": "Vence hoje",
   "debtsDueIn": "Em {days, plural, =1{1 dia} other{{days} dias}}",
@@ -767,7 +767,7 @@
       }
     }
   },
-  "debtsPendingEntryError": "Fiado registrado, mas a pendência no Financeiro não pôde ser criada. Verifique as movimentações.",
+  "debtsPendingEntryError": "Fiado registrado, mas a pendência não pôde ser criada.",
   "debtsRegisterError": "Não foi possível registrar o fiado. Tente novamente.",
   "debtsCustomerLinkLabel": "Cliente vinculado (opcional)",
   "debtsNoCustomer": "Sem vínculo",
@@ -828,7 +828,7 @@
       }
     }
   },
-  "salesItemUnavailable": "Um item do carrinho não está mais disponível. Tente novamente.",
+  "salesItemUnavailable": "Item do carrinho não disponível. Tente novamente.",
   "salesRegistered": "Venda registrada: {amount}!",
   "@salesRegistered": {
     "placeholders": {
@@ -885,7 +885,7 @@
   "salesStatusCancelled": "Anulada",
   "saleDetailCancelAction": "Anular venda",
   "saleDetailCancelConfirmTitle": "Anular esta venda?",
-  "saleDetailCancelConfirmBody": "O estoque dos itens será devolvido e a entrada no caixa estornada ({amount}). Esta ação não pode ser desfeita.",
+  "saleDetailCancelConfirmBody": "Estoque será devolvido e caixa estornado ({amount}).",
   "@saleDetailCancelConfirmBody": {
     "description": "Confirmação de anulação de venda — avisa que estoque e caixa serão estornados",
     "placeholders": {
@@ -926,8 +926,8 @@
   },
   "adminTenantsEmpty": "Nenhum tenant registrado ainda.",
   "adminRequestsLoadError": "Não foi possível carregar as solicitações.",
-  "adminNothingPendingTitle": "Nada aguardando aprovação",
-  "adminNothingPendingSubtitle": "Novas solicitações de tenant aparecem aqui.",
+  "adminNothingPendingTitle": "Nada pendente",
+  "adminNothingPendingSubtitle": "Novas solicitações aparecem aqui.",
   "adminTenantsLoadError": "Não foi possível carregar os tenants.",
   "adminRejectError": "Não foi possível rejeitar a solicitação.",
   "adminApproveError": "Não foi possível aprovar a solicitação.",
@@ -956,7 +956,7 @@
     }
   },
   "adminRejectReasonLabel": "Motivo da rejeição",
-  "adminRejectReasonHint": "Ex.: informações incompletas no cadastro",
+  "adminRejectReasonHint": "Ex.: informações incompletas",
   "adminApprove": "Aprovar",
   "adminReject": "Rejeitar",
   "adminPlanLabel": "Plano: {plan}",
@@ -1022,7 +1022,7 @@
   "adminPlanNewTitle": "Novo plano",
   "adminPlanEditTitle": "Editar plano",
   "adminPlanNameLabel": "Nome do plano",
-  "adminPlanPriceLabel": "Preço mensal", 
+  "adminPlanPriceLabel": "Preço mensal",
   "adminPlanMaxStores": "Máx. lojas",
   "adminPlanMaxEmployees": "Máx. funcionários",
   "adminPlanActiveTitle": "Plano ativo",
@@ -1032,7 +1032,7 @@
   "adminUpgradesLoadError": "Não foi possível carregar os pedidos de upgrade.",
   "adminUpgradesEmptyTitle": "Nenhum upgrade pendente",
   "adminUpgradesEmptySubtitle": "Pedidos de mudança de plano aparecem aqui.",
-  "adminUpgradeApproved": "Upgrade aprovado — plano do tenant atualizado!",
+  "adminUpgradeApproved": "Upgrade aprovado — plano atualizado!",
   "adminUpgradeRejected": "Upgrade rejeitado.",
   "adminUpgradeProcessError": "Não foi possível processar o pedido.",
   "adminPlanRequested": "Solicitado",

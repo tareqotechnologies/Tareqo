@@ -505,23 +505,26 @@ class _SplashScreenState extends State<_SplashScreen>
                 ),
               ),
               child: Container(
-                width: 132,
-                height: 132,
+                width: 112,
+                height: 112,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF0076F6).withValues(alpha: 0.25),
+                      color: const Color(0xFF0076F6).withValues(alpha: 0.35),
                       blurRadius: 48,
                       spreadRadius: 8,
                     ),
                   ],
                 ),
-                child: Image.asset(
-                  'assets/branding/splash_logo.png',
-                  width: 116,
-                  height: 116,
-                  fit: BoxFit.contain,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: Image.asset(
+                    'assets/branding/splash_logo.png',
+                    width: 112,
+                    height: 112,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),

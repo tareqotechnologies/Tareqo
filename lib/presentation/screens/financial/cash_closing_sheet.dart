@@ -236,7 +236,7 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
  textAlign: TextAlign.center,
  style: theme.textTheme.bodyMedium?.copyWith(
  color: theme.colorScheme.primary,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ],
@@ -306,7 +306,7 @@ class _SummaryCard extends StatelessWidget {
  label,
  style: theme.textTheme.bodyMedium?.copyWith(
  color: color,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ),
@@ -343,7 +343,7 @@ class _SummaryCard extends StatelessWidget {
  alignment: Alignment.centerRight,
  style: emphasize
  ? theme.textTheme.titleMedium?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  )
  : theme.textTheme.titleSmall,
  ),
@@ -401,7 +401,7 @@ class _ByMethodBreakdown extends StatelessWidget {
  cents: entry.value,
  alignment: Alignment.centerRight,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ],

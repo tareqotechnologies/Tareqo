@@ -2,8 +2,8 @@
   "@@locale": "fr",
   "appTitle": "Dumbhanengue ERP",
   "onboardingTitle": "Bienvenue !",
-  "onboardingHeading": "Activez votre entreprise dans l'ERP",
-  "onboardingSubtitle": "Choisissez un forfait, indiquez le nom de votre entreprise et définissez la devise et la langue. Votre accès sera libéré après approbation (délai de 24 h).",
+  "onboardingHeading": "Configurez votre entreprise",
+  "onboardingSubtitle": "Choisissez le forfait, le nom et la devise. Approbation en 24h.",
   "onboardingBusinessLabel": "Nom de l'entreprise",
   "onboardingBusinessError": "Indiquez le nom de votre entreprise.",
   "onboardingPlanLabel": "Choisissez le forfait",
@@ -21,7 +21,7 @@
     }
   },
   "onboardingSubmit": "Demander l'accès",
-  "onboardingSuccess": "Demande pour {business} envoyée ! Attendez l'approbation (dans les 24 h).",
+  "onboardingSuccess": "Demande pour {business} envoyée ! Agardez l'approbation (24h).",
   "@onboardingSuccess": {
     "description": "Retour après l'envoi de la demande d'accès",
     "placeholders": {
@@ -43,28 +43,28 @@
   "currencyUsd": "Dollar américain (USD)",
   "currencyEur": "Euro (EUR)",
   "currencyMzn": "Metical (MZN)",
-  "settingsSave": "Enregistrer les réglages",
+  "settingsSave": "Enregistrer",
   "settingsSaved": "Réglages enregistrés !",
-  "settingsGenericError": "Impossible d'enregistrer les réglages. Réessayez.",
+  "settingsGenericError": "Impossible d'enregistrer. Réessayez.",
   "settingsSupportSection": "Assistance",
   "settingsSupportEntry": "Aide et documentation",
-  "settingsSupportEntryHint": "Guide de l'utilisateur et dépannage — lecture hors ligne",
+  "settingsSupportEntryHint": "Guide et dépannage — hors ligne",
   "supportTitle": "Aide",
-  "supportSubtitle": "Tout ce qu'il faut pour tirer le meilleur de l'app : le guide complet de l'utilisateur et la résolution des problèmes les plus courants.",
+  "supportSubtitle": "Guide utilisateur et dépannage.",
   "supportUserGuide": "Guide de l'utilisateur",
-  "supportUserGuideHint": "Manuel simple et complet : connexion, magasins, produits (avec photo), ventes, crédit, finances, clôture de caisse, rapports et FAQ",
+  "supportUserGuideHint": "Connexion, magasins, produits, ventes, crédit, finances et rapports",
   "supportTroubleshooting": "Dépannage",
-  "supportTroubleshootingHint": "Résolution des problèmes courants : connexion, photos, ventes, stock, caisse, connexion réseau et messages d'erreur",
-  "supportReadingError": "Impossible d'ouvrir le document. Réessayez.",
+  "supportTroubleshootingHint": "Problèmes courants : connexion, ventes, stock et réseau",
+  "supportReadingError": "Impossible d'ouvrir le document.",
   "commonSearch": "Rechercher...",
   "commonRetry": "Réessayer",
   "commonSignOut": "Se déconnecter",
   "appSheetClose": "Fermer",
   "storeSwitcherTooltip": "Changer de magasin",
   "storeSelectorSectionTitle": "Magasin actif",
-  "storeSelectorSectionHint": "Choisissez le magasin dont les données apparaissent dans les modules (ventes, stock, finances).",
+  "storeSelectorSectionHint": "Choisissez le magasin actif.",
   "tenantPendingTitle": "En attente d'approbation",
-  "tenantPendingSubtitle": "La demande d'accès pour \"{business}\" a été envoyée. Le super administrateur va l'examiner et vous recevrez l'accès dans les 24 h.",
+  "tenantPendingSubtitle": "Demande pour \"{business}\" envoyée. Attendez 24h.",
   "@tenantPendingSubtitle": {
     "placeholders": {
       "business": {
@@ -72,9 +72,9 @@
       }
     }
   },
-  "tenantPendingHint": "Une fois approuvé, vous pourrez créer des magasins, embaucher des employés et commencer à opérer.",
+  "tenantPendingHint": "Une fois approuvé, créez des magasins et commencez.",
   "tenantRejectedTitle": "Demande rejetée",
-  "tenantRejectedSubtitle": "La demande d'accès pour \"{business}\" n'a pas été approuvée.",
+  "tenantRejectedSubtitle": "La demande pour \"{business}\" n'a pas été approuvée.",
   "@tenantRejectedSubtitle": {
     "placeholders": {
       "business": {
@@ -83,11 +83,11 @@
     }
   },
   "authBlockedTitle": "Accès suspendu",
-  "authBlockedMessage": "Votre compte d'employé a été désactivé par le propriétaire de l'établissement. En cas de doute, contactez-le.",
+  "authBlockedMessage": "Votre compte a été désactivé par le propriétaire.",
   "authBlockedSignOut": "Se déconnecter",
-  "authErrorRestoreSession": "Impossible de restaurer votre session",
+  "authErrorRestoreSession": "Session non restaurée",
   "authErrorCheckConnection": "Vérifiez votre connexion et réessayez.",
-  "authErrorLoadAccount": "Impossible de charger votre compte",
+  "authErrorLoadAccount": "Compte non chargé",
   "splashLoading": "Ouverture de votre session…",
   "loginSubtitleSignUp": "Créez votre compte pour commencer",
   "loginSubtitleSignIn": "Une gestion simple pour votre entreprise",
@@ -97,8 +97,8 @@
   "loginPasswordLabel": "Mot de passe",
   "loginPasswordError": "Le mot de passe doit contenir au moins 8 caractères.",
   "loginPasswordHint": "Min. 8 caractères avec minuscule, majuscule, chiffre et symbole.",
-  "loginWeakPasswordError": "Le mot de passe doit contenir des minuscules, des majuscules, des chiffres et des symboles.",
-  "loginRateLimitError": "Trop de tentatives consécutives. Attendez environ 1 heure et réessayez.",
+  "loginWeakPasswordError": "Le mot de passe doit contenir lettres, chiffres et symboles.",
+  "loginRateLimitError": "Trop de tentatives. Attendez 1h et réessayez.",
   "loginShowPassword": "Afficher le mot de passe",
   "loginHidePassword": "Masquer le mot de passe",
   "loginConfirmLabel": "Confirmer le mot de passe",
@@ -110,18 +110,18 @@
   "loginSignUpSuccess": "Compte créé ! Confirmez votre e-mail pour vous connecter.",
   "loginSignUpError": "Impossible de créer le compte. Réessayez.",
   "loginSignInError": "Impossible de se connecter. Vérifiez l'e-mail et le mot de passe.",
-  "loginSecurityNote": "Vos données sont protégées par chiffrement.",
+  "loginSecurityNote": "Données protégées par chiffrement.",
   "loginForgotPassword": "Mot de passe oublié ?",
   "forgotPasswordTitle": "Réinitialiser le mot de passe",
-  "forgotPasswordHint": "Indiquez l'e-mail de votre compte. Nous vous envoyons un lien pour créer un nouveau mot de passe.",
+  "forgotPasswordHint": "Indiquez votre e-mail. Nous enverrons un lien.",
   "forgotPasswordSubmit": "Envoyer le lien",
-  "forgotPasswordSent": "S'il existe un compte avec cet e-mail, nous avons envoyé un lien pour réinitialiser le mot de passe.",
+  "forgotPasswordSent": "Si un compte existe, nous avons envoyé un lien.",
   "forgotPasswordError": "Impossible d'envoyer le lien. Réessayez.",
   "setNewPasswordTitle": "Définir un nouveau mot de passe",
   "setNewPasswordHint": "Min. 8 caractères avec minuscule, majuscule, chiffre et symbole.",
   "setNewPasswordSubmit": "Enregistrer le nouveau mot de passe",
   "setNewPasswordSuccess": "Mot de passe mis à jour !",
-  "setNewPasswordError": "Impossible de mettre à jour le mot de passe. Réessayez.",
+  "setNewPasswordError": "Impossible de mettre à jour. Réessayez.",
   "setNewPasswordSignOut": "Se déconnecter",
   "changePasswordTitle": "Changer le mot de passe",
   "changePasswordCurrentLabel": "Mot de passe actuel",
@@ -153,7 +153,7 @@
   "fabMenuAddDebt": "Enregistrer un crédit",
   "fabMenuAddDebtHint": "À recevoir ou à payer",
   "fabMenuCancel": "Annuler",
-  "syncPendingCount": "{count, plural, =1{1 opération en attente de synchronisation} other{{count} opérations en attente de synchronisation}}",
+  "syncPendingCount": "{count, plural, =1{1 opération en attente} other{{count} opérations en attente}}",
   "@syncPendingCount": {
     "placeholders": {
       "count": {
@@ -162,7 +162,7 @@
     }
   },
   "syncNow": "Synchroniser",
-  "syncOfflineSaved": "Pas de connexion. L'opération a été enregistrée et sera synchronisée automatiquement.",
+  "syncOfflineSaved": "Pas de connexion. Enregistré — synchronisé automatiquement.",
   "syncDone": "{count, plural, =1{1 opération synchronisée} other{{count} opérations synchronisées}}",
   "@syncDone": {
     "placeholders": {
@@ -171,7 +171,7 @@
       }
     }
   },
-  "syncStillOffline": "Pas de connexion — les opérations restent en attente.",
+  "syncStillOffline": "Pas de connexion — opérations en attente.",
   "dashboardGreeting": "Bonjour, {name}",
   "@dashboardGreeting": {
     "placeholders": {
@@ -200,9 +200,9 @@
   "dashboardModuleStores": "Magasins",
   "dashboardRecentSales": "Ventes récentes",
   "dashboardViewAll": "Tout voir",
-  "dashboardNoSales": "Aucune vente pour l'instant — enregistrez la première !",
+  "dashboardNoSales": "Aucune vente — enregistrez la première !",
   "dashboardRecentPurchases": "Achats récents",
-  "dashboardNoPurchases": "Aucun achat pour l'instant — enregistrez le premier !",
+  "dashboardNoPurchases": "Aucun achat — enregistrez le premier !",
   "dashboardLowStock": "Stock faible",
   "dashboardKpisError": "Impossible de charger les indicateurs.",
   "dashboardActivityTitle": "Activité du jour",
@@ -221,7 +221,7 @@
       }
     }
   },
-  "dashboardActivityEmpty": "Aucune activité enregistrée pour l'instant.",
+  "dashboardActivityEmpty": "Aucune activité enregistrée.",
   "dashboardActivitySeeAll": "Tout voir",
   "dashboardStockEntry": "Stock · {product}",
   "@dashboardStockEntry": {
@@ -295,15 +295,15 @@
   "roleEmployee": "Employé",
   "employeeActive": "Actif",
   "employeeInactive": "Inactif",
-  "employeeDeactivateConfirm": "Désactiver {name} ? L'employé perd immédiatement l'accès et ne pourra pas vendre jusqu'à sa réactivation.",
-  "employeeReactivateConfirm": "Réactiver {name} ? L'employé retrouve l'accès au magasin.",
+  "employeeDeactivateConfirm": "Désactiver {name} ? Perd l'accès immédiatement.",
+  "employeeReactivateConfirm": "Réactiver {name} ? Retrouve l'accès au magasin.",
   "employeeDeactivated": "Employé désactivé.",
   "employeeReactivated": "Employé réactivé.",
   "employeeDeactivateAction": "Désactiver",
   "employeeReactivateAction": "Réactiver",
-  "upgradesLoadError": "Impossible de charger les demandes d'évolution de forfait.",
+  "upgradesLoadError": "Impossible de charger les demandes d'évolution.",
   "upgradesEmptyTitle": "Aucune demande d'évolution",
-  "upgradesEmptySubtitle": "Demandez un forfait supérieur dans la carte ci-dessus.",
+  "upgradesEmptySubtitle": "Demandez un forfait supérieur ci-dessus.",
   "statusPending": "En attente",
   "statusApproved": "Approuvé",
   "statusRejected": "Rejeté",
@@ -354,21 +354,21 @@
   "addEmployeeStoreLabel": "Magasin",
   "addEmployeeNoStores": "Créez un magasin avant d'ajouter des employés.",
   "addEmployeeRoleLabel": "Poste",
-  "addEmployeeSuccess": "Employé enregistré ! Le compte d'accès a été créé.",
-  "addEmployeeError": "Impossible d'enregistrer l'employé. Vérifiez si l'e-mail n'est pas déjà utilisé.",
+  "addEmployeeSuccess": "Employé enregistré ! Compte d'accès créé.",
+  "addEmployeeError": "Impossible d'enregistrer. Vérifiez l'e-mail.",
   "addEmployeeSubmit": "Enregistrer l'employé",
   "upgradeTitle": "Évolution de forfait",
-  "upgradeSubtitle": "Choisissez le nouveau forfait. Le super administrateur devra approuver la demande avant le changement.",
-  "upgradeMaxReached": "Vous êtes déjà au forfait maximum disponible.",
+  "upgradeSubtitle": "Choisissez le nouveau forfait. Approuvé par le super admin.",
+  "upgradeMaxReached": "Vous êtes déjà au forfait maximum.",
   "upgradeChooseError": "Choisissez le forfait de destination.",
-  "upgradeSuccess": "Demande d'évolution envoyée ! Le super administrateur va l'examiner.",
+  "upgradeSuccess": "Demande d'évolution envoyée !",
   "upgradeError": "Impossible d'envoyer la demande. Réessayez.",
   "upgradeSubmit": "Demander l'évolution",
   "commonCancel": "Annuler",
   "commonConfirm": "Confirmer",
   "commonDescription": "Description",
   "commonNoResults": "Aucun résultat",
-  "commonNoResultsHint": "Essayez de chercher un autre terme.",
+  "commonNoResultsHint": "Essayez un autre terme.",
   "commonSave": "Enregistrer",
   "commonSoldOut": "Épuisé",
   "periodToday": "Aujourd'hui",
@@ -419,7 +419,7 @@
     }
   },
   "productsAdded": "Produit ajouté !",
-  "productsAddedNoPhoto": "Produit ajouté ! (photo non envoyée — autorisation de stockage absente)",
+  "productsAddedNoPhoto": "Produit ajouté ! (pas de permission de stockage)",
   "productsAddError": "Impossible d'ajouter le produit. Réessayez.",
   "productsNameError": "Indiquez le nom du produit.",
   "productsDescriptionLabel": "Description (facultatif)",
@@ -433,8 +433,8 @@
   "productsEditTitle": "Modifier le produit",
   "productsEditSubmit": "Enregistrer les modifications",
   "productsEditSaved": "Produit mis à jour !",
-  "productsEditSavedNoPhoto": "Produit mis à jour ! (photo non envoyée — autorisation de stockage absente)",
-  "productsEditError": "Impossible de mettre à jour le produit. Réessayez.",
+  "productsEditSavedNoPhoto": "Produit mis à jour ! (pas de permission de stockage)",
+  "productsEditError": "Impossible de mettre à jour. Réessayez.",
   "productsPhotoLabel": "Photo du produit",
   "productsPhotoTake": "Prendre une photo",
   "productsPhotoGallery": "Depuis la galerie",
@@ -442,8 +442,8 @@
   "productsInactive": "Inactif",
   "productsFilterInactive": "Inactifs",
   "productsActiveLabel": "Produit actif",
-  "productsActiveHint": "Désactivez pour retirer le produit du PDV et des achats (le stock est conservé).",
-  "productsStockAdjustHint": "Ajustement manuel : définit le stock exact, en créant/consommant des lots FIFO.",
+  "productsActiveHint": "Désactivez pour retirer du PDV et des achats.",
+  "productsStockAdjustHint": "Ajustement manuel : définit le stock exact (FIFO).",
   "productsSectionInfo": "Informations",
   "productsSectionPricing": "Prix",
   "productsSectionStock": "Stock",
@@ -488,8 +488,8 @@
   "purchasesAddNew": "Nouvel achat",
   "purchasesLoadError": "Impossible de charger les achats.",
   "purchasesEmptyTitle": "Aucun achat enregistré",
-  "purchasesEmptySubtitle": "Touchez \"Nouvel achat\" pour enregistrer l'entrée de marchandise et approvisionner le stock.",
-  "purchasesHeaderCount": "{count, plural, =0{0 achat} =1{1 achat} other{{count} achats}}",
+  "purchasesEmptySubtitle": "Touchez \"Nouvel achat\" pour enregistrer.",
+  "purchasesHeaderCount": "{count, plural, =0{0 achats} =1{1 achat} other{{count} achats}}",
   "@purchasesHeaderCount": {
     "description": "Nombre d'achats du jour dans le résumé de l'écran d'achats",
     "placeholders": {
@@ -514,8 +514,8 @@
   "purchasesEmptyFilteredTitle": "Aucun achat trouvé",
   "purchasesEmptyFilteredSubtitle": "Ajustez la recherche ou les filtres.",
   "purchasesClearFilters": "Effacer les filtres",
-  "purchasesSupplierError": "Indiquez le fournisseur de l'achat.",
-  "purchasesCartItemUnavailable": "Un article du panier n'est plus disponible. Réessayez.",
+  "purchasesSupplierError": "Indiquez le fournisseur.",
+  "purchasesCartItemUnavailable": "Article du panier indisponible. Réessayez.",
   "purchasesRegistered": "Achat enregistré : {amount} !",
   "@purchasesRegistered": {
     "placeholders": {
@@ -535,7 +535,7 @@
   "purchasesRegisterError": "Impossible d'enregistrer l'achat. Réessayez.",
   "purchasesSupplierLabel": "Fournisseur",
   "purchasesNoProductsTitle": "Aucun produit à acheter",
-  "purchasesNoProductsSubtitle": "Enregistrez des produits pour pouvoir faire des achats.",
+  "purchasesNoProductsSubtitle": "Enregistrez des produits pour faire des achats.",
   "purchasesConfirm": "Confirmer l'achat",
   "purchasesStockLabel": "{quantity} {unit} en stock",
   "@purchasesStockLabel": {
@@ -569,7 +569,7 @@
   "reportsExportCsv": "Exporter en CSV",
   "reportsExportPdf": "Exporter en PDF",
   "reportsExportDone": "Rapport exporté !",
-  "reportsExportError": "Impossible d'exporter le rapport. Réessayez.",
+  "reportsExportError": "Impossible d'exporter. Réessayez.",
   "reportsExportTitle": "Rapport de ventes",
   "reportsExportFileName": "rapport_ventes",
   "reportsExportStore": "Magasin",
@@ -593,9 +593,9 @@
   "financialLoadError": "Impossible de charger les transactions.",
   "financialCashFlowError": "Impossible de charger le flux de trésorerie.",
   "financialEmptyTitle": "Aucune transaction",
-  "financialEmptySubtitle": "Enregistrez des entrées et des sorties pour suivre le flux de trésorerie.",
+  "financialEmptySubtitle": "Enregistrez des entrées et sorties pour suivre le caisse.",
   "financialReceivePendingTitle": "Recevoir le montant en attente ?",
-  "financialReceivePendingBody": "Confirmer la réception de {amount} ? La transaction comptera dans la caisse réalisée.",
+  "financialReceivePendingBody": "Confirmer la réception de {amount} ?",
   "@financialReceivePendingBody": {
     "placeholders": {
       "amount": {
@@ -605,10 +605,10 @@
   },
   "financialReceive": "Recevoir",
   "financialReceived": "Transaction reçue !",
-  "financialReceiveError": "Impossible de recevoir le montant en attente. Réessayez.",
+  "financialReceiveError": "Impossible de recevoir. Réessayez.",
   "financialPay": "Payer",
   "financialPayPendingTitle": "Payer le montant en attente ?",
-  "financialPayPendingBody": "Confirmer le paiement de {amount} ? La transaction comptera dans la caisse réalisée.",
+  "financialPayPendingBody": "Confirmer le paiement de {amount} ?",
   "@financialPayPendingBody": {
     "placeholders": {
       "amount": {
@@ -617,7 +617,7 @@
     }
   },
   "financialPaid": "Sortie payée !",
-  "financialPayError": "Impossible de payer le montant en attente. Réessayez.",
+  "financialPayError": "Impossible de payer. Réessayez.",
   "financialAddTitle": "Enregistrer une transaction",
   "financialIncomingType": "Entrée",
   "financialOutgoingType": "Sortie",
@@ -627,9 +627,9 @@
   "financialAmountLabel": "Montant",
   "financialAmountError": "Indiquez un montant supérieur à zéro.",
   "financialPendingLabel": "En attente (crédit)",
-  "financialPendingHint": "Ne compte pas dans la caisse réalisée tant qu'il n'est pas reçu.",
+  "financialPendingHint": "Ne compte pas dans la caisse tant que non reçu.",
   "financialRegistered": "Transaction enregistrée !",
-  "financialRegisterError": "Impossible d'enregistrer la transaction. Réessayez.",
+  "financialRegisterError": "Impossible d'enregistrer. Réessayez.",
   "financialDefaultCategoryIncome": "Ventes",
   "financialDefaultCategoryExpense": "Dépenses",
   "cashClosingAction": "Clôture de caisse",
@@ -637,10 +637,10 @@
   "cashClosingDaySummary": "Résumé du jour",
   "cashClosingTotalSales": "Ventes du jour",
   "cashClosingExpectedCash": "Attendu dans le tiroir",
-  "cashClosingExpectedCashHint": "Uniquement les ventes en espèces — carte, M-Pesa, E-Mola et virement ne passent pas par le tiroir physique.",
+  "cashClosingExpectedCashHint": "Ventes en espèces uniquement.",
   "cashClosingByMethod": "Par moyen de paiement",
   "cashClosingCountedCash": "Espèces comptées",
-  "cashClosingCountedCashHint": "Comptez l'argent physique du tiroir et indiquez-le ici.",
+  "cashClosingCountedCashHint": "Comptez l'argent du tiroir et indiquez-le ici.",
   "cashClosingDifference": "Différence",
   "cashClosingConfers": "Caisse juste",
   "cashClosingSurplus": "Excédent de {amount}",
@@ -667,8 +667,8 @@
   "cashClosingError": "Impossible de fermer la caisse. Réessayez.",
   "cashClosingEmpty": "Aucune vente enregistrée ce jour.",
   "cashClosingHistory": "Historique des clôtures",
-  "cashClosingHistoryEmpty": "Aucune clôture enregistrée pour l'instant.",
-  "debtsTitle": "Crédit (fiado)",
+  "cashClosingHistoryEmpty": "Aucune clôture enregistrée.",
+  "debtsTitle": "Crédit",
   "debtsHeaderSubtitle": "Crédit à recevoir et à payer",
   "debtsAddDebt": "Enregistrer un crédit",
   "debtsSearchHint": "Rechercher par nom du client...",
@@ -689,7 +689,7 @@
   "debtsPendingSection": "Dettes en attente",
   "debtsLoadError": "Impossible de charger les dettes.",
   "debtsEmptyPendingTitle": "Aucun crédit en attente",
-  "debtsEmptyPendingSubtitle": "Quand un client achète à crédit, la dette apparaît ici.",
+  "debtsEmptyPendingSubtitle": "Les crédits en attente apparaîtront ici.",
   "debtsTotalSettled": "Total soldé",
   "debtsSettledCount": "{count, plural, =1{1 règlement enregistré} other{{count} règlements enregistrés}}",
   "@debtsSettledCount": {
@@ -701,10 +701,10 @@
   },
   "debtsSettledSection": "Historique des règlements",
   "debtsHistoryLoadError": "Impossible de charger l'historique.",
-  "debtsEmptySettledTitle": "Aucun règlement pour l'instant",
-  "debtsEmptySettledSubtitle": "Quand un crédit sera soldé, il apparaîtra ici.",
+  "debtsEmptySettledTitle": "Aucun règlement",
+  "debtsEmptySettledSubtitle": "Les crédits soldés apparaîtront ici.",
   "debtsSettleTitle": "Soldé la dette ?",
-  "debtsSettleBody": "Recevoir {amount} de {name} ? Une entrée sera enregistrée en caisse.",
+  "debtsSettleBody": "Recevoir {amount} de {name} ?",
   "@debtsSettleBody": {
     "placeholders": {
       "amount": {
@@ -728,7 +728,7 @@
     }
   },
   "debtsNotFound": "Cette dette n'est plus en attente.",
-  "debtsSettleError": "Impossible de solder la dette. Réessayez.",
+  "debtsSettleError": "Impossible de solder. Réessayez.",
   "debtsLate": "En retard",
   "debtsDueToday": "Échoit aujourd'hui",
   "debtsDueIn": "Dans {days, plural, =1{1 jour} other{{days} jours}}",
@@ -767,7 +767,7 @@
       }
     }
   },
-  "debtsPendingEntryError": "Crédit enregistré, mais la pendance dans Finances n'a pas pu être créée. Vérifiez les transactions.",
+  "debtsPendingEntryError": "Crédit enregistré, mais la pendance n'a pas pu être créée.",
   "debtsRegisterError": "Impossible d'enregistrer le crédit. Réessayez.",
   "debtsCustomerLinkLabel": "Client lié (facultatif)",
   "debtsNoCustomer": "Sans lien",
@@ -794,7 +794,7 @@
   "paymentFilterCard": "Carte",
   "paymentFilterAll": "Toutes",
   "salesStatusPaid": "Payée",
-  "salesHeaderTransactions": "{count, plural, =0{0 transaction} =1{1 transaction} other{{count} transactions}}",
+  "salesHeaderTransactions": "{count, plural, =0{0 transactions} =1{1 transaction} other{{count} transactions}}",
   "@salesHeaderTransactions": {
     "description": "Nombre de transactions du jour dans le résumé de l'écran des ventes",
     "placeholders": {
@@ -803,7 +803,7 @@
       }
     }
   },
-  "salesPdvCount": "{count, plural, =0{0 vente} =1{1 vente} other{{count} ventes}}",
+  "salesPdvCount": "{count, plural, =0{0 ventes} =1{1 vente} other{{count} ventes}}",
   "@salesPdvCount": {
     "description": "Nombre de ventes du jour dans l'en-tête du PDV plein écran",
     "placeholders": {
@@ -828,7 +828,7 @@
       }
     }
   },
-  "salesItemUnavailable": "Un article du panier n'est plus disponible. Réessayez.",
+  "salesItemUnavailable": "Article du panier indisponible. Réessayez.",
   "salesRegistered": "Vente enregistrée : {amount} !",
   "@salesRegistered": {
     "placeholders": {
@@ -885,7 +885,7 @@
   "salesStatusCancelled": "Annulée",
   "saleDetailCancelAction": "Annuler la vente",
   "saleDetailCancelConfirmTitle": "Annuler cette vente ?",
-  "saleDetailCancelConfirmBody": "Le stock des articles sera restitué et l'entrée en caisse sera annulée ({amount}). Cette action est irréversible.",
+  "saleDetailCancelConfirmBody": "Stock restitué et caisse annulée ({amount}).",
   "@saleDetailCancelConfirmBody": {
     "description": "Confirmation d'annulation de vente — avertit que le stock et la caisse seront annulés",
     "placeholders": {
@@ -924,10 +924,10 @@
       }
     }
   },
-  "adminTenantsEmpty": "Aucun tenant enregistré pour l'instant.",
+  "adminTenantsEmpty": "Aucun tenant enregistré.",
   "adminRequestsLoadError": "Impossible de charger les demandes.",
-  "adminNothingPendingTitle": "Rien en attente d'approbation",
-  "adminNothingPendingSubtitle": "Les nouvelles demandes de tenant apparaissent ici.",
+  "adminNothingPendingTitle": "Rien en attente",
+  "adminNothingPendingSubtitle": "Les nouvelles demandes apparaîtront ici.",
   "adminTenantsLoadError": "Impossible de charger les tenants.",
   "adminRejectError": "Impossible de rejeter la demande.",
   "adminApproveError": "Impossible d'approuver la demande.",
@@ -956,7 +956,7 @@
     }
   },
   "adminRejectReasonLabel": "Motif du rejet",
-  "adminRejectReasonHint": "Ex. : informations incomplètes lors de l'inscription",
+  "adminRejectReasonHint": "Ex. : informations incomplètes",
   "adminApprove": "Approuver",
   "adminReject": "Rejeter",
   "adminPlanLabel": "Forfait : {plan}",
@@ -982,7 +982,7 @@
   "adminPlanNewTooltip": "Nouveau forfait",
   "adminPlansLoadError": "Impossible de charger les forfaits.",
   "adminPlansEmptyTitle": "Aucun forfait créé",
-  "adminPlansEmptySubtitle": "Créez le premier forfait pour libérer les abonnements.",
+  "adminPlansEmptySubtitle": "Créez le premier forfait pour les abonnements.",
   "adminPlanInactive": "Inactif",
   "adminPlanDetails": "{price}/mois · {stores} magasin(s) · {employees} employé(s)",
   "@adminPlanDetails": {
@@ -1026,13 +1026,13 @@
   "adminPlanMaxStores": "Max. magasins",
   "adminPlanMaxEmployees": "Max. employés",
   "adminPlanActiveTitle": "Forfait actif",
-  "adminPlanActiveSubtitle": "Désactivez pour empêcher de nouveaux abonnements.",
+  "adminPlanActiveSubtitle": "Désactivez pour empêcher les nouveaux abonnements.",
   "adminPlanCreate": "Créer le forfait",
   "adminUpgradesTitle": "Évolutions de forfait",
   "adminUpgradesLoadError": "Impossible de charger les demandes d'évolution.",
   "adminUpgradesEmptyTitle": "Aucune évolution en attente",
-  "adminUpgradesEmptySubtitle": "Les demandes de changement de forfait apparaissent ici.",
-  "adminUpgradeApproved": "Évolution approuvée — forfait du tenant mis à jour !",
+  "adminUpgradesEmptySubtitle": "Les demandes de changement apparaissent ici.",
+  "adminUpgradeApproved": "Évolution approuvée — forfait mis à jour !",
   "adminUpgradeRejected": "Évolution rejetée.",
   "adminUpgradeProcessError": "Impossible de traiter la demande.",
   "adminPlanRequested": "Demandé",

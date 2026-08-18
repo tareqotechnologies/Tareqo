@@ -50,7 +50,7 @@ class _AdminPlansScreenState extends ConsumerState<AdminPlansScreen> {
  title: Text(
  l10n.adminPlansTitle,
  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -128,7 +128,7 @@ class _PlanTile extends StatelessWidget {
  child: Text(
  plan.name,
  style: theme.textTheme.titleSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ),

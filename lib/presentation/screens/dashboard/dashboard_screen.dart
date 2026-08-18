@@ -253,7 +253,7 @@ class DashboardScreen extends ConsumerWidget {
  style: theme.textTheme.labelSmall?.copyWith(
  color: theme.colorScheme.onSurfaceVariant,
  letterSpacing: 0.6,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(height: 2),
@@ -262,7 +262,7 @@ class DashboardScreen extends ConsumerWidget {
  maxLines: 1,
  overflow: TextOverflow.ellipsis,
  style: theme.textTheme.headlineMedium?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.6,
  ),
  ),
@@ -322,7 +322,7 @@ class DashboardScreen extends ConsumerWidget {
  child: Text(
  l10n.dashboardActivityTitle,
  style: theme.textTheme.titleLarge?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.3,
  ),
  ),
@@ -340,7 +340,7 @@ class DashboardScreen extends ConsumerWidget {
  l10n.dashboardActivityEvents(activity.length),
  style: theme.textTheme.labelSmall?.copyWith(
  color: theme.colorScheme.onSurfaceVariant,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ),
@@ -404,7 +404,7 @@ class _PeriodPill extends ConsumerWidget {
  period.label(l10n),
  style: theme.textTheme.labelLarge?.copyWith(
  color: theme.colorScheme.onSurface,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.2,
  ),
  ),
@@ -563,7 +563,7 @@ class _BalanceHero extends StatelessWidget {
  l10n.dashboardMetricCash,
  style: theme.textTheme.labelMedium?.copyWith(
  color: Colors.white.withValues(alpha: 0.8),
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  letterSpacing: 0.5,
  ),
  ),
@@ -580,7 +580,7 @@ class _BalanceHero extends StatelessWidget {
  maxLines: 1,
  style: theme.textTheme.displaySmall?.copyWith(
  color: cashNegative ? theme.expense : Colors.white,
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -1.2,
  height: 1.1,
  ),
@@ -670,7 +670,7 @@ class _HeroMetric extends StatelessWidget {
  overflow: TextOverflow.ellipsis,
  style: theme.textTheme.labelSmall?.copyWith(
  color: Colors.white.withValues(alpha: 0.6),
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  letterSpacing: 0.2,
  ),
  ),
@@ -683,7 +683,7 @@ class _HeroMetric extends StatelessWidget {
  maxLines: 1,
  style: theme.textTheme.titleLarge?.copyWith(
  color: Colors.white,
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.4,
  ),
  ),
@@ -696,7 +696,7 @@ class _HeroMetric extends StatelessWidget {
  overflow: TextOverflow.ellipsis,
  style: theme.textTheme.labelSmall?.copyWith(
  color: subtextColor ?? Colors.white.withValues(alpha: 0.6),
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ],
@@ -958,7 +958,7 @@ class _ActivityRow extends StatelessWidget {
  maxLines: 1,
  overflow: TextOverflow.ellipsis,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  const SizedBox(height: 2),
@@ -995,7 +995,7 @@ class _ActivityRow extends StatelessWidget {
  maxLines: 1,
  style: theme.textTheme.labelSmall?.copyWith(
  color: const Color(0xFF101413),
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  )
@@ -1007,7 +1007,7 @@ class _ActivityRow extends StatelessWidget {
  ? theme.textTheme.bodyMedium
  : theme.textTheme.labelMedium)
  ?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  color: item.amountColor ?? item.badgeColor,
  fontFeatures: const [
  FontFeature.tabularFigures(),

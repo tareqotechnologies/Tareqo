@@ -117,7 +117,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
  Text(
  l10n.debtsTitle,
  style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  ),
  ),
@@ -168,7 +168,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
  theme.colorScheme.onPrimaryContainer,
  foregroundColor: theme.colorScheme.onSurfaceVariant,
  textStyle: theme.textTheme.labelLarge?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  segments: [
@@ -458,7 +458,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
  cents: valueCents,
  style: theme.textTheme.headlineMedium?.copyWith(
  color: color,
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  letterSpacing: -0.5,
  fontFeatures: const [FontFeature.tabularFigures()],
  ),
@@ -484,7 +484,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
  '$statValue',
  style: theme.textTheme.headlineSmall?.copyWith(
  color: statColor,
- fontWeight: FontWeight.w700,
+ fontWeight: FontWeight.w500,
  ),
  ),
  ],
@@ -562,7 +562,7 @@ class _DebtCard extends StatelessWidget {
  Text(
  debt.personName,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  StatusChip(label: chipLabel, color: chipColor),
@@ -588,7 +588,7 @@ class _DebtCard extends StatelessWidget {
  cents: debt.amountCents,
  alignment: Alignment.centerRight,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  fontFeatures: const [FontFeature.tabularFigures()],
  ),
  ),
@@ -645,7 +645,7 @@ class _SettledDebtCard extends StatelessWidget {
  Text(
  debt.personName,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  ),
  ),
  StatusChip(
@@ -678,7 +678,7 @@ class _SettledDebtCard extends StatelessWidget {
  cents: debt.amountCents,
  alignment: Alignment.centerRight,
  style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  fontFeatures: const [FontFeature.tabularFigures()],
  ),
  ),

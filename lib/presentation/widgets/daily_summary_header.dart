@@ -183,7 +183,7 @@ class _DeltaPill extends StatelessWidget {
  overflow: TextOverflow.ellipsis,
  style: TextStyle(
  fontSize: 12,
- fontWeight: FontWeight.w600,
+ fontWeight: FontWeight.w500,
  color: color,
  // Percentuais (+25% / -10%) alinhados dígito a dígito.
  fontFeatures: [FontFeature.tabularFigures()],

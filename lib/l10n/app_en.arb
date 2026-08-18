@@ -2,8 +2,8 @@
   "@@locale": "en",
   "appTitle": "Dumbhanengue ERP",
   "onboardingTitle": "Welcome!",
-  "onboardingHeading": "Activate your business in the ERP",
-  "onboardingSubtitle": "Choose a plan, enter your business name and set the currency and language. Your access will be granted after approval (within 24h).",
+  "onboardingHeading": "Set up your business",
+  "onboardingSubtitle": "Choose a plan, name and currency. Approval within 24h.",
   "onboardingBusinessLabel": "Business name",
   "onboardingBusinessError": "Enter your business name.",
   "onboardingPlanLabel": "Choose a plan",
@@ -43,28 +43,28 @@
   "currencyUsd": "US Dollar (USD)",
   "currencyEur": "Euro (EUR)",
   "currencyMzn": "Mozambican Metical (MZN)",
-  "settingsSave": "Save settings",
+  "settingsSave": "Save",
   "settingsSaved": "Settings saved!",
-  "settingsGenericError": "Could not save the settings. Try again.",
+  "settingsGenericError": "Could not save settings. Try again.",
   "settingsSupportSection": "Support",
   "settingsSupportEntry": "Help and documentation",
-  "settingsSupportEntryHint": "User Guide and Troubleshooting — offline reading",
+  "settingsSupportEntryHint": "User Guide and Troubleshooting — offline",
   "supportTitle": "Help",
-  "supportSubtitle": "Everything you need to get the most out of the app: the complete user guide and answers to the most common problems.",
+  "supportSubtitle": "User guide and troubleshooting.",
   "supportUserGuide": "User Guide",
-  "supportUserGuideHint": "Simple and complete manual: sign-in, stores, products (with photos), sales, credit, finances, cash closing, reports and FAQ",
+  "supportUserGuideHint": "Sign-in, stores, products, sales, credit, finance and reports",
   "supportTroubleshooting": "Troubleshooting",
-  "supportTroubleshootingHint": "Solving common problems: sign-in, photos, sales, stock, cash, connection and error messages",
-  "supportReadingError": "Could not open the document. Try again.",
+  "supportTroubleshootingHint": "Common issues: sign-in, sales, stock and connection",
+  "supportReadingError": "Could not open the document.",
   "commonSearch": "Search...",
   "commonRetry": "Try again",
   "commonSignOut": "Sign out",
   "appSheetClose": "Close",
   "storeSwitcherTooltip": "Switch store",
   "storeSelectorSectionTitle": "Active store",
-  "storeSelectorSectionHint": "Choose the store whose data appears across modules (sales, stock, financial).",
+  "storeSelectorSectionHint": "Choose the active store.",
   "tenantPendingTitle": "Waiting for approval",
-  "tenantPendingSubtitle": "The access request for \"{business}\" was sent successfully. The super admin will review it and you will get access within 24h.",
+  "tenantPendingSubtitle": "Request for \"{business}\" sent. Wait up to 24h.",
   "@tenantPendingSubtitle": {
     "placeholders": {
       "business": {
@@ -72,9 +72,9 @@
       }
     }
   },
-  "tenantPendingHint": "Once approved, you will be able to create stores, hire employees and start operating.",
+  "tenantPendingHint": "Once approved, create stores and start operating.",
   "tenantRejectedTitle": "Request rejected",
-  "tenantRejectedSubtitle": "The access request for \"{business}\" was not approved.",
+  "tenantRejectedSubtitle": "The request for \"{business}\" was not approved.",
   "@tenantRejectedSubtitle": {
     "placeholders": {
       "business": {
@@ -83,11 +83,11 @@
     }
   },
   "authBlockedTitle": "Access suspended",
-  "authBlockedMessage": "Your employee account was deactivated by the business owner. If you have questions, please contact them.",
+  "authBlockedMessage": "Your account was deactivated by the owner.",
   "authBlockedSignOut": "Sign out",
-  "authErrorRestoreSession": "Could not restore your session",
+  "authErrorRestoreSession": "Session not restored",
   "authErrorCheckConnection": "Check your connection and try again.",
-  "authErrorLoadAccount": "Could not load your account",
+  "authErrorLoadAccount": "Account not loaded",
   "splashLoading": "Opening your session…",
   "loginSubtitleSignUp": "Create your account to get started",
   "loginSubtitleSignIn": "Simple management for your business",
@@ -97,8 +97,8 @@
   "loginPasswordLabel": "Password",
   "loginPasswordError": "Password must be at least 8 characters.",
   "loginPasswordHint": "Min. 8 characters with lowercase, uppercase, number and symbol.",
-  "loginWeakPasswordError": "Password must include lowercase, uppercase, numbers and symbols.",
-  "loginRateLimitError": "Too many attempts in a row. Please wait about an hour and try again.",
+  "loginWeakPasswordError": "Password must include letters, numbers and symbols.",
+  "loginRateLimitError": "Too many attempts. Wait 1 hour and try again.",
   "loginShowPassword": "Show password",
   "loginHidePassword": "Hide password",
   "loginConfirmLabel": "Confirm password",
@@ -110,12 +110,12 @@
   "loginSignUpSuccess": "Account created! Confirm your email to sign in.",
   "loginSignUpError": "Could not create the account. Try again.",
   "loginSignInError": "Could not sign in. Check your email and password.",
-  "loginSecurityNote": "Your data is protected with encryption.",
+  "loginSecurityNote": "Data protected with encryption.",
   "loginForgotPassword": "Forgot your password?",
   "forgotPasswordTitle": "Reset password",
-  "forgotPasswordHint": "Enter your account email. We'll send a link so you can create a new password.",
+  "forgotPasswordHint": "Enter your email. We'll send a reset link.",
   "forgotPasswordSubmit": "Send link",
-  "forgotPasswordSent": "If an account exists for this email, we've sent a link to reset your password.",
+  "forgotPasswordSent": "If an account exists, we've sent a link.",
   "forgotPasswordError": "Could not send the link. Try again.",
   "setNewPasswordTitle": "Set a new password",
   "setNewPasswordHint": "Min. 8 characters with lowercase, uppercase, number and symbol.",
@@ -162,7 +162,7 @@
     }
   },
   "syncNow": "Sync now",
-  "syncOfflineSaved": "No connection. The operation was saved and will sync automatically.",
+  "syncOfflineSaved": "No connection. Saved — will sync automatically.",
   "syncDone": "{count, plural, =1{1 operation synced} other{{count} operations synced}}",
   "@syncDone": {
     "placeholders": {
@@ -171,7 +171,7 @@
       }
     }
   },
-  "syncStillOffline": "No connection — operations remain pending.",
+  "syncStillOffline": "No connection — operations pending.",
   "dashboardGreeting": "Hello, {name}",
   "@dashboardGreeting": {
     "placeholders": {
@@ -204,7 +204,7 @@
   "dashboardRecentPurchases": "Recent purchases",
   "dashboardNoPurchases": "No purchases yet — record your first one!",
   "dashboardLowStock": "Low stock",
-  "dashboardKpisError": "Couldn't load the indicators.",
+  "dashboardKpisError": "Could not load indicators.",
   "dashboardActivityTitle": "Today's activity",
   "dashboardActivityEvents": "{count, plural, =1{1 event} other{{count} events}}",
   "dashboardActivityMinutesAgo": "{count} min ago",
@@ -295,8 +295,8 @@
   "roleEmployee": "Employee",
   "employeeActive": "Active",
   "employeeInactive": "Inactive",
-  "employeeDeactivateConfirm": "Deactivate {name}? The employee loses access immediately and cannot sell until reactivated.",
-  "employeeReactivateConfirm": "Reactivate {name}? The employee gets store access again.",
+  "employeeDeactivateConfirm": "Deactivate {name}? Loses access immediately.",
+  "employeeReactivateConfirm": "Reactivate {name}? Gets store access again.",
   "employeeDeactivated": "Employee deactivated.",
   "employeeReactivated": "Employee reactivated.",
   "employeeDeactivateAction": "Deactivate",
@@ -354,14 +354,14 @@
   "addEmployeeStoreLabel": "Store",
   "addEmployeeNoStores": "Create a store before adding employees.",
   "addEmployeeRoleLabel": "Role",
-  "addEmployeeSuccess": "Employee registered! The access account was created.",
-  "addEmployeeError": "Could not register the employee. Check if the email is already in use.",
+  "addEmployeeSuccess": "Employee registered! Access account created.",
+  "addEmployeeError": "Could not register. Check if the email is in use.",
   "addEmployeeSubmit": "Register employee",
   "upgradeTitle": "Plan upgrade",
-  "upgradeSubtitle": "Choose the new plan. The super admin will need to approve the request before the plan changes.",
-  "upgradeMaxReached": "You are already on the highest available plan.",
+  "upgradeSubtitle": "Choose the new plan. Awaits super admin approval.",
+  "upgradeMaxReached": "You are already on the highest plan.",
   "upgradeChooseError": "Choose the target plan.",
-  "upgradeSuccess": "Upgrade request sent! The super admin will review it.",
+  "upgradeSuccess": "Upgrade request sent!",
   "upgradeError": "Could not send the request. Try again.",
   "upgradeSubmit": "Request upgrade",
   "commonCancel": "Cancel",
@@ -380,8 +380,8 @@
   "paymentCreditCard": "Credit card",
   "paymentEMola": "E-Mola",
   "paymentMPesa": "M-Pesa",
-  "paymentTransfer": "Bank transfer",
-  "purchasesSearchHint": "Search purchase...",
+  "paymentTransfer": "Transfer",
+  "purchasesSearchHint": "Search purchases...",
   "productsFilterTooltip": "Filter products",
   "productsFilterAll": "All",
   "productsFilterAllCount": "All · {count}",
@@ -404,7 +404,7 @@
   "productsColPrice": "Price · Stock",
   "productsSearchHint": "Search product...",
   "productsLoadError": "Could not load the products.",
-  "productsEmptyTitle": "No products registered",
+  "productsEmptyTitle": "No products yet",
   "productsEmptySubtitle": "Tap \"New product\" to get started.",
   "productsAddNew": "New product",
   "productsBuySell": "Buy: {buy} · Sell: {sell}",
@@ -419,7 +419,7 @@
     }
   },
   "productsAdded": "Product added!",
-  "productsAddedNoPhoto": "Product added! (photo not uploaded — storage permission missing)",
+  "productsAddedNoPhoto": "Product added! (no storage permission)",
   "productsAddError": "Could not add the product. Try again.",
   "productsNameError": "Enter the product name.",
   "productsDescriptionLabel": "Description (optional)",
@@ -433,7 +433,7 @@
   "productsEditTitle": "Edit product",
   "productsEditSubmit": "Save changes",
   "productsEditSaved": "Product updated!",
-  "productsEditSavedNoPhoto": "Product updated! (photo not uploaded — storage permission missing)",
+  "productsEditSavedNoPhoto": "Product updated! (no storage permission)",
   "productsEditError": "Could not update the product. Try again.",
   "productsPhotoLabel": "Product photo",
   "productsPhotoTake": "Take photo",
@@ -442,9 +442,9 @@
   "productsInactive": "Inactive",
   "productsFilterInactive": "Inactive",
   "productsActiveLabel": "Active product",
-  "productsActiveHint": "Deactivate to remove the product from the POS and purchases (stock is preserved).",
-  "productsStockAdjustHint": "Manual adjustment: sets the exact stock, creating/consuming FIFO lots.",
-  "productsSectionInfo": "Details",
+  "productsActiveHint": "Disable to remove from POS and purchases.",
+  "productsStockAdjustHint": "Manual adjustment: sets exact stock (FIFO).",
+  "productsSectionInfo": "Info",
   "productsSectionPricing": "Pricing",
   "productsSectionStock": "Stock",
   "productsSectionStatus": "Status",
@@ -460,7 +460,7 @@
   "customersColContact": "Contact / Credit",
   "customersSearchHint": "Search customer...",
   "customersLoadError": "Could not load the customers.",
-  "customersEmptyTitle": "No customers registered",
+  "customersEmptyTitle": "No customers yet",
   "customersEmptySubtitle": "Tap \"New customer\" to get started.",
   "customersAddNew": "New customer",
   "customersCreditLabel": "Credit {amount}",
@@ -487,11 +487,11 @@
   "purchasesTitle": "Purchases",
   "purchasesAddNew": "New purchase",
   "purchasesLoadError": "Could not load the purchases.",
-  "purchasesEmptyTitle": "No purchases registered",
-  "purchasesEmptySubtitle": "Tap \"New purchase\" to record incoming goods and restock.",
+  "purchasesEmptyTitle": "No purchases yet",
+  "purchasesEmptySubtitle": "Tap \"New purchase\" to record.",
   "purchasesHeaderCount": "{count, plural, =0{0 purchases} =1{1 purchase} other{{count} purchases}}",
   "@purchasesHeaderCount": {
-    "description": "Today's purchase count in the purchases screen summary",
+    "description": "Number of today's purchases in the purchases screen summary",
     "placeholders": {
       "count": {
         "type": "int"
@@ -512,11 +512,11 @@
     }
   },
   "purchasesEmptyFilteredTitle": "No purchases found",
-  "purchasesEmptyFilteredSubtitle": "Adjust the search or the filters.",
+  "purchasesEmptyFilteredSubtitle": "Adjust the search or filters.",
   "purchasesClearFilters": "Clear filters",
-  "purchasesSupplierError": "Enter the purchase supplier.",
-  "purchasesCartItemUnavailable": "A cart item is no longer available. Try again.",
-  "purchasesRegistered": "Purchase registered: {amount}!",
+  "purchasesSupplierError": "Enter the supplier.",
+  "purchasesCartItemUnavailable": "Cart item no longer available. Try again.",
+  "purchasesRegistered": "Purchase recorded: {amount}!",
   "@purchasesRegistered": {
     "placeholders": {
       "amount": {
@@ -524,7 +524,7 @@
       }
     }
   },
-  "purchasesProductNotFound": "Product {id} not found in the catalog.",
+  "purchasesProductNotFound": "Product {id} not found in catalog.",
   "@purchasesProductNotFound": {
     "placeholders": {
       "id": {
@@ -593,9 +593,9 @@
   "financialLoadError": "Could not load the transactions.",
   "financialCashFlowError": "Could not load the cash flow.",
   "financialEmptyTitle": "No transactions",
-  "financialEmptySubtitle": "Record cash income and expenses to track the cash flow.",
-  "financialReceivePendingTitle": "Receive pending amount?",
-  "financialReceivePendingBody": "Confirm receiving {amount}? The transaction will count in the realized cash.",
+  "financialEmptySubtitle": "Record income and expenses to track cash flow.",
+  "financialReceivePendingTitle": "Receive pending?",
+  "financialReceivePendingBody": "Confirm receipt of {amount}?",
   "@financialReceivePendingBody": {
     "placeholders": {
       "amount": {
@@ -605,10 +605,10 @@
   },
   "financialReceive": "Receive",
   "financialReceived": "Transaction received!",
-  "financialReceiveError": "Could not receive the pending amount. Try again.",
+  "financialReceiveError": "Could not receive. Try again.",
   "financialPay": "Pay",
-  "financialPayPendingTitle": "Pay pending amount?",
-  "financialPayPendingBody": "Confirm paying {amount}? The transaction will count in the realized cash.",
+  "financialPayPendingTitle": "Pay pending?",
+  "financialPayPendingBody": "Confirm payment of {amount}?",
   "@financialPayPendingBody": {
     "placeholders": {
       "amount": {
@@ -617,32 +617,32 @@
     }
   },
   "financialPaid": "Expense paid!",
-  "financialPayError": "Could not pay the pending amount. Try again.",
-  "financialAddTitle": "Register transaction",
+  "financialPayError": "Could not pay. Try again.",
+  "financialAddTitle": "Record transaction",
   "financialIncomingType": "Income",
   "financialOutgoingType": "Expense",
   "financialDescriptionLabel": "Description",
-  "financialDescriptionError": "Enter a description.",
+  "financialDescriptionError": "Enter the description.",
   "financialCategoryLabel": "Category (optional)",
   "financialAmountLabel": "Amount",
   "financialAmountError": "Enter an amount greater than zero.",
   "financialPendingLabel": "Pending (credit)",
-  "financialPendingHint": "Does not count in realized cash until received.",
-  "financialRegistered": "Transaction registered!",
-  "financialRegisterError": "Could not register the transaction. Try again.",
+  "financialPendingHint": "Not counted in cash until received.",
+  "financialRegistered": "Transaction recorded!",
+  "financialRegisterError": "Could not record. Try again.",
   "financialDefaultCategoryIncome": "Sales",
   "financialDefaultCategoryExpense": "Expenses",
   "cashClosingAction": "Cash closing",
   "cashClosingTitle": "Daily cash closing",
-  "cashClosingDaySummary": "Daily summary",
-  "cashClosingTotalSales": "Day sales",
+  "cashClosingDaySummary": "Day summary",
+  "cashClosingTotalSales": "Today's sales",
   "cashClosingExpectedCash": "Expected in drawer",
-  "cashClosingExpectedCashHint": "Cash sales only — card, M-Pesa, E-Mola and transfer do not go through the physical drawer.",
+  "cashClosingExpectedCashHint": "Cash sales only.",
   "cashClosingByMethod": "By payment method",
-  "cashClosingCountedCash": "Counted cash",
-  "cashClosingCountedCashHint": "Count the physical cash in the drawer and enter it here.",
+  "cashClosingCountedCash": "Cash counted",
+  "cashClosingCountedCashHint": "Count the cash in the drawer and enter here.",
   "cashClosingDifference": "Difference",
-  "cashClosingConfers": "Drawer matches",
+  "cashClosingConfers": "Cash matches",
   "cashClosingSurplus": "Surplus of {amount}",
   "@cashClosingSurplus": {
     "placeholders": {
@@ -664,12 +664,12 @@
   "cashClosingClosedAt": "Closed at",
   "cashClosingSuccess": "Cash closed!",
   "cashClosingUpdated": "Closing updated!",
-  "cashClosingError": "Could not close the cash register. Try again.",
-  "cashClosingEmpty": "No sales recorded on this day.",
+  "cashClosingError": "Could not close the cash. Try again.",
+  "cashClosingEmpty": "No sales recorded this day.",
   "cashClosingHistory": "Closing history",
   "cashClosingHistoryEmpty": "No closings recorded yet.",
-  "debtsTitle": "Credit (credit sales)",
-  "debtsHeaderSubtitle": "Receivables and payables",
+  "debtsTitle": "Credit",
+  "debtsHeaderSubtitle": "Credit to receive and pay",
   "debtsAddDebt": "Register credit",
   "debtsSearchHint": "Search by customer name...",
   "debtsTabPending": "Pending",
@@ -689,7 +689,7 @@
   "debtsPendingSection": "Pending debts",
   "debtsLoadError": "Could not load the debts.",
   "debtsEmptyPendingTitle": "No pending credit",
-  "debtsEmptyPendingSubtitle": "When a customer buys on credit, the debt appears here.",
+  "debtsEmptyPendingSubtitle": "Pending credit will appear here.",
   "debtsTotalSettled": "Total settled",
   "debtsSettledCount": "{count, plural, =1{1 settlement recorded} other{{count} settlements recorded}}",
   "@debtsSettledCount": {
@@ -702,9 +702,9 @@
   "debtsSettledSection": "Settlement history",
   "debtsHistoryLoadError": "Could not load the history.",
   "debtsEmptySettledTitle": "No settlements yet",
-  "debtsEmptySettledSubtitle": "When credit is settled, it appears here.",
+  "debtsEmptySettledSubtitle": "Settled credit will appear here.",
   "debtsSettleTitle": "Settle debt?",
-  "debtsSettleBody": "Receive {amount} from {name}? A cash income entry will be recorded.",
+  "debtsSettleBody": "Receive {amount} from {name}?",
   "@debtsSettleBody": {
     "placeholders": {
       "amount": {
@@ -716,7 +716,7 @@
     }
   },
   "debtsSettle": "Settle",
-  "debtsSettled": "{name}'s credit settled — {amount} in cash.",
+  "debtsSettled": "Credit from {name} settled — {amount} in cash.",
   "@debtsSettled": {
     "placeholders": {
       "name": {
@@ -728,8 +728,8 @@
     }
   },
   "debtsNotFound": "This debt is no longer pending.",
-  "debtsSettleError": "Could not settle the debt. Try again.",
-  "debtsLate": "Late",
+  "debtsSettleError": "Could not settle. Try again.",
+  "debtsLate": "Overdue",
   "debtsDueToday": "Due today",
   "debtsDueIn": "In {days, plural, =1{1 day} other{{days} days}}",
   "@debtsDueIn": {
@@ -739,7 +739,7 @@
       }
     }
   },
-  "debtsDueAgo": "Due {days, plural, =1{1 day ago} other{{days} days ago}}",
+  "debtsDueAgo": "Overdue by {days, plural, =1{1 day} other{{days} days}}",
   "@debtsDueAgo": {
     "placeholders": {
       "days": {
@@ -767,7 +767,7 @@
       }
     }
   },
-  "debtsPendingEntryError": "Credit registered, but the pending entry in Finance could not be created. Check the transactions.",
+  "debtsPendingEntryError": "Credit registered, but pending transaction could not be created.",
   "debtsRegisterError": "Could not register the credit. Try again.",
   "debtsCustomerLinkLabel": "Linked customer (optional)",
   "debtsNoCustomer": "No link",
@@ -778,7 +778,7 @@
   "salesNewSale": "New sale",
   "salesCartSection": "Cart · {count, plural, =1{1 item} other{{count} items}}",
   "@salesCartSection": {
-    "description": "Header of the cart items section in the fullscreen point-of-sale",
+    "description": "Cart items section header in fullscreen POS",
     "placeholders": {
       "count": {
         "type": "int"
@@ -786,8 +786,8 @@
     }
   },
   "salesLoadError": "Could not load the sales.",
-  "salesEmptyTitle": "No sales registered",
-  "salesEmptySubtitle": "Tap \"New sale\" to record your first one.",
+  "salesEmptyTitle": "No sales yet",
+  "salesEmptySubtitle": "Tap \"New sale\" to record your first.",
   "salesSearchHint": "Search sales...",
   "periodYesterday": "Yesterday",
   "periodWeek": "This week",
@@ -796,7 +796,7 @@
   "salesStatusPaid": "Paid",
   "salesHeaderTransactions": "{count, plural, =0{0 transactions} =1{1 transaction} other{{count} transactions}}",
   "@salesHeaderTransactions": {
-    "description": "Today's transaction count in the sales screen summary",
+    "description": "Number of today's transactions in the sales screen summary",
     "placeholders": {
       "count": {
         "type": "int"
@@ -805,7 +805,7 @@
   },
   "salesPdvCount": "{count, plural, =0{0 sales} =1{1 sale} other{{count} sales}}",
   "@salesPdvCount": {
-    "description": "Today's sale count in the fullscreen point-of-sale header",
+    "description": "Number of today's sales in the fullscreen POS header",
     "placeholders": {
       "count": {
         "type": "int"
@@ -814,11 +814,11 @@
   },
   "salesHeaderVsYesterday": "vs yesterday",
   "salesEmptyFilteredTitle": "No sales found",
-  "salesEmptyFilteredSubtitle": "Adjust your search or filters.",
+  "salesEmptyFilteredSubtitle": "Adjust the search or filters.",
   "salesClearFilters": "Clear filters",
   "salesFilteredSummary": "{count, plural, =1{1 sale} other{{count} sales}} · Total {total}",
   "@salesFilteredSummary": {
-    "description": "Summary line when a filter is active on the sales list",
+    "description": "Summary line when a filter is active in the sales list",
     "placeholders": {
       "count": {
         "type": "int"
@@ -828,8 +828,8 @@
       }
     }
   },
-  "salesItemUnavailable": "A cart item is no longer available. Try again.",
-  "salesRegistered": "Sale registered: {amount}!",
+  "salesItemUnavailable": "Cart item no longer available. Try again.",
+  "salesRegistered": "Sale recorded: {amount}!",
   "@salesRegistered": {
     "placeholders": {
       "amount": {
@@ -848,7 +848,7 @@
       }
     }
   },
-  "salesStockFor": "of {name}",
+  "salesStockFor": "for {name}",
   "@salesStockFor": {
     "placeholders": {
       "name": {
@@ -881,13 +881,13 @@
   "saleDetailTotalLabel": "Sale total",
   "saleDetailItems": "Items",
   "saleDetailTotal": "Total",
-  "saleDetailSnapshot": "Prices frozen at the time of the sale.",
+  "saleDetailSnapshot": "Prices frozen at time of sale.",
   "salesStatusCancelled": "Cancelled",
   "saleDetailCancelAction": "Cancel sale",
   "saleDetailCancelConfirmTitle": "Cancel this sale?",
-  "saleDetailCancelConfirmBody": "Item stock will be returned and the cash entry reversed ({amount}). This action cannot be undone.",
+  "saleDetailCancelConfirmBody": "Stock will be restored and cash reversed ({amount}).",
   "@saleDetailCancelConfirmBody": {
-    "description": "Sale cancellation confirmation — warns that stock and cash will be reversed",
+    "description": "Sale cancellation confirmation — warns stock and cash will be reversed",
     "placeholders": {
       "amount": {
         "type": "String"
@@ -895,7 +895,7 @@
     }
   },
   "saleDetailCancelConfirm": "Yes, cancel",
-  "saleDetailCancelledAt": "Cancelled on",
+  "saleDetailCancelledAt": "Cancelled at",
   "saleCancelledSuccess": "Sale cancelled.",
   "saleNotFoundError": "This sale no longer exists.",
   "saleCancelError": "Could not cancel the sale. Try again.",
@@ -916,7 +916,7 @@
   "adminTenantsTitle": "Tenants",
   "adminPendingOnly": "Pending",
   "adminAll": "All",
-  "adminAwaitingCount": "{count} waiting for approval",
+  "adminAwaitingCount": "{count} awaiting approval",
   "@adminAwaitingCount": {
     "placeholders": {
       "count": {
@@ -926,12 +926,12 @@
   },
   "adminTenantsEmpty": "No tenants registered yet.",
   "adminRequestsLoadError": "Could not load the requests.",
-  "adminNothingPendingTitle": "Nothing waiting for approval",
-  "adminNothingPendingSubtitle": "New tenant requests appear here.",
+  "adminNothingPendingTitle": "Nothing pending",
+  "adminNothingPendingSubtitle": "New requests will appear here.",
   "adminTenantsLoadError": "Could not load the tenants.",
   "adminRejectError": "Could not reject the request.",
   "adminApproveError": "Could not approve the request.",
-  "adminAccessApproved": "Access for {name} approved!",
+  "adminAccessApproved": "{name}'s access approved!",
   "@adminAccessApproved": {
     "placeholders": {
       "name": {
@@ -939,7 +939,7 @@
       }
     }
   },
-  "adminRequestRejected": "Request for {name} rejected.",
+  "adminRequestRejected": "{name}'s request rejected.",
   "@adminRequestRejected": {
     "placeholders": {
       "name": {
@@ -956,7 +956,7 @@
     }
   },
   "adminRejectReasonLabel": "Rejection reason",
-  "adminRejectReasonHint": "E.g. incomplete registration info",
+  "adminRejectReasonHint": "e.g. incomplete registration info",
   "adminApprove": "Approve",
   "adminReject": "Reject",
   "adminPlanLabel": "Plan: {plan}",
@@ -984,7 +984,7 @@
   "adminPlansEmptyTitle": "No plans created",
   "adminPlansEmptySubtitle": "Create the first plan to enable subscriptions.",
   "adminPlanInactive": "Inactive",
-  "adminPlanDetails": "{price}/month · {stores} store(s) · {employees} employee(s)",
+  "adminPlanDetails": "{price}/mo · {stores} store(s) · {employees} employee(s)",
   "@adminPlanDetails": {
     "placeholders": {
       "price": {
@@ -1000,8 +1000,8 @@
   },
   "adminPlanNameError": "Enter the plan name.",
   "adminPlanPriceError": "Enter a valid price (≥ 0).",
-  "adminPlanStoresError": "The plan must allow at least 1 store.",
-  "adminPlanEmployeesError": "The plan must allow at least 1 employee.",
+  "adminPlanStoresError": "Plan must allow at least 1 store.",
+  "adminPlanEmployeesError": "Plan must allow at least 1 employee.",
   "adminPlanCreated": "Plan {name} created!",
   "@adminPlanCreated": {
     "placeholders": {
@@ -1023,39 +1023,39 @@
   "adminPlanEditTitle": "Edit plan",
   "adminPlanNameLabel": "Plan name",
   "adminPlanPriceLabel": "Monthly price",
-  "adminPlanMaxStores": "Max stores",
-  "adminPlanMaxEmployees": "Max employees",
+  "adminPlanMaxStores": "Max. stores",
+  "adminPlanMaxEmployees": "Max. employees",
   "adminPlanActiveTitle": "Active plan",
-  "adminPlanActiveSubtitle": "Deactivate to prevent new subscriptions.",
+  "adminPlanActiveSubtitle": "Disable to prevent new subscriptions.",
   "adminPlanCreate": "Create plan",
   "adminUpgradesTitle": "Plan upgrades",
   "adminUpgradesLoadError": "Could not load the upgrade requests.",
   "adminUpgradesEmptyTitle": "No pending upgrades",
   "adminUpgradesEmptySubtitle": "Plan change requests appear here.",
-  "adminUpgradeApproved": "Upgrade approved — tenant plan updated!",
+  "adminUpgradeApproved": "Upgrade approved — plan updated!",
   "adminUpgradeRejected": "Upgrade rejected.",
   "adminUpgradeProcessError": "Could not process the request.",
   "adminPlanRequested": "Requested",
   "adminPlanCurrent": "Current",
   "productsCodeLabel": "Barcode (PLU)",
-  "productsCodeHint": "Label scale code (e.g. 12345)",
+  "productsCodeHint": "Label scales (e.g. 12345)",
   "productsCodeError": "Invalid code: use up to 5 digits.",
   "productsWeighLabel": "Sell by weight (fraction)",
   "productsWeighHint": "Accepts decimal quantities (e.g. 1.75 kg)",
-  "productsUnitLabel": "Sale unit",
-  "productsExpiryLabel": "Expiry",
-  "productsExpiryAdd": "Set expiry date",
-  "productsExpiryHelp": "Product expiry date",
-  "productsExpiryClear": "Clear expiry date",
+  "productsUnitLabel": "Unit of sale",
   "productsStockWeightHint": "In sale units (e.g. 1.75)",
+  "productsExpiryLabel": "Expiry",
+  "productsExpiryAdd": "Set expiry",
+  "productsExpiryHelp": "Product expiry date",
+  "productsExpiryClear": "Remove expiry",
   "salesBarcodeLabel": "Barcode",
-  "salesBarcodeHint": "Scale labels and PLUs — camera or USB scanner",
+  "salesBarcodeHint": "Scale labels and PLUs — camera or USB reader",
   "salesBarcodeScan": "Scan with camera",
-  "salesBarcodeNotFound": "No product found for this code.",
-  "salesBarcodeInvalid": "Invalid scale barcode.",
+  "salesBarcodeNotFound": "Product not found for this code.",
+  "salesBarcodeInvalid": "Invalid scale code.",
   "salesStockLimit": "Stock limit reached for {product}.",
   "@salesStockLimit": {
-    "description": "Error adding more than the available stock",
+    "description": "Error when adding more than available stock",
     "placeholders": {
       "product": {
         "type": "String"
@@ -1065,12 +1065,12 @@
   "salesQuantityLabel": "Quantity",
   "salesQuantityHint": "Quantity (e.g. 1.75)",
   "purchasesExpiryLabel": "Expiry",
-  "purchasesExpiryAdd": "Set expiry date",
-  "purchasesExpiryHelp": "Lot expiry date",
+  "purchasesExpiryAdd": "Set expiry",
+  "purchasesExpiryHelp": "Batch expiry date",
   "dashboardExpiryAlerts": "Expiry",
   "dashboardExpiredIn": "Expired {days} day(s) ago",
   "@dashboardExpiredIn": {
-    "description": "Expired lot — days since expiry",
+    "description": "Expired batch — days since expiry",
     "placeholders": {
       "days": {
         "type": "int"
@@ -1079,7 +1079,7 @@
   },
   "dashboardExpiresIn": "Expires in {days} day(s)",
   "@dashboardExpiresIn": {
-    "description": "Expiring lot — days remaining",
+    "description": "Expiring batch — days remaining",
     "placeholders": {
       "days": {
         "type": "int"
