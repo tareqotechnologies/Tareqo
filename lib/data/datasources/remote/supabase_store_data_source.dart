@@ -23,17 +23,23 @@ final class StoreSupabaseDataSourceImpl implements StoreLocalDataSource {
  .order('created_at', ascending: true)
  .limit(SupabaseQueryLimits.pageSize);
  return List.unmodifiable([for (final row in rows) _map(row)]);
- }
+ }  @override
+  Future<void> add(Store store) async {
+    await supabaseClient.from(_table).insert({
+      'id': store.id,
+      'tenant_id': store.tenantId,
+      'name': store.name,
+      'address': store.address,
+    });
+  }
 
- @override
- Future<void> add(Store store) async {
- await supabaseClient.from(_table).insert({
- 'id': store.id,
- 'tenant_id': store.tenantId,
- 'name': store.name,
- 'address': store.address,
- });
- }
+  @override
+  Future<void> update(Store store) async {
+    await supabaseClient.from(_table).update({
+      'name': store.name,
+      'address': store.address,
+    }).eq('id', store.id);
+  }
 
  Store _map(Map<String, dynamic> row) => Store(
  id: row['id'] as String,

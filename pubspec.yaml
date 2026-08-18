@@ -74,6 +74,18 @@ dependencies:
   image_picker: ^1.2.3
   flutter_markdown: ^0.7.7+1
 
+  # Autenticação biométrica (W10 — auditoria 2026-08)
+  local_auth: ^2.3.0
+  local_auth_android: ^1.0.46
+  local_auth_darwin: ^1.2.8
+
+  # MFA/TOTP + QR code para configurar autenticador
+  otp: ^3.1.1
+  qr_flutter: ^4.1.0
+
+  # Criptografia AES-GCM para cifrar payloads offline (auditoria 2026-08)
+  cryptography: ^2.7.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -144,7 +156,7 @@ flutter_launcher_icons:
   image_path: "assets/branding/icon_legacy.png"
   # Fundo BRANCO do adaptativo — a mesma cara do .ico oficial (fundo branco
   # + logotipo azul no foreground, keyado).
-  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_background: "#15803D"
   adaptive_icon_foreground: "assets/branding/icon_fg.png"
   adaptive_icon_monochrome: "assets/branding/icon_mono.png"
   remove_alpha_ios: true

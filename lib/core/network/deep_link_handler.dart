@@ -20,59 +20,76 @@ import '../observability/crash_reporting.dart';
 /// - iOS: `Info.plist` (`CFBundleURLTypes` → `dumbhanengue`);
 /// - Supabase: `site_url` = `dumbhanengue://callback` (Authentication).
 abstract final class DeepLinkHandler {
- static AppLinks? _appLinks;
- static bool _listening = false;
+  /// Scheme do app registrado no AndroidManifest.xml / Info.plist.
+  static const String _scheme = 'dumbhanengue';
 
- /// Inicia o listener de deep links (chamado no [AuthGate]). Idempotente.
- ///
- /// Todo o corpo é protegido: em testes de widget o plugin não tem
- /// plataforma (MissingPluginException) e não deve quebrar o fluxo.
- static Future<void> init() async {
- if (!SupabaseConfig.isConfigured || _listening) return;
- try {
- final appLinks = _appLinks ??= AppLinks();
+  /// Host de callback do gotrue (OAuth PKCE / magic link).
+  static const String _callbackHost = 'callback';
 
- // Cold start: o app foi ABERTO pelo link (getInitialLink). Entrega a
- // URI ao gotrue para concluir a confirmação/exchange do PKCE.
- final initialUri = await appLinks.getInitialLink();
- if (initialUri != null) {
- await Supabase.instance.client.auth.getSessionFromUrl(initialUri);
- }
+  /// Valida se [uri] é um deep link de autenticação legítimo.
+  ///
+  /// Aceita apenas `dumbhanengue://callback?code=...` ou
+  /// `dumbhanengue://callback?error=...`. Qualquer outro scheme ou host
+  /// é rejeitado — protege contra hijack de scheme (auditoria 2026-08, V12).
+  static bool isAuthCallbackUri(Uri uri) {
+    return uri.scheme == _scheme && uri.host == _callbackHost;
+  }
 
- // Warm start: o app já estava aberto e o link foi tocado.
- appLinks.uriLinkStream.listen(
- (uri) async {
- try {
- await Supabase.instance.client.auth.getSessionFromUrl(uri);
- } catch (error, stackTrace) {
- CrashReporting.capture(
- error,
- stackTrace,
- hint: 'Deep link de autenticação (stream)',
- );
- }
- },
- // Erro no STREAM em si (canal da plataforma): sem handler vira um
- // erro de zona não tratado — loga e segue.
- onError: (Object error, StackTrace stackTrace) {
- CrashReporting.capture(
- error,
- stackTrace,
- hint: 'Deep link de autenticação (stream error)',
- );
- },
- );
+  static AppLinks? _appLinks;
+  static bool _listening = false;
 
- // Só marca como ativo DEPOIS do listener registrado: uma falha no
- // primeiro init (ex.: em testes, sem Supabase.initialize) não deixa
- // a flag presa e uma nova chamada pode tentar de novo.
- _listening = true;
- } catch (error, stackTrace) {
- CrashReporting.capture(
- error,
- stackTrace,
- hint: 'Deep link de autenticação (init)',
- );
- }
- }
+  /// Inicia o listener de deep links (chamado no [AuthGate]). Idempotente.
+  ///
+  /// Todo o corpo é protegido: em testes de widget o plugin não tem
+  /// plataforma (MissingPluginException) e não deve quebrar o fluxo.
+  static Future<void> init() async {
+    if (!SupabaseConfig.isConfigured || _listening) return;
+    try {
+      final appLinks = _appLinks ??= AppLinks();
+
+      // Cold start: o app foi ABERTO pelo link (getInitialLink). Entrega a
+      // URI ao gotrue para concluir a confirmação/exchange do PKCE —
+      // apenas se for callback legítimo (auditoria 2026-08, V12).
+      final initialUri = await appLinks.getInitialLink();
+      if (initialUri != null && isAuthCallbackUri(initialUri)) {
+        await Supabase.instance.client.auth.getSessionFromUrl(initialUri);
+      }
+
+      // Warm start: o app já estava aberto e o link foi tocado.
+      appLinks.uriLinkStream.listen(
+        (uri) async {
+          if (!isAuthCallbackUri(uri)) return;
+          try {
+            await Supabase.instance.client.auth.getSessionFromUrl(uri);
+          } catch (error, stackTrace) {
+            CrashReporting.capture(
+              error,
+              stackTrace,
+              hint: 'Deep link de autenticação (stream)',
+            );
+          }
+        },
+        // Erro no STREAM em si (canal da plataforma): sem handler vira um
+        // erro de zona não tratado — loga e segue.
+        onError: (Object error, StackTrace stackTrace) {
+          CrashReporting.capture(
+            error,
+            stackTrace,
+            hint: 'Deep link de autenticação (stream error)',
+          );
+        },
+      );
+
+      // Só marca como ativo DEPOIS do listener registrado: uma falha no
+      // primeiro init (ex.: em testes, sem Supabase.initialize) não deixa
+      // a flag presa e uma nova chamada pode tentar de novo.
+      _listening = true;
+    } catch (error, stackTrace) {
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Deep link de autenticação (init)',
+      );
+    }
+  }
 }

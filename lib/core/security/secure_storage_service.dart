@@ -9,10 +9,17 @@ abstract final class SecureStorageKeys {
  static const String accessToken = 'access_token';
 
  /// Token de renovação da sessão.
- static const String refreshToken = 'refresh_token';
+ static const String refreshToken = 'refresh_token';  /// Chave de API de serviços externos (ex.: gateway de pagamento).
+  static const String apiKey = 'api_key';
 
- /// Chave de API de serviços externos (ex.: gateway de pagamento).
- static const String apiKey = 'api_key';
+  /// Flag de ativação da autenticação biométrica (fingerprint/face).
+  static const String biometricEnabled = 'biometric_enabled';
+
+  /// Flag de ativação de MFA/TOTP.
+  static const String mfaEnabled = 'mfa_enabled';
+
+  /// Segredo TOTP (Base32) para gerar/verificar códigos de 6 dígitos.
+  static const String mfaSecret = 'mfa_secret';
 }
 
 /// Backend de armazenamento criptografado (abstraído para testes).

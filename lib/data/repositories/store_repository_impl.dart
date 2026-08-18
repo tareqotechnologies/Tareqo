@@ -10,8 +10,9 @@ final class StoreRepositoryImpl implements IStoreRepository {
 
  @override
  Future<List<Store>> getByTenant(String tenantId) =>
- _localDataSource.getByTenant(tenantId);
+ _localDataSource.getByTenant(tenantId);  @override
+  Future<void> add(Store store) => _localDataSource.add(store);
 
- @override
- Future<void> add(Store store) => _localDataSource.add(store);
+  @override
+  Future<void> update(Store store) => _localDataSource.update(store);
 }

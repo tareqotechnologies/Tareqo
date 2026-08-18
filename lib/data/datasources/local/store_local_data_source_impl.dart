@@ -10,10 +10,14 @@ final class StoreLocalDataSourceImpl implements StoreLocalDataSource {
  @override
  Future<List<Store>> getByTenant(String tenantId) async => List.unmodifiable(
  _stores.where((store) => store.tenantId == tenantId),
- );
+ );  @override
+  Future<void> add(Store store) async {
+    _stores.add(store);
+  }
 
- @override
- Future<void> add(Store store) async {
- _stores.add(store);
- }
+  @override
+  Future<void> update(Store store) async {
+    final index = _stores.indexWhere((s) => s.id == store.id);
+    if (index != -1) _stores[index] = store;
+  }
 }
