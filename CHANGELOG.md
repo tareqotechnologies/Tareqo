@@ -19,7 +19,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) �
 - **Estado vazio imune a overflow** em telas com altura apertada (`EmptyState` agora rola em vez de estourar).
 
 ### Documentação e ferramentas
-- **Docs limpas**: todos os emojis removidos de docs (pt/en/fr), READMEs, CHANGELOG, comentários de código e workflows (ferramenta `tool/strip_emojis.py` — idempotente, mantém símbolos tipográficos ✓/✗/setas; callouts ⚠️ viram `**Atenção:**`/`**Warning:**`/`**Attention :**` localizados); referências a ferramentas de IA removidas (incluindo caminho de origem do `apply_official_icon.py`, agora parametrizado por CLI).
+- **Docs limpas**: todos os emojis removidos de docs (pt/en/fr), READMEs, CHANGELOG, comentários de código e workflows (ferramenta `tool/strip_emojis.py` — idempotente, mantém símbolos tipográficos ✓/✗/setas; callouts de aviso viram `**Atenção:**`/`**Warning:**`/`**Attention :**` localizados); referências a ferramentas de IA removidas (incluindo caminho de origem do `apply_official_icon.py`, agora parametrizado por CLI).
 
 ## [1.2.0+4] — 2026-08-16
 
