@@ -7,16 +7,16 @@ import '../entities/cash_closing.dart';
 /// UPSERT — refazer o fecho do mesmo dia atualiza o registro (corrigindo
 /// a contagem física), nunca duplica.
 abstract interface class ICashClosingRepository {
-  /// Retorna o fecho do dia [day] da loja [storeId], ou `null` se o dia
-  /// ainda não foi fechado.
-  Future<CashClosing?> getByDay({
-    required String storeId,
-    required DateTime day,
-  });
+ /// Retorna o fecho do dia [day] da loja [storeId], ou `null` se o dia
+ /// ainda não foi fechado.
+ Future<CashClosing?> getByDay({
+ required String storeId,
+ required DateTime day,
+ });
 
-  /// Registra (ou atualiza) o fecho do dia — UPSERT por `(store_id, day)`.
-  Future<void> save(CashClosing closing);
+ /// Registra (ou atualiza) o fecho do dia — UPSERT por `(store_id, day)`.
+ Future<void> save(CashClosing closing);
 
-  /// Histórico de fechos da loja [storeId] (mais recentes primeiro).
-  Future<List<CashClosing>> getAll({required String storeId});
+ /// Histórico de fechos da loja [storeId] (mais recentes primeiro).
+ Future<List<CashClosing>> getAll({required String storeId});
 }

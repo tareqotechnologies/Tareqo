@@ -135,11 +135,24 @@
   "securityChangePassword": "Change password",
   "securityChangePasswordHint": "Update your account password",
   "appNavHome": "Home",
-  "appNavProducts": "Products",
   "appNavSales": "Sales",
+  "appNavWallet": "Wallet",
+  "appNavMenu": "Menu",
+  "appNavProducts": "Products",
   "appNavFinancial": "Finance",
   "appNavCredit": "Credit",
   "appNavCustomers": "Customers",
+  "fabMenuTitle": "New action",
+  "fabMenuSubtitle": "What would you like to do?",
+  "fabMenuNewSale": "New sale",
+  "fabMenuNewSaleHint": "Cart · stock deduction · cash",
+  "fabMenuExpense": "Register expense",
+  "fabMenuExpenseHint": "Cash outflow with category",
+  "fabMenuAddProduct": "Add product",
+  "fabMenuAddProductHint": "Catalog · price · initial stock",
+  "fabMenuAddDebt": "Register credit",
+  "fabMenuAddDebtHint": "Receivable or payable",
+  "fabMenuCancel": "Cancel",
   "syncPendingCount": "{count, plural, =1{1 operation awaiting sync} other{{count} operations awaiting sync}}",
   "@syncPendingCount": {
     "placeholders": {
@@ -159,7 +172,7 @@
     }
   },
   "syncStillOffline": "No connection — operations remain pending.",
-  "dashboardGreeting": "Hello, {name} 👋",
+  "dashboardGreeting": "Hello, {name}",
   "@dashboardGreeting": {
     "placeholders": {
       "name": {
@@ -191,6 +204,65 @@
   "dashboardRecentPurchases": "Recent purchases",
   "dashboardNoPurchases": "No purchases yet — record your first one!",
   "dashboardLowStock": "Low stock",
+  "dashboardKpisError": "Couldn't load the indicators.",
+  "dashboardActivityTitle": "Today's activity",
+  "dashboardActivityEvents": "{count, plural, =1{1 event} other{{count} events}}",
+  "dashboardActivityMinutesAgo": "{count} min ago",
+  "dashboardActivityHoursAgo": "{count} h ago",
+  "dashboardDateToday": "Today",
+  "dashboardMetricSales": "Sales",
+  "dashboardMetricCash": "Cash",
+  "dashboardMetricReceivables": "Receivables",
+  "dashboardFiadoCount": "{count, plural, =1{1 tab} other{{count} tabs}}",
+  "@dashboardFiadoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardActivityEmpty": "No activity recorded yet.",
+  "dashboardActivitySeeAll": "View all",
+  "dashboardStockEntry": "Stock · {product}",
+  "@dashboardStockEntry": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardStockEntryDetail": "Inflow of {quantity} · {time}",
+  "@dashboardStockEntryDetail": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardFiadoPayment": "Credit payment",
+  "dashboardExpenseRow": "Expense · {description}",
+  "@dashboardExpenseRow": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardLowStockDetail": "{name} · {quantity} left",
+  "@dashboardLowStockDetail": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardAlertBadge": "Alert",
   "dashboardSaleItems": "{count, plural, =1{1 item} other{{count} items}}",
   "@dashboardSaleItems": {
     "placeholders": {
@@ -311,6 +383,25 @@
   "paymentTransfer": "Bank transfer",
   "purchasesSearchHint": "Search purchase...",
   "productsFilterTooltip": "Filter products",
+  "productsFilterAll": "All",
+  "productsFilterAllCount": "All · {count}",
+  "@productsFilterAllCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsFilterLowCount": "Low stock · {count}",
+  "@productsFilterLowCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsColProduct": "Product / SKU",
+  "productsColPrice": "Price · Stock",
   "productsSearchHint": "Search product...",
   "productsLoadError": "Could not load the products.",
   "productsEmptyTitle": "No products registered",
@@ -349,6 +440,7 @@
   "productsPhotoGallery": "From gallery",
   "productsPhotoRemove": "Remove photo",
   "productsInactive": "Inactive",
+  "productsFilterInactive": "Inactive",
   "productsActiveLabel": "Active product",
   "productsActiveHint": "Deactivate to remove the product from the POS and purchases (stock is preserved).",
   "productsStockAdjustHint": "Manual adjustment: sets the exact stock, creating/consuming FIFO lots.",
@@ -356,6 +448,16 @@
   "productsSectionPricing": "Pricing",
   "productsSectionStock": "Stock",
   "productsSectionStatus": "Status",
+  "customersHeaderCount": "{count, plural, =1{1 customer} other{{count} customers}}",
+  "@customersHeaderCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "customersColCustomer": "Customer",
+  "customersColContact": "Contact / Credit",
   "customersSearchHint": "Search customer...",
   "customersLoadError": "Could not load the customers.",
   "customersEmptyTitle": "No customers registered",
@@ -410,7 +512,7 @@
     }
   },
   "purchasesEmptyFilteredTitle": "No purchases found",
-  "purchasesEmptyFilteredSubtitle": "Adjust the period filter.",
+  "purchasesEmptyFilteredSubtitle": "Adjust the search or the filters.",
   "purchasesClearFilters": "Clear filters",
   "purchasesSupplierError": "Enter the purchase supplier.",
   "purchasesCartItemUnavailable": "A cart item is no longer available. Try again.",
@@ -485,8 +587,11 @@
   "financialIncome": "Income",
   "financialExpense": "Expenses",
   "financialBalance": "Balance",
+  "financialPeriodBalance": "Period balance",
+  "financialSwipeHint": "Swipe for expenses →",
   "financialTransactions": "Transactions",
   "financialLoadError": "Could not load the transactions.",
+  "financialCashFlowError": "Could not load the cash flow.",
   "financialEmptyTitle": "No transactions",
   "financialEmptySubtitle": "Record cash income and expenses to track the cash flow.",
   "financialReceivePendingTitle": "Receive pending amount?",
@@ -564,11 +669,14 @@
   "cashClosingHistory": "Closing history",
   "cashClosingHistoryEmpty": "No closings recorded yet.",
   "debtsTitle": "Credit (credit sales)",
+  "debtsHeaderSubtitle": "Receivables and payables",
   "debtsAddDebt": "Register credit",
   "debtsSearchHint": "Search by customer name...",
   "debtsTabPending": "Pending",
   "debtsTabSettled": "Settled",
   "debtsTotalPending": "Total to receive",
+  "debtsOverdueStat": "Overdue",
+  "debtsSettledStat": "Settled",
   "debtsNoPendingCustomers": "No pending customers",
   "debtsPendingCustomers": "{count, plural, =1{1 pending customer} other{{count} pending customers}}",
   "@debtsPendingCustomers": {
@@ -580,8 +688,8 @@
   },
   "debtsPendingSection": "Pending debts",
   "debtsLoadError": "Could not load the debts.",
-  "debtsEmptyPendingTitle": "No pending credit 🎉",
-  "debtsEmptyPendingSubtitle": "No customer owes anything right now.",
+  "debtsEmptyPendingTitle": "No pending credit",
+  "debtsEmptyPendingSubtitle": "When a customer buys on credit, the debt appears here.",
   "debtsTotalSettled": "Total settled",
   "debtsSettledCount": "{count, plural, =1{1 settlement recorded} other{{count} settlements recorded}}",
   "@debtsSettledCount": {
@@ -631,6 +739,15 @@
       }
     }
   },
+  "debtsDueAgo": "Due {days, plural, =1{1 day ago} other{{days} days ago}}",
+  "@debtsDueAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsDueTodayDesc": "Due today",
   "debtsSettleAction": "Settle debt",
   "debtsSettledLabel": "Settled",
   "debtsSettledOn": "Settled on {date}",
@@ -659,6 +776,15 @@
   "debtsDueDateLabel": "Due date",
   "salesTitle": "Sales",
   "salesNewSale": "New sale",
+  "salesCartSection": "Cart · {count, plural, =1{1 item} other{{count} items}}",
+  "@salesCartSection": {
+    "description": "Header of the cart items section in the fullscreen point-of-sale",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "salesLoadError": "Could not load the sales.",
   "salesEmptyTitle": "No sales registered",
   "salesEmptySubtitle": "Tap \"New sale\" to record your first one.",
@@ -666,10 +792,20 @@
   "periodYesterday": "Yesterday",
   "periodWeek": "This week",
   "paymentFilterCard": "Card",
+  "paymentFilterAll": "All",
   "salesStatusPaid": "Paid",
   "salesHeaderTransactions": "{count, plural, =0{0 transactions} =1{1 transaction} other{{count} transactions}}",
   "@salesHeaderTransactions": {
     "description": "Today's transaction count in the sales screen summary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "salesPdvCount": "{count, plural, =0{0 sales} =1{1 sale} other{{count} sales}}",
+  "@salesPdvCount": {
+    "description": "Today's sale count in the fullscreen point-of-sale header",
     "placeholders": {
       "count": {
         "type": "int"
@@ -913,6 +1049,7 @@
   "productsExpiryClear": "Clear expiry date",
   "productsStockWeightHint": "In sale units (e.g. 1.75)",
   "salesBarcodeLabel": "Barcode",
+  "salesBarcodeHint": "Scale labels and PLUs — camera or USB scanner",
   "salesBarcodeScan": "Scan with camera",
   "salesBarcodeNotFound": "No product found for this code.",
   "salesBarcodeInvalid": "Invalid scale barcode.",

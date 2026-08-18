@@ -7,12 +7,12 @@ import 'add_plan_use_case.dart';
 /// Aplica as mesmas validações de criação ([validatePlan]) antes de
 /// persistir — sem nunca inserir (o UPDATE não deve chamar o INSERT).
 class UpdatePlanUseCase {
-  const UpdatePlanUseCase(this._repository);
+ const UpdatePlanUseCase(this._repository);
 
-  final IPlanRepository _repository;
+ final IPlanRepository _repository;
 
-  Future<void> call(Plan plan) async {
-    validatePlan(plan);
-    await _repository.update(plan);
-  }
+ Future<void> call(Plan plan) async {
+ validatePlan(plan);
+ await _repository.update(plan);
+ }
 }

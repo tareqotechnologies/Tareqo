@@ -6,10 +6,10 @@ import '../datasources/remote/supabase_sale_data_source.dart';
 /// que executa venda + itens + estoque + caixa em uma única transação no
 /// banco (ver `supabase/schema.sql`).
 final class SupabaseSaleProcessor implements ISaleAtomicProcessor {
-  const SupabaseSaleProcessor(this._dataSource);
+ const SupabaseSaleProcessor(this._dataSource);
 
-  final SaleSupabaseDataSourceImpl _dataSource;
+ final SaleSupabaseDataSourceImpl _dataSource;
 
-  @override
-  Future<void> process(Sale sale) => _dataSource.processSale(sale);
+ @override
+ Future<void> process(Sale sale) => _dataSource.processSale(sale);
 }

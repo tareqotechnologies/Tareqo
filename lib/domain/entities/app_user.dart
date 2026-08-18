@@ -9,11 +9,11 @@ part 'app_user.g.dart';
 /// o domínio e a UI não dependam do provedor de autenticação.
 @freezed
 abstract class AppUser with _$AppUser {
-  const factory AppUser({
-    required String id,
-    required String email,
-    @Default('') String fullName,
-  }) = _AppUser;
+ const factory AppUser({
+ required String id,
+ required String email,
+ @Default('') String fullName,
+ }) = _AppUser;
 
-  factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
+ factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
 }

@@ -6,12 +6,12 @@ import '../repositories/i_financial_transaction_repository.dart';
 /// pendente (ex.: fiado) passa a contar no caixa realizado quando é
 /// recebida. Usado pela tela de Financeiro no botão "Receber".
 class MarkTransactionAsPaidUseCase {
-  const MarkTransactionAsPaidUseCase(this._repository);
+ const MarkTransactionAsPaidUseCase(this._repository);
 
-  final IFinancialTransactionRepository _repository;
+ final IFinancialTransactionRepository _repository;
 
-  /// Marca a transação [transactionId] da loja [storeId] como paga — a
-  /// baixa é escopada pela loja (não alcança transação de outra loja).
-  Future<void> call(String transactionId, {required String storeId}) =>
-      _repository.markAsPaid(transactionId, storeId: storeId);
+ /// Marca a transação [transactionId] da loja [storeId] como paga — a
+ /// baixa é escopada pela loja (não alcança transação de outra loja).
+ Future<void> call(String transactionId, {required String storeId}) =>
+ _repository.markAsPaid(transactionId, storeId: storeId);
 }

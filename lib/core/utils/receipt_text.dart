@@ -13,76 +13,76 @@ import 'quantity.dart';
 /// itens com `quantidade × unitário = subtotal`, total, pagamento e
 /// agradecimento) — se um lado mudar, o outro deve mudar junto.
 abstract final class ReceiptText {
-  /// Monta o recibo em texto. [storeName]/[storeAddress] (opcionais) formam
-  /// o cabeçalho do estabelecimento; vendas anuladas ganham a marca
-  /// `(ANULADA)` ao lado do título.
-  static String build({
-    required Sale sale,
-    String? storeName,
-    String? storeAddress,
-    required String language,
-  }) {
-    final buffer = StringBuffer();
-    final cancelled = sale.status == SaleStatus.cancelled;
+ /// Monta o recibo em texto. [storeName]/[storeAddress] (opcionais) formam
+ /// o cabeçalho do estabelecimento; vendas anuladas ganham a marca
+ /// `(ANULADA)` ao lado do título.
+ static String build({
+ required Sale sale,
+ String? storeName,
+ String? storeAddress,
+ required String language,
+ }) {
+ final buffer = StringBuffer();
+ final cancelled = sale.status == SaleStatus.cancelled;
 
-    // Cabeçalho do estabelecimento (nome + endereço, se disponíveis).
-    if (storeName != null && storeName.trim().isNotEmpty) {
-      buffer.writeln(storeName.toUpperCase());
-      if (storeAddress != null && storeAddress.trim().isNotEmpty) {
-        buffer.writeln(storeAddress);
-      }
-      buffer.writeln();
-    }
+ // Cabeçalho do estabelecimento (nome + endereço, se disponíveis).
+ if (storeName != null && storeName.trim().isNotEmpty) {
+ buffer.writeln(storeName.toUpperCase());
+ if (storeAddress != null && storeAddress.trim().isNotEmpty) {
+ buffer.writeln(storeAddress);
+ }
+ buffer.writeln();
+ }
 
-    buffer.writeln(switch (language) {
-      'en' => 'SALE RECEIPT',
-      'fr' => 'REÇU DE VENTE',
-      _ => 'RECIBO DE VENDA',
-    });
-    final saleLabel = Formatters.saleLabel(sale.number);
-    buffer.writeln(
-      '${switch (language) {
-        'en' => 'Sale',
-        'fr' => 'Vente',
-        _ => 'Venda',
-      }} $saleLabel — ${Formatters.dateTime(sale.dateTime)}',
-    );
-    if (cancelled) {
-      buffer.writeln(switch (language) {
-        'en' => '(CANCELLED)',
-        'fr' => '(ANNULÉE)',
-        _ => '(ANULADA)',
-      });
-    }
-    buffer.writeln();
+ buffer.writeln(switch (language) {
+ 'en' => 'SALE RECEIPT',
+ 'fr' => 'REÇU DE VENTE',
+ _ => 'RECIBO DE VENDA',
+ });
+ final saleLabel = Formatters.saleLabel(sale.number);
+ buffer.writeln(
+ '${switch (language) {
+ 'en' => 'Sale',
+ 'fr' => 'Vente',
+ _ => 'Venda',
+ }} $saleLabel — ${Formatters.dateTime(sale.dateTime)}',
+ );
+ if (cancelled) {
+ buffer.writeln(switch (language) {
+ 'en' => '(CANCELLED)',
+ 'fr' => '(ANNULÉE)',
+ _ => '(ANULADA)',
+ });
+ }
+ buffer.writeln();
 
-    for (final item in sale.items) {
-      buffer.writeln(item.productName);
-      final qty = Quantity.format(item.quantity, language: language);
-      final unit = Formatters.currency(item.unitPriceCents);
-      final subtotal = Formatters.currency(
-        Quantity.lineTotal(item.quantity, item.unitPriceCents),
-      );
-      buffer.writeln('  $qty × $unit = $subtotal');
-    }
-    buffer.writeln();
+ for (final item in sale.items) {
+ buffer.writeln(item.productName);
+ final qty = Quantity.format(item.quantity, language: language);
+ final unit = Formatters.currency(item.unitPriceCents);
+ final subtotal = Formatters.currency(
+ Quantity.lineTotal(item.quantity, item.unitPriceCents),
+ );
+ buffer.writeln(' $qty × $unit = $subtotal');
+ }
+ buffer.writeln();
 
-    buffer.writeln('Total: ${Formatters.currency(sale.totalAmountCents)}');
-    buffer.writeln(
-      '${switch (language) {
-        'en' => 'Payment',
-        'fr' => 'Paiement',
-        _ => 'Pagamento',
-      }}: '
-      '${TransactionDescriptions.paymentMethodName(language, sale.paymentMethod)}',
-    );
-    buffer.writeln();
-    buffer.writeln(switch (language) {
-      'en' => 'Thank you for your purchase!',
-      'fr' => 'Merci de votre achat !',
-      _ => 'Obrigado pela preferência!',
-    });
+ buffer.writeln('Total: ${Formatters.currency(sale.totalAmountCents)}');
+ buffer.writeln(
+ '${switch (language) {
+ 'en' => 'Payment',
+ 'fr' => 'Paiement',
+ _ => 'Pagamento',
+ }}: '
+ '${TransactionDescriptions.paymentMethodName(language, sale.paymentMethod)}',
+ );
+ buffer.writeln();
+ buffer.writeln(switch (language) {
+ 'en' => 'Thank you for your purchase!',
+ 'fr' => 'Merci de votre achat !',
+ _ => 'Obrigado pela preferência!',
+ });
 
-    return buffer.toString();
-  }
+ return buffer.toString();
+ }
 }

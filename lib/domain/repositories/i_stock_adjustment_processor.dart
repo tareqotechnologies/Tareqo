@@ -9,15 +9,15 @@
 /// [IUnitOfWork] e [FifoStockUseCase], e este contrato fica sem implementação
 /// registrada.
 abstract interface class IStockAdjustmentProcessor {
-  /// Define a quantidade em estoque do produto [productId] da loja
-  /// [storeId] para [newQuantity] milésimos, ajustando os lotes FIFO na
-  /// MESMA transação (a invariante `stock = Σ lotes` nunca quebra).
-  ///
-  /// Lança exceções de domínio equivalentes às do caminho composto
-  /// (ex.: produto inexistente) — o caso de uso traduz para a UI.
-  Future<void> adjustStock(
-    String productId,
-    int newQuantity, {
-    required String storeId,
-  });
+ /// Define a quantidade em estoque do produto [productId] da loja
+ /// [storeId] para [newQuantity] milésimos, ajustando os lotes FIFO na
+ /// MESMA transação (a invariante `stock = Σ lotes` nunca quebra).
+ ///
+ /// Lança exceções de domínio equivalentes às do caminho composto
+ /// (ex.: produto inexistente) — o caso de uso traduz para a UI.
+ Future<void> adjustStock(
+ String productId,
+ int newQuantity, {
+ required String storeId,
+ });
 }

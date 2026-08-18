@@ -2,7 +2,7 @@
 
 > Glossaire des termes techniques utilisés dans la documentation, avec l'équivalent dans les trois langues : **portugais** (variante utilisée dans les docs — pt-BR), **anglais** et **français**. Les entrées suivent l'usage réel des chapitres (`docs/pt/`, `docs/en/`, `docs/fr/`).
 >
-> 🌐 [Glossário em português →](../pt/GLOSSARIO.md) · [Glossary in English →](../en/GLOSSARY.md) · Version française (cette page).
+> [Glossário em português →](../pt/GLOSSARIO.md) · [Glossary in English →](../en/GLOSSARY.md) · Version française (cette page).
 
 ## 1. Métier (domaine)
 
@@ -50,7 +50,7 @@
 | transferência bancária | bank transfer | virement |
 | M-Pesa | M-Pesa | M-Pesa |
 | E-Mola | E-Mola | E-Mola |
-| metical (MTn) | metical (MTn) | metical (MTn) |
+| metical (MZN) | metical (MZN) | metical (MZN) |
 | centavos | cents | centimes |
 
 ## 3. Accès et rôles

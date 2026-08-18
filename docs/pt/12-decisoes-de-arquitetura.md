@@ -19,35 +19,35 @@ Ao separar o código em três camadas — **domain** (entidades, contratos de re
 
 ```
 lib/
-├── main.dart                    # Bootstrap: ProviderScope (Riverpod) + GetIt
-├── app.dart                     # Widget raiz (MaterialApp, tema, locale/moeda do tenant)
+├── main.dart # Bootstrap: ProviderScope (Riverpod) + GetIt
+├── app.dart # Widget raiz (MaterialApp, tema, locale/moeda do tenant)
 │
-├── core/                        # Preocupações transversais (não pertencem a nenhuma camada)
-│   ├── config/                  # Configuração (Supabase, preferências do tenant)
-│   ├── database/                # Abertura do SQLite, schema e transações (Unit of Work)
-│   ├── di/                      # Service Locator (GetIt) — registro central de dependências
-│   ├── i18n/                    # Chaves de tradução e helpers de localização
-│   ├── security/                # Armazenamento seguro (Keychain/Keystore)
-│   ├── theme/                   # Tema Material 3 da aplicação
-│   └── utils/                   # Helpers genéricos (formatação de moeda/data, ids...)
+├── core/ # Preocupações transversais (não pertencem a nenhuma camada)
+│ ├── config/ # Configuração (Supabase, preferências do tenant)
+│ ├── database/ # Abertura do SQLite, schema e transações (Unit of Work)
+│ ├── di/ # Service Locator (GetIt) — registro central de dependências
+│ ├── i18n/ # Chaves de tradução e helpers de localização
+│ ├── security/ # Armazenamento seguro (Keychain/Keystore)
+│ ├── theme/ # Tema Material 3 da aplicação
+│ └── utils/ # Helpers genéricos (formatação de moeda/data, ids...)
 │
-├── domain/                      # NÚCLEO: regras de negócio puras, sem dependências externas
-│   ├── entities/                # Entidades imutáveis (Product, Sale, Tenant...) via Freezed
-│   ├── repositories/            # Contratos abstratos (interfaces) de persistência (ex.: IProductRepository)
-│   └── usecases/                # Casos de uso — orquestram as regras de negócio
+├── domain/ # NÚCLEO: regras de negócio puras, sem dependências externas
+│ ├── entities/ # Entidades imutáveis (Product, Sale, Tenant...) via Freezed
+│ ├── repositories/ # Contratos abstratos (interfaces) de persistência (ex.: IProductRepository)
+│ └── usecases/ # Casos de uso — orquestram as regras de negócio
 │
-├── data/                        # Implementações concretas do que o domínio define
-│   ├── datasources/
-│   │   ├── remote/              # Fontes de dados remotas (Supabase/REST)
-│   │   └── local/               # Fontes de dados locais (SQLite, memória)
-│   ├── models/                  # DTOs serializáveis — criados apenas quando o formato da API diverge do domínio
-│   ├── repositories/            # Implementações das interfaces do domínio
-│   └── services/                # Serviços de integração (contas de funcionário, processadores atômicos)
+├── data/ # Implementações concretas do que o domínio define
+│ ├── datasources/
+│ │ ├── remote/ # Fontes de dados remotas (Supabase/REST)
+│ │ └── local/ # Fontes de dados locais (SQLite, memória)
+│ ├── models/ # DTOs serializáveis — criados apenas quando o formato da API diverge do domínio
+│ ├── repositories/ # Implementações das interfaces do domínio
+│ └── services/ # Serviços de integração (contas de funcionário, processadores atômicos)
 │
-└── presentation/                # Tudo que o usuário vê e interage
-    ├── controllers/             # Estado: providers/notifiers do Riverpod
-    ├── screens/                 # Telas por módulo (auth, dashboard, produtos, vendas, financeiro...)
-    └── widgets/                 # Widgets compartilhados (KpiCard, EmptyState, StatusChip, AppSheet...)
+└── presentation/ # Tudo que o usuário vê e interage
+ ├── controllers/ # Estado: providers/notifiers do Riverpod
+ ├── screens/ # Telas por módulo (auth, dashboard, produtos, vendas, financeiro...)
+ └── widgets/ # Widgets compartilhados (KpiCard, EmptyState, StatusChip, AppSheet...)
 ```
 
 > **Regra de Dependência:** o fluxo de dependências aponta sempre para dentro. `presentation → domain` (via contratos), `data → domain` (implementa contratos), e o `domain` não conhece nenhuma das outras camadas.
@@ -90,9 +90,9 @@ A migração para SQLite foi concluída seguindo a **Inversão de Dependência**
 // lib/core/di/service_locator.dart — persistência ativa
 final database = await AppDatabase.openAppDatabase();
 if (database != null) {
-  _registerSqlitePersistence(database);   // SQLite (plataformas nativas)
+ _registerSqlitePersistence(database); // SQLite (plataformas nativas)
 } else {
-  _registerInMemoryPersistence();         // fallback: web / falha da lib nativa
+ _registerInMemoryPersistence(); // fallback: web / falha da lib nativa
 }
 ```
 
@@ -119,13 +119,13 @@ O fluxo de dependências aponta **sempre para dentro**:
 
 ```
 ProductListScreen (widget)
-      ↓ ref.watch
+ ↓ ref.watch
 productsProvider (provider)
-      ↓ ref.read
+ ↓ ref.read
 getProductsUseCaseProvider → GetProductsUseCase (domínio)
-      ↓
+ ↓
 IProductRepository (contrato do domínio)
-      ↓ (implementação injetada via GetIt no bootstrap)
+ ↓ (implementação injetada via GetIt no bootstrap)
 ProductRepositoryImpl → ProductLocalDataSource (camada data)
 ```
 
@@ -214,8 +214,8 @@ O controle de crédito responde à pergunta mais importante do pequeno comercian
 ### Estrutura
 
 - **`Debt` (dívida/fiado)** — registro de promessa de pagamento com `personName`, `amount`, `dueDate` e `isCustomerDebt`:
-  - `isCustomerDebt: true` → **a receber** (o cliente deve ao comerciante);
-  - `isCustomerDebt: false` → **a pagar** (o comerciante deve ao fornecedor).
+ - `isCustomerDebt: true` → **a receber** (o cliente deve ao comerciante);
+ - `isCustomerDebt: false` → **a pagar** (o comerciante deve ao fornecedor).
 - **`GetPendingDebtsUseCase`** — filtra e lista apenas o que está **a receber de clientes**, respondendo *"quanto tenho para receber e de quem"* de forma imediata.
 - **`FinancialTransaction.status`** (`paid`/`pending`) — separa o dinheiro que **já entrou no caixa** daquele que é apenas **expectativa de entrada**. Ao registrar um fiado, o `AddDebtUseCase` cria a pendência vinculada na hora (`debtId`): entrada pendente para contas a receber e saída pendente para contas a pagar. Pendências também podem ser criadas na tela de Financeiro (switch "Pendente (fiado)"); quando recebidas, são marcadas como `paid` pelo botão **"Receber"** (ou pela baixa do fiado) — o caixa realizado passa a contar a entrada na **data do recebimento**.
 - **`Debt.isPaid`** — estado da baixa: quando o cliente paga, o `SettleDebtUseCase` marca a dívida como `isPaid: true`. Se a dívida tiver uma transação **pendente vinculada**, a baixa marca a **mesma** transação como paga; caso contrário, registra a entrada no caixa. Nunca há duplicata.

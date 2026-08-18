@@ -9,14 +9,14 @@ import 'dart:math';
 /// ([Random.secure]) — colisões tornam-se praticamente impossíveis sem
 /// adicionar dependências.
 abstract final class AppIds {
-  static final Random _random = Random.secure();
+ static final Random _random = Random.secure();
 
-  /// Gera um id único com o prefixo [prefix] (ex.: 'p', 's', 't', 'c',
-  /// 'd', 'pc', 'st', 'e', 'emp').
-  static String newId(String prefix) {
-    final micros = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
-    final entropy =
-        _random.nextInt(0xFFFFFF).toRadixString(16).padLeft(6, '0');
-    return '$prefix${micros}_$entropy';
-  }
+ /// Gera um id único com o prefixo [prefix] (ex.: 'p', 's', 't', 'c',
+ /// 'd', 'pc', 'st', 'e', 'emp').
+ static String newId(String prefix) {
+ final micros = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
+ final entropy =
+ _random.nextInt(0xFFFFFF).toRadixString(16).padLeft(6, '0');
+ return '$prefix${micros}_$entropy';
+ }
 }

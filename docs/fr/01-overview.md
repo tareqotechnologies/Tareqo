@@ -4,10 +4,10 @@
 
 **Dumbhanengue ERP** est un système de gestion destiné aux **petits commerçants**. Il réunit les opérations quotidiennes d'un magasin dans une seule app :
 
-- 🏷️ **Stock** — enregistrement et contrôle des produits avec **lots FIFO et péremption** (achat, vente, quantité disponible, péremption) ;
-- 💰 **Ventes** — enregistrement des ventes avec panier, moyen de paiement et déduction automatique du stock ;
-- 📊 **Finances** — flux de trésorerie (entrées × sorties), transactions et montants en attente ;
-- 🧾 **Crédit (« fiado »)** — suivi de qui doit au commerçant, de l'échéance et de l'historique des règlements.
+- **Stock** — enregistrement et contrôle des produits avec **lots FIFO et péremption** (achat, vente, quantité disponible, péremption) ;
+- **Ventes** — enregistrement des ventes avec panier, moyen de paiement et déduction automatique du stock ;
+- **Finances** — flux de trésorerie (entrées × sorties), transactions et montants en attente ;
+- **Crédit (« fiado »)** — suivi de qui doit au commerçant, de l'échéance et de l'historique des règlements.
 
 *Dumbhanengue* est le surnom du projet ; le produit lui-même est un ERP léger axé sur la convivialité et la simplicité.
 
@@ -16,10 +16,10 @@
 ## Objectifs du produit
 
 1. **Répondre aux questions essentielles du commerçant :**
-   - « Combien ai-je vendu ? » (total des ventes) ;
-   - « Quelle trésorerie ai-je ? » (solde du flux de caisse) ;
-   - « Combien me doit-on à crédit, et qui ? » (à recevoir) ;
-   - « Quel stock ai-je et qu'est-ce qui manque ? » (stock faible).
+ - « Combien ai-je vendu ? » (total des ventes) ;
+ - « Quelle trésorerie ai-je ? » (solde du flux de caisse) ;
+ - « Combien me doit-on à crédit, et qui ? » (à recevoir) ;
+ - « Quel stock ai-je et qu'est-ce qui manque ? » (stock faible).
 2. **Éviter le « trou noir du crédit » :** transformer le crédit accordé en un chiffre visible et gérable (qui doit, combien, quand).
 3. **Garantir l'intégrité de l'entreprise :** stock jamais négatif, ventes atomiques, caisse cohérente.
 4. **Être un modèle SaaS multi-tenant :** authentification par magasin/commerçant (Supabase), prêt pour le RLS (Row Level Security).

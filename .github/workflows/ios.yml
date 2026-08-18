@@ -1,68 +1,68 @@
 # iOS — build + TestFlight (W1). Complementa o release.yml (Android).
 #
 # Disparado pela mesma tag `v*` (ex.: `git tag v1.1.0 && git push --tags`):
-#   1. analyze + test (macOS runner);
-#   2. build do IPA de PRODUÇÃO (--flavor prod) e upload para o TestFlight
-#      via Fastlane (`fastlane ios beta` — lane em fastlane/Fastfile).
+# 1. analyze + test (macOS runner);
+# 2. build do IPA de PRODUÇÃO (--flavor prod) e upload para o TestFlight
+# via Fastlane (`fastlane ios beta` — lane em fastlane/Fastfile).
 #
 # Secrets necessários (Settings → Secrets and variables → Actions):
-#   SUPABASE_URL_PROD / SUPABASE_ANON_KEY_PROD — defines de produção
-#   SENTRY_DSN (opcional)                      — observabilidade
-#   APPLE_ISSUER_ID / APPLE_KEY_ID / APPLE_KEY_CONTENT — API key da App
-#      Store Connect (conteúdo base64 da .p8)
-#   APPLE_TEAM_ID                              — team da Apple Developer
+# SUPABASE_URL_PROD / SUPABASE_ANON_KEY_PROD — defines de produção
+# SENTRY_DSN (opcional) — observabilidade
+# APPLE_ISSUER_ID / APPLE_KEY_ID / APPLE_KEY_CONTENT — API key da App
+# Store Connect (conteúdo base64 da .p8)
+# APPLE_TEAM_ID — team da Apple Developer
 #
-# ⚠️ Pré-requisito manual único: App ID `com.dumbhanengue.dumbhanengue`
+# Atenção: Pré-requisito manual único: App ID `com.dumbhanengue.dumbhanengue`
 # criado no Apple Developer + assinatura automática configurada no Xcode
 # (ver docs/14-go-live-ops.md).
 name: iOS (TestFlight)
 
 on:
-  push:
-    tags:
-      - "v*"
+ push:
+ tags:
+ - "v*"
 
 permissions:
-  contents: read
+ contents: read
 
 jobs:
-  build:
-    name: Build IPA + TestFlight
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
+ build:
+ name: Build IPA + TestFlight
+ runs-on: macos-14
+ steps:
+ - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
+ - uses: subosito/flutter-action@v2
+ with:
+ channel: stable
+ cache: true
 
-      - name: Flutter analyze
-        run: flutter analyze
+ - name: Flutter analyze
+ run: flutter analyze
 
-      - name: Flutter test
-        run: flutter test
+ - name: Flutter test
+ run: flutter test
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-          working-directory: fastlane
+ - uses: ruby/setup-ruby@v1
+ with:
+ ruby-version: '3.3'
+ bundler-cache: true
+ working-directory: fastlane
 
-      - name: Fastlane iOS beta (TestFlight)
-        working-directory: fastlane
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL_PROD }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_PROD }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
-          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
-          APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: bundle exec fastlane ios beta
+ - name: Fastlane iOS beta (TestFlight)
+ working-directory: fastlane
+ env:
+ SUPABASE_URL: ${{ secrets.SUPABASE_URL_PROD }}
+ SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_PROD }}
+ SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+ APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
+ APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+ APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
+ APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+ run: bundle exec fastlane ios beta
 
-      - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: runner-ipa
-          path: build/ios/ipa/*.ipa
+ - name: Upload IPA artifact
+ uses: actions/upload-artifact@v4
+ with:
+ name: runner-ipa
+ path: build/ios/ipa/*.ipa

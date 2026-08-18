@@ -12,9 +12,9 @@ Ce document couvre les décisions de sécurité de l'app : **stockage sécurisé
 
 ```text
 SecureStorageService
-  └─ SecureStorageBackend (interface)          ← abstraite pour les tests
-       ├─ FlutterSecureStorageBackend          ← réel : flutter_secure_storage
-       └─ (backend en mémoire dans les tests)
+ └─ SecureStorageBackend (interface) ← abstraite pour les tests
+ ├─ FlutterSecureStorageBackend ← réel : flutter_secure_storage
+ └─ (backend en mémoire dans les tests)
 ```
 
 - **Clés centralisées** dans `SecureStorageKeys` : `accessToken`, `refreshToken`, `apiKey` — évite les fautes de frappe et permet d'auditer exactement ce qui est traité comme sensible.
@@ -55,10 +55,10 @@ La **session Supabase** (jetons d'accès + rafraîchissement) est persistée par
 ## RLS (Row Level Security) sur Supabase
 
 - La clé anon est **publique par conception** — embarquée dans le client. La vraie sécurité vient de la base :
-  ```sql
-  -- règle d'isolation par tenant ET par magasin
-  user_id = auth.uid() OR public.is_my_store(store_id)
-  ```
+ ```sql
+ -- règle d'isolation par tenant ET par magasin
+ user_id = auth.uid() OR public.is_my_store(store_id)
+ ```
 - **`is_my_store(store_id)` :** le propriétaire du tenant est valide pour tous les magasins du tenant ; un employé lié est valide pour son magasin (`store_employees`). Des triggers anti-falsification imposent `user_id = auth.uid()` et un `store_id` valide sur chaque insert.
 - **`is_manager_of_store(store_id)` (Aug 6) :** matrice de niveau d'accès — le propriétaire du tenant **ou** un employé lié dont le `store_employees.role = 'manager'` a le pouvoir *managerial* sur le magasin. Utilisée par la garde de la RPC `process_purchase` et par les politiques RLS `purchases`/`purchase_items` : un employé ordinaire peut opérer ventes/stock/crédit mais **ne peut ni enregistrer ni lire les achats** — imposé côté serveur, même si un client modifié appelle PostgREST directement.
 - Les **fonctions helper RLS** (`is_my_store`, `is_tenant_owner`, `is_manager_of_store`) sont `SECURITY DEFINER` avec `search_path` épinglé à `public` (Aug 6) : elles sont appelées *dans* les politiques et interrogent des tables ayant leurs propres politiques (`stores`/`tenants`/`store_employees`), ce qui formait auparavant un cycle inter-tables pouvant faire exploser la pile (`54001 max_stack_depth`) sur les scans de table complète. Comme definers, elles contournent le RLS en interne, cassant le cycle **par construction** — même pattern que `is_super_admin` et les RPC d'argent. Elles ne renvoient qu'un booléen sur un id explicite, donc aucune donnée n'est exposée.
@@ -77,7 +77,7 @@ La **session Supabase** (jetons d'accès + rafraîchissement) est persistée par
 | Linux | libsecret | Raisonnable, pas d'enclave dédiée |
 | Web | Clé de chiffrement conservée dans `localStorage` | **Le plus faible** — pas adossé au matériel |
 
-> ⚠️ Pour les **secrets critiques, privilégiez le mobile** ; sur le web, restreignez ce qui est stocké ou combinez avec des mesures côté serveur.
+> **Attention :** Pour les **secrets critiques, privilégiez le mobile** ; sur le web, restreignez ce qui est stocké ou combinez avec des mesures côté serveur.
 
 ---
 

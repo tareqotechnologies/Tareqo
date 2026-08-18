@@ -8,21 +8,21 @@ import 'package:dumbhanengue/l10n/generated/app_localizations.dart';
 /// e, sem o delegate, quebrariam; e sem `locale` explícito o framework de
 /// teste resolveria `en_US`, fazendo as asserções em português falharem.
 ///
-/// O tema é o [AppTheme.light] real do app (antes era o ThemeData padrão do
-/// framework): a suíte inteira renderiza as telas sob o tema claro de
-/// produção — teste visual automatizado do modo claro, incluindo as novas
-/// cores semânticas com variantes por brilho (ver `theme_contrast_test.dart`).
+/// O tema é o [AppTheme.dark] real do app (V3 — dark total): a suíte inteira
+/// renderiza as telas sob o tema escuro de produção — teste visual
+/// automatizado do modo escuro, incluindo as cores semânticas com variantes
+/// por brilho (ver `theme_contrast_test.dart`, que valida as duas variantes).
 ///
 /// Uso: `testApp(home: MinhaTela())` dentro do `ProviderScope`.
 Widget testApp({
-  required Widget home,
-  Locale locale = const Locale('pt'),
+ required Widget home,
+ Locale locale = const Locale('pt'),
 }) {
-  return MaterialApp(
-    locale: locale,
-    theme: AppTheme.light,
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: home,
-  );
+ return MaterialApp(
+ locale: locale,
+ theme: AppTheme.dark,
+ localizationsDelegates: AppLocalizations.localizationsDelegates,
+ supportedLocales: AppLocalizations.supportedLocales,
+ home: home,
+ );
 }

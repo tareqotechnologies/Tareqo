@@ -22,13 +22,13 @@ mixin _$AppUser {
 @pragma('vm:prefer-inline')
 $AppUserCopyWith<AppUser> get copyWith => _$AppUserCopyWithImpl<AppUser>(this as AppUser, _$identity);
 
-  /// Serializes this AppUser to a JSON map.
-  Map<String, dynamic> toJson();
+ /// Serializes this AppUser to a JSON map.
+ Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.fullName, fullName) || other.fullName == fullName));
+ return identical(this, other) || (other.runtimeType == runtimeType&&other is AppUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.fullName, fullName) || other.fullName == fullName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -37,15 +37,15 @@ int get hashCode => Object.hash(runtimeType,id,email,fullName);
 
 @override
 String toString() {
-  return 'AppUser(id: $id, email: $email, fullName: $fullName)';
+ return 'AppUser(id: $id, email: $email, fullName: $fullName)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $AppUserCopyWith<$Res>  {
-  factory $AppUserCopyWith(AppUser value, $Res Function(AppUser) _then) = _$AppUserCopyWithImpl;
+abstract mixin class $AppUserCopyWith<$Res> {
+ factory $AppUserCopyWith(AppUser value, $Res Function(AppUser) _then) = _$AppUserCopyWithImpl;
 @useResult
 $Res call({
  String id, String email, String fullName
@@ -57,21 +57,21 @@ $Res call({
 }
 /// @nodoc
 class _$AppUserCopyWithImpl<$Res>
-    implements $AppUserCopyWith<$Res> {
-  _$AppUserCopyWithImpl(this._self, this._then);
+ implements $AppUserCopyWith<$Res> {
+ _$AppUserCopyWithImpl(this._self, this._then);
 
-  final AppUser _self;
-  final $Res Function(AppUser) _then;
+ final AppUser _self;
+ final $Res Function(AppUser) _then;
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? fullName = null,}) {
-  return _then(_self.copyWith(
+ return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
 as String,
-  ));
+ ));
 }
 
 }
@@ -84,19 +84,19 @@ extension AppUserPatterns on AppUser {
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
+/// case final Subclass value:
+/// return ...;
+/// case _:
+/// return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AppUser value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AppUser value)? $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _AppUser() when $default != null:
 return $default(_that);case _:
-  return orElse();
+ return orElse();
 
 }
 }
@@ -106,19 +106,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
+/// case final Subclass value:
+/// return ...;
+/// case final Subclass2 value:
+/// return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AppUser value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AppUser value) $default,){
 final _that = this;
 switch (_that) {
 case _AppUser():
 return $default(_that);case _:
-  throw StateError('Unexpected subclass');
+ throw StateError('Unexpected subclass');
 
 }
 }
@@ -127,19 +127,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
+/// case final Subclass value:
+/// return ...;
+/// case _:
+/// return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AppUser value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AppUser value)? $default,){
 final _that = this;
 switch (_that) {
 case _AppUser() when $default != null:
 return $default(_that);case _:
-  return null;
+ return null;
 
 }
 }
@@ -148,18 +148,18 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
+/// case Subclass(:final field):
+/// return ...;
+/// case _:
+/// return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String fullName)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, String email, String fullName)? $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppUser() when $default != null:
 return $default(_that.id,_that.email,_that.fullName);case _:
-  return orElse();
+ return orElse();
 
 }
 }
@@ -169,18 +169,18 @@ return $default(_that.id,_that.email,_that.fullName);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
+/// case Subclass(:final field):
+/// return ...;
+/// case Subclass2(:final field2):
+/// return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String fullName)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, String email, String fullName) $default,) {final _that = this;
 switch (_that) {
 case _AppUser():
 return $default(_that.id,_that.email,_that.fullName);case _:
-  throw StateError('Unexpected subclass');
+ throw StateError('Unexpected subclass');
 
 }
 }
@@ -189,18 +189,18 @@ return $default(_that.id,_that.email,_that.fullName);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
+/// case Subclass(:final field):
+/// return ...;
+/// case _:
+/// return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String fullName)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, String email, String fullName)? $default,) {final _that = this;
 switch (_that) {
 case _AppUser() when $default != null:
 return $default(_that.id,_that.email,_that.fullName);case _:
-  return null;
+ return null;
 
 }
 }
@@ -211,12 +211,12 @@ return $default(_that.id,_that.email,_that.fullName);case _:
 @JsonSerializable()
 
 class _AppUser implements AppUser {
-  const _AppUser({required this.id, required this.email, this.fullName = ''});
-  factory _AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
+ const _AppUser({required this.id, required this.email, this.fullName = ''});
+ factory _AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
 
-@override final  String id;
-@override final  String email;
-@override@JsonKey() final  String fullName;
+@override final String id;
+@override final String email;
+@override@JsonKey() final String fullName;
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
@@ -226,12 +226,12 @@ _$AppUserCopyWith<_AppUser> get copyWith => __$AppUserCopyWithImpl<_AppUser>(thi
 
 @override
 Map<String, dynamic> toJson() {
-  return _$AppUserToJson(this, );
+ return _$AppUserToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.fullName, fullName) || other.fullName == fullName));
+ return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.fullName, fullName) || other.fullName == fullName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -240,7 +240,7 @@ int get hashCode => Object.hash(runtimeType,id,email,fullName);
 
 @override
 String toString() {
-  return 'AppUser(id: $id, email: $email, fullName: $fullName)';
+ return 'AppUser(id: $id, email: $email, fullName: $fullName)';
 }
 
 
@@ -248,7 +248,7 @@ String toString() {
 
 /// @nodoc
 abstract mixin class _$AppUserCopyWith<$Res> implements $AppUserCopyWith<$Res> {
-  factory _$AppUserCopyWith(_AppUser value, $Res Function(_AppUser) _then) = __$AppUserCopyWithImpl;
+ factory _$AppUserCopyWith(_AppUser value, $Res Function(_AppUser) _then) = __$AppUserCopyWithImpl;
 @override @useResult
 $Res call({
  String id, String email, String fullName
@@ -260,21 +260,21 @@ $Res call({
 }
 /// @nodoc
 class __$AppUserCopyWithImpl<$Res>
-    implements _$AppUserCopyWith<$Res> {
-  __$AppUserCopyWithImpl(this._self, this._then);
+ implements _$AppUserCopyWith<$Res> {
+ __$AppUserCopyWithImpl(this._self, this._then);
 
-  final _AppUser _self;
-  final $Res Function(_AppUser) _then;
+ final _AppUser _self;
+ final $Res Function(_AppUser) _then;
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? fullName = null,}) {
-  return _then(_AppUser(
+ return _then(_AppUser(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
 as String,
-  ));
+ ));
 }
 
 

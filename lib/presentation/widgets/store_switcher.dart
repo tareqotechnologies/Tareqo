@@ -2,135 +2,124 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/i18n/l10n_ext.dart';
-import '../../domain/entities/store.dart';
+import '../../core/theme/app_tokens.dart';
 import '../controllers/account_providers.dart';
 import '../controllers/auth_providers.dart';
 
-/// Seletor rápido de loja ativa para o app bar (multi-loja).
-///
-/// Pílula compacta com o nome da loja ativa; com 2+ lojas, tocar abre o
-/// menu com todas as lojas do tenant (check na ativa). A troca chama
-/// [ActiveStoreNotifier.select] — todos os módulos observam
-/// [activeStoreIdProvider] e re-escopam na hora (mesma mecânica do seletor
-/// de Lojas → Ajustes, agora sem sair da tela atual).
-///
-/// Sem usuário/tenant/lojas renderiza nada (SizedBox.shrink). Com UMA loja
-/// e [hideWhenSingle] = true também não renderiza (não há o que escolher —
-/// mesmo critério do seletor de Lojas → Ajustes); com `false`, exibe a
-/// pílula NÃO-interativa (usado no cabeçalho do dashboard, que mostra o
-/// nome da loja ativa mesmo com uma única loja).
+/// Seletor rápido de loja ativa — pílula compacta com menu popup.
 class StoreSwitcher extends ConsumerWidget {
-  const StoreSwitcher({super.key, this.hideWhenSingle = true});
+ const StoreSwitcher({super.key, this.hideWhenSingle = true});
 
-  /// Quando `false`, renderiza a pílula mesmo com uma única loja (sem
-  /// menu — apenas o nome da loja ativa).
-  final bool hideWhenSingle;
+ final bool hideWhenSingle;
 
-  /// Chave da pílula — os testes localizam o seletor por ela.
-  static const pillKey = ValueKey('storeSwitcherPill');
+ static const pillKey = ValueKey('storeSwitcherPill');
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
+ @override
+ Widget build(BuildContext context, WidgetRef ref) {
+ final theme = Theme.of(context);
+ final l10n = context.l10n;
 
-    final user = ref.watch(authStateProvider).value;
-    if (user == null) return const SizedBox.shrink();
-    final tenant = ref.watch(myTenantProvider(user.id)).value;
-    if (tenant == null) return const SizedBox.shrink();
+ final user = ref.watch(authStateProvider).value;
+ if (user == null) return const SizedBox.shrink();
+ final tenant = ref.watch(myTenantProvider(user.id)).value;
+ if (tenant == null) return const SizedBox.shrink();
 
-    final stores =
-        ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
-    // Carregando/sem lojas: nada a exibir ainda.
-    if (stores.isEmpty) return const SizedBox.shrink();
+ final stores = ref.watch(storesProvider(tenant.id)).value ?? const [];
+ if (stores.isEmpty) return const SizedBox.shrink();
 
-    final multiStore = stores.length > 1;
-    if (!multiStore && hideWhenSingle) return const SizedBox.shrink();
+ final multiStore = stores.length > 1;
+ if (!multiStore && hideWhenSingle) return const SizedBox.shrink();
 
-    final activeStoreId = ref.watch(activeStoreIdProvider(user.id));
-    final active = activeStoreId == null
-        ? null
-        : stores.where((store) => store.id == activeStoreId).firstOrNull;
-    final activeName = active?.name ?? stores.first.name;
+ // Em listas (dashboard) o child estica para largura total — o Align
+ // devolve à pílula o tamanho do conteúdo (esquerda), então o hit-test
+ // cobre exatamente a pílula (sem "buraco" fora do texto).
+ Widget aligned(Widget widget) =>
+ Align(alignment: Alignment.centerLeft, child: widget);
 
-    // Pílula compacta (design system ultra-clean): superfície + borda sutil
-    // + ícone da loja na cor primária; seta indica que há menu. Texto com
-    // ellipsis e largura limitada — nunca estoura o app bar em telas
-    // estreitas ou com escala de texto alta.
-    final pill = Container(
-      key: StoreSwitcher.pillKey,
-      constraints: const BoxConstraints(maxWidth: 170),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.storefront_outlined,
-            size: 16,
-            color: theme.colorScheme.primary,
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              activeName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-          ),
-          if (multiStore) ...[
-            const SizedBox(width: 2),
-            Icon(
-              Icons.arrow_drop_down,
-              size: 18,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ],
-        ],
-      ),
-    );
+ final activeStoreId = ref.watch(activeStoreIdProvider(user.id));
+ final active = activeStoreId == null
+ ? null
+ : stores.where((store) => store.id == activeStoreId).firstOrNull;
+ final activeName = active?.name ?? stores.first.name;
 
-    // Com uma única loja a pílula é apenas informativa (sem menu).
-    if (!multiStore) return pill;
+ // Seletor curto — MESMO tamanho e tipografia do seletor de período da
+ // Home (labelLarge + chevron, sem caixa, sem ícone): só o nome da loja.
+ final pill = Container(
+ key: StoreSwitcher.pillKey,
+ constraints: const BoxConstraints(maxWidth: 160),
+ padding: const EdgeInsets.symmetric(
+ horizontal: AppSpacing.xs,
+ vertical: AppSpacing.xs,
+ ),
+ child: Row(
+ mainAxisSize: MainAxisSize.min,
+ children: [
+ Flexible(
+ child: Text(
+ activeName,
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ style: theme.textTheme.labelLarge?.copyWith(
+ color: theme.colorScheme.onSurface,
+ fontWeight: FontWeight.w600,
+ letterSpacing: -0.2,
+ ),
+ ),
+ ),
+ if (multiStore) ...[
+ const SizedBox(width: 2),
+ Icon(
+ Icons.keyboard_arrow_down_rounded,
+ size: 16,
+ color: theme.colorScheme.onSurfaceVariant,
+ ),
+ ],
+ ],
+ ),
+ );
 
-    return PopupMenuButton<String>(
-      tooltip: l10n.storeSwitcherTooltip,
-      onSelected: (storeId) =>
-          ref.read(activeStoreIdProvider(user.id).notifier).select(storeId),
-      itemBuilder: (context) => [
-        for (final store in stores)
-          PopupMenuItem<String>(
-            value: store.id,
-            child: Row(
-              children: [
-                Icon(
-                  store.id == activeStoreId
-                      ? Icons.check_circle
-                      : Icons.storefront_outlined,
-                  size: 18,
-                  color: store.id == activeStoreId
-                      ? theme.colorScheme.primary
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: Text(
-                    store.name,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
-      child: pill,
-    );
-  }
+ if (!multiStore) return aligned(pill);
+
+ // Theme local: anula o hover/splash do InkWell INTERNO do
+ // PopupMenuButton (que desenhava o realce ao pairar o mouse sobre a
+ // pílula) — o menu em si segue com hover normal (aberto num overlay
+ // com o tema global).
+ final noHover = Theme(
+ data: theme.copyWith(
+ hoverColor: Colors.transparent,
+ highlightColor: Colors.transparent,
+ splashColor: Colors.transparent,
+ ),
+ child: PopupMenuButton<String>(
+ tooltip: l10n.storeSwitcherTooltip,
+ onSelected: (storeId) =>
+ ref.read(activeStoreIdProvider(user.id).notifier).select(storeId),
+ itemBuilder: (context) => [
+ for (final store in stores)
+ PopupMenuItem<String>(
+ value: store.id,
+ child: Row(
+ children: [
+ Icon(
+ store.id == activeStoreId
+ ? Icons.check_circle_rounded
+ : Icons.storefront_outlined,
+ size: 18,
+ color: store.id == activeStoreId
+ ? theme.colorScheme.primary
+ : null,
+ ),
+ const SizedBox(width: AppSpacing.sm),
+ Flexible(
+ child: Text(store.name, overflow: TextOverflow.ellipsis),
+ ),
+ ],
+ ),
+ ),
+ ],
+ child: pill,
+ ),
+ );
+ return aligned(noHover);
+ }
 }

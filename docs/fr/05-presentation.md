@@ -21,14 +21,15 @@ La couche `lib/presentation/` contient tout ce que l'utilisateur voit et avec qu
 | `finance_providers.dart` | `financeRepositoryProvider`, `getCashFlowUseCaseProvider`, `addTransactionUseCaseProvider`, `markTransactionAsPaidUseCaseProvider`, **`cashFlowPeriodProvider`** (enum `CashFlowPeriod` : aujourd'hui/semaine/mois/tout), **`cashFlowProvider`** (se reconstruit quand la période change), **`transactionsProvider`** |
 | `debts_providers.dart` | `debtsRepositoryProvider`, `getPendingDebtsUseCaseProvider`, `addDebtUseCaseProvider`, `getSettledDebtsUseCaseProvider`, `settleDebtUseCaseProvider`, **`pendingDebtsProvider`** (par échéance), **`settledDebtsProvider`** (par `paidAt` desc) |
 | `expiry_alerts_provider.dart` | `getStockLotsUseCaseProvider`, **`expiryAlertsProvider`** (`AsyncNotifier<List<ExpiryAlert>>`) — alertes de péremption par lot (W11) |
+| `dashboard_providers.dart` | **`dashboardPeriodProvider`** (`CashFlowPeriod`, défaut `today`) — pilule de période de l'Accueil ; **`dashboardCashFlowProvider`** (solde de caisse cadencé à la période) ; **`dashboardKpisProvider`** (RPC `get_dashboard_kpis` en mode Supabase, repli côté client sinon) |
 
 **Détails pertinents :**
 
 - `cashFlowProvider` calcule la période comme suit (tout aligné sur le **début de journée**) :
-  - `today` → début d'aujourd'hui ;
-  - `week` → début d'aujourd'hui − 7 jours ;
-  - `month` → 1er jour du mois ;
-  - `all` → `DateTime(2000)` jusqu'à maintenant.
+ - `today` → début d'aujourd'hui ;
+ - `week` → début d'aujourd'hui − 7 jours ;
+ - `month` → 1er jour du mois ;
+ - `all` → `DateTime(2000)` jusqu'à maintenant.
 - `authStateProvider` : sans identifiants Supabase, émet `Stream.value(null)` au lieu d'accéder à `Supabase.instance` (évite `StateError`).
 - Tous les notifiers ont `refresh()` (`invalidateSelf()` + `await future`).
 - Les listes sont **copiées avant tri** (les entités/listes retournées sont immuables).
@@ -43,9 +44,9 @@ La couche `lib/presentation/` contient tout ce que l'utilisateur voit et avec qu
 
 ```text
 authStateProvider.when:
-  loading → _SplashScreen (restauration de la session persistée)
-  error   → LoginScreen
-  data    → user == null ? LoginScreen : AppShell
+ loading → _SplashScreen (restauration de la session persistée)
+ error → LoginScreen
+ data → user == null ? LoginScreen : AppShell
 ```
 
 ### `AppShell` (coquille adaptative)
@@ -55,7 +56,8 @@ authStateProvider.when:
 - **Écrans larges (≥ 880px, web/desktop) :** `NavigationRail` à gauche.
 - **Écrans étroits (mobile) :** `NavigationBar` en bas.
 - Les 5 sections vivent dans un **`IndexedStack`** (chaque onglet préserve son état : recherche, défilement, formulaires ouverts).
-- `shellIndexProvider` (`ShellIndexNotifier`) permet de **changer d'onglet par programmation** — utilisé par les actions rapides du tableau de bord.
+- `shellIndexProvider` (`ShellIndexNotifier`) permet de **changer d'onglet par programmation** — utilisé par les cartes de modules de l'onglet **Menu**.
+- Le **FAB central** ouvre le menu d'actions global (Nouvelle vente, Enregistrer une dépense, Ajouter un produit, Enregistrer un crédit) — sheets du canvas V3.
 
 ### Sections (`AppSection`)
 
@@ -68,7 +70,7 @@ authStateProvider.when:
 | 4 | Crédit | `receipt_long` | `DebtsScreen` |
 | 5 | Clients | `people` | `CustomersScreen` |
 
-> **Achats** et **Rapports** sont des écrans poussés (`Navigator.push`) depuis la section **« Modules »** du tableau de bord — ce qui garde la barre de navigation à 6 onglets. Le tableau de bord navigue aussi vers l'onglet Clients via sa carte.
+> **Achats** et **Rapports** sont des écrans poussés (`Navigator.push`) depuis la section **« Modules »** de l'onglet **Menu** — ce qui garde la barre à 4 onglets. L'onglet Menu héberge aussi **Produits / Crédit / Clients** (changement d'onglet), **Magasins** (propriétaire uniquement) et la tuile **Se déconnecter**.
 
 ---
 
@@ -76,15 +78,24 @@ authStateProvider.when:
 
 ### 1. `DashboardScreen` (Accueil)
 
-- Salutation avec le nom de l'utilisateur (« Olá, Maria 👋 ») + date du jour en pt-BR + bouton **Se déconnecter** ;
-- **KPI** dans une grille responsive (2 colonnes mobile / 4 sur écrans larges) :
-  - Total des ventes (tout l'historique) ;
-  - Solde de caisse (période sélectionnée dans Finances) ;
-  - Crédits à recevoir — somme des entrées en attente ;
-  - Stock en produits (somme des quantités) ;
-- **Actions rapides :** Nouvelle vente, Ajouter un produit, Enregistrer une transaction, Enregistrer un crédit (navigation via `shellIndexProvider`) ;
-- **Ventes récentes** (3 dernières) et alerte de **stock faible** (`stockQuantity < 5000` milli-unités = 5 unités, via `Quantity.lowStockThresholdUnits`) ;
-- **Alertes de péremption (W11)** via `expiryAlertsProvider` : **rouges** pour les lots **périmés** avec du stock et **jaunes** pour les lots expirant dans **< 30 jours** (`expiryWarningDays`), triées par urgence (périmés d'abord).
+Vue du jour du canvas V3 — l'onglet Accueil n'a PAS d'avatar (le bouton **Se déconnecter** vit dans l'onglet **Menu**) :
+
+- **En-tête :** date AU-DESSUS de la salutation (« Segunda, 17 ago ») → « Olá, {nom} » ; à droite, la **pilule de période** (`Hoje ▾` : aujourd'hui / semaine / mois / tout — `dashboardPeriodProvider` cadence les métriques Ventes/Caisse) ; en dessous, le **chip de magasin** vert foncé (`StoreSwitcher`, icône storefront blanche + nom ; avec 2+ magasins il ouvre le sélecteur rapide) ;
+- **3 cartes de métrique compactes** (sans icônes, disposition de l'app de référence) :
+ - **Ventes** — ventes de la période sélectionnée dans la pilule avec le **delta vs la période précédente** en sous-texte coloré (vert `+N%` / rouge `-N%`) ;
+ - **Caisse** — solde de caisse cadencé à la période (`dashboardCashFlowProvider`) ; un solde négatif rend la valeur en rouge ; sous-texte = code devise (`MZN`) ;
+ - **À recevoir** — total de crédit en attente avec le **compteur de fiados** en orange dans le sous-texte (ex. `4 fiados`) ;
+- **Flux d'activité** (« Atividade de hoje » + compteur d'événements à droite) dans une carte unique avec icônes circulaires teintées et ancre (valeur/badge) à droite :
+ - **Ventes** (icône `north_east` verte, `+valeur` en vert) — toucher ouvre `SaleDetailScreen` ;
+ - **Entrées de stock** (icône boîte grise, `+qty` en blanc) — achats du jour, une ligne par article ;
+ - **Paiements de fiado** (icône `payments` ambre dans un **cercle en pointillés**, `+valeur` en vert) — dettes soldées payées aujourd'hui ;
+ - **Dépenses** (icône `south_west` rouge, `-valeur` en rouge) — dépenses payées du jour ;
+ - **Stock faible** (icône d'alerte orange + pilule orange pleine **« Alerta »**) — produits actifs avec `stockQuantity < 5` unités (`Quantity.lowStockThresholdUnits`) ;
+ - **Péremption (W11)** via `expiryAlertsProvider` : **rouges** pour les lots **périmés** avec du stock et **jaunes** pour les lots expirant dans **< 30 jours** (`expiryWarningDays`), triées par urgence (périmés d'abord) ;
+- **Bannière de synchronisation en attente** (outbox du mode SaaS) quand la file hors-ligne n'est pas vide, avec action « Sincronizar » ;
+- Une erreur de chargement des KPI affiche un avertissement compact avec réessai (`InlineErrorCard`) au lieu de faux zéros.
+
+> Le bouton **Se déconnecter** vit dans l'onglet **Menu** ; l'en-tête de l'Accueil n'a pas d'avatar. L'Accueil n'a NI actions rapides NI cartes de modules — elles vivent dans le FAB central et l'onglet **Menu** (même grille de modules et matrice d'accès).
 
 ### 2. `ProductListScreen` (Produits)
 
@@ -98,13 +109,13 @@ authStateProvider.when:
 
 - **Liste :** cartes avec nombre d'articles, moyen de paiement, jour et total ; toucher ouvre le **détail** ;
 - **`NewSaleSheet`** (panier) :
-  - Recherche et ajout de produits avec **steppers** (+/−) limités au stock (`soldOut` désactive) ; les produits au poids utilisent des **pas de 0.1** et ouvrent un **dialogue de quantité décimale** (ex. `1.75` kg) ;
-  - **Champ code-barres** (les scanners style clavier USB déclenchent la recherche sur `onSubmitted`) + **lecture caméra** via `BarcodeScanSheet` (`mobile_scanner`, là où c'est pris en charge) ;
-  - Intercepte le **motif d'étiquette de balance `20PPPPPWWWWW`** (`ScaleBarcode`) : extrait le PLU, déduit la fraction du pesage (valeur ÷ prix — ne surfacture jamais) et ne traite le code comme un code balance que lorsque le produit est `vendaPorFracao` — les codes EAN-12 commençant par `20` retombent sur la recherche normale ; les PLU sont normalisés (zéros de tête : `123` ≡ `00123`) ;
-  - Moyen de paiement via des `ChoiceChip`s (`PaymentMethod.values`) ;
-  - Confirme via **`ProcessSaleUseCase`** → enregistre la vente + **déduction de stock FIFO (lots)** + entrée en caisse ;
-  - Attrape `InsufficientStockException` (affiche le produit et la quantité disponible) et `ProductNotFoundException` ;
-  - Après succès, invalide `productsProvider`, `salesListProvider`, `transactionsProvider`, `cashFlowProvider`, `expiryAlertsProvider` ;
+ - Recherche et ajout de produits avec **steppers** (+/−) limités au stock (`soldOut` désactive) ; les produits au poids utilisent des **pas de 0.1** et ouvrent un **dialogue de quantité décimale** (ex. `1.75` kg) ;
+ - **Champ code-barres** (les scanners style clavier USB déclenchent la recherche sur `onSubmitted`) + **lecture caméra** via `BarcodeScanSheet` (`mobile_scanner`, là où c'est pris en charge) ;
+ - Intercepte le **motif d'étiquette de balance `20PPPPPWWWWW`** (`ScaleBarcode`) : extrait le PLU, déduit la fraction du pesage (valeur ÷ prix — ne surfacture jamais) et ne traite le code comme un code balance que lorsque le produit est `vendaPorFracao` — les codes EAN-12 commençant par `20` retombent sur la recherche normale ; les PLU sont normalisés (zéros de tête : `123` ≡ `00123`) ;
+ - Moyen de paiement via des `ChoiceChip`s (`PaymentMethod.values`) ;
+ - Confirme via **`ProcessSaleUseCase`** → enregistre la vente + **déduction de stock FIFO (lots)** + entrée en caisse ;
+ - Attrape `InsufficientStockException` (affiche le produit et la quantité disponible) et `ProductNotFoundException` ;
+ - Après succès, invalide `productsProvider`, `salesListProvider`, `transactionsProvider`, `cashFlowProvider`, `expiryAlertsProvider` ;
 - **`SaleDetailScreen` :** résumé (id, date, paiement, total), articles avec `quantité × prix` et sous-total, et la note « Prix figés au moment de la vente ».
 
 ### 4. `FinancialScreen` + `AddTransactionSheet` (Finances)
@@ -173,11 +184,12 @@ Le thème est appliqué dans `app.dart` :
 
 ```dart
 MaterialApp(
-  title: 'Dumbhanengue ERP',
-  debugShowCheckedModeBanner: false,
-  theme: AppTheme.light,
-  darkTheme: AppTheme.dark,
-  home: const AuthGate(),
+ title: 'Dumbhanengue ERP',
+ debugShowCheckedModeBanner: false,
+ theme: AppTheme.dark,
+ darkTheme: AppTheme.dark,
+ themeMode: ThemeMode.dark, // V3 — 100 % sombre
+ home: const AuthGate(),
 )
 ```
 
@@ -187,10 +199,13 @@ MaterialApp(
 
 `lib/core/utils/formatters.dart` :
 
-- `currency(int cents)` → `1.234,56` avec le symbole du tenant (défaut `R$`, les tenants du Mozambique utilisent `MTn`) — depuis W4, l'argent est en centimes entiers ;
+- `currency(int cents)` → `1.234,56` avec le symbole du tenant (défaut `R$`, les tenants du Mozambique utilisent `MZN`) — depuis W4, l'argent est en centimes entiers ;
 - `date(DateTime)` → `04/08/2026` ;
+- `shortDate(DateTime)` → `17 ago` (date de l'en-tête du tableau de bord) ;
 - `dateTime(DateTime)` → `04/08/2026 14:30` ;
-- `day(DateTime)` → `Hoje`, `Ontem` ou `04/08`.
+- `day(DateTime)` → `Hoje`, `Ontem` ou `04/08` ;
+- `compact(double)` → `12,4k` (valeurs compactes des métriques) ;
+- `signedAmount(int cents)` → `+500,00` / `-500,00` (montants du flux).
 
 ---
 

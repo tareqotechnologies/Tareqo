@@ -8,19 +8,19 @@ L'authentification est la première étape du modèle **SaaS multi-tenant** : ch
 
 ```text
 main.dart
-  └─ SupabaseBootstrap.initialize()   # Supabase.initialize(url, anonKey)
-  └─ ServiceLocator.initialize()      # enregistre IAuthRepository → AuthRepositoryImpl → SupabaseAuthRemoteDataSourceImpl
-  └─ runApp(ProviderScope(...))
+ └─ SupabaseBootstrap.initialize() # Supabase.initialize(url, anonKey)
+ └─ ServiceLocator.initialize() # enregistre IAuthRepository → AuthRepositoryImpl → SupabaseAuthRemoteDataSourceImpl
+ └─ runApp(ProviderScope(...))
 
 AuthGate (écran racine)
-  └─ authStateProvider (StreamProvider<AppUser?>)
-       ├─ loading → splash (restauration de la session persistée)
-       ├─ user == null → LoginScreen
-       └─ user != null → route par rôle (voir Multi-tenant)             ├─ super admin (rôle dans la DB) → AdminShell
-            ├─ sans tenant → TenantOnboardingScreen (choisir un forfait)
-            ├─ tenant pending → TenantPendingScreen (≤ 24 h)
-            ├─ tenant rejected → TenantRejectedScreen (motif)
-            └─ tenant approved → AppShell (ERP)
+ └─ authStateProvider (StreamProvider<AppUser?>)
+ ├─ loading → splash (restauration de la session persistée)
+ ├─ user == null → LoginScreen
+ └─ user != null → route par rôle (voir Multi-tenant) ├─ super admin (rôle dans la DB) → AdminShell
+ ├─ sans tenant → TenantOnboardingScreen (choisir un forfait)
+ ├─ tenant pending → TenantPendingScreen (≤ 24 h)
+ ├─ tenant rejected → TenantRejectedScreen (motif)
+ └─ tenant approved → AppShell (ERP)
 ```
 
 La chaîne complète (toute la conversion de l'utilisateur Supabase `User` en `AppUser` du domaine se produit dans le datasource) :
@@ -37,10 +37,10 @@ LoginScreen → SignInUseCase → IAuthRepository → AuthRepositoryImpl → Aut
 
 ```dart
 static const String url = String.fromEnvironment(
-  'SUPABASE_URL', defaultValue: 'https://dotklbpqmlnhcdifiukd.supabase.co',
+ 'SUPABASE_URL', defaultValue: 'https://dotklbpqmlnhcdifiukd.supabase.co',
 );
 static const String anonKey = String.fromEnvironment(
-  'SUPABASE_ANON_KEY', defaultValue: 'eyJ...',  // clé anon publique par conception
+ 'SUPABASE_ANON_KEY', defaultValue: 'eyJ...', // clé anon publique par conception
 );
 static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
 ```
@@ -51,7 +51,7 @@ static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
 ```bash
 flutter run --flavor dev --dart-define-from-file=env/dev.env
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env
+ --dart-define-from-file=env/prod.env
 ```
 
 - **Fail-fast en release (S2) :** un build **release** avec les défauts embarqués (ou sans `--flavor prod`) lève une erreur au démarrage — un APK publié ne peut jamais pointer silencieusement vers le projet dev. En debug, les défauts conviennent au développement.
@@ -98,7 +98,7 @@ Bouton « Se déconnecter » sur le tableau de bord → `signOutUseCaseProvider.
 3. **Renouvellement automatique :** gotrue renouvelle le jeton d'accès avec le jeton de rafraîchissement avant son expiration.
 4. **Réactivité :** connexion/déconnexion émettent des événements sur le même flux ; la navigation et tout état dépendant de la session réagissent automatiquement.
 
-> ⚠️ **Note de migration :** les installations avec une session stockée précédemment par le défaut du SDK se déconnecteront **une fois** après la mise à niveau (la session passe dans le Keychain/Keystore).
+> **Attention :** **Note de migration :** les installations avec une session stockée précédemment par le défaut du SDK se déconnecteront **une fois** après la mise à niveau (la session passe dans le Keychain/Keystore).
 
 ---
 
@@ -124,7 +124,7 @@ Détails d'implémentation (la colonne `store_employees.is_active`, la RPC et le
 3. **Modèle de revenus :** l'identité identifie qui paie, quel forfait et quelles quotas s'appliquent ;
 4. **Onboarding/rétention :** la session persistante réduit la friction quotidienne.
 
-> ✅ **État actuel :** l'authentification + la **synchronisation SaaS complète** sont implémentées — les modules métier (produits, ventes, finances, crédit, clients, achats) persistent par tenant **et** par magasin dans Supabase avec RLS + triggers anti-falsification et RPC d'argent atomiques.
+> ✓ **État actuel :** l'authentification + la **synchronisation SaaS complète** sont implémentées — les modules métier (produits, ventes, finances, crédit, clients, achats) persistent par tenant **et** par magasin dans Supabase avec RLS + triggers anti-falsification et RPC d'argent atomiques.
 
 ---
 

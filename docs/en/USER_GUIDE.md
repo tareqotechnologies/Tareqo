@@ -24,11 +24,11 @@ The home screen shows your business summary **for the active store**:
 - **Cash balance**
 - **To receive (credit)**
 - **Stock value**
-- **Alerts** ⚠️ (expiry) — see below
+- **Alerts** Warning: (expiry) — see below
 
 ### Expiry alerts
-- 🟡 **Yellow** = product is **about to expire** (less than 30 days of shelf life).
-- 🔴 **Red** = product **has already expired** and still has stock.
+- ◔ **Yellow** = product is **about to expire** (less than 30 days of shelf life).
+- ● **Red** = product **has already expired** and still has stock.
 - Tap the alert to see which product and lot are involved.
 
 ### Quick actions
@@ -47,7 +47,7 @@ The system can have **multiple stores** (e.g., Central Store, Neighbourhood Stor
 - To switch: **Stores** → **Settings** tab → **"Active store"** section → tap the desired store.
 - Everything (stock, sales, finances, reports) now shows data for the selected store.
 
-> 💡 With a single store, this section doesn't appear — there is nothing to choose.
+> With a single store, this section doesn't appear — there is nothing to choose.
 
 ---
 
@@ -70,7 +70,7 @@ The system can have **multiple stores** (e.g., Central Store, Neighbourhood Stor
 - **Deactivate** (`Active product` off): the product disappears from checkout and purchases but **stays in history** with its stock kept — you can reactivate it later.
 - To remove the photo, tap **Remove photo**.
 
-> ⚠️ If the photo can't upload (e.g., no internet), the product is still saved — you'll see a notice and can add the photo later through Edit.
+> **Warning:** If the photo can't upload (e.g., no internet), the product is still saved — you'll see a notice and can add the photo later through Edit.
 
 ---
 
@@ -82,7 +82,7 @@ The system can have **multiple stores** (e.g., Central Store, Neighbourhood Stor
 4. Choose the **payment method**: Cash, Debit card, Credit card, M-Pesa, E-Mola or Bank transfer.
 5. Tap **Confirm sale**.
 
-> ✅ Stock is deducted automatically — **oldest lot first** (FIFO), so nothing expires sitting on the shelf.
+> ✓ Stock is deducted automatically — **oldest lot first** (FIFO), so nothing expires sitting on the shelf.
 
 ### Receipt and sharing
 - Tap a sale in the list to see its **details** (items, total, payment method).
@@ -111,8 +111,8 @@ If a sale was made by mistake:
 - **Customers**: register your customers with name, phone and e-mail.
 - **Register credit**: when a customer takes goods to pay later, register the amount and due date.
 - On the **Credit** screen you see:
-  - **Pending** = who still owes (total to receive).
-  - **Settled** = history of who already paid.
+ - **Pending** = who still owes (total to receive).
+ - **Settled** = history of who already paid.
 - When the customer pays, tap **Settle debt** — the money **enters the cash automatically**.
 
 ---
@@ -123,8 +123,8 @@ If a sale was made by mistake:
 - **Pending**: leave it checked if the amount hasn't been received/paid yet — it only counts in the **realized cash** once received/paid.
 - The screen shows **income**, **expenses** and the **balance**.
 - On pending items:
-  - **Receive** (pending income): confirms the money came in → it starts counting in the cash.
-  - **Pay** (pending expenses — bills to pay): confirms the payment → it starts counting in the cash.
+ - **Receive** (pending income): confirms the money came in → it starts counting in the cash.
+ - **Pay** (pending expenses — bills to pay): confirms the payment → it starts counting in the cash.
 
 ### Daily cash closing (Z-report) — owner/manager
 In **Finances**, tap the **Cash closing** card (or the action at the top):
@@ -134,7 +134,7 @@ In **Finances**, tap the **Cash closing** card (or the action at the top):
 3. The app shows the **difference** live: **Cash matches**, **Surplus** or **Shortage**.
 4. Tap **Confirm closing**.
 
-> 💡 Typed it wrong? You can **redo the day's closing** — the value is updated, no duplicates. After closing, the **"Cash closed!"** badge appears in Finances.
+> Typed it wrong? You can **redo the day's closing** — the value is updated, no duplicates. After closing, the **"Cash closed!"** badge appears in Finances.
 
 ---
 
@@ -160,9 +160,9 @@ Open **Stores** (card on Home) — there are 4 tabs:
 
 - **Stores**: register your stores. Each store has its own stock and cash.
 - **Employees**: create accounts for the people who work with you and choose the role:
-  - **Manager**: operates everything, except store/employee management.
-  - **Employee**: sells only (can't add products, see reports, make purchases, close the cash or cancel sales).
-  - Deactivate an employee any time — they **lose access immediately**.
+ - **Manager**: operates everything, except store/employee management.
+ - **Employee**: sells only (can't add products, see reports, make purchases, close the cash or cancel sales).
+ - Deactivate an employee any time — they **lose access immediately**.
 - **Upgrades**: view and request a plan change.
 - **Settings**: change the **Active store**, the **currency** (MZN, BRL, USD, EUR) and the **language** (Portuguese/English).
 
@@ -170,12 +170,12 @@ Open **Stores** (card on Home) — there are 4 tabs:
 
 ## 11. Quick tips
 
-- 🧾 Always double-check the **total** before confirming a sale.
-- ⚠️ Check the **expiry alerts** every week — expired product is lost money.
-- 📱 On any list (sales, products, customers...) **pull down to refresh**.
-- 🖼️ Products with a **photo** are much easier to identify at checkout.
-- 🔒 The app keeps your session secure — you only sign in once.
-- 💡 Need a connection to sell? **Yes** (online mode) — sales are registered instantly.
+- Always double-check the **total** before confirming a sale.
+- Warning: Check the **expiry alerts** every week — expired product is lost money.
+- On any list (sales, products, customers...) **pull down to refresh**.
+- Products with a **photo** are much easier to identify at checkout.
+- The app keeps your session secure — you only sign in once.
+- Need a connection to sell? **Yes** (online mode) — sales are registered instantly.
 
 ---
 

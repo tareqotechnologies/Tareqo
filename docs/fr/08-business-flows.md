@@ -12,25 +12,25 @@ Le `ProcessSaleUseCase` intègre **Ventes + Stock + Finances** avec un ordre d'o
 
 ```text
 1. Validation de la vente
-   ├─ rejette une vente sans articles
-   └─ rejette un total qui diverge de Σ(quantité × prix unitaire)
-      └─ comparaison en CENTIMES ((x * 100).round()) — évite les faux
-         positifs de la double précision (ex. : 2 × 9.9 + 9.9)
+ ├─ rejette une vente sans articles
+ └─ rejette un total qui diverge de Σ(quantité × prix unitaire)
+ └─ comparaison en CENTIMES ((x * 100).round()) — évite les faux
+ positifs de la double précision (ex. : 2 × 9.9 + 9.9)
 
 2. Pré-validation du stock (AUCUNE mutation)
-   └─ pour chaque article : UpdateProductStockUseCase.ensureSufficientStock
-      └─ si manquant → InsufficientStockException → rollback, rien n'est écrit
+ └─ pour chaque article : UpdateProductStockUseCase.ensureSufficientStock
+ └─ si manquant → InsufficientStockException → rollback, rien n'est écrit
 
 3. Enregistrement de la vente (ISaleRepository.registerSale)
-   └─ SQLite : tables sales + sale_items dans la même transaction
+ └─ SQLite : tables sales + sale_items dans la même transaction
 
 4. Déduction du stock (par article)
-   └─ UpdateProductStockUseCase.decrease — revalide en interne
-      (défense contre les appels directs) et persiste la VALEUR ABSOLUE
-      (stock − quantité) via IProductRepository.updateStock
+ └─ UpdateProductStockUseCase.decrease — revalide en interne
+ (défense contre les appels directs) et persiste la VALEUR ABSOLUE
+ (stock − quantité) via IProductRepository.updateStock
 
 5. Entrée en caisse
-   └─ FinancialTransaction(income, catégorie "Vendas", statut paid)
+ └─ FinancialTransaction(income, catégorie "Vendas", statut paid)
 ```
 
 ### Garanties
@@ -57,37 +57,37 @@ Chaque `SaleItem` conserve `productName` et `unitPrice` **au moment de la vente*
 
 ```text
 SaleDetailScreen (détail d'une vente ACTIVE + utilisateur propriétaire/gérant)
-  │  confirmation (AlertDialog montre le montant de la vente)
-  ▼
+ │ confirmation (AlertDialog montre le montant de la vente)
+ ▼
 CancelSaleUseCase
-  │
-  ├─ MODE SUPABASE (ISaleCancellationProcessor → RPC cancel_sale, UNE transaction) :
-  │    ├─ délégation immédiate (pas de validation côté client) — le serveur
-  │    │   valide l'existence + l'idempotence : garde is_manager_of_store
-  │    │   (les employés NE PEUVENT PAS annuler — le serveur est l'autorité,
-  │    │   même si un client modifié contourne l'UI)
-  │    ├─ lit et VERROUILLE la vente FOR UPDATE (portée magasin) ; absente ou
-  │    │   déjà annulée → no-op (ne lève jamais SaleNotFoundException)
-  │    ├─ rend le stock aux lots EXACTS consommés (sale_lot_consumption) :
-  │    │    └─ par lot (FOR UPDATE) : current_quantity += rendu
-  │    │       et le stock du produit += rendu — l'invariant
-  │    │       `stock = Σ lots` ne se brise jamais
-  │    ├─ annulation en caisse : SORTIE du montant de la vente, catégorie
-  │    │   Ventes, statut paid, description « Annulation de vente — <moyen> » —
-  │    │   la paire (entrée d'origine + annulation) ferme la caisse à ZÉRO
-  │    └─ marque la vente : status = 'cancelled', cancelled_at = now()
-  │
-  └─ MODE LOCAL (SQLite/en mémoire, dans un IUnitOfWork) :
-       ├─ validation : getById → sinon SaleNotFoundException ; déjà
-       │  annulée → retour (no-op idempotent)
-       ├─ FifoStockUseCase.restoreLot pour chaque LotConsumption
-       ├─ markCancelled(saleId, storeId)
-       └─ add FinancialTransaction(expense, « Annulation de vente — … », catégorie Ventes)
-  ▼
+ │
+ ├─ MODE SUPABASE (ISaleCancellationProcessor → RPC cancel_sale, UNE transaction) :
+ │ ├─ délégation immédiate (pas de validation côté client) — le serveur
+ │ │ valide l'existence + l'idempotence : garde is_manager_of_store
+ │ │ (les employés NE PEUVENT PAS annuler — le serveur est l'autorité,
+ │ │ même si un client modifié contourne l'UI)
+ │ ├─ lit et VERROUILLE la vente FOR UPDATE (portée magasin) ; absente ou
+ │ │ déjà annulée → no-op (ne lève jamais SaleNotFoundException)
+ │ ├─ rend le stock aux lots EXACTS consommés (sale_lot_consumption) :
+ │ │ └─ par lot (FOR UPDATE) : current_quantity += rendu
+ │ │ et le stock du produit += rendu — l'invariant
+ │ │ `stock = Σ lots` ne se brise jamais
+ │ ├─ annulation en caisse : SORTIE du montant de la vente, catégorie
+ │ │ Ventes, statut paid, description « Annulation de vente — <moyen> » —
+ │ │ la paire (entrée d'origine + annulation) ferme la caisse à ZÉRO
+ │ └─ marque la vente : status = 'cancelled', cancelled_at = now()
+ │
+ └─ MODE LOCAL (SQLite/en mémoire, dans un IUnitOfWork) :
+ ├─ validation : getById → sinon SaleNotFoundException ; déjà
+ │ annulée → retour (no-op idempotent)
+ ├─ FifoStockUseCase.restoreLot pour chaque LotConsumption
+ ├─ markCancelled(saleId, storeId)
+ └─ add FinancialTransaction(expense, « Annulation de vente — … », catégorie Ventes)
+ ▼
 Vente annulée → UI : badge « Annulée », total barré, reste dans l'historique
-  └─ SORT des rapports, des KPI et du résumé du jour (status != 'active' filtré)
-  └─ invalide salesListProvider, productsProvider, transactionsProvider,
-     cashFlowProvider et dashboardKpisProvider (les écrans se rechargent)
+ └─ SORT des rapports, des KPI et du résumé du jour (status != 'active' filtré)
+ └─ invalide salesListProvider, productsProvider, transactionsProvider,
+ cashFlowProvider et dashboardKpisProvider (les écrans se rechargent)
 ```
 
 ### Décisions métier de l'annulation
@@ -113,8 +113,8 @@ Vente annulée → UI : badge « Annulée », total barré, reste dans l'histori
 1. Valide `amount > 0` (`InvalidDebtAmountException`) ;
 2. Enregistre la **dette** (`IDebtRepository.add`) — la source de vérité des à recevoir/à payer ;
 3. Crée l'**entrée en attente liée** (`debtId`) :
-   - client (`isCustomerDebt: true`) → **entrée en attente** (à recevoir) ;
-   - fournisseur (`isCustomerDebt: false`) → **sortie en attente** (à payer).
+ - client (`isCustomerDebt: true`) → **entrée en attente** (à recevoir) ;
+ - fournisseur (`isCustomerDebt: false`) → **sortie en attente** (à payer).
 
 > Si l'entrée en attente échoue **après** la dette, il lève `PendingEntryRegistrationException` — l'UI informe que le crédit a été enregistré et demande de vérifier Finances (jamais « réessayer », ce qui dupliquerait le crédit).
 
@@ -125,12 +125,12 @@ Vente annulée → UI : badge « Annulée », total barré, reste dans l'histori
 2. Idempotence : si déjà réglée, retour (ne duplique jamais l'entrée en caisse)
 3. Marquer la dette comme payée (isPaid = true, paidAt = now)
 4. Entrée en caisse :
-   ├─ entrée en attente liée existe (debtId) ?
-   │    ├─ en attente → marquer la MÊME transaction comme payée ET estampiller
-   │    │          la date de réalisation (date = now — le flux de trésorerie
-   │    │          reconnaît l'argent quand il ENTRE, en local comme en SaaS)
-   │    └─ déjà payée → rien (idempotent)
-   └─ n'existe pas → enregistrer une nouvelle entrée (catégorie « Fiado »)
+ ├─ entrée en attente liée existe (debtId) ?
+ │ ├─ en attente → marquer la MÊME transaction comme payée ET estampiller
+ │ │ la date de réalisation (date = now — le flux de trésorerie
+ │ │ reconnaît l'argent quand il ENTRE, en local comme en SaaS)
+ │ └─ déjà payée → rien (idempotent)
+ └─ n'existe pas → enregistrer une nouvelle entrée (catégorie « Fiado »)
 ```
 
 > Sur **Supabase**, tout le règlement s'exécute comme la RPC **`settle_debt`** — une transaction, idempotente, portée par magasin. Depuis Aug 6, elle estampille aussi `date = now()` sur l'entrée en attente liée, en accord avec la sémantique locale SQLite `markAsPaid`.
@@ -177,8 +177,8 @@ Les séparer évite les champs vides et les règles incohérentes (les dépenses
 ### 4.1 Total du produit (couche historique)
 
 - **`UpdateProductStockUseCase`** est le port qui mute le **total** `stock_quantity` du produit :
-  - `ensureSufficientStock(productId, quantity)` — pré-validation sans mutation ;
-  - `increase`/`decrease` — revalident et persistent la **valeur absolue** ;
+ - `ensureSufficientStock(productId, quantity)` — pré-validation sans mutation ;
+ - `increase`/`decrease` — revalident et persistent la **valeur absolue** ;
 - **`IProductRepository.updateStock`** reçoit une **valeur absolue** (pas un delta) — deux couches de protection ;
 - **`CHECK (stock_quantity >= 0)`** en SQLite est la dernière ligne de défense ;
 - L'UI bloque l'ajout au panier au-delà du stock (`soldOut`) et signale le stock faible (`< 5` unités) sur le tableau de bord et la liste.
@@ -205,36 +205,36 @@ Les séparer évite les champs vides et les règles incohérentes (les dépenses
 
 ```text
 CashClosingSheet (Finances → Clôture de caisse)
-  │  1. APERÇU — cashClosingSummaryProvider → get_cash_closing_summary (côté serveur)
-  │     └─ total du jour (tous les moyens) · attendu dans le tiroir (ESPÈCES uniquement)
-  │        · répartition par moyen (JSONB) · clôture déjà enregistrée (si elle existe)
-  │  2. L'utilisateur (propriétaire/gérant) saisit le COMPTAGE PHYSIQUE du tiroir
-  │     └─ différence EN DIRECT : juste / excédent / manque (vs. l'attendu)
-  ▼
+ │ 1. APERÇU — cashClosingSummaryProvider → get_cash_closing_summary (côté serveur)
+ │ └─ total du jour (tous les moyens) · attendu dans le tiroir (ESPÈCES uniquement)
+ │ · répartition par moyen (JSONB) · clôture déjà enregistrée (si elle existe)
+ │ 2. L'utilisateur (propriétaire/gérant) saisit le COMPTAGE PHYSIQUE du tiroir
+ │ └─ différence EN DIRECT : juste / excédent / manque (vs. l'attendu)
+ ▼
 CloseCashRegisterUseCase
-  ├─ valide countedCashCents >= 0 → sinon InvalidCashCountException
-  │
-  ├─ MODE SUPABASE (ICashClosingProcessor → RPC close_cash_register, UNE transaction) :
-  │    ├─ garde is_manager_of_store — les employés NE PEUVENT PAS clôturer (le
-  │    │   serveur est l'autorité, même si un client modifié contourne l'UI)
-  │    ├─ valide la session et le comptage non négatif SUR LE SERVEUR
-  │    ├─ calcule SUR LE SERVEUR (le client n'envoie JAMAIS de valeurs calculées) :
-  │    │    └─ attendu = Σ des ventes ACTIVES EN ESPÈCES sur [p_day, p_day+1)
-  │    │       · total = Σ des ventes actives (tous les moyens)
-  │    │       · répartition = jsonb_object_agg par moyen (rapport Z)
-  │    └─ UPSERT dans cash_closings (UNIQUE store_id + closing_date) :
-  │         re-clôturer le jour MET À JOUR le comptage physique, pas de doublons
-  │    └─ renvoie la clôture enregistrée (JSONB) → l'UI affiche le résultat
-  │
-  └─ MODE LOCAL (SQLite/en mémoire) :
-       └─ aggregateCashClosingDay (MÊMES critères que la RPC : actives
-          uniquement, annulées exclues) → ICashClosingRepository.save (UPSERT par
-          magasin + jour)
-  ▼
+ ├─ valide countedCashCents >= 0 → sinon InvalidCashCountException
+ │
+ ├─ MODE SUPABASE (ICashClosingProcessor → RPC close_cash_register, UNE transaction) :
+ │ ├─ garde is_manager_of_store — les employés NE PEUVENT PAS clôturer (le
+ │ │ serveur est l'autorité, même si un client modifié contourne l'UI)
+ │ ├─ valide la session et le comptage non négatif SUR LE SERVEUR
+ │ ├─ calcule SUR LE SERVEUR (le client n'envoie JAMAIS de valeurs calculées) :
+ │ │ └─ attendu = Σ des ventes ACTIVES EN ESPÈCES sur [p_day, p_day+1)
+ │ │ · total = Σ des ventes actives (tous les moyens)
+ │ │ · répartition = jsonb_object_agg par moyen (rapport Z)
+ │ └─ UPSERT dans cash_closings (UNIQUE store_id + closing_date) :
+ │ re-clôturer le jour MET À JOUR le comptage physique, pas de doublons
+ │ └─ renvoie la clôture enregistrée (JSONB) → l'UI affiche le résultat
+ │
+ └─ MODE LOCAL (SQLite/en mémoire) :
+ └─ aggregateCashClosingDay (MÊMES critères que la RPC : actives
+ uniquement, annulées exclues) → ICashClosingRepository.save (UPSERT par
+ magasin + jour)
+ ▼
 Clôture persistée → l'UI affiche le résultat (sur SaaS, les valeurs affichées sont
-  le RETOUR de la RPC — le serveur est l'autorité)
-  └─ invalide cashClosingSummaryProvider + cashClosingHistoryProvider
-     (l'aperçu et l'historique sont re-récupérés avec la nouvelle clôture)
+ le RETOUR de la RPC — le serveur est l'autorité)
+ └─ invalide cashClosingSummaryProvider + cashClosingHistoryProvider
+ (l'aperçu et l'historique sont re-récupérés avec la nouvelle clôture)
 ```
 
 ### Décisions métier

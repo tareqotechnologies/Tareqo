@@ -28,55 +28,55 @@ flutter test --coverage
 ```text
 test/
 ├── core/
-│   ├── database/app_database_test.dart          # Schema, re-entrant transactions, migrations W4/W11
-│   ├── utils/quantity_test.dart                 # Milli-units ↔ units (W11)
-│   ├── utils/scale_barcode_test.dart            # 20PPPPPWWWWW parser + PLU normalization (W11)
-│   └── security/
-│       ├── secure_storage_service_test.dart           # In-memory backend
-│       └── secure_supabase_local_storage_test.dart    # Secure session + PKCE storage (S1, Aug 6)
+│ ├── database/app_database_test.dart # Schema, re-entrant transactions, migrations W4/W11
+│ ├── utils/quantity_test.dart # Milli-units ↔ units (W11)
+│ ├── utils/scale_barcode_test.dart # 20PPPPPWWWWW parser + PLU normalization (W11)
+│ └── security/
+│ ├── secure_storage_service_test.dart # In-memory backend
+│ └── secure_supabase_local_storage_test.dart # Secure session + PKCE storage (S1, Aug 6)
 ├── data/
-│   ├── datasources/local/
-│   │   ├── product_sqlite_data_source_test.dart
-│   │   ├── sale_sqlite_data_source_test.dart
-│   │   ├── stock_lot_sqlite_data_source_test.dart  # FIFO order + store scope (W11)
-│   │   ├── purchase_sqlite_data_source_test.dart   # Purchases with expiry/lot (W11)
-│   │   ├── financial_transaction_sqlite_data_source_test.dart
-│   │   ├── debt_sqlite_data_source_test.dart
-│   │   └── sqlite_unit_of_work_test.dart
-│   └── repositories/                             # Repositories (with fakes/in-memory impls)
-│       ├── product_repository_impl_test.dart
-│       ├── sale_repository_impl_test.dart
-│       ├── financial_transaction_repository_impl_test.dart
-│       ├── debt_repository_impl_test.dart
-│       └── auth_repository_impl_test.dart
+│ ├── datasources/local/
+│ │ ├── product_sqlite_data_source_test.dart
+│ │ ├── sale_sqlite_data_source_test.dart
+│ │ ├── stock_lot_sqlite_data_source_test.dart # FIFO order + store scope (W11)
+│ │ ├── purchase_sqlite_data_source_test.dart # Purchases with expiry/lot (W11)
+│ │ ├── financial_transaction_sqlite_data_source_test.dart
+│ │ ├── debt_sqlite_data_source_test.dart
+│ │ └── sqlite_unit_of_work_test.dart
+│ └── repositories/ # Repositories (with fakes/in-memory impls)
+│ ├── product_repository_impl_test.dart
+│ ├── sale_repository_impl_test.dart
+│ ├── financial_transaction_repository_impl_test.dart
+│ ├── debt_repository_impl_test.dart
+│ └── auth_repository_impl_test.dart
 ├── domain/
-│   ├── entities/                                 # financial_transaction_test, sale_test
-│   └── usecases/
-│       ├── add_debt_use_case_test.dart
-│       ├── add_financial_transaction_use_case_test.dart
-│       ├── get_cash_flow_use_case_test.dart
-│       ├── get_pending_debts_use_case_test.dart
-│       ├── get_settled_debts_use_case_test.dart
-│       ├── product_use_cases_test.dart
-│       ├── settle_debt_use_case_test.dart
-│       ├── process_sale_use_case_test.dart       # with fakes
-│       ├── process_sale_use_case_sqlite_test.dart # with a real in-memory database
-│       ├── fifo_stock_use_case_test.dart         # FIFO lot decrease (W11)
-│       └── add_purchase_use_case_test.dart       # Stock-in with expiry (W11)
-├── helpers/test_sqlite.dart                      # openTestDatabase(): sqlite in-memory + schema
+│ ├── entities/ # financial_transaction_test, sale_test
+│ └── usecases/
+│ ├── add_debt_use_case_test.dart
+│ ├── add_financial_transaction_use_case_test.dart
+│ ├── get_cash_flow_use_case_test.dart
+│ ├── get_pending_debts_use_case_test.dart
+│ ├── get_settled_debts_use_case_test.dart
+│ ├── product_use_cases_test.dart
+│ ├── settle_debt_use_case_test.dart
+│ ├── process_sale_use_case_test.dart # with fakes
+│ ├── process_sale_use_case_sqlite_test.dart # with a real in-memory database
+│ ├── fifo_stock_use_case_test.dart # FIFO lot decrease (W11)
+│ └── add_purchase_use_case_test.dart # Stock-in with expiry (W11)
+├── helpers/test_sqlite.dart # openTestDatabase(): sqlite in-memory + schema
 ├── presentation/
-│   ├── controllers/expiry_alerts_provider_test.dart  # Red/yellow alerts (W11)
-│   └── screens/
-│       ├── login_screen_test.dart
-│       ├── app_shell_test.dart
-│       ├── product_list_screen_test.dart
-│       ├── new_sale_sheet_test.dart
-│       ├── sales_screen_test.dart
-│       ├── sale_detail_screen_test.dart
-│       ├── financial_screen_test.dart
-│       ├── add_debt_sheet_test.dart
-│       └── debts_screen_test.dart
-└── widget_test.dart                              # Dashboard end-to-end with overrides (test/ root)
+│ ├── controllers/expiry_alerts_provider_test.dart # Red/yellow alerts (W11)
+│ └── screens/
+│ ├── login_screen_test.dart
+│ ├── app_shell_test.dart
+│ ├── product_list_screen_test.dart
+│ ├── new_sale_sheet_test.dart
+│ ├── sales_screen_test.dart
+│ ├── sale_detail_screen_test.dart
+│ ├── financial_screen_test.dart
+│ ├── add_debt_sheet_test.dart
+│ └── debts_screen_test.dart
+└── widget_test.dart # Dashboard end-to-end with overrides (test/ root)
 ```
 
 ---
@@ -93,15 +93,15 @@ test/
 ### Data (SQLite datasources/repositories)
 
 - `test/helpers/test_sqlite.dart`:
-  ```dart
-  Database openTestDatabase() {
-    AppDatabase.configureLoader();
-    final db = sqlite3.openInMemory();
-    db.execute('PRAGMA foreign_keys = ON;');
-    AppDatabase.createSchema(db);
-    return db;
-  }
-  ```
+ ```dart
+ Database openTestDatabase() {
+ AppDatabase.configureLoader();
+ final db = sqlite3.openInMemory();
+ db.execute('PRAGMA foreign_keys = ON;');
+ AppDatabase.createSchema(db);
+ return db;
+ }
+ ```
 - Test SQL, row mapping (enums by name, dates as epoch millis, bool 0/1), schema `CHECK`s and `SqliteUnitOfWork` (BEGIN/COMMIT/ROLLBACK, FIFO queue);
 - `stock_lot_sqlite_data_source_test.dart` validates the **query FIFO order** (expiry ASC → entry ASC), the per-store scope and the atomic `current_quantity` update; `quantity_test.dart` and `scale_barcode_test.dart` cover the milli-unit math and the `20PPPPPWWWWW` parser (incl. PLU normalization).
 
@@ -138,7 +138,7 @@ Runs `sqlcheck_stub.sql` (auth stubs) + `supabase/schema.sql` against a throwawa
 
 Additionally, **`scripts/sql_check_live.sh`** is the **read-only** live verification (31 checks, 7 of them W11: columns, `stock_lots`/RLS/indexes, RPC bodies and the lots invariant) — used by the [W11 migration runbook](18-migracao-w11.md).
 
-Run locally (Docker): `PGPASSWORD=... bash scripts/sql_check.sh [PGHOST] [PGUSER] [PGDATABASE]` (⚠️ destructive — throwaway DB only).
+Run locally (Docker): `PGPASSWORD=... bash scripts/sql_check.sh [PGHOST] [PGUSER] [PGDATABASE]` (Warning: destructive — throwaway DB only).
 
 ---
 

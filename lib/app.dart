@@ -17,26 +17,30 @@ import 'presentation/screens/auth/auth_gate.dart';
 /// — definidos no onboarding e alteráveis em Lojas → Ajustes. Sem tenant
 /// (login / super admin) o padrão é pt + MZN (mercado-alvo Moçambique).
 class DumbhanengueApp extends ConsumerWidget {
-  const DumbhanengueApp({super.key});
+ const DumbhanengueApp({super.key});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(tenantSettingsProvider);
+ @override
+ Widget build(BuildContext context, WidgetRef ref) {
+ final settings = ref.watch(tenantSettingsProvider);
 
-    Formatters.applySettings(
-      currencyCode: settings?.currencyCode ?? 'MZN',
-      language: settings?.language ?? 'pt',
-    );
+ Formatters.applySettings(
+ currencyCode: settings?.currencyCode ?? 'MZN',
+ language: settings?.language ?? 'pt',
+ );
 
-    return MaterialApp(
-      title: 'Dumbhanengue ERP',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      locale: settings?.locale ?? const Locale('pt'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: const AuthGate(),
-    );
-  }
+ return MaterialApp(
+ title: 'Dumbhanengue ERP',
+ debugShowCheckedModeBanner: false,
+ // V3 — dark total (design do canvas): o app é 100% escuro, sem
+ // seguir o brilho do sistema. O tema claro permanece definido para
+ // os testes de contraste/tipografia validarem ambas as variantes.
+ theme: AppTheme.dark,
+ darkTheme: AppTheme.dark,
+ themeMode: ThemeMode.dark,
+ locale: settings?.locale ?? const Locale('pt'),
+ localizationsDelegates: AppLocalizations.localizationsDelegates,
+ supportedLocales: AppLocalizations.supportedLocales,
+ home: const AuthGate(),
+ );
+ }
 }

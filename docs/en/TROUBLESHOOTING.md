@@ -10,7 +10,7 @@ A practical guide to solving the most common day-to-day app problems. To learn h
 2. Follow the steps in order — always start with the simplest.
 3. If the problem persists, check **Common error messages** and, finally, **When to contact support**.
 
-> ⚠️ **Golden rule**: before anything else, check that your phone has **internet** and that the app is **up to date** (app store). Many "errors" are just a missing connection or an old version.
+> **Warning:** **Golden rule**: before anything else, check that your phone has **internet** and that the app is **up to date** (app store). Many "errors" are just a missing connection or an old version.
 
 ---
 
@@ -42,7 +42,7 @@ A practical guide to solving the most common day-to-day app problems. To learn h
 2. Close and reopen the app and try again.
 
 ### "Product added! (photo not uploaded...)" appears
-- The product was saved ✅ — only the photo didn't upload (no internet or temporary error).
+- The product was saved ✓ — only the photo didn't upload (no internet or temporary error).
 - You can add the photo **later**, through product edit.
 - If it always happens, even with internet, contact **support** (it may be a server configuration).
 
@@ -140,7 +140,7 @@ A practical guide to solving the most common day-to-day app problems. To learn h
 ### "White screen / won't open"
 1. Close and reopen the app.
 2. Check your internet (the sign-in screen needs it).
-3. If it persists, **uninstall and reinstall** — your data stays on the server and returns when you sign in. ⚠️ Uninstalling **doesn't delete** your business data (it's in the cloud), but make sure you know your e-mail/password first.
+3. If it persists, **uninstall and reinstall** — your data stays on the server and returns when you sign in. Warning: Uninstalling **doesn't delete** your business data (it's in the cloud), but make sure you know your e-mail/password first.
 
 ### "The app suddenly changed language / currency"
 - **Currency** and **language** are set by the owner in **Stores → Settings** and apply to the **whole business**, instantly. If it changed suddenly, a setting was changed (or on another device with the same owner account) — just go back to **Stores → Settings** and choose again.

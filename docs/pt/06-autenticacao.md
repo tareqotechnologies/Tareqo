@@ -8,19 +8,19 @@ A autenticação é o primeiro passo do modelo **SaaS multi-tenant**: cada comer
 
 ```text
 main.dart
-  └─ SupabaseBootstrap.initialize()   # Supabase.initialize(url, anonKey)
-  └─ ServiceLocator.initialize()      # registra IAuthRepository → AuthRepositoryImpl → SupabaseAuthRemoteDataSourceImpl
-  └─ runApp(ProviderScope(...))
+ └─ SupabaseBootstrap.initialize() # Supabase.initialize(url, anonKey)
+ └─ ServiceLocator.initialize() # registra IAuthRepository → AuthRepositoryImpl → SupabaseAuthRemoteDataSourceImpl
+ └─ runApp(ProviderScope(...))
 
 AuthGate (tela raiz)
-  └─ authStateProvider (StreamProvider<AppUser?>)
-       ├─ loading → splash (restaurando sessão persistida)
-       ├─ user == null → LoginScreen
-       └─ user != null → roteia por papel (ver Multi-tenancy)             ├─ super admin (papel em banco) → AdminShell
-            ├─ sem tenant → TenantOnboardingScreen (escolher plano)
-            ├─ tenant pending → TenantPendingScreen (≤ 24h)
-            ├─ tenant rejected → TenantRejectedScreen (motivo)
-            └─ tenant approved → AppShell (ERP)
+ └─ authStateProvider (StreamProvider<AppUser?>)
+ ├─ loading → splash (restaurando sessão persistida)
+ ├─ user == null → LoginScreen
+ └─ user != null → roteia por papel (ver Multi-tenancy) ├─ super admin (papel em banco) → AdminShell
+ ├─ sem tenant → TenantOnboardingScreen (escolher plano)
+ ├─ tenant pending → TenantPendingScreen (≤ 24h)
+ ├─ tenant rejected → TenantRejectedScreen (motivo)
+ └─ tenant approved → AppShell (ERP)
 ```
 
 A cadeia completa (toda a conversão do `User` do Supabase para o `AppUser` do domínio acontece no datasource):
@@ -37,10 +37,10 @@ LoginScreen → SignInUseCase → IAuthRepository → AuthRepositoryImpl → Aut
 
 ```dart
 static const String url = String.fromEnvironment(
-  'SUPABASE_URL', defaultValue: 'https://dotklbpqmlnhcdifiukd.supabase.co',
+ 'SUPABASE_URL', defaultValue: 'https://dotklbpqmlnhcdifiukd.supabase.co',
 );
 static const String anonKey = String.fromEnvironment(
-  'SUPABASE_ANON_KEY', defaultValue: 'eyJ...',  // anon key pública por design
+ 'SUPABASE_ANON_KEY', defaultValue: 'eyJ...', // anon key pública por design
 );
 static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
 ```
@@ -50,7 +50,7 @@ static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
 
 ```bash
 flutter run --dart-define=SUPABASE_URL=https://seu-projeto.supabase.co \
-            --dart-define=SUPABASE_ANON_KEY=eyJ...
+ --dart-define=SUPABASE_ANON_KEY=eyJ...
 ```
 
 - Sem credenciais, `SupabaseBootstrap.initialize()` apenas loga um aviso; o app abre e o `authStateProvider` emite `null` (deslogado) — o login falha com mensagem amigável em vez de quebrar.
@@ -119,7 +119,7 @@ Detalhes da implementação (coluna `store_employees.is_active`, RPC e helpers) 
 3. **Modelo de receita:** a identidade identifica quem paga, qual plano e quais quotas aplicar;
 4. **Onboarding/retenção:** sessão persistente reduz atrito diário.
 
-> ⚠️ **Estado atual:** a autenticação está implementada e funcional, mas os **módulos de negócio (produtos, vendas, financeiro, fiado) ainda não são sincronizados por tenant** — a persistência é local (SQLite/memória). Sincronizar com o Supabase e ativar RLS é o próximo passo sugerido (ver [Visão geral](01-visao-geral.md#estado-atual-e-próximos-passos)).
+> **Atenção:** **Estado atual:** a autenticação está implementada e funcional, mas os **módulos de negócio (produtos, vendas, financeiro, fiado) ainda não são sincronizados por tenant** — a persistência é local (SQLite/memória). Sincronizar com o Supabase e ativar RLS é o próximo passo sugerido (ver [Visão geral](01-visao-geral.md#estado-atual-e-próximos-passos)).
 
 ---
 

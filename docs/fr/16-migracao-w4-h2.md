@@ -12,20 +12,20 @@
 > `25.50 → 2550` sans double application. Sans danger de le relancer autant de
 > fois que nécessaire.
 >
-> 🇵🇹 Portugais (source faisant autorité) : [`../pt/15-migracao-w4-h2.md`](../pt/15-migracao-w4-h2.md)
+> Portugais (source faisant autorité) : [`../pt/15-migracao-w4-h2.md`](../pt/15-migracao-w4-h2.md)
 
 ---
 
 ## Étape 0 — Prérequis
 
 - Accès au Dashboard du projet + **mot de passe de la base**
-  (Settings → Database → Connection string).
+ (Settings → Database → Connection string).
 - L'hôte direct du projet est **IPv6 uniquement** → utiliser le **pooler**
-  `aws-0-eu-north-1.pooler.supabase.com`.
+ `aws-0-eu-north-1.pooler.supabase.com`.
 - `psql` local **ou** Docker (`postgres:16` embarque `psql`).
-- ⚠️ **NE JAMAIS** exécuter `scripts/sql_check.sh` contre la base live — il
-  fait `DROP SCHEMA public CASCADE`. La vérification live passe uniquement par
-  `scripts/sql_check_live.sh` (lecture seule).
+- Attention : **NE JAMAIS** exécuter `scripts/sql_check.sh` contre la base live — il
+ fait `DROP SCHEMA public CASCADE`. La vérification live passe uniquement par
+ `scripts/sql_check_live.sh` (lecture seule).
 
 Définir l'URL (remplacer `SENHA`) :
 
@@ -36,12 +36,12 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 ## Étape 1 — Sauvegarde (obligatoire)
 
 - **Option rapide :** Dashboard → Database → **Backups** → « Create a backup »
-  (ou activer le PITR).
+ (ou activer le PITR).
 - **Option CLI** (port **5432** *session* pooler, adapté à `pg_dump`) :
 
 ```bash
 pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
-  --schema=public -f backup_pre_w4.sql
+ --schema=public -f backup_pre_w4.sql
 ```
 
 ## Étape 2 — Pré-vol (lecture seule, SQL Editor)
@@ -53,7 +53,7 @@ pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.poole
 SELECT table_name, column_name, data_type
 FROM information_schema.columns
 WHERE table_schema = 'public'
-  AND column_name IN ('purchase_price','sale_price','total_amount','unit_price','amount','price_monthly')
+ AND column_name IN ('purchase_price','sale_price','total_amount','unit_price','amount','price_monthly')
 ORDER BY 1, 2;
 ```
 
@@ -80,24 +80,24 @@ SELECT 'debts', count(*) FROM public.debts;
 
 ## Étape 3 — Appliquer `supabase/upgrade.sql`
 
-### Option A — psql via le pooler, UNE transaction (recommandé — convention du projet) ✅
+### Option A — psql via le pooler, UNE transaction (recommandé — convention du projet) ✓
 
 ```bash
 psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
 ```
 
 - `-1` = transaction unique : si **une quelconque** partie échoue (ex. la garde
-  S3), **tout** est annulé — aucun état partiel.
+ S3), **tout** est annulé — aucun état partiel.
 - Attendu : aucune erreur. En cas d'interruption, le message indique la raison
-  (ex. doublons en attente) ; corriger et réappliquer.
+ (ex. doublons en attente) ; corriger et réappliquer.
 
 ### Option B — SQL Editor du Dashboard
 
 1. Ouvrir le **SQL Editor** du projet.
 2. Coller le **contenu complet** de `supabase/upgrade.sql`.
 3. Exécuter. L'éditeur exécute le script en un seul lot ; en cas d'erreur il
-   s'arrête et affiche le message. Comme le script est idempotent, corriger et
-   relancer est sans danger.
+ s'arrête et affiche le message. Comme le script est idempotent, corriger et
+ relancer est sans danger.
 
 ## Étape 4 — Vérification post-migration (lecture seule)
 
@@ -108,9 +108,9 @@ SUPABASE_DB_URL="$SUPABASE_DB_URL" bash scripts/sql_check_live.sh
 ```
 
 - Attendu : **VERIFICAÇÃO CONCLUÍDA — todos os checks passaram** (14/14),
-  couvrant : 9 colonnes monétaires en `BIGINT`, zéro valeur fractionnaire, RPC
-  H2 présents (`get_cash_flow`/`get_sales_report`/`get_dashboard_kpis`) avec
-  `SECURITY DEFINER` + retours `BIGINT`.
+ couvrant : 9 colonnes monétaires en `BIGINT`, zéro valeur fractionnaire, RPC
+ H2 présents (`get_cash_flow`/`get_sales_report`/`get_dashboard_kpis`) avec
+ `SECURITY DEFINER` + retours `BIGINT`.
 
 **4.2 Contrôle manuel (SQL Editor) :**
 
@@ -119,7 +119,7 @@ SUPABASE_DB_URL="$SUPABASE_DB_URL" bash scripts/sql_check_live.sh
 SELECT table_name, column_name, data_type
 FROM information_schema.columns
 WHERE table_schema = 'public'
-  AND column_name IN ('purchase_price','sale_price','total_amount','unit_price','amount','price_monthly')
+ AND column_name IN ('purchase_price','sale_price','total_amount','unit_price','amount','price_monthly')
 ORDER BY 1, 2;
 -- Attendu : data_type = bigint sur les 9 colonnes.
 
@@ -134,7 +134,7 @@ UNION ALL SELECT 'debts', count(*) FROM public.debts WHERE amount % 1 <> 0;
 SELECT p.proname, pg_get_function_identity_arguments(p.oid) args
 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
 WHERE n.nspname = 'public'
-  AND p.proname IN ('get_cash_flow','get_sales_report','get_dashboard_kpis')
+ AND p.proname IN ('get_cash_flow','get_sales_report','get_dashboard_kpis')
 ORDER BY 1;
 ```
 
@@ -157,7 +157,7 @@ l'agrégation côté client) :
 
 ```sql
 ALTER TABLE public.products ALTER COLUMN purchase_price TYPE NUMERIC(12,2) USING (purchase_price / 100.0);
-ALTER TABLE public.products ALTER COLUMN sale_price     TYPE NUMERIC(12,2) USING (sale_price     / 100.0);
+ALTER TABLE public.products ALTER COLUMN sale_price TYPE NUMERIC(12,2) USING (sale_price / 100.0);
 -- … répéter pour sales.total_amount, sale_items.unit_price,
 -- financial_transactions.amount, debts.amount, purchases.total_amount,
 -- purchase_items.unit_price, plans.price_monthly
@@ -172,6 +172,6 @@ ALTER TABLE public.products ALTER COLUMN sale_price     TYPE NUMERIC(12,2) USING
 | 1 | Sauvegarde effectuée | le fichier `backup_pre_w4.sql` existe |
 | 2 | Pré-vol propre | aucun doublon en attente ; types `numeric` |
 | 3 | `upgrade.sql` appliqué | aucune erreur (transaction unique) |
-| 4 | `sql_check_live.sh` | ✅ 14/14 |
+| 4 | `sql_check_live.sh` | ✓ 14/14 |
 | 5 | Réapplication sans effet | idempotence confirmée |
 | 6 | App en mode Supabase | KPIs/rapports/cash flow avec les bonnes valeurs |

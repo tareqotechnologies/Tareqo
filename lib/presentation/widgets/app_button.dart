@@ -1,86 +1,82 @@
 import 'package:flutter/material.dart';
 
-/// Botão padrão do design system ultra-clean: altura 48, cantos 12, cores
-/// SÓLIDAS e texto `w400` (herdado do tema — o [FilledButtonTheme] global
-/// já aplica 48/12/w400; este componente padroniza as variantes).
-///
-/// - [AppButton.primary] — FilledButton no acento (ação principal);
-/// - [AppButton.secondary] — OutlinedButton na superfície (ação neutra);
-/// - [AppButton.danger] — FilledButton em vermelho sóbrio (ação destrutiva
-///   de confirmação — ex.: anular venda no diálogo).
-///
-/// Um [style] opcional permite sobrepor cores/estados específicos (ex.:
-/// botão secundário em laranja) sem abrir mão das medidas do design system
-/// (altura 48, cantos 12, w400 — herdados dos temas globais).
+import '../../core/theme/app_tokens.dart';
+
+/// Botão padrão V4 — variantes primary, secondary e danger.
 class AppButton extends StatelessWidget {
-  const AppButton.primary({
-    super.key,
-    required this.label,
-    this.onPressed,
-    this.icon,
-    this.style,
-  }) : _variant = _AppButtonVariant.primary;
+ const AppButton.primary({
+ super.key,
+ required this.label,
+ this.onPressed,
+ this.icon,
+ this.style,
+ this.expanded = false,
+ }) : _variant = _AppButtonVariant.primary;
 
-  const AppButton.secondary({
-    super.key,
-    required this.label,
-    this.onPressed,
-    this.icon,
-    this.style,
-  }) : _variant = _AppButtonVariant.secondary;
+ const AppButton.secondary({
+ super.key,
+ required this.label,
+ this.onPressed,
+ this.icon,
+ this.style,
+ this.expanded = false,
+ }) : _variant = _AppButtonVariant.secondary;
 
-  const AppButton.danger({
-    super.key,
-    required this.label,
-    this.onPressed,
-    this.icon,
-    this.style,
-  }) : _variant = _AppButtonVariant.danger;
+ const AppButton.danger({
+ super.key,
+ required this.label,
+ this.onPressed,
+ this.icon,
+ this.style,
+ this.expanded = false,
+ }) : _variant = _AppButtonVariant.danger;
 
-  final String label;
-  final VoidCallback? onPressed;
-  final Widget? icon;
+ final String label;
+ final VoidCallback? onPressed;
+ final Widget? icon;
+ final ButtonStyle? style;
+ final bool expanded;
+ final _AppButtonVariant _variant;
 
-  /// Sobreposição de estilo — merge sobre o estilo da variante/tema.
-  final ButtonStyle? style;
-  final _AppButtonVariant _variant;
+ @override
+ Widget build(BuildContext context) {
+ final scheme = Theme.of(context).colorScheme;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+ final Widget content;
+ if (icon != null) {
+ content = Row(
+ mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
+ mainAxisAlignment: MainAxisAlignment.center,
+ children: [icon!, const SizedBox(width: AppSpacing.xs), Text(label)],
+ );
+ } else {
+ content = Text(label);
+ }
 
-    final Widget content;
-    if (icon != null) {
-      content = Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [icon!, const SizedBox(width: 8), Text(label)],
-      );
-    } else {
-      content = Text(label);
-    }
+ final button = switch (_variant) {
+ _AppButtonVariant.primary => FilledButton(
+ onPressed: onPressed,
+ style: style,
+ child: content,
+ ),
+ _AppButtonVariant.secondary => OutlinedButton(
+ onPressed: onPressed,
+ style: style,
+ child: content,
+ ),
+ _AppButtonVariant.danger => FilledButton(
+ onPressed: onPressed,
+ style: FilledButton.styleFrom(
+ backgroundColor: scheme.error,
+ foregroundColor: scheme.onError,
+ ).merge(style),
+ child: content,
+ ),
+ };
 
-    return switch (_variant) {
-      _AppButtonVariant.primary => FilledButton(
-          onPressed: onPressed,
-          style: style,
-          child: content,
-        ),
-      _AppButtonVariant.secondary => OutlinedButton(
-          onPressed: onPressed,
-          style: style,
-          child: content,
-        ),
-      _AppButtonVariant.danger => FilledButton(
-          onPressed: onPressed,
-          style: FilledButton.styleFrom(
-            backgroundColor: scheme.error,
-            foregroundColor: scheme.onError,
-          ).merge(style),
-          child: content,
-        ),
-    };
-  }
+ if (!expanded) return button;
+ return SizedBox(width: double.infinity, child: button);
+ }
 }
 
 enum _AppButtonVariant { primary, secondary, danger }

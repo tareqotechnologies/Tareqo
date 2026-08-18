@@ -7,12 +7,12 @@ part 'store.g.dart';
 /// Fase 2, seu próprio estoque e vendas (escopo por `store_id`).
 @freezed
 abstract class Store with _$Store {
-  const factory Store({
-    required String id,
-    required String tenantId,
-    required String name,
-    @Default('') String address,
-  }) = _Store;
+ const factory Store({
+ required String id,
+ required String tenantId,
+ required String name,
+ @Default('') String address,
+ }) = _Store;
 
-  factory Store.fromJson(Map<String, dynamic> json) => _$StoreFromJson(json);
+ factory Store.fromJson(Map<String, dynamic> json) => _$StoreFromJson(json);
 }

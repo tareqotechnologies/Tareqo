@@ -349,10 +349,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get appNavHome => 'Accueil';
 
   @override
-  String get appNavProducts => 'Produits';
+  String get appNavSales => 'Ventes';
 
   @override
-  String get appNavSales => 'Ventes';
+  String get appNavWallet => 'Portefeuille';
+
+  @override
+  String get appNavMenu => 'Menu';
+
+  @override
+  String get appNavProducts => 'Produits';
 
   @override
   String get appNavFinancial => 'Finances';
@@ -362,6 +368,39 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get appNavCustomers => 'Clients';
+
+  @override
+  String get fabMenuTitle => 'Nouvelle action';
+
+  @override
+  String get fabMenuSubtitle => 'Que souhaitez-vous faire ?';
+
+  @override
+  String get fabMenuNewSale => 'Nouvelle vente';
+
+  @override
+  String get fabMenuNewSaleHint => 'Panier · déduction de stock · caisse';
+
+  @override
+  String get fabMenuExpense => 'Enregistrer une dépense';
+
+  @override
+  String get fabMenuExpenseHint => 'Sortie de caisse avec catégorie';
+
+  @override
+  String get fabMenuAddProduct => 'Ajouter un produit';
+
+  @override
+  String get fabMenuAddProductHint => 'Catalogue · prix · stock initial';
+
+  @override
+  String get fabMenuAddDebt => 'Enregistrer un crédit';
+
+  @override
+  String get fabMenuAddDebtHint => 'À recevoir ou à payer';
+
+  @override
+  String get fabMenuCancel => 'Annuler';
 
   @override
   String syncPendingCount(int count) {
@@ -398,7 +437,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String dashboardGreeting(String name) {
-    return 'Bonjour, $name 👋';
+    return 'Bonjour, $name';
   }
 
   @override
@@ -474,6 +513,89 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dashboardLowStock => 'Stock faible';
+
+  @override
+  String get dashboardKpisError => 'Impossible de charger les indicateurs.';
+
+  @override
+  String get dashboardActivityTitle => 'Activité du jour';
+
+  @override
+  String dashboardActivityEvents(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count événements',
+      one: '1 événement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashboardActivityMinutesAgo(Object count) {
+    return 'il y a $count min';
+  }
+
+  @override
+  String dashboardActivityHoursAgo(Object count) {
+    return 'il y a $count h';
+  }
+
+  @override
+  String get dashboardDateToday => 'Aujourd\'hui';
+
+  @override
+  String get dashboardMetricSales => 'Ventes';
+
+  @override
+  String get dashboardMetricCash => 'Caisse';
+
+  @override
+  String get dashboardMetricReceivables => 'À recevoir';
+
+  @override
+  String dashboardFiadoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count crédits',
+      one: '1 crédit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardActivityEmpty =>
+      'Aucune activité enregistrée pour l\'instant.';
+
+  @override
+  String get dashboardActivitySeeAll => 'Tout voir';
+
+  @override
+  String dashboardStockEntry(String product) {
+    return 'Stock · $product';
+  }
+
+  @override
+  String dashboardStockEntryDetail(String quantity, String time) {
+    return 'Entrée de $quantity · $time';
+  }
+
+  @override
+  String get dashboardFiadoPayment => 'Paiement à crédit';
+
+  @override
+  String dashboardExpenseRow(String description) {
+    return 'Dépense · $description';
+  }
+
+  @override
+  String dashboardLowStockDetail(String name, String quantity) {
+    return '$name · $quantity restantes';
+  }
+
+  @override
+  String get dashboardAlertBadge => 'Alerte';
 
   @override
   String dashboardSaleItems(int count) {
@@ -772,6 +894,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsFilterTooltip => 'Filtrer les produits';
 
   @override
+  String get productsFilterAll => 'Tous';
+
+  @override
+  String productsFilterAllCount(int count) {
+    return 'Tous · $count';
+  }
+
+  @override
+  String productsFilterLowCount(int count) {
+    return 'Stock faible · $count';
+  }
+
+  @override
+  String get productsColProduct => 'Produit / SKU';
+
+  @override
+  String get productsColPrice => 'Prix · Stock';
+
+  @override
   String get productsSearchHint => 'Rechercher un produit...';
 
   @override
@@ -862,6 +1003,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsInactive => 'Inactif';
 
   @override
+  String get productsFilterInactive => 'Inactifs';
+
+  @override
   String get productsActiveLabel => 'Produit actif';
 
   @override
@@ -883,6 +1027,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productsSectionStatus => 'Statut';
+
+  @override
+  String customersHeaderCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clients',
+      one: '1 client',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get customersColCustomer => 'Client';
+
+  @override
+  String get customersColContact => 'Contact / Crédit';
 
   @override
   String get customersSearchHint => 'Rechercher un client...';
@@ -966,7 +1127,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get purchasesEmptyFilteredTitle => 'Aucun achat trouvé';
 
   @override
-  String get purchasesEmptyFilteredSubtitle => 'Ajustez le filtre de période.';
+  String get purchasesEmptyFilteredSubtitle =>
+      'Ajustez la recherche ou les filtres.';
 
   @override
   String get purchasesClearFilters => 'Effacer les filtres';
@@ -1111,10 +1273,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financialBalance => 'Solde';
 
   @override
+  String get financialPeriodBalance => 'Solde de la période';
+
+  @override
+  String get financialSwipeHint => 'Glissez pour les dépenses →';
+
+  @override
   String get financialTransactions => 'Transactions';
 
   @override
   String get financialLoadError => 'Impossible de charger les transactions.';
+
+  @override
+  String get financialCashFlowError =>
+      'Impossible de charger le flux de trésorerie.';
 
   @override
   String get financialEmptyTitle => 'Aucune transaction';
@@ -1280,6 +1452,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtsTitle => 'Crédit (fiado)';
 
   @override
+  String get debtsHeaderSubtitle => 'Crédit à recevoir et à payer';
+
+  @override
   String get debtsAddDebt => 'Enregistrer un crédit';
 
   @override
@@ -1293,6 +1468,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debtsTotalPending => 'Total à recevoir';
+
+  @override
+  String get debtsOverdueStat => 'En retard';
+
+  @override
+  String get debtsSettledStat => 'Soldées';
 
   @override
   String get debtsNoPendingCustomers => 'Aucun client en attente';
@@ -1315,11 +1496,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtsLoadError => 'Impossible de charger les dettes.';
 
   @override
-  String get debtsEmptyPendingTitle => 'Aucun crédit en attente 🎉';
+  String get debtsEmptyPendingTitle => 'Aucun crédit en attente';
 
   @override
   String get debtsEmptyPendingSubtitle =>
-      'Aucun client ne doit rien pour le moment.';
+      'Quand un client achète à crédit, la dette apparaît ici.';
 
   @override
   String get debtsTotalSettled => 'Total soldé';
@@ -1388,6 +1569,20 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String debtsDueAgo(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours',
+      one: '1 jour',
+    );
+    return 'Échu il y a $_temp0';
+  }
+
+  @override
+  String get debtsDueTodayDesc => 'Échoit aujourd\'hui';
+
+  @override
   String get debtsSettleAction => 'Soldé la dette';
 
   @override
@@ -1436,6 +1631,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get salesNewSale => 'Nouvelle vente';
 
   @override
+  String salesCartSection(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+    );
+    return 'Panier · $_temp0';
+  }
+
+  @override
   String get salesLoadError => 'Impossible de charger les ventes.';
 
   @override
@@ -1455,6 +1661,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paymentFilterCard => 'Carte';
 
   @override
+  String get paymentFilterAll => 'Toutes';
+
+  @override
   String get salesStatusPaid => 'Payée';
 
   @override
@@ -1465,6 +1674,18 @@ class AppLocalizationsFr extends AppLocalizations {
       other: '$count transactions',
       one: '1 transaction',
       zero: '0 transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String salesPdvCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ventes',
+      one: '1 vente',
+      zero: '0 vente',
     );
     return '$_temp0';
   }
@@ -1848,6 +2069,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get salesBarcodeLabel => 'Code-barres';
+
+  @override
+  String get salesBarcodeHint =>
+      'Étiquettes de balance et PLU — caméra ou lecteur USB';
 
   @override
   String get salesBarcodeScan => 'Lire avec la caméra';

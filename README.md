@@ -3,10 +3,10 @@
 > Sistema de gestão empresarial multi-tenant (estoque, vendas, compras, financeiro, crédito e relatórios) construído em **Flutter** com **Clean Architecture** — com persistência local (SQLite), SaaS autenticado (Supabase + RLS) e interface **pt/en/fr**.
 
 <p align="center">
-  <a href="docs/pt/README.md"><strong>📚 Documentação (pt)</strong></a> ·
-  <a href="docs/en/README.md"><strong>📚 Documentation (en)</strong></a> ·
-  <a href="docs/fr/README.md"><strong>📚 Documentation (fr)</strong></a> ·
-  <a href="README.en.md"><strong>🌐 English version</strong></a>
+ <a href="docs/pt/README.md"><strong> Documentação (pt)</strong></a> ·
+ <a href="docs/en/README.md"><strong> Documentation (en)</strong></a> ·
+ <a href="docs/fr/README.md"><strong> Documentation (fr)</strong></a> ·
+ <a href="README.en.md"><strong> English version</strong></a>
 </p>
 
 ---
@@ -50,7 +50,7 @@ flutter run --flavor dev --dart-define-from-file=env/dev.env
 # Produção (release, assinada): usa env/prod.env (NUNCA versionado —
 # veja env/prod.env.example) + key.properties (veja docs/13-build-e-publicacao).
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env
+ --dart-define-from-file=env/prod.env
 ```
 
 > A anon key do Supabase é **pública por design** (a segurança real vem do RLS). **Nunca** embuta a *service role key* no cliente.

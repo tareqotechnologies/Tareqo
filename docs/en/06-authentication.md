@@ -8,19 +8,19 @@ Authentication is the first step of the **SaaS multi-tenant** model: each mercha
 
 ```text
 main.dart
-  └─ SupabaseBootstrap.initialize()   # Supabase.initialize(url, anonKey)
-  └─ ServiceLocator.initialize()      # registers IAuthRepository → AuthRepositoryImpl → SupabaseAuthRemoteDataSourceImpl
-  └─ runApp(ProviderScope(...))
+ └─ SupabaseBootstrap.initialize() # Supabase.initialize(url, anonKey)
+ └─ ServiceLocator.initialize() # registers IAuthRepository → AuthRepositoryImpl → SupabaseAuthRemoteDataSourceImpl
+ └─ runApp(ProviderScope(...))
 
 AuthGate (root screen)
-  └─ authStateProvider (StreamProvider<AppUser?>)
-       ├─ loading → splash (restoring persisted session)
-       ├─ user == null → LoginScreen
-       └─ user != null → routes by role (see Multi-tenancy)             ├─ super admin (DB-backed role) → AdminShell
-            ├─ no tenant → TenantOnboardingScreen (pick a plan)
-            ├─ tenant pending → TenantPendingScreen (≤ 24h)
-            ├─ tenant rejected → TenantRejectedScreen (reason)
-            └─ tenant approved → AppShell (ERP)
+ └─ authStateProvider (StreamProvider<AppUser?>)
+ ├─ loading → splash (restoring persisted session)
+ ├─ user == null → LoginScreen
+ └─ user != null → routes by role (see Multi-tenancy) ├─ super admin (DB-backed role) → AdminShell
+ ├─ no tenant → TenantOnboardingScreen (pick a plan)
+ ├─ tenant pending → TenantPendingScreen (≤ 24h)
+ ├─ tenant rejected → TenantRejectedScreen (reason)
+ └─ tenant approved → AppShell (ERP)
 ```
 
 The full chain (all conversion of the Supabase `User` into the domain `AppUser` happens in the datasource):
@@ -37,10 +37,10 @@ LoginScreen → SignInUseCase → IAuthRepository → AuthRepositoryImpl → Aut
 
 ```dart
 static const String url = String.fromEnvironment(
-  'SUPABASE_URL', defaultValue: 'https://dotklbpqmlnhcdifiukd.supabase.co',
+ 'SUPABASE_URL', defaultValue: 'https://dotklbpqmlnhcdifiukd.supabase.co',
 );
 static const String anonKey = String.fromEnvironment(
-  'SUPABASE_ANON_KEY', defaultValue: 'eyJ...',  // anon key public by design
+ 'SUPABASE_ANON_KEY', defaultValue: 'eyJ...', // anon key public by design
 );
 static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
 ```
@@ -51,7 +51,7 @@ static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
 ```bash
 flutter run --flavor dev --dart-define-from-file=env/dev.env
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env
+ --dart-define-from-file=env/prod.env
 ```
 
 - **Fail-fast in release (S2):** a **release** build with the embedded defaults (or without `--flavor prod`) throws at startup — a published APK can never silently point at the dev project. In debug the defaults are fine for development.
@@ -97,7 +97,7 @@ flutter build appbundle --flavor prod --release \
 3. **Automatic renewal:** gotrue renews the access token with the refresh token before it expires.
 4. **Reactivity:** sign in/out emit events on the same stream; navigation and any session-dependent state react automatically.
 
-> ⚠️ **Migration note:** installations with a session previously stored by the SDK default will sign out **once** after upgrading (the session moves to the Keychain/Keystore).
+> **Warning:** **Migration note:** installations with a session previously stored by the SDK default will sign out **once** after upgrading (the session moves to the Keychain/Keystore).
 
 ---
 
@@ -123,7 +123,7 @@ Implementation details (the `store_employees.is_active` column, RPC and helpers)
 3. **Revenue model:** identity identifies who pays, which plan and which quotas apply;
 4. **Onboarding/retention:** persistent session reduces daily friction.
 
-> ✅ **Current state:** authentication + **full SaaS sync** are implemented — business modules (products, sales, finance, credit, customers, purchases) persist per tenant **and per store** in Supabase with RLS + anti-forgery triggers and atomic money RPCs.
+> ✓ **Current state:** authentication + **full SaaS sync** are implemented — business modules (products, sales, finance, credit, customers, purchases) persist per tenant **and per store** in Supabase with RLS + anti-forgery triggers and atomic money RPCs.
 
 ---
 

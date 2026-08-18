@@ -2,7 +2,7 @@
 
 > Glossário dos termos técnicos usados na documentação, com o equivalente nas três línguas: **português** (variante usada nos docs — pt-BR), **inglês** e **francês**. As entradas seguem o uso real dos capítulos (`docs/pt/`, `docs/en/`, `docs/fr/`).
 >
-> 🌐 [Glossary in English →](../en/GLOSSARY.md) · [Glossaire en français →](../fr/GLOSSAIRE.md) · Versão em português (esta página).
+> [Glossary in English →](../en/GLOSSARY.md) · [Glossaire en français →](../fr/GLOSSAIRE.md) · Versão em português (esta página).
 
 ## 1. Negócio (domínio)
 
@@ -50,7 +50,7 @@
 | transferência bancária | bank transfer | virement |
 | M-Pesa | M-Pesa | M-Pesa |
 | E-Mola | E-Mola | E-Mola |
-| metical (MTn) | metical (MTn) | metical (MTn) |
+| metical (MZN) | metical (MZN) | metical (MZN) |
 | centavos | cents | centimes |
 
 ## 3. Acessos e papéis

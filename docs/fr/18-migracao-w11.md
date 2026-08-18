@@ -9,18 +9,18 @@
 > Ce que fait la Partie 22 (idempotente — mêmes conventions que les Parties
 > 7/8) :
 > 1. **22.1** — nouvelles colonnes sur `products` (`code`/PLU,
->    `venda_por_fracao`, `unit_label`) et `purchase_items.expiry_date`
->    (péremption optionnelle par article) ;
+> `venda_por_fracao`, `unit_label`) et `purchase_items.expiry_date`
+> (péremption optionnelle par article) ;
 > 2. **22.2** — table `stock_lots` (un lot = un bon de réception : péremption,
->    quantité initiale/actuelle, coût d'acquisition) + index FIFO ;
+> quantité initiale/actuelle, coût d'acquisition) + index FIFO ;
 > 3. **22.3** — migration **×1000** de TOUTES les quantités (products, sale
->    items et purchase items) + **backfill des lots initiaux** pour chaque
->    produit avec du stock (l'invariant `stock = Σ lots` tient dès le premier
->    jour) ;
+> items et purchase items) + **backfill des lots initiaux** pour chaque
+> produit avec du stock (l'invariant `stock = Σ lots` tient dès le premier
+> jour) ;
 > 4. **22.4** — RLS + politiques + triggers sur `stock_lots` ;
 > 5. **22.5/22.6/22.7** — RPC recréés : `process_sale` avec **consommation
->    FIFO** des lots, `process_purchase` **créant des lots** à la réception,
->    `get_sales_report` avec des maths en millièmes.
+> FIFO** des lots, `process_purchase` **créant des lots** à la réception,
+> `get_sales_report` avec des maths en millièmes.
 >
 > Le script est **100% idempotent** et a été validé contre un vrai Postgres
 > 16 (Docker, config CI exacte) : le `sql_check.sh` complet est vert (y
@@ -28,26 +28,26 @@
 > la migration `25.50 → 2550` + `5 → 5000` sans effet de bord). Sans danger
 > de le relancer autant de fois que nécessaire.
 >
-> ⚠️ **IMPORTANT — à lire avant d'appliquer :** la Partie 22.3 multiplie
+> **Attention :** **IMPORTANT — à lire avant d'appliquer :** la Partie 22.3 multiplie
 > **les quantités existantes par 1000** (5 unités → 5000 millièmes). Après
 > cela, **aucun client hérité** (versions d'app pré-W11) ne doit écrire de
 > données — la nouvelle version de l'app doit être publiée dans la même
 > fenêtre (voir l'étape 6).
 >
-> 🇵🇹 Portugais (source faisant autorité) : [`../pt/16-migracao-w11.md`](../pt/16-migracao-w11.md)
+> Portugais (source faisant autorité) : [`../pt/16-migracao-w11.md`](../pt/16-migracao-w11.md)
 
 ---
 
 ## Étape 0 — Prérequis
 
 - Accès au Dashboard du projet + **mot de passe de la base**
-  (Settings → Database → Connection string).
+ (Settings → Database → Connection string).
 - L'hôte direct du projet est **IPv6 uniquement** → utiliser le **pooler**
-  `aws-0-eu-north-1.pooler.supabase.com`.
+ `aws-0-eu-north-1.pooler.supabase.com`.
 - `psql` local **ou** Docker (`postgres:16` embarque `psql`).
-- ⚠️ **NE JAMAIS** exécuter `scripts/sql_check.sh` contre la base live — il
-  fait `DROP SCHEMA public CASCADE`. La vérification live passe uniquement par
-  `scripts/sql_check_live.sh` (lecture seule).
+- Attention : **NE JAMAIS** exécuter `scripts/sql_check.sh` contre la base live — il
+ fait `DROP SCHEMA public CASCADE`. La vérification live passe uniquement par
+ `scripts/sql_check_live.sh` (lecture seule).
 - **App construite sur la version W11** prête à publier (voir l'étape 6).
 
 Définir l'URL (remplacer `SENHA`) :
@@ -59,12 +59,12 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 ## Étape 1 — Sauvegarde (obligatoire)
 
 - **Option rapide :** Dashboard → Database → **Backups** → « Create a backup »
-  (ou activer le PITR).
+ (ou activer le PITR).
 - **Option CLI** (port **5432** *session* pooler, adapté à `pg_dump`) :
 
 ```bash
 pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
-  --schema=public -f backup_pre_w11.sql
+ --schema=public -f backup_pre_w11.sql
 ```
 
 ## Étape 2 — Pré-vol (lecture seule, SQL Editor)
@@ -97,27 +97,27 @@ SELECT 'purchase_items', count(*) FROM public.purchase_items;
 
 ## Étape 3 — Appliquer `supabase/upgrade.sql`
 
-### Option A — psql via le pooler, UNE transaction (recommandé — convention du projet) ✅
+### Option A — psql via le pooler, UNE transaction (recommandé — convention du projet) ✓
 
 ```bash
 psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
 ```
 
 - `-1` = transaction unique : si **une quelconque** partie échoue, **tout**
-  est annulé — aucun état partiel.
+ est annulé — aucun état partiel.
 - Attendu : aucune erreur (la Partie 22 n'émet que des NOTICE « already
-  exists » sur les colonnes/tables déjà créées — normal, c'est l'idempotence
-  qui travaille).
+ exists » sur les colonnes/tables déjà créées — normal, c'est l'idempotence
+ qui travaille).
 - La migration ×1000 + le backfill ne s'exécutent **que si `stock_lots` est
-  vide** (garde de la Partie 22.3) — relancer le script est un no-op.
+ vide** (garde de la Partie 22.3) — relancer le script est un no-op.
 
 ### Option B — SQL Editor du Dashboard
 
 1. Ouvrir le **SQL Editor** du projet.
 2. Coller le **contenu complet** de `supabase/upgrade.sql`.
 3. Exécuter. L'éditeur exécute le script en un seul lot ; en cas d'erreur il
-   s'arrête et affiche le message. Comme le script est idempotent, corriger et
-   relancer est sans danger.
+ s'arrête et affiche le message. Comme le script est idempotent, corriger et
+ relancer est sans danger.
 
 ## Étape 4 — Vérification post-migration (lecture seule)
 
@@ -131,16 +131,16 @@ SUPABASE_DB_URL="$SUPABASE_DB_URL" bash scripts/sql_check_live.sh
 ```
 
 - Attendu : **VERIFICAÇÃO CONCLUÍDA — todos os checks passaram**, y compris
-  les 7 nouveaux contrôles W11 (25–31) :
-  - 25 — colonnes `products.code` / `venda_por_fracao` / `unit_label` ;
-  - 26 — `purchase_items.expiry_date` ;
-  - 27 — table `stock_lots` + RLS ON + index FIFO ;
-  - 28 — `process_sale` avec consommation FIFO des lots en millièmes ;
-  - 29 — `process_purchase` créant des lots ;
-  - 30 — `get_sales_report` avec des maths en millièmes ;
-  - 31 — **invariant `stock = Σ lots actifs`** (compte combien de produits ont
-    un stock différent de la somme de leurs lots — attendu `0` juste après la
-    migration).
+ les 7 nouveaux contrôles W11 (25–31) :
+ - 25 — colonnes `products.code` / `venda_por_fracao` / `unit_label` ;
+ - 26 — `purchase_items.expiry_date` ;
+ - 27 — table `stock_lots` + RLS ON + index FIFO ;
+ - 28 — `process_sale` avec consommation FIFO des lots en millièmes ;
+ - 29 — `process_purchase` créant des lots ;
+ - 30 — `get_sales_report` avec des maths en millièmes ;
+ - 31 — **invariant `stock = Σ lots actifs`** (compte combien de produits ont
+ un stock différent de la somme de leurs lots — attendu `0` juste après la
+ migration).
 
 **4.2 Contrôle manuel (SQL Editor) :**
 
@@ -154,11 +154,11 @@ ORDER BY created_at DESC LIMIT 5;
 SELECT count(*) AS products_with_stock_out_of_lot_sum
 FROM public.products p
 WHERE p.stock_quantity > 0
-  AND COALESCE((
-    SELECT SUM(l.current_quantity) FROM public.stock_lots l
-    WHERE l.product_id = p.id AND l.store_id = p.store_id
-      AND l.current_quantity > 0
-  ), 0) <> p.stock_quantity;
+ AND COALESCE((
+ SELECT SUM(l.current_quantity) FROM public.stock_lots l
+ WHERE l.product_id = p.id AND l.store_id = p.store_id
+ AND l.current_quantity > 0
+ ), 0) <> p.stock_quantity;
 -- Attendu : 0.
 
 -- 3) Lots backfillés (sans péremption — produits non périssables) ?
@@ -169,7 +169,7 @@ FROM public.stock_lots;
 SELECT p.proname
 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
 WHERE n.nspname = 'public'
-  AND p.proname IN ('process_sale','process_purchase','get_sales_report')
+ AND p.proname IN ('process_sale','process_purchase','get_sales_report')
 ORDER BY 1;
 ```
 
@@ -193,16 +193,16 @@ La migration change le **contrat des quantités** (unités → millièmes) dans 
 base. Pour éviter de mélanger les échelles :
 
 1. **Publier la version W11 de l'app immédiatement après l'étape 3** — la
-   nouvelle app est la seule à lire/écrire les quantités correctement.
+ nouvelle app est la seule à lire/écrire les quantités correctement.
 2. Les clients hérités encore ouverts peuvent échouer à écrire (quantité hors
-   échelle) — la migration est une **courte fenêtre de maintenance** :
-   appliquer `upgrade.sql` et publier l'app dès que possible.
+ échelle) — la migration est une **courte fenêtre de maintenance** :
+ appliquer `upgrade.sql` et publier l'app dès que possible.
 3. L'app W11 reste **100% compatible hors-ligne** (le SQLite local se migre
-   lui-même via la migration W11 dans `AppDatabase`).
+ lui-même via la migration W11 dans `AppDatabase`).
 
 ## Rollback (seulement si nécessaire)
 
-> ⚠️ Il n'y a pas de rollback automatique pour la Partie 22.3 (×1000 + lots) —
+> **Attention :** Il n'y a pas de rollback automatique pour la Partie 22.3 (×1000 + lots) —
 > restaurer via la **sauvegarde** (étape 1). Pour revenir en arrière : restaurer
 > la base depuis `backup_pre_w11.sql` **et** publier l'ancienne version de
 > l'app.
@@ -216,7 +216,7 @@ base. Pour éviter de mélanger les échelles :
 | 1 | Sauvegarde effectuée | le fichier `backup_pre_w11.sql` existe |
 | 2 | Pré-vol propre | `stock_lots` n'existe pas ; échantillon de quantités noté |
 | 3 | `upgrade.sql` appliqué | aucune erreur (transaction unique) |
-| 4 | `sql_check_live.sh` | ✅ tous les contrôles (incl. W11 25–31) |
+| 4 | `sql_check_live.sh` | ✓ tous les contrôles (incl. W11 25–31) |
 | 5 | Invariant `stock = Σ lots actifs` | `products_with_stock_out_of_lot_sum` = 0 |
 | 6 | Réapplication sans effet | idempotence confirmée (étape 5) |
 | 7 | App W11 publiée | aucun client hérité n'écrit dans la même fenêtre |

@@ -7,41 +7,41 @@ part of 'financial_transaction.dart';
 // **************************************************************************
 
 _FinancialTransaction _$FinancialTransactionFromJson(
-  Map<String, dynamic> json,
+ Map<String, dynamic> json,
 ) => _FinancialTransaction(
-  id: json['id'] as String,
-  storeId: json['storeId'] as String? ?? 'st1',
-  description: json['description'] as String,
-  amountCents: (json['amountCents'] as num).toInt(),
-  type: $enumDecode(_$TransactionTypeEnumMap, json['type']),
-  category: json['category'] as String,
-  date: DateTime.parse(json['date'] as String),
-  status:
-      $enumDecodeNullable(_$TransactionStatusEnumMap, json['status']) ??
-      TransactionStatus.paid,
-  debtId: json['debtId'] as String?,
+ id: json['id'] as String,
+ storeId: json['storeId'] as String? ?? 'st1',
+ description: json['description'] as String,
+ amountCents: (json['amountCents'] as num).toInt(),
+ type: $enumDecode(_$TransactionTypeEnumMap, json['type']),
+ category: json['category'] as String,
+ date: DateTime.parse(json['date'] as String),
+ status:
+ $enumDecodeNullable(_$TransactionStatusEnumMap, json['status']) ??
+ TransactionStatus.paid,
+ debtId: json['debtId'] as String?,
 );
 
 Map<String, dynamic> _$FinancialTransactionToJson(
-  _FinancialTransaction instance,
+ _FinancialTransaction instance,
 ) => <String, dynamic>{
-  'id': instance.id,
-  'storeId': instance.storeId,
-  'description': instance.description,
-  'amountCents': instance.amountCents,
-  'type': _$TransactionTypeEnumMap[instance.type]!,
-  'category': instance.category,
-  'date': instance.date.toIso8601String(),
-  'status': _$TransactionStatusEnumMap[instance.status]!,
-  'debtId': instance.debtId,
+ 'id': instance.id,
+ 'storeId': instance.storeId,
+ 'description': instance.description,
+ 'amountCents': instance.amountCents,
+ 'type': _$TransactionTypeEnumMap[instance.type]!,
+ 'category': instance.category,
+ 'date': instance.date.toIso8601String(),
+ 'status': _$TransactionStatusEnumMap[instance.status]!,
+ 'debtId': instance.debtId,
 };
 
 const _$TransactionTypeEnumMap = {
-  TransactionType.income: 'income',
-  TransactionType.expense: 'expense',
+ TransactionType.income: 'income',
+ TransactionType.expense: 'expense',
 };
 
 const _$TransactionStatusEnumMap = {
-  TransactionStatus.paid: 'paid',
-  TransactionStatus.pending: 'pending',
+ TransactionStatus.paid: 'paid',
+ TransactionStatus.pending: 'pending',
 };

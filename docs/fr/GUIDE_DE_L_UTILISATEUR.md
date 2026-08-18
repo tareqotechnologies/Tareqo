@@ -24,11 +24,11 @@ L'écran d'accueil affiche le résumé de votre entreprise **dans le magasin act
 - **Solde en caisse**
 - **À recevoir (crédit)**
 - **Stock en produits**
-- **Alertes** ⚠️ (péremption) — voir ci-dessous
+- **Alertes** Attention : (péremption) — voir ci-dessous
 
 ### Alertes de péremption
-- 🟡 **Jaune** = le produit **va bientôt expirer** (moins de 30 jours de validité).
-- 🔴 **Rouge** = le produit **a déjà expiré** et il reste du stock.
+- ◔ **Jaune** = le produit **va bientôt expirer** (moins de 30 jours de validité).
+- ● **Rouge** = le produit **a déjà expiré** et il reste du stock.
 - Touchez l'alerte pour voir le produit et le lot concernés.
 
 ### Actions rapides
@@ -47,7 +47,7 @@ Le système peut avoir **plusieurs magasins** (ex. : Magasin central, Magasin du
 - Pour changer : **Magasins** → onglet **Réglages** → section **« Magasin actif »** → touchez le magasin souhaité.
 - Tout (stock, ventes, finances, rapports) affiche alors les données du magasin choisi.
 
-> 💡 Avec un seul magasin, cette section n'apparaît pas — il n'y a rien à choisir.
+> Avec un seul magasin, cette section n'apparaît pas — il n'y a rien à choisir.
 
 ---
 
@@ -70,7 +70,7 @@ Le système peut avoir **plusieurs magasins** (ex. : Magasin central, Magasin du
 - **Désactiver** (`Produit actif` désactivé) : le produit disparaît du PDV et des achats, mais **reste dans l'historique** avec son stock conservé — vous pouvez le réactiver plus tard.
 - Pour retirer la photo, touchez **Retirer la photo**.
 
-> ⚠️ Si la photo ne s'envoie pas (ex. : sans internet), le produit est enregistré quand même — vous verrez un avertissement et pourrez ajouter la photo plus tard via l'édition.
+> **Attention :** Si la photo ne s'envoie pas (ex. : sans internet), le produit est enregistré quand même — vous verrez un avertissement et pourrez ajouter la photo plus tard via l'édition.
 
 ---
 
@@ -82,7 +82,7 @@ Le système peut avoir **plusieurs magasins** (ex. : Magasin central, Magasin du
 4. Choisissez le **moyen de paiement** : Espèces, Carte de débit, Carte de crédit, M-Pesa, E-Mola ou Virement.
 5. Touchez **Confirmer la vente**.
 
-> ✅ Le stock est déduit automatiquement — **d'abord le lot le plus ancien** (FIFO), pour que rien n'expire en rayon.
+> ✓ Le stock est déduit automatiquement — **d'abord le lot le plus ancien** (FIFO), pour que rien n'expire en rayon.
 
 ### Reçu et partage
 - Touchez une vente dans la liste pour voir le **détail** (articles, total, moyen de paiement).
@@ -111,8 +111,8 @@ Si une vente a été faite par erreur :
 - **Clients** : enregistrez vos clients avec nom, téléphone et e-mail.
 - **Enregistrer un crédit** : quand un client emporte de la marchandise à payer plus tard, enregistrez le montant et l'échéance.
 - Sur l'écran **Crédit** vous voyez :
-  - **En attente** = qui doit encore (total à recevoir).
-  - **Soldées** = l'historique de ceux qui ont déjà payé.
+ - **En attente** = qui doit encore (total à recevoir).
+ - **Soldées** = l'historique de ceux qui ont déjà payé.
 - Quand le client paie, touchez **Soldé la dette** — l'argent **entre automatiquement en caisse**.
 
 ---
@@ -123,8 +123,8 @@ Si une vente a été faite par erreur :
 - **En attente** : cochez si le montant n'a pas encore été reçu/payé — il ne compte dans la caisse **réalisée** que lorsqu'il est reçu/payé.
 - L'écran affiche les **entrées**, les **sorties** et le **solde**.
 - Pour les montants en attente :
-  - **Recevoir** (entrées en attente) : confirme que l'argent est entré → il compte dans la caisse.
-  - **Payer** (sorties en attente — factures à payer) : confirme le paiement → il compte dans la caisse.
+ - **Recevoir** (entrées en attente) : confirme que l'argent est entré → il compte dans la caisse.
+ - **Payer** (sorties en attente — factures à payer) : confirme le paiement → il compte dans la caisse.
 
 ### Clôture de caisse du jour (Z-report) — propriétaire/gérant
 Dans **Finances**, touchez la carte **Clôture de caisse** (ou l'action en haut) :
@@ -134,7 +134,7 @@ Dans **Finances**, touchez la carte **Clôture de caisse** (ou l'action en haut)
 3. L'app affiche la **différence** en temps réel : **Caisse juste**, **Excédent** ou **Manque**.
 4. Touchez **Confirmer la clôture**.
 
-> 💡 Une erreur de comptage ? Vous pouvez **refaire la clôture du jour** — le montant est mis à jour, sans doublon. Après la clôture, le badge **« Caisse fermée ! »** apparaît dans Finances.
+> Une erreur de comptage ? Vous pouvez **refaire la clôture du jour** — le montant est mis à jour, sans doublon. Après la clôture, le badge **« Caisse fermée ! »** apparaît dans Finances.
 
 ---
 
@@ -160,9 +160,9 @@ Ouvrez **Magasins** (carte sur l'Accueil) — 4 onglets :
 
 - **Magasins** : enregistrez vos magasins. Chaque magasin a son propre stock et sa propre caisse.
 - **Employés** : créez des comptes pour ceux qui travaillent avec vous et choisissez le poste :
-  - **Gérant** : opère tout, sauf la gestion des magasins/employés.
-  - **Employé** : ne fait que vendre (n'enregistre pas les produits, ne voit pas les rapports, ne fait ni achats, ni clôture de caisse, ni annulations).
-  - Désactivez un employé à tout moment — il **perd l'accès immédiatement**.
+ - **Gérant** : opère tout, sauf la gestion des magasins/employés.
+ - **Employé** : ne fait que vendre (n'enregistre pas les produits, ne voit pas les rapports, ne fait ni achats, ni clôture de caisse, ni annulations).
+ - Désactivez un employé à tout moment — il **perd l'accès immédiatement**.
 - **Upgrades** : consultez et demandez le changement de forfait.
 - **Réglages** : changez le **Magasin actif**, la **devise** (MZN, BRL, USD, EUR) et la **langue** (Português/English/Français).
 
@@ -170,12 +170,12 @@ Ouvrez **Magasins** (carte sur l'Accueil) — 4 onglets :
 
 ## 11. Conseils rapides
 
-- 🧾 Vérifiez toujours le **total** avant de confirmer une vente.
-- ⚠️ Surveillez les **alertes de péremption** chaque semaine — un produit périmé, c'est de la perte.
-- 📱 Dans n'importe quelle liste (ventes, produits, clients...) **tirez l'écran vers le bas** pour actualiser.
-- 🖼️ Les produits avec **photo** sont bien plus faciles à identifier au PDV.
-- 🔒 L'app garde votre session en sécurité — vous ne vous connectez qu'une fois.
-- 💡 Besoin de connexion pour vendre ? **Oui** (en mode en ligne) — les ventes sont enregistrées immédiatement.
+- Vérifiez toujours le **total** avant de confirmer une vente.
+- Attention : Surveillez les **alertes de péremption** chaque semaine — un produit périmé, c'est de la perte.
+- Dans n'importe quelle liste (ventes, produits, clients...) **tirez l'écran vers le bas** pour actualiser.
+- Les produits avec **photo** sont bien plus faciles à identifier au PDV.
+- L'app garde votre session en sécurité — vous ne vous connectez qu'une fois.
+- Besoin de connexion pour vendre ? **Oui** (en mode en ligne) — les ventes sont enregistrées immédiatement.
 
 ---
 

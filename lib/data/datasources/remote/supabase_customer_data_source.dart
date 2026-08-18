@@ -8,40 +8,40 @@ import 'supabase_datasource_helpers.dart';
 /// gravado explicitamente nos INSERTs (o trigger do schema reforça com
 /// `auth.uid()`).
 final class CustomerSupabaseDataSourceImpl implements CustomerLocalDataSource {
-  const CustomerSupabaseDataSourceImpl();
+ const CustomerSupabaseDataSourceImpl();
 
-  static const _table = 'customers';
+ static const _table = 'customers';
 
-  @override
-  Future<List<Customer>> getAll({required String storeId}) async {
-    // Paginação keyset (H2): lotes de pageSize pelo id, sem teto total.
-    // A ordem final de exibição (nome) é aplicada pelo provider.
-    final rows = await fetchAllKeyset(
-      supabaseClient
-          .from(_table)
-          .select('id, store_id, name, phone, email')
-          .eq('store_id', storeId),
-    );
-    return List.unmodifiable([for (final row in rows) _map(row)]);
-  }
+ @override
+ Future<List<Customer>> getAll({required String storeId}) async {
+ // Paginação keyset (H2): lotes de pageSize pelo id, sem teto total.
+ // A ordem final de exibição (nome) é aplicada pelo provider.
+ final rows = await fetchAllKeyset(
+ supabaseClient
+ .from(_table)
+ .select('id, store_id, name, phone, email')
+ .eq('store_id', storeId),
+ );
+ return List.unmodifiable([for (final row in rows) _map(row)]);
+ }
 
-  @override
-  Future<void> add(Customer customer) async {
-    await supabaseClient.from(_table).insert({
-      'id': customer.id,
-      'user_id': requireCurrentUserId(),
-      'store_id': customer.storeId,
-      'name': customer.name,
-      'phone': customer.phone,
-      'email': customer.email,
-    });
-  }
+ @override
+ Future<void> add(Customer customer) async {
+ await supabaseClient.from(_table).insert({
+ 'id': customer.id,
+ 'user_id': requireCurrentUserId(),
+ 'store_id': customer.storeId,
+ 'name': customer.name,
+ 'phone': customer.phone,
+ 'email': customer.email,
+ });
+ }
 
-  Customer _map(Map<String, dynamic> row) => Customer(
-    id: row['id'] as String,
-    storeId: row['store_id'] as String,
-    name: row['name'] as String,
-    phone: (row['phone'] as String?) ?? '',
-    email: (row['email'] as String?) ?? '',
-  );
+ Customer _map(Map<String, dynamic> row) => Customer(
+ id: row['id'] as String,
+ storeId: row['store_id'] as String,
+ name: row['name'] as String,
+ phone: (row['phone'] as String?) ?? '',
+ email: (row['email'] as String?) ?? '',
+ );
 }

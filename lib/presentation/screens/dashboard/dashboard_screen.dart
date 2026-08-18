@@ -1,830 +1,1065 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../widgets/app_card.dart';
-
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/period_utils.dart';
 import '../../../core/utils/quantity.dart';
-import '../../../l10n/generated/app_localizations.dart';
+import '../../../domain/entities/debt.dart';
+import '../../../domain/entities/financial_transaction.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/purchase.dart';
 import '../../../domain/entities/sale.dart';
-import '../../../domain/entities/tenant.dart';
-import '../../controllers/account_providers.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/dashboard_providers.dart';
+import '../../controllers/debts_providers.dart';
 import '../../controllers/expiry_alerts_provider.dart';
 import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/purchases_providers.dart';
-import '../../controllers/reports_providers.dart';
 import '../../controllers/sales_providers.dart';
-import '../../widgets/kpi_card.dart';
-import '../../widgets/purchase_card.dart';
-import '../../widgets/sale_card.dart';
-import '../../widgets/section_header.dart';
-import '../../widgets/status_chip.dart';
+import '../../widgets/app_card.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/inline_error_card.dart';
 import '../../widgets/store_switcher.dart';
-import '../purchases/purchases_screen.dart';
-import '../reports/reports_screen.dart';
-import '../shell/app_shell.dart';
-import '../stores/stores_screen.dart';
+import '../sales/sale_detail_screen.dart';
 
 /// Limiar de "stock baixo" (W8 + W11): produtos com estoque inferior a
 /// [Quantity.lowStockThresholdUnits] UNIDADES entram no alerta do
 /// dashboard (o estoque vive em milésimos — a comparação usa ×1000).
 
-/// Tela inicial do ERP — visão geral do negócio: indicadores (KPIs),
-/// ações rápidas, vendas recentes e alertas de estoque.
+/// Tela inicial do ERP — visão do dia com cara de app de referência:
+/// cabeçalho tipográfico (data + saudação), pílula de período, chip da
+/// loja, o card-hero de saldo (caixa em destaque + vendas/a receber) e o
+/// feed "Atividade de hoje" com ícones circulares tintados.
 class DashboardScreen extends ConsumerWidget {
-  const DashboardScreen({super.key});
+ const DashboardScreen({super.key});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    final user = ref.watch(authStateProvider).value;
-    // Tenant do usuário (dono aprovado) — usado no card de Lojas.
-    final tenant = user == null
-        ? null
-        : ref.watch(myTenantProvider(user.id)).value;
-    // Nível de acesso (dono/gerente/funcionário): condiciona os módulos
-    // de gestão (Lojas = só dono) e os módulos de nível gerencial
-    // (Compras/Relatórios = gerente+). O servidor continua sendo a
-    // autoridade (RLS + guardas das RPCs).
-    final accessLevel = ref.watch(currentAccessLevelProvider);
+ @override
+ Widget build(BuildContext context, WidgetRef ref) {
+ final theme = Theme.of(context);
+ final l10n = context.l10n;
+ final user = ref.watch(authStateProvider).value;
 
-    final productsAsync = ref.watch(productsProvider);
-    final salesAsync = ref.watch(salesListProvider);
-    // Compras recentes (módulo GERENCIAL — a seção só aparece para dono e
-    // gerente; o servidor também nega funcionários). O watch é incondicional
-    // e a seção filtra por acesso: para funcionários a busca é negada pelo
-    // servidor (is_manager_of_store) e cai em AsyncError — engolido pelo
-    // `.value ?? const []` (seção vazia e oculta, sem efeito na UI).
-    final purchasesAsync = ref.watch(purchasesProvider);
-    // KPIs (W5): no modo Supabase a agregação roda no SERVIDOR (RPC
-    // `get_dashboard_kpis` — uma chamada em vez de 4 listagens de até 1000
-    // linhas); no modo local, fallback client-side idêntico ao anterior.
-    final kpisAsync = ref.watch(dashboardKpisProvider);
-    final cashFlowPeriod = ref.watch(cashFlowPeriodProvider);
-    // Loja ativa (seletor no topo das telas) — o dashboard mostra os
-    // indicadores da loja selecionada e exibe o nome dela no topo (via
-    // StoreSwitcher, que observa activeStoreIdProvider e storesProvider).
+ // Período da pílula "Hoje" — escopo das métricas Vendas/Caixa.
+ final period = ref.watch(dashboardPeriodProvider);
 
-    final kpis = kpisAsync.value;
+ final productsAsync = ref.watch(productsProvider);
+ final salesAsync = ref.watch(salesListProvider);
+ final purchasesAsync = ref.watch(purchasesProvider);
+ // Baixas de fiado (feed "Pagamento fiado") e movimentações (feed de
+ // despesas) — o watch é incondicional; erro/ausência vira lista vazia.
+ final settledAsync = ref.watch(settledDebtsProvider);
+ final transactionsAsync = ref.watch(transactionsProvider);
+ final pendingAsync = ref.watch(pendingDebtsProvider);
+ // KPIs (W5): no modo Supabase a agregação roda no SERVIDOR (RPC
+ // `get_dashboard_kpis`); no modo local, fallback client-side.
+ final kpisAsync = ref.watch(dashboardKpisProvider);
+ // Fluxo de caixa do período do DASHBOARD (Caixa do topo).
+ final cashFlowAsync = ref.watch(dashboardCashFlowProvider);
+ // Alertas de validade (W11): vermelho = vencido; amarelo = < 30 dias.
+ final expiryAlertsAsync = ref.watch(expiryAlertsProvider);
 
-    final products = productsAsync.value ?? const <Product>[];
-    // Alerta de estoque baixo: apenas produtos ATIVOS (desativado não
-    // vende — não precisa de reabastecimento urgente).
-    final lowStock = products
-        .where(
-          (product) =>
-              product.isActive &&
-              product.stockQuantity <
-                  Quantity.lowStockThresholdUnits * Quantity.milliFactor,
-        )
-        .toList();
-    // Alertas de validade (W11): vermelho = lote vencido com estoque;
-    // amarelo = vence em menos de 30 dias.
-    final expiryAlertsAsync = ref.watch(expiryAlertsProvider);
-    final expiryAlerts = expiryAlertsAsync.value ?? const <ExpiryAlert>[];
-    // Vendas recentes: apenas ATIVAS — anuladas não aparecem no dashboard
-    // (o estorno já as removeu do caixa; o selo "Anulada" fica no
-    // histórico de Vendas).
-    final recentSales = (salesAsync.value ?? const <Sale>[])
-        .where((sale) => sale.status == SaleStatus.active)
-        .take(3)
-        .toList();
-    final recentPurchases = (purchasesAsync.value ?? const <Purchase>[])
-        .take(3)
-        .toList();
+ final kpis = kpisAsync.value;
+ final cashFlow = cashFlowAsync.value;
 
-    final displayName = (user?.fullName.isNotEmpty ?? false)
-        ? user!.fullName.split(' ').first
-        : (user?.email.isNotEmpty ?? false)
-        ? user!.email.split('@').first
-        : l10n.dashboardOwnerFallback;
+ // ----- Métricas (3 cards compactos — app de referência) --------------
+ final now = DateTime.now();
+ final (start, previousStart) = switch (period) {
+ CashFlowPeriod.today => (
+ startOfDay(now),
+ startOfDay(now).subtract(const Duration(days: 1)),
+ ),
+ CashFlowPeriod.week => (
+ startOfDay(now).subtract(const Duration(days: 7)),
+ startOfDay(now).subtract(const Duration(days: 14)),
+ ),
+ CashFlowPeriod.month => (
+ DateTime(now.year, now.month, 1),
+ DateTime(now.year, now.month - 1, 1),
+ ),
+ CashFlowPeriod.all => (DateTime(2000), null),
+ };
 
-    final now = DateTime.now();
-    final todayLabel =
-        '${_weekday(now.weekday, l10n)}, ${Formatters.date(now)}';
+ // Vendas do período + delta vs o período anterior ("+18%").
+ var periodSalesCents = 0;
+ var previousSalesCents = 0;
+ for (final sale in salesAsync.value ?? const <Sale>[]) {
+ if (sale.status == SaleStatus.cancelled) continue;
+ if (!sale.dateTime.isBefore(start)) {
+ periodSalesCents += sale.totalAmountCents;
+ } else if (previousStart != null &&
+ !sale.dateTime.isBefore(previousStart)) {
+ previousSalesCents += sale.totalAmountCents;
+ }
+ }
+ final salesDelta = previousSalesCents > 0
+ ? ((periodSalesCents - previousSalesCents) /
+ previousSalesCents *
+ 100)
+ .round()
+ : null;
 
-    // Padding lateral adaptativo: mais respiro em telas largas (web/tablet),
-    // sem desperdiçar espaço em telefones.
-    final horizontal = MediaQuery.sizeOf(context).width >= 720 ? 32.0 : 20.0;
+ // ----- Feed "Atividade de hoje" --------------------------------------
+ final todayStart = startOfDay(now);
 
-    return Scaffold(
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            // Recarrega KPIs, produtos (estoque) e vendas recentes. O
-            // indicador permanece visível até os dados de fato chegarem
-            // (`provider.future` resolve quando o AsyncNotifier termina;
-            // `onError` engole falhas — o estado AsyncValue já expõe o erro
-            // na UI).
-            ref.invalidate(dashboardKpisProvider);
-            ref.invalidate(productsProvider);
-            ref.invalidate(salesListProvider);
-            ref.invalidate(purchasesProvider);
-            ref.invalidate(expiryAlertsProvider);
-            await Future.wait<void>([
-              ref
-                  .read(dashboardKpisProvider.future)
-                  .then<void>((_) {}, onError: (_) {}),
-              ref
-                  .read(productsProvider.future)
-                  .then<void>((_) {}, onError: (_) {}),
-              ref
-                  .read(salesListProvider.future)
-                  .then<void>((_) {}, onError: (_) {}),
-              ref
-                  .read(purchasesProvider.future)
-                  .then<void>((_) {}, onError: (_) {}),
-              ref
-                  .read(expiryAlertsProvider.future)
-                  .then<void>((_) {}, onError: (_) {}),
-            ]);
-          },
-          child: ListView(
-            // Sempre rolável: permite o pull-to-refresh mesmo com pouco
-            // conteúdo na tela.
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(horizontal, 12, horizontal, 32),
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.dashboardGreeting(displayName),
-                          style: theme.textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          todayLabel,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        // Nome da loja ativa — deixa claro qual loja os
-                        // indicadores abaixo estão exibindo. Com 2+ lojas a
-                        // pílula vira o seletor RÁPIDO (menu com as lojas do
-                        // tenant); com 1 loja fica apenas informativa.
-                        const SizedBox(height: 6),
-                        const StoreSwitcher(hideWhenSingle: false),
-                      ],
-                    ),
-                  ),
-                  // Avatar circular com iniciais do usuário (design system
-                  // 2026 — igual ao app de referência). Tocar abre um menu
-                  // com a ação de sair da conta (mantém a funcionalidade
-                  // que antes era um ícone de logout).
-                  PopupMenuButton<String>(
-                    tooltip: l10n.dashboardSignOutTooltip,
-                    onSelected: (value) {
-                      if (value == 'signOut') {
-                        ref.read(signOutUseCaseProvider).call();
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem<String>(
-                        value: 'signOut',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.logout,
-                              size: 18,
-                              color: theme.colorScheme.error,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(l10n.commonSignOut),
-                          ],
-                        ),
-                      ),
-                    ],
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: theme.colorScheme.primaryContainer,
-                        border: Border.all(
-                          color: theme.colorScheme.primary,
-                          width: 2,
-                        ),
-                      ),
-                      child: Text(
-                        _initials(displayName),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              // Banner de sincronização pendente (outbox offline do modo
-              // SaaS) — some sozinho quando a fila esvazia.
-              const SizedBox(height: 14),
-              const _SyncPendingBanner(),
-              const SizedBox(height: 20),
-              _KpiGrid(
-                cards: [
-                  KpiCard(
-                    label: l10n.dashboardTotalSales,
-                    amountCents: kpis?.totalSalesCents ?? 0,
-                    caption: l10n.dashboardAllTime,
-                    icon: Icons.point_of_sale_outlined,
-                    loading: kpisAsync.isLoading,
-                  ),
-                  KpiCard(
-                    label: l10n.dashboardCashBalance,
-                    amountCents: kpis?.cashBalanceCents ?? 0,
-                    caption: cashFlowPeriod.label(context.l10n),
-                    icon: Icons.account_balance_wallet_outlined,
-                    iconBackground: theme.income.withValues(alpha: 0.14),
-                    iconColor: theme.income,
-                    loading: kpisAsync.isLoading,
-                  ),
-                  KpiCard(
-                    label: l10n.dashboardReceivables,
-                    amountCents: kpis?.pendingTotalCents ?? 0,
-                    icon: Icons.receipt_long_outlined,
-                    iconBackground: theme.warning.withValues(alpha: 0.14),
-                    iconColor: theme.warning,
-                    loading: kpisAsync.isLoading,
-                  ),
-                  KpiCard(
-                    label: l10n.dashboardStockLabel,
-                    // W11: o KPI soma milésimos — exibe em unidades.
-                    value:
-                        '${Quantity.format(kpis?.stockTotal ?? 0)} ${l10n.commonUnits}',
-                    icon: Icons.inventory_2_outlined,
-                    loading: kpisAsync.isLoading,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SectionHeader(title: l10n.dashboardQuickActions),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _QuickAction(
-                    icon: Icons.add_shopping_cart,
-                    label: l10n.dashboardQuickNewSale,
-                    onTap: () => ref
-                        .read(shellIndexProvider.notifier)
-                        .goTo(AppSection.sales),
-                  ),
-                  _QuickAction(
-                    icon: Icons.add_box_outlined,
-                    label: l10n.dashboardQuickAddProduct,
-                    onTap: () => ref
-                        .read(shellIndexProvider.notifier)
-                        .goTo(AppSection.products),
-                  ),
-                  _QuickAction(
-                    icon: Icons.swap_horiz,
-                    label: l10n.dashboardQuickAddTransaction,
-                    onTap: () => ref
-                        .read(shellIndexProvider.notifier)
-                        .goTo(AppSection.financial),
-                  ),
-                  _QuickAction(
-                    icon: Icons.add_card,
-                    label: l10n.dashboardQuickAddDebt,
-                    onTap: () => ref
-                        .read(shellIndexProvider.notifier)
-                        .goTo(AppSection.credit),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SectionHeader(title: l10n.dashboardModules),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _ModuleCard(
-                    icon: Icons.people_outline,
-                    label: l10n.dashboardModuleCustomers,
-                    onTap: () => ref
-                        .read(shellIndexProvider.notifier)
-                        .goTo(AppSection.customers),
-                  ),
-                  // Compras e Relatórios: módulos de nível GERENCIAL —
-                  // visíveis para dono e gerente, ocultos para funcionários
-                  // (matriz de acesso). O servidor também nega compras de
-                  // funcionários (is_manager_of_store no process_purchase e
-                  // nas políticas RLS de purchases).
-                  if (accessLevel != UserAccessLevel.employee)
-                    _ModuleCard(
-                      icon: Icons.local_shipping_outlined,
-                      label: l10n.dashboardModulePurchases,
-                      onTap: () {
-                        // Dados frescos ao reabrir (providers de escopo raiz).
-                        ref.invalidate(purchasesProvider);
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const PurchasesScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  if (accessLevel != UserAccessLevel.employee)
-                    _ModuleCard(
-                      icon: Icons.bar_chart_outlined,
-                      label: l10n.dashboardModuleReports,
-                      onTap: () {
-                        // Dados frescos ao reabrir (providers de escopo raiz).
-                        ref.invalidate(salesReportProvider);
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const ReportsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  // Lojas: gestão do tenant (lojas, funcionários e plano) —
-                  // visível APENAS para o DONO com tenant aprovado.
-                  if (tenant != null &&
-                      tenant.status == TenantStatus.approved &&
-                      accessLevel == UserAccessLevel.owner)
-                    _ModuleCard(
-                      icon: Icons.storefront_outlined,
-                      label: l10n.dashboardModuleStores,
-                      onTap: () {
-                        // Dados frescos ao voltar: a loja ativa (escolhida
-                        // em Lojas → Ajustes) observa storesProvider e se
-                        // uma loja nova foi criada, a seleção volta à
-                        // primeira (nunca aponta para loja inexistente).
-                        ref.invalidate(storesProvider(tenant.id));
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => StoresScreen(tenant: tenant),
-                          ),
-                        );
-                      },
-                    ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SectionHeader(
-                title: l10n.dashboardRecentSales,
-                // "Ver todas" só quando há vendas para ver (o vazio já
-                // orienta a registrar a primeira).
-                actionLabel: recentSales.isEmpty ? null : l10n.dashboardViewAll,
-                onAction: () => ref
-                    .read(shellIndexProvider.notifier)
-                    .goTo(AppSection.sales),
-              ),
-              const SizedBox(height: 12),
-              if (recentSales.isEmpty)
-                _InlineEmpty(message: l10n.dashboardNoSales)
-              else
-                for (final sale in recentSales) ...[
-                  // Card de venda COMPARTILHADO com a lista de Vendas
-                  // (tocar abre os detalhes da venda).
-                  SalesCard(sale: sale),
-                  const SizedBox(height: 8),
-                ],
-              // Compras recentes — módulo de nível GERENCIAL: visível para
-              // dono e gerente, oculto para funcionários (mesma regra do
-              // card de módulo; o servidor também nega via is_manager_of_store).
-              // Card COMPARTILHADO com a lista de Compras.
-              if (accessLevel != UserAccessLevel.employee) ...[
-                const SizedBox(height: 24),
-                SectionHeader(
-                  title: l10n.dashboardRecentPurchases,
-                  actionLabel: recentPurchases.isEmpty
-                      ? null
-                      : l10n.dashboardViewAll,
-                  onAction: () {
-                    // Dados frescos ao reabrir (providers de escopo raiz).
-                    ref.invalidate(purchasesProvider);
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const PurchasesScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                if (recentPurchases.isEmpty)
-                  _InlineEmpty(message: l10n.dashboardNoPurchases)
-                else
-                  for (final purchase in recentPurchases) ...[
-                    PurchaseCard(purchase: purchase),
-                    const SizedBox(height: 8),
-                  ],
-              ],
-              if (expiryAlerts.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                SectionHeader(title: l10n.dashboardExpiryAlerts),
-                const SizedBox(height: 12),
-                for (final alert in expiryAlerts) ...[
-                  _ExpiryAlertCard(alert: alert),
-                  const SizedBox(height: 8),
-                ],
-              ],
-              if (lowStock.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                SectionHeader(title: l10n.dashboardLowStock),
-                const SizedBox(height: 12),
-                for (final product in lowStock) ...[
-                  _LowStockCard(product: product),
-                  const SizedBox(height: 8),
-                ],
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+ final todaySales = (salesAsync.value ?? const <Sale>[])
+ .where(
+ (sale) =>
+ sale.status == SaleStatus.active &&
+ !sale.dateTime.isBefore(todayStart),
+ )
+ .toList();
+ final todayPurchases = (purchasesAsync.value ?? const <Purchase>[])
+ .where((purchase) => !purchase.dateTime.isBefore(todayStart))
+ .toList();
+ final todaySettled = (settledAsync.value ?? const <Debt>[])
+ .where(
+ (debt) =>
+ debt.isCustomerDebt &&
+ debt.paidAt != null &&
+ !debt.paidAt!.isBefore(todayStart),
+ )
+ .toList();
+ final todayExpenses =
+ (transactionsAsync.value ?? const <FinancialTransaction>[])
+ .where(
+ (t) =>
+ t.type == TransactionType.expense &&
+ t.status == TransactionStatus.paid &&
+ !t.date.isBefore(todayStart),
+ )
+ .toList();
 
-  static String _weekday(int weekday, AppLocalizations l10n) =>
-      switch (weekday) {
-        DateTime.monday => l10n.weekdayMonday,
-        DateTime.tuesday => l10n.weekdayTuesday,
-        DateTime.wednesday => l10n.weekdayWednesday,
-        DateTime.thursday => l10n.weekdayThursday,
-        DateTime.friday => l10n.weekdayFriday,
-        DateTime.saturday => l10n.weekdaySaturday,
-        _ => l10n.weekdaySunday,
-      };
+ // Produtos ATIVOS com estoque baixo (< 5 un) — alerta do feed.
+ final lowStock = (productsAsync.value ?? const <Product>[])
+ .where(
+ (product) =>
+ product.isActive &&
+ product.stockQuantity <
+ Quantity.lowStockThresholdUnits * Quantity.milliFactor,
+ )
+ .toList();
 
-  /// Iniciais para o avatar circular: até 2 letras (primeiro + último nome).
-  static String _initials(String name) {
-    final parts = name
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .toList();
-    if (parts.isEmpty) return '?';
-    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
-    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
-        .toUpperCase();
-  }
+ // Feed: eventos datados de hoje ordenados por hora + alertas no fim.
+ final events = <_ActivityItem>[
+ for (final sale in todaySales)
+ _ActivityItem.sale(
+ sale: sale,
+ l10n: l10n,
+ // Tocar na venda do feed abre os detalhes (mesma navegação do
+ // card compartilhado da lista de Vendas).
+ onTap: () => Navigator.of(context).push(
+ MaterialPageRoute<void>(
+ builder: (_) => SaleDetailScreen(sale: sale),
+ ),
+ ),
+ ),
+ for (final purchase in todayPurchases)
+ for (final item in purchase.items)
+ _ActivityItem.stockEntry(purchase: purchase, item: item, l10n: l10n),
+ for (final debt in todaySettled)
+ _ActivityItem.fiadoPayment(debt: debt, l10n: l10n),
+ for (final transaction in todayExpenses)
+ _ActivityItem.expense(transaction: transaction, l10n: l10n),
+ ]..sort((a, b) => b.dateTime.compareTo(a.dateTime));
+
+ final expiryAlerts = expiryAlertsAsync.value ?? const <ExpiryAlert>[];
+ final activity = <_ActivityItem>[
+ ...events.take(6),
+ for (final product in lowStock)
+ _ActivityItem.lowStock(product: product, l10n: l10n),
+ for (final alert in expiryAlerts)
+ _ActivityItem.expiry(alert: alert, l10n: l10n),
+ ];
+
+ final displayName = (user?.fullName.isNotEmpty ?? false)
+ ? user!.fullName.split(' ').first
+ : (user?.email.isNotEmpty ?? false)
+ ? user!.email.split('@').first
+ : l10n.dashboardOwnerFallback;
+
+ // Cabeçalho: data ACIMA da saudação ("Segunda, 17 ago").
+ final dateLabel =
+ '${_weekday(now.weekday, l10n)}, ${Formatters.shortDate(now)}';
+
+ final horizontal = AppSpacing.pagePaddingForWidth(
+ MediaQuery.sizeOf(context).width,
+ );
+
+ // Saldo de caixa (centavos → unidades) para o card-hero.
+ final cashCents = (cashFlow?.incomeCents ?? 0) - (cashFlow?.expenseCents ?? 0);
+
+ return Scaffold(
+ body: SafeArea(
+ child: RefreshIndicator(
+ onRefresh: () async {
+ ref.invalidate(dashboardKpisProvider);
+ ref.invalidate(dashboardCashFlowProvider);
+ ref.invalidate(productsProvider);
+ ref.invalidate(salesListProvider);
+ ref.invalidate(purchasesProvider);
+ ref.invalidate(settledDebtsProvider);
+ ref.invalidate(transactionsProvider);
+ ref.invalidate(expiryAlertsProvider);
+ await Future.wait<void>([
+ ref
+ .read(dashboardKpisProvider.future)
+ .then<void>((_) {}, onError: (_) {}),
+ ref
+ .read(dashboardCashFlowProvider.future)
+ .then<void>((_) {}, onError: (_) {}),
+ ref
+ .read(productsProvider.future)
+ .then<void>((_) {}, onError: (_) {}),
+ ref
+ .read(salesListProvider.future)
+ .then<void>((_) {}, onError: (_) {}),
+ ref
+ .read(purchasesProvider.future)
+ .then<void>((_) {}, onError: (_) {}),
+ ref
+ .read(settledDebtsProvider.future)
+ .then<void>((_) {}, onError: (_) {}),
+ ref
+ .read(transactionsProvider.future)
+ .then<void>((_) {}, onError: (_) {}),
+ ref
+ .read(expiryAlertsProvider.future)
+ .then<void>((_) {}, onError: (_) {}),
+ ]);
+ },
+ child: ListView(
+ // Sempre rolável: permite o pull-to-refresh mesmo com pouco
+ // conteúdo na tela.
+ physics: const AlwaysScrollableScrollPhysics(),
+ padding: EdgeInsets.fromLTRB(horizontal, AppSpacing.sm, horizontal, AppSpacing.xxl),
+ children: [
+ // Cabeçalho tipográfico: data em caption ACIMA da saudação;
+ // pílula de período à direita.
+ Row(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ Expanded(
+ child: Column(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ Text(
+ dateLabel,
+ style: theme.textTheme.labelSmall?.copyWith(
+ color: theme.colorScheme.onSurfaceVariant,
+ letterSpacing: 0.6,
+ fontWeight: FontWeight.w600,
+ ),
+ ),
+ const SizedBox(height: 2),
+ Text(
+ l10n.dashboardGreeting(displayName),
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ style: theme.textTheme.headlineMedium?.copyWith(
+ fontWeight: FontWeight.w700,
+ letterSpacing: -0.6,
+ ),
+ ),
+ ],
+ ),
+ ),
+ const SizedBox(width: AppSpacing.sm),
+ const _PeriodPill(),
+ ],
+ ),
+ // Chip da loja ativa — discreto; com 2+ lojas vira o
+ // seletor rápido; com 1 loja fica apenas informativo.
+ const SizedBox(height: AppSpacing.sm + 2),
+ const StoreSwitcher(hideWhenSingle: false),
+ const SizedBox(height: AppSpacing.lg),
+ const _SyncPendingBanner(),
+ const SizedBox(height: AppSpacing.lg),
+ // Card-hero de saldo (canvas estilo app de referência):
+ // caixa em DESTAQUE + vendas/a receber como colunas
+ // secundárias. Erro de KPIs: em vez de zeros falsos, um
+ // aviso compacto com retry (`hasError` cobre o retry mesmo
+ // quando o AsyncError retém o valor anterior).
+ if (kpisAsync.hasError)
+ InlineErrorCard(
+ message: l10n.dashboardKpisError,
+ onRetry: () => ref.invalidate(dashboardKpisProvider),
+ )
+ else
+ _BalanceHero(
+ cashValue: Formatters.amountWithCode(cashCents / 100),
+ cashNegative: cashCents < 0,
+ cashLoading: cashFlowAsync.isLoading,
+ salesValue: Formatters.amountWithCode(periodSalesCents / 100),
+ salesSubtext: salesDelta == null
+ ? null
+ : '${salesDelta >= 0 ? '+' : ''}$salesDelta%',
+ salesSubtextColor: salesDelta == null
+ ? null
+ : salesDelta >= 0
+ ? theme.income
+ : theme.expense,
+ salesLoading: salesAsync.isLoading,
+ receivablesValue: Formatters.amountWithCode(
+ (kpis?.pendingTotalCents ?? 0) / 100,
+ ),
+ receivablesSubtext: l10n.dashboardFiadoCount(
+ (pendingAsync.value ?? const <Debt>[]).length,
+ ),
+ receivablesLoading: kpisAsync.isLoading,
+ ),
+ const SizedBox(height: AppSpacing.xl),
+ // Feed de atividade — título à esquerda, contagem numa
+ // pílula sutil à direita (estilo iOS: "Atividade" + badge).
+ Row(
+ children: [
+ Expanded(
+ child: Text(
+ l10n.dashboardActivityTitle,
+ style: theme.textTheme.titleLarge?.copyWith(
+ fontWeight: FontWeight.w700,
+ letterSpacing: -0.3,
+ ),
+ ),
+ ),
+ Container(
+ padding: const EdgeInsets.symmetric(
+ horizontal: 10,
+ vertical: 4,
+ ),
+ decoration: BoxDecoration(
+ color: theme.colorScheme.surfaceContainerHighest,
+ borderRadius: BorderRadius.circular(AppRadius.full),
+ ),
+ child: Text(
+ l10n.dashboardActivityEvents(activity.length),
+ style: theme.textTheme.labelSmall?.copyWith(
+ color: theme.colorScheme.onSurfaceVariant,
+ fontWeight: FontWeight.w600,
+ ),
+ ),
+ ),
+ ],
+ ),
+ const SizedBox(height: AppSpacing.sm),
+ if (activity.isEmpty)
+ InlineEmpty(message: l10n.dashboardActivityEmpty)
+ else
+ _ActivityFeed(items: activity),
+ ],
+ ),
+ ),
+ ),
+ );
+ }
+
+ static String _weekday(int weekday, AppLocalizations l10n) =>
+ switch (weekday) {
+ DateTime.monday => l10n.weekdayMonday,
+ DateTime.tuesday => l10n.weekdayTuesday,
+ DateTime.wednesday => l10n.weekdayWednesday,
+ DateTime.thursday => l10n.weekdayThursday,
+ DateTime.friday => l10n.weekdayFriday,
+ DateTime.saturday => l10n.weekdaySaturday,
+ _ => l10n.weekdaySunday,
+ };
 }
 
-/// Grade responsiva de KPIs — sem altura fixa por célula.
-///
-/// Substitui o `GridView.count` com `childAspectRatio` fixo (que estourava
-/// quando um card tinha conteúdo maior — ex.: caption de período —, gerando
-/// "BOTTOM OVERFLOWED"): cada linha cresce até a altura do card mais alto
-/// via [IntrinsicHeight], então a grade se adapta a escala de texto alta,
-/// valores longos e qualquer largura (2 colunas no telefone, 4 em telas
-/// largas).
-class _KpiGrid extends StatelessWidget {
-  const _KpiGrid({required this.cards});
+/// Seletor de período minimalista ("Hoje ▾") — só texto + chevron, sem
+/// caixa nem borda (estilo iOS). Abre o menu Hoje / Semana / Mês / Tudo
+/// e escopa as métricas Vendas/Caixa.
+class _PeriodPill extends ConsumerWidget {
+ const _PeriodPill();
 
-  final List<Widget> cards;
+ @override
+ Widget build(BuildContext context, WidgetRef ref) {
+ final theme = Theme.of(context);
+ final l10n = context.l10n;
+ final period = ref.watch(dashboardPeriodProvider);
 
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 720 ? 4 : 2;
-        final rows = <List<Widget>>[];
-        for (var i = 0; i < cards.length; i += columns) {
-          rows.add(cards.sublist(i, (i + columns).clamp(0, cards.length)));
-        }
-
-        return Column(
-          children: [
-            for (var r = 0; r < rows.length; r++) ...[
-              if (r > 0) const SizedBox(height: 12),
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var c = 0; c < rows[r].length; c++) ...[
-                      if (c > 0) const SizedBox(width: 12),
-                      Expanded(child: rows[r][c]),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ],
-        );
-      },
-    );
-  }
+ return PopupMenuButton<CashFlowPeriod>(
+ key: const ValueKey('dashboardPeriodPill'),
+ onSelected: (selected) =>
+ ref.read(dashboardPeriodProvider.notifier).select(selected),
+ itemBuilder: (context) => [
+ for (final option in CashFlowPeriod.values)
+ CheckedPopupMenuItem(
+ value: option,
+ checked: option == period,
+ child: Text(option.label(l10n)),
+ ),
+ ],
+ // Ripple mínimo só no próprio conteúdo (sem fundo próprio).
+ child: Padding(
+ padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+ child: Row(
+ mainAxisSize: MainAxisSize.min,
+ children: [
+ Text(
+ period.label(l10n),
+ style: theme.textTheme.labelLarge?.copyWith(
+ color: theme.colorScheme.onSurface,
+ fontWeight: FontWeight.w600,
+ letterSpacing: -0.2,
+ ),
+ ),
+ const SizedBox(width: 2),
+ Icon(
+ Icons.keyboard_arrow_down_rounded,
+ size: 16,
+ color: theme.colorScheme.onSurfaceVariant,
+ ),
+ ],
+ ),
+ ),
+ );
+ }
 }
 
-/// Card de módulo — acesso a módulos complementares (Clientes, Compras,
-/// Relatórios) a partir do dashboard.
-class _ModuleCard extends StatelessWidget {
-  const _ModuleCard({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
+/// Card-hero de saldo (estilo app de referência) — caixa em destaque com
+/// tipografia grande e tabular, mais as métricas Vendas / A receber em
+/// colunas secundárias separadas por uma régua fina.
+class _BalanceHero extends StatelessWidget {
+ const _BalanceHero({
+ required this.cashValue,
+ required this.cashNegative,
+ required this.cashLoading,
+ required this.salesValue,
+ required this.salesSubtext,
+ required this.salesSubtextColor,
+ required this.salesLoading,
+ required this.receivablesValue,
+ required this.receivablesSubtext,
+ required this.receivablesLoading,
+ });
 
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
+ final String cashValue;
+ final bool cashNegative;
+ final bool cashLoading;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+ final String salesValue;
+ final String? salesSubtext;
+ final Color? salesSubtextColor;
+ final bool salesLoading;
 
-    return SizedBox(
-      width: 148,
-      // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat —
-      // o toque (ripple) vem do próprio AppCard.
-      child: AppCard(
-        onTap: onTap,
-        padding: const EdgeInsets.all(14),
-        child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: theme.colorScheme.onSecondaryContainer,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelLarge,
-                ),
-          ],
-        ),
-      ),
-    );
-  }
+ final String receivablesValue;
+ final String receivablesSubtext;
+ final bool receivablesLoading;
+
+ @override
+ Widget build(BuildContext context) {
+ final theme = Theme.of(context);
+ final l10n = context.l10n;
+
+ return Container(
+ decoration: BoxDecoration(
+ borderRadius: BorderRadius.circular(AppRadius.xxl),
+ gradient: const LinearGradient(
+ begin: Alignment.topLeft,
+ end: Alignment.bottomRight,
+ stops: [0.0, 0.55, 1.0],
+ colors: [
+ Color(0xFF1E7A45),
+ Color(0xFF0F4D2C),
+ Color(0xFF0A3320),
+ ],
+ ),
+ border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+ boxShadow: [
+ BoxShadow(
+ color: Colors.black.withValues(alpha: 0.40),
+ blurRadius: 28,
+ offset: const Offset(0, 14),
+ ),
+ ],
+ ),
+ clipBehavior: Clip.antiAlias,
+ child: Stack(
+ children: [
+ // Brilhos internos (profundidade estilo iOS): um halo quente no
+ // canto superior direito e um reflexo frio no inferior esquerdo.
+ Positioned(
+ right: -70,
+ top: -90,
+ child: Container(
+ width: 240,
+ height: 240,
+ decoration: BoxDecoration(
+ shape: BoxShape.circle,
+ gradient: RadialGradient(
+ colors: [
+ Colors.white.withValues(alpha: 0.12),
+ Colors.transparent,
+ ],
+ ),
+ ),
+ ),
+ ),
+ Positioned(
+ left: -60,
+ bottom: -100,
+ child: Container(
+ width: 200,
+ height: 200,
+ decoration: BoxDecoration(
+ shape: BoxShape.circle,
+ gradient: RadialGradient(
+ colors: [
+ const Color(0xFF34D399).withValues(alpha: 0.10),
+ Colors.transparent,
+ ],
+ ),
+ ),
+ ),
+ ),
+ // Aresta superior de "vidro" — um filete claro que dá o efeito
+ // de luz incidindo no topo do card (Apple Materials).
+ Positioned(
+ left: 0,
+ right: 0,
+ top: 0,
+ child: IgnorePointer(
+ child: Container(
+ height: 1.2,
+ decoration: BoxDecoration(
+ gradient: LinearGradient(
+ begin: Alignment.centerLeft,
+ end: Alignment.centerRight,
+ colors: [
+ Colors.white.withValues(alpha: 0.0),
+ Colors.white.withValues(alpha: 0.35),
+ Colors.white.withValues(alpha: 0.0),
+ ],
+ ),
+ ),
+ ),
+ ),
+ ),
+ Padding(
+ padding: const EdgeInsets.all(AppSpacing.lg),
+ child: Column(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ // Coluna da métrica CAIXA — chave cobre rótulo + valor
+ // (os testes localizam label e número pelo mesmo key).
+ Column(
+ key: const ValueKey('metric-cash'),
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ Row(
+ children: [
+ Icon(
+ Icons.account_balance_wallet_rounded,
+ size: 16,
+ color: Colors.white.withValues(alpha: 0.8),
+ ),
+ const SizedBox(width: 6),
+ Text(
+ l10n.dashboardMetricCash,
+ style: theme.textTheme.labelMedium?.copyWith(
+ color: Colors.white.withValues(alpha: 0.8),
+ fontWeight: FontWeight.w600,
+ letterSpacing: 0.5,
+ ),
+ ),
+ ],
+ ),
+ const SizedBox(height: 6),
+ // Valor grande e tabular — o destaque visual da Home.
+ // Formato "1.000,00 MZN": valor + código da moeda.
+ FittedBox(
+ fit: BoxFit.scaleDown,
+ alignment: Alignment.centerLeft,
+ child: Text(
+ cashLoading ? '—' : cashValue,
+ maxLines: 1,
+ style: theme.textTheme.displaySmall?.copyWith(
+ color: cashNegative ? theme.expense : Colors.white,
+ fontWeight: FontWeight.w700,
+ letterSpacing: -1.2,
+ height: 1.1,
+ ),
+ ),
+ ),
+ ],
+ ),
+ const SizedBox(height: AppSpacing.md),
+ // Régua fina separando o saldo das métricas secundárias.
+ Divider(
+ height: 1,
+ color: Colors.white.withValues(alpha: 0.14),
+ ),
+ const SizedBox(height: AppSpacing.sm),
+ Row(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ Expanded(
+ child: _HeroMetric(
+ label: l10n.dashboardMetricSales,
+ value: salesValue,
+ subtext: salesSubtext,
+ subtextColor: salesSubtextColor,
+ loading: salesLoading,
+ valueKey: const ValueKey('metric-sales'),
+ ),
+ ),
+ const SizedBox(width: AppSpacing.md),
+ Container(
+ width: 1,
+ height: 40,
+ color: Colors.white.withValues(alpha: 0.14),
+ ),
+ const SizedBox(width: AppSpacing.md),
+ Expanded(
+ child: _HeroMetric(
+ label: l10n.dashboardMetricReceivables,
+ value: receivablesValue,
+ subtext: receivablesSubtext,
+ subtextColor: theme.warning,
+ loading: receivablesLoading,
+ valueKey: const ValueKey('metric-receivables'),
+ ),
+ ),
+ ],
+ ),
+ ],
+ ),
+ ),
+ ],
+ ),
+ );
+ }
 }
 
-/// Ação rápida — botão CIRCULAR com ícone + rótulo abaixo (design system
-/// 2026, igual ao app de referência): círculo com borda verde e ícone
-/// verde, label esmaecido por baixo. O Wrap do dashboard já quebra linha
-/// em telas estreitas / escala de texto alta.
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
+/// Coluna de métrica dentro do card-hero — rótulo, valor e subtexto
+/// colorido (delta de vendas / contagem de fiados).
+class _HeroMetric extends StatelessWidget {
+ const _HeroMetric({
+ required this.label,
+ required this.value,
+ required this.subtext,
+ required this.subtextColor,
+ required this.loading,
+ required this.valueKey,
+ });
 
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
+ final String label;
+ final String value;
+ final String? subtext;
+ final Color? subtextColor;
+ final bool loading;
+ final Key valueKey;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+ @override
+ Widget build(BuildContext context) {
+ final theme = Theme.of(context);
 
-    return SizedBox(
-      // Largura folgada para o rótulo mais longo ('Registrar transação' ≈
-      // 106px em labelSmall 11) caber numa linha — antes a fonte era
-      // forçada a 8px (abaixo da menor da escala, ilegível) para caber em
-      // 76px. 116px × 4 botões + gaps ≈ 480px: cabe no conteúdo (máx. 1040)
-      // e em 2 colunas no mobile.
-      width: 116,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Material(
-            color: theme.colorScheme.primaryContainer,
-            shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: onTap,
-              child: Container(
-                width: 52,
-                height: 52,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.5),
-                    width: 1.5,
-                  ),
-                ),
-                child: Icon(
-                  icon,
-                  size: 22,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // labelSmall do tema (11) — escala legível do design system. Quebra
-          // em até 2 linhas com escala de texto alta — o rótulo nunca perde
-          // informação (ellipsis apenas como último recurso defensivo).
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+ return Column(
+ key: valueKey,
+ crossAxisAlignment: CrossAxisAlignment.start,
+ mainAxisSize: MainAxisSize.min,
+ children: [
+ Text(
+ label,
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ style: theme.textTheme.labelSmall?.copyWith(
+ color: Colors.white.withValues(alpha: 0.6),
+ fontWeight: FontWeight.w600,
+ letterSpacing: 0.2,
+ ),
+ ),
+ const SizedBox(height: 4),
+ FittedBox(
+ fit: BoxFit.scaleDown,
+ alignment: Alignment.centerLeft,
+ child: Text(
+ loading ? '—' : value,
+ maxLines: 1,
+ style: theme.textTheme.titleLarge?.copyWith(
+ color: Colors.white,
+ fontWeight: FontWeight.w700,
+ letterSpacing: -0.4,
+ ),
+ ),
+ ),
+ if (subtext != null) ...[
+ const SizedBox(height: 2),
+ Text(
+ subtext!,
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ style: theme.textTheme.labelSmall?.copyWith(
+ color: subtextColor ?? Colors.white.withValues(alpha: 0.6),
+ fontWeight: FontWeight.w700,
+ ),
+ ),
+ ],
+ ],
+ );
+ }
 }
 
-/// Alerta de produto com estoque baixo.
-class _LowStockCard extends StatelessWidget {
-  const _LowStockCard({required this.product});
+/// Um item do feed de atividade — venda, entrada de estoque, pagamento de
+/// fiado, despesa, estoque baixo ou alerta de validade.
+class _ActivityItem {
+ const _ActivityItem({
+ required this.title,
+ required this.details,
+ required this.dateTime,
+ required this.icon,
+ required this.iconBackground,
+ required this.iconColor,
+ this.amount,
+ this.amountColor,
+ this.badge,
+ this.badgeColor,
+ this.badgeBackground,
+ this.dashedBorder = false,
+ this.onTap,
+ });
 
-  final Product product;
+ factory _ActivityItem.sale({
+ required Sale sale,
+ required AppLocalizations l10n,
+ required VoidCallback onTap,
+ }) {
+ return _ActivityItem(
+ title: 'Venda ${Formatters.saleLabel(sale.number)}',
+ details: '${sale.paymentMethod.labelFor(l10n)} · '
+ '${_timeLabel(sale.dateTime, l10n)}',
+ dateTime: sale.dateTime,
+ icon: Icons.north_east_rounded,
+ iconBackground: const Color(0xFF123F26),
+ iconColor: const Color(0xFF22C55E),
+ amount: Formatters.signedAmount(sale.totalAmountCents),
+ amountColor: const Color(0xFF22C55E),
+ onTap: onTap,
+ );
+ }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+ factory _ActivityItem.stockEntry({
+ required Purchase purchase,
+ required PurchaseItem item,
+ required AppLocalizations l10n,
+ }) =>
+ _ActivityItem(
+ title: l10n.dashboardStockEntry(item.productName),
+ details: l10n.dashboardStockEntryDetail(
+ '${Quantity.format(item.quantity)} un',
+ _timeLabel(purchase.dateTime, l10n),
+ ),
+ dateTime: purchase.dateTime,
+ icon: Icons.inventory_2_outlined,
+ iconBackground: const Color(0xFF2A3034),
+ iconColor: Colors.white,
+ amount: '+${Quantity.format(item.quantity)}',
+ amountColor: Colors.white,
+ );
 
-    // AppCard (design system ultra-clean): radius 12, borda 0.5px, flat.
-    return AppCard(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        children: [
-            // Ícone em container tingido — mesma hierarquia visual dos
-            // demais cards (produto, resumo diário): o ícone não "flutua"
-            // solto; a âncora (chip de estoque) fica à direita do card.
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: theme.warning.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                Icons.warning_amber_rounded,
-                size: 18,
-                color: theme.warning,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              // Texto COMPLETO do produto — quebra em linhas quando
-              // necessário (nada de truncar nomes nos cards de alerta).
-              child: Text(
-                product.name,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Align + Flexible: o chip fica ANCORADO à direita do card e
-            // encolhe (ellipsis) com escala de texto alta ou estoque grande.
-            Flexible(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: StatusChip(
-                  label:
-                      '${Quantity.format(product.stockQuantity, unitLabel: product.vendaPorFracao ? product.unitLabel : null, language: Formatters.currentLanguage)}'
-                      '${product.vendaPorFracao ? '' : ' ${context.l10n.commonUnits}'}',
-                  color: theme.warning,
-                  icon: Icons.inventory_2_outlined,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+ factory _ActivityItem.fiadoPayment({
+ required Debt debt,
+ required AppLocalizations l10n,
+ }) {
+ final paidAt = debt.paidAt ?? debt.dueDate;
+ return _ActivityItem(
+ title: l10n.dashboardFiadoPayment,
+ details: '${debt.personName} · ${_timeLabel(paidAt, l10n)}',
+ dateTime: paidAt,
+ icon: Icons.payments_outlined,
+ iconBackground: const Color(0xFF3A2810),
+ iconColor: const Color(0xFFE08F2B),
+ amount: Formatters.signedAmount(debt.amountCents),
+ amountColor: const Color(0xFF22C55E),
+ dashedBorder: true,
+ );
+ }
+
+ factory _ActivityItem.expense({
+ required FinancialTransaction transaction,
+ required AppLocalizations l10n,
+ }) =>
+ _ActivityItem(
+ title: l10n.dashboardExpenseRow(transaction.description),
+ details: _timeLabel(transaction.date, l10n),
+ dateTime: transaction.date,
+ icon: Icons.south_west_rounded,
+ iconBackground: const Color(0xFF3A1618),
+ iconColor: const Color(0xFFE05B64),
+ amount: Formatters.signedAmount(-transaction.amountCents),
+ amountColor: const Color(0xFFE05B64),
+ );
+
+ factory _ActivityItem.lowStock({
+ required Product product,
+ required AppLocalizations l10n,
+ }) =>
+ _ActivityItem(
+ title: l10n.dashboardLowStock,
+ details: l10n.dashboardLowStockDetail(
+ product.name,
+ '${Quantity.format(product.stockQuantity)} un',
+ ),
+ dateTime: DateTime.now(),
+ icon: Icons.warning_amber_rounded,
+ iconBackground: const Color(0xFF3A2810),
+ iconColor: const Color(0xFFE08F2B),
+ badge: l10n.dashboardAlertBadge,
+ badgeColor: const Color(0xFFE08F2B),
+ badgeBackground: const Color(0xFFE08F2B),
+ );
+
+ factory _ActivityItem.expiry({
+ required ExpiryAlert alert,
+ required AppLocalizations l10n,
+ }) {
+ final expired = alert.isExpired;
+ final color = expired ? const Color(0xFFE05B64) : const Color(0xFFE08F2B);
+ return _ActivityItem(
+ title: alert.product.name,
+ details: expired
+ ? l10n.dashboardExpiredIn(-alert.daysRemaining)
+ : l10n.dashboardExpiresIn(alert.daysRemaining),
+ dateTime: DateTime.now(),
+ icon: expired
+ ? Icons.dangerous_outlined
+ : Icons.hourglass_top_rounded,
+ iconBackground: color.withValues(alpha: 0.18),
+ iconColor: color,
+ badge: Quantity.format(
+ alert.lot.currentQuantity,
+ unitLabel: alert.product.vendaPorFracao
+ ? alert.product.unitLabel
+ : null,
+ language: Formatters.currentLanguage,
+ ),
+ badgeColor: color,
+ );
+ }
+
+ final String title;
+ final String details;
+ final DateTime dateTime;
+ final IconData icon;
+ final Color iconBackground;
+ final Color iconColor;
+
+ /// Valor à direita (ex.: "+500,00").
+ final String? amount;
+ final Color? amountColor;
+
+ /// Contagem/estado à direita (estoque baixo, validade).
+ final String? badge;
+ final Color? badgeColor;
+
+ /// Fundo do badge (pílula sólida — ex.: "Alerta").
+ final Color? badgeBackground;
+
+ /// Borda TRACEJADA ao redor do ícone (pagamento de fiado).
+ final bool dashedBorder;
+
+ final VoidCallback? onTap;
 }
 
-/// Alerta de VALIDADE (W11): vermelho para lotes VENCIDOS com estoque,
-/// amarelo para lotes que vencem em menos de [expiryWarningDays] dias.
-class _ExpiryAlertCard extends StatelessWidget {
-  const _ExpiryAlertCard({required this.alert});
-
-  final ExpiryAlert alert;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    final expired = alert.isExpired;
-    final color = expired ? theme.colorScheme.error : theme.warning;
-    final product = alert.product;
-    final label = expired
-        ? l10n.dashboardExpiredIn(-alert.daysRemaining)
-        : l10n.dashboardExpiresIn(alert.daysRemaining);
-
-    // AppCard (design system ultra-clean): radius 12, borda 0.5px — a cor
-    // do alerta (vencido/vencendo) tinge a borda, o padrão permanece.
-    return AppCard(
-      borderColor: color.withValues(alpha: 0.5),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-          children: [
-            // Ícone em container tingido na cor do alerta (igual aos demais
-            // cards do dashboard — hierarquia consistente).
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                expired
-                    ? Icons.dangerous_outlined
-                    : Icons.hourglass_top_rounded,
-                size: 18,
-                color: color,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Texto COMPLETO do produto — quebra em linhas quando
-                  // necessário (nada de truncar nomes nos cards de alerta).
-                  Text(
-                    product.name,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  // Alerta ("Vence em 12 dias · 12/08/2026") também
-                  // completo — quebra se o texto for longo.
-                  Text(
-                    '$label · ${Formatters.date(alert.lot.expiryDate!)}',
-                    style: theme.textTheme.bodySmall?.copyWith(color: color),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Align + Flexible: a âncora (chip de quantidade) fica colada à
-            // BORDA DIREITA do card, como nos demais cards do app.
-            Flexible(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: StatusChip(
-                  label: Quantity.format(
-                    alert.lot.currentQuantity,
-                    unitLabel: product.vendaPorFracao
-                        ? product.unitLabel
-                        : null,
-                    language: Formatters.currentLanguage,
-                  ),
-                  color: color,
-                  icon: Icons.inventory_2_outlined,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+/// Rótulo de tempo do feed: < 1h → "há X min"; senão → hora absoluta.
+String _timeLabel(DateTime date, AppLocalizations l10n) {
+ final diff = DateTime.now().difference(date);
+ if (diff.inMinutes < 60) {
+ return l10n.dashboardActivityMinutesAgo(diff.inMinutes);
+ }
+ return Formatters.time(date);
 }
 
-/// Mensagem inline de seção vazia (sem o peso visual do EmptyState).
-class _InlineEmpty extends StatelessWidget {
-  const _InlineEmpty({required this.message});
+/// Feed de atividade — um card único elevado com as linhas separadas por
+/// divisórias finas (mesma linguagem do app de referência).
+class _ActivityFeed extends StatelessWidget {
+ const _ActivityFeed({required this.items});
 
-  final String message;
+ final List<_ActivityItem> items;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+ @override
+ Widget build(BuildContext context) {
+ final theme = Theme.of(context);
 
-    // AppCard (design system ultra-clean): fundo transparente + borda
-    // sutil — o estado vazio inline segue o padrão dos demais cards.
-    return AppCard(
-      color: Colors.transparent,
-      borderColor: theme.colorScheme.outlineVariant,
-      padding: const EdgeInsets.all(16),
-      child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-    );
-  }
+ return Material(
+ color: theme.colorScheme.surfaceContainerHighest,
+ elevation: 0,
+ shape: RoundedRectangleBorder(
+ borderRadius: BorderRadius.circular(AppRadius.xl),
+ side: BorderSide(
+ color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+ ),
+ ),
+ clipBehavior: Clip.antiAlias,
+ child: Column(
+ crossAxisAlignment: CrossAxisAlignment.stretch,
+ children: [
+ for (var i = 0; i < items.length; i++) ...[
+ if (i > 0)
+ Divider(
+ height: 1,
+ indent: 60,
+ endIndent: AppSpacing.md,
+ color: theme.colorScheme.outlineVariant,
+ ),
+ _ActivityRow(item: items[i]),
+ ],
+ ],
+ ),
+ );
+ }
+}
+
+/// Linha do feed — ícone em container circular tingido (com borda tracejada
+/// opcional) + título/detalhe + âncora à direita (valor ou badge).
+class _ActivityRow extends StatelessWidget {
+ const _ActivityRow({required this.item});
+
+ final _ActivityItem item;
+
+ @override
+ Widget build(BuildContext context) {
+ final theme = Theme.of(context);
+
+ final row = Padding(
+ padding: const EdgeInsets.symmetric(
+ horizontal: AppSpacing.md,
+ vertical: AppSpacing.sm + 2,
+ ),
+ child: Row(
+ children: [
+ // Container circular do ícone (40px) — mesmo padrão do canvas.
+ Container(
+ width: 40,
+ height: 40,
+ decoration: BoxDecoration(
+ color: item.iconBackground,
+ shape: BoxShape.circle,
+ ),
+ child: CustomPaint(
+ painter: item.dashedBorder
+ ? _DashedCirclePainter(color: item.iconColor)
+ : null,
+ child: Icon(item.icon, size: 18, color: item.iconColor),
+ ),
+ ),
+ const SizedBox(width: AppSpacing.sm),
+ Expanded(
+ child: Column(
+ crossAxisAlignment: CrossAxisAlignment.start,
+ children: [
+ Text(
+ item.title,
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ style: theme.textTheme.bodyMedium?.copyWith(
+ fontWeight: FontWeight.w600,
+ ),
+ ),
+ const SizedBox(height: 2),
+ Text(
+ item.details,
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ style: theme.textTheme.labelSmall?.copyWith(
+ color: theme.colorScheme.onSurfaceVariant,
+ ),
+ ),
+ ],
+ ),
+ ),
+ const SizedBox(width: AppSpacing.xs),
+ if (item.amount != null || item.badge != null)
+ Flexible(
+ child: Align(
+ alignment: Alignment.centerRight,
+ child: item.badgeBackground != null
+ // Pílula sólida (ex.: "Alerta") — fundo colorido com
+ // texto escuro, igual ao canvas.
+ ? Container(
+ padding: const EdgeInsets.symmetric(
+ horizontal: 10,
+ vertical: 4,
+ ),
+ decoration: BoxDecoration(
+ color: item.badgeBackground,
+ borderRadius: BorderRadius.circular(AppRadius.full),
+ ),
+ child: Text(
+ item.badge!,
+ maxLines: 1,
+ style: theme.textTheme.labelSmall?.copyWith(
+ color: const Color(0xFF101413),
+ fontWeight: FontWeight.w700,
+ ),
+ ),
+ )
+ : Text(
+ item.amount ?? item.badge!,
+ maxLines: 1,
+ overflow: TextOverflow.ellipsis,
+ style: (item.amount != null
+ ? theme.textTheme.bodyMedium
+ : theme.textTheme.labelMedium)
+ ?.copyWith(
+ fontWeight: FontWeight.w700,
+ color: item.amountColor ?? item.badgeColor,
+ fontFeatures: const [
+ FontFeature.tabularFigures(),
+ ],
+ ),
+ ),
+ ),
+ ),
+ ],
+ ),
+ );
+
+ if (item.onTap == null) return row;
+ return InkWell(
+ onTap: item.onTap,
+ borderRadius: BorderRadius.circular(AppRadius.lg),
+ child: row,
+ );
+ }
+}
+
+/// Desenha a borda TRACEJADA circular do ícone de pagamento de fiado.
+class _DashedCirclePainter extends CustomPainter {
+ const _DashedCirclePainter({required this.color});
+
+ final Color color;
+
+ @override
+ void paint(Canvas canvas, Size size) {
+ final paint = Paint()
+ ..color = color
+ ..style = PaintingStyle.stroke
+ ..strokeWidth = 1.4;
+ final center = size.center(Offset.zero);
+ final radius = size.width / 2 - 2;
+ const dashCount = 12;
+ const totalAngle = 2 * 3.141592653589793;
+ final dashAngle = totalAngle / dashCount;
+ for (var i = 0; i < dashCount; i++) {
+ canvas.drawArc(
+ Rect.fromCircle(center: center, radius: radius),
+ i * dashAngle,
+ dashAngle * 0.55,
+ false,
+ paint,
+ );
+ }
+ }
+
+ @override
+ bool shouldRepaint(covariant _DashedCirclePainter oldDelegate) =>
+ oldDelegate.color != color;
 }
 
 /// Banner de sincronização pendente (outbox offline do modo SaaS).
@@ -833,54 +1068,62 @@ class _InlineEmpty extends StatelessWidget {
 /// enfileiradas sem conexão ([pendingOpsCountProvider] > 0) e some sozinho
 /// quando a fila esvazia. "Sincronizar" dispara o dreno imediato da fila.
 class _SyncPendingBanner extends ConsumerWidget {
-  const _SyncPendingBanner();
+ const _SyncPendingBanner();
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    final count = ref.watch(pendingOpsCountProvider).value ?? 0;
-    if (count <= 0) return const SizedBox.shrink();
+ @override
+ Widget build(BuildContext context, WidgetRef ref) {
+ final theme = Theme.of(context);
+ final l10n = context.l10n;
+ final count = ref.watch(pendingOpsCountProvider).value ?? 0;
+ if (count <= 0) return const SizedBox.shrink();
 
-    return AppCard(
-      color: theme.warning.withValues(alpha: 0.1),
-      borderColor: theme.warning.withValues(alpha: 0.35),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Icon(Icons.cloud_off_outlined, color: theme.warning, size: 22),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              l10n.syncPendingCount(count),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          TextButton(
-            onPressed: () => _syncNow(context, ref),
-            child: Text(l10n.syncNow),
-          ),
-        ],
-      ),
-    );
-  }
+ return AppCard(
+ color: theme.warning.withValues(alpha: 0.08),
+ borderColor: theme.warning.withValues(alpha: 0.30),
+ padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 6),
+ child: Row(
+ children: [
+ Icon(
+ Icons.cloud_off_outlined,
+ color: theme.warning.withValues(alpha: 0.9),
+ size: 20,
+ ),
+ const SizedBox(width: AppSpacing.sm),
+ Expanded(
+ child: Text(
+ l10n.syncPendingCount(count),
+ style: theme.textTheme.bodySmall?.copyWith(
+ color: theme.colorScheme.onSurfaceVariant,
+ fontWeight: FontWeight.w500,
+ ),
+ ),
+ ),
+ TextButton(
+ onPressed: () => _syncNow(context, ref),
+ style: TextButton.styleFrom(
+ minimumSize: const Size(0, 36),
+ padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+ ),
+ child: Text(l10n.syncNow),
+ ),
+ ],
+ ),
+ );
+ }
 
-  Future<void> _syncNow(BuildContext context, WidgetRef ref) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final l10n = context.l10n;
-    final sync = ref.read(offlineSyncServiceProvider);
-    if (sync == null) return;
-    final synced = await sync.drain();
-    if (!context.mounted) return;
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          synced > 0 ? l10n.syncDone(synced) : l10n.syncStillOffline,
-        ),
-      ),
-    );
-  }
+ Future<void> _syncNow(BuildContext context, WidgetRef ref) async {
+ final messenger = ScaffoldMessenger.of(context);
+ final l10n = context.l10n;
+ final sync = ref.read(offlineSyncServiceProvider);
+ if (sync == null) return;
+ final synced = await sync.drain();
+ if (!context.mounted) return;
+ messenger.showSnackBar(
+ SnackBar(
+ content: Text(
+ synced > 0 ? l10n.syncDone(synced) : l10n.syncStillOffline,
+ ),
+ ),
+ );
+ }
 }

@@ -1,71 +1,111 @@
 import 'package:flutter/material.dart';
 
-/// Estado vazio padrão — ícone, título, subtítulo e ação opcional.
+import '../../core/theme/app_tokens.dart';
+import 'app_button.dart';
+import 'app_card.dart';
+
+/// Estado vazio V4 — ícone, título, subtítulo e ação opcional.
 class EmptyState extends StatelessWidget {
-  const EmptyState({
-    super.key,
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    this.actionLabel,
-    this.onAction,
-  });
+ const EmptyState({
+ super.key,
+ required this.icon,
+ required this.title,
+ this.subtitle,
+ this.actionLabel,
+ this.onAction,
+ });
 
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final String? actionLabel;
-  final VoidCallback? onAction;
+ final IconData icon;
+ final String title;
+ final String? subtitle;
+ final String? actionLabel;
+ final VoidCallback? onAction;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+ @override
+ Widget build(BuildContext context) {
+ final theme = Theme.of(context);
+ final scheme = theme.colorScheme;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Icon(
-                icon,
-                size: 40,
-                color: theme.colorScheme.outline,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium,
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 6),
-              Text(
-                subtitle!,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 16),
-              FilledButton.tonalIcon(
-                onPressed: onAction,
-                icon: const Icon(Icons.add),
-                label: Text(actionLabel!),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+ // Center + SingleChildScrollView: em alturas apertadas (ex.: o PDV em
+ // ecrãs baixos) o conteúdo rola em vez de estourar ("bottom overflowed");
+ // quando há espaço, fica centralizado como sempre.
+ return Center(
+ child: SingleChildScrollView(
+ padding: const EdgeInsets.all(AppSpacing.xxl),
+ child: Column(
+ mainAxisSize: MainAxisSize.min,
+ children: [
+ Container(
+ width: 72,
+ height: 72,
+ alignment: Alignment.center,
+ decoration: BoxDecoration(
+ color: scheme.surfaceContainerHighest,
+ borderRadius: AppRadius.xlAll,
+ border: Border.all(color: scheme.outlineVariant),
+ ),
+ child: Icon(icon, size: 32, color: scheme.onSurfaceVariant),
+ ),
+ const SizedBox(height: AppSpacing.md),
+ Text(
+ title,
+ textAlign: TextAlign.center,
+ style: theme.textTheme.titleMedium,
+ ),
+ if (subtitle != null) ...[
+ const SizedBox(height: AppSpacing.xs),
+ Text(
+ subtitle!,
+ textAlign: TextAlign.center,
+ style: theme.textTheme.bodySmall,
+ ),
+ ],
+ if (actionLabel != null && onAction != null) ...[
+ const SizedBox(height: AppSpacing.lg),
+ AppButton.primary(
+ label: actionLabel!,
+ icon: const Icon(Icons.add, size: 18),
+ onPressed: onAction,
+ ),
+ ],
+ ],
+ ),
+ ),
+ );
+ }
+}
+
+/// Mensagem inline de seção vazia (menor peso visual que [EmptyState]).
+class InlineEmpty extends StatelessWidget {
+ const InlineEmpty({super.key, required this.message, this.icon});
+
+ final String message;
+ final IconData? icon;
+
+ @override
+ Widget build(BuildContext context) {
+ final theme = Theme.of(context);
+
+ return AppCard(
+ color: Colors.transparent,
+ padding: const EdgeInsets.all(AppSpacing.lg),
+ child: Row(
+ children: [
+ if (icon != null) ...[
+ Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+ const SizedBox(width: AppSpacing.sm),
+ ],
+ Expanded(
+ child: Text(
+ message,
+ textAlign: icon == null ? TextAlign.center : TextAlign.start,
+ style: theme.textTheme.bodyMedium?.copyWith(
+ color: theme.colorScheme.onSurfaceVariant,
+ ),
+ ),
+ ),
+ ],
+ ),
+ );
+ }
 }

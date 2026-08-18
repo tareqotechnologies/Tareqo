@@ -24,13 +24,13 @@ mixin _$Plan {
 @pragma('vm:prefer-inline')
 $PlanCopyWith<Plan> get copyWith => _$PlanCopyWithImpl<Plan>(this as Plan, _$identity);
 
-  /// Serializes this Plan to a JSON map.
-  Map<String, dynamic> toJson();
+ /// Serializes this Plan to a JSON map.
+ Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Plan&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.priceMonthlyCents, priceMonthlyCents) || other.priceMonthlyCents == priceMonthlyCents)&&(identical(other.maxStores, maxStores) || other.maxStores == maxStores)&&(identical(other.maxEmployees, maxEmployees) || other.maxEmployees == maxEmployees)&&(identical(other.isActive, isActive) || other.isActive == isActive));
+ return identical(this, other) || (other.runtimeType == runtimeType&&other is Plan&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.priceMonthlyCents, priceMonthlyCents) || other.priceMonthlyCents == priceMonthlyCents)&&(identical(other.maxStores, maxStores) || other.maxStores == maxStores)&&(identical(other.maxEmployees, maxEmployees) || other.maxEmployees == maxEmployees)&&(identical(other.isActive, isActive) || other.isActive == isActive));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -39,15 +39,15 @@ int get hashCode => Object.hash(runtimeType,id,name,description,priceMonthlyCent
 
 @override
 String toString() {
-  return 'Plan(id: $id, name: $name, description: $description, priceMonthlyCents: $priceMonthlyCents, maxStores: $maxStores, maxEmployees: $maxEmployees, isActive: $isActive)';
+ return 'Plan(id: $id, name: $name, description: $description, priceMonthlyCents: $priceMonthlyCents, maxStores: $maxStores, maxEmployees: $maxEmployees, isActive: $isActive)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $PlanCopyWith<$Res>  {
-  factory $PlanCopyWith(Plan value, $Res Function(Plan) _then) = _$PlanCopyWithImpl;
+abstract mixin class $PlanCopyWith<$Res> {
+ factory $PlanCopyWith(Plan value, $Res Function(Plan) _then) = _$PlanCopyWithImpl;
 @useResult
 $Res call({
  String id, String name, String description, int priceMonthlyCents, int maxStores, int maxEmployees, bool isActive
@@ -59,16 +59,16 @@ $Res call({
 }
 /// @nodoc
 class _$PlanCopyWithImpl<$Res>
-    implements $PlanCopyWith<$Res> {
-  _$PlanCopyWithImpl(this._self, this._then);
+ implements $PlanCopyWith<$Res> {
+ _$PlanCopyWithImpl(this._self, this._then);
 
-  final Plan _self;
-  final $Res Function(Plan) _then;
+ final Plan _self;
+ final $Res Function(Plan) _then;
 
 /// Create a copy of Plan
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = null,Object? priceMonthlyCents = null,Object? maxStores = null,Object? maxEmployees = null,Object? isActive = null,}) {
-  return _then(_self.copyWith(
+ return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -77,7 +77,7 @@ as int,maxStores: null == maxStores ? _self.maxStores : maxStores // ignore: cas
 as int,maxEmployees: null == maxEmployees ? _self.maxEmployees : maxEmployees // ignore: cast_nullable_to_non_nullable
 as int,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,
-  ));
+ ));
 }
 
 }
@@ -90,19 +90,19 @@ extension PlanPatterns on Plan {
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
+/// case final Subclass value:
+/// return ...;
+/// case _:
+/// return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Plan value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Plan value)? $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Plan() when $default != null:
 return $default(_that);case _:
-  return orElse();
+ return orElse();
 
 }
 }
@@ -112,19 +112,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
+/// case final Subclass value:
+/// return ...;
+/// case final Subclass2 value:
+/// return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Plan value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Plan value) $default,){
 final _that = this;
 switch (_that) {
 case _Plan():
 return $default(_that);case _:
-  throw StateError('Unexpected subclass');
+ throw StateError('Unexpected subclass');
 
 }
 }
@@ -133,19 +133,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
+/// case final Subclass value:
+/// return ...;
+/// case _:
+/// return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Plan value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Plan value)? $default,){
 final _that = this;
 switch (_that) {
 case _Plan() when $default != null:
 return $default(_that);case _:
-  return null;
+ return null;
 
 }
 }
@@ -154,18 +154,18 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
+/// case Subclass(:final field):
+/// return ...;
+/// case _:
+/// return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String description,  int priceMonthlyCents,  int maxStores,  int maxEmployees,  bool isActive)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, String name, String description, int priceMonthlyCents, int maxStores, int maxEmployees, bool isActive)? $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Plan() when $default != null:
 return $default(_that.id,_that.name,_that.description,_that.priceMonthlyCents,_that.maxStores,_that.maxEmployees,_that.isActive);case _:
-  return orElse();
+ return orElse();
 
 }
 }
@@ -175,18 +175,18 @@ return $default(_that.id,_that.name,_that.description,_that.priceMonthlyCents,_t
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
+/// case Subclass(:final field):
+/// return ...;
+/// case Subclass2(:final field2):
+/// return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String description,  int priceMonthlyCents,  int maxStores,  int maxEmployees,  bool isActive)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, String name, String description, int priceMonthlyCents, int maxStores, int maxEmployees, bool isActive) $default,) {final _that = this;
 switch (_that) {
 case _Plan():
 return $default(_that.id,_that.name,_that.description,_that.priceMonthlyCents,_that.maxStores,_that.maxEmployees,_that.isActive);case _:
-  throw StateError('Unexpected subclass');
+ throw StateError('Unexpected subclass');
 
 }
 }
@@ -195,18 +195,18 @@ return $default(_that.id,_that.name,_that.description,_that.priceMonthlyCents,_t
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
+/// case Subclass(:final field):
+/// return ...;
+/// case _:
+/// return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String description,  int priceMonthlyCents,  int maxStores,  int maxEmployees,  bool isActive)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, String name, String description, int priceMonthlyCents, int maxStores, int maxEmployees, bool isActive)? $default,) {final _that = this;
 switch (_that) {
 case _Plan() when $default != null:
 return $default(_that.id,_that.name,_that.description,_that.priceMonthlyCents,_that.maxStores,_that.maxEmployees,_that.isActive);case _:
-  return null;
+ return null;
 
 }
 }
@@ -217,18 +217,18 @@ return $default(_that.id,_that.name,_that.description,_that.priceMonthlyCents,_t
 @JsonSerializable()
 
 class _Plan implements Plan {
-  const _Plan({required this.id, required this.name, this.description = '', this.priceMonthlyCents = 0, this.maxStores = 1, this.maxEmployees = 1, this.isActive = true});
-  factory _Plan.fromJson(Map<String, dynamic> json) => _$PlanFromJson(json);
+ const _Plan({required this.id, required this.name, this.description = '', this.priceMonthlyCents = 0, this.maxStores = 1, this.maxEmployees = 1, this.isActive = true});
+ factory _Plan.fromJson(Map<String, dynamic> json) => _$PlanFromJson(json);
 
-@override final  String id;
-@override final  String name;
-@override@JsonKey() final  String description;
+@override final String id;
+@override final String name;
+@override@JsonKey() final String description;
 // Preço mensal em CENTAVOS inteiros (W4 — migração de dinheiro para
 // centavos; o banco persiste BIGINT/INTEGER).
-@override@JsonKey() final  int priceMonthlyCents;
-@override@JsonKey() final  int maxStores;
-@override@JsonKey() final  int maxEmployees;
-@override@JsonKey() final  bool isActive;
+@override@JsonKey() final int priceMonthlyCents;
+@override@JsonKey() final int maxStores;
+@override@JsonKey() final int maxEmployees;
+@override@JsonKey() final bool isActive;
 
 /// Create a copy of Plan
 /// with the given fields replaced by the non-null parameter values.
@@ -238,12 +238,12 @@ _$PlanCopyWith<_Plan> get copyWith => __$PlanCopyWithImpl<_Plan>(this, _$identit
 
 @override
 Map<String, dynamic> toJson() {
-  return _$PlanToJson(this, );
+ return _$PlanToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Plan&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.priceMonthlyCents, priceMonthlyCents) || other.priceMonthlyCents == priceMonthlyCents)&&(identical(other.maxStores, maxStores) || other.maxStores == maxStores)&&(identical(other.maxEmployees, maxEmployees) || other.maxEmployees == maxEmployees)&&(identical(other.isActive, isActive) || other.isActive == isActive));
+ return identical(this, other) || (other.runtimeType == runtimeType&&other is _Plan&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.priceMonthlyCents, priceMonthlyCents) || other.priceMonthlyCents == priceMonthlyCents)&&(identical(other.maxStores, maxStores) || other.maxStores == maxStores)&&(identical(other.maxEmployees, maxEmployees) || other.maxEmployees == maxEmployees)&&(identical(other.isActive, isActive) || other.isActive == isActive));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -252,7 +252,7 @@ int get hashCode => Object.hash(runtimeType,id,name,description,priceMonthlyCent
 
 @override
 String toString() {
-  return 'Plan(id: $id, name: $name, description: $description, priceMonthlyCents: $priceMonthlyCents, maxStores: $maxStores, maxEmployees: $maxEmployees, isActive: $isActive)';
+ return 'Plan(id: $id, name: $name, description: $description, priceMonthlyCents: $priceMonthlyCents, maxStores: $maxStores, maxEmployees: $maxEmployees, isActive: $isActive)';
 }
 
 
@@ -260,7 +260,7 @@ String toString() {
 
 /// @nodoc
 abstract mixin class _$PlanCopyWith<$Res> implements $PlanCopyWith<$Res> {
-  factory _$PlanCopyWith(_Plan value, $Res Function(_Plan) _then) = __$PlanCopyWithImpl;
+ factory _$PlanCopyWith(_Plan value, $Res Function(_Plan) _then) = __$PlanCopyWithImpl;
 @override @useResult
 $Res call({
  String id, String name, String description, int priceMonthlyCents, int maxStores, int maxEmployees, bool isActive
@@ -272,16 +272,16 @@ $Res call({
 }
 /// @nodoc
 class __$PlanCopyWithImpl<$Res>
-    implements _$PlanCopyWith<$Res> {
-  __$PlanCopyWithImpl(this._self, this._then);
+ implements _$PlanCopyWith<$Res> {
+ __$PlanCopyWithImpl(this._self, this._then);
 
-  final _Plan _self;
-  final $Res Function(_Plan) _then;
+ final _Plan _self;
+ final $Res Function(_Plan) _then;
 
 /// Create a copy of Plan
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = null,Object? priceMonthlyCents = null,Object? maxStores = null,Object? maxEmployees = null,Object? isActive = null,}) {
-  return _then(_Plan(
+ return _then(_Plan(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -290,7 +290,7 @@ as int,maxStores: null == maxStores ? _self.maxStores : maxStores // ignore: cas
 as int,maxEmployees: null == maxEmployees ? _self.maxEmployees : maxEmployees // ignore: cast_nullable_to_non_nullable
 as int,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,
-  ));
+ ));
 }
 
 

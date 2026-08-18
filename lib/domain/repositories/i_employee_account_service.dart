@@ -4,12 +4,12 @@
 /// usuário sem permissão) para exibição direta no formulário — em vez do
 /// erro genérico do `catch` da tela.
 final class EmployeeAccountCreationException implements Exception {
-  const EmployeeAccountCreationException(this.message);
+ const EmployeeAccountCreationException(this.message);
 
-  final String message;
+ final String message;
 
-  @override
-  String toString() => 'EmployeeAccountCreationException: $message';
+ @override
+ String toString() => 'EmployeeAccountCreationException: $message';
 }
 
 /// Criação de contas de acesso de funcionário — modo LOCAL (dev sem
@@ -20,13 +20,13 @@ final class EmployeeAccountCreationException implements Exception {
 /// [IEmployeeAccountProcessor] (RPC `create_employee_account` — conta +
 /// vínculo em UMA transação); neste modo este serviço não é registrado.
 abstract interface class EmployeeAccountService {
-  /// Cria a conta de acesso e retorna o id do usuário criado.
-  ///
-  /// Lança [EmployeeAccountCreationException] com mensagem amigável quando
-  /// a criação falha (e-mail já em uso, senha fraca, sem permissão...).
-  Future<String> createAccount({
-    required String email,
-    required String password,
-    required String fullName,
-  });
+ /// Cria a conta de acesso e retorna o id do usuário criado.
+ ///
+ /// Lança [EmployeeAccountCreationException] com mensagem amigável quando
+ /// a criação falha (e-mail já em uso, senha fraca, sem permissão...).
+ Future<String> createAccount({
+ required String email,
+ required String password,
+ required String fullName,
+ });
 }

@@ -10,25 +10,25 @@ O `ProcessSaleUseCase` integra **Vendas + Estoque + Financeiro** com uma ordem d
 
 ```text
 1. Validação da venda
-   ├─ rejeita venda sem itens
-   └─ rejeita total divergente de Σ(quantidade × preço unitário)
-      └─ comparação em CENTAVOS ((x * 100).round()) — evita falsos
-         positivos de precisão de double (ex.: 2 × 9.9 + 9.9)
+ ├─ rejeita venda sem itens
+ └─ rejeita total divergente de Σ(quantidade × preço unitário)
+ └─ comparação em CENTAVOS ((x * 100).round()) — evita falsos
+ positivos de precisão de double (ex.: 2 × 9.9 + 9.9)
 
 2. Pré-validação de estoque (SEM mutação)
-   └─ para cada item: UpdateProductStockUseCase.ensureSufficientStock
-      └─ se faltar → InsufficientStockException → rollback, nada gravado
+ └─ para cada item: UpdateProductStockUseCase.ensureSufficientStock
+ └─ se faltar → InsufficientStockException → rollback, nada gravado
 
 3. Registro da venda (ISaleRepository.registerSale)
-   └─ SQLite: tabelas sales + sale_items na mesma transação
+ └─ SQLite: tabelas sales + sale_items na mesma transação
 
 4. Baixa do estoque (por item)
-   └─ UpdateProductStockUseCase.decrease — revalida internamente
-      (defesa contra chamadas diretas) e persiste VALOR ABSOLUTO
-      (estoque − quantidade) via IProductRepository.updateStock
+ └─ UpdateProductStockUseCase.decrease — revalida internamente
+ (defesa contra chamadas diretas) e persiste VALOR ABSOLUTO
+ (estoque − quantidade) via IProductRepository.updateStock
 
 5. Entrada no caixa
-   └─ FinancialTransaction(income, categoria "Vendas", status paid)
+ └─ FinancialTransaction(income, categoria "Vendas", status paid)
 ```
 
 ### Garantias
@@ -55,37 +55,37 @@ O `CancelSaleUseCase` **desfaz** uma venda registrada: devolve o estoque aos lot
 
 ```text
 SaleDetailScreen (detalhe da venda ATIVA + usuário dono/gerente)
-  │  confirmação (AlertDialog mostra o valor da venda)
-  ▼
+ │ confirmação (AlertDialog mostra o valor da venda)
+ ▼
 CancelSaleUseCase
-  │
-  ├─ MODO SUPABASE (ISaleCancellationProcessor → RPC cancel_sale, UMA transação):
-  │    ├─ delegação IMEDIATA (sem validação client-side) — o servidor valida
-  │    │   existência + idempotência: guarda is_manager_of_store (funcionário
-  │    │   NÃO anula — o servidor é a autoridade, mesmo que um cliente
-  │    │   modificado contorne a UI)
-  │    ├─ lê e TRAVA a venda FOR UPDATE (escopo por loja); inexistente ou já
-  │    │   anulada → no-op (nunca lança SaleNotFoundException)
-  │    ├─ devolve o estoque aos LOTES EXATOS consumidos (sale_lot_consumption):
-  │    │    └─ por lote (FOR UPDATE): current_quantity += devolvido
-  │    │       e stock_quantity do produto += devolvido — a invariante
-  │    │       `stock = Σ lotes` nunca quebra
-  │    ├─ estorno no caixa: SAÍDA (expense) no valor da venda, categoria Vendas,
-  │    │   status paid, descrição "Estorno de venda — <forma>" — o par
-  │    │   (entrada original + estorno) fecha o caixa em ZERO
-  │    └─ marca a venda: status = 'cancelled', cancelled_at = now()
-  │
-  └─ MODO LOCAL (SQLite/memória, dentro de IUnitOfWork):
-       ├─ validação: getById → senão SaleNotFoundException; já anulada →
-       │  retorna (no-op idempotente)
-       ├─ FifoStockUseCase.restoreLot para cada LotConsumption
-       ├─ markCancelled(saleId, storeId)
-       └─ add FinancialTransaction(expense, "Estorno de venda — …", categoria Vendas)
-  ▼
+ │
+ ├─ MODO SUPABASE (ISaleCancellationProcessor → RPC cancel_sale, UMA transação):
+ │ ├─ delegação IMEDIATA (sem validação client-side) — o servidor valida
+ │ │ existência + idempotência: guarda is_manager_of_store (funcionário
+ │ │ NÃO anula — o servidor é a autoridade, mesmo que um cliente
+ │ │ modificado contorne a UI)
+ │ ├─ lê e TRAVA a venda FOR UPDATE (escopo por loja); inexistente ou já
+ │ │ anulada → no-op (nunca lança SaleNotFoundException)
+ │ ├─ devolve o estoque aos LOTES EXATOS consumidos (sale_lot_consumption):
+ │ │ └─ por lote (FOR UPDATE): current_quantity += devolvido
+ │ │ e stock_quantity do produto += devolvido — a invariante
+ │ │ `stock = Σ lotes` nunca quebra
+ │ ├─ estorno no caixa: SAÍDA (expense) no valor da venda, categoria Vendas,
+ │ │ status paid, descrição "Estorno de venda — <forma>" — o par
+ │ │ (entrada original + estorno) fecha o caixa em ZERO
+ │ └─ marca a venda: status = 'cancelled', cancelled_at = now()
+ │
+ └─ MODO LOCAL (SQLite/memória, dentro de IUnitOfWork):
+ ├─ validação: getById → senão SaleNotFoundException; já anulada →
+ │ retorna (no-op idempotente)
+ ├─ FifoStockUseCase.restoreLot para cada LotConsumption
+ ├─ markCancelled(saleId, storeId)
+ └─ add FinancialTransaction(expense, "Estorno de venda — …", categoria Vendas)
+ ▼
 Venda anulada → UI: selo "Anulada", total riscado, permanece no histórico
-  └─ SAI de relatórios, KPIs e do resumo do dia (status != 'active' é filtrado)
-  └─ invalida salesListProvider, productsProvider, transactionsProvider,
-     cashFlowProvider e dashboardKpisProvider (telas recarregam)
+ └─ SAI de relatórios, KPIs e do resumo do dia (status != 'active' é filtrado)
+ └─ invalida salesListProvider, productsProvider, transactionsProvider,
+ cashFlowProvider e dashboardKpisProvider (telas recarregam)
 ```
 
 ### Decisões de negócio da anulação
@@ -111,8 +111,8 @@ Venda anulada → UI: selo "Anulada", total riscado, permanece no histórico
 1. Valida `amount > 0` (`InvalidDebtAmountException`);
 2. Registra a **dívida** (`IDebtRepository.add`) — fonte de verdade do "a receber / a pagar";
 3. Cria a **pendência financeira vinculada** (`debtId`):
-   - cliente (`isCustomerDebt: true`) → **entrada pendente** (a receber);
-   - fornecedor (`isCustomerDebt: false`) → **saída pendente** (a pagar).
+ - cliente (`isCustomerDebt: true`) → **entrada pendente** (a receber);
+ - fornecedor (`isCustomerDebt: false`) → **saída pendente** (a pagar).
 
 > Se a pendência falhar **depois** da dívida, lança `PendingEntryRegistrationException` — a UI informa que o fiado foi registrado e pede conferência no Financeiro (nunca "tentar novamente", o que duplicaria o fiado).
 
@@ -123,10 +123,10 @@ Venda anulada → UI: selo "Anulada", total riscado, permanece no histórico
 2. Idempotência: se já quitada, retorna (nunca duplica entrada no caixa)
 3. Marca a dívida como paga (isPaid = true, paidAt = agora)
 4. Entrada no caixa:
-   ├─ existe pendência vinculada (debtId)?
-   │    ├─ pendente → marca a MESMA transação como paga
-   │    └─ já paga → nada (idempotente)
-   └─ não existe → registra nova entrada (categoria "Fiado")
+ ├─ existe pendência vinculada (debtId)?
+ │ ├─ pendente → marca a MESMA transação como paga
+ │ └─ já paga → nada (idempotente)
+ └─ não existe → registra nova entrada (categoria "Fiado")
 ```
 
 **Ordem deliberada:** a baixa acontece **antes** da entrada. Se algo falhar no meio, o pior cenário é um fiado baixado sem movimento no caixa (livro subestimado) — jamais o inverso, que permitiria **cobrar o cliente duas vezes**.
@@ -171,8 +171,8 @@ Separar evita campos vazios e regras incoerentes (despesas não têm item/estoqu
 ### 4.1 Total do produto (camada histórica)
 
 - **`UpdateProductStockUseCase`** é a porta que muta o **total** `stock_quantity` do produto:
-  - `ensureSufficientStock(productId, quantity)` — pré-validação sem mutação;
-  - `increase`/`decrease` — revalidam e gravam **valor absoluto**;
+ - `ensureSufficientStock(productId, quantity)` — pré-validação sem mutação;
+ - `increase`/`decrease` — revalidam e gravam **valor absoluto**;
 - **`IProductRepository.updateStock`** recebe **valor absoluto** (não delta) — duas camadas de proteção;
 - **`CHECK (stock_quantity >= 0)`** no SQLite é a salvaguarda final;
 - A UI bloqueia adicionar ao carrinho além do estoque (`soldOut`) e sinaliza estoque baixo (`< 5` un.) no dashboard e na listagem.
@@ -183,16 +183,16 @@ Desde o **W11**, o estoque tem camada de **lotes**: cada entrada de mercadoria c
 
 ```text
 Entrada (compra)
-  └─ increase: valida produto → cria LOTE novo (validade opcional, custo)
-     └─ aumenta o total do produto (mesma quantidade)
+ └─ increase: valida produto → cria LOTE novo (validade opcional, custo)
+ └─ aumenta o total do produto (mesma quantidade)
 
 Baixa (venda)
-  └─ decrease: pré-valida a SOMA dos lotes (nada é mutado se faltar)
-     └─ consome os lotes em ordem FIFO:
-        1º data_validade ASC (mais próximo do vencimento primeiro)
-        2º sem validade no fim — por data_entrada ASC
-     └─ se um lote não cobre, o excedente abate do lote SEGUINTE
-     └─ reduz o total do produto na mesma quantidade
+ └─ decrease: pré-valida a SOMA dos lotes (nada é mutado se faltar)
+ └─ consome os lotes em ordem FIFO:
+ 1º data_validade ASC (mais próximo do vencimento primeiro)
+ 2º sem validade no fim — por data_entrada ASC
+ └─ se um lote não cobre, o excedente abate do lote SEGUINTE
+ └─ reduz o total do produto na mesma quantidade
 ```
 
 **Por que FIFO por validade?** O lote que vence primeiro deve sair primeiro — evita prejuízo por mercadoria vencida parada no estoque e é o comportamento esperado pelo comerciante (e pela fiscalização sanitária). Lotes sem validade (não perecíveis) são consumidos por antiguidade de entrada.
@@ -207,24 +207,24 @@ Produtos marcados com **`vendaPorFracao: true`** (ex.: arroz, feijão, queijo �
 
 ```text
 20 PP PPP P WW WWW
-│  └────┬──┘  └─┬──┘
-pref  código   valor total
-'20'  produto  da pesagem (5 dígitos, em CENTAVOS)
+│ └────┬──┘ └─┬──┘
+pref código valor total
+'20' produto da pesagem (5 dígitos, em CENTAVOS)
 ```
 
 O fluxo no PDV (`_handleBarcode`):
 
 ```text
 leitura → 20 + 5 + 5 dígitos?
-  ├─ NÃO → busca pelo code/PLU normal (adiciona 1 unidade)
-  └─ SIM → busca o produto pelo PLU (normalizando zeros à esquerda:
-           "00123" ≡ "123")
-      ├─ produto não é venda_por_fracao? → NÃO intercepta (cai no
-      │   fluxo normal — evita confundir EAN-12 que comece com "20")
-      └─ é por peso → deriva a QUANTIDADE:
-           qtd(milésimos) = valor_total_centavos × 1000 ~/ preço_unitário
-           (divisão inteira — nunca cobra a mais por arredondamento)
-         e adiciona ao carrinho (limitada ao estoque)
+ ├─ NÃO → busca pelo code/PLU normal (adiciona 1 unidade)
+ └─ SIM → busca o produto pelo PLU (normalizando zeros à esquerda:
+ "00123" ≡ "123")
+ ├─ produto não é venda_por_fracao? → NÃO intercepta (cai no
+ │ fluxo normal — evita confundir EAN-12 que comece com "20")
+ └─ é por peso → deriva a QUANTIDADE:
+ qtd(milésimos) = valor_total_centavos × 1000 ~/ preço_unitário
+ (divisão inteira — nunca cobra a mais por arredondamento)
+ e adiciona ao carrinho (limitada ao estoque)
 ```
 
 > A balança imprime o **valor total** da pesagem (não o peso); a fração de peso é derivada matematicamente de `valor ÷ preço unitário` — ex.: etiqueta de 200,00 a 80,00/kg → 2,5 kg → 2500 milésimos.
@@ -239,35 +239,35 @@ O `CloseCashRegisterUseCase` registra o **fecho do dia** da loja com a **confer�
 
 ```text
 CashClosingSheet (Financeiro → Fecho de caixa)
-  │  1. PRÉVIA — cashClosingSummaryProvider → get_cash_closing_summary (server-side)
-  │     └─ total do dia (todas as formas) · esperado na gaveta (só DINHEIRO)
-  │        · abertura por forma (JSONB) · fecho já registrado (se houver)
-  │  2. O usuário (dono/gerente) digita a CONTAGEM FÍSICA da gaveta
-  │     └─ diferença AO VIVO: confere / sobra / falta (conforme o esperado)
-  ▼
+ │ 1. PRÉVIA — cashClosingSummaryProvider → get_cash_closing_summary (server-side)
+ │ └─ total do dia (todas as formas) · esperado na gaveta (só DINHEIRO)
+ │ · abertura por forma (JSONB) · fecho já registrado (se houver)
+ │ 2. O usuário (dono/gerente) digita a CONTAGEM FÍSICA da gaveta
+ │ └─ diferença AO VIVO: confere / sobra / falta (conforme o esperado)
+ ▼
 CloseCashRegisterUseCase
-  ├─ valida countedCashCents >= 0 → senão InvalidCashCountException
-  │
-  ├─ MODO SUPABASE (ICashClosingProcessor → RPC close_cash_register, UMA transação):
-  │    ├─ guarda is_manager_of_store — funcionário NÃO fecha (servidor é a autoridade,
-  │    │   mesmo que um cliente modificado contorne a UI)
-  │    ├─ valida a sessão e a contagem não-negativa NO SERVIDOR
-  │    ├─ calcula NO SERVIDOR (o cliente NUNCA envia valores calculados):
-  │    │    └─ esperado = Σ vendas ATIVAS em DINHEIRO no dia [p_day, p_day+1)
-  │    │       · total = Σ vendas ATIVAS (todas as formas)
-  │    │       · abertura = jsonb_object_agg por forma (relatório Z)
-  │    └─ UPSERT em cash_closings (UNIQUE store_id + closing_date):
-  │         refazer o fecho do dia ATUALIZA a contagem física, sem duplicar
-  │    └─ devolve o fecho registrado (JSONB) → UI exibe o resultado
-  │
-  └─ MODO LOCAL (SQLite/memória):
-       └─ aggregateCashClosingDay (MESMO critério da RPC: ativas, anuladas fora)
-          → ICashClosingRepository.save (UPSERT por loja + dia)
-  ▼
+ ├─ valida countedCashCents >= 0 → senão InvalidCashCountException
+ │
+ ├─ MODO SUPABASE (ICashClosingProcessor → RPC close_cash_register, UMA transação):
+ │ ├─ guarda is_manager_of_store — funcionário NÃO fecha (servidor é a autoridade,
+ │ │ mesmo que um cliente modificado contorne a UI)
+ │ ├─ valida a sessão e a contagem não-negativa NO SERVIDOR
+ │ ├─ calcula NO SERVIDOR (o cliente NUNCA envia valores calculados):
+ │ │ └─ esperado = Σ vendas ATIVAS em DINHEIRO no dia [p_day, p_day+1)
+ │ │ · total = Σ vendas ATIVAS (todas as formas)
+ │ │ · abertura = jsonb_object_agg por forma (relatório Z)
+ │ └─ UPSERT em cash_closings (UNIQUE store_id + closing_date):
+ │ refazer o fecho do dia ATUALIZA a contagem física, sem duplicar
+ │ └─ devolve o fecho registrado (JSONB) → UI exibe o resultado
+ │
+ └─ MODO LOCAL (SQLite/memória):
+ └─ aggregateCashClosingDay (MESMO critério da RPC: ativas, anuladas fora)
+ → ICashClosingRepository.save (UPSERT por loja + dia)
+ ▼
 Fecho persistido → UI mostra o resultado (no SaaS, os valores exibidos são
-  o RETORNO da RPC — o servidor é a autoridade)
-  └─ invalida cashClosingSummaryProvider + cashClosingHistoryProvider
-     (prévia e histórico são re-buscados com o fecho novo)
+ o RETORNO da RPC — o servidor é a autoridade)
+ └─ invalida cashClosingSummaryProvider + cashClosingHistoryProvider
+ (prévia e histórico são re-buscados com o fecho novo)
 ```
 
 ### Decisões de negócio

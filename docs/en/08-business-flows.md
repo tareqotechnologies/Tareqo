@@ -12,25 +12,25 @@ The `ProcessSaleUseCase` integrates **Sales + Stock + Finance** with a deliberat
 
 ```text
 1. Sale validation
-   ├─ rejects a sale without items
-   └─ rejects a total that diverges from Σ(quantity × unit price)
-      └─ comparison in CENTS ((x * 100).round()) — avoids false
-         positives from double precision (e.g.: 2 × 9.9 + 9.9)
+ ├─ rejects a sale without items
+ └─ rejects a total that diverges from Σ(quantity × unit price)
+ └─ comparison in CENTS ((x * 100).round()) — avoids false
+ positives from double precision (e.g.: 2 × 9.9 + 9.9)
 
 2. Stock pre-validation (NO mutation)
-   └─ for each item: UpdateProductStockUseCase.ensureSufficientStock
-      └─ if missing → InsufficientStockException → rollback, nothing written
+ └─ for each item: UpdateProductStockUseCase.ensureSufficientStock
+ └─ if missing → InsufficientStockException → rollback, nothing written
 
 3. Sale recording (ISaleRepository.registerSale)
-   └─ SQLite: sales + sale_items tables in the same transaction
+ └─ SQLite: sales + sale_items tables in the same transaction
 
 4. Stock deduction (per item)
-   └─ UpdateProductStockUseCase.decrease — revalidates internally
-      (defense against direct calls) and persists the ABSOLUTE VALUE
-      (stock − quantity) via IProductRepository.updateStock
+ └─ UpdateProductStockUseCase.decrease — revalidates internally
+ (defense against direct calls) and persists the ABSOLUTE VALUE
+ (stock − quantity) via IProductRepository.updateStock
 
 5. Cash income
-   └─ FinancialTransaction(income, category "Vendas", status paid)
+ └─ FinancialTransaction(income, category "Vendas", status paid)
 ```
 
 ### Guarantees
@@ -57,37 +57,37 @@ Each `SaleItem` keeps `productName` and `unitPrice` **at the time of sale** (plu
 
 ```text
 SaleDetailScreen (detail of an ACTIVE sale + owner/manager user)
-  │  confirmation (AlertDialog shows the sale amount)
-  ▼
+ │ confirmation (AlertDialog shows the sale amount)
+ ▼
 CancelSaleUseCase
-  │
-  ├─ SUPABASE MODE (ISaleCancellationProcessor → cancel_sale RPC, ONE transaction):
-  │    ├─ immediate delegation (no client-side validation) — the server
-  │    │   validates existence + idempotence: is_manager_of_store guard
-  │    │   (employees CANNOT cancel — the server is the authority, even if a
-  │    │   tampered client bypasses the UI)
-  │    ├─ reads and LOCKS the sale FOR UPDATE (store-scoped); missing or
-  │    │   already cancelled → no-op (never throws SaleNotFoundException)
-  │    ├─ returns the stock to the EXACT lots consumed (sale_lot_consumption):
-  │    │    └─ per lot (FOR UPDATE): current_quantity += returned
-  │    │       and the product stock_quantity += returned — the
-  │    │       `stock = Σ lots` invariant never breaks
-  │    ├─ cash reversal: EXPENSE for the sale amount, category Sales, status
-  │    │   paid, description "Sale reversal — <method>" — the pair
-  │    │   (original income + reversal) closes the cash at ZERO
-  │    └─ marks the sale: status = 'cancelled', cancelled_at = now()
-  │
-  └─ LOCAL MODE (SQLite/in-memory, inside an IUnitOfWork):
-       ├─ validation: getById → else SaleNotFoundException; already
-       │  cancelled → return (idempotent no-op)
-       ├─ FifoStockUseCase.restoreLot for each LotConsumption
-       ├─ markCancelled(saleId, storeId)
-       └─ add FinancialTransaction(expense, "Sale reversal — …", category Sales)
-  ▼
+ │
+ ├─ SUPABASE MODE (ISaleCancellationProcessor → cancel_sale RPC, ONE transaction):
+ │ ├─ immediate delegation (no client-side validation) — the server
+ │ │ validates existence + idempotence: is_manager_of_store guard
+ │ │ (employees CANNOT cancel — the server is the authority, even if a
+ │ │ tampered client bypasses the UI)
+ │ ├─ reads and LOCKS the sale FOR UPDATE (store-scoped); missing or
+ │ │ already cancelled → no-op (never throws SaleNotFoundException)
+ │ ├─ returns the stock to the EXACT lots consumed (sale_lot_consumption):
+ │ │ └─ per lot (FOR UPDATE): current_quantity += returned
+ │ │ and the product stock_quantity += returned — the
+ │ │ `stock = Σ lots` invariant never breaks
+ │ ├─ cash reversal: EXPENSE for the sale amount, category Sales, status
+ │ │ paid, description "Sale reversal — <method>" — the pair
+ │ │ (original income + reversal) closes the cash at ZERO
+ │ └─ marks the sale: status = 'cancelled', cancelled_at = now()
+ │
+ └─ LOCAL MODE (SQLite/in-memory, inside an IUnitOfWork):
+ ├─ validation: getById → else SaleNotFoundException; already
+ │ cancelled → return (idempotent no-op)
+ ├─ FifoStockUseCase.restoreLot for each LotConsumption
+ ├─ markCancelled(saleId, storeId)
+ └─ add FinancialTransaction(expense, "Sale reversal — …", category Sales)
+ ▼
 Cancelled sale → UI: "Cancelled" badge, total struck through, stays in history
-  └─ LEAVES reports, KPIs and the day summary (status != 'active' is filtered)
-  └─ invalidates salesListProvider, productsProvider, transactionsProvider,
-     cashFlowProvider and dashboardKpisProvider (screens reload)
+ └─ LEAVES reports, KPIs and the day summary (status != 'active' is filtered)
+ └─ invalidates salesListProvider, productsProvider, transactionsProvider,
+ cashFlowProvider and dashboardKpisProvider (screens reload)
 ```
 
 ### Cancellation business decisions
@@ -113,8 +113,8 @@ Cancelled sale → UI: "Cancelled" badge, total struck through, stays in history
 1. Validates `amount > 0` (`InvalidDebtAmountException`);
 2. Records the **debt** (`IDebtRepository.add`) — the source of truth for receivables/payables;
 3. Creates the **linked financial pending entry** (`debtId`):
-   - customer (`isCustomerDebt: true`) → **pending income** (receivable);
-   - supplier (`isCustomerDebt: false`) → **pending expense** (payable).
+ - customer (`isCustomerDebt: true`) → **pending income** (receivable);
+ - supplier (`isCustomerDebt: false`) → **pending expense** (payable).
 
 > If the pending entry fails **after** the debt, it throws `PendingEntryRegistrationException` — the UI informs that the credit was recorded and asks to check Finance (never "try again", which would duplicate the credit).
 
@@ -125,12 +125,12 @@ Cancelled sale → UI: "Cancelled" badge, total struck through, stays in history
 2. Idempotence: if already settled, return (never duplicates cash income)
 3. Mark the debt as paid (isPaid = true, paidAt = now)
 4. Cash income:
-   ├─ linked pending entry exists (debtId)?
-   │    ├─ pending → mark the SAME transaction as paid AND stamp the
-   │    │          realization date (date = now — cash flow recognizes
-   │    │          the money when it ENTERS, in both local and SaaS modes)
-   │    └─ already paid → nothing (idempotent)
-   └─ doesn't exist → record a new income (category "Fiado")
+ ├─ linked pending entry exists (debtId)?
+ │ ├─ pending → mark the SAME transaction as paid AND stamp the
+ │ │ realization date (date = now — cash flow recognizes
+ │ │ the money when it ENTERS, in both local and SaaS modes)
+ │ └─ already paid → nothing (idempotent)
+ └─ doesn't exist → record a new income (category "Fiado")
 ```
 
 > On **Supabase** the whole settlement runs as the **`settle_debt` RPC** — one transaction, idempotent, scoped by store. Since Aug 6 it also stamps `date = now()` on the linked pending entry, matching the local SQLite `markAsPaid` semantics.
@@ -177,8 +177,8 @@ Separating them avoids empty fields and incoherent rules (expenses have no item/
 ### 4.1 Product total (historical layer)
 
 - **`UpdateProductStockUseCase`** is the port that mutates the product's **total** `stock_quantity`:
-  - `ensureSufficientStock(productId, quantity)` — pre-validation without mutation;
-  - `increase`/`decrease` — revalidate and persist the **absolute value**;
+ - `ensureSufficientStock(productId, quantity)` — pre-validation without mutation;
+ - `increase`/`decrease` — revalidate and persist the **absolute value**;
 - **`IProductRepository.updateStock`** receives an **absolute value** (not a delta) — two layers of protection;
 - **`CHECK (stock_quantity >= 0)`** in SQLite is the last line of defense;
 - The UI blocks adding to the cart beyond stock (`soldOut`) and flags low stock (`< 5` units) on the dashboard and the listing.
@@ -205,35 +205,35 @@ Separating them avoids empty fields and incoherent rules (expenses have no item/
 
 ```text
 CashClosingSheet (Financial → Cash closing)
-  │  1. PREVIEW — cashClosingSummaryProvider → get_cash_closing_summary (server-side)
-  │     └─ day total (all methods) · expected in the drawer (CASH only)
-  │        · breakdown by method (JSONB) · already-registered closing (if any)
-  │  2. The user (owner/manager) types the PHYSICAL COUNT of the drawer
-  │     └─ LIVE difference: matches / surplus / shortage (vs. the expected)
-  ▼
+ │ 1. PREVIEW — cashClosingSummaryProvider → get_cash_closing_summary (server-side)
+ │ └─ day total (all methods) · expected in the drawer (CASH only)
+ │ · breakdown by method (JSONB) · already-registered closing (if any)
+ │ 2. The user (owner/manager) types the PHYSICAL COUNT of the drawer
+ │ └─ LIVE difference: matches / surplus / shortage (vs. the expected)
+ ▼
 CloseCashRegisterUseCase
-  ├─ validates countedCashCents >= 0 → else InvalidCashCountException
-  │
-  ├─ SUPABASE MODE (ICashClosingProcessor → close_cash_register RPC, ONE transaction):
-  │    ├─ is_manager_of_store guard — employees CANNOT close (the server is the
-  │    │   authority, even if a tampered client bypasses the UI)
-  │    ├─ validates the session and the non-negative count ON THE SERVER
-  │    ├─ computes ON THE SERVER (the client NEVER sends computed values):
-  │    │    └─ expected = Σ ACTIVE CASH sales on [p_day, p_day+1)
-  │    │       · total = Σ active sales (all methods)
-  │    │       · breakdown = jsonb_object_agg by method (Z report)
-  │    └─ UPSERT into cash_closings (UNIQUE store_id + closing_date):
-  │         re-closing the day UPDATES the physical count, no duplicates
-  │    └─ returns the registered closing (JSONB) → UI shows the result
-  │
-  └─ LOCAL MODE (SQLite/in-memory):
-       └─ aggregateCashClosingDay (SAME criteria as the RPC: active only,
-          cancelled out) → ICashClosingRepository.save (UPSERT per store + day)
-  ▼
+ ├─ validates countedCashCents >= 0 → else InvalidCashCountException
+ │
+ ├─ SUPABASE MODE (ICashClosingProcessor → close_cash_register RPC, ONE transaction):
+ │ ├─ is_manager_of_store guard — employees CANNOT close (the server is the
+ │ │ authority, even if a tampered client bypasses the UI)
+ │ ├─ validates the session and the non-negative count ON THE SERVER
+ │ ├─ computes ON THE SERVER (the client NEVER sends computed values):
+ │ │ └─ expected = Σ ACTIVE CASH sales on [p_day, p_day+1)
+ │ │ · total = Σ active sales (all methods)
+ │ │ · breakdown = jsonb_object_agg by method (Z report)
+ │ └─ UPSERT into cash_closings (UNIQUE store_id + closing_date):
+ │ re-closing the day UPDATES the physical count, no duplicates
+ │ └─ returns the registered closing (JSONB) → UI shows the result
+ │
+ └─ LOCAL MODE (SQLite/in-memory):
+ └─ aggregateCashClosingDay (SAME criteria as the RPC: active only,
+ cancelled out) → ICashClosingRepository.save (UPSERT per store + day)
+ ▼
 Closing persisted → UI shows the result (on SaaS, the displayed values are the
-  RPC's RETURN — the server is the authority)
-  └─ invalidates cashClosingSummaryProvider + cashClosingHistoryProvider
-     (preview and history are re-fetched with the new closing)
+ RPC's RETURN — the server is the authority)
+ └─ invalidates cashClosingSummaryProvider + cashClosingHistoryProvider
+ (preview and history are re-fetched with the new closing)
 ```
 
 ### Business decisions

@@ -41,7 +41,7 @@ Credentials are supplied via **flavors + `--dart-define-from-file`** (`FLUTTER_A
 
 ```bash
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env
+ --dart-define-from-file=env/prod.env
 ```
 
 - `env/dev.env` is committed (dev project); `env/prod.env` is **never** versioned (model in `env/prod.env.example`);
@@ -73,7 +73,7 @@ Release signing reads `android/key.properties` (never versioned — see `.gitign
 
 - **Keystore:** `android/app/upload-keystore.jks` (already generated — alias `upload`, RSA 2048, valid until 2053);
 - **`key.properties`:** already filled with the generated credentials (passwords live in the file — back it up in a password manager together with the `.jks`; losing both means you can't publish updates);
-- **⚠️ PKCS12 (JDK 9+):** the store and the key share a SINGLE password — `storePassword` and `keyPassword` must be equal;
+- **Warning: PKCS12 (JDK 9+):** the store and the key share a SINGLE password — `storePassword` and `keyPassword` must be equal;
 - **Without `key.properties`** (CI/dev): the release build falls back to the **debug** keystore — not publishable. **Gradle guard:** a `prodRelease` build **fails** at configuration time without `key.properties` (a production AAB can never be debug-signed);
 - **Play Console:** publish the first AAB with this key, enable *Play App Signing*, and register the upload key's SHA-256 fingerprint in *Setup → App integrity*;
 - **CI/CD:** `.github/workflows/ci.yml` builds only the **dev** flavor (validation). Publishable artifacts come from `.github/workflows/release.yml` (tag `v*` → **Fastlane**): it decodes the keystore from the `KEYSTORE_BASE64` secret, builds the prod AAB (`--obfuscate --split-debug-info`) and uploads to **Internal testing** (service account from `PLAY_SERVICE_ACCOUNT_JSON`). See `docs/pt/13-build-e-publicacao.md` for the full secrets list.
@@ -90,17 +90,17 @@ keytool -list -v -keystore android/app/upload-keystore.jks -storepass YOUR_PASSW
 
 ```text
 New feature:
-  1. Entity in the domain (freezed)      → lib/domain/entities/
-  2. Repository contract                 → lib/domain/repositories/
-  3. Use case + domain exceptions        → lib/domain/usecases/
-  4. Implementation in data              → lib/data/datasources/ (in-memory + SQLite)
-                                          lib/data/datasources/remote/ (Supabase)
-                                          lib/data/repositories/
-  5. Register in ServiceLocator          → lib/core/di/service_locator.dart
-  6. Riverpod provider                   → lib/presentation/controllers/
-  7. Screen/widget                       → lib/presentation/screens/ | widgets/
-  8. Tests (domain → data → UI)          → test/
-  9. `dart run build_runner build --delete-conflicting-outputs`
+ 1. Entity in the domain (freezed) → lib/domain/entities/
+ 2. Repository contract → lib/domain/repositories/
+ 3. Use case + domain exceptions → lib/domain/usecases/
+ 4. Implementation in data → lib/data/datasources/ (in-memory + SQLite)
+ lib/data/datasources/remote/ (Supabase)
+ lib/data/repositories/
+ 5. Register in ServiceLocator → lib/core/di/service_locator.dart
+ 6. Riverpod provider → lib/presentation/controllers/
+ 7. Screen/widget → lib/presentation/screens/ | widgets/
+ 8. Tests (domain → data → UI) → test/
+ 9. `dart run build_runner build --delete-conflicting-outputs`
 ```
 
 ---
@@ -121,7 +121,7 @@ New feature:
 - **Serialization:** enums by name, `DateTime` as epoch millis, `bool` as 0/1;
 - **Transactions:** related multiple writes inside `IUnitOfWork` / `runInTransaction` (re-entrant);
 - **Lightweight migrations:** idempotent `ALTER TABLE` in `AppDatabase.createSchema`, guarded by `PRAGMA table_info`;
-- **⚠️ Keep the signatures in sync** between `app_database_io.dart` ↔ `app_database_stub.dart`.
+- **Warning: Keep the signatures in sync** between `app_database_io.dart` ↔ `app_database_stub.dart`.
 
 ### SQLite for new data
 
@@ -154,13 +154,13 @@ When adding tables/columns: create them in `createSchema` (with guard `CHECK`s) 
 Fictional example: **Suppliers** module.
 
 1. **Domain:**
-   - `Supplier` (freezed entity) in `lib/domain/entities/`;
-   - `ISupplierRepository` in `lib/domain/repositories/`;
-   - `GetSuppliersUseCase`, `AddSupplierUseCase` in `lib/domain/usecases/`;
+ - `Supplier` (freezed entity) in `lib/domain/entities/`;
+ - `ISupplierRepository` in `lib/domain/repositories/`;
+ - `GetSuppliersUseCase`, `AddSupplierUseCase` in `lib/domain/usecases/`;
 2. **Data:**
-   - `SupplierLocalDataSource` (contract) + `SupplierLocalDataSourceImpl` (in-memory) + `SupplierSqliteDataSourceImpl`;
-   - `SupplierRepositoryImpl`;
-   - `suppliers` table in `AppDatabase.createSchema` (+ migration if there's an old database);
+ - `SupplierLocalDataSource` (contract) + `SupplierLocalDataSourceImpl` (in-memory) + `SupplierSqliteDataSourceImpl`;
+ - `SupplierRepositoryImpl`;
+ - `suppliers` table in `AppDatabase.createSchema` (+ migration if there's an old database);
 3. **DI:** register the datasource (in both ServiceLocator branches), repository and use cases;
 4. **Presentation:** `suppliers_providers.dart`, screen, registration sheet;
 5. **Tests:** use case, SQLite datasource, screen;

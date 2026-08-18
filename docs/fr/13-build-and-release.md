@@ -16,7 +16,7 @@ flutter pub get
 
 - **Version de l'app :** `version: 1.1.0+2` dans `pubspec.yaml` (appliquée automatiquement à `versionCode`/`versionName` sur Android et `CFBundleVersion` sur iOS).
 
-> ⚠️ **Mode SaaS vs. local (flavors dev/prod) :** les identifiants sont fournis via `--dart-define-from-file` — `env/dev.env` (commité, projet dev) et `env/prod.env` (**jamais** versionné ; modèle dans `env/prod.env.example`). `FLUTTER_APP_FLAVOR` est un **define réservé** injecté depuis `--flavor`. Un build **release** sans `--flavor prod` **lève une erreur au démarrage** (`main.dart` fail-fast) ; de plus, `SupabaseBootstrap` lève une erreur dans un release NON-prod avec les défauts dev embarqués (fail-fast S2 — **ajusté Aug 9** : le déploiement utilise UN SEUL projet Supabase `dotklbpqmlnhcdifiukd` partagé par dev/prod, donc un release `prod` avec les identifiants du projet est légitime) ; la configuration Gradle **échoue aussi `prodRelease` sans `android/key.properties`**. La clé anon est publique par conception — la vraie sécurité vient du RLS ; **n'embarquez jamais** la clé *service role* :
+> **Attention :** **Mode SaaS vs. local (flavors dev/prod) :** les identifiants sont fournis via `--dart-define-from-file` — `env/dev.env` (commité, projet dev) et `env/prod.env` (**jamais** versionné ; modèle dans `env/prod.env.example`). `FLUTTER_APP_FLAVOR` est un **define réservé** injecté depuis `--flavor`. Un build **release** sans `--flavor prod` **lève une erreur au démarrage** (`main.dart` fail-fast) ; de plus, `SupabaseBootstrap` lève une erreur dans un release NON-prod avec les défauts dev embarqués (fail-fast S2 — **ajusté Aug 9** : le déploiement utilise UN SEUL projet Supabase `dotklbpqmlnhcdifiukd` partagé par dev/prod, donc un release `prod` avec les identifiants du projet est légitime) ; la configuration Gradle **échoue aussi `prodRelease` sans `android/key.properties`**. La clé anon est publique par conception — la vraie sécurité vient du RLS ; **n'embarquez jamais** la clé *service role* :
 
 ```bash
 # Développement (debug/hot reload)
@@ -24,7 +24,7 @@ flutter run --flavor dev --dart-define-from-file=env/dev.env
 
 # Production (release)
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env
+ --dart-define-from-file=env/prod.env
 ```
 
 ## Résumé par plateforme
@@ -58,7 +58,7 @@ La signature de release lit `android/key.properties` (jamais versionné — voir
 
 ```bash
 # ── Flavors ────────────────────────────────────────────────────────────
-# dev  → applicationId com.dumbhanengue.dumbhanengue.dev, libellé « Dev »
+# dev → applicationId com.dumbhanengue.dumbhanengue.dev, libellé « Dev »
 # prod → applicationId de production com.dumbhanengue.dumbhanengue
 
 # APK dev (distribution directe / test)
@@ -67,13 +67,13 @@ flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
 
 # AAB PROD — le format exigé par Google Play
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env
+ --dart-define-from-file=env/prod.env
 # → build/app/outputs/bundle/prodRelease/app-prod-release.aab
 
 # AAB PROD avec obfuscation Dart (recommandé avant publication)
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env \
-  --obfuscate --split-debug-info=build/symbols
+ --dart-define-from-file=env/prod.env \
+ --obfuscate --split-debug-info=build/symbols
 
 # Tester sur un appareil/émulateur (debug, avec hot reload)
 flutter run --flavor dev --dart-define-from-file=env/dev.env
@@ -83,7 +83,7 @@ flutter run --flavor dev --dart-define-from-file=env/dev.env
 
 #### Avertissement de build connu (sentry_flutter + KGP) — suivi upstream
 
-> ⚠️ **Aug 8 :** Flutter 3.44+ avec AGP 9+ affiche un **avertissement** en configurant Gradle pour TOUT build Android (dev ou prod) :
+> **Attention :** **Aug 8 :** Flutter 3.44+ avec AGP 9+ affiche un **avertissement** en configurant Gradle pour TOUT build Android (dev ou prod) :
 >
 > ```
 > WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): sentry_flutter
@@ -127,7 +127,7 @@ flutter run
 3. **Product → Archive**, puis uploadez via **App Store Connect** (Transporter ou *Distribute App*) ;
 4. Configurez l'app dans App Store Connect (métadonnées, confidentialité, captures d'écran) et soumettez à la revue.
 
-> ⚠️ `supabase_flutter` et `flutter_secure_storage` fonctionnent sur iOS sans configuration supplémentaire. Pensez à déclarer les autorisations appropriées dans `Info.plist` si vous ajoutez un jour caméra/localisation.
+> **Attention :** `supabase_flutter` et `flutter_secure_storage` fonctionnent sur iOS sans configuration supplémentaire. Pensez à déclarer les autorisations appropriées dans `Info.plist` si vous ajoutez un jour caméra/localisation.
 
 ---
 
@@ -177,7 +177,7 @@ flutter build web --release --wasm
 
 `build/web/` est un **site statique** : hébergez-le sur n'importe quel serveur/CDN (Firebase Hosting, Vercel, Netlify, GitHub Pages, nginx...). Configurez un repli vers `index.html` (SPA) si vous utilisez des routes.
 
-> ⚠️ **Limitation web :** le sqlite3 natif ne s'exécute pas dans le navigateur (`dart:ffi` n'existe pas). Sur cette plateforme, l'app utilise les datasources **en mémoire** (mêmes contrats — UI identique), et **SaaS (Supabase)** est le mode de production recommandé pour le web. Le stockage sécurisé sur web est aussi plus faible (la clé de chiffrement vit dans `localStorage`).
+> **Attention :** **Limitation web :** le sqlite3 natif ne s'exécute pas dans le navigateur (`dart:ffi` n'existe pas). Sur cette plateforme, l'app utilise les datasources **en mémoire** (mêmes contrats — UI identique), et **SaaS (Supabase)** est le mode de production recommandé pour le web. Le stockage sécurisé sur web est aussi plus faible (la clé de chiffrement vit dans `localStorage`).
 
 ---
 

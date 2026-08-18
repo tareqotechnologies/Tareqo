@@ -6,9 +6,9 @@ import '../../../domain/entities/customer.dart';
 /// Implementações possíveis: memória, SQLite, Supabase... O repositório
 /// depende desta abstração, e não de uma implementação.
 abstract interface class CustomerLocalDataSource {
-  /// Retorna todos os clientes da loja [storeId] armazenados.
-  Future<List<Customer>> getAll({required String storeId});
+ /// Retorna todos os clientes da loja [storeId] armazenados.
+ Future<List<Customer>> getAll({required String storeId});
 
-  /// Registra um cliente no armazenamento.
-  Future<void> add(Customer customer);
+ /// Registra um cliente no armazenamento.
+ Future<void> add(Customer customer);
 }

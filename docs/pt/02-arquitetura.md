@@ -6,33 +6,33 @@ O Dumbhanengue segue a **Clean Architecture** em três camadas, todas dentro de 
 
 ```text
 lib/
-├── main.dart                    # Bootstrap: inicializa Supabase + GetIt + ProviderScope
-├── app.dart                     # Widget raiz (MaterialApp, tema, AuthGate)
-├── core/                        # Preocupações transversais (não pertencem a nenhuma camada)
-│   ├── config/                  # Configurações (Supabase URL/anon key via --dart-define)
-│   ├── database/                # Facade SQLite (import condicional io × stub)
-│   ├── di/                      # Service Locator (GetIt) — registro central de dependências
-│   ├── errors/                  # (vazio — exceções de domínio substituem a antiga hierarquia Failure)
-│   ├── i18n/                    # Helpers de L10n + strings de descrição de transações
-│   ├── observability/           # Crash reporting (Sentry) — CrashReporting
-│   ├── network/                 # Bootstrap do Supabase
-│   ├── security/                # Armazenamento seguro (Keychain/Keystore)
-│   ├── theme/                   # Tema Material 3 (AppTheme, AppColors)
-│   └── utils/                   # Helpers genéricos (Formatters pt-BR)
-├── domain/                      # NÚCLEO: regras de negócio puras, sem dependências externas
-│   ├── entities/                # Entidades imutáveis (Freezed): Product, Sale, SaleItem, Debt, FinancialTransaction, AppUser
-│   ├── repositories/            # Contratos abstratos (IProductRepository, ISaleRepository, ...)
-│   └── usecases/                # Casos de uso — orquestram as regras de negócio
-├── data/                        # Implementações concretas do que o domínio define
-│   ├── datasources/
-│   │   ├── auth/                # AuthRemoteDataSource (Supabase)
-│   │   └── local/               # Contratos + impls em memória e SQLite (product, sale, financial_transaction, debt) + unit of work + catálogo de planos
-│   ├── models/                  # DTOs serializáveis (reservado)
-│   └── repositories/            # Implementações dos contratos do domínio (ProductRepositoryImpl, ...)
-└── presentation/                # Tudo que o usuário vê e interage
-    ├── controllers/             # Providers/notifiers do Riverpod (auth, products, sales, finance, debts)
-    ├── screens/                 # Telas por módulo (auth, shell, dashboard, products, sales, financial, credit)
-    └── widgets/                 # Widgets compartilhados (KpiCard, EmptyState, StatusChip, AppSheet, ...)
+├── main.dart # Bootstrap: inicializa Supabase + GetIt + ProviderScope
+├── app.dart # Widget raiz (MaterialApp, tema, AuthGate)
+├── core/ # Preocupações transversais (não pertencem a nenhuma camada)
+│ ├── config/ # Configurações (Supabase URL/anon key via --dart-define)
+│ ├── database/ # Facade SQLite (import condicional io × stub)
+│ ├── di/ # Service Locator (GetIt) — registro central de dependências
+│ ├── errors/ # (vazio — exceções de domínio substituem a antiga hierarquia Failure)
+│ ├── i18n/ # Helpers de L10n + strings de descrição de transações
+│ ├── observability/ # Crash reporting (Sentry) — CrashReporting
+│ ├── network/ # Bootstrap do Supabase
+│ ├── security/ # Armazenamento seguro (Keychain/Keystore)
+│ ├── theme/ # Tema Material 3 (AppTheme, AppColors)
+│ └── utils/ # Helpers genéricos (Formatters pt-BR)
+├── domain/ # NÚCLEO: regras de negócio puras, sem dependências externas
+│ ├── entities/ # Entidades imutáveis (Freezed): Product, Sale, SaleItem, Debt, FinancialTransaction, AppUser
+│ ├── repositories/ # Contratos abstratos (IProductRepository, ISaleRepository, ...)
+│ └── usecases/ # Casos de uso — orquestram as regras de negócio
+├── data/ # Implementações concretas do que o domínio define
+│ ├── datasources/
+│ │ ├── auth/ # AuthRemoteDataSource (Supabase)
+│ │ └── local/ # Contratos + impls em memória e SQLite (product, sale, financial_transaction, debt) + unit of work + catálogo de planos
+│ ├── models/ # DTOs serializáveis (reservado)
+│ └── repositories/ # Implementações dos contratos do domínio (ProductRepositoryImpl, ...)
+└── presentation/ # Tudo que o usuário vê e interage
+ ├── controllers/ # Providers/notifiers do Riverpod (auth, products, sales, finance, debts)
+ ├── screens/ # Telas por módulo (auth, shell, dashboard, products, sales, financial, credit)
+ └── widgets/ # Widgets compartilhados (KpiCard, EmptyState, StatusChip, AppSheet, ...)
 ```
 
 ---
@@ -42,10 +42,10 @@ lib/
 O fluxo de dependências aponta **sempre para dentro**:
 
 ```text
-presentation → domain   (a UI conhece apenas abstrações: entidades, casos de uso, contratos)
-data         → domain   (implementa os contratos do domínio)
-core         → nada     (serve a todas as camadas)
-domain       → nada     (não conhece Flutter, Dio, SQLite, Riverpod, GetIt...)
+presentation → domain (a UI conhece apenas abstrações: entidades, casos de uso, contratos)
+data → domain (implementa os contratos do domínio)
+core → nada (serve a todas as camadas)
+domain → nada (não conhece Flutter, Dio, SQLite, Riverpod, GetIt...)
 ```
 
 - **O domínio não importa nenhuma outra camada.** Entidades, contratos e casos de uso são Dart puro (com anotações Freezed para imutabilidade e serialização).
@@ -55,15 +55,15 @@ domain       → nada     (não conhece Flutter, Dio, SQLite, Riverpod, GetIt...
 
 ```text
 ProductListScreen (widget)
-      ↓ ref.watch
+ ↓ ref.watch
 productsProvider (AsyncNotifier)
-      ↓ ref.read
+ ↓ ref.read
 getProductsUseCaseProvider → GetProductsUseCase (domínio)
-      ↓
+ ↓
 IProductRepository (contrato do domínio)
-      ↓ (implementação injetada via GetIt)
+ ↓ (implementação injetada via GetIt)
 ProductRepositoryImpl → ProductLocalDataSource (camada data)
-      ↓ (SQLite em nativas / memória na web)
+ ↓ (SQLite em nativas / memória na web)
 banco dumbhanengue.db
 ```
 
@@ -92,15 +92,15 @@ A `presentation` conhece **apenas abstrações** — `Product`, `GetProductsUseC
 
 1. `Dio`, `SecureStorageService` e `IAuthRepository`;
 2. **Persistência condicional:**
-   - `AppDatabase.openAppDatabase()` retorna `true` (nativas) → registra datasources **SQLite** + `SqliteUnitOfWork`;
-   - `false` (web ou falha da lib nativa) → registra datasources **em memória** + unit of work no-op.
+ - `AppDatabase.openAppDatabase()` retorna `true` (nativas) → registra datasources **SQLite** + `SqliteUnitOfWork`;
+ - `false` (web ou falha da lib nativa) → registra datasources **em memória** + unit of work no-op.
 3. Repositórios e casos de uso (idênticos nos dois cenários, pois dependem apenas dos contratos).
 
 ```dart
 if (await AppDatabase.openAppDatabase()) {
-  AppDatabase.registerDatasources(instance);
+ AppDatabase.registerDatasources(instance);
 } else {
-  _registerInMemoryDatasources();
+ _registerInMemoryDatasources();
 }
 _registerRepositoriesAndUseCases();
 ```
@@ -111,7 +111,7 @@ O **GetIt** entrega as instâncias (dependências concretas); o **Riverpod** def
 
 ```dart
 final getProductsUseCaseProvider = Provider<GetProductsUseCase>(
-  (ref) => ServiceLocator.instance<GetProductsUseCase>(),
+ (ref) => ServiceLocator.instance<GetProductsUseCase>(),
 );
 ```
 
@@ -128,7 +128,7 @@ export 'app_database_stub.dart' if (dart.library.io) 'app_database_io.dart';
 - **`app_database_io.dart`** — abre `dumbhanengue.db`, cria schema, não semeia dados (banco nasce vazio), expõe transações re-entrantes;
 - **`app_database_stub.dart`** — `openAppDatabase()` sempre retorna `false` (web cai para memória).
 
-> ⚠️ **Manter as assinaturas de `openAppDatabase()` e `registerDatasources()` em sincronia** entre os dois arquivos (há comentário no código sobre isso).
+> **Atenção:** **Manter as assinaturas de `openAppDatabase()` e `registerDatasources()` em sincronia** entre os dois arquivos (há comentário no código sobre isso).
 
 ---
 
@@ -144,28 +144,28 @@ A prévia do Z-report precisa do resumo do dia da loja: **total de vendas ativas
 
 ```text
 CashClosingSheet (Financeiro → Fecho de caixa)
-      │  ref.watch
-      ▼
+ │ ref.watch
+ ▼
 cashClosingSummaryProvider (Riverpod — FutureProvider.autoDispose)
-      │  resolve storeId ativo + day = hoje
-      ▼
-GetCashClosingSummaryUseCase  (domínio)
-      │  serverRepository != null (registrado só no modo Supabase)
-      ▼
-SupabaseCashClosingSummaryRepository  (data)
-      │  UMA chamada RPC — o cliente nunca lista vendas
-      ▼
+ │ resolve storeId ativo + day = hoje
+ ▼
+GetCashClosingSummaryUseCase (domínio)
+ │ serverRepository != null (registrado só no modo Supabase)
+ ▼
+SupabaseCashClosingSummaryRepository (data)
+ │ UMA chamada RPC — o cliente nunca lista vendas
+ ▼
 supabaseClient.rpc('get_cash_closing_summary', {p_store_id, p_day})
-      │  PostgREST → Postgres
-      ▼
+ │ PostgREST → Postgres
+ ▼
 get_cash_closing_summary (SECURITY DEFINER + guarda is_my_store)
-      ├─ Σ total das vendas ATIVAS do dia (todas as formas)
-      ├─ Σ esperado na gaveta (só payment_method = 'cash')
-      ├─ jsonb_object_agg por forma → abertura (JSONB)
-      └─ fecho já registrado em cash_closings (se houver)
-      │  devolve JSONB
-      ▼
-CashClosingSummary (day, total, esperado, abertura, fecho existente)  → UI
+ ├─ Σ total das vendas ATIVAS do dia (todas as formas)
+ ├─ Σ esperado na gaveta (só payment_method = 'cash')
+ ├─ jsonb_object_agg por forma → abertura (JSONB)
+ └─ fecho já registrado em cash_closings (se houver)
+ │ devolve JSONB
+ ▼
+CashClosingSummary (day, total, esperado, abertura, fecho existente) → UI
 ```
 
 ### Decisões de arquitetura

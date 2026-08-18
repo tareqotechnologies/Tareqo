@@ -9,36 +9,36 @@ import 'supabase_datasource_helpers.dart';
 /// explicitamente; o trigger `set_tenant_id_from_owner` do schema reforça
 /// no servidor.
 final class StoreSupabaseDataSourceImpl implements StoreLocalDataSource {
-  const StoreSupabaseDataSourceImpl();
+ const StoreSupabaseDataSourceImpl();
 
-  static const _table = 'stores';
-  static const _columns = 'id, tenant_id, name, address';
+ static const _table = 'stores';
+ static const _columns = 'id, tenant_id, name, address';
 
-  @override
-  Future<List<Store>> getByTenant(String tenantId) async {
-    final rows = await supabaseClient
-        .from(_table)
-        .select(_columns)
-        .eq('tenant_id', tenantId)
-        .order('created_at', ascending: true)
-        .limit(SupabaseQueryLimits.pageSize);
-    return List.unmodifiable([for (final row in rows) _map(row)]);
-  }
+ @override
+ Future<List<Store>> getByTenant(String tenantId) async {
+ final rows = await supabaseClient
+ .from(_table)
+ .select(_columns)
+ .eq('tenant_id', tenantId)
+ .order('created_at', ascending: true)
+ .limit(SupabaseQueryLimits.pageSize);
+ return List.unmodifiable([for (final row in rows) _map(row)]);
+ }
 
-  @override
-  Future<void> add(Store store) async {
-    await supabaseClient.from(_table).insert({
-      'id': store.id,
-      'tenant_id': store.tenantId,
-      'name': store.name,
-      'address': store.address,
-    });
-  }
+ @override
+ Future<void> add(Store store) async {
+ await supabaseClient.from(_table).insert({
+ 'id': store.id,
+ 'tenant_id': store.tenantId,
+ 'name': store.name,
+ 'address': store.address,
+ });
+ }
 
-  Store _map(Map<String, dynamic> row) => Store(
-    id: row['id'] as String,
-    tenantId: row['tenant_id'] as String,
-    name: row['name'] as String,
-    address: (row['address'] as String?) ?? '',
-  );
+ Store _map(Map<String, dynamic> row) => Store(
+ id: row['id'] as String,
+ tenantId: row['tenant_id'] as String,
+ name: row['name'] as String,
+ address: (row['address'] as String?) ?? '',
+ );
 }

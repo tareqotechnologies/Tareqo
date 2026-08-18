@@ -1,67 +1,77 @@
 import 'package:flutter/material.dart';
 
 import '../../core/i18n/l10n_ext.dart';
+import '../../core/theme/app_tokens.dart';
+import 'app_button.dart';
 
-/// Estado de erro padrão — mensagem + detalhe técnico + retry.
+/// Estado de erro V4 — mensagem + detalhe técnico + retry.
 class ErrorView extends StatelessWidget {
-  const ErrorView({
-    super.key,
-    required this.message,
-    required this.onRetry,
-    this.details,
-  });
+ const ErrorView({
+ super.key,
+ required this.message,
+ required this.onRetry,
+ this.details,
+ });
 
-  final String message;
-  final String? details;
-  final VoidCallback onRetry;
+ final String message;
+ final String? details;
+ final VoidCallback onRetry;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+ @override
+ Widget build(BuildContext context) {
+ final theme = Theme.of(context);
+ final scheme = theme.colorScheme;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.errorContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Icon(
-                Icons.error_outline,
-                size: 40,
-                color: theme.colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium,
-            ),
-            if (details != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                details!,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: Text(context.l10n.commonRetry),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+ return Center(
+ child: Padding(
+ padding: const EdgeInsets.all(AppSpacing.xl),
+ child: Column(
+ mainAxisSize: MainAxisSize.min,
+ children: [
+ Container(
+ width: 72,
+ height: 72,
+ alignment: Alignment.center,
+ decoration: BoxDecoration(
+ color: scheme.errorContainer.withValues(alpha: 0.5),
+ borderRadius: AppRadius.xlAll,
+ border: Border.all(
+ color: scheme.error.withValues(alpha: 0.3),
+ ),
+ ),
+ child: Icon(
+ Icons.cloud_off_outlined,
+ size: 32,
+ color: scheme.error,
+ ),
+ ),
+ const SizedBox(height: AppSpacing.md),
+ Text(
+ message,
+ textAlign: TextAlign.center,
+ style: theme.textTheme.titleMedium,
+ ),
+ if (details != null) ...[
+ const SizedBox(height: AppSpacing.xs),
+ Text(
+ details!,
+ textAlign: TextAlign.center,
+ maxLines: 4,
+ overflow: TextOverflow.ellipsis,
+ style: theme.textTheme.bodySmall?.copyWith(
+ color: scheme.outline,
+ ),
+ ),
+ ],
+ const SizedBox(height: AppSpacing.lg),
+ AppButton.primary(
+ label: context.l10n.commonRetry,
+ icon: const Icon(Icons.refresh, size: 18),
+ onPressed: onRetry,
+ ),
+ ],
+ ),
+ ),
+ );
+ }
 }

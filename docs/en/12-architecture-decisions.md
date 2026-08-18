@@ -19,35 +19,35 @@ By splitting the code into three layers — **domain** (entities, repository con
 
 ```
 lib/
-├── main.dart                    # Bootstrap: ProviderScope (Riverpod) + GetIt
-├── app.dart                     # Root widget (MaterialApp, theme, tenant locale/currency)
+├── main.dart # Bootstrap: ProviderScope (Riverpod) + GetIt
+├── app.dart # Root widget (MaterialApp, theme, tenant locale/currency)
 │
-├── core/                        # Cross-cutting concerns (belong to no layer)
-│   ├── config/                  # Configuration (Supabase, tenant preferences)
-│   ├── database/                # SQLite opening, schema and transactions (Unit of Work)
-│   ├── di/                      # Service Locator (GetIt) — central dependency registry
-│   ├── i18n/                    # Translation keys and localization helpers
-│   ├── security/                # Secure storage (Keychain/Keystore)
-│   ├── theme/                   # Material 3 app theme
-│   └── utils/                   # Generic helpers (currency/date formatting, ids...)
+├── core/ # Cross-cutting concerns (belong to no layer)
+│ ├── config/ # Configuration (Supabase, tenant preferences)
+│ ├── database/ # SQLite opening, schema and transactions (Unit of Work)
+│ ├── di/ # Service Locator (GetIt) — central dependency registry
+│ ├── i18n/ # Translation keys and localization helpers
+│ ├── security/ # Secure storage (Keychain/Keystore)
+│ ├── theme/ # Material 3 app theme
+│ └── utils/ # Generic helpers (currency/date formatting, ids...)
 │
-├── domain/                      # CORE: pure business rules, no external dependencies
-│   ├── entities/                # Immutable entities (Product, Sale, Tenant...) via Freezed
-│   ├── repositories/            # Abstract persistence contracts (e.g. IProductRepository)
-│   └── usecases/                # Use cases — orchestrate the business rules
+├── domain/ # CORE: pure business rules, no external dependencies
+│ ├── entities/ # Immutable entities (Product, Sale, Tenant...) via Freezed
+│ ├── repositories/ # Abstract persistence contracts (e.g. IProductRepository)
+│ └── usecases/ # Use cases — orchestrate the business rules
 │
-├── data/                        # Concrete implementations of what the domain defines
-│   ├── datasources/
-│   │   ├── remote/              # Remote data sources (Supabase/REST)
-│   │   └── local/               # Local data sources (SQLite, in-memory)
-│   ├── models/                  # Serializable DTOs — only when the API format diverges from the domain
-│   ├── repositories/            # Implementations of the domain interfaces
-│   └── services/                # Integration services (employee accounts, atomic processors)
+├── data/ # Concrete implementations of what the domain defines
+│ ├── datasources/
+│ │ ├── remote/ # Remote data sources (Supabase/REST)
+│ │ └── local/ # Local data sources (SQLite, in-memory)
+│ ├── models/ # Serializable DTOs — only when the API format diverges from the domain
+│ ├── repositories/ # Implementations of the domain interfaces
+│ └── services/ # Integration services (employee accounts, atomic processors)
 │
-└── presentation/                # Everything the user sees and interacts with
-    ├── controllers/             # State: Riverpod providers/notifiers
-    ├── screens/                 # Screens per module (auth, dashboard, products, sales, finance...)
-    └── widgets/                 # Shared widgets (KpiCard, EmptyState, StatusChip, AppSheet...)
+└── presentation/ # Everything the user sees and interacts with
+ ├── controllers/ # State: Riverpod providers/notifiers
+ ├── screens/ # Screens per module (auth, dashboard, products, sales, finance...)
+ └── widgets/ # Shared widgets (KpiCard, EmptyState, StatusChip, AppSheet...)
 ```
 
 > **Dependency Rule:** the dependency flow always points inward. `presentation → domain` (via contracts), `data → domain` (implements contracts), and `domain` knows nothing about the other layers.
@@ -90,9 +90,9 @@ The SQLite migration was completed following **Dependency Inversion**: `*SqliteD
 // lib/core/di/service_locator.dart — active persistence
 final database = await AppDatabase.openAppDatabase();
 if (database != null) {
-  _registerSqlitePersistence(database);   // SQLite (native platforms)
+ _registerSqlitePersistence(database); // SQLite (native platforms)
 } else {
-  _registerInMemoryPersistence();         // fallback: web / native lib failure
+ _registerInMemoryPersistence(); // fallback: web / native lib failure
 }
 ```
 
@@ -119,13 +119,13 @@ The dependency flow always points **inward**:
 
 ```
 ProductListScreen (widget)
-      ↓ ref.watch
+ ↓ ref.watch
 productsProvider (provider)
-      ↓ ref.read
+ ↓ ref.read
 getProductsUseCaseProvider → GetProductsUseCase (domain)
-      ↓
+ ↓
 IProductRepository (domain contract)
-      ↓ (implementation injected via GetIt at bootstrap)
+ ↓ (implementation injected via GetIt at bootstrap)
 ProductRepositoryImpl → ProductLocalDataSource (data layer)
 ```
 
@@ -235,8 +235,8 @@ Credit control answers the small merchant's most important question: **who owes 
 ### Structure
 
 - **`Debt` (credit/IOU)** — a payment promise record with `personName`, `amount`, `dueDate` and `isCustomerDebt`:
-  - `isCustomerDebt: true` → **receivable** (the customer owes the merchant);
-  - `isCustomerDebt: false` → **payable** (the merchant owes the supplier).
+ - `isCustomerDebt: true` → **receivable** (the customer owes the merchant);
+ - `isCustomerDebt: false` → **payable** (the merchant owes the supplier).
 - **`GetPendingDebtsUseCase`** — filters and lists only what is **receivable from customers**, answering *"how much do I have to receive and from whom"* immediately.
 - **`FinancialTransaction.status`** (`paid`/`pending`) — separates money **already in the cash** from mere **expected inflow**. When registering credit, `AddDebtUseCase` creates the linked pending transaction right away (`debtId`): a pending inflow for receivables and a pending outflow for payables. Pending transactions can also be created on the Finance screen ("Pendente (fiado)" toggle); when received, they are marked `paid` via the **"Receber"** (Receive) button (or by settling the credit) — realized cash counts the inflow on the **receipt date**.
 - **`Debt.isPaid`** — settlement state: when the customer pays, `SettleDebtUseCase` marks the debt `isPaid: true`. If the debt has a **linked pending transaction**, the settlement marks the **same** transaction as paid; otherwise it registers the cash inflow. There is never a duplicate.

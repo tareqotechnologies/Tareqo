@@ -10,7 +10,7 @@ Guide pratique pour résoudre les problèmes les plus courants de l'app au quoti
 2. Suivez les étapes dans l'ordre indiqué — commencez toujours par la plus simple.
 3. Si le problème persiste, consultez la section **Messages d'erreur courants** et, en dernier recours, **Quand contacter le support**.
 
-> ⚠️ **Règle d'or** : avant tout, vérifiez que le téléphone a **internet** et que l'app est **à jour** (magasin d'applications). Beaucoup d'« erreurs » ne sont qu'un manque de connexion ou une version ancienne.
+> **Attention :** **Règle d'or** : avant tout, vérifiez que le téléphone a **internet** et que l'app est **à jour** (magasin d'applications). Beaucoup d'« erreurs » ne sont qu'un manque de connexion ou une version ancienne.
 
 ---
 
@@ -42,7 +42,7 @@ Guide pratique pour résoudre les problèmes les plus courants de l'app au quoti
 2. Fermez et rouvrez l'app, puis réessayez.
 
 ### « Il apparaît « Produit ajouté ! (photo non envoyée…) » »
-- Le produit est enregistré ✅ — seule la photo n'est pas montée (pas de connexion ou erreur temporaire).
+- Le produit est enregistré ✓ — seule la photo n'est pas montée (pas de connexion ou erreur temporaire).
 - Vous pouvez ajouter la photo **plus tard**, via l'édition du produit.
 - Si cela arrive toujours, même avec internet, contactez le **support** (il peut s'agir d'une configuration du serveur).
 
@@ -140,7 +140,7 @@ Guide pratique pour résoudre les problèmes les plus courants de l'app au quoti
 ### « Écran blanc / l'app ne s'ouvre pas »
 1. Fermez et rouvrez l'app.
 2. Vérifiez l'internet (l'écran de connexion en a besoin).
-3. Si cela continue, **désinstallez et réinstallez** — vos données restent sur le serveur et reviennent à la connexion. ⚠️ Désinstaller **n'efface pas** les données de l'entreprise (elles sont dans le cloud), mais confirmez l'e-mail/mot de passe avant.
+3. Si cela continue, **désinstallez et réinstallez** — vos données restent sur le serveur et reviennent à la connexion. Attention : Désinstaller **n'efface pas** les données de l'entreprise (elles sont dans le cloud), mais confirmez l'e-mail/mot de passe avant.
 
 ### « L'app a changé de langue / devise tout d'un coup »
 - La **devise** et la **langue** sont définies par le propriétaire dans **Magasins → Réglages** et valent pour **toute l'entreprise**, immédiatement. Si c'est changé d'un coup, c'est une modification faite dans les réglages (ou sur un autre appareil avec le même compte de propriétaire) — il suffit de revenir dans **Magasins → Réglages** et de choisir à nouveau.

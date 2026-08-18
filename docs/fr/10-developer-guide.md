@@ -41,7 +41,7 @@ Les identifiants sont fournis via **flavors + `--dart-define-from-file`** (`FLUT
 
 ```bash
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env
+ --dart-define-from-file=env/prod.env
 ```
 
 - `env/dev.env` est commité (projet dev) ; `env/prod.env` n'est **jamais** versionné (modèle dans `env/prod.env.example`) ;
@@ -73,7 +73,7 @@ La signature de release lit `android/key.properties` (jamais versionné — voir
 
 - **Keystore :** `android/app/upload-keystore.jks` (déjà généré — alias `upload`, RSA 2048, valide jusqu'en 2053) ;
 - **`key.properties` :** déjà rempli avec les identifiants générés (les mots de passe vivent dans le fichier — sauvegardez-le dans un gestionnaire de mots de passe avec le `.jks` ; perdre les deux signifie que vous ne pouvez pas publier de mises à jour) ;
-- **⚠️ PKCS12 (JDK 9+) :** le store et la clé partagent UN SEUL mot de passe — `storePassword` et `keyPassword` doivent être égaux ;
+- **Attention : PKCS12 (JDK 9+) :** le store et la clé partagent UN SEUL mot de passe — `storePassword` et `keyPassword` doivent être égaux ;
 - **Sans `key.properties`** (CI/dev) : le build de release retombe sur le keystore **debug** — non publiable. **Garde Gradle :** un build `prodRelease` **échoue** à la configuration sans `key.properties` (un AAB de production ne peut jamais être signé debug) ;
 - **Play Console :** publiez le premier AAB avec cette clé, activez *Play App Signing*, et enregistrez l'empreinte SHA-256 de la clé d'upload dans *Setup → App integrity* ;
 - **CI/CD :** `.github/workflows/ci.yml` ne construit que le flavor **dev** (validation). Les artefacts publiables viennent de `.github/workflows/release.yml` (tag `v*` → **Fastlane**) : il décode le keystore depuis le secret `KEYSTORE_BASE64`, construit l'AAB prod (`--obfuscate --split-debug-info`) et l'upload vers **Internal testing** (compte de service depuis `PLAY_SERVICE_ACCOUNT_JSON`). Voir `docs/pt/13-build-e-publicacao.md` pour la liste complète des secrets.
@@ -90,17 +90,17 @@ keytool -list -v -keystore android/app/upload-keystore.jks -storepass YOUR_PASSW
 
 ```text
 Nouvelle fonctionnalité :
-  1. Entité dans le domaine (freezed)      → lib/domain/entities/
-  2. Contrat de repository                 → lib/domain/repositories/
-  3. Cas d'usage + exceptions du domaine   → lib/domain/usecases/
-  4. Implémentation dans data              → lib/data/datasources/ (en mémoire + SQLite)
-                                            lib/data/datasources/remote/ (Supabase)
-                                            lib/data/repositories/
-  5. Enregistrer dans le ServiceLocator    → lib/core/di/service_locator.dart
-  6. Provider Riverpod                     → lib/presentation/controllers/
-  7. Écran/widget                          → lib/presentation/screens/ | widgets/
-  8. Tests (domaine → données → UI)        → test/
-  9. `dart run build_runner build --delete-conflicting-outputs`
+ 1. Entité dans le domaine (freezed) → lib/domain/entities/
+ 2. Contrat de repository → lib/domain/repositories/
+ 3. Cas d'usage + exceptions du domaine → lib/domain/usecases/
+ 4. Implémentation dans data → lib/data/datasources/ (en mémoire + SQLite)
+ lib/data/datasources/remote/ (Supabase)
+ lib/data/repositories/
+ 5. Enregistrer dans le ServiceLocator → lib/core/di/service_locator.dart
+ 6. Provider Riverpod → lib/presentation/controllers/
+ 7. Écran/widget → lib/presentation/screens/ | widgets/
+ 8. Tests (domaine → données → UI) → test/
+ 9. `dart run build_runner build --delete-conflicting-outputs`
 ```
 
 ---
@@ -121,7 +121,7 @@ Nouvelle fonctionnalité :
 - **Sérialisation :** enums par nom, `DateTime` en millis epoch, `bool` en 0/1 ;
 - **Transactions :** plusieurs écritures liées dans `IUnitOfWork` / `runInTransaction` (réentrant) ;
 - **Migrations légères :** `ALTER TABLE` idempotent dans `AppDatabase.createSchema`, protégé par `PRAGMA table_info` ;
-- **⚠️ Gardez les signatures synchronisées** entre `app_database_io.dart` ↔ `app_database_stub.dart`.
+- **Attention : Gardez les signatures synchronisées** entre `app_database_io.dart` ↔ `app_database_stub.dart`.
 
 ### SQLite pour de nouvelles données
 
@@ -154,13 +154,13 @@ En ajoutant des tables/colonnes : créez-les dans `createSchema` (avec `CHECK` d
 Exemple fictif : module **Fournisseurs**.
 
 1. **Domaine :**
-   - `Supplier` (entité freezed) dans `lib/domain/entities/` ;
-   - `ISupplierRepository` dans `lib/domain/repositories/` ;
-   - `GetSuppliersUseCase`, `AddSupplierUseCase` dans `lib/domain/usecases/` ;
+ - `Supplier` (entité freezed) dans `lib/domain/entities/` ;
+ - `ISupplierRepository` dans `lib/domain/repositories/` ;
+ - `GetSuppliersUseCase`, `AddSupplierUseCase` dans `lib/domain/usecases/` ;
 2. **Données :**
-   - `SupplierLocalDataSource` (contrat) + `SupplierLocalDataSourceImpl` (en mémoire) + `SupplierSqliteDataSourceImpl` ;
-   - `SupplierRepositoryImpl` ;
-   - table `suppliers` dans `AppDatabase.createSchema` (+ migration s'il y a une ancienne base) ;
+ - `SupplierLocalDataSource` (contrat) + `SupplierLocalDataSourceImpl` (en mémoire) + `SupplierSqliteDataSourceImpl` ;
+ - `SupplierRepositoryImpl` ;
+ - table `suppliers` dans `AppDatabase.createSchema` (+ migration s'il y a une ancienne base) ;
 3. **DI :** enregistrez le datasource (dans les deux branches du ServiceLocator), le repository et les cas d'usage ;
 4. **Présentation :** `suppliers_providers.dart`, écran, sheet d'inscription ;
 5. **Tests :** cas d'usage, datasource SQLite, écran ;

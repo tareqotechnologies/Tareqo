@@ -1,10 +1,10 @@
-# 📚 Dumbhanengue ERP Documentation (English)
+# Dumbhanengue ERP Documentation (English)
 
 Welcome to the complete documentation of **Dumbhanengue ERP** — a business management system (inventory, sales, finance and credit/"fiado" tracking) built in Flutter with **Clean Architecture**.
 
-> 🌐 **Language:** This is the English version. The Portuguese documentation lives in ([`docs/pt/`](../pt/README.md)) and the French one in ([`docs/fr/`](../fr/README.md)).
+> **Language:** This is the English version. The Portuguese documentation lives in ([`docs/pt/`](../pt/README.md)) and the French one in ([`docs/fr/`](../fr/README.md)).
 >
-> 📌 **Audit docs:** the production-readiness audit reports ([`docs/pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md)) and the live checklist ([`docs/pt/PRODUCTION_CHECKLIST.md`](../pt/PRODUCTION_CHECKLIST.md)) are maintained in Portuguese (the project's primary language) and are the authoritative source for audit status. An English summary of the latest audit status (Update 6 + pending production items) is available in [15-audit-status.md](15-audit-status.md), the W4 + H2 live migration runbook in [16-migracao-w4-h2.md](16-migracao-w4-h2.md), the W11 live migration runbook (FIFO lots + scale/weight sales) in [18-migracao-w11.md](18-migracao-w11.md), the daily cash closing runbook (Part 25, Z-report) in [19-migracao-cash-closing.md](19-migracao-cash-closing.md), and the production readiness checklist in [17-production-checklist.md](17-production-checklist.md). The English chapters were synced with the Aug 5/6 changes (flavors, store-scoped RLS, DB-backed super admin, atomic RPCs, secure session storage, CI/CD, W4/H2/W10, SQL consolidation) — the Portuguese docs remain the primary reference.
+> **Audit docs:** the production-readiness audit reports ([`docs/pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md)) and the live checklist ([`docs/pt/PRODUCTION_CHECKLIST.md`](../pt/PRODUCTION_CHECKLIST.md)) are maintained in Portuguese (the project's primary language) and are the authoritative source for audit status. An English summary of the latest audit status (Update 6 + pending production items) is available in [15-audit-status.md](15-audit-status.md), the W4 + H2 live migration runbook in [16-migracao-w4-h2.md](16-migracao-w4-h2.md), the W11 live migration runbook (FIFO lots + scale/weight sales) in [18-migracao-w11.md](18-migracao-w11.md), the daily cash closing runbook (Part 25, Z-report) in [19-migracao-cash-closing.md](19-migracao-cash-closing.md), and the production readiness checklist in [17-production-checklist.md](17-production-checklist.md). The English chapters were synced with the Aug 5/6 changes (flavors, store-scoped RLS, DB-backed super admin, atomic RPCs, secure session storage, CI/CD, W4/H2/W10, SQL consolidation) — the Portuguese docs remain the primary reference.
 
 This folder gathers every document about the app: from what it does to how each layer works, with code examples, diagrams and practical guides for developers.
 
@@ -45,9 +45,9 @@ This folder gathers every document about the app: from what it does to how each 
 | [pt/en/fr Glossary](GLOSSARY.md) | Technical terms in the three languages — business, payments, access, authentication, plans, database, architecture, testing and release |
 | **PDF versions (printable)** | [User Guide PDF](pdf/en/USER_GUIDE.pdf) · [Troubleshooting PDF](pdf/en/TROUBLESHOOTING.pdf) — with cover and table of contents, ready to hand out / print |
 
-> 📖 **Tri-lingual glossary:** [português](../pt/GLOSSARIO.md) · [english](GLOSSARY.md) · [français](../fr/GLOSSAIRE.md)
+> **Tri-lingual glossary:** [português](../pt/GLOSSARIO.md) · [english](GLOSSARY.md) · [français](../fr/GLOSSAIRE.md)
 
-> 🌐 **In French (new language):** [User Guide](USER_GUIDE.md) → [`docs/fr/GUIDE_DE_L_UTILISATEUR.md`](../fr/GUIDE_DE_L_UTILISATEUR.md) · [Troubleshooting](TROUBLESHOOTING.md) → [`docs/fr/DEPANNAGE.md`](../fr/DEPANNAGE.md) — bundled in the app (offline reading) and as PDFs under `docs/pdf/fr/`. All **technical chapters** (01–19) are also in French in [`docs/fr/`](../fr/README.md).
+> **In French (new language):** [User Guide](USER_GUIDE.md) → [`docs/fr/GUIDE_DE_L_UTILISATEUR.md`](../fr/GUIDE_DE_L_UTILISATEUR.md) · [Troubleshooting](TROUBLESHOOTING.md) → [`docs/fr/DEPANNAGE.md`](../fr/DEPANNAGE.md) — bundled in the app (offline reading) and as PDFs under `docs/pdf/fr/`. All **technical chapters** (01–19) are also in French in [`docs/fr/`](../fr/README.md).
 
 ---
 
@@ -58,7 +58,7 @@ This folder gathers every document about the app: from what it does to how each 
 - **Want to understand how the code is organized?** → [Architecture](02-architecture.md)
 - **Want to run the project and work on the code?** → [Developer guide](10-developer-guide.md)
 
-> 💡 The `README.md` at the project root is the presentation document; this `docs/` folder is the complete reference manual.
+> The `README.md` at the project root is the presentation document; this `docs/` folder is the complete reference manual.
 
 ## Quick maps
 

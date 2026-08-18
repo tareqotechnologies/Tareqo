@@ -29,13 +29,13 @@ mixin _$FinancialTransaction {
 @pragma('vm:prefer-inline')
 $FinancialTransactionCopyWith<FinancialTransaction> get copyWith => _$FinancialTransactionCopyWithImpl<FinancialTransaction>(this as FinancialTransaction, _$identity);
 
-  /// Serializes this FinancialTransaction to a JSON map.
-  Map<String, dynamic> toJson();
+ /// Serializes this FinancialTransaction to a JSON map.
+ Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FinancialTransaction&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.description, description) || other.description == description)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.date, date) || other.date == date)&&(identical(other.status, status) || other.status == status)&&(identical(other.debtId, debtId) || other.debtId == debtId));
+ return identical(this, other) || (other.runtimeType == runtimeType&&other is FinancialTransaction&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.description, description) || other.description == description)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.date, date) || other.date == date)&&(identical(other.status, status) || other.status == status)&&(identical(other.debtId, debtId) || other.debtId == debtId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -44,15 +44,15 @@ int get hashCode => Object.hash(runtimeType,id,storeId,description,amountCents,t
 
 @override
 String toString() {
-  return 'FinancialTransaction(id: $id, storeId: $storeId, description: $description, amountCents: $amountCents, type: $type, category: $category, date: $date, status: $status, debtId: $debtId)';
+ return 'FinancialTransaction(id: $id, storeId: $storeId, description: $description, amountCents: $amountCents, type: $type, category: $category, date: $date, status: $status, debtId: $debtId)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $FinancialTransactionCopyWith<$Res>  {
-  factory $FinancialTransactionCopyWith(FinancialTransaction value, $Res Function(FinancialTransaction) _then) = _$FinancialTransactionCopyWithImpl;
+abstract mixin class $FinancialTransactionCopyWith<$Res> {
+ factory $FinancialTransactionCopyWith(FinancialTransaction value, $Res Function(FinancialTransaction) _then) = _$FinancialTransactionCopyWithImpl;
 @useResult
 $Res call({
  String id, String storeId, String description, int amountCents, TransactionType type, String category, DateTime date, TransactionStatus status, String? debtId
@@ -64,16 +64,16 @@ $Res call({
 }
 /// @nodoc
 class _$FinancialTransactionCopyWithImpl<$Res>
-    implements $FinancialTransactionCopyWith<$Res> {
-  _$FinancialTransactionCopyWithImpl(this._self, this._then);
+ implements $FinancialTransactionCopyWith<$Res> {
+ _$FinancialTransactionCopyWithImpl(this._self, this._then);
 
-  final FinancialTransaction _self;
-  final $Res Function(FinancialTransaction) _then;
+ final FinancialTransaction _self;
+ final $Res Function(FinancialTransaction) _then;
 
 /// Create a copy of FinancialTransaction
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? description = null,Object? amountCents = null,Object? type = null,Object? category = null,Object? date = null,Object? status = null,Object? debtId = freezed,}) {
-  return _then(_self.copyWith(
+ return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -84,7 +84,7 @@ as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non
 as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as TransactionStatus,debtId: freezed == debtId ? _self.debtId : debtId // ignore: cast_nullable_to_non_nullable
 as String?,
-  ));
+ ));
 }
 
 }
@@ -97,19 +97,19 @@ extension FinancialTransactionPatterns on FinancialTransaction {
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
+/// case final Subclass value:
+/// return ...;
+/// case _:
+/// return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FinancialTransaction value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FinancialTransaction value)? $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _FinancialTransaction() when $default != null:
 return $default(_that);case _:
-  return orElse();
+ return orElse();
 
 }
 }
@@ -119,19 +119,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
+/// case final Subclass value:
+/// return ...;
+/// case final Subclass2 value:
+/// return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FinancialTransaction value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FinancialTransaction value) $default,){
 final _that = this;
 switch (_that) {
 case _FinancialTransaction():
 return $default(_that);case _:
-  throw StateError('Unexpected subclass');
+ throw StateError('Unexpected subclass');
 
 }
 }
@@ -140,19 +140,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
+/// case final Subclass value:
+/// return ...;
+/// case _:
+/// return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FinancialTransaction value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FinancialTransaction value)? $default,){
 final _that = this;
 switch (_that) {
 case _FinancialTransaction() when $default != null:
 return $default(_that);case _:
-  return null;
+ return null;
 
 }
 }
@@ -161,18 +161,18 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
+/// case Subclass(:final field):
+/// return ...;
+/// case _:
+/// return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  String description,  int amountCents,  TransactionType type,  String category,  DateTime date,  TransactionStatus status,  String? debtId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, String storeId, String description, int amountCents, TransactionType type, String category, DateTime date, TransactionStatus status, String? debtId)? $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FinancialTransaction() when $default != null:
 return $default(_that.id,_that.storeId,_that.description,_that.amountCents,_that.type,_that.category,_that.date,_that.status,_that.debtId);case _:
-  return orElse();
+ return orElse();
 
 }
 }
@@ -182,18 +182,18 @@ return $default(_that.id,_that.storeId,_that.description,_that.amountCents,_that
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
+/// case Subclass(:final field):
+/// return ...;
+/// case Subclass2(:final field2):
+/// return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  String description,  int amountCents,  TransactionType type,  String category,  DateTime date,  TransactionStatus status,  String? debtId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, String storeId, String description, int amountCents, TransactionType type, String category, DateTime date, TransactionStatus status, String? debtId) $default,) {final _that = this;
 switch (_that) {
 case _FinancialTransaction():
 return $default(_that.id,_that.storeId,_that.description,_that.amountCents,_that.type,_that.category,_that.date,_that.status,_that.debtId);case _:
-  throw StateError('Unexpected subclass');
+ throw StateError('Unexpected subclass');
 
 }
 }
@@ -202,18 +202,18 @@ return $default(_that.id,_that.storeId,_that.description,_that.amountCents,_that
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
+/// case Subclass(:final field):
+/// return ...;
+/// case _:
+/// return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  String description,  int amountCents,  TransactionType type,  String category,  DateTime date,  TransactionStatus status,  String? debtId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, String storeId, String description, int amountCents, TransactionType type, String category, DateTime date, TransactionStatus status, String? debtId)? $default,) {final _that = this;
 switch (_that) {
 case _FinancialTransaction() when $default != null:
 return $default(_that.id,_that.storeId,_that.description,_that.amountCents,_that.type,_that.category,_that.date,_that.status,_that.debtId);case _:
-  return null;
+ return null;
 
 }
 }
@@ -224,25 +224,25 @@ return $default(_that.id,_that.storeId,_that.description,_that.amountCents,_that
 @JsonSerializable()
 
 class _FinancialTransaction implements FinancialTransaction {
-  const _FinancialTransaction({required this.id, this.storeId = 'st1', required this.description, required this.amountCents, required this.type, required this.category, required this.date, this.status = TransactionStatus.paid, this.debtId}): assert(amountCents >= 0, 'O valor da transação deve ser positivo.');
-  factory _FinancialTransaction.fromJson(Map<String, dynamic> json) => _$FinancialTransactionFromJson(json);
+ const _FinancialTransaction({required this.id, this.storeId = 'st1', required this.description, required this.amountCents, required this.type, required this.category, required this.date, this.status = TransactionStatus.paid, this.debtId}): assert(amountCents >= 0, 'O valor da transação deve ser positivo.');
+ factory _FinancialTransaction.fromJson(Map<String, dynamic> json) => _$FinancialTransactionFromJson(json);
 
-@override final  String id;
+@override final String id;
 // Loja dona do movimento — o caixa é por loja (Fase 2 do
 // multi-tenancy).
-@override@JsonKey() final  String storeId;
-@override final  String description;
+@override@JsonKey() final String storeId;
+@override final String description;
 // Valor em CENTAVOS inteiros (W4 — migração de dinheiro para
 // centavos; o banco persiste BIGINT/INTEGER).
-@override final  int amountCents;
-@override final  TransactionType type;
-@override final  String category;
-@override final  DateTime date;
-@override@JsonKey() final  TransactionStatus status;
+@override final int amountCents;
+@override final TransactionType type;
+@override final String category;
+@override final DateTime date;
+@override@JsonKey() final TransactionStatus status;
 // Vínculo opcional com a dívida de "fiado" que originou a pendência
 // (ex.: seed). Permite que a baixa (SettleDebtUseCase) marque a MESMA
 // transação como paga, em vez de criar uma duplicata no caixa.
-@override final  String? debtId;
+@override final String? debtId;
 
 /// Create a copy of FinancialTransaction
 /// with the given fields replaced by the non-null parameter values.
@@ -252,12 +252,12 @@ _$FinancialTransactionCopyWith<_FinancialTransaction> get copyWith => __$Financi
 
 @override
 Map<String, dynamic> toJson() {
-  return _$FinancialTransactionToJson(this, );
+ return _$FinancialTransactionToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FinancialTransaction&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.description, description) || other.description == description)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.date, date) || other.date == date)&&(identical(other.status, status) || other.status == status)&&(identical(other.debtId, debtId) || other.debtId == debtId));
+ return identical(this, other) || (other.runtimeType == runtimeType&&other is _FinancialTransaction&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.description, description) || other.description == description)&&(identical(other.amountCents, amountCents) || other.amountCents == amountCents)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.date, date) || other.date == date)&&(identical(other.status, status) || other.status == status)&&(identical(other.debtId, debtId) || other.debtId == debtId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -266,7 +266,7 @@ int get hashCode => Object.hash(runtimeType,id,storeId,description,amountCents,t
 
 @override
 String toString() {
-  return 'FinancialTransaction(id: $id, storeId: $storeId, description: $description, amountCents: $amountCents, type: $type, category: $category, date: $date, status: $status, debtId: $debtId)';
+ return 'FinancialTransaction(id: $id, storeId: $storeId, description: $description, amountCents: $amountCents, type: $type, category: $category, date: $date, status: $status, debtId: $debtId)';
 }
 
 
@@ -274,7 +274,7 @@ String toString() {
 
 /// @nodoc
 abstract mixin class _$FinancialTransactionCopyWith<$Res> implements $FinancialTransactionCopyWith<$Res> {
-  factory _$FinancialTransactionCopyWith(_FinancialTransaction value, $Res Function(_FinancialTransaction) _then) = __$FinancialTransactionCopyWithImpl;
+ factory _$FinancialTransactionCopyWith(_FinancialTransaction value, $Res Function(_FinancialTransaction) _then) = __$FinancialTransactionCopyWithImpl;
 @override @useResult
 $Res call({
  String id, String storeId, String description, int amountCents, TransactionType type, String category, DateTime date, TransactionStatus status, String? debtId
@@ -286,16 +286,16 @@ $Res call({
 }
 /// @nodoc
 class __$FinancialTransactionCopyWithImpl<$Res>
-    implements _$FinancialTransactionCopyWith<$Res> {
-  __$FinancialTransactionCopyWithImpl(this._self, this._then);
+ implements _$FinancialTransactionCopyWith<$Res> {
+ __$FinancialTransactionCopyWithImpl(this._self, this._then);
 
-  final _FinancialTransaction _self;
-  final $Res Function(_FinancialTransaction) _then;
+ final _FinancialTransaction _self;
+ final $Res Function(_FinancialTransaction) _then;
 
 /// Create a copy of FinancialTransaction
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? description = null,Object? amountCents = null,Object? type = null,Object? category = null,Object? date = null,Object? status = null,Object? debtId = freezed,}) {
-  return _then(_FinancialTransaction(
+ return _then(_FinancialTransaction(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -306,7 +306,7 @@ as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non
 as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as TransactionStatus,debtId: freezed == debtId ? _self.debtId : debtId // ignore: cast_nullable_to_non_nullable
 as String?,
-  ));
+ ));
 }
 
 

@@ -12,514 +12,524 @@ import 'package:dumbhanengue/domain/entities/sale_item.dart';
 import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
 import 'package:dumbhanengue/presentation/controllers/sales_providers.dart';
 import 'package:dumbhanengue/presentation/screens/sales/sales_screen.dart';
+import 'package:dumbhanengue/presentation/widgets/payment_filter.dart';
+import 'package:dumbhanengue/presentation/widgets/period_filter.dart';
 import 'package:dumbhanengue/presentation/widgets/sale_card.dart';
 
 import '../../helpers/store_context.dart';
 
 class _FakeSalesRepository implements ISaleRepository {
-  _FakeSalesRepository(this._sales);
+ _FakeSalesRepository(this._sales);
 
-  final List<Sale> _sales;
+ final List<Sale> _sales;
 
-  @override
-  Future<void> registerSale(Sale sale) async {}
+ @override
+ Future<void> registerSale(Sale sale) async {}
 
-  @override
-  Future<Sale?> getById(String id, {required String storeId}) async {
-    for (final sale in _sales) {
-      if (sale.id == id) return sale;
-    }
-    return null;
-  }
+ @override
+ Future<Sale?> getById(String id, {required String storeId}) async {
+ for (final sale in _sales) {
+ if (sale.id == id) return sale;
+ }
+ return null;
+ }
 
-  @override
-  Future<void> markCancelled(String id, {required String storeId}) async {}
+ @override
+ Future<void> markCancelled(String id, {required String storeId}) async {}
 
-  @override
-  Future<List<LotConsumption>> getLotConsumption(
-    String saleId, {
-    required String storeId,
-  }) async => const [];
+ @override
+ Future<List<LotConsumption>> getLotConsumption(
+ String saleId, {
+ required String storeId,
+ }) async => const [];
 
-  @override
-  Future<void> registerLotConsumption(
-    String saleId,
-    String storeId,
-    List<LotConsumption> consumption,
-  ) async {}
+ @override
+ Future<void> registerLotConsumption(
+ String saleId,
+ String storeId,
+ List<LotConsumption> consumption,
+ ) async {}
 
-  @override
-  Future<List<Sale>> getAll({required String storeId}) async =>
-      List.unmodifiable(_sales);
+ @override
+ Future<List<Sale>> getAll({required String storeId}) async =>
+ List.unmodifiable(_sales);
 }
 
 Widget _buildApp(ISaleRepository repository) {
-  return ProviderScope(
-    overrides: [
-      // Contexto de loja — a lista de vendas escopa pela loja ativa.
-      ...storeContextOverrides(),
-      salesRepositoryProvider.overrideWithValue(repository),
-    ],
-    child: testApp(home: SalesScreen()),
-  );
+ return ProviderScope(
+ overrides: [
+ // Contexto de loja — a lista de vendas escopa pela loja ativa.
+ ...storeContextOverrides(),
+ salesRepositoryProvider.overrideWithValue(repository),
+ ],
+ child: testApp(home: SalesScreen()),
+ );
 }
 
 /// Venda com data fixa no PASSADO — o resumo do dia (hoje) nunca é afetado
 /// pela data real da execução do teste (determinístico).
 Sale _pastSale({
-  String id = 's1',
-  int number = 1,
-  List<SaleItem>? items,
-  int totalAmountCents = 400,
-  PaymentMethod paymentMethod = PaymentMethod.mPesa,
-  DateTime? dateTime,
+ String id = 's1',
+ int number = 1,
+ List<SaleItem>? items,
+ int totalAmountCents = 400,
+ PaymentMethod paymentMethod = PaymentMethod.mPesa,
+ DateTime? dateTime,
 }) {
-  return Sale(
-    id: id,
-    number: number,
-    items: items ??
-        [
-          SaleItem(
-            productId: 'p1',
-            productName: 'Produto p1',
-            quantity: 1,
-            unitPriceCents: totalAmountCents,
-          ),
-        ],
-    totalAmountCents: totalAmountCents,
-    paymentMethod: paymentMethod,
-    dateTime: dateTime ?? DateTime(2024, 1, 10, 14, 30),
-  );
+ return Sale(
+ id: id,
+ number: number,
+ items:
+ items ??
+ [
+ SaleItem(
+ productId: 'p1',
+ productName: 'Produto p1',
+ quantity: 1,
+ unitPriceCents: totalAmountCents,
+ ),
+ ],
+ totalAmountCents: totalAmountCents,
+ paymentMethod: paymentMethod,
+ dateTime: dateTime ?? DateTime(2024, 1, 10, 14, 30),
+ );
 }
 
 void main() {
-  testWidgets('exibe as vendas registradas pelo repositório', (tester) async {
-    await tester.pumpWidget(
-      _buildApp(
-        _FakeSalesRepository([
-          _pastSale(
-            items: const [
-              SaleItem(
-                productId: 'p1',
-                productName: 'Caneta',
-                quantity: 2,
-                unitPriceCents: 200,
-              ),
-            ],
-          ),
-        ]),
-      ),
-    );
+ testWidgets('exibe as vendas registradas pelo repositório', (tester) async {
+ await tester.pumpWidget(
+ _buildApp(
+ _FakeSalesRepository([
+ _pastSale(
+ items: const [
+ SaleItem(
+ productId: 'p1',
+ productName: 'Caneta',
+ quantity: 2,
+ unitPriceCents: 200,
+ ),
+ ],
+ ),
+ ]),
+ ),
+ );
 
-    await tester.pumpAndSettle();
+ await tester.pumpAndSettle();
 
-    // O card separa número SEQUENCIAL da venda (S-00001) + itens, com a
-    // forma de pagamento em linha própria e o status "Pago".
-    expect(find.text('S-00001 · 1 item'), findsOneWidget);
-    expect(find.text('R\$ 4,00'), findsOneWidget);
-    expect(find.text('Pago'), findsOneWidget);
-    // Resumo do dia presente (venda antiga → hoje ainda zerado).
-    expect(find.text('R\$ 0,00'), findsOneWidget);
-    expect(find.text('0 transações'), findsOneWidget);
-    // FAB circular com dados (sem label — tooltip, igual ao Novo produto).
-    expect(find.byType(FloatingActionButton), findsOneWidget);
-  });
+ // O card separa número SEQUENCIAL da venda (S-00001) + itens, com a
+ // forma de pagamento em linha própria e o status "Pago".
+ expect(find.text('S-00001 · 1 item'), findsOneWidget);
+ expect(find.text('R\$ 4,00'), findsOneWidget);
+ expect(find.text('Pago'), findsOneWidget);
+ // Resumo do dia presente (venda antiga → hoje ainda zerado).
+ expect(find.text('R\$ 0,00'), findsOneWidget);
+ expect(find.text('0 transações'), findsOneWidget);
+ // FAB circular com dados (sem label — tooltip, igual ao Novo produto).
+ expect(find.byType(FloatingActionButton), findsOneWidget);
+ });
 
-  testWidgets('SalesCard com onTap personalizado não navega para detalhes', (
-    tester,
-  ) async {
-    var tapped = false;
-    await tester.pumpWidget(
-      testApp(
-        home: Scaffold(
-          body: SalesCard(
-            sale: _pastSale(),
-            onTap: () => tapped = true,
-          ),
-        ),
-      ),
-    );
+ testWidgets('SalesCard com onTap personalizado não navega para detalhes', (
+ tester,
+ ) async {
+ var tapped = false;
+ await tester.pumpWidget(
+ testApp(
+ home: Scaffold(
+ body: SalesCard(sale: _pastSale(), onTap: () => tapped = true),
+ ),
+ ),
+ );
 
-    await tester.tap(find.text('M-Pesa'));
-    await tester.pumpAndSettle();
+ await tester.tap(find.text('M-Pesa'));
+ await tester.pumpAndSettle();
 
-    // A ação personalizada foi chamada e a navegação padrão NÃO ocorreu.
-    expect(tapped, isTrue);
-    expect(find.text('Detalhes da venda'), findsNothing);
-  });
+ // A ação personalizada foi chamada e a navegação padrão NÃO ocorreu.
+ expect(tapped, isTrue);
+ expect(find.text('Detalhes da venda'), findsNothing);
+ });
 
-  testWidgets('exibe estado vazio quando não há vendas', (tester) async {
-    await tester.pumpWidget(_buildApp(_FakeSalesRepository(const [])));
+ testWidgets('exibe estado vazio quando não há vendas', (tester) async {
+ await tester.pumpWidget(_buildApp(_FakeSalesRepository(const [])));
 
-    await tester.pumpAndSettle();
+ await tester.pumpAndSettle();
 
-    expect(find.text('Nenhuma venda registrada'), findsOneWidget);
-    // CTA ÚNICO: no estado vazio o FAB some e o botão do EmptyState é o
-    // único "Nova venda" (sem duplicação).
-    expect(find.text('Nova venda'), findsOneWidget);
-  });
+ expect(find.text('Nenhuma venda registrada'), findsOneWidget);
+ // CTA ÚNICO: no estado vazio o FAB some e o botão do EmptyState é o
+ // único "Nova venda" (sem duplicação).
+ expect(find.text('Nova venda'), findsOneWidget);
+ });
 
-  testWidgets('tocar no card abre a tela de detalhes da venda', (tester) async {
-    await tester.pumpWidget(
-      _buildApp(
-        _FakeSalesRepository([
-          _pastSale(
-            items: const [
-              SaleItem(
-                productId: 'p1',
-                productName: 'Caneta',
-                quantity: 2000, // 2 unidades em MILÉSIMOS (W11)
-                unitPriceCents: 200,
-              ),
-            ],
-          ),
-        ]),
-      ),
-    );
+ testWidgets('tocar no card abre a tela de detalhes da venda', (tester) async {
+ await tester.pumpWidget(
+ _buildApp(
+ _FakeSalesRepository([
+ _pastSale(
+ items: const [
+ SaleItem(
+ productId: 'p1',
+ productName: 'Caneta',
+ quantity: 2000, // 2 unidades em MILÉSIMOS (W11)
+ unitPriceCents: 200,
+ ),
+ ],
+ ),
+ ]),
+ ),
+ );
 
-    await tester.pumpAndSettle();
+ await tester.pumpAndSettle();
 
-    await tester.tap(find.text('S-00001 · 1 item'));
-    await tester.pumpAndSettle();
+ await tester.tap(find.text('S-00001 · 1 item'));
+ await tester.pumpAndSettle();
 
-    // Tela de detalhes com os itens expandidos.
-    expect(find.text('Detalhes da venda'), findsOneWidget);
-    expect(find.text('Caneta'), findsOneWidget);
-    expect(find.text('2 × R\$ 2,00'), findsOneWidget);
-    // Subtotal do item + total (resumo e rodapé) da venda.
-    expect(find.text('R\$ 4,00'), findsAtLeastNWidgets(2));
-  });
+ // Tela de detalhes com os itens expandidos.
+ expect(find.text('Detalhes da venda'), findsOneWidget);
+ expect(find.text('Caneta'), findsOneWidget);
+ expect(find.text('2 × R\$ 2,00'), findsOneWidget);
+ // Subtotal do item + total (resumo e rodapé) da venda.
+ expect(find.text('R\$ 4,00'), findsAtLeastNWidgets(2));
+ });
 
-  testWidgets('resumo mostra o total e o número de transações de hoje', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _buildApp(
-        _FakeSalesRepository([
-          Sale(
-            id: 's1',
-            number: 1,
-            items: const [
-              SaleItem(
-                productId: 'p1',
-                productName: 'Caneta',
-                quantity: 2000,
-                unitPriceCents: 200,
-              ),
-            ],
-            totalAmountCents: 400,
-            paymentMethod: PaymentMethod.mPesa,
-            dateTime: DateTime.now(),
-          ),
-        ]),
-      ),
-    );
+ testWidgets('resumo mostra o total e o número de transações de hoje', (
+ tester,
+ ) async {
+ await tester.pumpWidget(
+ _buildApp(
+ _FakeSalesRepository([
+ Sale(
+ id: 's1',
+ number: 1,
+ items: const [
+ SaleItem(
+ productId: 'p1',
+ productName: 'Caneta',
+ quantity: 2000,
+ unitPriceCents: 200,
+ ),
+ ],
+ totalAmountCents: 400,
+ paymentMethod: PaymentMethod.mPesa,
+ dateTime: DateTime.now(),
+ ),
+ ]),
+ ),
+ );
 
-    await tester.pumpAndSettle();
+ await tester.pumpAndSettle();
 
-    // Valor do dia aparece no resumo E no card (2 instâncias).
-    expect(find.text('R\$ 4,00'), findsNWidgets(2));
-    expect(find.text('1 transação'), findsOneWidget);
-  });
+ // Valor do dia aparece no resumo E no card (2 instâncias).
+ expect(find.text('R\$ 4,00'), findsNWidgets(2));
+ expect(find.text('1 transação'), findsOneWidget);
+ });
 
-  testWidgets('filtra por período Hoje', (tester) async {
-    await tester.pumpWidget(
-      _buildApp(
-        _FakeSalesRepository([
-          Sale(
-            id: 's1',
-            number: 1,
-            items: const [
-              SaleItem(
-                productId: 'p1',
-                productName: 'Caneta',
-                quantity: 1,
-                unitPriceCents: 100,
-              ),
-            ],
-            totalAmountCents: 100,
-            paymentMethod: PaymentMethod.mPesa,
-            dateTime: DateTime.now(),
-          ),
-          Sale(
-            id: 's2',
-            number: 2,
-            items: const [
-              SaleItem(
-                productId: 'p1',
-                productName: 'Caneta',
-                quantity: 1,
-                unitPriceCents: 200,
-              ),
-            ],
-            totalAmountCents: 200,
-            paymentMethod: PaymentMethod.cash,
-            dateTime: DateTime.now().subtract(const Duration(days: 1)),
-          ),
-        ]),
-      ),
-    );
+ testWidgets('filtra por período Hoje', (tester) async {
+ await tester.pumpWidget(
+ _buildApp(
+ _FakeSalesRepository([
+ Sale(
+ id: 's1',
+ number: 1,
+ items: const [
+ SaleItem(
+ productId: 'p1',
+ productName: 'Caneta',
+ quantity: 1,
+ unitPriceCents: 100,
+ ),
+ ],
+ totalAmountCents: 100,
+ paymentMethod: PaymentMethod.mPesa,
+ dateTime: DateTime.now(),
+ ),
+ Sale(
+ id: 's2',
+ number: 2,
+ items: const [
+ SaleItem(
+ productId: 'p1',
+ productName: 'Caneta',
+ quantity: 1,
+ unitPriceCents: 200,
+ ),
+ ],
+ totalAmountCents: 200,
+ paymentMethod: PaymentMethod.cash,
+ dateTime: DateTime.now().subtract(const Duration(days: 1)),
+ ),
+ ]),
+ ),
+ );
 
-    await tester.pumpAndSettle();
+ await tester.pumpAndSettle();
 
-    // Ambas as vendas visíveis inicialmente.
-    expect(find.text('S-00001 · 1 item'), findsOneWidget);
-    expect(find.text('S-00002 · 1 item'), findsOneWidget);
+ // Ambas as vendas visíveis inicialmente.
+ expect(find.text('S-00001 · 1 item'), findsOneWidget);
+ expect(find.text('S-00002 · 1 item'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Hoje'));
-    await tester.pump();
+ // Filtro minimalista (canvas V3): abre o seletor de período (chip
+ // "Tudo") e escolhe "Hoje" no menu.
+ await tester.tap(find.text('Tudo'));
+ await tester.pumpAndSettle();
+ await tester.tap(find.widgetWithText(PopupMenuItem<PeriodFilter>, 'Hoje'));
+ await tester.pumpAndSettle();
 
-    // Só a venda de hoje permanece.
-    expect(find.text('S-00001 · 1 item'), findsOneWidget);
-    expect(find.text('S-00002 · 1 item'), findsNothing);
-  });
+ // Só a venda de hoje permanece.
+ expect(find.text('S-00001 · 1 item'), findsOneWidget);
+ expect(find.text('S-00002 · 1 item'), findsNothing);
+ });
 
-  testWidgets('busca por número da venda', (tester) async {
-    await tester.pumpWidget(
-      _buildApp(
-        _FakeSalesRepository([
-          _pastSale(id: 's1', number: 1),
-          _pastSale(id: 's2', number: 2, totalAmountCents: 200),
-        ]),
-      ),
-    );
+ testWidgets('busca por número da venda', (tester) async {
+ await tester.pumpWidget(
+ _buildApp(
+ _FakeSalesRepository([
+ _pastSale(id: 's1', number: 1),
+ _pastSale(id: 's2', number: 2, totalAmountCents: 200),
+ ]),
+ ),
+ );
 
-    await tester.pumpAndSettle();
+ await tester.pumpAndSettle();
 
-    await tester.enterText(find.byType(TextField), 'S-00002');
-    await tester.pump();
+ await tester.enterText(find.byType(TextField), 'S-00002');
+ await tester.pump();
 
-    expect(find.text('S-00002 · 1 item'), findsOneWidget);
-    expect(find.text('S-00001 · 1 item'), findsNothing);
-  });
+ expect(find.text('S-00002 · 1 item'), findsOneWidget);
+ expect(find.text('S-00001 · 1 item'), findsNothing);
+ });
 
-  testWidgets('filtra por forma de pagamento', (tester) async {
-    await tester.pumpWidget(
-      _buildApp(
-        _FakeSalesRepository([
-          _pastSale(id: 's1', number: 1, paymentMethod: PaymentMethod.cash),
-          _pastSale(
-            id: 's2',
-            number: 2,
-            totalAmountCents: 200,
-            paymentMethod: PaymentMethod.mPesa,
-          ),
-        ]),
-      ),
-    );
+ testWidgets('filtra por forma de pagamento', (tester) async {
+ await tester.pumpWidget(
+ _buildApp(
+ _FakeSalesRepository([
+ _pastSale(id: 's1', number: 1, paymentMethod: PaymentMethod.cash),
+ _pastSale(
+ id: 's2',
+ number: 2,
+ totalAmountCents: 200,
+ paymentMethod: PaymentMethod.mPesa,
+ ),
+ ]),
+ ),
+ );
 
-    await tester.pumpAndSettle();
+ await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(FilterChip, 'Dinheiro'));
-    await tester.pump();
+ await tester.tap(find.text('Todas'));
+ await tester.pumpAndSettle();
+ await tester.tap(
+ find.widgetWithText(PopupMenuItem<PaymentFilter>, 'Dinheiro'),
+ );
+ await tester.pumpAndSettle();
 
-    expect(find.text('S-00001 · 1 item'), findsOneWidget);
-    expect(find.text('S-00002 · 1 item'), findsNothing);
-  });
+ expect(find.text('S-00001 · 1 item'), findsOneWidget);
+ expect(find.text('S-00002 · 1 item'), findsNothing);
+ });
 
-  testWidgets('busca sem resultado mostra estado vazio e limpa filtros', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _buildApp(_FakeSalesRepository([_pastSale()])),
-    );
+ // Microcopy: a chip "todas as formas de pagamento" tem rótulo PRÓPRIO
+ // ("Todas") — distinto do "Tudo" da linha de período acima (duas chips
+ // idênticas empilhadas confundiam a leitura).
+ testWidgets('filtro de pagamento usa rótulo próprio "Todas"', (tester) async {
+ await tester.pumpWidget(_buildApp(_FakeSalesRepository([_pastSale()])));
+ await tester.pumpAndSettle();
 
-    await tester.pumpAndSettle();
+ // A chip "todas" do pagamento existe com o rótulo distinto;
+ // o período continua com "Tudo".
+ expect(find.text('Todas'), findsOneWidget);
+ expect(find.text('Tudo'), findsOneWidget);
+ });
 
-    await tester.enterText(find.byType(TextField), 'zzz');
-    await tester.pump();
+ testWidgets('busca sem resultado mostra estado vazio e limpa filtros', (
+ tester,
+ ) async {
+ await tester.pumpWidget(_buildApp(_FakeSalesRepository([_pastSale()])));
 
-    expect(find.text('Nenhuma venda encontrada'), findsOneWidget);
+ await tester.pumpAndSettle();
 
-    // O estado vazio fica abaixo do fold na viewport 800×600 com a barra
-    // fixa de 10 chips — rola até o botão antes de tocar.
-    await tester.ensureVisible(find.text('Limpar filtros'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Limpar filtros'));
-    await tester.pump();
+ await tester.enterText(find.byType(TextField), 'zzz');
+ await tester.pump();
 
-    expect(find.text('S-00001 · 1 item'), findsOneWidget);
-    expect(find.text('Nenhuma venda encontrada'), findsNothing);
-  });
+ expect(find.text('Nenhuma venda encontrada'), findsOneWidget);
 
-  testWidgets('busca e filtros ficam fixos ao rolar a lista', (tester) async {
-    // Várias vendas para permitir rolagem real.
-    final sales = [
-      for (var i = 1; i <= 15; i++)
-        _pastSale(id: 's$i', number: i, totalAmountCents: 100 + i),
-    ];
-    await tester.pumpWidget(_buildApp(_FakeSalesRepository(sales)));
-    await tester.pumpAndSettle();
+ // O estado vazio fica abaixo do fold na viewport 800×600 com a barra
+ // fixa de 10 chips — rola até o botão antes de tocar.
+ await tester.ensureVisible(find.text('Limpar filtros'));
+ await tester.pumpAndSettle();
+ await tester.tap(find.text('Limpar filtros'));
+ await tester.pump();
 
-    // Busca visível no topo, junto com o resumo do dia.
-    expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('R\$ 0,00'), findsOneWidget);
+ expect(find.text('S-00001 · 1 item'), findsOneWidget);
+ expect(find.text('Nenhuma venda encontrada'), findsNothing);
+ });
 
-    // Rola a lista até o fim.
-    await tester.drag(
-      find.byType(CustomScrollView),
-      const Offset(0, -2000),
-    );
-    await tester.pumpAndSettle();
+ testWidgets('busca e filtros ficam fixos ao rolar a lista', (tester) async {
+ // Várias vendas para permitir rolagem real.
+ final sales = [
+ for (var i = 1; i <= 15; i++)
+ _pastSale(id: 's$i', number: i, totalAmountCents: 100 + i),
+ ];
+ await tester.pumpWidget(_buildApp(_FakeSalesRepository(sales)));
+ await tester.pumpAndSettle();
 
-    // A busca continua FIXA (pinned), mas o resumo rolou para fora.
-    expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('R\$ 0,00'), findsNothing);
-  });
+ // Busca visível no topo, junto com o resumo do dia.
+ expect(find.byType(TextField), findsOneWidget);
+ expect(find.text('R\$ 0,00'), findsOneWidget);
 
-  testWidgets('re-mede a barra fixa quando a escala de texto muda em runtime',
-      (tester) async {
-    await tester.pumpWidget(
-      _buildApp(
-        _FakeSalesRepository([_pastSale(), _pastSale(id: 's2', number: 2)]),
-      ),
-    );
-    await tester.pumpAndSettle();
+ // Rola a lista até o fim.
+ await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
+ await tester.pumpAndSettle();
 
-    // Altura pintada do header fixo (RenderSliver, não RenderBox).
-    double headerHeight() {
-      final render = tester.renderObject(
-        find.byType(SliverPersistentHeader),
-      ) as RenderSliver;
-      return render.geometry!.paintExtent;
-    }
+ // A busca continua FIXA (pinned), mas o resumo rolou para fora.
+ expect(find.byType(TextField), findsOneWidget);
+ expect(find.text('R\$ 0,00'), findsNothing);
+ });
 
-    final before = headerHeight();
+ testWidgets('re-mede a barra fixa quando a escala de texto muda em runtime', (
+ tester,
+ ) async {
+ await tester.pumpWidget(
+ _buildApp(
+ _FakeSalesRepository([_pastSale(), _pastSale(id: 's2', number: 2)]),
+ ),
+ );
+ await tester.pumpAndSettle();
 
-    // Usuário ajusta a escala de texto do sistema DEPOIS da montagem:
-    // a altura da barra fixa precisa ser re-medida (senão o conteúdo
-    // ficaria cortado pelo extent antigo).
-    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
-    addTearDown(tester.platformDispatcher.clearAllTestValues);
-    await tester.pumpAndSettle();
+ // Altura pintada do header fixo (RenderSliver, não RenderBox).
+ double headerHeight() {
+ final render =
+ tester.renderObject(find.byType(SliverPersistentHeader))
+ as RenderSliver;
+ return render.geometry!.paintExtent;
+ }
 
-    final after = headerHeight();
-    expect(after, greaterThan(before));
-    expect(find.byType(TextField), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+ final before = headerHeight();
 
-  // Rotação (UI): em paisagem a largura muda e a barra fixa precisa ser
-  // re-medida em runtime (mesmo mecanismo do text-scale — o PinnedHeader
-  // assina MediaQuery). O campo de busca continua fixo e sem overflow
-  // após o giro; rolando, o resumo sai de cena e a busca permanece.
-  testWidgets('busca fixa sobrevive à rotação para paisagem', (tester) async {
-    // Retrato estreito: busca + filtros visíveis no topo.
-    usePortraitViewport(tester);
+ // Usuário ajusta a escala de texto do sistema DEPOIS da montagem:
+ // a altura da barra fixa precisa ser re-medida (senão o conteúdo
+ // ficaria cortado pelo extent antigo).
+ tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+ addTearDown(tester.platformDispatcher.clearAllTestValues);
+ await tester.pumpAndSettle();
 
-    // Várias vendas para permitir rolagem real.
-    final sales = [
-      for (var i = 1; i <= 15; i++)
-        _pastSale(id: 's$i', number: i, totalAmountCents: 100 + i),
-    ];
-    await tester.pumpWidget(_buildApp(_FakeSalesRepository(sales)));
-    await tester.pumpAndSettle();
+ final after = headerHeight();
+ expect(after, greaterThan(before));
+ expect(find.byType(TextField), findsOneWidget);
+ expect(tester.takeException(), isNull);
+ });
 
-    // Busca fixa no topo, junto com o resumo do dia.
-    expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('R\$ 0,00'), findsOneWidget);
+ // Rotação (UI): em paisagem a largura muda e a barra fixa precisa ser
+ // re-medida em runtime (mesmo mecanismo do text-scale — o PinnedHeader
+ // assina MediaQuery). O campo de busca continua fixo e sem overflow
+ // após o giro; rolando, o resumo sai de cena e a busca permanece.
+ testWidgets('busca fixa sobrevive à rotação para paisagem', (tester) async {
+ // Retrato estreito: busca + filtros visíveis no topo.
+ usePortraitViewport(tester);
 
-    // Gira para paisagem (800×600): a largura maior pode quebrar os chips
-    // em menos linhas — a barra precisa re-medir o próprio extent.
-    await rotateToLandscape(tester);
+ // Várias vendas para permitir rolagem real.
+ final sales = [
+ for (var i = 1; i <= 15; i++)
+ _pastSale(id: 's$i', number: i, totalAmountCents: 100 + i),
+ ];
+ await tester.pumpWidget(_buildApp(_FakeSalesRepository(sales)));
+ await tester.pumpAndSettle();
 
-    // Sem overflow e a busca continua fixa após o giro.
-    expect(tester.takeException(), isNull);
-    expect(find.byType(TextField), findsOneWidget);
+ // Busca fixa no topo, junto com o resumo do dia.
+ expect(find.byType(TextField), findsOneWidget);
+ expect(find.text('R\$ 0,00'), findsOneWidget);
 
-    // Rolando até o fim, a busca permanece FIXA e o resumo rolou para fora.
-    await tester.drag(
-      find.byType(CustomScrollView),
-      const Offset(0, -2000),
-    );
-    await tester.pumpAndSettle();
+ // Gira para paisagem (800×600): a largura maior pode quebrar os chips
+ // em menos linhas — a barra precisa re-medir o próprio extent.
+ await rotateToLandscape(tester);
 
-    expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('R\$ 0,00'), findsNothing);
-    expect(tester.takeException(), isNull);
-  });
+ // Sem overflow e a busca continua fixa após o giro.
+ expect(tester.takeException(), isNull);
+ expect(find.byType(TextField), findsOneWidget);
 
-  // Regressão (UI): a coluna de total/data ficava sem Flexível — com
-  // escala de texto 2.0 em tela estreita (e totais grandes), o card
-  // estourava. Agora ela encolhe com ellipsis; overflows de RenderFlex
-  // falham o teste via takeException.
-  testWidgets('não estoura com escala de texto 2.0 em tela estreita', (
-    tester,
-  ) async {
-    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
-    addTearDown(tester.platformDispatcher.clearAllTestValues);
+ // Rolando até o fim, a busca permanece FIXA e o resumo rolou para fora.
+ await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
+ await tester.pumpAndSettle();
 
-    // Estreita (360) porém alta: garante que o card seja construído/pintado
-    // com escala 2.0 (abaixo do fold o overflow ficaria mascarado).
-    tester.view.physicalSize = const Size(360, 2000);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+ expect(find.byType(TextField), findsOneWidget);
+ expect(find.text('R\$ 0,00'), findsNothing);
+ expect(tester.takeException(), isNull);
+ });
 
-    await tester.pumpWidget(
-      _buildApp(
-        _FakeSalesRepository([
-          _pastSale(
-            items: [
-              for (var i = 0; i < 12; i++)
-                SaleItem(
-                  productId: 'p$i',
-                  productName: 'Produto $i',
-                  quantity: 3,
-                  unitPriceCents: 99999,
-                ),
-            ],
-            totalAmountCents: 999999999,
-            // Cartão de crédito = pior caso (rótulo localizado longo +
-            // ícone de cartão) na linha superior do card com o chip 'Pago'.
-            paymentMethod: PaymentMethod.creditCard,
-          ),
-        ]),
-      ),
-    );
-    await tester.pumpAndSettle();
+ // Regressão (UI): a coluna de total/data ficava sem Flexível — com
+ // escala de texto 2.0 em tela estreita (e totais grandes), o card
+ // estourava. Agora ela encolhe com ellipsis; overflows de RenderFlex
+ // falham o teste via takeException.
+ testWidgets('não estoura com escala de texto 2.0 em tela estreita', (
+ tester,
+ ) async {
+ tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+ addTearDown(tester.platformDispatcher.clearAllTestValues);
 
-    // O card segue renderizado e nenhum overflow foi registrado.
-    expect(find.byType(FloatingActionButton), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+ // Estreita (360) porém alta: garante que o card seja construído/pintado
+ // com escala 2.0 (abaixo do fold o overflow ficaria mascarado).
+ tester.view.physicalSize = const Size(360, 2000);
+ tester.view.devicePixelRatio = 1.0;
+ addTearDown(tester.view.reset);
 
-  testWidgets('venda anulada: selo Anulada no card e fora do resumo do dia', (
-    tester,
-  ) async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day, 10);
-    await tester.pumpWidget(
-      _buildApp(
-        _FakeSalesRepository([
-          // Ativa HOJE — entra no resumo e mostra 'Pago'.
-          _pastSale(
-            id: 's-active',
-            totalAmountCents: 400,
-            dateTime: today,
-          ),
-          // Anulada HOJE — NÃO entra no resumo e mostra 'Anulada'.
-          _pastSale(
-            id: 's-cancelled',
-            number: 2,
-            totalAmountCents: 700,
-            paymentMethod: PaymentMethod.cash,
-            dateTime: today,
-          ).copyWith(
-            status: SaleStatus.cancelled,
-            cancelledAt: today.add(const Duration(hours: 1)),
-          ),
-        ]),
-      ),
-    );
-    await tester.pumpAndSettle();
+ await tester.pumpWidget(
+ _buildApp(
+ _FakeSalesRepository([
+ _pastSale(
+ items: [
+ for (var i = 0; i < 12; i++)
+ SaleItem(
+ productId: 'p$i',
+ productName: 'Produto $i',
+ quantity: 3,
+ unitPriceCents: 99999,
+ ),
+ ],
+ totalAmountCents: 999999999,
+ // Cartão de crédito = pior caso (rótulo localizado longo +
+ // ícone de cartão) na linha superior do card com o chip 'Pago'.
+ paymentMethod: PaymentMethod.creditCard,
+ ),
+ ]),
+ ),
+ );
+ await tester.pumpAndSettle();
 
-    // Cards: ativa 'Pago', anulada 'Anulada'.
-    expect(find.text('Pago'), findsOneWidget);
-    expect(find.text('Anulada'), findsOneWidget);
-    expect(find.text('R\$ 7,00'), findsOneWidget);
+ // O card segue renderizado e nenhum overflow foi registrado.
+ expect(find.byType(FloatingActionButton), findsOneWidget);
+ expect(tester.takeException(), isNull);
+ });
 
-    // Resumo do dia: só a ativa conta (R\$ 4,00 no resumo + no card).
-    expect(find.text('R\$ 4,00'), findsNWidgets(2));
-    expect(find.text('R\$ 11,00'), findsNothing); // 400 + 700 NÃO soma
-  });
+ testWidgets('venda anulada: selo Anulada no card e fora do resumo do dia', (
+ tester,
+ ) async {
+ final now = DateTime.now();
+ final today = DateTime(now.year, now.month, now.day, 10);
+ await tester.pumpWidget(
+ _buildApp(
+ _FakeSalesRepository([
+ // Ativa HOJE — entra no resumo e mostra 'Pago'.
+ _pastSale(id: 's-active', totalAmountCents: 400, dateTime: today),
+ // Anulada HOJE — NÃO entra no resumo e mostra 'Anulada'.
+ _pastSale(
+ id: 's-cancelled',
+ number: 2,
+ totalAmountCents: 700,
+ paymentMethod: PaymentMethod.cash,
+ dateTime: today,
+ ).copyWith(
+ status: SaleStatus.cancelled,
+ cancelledAt: today.add(const Duration(hours: 1)),
+ ),
+ ]),
+ ),
+ );
+ await tester.pumpAndSettle();
+
+ // Cards: ativa 'Pago', anulada 'Anulada'.
+ expect(find.text('Pago'), findsOneWidget);
+ expect(find.text('Anulada'), findsOneWidget);
+ expect(find.text('R\$ 7,00'), findsOneWidget);
+
+ // Resumo do dia: só a ativa conta (R\$ 4,00 no resumo + no card).
+ expect(find.text('R\$ 4,00'), findsNWidgets(2));
+ expect(find.text('R\$ 11,00'), findsNothing); // 400 + 700 NÃO soma
+ });
 }

@@ -7,9 +7,9 @@ import '../repositories/i_tenant_repository.dart';
 /// **funcionário** vinculado a uma loja do tenant. Retorna `null` quando o
 /// usuário ainda não pertence a nenhum tenant (fluxo de onboarding).
 class GetMyTenantUseCase {
-  const GetMyTenantUseCase(this._repository);
+ const GetMyTenantUseCase(this._repository);
 
-  final ITenantRepository _repository;
+ final ITenantRepository _repository;
 
-  Future<Tenant?> call(String userId) => _repository.getMyTenant(userId);
+ Future<Tenant?> call(String userId) => _repository.getMyTenant(userId);
 }

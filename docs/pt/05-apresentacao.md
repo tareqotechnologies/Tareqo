@@ -21,14 +21,15 @@ A camada `lib/presentation/` contém tudo que o usuário vê e interage: **provi
 | `finance_providers.dart` | `financeRepositoryProvider`, `getCashFlowUseCaseProvider`, `addTransactionUseCaseProvider`, `markTransactionAsPaidUseCaseProvider`, **`cashFlowPeriodProvider`** (enum `CashFlowPeriod`: today/week/month/all), **`cashFlowProvider`** (reconstrói quando o período muda), **`transactionsProvider`** |
 | `debts_providers.dart` | `debtsRepositoryProvider`, `getPendingDebtsUseCaseProvider`, `addDebtUseCaseProvider`, `getSettledDebtsUseCaseProvider`, `settleDebtUseCaseProvider`, **`pendingDebtsProvider`** (por vencimento), **`settledDebtsProvider`** (por `paidAt` desc) |
 | `expiry_alerts_provider.dart` | `getStockLotsUseCaseProvider`, **`expiryAlertsProvider`** (`AsyncNotifier<List<ExpiryAlert>>`) — alertas de validade por lote (W11) |
+| `dashboard_providers.dart` | **`dashboardPeriodProvider`** (`CashFlowPeriod`, default `today`) — pílula de período da Home; **`dashboardCashFlowProvider`** (saldo de caixa escopado ao período); **`dashboardKpisProvider`** (RPC `get_dashboard_kpis` no modo Supabase, fallback client-side caso contrário) |
 
 **Detalhes relevantes:**
 
 - `cashFlowProvider` calcula o período assim (todos alinhados ao **início do dia**):
-  - `today` → início de hoje;
-  - `week` → início de hoje − 7 dias;
-  - `month` → dia 1 do mês;
-  - `all` → `DateTime(2000)` até agora.
+ - `today` → início de hoje;
+ - `week` → início de hoje − 7 dias;
+ - `month` → dia 1 do mês;
+ - `all` → `DateTime(2000)` até agora.
 - `authStateProvider`: sem credenciais Supabase, emite `Stream.value(null)` em vez de acessar `Supabase.instance` (evita `StateError`).
 - Todos os notifiers têm `refresh()` (`invalidateSelf()` + `await future`).
 - As listas são **copiadas antes de ordenar** (entidades/lista retornada são imutáveis).
@@ -43,9 +44,9 @@ A camada `lib/presentation/` contém tudo que o usuário vê e interage: **provi
 
 ```text
 authStateProvider.when:
-  loading → _SplashScreen (restaurando sessão persistida)
-  error   → LoginScreen
-  data    → user == null ? LoginScreen : AppShell
+ loading → _SplashScreen (restaurando sessão persistida)
+ error → LoginScreen
+ data → user == null ? LoginScreen : AppShell
 ```
 
 ### `AppShell` (casca adaptativa)
@@ -55,7 +56,8 @@ authStateProvider.when:
 - **Telas largas (≥ 880px, web/desktop):** `NavigationRail` à esquerda.
 - **Telas estreitas (mobile):** `NavigationBar` embaixo.
 - As 5 seções ficam num **`IndexedStack`** (cada aba preserva estado: busca, scroll, formulários).
-- `shellIndexProvider` (`ShellIndexNotifier`) permite **trocar de aba programaticamente** — usado pelas ações rápidas do dashboard.
+- `shellIndexProvider` (`ShellIndexNotifier`) permite **trocar de aba programaticamente** — usado pelos cards de módulos da aba **Menu**.
+- O **FAB central** abre o menu global de ações (Nova venda, Registrar despesa, Adicionar produto, Registrar fiado) — sheets do canvas V3.
 
 ### Seções (`AppSection`)
 
@@ -68,7 +70,7 @@ authStateProvider.when:
 | 4 | Crédito | `receipt_long` | `DebtsScreen` |
 | 5 | Clientes | `people` | `CustomersScreen` |
 
-> **Compras** e **Relatórios** são telas empilhadas (`Navigator.push`) a partir da seção **"Módulos"** do dashboard — mantém a barra de navegação com 6 abas. O dashboard também navega para a aba Clientes pelo card correspondente.
+> **Compras** e **Relatórios** são telas empilhadas (`Navigator.push`) a partir da seção **"Módulos"** da aba **Menu** — mantém a barra com 4 abas. A aba Menu também abriga **Produtos / Crédito / Clientes** (troca de aba), **Lojas** (apenas dono) e o tile **Sair**.
 
 ---
 
@@ -76,15 +78,24 @@ authStateProvider.when:
 
 ### 1. `DashboardScreen` (Início)
 
-- Saudação com nome do usuário ("Olá, Maria 👋") + data do dia em pt-BR + botão **Sair**;
-- **KPIs** em grid responsivo (2 colunas mobile / 4 em telas largas):
-  - Total de vendas (todo o histórico);
-  - Saldo em caixa (período selecionado no Financeiro);
-  - A receber (fiado) — soma das pendências;
-  - Estoque em produtos (soma das quantidades);
-- **Ações rápidas:** Nova venda, Adicionar produto, Registrar transação, Registrar fiado (navegam via `shellIndexProvider`);
-- **Vendas recentes** (3 últimas) e alerta de **estoque baixo** (`stockQuantity < 5000` milésimos = 5 unidades, via `Quantity.lowStockThresholdUnits`);
-- **Alertas de validade (W11)** via `expiryAlertsProvider`: **vermelho** para lotes **vencidos** com estoque e **amarelo** para vencimento em **menos de 30 dias** (`expiryWarningDays`), ordenados por urgência (vencidos primeiro).
+Visão do dia do canvas V3 — a aba Início NÃO tem avatar (o **Sair** vive na aba **Menu**):
+
+- **Cabeçalho:** data ACIMA da saudação ("Segunda, 17 ago") → "Olá, {nome}"; à direita, a **pílula de período** (`Hoje ▾`: hoje / semana / mês / tudo — `dashboardPeriodProvider` escopa as métricas Vendas/Caixa); abaixo, o **chip da loja** verde-escuro (`StoreSwitcher`, ícone storefront branco + nome; com 2+ lojas abre o seletor rápido);
+- **3 cards compactos de métrica** (sem ícones, layout do app de referência):
+ - **Vendas** — vendas do período selecionado na pílula com o **delta vs o período anterior** como subtexto colorido (verde `+N%` / vermelho `-N%`);
+ - **Caixa** — saldo de caixa escopado ao período (`dashboardCashFlowProvider`); saldo negativo renderiza o valor em vermelho; subtexto = código da moeda (`MZN`);
+ - **A receber** — total de fiado pendente com o **contador de fiados** em laranja no subtexto (ex.: `4 fiados`);
+- **Feed "Atividade de hoje"** (título + contagem de eventos à direita) num card único com ícones circulares tingidos e âncora (valor/badge) à direita:
+ - **Vendas** (ícone `north_east` verde, `+valor` em verde) — toque abre o `SaleDetailScreen`;
+ - **Entradas de estoque** (ícone caixa cinza, `+qtd` em branco) — compras de hoje, uma linha por item;
+ - **Pagamentos de fiado** (ícone `payments` âmbar dentro de **borda tracejada**, `+valor` em verde) — baixas quitadas hoje;
+ - **Despesas** (ícone `south_west` vermelho, `-valor` em vermelho) — despesas pagas de hoje;
+ - **Estoque baixo** (ícone de alerta laranja + pílula sólida laranja **"Alerta"**) — produtos ativos com `stockQuantity < 5` unidades (`Quantity.lowStockThresholdUnits`);
+ - **Validade (W11)** via `expiryAlertsProvider`: **vermelho** para lotes **vencidos** com estoque e **amarelo** para vencimento em **menos de 30 dias** (`expiryWarningDays`), ordenados por urgência (vencidos primeiro);
+- **Banner de sincronização pendente** (outbox do modo SaaS) quando a fila offline não está vazia, com ação "Sincronizar";
+- Erro ao carregar KPIs mostra aviso inline compacto com retry (`InlineErrorCard`) em vez de zeros falsos.
+
+> O **Sair** vive na aba **Menu**; o cabeçalho da Home não tem avatar. A Home NÃO tem ações rápidas nem cards de módulos — eles vivem no FAB central e na aba **Menu** (mesma grade de módulos e matriz de acesso).
 
 ### 2. `ProductListScreen` (Produtos)
 
@@ -98,13 +109,13 @@ authStateProvider.when:
 
 - **Lista:** cards com nº de itens, forma de pagamento, dia e total; toque abre o **detalhe**;
 - **`NewSaleSheet`** (carrinho):
-  - Busca e adiciona produtos com **steppers** (+/−) limitados ao estoque (`soldOut` desabilita); produtos por peso usam **passos de 0,1** e abrem **diálogo de quantidade decimal** (ex.: `1,75` kg);
-  - **Campo de código de barras** (scanners USB tipo teclado disparam a busca no `onSubmitted`) + **leitura por câmera** via `BarcodeScanSheet` (`mobile_scanner`, onde suportado);
-  - Intercepta o padrão de **balanças etiquetadoras `20PPPPPWWWWW`** (`ScaleBarcode`): extrai o PLU, deriva a fração pela pesagem (valor ÷ preço — nunca cobra a mais) e só interpreta como balança se o produto for `vendaPorFracao` — EAN-12 que comece com `20` cai no fallback normal; PLUs são normalizados (zeros à esquerda: `123` ≡ `00123`);
-  - Forma de pagamento via `ChoiceChip`s (`PaymentMethod.values`);
-  - Confirma via **`ProcessSaleUseCase`** → registra venda + **baixa FIFO do estoque (lotes)** + entrada no caixa;
-  - Captura `InsufficientStockException` (mostra produto e disponível) e `ProductNotFoundException`;
-  - Após sucesso, invalida `productsProvider`, `salesListProvider`, `transactionsProvider`, `cashFlowProvider`, `expiryAlertsProvider`;
+ - Busca e adiciona produtos com **steppers** (+/−) limitados ao estoque (`soldOut` desabilita); produtos por peso usam **passos de 0,1** e abrem **diálogo de quantidade decimal** (ex.: `1,75` kg);
+ - **Campo de código de barras** (scanners USB tipo teclado disparam a busca no `onSubmitted`) + **leitura por câmera** via `BarcodeScanSheet` (`mobile_scanner`, onde suportado);
+ - Intercepta o padrão de **balanças etiquetadoras `20PPPPPWWWWW`** (`ScaleBarcode`): extrai o PLU, deriva a fração pela pesagem (valor ÷ preço — nunca cobra a mais) e só interpreta como balança se o produto for `vendaPorFracao` — EAN-12 que comece com `20` cai no fallback normal; PLUs são normalizados (zeros à esquerda: `123` ≡ `00123`);
+ - Forma de pagamento via `ChoiceChip`s (`PaymentMethod.values`);
+ - Confirma via **`ProcessSaleUseCase`** → registra venda + **baixa FIFO do estoque (lotes)** + entrada no caixa;
+ - Captura `InsufficientStockException` (mostra produto e disponível) e `ProductNotFoundException`;
+ - Após sucesso, invalida `productsProvider`, `salesListProvider`, `transactionsProvider`, `cashFlowProvider`, `expiryAlertsProvider`;
 - **`SaleDetailScreen`:** resumo (id, data, pagamento, total), itens com `quantidade × preço` e subtotal, e aviso "Preços congelados no momento da venda".
 
 ### 4. `FinancialScreen` + `AddTransactionSheet` (Financeiro)
@@ -173,11 +184,12 @@ O tema é aplicado em `app.dart`:
 
 ```dart
 MaterialApp(
-  title: 'Dumbhanengue ERP',
-  debugShowCheckedModeBanner: false,
-  theme: AppTheme.light,
-  darkTheme: AppTheme.dark,
-  home: const AuthGate(),
+ title: 'Dumbhanengue ERP',
+ debugShowCheckedModeBanner: false,
+ theme: AppTheme.dark,
+ darkTheme: AppTheme.dark,
+ themeMode: ThemeMode.dark, // V3 — 100% escuro
+ home: const AuthGate(),
 )
 ```
 
@@ -187,10 +199,13 @@ MaterialApp(
 
 `lib/core/utils/formatters.dart`:
 
-- `currency(int cents)` → `1.234,56` com símbolo do tenant (default `R$`, tenants em Moçambique usam `MTn`) — desde a W4, dinheiro é centavos inteiros;
+- `currency(int cents)` → `1.234,56` com símbolo do tenant (default `R$`, tenants em Moçambique usam `MZN`) — desde a W4, dinheiro é centavos inteiros;
 - `date(DateTime)` → `04/08/2026`;
+- `shortDate(DateTime)` → `17 ago` (data do cabeçalho do dashboard);
 - `dateTime(DateTime)` → `04/08/2026 14:30`;
-- `day(DateTime)` → `Hoje`, `Ontem` ou `04/08`.
+- `day(DateTime)` → `Hoje`, `Ontem` ou `04/08`;
+- `compact(double)` → `12,4k` (valores compactos das métricas);
+- `signedAmount(int cents)` → `+500,00` / `-500,00` (valores do feed).
 
 ---
 

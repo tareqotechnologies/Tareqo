@@ -9,19 +9,19 @@ import '../datasources/remote/supabase_cash_closing_data_source.dart';
 /// `supabase/schema.sql`) — o servidor é a autoridade, mesmo padrão dos
 /// demais RPCs do dinheiro.
 final class SupabaseCashClosingProcessor implements ICashClosingProcessor {
-  const SupabaseCashClosingProcessor(this._dataSource);
+ const SupabaseCashClosingProcessor(this._dataSource);
 
-  final CashClosingSupabaseDataSourceImpl _dataSource;
+ final CashClosingSupabaseDataSourceImpl _dataSource;
 
-  @override
-  Future<CashClosing> close({
-    required String storeId,
-    required DateTime day,
-    required int countedCashCents,
-  }) =>
-      _dataSource.closeCashRegister(
-        storeId: storeId,
-        day: day,
-        countedCashCents: countedCashCents,
-      );
+ @override
+ Future<CashClosing> close({
+ required String storeId,
+ required DateTime day,
+ required int countedCashCents,
+ }) =>
+ _dataSource.closeCashRegister(
+ storeId: storeId,
+ day: day,
+ countedCashCents: countedCashCents,
+ );
 }

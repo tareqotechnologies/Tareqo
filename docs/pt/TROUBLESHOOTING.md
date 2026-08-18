@@ -10,7 +10,7 @@ Guia prático para resolver os problemas mais comuns do app no dia a dia. Para a
 2. Siga os passos na ordem indicada — comece sempre pelo mais simples.
 3. Se o problema persistir, veja a secção **Mensagens de erro comuns** e, por último, **Quando contactar o suporte**.
 
-> ⚠️ **Regra de ouro**: antes de qualquer coisa, verifique se o telefone está **com internet** e se o app está **atualizado** (loja de aplicativos). Muitos "erros" são só falta de conexão ou versão antiga.
+> **Atenção:** **Regra de ouro**: antes de qualquer coisa, verifique se o telefone está **com internet** e se o app está **atualizado** (loja de aplicativos). Muitos "erros" são só falta de conexão ou versão antiga.
 
 ---
 
@@ -42,7 +42,7 @@ Guia prático para resolver os problemas mais comuns do app no dia a dia. Para a
 2. Feche e abra o app e tente de novo.
 
 ### "Aparece 'Produto adicionado! (foto não enviada…)'"
-- O produto foi salvo ✅ — só a foto não subiu (sem internet ou erro temporário).
+- O produto foi salvo ✓ — só a foto não subiu (sem internet ou erro temporário).
 - Pode adicionar a foto **depois**, pela edição do produto.
 - Se acontecer sempre, mesmo com internet, fale com o **suporte** (pode ser configuração do servidor).
 
@@ -140,7 +140,7 @@ Guia prático para resolver os problemas mais comuns do app no dia a dia. Para a
 ### "Tela branca / não abre"
 1. Feche e abra o app.
 2. Verifique a internet (a tela de login precisa dela).
-3. Se continuar, **desinstale e instale de novo** — os seus dados ficam no servidor e voltam ao entrar. ⚠️ Desinstalar **não apaga** os dados do negócio (estão na nuvem), mas confirme o e-mail/senha antes.
+3. Se continuar, **desinstale e instale de novo** — os seus dados ficam no servidor e voltam ao entrar. Atenção: Desinstalar **não apaga** os dados do negócio (estão na nuvem), mas confirme o e-mail/senha antes.
 
 ### "O app mudou de idioma / moeda de repente"
 - A **moeda** e o **idioma** são definidos pelo dono em **Lojas → Ajustes** e valem para o **negócio inteiro**, na hora. Se mudou de repente, foi uma alteração feita nas definições (ou noutro aparelho com a mesma conta de dono) — basta voltar a **Lojas → Ajustes** e escolher de novo.

@@ -13,80 +13,80 @@ import 'admin_tenants_screen.dart';
 /// de tenant (aprovar/rejeitar), planos (CRUD) e upgrades de plano
 /// (aprovar/rejeitar).
 class AdminShell extends StatefulWidget {
-  const AdminShell({super.key});
+ const AdminShell({super.key});
 
-  @override
-  State<AdminShell> createState() => _AdminShellState();
+ @override
+ State<AdminShell> createState() => _AdminShellState();
 }
 
 class _AdminShellState extends State<AdminShell> {
-  int _index = 0;
+ int _index = 0;
 
-  static const _sections = [
-    AdminTenantsScreen(),
-    AdminPlansScreen(),
-    AdminPlanRequestsScreen(),
-  ];
+ static const _sections = [
+ AdminTenantsScreen(),
+ AdminPlansScreen(),
+ AdminPlanRequestsScreen(),
+ ];
 
-  @override
-  Widget build(BuildContext context) {
-    final wide = MediaQuery.sizeOf(context).width >= 880;
-    final l10n = context.l10n;
+ @override
+ Widget build(BuildContext context) {
+ final wide = MediaQuery.sizeOf(context).width >= 880;
+ final l10n = context.l10n;
 
-    final destinations = [
-      (
-        Icons.verified_user_outlined,
-        Icons.verified_user,
-        l10n.adminNavRequests,
-      ),
-      (Icons.workspaces_outline, Icons.workspaces, l10n.adminNavPlans),
-      (Icons.upgrade_outlined, Icons.upgrade, l10n.adminNavUpgrades),
-    ];
+ final destinations = [
+ (
+ Icons.verified_user_outlined,
+ Icons.verified_user,
+ l10n.adminNavRequests,
+ ),
+ (Icons.workspaces_outline, Icons.workspaces, l10n.adminNavPlans),
+ (Icons.upgrade_outlined, Icons.upgrade, l10n.adminNavUpgrades),
+ ];
 
-    // Fase 3 — navegação híbrida: fade suave ao trocar de seção, com o
-    // estado preservado (IndexedStack interno do FadeIndexedStack).
-    final body = FadeIndexedStack(index: _index, children: _sections);
+ // Fase 3 — navegação híbrida: fade suave ao trocar de seção, com o
+ // estado preservado (IndexedStack interno do FadeIndexedStack).
+ final body = FadeIndexedStack(index: _index, children: _sections);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.adminTitle),
-        actions: const [SignOutButton(), SizedBox(width: 8)],
-      ),
-      body: wide
-          ? Row(
-              children: [
-                NavigationRail(
-                  selectedIndex: _index,
-                  onDestinationSelected: (value) =>
-                      setState(() => _index = value),
-                  labelType: NavigationRailLabelType.all,
-                  destinations: [
-                    for (final (icon, selected, label) in destinations)
-                      NavigationRailDestination(
-                        icon: Icon(icon),
-                        selectedIcon: Icon(selected),
-                        label: Text(label),
-                      ),
-                  ],
-                ),
-                Expanded(child: body),
-              ],
-            )
-          : body,
-      bottomNavigationBar: wide
-          ? null
-          : NavigationBar(
-              selectedIndex: _index,
-              onDestinationSelected: (value) => setState(() => _index = value),
-              destinations: [
-                for (final (icon, selected, label) in destinations)
-                  NavigationDestination(
-                    icon: Icon(icon),
-                    selectedIcon: Icon(selected),
-                    label: label,
-                  ),
-              ],
-            ),
-    );
-  }
+ return Scaffold(
+ appBar: AppBar(
+ title: Text(l10n.adminTitle),
+ actions: const [SignOutButton(), SizedBox(width: 8)],
+ ),
+ body: wide
+ ? Row(
+ children: [
+ NavigationRail(
+ selectedIndex: _index,
+ onDestinationSelected: (value) =>
+ setState(() => _index = value),
+ labelType: NavigationRailLabelType.all,
+ destinations: [
+ for (final (icon, selected, label) in destinations)
+ NavigationRailDestination(
+ icon: Icon(icon),
+ selectedIcon: Icon(selected),
+ label: Text(label),
+ ),
+ ],
+ ),
+ Expanded(child: body),
+ ],
+ )
+ : body,
+ bottomNavigationBar: wide
+ ? null
+ : NavigationBar(
+ selectedIndex: _index,
+ onDestinationSelected: (value) => setState(() => _index = value),
+ destinations: [
+ for (final (icon, selected, label) in destinations)
+ NavigationDestination(
+ icon: Icon(icon),
+ selectedIcon: Icon(selected),
+ label: label,
+ ),
+ ],
+ ),
+ );
+ }
 }

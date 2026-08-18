@@ -4,15 +4,15 @@ The **Accounts** layer turns Dumbhanengue into a SaaS with manual approval: owne
 
 ```text
 Owner signs up → picks plan + business name → tenant PENDING
-                                                    │
-                        Super admin approves/rejects (≤ 24h)
-                                                    │
-                                        ┌───────────┴───────────┐
-                                     Approved               Rejected
-                                        │                       │
-                        Owner creates stores and      Owner sees the reason
-                        employees (plan limits)       and can sign out
-                                                      (re-register)
+ │
+ Super admin approves/rejects (≤ 24h)
+ │
+ ┌───────────┴───────────┐
+ Approved Rejected
+ │ │
+ Owner creates stores and Owner sees the reason
+ employees (plan limits) and can sign out
+ (re-register)
 ```
 
 ---
@@ -30,11 +30,11 @@ Owner signs up → picks plan + business name → tenant PENDING
 
 | Module | Owner | Manager | Employee |
 | ------ | ----- | ------- | -------- |
-| Sales / Products (list/sell) / Finance / Credit / Customers | ✅ | ✅ | ✅ |
-| **Create product** ("New product" FAB) | ✅ | ✅ | ❌ |
-| Purchases | ✅ | ✅ | ❌ |
-| Reports | ✅ | ✅ | ❌ |
-| Stores (stores/employees/plan/settings) | ✅ | ❌ | ❌ |
+| Sales / Products (list/sell) / Finance / Credit / Customers | ✓ | ✓ | ✓ |
+| **Create product** ("New product" FAB) | ✓ | ✓ | ✗ |
+| Purchases | ✓ | ✓ | ✗ |
+| Reports | ✓ | ✓ | ✗ |
+| Stores (stores/employees/plan/settings) | ✓ | ✗ | ✗ |
 
 - **UI (UX only):** the dashboard hides the Purchases/Reports cards for employees and the Stores card for anyone who is not the owner — `currentAccessLevelProvider` (`account_providers.dart`) resolves the signed-in user's level from `tenants.owner_user_id` or the highest role among their `store_employees` links;
 - **Products (Aug 7):** a regular **employee does not create products** — they only list and sell. The "New product" FAB (and the empty-state action) is hidden when `currentAccessLevelProvider == employee`; the owner and managers keep it. The server also restricts the INSERT (`products_insert` via `is_my_store`);
@@ -70,7 +70,7 @@ ON CONFLICT (user_id) DO NOTHING;
 | `StoreEmployee` | `tenantId`, `storeId`, `userId`, `fullName`, `email`, `role` (`manager/employee`) | Links a user account to a store |
 | `PlanRequest` | `tenantId`, `currentPlanId`, `requestedPlanId`, `status` | Upgrade request decided by the super admin |
 
-> ✅ **Phase 2 implemented:** the business modules (products, sales, finance, credit, customers, purchases) are scoped by **store** (`store_id`) — every record carries the store it belongs to, the app filters by store on every read/write, and the server (anti-forgery trigger + RLS) prevents a user from writing to stores outside their access. The active-store selector (at the top of every screen) switches the scope of the displayed data.
+> ✓ **Phase 2 implemented:** the business modules (products, sales, finance, credit, customers, purchases) are scoped by **store** (`store_id`) — every record carries the store it belongs to, the app filters by store on every read/write, and the server (anti-forgery trigger + RLS) prevents a user from writing to stores outside their access. The active-store selector (at the top of every screen) switches the scope of the displayed data.
 
 ---
 
@@ -97,12 +97,12 @@ ON CONFLICT (user_id) DO NOTHING;
 
 ```text
 Active session (AppUser)
-  ├─ role is_super_admin (RPC) = true → AdminShell (super admin panel)
-  └─ otherwise → GetMyTenantUseCase(user.id)
-       ├─ null             → TenantOnboardingScreen (pick plan + business name)
-       ├─ status pending   → TenantPendingScreen ("waiting for approval ≤ 24h")
-       ├─ status rejected  → TenantRejectedScreen (rejection reason)
-       └─ status approved  → AppShell (ERP) — access to Stores management
+ ├─ role is_super_admin (RPC) = true → AdminShell (super admin panel)
+ └─ otherwise → GetMyTenantUseCase(user.id)
+ ├─ null → TenantOnboardingScreen (pick plan + business name)
+ ├─ status pending → TenantPendingScreen ("waiting for approval ≤ 24h")
+ ├─ status rejected → TenantRejectedScreen (rejection reason)
+ └─ status approved → AppShell (ERP) — access to Stores management
 ```
 
 The state screens (`pending`/`rejected`) do not expose the ERP: the owner can only operate after approval.

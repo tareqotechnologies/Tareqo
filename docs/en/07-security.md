@@ -12,9 +12,9 @@ This document covers the app's security decisions: **secure storage** of secrets
 
 ```text
 SecureStorageService
-  └─ SecureStorageBackend (interface)          ← abstracted for testing
-       ├─ FlutterSecureStorageBackend          ← real: flutter_secure_storage
-       └─ (in-memory backend in tests)
+ └─ SecureStorageBackend (interface) ← abstracted for testing
+ ├─ FlutterSecureStorageBackend ← real: flutter_secure_storage
+ └─ (in-memory backend in tests)
 ```
 
 - **Centralized keys** in `SecureStorageKeys`: `accessToken`, `refreshToken`, `apiKey` — avoids typos and lets you audit exactly what is treated as sensitive.
@@ -55,10 +55,10 @@ The **Supabase session** (access + refresh tokens) is persisted by `supabase_flu
 ## RLS (Row Level Security) on Supabase
 
 - The anon key is **public by design** — embedded in the client. The real security comes from the database:
-  ```sql
-  -- per-tenant AND per-store isolation rule
-  user_id = auth.uid() OR public.is_my_store(store_id)
-  ```
+ ```sql
+ -- per-tenant AND per-store isolation rule
+ user_id = auth.uid() OR public.is_my_store(store_id)
+ ```
 - **`is_my_store(store_id)`:** the tenant owner is valid for all of the tenant's stores; a linked employee is valid for their store (`store_employees`). Anti-forgery triggers force `user_id = auth.uid()` and a valid `store_id` on every insert.
 - **`is_manager_of_store(store_id)` (Aug 6):** access-level matrix — the tenant owner **or** a linked employee whose `store_employees.role = 'manager'` has *managerial* power over the store. Used by the `process_purchase` RPC guard and by the `purchases`/`purchase_items` RLS policies: a regular employee can operate sales/stock/credit but **cannot register purchases nor read them** — enforced server-side, even if a modified client calls PostgREST directly.
 - The **RLS helper functions** (`is_my_store`, `is_tenant_owner`, `is_manager_of_store`) are `SECURITY DEFINER` with `search_path` pinned to `public` (Aug 6): they are called *inside* the policies and query tables that have their own policies (`stores`/`tenants`/`store_employees`), which previously formed a cross-table cycle that could blow the stack (`54001 max_stack_depth`) on full-table scans. As definers they bypass RLS internally, breaking the cycle **by construction** — same pattern as `is_super_admin` and the money RPCs. They only return a boolean about an explicit id, so no data is exposed.
@@ -77,7 +77,7 @@ The **Supabase session** (access + refresh tokens) is persisted by `supabase_flu
 | Linux | libsecret | Reasonable, no dedicated enclave |
 | Web | Encryption key kept in `localStorage` | **Weakest** — not hardware-backed |
 
-> ⚠️ For **critical secrets, prioritize mobile**; on web, restrict what is stored or combine with server-side measures.
+> **Warning:** For **critical secrets, prioritize mobile**; on web, restrict what is stored or combine with server-side measures.
 
 ---
 

@@ -1,4 +1,4 @@
-# 📊 Statut de l'audit et éléments de production en attente (français)
+# Statut de l'audit et éléments de production en attente (français)
 
 > **Source faisant autorité :** l'audit complet de préparation à la production vit en portugais dans [`../pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md) (la langue principale du projet). Ce chapitre est la **version française de la Mise à jour 6** (session finale, partie 3 — Aug 6, 2026), **de la Mise à jour 7** (Aug 7 — activation/désactivation des employés + matrice de création de produits) **et de la Section 9** (éléments de la checklist de production en attente). Les chiffres reflètent le rapport faisant autorité : `381/381` tests, `sql_check.sh` **12/12**, `sql_check_live.sh` **14/14**, `schema.sql` 2 311 lignes, 73 fichiers de test.
 
@@ -41,33 +41,33 @@ Cela a attrapé et corrigé un **vrai bug W4** : `SUM(bigint)` renvoie `numeric`
 
 | Élément | Statut |
 |---|---|
-| **W4 — argent en centimes entiers de bout en bout** | ✅ Fait — `*Cents` dans le domaine, SQLite `INTEGER` + migration ×100 idempotente, Supabase `BIGINT` (+ migration de colonnes W4, Partie 7 de `upgrade.sql`), les RPC comparent/somment en centimes directement (pas de `ROUND(x*100)`), catalogue de forfaits en centimes, `Money.parse` / `Formatters.currency(cents)` |
-| **H2 — agrégation côté serveur + pagination par clé** | ✅ Fait — RPC `get_cash_flow` + `get_sales_report` (SECURITY DEFINER, portées par `is_my_store`, BIGINT, buckets de jour dans le fuseau de l'appareil ; Parties 8.6–8.7 de `upgrade.sql`) ; `fetchAllKeyset` (curseur `id` stable, lots `pageSize`) remplaçant `.limit(1000)` sur les 6 `getAll` Supabase |
-| **W10 — sqlite3 3.x** | ✅ Fait — `sqlite3` ^3.5.1 via build hooks/native assets ; `sqlite3_flutter_libs` (EOL) supprimé ; `dispose()` → `close()` |
-| **Consolidation SQL** | ✅ Fait — 13 → 4 fichiers SQL (`schema.sql` installation neuve, `upgrade.sql` bases existantes, `promote_super_admin.sql` helper ops, `sqlcheck_stub.sql` stub de smoke-test) ; `supabase/migrations/` supprimé |
-| **Validation** | ✅ `sql_check.sh` **12/12** sur vrai Postgres 16 (incl. idempotence + migration W4 avec de vraies données) · `sql_check_live.sh` **14/14** · la CI exécute la suite complète dans `ci.yml` + `release.yml` |
+| **W4 — argent en centimes entiers de bout en bout** | ✓ Fait — `*Cents` dans le domaine, SQLite `INTEGER` + migration ×100 idempotente, Supabase `BIGINT` (+ migration de colonnes W4, Partie 7 de `upgrade.sql`), les RPC comparent/somment en centimes directement (pas de `ROUND(x*100)`), catalogue de forfaits en centimes, `Money.parse` / `Formatters.currency(cents)` |
+| **H2 — agrégation côté serveur + pagination par clé** | ✓ Fait — RPC `get_cash_flow` + `get_sales_report` (SECURITY DEFINER, portées par `is_my_store`, BIGINT, buckets de jour dans le fuseau de l'appareil ; Parties 8.6–8.7 de `upgrade.sql`) ; `fetchAllKeyset` (curseur `id` stable, lots `pageSize`) remplaçant `.limit(1000)` sur les 6 `getAll` Supabase |
+| **W10 — sqlite3 3.x** | ✓ Fait — `sqlite3` ^3.5.1 via build hooks/native assets ; `sqlite3_flutter_libs` (EOL) supprimé ; `dispose()` → `close()` |
+| **Consolidation SQL** | ✓ Fait — 13 → 4 fichiers SQL (`schema.sql` installation neuve, `upgrade.sql` bases existantes, `promote_super_admin.sql` helper ops, `sqlcheck_stub.sql` stub de smoke-test) ; `supabase/migrations/` supprimé |
+| **Validation** | ✓ `sql_check.sh` **12/12** sur vrai Postgres 16 (incl. idempotence + migration W4 avec de vraies données) · `sql_check_live.sh` **14/14** · la CI exécute la suite complète dans `ci.yml` + `release.yml` |
 
 ---
 
 ## Section 9 — Éléments de la checklist de production en attente
 
-> Statut final (Mise à jour 6, Aug 6) : **tout le travail d'ingénierie interne est terminé** (W4, H2, W10, W1–W11, consolidation SQL) et validé sur PostgreSQL réel. **`upgrade.sql` a été appliqué au projet live le Aug 6 (ancien élément 1 ✅, retiré de la liste)** — il ne reste que des **opérations externes** (1–5) + **des éléments produit/sécurité** (6–8) + une longue traîne facultative (9).
+> Statut final (Mise à jour 6, Aug 6) : **tout le travail d'ingénierie interne est terminé** (W4, H2, W10, W1–W11, consolidation SQL) et validé sur PostgreSQL réel. **`upgrade.sql` a été appliqué au projet live le Aug 6 (ancien élément 1 ✓, retiré de la liste)** — il ne reste que des **opérations externes** (1–5) + **des éléments produit/sécurité** (6–8) + une longue traîne facultative (9).
 
 | # | Élément (checklist) | Type | Statut |
 |---|---|---|---|
-| 1 | Activer **Play App Signing** + enregistrer le SHA-256 de la clé d'upload (7.1 — partie externe de C1) | Externe (Play Console) | ⏳ |
-| 2 | Vérifier **confirmation d'e-mail ON** + activer la **2FA sur le super admin** (2.1/2.2 — H9) | Externe (dashboard Supabase) | ⏳ |
-| 3 | `password_min_length = 8` dans les réglages du projet (M7) | Externe (dashboard Supabase) | ⏳ |
-| 4 | Comptes Google Play / Apple + secrets dans la CI (7.9) | Externe | ⏳ |
-| 5 | Politique de confidentialité / CGU + politique de sauvegarde (7.5/7.6) | Légal | ⏳ |
-| 6 | **Facturation** (W2) — reportée par décision produit ; les limites de forfait sont déjà appliquées en base | Produit | ⏳ reporté |
-| 7 | Limite de débit de création de tenants + reCAPTCHA (H6) | Sécurité | ⏳ |
-| 8 | Flux d'invitation des employés (H7 — partie externe de C2) | Sécurité/UX | ⏳ |
-| 9 | Longue traîne facultative : M3 (onglets paresseux), M5 (AppIds restants), M6 (gitleaks), M8 (stock faible par produit), M12 (UUID v7) ; M2 (CSP, seulement si le web est livré) | Maintenance | ⏳ facultatif |
+| 1 | Activer **Play App Signing** + enregistrer le SHA-256 de la clé d'upload (7.1 — partie externe de C1) | Externe (Play Console) | ○ |
+| 2 | Vérifier **confirmation d'e-mail ON** + activer la **2FA sur le super admin** (2.1/2.2 — H9) | Externe (dashboard Supabase) | ○ |
+| 3 | `password_min_length = 8` dans les réglages du projet (M7) | Externe (dashboard Supabase) | ○ |
+| 4 | Comptes Google Play / Apple + secrets dans la CI (7.9) | Externe | ○ |
+| 5 | Politique de confidentialité / CGU + politique de sauvegarde (7.5/7.6) | Légal | ○ |
+| 6 | **Facturation** (W2) — reportée par décision produit ; les limites de forfait sont déjà appliquées en base | Produit | ○ reporté |
+| 7 | Limite de débit de création de tenants + reCAPTCHA (H6) | Sécurité | ○ |
+| 8 | Flux d'invitation des employés (H7 — partie externe de C2) | Sécurité/UX | ○ |
+| 9 | Longue traîne facultative : M3 (onglets paresseux), M5 (AppIds restants), M6 (gitleaks), M8 (stock faible par produit), M12 (UUID v7) ; M2 (CSP, seulement si le web est livré) | Maintenance | ○ facultatif |
 
 **Terminé Aug 6 (retiré de la liste) :** application de `supabase/upgrade.sql` au projet live (ancien élément 1) — pooler eu-north-1, transaction unique `-1`, PostgreSQL 17.6 : 9 colonnes d'argent → `bigint`, zéro valeur fractionnaire, `sql_check_live.sh` **14/14 PASS**, idempotence confirmée ; sauvegarde `backup_pre_w4.sql` (gitignorée) ; E2E web re-validé après migration. Runbook : [chapitre 16](16-migracao-w4-h2.md).
 
-Tous les éléments restants de la checklist (1.1–1.18, 2.3–2.4, 4.1–4.2, 6.2, 7.1–7.8, 8.1–8.3, 9.1–9.2) sont **✅**.
+Tous les éléments restants de la checklist (1.1–1.18, 2.3–2.4, 4.1–4.2, 6.2, 7.1–7.8, 8.1–8.3, 9.1–9.2) sont **✓**.
 
 ---
 

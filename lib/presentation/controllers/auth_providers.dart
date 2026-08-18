@@ -18,39 +18,39 @@ import '../../domain/usecases/sign_up_use_case.dart';
 /// provider. Os use cases são **compostos** a partir dele (e não lidos do
 /// GetIt), para que um único override nos testes cubra toda a cadeia.
 final authRepositoryProvider = Provider<IAuthRepository>(
-  (ref) => ServiceLocator.instance<IAuthRepository>(),
+ (ref) => ServiceLocator.instance<IAuthRepository>(),
 );
 
 final signInUseCaseProvider = Provider<SignInUseCase>(
-  (ref) => SignInUseCase(ref.watch(authRepositoryProvider)),
+ (ref) => SignInUseCase(ref.watch(authRepositoryProvider)),
 );
 
 final signUpUseCaseProvider = Provider<SignUpUseCase>(
-  (ref) => SignUpUseCase(ref.watch(authRepositoryProvider)),
+ (ref) => SignUpUseCase(ref.watch(authRepositoryProvider)),
 );
 
 final signOutUseCaseProvider = Provider<SignOutUseCase>(
-  (ref) => SignOutUseCase(ref.watch(authRepositoryProvider)),
+ (ref) => SignOutUseCase(ref.watch(authRepositoryProvider)),
 );
 
 final resetPasswordUseCaseProvider = Provider<ResetPasswordUseCase>(
-  (ref) => ResetPasswordUseCase(ref.watch(authRepositoryProvider)),
+ (ref) => ResetPasswordUseCase(ref.watch(authRepositoryProvider)),
 );
 
 final changePasswordUseCaseProvider = Provider<ChangePasswordUseCase>(
-  (ref) => ChangePasswordUseCase(ref.watch(authRepositoryProvider)),
+ (ref) => ChangePasswordUseCase(ref.watch(authRepositoryProvider)),
 );
 
 final setNewPasswordUseCaseProvider = Provider<SetNewPasswordUseCase>(
-  (ref) => SetNewPasswordUseCase(ref.watch(authRepositoryProvider)),
+ (ref) => SetNewPasswordUseCase(ref.watch(authRepositoryProvider)),
 );
 
 /// Eventos de autenticação em bruto — o [AuthGate] usa para detectar o
 /// fluxo de RECUPERAÇÃO de senha vindo do link do e-mail.
 final authEventsProvider = StreamProvider<AuthEvent>(
-  (ref) => SupabaseConfig.isConfigured
-      ? ref.watch(authRepositoryProvider).authEvents
-      : Stream.value(AuthEvent.other),
+ (ref) => SupabaseConfig.isConfigured
+ ? ref.watch(authRepositoryProvider).authEvents
+ : Stream.value(AuthEvent.other),
 );
 
 /// Sinaliza que a sessão veio de um link de recuperação de senha: o
@@ -68,7 +68,7 @@ final passwordRecoveryPendingProvider = StateProvider<bool>((ref) => false);
 /// não fosse inicializado) — o app abre e o login falha com mensagem
 /// amigável em vez de quebrar.
 final authStateProvider = StreamProvider<AppUser?>(
-  (ref) => SupabaseConfig.isConfigured
-      ? ref.watch(authRepositoryProvider).authStateChanges
-      : Stream.value(null),
+ (ref) => SupabaseConfig.isConfigured
+ ? ref.watch(authRepositoryProvider).authStateChanges
+ : Stream.value(null),
 );

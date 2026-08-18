@@ -135,11 +135,24 @@
   "securityChangePassword": "Changer le mot de passe",
   "securityChangePasswordHint": "Mettez à jour le mot de passe de votre compte",
   "appNavHome": "Accueil",
-  "appNavProducts": "Produits",
   "appNavSales": "Ventes",
+  "appNavWallet": "Portefeuille",
+  "appNavMenu": "Menu",
+  "appNavProducts": "Produits",
   "appNavFinancial": "Finances",
   "appNavCredit": "Crédit",
   "appNavCustomers": "Clients",
+  "fabMenuTitle": "Nouvelle action",
+  "fabMenuSubtitle": "Que souhaitez-vous faire ?",
+  "fabMenuNewSale": "Nouvelle vente",
+  "fabMenuNewSaleHint": "Panier · déduction de stock · caisse",
+  "fabMenuExpense": "Enregistrer une dépense",
+  "fabMenuExpenseHint": "Sortie de caisse avec catégorie",
+  "fabMenuAddProduct": "Ajouter un produit",
+  "fabMenuAddProductHint": "Catalogue · prix · stock initial",
+  "fabMenuAddDebt": "Enregistrer un crédit",
+  "fabMenuAddDebtHint": "À recevoir ou à payer",
+  "fabMenuCancel": "Annuler",
   "syncPendingCount": "{count, plural, =1{1 opération en attente de synchronisation} other{{count} opérations en attente de synchronisation}}",
   "@syncPendingCount": {
     "placeholders": {
@@ -159,7 +172,7 @@
     }
   },
   "syncStillOffline": "Pas de connexion — les opérations restent en attente.",
-  "dashboardGreeting": "Bonjour, {name} 👋",
+  "dashboardGreeting": "Bonjour, {name}",
   "@dashboardGreeting": {
     "placeholders": {
       "name": {
@@ -191,6 +204,65 @@
   "dashboardRecentPurchases": "Achats récents",
   "dashboardNoPurchases": "Aucun achat pour l'instant — enregistrez le premier !",
   "dashboardLowStock": "Stock faible",
+  "dashboardKpisError": "Impossible de charger les indicateurs.",
+  "dashboardActivityTitle": "Activité du jour",
+  "dashboardActivityEvents": "{count, plural, =1{1 événement} other{{count} événements}}",
+  "dashboardActivityMinutesAgo": "il y a {count} min",
+  "dashboardActivityHoursAgo": "il y a {count} h",
+  "dashboardDateToday": "Aujourd'hui",
+  "dashboardMetricSales": "Ventes",
+  "dashboardMetricCash": "Caisse",
+  "dashboardMetricReceivables": "À recevoir",
+  "dashboardFiadoCount": "{count, plural, =1{1 crédit} other{{count} crédits}}",
+  "@dashboardFiadoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardActivityEmpty": "Aucune activité enregistrée pour l'instant.",
+  "dashboardActivitySeeAll": "Tout voir",
+  "dashboardStockEntry": "Stock · {product}",
+  "@dashboardStockEntry": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardStockEntryDetail": "Entrée de {quantity} · {time}",
+  "@dashboardStockEntryDetail": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardFiadoPayment": "Paiement à crédit",
+  "dashboardExpenseRow": "Dépense · {description}",
+  "@dashboardExpenseRow": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardLowStockDetail": "{name} · {quantity} restantes",
+  "@dashboardLowStockDetail": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardAlertBadge": "Alerte",
   "dashboardSaleItems": "{count, plural, =1{1 article} other{{count} articles}}",
   "@dashboardSaleItems": {
     "placeholders": {
@@ -311,6 +383,25 @@
   "paymentTransfer": "Virement",
   "purchasesSearchHint": "Rechercher un achat...",
   "productsFilterTooltip": "Filtrer les produits",
+  "productsFilterAll": "Tous",
+  "productsFilterAllCount": "Tous · {count}",
+  "@productsFilterAllCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsFilterLowCount": "Stock faible · {count}",
+  "@productsFilterLowCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsColProduct": "Produit / SKU",
+  "productsColPrice": "Prix · Stock",
   "productsSearchHint": "Rechercher un produit...",
   "productsLoadError": "Impossible de charger les produits.",
   "productsEmptyTitle": "Aucun produit enregistré",
@@ -349,6 +440,7 @@
   "productsPhotoGallery": "Depuis la galerie",
   "productsPhotoRemove": "Retirer la photo",
   "productsInactive": "Inactif",
+  "productsFilterInactive": "Inactifs",
   "productsActiveLabel": "Produit actif",
   "productsActiveHint": "Désactivez pour retirer le produit du PDV et des achats (le stock est conservé).",
   "productsStockAdjustHint": "Ajustement manuel : définit le stock exact, en créant/consommant des lots FIFO.",
@@ -356,6 +448,16 @@
   "productsSectionPricing": "Prix",
   "productsSectionStock": "Stock",
   "productsSectionStatus": "Statut",
+  "customersHeaderCount": "{count, plural, =1{1 client} other{{count} clients}}",
+  "@customersHeaderCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "customersColCustomer": "Client",
+  "customersColContact": "Contact / Crédit",
   "customersSearchHint": "Rechercher un client...",
   "customersLoadError": "Impossible de charger les clients.",
   "customersEmptyTitle": "Aucun client enregistré",
@@ -410,7 +512,7 @@
     }
   },
   "purchasesEmptyFilteredTitle": "Aucun achat trouvé",
-  "purchasesEmptyFilteredSubtitle": "Ajustez le filtre de période.",
+  "purchasesEmptyFilteredSubtitle": "Ajustez la recherche ou les filtres.",
   "purchasesClearFilters": "Effacer les filtres",
   "purchasesSupplierError": "Indiquez le fournisseur de l'achat.",
   "purchasesCartItemUnavailable": "Un article du panier n'est plus disponible. Réessayez.",
@@ -485,8 +587,11 @@
   "financialIncome": "Entrées",
   "financialExpense": "Sorties",
   "financialBalance": "Solde",
+  "financialPeriodBalance": "Solde de la période",
+  "financialSwipeHint": "Glissez pour les dépenses →",
   "financialTransactions": "Transactions",
   "financialLoadError": "Impossible de charger les transactions.",
+  "financialCashFlowError": "Impossible de charger le flux de trésorerie.",
   "financialEmptyTitle": "Aucune transaction",
   "financialEmptySubtitle": "Enregistrez des entrées et des sorties pour suivre le flux de trésorerie.",
   "financialReceivePendingTitle": "Recevoir le montant en attente ?",
@@ -564,11 +669,14 @@
   "cashClosingHistory": "Historique des clôtures",
   "cashClosingHistoryEmpty": "Aucune clôture enregistrée pour l'instant.",
   "debtsTitle": "Crédit (fiado)",
+  "debtsHeaderSubtitle": "Crédit à recevoir et à payer",
   "debtsAddDebt": "Enregistrer un crédit",
   "debtsSearchHint": "Rechercher par nom du client...",
   "debtsTabPending": "En attente",
   "debtsTabSettled": "Soldées",
   "debtsTotalPending": "Total à recevoir",
+  "debtsOverdueStat": "En retard",
+  "debtsSettledStat": "Soldées",
   "debtsNoPendingCustomers": "Aucun client en attente",
   "debtsPendingCustomers": "{count, plural, =1{1 client en attente} other{{count} clients en attente}}",
   "@debtsPendingCustomers": {
@@ -580,8 +688,8 @@
   },
   "debtsPendingSection": "Dettes en attente",
   "debtsLoadError": "Impossible de charger les dettes.",
-  "debtsEmptyPendingTitle": "Aucun crédit en attente 🎉",
-  "debtsEmptyPendingSubtitle": "Aucun client ne doit rien pour le moment.",
+  "debtsEmptyPendingTitle": "Aucun crédit en attente",
+  "debtsEmptyPendingSubtitle": "Quand un client achète à crédit, la dette apparaît ici.",
   "debtsTotalSettled": "Total soldé",
   "debtsSettledCount": "{count, plural, =1{1 règlement enregistré} other{{count} règlements enregistrés}}",
   "@debtsSettledCount": {
@@ -631,6 +739,15 @@
       }
     }
   },
+  "debtsDueAgo": "Échu il y a {days, plural, =1{1 jour} other{{days} jours}}",
+  "@debtsDueAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsDueTodayDesc": "Échoit aujourd'hui",
   "debtsSettleAction": "Soldé la dette",
   "debtsSettledLabel": "Soldée",
   "debtsSettledOn": "Soldée le {date}",
@@ -659,6 +776,15 @@
   "debtsDueDateLabel": "Échéance",
   "salesTitle": "Ventes",
   "salesNewSale": "Nouvelle vente",
+  "salesCartSection": "Panier · {count, plural, =1{1 article} other{{count} articles}}",
+  "@salesCartSection": {
+    "description": "En-tête de la section des articles du panier dans le PDV plein écran",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "salesLoadError": "Impossible de charger les ventes.",
   "salesEmptyTitle": "Aucune vente enregistrée",
   "salesEmptySubtitle": "Touchez \"Nouvelle vente\" pour enregistrer la première.",
@@ -666,10 +792,20 @@
   "periodYesterday": "Hier",
   "periodWeek": "Cette semaine",
   "paymentFilterCard": "Carte",
+  "paymentFilterAll": "Toutes",
   "salesStatusPaid": "Payée",
   "salesHeaderTransactions": "{count, plural, =0{0 transaction} =1{1 transaction} other{{count} transactions}}",
   "@salesHeaderTransactions": {
     "description": "Nombre de transactions du jour dans le résumé de l'écran des ventes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "salesPdvCount": "{count, plural, =0{0 vente} =1{1 vente} other{{count} ventes}}",
+  "@salesPdvCount": {
+    "description": "Nombre de ventes du jour dans l'en-tête du PDV plein écran",
     "placeholders": {
       "count": {
         "type": "int"
@@ -913,6 +1049,7 @@
   "productsExpiryHelp": "Date de péremption du produit",
   "productsExpiryClear": "Retirer la péremption",
   "salesBarcodeLabel": "Code-barres",
+  "salesBarcodeHint": "Étiquettes de balance et PLU — caméra ou lecteur USB",
   "salesBarcodeScan": "Lire avec la caméra",
   "salesBarcodeNotFound": "Produit introuvable pour ce code.",
   "salesBarcodeInvalid": "Code de balance invalide.",

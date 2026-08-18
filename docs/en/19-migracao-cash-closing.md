@@ -9,20 +9,20 @@
 >
 > What Part 25 does (idempotent — same conventions as Parts 7/8/22):
 > 1. **25.1** — `cash_closings` table (day snapshot: total sales, expected
->    drawer, counted cash, per-payment-method breakdown as JSONB) with a
->    **UNIQUE `(store_id, closing_date)`** — re-closing the same day UPDATES,
->    never duplicates;
+> drawer, counted cash, per-payment-method breakdown as JSONB) with a
+> **UNIQUE `(store_id, closing_date)`** — re-closing the same day UPDATES,
+> never duplicates;
 > 2. **25.2** — RLS + policies: read for the store owner/employees; writes
->    through the RPC (INSERT for own store; UPDATE/DELETE only on own rows —
->    defense in depth);
+> through the RPC (INSERT for own store; UPDATE/DELETE only on own rows —
+> defense in depth);
 > 3. **25.3** — `idx_cash_closings_store` index (store-scoped scans);
 > 4. **25.4** — `user_id`/`store_id` triggers (same helpers as the schema);
 > 5. **25.5** — `close_cash_register(text, timestamptz, bigint)` RPC,
->    `SECURITY DEFINER` with the **`is_manager_of_store`** guard (closing is
->    a MANAGERIAL operation — owner/manager only), server-side expected-cash
->    calculation (Σ ACTIVE **cash** sales of the day — card/M-Pesa/E-Mola/
->    transfer do not go through the physical drawer) and an UPSERT in ONE
->    transaction.
+> `SECURITY DEFINER` with the **`is_manager_of_store`** guard (closing is
+> a MANAGERIAL operation — owner/manager only), server-side expected-cash
+> calculation (Σ ACTIVE **cash** sales of the day — card/M-Pesa/E-Mola/
+> transfer do not go through the physical drawer) and an UPSERT in ONE
+> transaction.
 >> The same application also brings **Part 26**: the read-only
 > `get_cash_closing_summary(text, timestamptz)` RPC — the Z-report PREVIEW
 > aggregated SERVER-SIDE (same criteria as `close_cash_register`, guarded
@@ -39,7 +39,7 @@
 > job, disposable Postgres 16) — the syntax was already validated locally
 > (`bash -n`). Safe to re-run as many times as needed.
 >
-> ⚠️ **No hard compatibility window** (unlike W11): Part 25 only ADDS a
+> **Warning:** **No hard compatibility window** (unlike W11): Part 25 only ADDS a
 > table + RPC — no existing data is rewritten. The app must be on the
 > version with the cash closing to USE the RPC, but legacy clients do not
 > break while writing. Still, publish the new version together (Step 6) so
@@ -50,13 +50,13 @@
 ## Step 0 — Prerequisites
 
 - Access to the project Dashboard + **database password**
-  (Settings → Database → Connection string).
+ (Settings → Database → Connection string).
 - The project's direct host is **IPv6-only** → use the **pooler**
-  `aws-0-eu-north-1.pooler.supabase.com`.
+ `aws-0-eu-north-1.pooler.supabase.com`.
 - Local `psql` **or** Docker (`postgres:16` ships `psql`).
-- ⚠️ **NEVER** run `scripts/sql_check.sh` against the live database — it
-  does `DROP SCHEMA public CASCADE`. Live verification is only
-  `scripts/sql_check_live.sh` (read-only).
+- Warning: **NEVER** run `scripts/sql_check.sh` against the live database — it
+ does `DROP SCHEMA public CASCADE`. Live verification is only
+ `scripts/sql_check_live.sh` (read-only).
 - **App built with the cash closing feature** ready to publish (see Step 6).
 
 Set the URL (replace `SENHA`):
@@ -68,12 +68,12 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 ## Step 1 — Backup (mandatory)
 
 - **Quick option:** Dashboard → Database → **Backups** → "Create a backup"
-  (or enable PITR).
+ (or enable PITR).
 - **CLI option** (pooler **5432** *session* port, suitable for `pg_dump`):
 
 ```bash
 pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
-  --schema=public -f backup_pre_cash_closing.sql
+ --schema=public -f backup_pre_cash_closing.sql
 ```
 
 ## Step 2 — Pre-flight (read-only, SQL Editor)
@@ -95,7 +95,7 @@ SELECT count(*) AS existing_closings FROM public.cash_closings;
 
 **2.3 Day sample** (to verify later that the server-side expected-cash
 calculation matches today's cash sales — note the total of cash sales
-today). ⚠️ The query uses `date_trunc('day', now())` in the SERVER timezone
+today). Warning: The query uses `date_trunc('day', now())` in the SERVER timezone
 (UTC on Supabase), while the RPC receives the client's LOCAL day start
 converted to UTC — for MZN stores (UTC+2) the two "days" can diverge near
 midnight. The sample is informational; the RPC is the authority:
@@ -104,31 +104,31 @@ midnight. The sample is informational; the RPC is the authority:
 SELECT COALESCE(SUM(total_amount), 0) AS cash_sales_today
 FROM public.sales
 WHERE status = 'active'
-  AND payment_method = 'cash'
-  AND date_time >= date_trunc('day', now())
-  AND date_time < date_trunc('day', now()) + interval '1 day';
+ AND payment_method = 'cash'
+ AND date_time >= date_trunc('day', now())
+ AND date_time < date_trunc('day', now()) + interval '1 day';
 ```
 
 ## Step 3 — Apply `supabase/upgrade.sql`
 
-### Option A — psql via pooler, ONE transaction (recommended — project convention) ✅
+### Option A — psql via pooler, ONE transaction (recommended — project convention) ✓
 
 ```bash
 psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
 ```
 
 - `-1` = single transaction: if **any** part fails, **everything** is
-  rolled back — no partial state.
+ rolled back — no partial state.
 - Expected: no errors (Part 25 only emits "already exists" NOTICEs on
-  already-created columns/tables — normal, that's idempotency at work).
+ already-created columns/tables — normal, that's idempotency at work).
 
 ### Option B — Dashboard SQL Editor
 
 1. Open the **SQL Editor** in the project.
 2. Paste the **full contents** of `supabase/upgrade.sql`.
 3. Run it. The editor runs the script as a single batch; on error it stops
-   and shows the message. Since the script is idempotent, fixing and
-   re-running is safe.
+ and shows the message. Since the script is idempotent, fixing and
+ re-running is safe.
 
 ## Step 4 — Post-migration verification (read-only)
 
@@ -140,10 +140,10 @@ SUPABASE_DB_URL="$SUPABASE_DB_URL" bash scripts/sql_check_live.sh
 ```
 
 - Expected: **VERIFICATION COMPLETE — all checks passed**, including:
-  - 32 — `cash_closings` table + RLS ON + UNIQUE `(store_id, closing_date)`;
-  - 33 — `close_cash_register` RPC `SECURITY DEFINER` + `is_manager_of_store`
-    guard + server-side calculation over `sales`;
-  - 34 — `user_id`/`store_id` triggers + `idx_cash_closings_store` index.
+ - 32 — `cash_closings` table + RLS ON + UNIQUE `(store_id, closing_date)`;
+ - 33 — `close_cash_register` RPC `SECURITY DEFINER` + `is_manager_of_store`
+ guard + server-side calculation over `sales`;
+ - 34 — `user_id`/`store_id` triggers + `idx_cash_closings_store` index.
 
 **4.2 Manual check (SQL Editor):**
 
@@ -152,7 +152,7 @@ SUPABASE_DB_URL="$SUPABASE_DB_URL" bash scripts/sql_check_live.sh
 SELECT conname, pg_get_constraintdef(oid) AS def
 FROM pg_constraint
 WHERE conrelid = 'public.cash_closings'::regclass
-  AND contype = 'u';
+ AND contype = 'u';
 
 -- 2) RPC present + SECURITY DEFINER + fixed search_path:
 SELECT p.proname, p.prosecdef, p.proconfig
@@ -187,11 +187,11 @@ WHERE schemaname = 'public' AND tablename = 'cash_closings';
 Part 25 does not rewrite data, but the feature only shows in the new UI:
 
 1. **Publish the app version with the cash closing** — button in Finance
-   (owner/manager) → Z-report sheet with the physical cash count.
+ (owner/manager) → Z-report sheet with the physical cash count.
 2. Legacy clients keep working (the RPC is additive); the feature simply
-   does not appear until they update.
+ does not appear until they update.
 3. The new app stays **100% offline-compatible** (local SQLite already
-   creates the `cash_closings` table on database open).
+ creates the `cash_closings` table on database open).
 
 ## Rollback (only if needed)
 
@@ -209,7 +209,7 @@ Part 25 does not rewrite data, but the feature only shows in the new UI:
 | 1 | Backup made | `backup_pre_cash_closing.sql` exists |
 | 2 | Pre-flight clean | `cash_closings` does not exist; sample noted |
 | 3 | `upgrade.sql` applied | no errors (single transaction) |
-| 4 | `sql_check_live.sh` | ✅ all 35 checks (closing 32–34 + server-side preview 35) |
+| 4 | `sql_check_live.sh` | ✓ all 35 checks (closing 32–34 + server-side preview 35) |
 | 5 | Per-store/day uniqueness | UNIQUE `(store_id, closing_date)` present |
 | 6 | Re-apply without effect | idempotency confirmed (Step 5) |
 | 7 | App published | version with cash closing published |

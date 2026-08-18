@@ -24,11 +24,11 @@ A tela inicial mostra o resumo do seu negócio **na loja ativa**:
 - **Saldo em caixa**
 - **A receber (fiado)**
 - **Estoque em produtos**
-- **Alertas** ⚠️ (validade) — veja abaixo
+- **Alertas** Atenção: (validade) — veja abaixo
 
 ### Alertas de validade
-- 🟡 **Amarelo** = produto está **para vencer** (menos de 30 dias de validade).
-- 🔴 **Vermelho** = produto **já venceu** e ainda tem estoque.
+- ◔ **Amarelo** = produto está **para vencer** (menos de 30 dias de validade).
+- ● **Vermelho** = produto **já venceu** e ainda tem estoque.
 - Toque no alerta para ver qual é o produto e o lote envolvido.
 
 ### Ações rápidas
@@ -47,7 +47,7 @@ O sistema pode ter **várias lojas** (ex.: Loja Central, Loja do Bairro). Cada l
 - Para trocar: **Lojas** → aba **Ajustes** → seção **"Loja ativa"** → toque na loja desejada.
 - Tudo (estoque, vendas, financeiro, relatórios) passa a mostrar os dados da loja escolhida.
 
-> 💡 Com apenas uma loja, essa seção não aparece — não há o que escolher.
+> Com apenas uma loja, essa seção não aparece — não há o que escolher.
 
 ---
 
@@ -70,7 +70,7 @@ O sistema pode ter **várias lojas** (ex.: Loja Central, Loja do Bairro). Cada l
 - **Desativar** (`Produto ativo` desligado): o produto some do PDV e das compras, mas **permanece no histórico** com o estoque guardado — dá para reativar depois.
 - Para remover a foto, toque em **Remover foto**.
 
-> ⚠️ Se a foto não enviar (ex.: sem internet), o produto é salvo mesmo assim — você verá um aviso e pode adicionar a foto depois pela edição.
+> **Atenção:** Se a foto não enviar (ex.: sem internet), o produto é salvo mesmo assim — você verá um aviso e pode adicionar a foto depois pela edição.
 
 ---
 
@@ -82,7 +82,7 @@ O sistema pode ter **várias lojas** (ex.: Loja Central, Loja do Bairro). Cada l
 4. Escolha a **forma de pagamento**: Dinheiro, Cartão de débito, Cartão de crédito, M-Pesa, E-Mola ou Transferência.
 5. Toque em **Confirmar venda**.
 
-> ✅ O estoque é abatido automaticamente — **primeiro o lote mais antigo** (FIFO), para nada vencer parado.
+> ✓ O estoque é abatido automaticamente — **primeiro o lote mais antigo** (FIFO), para nada vencer parado.
 
 ### Recibo e partilha
 - Toque numa venda da lista para ver o **detalhe** (itens, total, forma de pagamento).
@@ -111,8 +111,8 @@ Se uma venda foi feita por engano:
 - **Clientes**: cadastre seus clientes com nome, telefone e e-mail.
 - **Registrar fiado**: quando um cliente leva mercadoria para pagar depois, registre o valor e o vencimento.
 - Na tela **Crédito** você vê:
-  - **Pendentes** = quem ainda deve (total a receber).
-  - **Quitadas** = histórico de quem já pagou.
+ - **Pendentes** = quem ainda deve (total a receber).
+ - **Quitadas** = histórico de quem já pagou.
 - Quando o cliente pagar, toque em **Quitar dívida** — o dinheiro **entra no caixa automaticamente**.
 
 ---
@@ -123,8 +123,8 @@ Se uma venda foi feita por engano:
 - **Pendente**: deixe marcado se o valor ainda não foi recebido/pago — ele só conta no caixa **realizado** quando for recebido/pago.
 - A tela mostra **entradas**, **saídas** e o **saldo**.
 - Nas pendências:
-  - **Receber** (entradas pendentes): confirma que o dinheiro entrou → passa a contar no caixa.
-  - **Pagar** (saídas pendentes — contas a pagar): confirma o pagamento → passa a contar no caixa.
+ - **Receber** (entradas pendentes): confirma que o dinheiro entrou → passa a contar no caixa.
+ - **Pagar** (saídas pendentes — contas a pagar): confirma o pagamento → passa a contar no caixa.
 
 ### Fecho de caixa do dia (Z-report) — dono/gerente
 No **Financeiro**, toque no card **Fecho de caixa** (ou na ação no topo):
@@ -134,7 +134,7 @@ No **Financeiro**, toque no card **Fecho de caixa** (ou na ação no topo):
 3. O app mostra a **diferença** em tempo real: **Caixa confere**, **Sobra** ou **Falta**.
 4. Toque em **Confirmar fecho**.
 
-> 💡 Errou a contagem? Pode **refazer o fecho do dia** — o valor é atualizado, sem duplicar. Depois do fecho, o badge **"Caixa fechado!"** aparece no Financeiro.
+> Errou a contagem? Pode **refazer o fecho do dia** — o valor é atualizado, sem duplicar. Depois do fecho, o badge **"Caixa fechado!"** aparece no Financeiro.
 
 ---
 
@@ -160,9 +160,9 @@ Abra **Lojas** (card no Início) — são 4 abas:
 
 - **Lojas**: cadastre as suas lojas. Cada loja tem estoque e caixa próprios.
 - **Funcionários**: crie contas para quem trabalha com você e escolha o cargo:
-  - **Gerente**: opera tudo, exceto gestão de lojas/funcionários.
-  - **Funcionário**: só vende (não cadastra produtos, não vê relatórios, não faz compras, fecho de caixa nem anulações).
-  - Desative um funcionário a qualquer momento — ele **perde o acesso na hora**.
+ - **Gerente**: opera tudo, exceto gestão de lojas/funcionários.
+ - **Funcionário**: só vende (não cadastra produtos, não vê relatórios, não faz compras, fecho de caixa nem anulações).
+ - Desative um funcionário a qualquer momento — ele **perde o acesso na hora**.
 - **Upgrades**: veja e peça a mudança de plano.
 - **Ajustes**: troque a **Loja ativa**, a **moeda** (MZN, BRL, USD, EUR) e o **idioma** (Português/Inglês).
 
@@ -170,12 +170,12 @@ Abra **Lojas** (card no Início) — são 4 abas:
 
 ## 11. Dicas rápidas
 
-- 🧾 Confira sempre o **total** antes de confirmar uma venda.
-- ⚠️ Olhe os **alertas de validade** toda semana — produto vencido é prejuízo.
-- 📱 Em qualquer lista (vendas, produtos, clientes...) **puxe a tela para baixo** para atualizar.
-- 🖼️ Produtos com **foto** são muito mais fáceis de identificar no PDV.
-- 🔒 O app guarda a sua sessão com segurança — você só precisa entrar uma vez.
-- 💡 Precisa de conexão para vender? **Sim** (no modo online) — as vendas são registradas na hora.
+- Confira sempre o **total** antes de confirmar uma venda.
+- Atenção: Olhe os **alertas de validade** toda semana — produto vencido é prejuízo.
+- Em qualquer lista (vendas, produtos, clientes...) **puxe a tela para baixo** para atualizar.
+- Produtos com **foto** são muito mais fáceis de identificar no PDV.
+- O app guarda a sua sessão com segurança — você só precisa entrar uma vez.
+- Precisa de conexão para vender? **Sim** (no modo online) — as vendas são registradas na hora.
 
 ---
 

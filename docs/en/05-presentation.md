@@ -21,14 +21,15 @@ The `lib/presentation/` layer contains everything the user sees and interacts wi
 | `finance_providers.dart` | `financeRepositoryProvider`, `getCashFlowUseCaseProvider`, `addTransactionUseCaseProvider`, `markTransactionAsPaidUseCaseProvider`, **`cashFlowPeriodProvider`** (enum `CashFlowPeriod`: today/week/month/all), **`cashFlowProvider`** (rebuilds when the period changes), **`transactionsProvider`** |
 | `debts_providers.dart` | `debtsRepositoryProvider`, `getPendingDebtsUseCaseProvider`, `addDebtUseCaseProvider`, `getSettledDebtsUseCaseProvider`, `settleDebtUseCaseProvider`, **`pendingDebtsProvider`** (by due date), **`settledDebtsProvider`** (by `paidAt` desc) |
 | `expiry_alerts_provider.dart` | `getStockLotsUseCaseProvider`, **`expiryAlertsProvider`** (`AsyncNotifier<List<ExpiryAlert>>`) — per-lot expiry alerts (W11) |
+| `dashboard_providers.dart` | **`dashboardPeriodProvider`** (`CashFlowPeriod`, default `today`) — period pill of the Home; **`dashboardCashFlowProvider`** (cash balance scoped to that period); **`dashboardKpisProvider`** (RPC `get_dashboard_kpis` in Supabase mode, client-side fallback otherwise) |
 
 **Relevant details:**
 
 - `cashFlowProvider` computes the period as follows (all aligned to **start of day**):
-  - `today` → start of today;
-  - `week` → start of today − 7 days;
-  - `month` → 1st day of the month;
-  - `all` → `DateTime(2000)` until now.
+ - `today` → start of today;
+ - `week` → start of today − 7 days;
+ - `month` → 1st day of the month;
+ - `all` → `DateTime(2000)` until now.
 - `authStateProvider`: without Supabase credentials, emits `Stream.value(null)` instead of accessing `Supabase.instance` (avoids `StateError`).
 - All notifiers have `refresh()` (`invalidateSelf()` + `await future`).
 - Lists are **copied before sorting** (entities/returned lists are immutable).
@@ -43,9 +44,9 @@ The `lib/presentation/` layer contains everything the user sees and interacts wi
 
 ```text
 authStateProvider.when:
-  loading → _SplashScreen (restoring persisted session)
-  error   → LoginScreen
-  data    → user == null ? LoginScreen : AppShell
+ loading → _SplashScreen (restoring persisted session)
+ error → LoginScreen
+ data → user == null ? LoginScreen : AppShell
 ```
 
 ### `AppShell` (adaptive shell)
@@ -55,7 +56,8 @@ authStateProvider.when:
 - **Wide screens (≥ 880px, web/desktop):** `NavigationRail` on the left.
 - **Narrow screens (mobile):** `NavigationBar` at the bottom.
 - The 5 sections live in an **`IndexedStack`** (each tab preserves state: search, scroll, open forms).
-- `shellIndexProvider` (`ShellIndexNotifier`) allows **switching tabs programmatically** — used by the dashboard quick actions.
+- `shellIndexProvider` (`ShellIndexNotifier`) allows **switching tabs programmatically** — used by the module cards in the **Menu** tab.
+- The **central FAB** opens the global action menu (New sale, Register expense, Add product, Register credit) — canvas V3 sheets.
 
 ### Sections (`AppSection`)
 
@@ -68,7 +70,7 @@ authStateProvider.when:
 | 4 | Credit | `receipt_long` | `DebtsScreen` |
 | 5 | Customers | `people` | `CustomersScreen` |
 
-> **Purchases** and **Reports** are pushed screens (`Navigator.push`) from the dashboard's **"Modules"** section — keeping the nav bar at 6 tabs. The dashboard also navigates to the Customers tab via its card.
+> **Purchases** and **Reports** are pushed screens (`Navigator.push`) from the **Menu** tab's **"Modules"** section — keeping the nav bar at 4 tabs. The Menu tab also hosts **Products / Credit / Customers** (tab switch), **Stores** (owner only) and the **Sign out** tile.
 
 ---
 
@@ -76,15 +78,24 @@ authStateProvider.when:
 
 ### 1. `DashboardScreen` (Home)
 
-- Greeting with the user's name ("Olá, Maria 👋") + today's date in pt-BR + **Sign out** button;
-- **KPIs** in a responsive grid (2 columns mobile / 4 on wide screens):
-  - Total sales (entire history);
-  - Cash balance (period selected in Finance);
-  - Credit receivables — sum of pending entries;
-  - Inventory in products (sum of quantities);
-- **Quick actions:** New sale, Add product, Register transaction, Register credit (navigate via `shellIndexProvider`);
-- **Recent sales** (last 3) and **low-stock** alert (`stockQuantity < 5000` milli-units = 5 units, via `Quantity.lowStockThresholdUnits`);
-- **Expiry alerts (W11)** via `expiryAlertsProvider`: **red** for **expired** lots with stock and **yellow** for lots expiring in **< 30 days** (`expiryWarningDays`), sorted by urgency (expired first).
+Canvas V3 "day view" — the Home tab has no avatar (sign out lives in the **Menu** tab):
+
+- **Header:** date *above* the greeting ("Segunda, 17 ago") → "Olá, {name}"; to the right, the **period pill** (`Hoje ▾`: today / week / month / all — `dashboardPeriodProvider` scopes the Vendas/Caixa metrics); below, the dark-green **store chip** (`StoreSwitcher`, white storefront icon + name; with 2+ stores it opens the quick switcher);
+- **3 compact metric cards** (no icons, reference layout):
+ - **Vendas** — sales of the period selected in the pill with the **delta vs the previous period** as colored subtext (green `+N%` / red `-N%`);
+ - **Caixa** — period-scoped cash balance (`dashboardCashFlowProvider`); negative balance renders the value in red; subtext = currency code (`MZN`);
+ - **A receber** — pending credit total with the **fiado count** subtext in orange (e.g. `4 fiados`);
+- **Activity feed** ("Atividade de hoje" + event count on the right) in a single card with tinted circular icons and an anchor value/badge on the right:
+ - **Sales** (green `north_east` icon, `+value` in green) — tap opens `SaleDetailScreen`;
+ - **Stock entries** (grey box icon, `+qty` in white) — purchases of today, one row per item;
+ - **Fiado payments** (amber `payments` icon inside a **dashed circle**, `+value` in green) — settled debts paid today;
+ - **Expenses** (red `south_west` icon, `-value` in red) — paid expenses of today;
+ - **Low-stock** (orange warning icon + solid orange **"Alerta"** pill) — active products with `stockQuantity < 5` units (`Quantity.lowStockThresholdUnits`);
+ - **Expiry (W11)** via `expiryAlertsProvider`: **red** for **expired** lots with stock, **yellow** for lots expiring in **< 30 days** (`expiryWarningDays`), sorted by urgency (expired first);
+- **Pending sync banner** (SaaS outbox) when the offline queue is non-empty, with a "Sync" action;
+- KPI load error shows a compact inline warning with retry (`InlineErrorCard`) instead of fake zeros.
+
+> **Sign out** lives in the **Menu** tab; the Home header has no avatar. The Home has **no quick actions and no module cards** — those live in the central FAB and the **Menu** tab (same module grid and access matrix).
 
 ### 2. `ProductListScreen` (Products)
 
@@ -98,13 +109,13 @@ authStateProvider.when:
 
 - **List:** cards with item count, payment method, day and total; tapping opens the **detail**;
 - **`NewSaleSheet`** (cart):
-  - Searches and adds products with **steppers** (+/−) limited to stock (`soldOut` disables); weight-based products use **0.1 steps** and open a **decimal quantity dialog** (e.g., `1.75` kg);
-  - **Barcode field** (USB keyboard-style scanners trigger the lookup on `onSubmitted`) + **camera reading** via `BarcodeScanSheet` (`mobile_scanner`, where supported);
-  - Intercepts the **scale-label pattern `20PPPPPWWWWW`** (`ScaleBarcode`): extracts the PLU, derives the fraction from the weighing (value ÷ price — never overcharges) and only treats it as a scale code when the product is `vendaPorFracao` — EAN-12 codes starting with `20` fall back to the normal lookup; PLUs are normalized (leading zeros: `123` ≡ `00123`);
-  - Payment method via `ChoiceChip`s (`PaymentMethod.values`);
-  - Confirms via **`ProcessSaleUseCase`** → records the sale + **FIFO stock deduction (lots)** + cash income;
-  - Catches `InsufficientStockException` (shows the product and available amount) and `ProductNotFoundException`;
-  - After success, invalidates `productsProvider`, `salesListProvider`, `transactionsProvider`, `cashFlowProvider`, `expiryAlertsProvider`;
+ - Searches and adds products with **steppers** (+/−) limited to stock (`soldOut` disables); weight-based products use **0.1 steps** and open a **decimal quantity dialog** (e.g., `1.75` kg);
+ - **Barcode field** (USB keyboard-style scanners trigger the lookup on `onSubmitted`) + **camera reading** via `BarcodeScanSheet` (`mobile_scanner`, where supported);
+ - Intercepts the **scale-label pattern `20PPPPPWWWWW`** (`ScaleBarcode`): extracts the PLU, derives the fraction from the weighing (value ÷ price — never overcharges) and only treats it as a scale code when the product is `vendaPorFracao` — EAN-12 codes starting with `20` fall back to the normal lookup; PLUs are normalized (leading zeros: `123` ≡ `00123`);
+ - Payment method via `ChoiceChip`s (`PaymentMethod.values`);
+ - Confirms via **`ProcessSaleUseCase`** → records the sale + **FIFO stock deduction (lots)** + cash income;
+ - Catches `InsufficientStockException` (shows the product and available amount) and `ProductNotFoundException`;
+ - After success, invalidates `productsProvider`, `salesListProvider`, `transactionsProvider`, `cashFlowProvider`, `expiryAlertsProvider`;
 - **`SaleDetailScreen`:** summary (id, date, payment, total), items with `quantity × price` and subtotal, and the note "Preços congelados no momento da venda" (prices frozen at the time of sale).
 
 ### 4. `FinancialScreen` + `AddTransactionSheet` (Finance)
@@ -173,11 +184,12 @@ The theme is applied in `app.dart`:
 
 ```dart
 MaterialApp(
-  title: 'Dumbhanengue ERP',
-  debugShowCheckedModeBanner: false,
-  theme: AppTheme.light,
-  darkTheme: AppTheme.dark,
-  home: const AuthGate(),
+ title: 'Dumbhanengue ERP',
+ debugShowCheckedModeBanner: false,
+ theme: AppTheme.dark,
+ darkTheme: AppTheme.dark,
+ themeMode: ThemeMode.dark, // V3 — 100% dark
+ home: const AuthGate(),
 )
 ```
 
@@ -187,10 +199,13 @@ MaterialApp(
 
 `lib/core/utils/formatters.dart`:
 
-- `currency(int cents)` → `1.234,56` with the tenant's symbol (default `R$`, Mozambique tenants use `MTn`) — since W4, money is integer cents;
+- `currency(int cents)` → `1.234,56` with the tenant's symbol (default `R$`, Mozambique tenants use `MZN`) — since W4, money is integer cents;
 - `date(DateTime)` → `04/08/2026`;
+- `shortDate(DateTime)` → `17 ago` (header date of the dashboard);
 - `dateTime(DateTime)` → `04/08/2026 14:30`;
-- `day(DateTime)` → `Hoje`, `Ontem` or `04/08`.
+- `day(DateTime)` → `Hoje`, `Ontem` or `04/08`;
+- `compact(double)` → `12,4k` (compact metric values);
+- `signedAmount(int cents)` → `+500,00` / `-500,00` (feed amounts).
 
 ---
 

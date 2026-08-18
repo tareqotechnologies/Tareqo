@@ -16,7 +16,7 @@ flutter pub get
 
 - **Versão do app:** `version: 1.1.0+2` em `pubspec.yaml` (aplicada automaticamente ao `versionCode`/`versionName` no Android e ao CFBundleVersion no iOS).
 
-> ⚠️ **Modo SaaS vs. local:** o app usa as credenciais do Supabase **embutidas** (`lib/core/config/supabase_config.dart`) apontando para o projeto de DESENVOLVIMENTO — em produção isso é erro de configuração (guarda S2). Desde a auditoria (Aug 5) o projeto tem **flavors `dev`/`prod`** com dart-defines **obrigatórios** fornecidos via `--dart-define-from-file` (o `main.dart` bloqueia release sem `--flavor prod`). **Aug 9:** o deployment usa projeto Supabase **ÚNICO** (`dotklbpqmlnhcdifiukd`) compartilhado dev/prod — a guarda S2 foi ajustada para aceitar release `prod` com as credenciais do próprio projeto (`SupabaseBootstrap` só lança em release NÃO-prod com defaults embutidos):
+> **Atenção:** **Modo SaaS vs. local:** o app usa as credenciais do Supabase **embutidas** (`lib/core/config/supabase_config.dart`) apontando para o projeto de DESENVOLVIMENTO — em produção isso é erro de configuração (guarda S2). Desde a auditoria (Aug 5) o projeto tem **flavors `dev`/`prod`** com dart-defines **obrigatórios** fornecidos via `--dart-define-from-file` (o `main.dart` bloqueia release sem `--flavor prod`). **Aug 9:** o deployment usa projeto Supabase **ÚNICO** (`dotklbpqmlnhcdifiukd`) compartilhado dev/prod — a guarda S2 foi ajustada para aceitar release `prod` com as credenciais do próprio projeto (`SupabaseBootstrap` só lança em release NÃO-prod com defaults embutidos):
 
 ```bash
 # Desenvolvimento (debug/hot reload)
@@ -24,7 +24,7 @@ flutter run --flavor dev --dart-define-from-file=env/dev.env
 
 # Produção (release)
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env
+ --dart-define-from-file=env/prod.env
 ```
 
 > A anon key é pública por design (a segurança real vem do RLS — **nunca** embuta a service role key). `env/dev.env` é commitado (valores de dev); `env/prod.env` **nunca** é versionado (ver `.gitignore`) e `env/prod.env.example` é o modelo.
@@ -61,7 +61,7 @@ A assinatura de produção lê `android/key.properties` (nunca versionado — ve
 
 ```bash
 # ── Flavors (auditoria 2.4) ────────────────────────────────────────────
-# dev  → applicationId com.dumbhanengue.dumbhanengue.dev, label "Dev"
+# dev → applicationId com.dumbhanengue.dumbhanengue.dev, label "Dev"
 # prod → applicationId de produção com.dumbhanengue.dumbhanengue
 
 # APK dev (distribuição direta / testes)
@@ -70,23 +70,23 @@ flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
 
 # AAB de PRODUÇÃO — formato obrigatório para o Google Play
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env
+ --dart-define-from-file=env/prod.env
 # → build/app/outputs/bundle/prodRelease/app-prod-release.aab
 
 # AAB de produção com ofuscação Dart (recomendado antes de publicar)
 flutter build appbundle --flavor prod --release \
-  --dart-define-from-file=env/prod.env \
-  --obfuscate --split-debug-info=build/symbols
+ --dart-define-from-file=env/prod.env \
+ --obfuscate --split-debug-info=build/symbols
 
 # Testar em dispositivo/emulador (debug, com hot reload)
 flutter run --flavor dev --dart-define-from-file=env/dev.env
 ```
 
-> **R8/minify estão ATIVADOS** (auditoria S7, Aug 5): `isMinifyEnabled`/`isShrinkResources` no `build.gradle.kts`. Para ofuscar também o código **Dart**, adicione ao comando de release: `flutter build apk --release --obfuscate --split-debug-info=build/symbols` (e faça o upload dos símbolos ao Sentry: `sentry-cli debug-files upload`). Para reduzir o APK de 61 MB, use `--split-per-abi` (ou `flutter build appbundle` — formato exigido pela Play). Com os flavors (Aug 5), `prod` mantém o Application ID `com.dumbhanengue.dumbhanengue` e `dev` ganhou o sufixo `.dev`. ⚠️ **O package de produção é imutável após o primeiro upload ao Play** — se um dia decidir mudá-lo, será um app NOVO no console (sem herdar reviews/installs).
+> **R8/minify estão ATIVADOS** (auditoria S7, Aug 5): `isMinifyEnabled`/`isShrinkResources` no `build.gradle.kts`. Para ofuscar também o código **Dart**, adicione ao comando de release: `flutter build apk --release --obfuscate --split-debug-info=build/symbols` (e faça o upload dos símbolos ao Sentry: `sentry-cli debug-files upload`). Para reduzir o APK de 61 MB, use `--split-per-abi` (ou `flutter build appbundle` — formato exigido pela Play). Com os flavors (Aug 5), `prod` mantém o Application ID `com.dumbhanengue.dumbhanengue` e `dev` ganhou o sufixo `.dev`. Atenção: **O package de produção é imutável após o primeiro upload ao Play** — se um dia decidir mudá-lo, será um app NOVO no console (sem herdar reviews/installs).
 
 #### Aviso conhecido no build (sentry_flutter + KGP) — rastreado upstream
 
-> ⚠️ **Aug 8:** o Flutter 3.44+ com AGP 9+ emite um **aviso** ao configurar o Gradle de QUALQUER build Android (dev ou prod):
+> **Atenção:** **Aug 8:** o Flutter 3.44+ com AGP 9+ emite um **aviso** ao configurar o Gradle de QUALQUER build Android (dev ou prod):
 >
 > ```
 > WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): sentry_flutter
@@ -132,7 +132,7 @@ Crie os secrets em **GitHub → Settings → Secrets and variables → Actions**
 | `PLAY_SERVICE_ACCOUNT_JSON` | JSON da service account do Play | Play Console → Setup and testing → API access → criar/associar service account (papel de upload/release do app) → gerar chave JSON → colar o conteúdo na íntegra |
 | `SENTRY_DSN` (opcional) | DSN do Sentry | Sentry → Settings → Projects → Client Keys (DSN) |
 
-> ⚠️ A **service account** precisa de permissão de **upload/release** no app (papel "Release manager" do app no Play Console). O secret `PLAY_SERVICE_ACCOUNT_JSON` é o ficheiro JSON da chave na íntegra.
+> **Atenção:** A **service account** precisa de permissão de **upload/release** no app (papel "Release manager" do app no Play Console). O secret `PLAY_SERVICE_ACCOUNT_JSON` é o ficheiro JSON da chave na íntegra.
 
 ---
 
@@ -166,7 +166,7 @@ flutter run
 3. **Product → Archive** e envie pelo **App Store Connect** (Transporter ou *Distribute App*);
 4. Configure o aplicativo no App Store Connect (metadados, privacidade, capturas) e submeta à revisão.
 
-> ⚠️ O `supabase_flutter` e o `flutter_secure_storage` funcionam em iOS sem configuração extra. Lembre-se de declarar as permissões adequadas no `Info.plist` se um dia adicionar câmera/localização.
+> **Atenção:** O `supabase_flutter` e o `flutter_secure_storage` funcionam em iOS sem configuração extra. Lembre-se de declarar as permissões adequadas no `Info.plist` se um dia adicionar câmera/localização.
 
 ---
 
@@ -216,7 +216,7 @@ flutter build web --release --wasm
 
 `build/web/` é um **site estático**: hospede em qualquer servidor/CDN (Firebase Hosting, Vercel, Netlify, GitHub Pages, nginx...). Configure um fallback para `index.html` (SPA) se usar rotas.
 
-> ⚠️ **Limitação da web:** o `sqlite3` nativo não roda no navegador (`dart:ffi` não existe lá). Nesta plataforma o app usa os datasources **em memória** (mesmos contratos — a UI é idêntica), e o **SaaS (Supabase)** é o modo de produção recomendado para a web. O armazenamento seguro na web também é mais fraco (chave em `localStorage`).
+> **Atenção:** **Limitação da web:** o `sqlite3` nativo não roda no navegador (`dart:ffi` não existe lá). Nesta plataforma o app usa os datasources **em memória** (mesmos contratos — a UI é idêntica), e o **SaaS (Supabase)** é o modo de produção recomendado para a web. O armazenamento seguro na web também é mais fraco (chave em `localStorage`).
 
 ---
 

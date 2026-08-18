@@ -53,9 +53,9 @@ Cada **entrada de mercadoria cria um lote** associado ao produto — a base do c
 
 ```dart
 enum PaymentMethod {
-  cash('Dinheiro'), debitCard('Cartão de débito'),
-  creditCard('Cartão de crédito'), mPesa('M-Pesa'), eMola('E-Mola'),
-  transfer('Transferência');
+ cash('Dinheiro'), debitCard('Cartão de débito'),
+ creditCard('Cartão de crédito'), mPesa('M-Pesa'), eMola('E-Mola'),
+ transfer('Transferência');
 }
 ```
 

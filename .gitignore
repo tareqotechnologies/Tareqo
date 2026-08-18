@@ -66,5 +66,8 @@ windows/.vs/
 # Fastlane — credenciais locais da service account
 fastlane/play-service-account.json
 
+# Artefato local da ferramenta de design (canvas de referência) — nunca versionar
+.kombai/
+
 # Base64 do keystore de upload (conveniência para adicionar o secret KEYSTORE_BASE64)
 android/app/upload-keystore.jks.b64

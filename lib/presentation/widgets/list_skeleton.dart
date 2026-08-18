@@ -10,31 +10,31 @@ import 'skeleton.dart';
 /// conteúdo, reduzindo a sensação de espera e padronizando o loading em
 /// toda a app.
 class ListSkeleton extends StatelessWidget {
-  const ListSkeleton({super.key, this.items = 6, this.showHeader = false});
+ const ListSkeleton({super.key, this.items = 6, this.showHeader = false});
 
-  /// Número de blocos-card desenhados.
-  final int items;
+ /// Número de blocos-card desenhados.
+ final int items;
 
-  /// Desenha um bloco de resumo (tipo cabeçalho do dia) antes dos cards.
-  final bool showHeader;
+ /// Desenha um bloco de resumo (tipo cabeçalho do dia) antes dos cards.
+ final bool showHeader;
 
-  @override
-  Widget build(BuildContext context) {
-    return Skeleton(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
-        physics: const NeverScrollableScrollPhysics(),
-        children: [
-          if (showHeader) ...[
-            const SkeletonBlock(height: 96, radius: 20),
-            const SizedBox(height: 16),
-          ],
-          for (var i = 0; i < items; i++) ...[
-            const SkeletonBlock(height: 72, radius: 20),
-            const SizedBox(height: 8),
-          ],
-        ],
-      ),
-    );
-  }
+ @override
+ Widget build(BuildContext context) {
+ return Skeleton(
+ child: ListView(
+ padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
+ physics: const NeverScrollableScrollPhysics(),
+ children: [
+ if (showHeader) ...[
+ const SkeletonBlock(height: 96, radius: 20),
+ const SizedBox(height: 16),
+ ],
+ for (var i = 0; i < items; i++) ...[
+ const SkeletonBlock(height: 72, radius: 20),
+ const SizedBox(height: 8),
+ ],
+ ],
+ ),
+ );
+ }
 }

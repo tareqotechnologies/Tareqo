@@ -12,9 +12,9 @@ Este documento cobre as decisões de segurança do app: **armazenamento seguro**
 
 ```text
 SecureStorageService
-  └─ SecureStorageBackend (interface)          ← abstraído para testes
-       ├─ FlutterSecureStorageBackend          ← real: flutter_secure_storage
-       └─ (in-memory backend nos testes)
+ └─ SecureStorageBackend (interface) ← abstraído para testes
+ ├─ FlutterSecureStorageBackend ← real: flutter_secure_storage
+ └─ (in-memory backend nos testes)
 ```
 
 - **Chaves centralizadas** em `SecureStorageKeys`: `accessToken`, `refreshToken`, `apiKey` — evita erros de digitação e permite auditar o que é tratado como sensível.
@@ -57,10 +57,10 @@ Manter essa fronteira evita **dois lugares gravando a sessão** (fonte de confli
 ## RLS (Row Level Security) no Supabase
 
 - A anon key é **pública por design** — embutida no cliente. A segurança real vem do banco:
-  ```sql
-  -- regra de isolamento por tenant E loja
-  user_id = auth.uid() OR public.is_my_store(store_id)
-  ```
+ ```sql
+ -- regra de isolamento por tenant E loja
+ user_id = auth.uid() OR public.is_my_store(store_id)
+ ```
 - **`is_my_store(store_id)`:** o dono do tenant vale para todas as lojas do tenant; um funcionário vinculado vale para a loja dele (`store_employees`). Os triggers anti-forja forçam `user_id = auth.uid()` e um `store_id` válido em todo INSERT.
 - **`is_manager_of_store(store_id)` (Aug 6):** matriz de acesso — o dono do tenant **ou** um funcionário vinculado com `store_employees.role = 'manager'` tem poder **gerencial** sobre a loja. Usado na guarda da RPC `process_purchase` e nas políticas RLS de `purchases`/`purchase_items`: o funcionário comum opera vendas/estoque/fiado, mas **não registra nem lê compras** — reforçado no servidor, mesmo que um cliente modificado chame o PostgREST direto.
 - As **funções helper de RLS** (`is_my_store`, `is_tenant_owner`, `is_manager_of_store`) são `SECURITY DEFINER` com `search_path` fixado em `public` (Aug 6): são chamadas DENTRO das políticas e consultam tabelas que têm políticas próprias (`stores`/`tenants`/`store_employees`), que antes formavam um ciclo entre tabelas capaz de estourar a pilha (`54001 max_stack_depth`) em varreduras completas. Como definers, ignoram o RLS internamente, quebrando o ciclo **por construção** — mesmo padrão do `is_super_admin` e das RPCs do dinheiro. Só devolvem um BOOLEAN sobre um id explícito, então não exfiltram dados.
@@ -79,7 +79,7 @@ Manter essa fronteira evita **dois lugares gravando a sessão** (fonte de confli
 | Linux | libsecret | Razoável, sem enclave dedicado |
 | Web | Chave de criptografia guardada no `localStorage` | **Mais fraco** — não é hardware-backed |
 
-> ⚠️ Para **segredos críticos, priorize mobile**; na web, restrinja o que é armazenado ou combine com medidas de servidor.
+> **Atenção:** Para **segredos críticos, priorize mobile**; na web, restrinja o que é armazenado ou combine com medidas de servidor.
 
 ---
 

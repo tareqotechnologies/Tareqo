@@ -31,53 +31,53 @@ flutter test --coverage
 ```text
 test/
 ├── core/
-│   ├── database/app_database_test.dart          # Schema, transações re-entrantes, migrações W4/W11
-│   ├── utils/quantity_test.dart                 # Milésimos ↔ unidades (W11)
-│   ├── utils/scale_barcode_test.dart            # Parser 20PPPPPWWWWW + normalização de PLU (W11)
-│   └── security/secure_storage_service_test.dart # Backend em memória
+│ ├── database/app_database_test.dart # Schema, transações re-entrantes, migrações W4/W11
+│ ├── utils/quantity_test.dart # Milésimos ↔ unidades (W11)
+│ ├── utils/scale_barcode_test.dart # Parser 20PPPPPWWWWW + normalização de PLU (W11)
+│ └── security/secure_storage_service_test.dart # Backend em memória
 ├── data/
-│   ├── datasources/local/
-│   │   ├── product_sqlite_data_source_test.dart
-│   │   ├── sale_sqlite_data_source_test.dart
-│   │   ├── stock_lot_sqlite_data_source_test.dart  # Ordem FIFO + escopo por loja (W11)
-│   │   ├── purchase_sqlite_data_source_test.dart   # Compras com validade/lote (W11)
-│   │   ├── financial_transaction_sqlite_data_source_test.dart
-│   │   ├── debt_sqlite_data_source_test.dart
-│   │   └── sqlite_unit_of_work_test.dart
-│   └── repositories/                             # Repositórios (com fakes/impls em memória)
-│       ├── product_repository_impl_test.dart
-│       ├── sale_repository_impl_test.dart
-│       ├── financial_transaction_repository_impl_test.dart
-│       ├── debt_repository_impl_test.dart
-│       └── auth_repository_impl_test.dart
+│ ├── datasources/local/
+│ │ ├── product_sqlite_data_source_test.dart
+│ │ ├── sale_sqlite_data_source_test.dart
+│ │ ├── stock_lot_sqlite_data_source_test.dart # Ordem FIFO + escopo por loja (W11)
+│ │ ├── purchase_sqlite_data_source_test.dart # Compras com validade/lote (W11)
+│ │ ├── financial_transaction_sqlite_data_source_test.dart
+│ │ ├── debt_sqlite_data_source_test.dart
+│ │ └── sqlite_unit_of_work_test.dart
+│ └── repositories/ # Repositórios (com fakes/impls em memória)
+│ ├── product_repository_impl_test.dart
+│ ├── sale_repository_impl_test.dart
+│ ├── financial_transaction_repository_impl_test.dart
+│ ├── debt_repository_impl_test.dart
+│ └── auth_repository_impl_test.dart
 ├── domain/
-│   ├── entities/                                 # financial_transaction_test, sale_test
-│   └── usecases/
-│       ├── add_debt_use_case_test.dart
-│       ├── add_financial_transaction_use_case_test.dart
-│       ├── get_cash_flow_use_case_test.dart
-│       ├── get_pending_debts_use_case_test.dart
-│       ├── get_settled_debts_use_case_test.dart
-│       ├── product_use_cases_test.dart
-│       ├── settle_debt_use_case_test.dart
-│       ├── process_sale_use_case_test.dart       # com fakes
-│       ├── process_sale_use_case_sqlite_test.dart # com banco real em memória
-│       ├── fifo_stock_use_case_test.dart         # Baixa FIFO por lotes (W11)
-│       └── add_purchase_use_case_test.dart       # Entradas com validade (W11)
-├── helpers/test_sqlite.dart                      # openTestDatabase(): sqlite in-memory + schema
+│ ├── entities/ # financial_transaction_test, sale_test
+│ └── usecases/
+│ ├── add_debt_use_case_test.dart
+│ ├── add_financial_transaction_use_case_test.dart
+│ ├── get_cash_flow_use_case_test.dart
+│ ├── get_pending_debts_use_case_test.dart
+│ ├── get_settled_debts_use_case_test.dart
+│ ├── product_use_cases_test.dart
+│ ├── settle_debt_use_case_test.dart
+│ ├── process_sale_use_case_test.dart # com fakes
+│ ├── process_sale_use_case_sqlite_test.dart # com banco real em memória
+│ ├── fifo_stock_use_case_test.dart # Baixa FIFO por lotes (W11)
+│ └── add_purchase_use_case_test.dart # Entradas com validade (W11)
+├── helpers/test_sqlite.dart # openTestDatabase(): sqlite in-memory + schema
 ├── presentation/
-│   ├── controllers/expiry_alerts_provider_test.dart  # Alertas vermelho/amarelo (W11)
-│   └── screens/
-│       ├── login_screen_test.dart
-│       ├── app_shell_test.dart
-│       ├── product_list_screen_test.dart
-│       ├── new_sale_sheet_test.dart
-│       ├── sales_screen_test.dart
-│       ├── sale_detail_screen_test.dart
-│       ├── financial_screen_test.dart
-│       ├── add_debt_sheet_test.dart
-│       └── debts_screen_test.dart
-└── widget_test.dart                              # Dashboard end-to-end com overrides (raiz de test/)
+│ ├── controllers/expiry_alerts_provider_test.dart # Alertas vermelho/amarelo (W11)
+│ └── screens/
+│ ├── login_screen_test.dart
+│ ├── app_shell_test.dart
+│ ├── product_list_screen_test.dart
+│ ├── new_sale_sheet_test.dart
+│ ├── sales_screen_test.dart
+│ ├── sale_detail_screen_test.dart
+│ ├── financial_screen_test.dart
+│ ├── add_debt_sheet_test.dart
+│ └── debts_screen_test.dart
+└── widget_test.dart # Dashboard end-to-end com overrides (raiz de test/)
 ```
 
 ---
@@ -94,15 +94,15 @@ test/
 ### Dados (datasources/repositórios SQLite)
 
 - `test/helpers/test_sqlite.dart`:
-  ```dart
-  Database openTestDatabase() {
-    AppDatabase.configureLoader();
-    final db = sqlite3.openInMemory();
-    db.execute('PRAGMA foreign_keys = ON;');
-    AppDatabase.createSchema(db);
-    return db;
-  }
-  ```
+ ```dart
+ Database openTestDatabase() {
+ AppDatabase.configureLoader();
+ final db = sqlite3.openInMemory();
+ db.execute('PRAGMA foreign_keys = ON;');
+ AppDatabase.createSchema(db);
+ return db;
+ }
+ ```
 - Testam SQL, mapeamento de linhas (enum por nome, datas em epoch millis, bool 0/1), `CHECK` do schema e o `SqliteUnitOfWork` (BEGIN/COMMIT/ROLLBACK, fila FIFO);
 - `stock_lot_sqlite_data_source_test.dart` valida a **ordem FIFO da query** (validade ASC → entrada ASC), o escopo por loja e a atualização atômica de `current_quantity`; `quantity_test.dart` e `scale_barcode_test.dart` cobrem a matemática de milésimos e o parser `20PPPPPWWWWW` (incl. normalização de PLU com zeros à esquerda).
 

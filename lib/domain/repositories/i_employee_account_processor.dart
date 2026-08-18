@@ -12,12 +12,12 @@ import '../entities/store_employee.dart';
 /// (conta sintética + repositório) e este contrato fica sem implementação
 /// registrada.
 abstract interface class IEmployeeAccountProcessor {
-  /// Cria a conta de acesso e o vínculo na loja; retorna o id do usuário.
-  ///
-  /// Lança [EmployeeAccountCreationException] com mensagem amigável quando
-  /// a criação falha (e-mail em uso, senha fraca, loja inválida...).
-  Future<String> create({
-    required StoreEmployee employee,
-    required String password,
-  });
+ /// Cria a conta de acesso e o vínculo na loja; retorna o id do usuário.
+ ///
+ /// Lança [EmployeeAccountCreationException] com mensagem amigável quando
+ /// a criação falha (e-mail em uso, senha fraca, loja inválida...).
+ Future<String> create({
+ required StoreEmployee employee,
+ required String password,
+ });
 }

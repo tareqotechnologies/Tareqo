@@ -4,15 +4,15 @@ La couche **Comptes** transforme Dumbhanengue en SaaS avec approbation manuelle 
 
 ```text
 Le propriétaire s'inscrit → choisit forfait + nom de l'entreprise → tenant PENDING
-                                                    │
-                        Le super admin approuve/rejette (≤ 24 h)
-                                                    │
-                                        ┌───────────┴───────────┐
-                                     Approuvé                Rejeté
-                                        │                       │
-                        Le propriétaire crée magasins   Le propriétaire voit le
-                        et employés (limites du forfait) motif et peut se
-                                                         déconnecter (ré-inscrire)
+ │
+ Le super admin approuve/rejette (≤ 24 h)
+ │
+ ┌───────────┴───────────┐
+ Approuvé Rejeté
+ │ │
+ Le propriétaire crée magasins Le propriétaire voit le
+ et employés (limites du forfait) motif et peut se
+ déconnecter (ré-inscrire)
 ```
 
 ---
@@ -30,11 +30,11 @@ Le propriétaire s'inscrit → choisit forfait + nom de l'entreprise → tenant 
 
 | Module | Propriétaire | Gérant | Employé |
 | ------ | ----- | ------- | -------- |
-| Ventes / Produits (liste/vente) / Finances / Crédit / Clients | ✅ | ✅ | ✅ |
-| **Créer un produit** (FAB « Nouveau produit ») | ✅ | ✅ | ❌ |
-| Achats | ✅ | ✅ | ❌ |
-| Rapports | ✅ | ✅ | ❌ |
-| Magasins (magasins/employés/forfait/réglages) | ✅ | ❌ | ❌ |
+| Ventes / Produits (liste/vente) / Finances / Crédit / Clients | ✓ | ✓ | ✓ |
+| **Créer un produit** (FAB « Nouveau produit ») | ✓ | ✓ | ✗ |
+| Achats | ✓ | ✓ | ✗ |
+| Rapports | ✓ | ✓ | ✗ |
+| Magasins (magasins/employés/forfait/réglages) | ✓ | ✗ | ✗ |
 
 - **UI (UX uniquement) :** le tableau de bord masque les cartes Achats/Rapports pour les employés et la carte Magasins pour quiconque n'est pas propriétaire — `currentAccessLevelProvider` (`account_providers.dart`) résout le niveau de l'utilisateur connecté depuis `tenants.owner_user_id` ou le rôle le plus élevé parmi ses liens `store_employees` ;
 - **Produits (Aug 7) :** un **employé ordinaire ne crée pas de produits** — il ne fait que lister et vendre. Le FAB « Nouveau produit » (et l'action d'état vide) est masqué quand `currentAccessLevelProvider == employee` ; le propriétaire et les gérants le gardent. Le serveur restreint aussi l'INSERT (`products_insert` via `is_my_store`) ;
@@ -70,7 +70,7 @@ ON CONFLICT (user_id) DO NOTHING;
 | `StoreEmployee` | `tenantId`, `storeId`, `userId`, `fullName`, `email`, `role` (`manager/employee`) | Lie un compte utilisateur à un magasin |
 | `PlanRequest` | `tenantId`, `currentPlanId`, `requestedPlanId`, `status` | Demande d'évolution décidée par le super admin |
 
-> ✅ **Phase 2 implémentée :** les modules métier (produits, ventes, finances, crédit, clients, achats) sont portés par **magasin** (`store_id`) — chaque enregistrement porte le magasin auquel il appartient, l'app filtre par magasin à chaque lecture/écriture, et le serveur (trigger anti-falsification + RLS) empêche un utilisateur d'écrire dans des magasins hors de son accès. Le sélecteur de magasin actif (en haut de chaque écran) change la portée des données affichées.
+> ✓ **Phase 2 implémentée :** les modules métier (produits, ventes, finances, crédit, clients, achats) sont portés par **magasin** (`store_id`) — chaque enregistrement porte le magasin auquel il appartient, l'app filtre par magasin à chaque lecture/écriture, et le serveur (trigger anti-falsification + RLS) empêche un utilisateur d'écrire dans des magasins hors de son accès. Le sélecteur de magasin actif (en haut de chaque écran) change la portée des données affichées.
 
 ---
 
@@ -97,12 +97,12 @@ ON CONFLICT (user_id) DO NOTHING;
 
 ```text
 Session active (AppUser)
-  ├─ rôle is_super_admin (RPC) = true → AdminShell (panneau du super admin)
-  └─ sinon → GetMyTenantUseCase(user.id)
-       ├─ null             → TenantOnboardingScreen (choisir forfait + nom de l'entreprise)
-       ├─ status pending   → TenantPendingScreen (« en attente d'approbation ≤ 24 h »)
-       ├─ status rejected  → TenantRejectedScreen (motif du rejet)
-       └─ status approved  → AppShell (ERP) — accès à la gestion des magasins
+ ├─ rôle is_super_admin (RPC) = true → AdminShell (panneau du super admin)
+ └─ sinon → GetMyTenantUseCase(user.id)
+ ├─ null → TenantOnboardingScreen (choisir forfait + nom de l'entreprise)
+ ├─ status pending → TenantPendingScreen (« en attente d'approbation ≤ 24 h »)
+ ├─ status rejected → TenantRejectedScreen (motif du rejet)
+ └─ status approved → AppShell (ERP) — accès à la gestion des magasins
 ```
 
 Les écrans d'état (`pending`/`rejected`) n'exposent pas l'ERP : le propriétaire ne peut opérer qu'après approbation.

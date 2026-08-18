@@ -1,10 +1,10 @@
-# 📚 Documentation du Dumbhanengue ERP (français)
+# Documentation du Dumbhanengue ERP (français)
 
 Bienvenue dans la documentation complète du **Dumbhanengue ERP** — système de gestion d'entreprise (stock, ventes, finances et suivi du crédit/« fiado ») construit en Flutter avec **Clean Architecture**.
 
-> 🌐 **Langue :** ceci est la version française. La documentation portugaise vit dans ([`docs/pt/`](../pt/README.md)) et la version anglaise dans ([`docs/en/`](../en/README.md)).
+> **Langue :** ceci est la version française. La documentation portugaise vit dans ([`docs/pt/`](../pt/README.md)) et la version anglaise dans ([`docs/en/`](../en/README.md)).
 >
-> 📌 **Documents d'audit :** les rapports d'audit de préparation à la production ([`docs/pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md)) et la checklist vivante ([`docs/pt/PRODUCTION_CHECKLIST.md`](../pt/PRODUCTION_CHECKLIST.md)) sont maintenus en portugais (la langue principale du projet) et font autorité pour le statut d'audit. Un résumé anglais du dernier statut d'audit (Update 6 + éléments de production en attente) est disponible dans [15-audit-status.md](15-audit-status.md), le runbook de migration live W4 + H2 dans [16-migracao-w4-h2.md](16-migracao-w4-h2.md), le runbook de migration live W11 (lots FIFO + ventes au poids/bascule) dans [18-migracao-w11.md](18-migracao-w11.md), le runbook de clôture de caisse quotidienne (Partie 25, rapport Z) dans [19-migracao-cash-closing.md](19-migracao-cash-closing.md), et la checklist de préparation à la production dans [17-production-checklist.md](17-production-checklist.md). Les chapitres français ont été traduits depuis les miroirs anglais (synchronisés avec les changements des 5/6 août : flavors, RLS scopée magasin, super admin adossé à la base, RPC atomiques, stockage sécurisé de session, CI/CD, W4/H2/W10, consolidation SQL) — les documents portugais restent la référence principale.
+> **Documents d'audit :** les rapports d'audit de préparation à la production ([`docs/pt/AUDIT_REPORT.md`](../pt/AUDIT_REPORT.md)) et la checklist vivante ([`docs/pt/PRODUCTION_CHECKLIST.md`](../pt/PRODUCTION_CHECKLIST.md)) sont maintenus en portugais (la langue principale du projet) et font autorité pour le statut d'audit. Un résumé anglais du dernier statut d'audit (Update 6 + éléments de production en attente) est disponible dans [15-audit-status.md](15-audit-status.md), le runbook de migration live W4 + H2 dans [16-migracao-w4-h2.md](16-migracao-w4-h2.md), le runbook de migration live W11 (lots FIFO + ventes au poids/bascule) dans [18-migracao-w11.md](18-migracao-w11.md), le runbook de clôture de caisse quotidienne (Partie 25, rapport Z) dans [19-migracao-cash-closing.md](19-migracao-cash-closing.md), et la checklist de préparation à la production dans [17-production-checklist.md](17-production-checklist.md). Les chapitres français ont été traduits depuis les miroirs anglais (synchronisés avec les changements des 5/6 août : flavors, RLS scopée magasin, super admin adossé à la base, RPC atomiques, stockage sécurisé de session, CI/CD, W4/H2/W10, consolidation SQL) — les documents portugais restent la référence principale.
 
 Ce dossier rassemble tous les documents sur l'application : de ce qu'elle fait à comment chaque couche fonctionne, avec des exemples de code, des diagrammes et des guides pratiques pour les développeurs.
 
@@ -45,9 +45,9 @@ Ce dossier rassemble tous les documents sur l'application : de ce qu'elle fait �
 | [Glossaire pt/en/fr](GLOSSAIRE.md) | Termes techniques dans les trois langues — métier, paiements, accès, authentification, plans, base de données, architecture, tests et release |
 | **Versions PDF (imprimables)** | [Guide de l'utilisateur PDF](pdf/fr/GUIDE_DE_L_UTILISATEUR.pdf) · [Dépannage PDF](pdf/fr/DEPANNAGE.pdf) — avec couverture et sommaire, prêtes à distribuer/imprimer |
 
-> 📖 **Glossaire trilingue :** [português](../pt/GLOSSARIO.md) · [english](../en/GLOSSARY.md) · [français](GLOSSAIRE.md)
+> **Glossaire trilingue :** [português](../pt/GLOSSARIO.md) · [english](../en/GLOSSARY.md) · [français](GLOSSAIRE.md)
 
-> 🌐 **Dans les autres langues :** [Guide de l'utilisateur](GUIDE_DE_L_UTILISATEUR.md) → [`docs/pt/GUIA_DO_USUARIO.md`](../pt/GUIA_DO_USUARIO.md) · [`docs/en/USER_GUIDE.md`](../en/USER_GUIDE.md) — empaquetés dans l'app (lecture hors-ligne) et en PDF sous `docs/pdf/{pt,en}/`.
+> **Dans les autres langues :** [Guide de l'utilisateur](GUIDE_DE_L_UTILISATEUR.md) → [`docs/pt/GUIA_DO_USUARIO.md`](../pt/GUIA_DO_USUARIO.md) · [`docs/en/USER_GUIDE.md`](../en/USER_GUIDE.md) — empaquetés dans l'app (lecture hors-ligne) et en PDF sous `docs/pdf/{pt,en}/`.
 
 ---
 
@@ -58,7 +58,7 @@ Ce dossier rassemble tous les documents sur l'application : de ce qu'elle fait �
 - **Vous voulez comprendre comment le code est organisé ?** → [Architecture](02-architecture.md)
 - **Vous voulez exécuter le projet et travailler sur le code ?** → [Guide du développeur](10-developer-guide.md)
 
-> 💡 Le `README.md` à la racine du projet est le document de présentation ; ce dossier `docs/fr/` est le manuel de référence complet.
+> Le `README.md` à la racine du projet est le document de présentation ; ce dossier `docs/fr/` est le manuel de référence complet.
 
 ## Cartes rapides
 

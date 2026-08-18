@@ -28,241 +28,243 @@ import '../../helpers/store_context.dart';
 /// troca de loja (agora em Lojas → Ajustes) realmente muda o escopo dos
 /// dados exibidos.
 class _StoreScopedGetProductsUseCase implements GetProductsUseCase {
-  @override
-  Future<List<Product>> call({required String storeId}) async => [
-        Product(
-          id: 'p-$storeId',
-          storeId: storeId,
-          name: storeId == 'st1' ? 'Produto Loja Centro' : 'Produto Loja Shopping',
-          purchasePriceCents: 100,
-          salePriceCents: 200,
-          stockQuantity: 2, // estoque baixo → aparece no dashboard
-        ),
-      ];
+ @override
+ Future<List<Product>> call({required String storeId}) async => [
+ Product(
+ id: 'p-$storeId',
+ storeId: storeId,
+ name: storeId == 'st1' ? 'Produto Loja Centro' : 'Produto Loja Shopping',
+ purchasePriceCents: 100,
+ salePriceCents: 200,
+ stockQuantity: 2, // estoque baixo → aparece no dashboard
+ ),
+ ];
 }
 
 /// Fake de compras por loja — usado para verificar que as telas EMPURRADAS
 /// por cima do AppShell exibem os dados da loja ativa (sem banner).
 class _StoreScopedGetPurchasesUseCase implements GetPurchasesUseCase {
-  @override
-  Future<List<Purchase>> call({required String storeId}) async => [
-        Purchase(
-          id: 'pc-$storeId',
-          storeId: storeId,
-          supplierName: storeId == 'st1'
-              ? 'Fornecedor Centro'
-              : 'Fornecedor Shopping',
-          items: const [
-            PurchaseItem(productId: 'p1', productName: 'X', quantity: 1, unitPriceCents: 100),
-          ],
-          totalAmountCents: 1000,
-          dateTime: DateTime.now(),
-        ),
-      ];
+ @override
+ Future<List<Purchase>> call({required String storeId}) async => [
+ Purchase(
+ id: 'pc-$storeId',
+ storeId: storeId,
+ supplierName: storeId == 'st1'
+ ? 'Fornecedor Centro'
+ : 'Fornecedor Shopping',
+ items: const [
+ PurchaseItem(productId: 'p1', productName: 'X', quantity: 1, unitPriceCents: 100),
+ ],
+ totalAmountCents: 1000,
+ dateTime: DateTime.now(),
+ ),
+ ];
 }
 
 class _EmptySalesRepository implements ISaleRepository {
-  @override
-  Future<void> registerSale(Sale sale) async {}
+ @override
+ Future<void> registerSale(Sale sale) async {}
 
-  @override
-  Future<Sale?> getById(String id, {required String storeId}) async => null;
+ @override
+ Future<Sale?> getById(String id, {required String storeId}) async => null;
 
-  @override
-  Future<void> markCancelled(String id, {required String storeId}) async {}
+ @override
+ Future<void> markCancelled(String id, {required String storeId}) async {}
 
-  @override
-  Future<List<LotConsumption>> getLotConsumption(
-    String saleId, {
-    required String storeId,
-  }) async => const [];
+ @override
+ Future<List<LotConsumption>> getLotConsumption(
+ String saleId, {
+ required String storeId,
+ }) async => const [];
 
-  @override
-  Future<void> registerLotConsumption(
-    String saleId,
-    String storeId,
-    List<LotConsumption> consumption,
-  ) async {}
+ @override
+ Future<void> registerLotConsumption(
+ String saleId,
+ String storeId,
+ List<LotConsumption> consumption,
+ ) async {}
 
-  @override
-  Future<List<Sale>> getAll({required String storeId}) async => const [];
+ @override
+ Future<List<Sale>> getAll({required String storeId}) async => const [];
 }
 
 class _ZeroCashFlowUseCase implements GetCashFlowUseCase {
-  @override
-  final ICashFlowRepository? serverRepository = null;
+ @override
+ final ICashFlowRepository? serverRepository = null;
 
-  @override
-  Future<CashFlow> call({
-    required String storeId,
-    required DateTime start,
-    required DateTime end,
-  }) async =>
-      const CashFlow(incomeCents: 0, expenseCents: 0);
+ @override
+ Future<CashFlow> call({
+ required String storeId,
+ required DateTime start,
+ required DateTime end,
+ }) async =>
+ const CashFlow(incomeCents: 0, expenseCents: 0);
 }
 
 void main() {
-  // Regressão: o banner de seleção de loja NÃO existe mais no topo das
-  // telas (migrado para Lojas → Ajustes). O dashboard continua exibindo a
-  // loja ativa e os dados dela.
-  testWidgets('banner de loja removido do topo (AppShell) — dados da loja '
-      'ativa seguem no dashboard', (tester) async {
-    // Viewport alto: o dashboard usa ListView preguiçoso e o card de
-    // estoque baixo (que exibe o nome do produto) fica abaixo da dobra.
-    tester.view.physicalSize = const Size(800, 2600);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+ // Regressão: o banner de seleção de loja NÃO existe mais no topo das
+ // telas (migrado para Lojas → Ajustes). O dashboard continua exibindo a
+ // loja ativa e os dados dela.
+ testWidgets('banner de loja removido do topo (AppShell) — dados da loja '
+ 'ativa seguem no dashboard', (tester) async {
+ // Viewport alto: o dashboard usa ListView preguiçoso e o card de
+ // estoque baixo (que exibe o nome do produto) fica abaixo da dobra.
+ tester.view.physicalSize = const Size(800, 2600);
+ tester.view.devicePixelRatio = 1.0;
+ addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          ...storeContextOverrides(
-            stores: const [
-              Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
-              Store(id: 'st2', tenantId: 'tn1', name: 'Loja Shopping'),
-            ],
-          ),
-          getProductsUseCaseProvider
-              .overrideWithValue(_StoreScopedGetProductsUseCase()),
-          salesRepositoryProvider.overrideWithValue(_EmptySalesRepository()),
-          getCashFlowUseCaseProvider.overrideWithValue(_ZeroCashFlowUseCase()),
-        ],
-        child: testApp(home: AppShell()),
-      ),
-    );
-    await tester.pumpAndSettle();
+ await tester.pumpWidget(
+ ProviderScope(
+ overrides: [
+ ...storeContextOverrides(
+ stores: const [
+ Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
+ Store(id: 'st2', tenantId: 'tn1', name: 'Loja Shopping'),
+ ],
+ ),
+ getProductsUseCaseProvider
+ .overrideWithValue(_StoreScopedGetProductsUseCase()),
+ salesRepositoryProvider.overrideWithValue(_EmptySalesRepository()),
+ getCashFlowUseCaseProvider.overrideWithValue(_ZeroCashFlowUseCase()),
+ ],
+ child: testApp(home: AppShell()),
+ ),
+ );
+ await tester.pumpAndSettle();
 
-    // SEM banner no topo: nenhum ChoiceChip de loja no shell.
-    expect(find.widgetWithText(ChoiceChip, 'Loja Centro'), findsNothing);
-    expect(find.widgetWithText(ChoiceChip, 'Loja Shopping'), findsNothing);
+ // SEM banner no topo: nenhum ChoiceChip de loja no shell.
+ expect(find.widgetWithText(ChoiceChip, 'Loja Centro'), findsNothing);
+ expect(find.widgetWithText(ChoiceChip, 'Loja Shopping'), findsNothing);
 
-    // O dashboard mostra os dados da loja ativa (primeira = Loja Centro).
-    expect(find.text('Produto Loja Centro'), findsOneWidget);
-  });
+ // O dashboard mostra os dados da loja ativa (primeira = Loja Centro):
+ // o produto com estoque baixo entra no feed "Atividade de hoje" com o
+ // nome embutido no detalhe da linha.
+ expect(find.textContaining('Produto Loja Centro'), findsOneWidget);
+ });
 
-  testWidgets('banner de loja também removido de tela empurrada (Compras)',
-      (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          ...storeContextOverrides(
-            stores: const [
-              Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
-              Store(id: 'st2', tenantId: 'tn1', name: 'Loja Shopping'),
-            ],
-          ),
-          getPurchasesUseCaseProvider
-              .overrideWithValue(_StoreScopedGetPurchasesUseCase()),
-        ],
-        child: testApp(home: PurchasesScreen()),
-      ),
-    );
-    await tester.pumpAndSettle();
+ testWidgets('banner de loja também removido de tela empurrada (Compras)',
+ (tester) async {
+ await tester.pumpWidget(
+ ProviderScope(
+ overrides: [
+ ...storeContextOverrides(
+ stores: const [
+ Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
+ Store(id: 'st2', tenantId: 'tn1', name: 'Loja Shopping'),
+ ],
+ ),
+ getPurchasesUseCaseProvider
+ .overrideWithValue(_StoreScopedGetPurchasesUseCase()),
+ ],
+ child: testApp(home: PurchasesScreen()),
+ ),
+ );
+ await tester.pumpAndSettle();
 
-    // Sem banner na tela empurrada; os dados são da loja ativa.
-    expect(find.widgetWithText(ChoiceChip, 'Loja Centro'), findsNothing);
-    expect(find.widgetWithText(ChoiceChip, 'Loja Shopping'), findsNothing);
-    expect(find.text('Fornecedor Centro'), findsOneWidget);
-  });
+ // Sem banner na tela empurrada; os dados são da loja ativa.
+ expect(find.widgetWithText(ChoiceChip, 'Loja Centro'), findsNothing);
+ expect(find.widgetWithText(ChoiceChip, 'Loja Shopping'), findsNothing);
+ expect(find.text('Fornecedor Centro'), findsOneWidget);
+ });
 
-  testWidgets('seletor rápido no app bar troca a loja ativa e re-escopa os '
-      'dados', (tester) async {
-    // Viewport alto: o dashboard usa ListView preguiçoso e o card de
-    // estoque baixo (que exibe o nome do produto) fica abaixo da dobra.
-    tester.view.physicalSize = const Size(800, 2600);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+ testWidgets('seletor rápido no app bar troca a loja ativa e re-escopa os '
+ 'dados', (tester) async {
+ // Viewport alto: o dashboard usa ListView preguiçoso e o card de
+ // estoque baixo (que exibe o nome do produto) fica abaixo da dobra.
+ tester.view.physicalSize = const Size(800, 2600);
+ tester.view.devicePixelRatio = 1.0;
+ addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          ...storeContextOverrides(
-            stores: const [
-              Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
-              Store(id: 'st2', tenantId: 'tn1', name: 'Loja Shopping'),
-            ],
-          ),
-          getProductsUseCaseProvider
-              .overrideWithValue(_StoreScopedGetProductsUseCase()),
-          salesRepositoryProvider.overrideWithValue(_EmptySalesRepository()),
-          getCashFlowUseCaseProvider.overrideWithValue(_ZeroCashFlowUseCase()),
-        ],
-        child: testApp(home: AppShell()),
-      ),
-    );
-    await tester.pumpAndSettle();
+ await tester.pumpWidget(
+ ProviderScope(
+ overrides: [
+ ...storeContextOverrides(
+ stores: const [
+ Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
+ Store(id: 'st2', tenantId: 'tn1', name: 'Loja Shopping'),
+ ],
+ ),
+ getProductsUseCaseProvider
+ .overrideWithValue(_StoreScopedGetProductsUseCase()),
+ salesRepositoryProvider.overrideWithValue(_EmptySalesRepository()),
+ getCashFlowUseCaseProvider.overrideWithValue(_ZeroCashFlowUseCase()),
+ ],
+ child: testApp(home: AppShell()),
+ ),
+ );
+ await tester.pumpAndSettle();
 
-    // A pílula do seletor rápido aparece no cabeçalho com a loja ATIVA
-    // (primeira = Loja Centro) e os dados são dela.
-    final pill = find.byKey(StoreSwitcher.pillKey);
-    expect(pill, findsOneWidget);
-    expect(
-      find.descendant(of: pill, matching: find.text('Loja Centro')),
-      findsOneWidget,
-    );
-    expect(find.text('Produto Loja Centro'), findsOneWidget);
+ // A pílula do seletor rápido aparece no cabeçalho com a loja ATIVA
+ // (primeira = Loja Centro) e os dados são dela.
+ final pill = find.byKey(StoreSwitcher.pillKey);
+ expect(pill, findsOneWidget);
+ expect(
+ find.descendant(of: pill, matching: find.text('Loja Centro')),
+ findsOneWidget,
+ );
+ expect(find.textContaining('Produto Loja Centro'), findsOneWidget);
 
-    // Abre o menu: as duas lojas aparecem (check na ativa).
-    await tester.tap(pill);
-    await tester.pumpAndSettle();
-    expect(find.text('Loja Shopping'), findsOneWidget);
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+ // Abre o menu: as duas lojas aparecem (check na ativa).
+ await tester.tap(pill);
+ await tester.pumpAndSettle();
+ expect(find.text('Loja Shopping'), findsOneWidget);
+ expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
 
-    // Seleciona a segunda loja.
-    await tester.tap(find.text('Loja Shopping'));
-    await tester.pumpAndSettle();
+ // Seleciona a segunda loja.
+ await tester.tap(find.text('Loja Shopping'));
+ await tester.pumpAndSettle();
 
-    // A pílula mostra a nova loja e os dados do dashboard re-escopam.
-    expect(
-      find.descendant(of: pill, matching: find.text('Loja Shopping')),
-      findsOneWidget,
-    );
-    expect(find.text('Produto Loja Shopping'), findsOneWidget);
-    expect(find.text('Produto Loja Centro'), findsNothing);
-  });
+ // A pílula mostra a nova loja e os dados do dashboard re-escopam.
+ expect(
+ find.descendant(of: pill, matching: find.text('Loja Shopping')),
+ findsOneWidget,
+ );
+ expect(find.textContaining('Produto Loja Shopping'), findsOneWidget);
+ expect(find.textContaining('Produto Loja Centro'), findsNothing);
+ });
 
-  testWidgets('com uma única loja o seletor rápido não aparece no app bar',
-      (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [...storeContextOverrides()], // 1 loja (st1) por padrão
-        child: testApp(
-          home: Scaffold(
-            appBar: AppBar(actions: const [StoreSwitcher()]),
-            body: const SizedBox(),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+ testWidgets('com uma única loja o seletor rápido não aparece no app bar',
+ (tester) async {
+ await tester.pumpWidget(
+ ProviderScope(
+ overrides: [...storeContextOverrides()], // 1 loja (st1) por padrão
+ child: testApp(
+ home: Scaffold(
+ appBar: AppBar(actions: const [StoreSwitcher()]),
+ body: const SizedBox(),
+ ),
+ ),
+ ),
+ );
+ await tester.pumpAndSettle();
 
-    // Sem pílula: com 1 loja não há o que escolher (mesmo critério do
-    // seletor de Lojas → Ajustes).
-    expect(find.byKey(StoreSwitcher.pillKey), findsNothing);
-  });
+ // Sem pílula: com 1 loja não há o que escolher (mesmo critério do
+ // seletor de Lojas → Ajustes).
+ expect(find.byKey(StoreSwitcher.pillKey), findsNothing);
+ });
 
-  testWidgets('com uma única loja não há seletor nem banner', (tester) async {
-    // Viewport alto (mesmo motivo do teste anterior).
-    tester.view.physicalSize = const Size(800, 2600);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+ testWidgets('com uma única loja não há seletor nem banner', (tester) async {
+ // Viewport alto (mesmo motivo do teste anterior).
+ tester.view.physicalSize = const Size(800, 2600);
+ tester.view.devicePixelRatio = 1.0;
+ addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          ...storeContextOverrides(), // 1 loja (st1) por padrão
-          getProductsUseCaseProvider
-              .overrideWithValue(_StoreScopedGetProductsUseCase()),
-          salesRepositoryProvider.overrideWithValue(_EmptySalesRepository()),
-          getCashFlowUseCaseProvider.overrideWithValue(_ZeroCashFlowUseCase()),
-        ],
-        child: testApp(home: AppShell()),
-      ),
-    );
-    await tester.pumpAndSettle();
+ await tester.pumpWidget(
+ ProviderScope(
+ overrides: [
+ ...storeContextOverrides(), // 1 loja (st1) por padrão
+ getProductsUseCaseProvider
+ .overrideWithValue(_StoreScopedGetProductsUseCase()),
+ salesRepositoryProvider.overrideWithValue(_EmptySalesRepository()),
+ getCashFlowUseCaseProvider.overrideWithValue(_ZeroCashFlowUseCase()),
+ ],
+ child: testApp(home: AppShell()),
+ ),
+ );
+ await tester.pumpAndSettle();
 
-    // Sem ChoiceChip no shell (nada a selecionar) e a loja única é a ativa.
-    expect(find.byType(ChoiceChip), findsNothing);
-    expect(find.text('Produto Loja Centro'), findsOneWidget);
-  });
+ // Sem ChoiceChip no shell (nada a selecionar) e a loja única é a ativa.
+ expect(find.byType(ChoiceChip), findsNothing);
+ expect(find.textContaining('Produto Loja Centro'), findsOneWidget);
+ });
 }

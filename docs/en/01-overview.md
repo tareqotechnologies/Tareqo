@@ -4,10 +4,10 @@
 
 **Dumbhanengue ERP** is a business management system aimed at **small merchants**. It brings together the day-to-day operations of a store in a single app:
 
-- 🏷️ **Inventory** — product registration and control with **FIFO lots and expiry** (purchase, sale, available quantity, expiry);
-- 💰 **Sales** — sale registration with a cart, payment method and automatic stock deduction;
-- 📊 **Finance** — cash flow (income × expenses), transactions and pending entries;
-- 🧾 **Credit ("fiado")** — tracking who owes the merchant, when it's due and the settlement history.
+- **Inventory** — product registration and control with **FIFO lots and expiry** (purchase, sale, available quantity, expiry);
+- **Sales** — sale registration with a cart, payment method and automatic stock deduction;
+- **Finance** — cash flow (income × expenses), transactions and pending entries;
+- **Credit ("fiado")** — tracking who owes the merchant, when it's due and the settlement history.
 
 *Dumbhanengue* is the project's nickname; the product itself is a lean ERP focused on usability and simplicity.
 
@@ -16,10 +16,10 @@
 ## Product goals
 
 1. **Answer the merchant's essential questions:**
-   - "How much did I sell?" (total sales);
-   - "How much cash do I have?" (cash flow balance);
-   - "How much is owed to me on credit, and by whom?" (receivables);
-   - "How much inventory do I have and what's running out?" (low stock).
+ - "How much did I sell?" (total sales);
+ - "How much cash do I have?" (cash flow balance);
+ - "How much is owed to me on credit, and by whom?" (receivables);
+ - "How much inventory do I have and what's running out?" (low stock).
 2. **Avoid the "credit black hole":** turn granted credit into a visible, manageable number (who owes, how much, when it's due).
 3. **Guarantee business integrity:** stock never negative, atomic sales, consistent cash register.
 4. **Be a SaaS multi-tenant model:** per-store/merchant authentication (Supabase), prepared for RLS (Row Level Security).

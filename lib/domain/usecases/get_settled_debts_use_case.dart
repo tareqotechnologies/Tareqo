@@ -8,14 +8,14 @@ import '../repositories/i_debt_repository.dart';
 /// Filtra apenas dívidas com [Debt.isCustomerDebt] `true` e [Debt.isPaid]
 /// `true` (o mesmo recorte do restante da tela de Crédito).
 class GetSettledDebtsUseCase {
-  const GetSettledDebtsUseCase(this._repository);
+ const GetSettledDebtsUseCase(this._repository);
 
-  final IDebtRepository _repository;
+ final IDebtRepository _repository;
 
-  /// Retorna as dívidas a receber de clientes já quitadas da loja
-  /// [storeId].
-  Future<List<Debt>> call({required String storeId}) async {
-    final debts = await _repository.getAll(storeId: storeId);
-    return debts.where((debt) => debt.isCustomerDebt && debt.isPaid).toList();
-  }
+ /// Retorna as dívidas a receber de clientes já quitadas da loja
+ /// [storeId].
+ Future<List<Debt>> call({required String storeId}) async {
+ final debts = await _repository.getAll(storeId: storeId);
+ return debts.where((debt) => debt.isCustomerDebt && debt.isPaid).toList();
+ }
 }

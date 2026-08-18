@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// imagens em disco na web (store no-op), então qualquer caminho local
 /// cai no fallback do ícone.
 Widget localImageFile(
-  String path,
-  Widget fallback, {
-  int? cacheWidth,
+ String path,
+ Widget fallback, {
+ int? cacheWidth,
 }) => fallback;

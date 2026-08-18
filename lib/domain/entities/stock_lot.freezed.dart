@@ -33,13 +33,13 @@ mixin _$StockLot {
 @pragma('vm:prefer-inline')
 $StockLotCopyWith<StockLot> get copyWith => _$StockLotCopyWithImpl<StockLot>(this as StockLot, _$identity);
 
-  /// Serializes this StockLot to a JSON map.
-  Map<String, dynamic> toJson();
+ /// Serializes this StockLot to a JSON map.
+ Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StockLot&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.entryDate, entryDate) || other.entryDate == entryDate)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.initialQuantity, initialQuantity) || other.initialQuantity == initialQuantity)&&(identical(other.currentQuantity, currentQuantity) || other.currentQuantity == currentQuantity)&&(identical(other.costPriceCents, costPriceCents) || other.costPriceCents == costPriceCents));
+ return identical(this, other) || (other.runtimeType == runtimeType&&other is StockLot&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.entryDate, entryDate) || other.entryDate == entryDate)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.initialQuantity, initialQuantity) || other.initialQuantity == initialQuantity)&&(identical(other.currentQuantity, currentQuantity) || other.currentQuantity == currentQuantity)&&(identical(other.costPriceCents, costPriceCents) || other.costPriceCents == costPriceCents));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,15 +48,15 @@ int get hashCode => Object.hash(runtimeType,id,storeId,productId,entryDate,expir
 
 @override
 String toString() {
-  return 'StockLot(id: $id, storeId: $storeId, productId: $productId, entryDate: $entryDate, expiryDate: $expiryDate, initialQuantity: $initialQuantity, currentQuantity: $currentQuantity, costPriceCents: $costPriceCents)';
+ return 'StockLot(id: $id, storeId: $storeId, productId: $productId, entryDate: $entryDate, expiryDate: $expiryDate, initialQuantity: $initialQuantity, currentQuantity: $currentQuantity, costPriceCents: $costPriceCents)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $StockLotCopyWith<$Res>  {
-  factory $StockLotCopyWith(StockLot value, $Res Function(StockLot) _then) = _$StockLotCopyWithImpl;
+abstract mixin class $StockLotCopyWith<$Res> {
+ factory $StockLotCopyWith(StockLot value, $Res Function(StockLot) _then) = _$StockLotCopyWithImpl;
 @useResult
 $Res call({
  String id, String storeId, String productId, DateTime entryDate, DateTime? expiryDate, int initialQuantity, int currentQuantity, int costPriceCents
@@ -68,16 +68,16 @@ $Res call({
 }
 /// @nodoc
 class _$StockLotCopyWithImpl<$Res>
-    implements $StockLotCopyWith<$Res> {
-  _$StockLotCopyWithImpl(this._self, this._then);
+ implements $StockLotCopyWith<$Res> {
+ _$StockLotCopyWithImpl(this._self, this._then);
 
-  final StockLot _self;
-  final $Res Function(StockLot) _then;
+ final StockLot _self;
+ final $Res Function(StockLot) _then;
 
 /// Create a copy of StockLot
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? productId = null,Object? entryDate = null,Object? expiryDate = freezed,Object? initialQuantity = null,Object? currentQuantity = null,Object? costPriceCents = null,}) {
-  return _then(_self.copyWith(
+ return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
@@ -87,7 +87,7 @@ as DateTime?,initialQuantity: null == initialQuantity ? _self.initialQuantity : 
 as int,currentQuantity: null == currentQuantity ? _self.currentQuantity : currentQuantity // ignore: cast_nullable_to_non_nullable
 as int,costPriceCents: null == costPriceCents ? _self.costPriceCents : costPriceCents // ignore: cast_nullable_to_non_nullable
 as int,
-  ));
+ ));
 }
 
 }
@@ -100,19 +100,19 @@ extension StockLotPatterns on StockLot {
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
+/// case final Subclass value:
+/// return ...;
+/// case _:
+/// return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _StockLot value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _StockLot value)? $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _StockLot() when $default != null:
 return $default(_that);case _:
-  return orElse();
+ return orElse();
 
 }
 }
@@ -122,19 +122,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
+/// case final Subclass value:
+/// return ...;
+/// case final Subclass2 value:
+/// return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _StockLot value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _StockLot value) $default,){
 final _that = this;
 switch (_that) {
 case _StockLot():
 return $default(_that);case _:
-  throw StateError('Unexpected subclass');
+ throw StateError('Unexpected subclass');
 
 }
 }
@@ -143,19 +143,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
+/// case final Subclass value:
+/// return ...;
+/// case _:
+/// return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _StockLot value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _StockLot value)? $default,){
 final _that = this;
 switch (_that) {
 case _StockLot() when $default != null:
 return $default(_that);case _:
-  return null;
+ return null;
 
 }
 }
@@ -164,18 +164,18 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
+/// case Subclass(:final field):
+/// return ...;
+/// case _:
+/// return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  String productId,  DateTime entryDate,  DateTime? expiryDate,  int initialQuantity,  int currentQuantity,  int costPriceCents)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, String storeId, String productId, DateTime entryDate, DateTime? expiryDate, int initialQuantity, int currentQuantity, int costPriceCents)? $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StockLot() when $default != null:
 return $default(_that.id,_that.storeId,_that.productId,_that.entryDate,_that.expiryDate,_that.initialQuantity,_that.currentQuantity,_that.costPriceCents);case _:
-  return orElse();
+ return orElse();
 
 }
 }
@@ -185,18 +185,18 @@ return $default(_that.id,_that.storeId,_that.productId,_that.entryDate,_that.exp
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
+/// case Subclass(:final field):
+/// return ...;
+/// case Subclass2(:final field2):
+/// return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  String productId,  DateTime entryDate,  DateTime? expiryDate,  int initialQuantity,  int currentQuantity,  int costPriceCents)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, String storeId, String productId, DateTime entryDate, DateTime? expiryDate, int initialQuantity, int currentQuantity, int costPriceCents) $default,) {final _that = this;
 switch (_that) {
 case _StockLot():
 return $default(_that.id,_that.storeId,_that.productId,_that.entryDate,_that.expiryDate,_that.initialQuantity,_that.currentQuantity,_that.costPriceCents);case _:
-  throw StateError('Unexpected subclass');
+ throw StateError('Unexpected subclass');
 
 }
 }
@@ -205,18 +205,18 @@ return $default(_that.id,_that.storeId,_that.productId,_that.entryDate,_that.exp
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
+/// case Subclass(:final field):
+/// return ...;
+/// case _:
+/// return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  String productId,  DateTime entryDate,  DateTime? expiryDate,  int initialQuantity,  int currentQuantity,  int costPriceCents)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, String storeId, String productId, DateTime entryDate, DateTime? expiryDate, int initialQuantity, int currentQuantity, int costPriceCents)? $default,) {final _that = this;
 switch (_that) {
 case _StockLot() when $default != null:
 return $default(_that.id,_that.storeId,_that.productId,_that.entryDate,_that.expiryDate,_that.initialQuantity,_that.currentQuantity,_that.costPriceCents);case _:
-  return null;
+ return null;
 
 }
 }
@@ -227,28 +227,28 @@ return $default(_that.id,_that.storeId,_that.productId,_that.entryDate,_that.exp
 @JsonSerializable()
 
 class _StockLot implements StockLot {
-  const _StockLot({required this.id, this.storeId = 'st1', required this.productId, required this.entryDate, this.expiryDate, required this.initialQuantity, required this.currentQuantity, required this.costPriceCents});
-  factory _StockLot.fromJson(Map<String, dynamic> json) => _$StockLotFromJson(json);
+ const _StockLot({required this.id, this.storeId = 'st1', required this.productId, required this.entryDate, this.expiryDate, required this.initialQuantity, required this.currentQuantity, required this.costPriceCents});
+ factory _StockLot.fromJson(Map<String, dynamic> json) => _$StockLotFromJson(json);
 
-@override final  String id;
+@override final String id;
 // Loja dona do lote — cada loja tem seus próprios lotes (Fase 2 do
 // multi-tenancy).
-@override@JsonKey() final  String storeId;
-@override final  String productId;
+@override@JsonKey() final String storeId;
+@override final String productId;
 // Data de ENTRADA do lote (data da compra) — critério FIFO quando não
 // há data de validade.
-@override final  DateTime entryDate;
+@override final DateTime entryDate;
 // Data de VALIDADE — `null` para produtos sem validade (não
 // perecíveis), que seguem FIFO por data de entrada.
-@override final  DateTime? expiryDate;
+@override final DateTime? expiryDate;
 // Quantidade INICIAL recebida (milésimos) — referência histórica.
-@override final  int initialQuantity;
+@override final int initialQuantity;
 // Quantidade ATUAL disponível (milésimos) — diminui a cada venda FIFO;
 // lotes zerados são inativos e não participam das baixas.
-@override final  int currentQuantity;
+@override final int currentQuantity;
 // Custo de aquisição em CENTAVOS inteiros (W4) — base do custo do
 // estoque (custo do lote na data da compra).
-@override final  int costPriceCents;
+@override final int costPriceCents;
 
 /// Create a copy of StockLot
 /// with the given fields replaced by the non-null parameter values.
@@ -258,12 +258,12 @@ _$StockLotCopyWith<_StockLot> get copyWith => __$StockLotCopyWithImpl<_StockLot>
 
 @override
 Map<String, dynamic> toJson() {
-  return _$StockLotToJson(this, );
+ return _$StockLotToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StockLot&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.entryDate, entryDate) || other.entryDate == entryDate)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.initialQuantity, initialQuantity) || other.initialQuantity == initialQuantity)&&(identical(other.currentQuantity, currentQuantity) || other.currentQuantity == currentQuantity)&&(identical(other.costPriceCents, costPriceCents) || other.costPriceCents == costPriceCents));
+ return identical(this, other) || (other.runtimeType == runtimeType&&other is _StockLot&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.entryDate, entryDate) || other.entryDate == entryDate)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.initialQuantity, initialQuantity) || other.initialQuantity == initialQuantity)&&(identical(other.currentQuantity, currentQuantity) || other.currentQuantity == currentQuantity)&&(identical(other.costPriceCents, costPriceCents) || other.costPriceCents == costPriceCents));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -272,7 +272,7 @@ int get hashCode => Object.hash(runtimeType,id,storeId,productId,entryDate,expir
 
 @override
 String toString() {
-  return 'StockLot(id: $id, storeId: $storeId, productId: $productId, entryDate: $entryDate, expiryDate: $expiryDate, initialQuantity: $initialQuantity, currentQuantity: $currentQuantity, costPriceCents: $costPriceCents)';
+ return 'StockLot(id: $id, storeId: $storeId, productId: $productId, entryDate: $entryDate, expiryDate: $expiryDate, initialQuantity: $initialQuantity, currentQuantity: $currentQuantity, costPriceCents: $costPriceCents)';
 }
 
 
@@ -280,7 +280,7 @@ String toString() {
 
 /// @nodoc
 abstract mixin class _$StockLotCopyWith<$Res> implements $StockLotCopyWith<$Res> {
-  factory _$StockLotCopyWith(_StockLot value, $Res Function(_StockLot) _then) = __$StockLotCopyWithImpl;
+ factory _$StockLotCopyWith(_StockLot value, $Res Function(_StockLot) _then) = __$StockLotCopyWithImpl;
 @override @useResult
 $Res call({
  String id, String storeId, String productId, DateTime entryDate, DateTime? expiryDate, int initialQuantity, int currentQuantity, int costPriceCents
@@ -292,16 +292,16 @@ $Res call({
 }
 /// @nodoc
 class __$StockLotCopyWithImpl<$Res>
-    implements _$StockLotCopyWith<$Res> {
-  __$StockLotCopyWithImpl(this._self, this._then);
+ implements _$StockLotCopyWith<$Res> {
+ __$StockLotCopyWithImpl(this._self, this._then);
 
-  final _StockLot _self;
-  final $Res Function(_StockLot) _then;
+ final _StockLot _self;
+ final $Res Function(_StockLot) _then;
 
 /// Create a copy of StockLot
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? productId = null,Object? entryDate = null,Object? expiryDate = freezed,Object? initialQuantity = null,Object? currentQuantity = null,Object? costPriceCents = null,}) {
-  return _then(_StockLot(
+ return _then(_StockLot(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
@@ -311,7 +311,7 @@ as DateTime?,initialQuantity: null == initialQuantity ? _self.initialQuantity : 
 as int,currentQuantity: null == currentQuantity ? _self.currentQuantity : currentQuantity // ignore: cast_nullable_to_non_nullable
 as int,costPriceCents: null == costPriceCents ? _self.costPriceCents : costPriceCents // ignore: cast_nullable_to_non_nullable
 as int,
-  ));
+ ));
 }
 
 

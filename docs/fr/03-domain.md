@@ -51,9 +51,9 @@ Toutes les entités sont des classes `@freezed` (immuables, avec `copyWith`, `==
 
 ```dart
 enum PaymentMethod {
-  cash('Dinheiro'), debitCard('Cartão de débito'),
-  creditCard('Cartão de crédito'), mPesa('M-Pesa'), eMola('E-Mola'),
-  transfer('Transferência');
+ cash('Dinheiro'), debitCard('Cartão de débito'),
+ creditCard('Cartão de crédito'), mPesa('M-Pesa'), eMola('E-Mola'),
+ transfer('Transferência');
 }
 ```
 

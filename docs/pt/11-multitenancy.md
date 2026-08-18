@@ -4,15 +4,15 @@ A camada de **Contas** transforma o Dumbhanengue em um SaaS com aprovação manu
 
 ```text
 Dono se cadastra → escolhe plano + nome do negócio → tenant PENDING
-                                                          │
-                              Super admin aprova/rejeita (≤ 24h)
-                                                          │
-                                              ┌───────────┴───────────┐
-                                         Aprovado                Rejeitado
-                                              │                        │
-                              Dono cria lojas e          Dono vê o motivo
-                              funcionários (limites      e pode sair
-                              do plano)                  (refazer cadastro)
+ │
+ Super admin aprova/rejeita (≤ 24h)
+ │
+ ┌───────────┴───────────┐
+ Aprovado Rejeitado
+ │ │
+ Dono cria lojas e Dono vê o motivo
+ funcionários (limites e pode sair
+ do plano) (refazer cadastro)
 ```
 
 ---
@@ -30,11 +30,11 @@ Dono se cadastra → escolhe plano + nome do negócio → tenant PENDING
 
 | Módulo | Dono | Gerente | Funcionário |
 | ------ | ---- | ------- | ----------- |
-| Vendas / Produtos (listar/vender) / Financeiro / Fiado / Clientes | ✅ | ✅ | ✅ |
-| **Criar produto** (FAB "Novo produto") | ✅ | ✅ | ❌ |
-| Compras | ✅ | ✅ | ❌ |
-| Relatórios | ✅ | ✅ | ❌ |
-| Lojas (lojas/funcionários/plano/ajustes) | ✅ | ❌ | ❌ |
+| Vendas / Produtos (listar/vender) / Financeiro / Fiado / Clientes | ✓ | ✓ | ✓ |
+| **Criar produto** (FAB "Novo produto") | ✓ | ✓ | ✗ |
+| Compras | ✓ | ✓ | ✗ |
+| Relatórios | ✓ | ✓ | ✗ |
+| Lojas (lojas/funcionários/plano/ajustes) | ✓ | ✗ | ✗ |
 
 - **UI (apenas UX):** o dashboard oculta os cards de Compras/Relatórios para funcionários e o card de Lojas para quem não é dono — o `currentAccessLevelProvider` (`account_providers.dart`) resolve o nível do usuário logado a partir de `tenants.owner_user_id` ou do maior cargo entre os vínculos em `store_employees`;
 - **Produtos (Aug 7):** o funcionário comum **não cria produto** — só lista e vende. O FAB "Novo produto" (e a ação no estado vazio) é ocultado para `currentAccessLevelProvider == employee`; dono e gerente mantêm o cadastro. O servidor também restringe o INSERT (`products_insert` via `is_my_store`);
@@ -70,7 +70,7 @@ ON CONFLICT (user_id) DO NOTHING;
 | `StoreEmployee` | `tenantId`, `storeId`, `userId`, `fullName`, `email`, `role` (`manager/employee`) | Vínculo de conta de usuário a uma loja |
 | `PlanRequest` | `tenantId`, `currentPlanId`, `requestedPlanId`, `status` | Pedido de upgrade decidido pelo super admin |
 
-> ✅ **Fase 2 implementada:** os módulos de negócio (produtos, vendas, financeiro, fiado, clientes, compras) são escopados por **loja** (`store_id`) — cada registro carrega a loja à qual pertence, o app filtra por loja em toda leitura/escrita e o servidor (trigger anti-forja + RLS) impede que um usuário escreva em lojas de fora do seu acesso. O seletor de loja ativa (no topo de todas as telas) troca o escopo dos dados exibidos.
+> ✓ **Fase 2 implementada:** os módulos de negócio (produtos, vendas, financeiro, fiado, clientes, compras) são escopados por **loja** (`store_id`) — cada registro carrega a loja à qual pertence, o app filtra por loja em toda leitura/escrita e o servidor (trigger anti-forja + RLS) impede que um usuário escreva em lojas de fora do seu acesso. O seletor de loja ativa (no topo de todas as telas) troca o escopo dos dados exibidos.
 
 ---
 
@@ -97,12 +97,12 @@ ON CONFLICT (user_id) DO NOTHING;
 
 ```text
 Sessão ativa (AppUser)
-  ├─ papel is_super_admin (RPC) = true → AdminShell (painel do super admin)
-  └─ senão → GetMyTenantUseCase(user.id)
-       ├─ null             → TenantOnboardingScreen (escolher plano + negócio)
-       ├─ status pending   → TenantPendingScreen ("aguardando aprovação ≤ 24h")
-       ├─ status rejected  → TenantRejectedScreen (motivo da rejeição)
-       └─ status approved  → AppShell (ERP) — acesso à gestão de Lojas
+ ├─ papel is_super_admin (RPC) = true → AdminShell (painel do super admin)
+ └─ senão → GetMyTenantUseCase(user.id)
+ ├─ null → TenantOnboardingScreen (escolher plano + negócio)
+ ├─ status pending → TenantPendingScreen ("aguardando aprovação ≤ 24h")
+ ├─ status rejected → TenantRejectedScreen (motivo da rejeição)
+ └─ status approved → AppShell (ERP) — acesso à gestão de Lojas
 ```
 
 As telas de estado (`pending`/`rejected`) não expõem o ERP: o dono só operacionaliza após a aprovação.

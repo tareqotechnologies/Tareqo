@@ -22,13 +22,13 @@ mixin _$Store {
 @pragma('vm:prefer-inline')
 $StoreCopyWith<Store> get copyWith => _$StoreCopyWithImpl<Store>(this as Store, _$identity);
 
-  /// Serializes this Store to a JSON map.
-  Map<String, dynamic> toJson();
+ /// Serializes this Store to a JSON map.
+ Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Store&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.name, name) || other.name == name)&&(identical(other.address, address) || other.address == address));
+ return identical(this, other) || (other.runtimeType == runtimeType&&other is Store&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.name, name) || other.name == name)&&(identical(other.address, address) || other.address == address));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -37,15 +37,15 @@ int get hashCode => Object.hash(runtimeType,id,tenantId,name,address);
 
 @override
 String toString() {
-  return 'Store(id: $id, tenantId: $tenantId, name: $name, address: $address)';
+ return 'Store(id: $id, tenantId: $tenantId, name: $name, address: $address)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $StoreCopyWith<$Res>  {
-  factory $StoreCopyWith(Store value, $Res Function(Store) _then) = _$StoreCopyWithImpl;
+abstract mixin class $StoreCopyWith<$Res> {
+ factory $StoreCopyWith(Store value, $Res Function(Store) _then) = _$StoreCopyWithImpl;
 @useResult
 $Res call({
  String id, String tenantId, String name, String address
@@ -57,22 +57,22 @@ $Res call({
 }
 /// @nodoc
 class _$StoreCopyWithImpl<$Res>
-    implements $StoreCopyWith<$Res> {
-  _$StoreCopyWithImpl(this._self, this._then);
+ implements $StoreCopyWith<$Res> {
+ _$StoreCopyWithImpl(this._self, this._then);
 
-  final Store _self;
-  final $Res Function(Store) _then;
+ final Store _self;
+ final $Res Function(Store) _then;
 
 /// Create a copy of Store
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? tenantId = null,Object? name = null,Object? address = null,}) {
-  return _then(_self.copyWith(
+ return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,tenantId: null == tenantId ? _self.tenantId : tenantId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String,
-  ));
+ ));
 }
 
 }
@@ -85,19 +85,19 @@ extension StorePatterns on Store {
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
+/// case final Subclass value:
+/// return ...;
+/// case _:
+/// return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Store value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Store value)? $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Store() when $default != null:
 return $default(_that);case _:
-  return orElse();
+ return orElse();
 
 }
 }
@@ -107,19 +107,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
+/// case final Subclass value:
+/// return ...;
+/// case final Subclass2 value:
+/// return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Store value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Store value) $default,){
 final _that = this;
 switch (_that) {
 case _Store():
 return $default(_that);case _:
-  throw StateError('Unexpected subclass');
+ throw StateError('Unexpected subclass');
 
 }
 }
@@ -128,19 +128,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
+/// case final Subclass value:
+/// return ...;
+/// case _:
+/// return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Store value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Store value)? $default,){
 final _that = this;
 switch (_that) {
 case _Store() when $default != null:
 return $default(_that);case _:
-  return null;
+ return null;
 
 }
 }
@@ -149,18 +149,18 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
+/// case Subclass(:final field):
+/// return ...;
+/// case _:
+/// return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String tenantId,  String name,  String address)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, String tenantId, String name, String address)? $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Store() when $default != null:
 return $default(_that.id,_that.tenantId,_that.name,_that.address);case _:
-  return orElse();
+ return orElse();
 
 }
 }
@@ -170,18 +170,18 @@ return $default(_that.id,_that.tenantId,_that.name,_that.address);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
+/// case Subclass(:final field):
+/// return ...;
+/// case Subclass2(:final field2):
+/// return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String tenantId,  String name,  String address)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, String tenantId, String name, String address) $default,) {final _that = this;
 switch (_that) {
 case _Store():
 return $default(_that.id,_that.tenantId,_that.name,_that.address);case _:
-  throw StateError('Unexpected subclass');
+ throw StateError('Unexpected subclass');
 
 }
 }
@@ -190,18 +190,18 @@ return $default(_that.id,_that.tenantId,_that.name,_that.address);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
+/// case Subclass(:final field):
+/// return ...;
+/// case _:
+/// return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String tenantId,  String name,  String address)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, String tenantId, String name, String address)? $default,) {final _that = this;
 switch (_that) {
 case _Store() when $default != null:
 return $default(_that.id,_that.tenantId,_that.name,_that.address);case _:
-  return null;
+ return null;
 
 }
 }
@@ -212,13 +212,13 @@ return $default(_that.id,_that.tenantId,_that.name,_that.address);case _:
 @JsonSerializable()
 
 class _Store implements Store {
-  const _Store({required this.id, required this.tenantId, required this.name, this.address = ''});
-  factory _Store.fromJson(Map<String, dynamic> json) => _$StoreFromJson(json);
+ const _Store({required this.id, required this.tenantId, required this.name, this.address = ''});
+ factory _Store.fromJson(Map<String, dynamic> json) => _$StoreFromJson(json);
 
-@override final  String id;
-@override final  String tenantId;
-@override final  String name;
-@override@JsonKey() final  String address;
+@override final String id;
+@override final String tenantId;
+@override final String name;
+@override@JsonKey() final String address;
 
 /// Create a copy of Store
 /// with the given fields replaced by the non-null parameter values.
@@ -228,12 +228,12 @@ _$StoreCopyWith<_Store> get copyWith => __$StoreCopyWithImpl<_Store>(this, _$ide
 
 @override
 Map<String, dynamic> toJson() {
-  return _$StoreToJson(this, );
+ return _$StoreToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Store&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.name, name) || other.name == name)&&(identical(other.address, address) || other.address == address));
+ return identical(this, other) || (other.runtimeType == runtimeType&&other is _Store&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.name, name) || other.name == name)&&(identical(other.address, address) || other.address == address));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -242,7 +242,7 @@ int get hashCode => Object.hash(runtimeType,id,tenantId,name,address);
 
 @override
 String toString() {
-  return 'Store(id: $id, tenantId: $tenantId, name: $name, address: $address)';
+ return 'Store(id: $id, tenantId: $tenantId, name: $name, address: $address)';
 }
 
 
@@ -250,7 +250,7 @@ String toString() {
 
 /// @nodoc
 abstract mixin class _$StoreCopyWith<$Res> implements $StoreCopyWith<$Res> {
-  factory _$StoreCopyWith(_Store value, $Res Function(_Store) _then) = __$StoreCopyWithImpl;
+ factory _$StoreCopyWith(_Store value, $Res Function(_Store) _then) = __$StoreCopyWithImpl;
 @override @useResult
 $Res call({
  String id, String tenantId, String name, String address
@@ -262,22 +262,22 @@ $Res call({
 }
 /// @nodoc
 class __$StoreCopyWithImpl<$Res>
-    implements _$StoreCopyWith<$Res> {
-  __$StoreCopyWithImpl(this._self, this._then);
+ implements _$StoreCopyWith<$Res> {
+ __$StoreCopyWithImpl(this._self, this._then);
 
-  final _Store _self;
-  final $Res Function(_Store) _then;
+ final _Store _self;
+ final $Res Function(_Store) _then;
 
 /// Create a copy of Store
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? tenantId = null,Object? name = null,Object? address = null,}) {
-  return _then(_Store(
+ return _then(_Store(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,tenantId: null == tenantId ? _self.tenantId : tenantId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String,
-  ));
+ ));
 }
 
 

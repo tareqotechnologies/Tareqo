@@ -712,17 +712,29 @@ abstract class AppLocalizations {
   /// **'Início'**
   String get appNavHome;
 
-  /// No description provided for @appNavProducts.
-  ///
-  /// In pt, this message translates to:
-  /// **'Produtos'**
-  String get appNavProducts;
-
   /// No description provided for @appNavSales.
   ///
   /// In pt, this message translates to:
   /// **'Vendas'**
   String get appNavSales;
+
+  /// No description provided for @appNavWallet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Carteira'**
+  String get appNavWallet;
+
+  /// No description provided for @appNavMenu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menu'**
+  String get appNavMenu;
+
+  /// No description provided for @appNavProducts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produtos'**
+  String get appNavProducts;
 
   /// No description provided for @appNavFinancial.
   ///
@@ -741,6 +753,72 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Clientes'**
   String get appNavCustomers;
+
+  /// No description provided for @fabMenuTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova ação'**
+  String get fabMenuTitle;
+
+  /// No description provided for @fabMenuSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que deseja fazer?'**
+  String get fabMenuSubtitle;
+
+  /// No description provided for @fabMenuNewSale.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova venda'**
+  String get fabMenuNewSale;
+
+  /// No description provided for @fabMenuNewSaleHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Carrinho · baixa de estoque · caixa'**
+  String get fabMenuNewSaleHint;
+
+  /// No description provided for @fabMenuExpense.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar despesa'**
+  String get fabMenuExpense;
+
+  /// No description provided for @fabMenuExpenseHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saída de caixa com categoria'**
+  String get fabMenuExpenseHint;
+
+  /// No description provided for @fabMenuAddProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar produto'**
+  String get fabMenuAddProduct;
+
+  /// No description provided for @fabMenuAddProductHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Catálogo · preço · estoque inicial'**
+  String get fabMenuAddProductHint;
+
+  /// No description provided for @fabMenuAddDebt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar fiado'**
+  String get fabMenuAddDebt;
+
+  /// No description provided for @fabMenuAddDebtHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'A receber ou a pagar'**
+  String get fabMenuAddDebtHint;
+
+  /// No description provided for @fabMenuCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get fabMenuCancel;
 
   /// No description provided for @syncPendingCount.
   ///
@@ -775,7 +853,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardGreeting.
   ///
   /// In pt, this message translates to:
-  /// **'Olá, {name} 👋'**
+  /// **'Olá, {name}'**
   String dashboardGreeting(String name);
 
   /// No description provided for @dashboardSignOutTooltip.
@@ -921,6 +999,114 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Estoque baixo'**
   String get dashboardLowStock;
+
+  /// No description provided for @dashboardKpisError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar os indicadores.'**
+  String get dashboardKpisError;
+
+  /// No description provided for @dashboardActivityTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atividade de hoje'**
+  String get dashboardActivityTitle;
+
+  /// No description provided for @dashboardActivityEvents.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 evento} other{{count} eventos}}'**
+  String dashboardActivityEvents(num count);
+
+  /// No description provided for @dashboardActivityMinutesAgo.
+  ///
+  /// In pt, this message translates to:
+  /// **'há {count} min'**
+  String dashboardActivityMinutesAgo(Object count);
+
+  /// No description provided for @dashboardActivityHoursAgo.
+  ///
+  /// In pt, this message translates to:
+  /// **'há {count} h'**
+  String dashboardActivityHoursAgo(Object count);
+
+  /// No description provided for @dashboardDateToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get dashboardDateToday;
+
+  /// No description provided for @dashboardMetricSales.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vendas'**
+  String get dashboardMetricSales;
+
+  /// No description provided for @dashboardMetricCash.
+  ///
+  /// In pt, this message translates to:
+  /// **'Caixa'**
+  String get dashboardMetricCash;
+
+  /// No description provided for @dashboardMetricReceivables.
+  ///
+  /// In pt, this message translates to:
+  /// **'A receber'**
+  String get dashboardMetricReceivables;
+
+  /// No description provided for @dashboardFiadoCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 fiado} other{{count} fiados}}'**
+  String dashboardFiadoCount(int count);
+
+  /// No description provided for @dashboardActivityEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma atividade registrada ainda.'**
+  String get dashboardActivityEmpty;
+
+  /// No description provided for @dashboardActivitySeeAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver todas'**
+  String get dashboardActivitySeeAll;
+
+  /// No description provided for @dashboardStockEntry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque · {product}'**
+  String dashboardStockEntry(String product);
+
+  /// No description provided for @dashboardStockEntryDetail.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrada de {quantity} · {time}'**
+  String dashboardStockEntryDetail(String quantity, String time);
+
+  /// No description provided for @dashboardFiadoPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento fiado'**
+  String get dashboardFiadoPayment;
+
+  /// No description provided for @dashboardExpenseRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Despesa · {description}'**
+  String dashboardExpenseRow(String description);
+
+  /// No description provided for @dashboardLowStockDetail.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} · {quantity} restantes'**
+  String dashboardLowStockDetail(String name, String quantity);
+
+  /// No description provided for @dashboardAlertBadge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alerta'**
+  String get dashboardAlertBadge;
 
   /// No description provided for @dashboardSaleItems.
   ///
@@ -1456,6 +1642,36 @@ abstract class AppLocalizations {
   /// **'Filtrar produtos'**
   String get productsFilterTooltip;
 
+  /// No description provided for @productsFilterAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos'**
+  String get productsFilterAll;
+
+  /// No description provided for @productsFilterAllCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos · {count}'**
+  String productsFilterAllCount(int count);
+
+  /// No description provided for @productsFilterLowCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque baixo · {count}'**
+  String productsFilterLowCount(int count);
+
+  /// No description provided for @productsColProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto / SKU'**
+  String get productsColProduct;
+
+  /// No description provided for @productsColPrice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço · Stock'**
+  String get productsColPrice;
+
   /// No description provided for @productsSearchHint.
   ///
   /// In pt, this message translates to:
@@ -1624,6 +1840,12 @@ abstract class AppLocalizations {
   /// **'Inativo'**
   String get productsInactive;
 
+  /// No description provided for @productsFilterInactive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inativos'**
+  String get productsFilterInactive;
+
   /// No description provided for @productsActiveLabel.
   ///
   /// In pt, this message translates to:
@@ -1665,6 +1887,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Status'**
   String get productsSectionStatus;
+
+  /// No description provided for @customersHeaderCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 cliente} other{{count} clientes}}'**
+  String customersHeaderCount(int count);
+
+  /// No description provided for @customersColCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente'**
+  String get customersColCustomer;
+
+  /// No description provided for @customersColContact.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contacto / Fiado'**
+  String get customersColContact;
 
   /// No description provided for @customersSearchHint.
   ///
@@ -1795,7 +2035,7 @@ abstract class AppLocalizations {
   /// No description provided for @purchasesEmptyFilteredSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Ajuste o filtro de período.'**
+  /// **'Ajuste a busca ou os filtros.'**
   String get purchasesEmptyFilteredSubtitle;
 
   /// No description provided for @purchasesClearFilters.
@@ -2056,6 +2296,18 @@ abstract class AppLocalizations {
   /// **'Saldo'**
   String get financialBalance;
 
+  /// No description provided for @financialPeriodBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saldo do período'**
+  String get financialPeriodBalance;
+
+  /// No description provided for @financialSwipeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deslize para saídas →'**
+  String get financialSwipeHint;
+
   /// No description provided for @financialTransactions.
   ///
   /// In pt, this message translates to:
@@ -2067,6 +2319,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível carregar as movimentações.'**
   String get financialLoadError;
+
+  /// No description provided for @financialCashFlowError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar o fluxo de caixa.'**
+  String get financialCashFlowError;
 
   /// No description provided for @financialEmptyTitle.
   ///
@@ -2362,6 +2620,12 @@ abstract class AppLocalizations {
   /// **'Crédito (fiado)'**
   String get debtsTitle;
 
+  /// No description provided for @debtsHeaderSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fiado a receber e a pagar'**
+  String get debtsHeaderSubtitle;
+
   /// No description provided for @debtsAddDebt.
   ///
   /// In pt, this message translates to:
@@ -2392,6 +2656,18 @@ abstract class AppLocalizations {
   /// **'Total a receber'**
   String get debtsTotalPending;
 
+  /// No description provided for @debtsOverdueStat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atrasados'**
+  String get debtsOverdueStat;
+
+  /// No description provided for @debtsSettledStat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Baixas'**
+  String get debtsSettledStat;
+
   /// No description provided for @debtsNoPendingCustomers.
   ///
   /// In pt, this message translates to:
@@ -2419,13 +2695,13 @@ abstract class AppLocalizations {
   /// No description provided for @debtsEmptyPendingTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhum fiado pendente 🎉'**
+  /// **'Nenhum fiado pendente'**
   String get debtsEmptyPendingTitle;
 
   /// No description provided for @debtsEmptyPendingSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhum cliente está devendo no momento.'**
+  /// **'Quando um cliente comprar fiado, a dívida aparece aqui.'**
   String get debtsEmptyPendingSubtitle;
 
   /// No description provided for @debtsTotalSettled.
@@ -2518,6 +2794,18 @@ abstract class AppLocalizations {
   /// **'Em {days, plural, =1{1 dia} other{{days} dias}}'**
   String debtsDueIn(int days);
 
+  /// No description provided for @debtsDueAgo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Venceu há {days, plural, =1{1 dia} other{{days} dias}}'**
+  String debtsDueAgo(int days);
+
+  /// No description provided for @debtsDueTodayDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vence hoje'**
+  String get debtsDueTodayDesc;
+
   /// No description provided for @debtsSettleAction.
   ///
   /// In pt, this message translates to:
@@ -2602,6 +2890,12 @@ abstract class AppLocalizations {
   /// **'Nova venda'**
   String get salesNewSale;
 
+  /// Cabeçalho da secção de itens do carrinho no PDV fullscreen
+  ///
+  /// In pt, this message translates to:
+  /// **'Carrinho · {count, plural, =1{1 item} other{{count} itens}}'**
+  String salesCartSection(int count);
+
   /// No description provided for @salesLoadError.
   ///
   /// In pt, this message translates to:
@@ -2638,6 +2932,12 @@ abstract class AppLocalizations {
   /// **'Cartão'**
   String get paymentFilterCard;
 
+  /// No description provided for @paymentFilterAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todas'**
+  String get paymentFilterAll;
+
   /// No description provided for @salesStatusPaid.
   ///
   /// In pt, this message translates to:
@@ -2649,6 +2949,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{count, plural, =0{0 transações} =1{1 transação} other{{count} transações}}'**
   String salesHeaderTransactions(int count);
+
+  /// Contagem de vendas de hoje no cabeçalho do PDV fullscreen
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{0 vendas} =1{1 venda} other{{count} vendas}}'**
+  String salesPdvCount(int count);
 
   /// No description provided for @salesHeaderVsYesterday.
   ///
@@ -3297,6 +3603,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Código de barras'**
   String get salesBarcodeLabel;
+
+  /// No description provided for @salesBarcodeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Etiquetas de balança e PLUs — câmera ou leitor USB'**
+  String get salesBarcodeHint;
 
   /// No description provided for @salesBarcodeScan.
   ///

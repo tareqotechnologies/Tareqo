@@ -4,10 +4,10 @@
 
 O **Dumbhanengue ERP** é um sistema de gestão empresarial voltado para **pequenos comerciantes**. Ele concentra em um único aplicativo as operações do dia a dia de uma loja:
 
-- 🏷️ **Estoque** — cadastro e controle de produtos com **lotes FIFO e validade** (compra, venda, quantidade disponível, vencimento);
-- 💰 **Vendas** — registro de vendas com carrinho, forma de pagamento e baixa automática de estoque;
-- 📊 **Financeiro** — fluxo de caixa (entradas × saídas), movimentações e pendências;
-- 🧾 **Crédito ("fiado")** — controle de quem deve ao comerciante, quando vence e histórico de quitações.
+- **Estoque** — cadastro e controle de produtos com **lotes FIFO e validade** (compra, venda, quantidade disponível, vencimento);
+- **Vendas** — registro de vendas com carrinho, forma de pagamento e baixa automática de estoque;
+- **Financeiro** — fluxo de caixa (entradas × saídas), movimentações e pendências;
+- **Crédito ("fiado")** — controle de quem deve ao comerciante, quando vence e histórico de quitações.
 
 O nome *Dumbhanengue* é o apelido do projeto; o produto em si é um ERP enxuto, com foco em usabilidade e simplicidade.
 
@@ -16,10 +16,10 @@ O nome *Dumbhanengue* é o apelido do projeto; o produto em si é um ERP enxuto,
 ## Objetivos do produto
 
 1. **Responder às perguntas essenciais do comerciante:**
-   - "Quanto vendi?" (total de vendas);
-   - "Quanto tenho em caixa?" (saldo do fluxo de caixa);
-   - "Quanto tenho a receber de fiado e de quem?" (crédito a receber);
-   - "Quanto tenho em estoque e o que está acabando?" (estoque baixo).
+ - "Quanto vendi?" (total de vendas);
+ - "Quanto tenho em caixa?" (saldo do fluxo de caixa);
+ - "Quanto tenho a receber de fiado e de quem?" (crédito a receber);
+ - "Quanto tenho em estoque e o que está acabando?" (estoque baixo).
 2. **Evitar o "buraco negro do fiado":** transformar o crédito concedido em um número visível e gerenciável (quem deve, quanto, quando vence).
 3. **Garantir integridade do negócio:** estoque nunca negativo, vendas atômicas, caixa sempre consistente.
 4. **Ser um modelo SaaS multi-tenant:** autenticação por loja/comerciante (Supabase), preparado para RLS (Row Level Security).
@@ -88,9 +88,9 @@ O app está funcional de ponta a ponta. Com o Supabase configurado (padrão), os
 Próximos passos:
 
 1. Recorrência de despesas fixas (agendamento de aluguel/luz);
-2. ~~Ação "Pagar" para saídas pendentes no Financeiro~~ ✅ **FEITO** — saídas pendentes (contas a pagar) ganham o botão "Pagar" (mesmo ciclo `pending → paid` das entradas, via `_settlePending` unificado);
+2. ~~Ação "Pagar" para saídas pendentes no Financeiro~~ ✓ **FEITO** — saídas pendentes (contas a pagar) ganham o botão "Pagar" (mesmo ciclo `pending → paid` das entradas, via `_settlePending` unificado);
 3. Cache offline (leitura local + sincronização) para uso sem conexão;
-4. ~~Aplicação dos limites de plano no servidor~~ ✅ **FEITO** — triggers `enforce_store_limit`/`enforce_employee_limit` no Postgres (ver 1.4 do checklist).
+4. ~~Aplicação dos limites de plano no servidor~~ ✓ **FEITO** — triggers `enforce_store_limit`/`enforce_employee_limit` no Postgres (ver 1.4 do checklist).
 
 ---
 

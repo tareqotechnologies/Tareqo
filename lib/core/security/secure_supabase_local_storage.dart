@@ -15,38 +15,38 @@ import 'secure_storage_service.dart';
 /// Keychain/Keystore — a mesma classe de proteção já usada pelo
 /// [SecureStorageService] do app.
 ///
-/// ⚠️ **Web:** o `flutter_secure_storage` 10.x não suporta a web (o
+/// Atenção: **Web:** o `flutter_secure_storage` 10.x não suporta a web (o
 /// `SupabaseBootstrap` mantém o default do SDK nessa plataforma — o
 /// `localStorage` do navegador, limitação documentada). Este tipo só é
 /// registrado em plataformas nativas.
 final class SecureSupabaseLocalStorage implements LocalStorage {
-  /// [backend] injetável para testes (padrão: backend real do Keychain).
-  SecureSupabaseLocalStorage({SecureStorageBackend? backend})
-      : _backend = backend ?? const FlutterSecureStorageBackend();
+ /// [backend] injetável para testes (padrão: backend real do Keychain).
+ SecureSupabaseLocalStorage({SecureStorageBackend? backend})
+ : _backend = backend ?? const FlutterSecureStorageBackend();
 
-  final SecureStorageBackend _backend;
+ final SecureStorageBackend _backend;
 
-  /// Chave única onde a sessão serializada do Supabase é gravada.
-  static const String sessionKey = 'sb_session';
+ /// Chave única onde a sessão serializada do Supabase é gravada.
+ static const String sessionKey = 'sb_session';
 
-  /// A sessão é criptografada no Keychain/Keystore — nada a fazer além de
-  /// garantir o binding (as plataformas nativas inicializam sob demanda).
-  @override
-  Future<void> initialize() async {}
+ /// A sessão é criptografada no Keychain/Keystore — nada a fazer além de
+ /// garantir o binding (as plataformas nativas inicializam sob demanda).
+ @override
+ Future<void> initialize() async {}
 
-  @override
-  Future<bool> hasAccessToken() async =>
-      (await _backend.read(sessionKey)) != null;
+ @override
+ Future<bool> hasAccessToken() async =>
+ (await _backend.read(sessionKey)) != null;
 
-  @override
-  Future<String?> accessToken() => _backend.read(sessionKey);
+ @override
+ Future<String?> accessToken() => _backend.read(sessionKey);
 
-  @override
-  Future<void> removePersistedSession() => _backend.delete(sessionKey);
+ @override
+ Future<void> removePersistedSession() => _backend.delete(sessionKey);
 
-  @override
-  Future<void> persistSession(String persistSessionString) =>
-      _backend.write(sessionKey, persistSessionString);
+ @override
+ Future<void> persistSession(String persistSessionString) =>
+ _backend.write(sessionKey, persistSessionString);
 }
 
 /// Armazenamento do **code verifier do fluxo PKCE** apoiado no mesmo backend
@@ -58,19 +58,19 @@ final class SecureSupabaseLocalStorage implements LocalStorage {
 /// no armazenamento criptografado remove a última peça em texto claro do
 /// ciclo de login (auditoria S1, Aug 6).
 final class SecureGotrueAsyncStorage implements GotrueAsyncStorage {
-  /// [backend] injetável para testes (padrão: backend real do Keychain).
-  SecureGotrueAsyncStorage({SecureStorageBackend? backend})
-      : _backend = backend ?? const FlutterSecureStorageBackend();
+ /// [backend] injetável para testes (padrão: backend real do Keychain).
+ SecureGotrueAsyncStorage({SecureStorageBackend? backend})
+ : _backend = backend ?? const FlutterSecureStorageBackend();
 
-  final SecureStorageBackend _backend;
+ final SecureStorageBackend _backend;
 
-  @override
-  Future<String?> getItem({required String key}) => _backend.read(key);
+ @override
+ Future<String?> getItem({required String key}) => _backend.read(key);
 
-  @override
-  Future<void> setItem({required String key, required String value}) =>
-      _backend.write(key, value);
+ @override
+ Future<void> setItem({required String key, required String value}) =>
+ _backend.write(key, value);
 
-  @override
-  Future<void> removeItem({required String key}) => _backend.delete(key);
+ @override
+ Future<void> removeItem({required String key}) => _backend.delete(key);
 }

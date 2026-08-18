@@ -14,46 +14,46 @@ La couche `lib/data/` implémente concrètement ce que déclare le domaine. Elle
 ```text
 lib/data/
 ├── datasources/
-│   ├── auth/
-│   │   ├── auth_remote_data_source.dart              # Contrat d'auth distante
-│   │   └── supabase_auth_remote_data_source.dart     # Implémentation Supabase/gotrue
-│   ├── remote/
-│   │   ├── supabase_datasource_helpers.dart          # Client + user_id de session
-│   │   ├── supabase_product_data_source.dart         # Produits (Supabase)
-│   │   ├── supabase_sale_data_source.dart            # Ventes (insert imbriqué sale + items)
-│   │   ├── supabase_stock_lot_data_source.dart       # Lots FIFO (Supabase)
-│   │   ├── supabase_financial_transaction_data_source.dart  # Transactions (Supabase)
-│   │   ├── supabase_debt_data_source.dart            # Dettes/crédit (Supabase)
-│   │   ├── supabase_plan_data_source.dart            # Forfaits (Supabase)
-│   │   ├── supabase_tenant_data_source.dart          # Tenants + approbation (Supabase)
-│   │   ├── supabase_store_data_source.dart           # Magasins (Supabase)
-│   │   ├── supabase_employee_data_source.dart        # Employés (Supabase)
-│   │   └── supabase_plan_request_data_source.dart    # Évolutions (Supabase)
-│   └── local/
-│       ├── product_local_data_source.dart            # Contrat
-│       ├── product_local_data_source_impl.dart       # En mémoire
-│       ├── product_sqlite_data_source_impl.dart      # SQLite
-│       ├── stock_lot_local_data_source.dart / _impl / _sqlite  # Lots FIFO (contrat + mémoire + SQLite)
-│       ├── sale_local_data_source.dart / _impl / _sqlite
-│       ├── financial_transaction_local_data_source.dart / _impl / _sqlite
-│       ├── cash_closing_local_data_source.dart / _impl / _sqlite   # Clôture de caisse (Z-report)
-│       ├── debt_local_data_source.dart / _impl / _sqlite
-│       ├── plan_local_data_source.dart / _impl       # Contrat + mémoire (Comptes)
-│       ├── tenant_local_data_source.dart / _impl     # Tenants (Comptes)
-│       ├── store_local_data_source.dart / _impl      # Magasins (Comptes)
-│       ├── employee_local_data_source.dart / _impl   # Employés (Comptes)
-│       ├── plan_request_local_data_source.dart / _impl  # Évolutions (Comptes)
-│       ├── sqlite_unit_of_work.dart                  # IUnitOfWork réel (transaction)
-│       └── plan_catalog.dart                        # Forfaits (catalogue réel)
+│ ├── auth/
+│ │ ├── auth_remote_data_source.dart # Contrat d'auth distante
+│ │ └── supabase_auth_remote_data_source.dart # Implémentation Supabase/gotrue
+│ ├── remote/
+│ │ ├── supabase_datasource_helpers.dart # Client + user_id de session
+│ │ ├── supabase_product_data_source.dart # Produits (Supabase)
+│ │ ├── supabase_sale_data_source.dart # Ventes (insert imbriqué sale + items)
+│ │ ├── supabase_stock_lot_data_source.dart # Lots FIFO (Supabase)
+│ │ ├── supabase_financial_transaction_data_source.dart # Transactions (Supabase)
+│ │ ├── supabase_debt_data_source.dart # Dettes/crédit (Supabase)
+│ │ ├── supabase_plan_data_source.dart # Forfaits (Supabase)
+│ │ ├── supabase_tenant_data_source.dart # Tenants + approbation (Supabase)
+│ │ ├── supabase_store_data_source.dart # Magasins (Supabase)
+│ │ ├── supabase_employee_data_source.dart # Employés (Supabase)
+│ │ └── supabase_plan_request_data_source.dart # Évolutions (Supabase)
+│ └── local/
+│ ├── product_local_data_source.dart # Contrat
+│ ├── product_local_data_source_impl.dart # En mémoire
+│ ├── product_sqlite_data_source_impl.dart # SQLite
+│ ├── stock_lot_local_data_source.dart / _impl / _sqlite # Lots FIFO (contrat + mémoire + SQLite)
+│ ├── sale_local_data_source.dart / _impl / _sqlite
+│ ├── financial_transaction_local_data_source.dart / _impl / _sqlite
+│ ├── cash_closing_local_data_source.dart / _impl / _sqlite # Clôture de caisse (Z-report)
+│ ├── debt_local_data_source.dart / _impl / _sqlite
+│ ├── plan_local_data_source.dart / _impl # Contrat + mémoire (Comptes)
+│ ├── tenant_local_data_source.dart / _impl # Tenants (Comptes)
+│ ├── store_local_data_source.dart / _impl # Magasins (Comptes)
+│ ├── employee_local_data_source.dart / _impl # Employés (Comptes)
+│ ├── plan_request_local_data_source.dart / _impl # Évolutions (Comptes)
+│ ├── sqlite_unit_of_work.dart # IUnitOfWork réel (transaction)
+│ └── plan_catalog.dart # Forfaits (catalogue réel)
 └── repositories/
-    ├── product_repository_impl.dart
-    ├── sale_repository_impl.dart
-    ├── financial_transaction_repository_impl.dart
-    ├── debt_repository_impl.dart
-    ├── auth_repository_impl.dart
-    ├── plan_repository_impl.dart / tenant_repository_impl.dart
-    ├── store_repository_impl.dart / employee_repository_impl.dart
-    └── plan_request_repository_impl.dart
+ ├── product_repository_impl.dart
+ ├── sale_repository_impl.dart
+ ├── financial_transaction_repository_impl.dart
+ ├── debt_repository_impl.dart
+ ├── auth_repository_impl.dart
+ ├── plan_repository_impl.dart / tenant_repository_impl.dart
+ ├── store_repository_impl.dart / employee_repository_impl.dart
+ └── plan_request_repository_impl.dart
 ```
 
 ---
@@ -75,11 +75,11 @@ Chaque `XxxLocalDataSource` est une **interface** ; il y a deux implémentations
 
 ```dart
 if (SupabaseConfig.isConfigured) {
-  _registerSupabaseDatasources();            // distant : SaaS, RLS par tenant
+ _registerSupabaseDatasources(); // distant : SaaS, RLS par tenant
 } else if (await AppDatabase.openAppDatabase()) {
-  AppDatabase.registerDatasources(instance); // SQLite (natif)
+ AppDatabase.registerDatasources(instance); // SQLite (natif)
 } else {
-  _registerInMemoryDatasources();            // en mémoire (web/repli)
+ _registerInMemoryDatasources(); // en mémoire (web/repli)
 }
 ```
 
@@ -134,36 +134,36 @@ Depuis W4, l'argent est en **centimes INTEGER** ; depuis W11, les quantités son
 
 ```sql
 CREATE TABLE products (
-  id TEXT PRIMARY KEY,
-  store_id TEXT NOT NULL DEFAULT 'st1',  -- Phase 2 : portée magasin
-  name TEXT NOT NULL,
-  description TEXT NOT NULL DEFAULT '',
-  purchase_price INTEGER NOT NULL CHECK (purchase_price >= 0),  -- centimes (W4)
-  sale_price INTEGER NOT NULL CHECK (sale_price >= 0),          -- centimes (W4)
-  stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),  -- milli-unités (W11)
-  code TEXT,                 -- code-barres d'étiquette/PLU (W11, facultatif)
-  venda_por_fracao INTEGER NOT NULL DEFAULT 0,  -- 0/1 : vendu au poids (W11)
-  unit_label TEXT NOT NULL DEFAULT 'un'         -- kg | un (W11)
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1', -- Phase 2 : portée magasin
+ name TEXT NOT NULL,
+ description TEXT NOT NULL DEFAULT '',
+ purchase_price INTEGER NOT NULL CHECK (purchase_price >= 0), -- centimes (W4)
+ sale_price INTEGER NOT NULL CHECK (sale_price >= 0), -- centimes (W4)
+ stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0), -- milli-unités (W11)
+ code TEXT, -- code-barres d'étiquette/PLU (W11, facultatif)
+ venda_por_fracao INTEGER NOT NULL DEFAULT 0, -- 0/1 : vendu au poids (W11)
+ unit_label TEXT NOT NULL DEFAULT 'un' -- kg | un (W11)
 );
 
 CREATE TABLE sales (
-  id TEXT PRIMARY KEY,
-  store_id TEXT NOT NULL DEFAULT 'st1',
-  sale_number INTEGER NOT NULL DEFAULT 0,  -- séquentiel par magasin (S-00001)
-  total_amount INTEGER NOT NULL CHECK (total_amount >= 0),  -- centimes
-  payment_method TEXT NOT NULL,          -- nom de l'enum (stable)
-  date_time INTEGER NOT NULL,            -- millis epoch
-  status TEXT NOT NULL DEFAULT 'active', -- active | cancelled (annulation)
-  cancelled_at INTEGER                   -- moment de l'annulation (NULL tant qu'active)
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ sale_number INTEGER NOT NULL DEFAULT 0, -- séquentiel par magasin (S-00001)
+ total_amount INTEGER NOT NULL CHECK (total_amount >= 0), -- centimes
+ payment_method TEXT NOT NULL, -- nom de l'enum (stable)
+ date_time INTEGER NOT NULL, -- millis epoch
+ status TEXT NOT NULL DEFAULT 'active', -- active | cancelled (annulation)
+ cancelled_at INTEGER -- moment de l'annulation (NULL tant qu'active)
 );
 
 CREATE TABLE sale_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
-  product_id TEXT NOT NULL,
-  product_name TEXT NOT NULL,            -- snapshot
-  quantity INTEGER NOT NULL CHECK (quantity > 0),    -- milli-unités (W11)
-  unit_price INTEGER NOT NULL CHECK (unit_price >= 0) -- centimes
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+ product_id TEXT NOT NULL,
+ product_name TEXT NOT NULL, -- snapshot
+ quantity INTEGER NOT NULL CHECK (quantity > 0), -- milli-unités (W11)
+ unit_price INTEGER NOT NULL CHECK (unit_price >= 0) -- centimes
 );
 CREATE INDEX idx_sale_items_sale_id ON sale_items(sale_id);
 
@@ -171,66 +171,66 @@ CREATE INDEX idx_sale_items_sale_id ON sale_items(sale_id);
 -- Elle permet à l'annulation de rendre le stock aux lots EXACTS consommés
 -- (en préservant la péremption et le coût de chaque lot).
 CREATE TABLE sale_lot_consumption (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
-  lot_id TEXT NOT NULL,
-  product_id TEXT NOT NULL,
-  quantity INTEGER NOT NULL CHECK (quantity > 0)    -- milli-unités (W11)
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+ lot_id TEXT NOT NULL,
+ product_id TEXT NOT NULL,
+ quantity INTEGER NOT NULL CHECK (quantity > 0) -- milli-unités (W11)
 );
 CREATE INDEX idx_sale_lot_consumption_sale ON sale_lot_consumption(sale_id);
 
 CREATE TABLE financial_transactions (
-  id TEXT PRIMARY KEY,
-  store_id TEXT NOT NULL DEFAULT 'st1',
-  description TEXT NOT NULL,
-  amount INTEGER NOT NULL CHECK (amount >= 0),  -- centimes
-  type TEXT NOT NULL,                    -- income | expense
-  category TEXT NOT NULL,
-  date INTEGER NOT NULL,                 -- millis epoch
-  status TEXT NOT NULL DEFAULT 'paid',   -- paid | pending
-  debt_id TEXT                           -- lien vers debts (crédit)
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ description TEXT NOT NULL,
+ amount INTEGER NOT NULL CHECK (amount >= 0), -- centimes
+ type TEXT NOT NULL, -- income | expense
+ category TEXT NOT NULL,
+ date INTEGER NOT NULL, -- millis epoch
+ status TEXT NOT NULL DEFAULT 'paid', -- paid | pending
+ debt_id TEXT -- lien vers debts (crédit)
 );
 
 CREATE TABLE debts (
-  id TEXT PRIMARY KEY,
-  store_id TEXT NOT NULL DEFAULT 'st1',
-  debt_number INTEGER NOT NULL DEFAULT 0,  -- séquentiel par magasin (D-00001)
-  person_name TEXT NOT NULL,
-  amount INTEGER NOT NULL CHECK (amount >= 0),  -- centimes
-  due_date INTEGER NOT NULL,             -- millis epoch
-  is_customer_debt INTEGER NOT NULL,     -- 0/1
-  is_paid INTEGER NOT NULL DEFAULT 0,    -- 0/1
-  paid_at INTEGER,                       -- millis epoch (date du règlement)
-  customer_id TEXT                       -- lien vers customers (module crédit)
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ debt_number INTEGER NOT NULL DEFAULT 0, -- séquentiel par magasin (D-00001)
+ person_name TEXT NOT NULL,
+ amount INTEGER NOT NULL CHECK (amount >= 0), -- centimes
+ due_date INTEGER NOT NULL, -- millis epoch
+ is_customer_debt INTEGER NOT NULL, -- 0/1
+ is_paid INTEGER NOT NULL DEFAULT 0, -- 0/1
+ paid_at INTEGER, -- millis epoch (date du règlement)
+ customer_id TEXT -- lien vers customers (module crédit)
 );
 
 CREATE TABLE customers (
-  id TEXT PRIMARY KEY,
-  store_id TEXT NOT NULL DEFAULT 'st1',
-  name TEXT NOT NULL,
-  phone TEXT NOT NULL DEFAULT '',
-  email TEXT NOT NULL DEFAULT ''
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ name TEXT NOT NULL,
+ phone TEXT NOT NULL DEFAULT '',
+ email TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE purchases (
-  id TEXT PRIMARY KEY,
-  store_id TEXT NOT NULL DEFAULT 'st1',
-  purchase_number INTEGER NOT NULL DEFAULT 0,  -- séquentiel par magasin (C-00001)
-  supplier_name TEXT NOT NULL,
-  total_amount INTEGER NOT NULL CHECK (total_amount >= 0),  -- centimes
-  payment_method TEXT NOT NULL DEFAULT 'cash',  -- moyen de paiement du fournisseur
-  date_time INTEGER NOT NULL
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ purchase_number INTEGER NOT NULL DEFAULT 0, -- séquentiel par magasin (C-00001)
+ supplier_name TEXT NOT NULL,
+ total_amount INTEGER NOT NULL CHECK (total_amount >= 0), -- centimes
+ payment_method TEXT NOT NULL DEFAULT 'cash', -- moyen de paiement du fournisseur
+ date_time INTEGER NOT NULL
 );
 
 CREATE TABLE purchase_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  purchase_id TEXT NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
-  product_id TEXT NOT NULL,
-  product_name TEXT NOT NULL,
-  quantity INTEGER NOT NULL CHECK (quantity > 0),    -- milli-unités (W11)
-  unit_price INTEGER NOT NULL CHECK (unit_price >= 0),  -- centimes
-  expiry_date INTEGER,             -- péremption du lot créé par cet article (W11)
-  UNIQUE (purchase_id, product_id)
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ purchase_id TEXT NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
+ product_id TEXT NOT NULL,
+ product_name TEXT NOT NULL,
+ quantity INTEGER NOT NULL CHECK (quantity > 0), -- milli-unités (W11)
+ unit_price INTEGER NOT NULL CHECK (unit_price >= 0), -- centimes
+ expiry_date INTEGER, -- péremption du lot créé par cet article (W11)
+ UNIQUE (purchase_id, product_id)
 );
 CREATE INDEX idx_purchase_items_purchase_id ON purchase_items(purchase_id);
 
@@ -238,14 +238,14 @@ CREATE INDEX idx_purchase_items_purchase_id ON purchase_items(purchase_id);
 -- consomme par péremption (la plus proche d'abord) et, sans péremption, par
 -- date d'entrée.
 CREATE TABLE stock_lots (
-  id TEXT PRIMARY KEY,
-  store_id TEXT NOT NULL DEFAULT 'st1',
-  product_id TEXT NOT NULL,
-  entry_date INTEGER NOT NULL,             -- millis epoch (date d'entrée)
-  expiry_date INTEGER,                     -- péremption (facultatif, NULL = aucune)
-  initial_quantity INTEGER NOT NULL CHECK (initial_quantity >= 0),  -- milli-unités
-  current_quantity INTEGER NOT NULL CHECK (current_quantity >= 0),  -- milli-unités
-  cost_price INTEGER NOT NULL CHECK (cost_price >= 0)               -- centimes
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ product_id TEXT NOT NULL,
+ entry_date INTEGER NOT NULL, -- millis epoch (date d'entrée)
+ expiry_date INTEGER, -- péremption (facultatif, NULL = aucune)
+ initial_quantity INTEGER NOT NULL CHECK (initial_quantity >= 0), -- milli-unités
+ current_quantity INTEGER NOT NULL CHECK (current_quantity >= 0), -- milli-unités
+ cost_price INTEGER NOT NULL CHECK (cost_price >= 0) -- centimes
 );
 CREATE INDEX idx_stock_lots_product ON stock_lots(product_id, store_id);
 CREATE INDEX idx_stock_lots_expiry ON stock_lots(expiry_date) WHERE current_quantity > 0;
@@ -256,14 +256,14 @@ CREATE INDEX idx_stock_lots_expiry ON stock_lots(expiry_date) WHERE current_quan
 -- counted_cash = espèces physiques comptées lors de la conférence ;
 -- sales_by_method = répartition par moyen (JSON).
 CREATE TABLE cash_closings (
-  id TEXT PRIMARY KEY,
-  store_id TEXT NOT NULL DEFAULT 'st1',
-  closing_date INTEGER NOT NULL,             -- millis epoch (début du jour local)
-  total_sales INTEGER NOT NULL CHECK (total_sales >= 0),   -- centimes
-  expected_cash INTEGER NOT NULL CHECK (expected_cash >= 0), -- centimes
-  counted_cash INTEGER NOT NULL CHECK (counted_cash >= 0), -- centimes
-  sales_by_method TEXT NOT NULL DEFAULT '{}', -- JSON (method.name → centimes)
-  closed_at INTEGER NOT NULL                  -- millis epoch
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ closing_date INTEGER NOT NULL, -- millis epoch (début du jour local)
+ total_sales INTEGER NOT NULL CHECK (total_sales >= 0), -- centimes
+ expected_cash INTEGER NOT NULL CHECK (expected_cash >= 0), -- centimes
+ counted_cash INTEGER NOT NULL CHECK (counted_cash >= 0), -- centimes
+ sales_by_method TEXT NOT NULL DEFAULT '{}', -- JSON (method.name → centimes)
+ closed_at INTEGER NOT NULL -- millis epoch
 );
 CREATE UNIQUE INDEX uq_cash_closings_store_day ON cash_closings(store_id, closing_date);
 CREATE INDEX idx_cash_closings_store ON cash_closings(store_id);
@@ -310,7 +310,7 @@ La base de données **ne seed jamais de données de démo** : `AppDatabase.initi
 
 ```dart
 abstract interface class IUnitOfWork {
-  Future<T> run<T>(Future<T> Function() action);
+ Future<T> run<T>(Future<T> Function() action);
 }
 ```
 
@@ -328,7 +328,7 @@ SQLite **n'accepte pas les transactions imbriquées**. C'est pourquoi `AppDataba
 - appels imbriqués (ex. : `SaleSqliteDataSourceImpl.add` dans `ProcessSaleUseCase` via `runInTransaction`) → incrémentent seulement le compteur et **rejoignent** la transaction externe ;
 - `commit`/`rollback` ne sont émis que lorsque le compteur revient à 0.
 
-> ⚠️ **Invariant global :** le compteur est statique et suppose **une seule connexion** (singleton Database) et **un** `IUnitOfWork` par processus — comme l'app l'enregistre. N'ouvrez pas plusieurs connexions transactionnelles concurrentes.
+> **Attention :** **Invariant global :** le compteur est statique et suppose **une seule connexion** (singleton Database) et **un** `IUnitOfWork` par processus — comme l'app l'enregistre. N'ouvrez pas plusieurs connexions transactionnelles concurrentes.
 
 ### Implémentation en mémoire
 

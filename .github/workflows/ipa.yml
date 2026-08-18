@@ -7,86 +7,86 @@
 #
 # Notas:
 # - `--no-codesign`: o IPA sai sem assinatura (sem secrets da Apple no repo).
-#   Para TestFlight/App Store é preciso assinar localmente ou via fastlane
-#   (workflow ios.yml, que requer APPLE_ISSUER_ID/APPLE_KEY_ID/...).
+# Para TestFlight/App Store é preciso assinar localmente ou via fastlane
+# (workflow ios.yml, que requer APPLE_ISSUER_ID/APPLE_KEY_ID/...).
 # - Sem `--flavor`: o projeto iOS não define schemes de flavor (o xcode
-#   rejeita --flavor sem schemes customizados). Em vez disso usa-se o define
-#   livre `APP_FLAVOR=prod` — fallback lido por AppFlavorConfig em
-#   plataformas sem injeção de FLUTTER_APP_FLAVOR (ver lib/core/config/
-#   app_flavor.dart). Isso satisfaz a guarda de release do main.dart.
+# rejeita --flavor sem schemes customizados). Em vez disso usa-se o define
+# livre `APP_FLAVOR=prod` — fallback lido por AppFlavorConfig em
+# plataformas sem injeção de FLUTTER_APP_FLAVOR (ver lib/core/config/
+# app_flavor.dart). Isso satisfaz a guarda de release do main.dart.
 # - Sem `--dart-define-from-file`: o deployment usa um ÚNICO projeto Supabase
-#   (dotklbpqmlnhcdifiukd) partilhado dev/prod, e os defaults embutidos em
-#   `SupabaseConfig` já apontam para ele; o fail-fast S2 aceita release
-#   `prod` com essas credenciais (ver lib/core/network/supabase_bootstrap.dart).
+# (dotklbpqmlnhcdifiukd) partilhado dev/prod, e os defaults embutidos em
+# `SupabaseConfig` já apontam para ele; o fail-fast S2 aceita release
+# `prod` com essas credenciais (ver lib/core/network/supabase_bootstrap.dart).
 name: iOS IPA (release artifact)
 
 on:
-  push:
-    tags:
-      - "v*"
-  workflow_dispatch:
+ push:
+ tags:
+ - "v*"
+ workflow_dispatch:
 
 permissions:
-  contents: write
+ contents: write
 
 jobs:
-  ipa:
-    name: Build unsigned IPA + attach to release
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
+ ipa:
+ name: Build unsigned IPA + attach to release
+ runs-on: macos-14
+ steps:
+ - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
+ - uses: subosito/flutter-action@v2
+ with:
+ channel: stable
+ cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
+ - name: Install dependencies
+ run: flutter pub get
 
-      # Todos os plugins iOS são Swift Packages (SPM) — o projeto foi migrado
-      # para Swift Package Manager puro (Podfile removido do repo). Manter a
-      # integração CocoaPods legada em runners limpos causa o erro "The
-      # sandbox is not in sync with the Podfile.lock" (o Flutter recria o
-      # Podfile e o check de sandbox falha). Garante-se o SPM explícito e
-      # remove-se qualquer resquício local de CocoaPods.
-      - name: Remove legacy CocoaPods integration (SPM)
-        run: |
-          flutter config --enable-swift-package-manager
-          cd ios
-          rm -f Podfile Podfile.lock
-          rm -rf Pods .symlinks
+ # Todos os plugins iOS são Swift Packages (SPM) — o projeto foi migrado
+ # para Swift Package Manager puro (Podfile removido do repo). Manter a
+ # integração CocoaPods legada em runners limpos causa o erro "The
+ # sandbox is not in sync with the Podfile.lock" (o Flutter recria o
+ # Podfile e o check de sandbox falha). Garante-se o SPM explícito e
+ # remove-se qualquer resquício local de CocoaPods.
+ - name: Remove legacy CocoaPods integration (SPM)
+ run: |
+ flutter config --enable-swift-package-manager
+ cd ios
+ rm -f Podfile Podfile.lock
+ rm -rf Pods .symlinks
 
-      - name: Build IPA (no codesign)
-        run: flutter build ipa --release --no-codesign --dart-define=APP_FLAVOR=prod --obfuscate --split-debug-info=build/symbols
+ - name: Build IPA (no codesign)
+ run: flutter build ipa --release --no-codesign --dart-define=APP_FLAVOR=prod --obfuscate --split-debug-info=build/symbols
 
-      # `flutter build ipa --no-codesign` arquiva mas NÃO exporta o .ipa (sem
-      # assinatura não há export). Se o flutter não gerar o .ipa, empacota-se
-      # o Runner.app no formato IPA legítimo (zip com Payload/) para assinar
-      # depois (TestFlight/App Store).
-      - name: Package iOS artifact (IPA)
-        run: |
-          set -e
-          # Versão da release vem do pubspec (ex.: 1.2.0+4 → 1.2.0) — nunca
-          # hardcoded: o IPA anexado à Release deve acompanhar a tag v*.
-          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
-          echo "Versão do pubspec: ${VERSION}"
-          if ls build/ios/ipa/*.ipa >/dev/null 2>&1; then
-            echo "IPA gerado pelo flutter: $(ls build/ios/ipa/*.ipa)"
-          else
-            echo "Sem IPA do flutter — empacotando Runner.app como IPA (Payload)"
-            APP=$(find build/ios -type d -name Runner.app | head -1)
-            [ -n "$APP" ] || { echo "Runner.app não encontrado"; exit 1; }
-            APPDIR=$(dirname "$APP")
-            mkdir -p build/ios/ipa
-            (cd "$APPDIR" && mkdir -p Payload && cp -R Runner.app Payload/ \
-              && zip -qry "$OLDPWD/build/ios/ipa/dumbhanengue-${VERSION}-unsigned.ipa" Payload \
-              && rm -rf Payload)
-          fi
-          ls -la build/ios/ipa/
+ # `flutter build ipa --no-codesign` arquiva mas NÃO exporta o .ipa (sem
+ # assinatura não há export). Se o flutter não gerar o .ipa, empacota-se
+ # o Runner.app no formato IPA legítimo (zip com Payload/) para assinar
+ # depois (TestFlight/App Store).
+ - name: Package iOS artifact (IPA)
+ run: |
+ set -e
+ # Versão da release vem do pubspec (ex.: 1.2.0+4 → 1.2.0) — nunca
+ # hardcoded: o IPA anexado à Release deve acompanhar a tag v*.
+ VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
+ echo "Versão do pubspec: ${VERSION}"
+ if ls build/ios/ipa/*.ipa >/dev/null 2>&1; then
+ echo "IPA gerado pelo flutter: $(ls build/ios/ipa/*.ipa)"
+ else
+ echo "Sem IPA do flutter — empacotando Runner.app como IPA (Payload)"
+ APP=$(find build/ios -type d -name Runner.app | head -1)
+ [ -n "$APP" ] || { echo "Runner.app não encontrado"; exit 1; }
+ APPDIR=$(dirname "$APP")
+ mkdir -p build/ios/ipa
+ (cd "$APPDIR" && mkdir -p Payload && cp -R Runner.app Payload/ \
+ && zip -qry "$OLDPWD/build/ios/ipa/dumbhanengue-${VERSION}-unsigned.ipa" Payload \
+ && rm -rf Payload)
+ fi
+ ls -la build/ios/ipa/
 
-      - name: Upload IPA to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/ios/ipa/*.*
-          generate_release_notes: true
+ - name: Upload IPA to release
+ uses: softprops/action-gh-release@v2
+ with:
+ files: build/ios/ipa/*.*
+ generate_release_notes: true

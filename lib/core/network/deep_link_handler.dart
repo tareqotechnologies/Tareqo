@@ -20,59 +20,59 @@ import '../observability/crash_reporting.dart';
 /// - iOS: `Info.plist` (`CFBundleURLTypes` → `dumbhanengue`);
 /// - Supabase: `site_url` = `dumbhanengue://callback` (Authentication).
 abstract final class DeepLinkHandler {
-  static AppLinks? _appLinks;
-  static bool _listening = false;
+ static AppLinks? _appLinks;
+ static bool _listening = false;
 
-  /// Inicia o listener de deep links (chamado no [AuthGate]). Idempotente.
-  ///
-  /// Todo o corpo é protegido: em testes de widget o plugin não tem
-  /// plataforma (MissingPluginException) e não deve quebrar o fluxo.
-  static Future<void> init() async {
-    if (!SupabaseConfig.isConfigured || _listening) return;
-    try {
-      final appLinks = _appLinks ??= AppLinks();
+ /// Inicia o listener de deep links (chamado no [AuthGate]). Idempotente.
+ ///
+ /// Todo o corpo é protegido: em testes de widget o plugin não tem
+ /// plataforma (MissingPluginException) e não deve quebrar o fluxo.
+ static Future<void> init() async {
+ if (!SupabaseConfig.isConfigured || _listening) return;
+ try {
+ final appLinks = _appLinks ??= AppLinks();
 
-      // Cold start: o app foi ABERTO pelo link (getInitialLink). Entrega a
-      // URI ao gotrue para concluir a confirmação/exchange do PKCE.
-      final initialUri = await appLinks.getInitialLink();
-      if (initialUri != null) {
-        await Supabase.instance.client.auth.getSessionFromUrl(initialUri);
-      }
+ // Cold start: o app foi ABERTO pelo link (getInitialLink). Entrega a
+ // URI ao gotrue para concluir a confirmação/exchange do PKCE.
+ final initialUri = await appLinks.getInitialLink();
+ if (initialUri != null) {
+ await Supabase.instance.client.auth.getSessionFromUrl(initialUri);
+ }
 
-      // Warm start: o app já estava aberto e o link foi tocado.
-      appLinks.uriLinkStream.listen(
-        (uri) async {
-          try {
-            await Supabase.instance.client.auth.getSessionFromUrl(uri);
-          } catch (error, stackTrace) {
-            CrashReporting.capture(
-              error,
-              stackTrace,
-              hint: 'Deep link de autenticação (stream)',
-            );
-          }
-        },
-        // Erro no STREAM em si (canal da plataforma): sem handler vira um
-        // erro de zona não tratado — loga e segue.
-        onError: (Object error, StackTrace stackTrace) {
-          CrashReporting.capture(
-            error,
-            stackTrace,
-            hint: 'Deep link de autenticação (stream error)',
-          );
-        },
-      );
+ // Warm start: o app já estava aberto e o link foi tocado.
+ appLinks.uriLinkStream.listen(
+ (uri) async {
+ try {
+ await Supabase.instance.client.auth.getSessionFromUrl(uri);
+ } catch (error, stackTrace) {
+ CrashReporting.capture(
+ error,
+ stackTrace,
+ hint: 'Deep link de autenticação (stream)',
+ );
+ }
+ },
+ // Erro no STREAM em si (canal da plataforma): sem handler vira um
+ // erro de zona não tratado — loga e segue.
+ onError: (Object error, StackTrace stackTrace) {
+ CrashReporting.capture(
+ error,
+ stackTrace,
+ hint: 'Deep link de autenticação (stream error)',
+ );
+ },
+ );
 
-      // Só marca como ativo DEPOIS do listener registrado: uma falha no
-      // primeiro init (ex.: em testes, sem Supabase.initialize) não deixa
-      // a flag presa e uma nova chamada pode tentar de novo.
-      _listening = true;
-    } catch (error, stackTrace) {
-      CrashReporting.capture(
-        error,
-        stackTrace,
-        hint: 'Deep link de autenticação (init)',
-      );
-    }
-  }
+ // Só marca como ativo DEPOIS do listener registrado: uma falha no
+ // primeiro init (ex.: em testes, sem Supabase.initialize) não deixa
+ // a flag presa e uma nova chamada pode tentar de novo.
+ _listening = true;
+ } catch (error, stackTrace) {
+ CrashReporting.capture(
+ error,
+ stackTrace,
+ hint: 'Deep link de autenticação (init)',
+ );
+ }
+ }
 }

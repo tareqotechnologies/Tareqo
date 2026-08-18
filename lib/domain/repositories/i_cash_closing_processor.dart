@@ -11,11 +11,11 @@ import '../entities/cash_closing.dart';
 /// [CloseCashRegisterUseCase] calcula client-side e persiste via
 /// [ICashClosingRepository].
 abstract interface class ICashClosingProcessor {
-  /// Fecha (ou refaz) o caixa do dia [day] da loja [storeId] com a
-  /// contagem física [countedCashCents]. Retorna o fecho registrado.
-  Future<CashClosing> close({
-    required String storeId,
-    required DateTime day,
-    required int countedCashCents,
-  });
+ /// Fecha (ou refaz) o caixa do dia [day] da loja [storeId] com a
+ /// contagem física [countedCashCents]. Retorna o fecho registrado.
+ Future<CashClosing> close({
+ required String storeId,
+ required DateTime day,
+ required int countedCashCents,
+ });
 }

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-# Aplica o ÍCONE OFICIAL (anexo do utilizador, 12/ago/2026) como mestre da
-# marca e regenera o favicon SVG vetorial com a MESMA geometria.
+# Aplica o ÍCONE OFICIAL como mestre da marca e regenera o favicon SVG
+# vetorial com a MESMA geometria.
 #
-#   python tool/apply_official_icon.py
+#   python tool/apply_official_icon.py [caminho-do-png]
 #
-# 1) Lê o PNG anexado (457x524): fundo branco + design azul (arco no topo,
-#    quadrado arredondado com gradiente, "D" branco recortado e ponto azul
-#    ao centro). Remove o fundo por INUNDAÇÃO a partir das bordas (o "D"
+# 1) Lê o PNG (457x524): fundo branco + design azul (arco no topo, quadrado
+#    arredondado com gradiente, "D" branco recortado e ponto azul ao
+#    centro). Remove o fundo por INUNDAÇÃO a partir das bordas (o "D"
 #    branco, ENCERRADO pelo azul, sobrevive), escala UNIFORMEMENTE para
 #    caber em 1024x1024 com fundo branco puro e grava
 #    assets/branding/icon_official.png — o mestre que alimenta
@@ -25,28 +25,29 @@
 #   dart run flutter_launcher_icons
 import glob
 import os
+import sys
 
 from PIL import Image
 
 SIZE = 1024
-SRC = (
-    'C:/Users/emili/AppData/Local/Temp/codebuff-clipboard-images/'
-    'clipboard-2026-08-12T22-36-14-812Z.png'
-)
+DEFAULT_SRC = 'icon_official_input.png'
 MASTER = 'assets/branding/icon_official.png'
 FAVICON_SVG = 'web/icons/favicon.svg'
 
 
 def find_src():
-    if os.path.exists(SRC):
-        return SRC
-    candidates = sorted(
-        glob.glob(os.path.dirname(SRC) + '/clipboard-*.png'), reverse=True
-    )
+    # Origem: 1º argumento da CLI (ou ICON_SRC), senão um PNG do diretório.
+    src = sys.argv[1] if len(sys.argv) > 1 else os.environ.get('ICON_SRC')
+    if src and os.path.exists(src):
+        return src
+    if os.path.exists(DEFAULT_SRC):
+        return DEFAULT_SRC
+    candidates = sorted(glob.glob('icon_*.png'), reverse=True)
     if candidates:
-        print('anexo original ausente — usando o mais recente:', candidates[0])
+        print('usando o PNG encontrado:', candidates[0])
         return candidates[0]
-    raise SystemExit('anexo não encontrado: %s' % SRC)
+    raise SystemExit('PNG de origem não encontrado: passe o caminho como '
+                     'argumento (python tool/apply_official_icon.py <png>)')
 
 
 def flood_bg(im):

@@ -17,9 +17,9 @@ const landscapeViewportSize = Size(800, 600);
 /// Sempre a primeira chamada de um teste de rotação: monta a tela em
 /// retrato, verifica o layout estreito e só então gira.
 void usePortraitViewport(WidgetTester tester) {
-  tester.view.physicalSize = portraitViewportSize;
-  tester.view.devicePixelRatio = 1.0;
-  addTearDown(tester.view.reset);
+ tester.view.physicalSize = portraitViewportSize;
+ tester.view.devicePixelRatio = 1.0;
+ addTearDown(tester.view.reset);
 }
 
 /// Gira o viewport para paisagem (800×600 por padrão) e espera a re-layout.
@@ -27,9 +27,9 @@ void usePortraitViewport(WidgetTester tester) {
 /// [size] permite um limiar específico — ex.: 1280×800 para o teste do
 /// NavigationRail do AppShell (>= 880px).
 Future<void> rotateToLandscape(
-  WidgetTester tester, {
-  Size size = landscapeViewportSize,
+ WidgetTester tester, {
+ Size size = landscapeViewportSize,
 }) async {
-  tester.view.physicalSize = size;
-  await tester.pumpAndSettle();
+ tester.view.physicalSize = size;
+ await tester.pumpAndSettle();
 }

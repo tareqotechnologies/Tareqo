@@ -3,6 +3,24 @@
 Todas as mudanças relevantes do Dumbhanengue ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [1.3.0+5] — 2026-08-18
+
+### Redesign (V3 — interface nível Apple, dark-first)
+- **Tema 100% escuro em todo o app**: `themeMode: ThemeMode.dark` no `MaterialApp` — o tema claro permanece definido apenas para os testes de contraste/tipografia validarem ambas as variantes; paleta re-trabalhada (superfícies quase-pretas `#131316`/`#09090B`, acento verde profissional, cores semânticas income/expense/warning com variantes AA).
+- **Dashboard (Home) reescrito como "vista do dia"**: cabeçalho com data acima da saudação + pílula de período (`Hoje ▾` — hoje/semana/mês/tudo via `dashboardPeriodProvider`) + chip compacto de loja (`StoreSwitcher`); 3 cards compactos de métrica (Vendas com delta % vs período anterior, Caixa escopado ao período com negativo em vermelho, A receber com contador de fiados); feed "Atividade de hoje" com ícones circulares tintados e âncora à direita (vendas, entradas de estoque, pagamentos de fiado, despesas, estoque baixo, validade W11); banner de sincronização pendente; erro de KPI vira aviso inline com retry (`InlineErrorCard`).
+- **Menu como quinta aba** (substitui o avatar/quick actions da Home): grade de módulos (Produtos/Crédito/Clientes via troca de aba, Compras/Relatórios como telas empilhadas, Lojas para o dono) + linha minimalista de Sair da conta; FAB central abre o menu global de ações (Nova venda, Registrar despesa, Adicionar produto, Registrar fiado).
+- **Financeiro, Vendas, Compras, Produtos, Clientes e Crédito alinhados ao novo design system**: cards no estilo do feed da Home (`FeedCard` com hairline dividers), valores ancorados ao canto direito e alinhados, `SmartAmount` com símbolo da moeda no prefixo.
+- **Filtros minimalistas em Vendas e Compras**: os dois seletores (período + pagamento) viram chips compactos `FilterDropdown` numa única linha (menu com a opção ativa marcada), em vez das 2-3 linhas de pílulas com ícones; estado não-default acende em `primaryContainer`.
+- **Símbolo monetário `MTn` → `MZN`** em todas as exibições de valor do app (formatters, `SmartAmount`, onboarding, recibo) e nas docs.
+- **Seletor de loja sem sombra/realce de hover** (neutralizado via `Theme` local transparente) e com hit-test limpo (pílula encolhida ao conteúdo via `Align`).
+
+### Correções
+- **Overflow do PDV (`BOTTOM OVERFLOWED BY 5.0/68 PIXELS`)**: corpo do balcão de vendas reestruturado em um único `CustomScrollView` (scanner + busca + estado vazio/catálogo rolam juntos, `SliverFillRemaining` centraliza o estado vazio) com rodapé fixo — zero overflow em ecrãs de telefone (regressão coberta por teste com `tester.view.physicalSize`).
+- **Estado vazio imune a overflow** em telas com altura apertada (`EmptyState` agora rola em vez de estourar).
+
+### Documentação e ferramentas
+- **Docs limpas**: todos os emojis removidos de docs (pt/en/fr), READMEs, CHANGELOG, comentários de código e workflows (ferramenta `tool/strip_emojis.py` — idempotente, mantém símbolos tipográficos ✓/✗/setas; callouts ⚠️ viram `**Atenção:**`/`**Warning:**`/`**Attention :**` localizados); referências a ferramentas de IA removidas (incluindo caminho de origem do `apply_official_icon.py`, agora parametrizado por CLI).
+
 ## [1.2.0+4] — 2026-08-16
 
 ### Adicionado (Aug 16, 2026 — resiliência offline + produtividade)
@@ -115,16 +133,16 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) �
 
 ### Adicionado (Aug 6, 2026 — auditoria de follow-up)
 - **Sessão do Supabase em armazenamento seguro**: nova `SecureSupabaseLocalStorage` (`lib/core/security/secure_supabase_local_storage.dart`) persiste a sessão (access + refresh tokens) no **Keychain/Keystore** via `flutter_secure_storage`, em vez do default do SDK (`shared_preferences` — texto claro). Conectada no `SupabaseBootstrap` via `authOptions: FlutterAuthClientOptions(localStorage: …)` (plataformas nativas; web mantém o default — limitação documentada). O **code verifier do PKCE** também passou a usar o armazenamento seguro (`SecureGotrueAsyncStorage`) — nenhum material de autenticação fica em texto claro no dispositivo.
-  > ⚠️ **Nota de migração:** instalações que já tinham uma sessão persistida no `shared_preferences` serão deslogadas UMA vez após esta mudança (a sessão passa a viver no Keychain/Keystore).
+ > **Atenção:** Nota de migração:** instalações que já tinham uma sessão persistida no `shared_preferences` serão deslogadas UMA vez após esta mudança (a sessão passa a viver no Keychain/Keystore).
 - **Data de realização do fiado**: `settle_debt` carimba a **data de realização** (`date = now()`) na pendência vinculada — alinhando o fluxo de caixa do modo SaaS ao modo local (SQLite). `schema.sql` atualizado na mesma semântica; consolidação em `supabase/upgrade.sql` (Parte 8.3).
 - **Teste** de `SecureSupabaseLocalStorage` (5 casos: persist, hasAccessToken, accessToken, remove, initialize) — `test/core/security/secure_supabase_local_storage_test.dart`.
 - **`CHANGELOG.md`** (este arquivo).
 
 ### Adicionado (Aug 6, 2026 — matriz de acesso)
 - **Níveis de acesso distintos por papel** (dono/gerente/funcionário):
-  - **UI:** novo `currentAccessLevelProvider` (`account_providers.dart`) resolve o nível do usuário logado (dono via `tenants.owner_user_id`, ou o **maior cargo** entre os vínculos em `store_employees`). O dashboard oculta os cards de **Compras/Relatórios para funcionários** e o card de **Lojas para quem não é dono** (gerente continua com operação completa, sem gestão).
-  - **Servidor (autoridade):** novo helper `SECURITY DEFINER` `public.is_manager_of_store(store_id)` (dono OU funcionário com `role = 'manager'`); a RPC `process_purchase` passou a exigir `is_manager_of_store`; as políticas RLS de `purchases`/`purchase_items` (leitura E escrita) também — um funcionário não registra nem lê compras, mesmo chamando o PostgREST diretamente. Migração consolidada em `supabase/upgrade.sql` (Parte 4) + `schema.sql` atualizado.
-  - **Testes:** regressão `[8/8]` no `sql_check.sh` (funcionário bloqueado em compras — helper, RPC e RLS; gerente autorizado com efeitos completos) + testes de widget do dashboard (funcionário não vê Compras/Relatórios/Lojas; gerente vê Compras/Relatórios mas não Lojas).
+ - **UI:** novo `currentAccessLevelProvider` (`account_providers.dart`) resolve o nível do usuário logado (dono via `tenants.owner_user_id`, ou o **maior cargo** entre os vínculos em `store_employees`). O dashboard oculta os cards de **Compras/Relatórios para funcionários** e o card de **Lojas para quem não é dono** (gerente continua com operação completa, sem gestão).
+ - **Servidor (autoridade):** novo helper `SECURITY DEFINER` `public.is_manager_of_store(store_id)` (dono OU funcionário com `role = 'manager'`); a RPC `process_purchase` passou a exigir `is_manager_of_store`; as políticas RLS de `purchases`/`purchase_items` (leitura E escrita) também — um funcionário não registra nem lê compras, mesmo chamando o PostgREST diretamente. Migração consolidada em `supabase/upgrade.sql` (Parte 4) + `schema.sql` atualizado.
+ - **Testes:** regressão `[8/8]` no `sql_check.sh` (funcionário bloqueado em compras — helper, RPC e RLS; gerente autorizado com efeitos completos) + testes de widget do dashboard (funcionário não vê Compras/Relatórios/Lojas; gerente vê Compras/Relatórios mas não Lojas).
 
 ### Corrigido (Aug 6, 2026)
 - **RLS sem recursão (regressão `54001 max_stack_depth`)**: os helpers `public.is_my_store`/`public.is_tenant_owner` passaram a ser `SECURITY DEFINER` com `search_path` fixado — chamados DENTRO das políticas RLS e consultando tabelas com políticas próprias (`stores`/`tenants`/`store_employees`), formavam um ciclo entre tabelas que, em varreduras completas (listagens sem WHERE do PostgREST), estourava a pilha num Supabase com schema antigo. O definer quebra o ciclo **por construção** (mesmo padrão de `is_super_admin` e das RPCs do dinheiro). Migração `006` consolidada em `supabase/upgrade.sql` (Parte 3) + smoke test de varredura completa no `sql_check.sh` (dono/funcionário/anon, sem WHERE).

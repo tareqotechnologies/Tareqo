@@ -9,5 +9,5 @@ import '../../l10n/generated/app_localizations.dart';
 /// nunca retorna null (crash explícito se o delegate faltar no widget tree —
 /// os testes de widget devem incluir `AppLocalizations.localizationsDelegates`).
 extension L10nBuildContext on BuildContext {
-  AppLocalizations get l10n => AppLocalizations.of(this);
+ AppLocalizations get l10n => AppLocalizations.of(this);
 }

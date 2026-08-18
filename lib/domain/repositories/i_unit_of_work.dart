@@ -9,6 +9,6 @@
 /// via BEGIN/COMMIT/ROLLBACK) ou no-op (memória/web, onde a execução já é
 /// sequencial).
 abstract interface class IUnitOfWork {
-  /// Executa [action] dentro de uma transação atômica.
-  Future<T> run<T>(Future<T> Function() action);
+ /// Executa [action] dentro de uma transação atômica.
+ Future<T> run<T>(Future<T> Function() action);
 }

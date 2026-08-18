@@ -3,10 +3,10 @@
 > Multi-tenant business management system (inventory, sales, purchases, finance, credit and reports) built in **Flutter** with **Clean Architecture** — with local persistence (SQLite), authenticated SaaS (Supabase + RLS) and a **pt/en/fr** interface.
 
 <p align="center">
-  <a href="docs/en/README.md"><strong>📚 Documentation (en)</strong></a> ·
-  <a href="docs/pt/README.md"><strong>📚 Documentação (pt)</strong></a> ·
-  <a href="docs/fr/README.md"><strong>📚 Documentation (fr)</strong></a> ·
-  <a href="README.md"><strong>🌐 Versão em português</strong></a>
+ <a href="docs/en/README.md"><strong> Documentation (en)</strong></a> ·
+ <a href="docs/pt/README.md"><strong> Documentação (pt)</strong></a> ·
+ <a href="docs/fr/README.md"><strong> Documentation (fr)</strong></a> ·
+ <a href="README.md"><strong> Versão em português</strong></a>
 </p>
 
 ---
@@ -43,9 +43,9 @@
 
 ```bash
 flutter pub get
-flutter run                              # dev mode (local persistence)
+flutter run # dev mode (local persistence)
 flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co \
-             --dart-define=SUPABASE_ANON_KEY=eyJ...   # SaaS mode (Supabase)
+ --dart-define=SUPABASE_ANON_KEY=eyJ... # SaaS mode (Supabase)
 ```
 
 > The Supabase anon key is **public by design** (real security comes from RLS). **Never** embed the *service role key* in the client.

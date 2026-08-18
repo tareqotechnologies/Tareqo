@@ -1,133 +1,133 @@
 # CI — Dumbhanengue ERP (auditoria H3/C1)
 #
 # Jobs:
-#   analyze   — flutter analyze (zero erros/avisos);
-#   test      — flutter test --coverage + resumo de cobertura;
-#   build     — APK release do flavor DEV (sem key.properties no CI →
-#               fallback de assinatura debug). O artefato é apenas de
-#               VALIDAÇÃO de compilação: um release dev falha no arranque
-#               por design (guarda de produção — main.dart). A assinatura
-#               real do AAB de PRODUÇÃO acontece no workflow release.yml
-#               (tag v*, Fastlane, secrets do keystore);
-#   sql-check — smoke test do supabase/schema.sql + upgrade.sql + RLS
-#               contra um Postgres 16 real (scripts/sql_check.sh — 16
-#               passos: RLS por loja, RPCs atômicas do dinheiro,
-#               get_dashboard_kpis (W5), get_cash_flow/get_sales_report
-#               (H2), upgrade.sql idempotente (aplicação dupla),
-#               migração W4 NUMERIC→centavos, numeração sequencial por
-#               loja, regressão 42710 do Realtime no cenário Supabase e
-#               catálogo de planos pl1/pl2/pl3 — checklist 6.2).
+# analyze — flutter analyze (zero erros/avisos);
+# test — flutter test --coverage + resumo de cobertura;
+# build — APK release do flavor DEV (sem key.properties no CI →
+# fallback de assinatura debug). O artefato é apenas de
+# VALIDAÇÃO de compilação: um release dev falha no arranque
+# por design (guarda de produção — main.dart). A assinatura
+# real do AAB de PRODUÇÃO acontece no workflow release.yml
+# (tag v*, Fastlane, secrets do keystore);
+# sql-check — smoke test do supabase/schema.sql + upgrade.sql + RLS
+# contra um Postgres 16 real (scripts/sql_check.sh — 16
+# passos: RLS por loja, RPCs atômicas do dinheiro,
+# get_dashboard_kpis (W5), get_cash_flow/get_sales_report
+# (H2), upgrade.sql idempotente (aplicação dupla),
+# migração W4 NUMERIC→centavos, numeração sequencial por
+# loja, regressão 42710 do Realtime no cenário Supabase e
+# catálogo de planos pl1/pl2/pl3 — checklist 6.2).
 name: CI
 
 on:
-  push:
-    branches: [master, main]
-  pull_request:
+ push:
+ branches: [master, main]
+ pull_request:
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+ group: ci-${{ github.ref }}
+ cancel-in-progress: true
 
 permissions:
-  contents: read
+ contents: read
 
 jobs:
-  analyze:
-    name: Analyze
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-      - run: flutter pub get
-      - run: flutter analyze
+ analyze:
+ name: Analyze
+ runs-on: ubuntu-latest
+ steps:
+ - uses: actions/checkout@v4
+ - uses: subosito/flutter-action@v2
+ with:
+ channel: stable
+ cache: true
+ - run: flutter pub get
+ - run: flutter analyze
 
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-      - run: flutter pub get
-      - run: flutter test --coverage
-      - name: Coverage summary
-        run: |
-          if [ -f coverage/lcov.info ]; then
-            # Comparação em ponto flutuante com awk puro (sem depender de bc).
-            pct=$(awk -F: '/^LF:/{lf+=$2} /^LH:/{lh+=$2} END {printf "%.1f", (lf>0 ? 100*lh/lf : 0)}' coverage/lcov.info)
-            echo "Line coverage: ${pct}%"
-            # Gate de cobertura (auditoria H3/6.5): baseline medido em
-            # 48.1% (Aug 5, 2026). Subir o limite conforme novos testes.
-            threshold=45.0
-            below=$(awk -v p="$pct" -v t="$threshold" 'BEGIN { print (p < t) ? 1 : 0 }')
-            if [ "$below" = "1" ]; then
-              echo "::error::Coverage ${pct}% is below the ${threshold}% threshold"
-              exit 1
-            fi
-          fi
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-lcov
-          path: coverage/lcov.info
+ test:
+ name: Test
+ runs-on: ubuntu-latest
+ steps:
+ - uses: actions/checkout@v4
+ - uses: subosito/flutter-action@v2
+ with:
+ channel: stable
+ cache: true
+ - run: flutter pub get
+ - run: flutter test --coverage
+ - name: Coverage summary
+ run: |
+ if [ -f coverage/lcov.info ]; then
+ # Comparação em ponto flutuante com awk puro (sem depender de bc).
+ pct=$(awk -F: '/^LF:/{lf+=$2} /^LH:/{lh+=$2} END {printf "%.1f", (lf>0 ? 100*lh/lf : 0)}' coverage/lcov.info)
+ echo "Line coverage: ${pct}%"
+ # Gate de cobertura (auditoria H3/6.5): baseline medido em
+ # 48.1% (Aug 5, 2026). Subir o limite conforme novos testes.
+ threshold=45.0
+ below=$(awk -v p="$pct" -v t="$threshold" 'BEGIN { print (p < t) ? 1 : 0 }')
+ if [ "$below" = "1" ]; then
+ echo "::error::Coverage ${pct}% is below the ${threshold}% threshold"
+ exit 1
+ fi
+ fi
+ - name: Upload coverage artifact
+ uses: actions/upload-artifact@v4
+ with:
+ name: coverage-lcov
+ path: coverage/lcov.info
 
-  build:
-    name: Build (Android release APK, flavor dev)
-    runs-on: ubuntu-latest
-    needs: [analyze, test]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-      - run: flutter pub get
-      # Build do flavor DEV com os dart-defines de desenvolvimento
-      # (env/dev.env, commitado). Sem key.properties no CI → assinatura
-      # debug (fallback) — valida que o build de release compila e que os
-      # flavors + dart-define-from-file funcionam. O AAB de PRODUÇÃO
-      # (assinado) é construído apenas no workflow release.yml (tag v*,
-      # Fastlane, secrets do keystore).
-      - run: flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-dev-release.apk
+ build:
+ name: Build (Android release APK, flavor dev)
+ runs-on: ubuntu-latest
+ needs: [analyze, test]
+ steps:
+ - uses: actions/checkout@v4
+ - uses: actions/setup-java@v4
+ with:
+ distribution: temurin
+ java-version: '17'
+ - uses: subosito/flutter-action@v2
+ with:
+ channel: stable
+ cache: true
+ - run: flutter pub get
+ # Build do flavor DEV com os dart-defines de desenvolvimento
+ # (env/dev.env, commitado). Sem key.properties no CI → assinatura
+ # debug (fallback) — valida que o build de release compila e que os
+ # flavors + dart-define-from-file funcionam. O AAB de PRODUÇÃO
+ # (assinado) é construído apenas no workflow release.yml (tag v*,
+ # Fastlane, secrets do keystore).
+ - run: flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
+ - uses: actions/upload-artifact@v4
+ with:
+ name: release-apk
+ path: build/app/outputs/flutter-apk/app-dev-release.apk
 
-  sql-check:
-    name: SQL / RLS check (16 passos — W4/H2/upgrade/42710)
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: dumbhanengue
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v4
-      # 16 passos: schema.sql + upgrade.sql 2x (idempotência) + RLS por loja
-      # + RPCs atômicas + get_dashboard_kpis/get_cash_flow/get_sales_report
-      # + migração W4 NUMERIC→centavos (25.50→2550, sem dupla aplicação)
-      # + numeração sequencial + regressão 42710 (Realtime no cenário
-      # Supabase) + catálogo de planos pl1/pl2/pl3.
-      - name: Run SQL/RLS smoke test (W4/H2/upgrade)
-        env:
-          PGPASSWORD: postgres
-        run: bash scripts/sql_check.sh localhost postgres dumbhanengue
+ sql-check:
+ name: SQL / RLS check (16 passos — W4/H2/upgrade/42710)
+ runs-on: ubuntu-latest
+ timeout-minutes: 30
+ services:
+ postgres:
+ image: postgres:16
+ env:
+ POSTGRES_PASSWORD: postgres
+ POSTGRES_DB: dumbhanengue
+ ports:
+ - 5432:5432
+ options: >-
+ --health-cmd "pg_isready -U postgres"
+ --health-interval 10s
+ --health-timeout 5s
+ --health-retries 5
+ steps:
+ - uses: actions/checkout@v4
+ # 16 passos: schema.sql + upgrade.sql 2x (idempotência) + RLS por loja
+ # + RPCs atômicas + get_dashboard_kpis/get_cash_flow/get_sales_report
+ # + migração W4 NUMERIC→centavos (25.50→2550, sem dupla aplicação)
+ # + numeração sequencial + regressão 42710 (Realtime no cenário
+ # Supabase) + catálogo de planos pl1/pl2/pl3.
+ - name: Run SQL/RLS smoke test (W4/H2/upgrade)
+ env:
+ PGPASSWORD: postgres
+ run: bash scripts/sql_check.sh localhost postgres dumbhanengue

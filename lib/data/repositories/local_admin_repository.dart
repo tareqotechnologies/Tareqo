@@ -5,8 +5,8 @@ import '../../domain/repositories/i_admin_repository.dart';
 /// Sem o Supabase não há sessão nem banco de papéis — ninguém é super
 /// admin. O painel administrativo só é alcançável no modo SaaS.
 final class LocalAdminRepository implements IAdminRepository {
-  const LocalAdminRepository();
+ const LocalAdminRepository();
 
-  @override
-  Future<bool> isSuperAdmin() async => false;
+ @override
+ Future<bool> isSuperAdmin() async => false;
 }
