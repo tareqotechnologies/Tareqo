@@ -57,19 +57,22 @@ class TransactionCard extends StatelessWidget {
  crossAxisAlignment: CrossAxisAlignment.start,
  children: [
  Row(
- children: [
- // Ícone circular tintado (estilo feed da Home) — círculo
- // pleno com fundo translúcido na cor da direção.
- Container(
- width: 42,
- height: 42,
- alignment: Alignment.center,
- decoration: BoxDecoration(
- shape: BoxShape.circle,
- color: color.withValues(alpha: 0.14),
- ),
- child: Icon(transaction.type.icon, size: 20, color: color),
- ),
+ children: [            // Ícone circular tintado (estilo feed da Home) — círculo
+            // pleno com fundo translúcido na cor da direção + borda sutil
+            // (mesmo padrão do PaymentMethodBadge).
+            Container(
+              width: 42,
+              height: 42,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color.withValues(alpha: 0.14),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.25),
+                ),
+              ),
+              child: Icon(transaction.type.icon, size: 20, color: color),
+            ),
  const SizedBox(width: 12),
  Expanded(
  child: Column(

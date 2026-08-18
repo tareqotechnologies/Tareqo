@@ -461,20 +461,21 @@ class _CashLine extends StatelessWidget {
  @override
  Widget build(BuildContext context) {
  final theme = Theme.of(context);
- final scheme = theme.colorScheme;
-
- return Row(
- children: [
- Container(
- width: 26,
- height: 26,
- alignment: Alignment.center,
- decoration: BoxDecoration(
- shape: BoxShape.circle,
- color: color.withValues(alpha: 0.12),
- ),
- child: Icon(icon, size: 14, color: color),
- ),
+ final scheme = theme.colorScheme;    return Row(
+      children: [
+        Container(
+          width: 26,
+          height: 26,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withValues(alpha: 0.12),
+            border: Border.all(
+              color: color.withValues(alpha: 0.25),
+            ),
+          ),
+          child: Icon(icon, size: 14, color: color),
+        ),
  const SizedBox(width: 10),
  Expanded(
  child: Text(

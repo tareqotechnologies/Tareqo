@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#FFFFFF</color>
+    <!-- Fundo do splash: agora escuro (tema V3 dark-first do app).
+         A cor 0xFF121218 é a surface do tema escuro — evita o flash
+         branco entre o splash nativo e o Flutter. -->
+    <color name="ic_launcher_background">#121218</color>
 </resources>

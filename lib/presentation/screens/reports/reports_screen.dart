@@ -106,23 +106,45 @@ class ReportsScreen extends ConsumerWidget {
  child: ListView(
  physics: const AlwaysScrollableScrollPhysics(),
  padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
- children: [
- Center(
- child: SegmentedButton<ReportPeriod>(
- showSelectedIcon: false,
- segments: [
- for (final value in ReportPeriod.values)
- ButtonSegment(
- value: value,
- label: Text(value.label(l10n)),
- ),
- ],
- selected: {period},
- onSelectionChanged: (selection) => ref
- .read(reportPeriodProvider.notifier)
- .select(selection.first),
- ),
- ),
+ children: [        Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: SegmentedButton<ReportPeriod>(
+              showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                shape: const StadiumBorder(),
+                side: BorderSide(
+                  color: theme.colorScheme.outlineVariant,
+                ),
+                backgroundColor: Colors.transparent,
+                selectedBackgroundColor:
+                    theme.colorScheme.primaryContainer,
+                selectedForegroundColor:
+                    theme.colorScheme.onPrimaryContainer,
+                foregroundColor: theme.colorScheme.onSurfaceVariant,
+                textStyle: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              segments: [
+                for (final value in ReportPeriod.values)
+                  ButtonSegment(
+                    value: value,
+                    label: Text(value.label(l10n)),
+                  ),
+              ],
+              selected: {period},
+              onSelectionChanged: (selection) => ref
+                  .read(reportPeriodProvider.notifier)
+                  .select(selection.first),
+            ),
+          ),
+        ),
  const SizedBox(height: 16),
  // Erro: em vez de uma linha de KPIs com "R\$ 0,00"/"0.0%"
  // (zeros falsos), mostra o aviso compacto com retry — mesmo
