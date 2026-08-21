@@ -3,6 +3,22 @@
 Todas as mudanças relevantes do Dumbhanengue ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [1.3.2+7] — 2026-08-21
+
+### Alterado (UI/UX minimalista)
+- **Splash logo reduzido 10%**: iOS `LaunchScreen.storyboard` (160→144pt), Android `launch_background.xml` (144dp×144dp), Flutter in-app `_SplashScreen` (112→101px container, 90→81px imagem) — transição invisível entre splash nativo e Flutter.
+- **Tela de vendas redesenhada**: search bar removida; filtros período (Hoje/Ontem/Semana/Tudo) e pagamento (Todas/Dinheiro/Cartão/M-Pesa/E-Mola/Transferência) viram dropdowns compactos `FilterDropdown` numa única linha — menos poluição visual.
+- **Tela de produtos — filtros unificados no sheet avançado**: barra de busca removida do body; todos os filtros (busca por nome, status, tipo de estoque, disponibilidade, faixa de preço) ficam dentro do sheet avançado (`_AdvancedFilterSheet`); ícone de filtro no AppBar abre o sheet.
+- **Filtros avançados com chips minimalistas**: `SegmentedButton` substituído por `_FilterChipGroup` com `Wrap` — textos longos como "Peso (kg/g/l/ml)" não estouram mais; fonte `labelSmall` 11px, ícones 13px, padding compacto.
+- **Card de produto minimalista**: foto 36×36 (era 40), nome `bodySmall` 13px `w400` (era `bodyMedium` 14px `w500`), código/descrição 11px `w300`, preço 12px `w500` (era 14px `w600`), quantidade 11px `w300`; chevron 18px com margem 4px; `StatusChip` reduzido (10px font, 8/3 padding).
+- **Search field sem borda**: `InputDecoration.collapsed()` substitui `InputDecoration` com bordas manuais — ignora o tema global `OutlineInputBorder`.
+- **Filtros dropdown uniformizados**: itens do menu popup com `constraints: BoxConstraints(minWidth: itemWidth)` — largura calculada pelo rótulo mais longo; ícones 16px, font `labelLarge`, `height: 40`.
+- **Relatório vendas por dia uniforme**: data e valor ambos em `bodySmall` 12px (era `bodyMedium` 14px e `titleMedium` 16px); data com cor `onSurfaceVariant`, valor com `w500`.
+
+### Corrigido
+- **Disco cheio impedia build**: caches Gradle + build antigo liberaram ~10GB (disco 100% → 96%).
+- **`app_shell.dart` referenciava `AddProductSheet` (público) mas a classe era `_AddProductSheet` (privado)**: classe tornada pública para compatibilidade.
+
 ## [1.3.0+5] — 2026-08-18
 
 ### Redesign (V3 — interface nível Apple, dark-first)
