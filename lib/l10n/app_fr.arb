@@ -144,6 +144,9 @@
   "appNavCustomers": "Clients",
   "fabMenuTitle": "Nouvelle action",
   "fabMenuSubtitle": "Que souhaitez-vous faire ?",
+  "menuSubtitle": "Choisissez une zone pour continuer",
+  "commonSignOutConfirmTitle": "Se d\u00e9connecter ?",
+  "commonSignOutConfirmMessage": "Vous allez vous d\u00e9connecter de votre compte sur cet appareil.",
   "fabMenuNewSale": "Nouvelle vente",
   "fabMenuNewSaleHint": "Panier · déduction de stock · caisse",
   "fabMenuExpense": "Enregistrer une dépense",
@@ -152,6 +155,8 @@
   "fabMenuAddProductHint": "Catalogue · prix · stock initial",
   "fabMenuAddDebt": "Enregistrer un crédit",
   "fabMenuAddDebtHint": "À recevoir ou à payer",
+  "fabMenuAddCustomer": "Ajouter un client",
+  "fabMenuAddCustomerHint": "Contacts · crédit lié",
   "fabMenuCancel": "Annuler",
   "syncPendingCount": "{count, plural, =1{1 opération en attente} other{{count} opérations en attente}}",
   "@syncPendingCount": {
@@ -440,7 +445,54 @@
   "productsPhotoGallery": "Depuis la galerie",
   "productsPhotoRemove": "Retirer la photo",
   "productsInactive": "Inactif",
+  "productsStockOut": "Rupture",
+  "productsStockLow": "Faible",
+  "productsFilterTooltip": "Filtrer",
+  "productsFilterAdvanced": "Filtres avancés",
+  "productsFilterClear": "Tout effacer",
+  "productsFilterStockType": "Type de stock",
+  "productsFilterStockTypeAll": "Tous",
+  "productsFilterStockTypeWeight": "Poids (kg/g/l/ml)",
+  "productsFilterStockTypeUnit": "Unité (pcs)",
+  "productsFilterAvailability": "Disponibilité",
+  "productsFilterAvailable": "En stock",
+  "productsFilterLowStock": "Stock faible",
+  "productsFilterOutOfStock": "Rupture",
+  "productsFilterPriceRange": "Fourchette de prix",
+  "productsFilterMinPrice": "Prix min",
+  "productsFilterMaxPrice": "Prix max",
+  "productsFilterApply": "Appliquer",
   "productsFilterInactive": "Inactifs",
+  "productsFilterInactiveCount": "Inactifs · {count}",
+  "@productsFilterInactiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsHeaderCount": "{count, plural, =1{1 produit} other{{count} produits}}",
+  "@productsHeaderCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsClearFilters": "Effacer les filtres",
+  "productsEmptyFilteredTitle": "Aucun produit trouvé",
+  "productsEmptyFilteredSubtitle": "Ajustez la recherche ou les filtres.",
+  "productsFilteredCount": "{count, plural, =1{1 produit} other{{count} produits}}",
+  "@productsFilteredCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsSummaryActive": "Actifs",
+  "productsSummaryLowStock": "Stock faible",
+  "productsSummaryInactive": "Inactifs",
   "productsActiveLabel": "Produit actif",
   "productsActiveHint": "Désactivez pour retirer du PDV et des achats.",
   "productsStockAdjustHint": "Ajustement manuel : définit le stock exact (FIFO).",
@@ -448,6 +500,43 @@
   "productsSectionPricing": "Prix",
   "productsSectionStock": "Stock",
   "productsSectionStatus": "Statut",
+  "productsAddNewTitle": "Nouveau produit",
+  "productsSave": "Enregistrer",
+  "productsSaving": "Enregistrement...",
+  "productsSaved": "Produit enregistré avec succès",
+  "productsSavedNoPhoto": "Produit enregistré ! (pas de permission de stockage)",
+  "productsPhotoLabelNew": "Photo du produit",
+  "productsPhotoTake": "Prendre une photo",
+  "productsPhotoGallery": "Choisir depuis la galerie",
+  "productsPhotoRemove": "Retirer la photo",
+  "productsPhotoHint": "Touchez pour ajouter",
+  "productsSectionBasic": "Informations de base",
+  "productsSectionPricingNew": "Prix",
+  "productsSectionStockNew": "Stock",
+  "productsNameLabel": "Nom du produit",
+  "productsNameHint": "Ex. : Riz type 1",
+  "productsNameErrorMsg": "Obligatoire",
+  "productsDescriptionLabelNew": "Description",
+  "productsDescriptionHint": "Facultatif",
+  "productsCodeLabel": "PLU ou code-barres",
+  "productsCodeHint": "Code utilisé sur balance étiqueteuse. Exemple : 12345",
+  "productsCodeError": "Utilisez jusqu'à 5 chiffres",
+  "productsPurchasePriceLabel": "Prix d'achat",
+  "productsPurchasePriceError": "Indiquez le prix d'achat",
+  "productsSalePriceLabel": "Prix de vente",
+  "productsSalePriceError": "Indiquez le prix de vente",
+  "productsPriceValidationError": "Le prix de vente doit être supérieur au prix d'achat",
+  "productsStockQuantityLabel": "Quantité en stock",
+  "productsStockHint": "Ex. : 50",
+  "productsStockWeightHint": "En kg (ex. : 1,75)",
+  "productsStockError": "Quantité invalide",
+  "productsExpiryLabel": "Date de péremption",
+  "productsExpiryHint": "Facultatif",
+  "productsExpiryAdd": "Sélectionner la date",
+  "productsExpiryClear": "Retirer la péremption",
+  "productsWeighLabel": "Vente au poids",
+  "productsWeighHint": "Permet de vendre des quantités décimales, ex. : 1,75 kg",
+  "productsUnitLabel": "Unité de mesure",
   "customersHeaderCount": "{count, plural, =1{1 client} other{{count} clients}}",
   "@customersHeaderCount": {
     "placeholders": {
@@ -587,9 +676,9 @@
   "financialIncome": "Entrées",
   "financialExpense": "Sorties",
   "financialBalance": "Solde",
-  "financialPeriodBalance": "Solde de la période",
+  "financialPeriodBalance": "Solde net de la période",
   "financialSwipeHint": "Glissez pour les dépenses →",
-  "financialTransactions": "Transactions",
+  "financialTransactions": "Transactions de la période",
   "financialLoadError": "Impossible de charger les transactions.",
   "financialCashFlowError": "Impossible de charger le flux de trésorerie.",
   "financialEmptyTitle": "Aucune transaction",
@@ -617,7 +706,7 @@
     }
   },
   "financialPaid": "Sortie payée !",
-  "financialPayError": "Impossible de payer. Réessayez.",
+  "financialPayError": "Impossible de payer la transaction en attente. Réessayez.",
   "financialAddTitle": "Enregistrer une transaction",
   "financialIncomingType": "Entrée",
   "financialOutgoingType": "Sortie",
@@ -794,6 +883,9 @@
   "paymentFilterCard": "Carte",
   "paymentFilterAll": "Toutes",
   "salesStatusPaid": "Payée",
+  "salesFilterAll": "Toutes",
+  "salesFilterActive": "Actives",
+  "salesFilterCancelled": "Annulées",
   "salesHeaderTransactions": "{count, plural, =0{0 transactions} =1{1 transaction} other{{count} transactions}}",
   "@salesHeaderTransactions": {
     "description": "Nombre de transactions du jour dans le résumé de l'écran des ventes",

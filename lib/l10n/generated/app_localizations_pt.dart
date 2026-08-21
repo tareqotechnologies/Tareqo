@@ -136,7 +136,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get commonRetry => 'Tentar novamente';
 
   @override
-  String get commonSignOut => 'Sair da conta';
+  String get commonSignOut => 'Terminar sessão';
 
   @override
   String get appSheetClose => 'Fechar';
@@ -371,6 +371,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get fabMenuSubtitle => 'O que deseja fazer?';
 
   @override
+  String get menuSubtitle => 'Escolha uma área para continuar';
+
+  @override
+  String get commonSignOutConfirmTitle => 'Terminar sessão?';
+
+  @override
+  String get commonSignOutConfirmMessage =>
+      'Vai sair da sua conta neste dispositivo.';
+
+  @override
   String get fabMenuNewSale => 'Nova venda';
 
   @override
@@ -393,6 +403,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get fabMenuAddDebtHint => 'A receber ou a pagar';
+
+  @override
+  String get fabMenuAddCustomer => 'Adicionar cliente';
+
+  @override
+  String get fabMenuAddCustomerHint => 'Contactos · fiado vinculado';
 
   @override
   String get fabMenuCancel => 'Cancelar';
@@ -880,19 +896,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get purchasesSearchHint => 'Buscar compra...';
 
   @override
-  String get productsFilterTooltip => 'Filtrar produtos';
+  String get productsFilterTooltip => 'Filtrar';
 
   @override
   String get productsFilterAll => 'Todos';
 
   @override
   String productsFilterAllCount(int count) {
-    return 'Todos · $count';
+    return 'Todos os produtos · $count';
   }
 
   @override
   String productsFilterLowCount(int count) {
-    return 'Estoque baixo · $count';
+    return 'Stock baixo · $count';
   }
 
   @override
@@ -902,7 +918,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsColPrice => 'Preço · Stock';
 
   @override
-  String get productsSearchHint => 'Buscar produto...';
+  String get productsSearchHint => 'Pesquisar produto...';
 
   @override
   String get productsLoadError => 'Não foi possível carregar os produtos.';
@@ -942,19 +958,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsPurchasePrice => 'Preço de compra';
 
   @override
-  String get productsPurchasePriceError => 'Informe o preço de compra.';
+  String get productsPurchasePriceError => 'Informe o preço de compra';
 
   @override
   String get productsSalePrice => 'Preço de venda';
 
   @override
-  String get productsSalePriceError => 'Informe o preço de venda.';
+  String get productsSalePriceError => 'Informe o preço de venda';
 
   @override
   String get productsStockQuantity => 'Quantidade em estoque';
 
   @override
-  String get productsStockError => 'Informe uma quantidade válida.';
+  String get productsStockError => 'Quantidade inválida';
 
   @override
   String get productsAddSubmit => 'Adicionar produto';
@@ -980,19 +996,113 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsPhotoLabel => 'Foto do produto';
 
   @override
-  String get productsPhotoTake => 'Tirar foto';
+  String get productsPhotoTake => 'Tirar fotografia';
 
   @override
-  String get productsPhotoGallery => 'Da galeria';
+  String get productsPhotoGallery => 'Escolher da galeria';
 
   @override
-  String get productsPhotoRemove => 'Remover foto';
+  String get productsPhotoRemove => 'Remover fotografia';
 
   @override
   String get productsInactive => 'Inativo';
 
   @override
-  String get productsFilterInactive => 'Inativos';
+  String get productsStockOut => 'Esgotado';
+
+  @override
+  String get productsStockLow => 'Baixo';
+
+  @override
+  String get productsFilterAdvanced => 'Filtros avançados';
+
+  @override
+  String get productsFilterClear => 'Limpar tudo';
+
+  @override
+  String get productsFilterStockType => 'Tipo de estoque';
+
+  @override
+  String get productsFilterStockTypeAll => 'Todos';
+
+  @override
+  String get productsFilterStockTypeWeight => 'Peso (kg/g/l/ml)';
+
+  @override
+  String get productsFilterStockTypeUnit => 'Unidade (un)';
+
+  @override
+  String get productsFilterAvailability => 'Disponibilidade';
+
+  @override
+  String get productsFilterAvailable => 'Em estoque';
+
+  @override
+  String get productsFilterLowStock => 'Estoque baixo';
+
+  @override
+  String get productsFilterOutOfStock => 'Esgotado';
+
+  @override
+  String get productsFilterPriceRange => 'Faixa de preço';
+
+  @override
+  String get productsFilterMinPrice => 'Preço mínimo';
+
+  @override
+  String get productsFilterMaxPrice => 'Preço máximo';
+
+  @override
+  String get productsFilterApply => 'Aplicar';
+
+  @override
+  String get productsFilterInactive => 'Inactivos';
+
+  @override
+  String productsFilterInactiveCount(int count) {
+    return 'Inactivos · $count';
+  }
+
+  @override
+  String productsHeaderCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count produtos',
+      one: '1 produto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productsClearFilters => 'Limpar filtros';
+
+  @override
+  String get productsEmptyFilteredTitle => 'Nenhum produto encontrado';
+
+  @override
+  String get productsEmptyFilteredSubtitle =>
+      'Ajuste a pesquisa ou os filtros.';
+
+  @override
+  String productsFilteredCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count produtos',
+      one: '1 produto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productsSummaryActive => 'Activos';
+
+  @override
+  String get productsSummaryLowStock => 'Stock baixo';
+
+  @override
+  String get productsSummaryInactive => 'Inactivos';
 
   @override
   String get productsActiveLabel => 'Produto ativo';
@@ -1015,6 +1125,101 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productsSectionStatus => 'Status';
+
+  @override
+  String get productsAddNewTitle => 'Novo produto';
+
+  @override
+  String get productsSave => 'Guardar';
+
+  @override
+  String get productsSaving => 'A guardar...';
+
+  @override
+  String get productsSaved => 'Produto guardado com sucesso';
+
+  @override
+  String get productsSavedNoPhoto =>
+      'Produto guardado! (sem permissão de armazenamento)';
+
+  @override
+  String get productsPhotoLabelNew => 'Fotografia do produto';
+
+  @override
+  String get productsPhotoHint => 'Toque para adicionar';
+
+  @override
+  String get productsSectionBasic => 'Informações básicas';
+
+  @override
+  String get productsSectionPricingNew => 'Preços';
+
+  @override
+  String get productsSectionStockNew => 'Stock';
+
+  @override
+  String get productsNameLabel => 'Nome do produto';
+
+  @override
+  String get productsNameHint => 'Ex.: Arroz tipo 1';
+
+  @override
+  String get productsNameErrorMsg => 'Obrigatório';
+
+  @override
+  String get productsDescriptionLabelNew => 'Descrição';
+
+  @override
+  String get productsDescriptionHint => 'Opcional';
+
+  @override
+  String get productsCodeLabel => 'Código de barras (PLU)';
+
+  @override
+  String get productsCodeHint => 'Balanças etiquetadoras (ex.: 12345)';
+
+  @override
+  String get productsCodeError => 'Código inválido: use até 5 dígitos.';
+
+  @override
+  String get productsPurchasePriceLabel => 'Preço de compra (MT)';
+
+  @override
+  String get productsSalePriceLabel => 'Preço de venda (MT)';
+
+  @override
+  String get productsPriceValidationError =>
+      'O preço de venda deve ser superior ao de compra';
+
+  @override
+  String get productsStockQuantityLabel => 'Quantidade em stock';
+
+  @override
+  String get productsStockHint => 'Ex.: 50';
+
+  @override
+  String get productsStockWeightHint => 'Em unidades da venda (ex.: 1,75)';
+
+  @override
+  String get productsExpiryLabel => 'Validade';
+
+  @override
+  String get productsExpiryHint => 'Opcional';
+
+  @override
+  String get productsExpiryAdd => 'Definir validade';
+
+  @override
+  String get productsExpiryClear => 'Remover validade';
+
+  @override
+  String get productsWeighLabel => 'Venda por peso (fração)';
+
+  @override
+  String get productsWeighHint => 'Aceita quantidades decimais (ex.: 1,75 kg)';
+
+  @override
+  String get productsUnitLabel => 'Unidade de venda';
 
   @override
   String customersHeaderCount(int count) {
@@ -1259,13 +1464,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get financialBalance => 'Saldo';
 
   @override
-  String get financialPeriodBalance => 'Saldo do período';
+  String get financialPeriodBalance => 'Saldo líquido do período';
 
   @override
   String get financialSwipeHint => 'Deslize para saídas →';
 
   @override
-  String get financialTransactions => 'Movimentações';
+  String get financialTransactions => 'Movimentos do período';
 
   @override
   String get financialLoadError =>
@@ -1315,7 +1520,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get financialPaid => 'Saída paga!';
 
   @override
-  String get financialPayError => 'Não foi possível pagar. Tente novamente.';
+  String get financialPayError =>
+      'Não foi possível pagar a pendência. Tente novamente.';
 
   @override
   String get financialAddTitle => 'Registrar movimentação';
@@ -1634,7 +1840,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Toque em \"Nova venda\" para registrar a primeira.';
 
   @override
-  String get salesSearchHint => 'Buscar venda...';
+  String get salesSearchHint => 'Pesquisar venda...';
 
   @override
   String get periodYesterday => 'Ontem';
@@ -1647,6 +1853,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get salesStatusPaid => 'Pago';
+
+  @override
+  String get salesFilterAll => 'Todas';
+
+  @override
+  String get salesFilterActive => 'Ativas';
+
+  @override
+  String get salesFilterCancelled => 'Anuladas';
 
   @override
   String salesHeaderTransactions(int count) {
@@ -2012,37 +2227,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get adminPlanCurrent => 'Atual';
 
   @override
-  String get productsCodeLabel => 'Código de barras (PLU)';
-
-  @override
-  String get productsCodeHint => 'Balanças etiquetadoras (ex.: 12345)';
-
-  @override
-  String get productsCodeError => 'Código inválido: use até 5 dígitos.';
-
-  @override
-  String get productsWeighLabel => 'Venda por peso (fração)';
-
-  @override
-  String get productsWeighHint => 'Aceita quantidades decimais (ex.: 1,75 kg)';
-
-  @override
-  String get productsUnitLabel => 'Unidade de venda';
-
-  @override
-  String get productsStockWeightHint => 'Em unidades da venda (ex.: 1,75)';
-
-  @override
-  String get productsExpiryLabel => 'Validade';
-
-  @override
-  String get productsExpiryAdd => 'Definir validade';
-
-  @override
   String get productsExpiryHelp => 'Data de validade do produto';
-
-  @override
-  String get productsExpiryClear => 'Remover validade';
 
   @override
   String get salesBarcodeLabel => 'Código de barras';

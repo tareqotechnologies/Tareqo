@@ -92,16 +92,18 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
  Navigator.of(context).pop();
  messenger.showSnackBar(SnackBar(content: Text(l10n.financialRegistered)));
  } on InvalidAmountException catch (error) {
- setState(() => _formError = error.message);
+ if (mounted) setState(() => _formError = error.message);
  } catch (error, stackTrace) {
  CrashReporting.capture(
  error,
  stackTrace,
  hint: 'Erro ao registrar transação',
  );
+ if (mounted) {
  setState(() {
  _formError = l10n.financialRegisterError;
  });
+ }
  } finally {
  if (mounted) setState(() => _isSubmitting = false);
  }
@@ -112,7 +114,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
  final theme = Theme.of(context);
  final l10n = context.l10n;
 
- return SingleChildScrollView(
+ return SafeArea(
+ top: false,
+ child: SingleChildScrollView(
+ keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
  child: Form(
  key: _formKey,
@@ -125,7 +130,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
           icon: Icons.swap_vert,
           title: l10n.financialAddTitle,
           children: [
-            SegmentedButton<TransactionType>(
+            Semantics(
+              container: true,
+              label: l10n.financialAddTitle,
+              child: SegmentedButton<TransactionType>(
               showSelectedIcon: false,
               style: SegmentedButton.styleFrom(
                 visualDensity: VisualDensity.compact,
@@ -158,6 +166,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               selected: {_type},
               onSelectionChanged: (selection) =>
                   setState(() => _type = selection.first),
+              ),
             ),
           ],
         ),
@@ -188,7 +197,8 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               controller: _amountController,
               label: l10n.financialAmountLabel,
               prefixIcon: Icons.attach_money,
-              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               validator: (value) => _parseAmount(value ?? '') <= 0
                   ? l10n.financialAmountError
                   : null,
@@ -242,6 +252,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
  : null,
  ),
  ],
+ ),
  ),
  ),
  );

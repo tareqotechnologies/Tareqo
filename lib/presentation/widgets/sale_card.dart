@@ -7,153 +7,156 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/utils/formatters.dart';
 import '../../domain/entities/sale.dart';
 import '../screens/sales/sale_detail_screen.dart';
-import 'method_badge.dart';
-import 'smart_amount.dart';
 import 'payment_filter.dart' show PaymentMethodAccent, PaymentMethodIcon;
 import 'status_chip.dart';
 
-/// Card de venda premium — compartilhado entre a lista de vendas e as
-/// vendas recentes do dashboard: forma de pagamento com selo colorido por
-/// método (cash/cartão/M-Pesa/E-Mola/transferência), número sequencial,
-/// itens, dia/hora inteligente, status "Pago" e valor em destaque.
+/// Card de venda minimalista — Google Apps style.
 ///
-/// Layout COMPACTO em linha única (design system 2026, igual ao app de
-/// referência): selo do método à esquerda, identificação no meio e o par
-/// (valor + status) ancorado à direita. No desktop/web o hover realça a
-/// borda e muda o cursor.
+/// Layout em duas linhas:
+/// - Linha 1: payment icon (sutil) + method name à esquerda, valor à direita
+/// - Linha 2: sale number · items · date à esquerda, status à direita
 class SalesCard extends StatefulWidget {
- const SalesCard({super.key, required this.sale, this.onTap});
+  const SalesCard({super.key, required this.sale, this.onTap});
 
- final Sale sale;
+  final Sale sale;
+  final VoidCallback? onTap;
 
- /// Ação ao tocar; quando nula, abre os detalhes da venda (padrão).
- final VoidCallback? onTap;
-
- @override
- State<SalesCard> createState() => _SalesCardState();
+  @override
+  State<SalesCard> createState() => _SalesCardState();
 }
 
 class _SalesCardState extends State<SalesCard> {
- /// Hover (web/desktop): realça a borda para sinalizar que o card é tocável.
- bool _hovered = false;
+  bool _hovered = false;
 
- Sale get _sale => widget.sale;
- VoidCallback? get _onTap => widget.onTap;
+  Sale get _sale => widget.sale;
+  VoidCallback? get _onTap => widget.onTap;
 
- @override
- Widget build(BuildContext context) {
- final theme = Theme.of(context);
- final scheme = theme.colorScheme;
- final l10n = context.l10n;
- // Cor de destaque da forma de pagamento — identidade visual por método.
- final accent = _sale.paymentMethod.accent(theme);
- final itemsLabel = l10n.dashboardSaleItems(_sale.items.length);
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final accent = _sale.paymentMethod.accent(theme);
+    final itemsLabel = l10n.dashboardSaleItems(_sale.items.length);
+    final isCancelled = _sale.status == SaleStatus.cancelled;
 
- // Linha do feed (estilo Home): transparente dentro da [FeedCard] — o
- // hover (web/desktop) realça o FUNDO com uma tinta do acento; o ripple
- // cobre a linha toda.
- return MouseRegion(
- cursor: SystemMouseCursors.click,
- onEnter: (_) => setState(() => _hovered = true),
- onExit: (_) => setState(() => _hovered = false),
- child: Material(
- color: _hovered
- ? scheme.primary.withValues(alpha: 0.06)
- : Colors.transparent,
- child: InkWell(
- onTap: _onTap ?? () => _openDetails(context),
- child: Padding(
- padding: const EdgeInsets.symmetric(
- horizontal: AppSpacing.md,
- vertical: AppSpacing.sm + 2,
- ),
- child: Row(
- children: [
- PaymentMethodBadge(
- accent: accent,
- icon: _sale.paymentMethod.icon,
- ),
- const SizedBox(width: 12),
- Expanded(
- child: Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- // Nome da forma de pagamento COMPLETO — quebra em
- // linhas quando necessário (nada de truncar).
- Text(
- _sale.paymentMethod.labelFor(l10n),
- style: theme.textTheme.titleSmall?.copyWith(
- fontWeight: FontWeight.w500,
- ),
- ),
- const SizedBox(height: 2),
- Text(
- '${Formatters.saleLabel(_sale.number)} · '
- '$itemsLabel',
- style: theme.textTheme.labelSmall?.copyWith(
- color: scheme.onSurfaceVariant,
- ),
- ),
- const SizedBox(height: 2),
- Text(
- // Data inteligente: 'Hoje/Ontem/04/08' + hora.
- '${Formatters.day(_sale.dateTime)} • '
- '${Formatters.time(_sale.dateTime)}',
- style: theme.textTheme.labelSmall?.copyWith(
- color: scheme.outline,
- ),
- ),
- ],
- ),
- ),
- const SizedBox(width: 8),
- // Coluna direita: valor + status, ANCORADA à borda.
- // Align + Flexible: encolhe (ellipsis interno) em telas
- // estreitas com escala alta — nunca estoura o Row.
- Flexible(
- child: Align(
- alignment: Alignment.centerRight,
- child: Column(
- crossAxisAlignment: CrossAxisAlignment.end,
- mainAxisSize: MainAxisSize.min,
- children: [
- // SmartAmount (design system ultra-clean): auto-size
- // do valor — encolhe em vez de estourar/truncar.
- SmartAmount(
- cents: _sale.totalAmountCents,
- alignment: Alignment.centerRight,
- style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w500,
- fontFeatures: const [FontFeature.tabularFigures()],
- ),
- ),
- const SizedBox(height: 4),
- StatusChip(
- label: _sale.status == SaleStatus.cancelled
- ? l10n.salesStatusCancelled
- : l10n.salesStatusPaid,
- color: _sale.status == SaleStatus.cancelled
- ? theme.expense
- : theme.income,
- icon: _sale.status == SaleStatus.cancelled
- ? Icons.block
- : Icons.check_circle_outline,
- ),
- ],
- ),
- ),
- ),
- ],
- ),
- ),
- ),
- ),
- );
- }
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Material(
+        color: _hovered
+            ? scheme.surfaceContainerHighest.withValues(alpha: 0.6)
+            : scheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          side: BorderSide(
+            color: scheme.outlineVariant.withValues(alpha: 0.6),
+          ),
+        ),
+        child: InkWell(
+          onTap: _onTap ?? () => _openDetails(context),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            child: Row(
+              children: [
+                // ── Left: small payment icon ──
+                Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  child: Icon(
+                    _sale.paymentMethod.icon,
+                    size: 18,
+                    color: accent,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Primary line: payment method + amount
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _sale.paymentMethod.labelFor(l10n),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              Formatters.currency(_sale.totalAmountCents),
+                              maxLines: 1,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      // Secondary line: sale number · items (date visible in details)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${Formatters.saleLabel(_sale.number)}'
+                              '  ·  $itemsLabel',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          StatusChip(
+                            label: isCancelled
+                                ? l10n.salesStatusCancelled
+                                : l10n.salesStatusPaid,
+                            color: isCancelled
+                                ? theme.expense
+                                : theme.income,
+                            icon: isCancelled
+                                ? Icons.block
+                                : Icons.check_circle_outline,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
- void _openDetails(BuildContext context) {
- Navigator.of(context).push(
- MaterialPageRoute<void>(builder: (_) => SaleDetailScreen(sale: _sale)),
- );
- }
+  void _openDetails(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => SaleDetailScreen(sale: _sale)),
+    );
+  }
 }

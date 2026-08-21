@@ -49,30 +49,29 @@ class DailySummaryHeader extends StatelessWidget {
  // resumo do dia compartilhado (Vendas/Compras). O valor é a âncora
  // principal; o delta fica ANCORADO no canto superior direito (como nas
  // demais telas), alinhado ao rótulo em vez de flutuar centralizado.
- return AppCard(
- elevated: true,
- borderRadius: AppRadius.xlAll,
- padding: const EdgeInsets.all(AppSpacing.lg),
- child: Row(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- // Ícone em círculo pleno tintado — mesmo idioma do feed da Home
- // e dos cards de movimentação do Financeiro.
- Container(
- width: 46,
- height: 46,
- alignment: Alignment.center,
- decoration: BoxDecoration(
- shape: BoxShape.circle,
- color: iconBackground ?? theme.colorScheme.primaryContainer,
- ),
- child: Icon(
- icon,
- size: 22,
- color: iconColor ?? theme.colorScheme.onPrimaryContainer,
- ),
- ),
- const SizedBox(width: AppSpacing.md),
+  return AppCard(
+    elevated: true,
+    borderRadius: AppRadius.lgAll,
+    padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Ícone em círculo tintado — compacto (42px).
+        Container(
+          width: 42,
+          height: 42,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: iconBackground ?? theme.colorScheme.primaryContainer,
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: iconColor ?? theme.colorScheme.onPrimaryContainer,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
  Expanded(
  child: Column(
  crossAxisAlignment: CrossAxisAlignment.start,

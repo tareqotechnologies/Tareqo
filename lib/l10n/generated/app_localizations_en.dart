@@ -363,6 +363,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fabMenuSubtitle => 'What would you like to do?';
 
   @override
+  String get menuSubtitle => 'Choose an area to continue';
+
+  @override
+  String get commonSignOutConfirmTitle => 'Sign out?';
+
+  @override
+  String get commonSignOutConfirmMessage =>
+      'You will sign out of your account on this device.';
+
+  @override
   String get fabMenuNewSale => 'New sale';
 
   @override
@@ -385,6 +395,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fabMenuAddDebtHint => 'Receivable or payable';
+
+  @override
+  String get fabMenuAddCustomer => 'Add customer';
+
+  @override
+  String get fabMenuAddCustomerHint => 'Contacts · linked credit';
 
   @override
   String get fabMenuCancel => 'Cancel';
@@ -870,7 +886,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get purchasesSearchHint => 'Search purchases...';
 
   @override
-  String get productsFilterTooltip => 'Filter products';
+  String get productsFilterTooltip => 'Filter';
 
   @override
   String get productsFilterAll => 'All';
@@ -930,19 +946,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsPurchasePrice => 'Purchase price';
 
   @override
-  String get productsPurchasePriceError => 'Enter the purchase price.';
+  String get productsPurchasePriceError => 'Enter purchase price';
 
   @override
   String get productsSalePrice => 'Sale price';
 
   @override
-  String get productsSalePriceError => 'Enter the sale price.';
+  String get productsSalePriceError => 'Enter sale price';
 
   @override
   String get productsStockQuantity => 'Stock quantity';
 
   @override
-  String get productsStockError => 'Enter a valid quantity.';
+  String get productsStockError => 'Invalid quantity';
 
   @override
   String get productsAddSubmit => 'Add product';
@@ -970,7 +986,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsPhotoTake => 'Take photo';
 
   @override
-  String get productsPhotoGallery => 'From gallery';
+  String get productsPhotoGallery => 'Choose from gallery';
 
   @override
   String get productsPhotoRemove => 'Remove photo';
@@ -979,7 +995,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsInactive => 'Inactive';
 
   @override
+  String get productsStockOut => 'Out of stock';
+
+  @override
+  String get productsStockLow => 'Low stock';
+
+  @override
+  String get productsFilterAdvanced => 'Advanced filters';
+
+  @override
+  String get productsFilterClear => 'Clear all';
+
+  @override
+  String get productsFilterStockType => 'Stock type';
+
+  @override
+  String get productsFilterStockTypeAll => 'All';
+
+  @override
+  String get productsFilterStockTypeWeight => 'Weight (kg/g/l/ml)';
+
+  @override
+  String get productsFilterStockTypeUnit => 'Unit (pcs)';
+
+  @override
+  String get productsFilterAvailability => 'Availability';
+
+  @override
+  String get productsFilterAvailable => 'In stock';
+
+  @override
+  String get productsFilterLowStock => 'Low stock';
+
+  @override
+  String get productsFilterOutOfStock => 'Out of stock';
+
+  @override
+  String get productsFilterPriceRange => 'Price range';
+
+  @override
+  String get productsFilterMinPrice => 'Min price';
+
+  @override
+  String get productsFilterMaxPrice => 'Max price';
+
+  @override
+  String get productsFilterApply => 'Apply';
+
+  @override
   String get productsFilterInactive => 'Inactive';
+
+  @override
+  String productsFilterInactiveCount(int count) {
+    return 'Inactive · $count';
+  }
+
+  @override
+  String productsHeaderCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count products',
+      one: '1 product',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productsClearFilters => 'Clear filters';
+
+  @override
+  String get productsEmptyFilteredTitle => 'No products found';
+
+  @override
+  String get productsEmptyFilteredSubtitle =>
+      'Try adjusting your search or filters.';
+
+  @override
+  String productsFilteredCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count products',
+      one: '1 product',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productsSummaryActive => 'Active';
+
+  @override
+  String get productsSummaryLowStock => 'Low stock';
+
+  @override
+  String get productsSummaryInactive => 'Inactive';
 
   @override
   String get productsActiveLabel => 'Active product';
@@ -1002,6 +1112,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productsSectionStatus => 'Status';
+
+  @override
+  String get productsAddNewTitle => 'New product';
+
+  @override
+  String get productsSave => 'Save';
+
+  @override
+  String get productsSaving => 'Saving...';
+
+  @override
+  String get productsSaved => 'Product saved successfully';
+
+  @override
+  String get productsSavedNoPhoto => 'Product saved! (no storage permission)';
+
+  @override
+  String get productsPhotoLabelNew => 'Product photo';
+
+  @override
+  String get productsPhotoHint => 'Tap to add';
+
+  @override
+  String get productsSectionBasic => 'Basic information';
+
+  @override
+  String get productsSectionPricingNew => 'Pricing';
+
+  @override
+  String get productsSectionStockNew => 'Stock';
+
+  @override
+  String get productsNameLabel => 'Product name';
+
+  @override
+  String get productsNameHint => 'E.g., Rice type 1';
+
+  @override
+  String get productsNameErrorMsg => 'Required';
+
+  @override
+  String get productsDescriptionLabelNew => 'Description';
+
+  @override
+  String get productsDescriptionHint => 'Optional';
+
+  @override
+  String get productsCodeLabel => 'Barcode (PLU)';
+
+  @override
+  String get productsCodeHint => 'Label scales (e.g. 12345)';
+
+  @override
+  String get productsCodeError => 'Invalid code: use up to 5 digits.';
+
+  @override
+  String get productsPurchasePriceLabel => 'Purchase price';
+
+  @override
+  String get productsSalePriceLabel => 'Sale price';
+
+  @override
+  String get productsPriceValidationError =>
+      'Sale price must be higher than purchase price';
+
+  @override
+  String get productsStockQuantityLabel => 'Stock quantity';
+
+  @override
+  String get productsStockHint => 'E.g., 50';
+
+  @override
+  String get productsStockWeightHint => 'In sale units (e.g. 1.75)';
+
+  @override
+  String get productsExpiryLabel => 'Expiry';
+
+  @override
+  String get productsExpiryHint => 'Optional';
+
+  @override
+  String get productsExpiryAdd => 'Set expiry';
+
+  @override
+  String get productsExpiryClear => 'Remove expiry';
+
+  @override
+  String get productsWeighLabel => 'Sell by weight (fraction)';
+
+  @override
+  String get productsWeighHint => 'Accepts decimal quantities (e.g. 1.75 kg)';
+
+  @override
+  String get productsUnitLabel => 'Unit of sale';
 
   @override
   String customersHeaderCount(int count) {
@@ -1242,13 +1446,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialBalance => 'Balance';
 
   @override
-  String get financialPeriodBalance => 'Period balance';
+  String get financialPeriodBalance => 'Net period balance';
 
   @override
   String get financialSwipeHint => 'Swipe for expenses →';
 
   @override
-  String get financialTransactions => 'Transactions';
+  String get financialTransactions => 'Period transactions';
 
   @override
   String get financialLoadError => 'Could not load the transactions.';
@@ -1295,7 +1499,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialPaid => 'Expense paid!';
 
   @override
-  String get financialPayError => 'Could not pay. Try again.';
+  String get financialPayError => 'Could not pay the pending item. Try again.';
 
   @override
   String get financialAddTitle => 'Record transaction';
@@ -1623,6 +1827,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get salesStatusPaid => 'Paid';
+
+  @override
+  String get salesFilterAll => 'All';
+
+  @override
+  String get salesFilterActive => 'Active';
+
+  @override
+  String get salesFilterCancelled => 'Cancelled';
 
   @override
   String salesHeaderTransactions(int count) {
@@ -1978,37 +2191,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminPlanCurrent => 'Current';
 
   @override
-  String get productsCodeLabel => 'Barcode (PLU)';
-
-  @override
-  String get productsCodeHint => 'Label scales (e.g. 12345)';
-
-  @override
-  String get productsCodeError => 'Invalid code: use up to 5 digits.';
-
-  @override
-  String get productsWeighLabel => 'Sell by weight (fraction)';
-
-  @override
-  String get productsWeighHint => 'Accepts decimal quantities (e.g. 1.75 kg)';
-
-  @override
-  String get productsUnitLabel => 'Unit of sale';
-
-  @override
-  String get productsStockWeightHint => 'In sale units (e.g. 1.75)';
-
-  @override
-  String get productsExpiryLabel => 'Expiry';
-
-  @override
-  String get productsExpiryAdd => 'Set expiry';
-
-  @override
   String get productsExpiryHelp => 'Product expiry date';
-
-  @override
-  String get productsExpiryClear => 'Remove expiry';
 
   @override
   String get salesBarcodeLabel => 'Barcode';

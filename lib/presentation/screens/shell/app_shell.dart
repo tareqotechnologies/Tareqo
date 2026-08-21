@@ -14,6 +14,9 @@ import '../customers/customers_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../financial/add_transaction_sheet.dart';
 import '../financial/financial_screen.dart';
+import '../../controllers/customers_providers.dart';
+import '../../controllers/dashboard_providers.dart';
+import '../../controllers/products_providers.dart';
 import '../products/product_list_screen.dart';
 import '../sales/new_sale_sheet.dart';
 import '../sales/sales_screen.dart';
@@ -153,15 +156,32 @@ class AppShell extends ConsumerWidget {
  ),
  ],
  ),
- floatingActionButton: FloatingActionButton(
+ // Seções que já trazem o seu próprio FAB: ocultamos o FAB do shell
+ // para evitar duplicação visual (Sales, Financial, Products, Customers).
+ floatingActionButton: _hasOwnFab(index)
+ ? null
+ : FloatingActionButton(
  heroTag: 'fab-shell',
  onPressed: openActionMenu,
  tooltip: l10n.fabMenuTitle,
  child: const Icon(Icons.add_rounded, size: 28),
- ),
- );
+ ),);
  }
-}/// Marca visual compacta do app (rail desktop).
+}
+
+/// Seções que trazem o seu próprio FAB — o shell não adiciona um
+/// segundo para evitar duplicação visual.
+bool _hasOwnFab(int sectionIndex) {
+ const ownFabSections = {
+ AppSection.sales,
+ AppSection.financial,
+ AppSection.products,
+ AppSection.customers,
+ };
+ return ownFabSections.contains(AppSection.values[sectionIndex]);
+}
+
+/// Marca visual compacta do app (rail desktop).
 class _BrandMark extends StatelessWidget {
   const _BrandMark({this.compact = false});
 
@@ -239,19 +259,37 @@ class _ActionMenuSheet extends ConsumerWidget {
  ),
  );
  },
- ),
- _ActionTile(
- icon: Icons.inventory_2_outlined,
- title: l10n.fabMenuAddProduct,
- hint: l10n.fabMenuAddProductHint,
- color: theme.colorScheme.onSurface,
- onTap: () {
- close();
- ref.read(shellIndexProvider.notifier).goTo(AppSection.products);
- },
- ),
- _ActionTile(
- icon: Icons.credit_card_outlined,
+ ),          _ActionTile(
+            icon: Icons.inventory_2_outlined,
+            title: l10n.fabMenuAddProduct,
+            hint: l10n.fabMenuAddProductHint,
+            color: theme.colorScheme.onSurface,
+            onTap: () async {
+              close();
+              await showAppSheet<void>(
+                context,
+                builder: (_) => const AddProductSheet(),
+              );
+              ref.invalidate(productsProvider);
+              ref.invalidate(dashboardKpisProvider);
+            },
+          ),
+          _ActionTile(
+            icon: Icons.person_add_alt_1_outlined,
+            title: l10n.fabMenuAddCustomer,
+            hint: l10n.fabMenuAddCustomerHint,
+            color: theme.colorScheme.primary,
+            onTap: () async {
+              close();
+              await showAppSheet<void>(
+                context,
+                builder: (_) => const AddCustomerSheet(),
+              );
+              ref.invalidate(customersProvider);
+            },
+          ),
+          _ActionTile(
+            icon: Icons.credit_card_outlined,
  title: l10n.fabMenuAddDebt,
  hint: l10n.fabMenuAddDebtHint,
  color: theme.warning,

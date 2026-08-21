@@ -337,7 +337,7 @@ abstract class AppLocalizations {
   /// No description provided for @commonSignOut.
   ///
   /// In pt, this message translates to:
-  /// **'Sair da conta'**
+  /// **'Terminar sessão'**
   String get commonSignOut;
 
   /// No description provided for @appSheetClose.
@@ -766,6 +766,24 @@ abstract class AppLocalizations {
   /// **'O que deseja fazer?'**
   String get fabMenuSubtitle;
 
+  /// No description provided for @menuSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha uma área para continuar'**
+  String get menuSubtitle;
+
+  /// No description provided for @commonSignOutConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Terminar sessão?'**
+  String get commonSignOutConfirmTitle;
+
+  /// No description provided for @commonSignOutConfirmMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vai sair da sua conta neste dispositivo.'**
+  String get commonSignOutConfirmMessage;
+
   /// No description provided for @fabMenuNewSale.
   ///
   /// In pt, this message translates to:
@@ -813,6 +831,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'A receber ou a pagar'**
   String get fabMenuAddDebtHint;
+
+  /// No description provided for @fabMenuAddCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar cliente'**
+  String get fabMenuAddCustomer;
+
+  /// No description provided for @fabMenuAddCustomerHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contactos · fiado vinculado'**
+  String get fabMenuAddCustomerHint;
 
   /// No description provided for @fabMenuCancel.
   ///
@@ -1639,7 +1669,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsFilterTooltip.
   ///
   /// In pt, this message translates to:
-  /// **'Filtrar produtos'**
+  /// **'Filtrar'**
   String get productsFilterTooltip;
 
   /// No description provided for @productsFilterAll.
@@ -1651,13 +1681,13 @@ abstract class AppLocalizations {
   /// No description provided for @productsFilterAllCount.
   ///
   /// In pt, this message translates to:
-  /// **'Todos · {count}'**
+  /// **'Todos os produtos · {count}'**
   String productsFilterAllCount(int count);
 
   /// No description provided for @productsFilterLowCount.
   ///
   /// In pt, this message translates to:
-  /// **'Estoque baixo · {count}'**
+  /// **'Stock baixo · {count}'**
   String productsFilterLowCount(int count);
 
   /// No description provided for @productsColProduct.
@@ -1675,7 +1705,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsSearchHint.
   ///
   /// In pt, this message translates to:
-  /// **'Buscar produto...'**
+  /// **'Pesquisar produto...'**
   String get productsSearchHint;
 
   /// No description provided for @productsLoadError.
@@ -1747,7 +1777,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsPurchasePriceError.
   ///
   /// In pt, this message translates to:
-  /// **'Informe o preço de compra.'**
+  /// **'Informe o preço de compra'**
   String get productsPurchasePriceError;
 
   /// No description provided for @productsSalePrice.
@@ -1759,7 +1789,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsSalePriceError.
   ///
   /// In pt, this message translates to:
-  /// **'Informe o preço de venda.'**
+  /// **'Informe o preço de venda'**
   String get productsSalePriceError;
 
   /// No description provided for @productsStockQuantity.
@@ -1771,7 +1801,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsStockError.
   ///
   /// In pt, this message translates to:
-  /// **'Informe uma quantidade válida.'**
+  /// **'Quantidade inválida'**
   String get productsStockError;
 
   /// No description provided for @productsAddSubmit.
@@ -1819,19 +1849,19 @@ abstract class AppLocalizations {
   /// No description provided for @productsPhotoTake.
   ///
   /// In pt, this message translates to:
-  /// **'Tirar foto'**
+  /// **'Tirar fotografia'**
   String get productsPhotoTake;
 
   /// No description provided for @productsPhotoGallery.
   ///
   /// In pt, this message translates to:
-  /// **'Da galeria'**
+  /// **'Escolher da galeria'**
   String get productsPhotoGallery;
 
   /// No description provided for @productsPhotoRemove.
   ///
   /// In pt, this message translates to:
-  /// **'Remover foto'**
+  /// **'Remover fotografia'**
   String get productsPhotoRemove;
 
   /// No description provided for @productsInactive.
@@ -1840,11 +1870,161 @@ abstract class AppLocalizations {
   /// **'Inativo'**
   String get productsInactive;
 
+  /// No description provided for @productsStockOut.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esgotado'**
+  String get productsStockOut;
+
+  /// No description provided for @productsStockLow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Baixo'**
+  String get productsStockLow;
+
+  /// No description provided for @productsFilterAdvanced.
+  ///
+  /// In pt, this message translates to:
+  /// **'Filtros avançados'**
+  String get productsFilterAdvanced;
+
+  /// No description provided for @productsFilterClear.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpar tudo'**
+  String get productsFilterClear;
+
+  /// No description provided for @productsFilterStockType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo de estoque'**
+  String get productsFilterStockType;
+
+  /// No description provided for @productsFilterStockTypeAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos'**
+  String get productsFilterStockTypeAll;
+
+  /// No description provided for @productsFilterStockTypeWeight.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peso (kg/g/l/ml)'**
+  String get productsFilterStockTypeWeight;
+
+  /// No description provided for @productsFilterStockTypeUnit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Unidade (un)'**
+  String get productsFilterStockTypeUnit;
+
+  /// No description provided for @productsFilterAvailability.
+  ///
+  /// In pt, this message translates to:
+  /// **'Disponibilidade'**
+  String get productsFilterAvailability;
+
+  /// No description provided for @productsFilterAvailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em estoque'**
+  String get productsFilterAvailable;
+
+  /// No description provided for @productsFilterLowStock.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque baixo'**
+  String get productsFilterLowStock;
+
+  /// No description provided for @productsFilterOutOfStock.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esgotado'**
+  String get productsFilterOutOfStock;
+
+  /// No description provided for @productsFilterPriceRange.
+  ///
+  /// In pt, this message translates to:
+  /// **'Faixa de preço'**
+  String get productsFilterPriceRange;
+
+  /// No description provided for @productsFilterMinPrice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço mínimo'**
+  String get productsFilterMinPrice;
+
+  /// No description provided for @productsFilterMaxPrice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço máximo'**
+  String get productsFilterMaxPrice;
+
+  /// No description provided for @productsFilterApply.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aplicar'**
+  String get productsFilterApply;
+
   /// No description provided for @productsFilterInactive.
   ///
   /// In pt, this message translates to:
-  /// **'Inativos'**
+  /// **'Inactivos'**
   String get productsFilterInactive;
+
+  /// No description provided for @productsFilterInactiveCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inactivos · {count}'**
+  String productsFilterInactiveCount(int count);
+
+  /// No description provided for @productsHeaderCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 produto} other{{count} produtos}}'**
+  String productsHeaderCount(int count);
+
+  /// No description provided for @productsClearFilters.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpar filtros'**
+  String get productsClearFilters;
+
+  /// No description provided for @productsEmptyFilteredTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum produto encontrado'**
+  String get productsEmptyFilteredTitle;
+
+  /// No description provided for @productsEmptyFilteredSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajuste a pesquisa ou os filtros.'**
+  String get productsEmptyFilteredSubtitle;
+
+  /// No description provided for @productsFilteredCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 produto} other{{count} produtos}}'**
+  String productsFilteredCount(int count);
+
+  /// No description provided for @productsSummaryActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Activos'**
+  String get productsSummaryActive;
+
+  /// No description provided for @productsSummaryLowStock.
+  ///
+  /// In pt, this message translates to:
+  /// **'Stock baixo'**
+  String get productsSummaryLowStock;
+
+  /// No description provided for @productsSummaryInactive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inactivos'**
+  String get productsSummaryInactive;
 
   /// No description provided for @productsActiveLabel.
   ///
@@ -1887,6 +2067,192 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Status'**
   String get productsSectionStatus;
+
+  /// No description provided for @productsAddNewTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo produto'**
+  String get productsAddNewTitle;
+
+  /// No description provided for @productsSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Guardar'**
+  String get productsSave;
+
+  /// No description provided for @productsSaving.
+  ///
+  /// In pt, this message translates to:
+  /// **'A guardar...'**
+  String get productsSaving;
+
+  /// No description provided for @productsSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto guardado com sucesso'**
+  String get productsSaved;
+
+  /// No description provided for @productsSavedNoPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto guardado! (sem permissão de armazenamento)'**
+  String get productsSavedNoPhoto;
+
+  /// No description provided for @productsPhotoLabelNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fotografia do produto'**
+  String get productsPhotoLabelNew;
+
+  /// No description provided for @productsPhotoHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para adicionar'**
+  String get productsPhotoHint;
+
+  /// No description provided for @productsSectionBasic.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações básicas'**
+  String get productsSectionBasic;
+
+  /// No description provided for @productsSectionPricingNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preços'**
+  String get productsSectionPricingNew;
+
+  /// No description provided for @productsSectionStockNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Stock'**
+  String get productsSectionStockNew;
+
+  /// No description provided for @productsNameLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome do produto'**
+  String get productsNameLabel;
+
+  /// No description provided for @productsNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Arroz tipo 1'**
+  String get productsNameHint;
+
+  /// No description provided for @productsNameErrorMsg.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigatório'**
+  String get productsNameErrorMsg;
+
+  /// No description provided for @productsDescriptionLabelNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descrição'**
+  String get productsDescriptionLabelNew;
+
+  /// No description provided for @productsDescriptionHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opcional'**
+  String get productsDescriptionHint;
+
+  /// No description provided for @productsCodeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de barras (PLU)'**
+  String get productsCodeLabel;
+
+  /// No description provided for @productsCodeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Balanças etiquetadoras (ex.: 12345)'**
+  String get productsCodeHint;
+
+  /// No description provided for @productsCodeError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código inválido: use até 5 dígitos.'**
+  String get productsCodeError;
+
+  /// No description provided for @productsPurchasePriceLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço de compra (MT)'**
+  String get productsPurchasePriceLabel;
+
+  /// No description provided for @productsSalePriceLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço de venda (MT)'**
+  String get productsSalePriceLabel;
+
+  /// No description provided for @productsPriceValidationError.
+  ///
+  /// In pt, this message translates to:
+  /// **'O preço de venda deve ser superior ao de compra'**
+  String get productsPriceValidationError;
+
+  /// No description provided for @productsStockQuantityLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantidade em stock'**
+  String get productsStockQuantityLabel;
+
+  /// No description provided for @productsStockHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: 50'**
+  String get productsStockHint;
+
+  /// No description provided for @productsStockWeightHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em unidades da venda (ex.: 1,75)'**
+  String get productsStockWeightHint;
+
+  /// No description provided for @productsExpiryLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Validade'**
+  String get productsExpiryLabel;
+
+  /// No description provided for @productsExpiryHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opcional'**
+  String get productsExpiryHint;
+
+  /// No description provided for @productsExpiryAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir validade'**
+  String get productsExpiryAdd;
+
+  /// No description provided for @productsExpiryClear.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover validade'**
+  String get productsExpiryClear;
+
+  /// No description provided for @productsWeighLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Venda por peso (fração)'**
+  String get productsWeighLabel;
+
+  /// No description provided for @productsWeighHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aceita quantidades decimais (ex.: 1,75 kg)'**
+  String get productsWeighHint;
+
+  /// No description provided for @productsUnitLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Unidade de venda'**
+  String get productsUnitLabel;
 
   /// No description provided for @customersHeaderCount.
   ///
@@ -2299,7 +2665,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialPeriodBalance.
   ///
   /// In pt, this message translates to:
-  /// **'Saldo do período'**
+  /// **'Saldo líquido do período'**
   String get financialPeriodBalance;
 
   /// No description provided for @financialSwipeHint.
@@ -2311,7 +2677,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialTransactions.
   ///
   /// In pt, this message translates to:
-  /// **'Movimentações'**
+  /// **'Movimentos do período'**
   String get financialTransactions;
 
   /// No description provided for @financialLoadError.
@@ -2395,7 +2761,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialPayError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível pagar. Tente novamente.'**
+  /// **'Não foi possível pagar a pendência. Tente novamente.'**
   String get financialPayError;
 
   /// No description provided for @financialAddTitle.
@@ -2917,7 +3283,7 @@ abstract class AppLocalizations {
   /// No description provided for @salesSearchHint.
   ///
   /// In pt, this message translates to:
-  /// **'Buscar venda...'**
+  /// **'Pesquisar venda...'**
   String get salesSearchHint;
 
   /// No description provided for @periodYesterday.
@@ -2943,6 +3309,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Pago'**
   String get salesStatusPaid;
+
+  /// No description provided for @salesFilterAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todas'**
+  String get salesFilterAll;
+
+  /// No description provided for @salesFilterActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativas'**
+  String get salesFilterActive;
+
+  /// No description provided for @salesFilterCancelled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anuladas'**
+  String get salesFilterCancelled;
 
   /// Contagem de transações de hoje no resumo da tela de vendas
   ///
@@ -3532,71 +3916,11 @@ abstract class AppLocalizations {
   /// **'Atual'**
   String get adminPlanCurrent;
 
-  /// No description provided for @productsCodeLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Código de barras (PLU)'**
-  String get productsCodeLabel;
-
-  /// No description provided for @productsCodeHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Balanças etiquetadoras (ex.: 12345)'**
-  String get productsCodeHint;
-
-  /// No description provided for @productsCodeError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Código inválido: use até 5 dígitos.'**
-  String get productsCodeError;
-
-  /// No description provided for @productsWeighLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Venda por peso (fração)'**
-  String get productsWeighLabel;
-
-  /// No description provided for @productsWeighHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aceita quantidades decimais (ex.: 1,75 kg)'**
-  String get productsWeighHint;
-
-  /// No description provided for @productsUnitLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Unidade de venda'**
-  String get productsUnitLabel;
-
-  /// No description provided for @productsStockWeightHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Em unidades da venda (ex.: 1,75)'**
-  String get productsStockWeightHint;
-
-  /// No description provided for @productsExpiryLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Validade'**
-  String get productsExpiryLabel;
-
-  /// No description provided for @productsExpiryAdd.
-  ///
-  /// In pt, this message translates to:
-  /// **'Definir validade'**
-  String get productsExpiryAdd;
-
   /// No description provided for @productsExpiryHelp.
   ///
   /// In pt, this message translates to:
   /// **'Data de validade do produto'**
   String get productsExpiryHelp;
-
-  /// No description provided for @productsExpiryClear.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover validade'**
-  String get productsExpiryClear;
 
   /// No description provided for @salesBarcodeLabel.
   ///

@@ -423,23 +423,26 @@ class _DailyRow extends StatelessWidget {
 
  @override
  Widget build(BuildContext context) {
- final theme = Theme.of(context);
-
- return Padding(
- padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
- child: Row(
- children: [
- Expanded(
- child: Text(
- Formatters.day(day),
- style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w500,
- ),
- ),
- ),
- Text(Formatters.currency(total), style: theme.textTheme.titleMedium),
- ],
- ),
- );
+ final theme = Theme.of(context);    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              Formatters.day(day),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Text(
+            Formatters.currency(total),
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
  }
 }

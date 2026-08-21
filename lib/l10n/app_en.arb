@@ -144,6 +144,9 @@
   "appNavCustomers": "Customers",
   "fabMenuTitle": "New action",
   "fabMenuSubtitle": "What would you like to do?",
+  "menuSubtitle": "Choose an area to continue",
+  "commonSignOutConfirmTitle": "Sign out?",
+  "commonSignOutConfirmMessage": "You will sign out of your account on this device.",
   "fabMenuNewSale": "New sale",
   "fabMenuNewSaleHint": "Cart · stock deduction · cash",
   "fabMenuExpense": "Register expense",
@@ -152,6 +155,8 @@
   "fabMenuAddProductHint": "Catalog · price · initial stock",
   "fabMenuAddDebt": "Register credit",
   "fabMenuAddDebtHint": "Receivable or payable",
+  "fabMenuAddCustomer": "Add customer",
+  "fabMenuAddCustomerHint": "Contacts · linked credit",
   "fabMenuCancel": "Cancel",
   "syncPendingCount": "{count, plural, =1{1 operation awaiting sync} other{{count} operations awaiting sync}}",
   "@syncPendingCount": {
@@ -440,7 +445,54 @@
   "productsPhotoGallery": "From gallery",
   "productsPhotoRemove": "Remove photo",
   "productsInactive": "Inactive",
+  "productsStockOut": "Out of stock",
+  "productsStockLow": "Low stock",
+  "productsFilterTooltip": "Filter",
+  "productsFilterAdvanced": "Advanced filters",
+  "productsFilterClear": "Clear all",
+  "productsFilterStockType": "Stock type",
+  "productsFilterStockTypeAll": "All",
+  "productsFilterStockTypeWeight": "Weight (kg/g/l/ml)",
+  "productsFilterStockTypeUnit": "Unit (pcs)",
+  "productsFilterAvailability": "Availability",
+  "productsFilterAvailable": "In stock",
+  "productsFilterLowStock": "Low stock",
+  "productsFilterOutOfStock": "Out of stock",
+  "productsFilterPriceRange": "Price range",
+  "productsFilterMinPrice": "Min price",
+  "productsFilterMaxPrice": "Max price",
+  "productsFilterApply": "Apply",
   "productsFilterInactive": "Inactive",
+  "productsFilterInactiveCount": "Inactive · {count}",
+  "@productsFilterInactiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsHeaderCount": "{count, plural, =1{1 product} other{{count} products}}",
+  "@productsHeaderCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsClearFilters": "Clear filters",
+  "productsEmptyFilteredTitle": "No products found",
+  "productsEmptyFilteredSubtitle": "Try adjusting your search or filters.",
+  "productsFilteredCount": "{count, plural, =1{1 product} other{{count} products}}",
+  "@productsFilteredCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsSummaryActive": "Active",
+  "productsSummaryLowStock": "Low stock",
+  "productsSummaryInactive": "Inactive",
   "productsActiveLabel": "Active product",
   "productsActiveHint": "Disable to remove from POS and purchases.",
   "productsStockAdjustHint": "Manual adjustment: sets exact stock (FIFO).",
@@ -448,6 +500,43 @@
   "productsSectionPricing": "Pricing",
   "productsSectionStock": "Stock",
   "productsSectionStatus": "Status",
+  "productsAddNewTitle": "New product",
+  "productsSave": "Save",
+  "productsSaving": "Saving...",
+  "productsSaved": "Product saved successfully",
+  "productsSavedNoPhoto": "Product saved! (no storage permission)",
+  "productsPhotoLabelNew": "Product photo",
+  "productsPhotoTake": "Take photo",
+  "productsPhotoGallery": "Choose from gallery",
+  "productsPhotoRemove": "Remove photo",
+  "productsPhotoHint": "Tap to add",
+  "productsSectionBasic": "Basic information",
+  "productsSectionPricingNew": "Pricing",
+  "productsSectionStockNew": "Stock",
+  "productsNameLabel": "Product name",
+  "productsNameHint": "E.g., Rice type 1",
+  "productsNameErrorMsg": "Required",
+  "productsDescriptionLabelNew": "Description",
+  "productsDescriptionHint": "Optional",
+  "productsCodeLabel": "PLU or barcode",
+  "productsCodeHint": "Code used on label scale. Example: 12345",
+  "productsCodeError": "Use up to 5 digits",
+  "productsPurchasePriceLabel": "Purchase price",
+  "productsPurchasePriceError": "Enter purchase price",
+  "productsSalePriceLabel": "Sale price",
+  "productsSalePriceError": "Enter sale price",
+  "productsPriceValidationError": "Sale price must be higher than purchase price",
+  "productsStockQuantityLabel": "Stock quantity",
+  "productsStockHint": "E.g., 50",
+  "productsStockWeightHint": "In kg (e.g., 1.75)",
+  "productsStockError": "Invalid quantity",
+  "productsExpiryLabel": "Expiry date",
+  "productsExpiryHint": "Optional",
+  "productsExpiryAdd": "Select date",
+  "productsExpiryClear": "Remove expiry",
+  "productsWeighLabel": "Sell by weight",
+  "productsWeighHint": "Allows selling decimal quantities, e.g., 1.75 kg",
+  "productsUnitLabel": "Unit of measure",
   "customersHeaderCount": "{count, plural, =1{1 customer} other{{count} customers}}",
   "@customersHeaderCount": {
     "placeholders": {
@@ -587,9 +676,9 @@
   "financialIncome": "Income",
   "financialExpense": "Expenses",
   "financialBalance": "Balance",
-  "financialPeriodBalance": "Period balance",
+  "financialPeriodBalance": "Net period balance",
   "financialSwipeHint": "Swipe for expenses →",
-  "financialTransactions": "Transactions",
+  "financialTransactions": "Period transactions",
   "financialLoadError": "Could not load the transactions.",
   "financialCashFlowError": "Could not load the cash flow.",
   "financialEmptyTitle": "No transactions",
@@ -617,7 +706,7 @@
     }
   },
   "financialPaid": "Expense paid!",
-  "financialPayError": "Could not pay. Try again.",
+  "financialPayError": "Could not pay the pending item. Try again.",
   "financialAddTitle": "Record transaction",
   "financialIncomingType": "Income",
   "financialOutgoingType": "Expense",
@@ -794,6 +883,9 @@
   "paymentFilterCard": "Card",
   "paymentFilterAll": "All",
   "salesStatusPaid": "Paid",
+  "salesFilterAll": "All",
+  "salesFilterActive": "Active",
+  "salesFilterCancelled": "Cancelled",
   "salesHeaderTransactions": "{count, plural, =0{0 transactions} =1{1 transaction} other{{count} transactions}}",
   "@salesHeaderTransactions": {
     "description": "Number of today's transactions in the sales screen summary",

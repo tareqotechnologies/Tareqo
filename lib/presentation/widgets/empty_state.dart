@@ -13,6 +13,7 @@ class EmptyState extends StatelessWidget {
  this.subtitle,
  this.actionLabel,
  this.onAction,
+ this.outlinedAction = false,
  });
 
  final IconData icon;
@@ -20,6 +21,13 @@ class EmptyState extends StatelessWidget {
  final String? subtitle;
  final String? actionLabel;
  final VoidCallback? onAction;
+
+ /// Quando `true`, renderiza a ação como botão OUTLINED em vez de
+ /// `AppButton.primary` — útil para ações secundárias (ex.: "Limpar
+ /// filtros") em estados vazios derivados de filtro ativo. Mantém o
+ /// `AppButton.primary` (CTA forte) como padrão para o primeiro
+ /// estado vazio (zero cadastros).
+ final bool outlinedAction;
 
  @override
  Widget build(BuildContext context) {
@@ -62,6 +70,21 @@ class EmptyState extends StatelessWidget {
  ],
  if (actionLabel != null && onAction != null) ...[
  const SizedBox(height: AppSpacing.lg),
+ if (outlinedAction)
+ OutlinedButton(
+ onPressed: onAction,
+ style: OutlinedButton.styleFrom(
+ foregroundColor: scheme.primary,
+ side: BorderSide(color: scheme.outline),
+ padding: const EdgeInsets.symmetric(
+ horizontal: AppSpacing.lg,
+ vertical: AppSpacing.sm,
+ ),
+ shape: const StadiumBorder(),
+ ),
+ child: Text(actionLabel!),
+ )
+ else
  AppButton.primary(
  label: actionLabel!,
  icon: const Icon(Icons.add, size: 18),

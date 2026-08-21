@@ -45,7 +45,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
  Future<void> _openAddSheet() async {
  await showAppSheet<void>(
  context,
- builder: (_) => const _AddCustomerSheet(),
+ builder: (_) => const AddCustomerSheet(),
  );
  if (!mounted) return;
  ref.invalidate(customersProvider);
@@ -296,14 +296,14 @@ class _CustomerTile extends StatelessWidget {
 }
 
 /// Bottom sheet de cadastro de cliente.
-class _AddCustomerSheet extends ConsumerStatefulWidget {
- const _AddCustomerSheet();
+class AddCustomerSheet extends ConsumerStatefulWidget {
+ const AddCustomerSheet({super.key});
 
  @override
- ConsumerState<_AddCustomerSheet> createState() => _AddCustomerSheetState();
+ ConsumerState<AddCustomerSheet> createState() => _AddCustomerSheetState();
 }
 
-class _AddCustomerSheetState extends ConsumerState<_AddCustomerSheet> {
+class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
  final _formKey = GlobalKey<FormState>();
  final _nameController = TextEditingController();
  final _phoneController = TextEditingController();

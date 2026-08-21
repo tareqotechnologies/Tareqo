@@ -264,8 +264,7 @@ void main() {
  // Card stack do fluxo de caixa (vindos do use case fake): cartão de
  // Entradas à frente, Saídas atrás e a faixa de saldo do período.
  expect(find.text('Entradas'), findsOneWidget);
- expect(find.text('Saídas'), findsOneWidget);
- expect(find.text('Saldo do período'), findsOneWidget);
+ expect(find.text('Saídas'), findsOneWidget);    expect(find.text('Saldo líquido do período'), findsOneWidget);
  // Sub-linhas com sinal e SEM o símbolo repetido (a moeda fica na
  // pílula + saldo); o saldo mantém o formato completo.
  expect(find.text('+1.500,00'), findsOneWidget);
@@ -561,8 +560,7 @@ void main() {
 
  // Retrato: o card stack e o seletor de período visíveis.
  expect(find.text('Entradas'), findsOneWidget);
- expect(find.text('Saídas'), findsOneWidget);
- expect(find.text('Saldo do período'), findsOneWidget);
+ expect(find.text('Saídas'), findsOneWidget);    expect(find.text('Saldo líquido do período'), findsOneWidget);
  expect(find.byType(SegmentedButton<CashFlowPeriod>), findsOneWidget);
  expect(find.text('Este mês'), findsOneWidget);
  expect(tester.takeException(), isNull);
@@ -573,8 +571,7 @@ void main() {
  // Sem overflow; card stack e seletor seguem presentes após o giro.
  expect(tester.takeException(), isNull);
  expect(find.text('Entradas'), findsOneWidget);
- expect(find.text('Saídas'), findsOneWidget);
- expect(find.text('Saldo do período'), findsOneWidget);
+ expect(find.text('Saídas'), findsOneWidget);    expect(find.text('Saldo líquido do período'), findsOneWidget);
  expect(find.text('+1.500,00'), findsOneWidget);
  expect(find.text('-450,00'), findsOneWidget);
  expect(find.byType(SegmentedButton<CashFlowPeriod>), findsOneWidget);

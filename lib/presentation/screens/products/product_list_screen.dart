@@ -26,9 +26,7 @@ import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
-import '../../widgets/feed_card.dart';
 import '../../widgets/list_skeleton.dart';
-import '../../widgets/search_field.dart';
 import '../../widgets/smart_amount.dart';
 import '../../widgets/status_chip.dart';
 import '../../../core/observability/crash_reporting.dart';
@@ -43,22 +41,25 @@ class ProductListScreen extends ConsumerStatefulWidget {
  ConsumerState<ProductListScreen> createState() => _ProductListScreenState();
 }
 
-class _ProductListScreenState extends ConsumerState<ProductListScreen> {
- final _searchController = TextEditingController();
- String _query = '';
+class _ProductListScreenState extends ConsumerState<ProductListScreen> {_AdvancedFilters _advanced = const _AdvancedFilters();
 
- /// Filtro rápido (design system 2026 — botão de filtro no AppBar):
- /// Todos / Estoque baixo / Inativos. Sempre começa em Todos.
- _ProductFilter _filter = _ProductFilter.all;
+  Future<void> _openFilterSheet() async {
+    final result = await showAppSheet<_AdvancedFilters>(
+      context,
+      builder: (_) => _AdvancedFilterSheet(initial: _advanced),
+    );
+    if (result == null || !mounted) return;
+    setState(() => _advanced = result);
+  }
 
- @override
- void dispose() {
- _searchController.dispose();
- super.dispose();
- }
+  void _clearFilters() {
+    setState(() {
+      _advanced = const _AdvancedFilters();
+    });
+  }
 
  Future<void> _openAddSheet() async {
- await showAppSheet<void>(context, builder: (_) => const _AddProductSheet());
+ await showAppSheet<void>(context, builder: (_) => const AddProductSheet());
  if (!mounted) return;
  ref.invalidate(productsProvider);
  ref.invalidate(dashboardKpisProvider);
@@ -86,18 +87,35 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
  ref.watch(currentAccessLevelProvider) != UserAccessLevel.employee;
 
  return Scaffold(
- // AppBar estilo iOS large title — mesmo padrão das demais telas.
- appBar: AppBar(
- toolbarHeight: 64,
- titleSpacing: 20,
- title: Text(
- l10n.appNavProducts,
- style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w500,
- letterSpacing: -0.5,
- ),
- ),
- ),
+    appBar: AppBar(
+    toolbarHeight: 72,
+    titleSpacing: 20,
+    title: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.appNavProducts,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.5,
+          ),
+        ),
+        Text(
+          l10n.productsHeaderCount(productsAsync.value?.length ?? 0),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    ),
+    actions: [
+      IconButton(
+        tooltip: l10n.productsFilterTooltip,
+        onPressed: _openFilterSheet,
+        icon: const Icon(Icons.tune_rounded),
+      ),
+    ],
+  ),
  // CTA único: sem produtos, o FAB some — o estado vazio traz o botão
  // de cadastro centralizado (mantendo a regra canManageProducts).
  // FAB CIRCULAR verde (design system 2026 — igual ao app de
@@ -111,44 +129,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 child: const Icon(Icons.add),
               )
             : null,
- body: Column(
- children: [
- Padding(
- padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
- child: SearchField(
- controller: _searchController,
- hintText: l10n.productsSearchHint,
- onChanged: (value) => setState(() => _query = value.trim()),
- ),
- ),
- // Chips de filtro visíveis (canvas V3): Todos · N / Estoque
- // baixo · N / Inativos — a contagem real ao lado do rótulo, em
- // vez do menu escondido no AppBar.
- Padding(
- padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
- child: Align(
- alignment: Alignment.centerLeft,
- child: _FilterChips(
- filter: _filter,
- counts: (
- all: productsAsync.value?.length ?? 0,
- lowStock: (productsAsync.value ?? const [])
- .where(
- (p) =>
- p.isActive &&
- p.stockQuantity <
- Quantity.lowStockThresholdUnits *
- Quantity.milliFactor,
- )
- .length,
- ),
- onSelected: (value) => setState(() => _filter = value),
- ),
- ),
- ),
- Expanded(
- child: productsAsync.when(
- // Skeleton no primeiro carregamento (padrão das listas).
+ body: productsAsync.when(
  loading: () => const ListSkeleton(),
  error: (error, _) => ErrorView(
  message: l10n.productsLoadError,
@@ -161,189 +142,463 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
  icon: Icons.inventory_2_outlined,
  title: l10n.productsEmptyTitle,
  subtitle: l10n.productsEmptySubtitle,
- // CTA único no estado vazio (o FAB some) — só para
- // quem pode gerir produtos (dono/gerente).
  actionLabel: canManageProducts ? l10n.productsAddNew : null,
  onAction: canManageProducts ? _openAddSheet : null,
  );
  }
 
- // Query NORMALIZADO para minúsculas: sem isso, digitar
- // 'CANETA' não achava 'Caneta Azul' (o nome era convertido,
- // o termo digitado não).
- final query = _query.toLowerCase();
+ final q = _advanced.query;
+ final isFiltering = _advanced.hasAny;
  final filtered = products.where((product) {
  final matchesQuery =
- query.isEmpty ||
- product.name.toLowerCase().contains(query) ||
- product.description.toLowerCase().contains(query);
- final matchesFilter = switch (_filter) {
+ q.isEmpty ||
+ product.name.toLowerCase().contains(q) ||
+ product.description.toLowerCase().contains(q) ||
+ product.code.toLowerCase().contains(q);
+ final matchesStatus = switch (_advanced.status) {
  _ProductFilter.all => true,
  _ProductFilter.lowStock =>
  product.isActive &&
  product.stockQuantity <
- Quantity.lowStockThresholdUnits *
- Quantity.milliFactor,
+ Quantity.lowStockThresholdUnits * Quantity.milliFactor,
  _ProductFilter.inactive => !product.isActive,
  };
- return matchesQuery && matchesFilter;
- }).toList();
-
- if (filtered.isEmpty) {
- return EmptyState(
- icon: Icons.search_off,
- title: l10n.commonNoResults,
- subtitle: l10n.commonNoResultsHint,
- );
- }
+ final matchesStockType =
+ _advanced.stockType == _StockTypeFilter.all ||
+ (_advanced.stockType == _StockTypeFilter.weight && product.vendaPorFracao) ||
+ (_advanced.stockType == _StockTypeFilter.unit && !product.vendaPorFracao);
+ final matchesAvailability =
+ _advanced.availability == _AvailabilityFilter.all ||
+ (_advanced.availability == _AvailabilityFilter.available && product.stockQuantity > 0 && product.isActive) ||
+ (_advanced.availability == _AvailabilityFilter.lowStock && product.isActive && product.stockQuantity < Quantity.lowStockThresholdUnits * Quantity.milliFactor) ||
+ (_advanced.availability == _AvailabilityFilter.outOfStock && product.stockQuantity <= 0);
+ final matchesPrice =
+ (_advanced.minPriceCents == null || product.salePriceCents >= _advanced.minPriceCents!) &&
+ (_advanced.maxPriceCents == null || product.salePriceCents <= _advanced.maxPriceCents!);
+ return matchesQuery && matchesStatus && matchesStockType && matchesAvailability && matchesPrice;
+ }).toList()
+   ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
  return RefreshIndicator(
- onRefresh: () =>
- ref.read(productsProvider.notifier).refresh(),
- // Folha única estilo Home (FeedCard): um só card com os
- // produtos como linhas separadas por divisórias hairline.
- child: ListView(
- padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
+ onRefresh: () => ref.read(productsProvider.notifier).refresh(),
+ child: CustomScrollView(
  physics: const AlwaysScrollableScrollPhysics(),
- children: [
- FeedCard(
- rows: [
- for (final product in filtered)
- _ProductTile(
- product: product,
- // Edição é operação de gestão (dono/gerente):
- // o tile só é tocável para quem pode gerir.
- onTap: canManageProducts
- ? () => _openEditSheet(product)
- : null,
+ slivers: [
+ if (isFiltering)
+ SliverToBoxAdapter(
+   child: Padding(
+     padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+     child: Align(
+       alignment: Alignment.centerRight,
+       child: Text(
+         l10n.productsFilteredCount(filtered.length),
+         style: theme.textTheme.labelSmall?.copyWith(
+           color: theme.colorScheme.onSurfaceVariant,
+           fontWeight: FontWeight.w500,
+         ),
+       ),
+     ),
+   ),
  ),
- ],
+ if (filtered.isEmpty)
+ SliverFillRemaining(
+   hasScrollBody: false,
+   child: EmptyState(
+     icon: Icons.filter_alt_off_outlined,
+     title: l10n.productsEmptyFilteredTitle,
+     subtitle: l10n.productsEmptyFilteredSubtitle,
+     actionLabel: l10n.productsClearFilters,
+     onAction: _clearFilters,
+     outlinedAction: true,
+   ),
+ )
+ else
+ SliverPadding(
+   padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
+   sliver: SliverList.separated(
+     itemCount: filtered.length,
+     separatorBuilder: (_, _) => const SizedBox(height: 8),
+     itemBuilder: (context, index) {
+       final product = filtered[index];
+       return _ProductTile(
+         product: product,
+         onTap: canManageProducts ? () => _openEditSheet(product) : null,
+       );
+     },
+   ),
  ),
  ],
  ),
  );
  },
  ),
- ),
- ],
- ),
  );
  }
-}
-
-/// Filtro rápido da listagem (canvas V3 — chips VISÍVEIS com contagem,
-/// em vez do menu escondido): Todos · N / Estoque baixo · N / Inativos.
+}/// Filtro de estado do produto — usado dentro do sheet avançado.
 enum _ProductFilter {
- all,
- lowStock,
- inactive;
+  all,
+  lowStock,
+  inactive;
 
- IconData get icon => switch (this) {
- _ProductFilter.all => Icons.inventory_2_outlined,
- _ProductFilter.lowStock => Icons.warning_amber_rounded,
- _ProductFilter.inactive => Icons.block_outlined,
- };
-
- String label(AppLocalizations l10n) => switch (this) {
- // Rótulos PRÓPRIOS do filtro: "Todos" (não o "Tudo" do período —
- // neutro, soa estranho) e "Inativos" (plural — o selo do tile
- // continua "Inativo", singular: descreve UM produto; o filtro é
- // uma categoria que abrange vários).
- _ProductFilter.all => l10n.productsFilterAll,
- _ProductFilter.lowStock => l10n.dashboardLowStock,
- _ProductFilter.inactive => l10n.productsFilterInactive,
- };
+  String label(AppLocalizations l10n) => switch (this) {
+    _ProductFilter.all => l10n.productsFilterAll,
+    _ProductFilter.lowStock => l10n.dashboardLowStock,
+    _ProductFilter.inactive => l10n.productsFilterInactive,
+  };
 }
+
+/// Filtros avançados — imutável, copiado no submit.
+/// Contém TODOS os filtros da tela (incluindo o antigo filtro rápido).
+class _AdvancedFilters {
+  const _AdvancedFilters({
+    this.query = '',
+    this.status = _ProductFilter.all,
+    this.stockType = _StockTypeFilter.all,
+    this.availability = _AvailabilityFilter.all,
+    this.minPriceCents,
+    this.maxPriceCents,
+  });
+
+  final String query;
+  final _ProductFilter status;
+  final _StockTypeFilter stockType;
+  final _AvailabilityFilter availability;
+  final int? minPriceCents;
+  final int? maxPriceCents;
+
+  bool get hasAny =>
+      query.isNotEmpty ||
+      status != _ProductFilter.all ||
+      stockType != _StockTypeFilter.all ||
+      availability != _AvailabilityFilter.all ||
+      minPriceCents != null ||
+      maxPriceCents != null;
+
+  _AdvancedFilters copyWith({
+    String? query,
+    _ProductFilter? status,
+    _StockTypeFilter? stockType,
+    _AvailabilityFilter? availability,
+    int? minPriceCents,
+    int? maxPriceCents,
+  }) {
+    return _AdvancedFilters(
+      query: query ?? this.query,
+      status: status ?? this.status,
+      stockType: stockType ?? this.stockType,
+      availability: availability ?? this.availability,
+      minPriceCents: minPriceCents ?? this.minPriceCents,
+      maxPriceCents: maxPriceCents ?? this.maxPriceCents,
+    );
+  }
+}
+
+enum _StockTypeFilter { all, weight, unit }
+enum _AvailabilityFilter { all, available, lowStock, outOfStock }
 
 /// Chips de filtro (canvas V3): pílulas com rótulo + contagem real — o
 /// ativo usa o container verde (primaryContainer), os inativos neutros.
-class _FilterChips extends StatelessWidget {
- const _FilterChips({
- required this.filter,
- required this.counts,
- required this.onSelected,
- });
+/// Grupo de chips de filtro minimalista — substitui o SegmentedButton
+/// para textos longos (ex.: "Peso (kg/g/l/ml)").
+class _FilterChipGroup<T> extends StatelessWidget {
+  const _FilterChipGroup({
+    required this.options,
+    required this.selected,
+    required this.labelOf,
+    required this.onChanged,
+    this.icon,
+  });
 
- final _ProductFilter filter;
+  final List<T> options;
+  final T selected;
+  final String Function(T) labelOf;
+  final ValueChanged<T> onChanged;
+  final IconData Function(T)? icon;
 
- /// (total de produtos ativos, total em estoque baixo).
- final ({int all, int lowStock}) counts;
- final ValueChanged<_ProductFilter> onSelected;
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        for (final option in options)
+          _CompactFilterChip(
+            label: labelOf(option),
+            isSelected: option == selected,
+            color: scheme.primary,
+            icon: icon?.call(option),
+            onTap: () => onChanged(option),
+          ),
+      ],
+    );
+  }
+}
 
- @override
- Widget build(BuildContext context) {
- final theme = Theme.of(context);
- final l10n = context.l10n;
- final scheme = theme.colorScheme;
+class _CompactFilterChip extends StatelessWidget {
+  const _CompactFilterChip({
+    required this.label,
+    required this.isSelected,
+    required this.color,
+    required this.onTap,
+    this.icon,
+  });
 
- Widget chip({required _ProductFilter value, required String label}) {
- final selected = filter == value;
- return Padding(
- padding: const EdgeInsets.only(right: 8),
- child: Material(
- color: selected
- ? scheme.primaryContainer
- : scheme.surfaceContainerLow,
- borderRadius: BorderRadius.circular(999),
- child: InkWell(
- onTap: () => onSelected(value),
- borderRadius: BorderRadius.circular(999),
- child: Container(
- padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
- decoration: BoxDecoration(
- borderRadius: BorderRadius.circular(999),
- border: Border.all(
- color: selected
- ? scheme.primary.withValues(alpha: 0.5)
- : scheme.outlineVariant,
- ),
- ),
- child: Row(
- mainAxisSize: MainAxisSize.min,
- children: [
- Icon(
- value.icon,
- size: 14,
- color: selected ? scheme.primary : scheme.onSurfaceVariant,
- ),
- const SizedBox(width: 6),
- Text(
- label,
- style: theme.textTheme.labelMedium?.copyWith(
- color: selected
- ? scheme.onPrimaryContainer
- : scheme.onSurfaceVariant,
- fontWeight: selected ? FontWeight.w500 : FontWeight.w500,
- ),
- ),
- ],
- ),
- ),
- ),
- ),
- );
- }
+  final String label;
+  final bool isSelected;
+  final Color color;
+  final VoidCallback onTap;
+  final IconData? icon;
 
- return SingleChildScrollView(
- scrollDirection: Axis.horizontal,
- child: Row(
- children: [
- chip(
- value: _ProductFilter.all,
- label: l10n.productsFilterAllCount(counts.all),
- ),
- chip(
- value: _ProductFilter.lowStock,
- label: l10n.productsFilterLowCount(counts.lowStock),
- ),
- chip(
- value: _ProductFilter.inactive,
- label: l10n.productsFilterInactive,
- ),
- ],
- ),
- );
- }
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? color.withValues(alpha: 0.14)
+              : scheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppRadius.full),
+          border: Border.all(
+            color: isSelected ? color : scheme.outlineVariant.withValues(alpha: 0.5),
+            width: isSelected ? 1.2 : 0.8,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 13, color: isSelected ? color : scheme.onSurfaceVariant),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontSize: 11,
+                color: isSelected ? color : scheme.onSurfaceVariant,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Filtro avançado de produtos — bottom sheet com todos os filtros
+/// centralizados: busca por nome, status, tipo de estoque,
+/// disponibilidade e faixa de preço.
+class _AdvancedFilterSheet extends ConsumerStatefulWidget {
+  const _AdvancedFilterSheet({required this.initial});
+  final _AdvancedFilters initial;
+  @override
+  ConsumerState<_AdvancedFilterSheet> createState() => _AdvancedFilterSheetState();
+}
+
+class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
+  late final TextEditingController _nameController;
+  late _ProductFilter _status;
+  late _StockTypeFilter _stockType;
+  late _AvailabilityFilter _availability;
+  late final TextEditingController _minPriceController;
+  late final TextEditingController _maxPriceController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initial.query);
+    _status = widget.initial.status;
+    _stockType = widget.initial.stockType;
+    _availability = widget.initial.availability;
+    _minPriceController = TextEditingController(
+      text: widget.initial.minPriceCents != null
+          ? Money.toReais(widget.initial.minPriceCents!).toStringAsFixed(2)
+          : '',
+    );
+    _maxPriceController = TextEditingController(
+      text: widget.initial.maxPriceCents != null
+          ? Money.toReais(widget.initial.maxPriceCents!).toStringAsFixed(2)
+          : '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _minPriceController.dispose();
+    _maxPriceController.dispose();
+    super.dispose();
+  }
+
+  int? _parsePrice(String value) {
+    if (value.trim().isEmpty) return null;
+    return Money.parse(value);
+  }
+
+  void _submit() {
+    Navigator.of(context).pop(
+      widget.initial.copyWith(
+        query: _nameController.text.trim().toLowerCase(),
+        status: _status,
+        stockType: _stockType,
+        availability: _availability,
+        minPriceCents: _parsePrice(_minPriceController.text),
+        maxPriceCents: _parsePrice(_maxPriceController.text),
+      ),
+    );
+  }
+
+  void _clear() {
+    setState(() {
+      _nameController.clear();
+      _status = _ProductFilter.all;
+      _stockType = _StockTypeFilter.all;
+      _availability = _AvailabilityFilter.all;
+      _minPriceController.clear();
+      _maxPriceController.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SheetHeader(
+            title: l10n.productsFilterAdvanced,
+            onSave: _submit,
+            onClose: _clear,
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xl),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _nameController,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText: l10n.productsSearchHint,
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SheetSection(
+                    icon: Icons.inventory_2_outlined,
+                    title: l10n.productsSectionStatus,
+                    children: [
+                      _FilterChipGroup<_ProductFilter>(
+                        options: _ProductFilter.values,
+                        selected: _status,
+                        labelOf: (f) => f.label(l10n),
+                        icon: (f) => switch (f) {
+                          _ProductFilter.all => Icons.all_inclusive_rounded,
+                          _ProductFilter.lowStock => Icons.warning_amber_rounded,
+                          _ProductFilter.inactive => Icons.visibility_off_outlined,
+                        },
+                        onChanged: (f) => setState(() => _status = f),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SheetSection(
+                    icon: Icons.scale_outlined,
+                    title: l10n.productsFilterStockType,
+                    children: [
+                      _FilterChipGroup<_StockTypeFilter>(
+                        options: _StockTypeFilter.values,
+                        selected: _stockType,
+                        labelOf: (f) => switch (f) {
+                          _StockTypeFilter.all => l10n.productsFilterStockTypeAll,
+                          _StockTypeFilter.weight => l10n.productsFilterStockTypeWeight,
+                          _StockTypeFilter.unit => l10n.productsFilterStockTypeUnit,
+                        },
+                        icon: (f) => switch (f) {
+                          _StockTypeFilter.all => Icons.all_inclusive_rounded,
+                          _StockTypeFilter.weight => Icons.monitor_weight_outlined,
+                          _StockTypeFilter.unit => Icons.inventory_2_outlined,
+                        },
+                        onChanged: (f) => setState(() => _stockType = f),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SheetSection(
+                    icon: Icons.warehouse_outlined,
+                    title: l10n.productsFilterAvailability,
+                    children: [
+                      _FilterChipGroup<_AvailabilityFilter>(
+                        options: _AvailabilityFilter.values,
+                        selected: _availability,
+                        labelOf: (f) => switch (f) {
+                          _AvailabilityFilter.all => l10n.productsFilterAll,
+                          _AvailabilityFilter.available => l10n.productsFilterAvailable,
+                          _AvailabilityFilter.lowStock => l10n.productsFilterLowStock,
+                          _AvailabilityFilter.outOfStock => l10n.productsFilterOutOfStock,
+                        },
+                        icon: (f) => switch (f) {
+                          _AvailabilityFilter.all => Icons.all_inclusive_rounded,
+                          _AvailabilityFilter.available => Icons.check_circle_outline,
+                          _AvailabilityFilter.lowStock => Icons.warning_amber_rounded,
+                          _AvailabilityFilter.outOfStock => Icons.remove_circle_outline,
+                        },
+                        onChanged: (f) => setState(() => _availability = f),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SheetSection(
+                    icon: Icons.payments_outlined,
+                    title: l10n.productsFilterPriceRange,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: AppTextField(
+                              controller: _minPriceController,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              label: l10n.productsFilterMinPrice,
+                              hintText: '0,00',
+                              suffixText: 'MT',
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: AppTextField(
+                              controller: _maxPriceController,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              label: l10n.productsFilterMaxPrice,
+                              hintText: '0,00',
+                              suffixText: 'MT',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Linha do card de produto (estilo Apple): foto, nome + detalhe à
@@ -387,8 +642,8 @@ class _ProductTile extends StatelessWidget {
  children: [
  // Foto do produto (fallback: ícone) — identifica o produto no
  // rolodex (dado real, mantido do design anterior).
- ProductImage(imagePath: product.imagePath, size: 40, radius: 10),
- const SizedBox(width: 12),
+ ProductImage(imagePath: product.imagePath, size: 36, radius: 8),
+ const SizedBox(width: 10),
  Expanded(
  child: Column(
  crossAxisAlignment: CrossAxisAlignment.start,
@@ -399,8 +654,9 @@ class _ProductTile extends StatelessWidget {
                   product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 13,
                     color: inactive ? theme.colorScheme.onSurfaceVariant : null,
                   ),
                 ),
@@ -408,15 +664,17 @@ class _ProductTile extends StatelessWidget {
  const SizedBox(height: 2),
  // Detalhe (código/PLU ou descrição) — trunca com
  // ellipsis (dado secundário; o nome nunca trunca).
- Text(
- detail,
- maxLines: 1,
- overflow: TextOverflow.ellipsis,
- style: theme.textTheme.bodySmall?.copyWith(
- color: theme.colorScheme.onSurfaceVariant,
- fontFeatures: const [FontFeature.tabularFigures()],
- ),
- ),
+          Text(
+            detail,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 11,
+              fontWeight: FontWeight.w300,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
  ],
  // Produto INATIVO: selo "Inativo" — não pode ser vendido
  // nem reposto até a reativação.
@@ -447,14 +705,14 @@ class _ProductTile extends StatelessWidget {
  alignment: Alignment.centerRight,
  child: SmartAmount(
  cents: product.salePriceCents,
- alignment: Alignment.centerRight,
- style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w500,
- color: inactive
- ? theme.colorScheme.onSurfaceVariant
- : null,
- fontFeatures: const [FontFeature.tabularFigures()],
- ),
+ alignment: Alignment.centerRight,          style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                    color: inactive
+                        ? theme.colorScheme.onSurfaceVariant
+                        : null,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
  ),
  ),
  const SizedBox(height: 2),
@@ -462,13 +720,13 @@ class _ProductTile extends StatelessWidget {
  Text(
  '${Quantity.format(product.stockQuantity, unitLabel: product.vendaPorFracao ? product.unitLabel : null, language: Formatters.currentLanguage)}'
  '${product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}',
- maxLines: 1,
- overflow: TextOverflow.ellipsis,
- style: theme.textTheme.bodySmall?.copyWith(
- color: lowStock
- ? theme.expense
- : theme.colorScheme.onSurfaceVariant,
- fontWeight: lowStock ? FontWeight.w500 : null,
+ maxLines: 1,          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: lowStock
+              ? theme.expense
+              : theme.colorScheme.onSurfaceVariant,
+            fontSize: 11,
+            fontWeight: lowStock ? FontWeight.w500 : FontWeight.w300,
  fontFeatures: const [FontFeature.tabularFigures()],
  ),
  ),
@@ -639,14 +897,14 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-class _AddProductSheet extends ConsumerStatefulWidget {
- const _AddProductSheet();
+class AddProductSheet extends ConsumerStatefulWidget {
+ const AddProductSheet();
 
  @override
- ConsumerState<_AddProductSheet> createState() => _AddProductSheetState();
+ ConsumerState<AddProductSheet> createState() => _AddProductSheetState();
 }
 
-class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
+class _AddProductSheetState extends ConsumerState<AddProductSheet> {
  final _formKey = GlobalKey<FormState>();
  final _nameController = TextEditingController();
  final _descriptionController = TextEditingController();

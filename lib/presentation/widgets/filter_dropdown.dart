@@ -30,48 +30,54 @@ class FilterDropdown<T> extends StatelessWidget {
  final T selected;
 
  final String Function(T option) labelOf;
- final ValueChanged<T> onChanged;
+ final ValueChanged<T> onChanged;  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final active = selected != options.first;
 
- @override
- Widget build(BuildContext context) {
- final theme = Theme.of(context);
- final scheme = theme.colorScheme;
- final active = selected != options.first;
+    // Largura mínima baseada no rótulo mais longo para itens uniformes.
+    final longestLabel = options
+        .map((o) => labelOf(o))
+        .fold<int>(0, (max, l) => l.length > max ? l.length : max);
+    final itemWidth = (longestLabel * 7.0) + 44; // ícone + padding
 
- return PopupMenuButton<T>(
- onSelected: onChanged,
- tooltip: labelOf(selected),
- position: PopupMenuPosition.under,
- shape: RoundedRectangleBorder(
- borderRadius: BorderRadius.circular(AppRadius.lg),
- ),
- itemBuilder: (context) => [
- for (final option in options)
- PopupMenuItem(
- value: option,
- child: Row(
- children: [
- Icon(
- option == selected
- ? Icons.check_circle_rounded
- : Icons.circle_outlined,
- size: 18,
- color: option == selected
- ? theme.accent
- : scheme.onSurfaceVariant,
- ),
- const SizedBox(width: 10),
- Text(
- labelOf(option),
- style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w500,
- ),
- ),
- ],
- ),
- ),
- ],
- child: Container(
+    return PopupMenuButton<T>(
+      onSelected: onChanged,
+      tooltip: labelOf(selected),
+      position: PopupMenuPosition.under,
+      constraints: BoxConstraints(minWidth: itemWidth),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      itemBuilder: (context) => [
+        for (final option in options)
+          PopupMenuItem(
+            value: option,
+            height: 40,
+            child: Row(
+              children: [
+                Icon(
+                  option == selected
+                      ? Icons.check_circle_rounded
+                      : Icons.circle_outlined,
+                  size: 16,
+                  color: option == selected
+                      ? theme.accent
+                      : scheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  labelOf(option),
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+      child: Container(
  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
  decoration: BoxDecoration(
  color: active ? scheme.primaryContainer : Colors.transparent,

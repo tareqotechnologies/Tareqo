@@ -84,16 +84,20 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
  messenger.showSnackBar(SnackBar(content: Text(_successMessage!)));
  _prefillCounted(closing.expectedCashCents);
  } on InvalidCashCountException catch (error) {
+ if (mounted) {
  setState(() {
  _isSubmitting = false;
  _formError = error.message;
  });
+ }
  } catch (error, stackTrace) {
  CrashReporting.capture(error, stackTrace, hint: 'Erro ao fechar o caixa');
+ if (mounted) {
  setState(() {
  _isSubmitting = false;
  _formError = l10n.cashClosingError;
  });
+ }
  }
  }
 
@@ -112,7 +116,10 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
  final theme = Theme.of(context);
  final summaryAsync = ref.watch(cashClosingSummaryProvider);
 
- return SingleChildScrollView(
+ return SafeArea(
+ top: false,
+ child: SingleChildScrollView(
+ keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
  child: Column(
  mainAxisSize: MainAxisSize.min,
@@ -144,6 +151,7 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
  },
  ),
  ],
+ ),
  ),
  );
  }
@@ -188,7 +196,12 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
  const SizedBox(height: 16),
  ],
  // Resumo do dia: total, esperado na gaveta e diferença ao vivo.
- _SummaryCard(summary: summary, countedCents: _parseAmount(_countedController.text)),
+ _SummaryCard(
+ summary: summary,
+ countedCents: _countedController.text.trim().isEmpty
+ ? null
+ : _parseAmount(_countedController.text),
+ ),
  const SizedBox(height: 16),
  // Abertura por forma de pagamento (o Z).
  Text(l10n.cashClosingByMethod, style: theme.textTheme.titleSmall),
@@ -201,7 +214,8 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
  controller: _countedController,
  label: l10n.cashClosingCountedCash,
  prefixIcon: Icons.payments_outlined,
- keyboardType: TextInputType.number,
+ textInputAction: TextInputAction.done,
+ keyboardType: const TextInputType.numberWithOptions(decimal: true),
  helperText: l10n.cashClosingCountedCashHint,
  errorText: _formError,
  suffixIcon: IconButton(
@@ -251,15 +265,23 @@ class _SummaryCard extends StatelessWidget {
  const _SummaryCard({required this.summary, required this.countedCents});
 
  final CashClosingSummary summary;
- final int countedCents;
+ final int? countedCents;
 
  @override
  Widget build(BuildContext context) {
  final theme = Theme.of(context);
  final l10n = context.l10n;
 
- final difference = countedCents - summary.expectedCashCents;
- final (Color color, IconData icon, String label) = switch (difference) {
+ final difference = countedCents == null
+ ? null
+ : countedCents! - summary.expectedCashCents;
+ final (Color color, IconData icon, String label) = difference == null
+ ? (
+ theme.colorScheme.onSurfaceVariant,
+ Icons.edit_note_outlined,
+ l10n.cashClosingCountedCashHint,
+ )
+ : switch (difference) {
  == 0 => (
  theme.colorScheme.primary,
  Icons.check_circle_outline,

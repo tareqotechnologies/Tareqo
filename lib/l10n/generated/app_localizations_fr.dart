@@ -370,6 +370,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get fabMenuSubtitle => 'Que souhaitez-vous faire ?';
 
   @override
+  String get menuSubtitle => 'Choisissez une zone pour continuer';
+
+  @override
+  String get commonSignOutConfirmTitle => 'Se déconnecter ?';
+
+  @override
+  String get commonSignOutConfirmMessage =>
+      'Vous allez vous déconnecter de votre compte sur cet appareil.';
+
+  @override
   String get fabMenuNewSale => 'Nouvelle vente';
 
   @override
@@ -392,6 +402,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get fabMenuAddDebtHint => 'À recevoir ou à payer';
+
+  @override
+  String get fabMenuAddCustomer => 'Ajouter un client';
+
+  @override
+  String get fabMenuAddCustomerHint => 'Contacts · crédit lié';
 
   @override
   String get fabMenuCancel => 'Annuler';
@@ -878,7 +894,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get purchasesSearchHint => 'Rechercher un achat...';
 
   @override
-  String get productsFilterTooltip => 'Filtrer les produits';
+  String get productsFilterTooltip => 'Filtrer';
 
   @override
   String get productsFilterAll => 'Tous';
@@ -940,19 +956,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsPurchasePrice => 'Prix d\'achat';
 
   @override
-  String get productsPurchasePriceError => 'Indiquez le prix d\'achat.';
+  String get productsPurchasePriceError => 'Indiquez le prix d\'achat';
 
   @override
   String get productsSalePrice => 'Prix de vente';
 
   @override
-  String get productsSalePriceError => 'Indiquez le prix de vente.';
+  String get productsSalePriceError => 'Indiquez le prix de vente';
 
   @override
   String get productsStockQuantity => 'Quantité en stock';
 
   @override
-  String get productsStockError => 'Indiquez une quantité valide.';
+  String get productsStockError => 'Quantité invalide';
 
   @override
   String get productsAddSubmit => 'Ajouter le produit';
@@ -980,7 +996,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsPhotoTake => 'Prendre une photo';
 
   @override
-  String get productsPhotoGallery => 'Depuis la galerie';
+  String get productsPhotoGallery => 'Choisir depuis la galerie';
 
   @override
   String get productsPhotoRemove => 'Retirer la photo';
@@ -989,7 +1005,101 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsInactive => 'Inactif';
 
   @override
+  String get productsStockOut => 'Rupture';
+
+  @override
+  String get productsStockLow => 'Faible';
+
+  @override
+  String get productsFilterAdvanced => 'Filtres avancés';
+
+  @override
+  String get productsFilterClear => 'Tout effacer';
+
+  @override
+  String get productsFilterStockType => 'Type de stock';
+
+  @override
+  String get productsFilterStockTypeAll => 'Tous';
+
+  @override
+  String get productsFilterStockTypeWeight => 'Poids (kg/g/l/ml)';
+
+  @override
+  String get productsFilterStockTypeUnit => 'Unité (pcs)';
+
+  @override
+  String get productsFilterAvailability => 'Disponibilité';
+
+  @override
+  String get productsFilterAvailable => 'En stock';
+
+  @override
+  String get productsFilterLowStock => 'Stock faible';
+
+  @override
+  String get productsFilterOutOfStock => 'Rupture';
+
+  @override
+  String get productsFilterPriceRange => 'Fourchette de prix';
+
+  @override
+  String get productsFilterMinPrice => 'Prix min';
+
+  @override
+  String get productsFilterMaxPrice => 'Prix max';
+
+  @override
+  String get productsFilterApply => 'Appliquer';
+
+  @override
   String get productsFilterInactive => 'Inactifs';
+
+  @override
+  String productsFilterInactiveCount(int count) {
+    return 'Inactifs · $count';
+  }
+
+  @override
+  String productsHeaderCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count produits',
+      one: '1 produit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productsClearFilters => 'Effacer les filtres';
+
+  @override
+  String get productsEmptyFilteredTitle => 'Aucun produit trouvé';
+
+  @override
+  String get productsEmptyFilteredSubtitle =>
+      'Ajustez la recherche ou les filtres.';
+
+  @override
+  String productsFilteredCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count produits',
+      one: '1 produit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productsSummaryActive => 'Actifs';
+
+  @override
+  String get productsSummaryLowStock => 'Stock faible';
+
+  @override
+  String get productsSummaryInactive => 'Inactifs';
 
   @override
   String get productsActiveLabel => 'Produit actif';
@@ -1013,6 +1123,103 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productsSectionStatus => 'Statut';
+
+  @override
+  String get productsAddNewTitle => 'Nouveau produit';
+
+  @override
+  String get productsSave => 'Enregistrer';
+
+  @override
+  String get productsSaving => 'Enregistrement...';
+
+  @override
+  String get productsSaved => 'Produit enregistré avec succès';
+
+  @override
+  String get productsSavedNoPhoto =>
+      'Produit enregistré ! (pas de permission de stockage)';
+
+  @override
+  String get productsPhotoLabelNew => 'Photo du produit';
+
+  @override
+  String get productsPhotoHint => 'Touchez pour ajouter';
+
+  @override
+  String get productsSectionBasic => 'Informations de base';
+
+  @override
+  String get productsSectionPricingNew => 'Prix';
+
+  @override
+  String get productsSectionStockNew => 'Stock';
+
+  @override
+  String get productsNameLabel => 'Nom du produit';
+
+  @override
+  String get productsNameHint => 'Ex. : Riz type 1';
+
+  @override
+  String get productsNameErrorMsg => 'Obligatoire';
+
+  @override
+  String get productsDescriptionLabelNew => 'Description';
+
+  @override
+  String get productsDescriptionHint => 'Facultatif';
+
+  @override
+  String get productsCodeLabel => 'Code-barres (PLU)';
+
+  @override
+  String get productsCodeHint => 'Balances étiqueteuses (ex. : 12345)';
+
+  @override
+  String get productsCodeError =>
+      'Code invalide : utilisez jusqu\'à 5 chiffres.';
+
+  @override
+  String get productsPurchasePriceLabel => 'Prix d\'achat';
+
+  @override
+  String get productsSalePriceLabel => 'Prix de vente';
+
+  @override
+  String get productsPriceValidationError =>
+      'Le prix de vente doit être supérieur au prix d\'achat';
+
+  @override
+  String get productsStockQuantityLabel => 'Quantité en stock';
+
+  @override
+  String get productsStockHint => 'Ex. : 50';
+
+  @override
+  String get productsStockWeightHint => 'En unités de vente (ex. : 1,75)';
+
+  @override
+  String get productsExpiryLabel => 'Date de péremption';
+
+  @override
+  String get productsExpiryHint => 'Facultatif';
+
+  @override
+  String get productsExpiryAdd => 'Définir la péremption';
+
+  @override
+  String get productsExpiryClear => 'Retirer la péremption';
+
+  @override
+  String get productsWeighLabel => 'Vente au poids (fraction)';
+
+  @override
+  String get productsWeighHint =>
+      'Accepte les quantités décimales (ex. : 1,75 kg)';
+
+  @override
+  String get productsUnitLabel => 'Unité de vente';
 
   @override
   String customersHeaderCount(int count) {
@@ -1258,13 +1465,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financialBalance => 'Solde';
 
   @override
-  String get financialPeriodBalance => 'Solde de la période';
+  String get financialPeriodBalance => 'Solde net de la période';
 
   @override
   String get financialSwipeHint => 'Glissez pour les dépenses →';
 
   @override
-  String get financialTransactions => 'Transactions';
+  String get financialTransactions => 'Transactions de la période';
 
   @override
   String get financialLoadError => 'Impossible de charger les transactions.';
@@ -1312,7 +1519,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financialPaid => 'Sortie payée !';
 
   @override
-  String get financialPayError => 'Impossible de payer. Réessayez.';
+  String get financialPayError =>
+      'Impossible de payer la transaction en attente. Réessayez.';
 
   @override
   String get financialAddTitle => 'Enregistrer une transaction';
@@ -1645,6 +1853,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get salesStatusPaid => 'Payée';
+
+  @override
+  String get salesFilterAll => 'Toutes';
+
+  @override
+  String get salesFilterActive => 'Actives';
+
+  @override
+  String get salesFilterCancelled => 'Annulées';
 
   @override
   String salesHeaderTransactions(int count) {
@@ -2012,39 +2229,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adminPlanCurrent => 'Actuel';
 
   @override
-  String get productsCodeLabel => 'Code-barres (PLU)';
-
-  @override
-  String get productsCodeHint => 'Balances étiqueteuses (ex. : 12345)';
-
-  @override
-  String get productsCodeError =>
-      'Code invalide : utilisez jusqu\'à 5 chiffres.';
-
-  @override
-  String get productsWeighLabel => 'Vente au poids (fraction)';
-
-  @override
-  String get productsWeighHint =>
-      'Accepte les quantités décimales (ex. : 1,75 kg)';
-
-  @override
-  String get productsUnitLabel => 'Unité de vente';
-
-  @override
-  String get productsStockWeightHint => 'En unités de vente (ex. : 1,75)';
-
-  @override
-  String get productsExpiryLabel => 'Date de péremption';
-
-  @override
-  String get productsExpiryAdd => 'Définir la péremption';
-
-  @override
   String get productsExpiryHelp => 'Date de péremption du produit';
-
-  @override
-  String get productsExpiryClear => 'Retirer la péremption';
 
   @override
   String get salesBarcodeLabel => 'Code-barres';

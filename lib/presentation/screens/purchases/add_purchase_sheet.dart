@@ -294,9 +294,10 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
  product.id: product,
  };
 
+ final bottomInset = MediaQuery.of(context).viewInsets.bottom;
  return ConstrainedBox(
  constraints: BoxConstraints(
- maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+ maxHeight: MediaQuery.sizeOf(context).height - bottomInset - 24,
  ),
  child: Column(
  children: [

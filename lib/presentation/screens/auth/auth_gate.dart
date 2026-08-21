@@ -486,9 +486,9 @@ class _SplashScreenState extends State<_SplashScreen>
     final l10n = context.l10n;
 
     return Scaffold(
-      // Fundo escuro idêntico ao splash nativo Android/iOS —
-      // transição invisível entre o nativo e o Flutter.
-      backgroundColor: const Color(0xFF121218),
+      // Fundo azul oficial da marca — transição invisível entre
+      // o splash nativo Android/iOS e o Flutter.
+      backgroundColor: const Color(0xFF0076F6),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -505,13 +505,13 @@ class _SplashScreenState extends State<_SplashScreen>
                 ),
               ),
               child: Container(
-                width: 112,
-                height: 112,
+                width: 101,
+                height: 101,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
-                      color: const Color(0xFF0076F6).withValues(alpha: 0.35),
+                      color: Colors.white24,
                       blurRadius: 48,
                       spreadRadius: 8,
                     ),
@@ -521,8 +521,8 @@ class _SplashScreenState extends State<_SplashScreen>
                   borderRadius: BorderRadius.circular(28),
                   child: Image.asset(
                     'assets/branding/splash_logo.png',
-                    width: 112,
-                    height: 112,
+                    width: 81,
+                    height: 81,
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -566,16 +566,15 @@ class _SplashScreenState extends State<_SplashScreen>
                     width: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      color: const Color(0xFF0076F6),
-                      backgroundColor:
-                          const Color(0xFF0076F6).withValues(alpha: 0.15),
+                      color: Colors.white,
+                      backgroundColor: Colors.white24,
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     l10n.splashLoading,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF8E939A),
+                      color: Colors.white70,
                     ),
                   ),
                 ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/i18n/l10n_ext.dart';
 import '../../core/theme/app_tokens.dart';
+import '../widgets/app_button.dart';
 
 /// Abre uma bottom sheet V4 com animação suave e suporte fullscreen.
 Future<T?> showAppSheet<T>(
@@ -99,7 +100,7 @@ class SheetSection extends StatelessWidget {
           color: scheme.outlineVariant.withValues(alpha: 0.4),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -107,29 +108,83 @@ class SheetSection extends StatelessWidget {
             Row(
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 16, color: scheme.primary),
-                  const SizedBox(width: 8),
+                  Icon(icon, size: 18, color: scheme.primary),
+                  const SizedBox(width: 10),
                 ],
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      title!,
-                      maxLines: 1,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
+                Text(
+                  title!,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
           ],
           ...children,
+        ],
+      ),
+    );
+  }
+}
+
+/// Cabeçalho unificado das sheets V4 — título centrado, fechar à esquerda,
+/// acção principal (Guardar) à direita.
+class SheetHeader extends StatelessWidget {
+  const SheetHeader({
+    super.key,
+    required this.title,
+    required this.onSave,
+    this.isSaving = false,
+    this.onClose,
+  });
+
+  final String title;
+  final VoidCallback onSave;
+  final bool isSaving;
+  final VoidCallback? onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        border: Border(bottom: BorderSide(color: scheme.outlineVariant, width: 0.5)),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.close, size: 20),
+            onPressed: onClose ?? () => Navigator.of(context).pop(),
+            tooltip: l10n.appSheetClose,
+          ),
+          Expanded(
+            child: Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          AppButton.primary(
+            label: l10n.productsSave,
+            onPressed: isSaving ? null : onSave,
+            icon: isSaving
+                ? const SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : null,
+          ),
         ],
       ),
     );

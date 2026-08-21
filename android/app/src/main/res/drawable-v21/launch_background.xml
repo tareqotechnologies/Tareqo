@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tela de abertura Android 21+ (<12) — tema ESCURO V3 (dark-first):
-     fundo @color/ic_launcher_background (#121218) + logotipo centralizado.
-     Evita o flash branco entre o splash nativo e o Flutter. -->
+<!-- Tela de abertura Android 21+ (<12) — fundo azul oficial (#0076F6)
+     + logotipo centralizado. Transição invisível com o Flutter. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/ic_launcher_background" />
     <item>
         <bitmap
             android:gravity="center"
+            android:width="144dp"
+            android:height="144dp"
             android:src="@drawable/launch_image" />
     </item>
 </layer-list>

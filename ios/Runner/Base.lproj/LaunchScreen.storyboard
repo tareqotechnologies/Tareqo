@@ -17,16 +17,16 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
-                                <rect key="frame" x="0.0" y="0.0" width="140" height="140"/>
+                                <rect key="frame" x="0.0" y="0.0" width="144" height="144"/>
                             </imageView>
                         </subviews>
-                        <!-- Fundo ESCURO V3 (dark-first): #121218 — evita flash branco -->
-                        <color key="backgroundColor" red="0.071" green="0.071" blue="0.094" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <!-- Fundo azul oficial da marca: #0076F6 (0, 118, 246) -->
+                        <color key="backgroundColor" red="0.0" green="0.463" blue="0.965" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="1a2-6s-vTC"/>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="4X2-HB-R7a"/>
-                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="width" constant="140" id="5a3-7c-xUD"/>
-                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="height" constant="140" id="6b4-8d-yVE"/>
+                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="width" constant="144" id="5a3-7c-xUD"/>
+                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="height" constant="144" id="6b4-8d-yVE"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -36,6 +36,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="LaunchImage" width="140" height="140"/>
+        <image name="LaunchImage" width="144" height="144"/>
     </resources>
 </document>
