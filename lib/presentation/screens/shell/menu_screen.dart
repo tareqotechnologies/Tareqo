@@ -127,33 +127,33 @@ class MenuScreen extends ConsumerWidget {
               ModuleCard(
                 icon: Icons.inventory_2_outlined,
                 label: l10n.appNavProducts,
-                iconColor: const Color(0xFF60A5FA),
+                iconColor: const Color(0xFF3B82F6),
                 onTap: () => goTo(AppSection.products),
               ),
               ModuleCard(
                 icon: Icons.people_outline_rounded,
                 label: l10n.appNavCustomers,
-                iconColor: const Color(0xFF34D399),
+                iconColor: const Color(0xFF10B981),
                 onTap: () => goTo(AppSection.customers),
               ),
               ModuleCard(
                 icon: Icons.receipt_long_outlined,
                 label: l10n.appNavCredit,
-                iconColor: const Color(0xFFFBBF24),
+                iconColor: const Color(0xFFF59E0B),
                 onTap: () => goTo(AppSection.credit),
               ),
               if (accessLevel != UserAccessLevel.employee)
                 ModuleCard(
                   icon: Icons.local_shipping_outlined,
                   label: l10n.dashboardModulePurchases,
-                  iconColor: const Color(0xFFA78BFA),
+                  iconColor: const Color(0xFF8B5CF6),
                   onTap: openPurchases,
                 ),
               if (accessLevel != UserAccessLevel.employee)
                 ModuleCard(
                   icon: Icons.bar_chart_outlined,
                   label: l10n.dashboardModuleReports,
-                  iconColor: const Color(0xFF2DD4BF),
+                  iconColor: const Color(0xFF14B8A6),
                   onTap: openReports,
                 ),
               if (tenant != null &&
@@ -162,7 +162,7 @@ class MenuScreen extends ConsumerWidget {
                 ModuleCard(
                   icon: Icons.storefront_outlined,
                   label: l10n.dashboardModuleStores,
-                  iconColor: const Color(0xFF818CF8),
+                  iconColor: const Color(0xFF6366F1),
                   onTap: () => openStores(tenant),
                 ),
             ],
@@ -185,12 +185,12 @@ class MenuScreen extends ConsumerWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: theme.colorScheme.error.withValues(alpha: 0.12),
+                      color: IconTone.darkBackground(theme.colorScheme.error),
                     ),
                     child: Icon(
                       Icons.logout_rounded,
                       size: 18,
-                      color: theme.colorScheme.error,
+                      color: IconTone.lightForeground(theme.colorScheme.error),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),

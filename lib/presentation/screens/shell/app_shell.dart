@@ -342,17 +342,16 @@ class _ActionTile extends StatelessWidget {
  child: Padding(
  padding: const EdgeInsets.all(AppSpacing.md),
  child: Row(
- children: [
- Container(
- width: AppSizes.avatarSm,
- height: AppSizes.avatarSm,
- alignment: Alignment.center,
- decoration: BoxDecoration(
- color: color.withValues(alpha: 0.12),
- borderRadius: AppRadius.smAll,
- ),
- child: Icon(icon, size: 18, color: color),
- ),
+ children: [              Container(
+                width: AppSizes.avatarSm,
+                height: AppSizes.avatarSm,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: IconTone.darkBackground(color),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 18, color: IconTone.lightForeground(color)),
+              ),
  const SizedBox(width: AppSpacing.sm),
  Expanded(
  child: Column(

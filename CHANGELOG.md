@@ -3,6 +3,16 @@
 Todas as mudanças relevantes do Dumbhanengue ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [1.3.3+8] — 2026-08-22
+
+### Alterado
+- **Financeiro — card de saldo responsivo**: `FittedBox` substituído por `LayoutBuilder` com escala proporcional à largura disponível — fonte adapta automaticamente entre portrait e landscape.
+- **Financeiro — badges de entrada/saída**: valores de income/expense exibidos em pill colorido (`Container` com fundo `color.withValues(alpha: 0.12)`, border-radius 999, fonte `labelMedium w600`) no canto direito, consistente com o padrão do `DateSectionHeader`.
+- **Financeiro — layout landscape**: em orientação landscape, balance + label ficam na mesma linha e income/expense lado a lado (`Row` + `Expanded`), aproveitando melhor o espaço horizontal.
+- **Ícones de ação (app_shell, menu_screen, finance)**: containers circulares com fundo `IconTone.darkBackground` e ícone `IconTone.lightForeground` (padrão dark-first consistente).
+- **Tipografia compacta em cards de venda e detalhe**: product name `bodySmall w500`, preço/descrição 11px, valor total `bodySmall w600` — cabem mais dados sem truncar.
+- **Cores de módulo atualizadas**: menu_screen usa cores mais saturadas (blue-500, emerald-500, amber-500, violet-500, teal-500, indigo-500).
+
 ## [1.3.2+7] — 2026-08-21
 
 ### Alterado (UI/UX minimalista)

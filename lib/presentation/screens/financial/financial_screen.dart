@@ -356,6 +356,8 @@ class _CashStack extends StatelessWidget {
     final scheme = theme.colorScheme;
     final balance = incomeCents - expenseCents;
     final balanceColor = balance < 0 ? theme.expense : theme.income;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     return Semantics(
       container: true,
@@ -371,80 +373,165 @@ class _CashStack extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    balanceLabel,
+            if (isLandscape) ...[
+              // Landscape: label + balance + currency badge na mesma linha
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          balanceLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          Formatters.currency(balance),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: balanceColor,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: -0.6,
+                            fontFeatures: const [
+                              FontFeature.tabularFigures(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      currency,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Divider(height: 1, color: scheme.outlineVariant),
+              const SizedBox(height: 10),
+              // Landscape: income e expense lado a lado
+              Row(
+                children: [
+                  Expanded(
+                    child: _CashLine(
+                      icon: Icons.north_east,
+                      color: theme.income,
+                      label: incomeLabel,
+                      value:
+                          Formatters.signedAmount(incomeCents),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _CashLine(
+                      icon: Icons.south_west,
+                      color: theme.expense,
+                      label: expenseLabel,
+                      value:
+                          Formatters.signedAmount(-expenseCents),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              // Portrait: layout vertical (original)
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      balanceLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      currency,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final text = Formatters.currency(balance);
+                  final baseSize =
+                      theme.textTheme.displaySmall?.fontSize ?? 32.0;
+                  final scale = (constraints.maxWidth /
+                          (text.length * baseSize * 0.52))
+                      .clamp(0.55, 1.0);
+                  return Text(
+                    text,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: scheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    currency,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      fontSize: baseSize * scale,
+                      color: balanceColor,
                       fontWeight: FontWeight.w500,
-                      letterSpacing: 0.4,
+                      letterSpacing: -0.8,
+                      fontFeatures: const [
+                        FontFeature.tabularFigures(),
+                      ],
                     ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final text = Formatters.currency(balance);
-                final baseSize =
-                    theme.textTheme.displaySmall?.fontSize ?? 32.0;
-                // Escala proporcional: texto maior ocupa mais espaço;
-                // em telas estreitas (landscape), reduz proporcionalmente.
-                final scale = (constraints.maxWidth /
-                        (text.length * baseSize * 0.52))
-                    .clamp(0.55, 1.0);
-                return Text(
-                  text,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    fontSize: baseSize * scale,
-                    color: balanceColor,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: -0.8,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            Divider(height: 1, color: scheme.outlineVariant),
-            const SizedBox(height: 10),
-            _CashLine(
-              icon: Icons.north_east,
-              color: theme.income,
-              label: incomeLabel,
-              value: Formatters.signedAmount(incomeCents),
-            ),
-            const SizedBox(height: 6),
-            _CashLine(
-              icon: Icons.south_west,
-              color: theme.expense,
-              label: expenseLabel,
-              value: Formatters.signedAmount(-expenseCents),
-            ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              Divider(height: 1, color: scheme.outlineVariant),
+              const SizedBox(height: 10),
+              _CashLine(
+                icon: Icons.north_east,
+                color: theme.income,
+                label: incomeLabel,
+                value: Formatters.signedAmount(incomeCents),
+              ),
+              const SizedBox(height: 6),
+              _CashLine(
+                icon: Icons.south_west,
+                color: theme.expense,
+                label: expenseLabel,
+                value: Formatters.signedAmount(-expenseCents),
+              ),
+            ],
           ],
         ),
       ),

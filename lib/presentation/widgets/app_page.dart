@@ -86,8 +86,8 @@ class AppIconBadge extends StatelessWidget {
  @override
  Widget build(BuildContext context) {
  final theme = Theme.of(context);
- final fg = color ?? theme.accent;
- final bg = backgroundColor ?? fg.withValues(alpha: 0.12);
+ final fg = color ?? theme.accent;  final bg = backgroundColor ?? IconTone.darkBackground(fg);
+  final iconFg = IconTone.lightForeground(fg);
  final radius = borderRadius ??
  const BorderRadius.all(Radius.circular(AppRadius.full));
 
@@ -99,8 +99,7 @@ class AppIconBadge extends StatelessWidget {
  borderRadius: radius,
  ),
  child: CustomPaint(
- painter: dashedBorder ? _DashedBorderPainter(color: fg) : null,
- child: Icon(icon, size: iconSize, color: fg),
+ painter: dashedBorder ? _DashedBorderPainter(color: fg) : null,    child: Icon(icon, size: iconSize, color: iconFg),
  ),
  );
  }

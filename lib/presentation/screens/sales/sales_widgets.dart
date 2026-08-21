@@ -61,7 +61,7 @@ class SalesSummaryHeader extends StatelessWidget {
               children: [
                 Text(
                   l10n.periodToday,
-                  style: theme.textTheme.labelMedium?.copyWith(
+                  style: theme.textTheme.labelSmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -82,6 +82,7 @@ class SalesSummaryHeader extends StatelessWidget {
                 Text(
                   l10n.salesHeaderTransactions(todayCount),
                   style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 11,
                     color: scheme.onSurfaceVariant,
                   ),
                 ),

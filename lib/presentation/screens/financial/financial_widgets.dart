@@ -72,12 +72,9 @@ class TransactionCard extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: color.withValues(alpha: 0.14),
-                    border: Border.all(
-                      color: color.withValues(alpha: 0.25),
-                    ),
+                    color: IconTone.darkBackground(color),
                   ),
-                  child: Icon(transaction.type.icon, size: 20, color: color),
+                  child: Icon(transaction.type.icon, size: 20, color: IconTone.lightForeground(color)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

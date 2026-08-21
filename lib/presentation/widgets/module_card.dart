@@ -4,10 +4,11 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import 'app_card.dart';
 
-/// Card de módulo V5 Apple-clean — ícone circular tingido + rótulo.
+/// Card de módulo — ícone circular com fundo sólido escuro + rótulo.
 ///
-/// Ícones seguem o padrão do dashboard: container circular, sem borda,
-/// cor de fundo com opacidade baixa + ícone colorido.
+/// Padrão replicado do feed de atividade da Home: container circular
+/// com background escuro (mesma família de cor do ícone) e ícone
+/// CLARO que contrasta sobre o fundo.
 class ModuleCard extends StatelessWidget {
   const ModuleCard({
     super.key,
@@ -31,6 +32,8 @@ class ModuleCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final color = iconColor ?? theme.accent;
+    final bg = IconTone.darkBackground(color);
+    final fg = IconTone.lightForeground(color);
 
     return SizedBox(
       width: width,
@@ -42,16 +45,16 @@ class ModuleCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ícone circular — padrão do dashboard (sem borda).
+            // Ícone circular — fundo sólido escuro, ícone claro.
             Container(
               width: AppSizes.avatarSm,
               height: AppSizes.avatarSm,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
+                color: bg,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 20, color: color),
+              child: Icon(icon, size: 20, color: fg),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(

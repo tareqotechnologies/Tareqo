@@ -37,19 +37,18 @@ extension PaymentMethodAccent on PaymentMethod {
  theme.brightness,
  const Color(0xFF4ADE80),
  theme.colorScheme.primary,
- ),
- // Dinheiro móvel de Moçambique: M-Pesa em azul, E-Mola em violeta
- // (distintos entre si e dos demais métodos — escaneabilidade).
- PaymentMethod.mPesa => AppColors.of(
- theme.brightness,
- const Color(0xFF4C9AFF),
- const Color(0xFF1B6AD6),
- ),
- PaymentMethod.eMola => AppColors.of(
- theme.brightness,
- const Color(0xFFB79CFF),
- const Color(0xFF6D4FC4),
- ),
+ ),    // Dinheiro móvel de Moçambique: M-Pesa em vermelho, E-Mola (Movitel)
+    // em laranja — cores sólidas que seguem o padrão do activity feed.
+    PaymentMethod.mPesa => AppColors.of(
+      theme.brightness,
+      const Color(0xFFE05B64),
+      const Color(0xFFDC2626),
+    ),
+    PaymentMethod.eMola => AppColors.of(
+      theme.brightness,
+      const Color(0xFFF59E0B),
+      const Color(0xFFD97706),
+    ),
  PaymentMethod.transfer => theme.warning,
  };
 }

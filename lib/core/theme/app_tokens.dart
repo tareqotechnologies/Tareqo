@@ -60,11 +60,44 @@ abstract final class AppSizes {
  static const double avatarMd = 42;
  static const double navBarHeight = 72;
  static const double contentMaxWidth = 1040;
+}/// Curvas de animação naturais.
+abstract final class AppCurves {
+  static const Curve standard = Curves.easeOutCubic;
+  static const Curve decelerate = Curves.decelerate;
+  static const Curve emphasized = Curves.easeInOutCubic;
 }
 
-/// Curvas de animação naturais.
-abstract final class AppCurves {
- static const Curve standard = Curves.easeOutCubic;
- static const Curve decelerate = Curves.decelerate;
- static const Curve emphasized = Curves.easeInOutCubic;
+/// Padrão de ícones com fundo sólido escuro — replicado do feed
+/// de atividade da Home. Cada ícone tem um container circular
+/// com fundo escuro (mesma família de cor) e ícone CLARO que
+/// contrasta bem sobre esse fundo.
+abstract final class IconTone {
+  /// Deriva um background sólido ESCURO a partir de uma cor.
+  /// Converte para HSL, zera a lightness para ~12% e mantém a
+  /// saturação — resultado: mesmo matiz, tom sólido escuro.
+  static Color darkBackground(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl.withLightness(0.12).toColor();
+  }
+
+  /// Deriva uma cor CLARA para ícone sobre fundo escuro.
+  /// Converte para HSL, aumenta a lightness para ~75% e reduz
+  /// saturação para ~60% — garante contraste ≥ 4.5:1 sobre
+  /// qualquer darkBackground derivado da mesma cor.
+  static Color lightForeground(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl
+        .withLightness(0.75)
+        .withSaturation((hsl.saturation * 0.6).clamp(0.0, 1.0))
+        .toColor();
+  }
+
+  // ── Cores pré-definidas (padrão do activity feed) ──
+  static const Color green = Color(0xFF22C55E);
+  static const Color greenDark = Color(0xFF123F26);
+  static const Color amber = Color(0xFFE08F2B);
+  static const Color amberDark = Color(0xFF3A2810);
+  static const Color red = Color(0xFFE05B64);
+  static const Color redDark = Color(0xFF3A1618);
+  static const Color slate = Color(0xFF2A3034);
 }

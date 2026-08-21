@@ -64,19 +64,19 @@ class _SalesCardState extends State<SalesCard> {
             ),
             child: Row(
               children: [
-                // ── Left: small payment icon ──
+                // ── Left: payment icon (dark solid bg + light fg) ──
                 Container(
                   width: 36,
                   height: 36,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                    color: IconTone.darkBackground(accent),
+                    shape: BoxShape.circle,
                   ),
                   child: Icon(
                     _sale.paymentMethod.icon,
                     size: 18,
-                    color: accent,
+                    color: IconTone.lightForeground(accent),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -92,7 +92,7 @@ class _SalesCardState extends State<SalesCard> {
                               _sale.paymentMethod.labelFor(l10n),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodyMedium?.copyWith(
+                              style: theme.textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -104,7 +104,7 @@ class _SalesCardState extends State<SalesCard> {
                             child: Text(
                               Formatters.currency(_sale.totalAmountCents),
                               maxLines: 1,
-                              style: theme.textTheme.bodyMedium?.copyWith(
+                              style: theme.textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 fontFeatures: const [
                                   FontFeature.tabularFigures(),
@@ -114,7 +114,7 @@ class _SalesCardState extends State<SalesCard> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       // Secondary line: sale number · items (date visible in details)
                       Row(
                         children: [
@@ -125,6 +125,7 @@ class _SalesCardState extends State<SalesCard> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 11,
                                 color: scheme.onSurfaceVariant,
                               ),
                             ),

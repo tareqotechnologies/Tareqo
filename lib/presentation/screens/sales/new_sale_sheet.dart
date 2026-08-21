@@ -797,26 +797,29 @@ class _CartProductRow extends StatelessWidget {
  child: Column(
  crossAxisAlignment: CrossAxisAlignment.start,
  children: [
- // Nome COMPLETO do produto no carrinho — quebra em
- // linhas quando necessário (nada de truncar nomes).
- Text(
- product.name,
- style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w500,
- color: outOfStock ? theme.colorScheme.outline : null,
- ),
- ),
- const SizedBox(height: 2),
- Text(
- outOfStock
- ? l10n.commonSoldOut
- : '${Formatters.currency(product.salePriceCents)} · '
- '${Quantity.format(product.stockQuantity, unitLabel: isWeight ? product.unitLabel : null, language: Formatters.currentLanguage)}'
- '${isWeight ? '' : ' ${l10n.commonUnits}'}',
- style: theme.textTheme.bodySmall?.copyWith(
- color: theme.colorScheme.onSurfaceVariant,
- ),
- ),
+        // Nome COMPLETO do produto no carrinho — quebra em
+        // linhas quando necessário (nada de truncar nomes).
+        Text(
+          product.name,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: outOfStock ? theme.colorScheme.outline : null,
+          ),
+        ),
+        const SizedBox(height: 1),
+        Text(
+          outOfStock
+              ? l10n.commonSoldOut
+              : '${Formatters.currency(product.salePriceCents)} · '
+                    '${Quantity.format(product.stockQuantity, unitLabel: isWeight ? product.unitLabel : null, language: Formatters.currentLanguage)}'
+                    '${isWeight ? '' : ' ${l10n.commonUnits}'}',
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 11,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
  ],
  ),
  ),
@@ -841,16 +844,15 @@ class _CartProductRow extends StatelessWidget {
  padding: const EdgeInsets.symmetric(
  horizontal: 6,
  vertical: 8,
- ),
- child: Text(
- Quantity.format(
- quantity,
- unitLabel: isWeight ? product.unitLabel : null,
- language: Formatters.currentLanguage,
- ),
- textAlign: TextAlign.center,
- style: theme.textTheme.labelLarge,
- ),
+ ),        child: Text(
+          Quantity.format(
+            quantity,
+            unitLabel: isWeight ? product.unitLabel : null,
+            language: Formatters.currentLanguage,
+          ),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.labelMedium,
+        ),
  ),
  ),
  IconButton(
@@ -920,35 +922,34 @@ class _CartPill extends StatelessWidget {
  Expanded(
  child: Column(
  crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- Text(
- product.name,
- maxLines: 1,
- overflow: TextOverflow.ellipsis,
- style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w500,
- ),
- ),
- const SizedBox(height: 1),
- Text(
- '${Formatters.currency(product.salePriceCents)} '
- '${isWeight ? product.unitLabel : l10n.commonUnits}',
- style: theme.textTheme.bodySmall?.copyWith(
- color: theme.colorScheme.onSurfaceVariant,
- ),
- ),
+ children: [        Text(
+          product.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 1),
+        Text(
+          '${Formatters.currency(product.salePriceCents)} '
+              '${isWeight ? product.unitLabel : l10n.commonUnits}',
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 11,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
  ],
  ),
  ),
  const SizedBox(width: 8),
- Flexible(
- child: SmartAmount(
- cents: Quantity.lineTotal(quantity, product.salePriceCents),
- alignment: Alignment.centerRight,
- style: theme.textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w500,
- ),
- ),
+ Flexible(        child: SmartAmount(
+          cents: Quantity.lineTotal(quantity, product.salePriceCents),
+          alignment: Alignment.centerRight,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
  ),
  ],
  ),
