@@ -602,149 +602,156 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
 }
 
 /// Linha do card de produto (estilo Apple): foto, nome + detalhe à
-/// esquerda; preço de venda + estoque à direita — com divisória fina vinda
-/// do separador da lista. Tocável para dono/gerente (abre a edição); o
-/// produto INATIVO ganha o selo "Inativo" e o nome fica esmaecido.
-class _ProductTile extends StatelessWidget {
- const _ProductTile({required this.product, this.onTap});
+/// Tile de produto minimalista — estilo Google Apps (inspirado no SalesCard).
+///
+/// Layout em row: foto do produto (36px) à esquerda, nome + detalhe no
+/// centro, preço + estoque à direita. Borda sutil com hover.
+class _ProductTile extends StatefulWidget {
+  const _ProductTile({required this.product, this.onTap});
 
- final Product product;
+  final Product product;
 
- /// `null` para funcionário comum (só vende — não edita produtos).
- final VoidCallback? onTap;
+  /// `null` para funcionário comum (só vende — não edita produtos).
+  final VoidCallback? onTap;
 
- @override
- Widget build(BuildContext context) {
- final theme = Theme.of(context);
- final l10n = context.l10n;
- // W11: o estoque vive em MILÉSIMOS — o limiar de estoque baixo e a
- // exibição convertem para unidades (5 unidades).
- final lowStock =
- product.stockQuantity <
- Quantity.lowStockThresholdUnits * Quantity.milliFactor;
- final inactive = !product.isActive;
+  @override
+  State<_ProductTile> createState() => _ProductTileState();
+}
 
- // Detalhe sob o nome (canvas: SKU). O app não tem campo SKU próprio —
- // usa o código de barras/PLU quando existe (mesma função de
- // identificação rápida).
- final detail = product.code.isEmpty
- ? (product.description.isEmpty ? null : product.description)
- : product.code;
+class _ProductTileState extends State<_ProductTile> {
+  bool _hovered = false;
 
- // Linha do feed (estilo Home): transparente dentro da [FeedCard] — o
- // ripple cobre a linha; tocável apenas para quem pode gerir produtos.
- final content = Padding(
- padding: const EdgeInsets.symmetric(
- horizontal: AppSpacing.md,
- vertical: AppSpacing.sm + 2,
- ),
- child: Row(
- children: [
- // Foto do produto (fallback: ícone) — identifica o produto no
- // rolodex (dado real, mantido do design anterior).
- ProductImage(imagePath: product.imagePath, size: 36, radius: 8),
- const SizedBox(width: 10),
- Expanded(
- child: Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- // Nome COMPLETO do produto — quebra em linhas quando
- // necessário (nada de truncar nomes no rolodex).
-                Text(
-                  product.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 13,
-                    color: inactive ? theme.colorScheme.onSurfaceVariant : null,
+  Product get _product => widget.product;
+  VoidCallback? get _onTap => widget.onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+
+    final lowStock =
+        _product.stockQuantity <
+        Quantity.lowStockThresholdUnits * Quantity.milliFactor;
+    final inactive = !_product.isActive;
+
+    final detail = _product.code.isEmpty
+        ? (_product.description.isEmpty ? null : _product.description)
+        : _product.code;
+
+    return MouseRegion(
+      cursor: _onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Material(
+        color: _hovered
+            ? scheme.surfaceContainerHighest.withValues(alpha: 0.6)
+            : scheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          side: BorderSide(
+            color: scheme.outlineVariant.withValues(alpha: 0.6),
+          ),
+        ),
+        child: InkWell(
+          onTap: _onTap,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            child: Row(
+              children: [
+                // ── Foto/ícone do produto ──
+                ProductImage(
+                  imagePath: _product.imagePath,
+                  size: 36,
+                  radius: 8,
+                ),
+                const SizedBox(width: 12),
+                // ── Coluna central: nome + detalhe + chips ──
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Nome do produto
+                      Text(
+                        _product.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: inactive ? scheme.onSurfaceVariant : null,
+                        ),
+                      ),
+                      if (detail != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          detail,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                      if (inactive) ...[
+                        const SizedBox(height: 4),
+                        StatusChip(
+                          label: l10n.productsInactive,
+                          color: scheme.outline,
+                          icon: Icons.block_outlined,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
- if (detail != null) ...[
- const SizedBox(height: 2),
- // Detalhe (código/PLU ou descrição) — trunca com
- // ellipsis (dado secundário; o nome nunca trunca).
-          Text(
-            detail,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 11,
-              fontWeight: FontWeight.w300,
-              fontFeatures: const [FontFeature.tabularFigures()],
+                const SizedBox(width: 12),
+                // ── Coluna direita: preço + estoque ──
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: SmartAmount(
+                        cents: _product.salePriceCents,
+                        alignment: Alignment.centerRight,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: inactive ? scheme.onSurfaceVariant : null,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${Quantity.format(_product.stockQuantity, unitLabel: _product.vendaPorFracao ? _product.unitLabel : null, language: Formatters.currentLanguage)}'
+                      '${_product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: lowStock ? theme.expense : scheme.onSurfaceVariant,
+                        fontWeight: lowStock ? FontWeight.w500 : FontWeight.w300,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
- ],
- // Produto INATIVO: selo "Inativo" — não pode ser vendido
- // nem reposto até a reativação.
- if (inactive) ...[
- const SizedBox(height: 4),
- StatusChip(
- label: l10n.productsInactive,
- color: theme.colorScheme.outline,
- icon: Icons.block_outlined,
- ),
- ],
- ],
- ),
- ),
- const SizedBox(width: 12),
- // Coluna direita: preço de venda em destaque + estoque por
- // baixo, alinhados à direita. Flexible: com escala de texto alta
- // a coluna encolhe e o FittedBox do preço escala para caber.
- Flexible(
- child: Column(
- crossAxisAlignment: CrossAxisAlignment.end,
- children: [
- // Preço de venda (semibold, tabular) — FittedBox: ENCOLHE
- // com escala de texto alta em vez de estourar (numa Column
- // vertical de lista, flex vertical é inválido).
- FittedBox(
- fit: BoxFit.scaleDown,
- alignment: Alignment.centerRight,
- child: SmartAmount(
- cents: product.salePriceCents,
- alignment: Alignment.centerRight,          style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 12,
-                    color: inactive
-                        ? theme.colorScheme.onSurfaceVariant
-                        : null,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
- ),
- ),
- const SizedBox(height: 2),
- // Estoque: vermelho quando baixo, neutro caso contrário.
- Text(
- '${Quantity.format(product.stockQuantity, unitLabel: product.vendaPorFracao ? product.unitLabel : null, language: Formatters.currentLanguage)}'
- '${product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}',
- maxLines: 1,          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: lowStock
-              ? theme.expense
-              : theme.colorScheme.onSurfaceVariant,
-            fontSize: 11,
-            fontWeight: lowStock ? FontWeight.w500 : FontWeight.w300,
- fontFeatures: const [FontFeature.tabularFigures()],
- ),
- ),
- ],
- ),
- ),
- ],
- ),
- );
-
- if (onTap == null) return content;
- return InkWell(onTap: onTap, child: content);
- }
+        ),
+      ),
+    );
+  }
 }
 
 /// Bottom sheet de cadastro de produto.
-/// Seletor de foto do produto (design system ultra-clean): preview
-/// quadrado arredondado + botões Câmera/Galeria + ação de remover.
+/// Seletor de foto do produto (design minimalista): preview
+/// quadrado arredondado + botões de ícone (câmera/galeria/remover) empilhados.
 /// [bytes] = foto NOVA escolhida (ainda não enviada); [imagePath] = foto
 /// atual persistida (modo edição).
 class _ProductPhotoPicker extends StatelessWidget {
@@ -780,87 +787,82 @@ class _ProductPhotoPicker extends StatelessWidget {
  )
  : ProductImage(imagePath: imagePath, size: 76, iconSize: 30);
 
- return Row(
- crossAxisAlignment: CrossAxisAlignment.center,
- children: [
- // Preview maior (76) com borda sutil — destaque discreto da foto.
- Container(
- decoration: BoxDecoration(
- borderRadius: BorderRadius.circular(16),
- border: Border.all(
- color: theme.colorScheme.outlineVariant,
- width: 1,
- ),
- ),
- child: preview,
- ),
- const SizedBox(width: 16),
- Expanded(
- child: Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- Text(
- l10n.productsPhotoLabel,
- style: theme.textTheme.bodySmall?.copyWith(
- color: theme.colorScheme.onSurfaceVariant,
- ),
- ),
- const SizedBox(height: 10),
- Row(
- children: [
- Expanded(
- child: OutlinedButton.icon(
- onPressed: onTakePhoto,
- icon: const Icon(Icons.photo_camera_outlined, size: 18),
- label: Text(l10n.productsPhotoTake),
- style: OutlinedButton.styleFrom(
- minimumSize: const Size.fromHeight(44),
- shape: RoundedRectangleBorder(
- borderRadius: BorderRadius.circular(12),
- ),
- ),
- ),
- ),
- const SizedBox(width: 8),
- Expanded(
- child: OutlinedButton.icon(
- onPressed: onPickGallery,
- icon: const Icon(Icons.photo_library_outlined, size: 18),
- label: Text(l10n.productsPhotoGallery),
- style: OutlinedButton.styleFrom(
- minimumSize: const Size.fromHeight(44),
- shape: RoundedRectangleBorder(
- borderRadius: BorderRadius.circular(12),
- ),
- ),
- ),
- ),
- ],
- ),
- if (hasImage) ...[
- const SizedBox(height: 8),
- TextButton.icon(
- onPressed: onRemove,
- icon: const Icon(Icons.delete_outline, size: 16),
- label: Text(l10n.productsPhotoRemove),
- style: TextButton.styleFrom(
- foregroundColor: theme.colorScheme.error,
- visualDensity: VisualDensity.compact,
- padding: EdgeInsets.zero,
- ),
- ),
- ],
- ],
- ),
- ),
- ],
- );
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Preview maior (76) com borda sutil — destaque discreto da foto.
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant,
+              width: 1,
+            ),
+          ),
+          child: preview,
+        ),
+        const SizedBox(width: 12),
+        // Botões minimalistas: apenas ícones, sem texto — horizontais.
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Câmera
+            IconButton(
+              onPressed: onTakePhoto,
+              icon: const Icon(Icons.photo_camera_outlined, size: 22),
+              tooltip: l10n.productsPhotoTake,
+              style: IconButton.styleFrom(
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            // Galeria
+            IconButton(
+              onPressed: onPickGallery,
+              icon: const Icon(Icons.photo_library_outlined, size: 22),
+              tooltip: l10n.productsPhotoGallery,
+              style: IconButton.styleFrom(
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            if (hasImage) ...[
+              const SizedBox(width: 6),
+              // Remover
+              IconButton(
+                onPressed: onRemove,
+                icon: const Icon(Icons.delete_outline, size: 18),
+                tooltip: l10n.productsPhotoRemove,
+                style: IconButton.styleFrom(
+                  foregroundColor: theme.colorScheme.error,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
  }
 }
 
 /// Rótulo de seção do formulário (design system ultra-clean): pequeno
 /// rótulo com letter-spacing e o ícone da seção em acento — hierarquia
 /// sutil que organiza os campos sem pesar visualmente.
+// Estilo minimalista para campos de formulário do produto —
+// labels e texto digitado menores, poluição visual reduzida.
+const _kFieldStyle = TextStyle(fontSize: 12, height: 1.4);
+const _kLabelStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.w400);
+const _kFloatingLabelStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.w500);
+const _kHintStyle = TextStyle(fontSize: 11);
+
 class _SectionLabel extends StatelessWidget {
  const _SectionLabel({required this.icon, required this.title});
 
@@ -898,7 +900,7 @@ class _SectionLabel extends StatelessWidget {
 }
 
 class AddProductSheet extends ConsumerStatefulWidget {
- const AddProductSheet();
+ const AddProductSheet({super.key});
 
  @override
  ConsumerState<AddProductSheet> createState() => _AddProductSheetState();
@@ -1115,98 +1117,123 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
  icon: Icons.inventory_2_outlined,
  title: l10n.productsSectionInfo,
  ),
- const SizedBox(height: 10),
- AppTextField(
- controller: _nameController,
- textInputAction: TextInputAction.next,
- label: l10n.loginNameLabel,
- prefixIcon: Icons.inventory_2_outlined,
- validator: (value) => (value == null || value.trim().isEmpty)
- ? l10n.productsNameError
- : null,
- ),
- const SizedBox(height: 12),
- AppTextField(
- controller: _descriptionController,
- textInputAction: TextInputAction.next,
- label: l10n.productsDescriptionLabel,
- prefixIcon: Icons.notes_outlined,
- ),
- const SizedBox(height: 12),
- // W11: código de barras/PLU — usado pelas balanças
- // etiquetadoras (20PPPPPWWWWW) e pelo campo do PDV.
- AppTextField(
- controller: _codeController,
- textInputAction: TextInputAction.next,
- keyboardType: TextInputType.number,
- maxLength: 5,
- label: l10n.productsCodeLabel,
- helperText: l10n.productsCodeHint,
- prefixIcon: Icons.qr_code_2_outlined,
- validator: (value) {
- final digits = value?.trim() ?? '';
- if (digits.isNotEmpty &&
- !RegExp(r'^\d{1,5}$').hasMatch(digits)) {
- return l10n.productsCodeError;
- }
- return null;
- },
- ),
- const SizedBox(height: 24),
- // PREÇOS — compra e venda lado a lado.
- _SectionLabel(
- icon: Icons.payments_outlined,
- title: l10n.productsSectionPricing,
- ),
- const SizedBox(height: 10),
- Row(
- children: [
- Expanded(
- child: AppTextField(
- controller: _purchasePriceController,
- keyboardType: TextInputType.number,
- // Sem prefixIcon: campo de MEIA largura — com ícone
- // (48px) o label flutuante 'Purchase price' ainda
- // comprimiria (o tema já o deixou em 13px — labels
- // discretos globais, app_theme). Ícone propositalmente
- // fora para a fileira de preços não apertar.
- label: l10n.productsPurchasePrice,
- validator: (value) => _parsePrice(value ?? '') <= 0
- ? l10n.productsPurchasePriceError
- : null,
- ),
- ),
- const SizedBox(width: 12),
- Expanded(
- child: AppTextField(
- controller: _salePriceController,
- keyboardType: TextInputType.number,
- label: l10n.productsSalePrice,
- validator: (value) => _parsePrice(value ?? '') <= 0
- ? l10n.productsSalePriceError
- : null,
- ),
- ),
- ],
- ),
- const SizedBox(height: 24),
- // ESTOQUE — quantidade + validade + venda por peso.
- _SectionLabel(
- icon: Icons.warehouse_outlined,
- title: l10n.productsSectionStock,
- ),
- const SizedBox(height: 10),
- AppTextField(
- controller: _stockController,
- keyboardType: const TextInputType.numberWithOptions(
- decimal: true,
- ),
- label: l10n.productsStockQuantity,
- helperText: _vendaPorFracao
- ? l10n.productsStockWeightHint
- : null,
- prefixIcon: Icons.warehouse_outlined,
- validator: (value) {
+ const SizedBox(height: 10),      AppTextField(
+        controller: _nameController,
+        textInputAction: TextInputAction.next,
+        label: l10n.loginNameLabel,
+        prefixIcon: Icons.inventory_2_outlined,
+        style: _kFieldStyle,
+        labelStyle: _kLabelStyle,
+        floatingLabelStyle: _kFloatingLabelStyle,
+        decorationHintStyle: _kHintStyle,
+        isDense: true,
+        validator: (value) => (value == null || value.trim().isEmpty)
+            ? l10n.productsNameError
+            : null,
+      ),
+      const SizedBox(height: 8),
+      AppTextField(
+        controller: _descriptionController,
+        textInputAction: TextInputAction.next,
+        label: l10n.productsDescriptionLabel,
+        prefixIcon: Icons.notes_outlined,
+        style: _kFieldStyle,
+        labelStyle: _kLabelStyle,
+        floatingLabelStyle: _kFloatingLabelStyle,
+        decorationHintStyle: _kHintStyle,
+        isDense: true,
+      ),
+      const SizedBox(height: 8),
+      // W11: código de barras/PLU — usado pelas balanças
+      // etiquetadoras (20PPPPPWWWWW) e pelo campo do PDV.
+      AppTextField(
+        controller: _codeController,
+        textInputAction: TextInputAction.next,
+        keyboardType: TextInputType.number,
+        maxLength: 5,
+        label: l10n.productsCodeLabel,
+        helperText: l10n.productsCodeHint,
+        prefixIcon: Icons.qr_code_2_outlined,
+        style: _kFieldStyle,
+        labelStyle: _kLabelStyle,
+        floatingLabelStyle: _kFloatingLabelStyle,
+        decorationHintStyle: _kHintStyle,
+        isDense: true,
+        validator: (value) {
+          final digits = value?.trim() ?? '';
+          if (digits.isNotEmpty &&
+              !RegExp(r'^\d{1,5}$').hasMatch(digits)) {
+            return l10n.productsCodeError;
+          }
+          return null;
+        },
+      ),
+      const SizedBox(height: 16),
+      // PREÇOS — compra e venda lado a lado.
+      _SectionLabel(
+        icon: Icons.payments_outlined,
+        title: l10n.productsSectionPricing,
+      ),
+      const SizedBox(height: 8),
+      Row(
+        children: [
+          Expanded(
+            child: AppTextField(
+              controller: _purchasePriceController,
+              keyboardType: TextInputType.number,
+              label: l10n.productsPurchasePrice,
+              style: _kFieldStyle,
+              labelStyle: _kLabelStyle,
+              floatingLabelStyle: _kFloatingLabelStyle,
+              decorationHintStyle: _kHintStyle,
+              isDense: true,
+              validator: (value) => _parsePrice(value ?? '') <= 0
+                  ? l10n.productsPurchasePriceError
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: AppTextField(
+              controller: _salePriceController,
+              keyboardType: TextInputType.number,
+              label: l10n.productsSalePrice,
+              style: _kFieldStyle,
+              labelStyle: _kLabelStyle,
+              floatingLabelStyle: _kFloatingLabelStyle,
+              decorationHintStyle: _kHintStyle,
+              isDense: true,
+              validator: (value) => _parsePrice(value ?? '') <= 0
+                  ? l10n.productsSalePriceError
+                  : null,
+            ),
+          ),
+        ],
+      ),
+
+      const SizedBox(height: 16),
+      // ESTOQUE — quantidade + validade + venda por peso.
+      _SectionLabel(
+        icon: Icons.warehouse_outlined,
+        title: l10n.productsSectionStock,
+      ),
+      const SizedBox(height: 8),
+      AppTextField(
+        controller: _stockController,
+        keyboardType: const TextInputType.numberWithOptions(
+          decimal: true,
+        ),
+        label: l10n.productsStockQuantity,
+        helperText: _vendaPorFracao
+            ? l10n.productsStockWeightHint
+            : null,
+        prefixIcon: Icons.warehouse_outlined,
+        style: _kFieldStyle,
+        labelStyle: _kLabelStyle,
+        floatingLabelStyle: _kFloatingLabelStyle,
+        decorationHintStyle: _kHintStyle,
+        isDense: true,
+        validator: (value) {
  // W11: aceita decimais (ex.: 1,75) — convertido para
  // milésimos no submit; rejeita texto/números negativos.
  final quantity = Quantity.parse(value?.trim() ?? '');
@@ -1546,115 +1573,135 @@ class _EditProductSheetState extends ConsumerState<_EditProductSheet> {
  icon: Icons.inventory_2_outlined,
  title: l10n.productsSectionInfo,
  ),
- const SizedBox(height: 10),
- AppTextField(
- controller: _nameController,
- textInputAction: TextInputAction.next,
- label: l10n.loginNameLabel,
- prefixIcon: Icons.inventory_2_outlined,
- validator: (value) => (value == null || value.trim().isEmpty)
- ? l10n.productsNameError
- : null,
- ),
- const SizedBox(height: 12),
- AppTextField(
- controller: _descriptionController,
- textInputAction: TextInputAction.next,
- label: l10n.productsDescriptionLabel,
- prefixIcon: Icons.notes_outlined,
- ),
- const SizedBox(height: 12),
- AppTextField(
- controller: _codeController,
- textInputAction: TextInputAction.next,
- keyboardType: TextInputType.number,
- maxLength: 5,
- label: l10n.productsCodeLabel,
- helperText: l10n.productsCodeHint,
- prefixIcon: Icons.qr_code_2_outlined,
- validator: (value) {
- final digits = value?.trim() ?? '';
- if (digits.isNotEmpty &&
- !RegExp(r'^\d{1,5}$').hasMatch(digits)) {
- return l10n.productsCodeError;
- }
- return null;
- },
- ),
- const SizedBox(height: 24),
- // PREÇOS — compra e venda lado a lado.
- _SectionLabel(
- icon: Icons.payments_outlined,
- title: l10n.productsSectionPricing,
- ),
- const SizedBox(height: 10),
- Row(
- children: [
- Expanded(
- child: AppTextField(
- controller: _purchasePriceController,
- keyboardType: TextInputType.number,
- // Sem prefixIcon: campo de MEIA largura — com ícone
- // (48px) o label flutuante 'Purchase price' ainda
- // comprimiria (o tema já o deixou em 13px — labels
- // discretos globais, app_theme). Ícone propositalmente
- // fora para a fileira de preços não apertar.
- label: l10n.productsPurchasePrice,
- validator: (value) => _parsePrice(value ?? '') <= 0
- ? l10n.productsPurchasePriceError
- : null,
- ),
- ),
- const SizedBox(width: 12),
- Expanded(
- child: AppTextField(
- controller: _salePriceController,
- keyboardType: TextInputType.number,
- label: l10n.productsSalePrice,
- validator: (value) => _parsePrice(value ?? '') <= 0
- ? l10n.productsSalePriceError
- : null,
- ),
- ),
- ],
- ),
- const SizedBox(height: 24),
- // ESTOQUE — quantidade exata + venda por peso (FIFO).
- _SectionLabel(
- icon: Icons.warehouse_outlined,
- title: l10n.productsSectionStock,
- ),
- const SizedBox(height: 10),
- // Ajuste MANUAL de estoque: campo SEMPRE preenchido com o
- // estoque atual — alterar define a quantidade exata,
- // criando/consumindo lotes FIFO (a invariante stock = Σ
- // lotes nunca quebra).
- AppTextField(
- controller: _stockController,
- keyboardType: const TextInputType.numberWithOptions(
- decimal: true,
- ),
- label: l10n.productsStockQuantity,
- helperText: _vendaPorFracao
- ? l10n.productsStockWeightHint
- : l10n.productsStockAdjustHint,
- prefixIcon: Icons.warehouse_outlined,
- validator: (value) {
- // Edição: aceita ZERO explícito (zerar o estoque é um
- // ajuste legítimo — ex.: quebra total). Vazio = 0.
- // Rejeita texto não numérico e negativos.
- final text = value?.trim() ?? '';
- if (text.isEmpty) return null;
- final normalized = text
- .replaceAll(' ', '')
- .replaceAll(',', '.');
- final parsed = double.tryParse(normalized);
- if (parsed == null || parsed < 0) {
- return l10n.productsStockError;
- }
- return null;
- },
- ),
+ const SizedBox(height: 10),      AppTextField(
+        controller: _nameController,
+        textInputAction: TextInputAction.next,
+        label: l10n.loginNameLabel,
+        prefixIcon: Icons.inventory_2_outlined,
+        style: _kFieldStyle,
+        labelStyle: _kLabelStyle,
+        floatingLabelStyle: _kFloatingLabelStyle,
+        decorationHintStyle: _kHintStyle,
+        isDense: true,
+        validator: (value) => (value == null || value.trim().isEmpty)
+            ? l10n.productsNameError
+            : null,
+      ),
+      const SizedBox(height: 8),
+      AppTextField(
+        controller: _descriptionController,
+        textInputAction: TextInputAction.next,
+        label: l10n.productsDescriptionLabel,
+        prefixIcon: Icons.notes_outlined,
+        style: _kFieldStyle,
+        labelStyle: _kLabelStyle,
+        floatingLabelStyle: _kFloatingLabelStyle,
+        decorationHintStyle: _kHintStyle,
+        isDense: true,
+      ),
+      const SizedBox(height: 8),
+      AppTextField(
+        controller: _codeController,
+        textInputAction: TextInputAction.next,
+        keyboardType: TextInputType.number,
+        maxLength: 5,
+        label: l10n.productsCodeLabel,
+        helperText: l10n.productsCodeHint,
+        prefixIcon: Icons.qr_code_2_outlined,
+        style: _kFieldStyle,
+        labelStyle: _kLabelStyle,
+        floatingLabelStyle: _kFloatingLabelStyle,
+        decorationHintStyle: _kHintStyle,
+        isDense: true,
+        validator: (value) {
+          final digits = value?.trim() ?? '';
+          if (digits.isNotEmpty &&
+              !RegExp(r'^\d{1,5}$').hasMatch(digits)) {
+            return l10n.productsCodeError;
+          }
+          return null;
+        },
+      ),
+      const SizedBox(height: 16),
+      // PREÇOS — compra e venda lado a lado.
+      _SectionLabel(
+        icon: Icons.payments_outlined,
+        title: l10n.productsSectionPricing,
+      ),
+      const SizedBox(height: 8),
+      Row(
+        children: [
+          Expanded(
+            child: AppTextField(
+              controller: _purchasePriceController,
+              keyboardType: TextInputType.number,
+              label: l10n.productsPurchasePrice,
+              style: _kFieldStyle,
+              labelStyle: _kLabelStyle,
+              floatingLabelStyle: _kFloatingLabelStyle,
+              decorationHintStyle: _kHintStyle,
+              isDense: true,
+              validator: (value) => _parsePrice(value ?? '') <= 0
+                  ? l10n.productsPurchasePriceError
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: AppTextField(
+              controller: _salePriceController,
+              keyboardType: TextInputType.number,
+              label: l10n.productsSalePrice,
+              style: _kFieldStyle,
+              labelStyle: _kLabelStyle,
+              floatingLabelStyle: _kFloatingLabelStyle,
+              decorationHintStyle: _kHintStyle,
+              isDense: true,
+              validator: (value) => _parsePrice(value ?? '') <= 0
+                  ? l10n.productsSalePriceError
+                  : null,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 16),
+      // ESTOQUE — quantidade exata + venda por peso (FIFO).
+      _SectionLabel(
+        icon: Icons.warehouse_outlined,
+        title: l10n.productsSectionStock,
+      ),
+      const SizedBox(height: 8),
+      AppTextField(
+        controller: _stockController,
+        keyboardType: const TextInputType.numberWithOptions(
+          decimal: true,
+        ),
+        label: l10n.productsStockQuantity,
+        helperText: _vendaPorFracao
+            ? l10n.productsStockWeightHint
+            : l10n.productsStockAdjustHint,
+        prefixIcon: Icons.warehouse_outlined,
+        style: _kFieldStyle,
+        labelStyle: _kLabelStyle,
+        floatingLabelStyle: _kFloatingLabelStyle,
+        decorationHintStyle: _kHintStyle,
+        isDense: true,
+        validator: (value) {
+          // Edição: aceita ZERO explícito (zerar o estoque é um
+          // ajuste legítimo — ex.: quebra total). Vazio = 0.
+          // Rejeita texto não numérico e negativos.
+          final text = value?.trim() ?? '';
+          if (text.isEmpty) return null;
+          final normalized = text
+              .replaceAll(' ', '')
+              .replaceAll(',', '.');
+          final parsed = double.tryParse(normalized);
+          if (parsed == null || parsed < 0) {
+            return l10n.productsStockError;
+          }
+          return null;
+        },
+      ),
  const SizedBox(height: 4),
  Material(
  type: MaterialType.transparency,

@@ -30,13 +30,9 @@ class DumbhanengueApp extends ConsumerWidget {
 
  return MaterialApp(
  title: 'Dumbhanengue ERP',
- debugShowCheckedModeBanner: false,
- // V3 — dark total (design do canvas): o app é 100% escuro, sem
- // seguir o brilho do sistema. O tema claro permanece definido para
- // os testes de contraste/tipografia validarem ambas as variantes.
- theme: AppTheme.dark,
- darkTheme: AppTheme.dark,
- themeMode: ThemeMode.dark,
+ debugShowCheckedModeBanner: false,    theme: AppTheme.light,
+    darkTheme: AppTheme.dark,
+    themeMode: ThemeMode.system,
  locale: settings?.locale ?? const Locale('pt'),
  localizationsDelegates: AppLocalizations.localizationsDelegates,
  supportedLocales: AppLocalizations.supportedLocales,
