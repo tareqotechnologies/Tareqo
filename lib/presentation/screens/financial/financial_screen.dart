@@ -405,19 +405,29 @@ class _CashStack extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Formatters.currency(balance),
-                maxLines: 1,
-                style: theme.textTheme.displaySmall?.copyWith(
-                  color: balanceColor,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: -0.8,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final text = Formatters.currency(balance);
+                final baseSize =
+                    theme.textTheme.displaySmall?.fontSize ?? 32.0;
+                // Escala proporcional: texto maior ocupa mais espaço;
+                // em telas estreitas (landscape), reduz proporcionalmente.
+                final scale = (constraints.maxWidth /
+                        (text.length * baseSize * 0.52))
+                    .clamp(0.55, 1.0);
+                return Text(
+                  text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    fontSize: baseSize * scale,
+                    color: balanceColor,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -0.8,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
             Divider(height: 1, color: scheme.outlineVariant),
@@ -471,12 +481,9 @@ class _CashLine extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.12),
-              border: Border.all(
-                color: color.withValues(alpha: 0.25),
-              ),
+              color: IconTone.darkBackground(color),
             ),
-            child: Icon(icon, size: 14, color: color),
+            child: Icon(icon, size: 14, color: IconTone.lightForeground(color)),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -490,18 +497,23 @@ class _CashLine extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                value,
-                maxLines: 1,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w500,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 3,
+            ),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
