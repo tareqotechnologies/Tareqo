@@ -704,6 +704,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeReactivateAction => 'Reactivate';
 
   @override
+  String get employeeDetailTitle => 'Employee details';
+
+  @override
+  String get employeeDetailEmail => 'Email';
+
+  @override
+  String get employeeDetailStore => 'Store';
+
+  @override
+  String get employeeDetailRole => 'Access level';
+
+  @override
+  String get employeeDetailStatus => 'Status';
+
+  @override
+  String get employeeDetailActive => 'Active';
+
+  @override
+  String get employeeDetailInactive => 'Inactive';
+
+  @override
+  String get employeeDetailActions => 'Actions';
+
+  @override
   String get upgradesLoadError => 'Could not load the plan upgrade requests.';
 
   @override

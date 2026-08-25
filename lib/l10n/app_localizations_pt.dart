@@ -687,6 +687,30 @@ class AppLocalizationsPt extends AppLocalizations {
   String get employeeReactivateAction => 'Reativar';
 
   @override
+  String get employeeDetailTitle => 'Detalhes do funcionário';
+
+  @override
+  String get employeeDetailEmail => 'E-mail';
+
+  @override
+  String get employeeDetailStore => 'Loja';
+
+  @override
+  String get employeeDetailRole => 'Nível de acesso';
+
+  @override
+  String get employeeDetailStatus => 'Estado';
+
+  @override
+  String get employeeDetailActive => 'Ativo';
+
+  @override
+  String get employeeDetailInactive => 'Inativo';
+
+  @override
+  String get employeeDetailActions => 'Ações';
+
+  @override
   String get upgradesLoadError => 'Não foi possível carregar os pedidos de upgrade.';
 
   @override

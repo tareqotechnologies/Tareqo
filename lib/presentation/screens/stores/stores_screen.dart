@@ -268,112 +268,96 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  subtitle: l10n.employeesEmptySubtitle,
  );
  }
- String storeName(String id) =>
- stores.where((store) => store.id == id).firstOrNull?.name ?? id;
 
  return ListView.separated(
  padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
  itemCount: employees.length,
- separatorBuilder: (_, _) => const SizedBox(height: 8),
- itemBuilder: (context, index) {
- final employee = employees[index];
- final scheme = Theme.of(context).colorScheme;
- final isManager = employee.role == EmployeeRole.manager;        return AppCard(
+ separatorBuilder: (_, _) => const SizedBox(height: 8),      itemBuilder: (context, index) {
+          final employee = employees[index];
+          final scheme = Theme.of(context).colorScheme;
+          final isManager = employee.role == EmployeeRole.manager;        return AppCard(
           borderRadius: BorderRadius.circular(16),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
- child: Row(
- crossAxisAlignment: CrossAxisAlignment.center,
- children: [
- CircleAvatar(
- backgroundColor: scheme.primaryContainer,
- child: Text(
- employee.fullName.isEmpty
- ? '?'
- : employee.fullName.substring(0, 1).toUpperCase(),
- style: TextStyle(
- color: scheme.onPrimaryContainer,
- fontWeight: FontWeight.w500,
- ),
- ),
- ),
- const SizedBox(width: 12),
- Expanded(
- child: Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [          // Nome — largura TOTAL restante: quebra em até 2
-          // linhas e nunca é truncado.
-          Text(
-            employee.fullName,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleSmall
-                ?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  height: 1.25,
-                ),
+          padding: EdgeInsets.zero,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => _openEmployeeDetail(employee, stores, isOwner),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: scheme.primaryContainer,
+                    child: Text(
+                      employee.fullName.isEmpty
+                          ? '?'
+                          : employee.fullName.substring(0, 1).toUpperCase(),
+                      style: TextStyle(
+                        color: scheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      employee.fullName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (!employee.isActive) ...[
+                    StatusChip(
+                      label: l10n.employeeInactive,
+                      color: scheme.error,
+                      icon: Icons.block,
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  StatusChip(
+                    label: isManager ? l10n.roleManager : l10n.roleEmployee,
+                    color: isManager ? scheme.primary : scheme.outline,
+                    icon: isManager
+                        ? Icons.manage_accounts_outlined
+                        : Icons.person_outline,
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
           ),
- const SizedBox(height: 2),          // Loja · e-mail — largura TOTAL, até 2 linhas.
-          Text(
-            '${storeName(employee.storeId)} · '
-            '${employee.email}',
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall
-                ?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  height: 1.35,
-                ),
-          ),
- ],
- ),
- ),
- // Coluna âncora à direita: chips (cargo; "Inativo" se
- // desativado) por cima do interruptor fino — o texto
- // nunca disputa largura com eles em telas estreitas.
- const SizedBox(width: 12),
- Column(
- mainAxisSize: MainAxisSize.min,
- crossAxisAlignment: CrossAxisAlignment.end,
- children: [
- if (!employee.isActive) ...[
- StatusChip(
- label: l10n.employeeInactive,
- color: scheme.error,
- icon: Icons.block,
- ),
- const SizedBox(height: 4),
- ],
- StatusChip(
- label: isManager ? l10n.roleManager : l10n.roleEmployee,
- color: isManager ? scheme.primary : scheme.outline,
- icon: isManager
- ? Icons.manage_accounts_outlined
- : Icons.person_outline,
- ),
- // Interruptor FINO (design system): trilho 40×20 com
- // thumb 16 — metade da altura do Switch M3 — área de
- // toque (44×24) e semânticas de switch. Só o dono vê.
- if (isOwner) ...[
- const SizedBox(height: 6),
- _ThinToggle(
- key: ValueKey('employee-toggle-${employee.id}'),
- value: employee.isActive,
- onChanged: (value) =>
- _toggleEmployee(employee, value),
- ),
- ],
- ],
- ),
- ],
- ),
- );
+        );
  },
  );
  },
  );
- }
+ }  void _openEmployeeDetail(
+    StoreEmployee employee,
+    List<Store> stores,
+    bool isOwner,
+  ) {
+    showAppSheet<void>(
+      context,
+      builder: (_) => _EmployeeDetailSheet(
+        employee: employee,
+        stores: stores,
+        isOwner: isOwner,
+        onToggle: (isActive) => _toggleEmployee(employee, isActive),
+      ),
+    );
+  }
 
- /// Confirma e ativa/desativa o funcionário (só o dono chega aqui).
+  /// Confirma e ativa/desativa o funcionário (só o dono chega aqui).
  Future<void> _toggleEmployee(StoreEmployee employee, bool isActive) async {
  final l10n = context.l10n;
  final confirmed = await showDialog<bool>(
@@ -664,74 +648,7 @@ class _LimitMeter extends StatelessWidget {
  }
 }
 
-/// Interruptor fino (design system ultra-clean).
-///
-/// O `Switch` do Material 3 é alto demais (trilho ~32px) para listas
-/// densas — este tem trilho 40×20 com thumb 16 (metade da altura), cantos
-/// totalmente arredondados, animação suave (160ms) e sem sombras (flat).
-/// A área de toque é 44×24 (maior que o visual) e o `Semantics` mantém o
-/// papel de switch para leitores de ecrã.
-class _ThinToggle extends StatelessWidget {
- const _ThinToggle({super.key, required this.value, required this.onChanged});
 
- final bool value;
- final ValueChanged<bool> onChanged;
-
- static const double _trackWidth = 40;
- static const double _trackHeight = 20;
- static const double _thumbSize = 16;
- static const double _inset = (_trackHeight - _thumbSize) / 2; // 2
-
- @override
- Widget build(BuildContext context) {
- final scheme = Theme.of(context).colorScheme;
-
- return Semantics(
- container: true,
- // `toggled` basta para anunciar ligado/desligado (o enum
- // `SemanticsRole.switch` não é exportado por este SDK do Flutter).
- toggled: value,
- child: GestureDetector(
- behavior: HitTestBehavior.opaque,
- onTap: () => onChanged(!value),
- child: SizedBox(
- width: _trackWidth + 4, // área de toque um pouco maior
- height: _trackHeight + 4,
- child: Center(
- child: AnimatedContainer(
- duration: const Duration(milliseconds: 160),
- curve: Curves.easeOut,
- width: _trackWidth,
- height: _trackHeight,
- padding: const EdgeInsets.all(_inset),
- decoration: BoxDecoration(
- color: value ? scheme.primary : scheme.surfaceContainerHighest,
- borderRadius: BorderRadius.circular(_trackHeight / 2),
- border: Border.all(
- color: value ? scheme.primary : scheme.outlineVariant,
- width: 1,
- ),
- ),
- child: AnimatedAlign(
- duration: const Duration(milliseconds: 160),
- curve: Curves.easeOut,
- alignment: value ? Alignment.centerRight : Alignment.centerLeft,
- child: Container(
- width: _thumbSize,
- height: _thumbSize,
- decoration: BoxDecoration(
- shape: BoxShape.circle,
- color: value ? scheme.onPrimary : scheme.onSurfaceVariant,
- ),
- ),
- ),
- ),
- ),
- ),
- ),
- );
- }
-}
 
 /// Sheet de criação de loja.
 class _AddStoreSheet extends ConsumerStatefulWidget {
@@ -1582,4 +1499,194 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
  ],
  );
  }
+}
+
+/// Sheet de detalhes de um funcionário — exibida ao tocar no card.
+class _EmployeeDetailSheet extends StatelessWidget {
+  const _EmployeeDetailSheet({
+    required this.employee,
+    required this.stores,
+    required this.isOwner,
+    required this.onToggle,
+  });
+
+  final StoreEmployee employee;
+  final List<Store> stores;
+  final bool isOwner;
+  final ValueChanged<bool> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final isManager = employee.role == EmployeeRole.manager;
+
+    final storeName = stores
+        .where((s) => s.id == employee.storeId)
+        .firstOrNull?.name ?? employee.storeId;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── Cabeçalho: avatar + nome ──
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: scheme.primaryContainer,
+                child: Text(
+                  employee.fullName.isEmpty
+                      ? '?'
+                      : employee.fullName.substring(0, 1).toUpperCase(),
+                  style: TextStyle(
+                    color: scheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      employee.fullName,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (!employee.isActive) ...[
+                      const SizedBox(height: 2),
+                      StatusChip(
+                        label: l10n.employeeDetailInactive,
+                        color: scheme.error,
+                        icon: Icons.block,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // ── Detalhes ──
+          _DetailRow(
+            label: l10n.employeeDetailEmail,
+            value: employee.email,
+            icon: Icons.email_outlined,
+          ),
+          _DetailRow(
+            label: l10n.employeeDetailStore,
+            value: storeName,
+            icon: Icons.store_outlined,
+          ),
+          _DetailRow(
+            label: l10n.employeeDetailRole,
+            value: isManager ? l10n.roleManager : l10n.roleEmployee,
+            icon: isManager
+                ? Icons.manage_accounts_outlined
+                : Icons.person_outline,
+            valueColor: isManager ? scheme.primary : null,
+          ),
+          _DetailRow(
+            label: l10n.employeeDetailStatus,
+            value: employee.isActive
+                ? l10n.employeeDetailActive
+                : l10n.employeeDetailInactive,
+            icon: employee.isActive
+                ? Icons.check_circle_outline
+                : Icons.cancel_outlined,
+            valueColor: employee.isActive ? scheme.primary : scheme.error,
+          ),
+
+          // ── Ações ──
+          if (isOwner) ...[
+            const SizedBox(height: 20),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            Text(
+              l10n.employeeDetailActions,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 12),
+            AppButton.primary(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onToggle(!employee.isActive);
+              },
+              label: employee.isActive
+                  ? l10n.employeeDeactivateAction
+                  : l10n.employeeReactivateAction,
+              icon: Icon(
+                employee.isActive
+                    ? Icons.block_outlined
+                    : Icons.check_circle_outlined,
+                size: 18,
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+}
+
+/// Linha de detalhe — ícone + rótulo + valor.
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.valueColor,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: scheme.onSurfaceVariant),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: valueColor ?? scheme.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

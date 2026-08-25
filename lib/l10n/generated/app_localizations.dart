@@ -1324,6 +1324,54 @@ abstract class AppLocalizations {
   /// **'Reativar'**
   String get employeeReactivateAction;
 
+  /// No description provided for @employeeDetailTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Detalhes do funcionário'**
+  String get employeeDetailTitle;
+
+  /// No description provided for @employeeDetailEmail.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail'**
+  String get employeeDetailEmail;
+
+  /// No description provided for @employeeDetailStore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Loja'**
+  String get employeeDetailStore;
+
+  /// No description provided for @employeeDetailRole.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nível de acesso'**
+  String get employeeDetailRole;
+
+  /// No description provided for @employeeDetailStatus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estado'**
+  String get employeeDetailStatus;
+
+  /// No description provided for @employeeDetailActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativo'**
+  String get employeeDetailActive;
+
+  /// No description provided for @employeeDetailInactive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inativo'**
+  String get employeeDetailInactive;
+
+  /// No description provided for @employeeDetailActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ações'**
+  String get employeeDetailActions;
+
   /// No description provided for @upgradesLoadError.
   ///
   /// In pt, this message translates to:

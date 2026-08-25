@@ -687,6 +687,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get employeeReactivateAction => 'Réactiver';
 
   @override
+  String get employeeDetailTitle => 'Détails de l\'employé';
+
+  @override
+  String get employeeDetailEmail => 'E-mail';
+
+  @override
+  String get employeeDetailStore => 'Magasin';
+
+  @override
+  String get employeeDetailRole => 'Niveau d\'accès';
+
+  @override
+  String get employeeDetailStatus => 'Statut';
+
+  @override
+  String get employeeDetailActive => 'Actif';
+
+  @override
+  String get employeeDetailInactive => 'Inactif';
+
+  @override
+  String get employeeDetailActions => 'Actions';
+
+  @override
   String get upgradesLoadError => 'Impossible de charger les demandes d\'évolution.';
 
   @override
