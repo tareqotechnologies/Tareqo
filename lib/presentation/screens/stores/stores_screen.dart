@@ -1631,7 +1631,7 @@ class _EmployeeDetailSheet extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                radius: 24,
+                radius: 20,
                 backgroundColor: scheme.primaryContainer,
                 child: Text(
                   employee.fullName.isEmpty
@@ -1639,36 +1639,32 @@ class _EmployeeDetailSheet extends StatelessWidget {
                       : employee.fullName.substring(0, 1).toUpperCase(),
                   style: TextStyle(
                     color: scheme.onPrimaryContainer,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 14,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      employee.fullName,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (!employee.isActive) ...[
-                      const SizedBox(height: 2),
-                      StatusChip(
-                        label: l10n.employeeDetailInactive,
-                        color: scheme.error,
-                        icon: Icons.block,
-                      ),
-                    ],
-                  ],
+                child: Text(
+                  employee.fullName,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w300,
+                  ),
                 ),
               ),
+              if (!employee.isActive)
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: scheme.error,
+                    shape: BoxShape.circle,
+                  ),
+                ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // ── Detalhes ──
           _DetailRow(
@@ -1702,32 +1698,27 @@ class _EmployeeDetailSheet extends StatelessWidget {
 
           // ── Ações ──
           if (isOwner) ...[
-            const SizedBox(height: 20),
-            const Divider(height: 1),
             const SizedBox(height: 16),
-            Text(
-              l10n.employeeDetailActions,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            const Divider(height: 1),
             const SizedBox(height: 12),
-            AppButton.primary(
-              onPressed: () {
-                Navigator.of(context).pop();
-                onToggle(!employee.isActive);
-              },
-              label: employee.isActive
-                  ? l10n.employeeDeactivateAction
-                  : l10n.employeeReactivateAction,
-              icon: Icon(
-                employee.isActive
-                    ? Icons.block_outlined
-                    : Icons.check_circle_outlined,
-                size: 18,
+            if (employee.isActive)
+              AppButton.danger(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  onToggle(false);
+                },
+                label: l10n.employeeDeactivateAction,
+                icon: const Icon(Icons.block_outlined, size: 18),
+              )
+            else
+              AppButton.primary(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  onToggle(true);
+                },
+                label: l10n.employeeReactivateAction,
+                icon: const Icon(Icons.check_circle_outlined, size: 18),
               ),
-            ),
           ],
           const SizedBox(height: 8),
         ],
@@ -1756,27 +1747,28 @@ class _DetailRow extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: scheme.onSurfaceVariant),
-          const SizedBox(width: 12),
+          Icon(icon, size: 16, color: scheme.onSurfaceVariant),
+          const SizedBox(width: 8),
           SizedBox(
-            width: 90,
+            width: 70,
             child: Text(
               label,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: scheme.onSurfaceVariant,
+                fontSize: 10,
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Expanded(
             child: Text(
               value,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: valueColor ?? scheme.onSurface,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ),

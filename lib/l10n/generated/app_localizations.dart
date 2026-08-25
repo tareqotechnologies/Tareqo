@@ -1469,36 +1469,69 @@ abstract class AppLocalizations {
   String get addStoreAddressLabel;
 
   /// No description provided for @addStorePhoneLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone (opcional)'**
   String get addStorePhoneLabel;
 
   /// No description provided for @addStoreEmailLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail (opcional)'**
   String get addStoreEmailLabel;
 
   /// No description provided for @addStoreNuitLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'NUIT (opcional)'**
   String get addStoreNuitLabel;
 
   /// No description provided for @addStoreCityLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cidade (opcional)'**
   String get addStoreCityLabel;
 
   /// No description provided for @storeDetailTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Detalhes da loja'**
   String get storeDetailTitle;
 
   /// No description provided for @storeDetailPhone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone'**
   String get storeDetailPhone;
 
   /// No description provided for @storeDetailEmail.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail'**
   String get storeDetailEmail;
 
   /// No description provided for @storeDetailNuit.
+  ///
+  /// In pt, this message translates to:
+  /// **'NUIT'**
   String get storeDetailNuit;
 
   /// No description provided for @storeDetailCity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cidade'**
   String get storeDetailCity;
 
   /// No description provided for @storeDetailAddress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Endereço'**
   String get storeDetailAddress;
 
   /// No description provided for @storeDetailActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ações'**
   String get storeDetailActions;
 
   /// No description provided for @addStoreSuccess.
