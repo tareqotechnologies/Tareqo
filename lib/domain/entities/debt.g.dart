@@ -7,29 +7,29 @@ part of 'debt.dart';
 // **************************************************************************
 
 _Debt _$DebtFromJson(Map<String, dynamic> json) => _Debt(
- id: json['id'] as String,
- number: (json['number'] as num?)?.toInt() ?? 0,
- storeId: json['storeId'] as String? ?? 'st1',
- personName: json['personName'] as String,
- amountCents: (json['amountCents'] as num).toInt(),
- dueDate: DateTime.parse(json['dueDate'] as String),
- isCustomerDebt: json['isCustomerDebt'] as bool,
- isPaid: json['isPaid'] as bool? ?? false,
- paidAt: json['paidAt'] == null
- ? null
- : DateTime.parse(json['paidAt'] as String),
- customerId: json['customerId'] as String?,
+  id: json['id'] as String,
+  number: (json['number'] as num?)?.toInt() ?? 0,
+  storeId: json['storeId'] as String? ?? 'st1',
+  personName: json['personName'] as String,
+  amountCents: (json['amountCents'] as num).toInt(),
+  dueDate: DateTime.parse(json['dueDate'] as String),
+  isCustomerDebt: json['isCustomerDebt'] as bool,
+  isPaid: json['isPaid'] as bool? ?? false,
+  paidAt: json['paidAt'] == null
+      ? null
+      : DateTime.parse(json['paidAt'] as String),
+  customerId: json['customerId'] as String?,
 );
 
 Map<String, dynamic> _$DebtToJson(_Debt instance) => <String, dynamic>{
- 'id': instance.id,
- 'number': instance.number,
- 'storeId': instance.storeId,
- 'personName': instance.personName,
- 'amountCents': instance.amountCents,
- 'dueDate': instance.dueDate.toIso8601String(),
- 'isCustomerDebt': instance.isCustomerDebt,
- 'isPaid': instance.isPaid,
- 'paidAt': instance.paidAt?.toIso8601String(),
- 'customerId': instance.customerId,
+  'id': instance.id,
+  'number': instance.number,
+  'storeId': instance.storeId,
+  'personName': instance.personName,
+  'amountCents': instance.amountCents,
+  'dueDate': instance.dueDate.toIso8601String(),
+  'isCustomerDebt': instance.isCustomerDebt,
+  'isPaid': instance.isPaid,
+  'paidAt': instance.paidAt?.toIso8601String(),
+  'customerId': instance.customerId,
 };

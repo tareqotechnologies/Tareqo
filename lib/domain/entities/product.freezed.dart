@@ -48,13 +48,13 @@ mixin _$Product {
 @pragma('vm:prefer-inline')
 $ProductCopyWith<Product> get copyWith => _$ProductCopyWithImpl<Product>(this as Product, _$identity);
 
- /// Serializes this Product to a JSON map.
- Map<String, dynamic> toJson();
+  /// Serializes this Product to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
- return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.purchasePriceCents, purchasePriceCents) || other.purchasePriceCents == purchasePriceCents)&&(identical(other.salePriceCents, salePriceCents) || other.salePriceCents == salePriceCents)&&(identical(other.stockQuantity, stockQuantity) || other.stockQuantity == stockQuantity)&&(identical(other.code, code) || other.code == code)&&(identical(other.vendaPorFracao, vendaPorFracao) || other.vendaPorFracao == vendaPorFracao)&&(identical(other.unitLabel, unitLabel) || other.unitLabel == unitLabel)&&(identical(other.isActive, isActive) || other.isActive == isActive));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.purchasePriceCents, purchasePriceCents) || other.purchasePriceCents == purchasePriceCents)&&(identical(other.salePriceCents, salePriceCents) || other.salePriceCents == salePriceCents)&&(identical(other.stockQuantity, stockQuantity) || other.stockQuantity == stockQuantity)&&(identical(other.code, code) || other.code == code)&&(identical(other.vendaPorFracao, vendaPorFracao) || other.vendaPorFracao == vendaPorFracao)&&(identical(other.unitLabel, unitLabel) || other.unitLabel == unitLabel)&&(identical(other.isActive, isActive) || other.isActive == isActive));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -63,15 +63,15 @@ int get hashCode => Object.hash(runtimeType,id,storeId,name,description,imagePat
 
 @override
 String toString() {
- return 'Product(id: $id, storeId: $storeId, name: $name, description: $description, imagePath: $imagePath, purchasePriceCents: $purchasePriceCents, salePriceCents: $salePriceCents, stockQuantity: $stockQuantity, code: $code, vendaPorFracao: $vendaPorFracao, unitLabel: $unitLabel, isActive: $isActive)';
+  return 'Product(id: $id, storeId: $storeId, name: $name, description: $description, imagePath: $imagePath, purchasePriceCents: $purchasePriceCents, salePriceCents: $salePriceCents, stockQuantity: $stockQuantity, code: $code, vendaPorFracao: $vendaPorFracao, unitLabel: $unitLabel, isActive: $isActive)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $ProductCopyWith<$Res> {
- factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
+abstract mixin class $ProductCopyWith<$Res>  {
+  factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
 @useResult
 $Res call({
  String id, String storeId, String name, String description, String imagePath, int purchasePriceCents, int salePriceCents, int stockQuantity, String code, bool vendaPorFracao, String unitLabel, bool isActive
@@ -83,16 +83,16 @@ $Res call({
 }
 /// @nodoc
 class _$ProductCopyWithImpl<$Res>
- implements $ProductCopyWith<$Res> {
- _$ProductCopyWithImpl(this._self, this._then);
+    implements $ProductCopyWith<$Res> {
+  _$ProductCopyWithImpl(this._self, this._then);
 
- final Product _self;
- final $Res Function(Product) _then;
+  final Product _self;
+  final $Res Function(Product) _then;
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? name = null,Object? description = null,Object? imagePath = null,Object? purchasePriceCents = null,Object? salePriceCents = null,Object? stockQuantity = null,Object? code = null,Object? vendaPorFracao = null,Object? unitLabel = null,Object? isActive = null,}) {
- return _then(_self.copyWith(
+  return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -106,7 +106,7 @@ as String,vendaPorFracao: null == vendaPorFracao ? _self.vendaPorFracao : vendaP
 as bool,unitLabel: null == unitLabel ? _self.unitLabel : unitLabel // ignore: cast_nullable_to_non_nullable
 as String,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,
- ));
+  ));
 }
 
 }
@@ -119,19 +119,19 @@ extension ProductPatterns on Product {
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case _:
-/// return orElse();
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Product value)? $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Product value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Product() when $default != null:
 return $default(_that);case _:
- return orElse();
+  return orElse();
 
 }
 }
@@ -141,19 +141,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case final Subclass2 value:
-/// return ...;
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Product value) $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Product value)  $default,){
 final _that = this;
 switch (_that) {
 case _Product():
 return $default(_that);case _:
- throw StateError('Unexpected subclass');
+  throw StateError('Unexpected subclass');
 
 }
 }
@@ -162,19 +162,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case _:
-/// return null;
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Product value)? $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Product value)?  $default,){
 final _that = this;
 switch (_that) {
 case _Product() when $default != null:
 return $default(_that);case _:
- return null;
+  return null;
 
 }
 }
@@ -183,18 +183,18 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case _:
-/// return orElse();
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, String storeId, String name, String description, String imagePath, int purchasePriceCents, int salePriceCents, int stockQuantity, String code, bool vendaPorFracao, String unitLabel, bool isActive)? $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  String name,  String description,  String imagePath,  int purchasePriceCents,  int salePriceCents,  int stockQuantity,  String code,  bool vendaPorFracao,  String unitLabel,  bool isActive)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
 return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imagePath,_that.purchasePriceCents,_that.salePriceCents,_that.stockQuantity,_that.code,_that.vendaPorFracao,_that.unitLabel,_that.isActive);case _:
- return orElse();
+  return orElse();
 
 }
 }
@@ -204,18 +204,18 @@ return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imageP
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case Subclass2(:final field2):
-/// return ...;
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, String storeId, String name, String description, String imagePath, int purchasePriceCents, int salePriceCents, int stockQuantity, String code, bool vendaPorFracao, String unitLabel, bool isActive) $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  String name,  String description,  String imagePath,  int purchasePriceCents,  int salePriceCents,  int stockQuantity,  String code,  bool vendaPorFracao,  String unitLabel,  bool isActive)  $default,) {final _that = this;
 switch (_that) {
 case _Product():
 return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imagePath,_that.purchasePriceCents,_that.salePriceCents,_that.stockQuantity,_that.code,_that.vendaPorFracao,_that.unitLabel,_that.isActive);case _:
- throw StateError('Unexpected subclass');
+  throw StateError('Unexpected subclass');
 
 }
 }
@@ -224,18 +224,18 @@ return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imageP
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case _:
-/// return null;
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, String storeId, String name, String description, String imagePath, int purchasePriceCents, int salePriceCents, int stockQuantity, String code, bool vendaPorFracao, String unitLabel, bool isActive)? $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  String name,  String description,  String imagePath,  int purchasePriceCents,  int salePriceCents,  int stockQuantity,  String code,  bool vendaPorFracao,  String unitLabel,  bool isActive)?  $default,) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
 return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imagePath,_that.purchasePriceCents,_that.salePriceCents,_that.stockQuantity,_that.code,_that.vendaPorFracao,_that.unitLabel,_that.isActive);case _:
- return null;
+  return null;
 
 }
 }
@@ -246,47 +246,47 @@ return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imageP
 @JsonSerializable()
 
 class _Product implements Product {
- const _Product({required this.id, this.storeId = 'st1', required this.name, this.description = '', this.imagePath = '', required this.purchasePriceCents, required this.salePriceCents, this.stockQuantity = 0, this.code = '', this.vendaPorFracao = false, this.unitLabel = 'un', this.isActive = true});
- factory _Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
+  const _Product({required this.id, this.storeId = 'st1', required this.name, this.description = '', this.imagePath = '', required this.purchasePriceCents, required this.salePriceCents, this.stockQuantity = 0, this.code = '', this.vendaPorFracao = false, this.unitLabel = 'un', this.isActive = true});
+  factory _Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
 
-@override final String id;
+@override final  String id;
 // Loja dona do produto — cada loja tem seu próprio estoque (Fase 2
 // do multi-tenancy). O valor default mantém compatibilidade com
 // construções antigas; a UI sempre carimba a loja ativa.
-@override@JsonKey() final String storeId;
-@override final String name;
-@override@JsonKey() final String description;
+@override@JsonKey() final  String storeId;
+@override final  String name;
+@override@JsonKey() final  String description;
 // Foto do produto (opcional): referência da imagem — URL pública do
 // Supabase Storage (modo SaaS) ou caminho de arquivo local (modo
 // SQLite). Vazio = sem foto (a UI mostra o ícone padrão do produto).
-@override@JsonKey() final String imagePath;
+@override@JsonKey() final  String imagePath;
 // Preços em CENTAVOS inteiros (W4 — migração de dinheiro para
 // centavos; o banco persiste BIGINT/INTEGER).
-@override final int purchasePriceCents;
-@override final int salePriceCents;
+@override final  int purchasePriceCents;
+@override final  int salePriceCents;
 // Estoque em MILÉSIMOS de unidade (W11): 1000 = 1 unidade (produtos
 // normais) ou 1 kg/litro (produtos por peso). Inteiro exato — mesma
 // filosofia dos centavos (W4).
-@override@JsonKey() final int stockQuantity;
+@override@JsonKey() final  int stockQuantity;
 // Código de barras/PLU do produto (opcional, até 5 dígitos): usado
 // pelas balanças etiquetadoras (formato 20PPPPPWWWWW) e pelo campo de
 // código de barras do PDV. Os ids internos são alfanuméricos longos;
 // o PLU é o código numérico impresso nas etiquetas.
-@override@JsonKey() final String code;
+@override@JsonKey() final  String code;
 // Venda por FRAÇÃO (peso/granel): quando verdadeiro, o PDV aceita
 // quantidades decimais (ex.: 1,75 kg) e o código de barras de balança
 // é interpretado. O preço unitário é por UNIDADE da [unitLabel]
 // (ex.: por kg).
-@override@JsonKey() final bool vendaPorFracao;
+@override@JsonKey() final  bool vendaPorFracao;
 // Unidade de venda dos produtos por peso (kg, g, l, ml...). 'un'
 // (padrão) = unidade inteira normal.
-@override@JsonKey() final String unitLabel;
+@override@JsonKey() final  String unitLabel;
 // Produto ATIVO no catálogo (padrão). Ao ser desativado, some do PDV
 // e das compras (não pode ser vendido nem reposto), mas permanece na
 // lista de Produtos com o selo "Inativo" — o dono/gerente pode
 // reativá-lo quando quiser. O estoque existente é preservado (volta a
 // ser vendível na reativação).
-@override@JsonKey() final bool isActive;
+@override@JsonKey() final  bool isActive;
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
@@ -296,12 +296,12 @@ _$ProductCopyWith<_Product> get copyWith => __$ProductCopyWithImpl<_Product>(thi
 
 @override
 Map<String, dynamic> toJson() {
- return _$ProductToJson(this, );
+  return _$ProductToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
- return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.purchasePriceCents, purchasePriceCents) || other.purchasePriceCents == purchasePriceCents)&&(identical(other.salePriceCents, salePriceCents) || other.salePriceCents == salePriceCents)&&(identical(other.stockQuantity, stockQuantity) || other.stockQuantity == stockQuantity)&&(identical(other.code, code) || other.code == code)&&(identical(other.vendaPorFracao, vendaPorFracao) || other.vendaPorFracao == vendaPorFracao)&&(identical(other.unitLabel, unitLabel) || other.unitLabel == unitLabel)&&(identical(other.isActive, isActive) || other.isActive == isActive));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.purchasePriceCents, purchasePriceCents) || other.purchasePriceCents == purchasePriceCents)&&(identical(other.salePriceCents, salePriceCents) || other.salePriceCents == salePriceCents)&&(identical(other.stockQuantity, stockQuantity) || other.stockQuantity == stockQuantity)&&(identical(other.code, code) || other.code == code)&&(identical(other.vendaPorFracao, vendaPorFracao) || other.vendaPorFracao == vendaPorFracao)&&(identical(other.unitLabel, unitLabel) || other.unitLabel == unitLabel)&&(identical(other.isActive, isActive) || other.isActive == isActive));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -310,7 +310,7 @@ int get hashCode => Object.hash(runtimeType,id,storeId,name,description,imagePat
 
 @override
 String toString() {
- return 'Product(id: $id, storeId: $storeId, name: $name, description: $description, imagePath: $imagePath, purchasePriceCents: $purchasePriceCents, salePriceCents: $salePriceCents, stockQuantity: $stockQuantity, code: $code, vendaPorFracao: $vendaPorFracao, unitLabel: $unitLabel, isActive: $isActive)';
+  return 'Product(id: $id, storeId: $storeId, name: $name, description: $description, imagePath: $imagePath, purchasePriceCents: $purchasePriceCents, salePriceCents: $salePriceCents, stockQuantity: $stockQuantity, code: $code, vendaPorFracao: $vendaPorFracao, unitLabel: $unitLabel, isActive: $isActive)';
 }
 
 
@@ -318,7 +318,7 @@ String toString() {
 
 /// @nodoc
 abstract mixin class _$ProductCopyWith<$Res> implements $ProductCopyWith<$Res> {
- factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
+  factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
 @override @useResult
 $Res call({
  String id, String storeId, String name, String description, String imagePath, int purchasePriceCents, int salePriceCents, int stockQuantity, String code, bool vendaPorFracao, String unitLabel, bool isActive
@@ -330,16 +330,16 @@ $Res call({
 }
 /// @nodoc
 class __$ProductCopyWithImpl<$Res>
- implements _$ProductCopyWith<$Res> {
- __$ProductCopyWithImpl(this._self, this._then);
+    implements _$ProductCopyWith<$Res> {
+  __$ProductCopyWithImpl(this._self, this._then);
 
- final _Product _self;
- final $Res Function(_Product) _then;
+  final _Product _self;
+  final $Res Function(_Product) _then;
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? name = null,Object? description = null,Object? imagePath = null,Object? purchasePriceCents = null,Object? salePriceCents = null,Object? stockQuantity = null,Object? code = null,Object? vendaPorFracao = null,Object? unitLabel = null,Object? isActive = null,}) {
- return _then(_Product(
+  return _then(_Product(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -353,7 +353,7 @@ as String,vendaPorFracao: null == vendaPorFracao ? _self.vendaPorFracao : vendaP
 as bool,unitLabel: null == unitLabel ? _self.unitLabel : unitLabel // ignore: cast_nullable_to_non_nullable
 as String,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,
- ));
+  ));
 }
 
 

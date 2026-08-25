@@ -26,13 +26,13 @@ mixin _$Tenant {
 @pragma('vm:prefer-inline')
 $TenantCopyWith<Tenant> get copyWith => _$TenantCopyWithImpl<Tenant>(this as Tenant, _$identity);
 
- /// Serializes this Tenant to a JSON map.
- Map<String, dynamic> toJson();
+  /// Serializes this Tenant to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
- return identical(this, other) || (other.runtimeType == runtimeType&&other is Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -41,15 +41,15 @@ int get hashCode => Object.hash(runtimeType,id,ownerUserId,businessName,planId,s
 
 @override
 String toString() {
- return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, currencyCode: $currencyCode, language: $language)';
+  return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, currencyCode: $currencyCode, language: $language)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $TenantCopyWith<$Res> {
- factory $TenantCopyWith(Tenant value, $Res Function(Tenant) _then) = _$TenantCopyWithImpl;
+abstract mixin class $TenantCopyWith<$Res>  {
+  factory $TenantCopyWith(Tenant value, $Res Function(Tenant) _then) = _$TenantCopyWithImpl;
 @useResult
 $Res call({
  String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, String currencyCode, String language
@@ -61,16 +61,16 @@ $Res call({
 }
 /// @nodoc
 class _$TenantCopyWithImpl<$Res>
- implements $TenantCopyWith<$Res> {
- _$TenantCopyWithImpl(this._self, this._then);
+    implements $TenantCopyWith<$Res> {
+  _$TenantCopyWithImpl(this._self, this._then);
 
- final Tenant _self;
- final $Res Function(Tenant) _then;
+  final Tenant _self;
+  final $Res Function(Tenant) _then;
 
 /// Create a copy of Tenant
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? ownerUserId = null,Object? businessName = null,Object? planId = null,Object? status = null,Object? rejectionReason = freezed,Object? approvedAt = freezed,Object? createdAt = null,Object? currencyCode = null,Object? language = null,}) {
- return _then(_self.copyWith(
+  return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,ownerUserId: null == ownerUserId ? _self.ownerUserId : ownerUserId // ignore: cast_nullable_to_non_nullable
 as String,businessName: null == businessName ? _self.businessName : businessName // ignore: cast_nullable_to_non_nullable
@@ -82,7 +82,7 @@ as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignor
 as DateTime,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String,
- ));
+  ));
 }
 
 }
@@ -95,19 +95,19 @@ extension TenantPatterns on Tenant {
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case _:
-/// return orElse();
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Tenant value)? $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Tenant value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Tenant() when $default != null:
 return $default(_that);case _:
- return orElse();
+  return orElse();
 
 }
 }
@@ -117,19 +117,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case final Subclass2 value:
-/// return ...;
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Tenant value) $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Tenant value)  $default,){
 final _that = this;
 switch (_that) {
 case _Tenant():
 return $default(_that);case _:
- throw StateError('Unexpected subclass');
+  throw StateError('Unexpected subclass');
 
 }
 }
@@ -138,19 +138,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case _:
-/// return null;
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Tenant value)? $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Tenant value)?  $default,){
 final _that = this;
 switch (_that) {
 case _Tenant() when $default != null:
 return $default(_that);case _:
- return null;
+  return null;
 
 }
 }
@@ -159,18 +159,18 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case _:
-/// return orElse();
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, String currencyCode, String language)? $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  String currencyCode,  String language)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Tenant() when $default != null:
 return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.currencyCode,_that.language);case _:
- return orElse();
+  return orElse();
 
 }
 }
@@ -180,18 +180,18 @@ return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case Subclass2(:final field2):
-/// return ...;
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, String currencyCode, String language) $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  String currencyCode,  String language)  $default,) {final _that = this;
 switch (_that) {
 case _Tenant():
 return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.currencyCode,_that.language);case _:
- throw StateError('Unexpected subclass');
+  throw StateError('Unexpected subclass');
 
 }
 }
@@ -200,18 +200,18 @@ return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case _:
-/// return null;
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, String currencyCode, String language)? $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  String currencyCode,  String language)?  $default,) {final _that = this;
 switch (_that) {
 case _Tenant() when $default != null:
 return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.currencyCode,_that.language);case _:
- return null;
+  return null;
 
 }
 }
@@ -222,23 +222,23 @@ return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that
 @JsonSerializable()
 
 class _Tenant implements Tenant {
- const _Tenant({required this.id, required this.ownerUserId, required this.businessName, required this.planId, required this.status, this.rejectionReason, this.approvedAt, required this.createdAt, this.currencyCode = 'MZN', this.language = 'pt'});
- factory _Tenant.fromJson(Map<String, dynamic> json) => _$TenantFromJson(json);
+  const _Tenant({required this.id, required this.ownerUserId, required this.businessName, required this.planId, required this.status, this.rejectionReason, this.approvedAt, required this.createdAt, this.currencyCode = 'MZN', this.language = 'pt'});
+  factory _Tenant.fromJson(Map<String, dynamic> json) => _$TenantFromJson(json);
 
-@override final String id;
-@override final String ownerUserId;
-@override final String businessName;
-@override final String planId;
-@override final TenantStatus status;
-@override final String? rejectionReason;
-@override final DateTime? approvedAt;
-@override final DateTime createdAt;
+@override final  String id;
+@override final  String ownerUserId;
+@override final  String businessName;
+@override final  String planId;
+@override final  TenantStatus status;
+@override final  String? rejectionReason;
+@override final  DateTime? approvedAt;
+@override final  DateTime createdAt;
 /// Moeda padrão dos valores (BRL, USD, EUR, MZN) — escolhida pelo dono
 /// no onboarding e alterável em Lojas → Ajustes. Novos tenants nascem
 /// com MZN (mercado-alvo Moçambique).
-@override@JsonKey() final String currencyCode;
+@override@JsonKey() final  String currencyCode;
 /// Idioma do aplicativo (`pt` ou `en`) — escolhido pelo dono.
-@override@JsonKey() final String language;
+@override@JsonKey() final  String language;
 
 /// Create a copy of Tenant
 /// with the given fields replaced by the non-null parameter values.
@@ -248,12 +248,12 @@ _$TenantCopyWith<_Tenant> get copyWith => __$TenantCopyWithImpl<_Tenant>(this, _
 
 @override
 Map<String, dynamic> toJson() {
- return _$TenantToJson(this, );
+  return _$TenantToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
- return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -262,7 +262,7 @@ int get hashCode => Object.hash(runtimeType,id,ownerUserId,businessName,planId,s
 
 @override
 String toString() {
- return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, currencyCode: $currencyCode, language: $language)';
+  return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, currencyCode: $currencyCode, language: $language)';
 }
 
 
@@ -270,7 +270,7 @@ String toString() {
 
 /// @nodoc
 abstract mixin class _$TenantCopyWith<$Res> implements $TenantCopyWith<$Res> {
- factory _$TenantCopyWith(_Tenant value, $Res Function(_Tenant) _then) = __$TenantCopyWithImpl;
+  factory _$TenantCopyWith(_Tenant value, $Res Function(_Tenant) _then) = __$TenantCopyWithImpl;
 @override @useResult
 $Res call({
  String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, String currencyCode, String language
@@ -282,16 +282,16 @@ $Res call({
 }
 /// @nodoc
 class __$TenantCopyWithImpl<$Res>
- implements _$TenantCopyWith<$Res> {
- __$TenantCopyWithImpl(this._self, this._then);
+    implements _$TenantCopyWith<$Res> {
+  __$TenantCopyWithImpl(this._self, this._then);
 
- final _Tenant _self;
- final $Res Function(_Tenant) _then;
+  final _Tenant _self;
+  final $Res Function(_Tenant) _then;
 
 /// Create a copy of Tenant
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? ownerUserId = null,Object? businessName = null,Object? planId = null,Object? status = null,Object? rejectionReason = freezed,Object? approvedAt = freezed,Object? createdAt = null,Object? currencyCode = null,Object? language = null,}) {
- return _then(_Tenant(
+  return _then(_Tenant(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,ownerUserId: null == ownerUserId ? _self.ownerUserId : ownerUserId // ignore: cast_nullable_to_non_nullable
 as String,businessName: null == businessName ? _self.businessName : businessName // ignore: cast_nullable_to_non_nullable
@@ -303,7 +303,7 @@ as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignor
 as DateTime,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String,
- ));
+  ));
 }
 
 

@@ -12,6 +12,10 @@ abstract class Store with _$Store {
  required String tenantId,
  required String name,
  @Default('') String address,
+ @Default('') String phone,
+ @Default('') String email,
+ @Default('') String nuit,
+ @Default('') String city,
  }) = _Store;
 
  factory Store.fromJson(Map<String, dynamic> json) => _$StoreFromJson(json);

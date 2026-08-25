@@ -30,13 +30,13 @@ mixin _$CashClosing {
 @pragma('vm:prefer-inline')
 $CashClosingCopyWith<CashClosing> get copyWith => _$CashClosingCopyWithImpl<CashClosing>(this as CashClosing, _$identity);
 
- /// Serializes this CashClosing to a JSON map.
- Map<String, dynamic> toJson();
+  /// Serializes this CashClosing to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
- return identical(this, other) || (other.runtimeType == runtimeType&&other is CashClosing&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.day, day) || other.day == day)&&(identical(other.totalSalesCents, totalSalesCents) || other.totalSalesCents == totalSalesCents)&&(identical(other.expectedCashCents, expectedCashCents) || other.expectedCashCents == expectedCashCents)&&(identical(other.countedCashCents, countedCashCents) || other.countedCashCents == countedCashCents)&&const DeepCollectionEquality().equals(other.salesByMethodCents, salesByMethodCents)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CashClosing&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.day, day) || other.day == day)&&(identical(other.totalSalesCents, totalSalesCents) || other.totalSalesCents == totalSalesCents)&&(identical(other.expectedCashCents, expectedCashCents) || other.expectedCashCents == expectedCashCents)&&(identical(other.countedCashCents, countedCashCents) || other.countedCashCents == countedCashCents)&&const DeepCollectionEquality().equals(other.salesByMethodCents, salesByMethodCents)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,15 +45,15 @@ int get hashCode => Object.hash(runtimeType,id,storeId,day,totalSalesCents,expec
 
 @override
 String toString() {
- return 'CashClosing(id: $id, storeId: $storeId, day: $day, totalSalesCents: $totalSalesCents, expectedCashCents: $expectedCashCents, countedCashCents: $countedCashCents, salesByMethodCents: $salesByMethodCents, closedAt: $closedAt)';
+  return 'CashClosing(id: $id, storeId: $storeId, day: $day, totalSalesCents: $totalSalesCents, expectedCashCents: $expectedCashCents, countedCashCents: $countedCashCents, salesByMethodCents: $salesByMethodCents, closedAt: $closedAt)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $CashClosingCopyWith<$Res> {
- factory $CashClosingCopyWith(CashClosing value, $Res Function(CashClosing) _then) = _$CashClosingCopyWithImpl;
+abstract mixin class $CashClosingCopyWith<$Res>  {
+  factory $CashClosingCopyWith(CashClosing value, $Res Function(CashClosing) _then) = _$CashClosingCopyWithImpl;
 @useResult
 $Res call({
  String id, String storeId, DateTime day, int totalSalesCents, int expectedCashCents, int countedCashCents, Map<String, int> salesByMethodCents, DateTime closedAt
@@ -65,16 +65,16 @@ $Res call({
 }
 /// @nodoc
 class _$CashClosingCopyWithImpl<$Res>
- implements $CashClosingCopyWith<$Res> {
- _$CashClosingCopyWithImpl(this._self, this._then);
+    implements $CashClosingCopyWith<$Res> {
+  _$CashClosingCopyWithImpl(this._self, this._then);
 
- final CashClosing _self;
- final $Res Function(CashClosing) _then;
+  final CashClosing _self;
+  final $Res Function(CashClosing) _then;
 
 /// Create a copy of CashClosing
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? day = null,Object? totalSalesCents = null,Object? expectedCashCents = null,Object? countedCashCents = null,Object? salesByMethodCents = null,Object? closedAt = null,}) {
- return _then(_self.copyWith(
+  return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,day: null == day ? _self.day : day // ignore: cast_nullable_to_non_nullable
@@ -84,7 +84,7 @@ as int,countedCashCents: null == countedCashCents ? _self.countedCashCents : cou
 as int,salesByMethodCents: null == salesByMethodCents ? _self.salesByMethodCents : salesByMethodCents // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,closedAt: null == closedAt ? _self.closedAt : closedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
- ));
+  ));
 }
 
 }
@@ -97,19 +97,19 @@ extension CashClosingPatterns on CashClosing {
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case _:
-/// return orElse();
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CashClosing value)? $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CashClosing value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _CashClosing() when $default != null:
 return $default(_that);case _:
- return orElse();
+  return orElse();
 
 }
 }
@@ -119,19 +119,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case final Subclass2 value:
-/// return ...;
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CashClosing value) $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CashClosing value)  $default,){
 final _that = this;
 switch (_that) {
 case _CashClosing():
 return $default(_that);case _:
- throw StateError('Unexpected subclass');
+  throw StateError('Unexpected subclass');
 
 }
 }
@@ -140,19 +140,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case _:
-/// return null;
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CashClosing value)? $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CashClosing value)?  $default,){
 final _that = this;
 switch (_that) {
 case _CashClosing() when $default != null:
 return $default(_that);case _:
- return null;
+  return null;
 
 }
 }
@@ -161,18 +161,18 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case _:
-/// return orElse();
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, String storeId, DateTime day, int totalSalesCents, int expectedCashCents, int countedCashCents, Map<String, int> salesByMethodCents, DateTime closedAt)? $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  DateTime day,  int totalSalesCents,  int expectedCashCents,  int countedCashCents,  Map<String, int> salesByMethodCents,  DateTime closedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CashClosing() when $default != null:
 return $default(_that.id,_that.storeId,_that.day,_that.totalSalesCents,_that.expectedCashCents,_that.countedCashCents,_that.salesByMethodCents,_that.closedAt);case _:
- return orElse();
+  return orElse();
 
 }
 }
@@ -182,18 +182,18 @@ return $default(_that.id,_that.storeId,_that.day,_that.totalSalesCents,_that.exp
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case Subclass2(:final field2):
-/// return ...;
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, String storeId, DateTime day, int totalSalesCents, int expectedCashCents, int countedCashCents, Map<String, int> salesByMethodCents, DateTime closedAt) $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  DateTime day,  int totalSalesCents,  int expectedCashCents,  int countedCashCents,  Map<String, int> salesByMethodCents,  DateTime closedAt)  $default,) {final _that = this;
 switch (_that) {
 case _CashClosing():
 return $default(_that.id,_that.storeId,_that.day,_that.totalSalesCents,_that.expectedCashCents,_that.countedCashCents,_that.salesByMethodCents,_that.closedAt);case _:
- throw StateError('Unexpected subclass');
+  throw StateError('Unexpected subclass');
 
 }
 }
@@ -202,18 +202,18 @@ return $default(_that.id,_that.storeId,_that.day,_that.totalSalesCents,_that.exp
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case _:
-/// return null;
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, String storeId, DateTime day, int totalSalesCents, int expectedCashCents, int countedCashCents, Map<String, int> salesByMethodCents, DateTime closedAt)? $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  DateTime day,  int totalSalesCents,  int expectedCashCents,  int countedCashCents,  Map<String, int> salesByMethodCents,  DateTime closedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _CashClosing() when $default != null:
 return $default(_that.id,_that.storeId,_that.day,_that.totalSalesCents,_that.expectedCashCents,_that.countedCashCents,_that.salesByMethodCents,_that.closedAt);case _:
- return null;
+  return null;
 
 }
 }
@@ -224,32 +224,32 @@ return $default(_that.id,_that.storeId,_that.day,_that.totalSalesCents,_that.exp
 @JsonSerializable()
 
 class _CashClosing implements CashClosing {
- const _CashClosing({required this.id, this.storeId = 'st1', required this.day, required this.totalSalesCents, required this.expectedCashCents, required this.countedCashCents, final Map<String, int> salesByMethodCents = const {}, required this.closedAt}): assert(expectedCashCents >= 0, 'O valor esperado deve ser positivo.'),assert(countedCashCents >= 0, 'O valor contado deve ser positivo.'),_salesByMethodCents = salesByMethodCents;
- factory _CashClosing.fromJson(Map<String, dynamic> json) => _$CashClosingFromJson(json);
+  const _CashClosing({required this.id, this.storeId = 'st1', required this.day, required this.totalSalesCents, required this.expectedCashCents, required this.countedCashCents, final  Map<String, int> salesByMethodCents = const {}, required this.closedAt}): assert(expectedCashCents >= 0, 'O valor esperado deve ser positivo.'),assert(countedCashCents >= 0, 'O valor contado deve ser positivo.'),_salesByMethodCents = salesByMethodCents;
+  factory _CashClosing.fromJson(Map<String, dynamic> json) => _$CashClosingFromJson(json);
 
-@override final String id;
+@override final  String id;
 // Loja dona do fecho — o caixa é por loja (Fase 2 do multi-tenancy).
-@override@JsonKey() final String storeId;
+@override@JsonKey() final  String storeId;
 // Dia fechado (início do dia local — a unicidade é por loja + dia).
-@override final DateTime day;
+@override final  DateTime day;
 // Σ das vendas ATIVAS do dia (todas as formas de pagamento).
-@override final int totalSalesCents;
+@override final  int totalSalesCents;
 // O que deveria estar na gaveta: só vendas em DINHEIRO (a conferência
 // física compara contra este valor).
-@override final int expectedCashCents;
+@override final  int expectedCashCents;
 // Dinheiro físico contado pelo usuário na conferência.
-@override final int countedCashCents;
+@override final  int countedCashCents;
 // Abertura por forma de pagamento (method.name → centavos) — o Z.
- final Map<String, int> _salesByMethodCents;
+ final  Map<String, int> _salesByMethodCents;
 // Abertura por forma de pagamento (method.name → centavos) — o Z.
 @override@JsonKey() Map<String, int> get salesByMethodCents {
- if (_salesByMethodCents is EqualUnmodifiableMapView) return _salesByMethodCents;
- // ignore: implicit_dynamic_type
- return EqualUnmodifiableMapView(_salesByMethodCents);
+  if (_salesByMethodCents is EqualUnmodifiableMapView) return _salesByMethodCents;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_salesByMethodCents);
 }
 
 // Momento em que o fecho foi confirmado/atualizado.
-@override final DateTime closedAt;
+@override final  DateTime closedAt;
 
 /// Create a copy of CashClosing
 /// with the given fields replaced by the non-null parameter values.
@@ -259,12 +259,12 @@ _$CashClosingCopyWith<_CashClosing> get copyWith => __$CashClosingCopyWithImpl<_
 
 @override
 Map<String, dynamic> toJson() {
- return _$CashClosingToJson(this, );
+  return _$CashClosingToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
- return identical(this, other) || (other.runtimeType == runtimeType&&other is _CashClosing&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.day, day) || other.day == day)&&(identical(other.totalSalesCents, totalSalesCents) || other.totalSalesCents == totalSalesCents)&&(identical(other.expectedCashCents, expectedCashCents) || other.expectedCashCents == expectedCashCents)&&(identical(other.countedCashCents, countedCashCents) || other.countedCashCents == countedCashCents)&&const DeepCollectionEquality().equals(other._salesByMethodCents, _salesByMethodCents)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CashClosing&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.day, day) || other.day == day)&&(identical(other.totalSalesCents, totalSalesCents) || other.totalSalesCents == totalSalesCents)&&(identical(other.expectedCashCents, expectedCashCents) || other.expectedCashCents == expectedCashCents)&&(identical(other.countedCashCents, countedCashCents) || other.countedCashCents == countedCashCents)&&const DeepCollectionEquality().equals(other._salesByMethodCents, _salesByMethodCents)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -273,7 +273,7 @@ int get hashCode => Object.hash(runtimeType,id,storeId,day,totalSalesCents,expec
 
 @override
 String toString() {
- return 'CashClosing(id: $id, storeId: $storeId, day: $day, totalSalesCents: $totalSalesCents, expectedCashCents: $expectedCashCents, countedCashCents: $countedCashCents, salesByMethodCents: $salesByMethodCents, closedAt: $closedAt)';
+  return 'CashClosing(id: $id, storeId: $storeId, day: $day, totalSalesCents: $totalSalesCents, expectedCashCents: $expectedCashCents, countedCashCents: $countedCashCents, salesByMethodCents: $salesByMethodCents, closedAt: $closedAt)';
 }
 
 
@@ -281,7 +281,7 @@ String toString() {
 
 /// @nodoc
 abstract mixin class _$CashClosingCopyWith<$Res> implements $CashClosingCopyWith<$Res> {
- factory _$CashClosingCopyWith(_CashClosing value, $Res Function(_CashClosing) _then) = __$CashClosingCopyWithImpl;
+  factory _$CashClosingCopyWith(_CashClosing value, $Res Function(_CashClosing) _then) = __$CashClosingCopyWithImpl;
 @override @useResult
 $Res call({
  String id, String storeId, DateTime day, int totalSalesCents, int expectedCashCents, int countedCashCents, Map<String, int> salesByMethodCents, DateTime closedAt
@@ -293,16 +293,16 @@ $Res call({
 }
 /// @nodoc
 class __$CashClosingCopyWithImpl<$Res>
- implements _$CashClosingCopyWith<$Res> {
- __$CashClosingCopyWithImpl(this._self, this._then);
+    implements _$CashClosingCopyWith<$Res> {
+  __$CashClosingCopyWithImpl(this._self, this._then);
 
- final _CashClosing _self;
- final $Res Function(_CashClosing) _then;
+  final _CashClosing _self;
+  final $Res Function(_CashClosing) _then;
 
 /// Create a copy of CashClosing
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? day = null,Object? totalSalesCents = null,Object? expectedCashCents = null,Object? countedCashCents = null,Object? salesByMethodCents = null,Object? closedAt = null,}) {
- return _then(_CashClosing(
+  return _then(_CashClosing(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,day: null == day ? _self.day : day // ignore: cast_nullable_to_non_nullable
@@ -312,7 +312,7 @@ as int,countedCashCents: null == countedCashCents ? _self.countedCashCents : cou
 as int,salesByMethodCents: null == salesByMethodCents ? _self._salesByMethodCents : salesByMethodCents // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,closedAt: null == closedAt ? _self.closedAt : closedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
- ));
+  ));
 }
 
 

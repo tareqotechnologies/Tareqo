@@ -320,6 +320,10 @@ CREATE TABLE IF NOT EXISTS public.stores (
   tenant_id  TEXT NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
   name       TEXT NOT NULL,
   address    TEXT NOT NULL DEFAULT '',
+  phone      TEXT NOT NULL DEFAULT '',
+  email      TEXT NOT NULL DEFAULT '',
+  nuit       TEXT NOT NULL DEFAULT '',
+  city       TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

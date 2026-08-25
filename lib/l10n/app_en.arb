@@ -347,6 +347,17 @@
   "addStoreNameLabel": "Store name",
   "addStoreNameError": "Enter the store name.",
   "addStoreAddressLabel": "Address (optional)",
+  "addStorePhoneLabel": "Phone (optional)",
+  "addStoreEmailLabel": "Email (optional)",
+  "addStoreNuitLabel": "Tax ID (optional)",
+  "addStoreCityLabel": "City (optional)",
+  "storeDetailTitle": "Store details",
+  "storeDetailPhone": "Phone",
+  "storeDetailEmail": "Email",
+  "storeDetailNuit": "Tax ID",
+  "storeDetailCity": "City",
+  "storeDetailAddress": "Address",
+  "storeDetailActions": "Actions",
   "addStoreSuccess": "Store {name} created!",
   "@addStoreSuccess": {
     "placeholders": {

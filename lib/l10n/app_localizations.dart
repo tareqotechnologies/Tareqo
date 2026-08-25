@@ -1465,6 +1465,39 @@ abstract class AppLocalizations {
   /// **'Address (optional)'**
   String get addStoreAddressLabel;
 
+  /// No description provided for @addStorePhoneLabel.
+  String get addStorePhoneLabel;
+
+  /// No description provided for @addStoreEmailLabel.
+  String get addStoreEmailLabel;
+
+  /// No description provided for @addStoreNuitLabel.
+  String get addStoreNuitLabel;
+
+  /// No description provided for @addStoreCityLabel.
+  String get addStoreCityLabel;
+
+  /// No description provided for @storeDetailTitle.
+  String get storeDetailTitle;
+
+  /// No description provided for @storeDetailPhone.
+  String get storeDetailPhone;
+
+  /// No description provided for @storeDetailEmail.
+  String get storeDetailEmail;
+
+  /// No description provided for @storeDetailNuit.
+  String get storeDetailNuit;
+
+  /// No description provided for @storeDetailCity.
+  String get storeDetailCity;
+
+  /// No description provided for @storeDetailAddress.
+  String get storeDetailAddress;
+
+  /// No description provided for @storeDetailActions.
+  String get storeDetailActions;
+
   /// No description provided for @addStoreSuccess.
   ///
   /// In en, this message translates to:

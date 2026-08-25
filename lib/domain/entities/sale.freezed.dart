@@ -35,13 +35,13 @@ mixin _$Sale {
 @pragma('vm:prefer-inline')
 $SaleCopyWith<Sale> get copyWith => _$SaleCopyWithImpl<Sale>(this as Sale, _$identity);
 
- /// Serializes this Sale to a JSON map.
- Map<String, dynamic> toJson();
+  /// Serializes this Sale to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
- return identical(this, other) || (other.runtimeType == runtimeType&&other is Sale&&(identical(other.id, id) || other.id == id)&&(identical(other.number, number) || other.number == number)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.totalAmountCents, totalAmountCents) || other.totalAmountCents == totalAmountCents)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime)&&(identical(other.status, status) || other.status == status)&&(identical(other.cancelledAt, cancelledAt) || other.cancelledAt == cancelledAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Sale&&(identical(other.id, id) || other.id == id)&&(identical(other.number, number) || other.number == number)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.totalAmountCents, totalAmountCents) || other.totalAmountCents == totalAmountCents)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime)&&(identical(other.status, status) || other.status == status)&&(identical(other.cancelledAt, cancelledAt) || other.cancelledAt == cancelledAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -50,15 +50,15 @@ int get hashCode => Object.hash(runtimeType,id,number,storeId,const DeepCollecti
 
 @override
 String toString() {
- return 'Sale(id: $id, number: $number, storeId: $storeId, items: $items, totalAmountCents: $totalAmountCents, paymentMethod: $paymentMethod, dateTime: $dateTime, status: $status, cancelledAt: $cancelledAt)';
+  return 'Sale(id: $id, number: $number, storeId: $storeId, items: $items, totalAmountCents: $totalAmountCents, paymentMethod: $paymentMethod, dateTime: $dateTime, status: $status, cancelledAt: $cancelledAt)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $SaleCopyWith<$Res> {
- factory $SaleCopyWith(Sale value, $Res Function(Sale) _then) = _$SaleCopyWithImpl;
+abstract mixin class $SaleCopyWith<$Res>  {
+  factory $SaleCopyWith(Sale value, $Res Function(Sale) _then) = _$SaleCopyWithImpl;
 @useResult
 $Res call({
  String id, int number, String storeId, List<SaleItem> items, int totalAmountCents, PaymentMethod paymentMethod, DateTime dateTime, SaleStatus status, DateTime? cancelledAt
@@ -70,16 +70,16 @@ $Res call({
 }
 /// @nodoc
 class _$SaleCopyWithImpl<$Res>
- implements $SaleCopyWith<$Res> {
- _$SaleCopyWithImpl(this._self, this._then);
+    implements $SaleCopyWith<$Res> {
+  _$SaleCopyWithImpl(this._self, this._then);
 
- final Sale _self;
- final $Res Function(Sale) _then;
+  final Sale _self;
+  final $Res Function(Sale) _then;
 
 /// Create a copy of Sale
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? number = null,Object? storeId = null,Object? items = null,Object? totalAmountCents = null,Object? paymentMethod = null,Object? dateTime = null,Object? status = null,Object? cancelledAt = freezed,}) {
- return _then(_self.copyWith(
+  return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,number: null == number ? _self.number : number // ignore: cast_nullable_to_non_nullable
 as int,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
@@ -90,7 +90,7 @@ as PaymentMethod,dateTime: null == dateTime ? _self.dateTime : dateTime // ignor
 as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as SaleStatus,cancelledAt: freezed == cancelledAt ? _self.cancelledAt : cancelledAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
- ));
+  ));
 }
 
 }
@@ -103,19 +103,19 @@ extension SalePatterns on Sale {
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case _:
-/// return orElse();
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Sale value)? $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Sale value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Sale() when $default != null:
 return $default(_that);case _:
- return orElse();
+  return orElse();
 
 }
 }
@@ -125,19 +125,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case final Subclass2 value:
-/// return ...;
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Sale value) $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Sale value)  $default,){
 final _that = this;
 switch (_that) {
 case _Sale():
 return $default(_that);case _:
- throw StateError('Unexpected subclass');
+  throw StateError('Unexpected subclass');
 
 }
 }
@@ -146,19 +146,19 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case final Subclass value:
-/// return ...;
-/// case _:
-/// return null;
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Sale value)? $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Sale value)?  $default,){
 final _that = this;
 switch (_that) {
 case _Sale() when $default != null:
 return $default(_that);case _:
- return null;
+  return null;
 
 }
 }
@@ -167,18 +167,18 @@ return $default(_that);case _:
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case _:
-/// return orElse();
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, int number, String storeId, List<SaleItem> items, int totalAmountCents, PaymentMethod paymentMethod, DateTime dateTime, SaleStatus status, DateTime? cancelledAt)? $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int number,  String storeId,  List<SaleItem> items,  int totalAmountCents,  PaymentMethod paymentMethod,  DateTime dateTime,  SaleStatus status,  DateTime? cancelledAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Sale() when $default != null:
 return $default(_that.id,_that.number,_that.storeId,_that.items,_that.totalAmountCents,_that.paymentMethod,_that.dateTime,_that.status,_that.cancelledAt);case _:
- return orElse();
+  return orElse();
 
 }
 }
@@ -188,18 +188,18 @@ return $default(_that.id,_that.number,_that.storeId,_that.items,_that.totalAmoun
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case Subclass2(:final field2):
-/// return ...;
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, int number, String storeId, List<SaleItem> items, int totalAmountCents, PaymentMethod paymentMethod, DateTime dateTime, SaleStatus status, DateTime? cancelledAt) $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int number,  String storeId,  List<SaleItem> items,  int totalAmountCents,  PaymentMethod paymentMethod,  DateTime dateTime,  SaleStatus status,  DateTime? cancelledAt)  $default,) {final _that = this;
 switch (_that) {
 case _Sale():
 return $default(_that.id,_that.number,_that.storeId,_that.items,_that.totalAmountCents,_that.paymentMethod,_that.dateTime,_that.status,_that.cancelledAt);case _:
- throw StateError('Unexpected subclass');
+  throw StateError('Unexpected subclass');
 
 }
 }
@@ -208,18 +208,18 @@ return $default(_that.id,_that.number,_that.storeId,_that.items,_that.totalAmoun
 /// It is equivalent to doing:
 /// ```dart
 /// switch (sealedClass) {
-/// case Subclass(:final field):
-/// return ...;
-/// case _:
-/// return null;
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, int number, String storeId, List<SaleItem> items, int totalAmountCents, PaymentMethod paymentMethod, DateTime dateTime, SaleStatus status, DateTime? cancelledAt)? $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int number,  String storeId,  List<SaleItem> items,  int totalAmountCents,  PaymentMethod paymentMethod,  DateTime dateTime,  SaleStatus status,  DateTime? cancelledAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Sale() when $default != null:
 return $default(_that.id,_that.number,_that.storeId,_that.items,_that.totalAmountCents,_that.paymentMethod,_that.dateTime,_that.status,_that.cancelledAt);case _:
- return null;
+  return null;
 
 }
 }
@@ -230,37 +230,37 @@ return $default(_that.id,_that.number,_that.storeId,_that.items,_that.totalAmoun
 @JsonSerializable()
 
 class _Sale implements Sale {
- const _Sale({required this.id, this.number = 0, this.storeId = 'st1', required final List<SaleItem> items, required this.totalAmountCents, required this.paymentMethod, required this.dateTime, this.status = SaleStatus.active, this.cancelledAt}): _items = items;
- factory _Sale.fromJson(Map<String, dynamic> json) => _$SaleFromJson(json);
+  const _Sale({required this.id, this.number = 0, this.storeId = 'st1', required final  List<SaleItem> items, required this.totalAmountCents, required this.paymentMethod, required this.dateTime, this.status = SaleStatus.active, this.cancelledAt}): _items = items;
+  factory _Sale.fromJson(Map<String, dynamic> json) => _$SaleFromJson(json);
 
-@override final String id;
+@override final  String id;
 // Número SEQUENCIAL da venda DENTRO da loja (ex.: S-00001, S-00002).
 // Atribuído pelo banco no insert — SQLite: MAX+1 por loja dentro da
 // transação; Supabase: RPC process_sale com advisory lock por loja.
 // O default 0 nunca é persistido (é substituído na gravação).
-@override@JsonKey() final int number;
+@override@JsonKey() final  int number;
 // Loja onde a venda foi realizada (Fase 2 do multi-tenancy). Cada
 // loja tem seu próprio histórico de vendas.
-@override@JsonKey() final String storeId;
- final List<SaleItem> _items;
+@override@JsonKey() final  String storeId;
+ final  List<SaleItem> _items;
 @override List<SaleItem> get items {
- if (_items is EqualUnmodifiableListView) return _items;
- // ignore: implicit_dynamic_type
- return EqualUnmodifiableListView(_items);
+  if (_items is EqualUnmodifiableListView) return _items;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_items);
 }
 
 // Valor TOTAL da venda em CENTAVOS inteiros (W4 — migração de
 // dinheiro para centavos; o banco persiste BIGINT/INTEGER).
-@override final int totalAmountCents;
-@override final PaymentMethod paymentMethod;
-@override final DateTime dateTime;
+@override final  int totalAmountCents;
+@override final  PaymentMethod paymentMethod;
+@override final  DateTime dateTime;
 // Situação no histórico: [SaleStatus.active] ao registrar; ao ser
 // anulada, [SaleStatus.cancelled] + [cancelledAt] preenchido. Default
 // 'active' preserva a leitura de vendas antigas (bancos sem a coluna
 // de status) e os testes existentes.
-@override@JsonKey() final SaleStatus status;
+@override@JsonKey() final  SaleStatus status;
 // Momento em que a venda foi anulada (null enquanto ativa).
-@override final DateTime? cancelledAt;
+@override final  DateTime? cancelledAt;
 
 /// Create a copy of Sale
 /// with the given fields replaced by the non-null parameter values.
@@ -270,12 +270,12 @@ _$SaleCopyWith<_Sale> get copyWith => __$SaleCopyWithImpl<_Sale>(this, _$identit
 
 @override
 Map<String, dynamic> toJson() {
- return _$SaleToJson(this, );
+  return _$SaleToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
- return identical(this, other) || (other.runtimeType == runtimeType&&other is _Sale&&(identical(other.id, id) || other.id == id)&&(identical(other.number, number) || other.number == number)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.totalAmountCents, totalAmountCents) || other.totalAmountCents == totalAmountCents)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime)&&(identical(other.status, status) || other.status == status)&&(identical(other.cancelledAt, cancelledAt) || other.cancelledAt == cancelledAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Sale&&(identical(other.id, id) || other.id == id)&&(identical(other.number, number) || other.number == number)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.totalAmountCents, totalAmountCents) || other.totalAmountCents == totalAmountCents)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime)&&(identical(other.status, status) || other.status == status)&&(identical(other.cancelledAt, cancelledAt) || other.cancelledAt == cancelledAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -284,7 +284,7 @@ int get hashCode => Object.hash(runtimeType,id,number,storeId,const DeepCollecti
 
 @override
 String toString() {
- return 'Sale(id: $id, number: $number, storeId: $storeId, items: $items, totalAmountCents: $totalAmountCents, paymentMethod: $paymentMethod, dateTime: $dateTime, status: $status, cancelledAt: $cancelledAt)';
+  return 'Sale(id: $id, number: $number, storeId: $storeId, items: $items, totalAmountCents: $totalAmountCents, paymentMethod: $paymentMethod, dateTime: $dateTime, status: $status, cancelledAt: $cancelledAt)';
 }
 
 
@@ -292,7 +292,7 @@ String toString() {
 
 /// @nodoc
 abstract mixin class _$SaleCopyWith<$Res> implements $SaleCopyWith<$Res> {
- factory _$SaleCopyWith(_Sale value, $Res Function(_Sale) _then) = __$SaleCopyWithImpl;
+  factory _$SaleCopyWith(_Sale value, $Res Function(_Sale) _then) = __$SaleCopyWithImpl;
 @override @useResult
 $Res call({
  String id, int number, String storeId, List<SaleItem> items, int totalAmountCents, PaymentMethod paymentMethod, DateTime dateTime, SaleStatus status, DateTime? cancelledAt
@@ -304,16 +304,16 @@ $Res call({
 }
 /// @nodoc
 class __$SaleCopyWithImpl<$Res>
- implements _$SaleCopyWith<$Res> {
- __$SaleCopyWithImpl(this._self, this._then);
+    implements _$SaleCopyWith<$Res> {
+  __$SaleCopyWithImpl(this._self, this._then);
 
- final _Sale _self;
- final $Res Function(_Sale) _then;
+  final _Sale _self;
+  final $Res Function(_Sale) _then;
 
 /// Create a copy of Sale
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? number = null,Object? storeId = null,Object? items = null,Object? totalAmountCents = null,Object? paymentMethod = null,Object? dateTime = null,Object? status = null,Object? cancelledAt = freezed,}) {
- return _then(_Sale(
+  return _then(_Sale(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,number: null == number ? _self.number : number // ignore: cast_nullable_to_non_nullable
 as int,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
@@ -324,7 +324,7 @@ as PaymentMethod,dateTime: null == dateTime ? _self.dateTime : dateTime // ignor
 as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as SaleStatus,cancelledAt: freezed == cancelledAt ? _self.cancelledAt : cancelledAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
- ));
+  ));
 }
 
 

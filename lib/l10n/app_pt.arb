@@ -347,6 +347,17 @@
   "addStoreNameLabel": "Nome da loja",
   "addStoreNameError": "Informe o nome da loja.",
   "addStoreAddressLabel": "Endereço (opcional)",
+  "addStorePhoneLabel": "Telefone (opcional)",
+  "addStoreEmailLabel": "E-mail (opcional)",
+  "addStoreNuitLabel": "NUIT (opcional)",
+  "addStoreCityLabel": "Cidade (opcional)",
+  "storeDetailTitle": "Detalhes da loja",
+  "storeDetailPhone": "Telefone",
+  "storeDetailEmail": "E-mail",
+  "storeDetailNuit": "NUIT",
+  "storeDetailCity": "Cidade",
+  "storeDetailAddress": "Endereço",
+  "storeDetailActions": "Ações",
   "addStoreSuccess": "Loja {name} criada!",
   "@addStoreSuccess": {
     "placeholders": {

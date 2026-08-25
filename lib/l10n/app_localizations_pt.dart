@@ -763,6 +763,39 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addStoreAddressLabel => 'Endereço (opcional)';
 
   @override
+  String get addStorePhoneLabel => 'Telefone (opcional)';
+
+  @override
+  String get addStoreEmailLabel => 'E-mail (opcional)';
+
+  @override
+  String get addStoreNuitLabel => 'NUIT (opcional)';
+
+  @override
+  String get addStoreCityLabel => 'Cidade (opcional)';
+
+  @override
+  String get storeDetailTitle => 'Detalhes da loja';
+
+  @override
+  String get storeDetailPhone => 'Telefone';
+
+  @override
+  String get storeDetailEmail => 'E-mail';
+
+  @override
+  String get storeDetailNuit => 'NUIT';
+
+  @override
+  String get storeDetailCity => 'Cidade';
+
+  @override
+  String get storeDetailAddress => 'Endereço';
+
+  @override
+  String get storeDetailActions => 'Ações';
+
+  @override
   String addStoreSuccess(String name) {
     return 'Loja $name criada!';
   }

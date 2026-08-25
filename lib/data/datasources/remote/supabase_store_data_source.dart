@@ -9,10 +9,8 @@ import 'supabase_datasource_helpers.dart';
 /// explicitamente; o trigger `set_tenant_id_from_owner` do schema reforça
 /// no servidor.
 final class StoreSupabaseDataSourceImpl implements StoreLocalDataSource {
- const StoreSupabaseDataSourceImpl();
-
- static const _table = 'stores';
- static const _columns = 'id, tenant_id, name, address';
+ const StoreSupabaseDataSourceImpl();  static const _table = 'stores';
+  static const _columns = 'id, tenant_id, name, address, phone, email, nuit, city';
 
  @override
  Future<List<Store>> getByTenant(String tenantId) async {
@@ -30,6 +28,10 @@ final class StoreSupabaseDataSourceImpl implements StoreLocalDataSource {
       'tenant_id': store.tenantId,
       'name': store.name,
       'address': store.address,
+      'phone': store.phone,
+      'email': store.email,
+      'nuit': store.nuit,
+      'city': store.city,
     });
   }
 
@@ -38,13 +40,19 @@ final class StoreSupabaseDataSourceImpl implements StoreLocalDataSource {
     await supabaseClient.from(_table).update({
       'name': store.name,
       'address': store.address,
+      'phone': store.phone,
+      'email': store.email,
+      'nuit': store.nuit,
+      'city': store.city,
     }).eq('id', store.id);
-  }
-
- Store _map(Map<String, dynamic> row) => Store(
- id: row['id'] as String,
- tenantId: row['tenant_id'] as String,
- name: row['name'] as String,
- address: (row['address'] as String?) ?? '',
- );
+  }  Store _map(Map<String, dynamic> row) => Store(
+    id: row['id'] as String,
+    tenantId: row['tenant_id'] as String,
+    name: row['name'] as String,
+    address: (row['address'] as String?) ?? '',
+    phone: (row['phone'] as String?) ?? '',
+    email: (row['email'] as String?) ?? '',
+    nuit: (row['nuit'] as String?) ?? '',
+    city: (row['city'] as String?) ?? '',
+  );
 }

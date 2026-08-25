@@ -229,6 +229,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
           padding: EdgeInsets.zero,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
+            onTap: () => _openStoreDetail(store),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
@@ -398,6 +399,13 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
         isOwner: isOwner,
         onToggle: (isActive) => _toggleEmployee(employee, isActive),
       ),
+    );
+  }
+
+  void _openStoreDetail(Store store) {
+    showAppSheet<void>(
+      context,
+      builder: (_) => _StoreDetailSheet(store: store),
     );
   }
 
@@ -702,37 +710,47 @@ class _AddStoreSheet extends ConsumerStatefulWidget {
 
  @override
  ConsumerState<_AddStoreSheet> createState() => _AddStoreSheetState();
-}
+}class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _nuitController = TextEditingController();
+  final _cityController = TextEditingController();
 
-class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
- final _formKey = GlobalKey<FormState>();
- final _nameController = TextEditingController();
- final _addressController = TextEditingController();
+  bool _isSubmitting = false;
+  String? _formError;
 
- bool _isSubmitting = false;
- String? _formError;
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _nuitController.dispose();
+    _cityController.dispose();
+    super.dispose();
+  }
 
- @override
- void dispose() {
- _nameController.dispose();
- _addressController.dispose();
- super.dispose();
- }
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
 
- Future<void> _submit() async {
- if (!_formKey.currentState!.validate()) return;
+    setState(() {
+      _isSubmitting = true;
+      _formError = null;
+    });
 
- setState(() {
- _isSubmitting = true;
- _formError = null;
- });
-
- final store = Store(
- id: AppIds.newId('st'),
- tenantId: widget.tenant.id,
- name: _nameController.text.trim(),
- address: _addressController.text.trim(),
- );
+    final store = Store(
+      id: AppIds.newId('st'),
+      tenantId: widget.tenant.id,
+      name: _nameController.text.trim(),
+      address: _addressController.text.trim(),
+      phone: _phoneController.text.trim(),
+      email: _emailController.text.trim(),
+      nuit: _nuitController.text.trim(),
+      city: _cityController.text.trim(),
+    );
 
  final messenger = ScaffoldMessenger.of(context);
  final l10n = context.l10n;
@@ -790,6 +808,39 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
             AppTextField(
               controller: _addressController,
               label: l10n.addStoreAddressLabel,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _phoneController,
+              label: l10n.addStorePhoneLabel,
+              keyboardType: TextInputType.phone,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _emailController,
+              label: l10n.addStoreEmailLabel,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        SheetSection(
+          icon: Icons.receipt_long_outlined,
+          title: l10n.storeDetailNuit,
+          children: [
+            AppTextField(
+              controller: _nuitController,
+              label: l10n.addStoreNuitLabel,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _cityController,
+              label: l10n.addStoreCityLabel,
               textInputAction: TextInputAction.done,
             ),
           ],
@@ -1729,6 +1780,98 @@ class _DetailRow extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Sheet de detalhes de uma loja — exibida ao tocar no card.
+class _StoreDetailSheet extends StatelessWidget {
+  const _StoreDetailSheet({required this.store});
+
+  final Store store;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── Cabeçalho: avatar + nome ──
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: scheme.tertiaryContainer,
+                child: Text(
+                  store.name.isEmpty
+                      ? '?'
+                      : store.name.substring(0, 1).toUpperCase(),
+                  style: TextStyle(
+                    color: scheme.onTertiaryContainer,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      store.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // ── Detalhes ──
+          if (store.phone.isNotEmpty)
+            _DetailRow(
+              label: l10n.storeDetailPhone,
+              value: store.phone,
+              icon: Icons.phone_outlined,
+            ),
+          if (store.email.isNotEmpty)
+            _DetailRow(
+              label: l10n.storeDetailEmail,
+              value: store.email,
+              icon: Icons.email_outlined,
+            ),
+          if (store.nuit.isNotEmpty)
+            _DetailRow(
+              label: l10n.storeDetailNuit,
+              value: store.nuit,
+              icon: Icons.receipt_long_outlined,
+            ),
+          if (store.city.isNotEmpty)
+            _DetailRow(
+              label: l10n.storeDetailCity,
+              value: store.city,
+              icon: Icons.location_city_outlined,
+            ),
+          if (store.address.isNotEmpty)
+            _DetailRow(
+              label: l10n.storeDetailAddress,
+              value: store.address,
+              icon: Icons.place_outlined,
+            ),
+
+          const SizedBox(height: 8),
         ],
       ),
     );
