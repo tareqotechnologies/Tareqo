@@ -138,32 +138,33 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  storeCount: storesAsync.value?.length ?? 0,
  employeeCount: employeesAsync.value?.length ?? 0,
  onUpgrade: _requestUpgrade,
- ),
- TabBar(
- controller: _tabController,
- tabs: [
- // FittedBox: rótulos longos ('Funcionários', 'Upgrades')
- // encolhem em vez de estourar o Tab de largura fixa em
- // telas estreitas. Defensivo: a regressão REAL de 21px
- // achada nos testes de rotação foi no _LimitMeter; aqui o
- // risco é de overflow a ~100px por aba com escala alta.
- for (final label in [
- l10n.storesTabStores,
- l10n.storesTabEmployees,
- l10n.storesTabUpgrades,
- l10n.storesTabSettings,
- ])
- Tab(
- child: FittedBox(
- fit: BoxFit.scaleDown,
- child: Text(label, maxLines: 1),
- ),
- ),
- ],
- labelStyle: theme.textTheme.labelLarge?.copyWith(
- fontWeight: FontWeight.w500,
- ),
- ),
+ ),          TabBar(
+            controller: _tabController,
+            tabs: [
+              for (final label in [
+                l10n.storesTabStores,
+                l10n.storesTabEmployees,
+                l10n.storesTabUpgrades,
+                l10n.storesTabSettings,
+              ])
+                Tab(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+            ],
+            labelStyle: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+            unselectedLabelStyle: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w400,
+            ),
+          ),
  Expanded(
  child: TabBarView(
  controller: _tabController,
