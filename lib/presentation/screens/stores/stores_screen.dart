@@ -141,6 +141,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  ),          TabBar(
             controller: _tabController,
             isScrollable: true,
+            labelPadding: EdgeInsets.zero,
             tabs: [
               for (final label in [
                 l10n.storesTabStores,
