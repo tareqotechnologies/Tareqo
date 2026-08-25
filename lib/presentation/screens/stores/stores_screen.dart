@@ -221,21 +221,69 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  return ListView.separated(
  padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
  itemCount: stores.length,
- separatorBuilder: (_, _) => const SizedBox(height: 8),
- itemBuilder: (context, index) {
- final store = stores[index];        return AppCard(
+ separatorBuilder: (_, _) => const SizedBox(height: 8),      itemBuilder: (context, index) {
+ final store = stores[index];
+ final scheme = Theme.of(context).colorScheme;
+ return AppCard(
           borderRadius: BorderRadius.circular(16),
           padding: EdgeInsets.zero,
-          child: ListTile(
-            leading: const Icon(Icons.store_outlined, size: 20),
-            title: Text(
-              store.name,
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w500),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  // Avatar pequeno — inicial da loja.
+                  CircleAvatar(
+                    radius: 14,
+                    backgroundColor: scheme.tertiaryContainer,
+                    child: Text(
+                      store.name.isEmpty
+                          ? '?'
+                          : store.name.substring(0, 1).toUpperCase(),
+                      style: TextStyle(
+                        color: scheme.onTertiaryContainer,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // Nome fino + endereço compacto.
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          store.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                        if (store.address.isNotEmpty) ...[
+                          const SizedBox(height: 1),
+                          Text(
+                            store.address,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  ),
+                ],
+              ),
             ),
-            subtitle: store.address.isEmpty ? null : Text(store.address),
-            dense: true,
           ),
         );
  },
@@ -275,18 +323,19 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  separatorBuilder: (_, _) => const SizedBox(height: 8),      itemBuilder: (context, index) {
           final employee = employees[index];
           final scheme = Theme.of(context).colorScheme;
-          final isManager = employee.role == EmployeeRole.manager;        return AppCard(
+          return AppCard(
           borderRadius: BorderRadius.circular(16),
           padding: EdgeInsets.zero,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: () => _openEmployeeDetail(employee, stores, isOwner),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
+                  // Avatar pequeno — só a inicial.
                   CircleAvatar(
-                    radius: 18,
+                    radius: 14,
                     backgroundColor: scheme.primaryContainer,
                     child: Text(
                       employee.fullName.isEmpty
@@ -294,43 +343,38 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                           : employee.fullName.substring(0, 1).toUpperCase(),
                       style: TextStyle(
                         color: scheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 12,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
+                  // Nome fino — sem bold, sem chips.
                   Expanded(
                     child: Text(
                       employee.fullName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w300,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  if (!employee.isActive) ...[
-                    StatusChip(
-                      label: l10n.employeeInactive,
-                      color: scheme.error,
-                      icon: Icons.block,
+                  // Indicador de estado discreto + chevron.
+                  if (!employee.isActive)
+                    Container(
+                      width: 6,
+                      height: 6,
+                      margin: const EdgeInsets.only(right: 6),
+                      decoration: BoxDecoration(
+                        color: scheme.error,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                    const SizedBox(width: 6),
-                  ],
-                  StatusChip(
-                    label: isManager ? l10n.roleManager : l10n.roleEmployee,
-                    color: isManager ? scheme.primary : scheme.outline,
-                    icon: isManager
-                        ? Icons.manage_accounts_outlined
-                        : Icons.person_outline,
-                  ),
-                  const SizedBox(width: 4),
                   Icon(
                     Icons.chevron_right,
-                    size: 20,
-                    color: scheme.onSurfaceVariant,
+                    size: 18,
+                    color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
                 ],
               ),
