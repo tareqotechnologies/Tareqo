@@ -131,7 +131,9 @@ import '../../domain/usecases/decide_plan_request_use_case.dart';
 import '../../domain/usecases/get_all_tenants_use_case.dart';
 import '../../domain/usecases/get_cash_flow_use_case.dart';
 import '../../domain/usecases/get_dashboard_kpis_use_case.dart';
+import '../../domain/usecases/delete_customer_use_case.dart';
 import '../../domain/usecases/get_customers_use_case.dart';
+import '../../domain/usecases/update_customer_use_case.dart';
 import '../../domain/usecases/get_employees_use_case.dart';
 import '../../domain/usecases/get_my_plan_requests_use_case.dart';
 import '../../domain/usecases/get_all_plans_use_case.dart';
@@ -788,10 +790,15 @@ final class ServiceLocator {
  )
  ..registerLazySingleton<GetCustomersUseCase>(
  () => GetCustomersUseCase(instance<ICustomerRepository>()),
- )
- ..registerLazySingleton<AddCustomerUseCase>(
- () => AddCustomerUseCase(instance<ICustomerRepository>()),
- )
+ )  ..registerLazySingleton<AddCustomerUseCase>(
+      () => AddCustomerUseCase(instance<ICustomerRepository>()),
+    )
+  ..registerLazySingleton<UpdateCustomerUseCase>(
+      () => UpdateCustomerUseCase(instance<ICustomerRepository>()),
+    )
+  ..registerLazySingleton<DeleteCustomerUseCase>(
+      () => DeleteCustomerUseCase(instance<ICustomerRepository>()),
+    )
  ..registerLazySingleton<GetPurchasesUseCase>(
  () => GetPurchasesUseCase(instance<IPurchaseRepository>()),
  )

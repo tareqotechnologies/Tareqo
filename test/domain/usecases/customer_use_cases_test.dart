@@ -9,6 +9,8 @@ import 'package:dumbhanengue/domain/usecases/get_customers_use_case.dart';
 class _FakeCustomerRepository implements ICustomerRepository {
  final List<Customer> _customers = [];
  bool addCalled = false;
+ bool updateCalled = false;
+ bool deleteCalled = false;
 
  @override
  Future<List<Customer>> getAll({required String storeId}) async =>
@@ -18,6 +20,19 @@ class _FakeCustomerRepository implements ICustomerRepository {
  Future<void> add(Customer customer) async {
  addCalled = true;
  _customers.add(customer);
+ }
+
+ @override
+ Future<void> update(Customer customer) async {
+ updateCalled = true;
+ final index = _customers.indexWhere((c) => c.id == customer.id);
+ if (index != -1) _customers[index] = customer;
+ }
+
+ @override
+ Future<void> delete(String id) async {
+ deleteCalled = true;
+ _customers.removeWhere((c) => c.id == id);
  }
 }
 

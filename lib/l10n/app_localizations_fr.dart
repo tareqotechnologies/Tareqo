@@ -816,6 +816,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commonConfirm => 'Confirmer';
 
   @override
+  String get commonDelete => 'Supprimer';
+
+  @override
   String get commonDescription => 'Description';
 
   @override
@@ -1239,6 +1242,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get customersAddSubmit => 'Enregistrer le client';
 
   @override
+  String get customersEditTitle => 'Modifier le client';
+
+  @override
+  String customersEditSuccess(String name) => 'Client $name mis à jour !';
+
+  @override
+  String get customersEditError => 'Impossible de modifier le client. Réessayez.';
+
+  @override
+  String get customersEditSubmit => 'Enregistrer';
+
+  @override
+  String get customersDeleteConfirmTitle => 'Supprimer le client ?';
+
+  @override
+  String customersDeleteConfirmMessage(String name) =>
+      '$name sera supprimé définitivement. Les enregistrements de crédit sont conservés.';
+
+  @override
+  String get customersDeleteSuccess => 'Client supprimé.';
+
+  @override
+  String get customersDeleteError => 'Impossible de supprimer le client. Réessayez.';
+
+  @override
   String get purchasesTitle => 'Achats';
 
   @override
@@ -1512,6 +1540,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get financialDefaultCategoryExpense => 'Dépenses';
+
+  @override
+  String get financialDetailDescription => 'Description';
+
+  @override
+  String get financialDetailCategory => 'Catégorie';
+
+  @override
+  String get financialDetailNumber => 'Nº mouvement';
+
+  @override
+  String get financialDetailDate => 'Date et heure';
+
+  @override
+  String get financialDetailStatus => 'Statut';
 
   @override
   String get cashClosingAction => 'Clôture de caisse';

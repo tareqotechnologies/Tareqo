@@ -15,43 +15,55 @@ class SectionHeader extends StatelessWidget {
  final String title;
  final String? subtitle;
  final String? actionLabel;
- final VoidCallback? onAction;
+ final VoidCallback? onAction;  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
- @override
- Widget build(BuildContext context) {
- final theme = Theme.of(context);
-
- return Row(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- Expanded(
- child: Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- Text(
- title,
- style: theme.textTheme.titleLarge?.copyWith(
- fontWeight: FontWeight.w500,
- letterSpacing: -0.3,
- ),
- ),
- if (subtitle != null) ...[
- const SizedBox(height: 2),
- Text(subtitle!, style: theme.textTheme.bodySmall),
- ],
- ],
- ),
- ),
- if (actionLabel != null && onAction != null)
- TextButton(
- onPressed: onAction,
- style: TextButton.styleFrom(
- visualDensity: VisualDensity.compact,
- padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
- ),
- child: Text(actionLabel!),
- ),
- ],
- );
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subtitle!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (actionLabel != null && onAction != null)
+          TextButton(
+            onPressed: onAction,
+            style: TextButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              actionLabel!,
+              style: theme.textTheme.labelMedium,
+            ),
+          ),
+      ],
+    );
  }
 }

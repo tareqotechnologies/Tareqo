@@ -17,10 +17,8 @@ abstract final class AppColors {
  static const Color warning = Color(0xFFFBBF24);
 
  /// Âmbar claro AA (≥4.5:1 sobre branco e chip@14% — W4 calibrado).
- static const Color warningLight = Color(0xFF9A5308);
-
- static const Color accent = Color(0xFF22C55E);
- static const Color accentLight = Color(0xFF16A34A);
+ static const Color warningLight = Color(0xFF9A5308);  static const Color accent = Color(0xFF16A34A);
+  static const Color accentLight = Color(0xFF15803D);
 
  static const Color surfaceDark = Color(0xFF131316);
  static const Color surfaceElevatedDark = Color(0xFF1A1A1F);
@@ -301,13 +299,11 @@ abstract final class AppTheme {
         fontWeight: FontWeight.w400,
         color: scheme.onSurfaceVariant,
       ),
-    ),
-
- floatingActionButtonTheme: FloatingActionButtonThemeData(
- backgroundColor: isLight
- ? const Color(0xFF15803D)
- : const Color(0xFF22C55E),
- foregroundColor: isLight ? Colors.white : const Color(0xFF052E16),
+    ),    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: isLight
+          ? const Color(0xFF15803D)
+          : const Color(0xFF16A34A),
+      foregroundColor: isLight ? Colors.white : const Color(0xFF052E16),
  elevation: 2,
  highlightElevation: 4,
  shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),

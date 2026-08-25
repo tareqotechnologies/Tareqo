@@ -20,10 +20,19 @@ final class CustomerLocalDataSourceImpl implements CustomerLocalDataSource {
  final sorted = [...filtered]
  ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
  return List.unmodifiable(sorted);
- }
+ }  @override
+  Future<void> add(Customer customer) async {
+    _customers.add(customer);
+  }
 
- @override
- Future<void> add(Customer customer) async {
- _customers.add(customer);
- }
+  @override
+  Future<void> update(Customer customer) async {
+    final index = _customers.indexWhere((c) => c.id == customer.id);
+    if (index != -1) _customers[index] = customer;
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    _customers.removeWhere((c) => c.id == id);
+  }
 }

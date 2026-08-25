@@ -13,8 +13,12 @@ final class CustomerRepositoryImpl implements ICustomerRepository {
 
  @override
  Future<List<Customer>> getAll({required String storeId}) =>
- _localDataSource.getAll(storeId: storeId);
+ _localDataSource.getAll(storeId: storeId);  @override
+  Future<void> add(Customer customer) => _localDataSource.add(customer);
 
- @override
- Future<void> add(Customer customer) => _localDataSource.add(customer);
+  @override
+  Future<void> update(Customer customer) => _localDataSource.update(customer);
+
+  @override
+  Future<void> delete(String id) => _localDataSource.delete(id);
 }

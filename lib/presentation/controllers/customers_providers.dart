@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/service_locator.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/usecases/add_customer_use_case.dart';
+import '../../domain/usecases/delete_customer_use_case.dart';
 import '../../domain/usecases/get_customers_use_case.dart';
+import '../../domain/usecases/update_customer_use_case.dart';
 import 'account_providers.dart';
 import 'auth_providers.dart';
 
@@ -15,6 +17,14 @@ final getCustomersUseCaseProvider = Provider<GetCustomersUseCase>(
 
 final addCustomerUseCaseProvider = Provider<AddCustomerUseCase>(
  (ref) => ServiceLocator.instance<AddCustomerUseCase>(),
+);
+
+final updateCustomerUseCaseProvider = Provider<UpdateCustomerUseCase>(
+ (ref) => ServiceLocator.instance<UpdateCustomerUseCase>(),
+);
+
+final deleteCustomerUseCaseProvider = Provider<DeleteCustomerUseCase>(
+ (ref) => ServiceLocator.instance<DeleteCustomerUseCase>(),
 );
 
 /// Estado da lista de clientes (ordenada por nome).

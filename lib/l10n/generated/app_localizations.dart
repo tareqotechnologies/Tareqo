@@ -1570,6 +1570,12 @@ abstract class AppLocalizations {
   /// **'Confirmar'**
   String get commonConfirm;
 
+  /// No description provided for @commonDelete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar'**
+  String get commonDelete;
+
   /// No description provided for @commonDescription.
   ///
   /// In pt, this message translates to:
@@ -2344,6 +2350,54 @@ abstract class AppLocalizations {
   /// **'Cadastrar cliente'**
   String get customersAddSubmit;
 
+  /// No description provided for @customersEditTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar cliente'**
+  String get customersEditTitle;
+
+  /// No description provided for @customersEditSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente {name} atualizado!'**
+  String customersEditSuccess(Object name);
+
+  /// No description provided for @customersEditError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível atualizar o cliente. Tente novamente.'**
+  String get customersEditError;
+
+  /// No description provided for @customersEditSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar alterações'**
+  String get customersEditSubmit;
+
+  /// No description provided for @customersDeleteConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover cliente?'**
+  String get customersDeleteConfirmTitle;
+
+  /// No description provided for @customersDeleteConfirmMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} será removido permanentemente. Registros de fiado são preservados.'**
+  String customersDeleteConfirmMessage(Object name);
+
+  /// No description provided for @customersDeleteSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente removido.'**
+  String get customersDeleteSuccess;
+
+  /// No description provided for @customersDeleteError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível remover o cliente. Tente novamente.'**
+  String get customersDeleteError;
+
   /// No description provided for @purchasesTitle.
   ///
   /// In pt, this message translates to:
@@ -2847,6 +2901,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Despesas'**
   String get financialDefaultCategoryExpense;
+
+  /// No description provided for @financialDetailDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descrição'**
+  String get financialDetailDescription;
+
+  /// No description provided for @financialDetailCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Categoria'**
+  String get financialDetailCategory;
+
+  /// No description provided for @financialDetailNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nº movimento'**
+  String get financialDetailNumber;
+
+  /// No description provided for @financialDetailDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data e hora'**
+  String get financialDetailDate;
+
+  /// No description provided for @financialDetailStatus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estado'**
+  String get financialDetailStatus;
 
   /// No description provided for @cashClosingAction.
   ///

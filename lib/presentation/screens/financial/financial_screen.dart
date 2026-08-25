@@ -173,8 +173,7 @@ class FinancialScreen extends ConsumerWidget {
                   child: SectionHeader(
                     title: l10n.financialTransactions,
                     subtitle: pendingCount > 0 && transactionsAsync.hasValue
-                        ? '${l10n.financialPendingLabel} · $pendingCount — '
-                          '${l10n.financialPendingHint}'
+                        ? '${l10n.financialPendingLabel} · $pendingCount'
                         : null,
                   ),
                 ),
@@ -219,6 +218,7 @@ class FinancialScreen extends ConsumerWidget {
                             label: group.label,
                             totalCents: group.totalCents,
                             transactions: group.transactions,
+                            onTap: (tx) => _openTransactionDetail(context, tx),
                             onReceive: (tx) => _settlePending(
                               context,
                               ref,
@@ -326,6 +326,14 @@ class FinancialScreen extends ConsumerWidget {
     if (!context.mounted) return;
     ref.invalidate(cashFlowProvider);
     ref.invalidate(dashboardKpisProvider);
+  }
+
+  void _openTransactionDetail(
+      BuildContext context, FinancialTransaction tx) {
+    showAppSheet<void>(
+      context,
+      builder: (_) => TransactionDetailSheet(transaction: tx),
+    );
   }
 }
 
@@ -620,6 +628,7 @@ class _DateGroup extends StatelessWidget {
     required this.label,
     required this.totalCents,
     required this.transactions,
+    required this.onTap,
     required this.onReceive,
     required this.onPay,
   });
@@ -628,6 +637,7 @@ class _DateGroup extends StatelessWidget {
   final String label;
   final int totalCents;
   final List<FinancialTransaction> transactions;
+  final ValueChanged<FinancialTransaction> onTap;
   final ValueChanged<FinancialTransaction> onReceive;
   final ValueChanged<FinancialTransaction> onPay;
 
@@ -664,6 +674,7 @@ class _DateGroup extends StatelessWidget {
                   TransactionCard(
                     key: ValueKey(transactions[i].id),
                     transaction: transactions[i],
+                    onTap: () => onTap(transactions[i]),
                     onReceive:
                         transactions[i].status == TransactionStatus.pending &&
                                 transactions[i].type == TransactionType.income

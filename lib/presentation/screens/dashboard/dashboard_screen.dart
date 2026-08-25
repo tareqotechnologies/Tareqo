@@ -722,125 +722,113 @@ class _ActivityItem {
  this.badgeBackground,
  this.dashedBorder = false,
  this.onTap,
- });
-
- factory _ActivityItem.sale({
- required Sale sale,
- required AppLocalizations l10n,
- required VoidCallback onTap,
- }) {
- return _ActivityItem(
- title: 'Venda ${Formatters.saleLabel(sale.number)}',
- details: '${sale.paymentMethod.labelFor(l10n)} · '
- '${_timeLabel(sale.dateTime, l10n)}',
- dateTime: sale.dateTime,
- icon: Icons.north_east_rounded,
- iconBackground: const Color(0xFF123F26),
- iconColor: const Color(0xFF22C55E),
- amount: Formatters.signedAmount(sale.totalAmountCents),
- amountColor: const Color(0xFF22C55E),
- onTap: onTap,
- );
- }
-
- factory _ActivityItem.stockEntry({
- required Purchase purchase,
- required PurchaseItem item,
- required AppLocalizations l10n,
- }) =>
- _ActivityItem(
- title: l10n.dashboardStockEntry(item.productName),
- details: l10n.dashboardStockEntryDetail(
- '${Quantity.format(item.quantity)} un',
- _timeLabel(purchase.dateTime, l10n),
- ),
- dateTime: purchase.dateTime,
- icon: Icons.inventory_2_outlined,
- iconBackground: const Color(0xFF2A3034),
- iconColor: Colors.white,
- amount: '+${Quantity.format(item.quantity)}',
- amountColor: Colors.white,
- );
-
- factory _ActivityItem.fiadoPayment({
- required Debt debt,
- required AppLocalizations l10n,
- }) {
- final paidAt = debt.paidAt ?? debt.dueDate;
- return _ActivityItem(
- title: l10n.dashboardFiadoPayment,
- details: '${debt.personName} · ${_timeLabel(paidAt, l10n)}',
- dateTime: paidAt,
- icon: Icons.payments_outlined,
- iconBackground: const Color(0xFF3A2810),
- iconColor: const Color(0xFFE08F2B),
- amount: Formatters.signedAmount(debt.amountCents),
- amountColor: const Color(0xFF22C55E),
- dashedBorder: true,
- );
- }
-
- factory _ActivityItem.expense({
- required FinancialTransaction transaction,
- required AppLocalizations l10n,
- }) =>
- _ActivityItem(
- title: l10n.dashboardExpenseRow(transaction.description),
- details: _timeLabel(transaction.date, l10n),
- dateTime: transaction.date,
- icon: Icons.south_west_rounded,
- iconBackground: const Color(0xFF3A1618),
- iconColor: const Color(0xFFE05B64),
- amount: Formatters.signedAmount(-transaction.amountCents),
- amountColor: const Color(0xFFE05B64),
- );
-
- factory _ActivityItem.lowStock({
- required Product product,
- required AppLocalizations l10n,
- }) =>
- _ActivityItem(
- title: l10n.dashboardLowStock,
- details: l10n.dashboardLowStockDetail(
- product.name,
- '${Quantity.format(product.stockQuantity)} un',
- ),
- dateTime: DateTime.now(),
- icon: Icons.warning_amber_rounded,
- iconBackground: const Color(0xFF3A2810),
- iconColor: const Color(0xFFE08F2B),
- badge: l10n.dashboardAlertBadge,
- badgeColor: const Color(0xFFE08F2B),
- badgeBackground: const Color(0xFFE08F2B),
- );
-
- factory _ActivityItem.expiry({
- required ExpiryAlert alert,
- required AppLocalizations l10n,
- }) {
- final expired = alert.isExpired;
- final color = expired ? const Color(0xFFE05B64) : const Color(0xFFE08F2B);
- return _ActivityItem(
- title: alert.product.name,
- details: expired
- ? l10n.dashboardExpiredIn(-alert.daysRemaining)
- : l10n.dashboardExpiresIn(alert.daysRemaining),
- dateTime: DateTime.now(),
- icon: expired
- ? Icons.dangerous_outlined
- : Icons.hourglass_top_rounded,
- iconBackground: color.withValues(alpha: 0.18),
- iconColor: color,
- badge: Quantity.format(
- alert.lot.currentQuantity,
- unitLabel: alert.product.vendaPorFracao
- ? alert.product.unitLabel
- : null,
- language: Formatters.currentLanguage,
- ),
- badgeColor: color,
- );
- }
+ });  factory _ActivityItem.sale({
+    required Sale sale,
+    required AppLocalizations l10n,
+    required VoidCallback onTap,
+  }) {
+    return _ActivityItem(
+      title: 'Venda ${Formatters.saleLabel(sale.number)}',
+      details: '${sale.paymentMethod.labelFor(l10n)} · '
+          '${_timeLabel(sale.dateTime, l10n)}',
+      dateTime: sale.dateTime,
+      icon: Icons.north_east_rounded,
+      iconBackground: IconTone.greenDark,
+      iconColor: IconTone.green,
+      amount: Formatters.signedAmount(sale.totalAmountCents),
+      amountColor: IconTone.green,
+      onTap: onTap,
+    );
+  }  factory _ActivityItem.stockEntry({
+    required Purchase purchase,
+    required PurchaseItem item,
+    required AppLocalizations l10n,
+  }) =>
+      _ActivityItem(
+        title: l10n.dashboardStockEntry(item.productName),
+        details: l10n.dashboardStockEntryDetail(
+          '${Quantity.format(item.quantity)} un',
+          _timeLabel(purchase.dateTime, l10n),
+        ),
+        dateTime: purchase.dateTime,
+        icon: Icons.inventory_2_outlined,
+        iconBackground: IconTone.slate,
+        iconColor: Colors.white,
+        amount: '+${Quantity.format(item.quantity)}',
+        amountColor: Colors.white,
+      );  factory _ActivityItem.fiadoPayment({
+    required Debt debt,
+    required AppLocalizations l10n,
+  }) {
+    final paidAt = debt.paidAt ?? debt.dueDate;
+    return _ActivityItem(
+      title: l10n.dashboardFiadoPayment,
+      details: '${debt.personName} · ${_timeLabel(paidAt, l10n)}',
+      dateTime: paidAt,
+      icon: Icons.payments_outlined,
+      iconBackground: IconTone.amberDark,
+      iconColor: IconTone.amber,
+      amount: Formatters.signedAmount(debt.amountCents),
+      amountColor: IconTone.green,
+      dashedBorder: true,
+    );
+  }  factory _ActivityItem.expense({
+    required FinancialTransaction transaction,
+    required AppLocalizations l10n,
+  }) =>
+      _ActivityItem(
+        title: l10n.dashboardExpenseRow(transaction.description),
+        details: _timeLabel(transaction.date, l10n),
+        dateTime: transaction.date,
+        icon: Icons.south_west_rounded,
+        iconBackground: IconTone.redDark,
+        iconColor: IconTone.red,
+        amount: Formatters.signedAmount(-transaction.amountCents),
+        amountColor: IconTone.red,
+      );  factory _ActivityItem.lowStock({
+    required Product product,
+    required AppLocalizations l10n,
+  }) =>
+      _ActivityItem(
+        title: l10n.dashboardLowStock,
+        details: l10n.dashboardLowStockDetail(
+          product.name,
+          '${Quantity.format(product.stockQuantity)} un',
+        ),
+        dateTime: DateTime.now(),
+        icon: Icons.warning_amber_rounded,
+        iconBackground: IconTone.amberDark,
+        iconColor: IconTone.amber,
+        badge: l10n.dashboardAlertBadge,
+        badgeColor: IconTone.amber,
+        badgeBackground: IconTone.amber,
+      );  factory _ActivityItem.expiry({
+    required ExpiryAlert alert,
+    required AppLocalizations l10n,
+  }) {
+    final expired = alert.isExpired;
+    final color = expired ? IconTone.red : IconTone.amber;
+    return _ActivityItem(
+      title: alert.product.name,
+      details: expired
+          ? l10n.dashboardExpiredIn(-alert.daysRemaining)
+          : l10n.dashboardExpiresIn(alert.daysRemaining),
+      dateTime: DateTime.now(),
+      icon: expired
+          ? Icons.dangerous_outlined
+          : Icons.hourglass_top_rounded,
+      iconBackground: color.withValues(alpha: 0.18),
+      iconColor: color,
+      badge: Quantity.format(
+        alert.lot.currentQuantity,
+        unitLabel: alert.product.vendaPorFracao
+            ? alert.product.unitLabel
+            : null,
+        language: Formatters.currentLanguage,
+      ),
+      badgeColor: color,
+    );
+  }
 
  final String title;
  final String details;

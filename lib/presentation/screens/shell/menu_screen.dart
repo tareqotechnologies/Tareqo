@@ -127,33 +127,33 @@ class MenuScreen extends ConsumerWidget {
               ModuleCard(
                 icon: Icons.inventory_2_outlined,
                 label: l10n.appNavProducts,
-                iconColor: const Color(0xFF3B82F6),
+                iconColor: ModuleColors.products,
                 onTap: () => goTo(AppSection.products),
               ),
               ModuleCard(
                 icon: Icons.people_outline_rounded,
                 label: l10n.appNavCustomers,
-                iconColor: const Color(0xFF10B981),
+                iconColor: ModuleColors.customers,
                 onTap: () => goTo(AppSection.customers),
               ),
               ModuleCard(
                 icon: Icons.receipt_long_outlined,
                 label: l10n.appNavCredit,
-                iconColor: const Color(0xFFF59E0B),
+                iconColor: ModuleColors.credit,
                 onTap: () => goTo(AppSection.credit),
               ),
               if (accessLevel != UserAccessLevel.employee)
                 ModuleCard(
                   icon: Icons.local_shipping_outlined,
                   label: l10n.dashboardModulePurchases,
-                  iconColor: const Color(0xFF8B5CF6),
+                  iconColor: ModuleColors.purchases,
                   onTap: openPurchases,
                 ),
               if (accessLevel != UserAccessLevel.employee)
                 ModuleCard(
                   icon: Icons.bar_chart_outlined,
                   label: l10n.dashboardModuleReports,
-                  iconColor: const Color(0xFF14B8A6),
+                  iconColor: ModuleColors.reports,
                   onTap: openReports,
                 ),
               if (tenant != null &&
@@ -162,7 +162,7 @@ class MenuScreen extends ConsumerWidget {
                 ModuleCard(
                   icon: Icons.storefront_outlined,
                   label: l10n.dashboardModuleStores,
-                  iconColor: const Color(0xFF6366F1),
+                  iconColor: ModuleColors.stores,
                   onTap: () => openStores(tenant),
                 ),
             ],

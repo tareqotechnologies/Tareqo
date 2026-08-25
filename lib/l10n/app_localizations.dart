@@ -1567,6 +1567,12 @@ abstract class AppLocalizations {
   /// **'Confirm'**
   String get commonConfirm;
 
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
   /// No description provided for @commonDescription.
   ///
   /// In en, this message translates to:
@@ -2341,6 +2347,54 @@ abstract class AppLocalizations {
   /// **'Register customer'**
   String get customersAddSubmit;
 
+  /// No description provided for @customersEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit customer'**
+  String get customersEditTitle;
+
+  /// No description provided for @customersEditSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer {name} updated!'**
+  String customersEditSuccess(String name);
+
+  /// No description provided for @customersEditError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update the customer. Try again.'**
+  String get customersEditError;
+
+  /// No description provided for @customersEditSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get customersEditSubmit;
+
+  /// No description provided for @customersDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove customer?'**
+  String get customersDeleteConfirmTitle;
+
+  /// No description provided for @customersDeleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be permanently removed. Credit records are preserved.'**
+  String customersDeleteConfirmMessage(String name);
+
+  /// No description provided for @customersDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer removed.'**
+  String get customersDeleteSuccess;
+
+  /// No description provided for @customersDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not remove the customer. Try again.'**
+  String get customersDeleteError;
+
   /// No description provided for @purchasesTitle.
   ///
   /// In en, this message translates to:
@@ -2844,6 +2898,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expenses'**
   String get financialDefaultCategoryExpense;
+
+  /// No description provided for @financialDetailDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get financialDetailDescription;
+
+  /// No description provided for @financialDetailCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get financialDetailCategory;
+
+  /// No description provided for @financialDetailNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Movement #'**
+  String get financialDetailNumber;
+
+  /// No description provided for @financialDetailDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date and time'**
+  String get financialDetailDate;
+
+  /// No description provided for @financialDetailStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get financialDetailStatus;
 
   /// No description provided for @cashClosingAction.
   ///

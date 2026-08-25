@@ -37,13 +37,24 @@ final class CustomerSqliteDataSourceImpl implements CustomerLocalDataSource {
  customer.email,
  ],
  );
- }
+ }  @override
+  Future<void> update(Customer customer) async {
+    _db.execute(
+      'UPDATE customers SET name = ?, phone = ?, email = ? WHERE id = ?',
+      [customer.name, customer.phone, customer.email, customer.id],
+    );
+  }
 
- Customer _map(Row row) => Customer(
- id: row['id'] as String,
- storeId: row['store_id'] as String,
- name: row['name'] as String,
- phone: (row['phone'] as String?) ?? '',
- email: (row['email'] as String?) ?? '',
- );
+  @override
+  Future<void> delete(String id) async {
+    _db.execute('DELETE FROM customers WHERE id = ?', [id]);
+  }
+
+  Customer _map(Row row) => Customer(
+    id: row['id'] as String,
+    storeId: row['store_id'] as String,
+    name: row['name'] as String,
+    phone: (row['phone'] as String?) ?? '',
+    email: (row['email'] as String?) ?? '',
+  );
 }

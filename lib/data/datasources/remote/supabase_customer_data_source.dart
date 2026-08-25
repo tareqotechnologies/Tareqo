@@ -35,13 +35,25 @@ final class CustomerSupabaseDataSourceImpl implements CustomerLocalDataSource {
  'phone': customer.phone,
  'email': customer.email,
  });
- }
+ }  @override
+  Future<void> update(Customer customer) async {
+    await supabaseClient.from(_table).update({
+      'name': customer.name,
+      'phone': customer.phone,
+      'email': customer.email,
+    }).eq('id', customer.id);
+  }
 
- Customer _map(Map<String, dynamic> row) => Customer(
- id: row['id'] as String,
- storeId: row['store_id'] as String,
- name: row['name'] as String,
- phone: (row['phone'] as String?) ?? '',
- email: (row['email'] as String?) ?? '',
- );
+  @override
+  Future<void> delete(String id) async {
+    await supabaseClient.from(_table).delete().eq('id', id);
+  }
+
+  Customer _map(Map<String, dynamic> row) => Customer(
+    id: row['id'] as String,
+    storeId: row['store_id'] as String,
+    name: row['name'] as String,
+    phone: (row['phone'] as String?) ?? '',
+    email: (row['email'] as String?) ?? '',
+  );
 }

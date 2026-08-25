@@ -67,6 +67,33 @@ abstract final class AppCurves {
   static const Curve emphasized = Curves.easeInOutCubic;
 }
 
+/// Cores de módulo — conjunto fechado de 6 cores profissionais
+/// para os módulos do Menu e ícones de navegação.
+///
+/// Cada cor tem uma versão escura (fundo circular) e uma versão
+/// clara (ícone sobre fundo escuro) derivadas automaticamente.
+/// ATENÇÃO: estas cores são pré-definidas e NÃO devem ser
+/// substituídas por cores aleatórias nos ecrãs.
+abstract final class ModuleColors {
+  /// Produtos — azul confiável (estoque, inventário)
+  static const Color products = Color(0xFF3B82F6);
+
+  /// Clientes — teal profissional (relações, CRM)
+  static const Color customers = Color(0xFF14B8A6);
+
+  /// Crédito/Fiado — âmbar quente (atenção, pendências)
+  static const Color credit = Color(0xFFD97706);
+
+  /// Compras — violeta sofisticado (approvisionnement)
+  static const Color purchases = Color(0xFF7C3AED);
+
+  /// Relatórios — azul-profundo (análise, dados)
+  static const Color reports = Color(0xFF2563EB);
+
+  /// Lojas — slate profissional (administração)
+  static const Color stores = Color(0xFF475569);
+}
+
 /// Padrão de ícones com fundo sólido escuro — replicado do feed
 /// de atividade da Home. Cada ícone tem um container circular
 /// com fundo escuro (mesma família de cor) e ícone CLARO que
@@ -93,11 +120,17 @@ abstract final class IconTone {
   }
 
   // ── Cores pré-definidas (padrão do activity feed) ──
-  static const Color green = Color(0xFF22C55E);
+  static const Color green = Color(0xFF16A34A);
   static const Color greenDark = Color(0xFF123F26);
-  static const Color amber = Color(0xFFE08F2B);
+  static const Color amber = Color(0xFFD97706);
   static const Color amberDark = Color(0xFF3A2810);
-  static const Color red = Color(0xFFE05B64);
+  static const Color red = Color(0xFFDC2626);
   static const Color redDark = Color(0xFF3A1618);
   static const Color slate = Color(0xFF2A3034);
+  static const Color blue = Color(0xFF2563EB);
+  static const Color blueDark = Color(0xFF0F1D3A);
+  static const Color teal = Color(0xFF0D9488);
+  static const Color tealDark = Color(0xFF0A2E2B);
+  static const Color violet = Color(0xFF7C3AED);
+  static const Color violetDark = Color(0xFF1E1540);
 }

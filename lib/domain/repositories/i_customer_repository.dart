@@ -12,4 +12,10 @@ abstract interface class ICustomerRepository {
 
  /// Registra um novo cliente.
  Future<void> add(Customer customer);
+
+ /// Atualiza os dados de um cliente existente.
+ Future<void> update(Customer customer);
+
+ /// Remove um cliente pelo seu [id].
+ Future<void> delete(String id);
 }

@@ -48,11 +48,12 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
  }
 
  @override
- Future<void> signOut() => _auth.signOut();
-
- @override
- Future<void> resetPassword({required String email}) =>
- _auth.resetPasswordForEmail(email);
+ Future<void> signOut() => _auth.signOut();  @override
+  Future<void> resetPassword({required String email}) =>
+      _auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'dumbhanengue://callback',
+      );
 
  @override
  Future<void> changePassword({

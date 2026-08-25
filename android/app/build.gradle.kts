@@ -54,15 +54,15 @@ android {
         if (hasReleaseKeystore) {
             create("release") {
                 // Erro claro se key.properties existir mas estiver incompleto.
-                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyAlias = (keystoreProperties["keyAlias"] as String?)
                     ?: error("key.properties: 'keyAlias' ausente")
-                keyPassword = keystoreProperties["keyPassword"] as String?
+                keyPassword = (keystoreProperties["keyPassword"] as String?)
                     ?: error("key.properties: 'keyPassword' ausente")
                 storeFile = file(
-                    keystoreProperties["storeFile"] as String?
+                    (keystoreProperties["storeFile"] as String?)
                         ?: error("key.properties: 'storeFile' ausente"),
                 )
-                storePassword = keystoreProperties["storePassword"] as String?
+                storePassword = (keystoreProperties["storePassword"] as String?)
                     ?: error("key.properties: 'storePassword' ausente")
             }
         }
