@@ -140,6 +140,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  onUpgrade: _requestUpgrade,
  ),          TabBar(
             controller: _tabController,
+            isScrollable: true,
             tabs: [
               for (final label in [
                 l10n.storesTabStores,

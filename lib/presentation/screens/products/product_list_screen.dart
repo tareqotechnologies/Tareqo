@@ -680,8 +680,8 @@ class _ProductTileState extends State<_ProductTile> {
                         _product.name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w400,
                           color: inactive ? scheme.onSurfaceVariant : null,
                         ),
                       ),
@@ -719,8 +719,8 @@ class _ProductTileState extends State<_ProductTile> {
                       child: SmartAmount(
                         cents: _product.salePriceCents,
                         alignment: Alignment.centerRight,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
                           color: inactive ? scheme.onSurfaceVariant : null,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
@@ -732,7 +732,7 @@ class _ProductTileState extends State<_ProductTile> {
                       '${_product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: theme.textTheme.labelSmall?.copyWith(
                         color: lowStock ? theme.expense : scheme.onSurfaceVariant,
                         fontWeight: lowStock ? FontWeight.w500 : FontWeight.w300,
                         fontFeatures: const [FontFeature.tabularFigures()],
