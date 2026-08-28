@@ -1321,5 +1321,124 @@
     }
   },
   "adminBulkApproveError": "Erreur lors de l'approbation. Certains tenants peuvent ne pas avoir été traités.",
-  "adminBulkRejectError": "Erreur lors du rejet. Certains tenants peuvent ne pas avoir été traités."
+  "adminBulkRejectError": "Erreur lors du rejet. Certains tenants peuvent ne pas avoir été traités.",
+  "adminWelcomeMessage": "Super Admin",
+  "adminPlatformStatus": "État de la plateforme",
+  "adminActionApproveTenant": "Approuver le tenant",
+  "adminActionRejectTenant": "Rejeter le tenant",
+  "adminActionManagePlans": "Gérer les forfaits",
+  "adminActionViewAuditLog": "Voir le journal d'audit",
+  "adminTenantRequests": "Demandes de tenant",
+  "adminPlanUpgrades": "Évolutions de forfait",
+  "adminRecentActivity": "Activité récente",
+  "adminPendingActionRequired": "{count, plural, =1{1 action requise} other{{count} actions requises}}",
+  "@adminPendingActionRequired": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminNoPendingActions": "Tout est à jour !",
+  "adminPlatformSummary": "{tenants} tenants · {plans} forfaits",
+  "adminAuditLogAll": "Tous",
+  "adminAuditLogTenants": "Tenants",
+  "adminAuditLogPlans": "Forfaits",
+  "adminAuditLogUpgrades": "Évolutions",
+  "adminAuditLogTotalActions": "Total des actions",
+  "adminAuditLogApproved": "Approuvés",
+  "adminAuditLogRejected": "Rejetés",
+  "adminAuditLogToday": "Aujourd'hui",
+  "adminAuditLogYesterday": "Hier",
+  "adminAuditLogThisWeek": "Cette semaine",
+  "adminAuditLogOlder": "Plus ancien",
+  "adminAuditLogSearchHint": "Rechercher dans le journal...",
+  "adminAuditLogNoResults": "Aucune entrée ne correspond à votre filtre.",
+  "adminDashboardApprovalRate": "Taux d'approbation",
+  "adminDashboardTenantDistribution": "Distribution des tenants",
+  "adminDashboardPlanDistribution": "Distribution des forfaits",
+  "adminDashboardRecentActivity": "Activité récente",
+  "adminDashboardActivityCount": "{count, plural, =0{Aucune action récente} =1{1 action ces 7 derniers jours} other{{count} actions ces 7 derniers jours}}",
+  "@adminDashboardActivityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminDashboardActivePercent": "{percent}% actifs",
+  "@adminDashboardActivePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "adminDashboardDaysSinceLastActivity": "{days, plural, =0{Actif aujourd'hui} =1{Dernière action il y a 1 jour} other{Dernière action il y a {days} jours}}",
+  "@adminDashboardDaysSinceLastActivity": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "adminGrowthTrends": "Tendances de Croissance",
+  "adminGrowthThisWeek": "Cette semaine",
+  "adminGrowthLastWeek": "Semaine dernière",
+  "adminGrowthThisMonth": "Ce mois-ci",
+  "adminGrowthLastMonth": "Mois dernier",
+  "adminGrowthNewTenants": "Nouveaux tenants",
+  "adminGrowthApprovals": "Approbations",
+  "adminGrowthVsLastWeek": "{count} vs semaine dernière",
+  "@adminGrowthVsLastWeek": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthVsLastMonth": "{count} vs mois dernier",
+  "@adminGrowthVsLastMonth": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthUp": "+{count}",
+  "@adminGrowthUp": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthDown": "-{count}",
+  "@adminGrowthDown": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthFlat": "Aucun changement",
+  "adminGrowthRegistrationsTrend": "Inscriptions (8 dernières semaines)",
+  "adminGrowthActivityTrend": "Activité (8 dernières semaines)",
+  "adminGrowthNoData": "Pas assez de données pour les tendances",
+  "adminGrowthWeekLabel": "S{week}",
+  "@adminGrowthWeekLabel": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthAvgPerWeek": "{count}/semaine moy.",
+  "@adminGrowthAvgPerWeek": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  }
 }

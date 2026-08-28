@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/fade_indexed_stack.dart';
 import '../../widgets/sign_out_button.dart';
@@ -26,18 +27,19 @@ class AdminShell extends ConsumerStatefulWidget {
 class _AdminShellState extends ConsumerState<AdminShell> {
   int _index = 0;
 
-  static const _sections = [
-    AdminDashboardScreen(),
-    AdminTenantsScreen(),
-    AdminPlansScreen(),
-    AdminPlanRequestsScreen(),
-    AdminAuditLogScreen(),
+  late final List<Widget> _sections = [
+    AdminDashboardScreen(onNavigateToTab: (i) => setState(() => _index = i)),
+    const AdminTenantsScreen(),
+    const AdminPlansScreen(),
+    const AdminPlanRequestsScreen(),
+    const AdminAuditLogScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 880;
     final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
 
     // Contadores de badge para itens pendentes.
     final pendingTenants =
@@ -73,30 +75,66 @@ class _AdminShellState extends ConsumerState<AdminShell> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.adminTitle),
+        title: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: scheme.primary,
+                borderRadius: AppRadius.smAll,
+              ),
+              child: Icon(
+                Icons.admin_panel_settings_outlined,
+                size: 18,
+                color: scheme.onPrimary,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              l10n.adminTitle,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.3,
+                  ),
+            ),
+          ],
+        ),
         actions: const [SignOutButton(), SizedBox(width: 8)],
       ),
       body: wide
           ? Row(
               children: [
-                NavigationRail(
-                  selectedIndex: _index,
-                  onDestinationSelected: (value) =>
-                      setState(() => _index = value),
-                  labelType: NavigationRailLabelType.all,
-                  leading: const SizedBox(height: 8),
-                  destinations: [
-                    for (var i = 0; i < destinations.length; i++)
-                      NavigationRailDestination(
-                        icon: _NavIcon(
-                          icon: destinations[i].$1,
-                          selectedIcon: destinations[i].$2,
-                          badgeCount: badges[i],
-                          isSelected: _index == i,
-                        ),
-                        label: Text(destinations[i].$3),
+                // Sidebar com label de seção
+                Container(
+                  width: 72,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      right: BorderSide(
+                        color: scheme.outlineVariant.withValues(alpha: 0.5),
                       ),
-                  ],
+                    ),
+                  ),
+                  child: NavigationRail(
+                    selectedIndex: _index,
+                    onDestinationSelected: (value) =>
+                        setState(() => _index = value),
+                    labelType: NavigationRailLabelType.all,
+                    leading: const SizedBox(height: 8),
+                    destinations: [
+                      for (var i = 0; i < destinations.length; i++)
+                        NavigationRailDestination(
+                          icon: _NavIcon(
+                            icon: destinations[i].$1,
+                            selectedIcon: destinations[i].$2,
+                            badgeCount: badges[i],
+                            isSelected: _index == i,
+                          ),
+                          label: Text(destinations[i].$3),
+                        ),
+                    ],
+                  ),
                 ),
                 Expanded(child: body),
               ],

@@ -182,16 +182,36 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
             ),
           ),
           if (!_showAll && pending.isNotEmpty && !_selectionMode)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l10n.adminAwaitingCount(pending.length),
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
-                ),
+            Container(
+              margin: const EdgeInsets.fromLTRB(20, 4, 20, 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .tertiaryContainer
+                    .withValues(alpha: 0.4),
+                borderRadius: AppRadius.smAll,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      l10n.adminAwaitingCount(pending.length),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.tertiary,
+                          ),
+                    ),
+                  ),
+                ],
               ),
             ),
           if (_selectionMode && !_showAll)
@@ -217,10 +237,10 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
  );
  }
 
- /// Nome do plano pelo id (usa o provider de planos ativos).
+ /// Nome do plano pelo id (usa o provider de todos os planos).
  String _plansById(String id) =>
  ref
- .watch(plansProvider)
+ .watch(allPlansProvider)
  .value
  ?.where((plan) => plan.id == id)
  .firstOrNull
@@ -291,7 +311,8 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
  AsyncValue<List<Tenant>> async,
  String emptyMessage,
  ) {
- final scheme = Theme.of(context).colorScheme;
+ final theme = Theme.of(context);
+ final scheme = theme.colorScheme;
  final l10n = context.l10n;
 
  return async.when(
@@ -322,24 +343,52 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
  TenantStatus.pending => (scheme.tertiary, l10n.statusPending),
  TenantStatus.approved => (scheme.primary, l10n.statusApproved),
  TenantStatus.rejected => (scheme.error, l10n.statusRejected),
- };
- return AppCard(
- elevated: true,
- borderRadius: const BorderRadius.all(Radius.circular(18)),
- padding: EdgeInsets.zero,
- child: ListTile(
- onTap: () => _showTenantDetail(tenant),
- leading: const Icon(Icons.business_outlined),
- title: Text(tenant.businessName),
- subtitle: Text(
- l10n.adminPlanSolicited(
- _plansById(tenant.planId),
- '${tenant.createdAt.day}/${tenant.createdAt.month}',
- ),
- ),
- trailing: StatusChip(label: label, color: color),
- ),
- );
+ };        return AppCard(
+          elevated: true,
+          borderRadius: const BorderRadius.all(Radius.circular(18)),
+          padding: const EdgeInsets.all(14),
+          borderColor: color.withValues(alpha: 0.3),
+          onTap: () => _showTenantDetail(tenant),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: AppRadius.smAll,
+                ),
+                child: Icon(
+                  Icons.business_outlined,
+                  size: 20,
+                  color: color,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tenant.businessName,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '${_plansById(tenant.planId)} · ${tenant.createdAt.day}/${tenant.createdAt.month}/${tenant.createdAt.year}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              StatusChip(label: label, color: color),
+            ],
+          ),
+        );
  },
  );
  },
@@ -495,12 +544,13 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    // Card premium (estilo Apple): cantos 18 + superfície elevada.
+    // Card premium com borda lateral de destaque para ação pendente.
     return GestureDetector(
       onLongPress: onLongPress,
       child: AppCard(
         elevated: true,
         borderRadius: const BorderRadius.all(Radius.circular(18)),
+        borderColor: scheme.tertiary.withValues(alpha: 0.4),
         padding: const EdgeInsets.all(14),
         onTap: onTap,
         child: Column(

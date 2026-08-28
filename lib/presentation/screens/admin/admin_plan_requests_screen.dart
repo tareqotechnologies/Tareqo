@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../domain/entities/plan_request.dart';
 import '../../../domain/entities/tenant.dart';
-import '../../controllers/account_providers.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
@@ -30,8 +30,7 @@ class _AdminPlanRequestsScreenState
  @override
  Widget build(BuildContext context) {
  final requestsAsync = ref.watch(pendingPlanRequestsProvider);
- final tenants = ref.watch(allTenantsProvider).value ?? const <Tenant>[];
- final plans = ref.watch(plansProvider).value ?? const [];
+ final tenants = ref.watch(allTenantsProvider).value ?? const <Tenant>[];    final plans = ref.watch(allPlansProvider).value ?? const [];
  final l10n = context.l10n;
 
  String tenantName(String id) =>
@@ -116,22 +115,28 @@ class _AdminPlanRequestsScreenState
  );
  }
  }
-}
+}class _RequestCard extends StatelessWidget {
+  const _RequestCard({
+    required this.request,
+    required this.tenantName,
+    required this.currentPlan,
+    required this.requestedPlan,
+    required this.onDecide,
+  });
 
-class _RequestCard extends StatelessWidget {
- const _RequestCard({
- required this.request,
- required this.tenantName,
- required this.currentPlan,
- required this.requestedPlan,
- required this.onDecide,
- });
+  final PlanRequest request;
+  final String tenantName;
+  final String currentPlan;
+  final String requestedPlan;
+  final void Function(bool approve) onDecide;
 
- final PlanRequest request;
- final String tenantName;
- final String currentPlan;
- final String requestedPlan;
- final void Function(bool approve) onDecide;
+  String _timeAgo() {
+    final diff = DateTime.now().difference(request.createdAt);
+    if (diff.inDays > 0) return '${diff.inDays}d';
+    if (diff.inHours > 0) return '${diff.inHours}h';
+    if (diff.inMinutes > 0) return '${diff.inMinutes}m';
+    return 'agora';
+  }
 
  @override
  Widget build(BuildContext context) {
@@ -139,34 +144,59 @@ class _RequestCard extends StatelessWidget {
  final scheme = theme.colorScheme;
  final l10n = context.l10n;
 
- // Card premium (estilo Apple): cantos 18 + superfície elevada.
- return AppCard(
- elevated: true,
- borderRadius: const BorderRadius.all(Radius.circular(18)),
- padding: const EdgeInsets.all(14),
- child: Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- children: [
- Row(
- children: [
- Expanded(
- child: Text(
- tenantName,
- style: theme.textTheme.titleMedium?.copyWith(
- fontWeight: FontWeight.w500,
- ),
- ),
- ),
- // Pendente = "a aguardar acção" → warning (âmbar), a mesma
- // semântica da tela Lojas (upgrades) e do resto do app.
- StatusChip(
- label: l10n.statusPending,
- color: theme.warning,
- icon: Icons.hourglass_top,
- ),
- ],
- ),
- const SizedBox(height: 10),
+    // Card premium com borda de destaque para upgrade pendente.
+    return AppCard(
+      elevated: true,
+      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderColor: theme.warning.withValues(alpha: 0.3),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: theme.warning.withValues(alpha: 0.12),
+                  borderRadius: AppRadius.smAll,
+                ),
+                child: Icon(
+                  Icons.upgrade_outlined,
+                  size: 18,
+                  color: theme.warning,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tenantName,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      _timeAgo(),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              StatusChip(
+                label: l10n.statusPending,
+                color: theme.warning,
+                icon: Icons.hourglass_top,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
  Row(
  children: [
  Expanded(

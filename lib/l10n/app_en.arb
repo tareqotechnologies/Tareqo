@@ -1321,5 +1321,124 @@
     }
   },
   "adminBulkApproveError": "Error approving tenants. Some may not have been processed.",
-  "adminBulkRejectError": "Error rejecting tenants. Some may not have been processed."
+  "adminBulkRejectError": "Error rejecting tenants. Some may not have been processed.",
+  "adminWelcomeMessage": "Super Admin",
+  "adminPlatformStatus": "Platform Status",
+  "adminActionApproveTenant": "Approve Tenant",
+  "adminActionRejectTenant": "Reject Tenant",
+  "adminActionManagePlans": "Manage Plans",
+  "adminActionViewAuditLog": "View Audit Log",
+  "adminTenantRequests": "Tenant Requests",
+  "adminPlanUpgrades": "Plan Upgrades",
+  "adminRecentActivity": "Recent Activity",
+  "adminPendingActionRequired": "{count, plural, =1{1 action required} other{{count} actions required}}",
+  "@adminPendingActionRequired": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminNoPendingActions": "All caught up!",
+  "adminPlatformSummary": "{tenants} tenants · {plans} plans",
+  "adminAuditLogAll": "All",
+  "adminAuditLogTenants": "Tenants",
+  "adminAuditLogPlans": "Plans",
+  "adminAuditLogUpgrades": "Upgrades",
+  "adminAuditLogTotalActions": "Total actions",
+  "adminAuditLogApproved": "Approved",
+  "adminAuditLogRejected": "Rejected",
+  "adminAuditLogToday": "Today",
+  "adminAuditLogYesterday": "Yesterday",
+  "adminAuditLogThisWeek": "This week",
+  "adminAuditLogOlder": "Older",
+  "adminAuditLogSearchHint": "Search audit log...",
+  "adminAuditLogNoResults": "No entries match your filter.",
+  "adminDashboardApprovalRate": "Approval rate",
+  "adminDashboardTenantDistribution": "Tenant distribution",
+  "adminDashboardPlanDistribution": "Plan distribution",
+  "adminDashboardRecentActivity": "Recent activity",
+  "adminDashboardActivityCount": "{count, plural, =0{No recent actions} =1{1 action in the last 7 days} other{{count} actions in the last 7 days}}",
+  "@adminDashboardActivityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminDashboardActivePercent": "{percent}% active",
+  "@adminDashboardActivePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "adminDashboardDaysSinceLastActivity": "{days, plural, =0{Active today} =1{Last action 1 day ago} other{Last action {days} days ago}}",
+  "@adminDashboardDaysSinceLastActivity": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "adminGrowthTrends": "Growth Trends",
+  "adminGrowthThisWeek": "This week",
+  "adminGrowthLastWeek": "Last week",
+  "adminGrowthThisMonth": "This month",
+  "adminGrowthLastMonth": "Last month",
+  "adminGrowthNewTenants": "New tenants",
+  "adminGrowthApprovals": "Approvals",
+  "adminGrowthVsLastWeek": "{count} vs last week",
+  "@adminGrowthVsLastWeek": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthVsLastMonth": "{count} vs last month",
+  "@adminGrowthVsLastMonth": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthUp": "+{count}",
+  "@adminGrowthUp": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthDown": "-{count}",
+  "@adminGrowthDown": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthFlat": "No change",
+  "adminGrowthRegistrationsTrend": "Registrations (last 8 weeks)",
+  "adminGrowthActivityTrend": "Activity (last 8 weeks)",
+  "adminGrowthNoData": "Not enough data to show trends",
+  "adminGrowthWeekLabel": "W{week}",
+  "@adminGrowthWeekLabel": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthAvgPerWeek": "{count}/week avg",
+  "@adminGrowthAvgPerWeek": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  }
 }

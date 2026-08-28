@@ -1321,5 +1321,124 @@
     }
   },
   "adminBulkApproveError": "Erro ao aprovar tenants. Alguns podem não ter sido processados.",
-  "adminBulkRejectError": "Erro ao rejeitar tenants. Alguns podem não ter sido processados."
+  "adminBulkRejectError": "Erro ao rejeitar tenants. Alguns podem não ter sido processados.",
+  "adminWelcomeMessage": "Super Admin",
+  "adminPlatformStatus": "Estado da Plataforma",
+  "adminActionApproveTenant": "Aprovar Tenant",
+  "adminActionRejectTenant": "Rejeitar Tenant",
+  "adminActionManagePlans": "Gerir Planos",
+  "adminActionViewAuditLog": "Ver Registo de Auditoria",
+  "adminTenantRequests": "Solicitações de Tenant",
+  "adminPlanUpgrades": "Upgrades de Plano",
+  "adminRecentActivity": "Atividade Recente",
+  "adminPendingActionRequired": "{count, plural, =1{1 ação necessária} other{{count} ações necessárias}}",
+  "@adminPendingActionRequired": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminNoPendingActions": "Tudo em dia!",
+  "adminPlatformSummary": "{tenants} tenants · {plans} planos",
+  "adminAuditLogAll": "Todos",
+  "adminAuditLogTenants": "Tenants",
+  "adminAuditLogPlans": "Planos",
+  "adminAuditLogUpgrades": "Upgrades",
+  "adminAuditLogTotalActions": "Total de ações",
+  "adminAuditLogApproved": "Aprovados",
+  "adminAuditLogRejected": "Rejeitados",
+  "adminAuditLogToday": "Hoje",
+  "adminAuditLogYesterday": "Ontem",
+  "adminAuditLogThisWeek": "Esta semana",
+  "adminAuditLogOlder": "Mais antigo",
+  "adminAuditLogSearchHint": "Pesquisar registo de auditoria...",
+  "adminAuditLogNoResults": "Nenhuma entrada corresponde ao filtro.",
+  "adminDashboardApprovalRate": "Taxa de aprovação",
+  "adminDashboardTenantDistribution": "Distribuição de tenants",
+  "adminDashboardPlanDistribution": "Distribuição de planos",
+  "adminDashboardRecentActivity": "Atividade recente",
+  "adminDashboardActivityCount": "{count, plural, =0{Sem ações recentes} =1{1 ação nos últimos 7 dias} other{{count} ações nos últimos 7 dias}}",
+  "@adminDashboardActivityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminDashboardActivePercent": "{percent}% ativos",
+  "@adminDashboardActivePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "adminDashboardDaysSinceLastActivity": "{days, plural, =0{Ativo hoje} =1{Última ação há 1 dia} other{Última ação há {days} dias}}",
+  "@adminDashboardDaysSinceLastActivity": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "adminGrowthTrends": "Tendências de Crescimento",
+  "adminGrowthThisWeek": "Esta semana",
+  "adminGrowthLastWeek": "Semana passada",
+  "adminGrowthThisMonth": "Este mês",
+  "adminGrowthLastMonth": "Mês passado",
+  "adminGrowthNewTenants": "Novos tenants",
+  "adminGrowthApprovals": "Aprovações",
+  "adminGrowthVsLastWeek": "{count} vs semana passada",
+  "@adminGrowthVsLastWeek": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthVsLastMonth": "{count} vs mês passado",
+  "@adminGrowthVsLastMonth": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthUp": "+{count}",
+  "@adminGrowthUp": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthDown": "-{count}",
+  "@adminGrowthDown": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthFlat": "Sem alteração",
+  "adminGrowthRegistrationsTrend": "Registos (últimas 8 semanas)",
+  "adminGrowthActivityTrend": "Atividade (últimas 8 semanas)",
+  "adminGrowthNoData": "Dados insuficientes para mostrar tendências",
+  "adminGrowthWeekLabel": "S{week}",
+  "@adminGrowthWeekLabel": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "adminGrowthAvgPerWeek": "{count}/semana média",
+  "@adminGrowthAvgPerWeek": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -4497,6 +4497,300 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Erro ao rejeitar tenants. Alguns podem não ter sido processados.'**
   String get adminBulkRejectError;
+
+  /// No description provided for @adminWelcomeMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Super Admin'**
+  String get adminWelcomeMessage;
+
+  /// No description provided for @adminPlatformStatus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estado da Plataforma'**
+  String get adminPlatformStatus;
+
+  /// No description provided for @adminActionApproveTenant.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovar Tenant'**
+  String get adminActionApproveTenant;
+
+  /// No description provided for @adminActionRejectTenant.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitar Tenant'**
+  String get adminActionRejectTenant;
+
+  /// No description provided for @adminActionManagePlans.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerir Planos'**
+  String get adminActionManagePlans;
+
+  /// No description provided for @adminActionViewAuditLog.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver Registo de Auditoria'**
+  String get adminActionViewAuditLog;
+
+  /// No description provided for @adminTenantRequests.
+  ///
+  /// In pt, this message translates to:
+  /// **'Solicitações de Tenant'**
+  String get adminTenantRequests;
+
+  /// No description provided for @adminPlanUpgrades.
+  ///
+  /// In pt, this message translates to:
+  /// **'Upgrades de Plano'**
+  String get adminPlanUpgrades;
+
+  /// No description provided for @adminRecentActivity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atividade Recente'**
+  String get adminRecentActivity;
+
+  /// No description provided for @adminPendingActionRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 ação necessária} other{{count} ações necessárias}}'**
+  String adminPendingActionRequired(int count);
+
+  /// No description provided for @adminNoPendingActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo em dia!'**
+  String get adminNoPendingActions;
+
+  /// No description provided for @adminPlatformSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'{tenants} tenants · {plans} planos'**
+  String adminPlatformSummary(Object plans, Object tenants);
+
+  /// No description provided for @adminAuditLogAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos'**
+  String get adminAuditLogAll;
+
+  /// No description provided for @adminAuditLogTenants.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tenants'**
+  String get adminAuditLogTenants;
+
+  /// No description provided for @adminAuditLogPlans.
+  ///
+  /// In pt, this message translates to:
+  /// **'Planos'**
+  String get adminAuditLogPlans;
+
+  /// No description provided for @adminAuditLogUpgrades.
+  ///
+  /// In pt, this message translates to:
+  /// **'Upgrades'**
+  String get adminAuditLogUpgrades;
+
+  /// No description provided for @adminAuditLogTotalActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total de ações'**
+  String get adminAuditLogTotalActions;
+
+  /// No description provided for @adminAuditLogApproved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovados'**
+  String get adminAuditLogApproved;
+
+  /// No description provided for @adminAuditLogRejected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitados'**
+  String get adminAuditLogRejected;
+
+  /// No description provided for @adminAuditLogToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get adminAuditLogToday;
+
+  /// No description provided for @adminAuditLogYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ontem'**
+  String get adminAuditLogYesterday;
+
+  /// No description provided for @adminAuditLogThisWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta semana'**
+  String get adminAuditLogThisWeek;
+
+  /// No description provided for @adminAuditLogOlder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais antigo'**
+  String get adminAuditLogOlder;
+
+  /// No description provided for @adminAuditLogSearchHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pesquisar registo de auditoria...'**
+  String get adminAuditLogSearchHint;
+
+  /// No description provided for @adminAuditLogNoResults.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma entrada corresponde ao filtro.'**
+  String get adminAuditLogNoResults;
+
+  /// No description provided for @adminDashboardApprovalRate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Taxa de aprovação'**
+  String get adminDashboardApprovalRate;
+
+  /// No description provided for @adminDashboardTenantDistribution.
+  ///
+  /// In pt, this message translates to:
+  /// **'Distribuição de tenants'**
+  String get adminDashboardTenantDistribution;
+
+  /// No description provided for @adminDashboardPlanDistribution.
+  ///
+  /// In pt, this message translates to:
+  /// **'Distribuição de planos'**
+  String get adminDashboardPlanDistribution;
+
+  /// No description provided for @adminDashboardRecentActivity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atividade recente'**
+  String get adminDashboardRecentActivity;
+
+  /// No description provided for @adminDashboardActivityCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Sem ações recentes} =1{1 ação nos últimos 7 dias} other{{count} ações nos últimos 7 dias}}'**
+  String adminDashboardActivityCount(int count);
+
+  /// No description provided for @adminDashboardActivePercent.
+  ///
+  /// In pt, this message translates to:
+  /// **'{percent}% ativos'**
+  String adminDashboardActivePercent(int percent);
+
+  /// No description provided for @adminDashboardDaysSinceLastActivity.
+  ///
+  /// In pt, this message translates to:
+  /// **'{days, plural, =0{Ativo hoje} =1{Última ação há 1 dia} other{Última ação há {days} dias}}'**
+  String adminDashboardDaysSinceLastActivity(int days);
+
+  /// No description provided for @adminGrowthTrends.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tendências de Crescimento'**
+  String get adminGrowthTrends;
+
+  /// No description provided for @adminGrowthThisWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta semana'**
+  String get adminGrowthThisWeek;
+
+  /// No description provided for @adminGrowthLastWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'Semana passada'**
+  String get adminGrowthLastWeek;
+
+  /// No description provided for @adminGrowthThisMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este mês'**
+  String get adminGrowthThisMonth;
+
+  /// No description provided for @adminGrowthLastMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mês passado'**
+  String get adminGrowthLastMonth;
+
+  /// No description provided for @adminGrowthNewTenants.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novos tenants'**
+  String get adminGrowthNewTenants;
+
+  /// No description provided for @adminGrowthApprovals.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovações'**
+  String get adminGrowthApprovals;
+
+  /// No description provided for @adminGrowthVsLastWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} vs semana passada'**
+  String adminGrowthVsLastWeek(String count);
+
+  /// No description provided for @adminGrowthVsLastMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} vs mês passado'**
+  String adminGrowthVsLastMonth(String count);
+
+  /// No description provided for @adminGrowthUp.
+  ///
+  /// In pt, this message translates to:
+  /// **'+{count}'**
+  String adminGrowthUp(String count);
+
+  /// No description provided for @adminGrowthDown.
+  ///
+  /// In pt, this message translates to:
+  /// **'-{count}'**
+  String adminGrowthDown(String count);
+
+  /// No description provided for @adminGrowthFlat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem alteração'**
+  String get adminGrowthFlat;
+
+  /// No description provided for @adminGrowthRegistrationsTrend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registos (últimas 8 semanas)'**
+  String get adminGrowthRegistrationsTrend;
+
+  /// No description provided for @adminGrowthActivityTrend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atividade (últimas 8 semanas)'**
+  String get adminGrowthActivityTrend;
+
+  /// No description provided for @adminGrowthNoData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados insuficientes para mostrar tendências'**
+  String get adminGrowthNoData;
+
+  /// No description provided for @adminGrowthWeekLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'S{week}'**
+  String adminGrowthWeekLabel(String week);
+
+  /// No description provided for @adminGrowthAvgPerWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count}/semana média'**
+  String adminGrowthAvgPerWeek(String count);
 }
 
 class _AppLocalizationsDelegate

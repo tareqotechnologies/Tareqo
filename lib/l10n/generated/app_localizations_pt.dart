@@ -2604,4 +2604,193 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get adminBulkRejectError =>
       'Erro ao rejeitar tenants. Alguns podem não ter sido processados.';
+
+  @override
+  String get adminWelcomeMessage => 'Super Admin';
+
+  @override
+  String get adminPlatformStatus => 'Estado da Plataforma';
+
+  @override
+  String get adminActionApproveTenant => 'Aprovar Tenant';
+
+  @override
+  String get adminActionRejectTenant => 'Rejeitar Tenant';
+
+  @override
+  String get adminActionManagePlans => 'Gerir Planos';
+
+  @override
+  String get adminActionViewAuditLog => 'Ver Registo de Auditoria';
+
+  @override
+  String get adminTenantRequests => 'Solicitações de Tenant';
+
+  @override
+  String get adminPlanUpgrades => 'Upgrades de Plano';
+
+  @override
+  String get adminRecentActivity => 'Atividade Recente';
+
+  @override
+  String adminPendingActionRequired(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ações necessárias',
+      one: '1 ação necessária',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminNoPendingActions => 'Tudo em dia!';
+
+  @override
+  String adminPlatformSummary(Object plans, Object tenants) {
+    return '$tenants tenants · $plans planos';
+  }
+
+  @override
+  String get adminAuditLogAll => 'Todos';
+
+  @override
+  String get adminAuditLogTenants => 'Tenants';
+
+  @override
+  String get adminAuditLogPlans => 'Planos';
+
+  @override
+  String get adminAuditLogUpgrades => 'Upgrades';
+
+  @override
+  String get adminAuditLogTotalActions => 'Total de ações';
+
+  @override
+  String get adminAuditLogApproved => 'Aprovados';
+
+  @override
+  String get adminAuditLogRejected => 'Rejeitados';
+
+  @override
+  String get adminAuditLogToday => 'Hoje';
+
+  @override
+  String get adminAuditLogYesterday => 'Ontem';
+
+  @override
+  String get adminAuditLogThisWeek => 'Esta semana';
+
+  @override
+  String get adminAuditLogOlder => 'Mais antigo';
+
+  @override
+  String get adminAuditLogSearchHint => 'Pesquisar registo de auditoria...';
+
+  @override
+  String get adminAuditLogNoResults => 'Nenhuma entrada corresponde ao filtro.';
+
+  @override
+  String get adminDashboardApprovalRate => 'Taxa de aprovação';
+
+  @override
+  String get adminDashboardTenantDistribution => 'Distribuição de tenants';
+
+  @override
+  String get adminDashboardPlanDistribution => 'Distribuição de planos';
+
+  @override
+  String get adminDashboardRecentActivity => 'Atividade recente';
+
+  @override
+  String adminDashboardActivityCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ações nos últimos 7 dias',
+      one: '1 ação nos últimos 7 dias',
+      zero: 'Sem ações recentes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String adminDashboardActivePercent(int percent) {
+    return '$percent% ativos';
+  }
+
+  @override
+  String adminDashboardDaysSinceLastActivity(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Última ação há $days dias',
+      one: 'Última ação há 1 dia',
+      zero: 'Ativo hoje',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminGrowthTrends => 'Tendências de Crescimento';
+
+  @override
+  String get adminGrowthThisWeek => 'Esta semana';
+
+  @override
+  String get adminGrowthLastWeek => 'Semana passada';
+
+  @override
+  String get adminGrowthThisMonth => 'Este mês';
+
+  @override
+  String get adminGrowthLastMonth => 'Mês passado';
+
+  @override
+  String get adminGrowthNewTenants => 'Novos tenants';
+
+  @override
+  String get adminGrowthApprovals => 'Aprovações';
+
+  @override
+  String adminGrowthVsLastWeek(String count) {
+    return '$count vs semana passada';
+  }
+
+  @override
+  String adminGrowthVsLastMonth(String count) {
+    return '$count vs mês passado';
+  }
+
+  @override
+  String adminGrowthUp(String count) {
+    return '+$count';
+  }
+
+  @override
+  String adminGrowthDown(String count) {
+    return '-$count';
+  }
+
+  @override
+  String get adminGrowthFlat => 'Sem alteração';
+
+  @override
+  String get adminGrowthRegistrationsTrend => 'Registos (últimas 8 semanas)';
+
+  @override
+  String get adminGrowthActivityTrend => 'Atividade (últimas 8 semanas)';
+
+  @override
+  String get adminGrowthNoData => 'Dados insuficientes para mostrar tendências';
+
+  @override
+  String adminGrowthWeekLabel(String week) {
+    return 'S$week';
+  }
+
+  @override
+  String adminGrowthAvgPerWeek(String count) {
+    return '$count/semana média';
+  }
 }

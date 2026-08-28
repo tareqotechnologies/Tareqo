@@ -10,6 +10,7 @@ import 'package:dumbhanengue/domain/entities/tenant.dart';
 import 'package:dumbhanengue/domain/usecases/decide_plan_request_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_all_tenants_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_pending_plan_requests_use_case.dart';
+import 'package:dumbhanengue/domain/usecases/get_all_plans_use_case.dart';
 import 'package:dumbhanengue/domain/usecases/get_plans_use_case.dart';
 import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
 import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
@@ -32,15 +33,22 @@ class _FakeGetAllTenantsUseCase implements GetAllTenantsUseCase {
 
  @override
  Future<List<Tenant>> call() async => _tenants;
+}class _FakeGetPlansUseCase implements GetPlansUseCase {
+  _FakeGetPlansUseCase(this._plans);
+
+  final List<Plan> _plans;
+
+  @override
+  Future<List<Plan>> call() async => _plans;
 }
 
-class _FakeGetPlansUseCase implements GetPlansUseCase {
- _FakeGetPlansUseCase(this._plans);
+class _FakeGetAllPlansUseCase implements GetAllPlansUseCase {
+  _FakeGetAllPlansUseCase(this._plans);
 
- final List<Plan> _plans;
+  final List<Plan> _plans;
 
- @override
- Future<List<Plan>> call() async => _plans;
+  @override
+  Future<List<Plan>> call() async => _plans;
 }
 
 class _FakeDecidePlanRequestUseCase implements DecidePlanRequestUseCase {
@@ -69,8 +77,8 @@ Widget _buildApp({
  ),
  getAllTenantsUseCaseProvider.overrideWithValue(
  _FakeGetAllTenantsUseCase(tenants),
- ),
- getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase(plans)),
+ ),    getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase(plans)),
+    getAllPlansUseCaseProvider.overrideWithValue(_FakeGetAllPlansUseCase(plans)),
  decidePlanRequestUseCaseProvider.overrideWithValue(
  decide ?? _FakeDecidePlanRequestUseCase(),
  ),
