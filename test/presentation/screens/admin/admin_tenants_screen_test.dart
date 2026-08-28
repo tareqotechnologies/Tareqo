@@ -143,14 +143,15 @@ void main() {
  await tester.pumpAndSettle();
 
  await tester.tap(find.text('Rejeitar'));
- await tester.pumpAndSettle();
-
- // Diálogo de motivo.
- expect(find.text('Rejeitar Comercial Demo'), findsOneWidget);
- await tester.enterText(
- find.byType(TextField),
- 'Documentação incompleta',
- );
+ await tester.pumpAndSettle();    // Diálogo de motivo — procura o TextField dentro do diálogo.
+    expect(find.text('Rejeitar Comercial Demo'), findsOneWidget);
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      'Documentação incompleta',
+    );
  await tester.tap(find.widgetWithText(FilledButton, 'Rejeitar'));
  await tester.pumpAndSettle();
 

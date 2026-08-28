@@ -1216,5 +1216,110 @@
         "type": "int"
       }
     }
-  }
+  },
+  "adminNavDashboard": "Overview",
+  "adminNavAuditLog": "Audit Log",
+  "adminDashboardTitle": "Overview",
+  "adminDashboardTotalTenants": "Total tenants",
+  "adminDashboardActiveTenants": "Active",
+  "adminDashboardPendingTenants": "Pending approval",
+  "adminDashboardPendingUpgrades": "Pending upgrades",
+  "adminDashboardTotalPlans": "Plans",
+  "adminDashboardLoadError": "Could not load overview.",
+  "adminAuditLogTitle": "Audit Log",
+  "adminAuditLogEmpty": "No actions recorded yet.",
+  "adminAuditLogEmptySubtitle": "Admin actions will appear here.",
+  "adminAuditLogLoadError": "Could not load the audit log.",
+  "adminTenantDetailTitle": "Tenant details",
+  "adminTenantDetailOwner": "Owner ID",
+  "adminTenantDetailPlan": "Plan",
+  "adminTenantDetailStores": "Stores",
+  "adminTenantDetailEmployees": "Employees",
+  "adminTenantDetailStatus": "Status",
+  "adminTenantDetailCreated": "Created",
+  "adminTenantDetailCurrency": "Currency",
+  "adminTenantDetailLanguage": "Language",
+  "adminTenantDetailRejectionReason": "Rejection reason",
+  "adminTenantDetailApprovedAt": "Approved at",
+  "adminTenantDetailStoresCount": "{count, plural, =1{1 store} other{{count} stores}}",
+  "@adminTenantDetailStoresCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminTenantDetailEmployeesCount": "{count, plural, =1{1 employee} other{{count} employees}}",
+  "@adminTenantDetailEmployeesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminTenantSearchHint": "Search tenants...",
+  "adminTenantDetailLoadError": "Could not load tenant details.",
+  "adminTenantDetailNoStores": "No stores created",
+  "adminTenantDetailNoEmployees": "No employees linked",
+  "adminTenantDetailActivity": "Recent activity",
+  "adminTenantDetailNoActivity": "No recent activity for this tenant",
+  "adminTenantDetailActivityCount": "{count, plural, =1{1 recent action} other{{count} recent actions}}",
+  "@adminTenantDetailActivityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminTenantDetailStoreAddress": "{city}",
+  "adminTenantDetailEmployeeRole": "{role, select, manager{Manager} other{Employee}}",
+  "@adminTenantDetailEmployeeRole": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "adminAuditLogAction": "Action",
+  "adminAuditLogEntity": "Entity",
+  "adminAuditLogDate": "Date",
+  "adminAuditLogActor": "Actor",
+  "adminBulkSelectAll": "Select all",
+  "adminBulkDeselectAll": "Deselect all",
+  "adminBulkApprove": "Approve ({count})",
+  "adminBulkReject": "Reject ({count})",
+  "adminBulkApproveConfirm": "Approve {count} pending {count, plural, =1{tenant} other{tenants}}?",
+  "@adminBulkApproveConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminBulkRejectTitle": "Reject {count} {count, plural, =1{tenant} other{tenants}}",
+  "@adminBulkRejectTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminBulkApproveSuccess": "{count} {count, plural, =1{tenant approved} other{tenants approved}}",
+  "@adminBulkApproveSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminBulkRejectSuccess": "{count} {count, plural, =1{tenant rejected} other{tenants rejected}}",
+  "@adminBulkRejectSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminBulkApproveError": "Error approving tenants. Some may not have been processed.",
+  "adminBulkRejectError": "Error rejecting tenants. Some may not have been processed."
 }

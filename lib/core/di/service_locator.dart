@@ -53,7 +53,11 @@ import '../../data/datasources/remote/supabase_sale_data_source.dart';
 import '../../data/datasources/remote/supabase_stock_lot_data_source.dart';
 import '../../data/datasources/remote/supabase_store_data_source.dart';
 import '../../data/datasources/remote/supabase_tenant_data_source.dart';
+import '../../data/datasources/local/audit_log_local_data_source.dart';
+import '../../data/datasources/local/audit_log_local_data_source_impl.dart';
+import '../../data/datasources/remote/supabase_audit_log_data_source.dart';
 import '../../data/repositories/admin_repository_impl.dart';
+import '../../data/repositories/audit_log_repository_impl.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/cash_closing_repository_impl.dart';
 import '../../data/repositories/supabase_cash_closing_summary_repository.dart';
@@ -87,6 +91,7 @@ import '../../domain/entities/debt.dart';
 import '../../domain/entities/purchase.dart';
 import '../../domain/entities/sale.dart';
 import '../../domain/repositories/i_admin_repository.dart';
+import '../../domain/repositories/i_audit_log_repository.dart';
 import '../../domain/repositories/i_employee_account_processor.dart';
 import '../../domain/repositories/i_product_image_store.dart';
 import '../../domain/repositories/i_employee_realtime_signal_source.dart';
@@ -128,6 +133,7 @@ import '../../domain/usecases/add_purchase_use_case.dart';
 import '../../domain/usecases/add_store_use_case.dart';
 import '../../domain/usecases/approve_tenant_use_case.dart';
 import '../../domain/usecases/decide_plan_request_use_case.dart';
+import '../../domain/usecases/get_audit_log_use_case.dart';
 import '../../domain/usecases/get_all_tenants_use_case.dart';
 import '../../domain/usecases/get_cash_flow_use_case.dart';
 import '../../domain/usecases/get_dashboard_kpis_use_case.dart';
@@ -184,15 +190,19 @@ final class ServiceLocator {
  () => AuthRepositoryImpl(SupabaseAuthRemoteDataSourceImpl()),
  )
  // Papel de super admin (baseado em BANCO — `public.super_admins` no
- // Supabase via RPC `is_super_admin`; nunca e-mail hardcoded). Sem
- // Supabase não há sessão nem papel — ninguém é super admin.
- ..registerLazySingleton<IAdminRepository>(
- () => SupabaseConfig.isConfigured
- ? const AdminRepositoryImpl()
- : const LocalAdminRepository(),
- );
+ // Supabase via RPC `is_super_admin`; nunca e-mail hardcoded). Sem    // Supabase não há sessão nem papel — ninguém é super admin.
+    ..registerLazySingleton<IAdminRepository>(
+      () => SupabaseConfig.isConfigured
+          ? const AdminRepositoryImpl()
+          : const LocalAdminRepository(),
+    )
+    ..registerLazySingleton<AuditLogLocalDataSource>(
+      () => SupabaseConfig.isConfigured
+          ? const SupabaseAuditLogDataSourceImpl()
+          : const AuditLogLocalDataSourceImpl(),
+    );
 
- // Criação de contas de funcionários — apenas no modo LOCAL (sem
+    // Criação de contas de funcionários — apenas no modo LOCAL (sem
  // Supabase): o vínculo é criado pelo caso de uso com um id sintético.
  // No modo Supabase quem cria a conta + vínculo é o processador atômico
  // IEmployeeAccountProcessor (RPC create_employee_account — UMA
@@ -557,12 +567,14 @@ final class ServiceLocator {
  )
  ..registerLazySingleton<IEmployeeRepository>(
  () => EmployeeRepositoryImpl(instance<EmployeeLocalDataSource>()),
- )
- ..registerLazySingleton<IPlanRequestRepository>(
- () => PlanRequestRepositoryImpl(
- instance<PlanRequestLocalDataSource>(),
- ),
- )
+ )    ..registerLazySingleton<IPlanRequestRepository>(
+      () => PlanRequestRepositoryImpl(
+        instance<PlanRequestLocalDataSource>(),
+      ),
+    )
+    ..registerLazySingleton<IAuditLogRepository>(
+      () => AuditLogRepositoryImpl(instance<AuditLogLocalDataSource>()),
+    )
  // Camada de Contas — casos de uso (planos/tenant/lojas/funcionários).
  ..registerLazySingleton<GetPlansUseCase>(
  () => GetPlansUseCase(instance<IPlanRepository>()),
@@ -590,10 +602,12 @@ final class ServiceLocator {
  )
  ..registerLazySingleton<RejectTenantUseCase>(
  () => RejectTenantUseCase(instance<ITenantRepository>()),
- )
- ..registerLazySingleton<GetPendingTenantsUseCase>(
- () => GetPendingTenantsUseCase(instance<ITenantRepository>()),
- )
+ )    ..registerLazySingleton<GetAuditLogUseCase>(
+      () => GetAuditLogUseCase(instance<IAuditLogRepository>()),
+    )
+    ..registerLazySingleton<GetPendingTenantsUseCase>(
+      () => GetPendingTenantsUseCase(instance<ITenantRepository>()),
+    )
  ..registerLazySingleton<GetAllTenantsUseCase>(
  () => GetAllTenantsUseCase(instance<ITenantRepository>()),
  )

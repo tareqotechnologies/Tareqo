@@ -2384,4 +2384,226 @@ class AppLocalizationsFr extends AppLocalizations {
   String dashboardExpiresIn(int days) {
     return 'Expire dans $days jour(s)';
   }
+
+  @override
+  String get adminNavDashboard => 'Vue d\'ensemble';
+
+  @override
+  String get adminNavAuditLog => 'Journal d\'audit';
+
+  @override
+  String get adminDashboardTitle => 'Vue d\'ensemble';
+
+  @override
+  String get adminDashboardTotalTenants => 'Total tenants';
+
+  @override
+  String get adminDashboardActiveTenants => 'Actifs';
+
+  @override
+  String get adminDashboardPendingTenants => 'En attente d\'approbation';
+
+  @override
+  String get adminDashboardPendingUpgrades => 'Évolutions en attente';
+
+  @override
+  String get adminDashboardTotalPlans => 'Forfaits';
+
+  @override
+  String get adminDashboardLoadError =>
+      'Impossible de charger la vue d\'ensemble.';
+
+  @override
+  String get adminAuditLogTitle => 'Journal d\'audit';
+
+  @override
+  String get adminAuditLogEmpty => 'Aucune action enregistrée.';
+
+  @override
+  String get adminAuditLogEmptySubtitle =>
+      'Les actions admin apparaîtront ici.';
+
+  @override
+  String get adminAuditLogLoadError =>
+      'Impossible de charger le journal d\'audit.';
+
+  @override
+  String get adminTenantDetailTitle => 'Détails du tenant';
+
+  @override
+  String get adminTenantDetailOwner => 'ID du propriétaire';
+
+  @override
+  String get adminTenantDetailPlan => 'Forfait';
+
+  @override
+  String get adminTenantDetailStores => 'Magasins';
+
+  @override
+  String get adminTenantDetailEmployees => 'Employés';
+
+  @override
+  String get adminTenantDetailStatus => 'Statut';
+
+  @override
+  String get adminTenantDetailCreated => 'Créé le';
+
+  @override
+  String get adminTenantDetailCurrency => 'Devise';
+
+  @override
+  String get adminTenantDetailLanguage => 'Langue';
+
+  @override
+  String get adminTenantDetailRejectionReason => 'Motif du rejet';
+
+  @override
+  String get adminTenantDetailApprovedAt => 'Approuvé le';
+
+  @override
+  String adminTenantDetailStoresCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count magasins',
+      one: '1 magasin',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String adminTenantDetailEmployeesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count employés',
+      one: '1 employé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminTenantSearchHint => 'Rechercher tenants...';
+
+  @override
+  String get adminTenantDetailLoadError =>
+      'Impossible de charger les détails du tenant.';
+
+  @override
+  String get adminTenantDetailNoStores => 'Aucun magasin créé';
+
+  @override
+  String get adminTenantDetailNoEmployees => 'Aucun employé lié';
+
+  @override
+  String get adminTenantDetailActivity => 'Activité récente';
+
+  @override
+  String get adminTenantDetailNoActivity =>
+      'Aucune activité récente pour ce tenant';
+
+  @override
+  String adminTenantDetailActivityCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count actions récentes',
+      one: '1 action récente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String adminTenantDetailStoreAddress(Object city) {
+    return '$city';
+  }
+
+  @override
+  String adminTenantDetailEmployeeRole(String role) {
+    String _temp0 = intl.Intl.selectLogic(role, {
+      'manager': 'Gestionnaire',
+      'other': 'Employé',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get adminAuditLogAction => 'Action';
+
+  @override
+  String get adminAuditLogEntity => 'Entité';
+
+  @override
+  String get adminAuditLogDate => 'Date';
+
+  @override
+  String get adminAuditLogActor => 'Acteur';
+
+  @override
+  String get adminBulkSelectAll => 'Tout sélectionner';
+
+  @override
+  String get adminBulkDeselectAll => 'Tout désélectionner';
+
+  @override
+  String adminBulkApprove(Object count) {
+    return 'Approuver ($count)';
+  }
+
+  @override
+  String adminBulkReject(Object count) {
+    return 'Rejeter ($count)';
+  }
+
+  @override
+  String adminBulkApproveConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tenants en attente',
+      one: 'tenant en attente',
+    );
+    return 'Approuver $count $_temp0 ?';
+  }
+
+  @override
+  String adminBulkRejectTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tenants',
+      one: 'tenant',
+    );
+    return 'Rejeter $count $_temp0';
+  }
+
+  @override
+  String adminBulkApproveSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tenants approuvés',
+      one: 'tenant approuvé',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String adminBulkRejectSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tenants rejetés',
+      one: 'tenant rejeté',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get adminBulkApproveError =>
+      'Erreur lors de l\'approbation. Certains tenants peuvent ne pas avoir été traités.';
+
+  @override
+  String get adminBulkRejectError =>
+      'Erreur lors du rejet. Certains tenants peuvent ne pas avoir été traités.';
 }

@@ -1216,5 +1216,110 @@
         "type": "int"
       }
     }
-  }
+  },
+  "adminNavDashboard": "Visão Geral",
+  "adminNavAuditLog": "Registo de Auditoria",
+  "adminDashboardTitle": "Visão Geral",
+  "adminDashboardTotalTenants": "Total de tenants",
+  "adminDashboardActiveTenants": "Ativos",
+  "adminDashboardPendingTenants": "Aguardando aprovação",
+  "adminDashboardPendingUpgrades": "Upgrades pendentes",
+  "adminDashboardTotalPlans": "Planos",
+  "adminDashboardLoadError": "Não foi possível carregar a visão geral.",
+  "adminAuditLogTitle": "Registo de Auditoria",
+  "adminAuditLogEmpty": "Nenhuma ação registada.",
+  "adminAuditLogEmptySubtitle": "Ações administrativas aparecerão aqui.",
+  "adminAuditLogLoadError": "Não foi possível carregar o registo de auditoria.",
+  "adminTenantDetailTitle": "Detalhes do tenant",
+  "adminTenantDetailOwner": "ID do proprietário",
+  "adminTenantDetailPlan": "Plano",
+  "adminTenantDetailStores": "Lojas",
+  "adminTenantDetailEmployees": "Funcionários",
+  "adminTenantDetailStatus": "Estado",
+  "adminTenantDetailCreated": "Criado em",
+  "adminTenantDetailCurrency": "Moeda",
+  "adminTenantDetailLanguage": "Idioma",
+  "adminTenantDetailRejectionReason": "Motivo da rejeição",
+  "adminTenantDetailApprovedAt": "Aprovado em",
+  "adminTenantDetailStoresCount": "{count, plural, =1{1 loja} other{{count} lojas}}",
+  "@adminTenantDetailStoresCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminTenantDetailEmployeesCount": "{count, plural, =1{1 funcionário} other{{count} funcionários}}",
+  "@adminTenantDetailEmployeesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminTenantSearchHint": "Buscar tenants...",
+  "adminTenantDetailLoadError": "Não foi possível carregar os detalhes do tenant.",
+  "adminTenantDetailNoStores": "Nenhuma loja criada",
+  "adminTenantDetailNoEmployees": "Nenhum funcionário vinculado",
+  "adminTenantDetailActivity": "Atividade recente",
+  "adminTenantDetailNoActivity": "Nenhuma atividade recente para este tenant",
+  "adminTenantDetailActivityCount": "{count, plural, =1{1 ação recente} other{{count} ações recentes}}",
+  "@adminTenantDetailActivityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminTenantDetailStoreAddress": "{city}",
+  "adminTenantDetailEmployeeRole": "{role, select, manager{Gestor} other{Funcionário}}",
+  "@adminTenantDetailEmployeeRole": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "adminAuditLogAction": "Ação",
+  "adminAuditLogEntity": "Entidade",
+  "adminAuditLogDate": "Data",
+  "adminAuditLogActor": "Responsável",
+  "adminBulkSelectAll": "Selecionar todos",
+  "adminBulkDeselectAll": "Desmarcar todos",
+  "adminBulkApprove": "Aprovar ({count})",
+  "adminBulkReject": "Rejeitar ({count})",
+  "adminBulkApproveConfirm": "Aprovar {count} {count, plural, =1{tenant pendente} other{tenants pendentes}}?",
+  "@adminBulkApproveConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminBulkRejectTitle": "Rejeitar {count} {count, plural, =1{tenant} other{tenants}}",
+  "@adminBulkRejectTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminBulkApproveSuccess": "{count} {count, plural, =1{tenant aprovado} other{tenants aprovados}}",
+  "@adminBulkApproveSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminBulkRejectSuccess": "{count} {count, plural, =1{tenant rejeitado} other{tenants rejeitados}}",
+  "@adminBulkRejectSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminBulkApproveError": "Erro ao aprovar tenants. Alguns podem não ter sido processados.",
+  "adminBulkRejectError": "Erro ao rejeitar tenants. Alguns podem não ter sido processados."
 }

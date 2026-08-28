@@ -4203,6 +4203,300 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Vence em {days} dia(s)'**
   String dashboardExpiresIn(int days);
+
+  /// No description provided for @adminNavDashboard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visão Geral'**
+  String get adminNavDashboard;
+
+  /// No description provided for @adminNavAuditLog.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registo de Auditoria'**
+  String get adminNavAuditLog;
+
+  /// No description provided for @adminDashboardTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visão Geral'**
+  String get adminDashboardTitle;
+
+  /// No description provided for @adminDashboardTotalTenants.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total de tenants'**
+  String get adminDashboardTotalTenants;
+
+  /// No description provided for @adminDashboardActiveTenants.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativos'**
+  String get adminDashboardActiveTenants;
+
+  /// No description provided for @adminDashboardPendingTenants.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aguardando aprovação'**
+  String get adminDashboardPendingTenants;
+
+  /// No description provided for @adminDashboardPendingUpgrades.
+  ///
+  /// In pt, this message translates to:
+  /// **'Upgrades pendentes'**
+  String get adminDashboardPendingUpgrades;
+
+  /// No description provided for @adminDashboardTotalPlans.
+  ///
+  /// In pt, this message translates to:
+  /// **'Planos'**
+  String get adminDashboardTotalPlans;
+
+  /// No description provided for @adminDashboardLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar a visão geral.'**
+  String get adminDashboardLoadError;
+
+  /// No description provided for @adminAuditLogTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registo de Auditoria'**
+  String get adminAuditLogTitle;
+
+  /// No description provided for @adminAuditLogEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma ação registada.'**
+  String get adminAuditLogEmpty;
+
+  /// No description provided for @adminAuditLogEmptySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ações administrativas aparecerão aqui.'**
+  String get adminAuditLogEmptySubtitle;
+
+  /// No description provided for @adminAuditLogLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar o registo de auditoria.'**
+  String get adminAuditLogLoadError;
+
+  /// No description provided for @adminTenantDetailTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Detalhes do tenant'**
+  String get adminTenantDetailTitle;
+
+  /// No description provided for @adminTenantDetailOwner.
+  ///
+  /// In pt, this message translates to:
+  /// **'ID do proprietário'**
+  String get adminTenantDetailOwner;
+
+  /// No description provided for @adminTenantDetailPlan.
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano'**
+  String get adminTenantDetailPlan;
+
+  /// No description provided for @adminTenantDetailStores.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lojas'**
+  String get adminTenantDetailStores;
+
+  /// No description provided for @adminTenantDetailEmployees.
+  ///
+  /// In pt, this message translates to:
+  /// **'Funcionários'**
+  String get adminTenantDetailEmployees;
+
+  /// No description provided for @adminTenantDetailStatus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estado'**
+  String get adminTenantDetailStatus;
+
+  /// No description provided for @adminTenantDetailCreated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criado em'**
+  String get adminTenantDetailCreated;
+
+  /// No description provided for @adminTenantDetailCurrency.
+  ///
+  /// In pt, this message translates to:
+  /// **'Moeda'**
+  String get adminTenantDetailCurrency;
+
+  /// No description provided for @adminTenantDetailLanguage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Idioma'**
+  String get adminTenantDetailLanguage;
+
+  /// No description provided for @adminTenantDetailRejectionReason.
+  ///
+  /// In pt, this message translates to:
+  /// **'Motivo da rejeição'**
+  String get adminTenantDetailRejectionReason;
+
+  /// No description provided for @adminTenantDetailApprovedAt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovado em'**
+  String get adminTenantDetailApprovedAt;
+
+  /// No description provided for @adminTenantDetailStoresCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 loja} other{{count} lojas}}'**
+  String adminTenantDetailStoresCount(int count);
+
+  /// No description provided for @adminTenantDetailEmployeesCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 funcionário} other{{count} funcionários}}'**
+  String adminTenantDetailEmployeesCount(int count);
+
+  /// No description provided for @adminTenantSearchHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar tenants...'**
+  String get adminTenantSearchHint;
+
+  /// No description provided for @adminTenantDetailLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar os detalhes do tenant.'**
+  String get adminTenantDetailLoadError;
+
+  /// No description provided for @adminTenantDetailNoStores.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma loja criada'**
+  String get adminTenantDetailNoStores;
+
+  /// No description provided for @adminTenantDetailNoEmployees.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum funcionário vinculado'**
+  String get adminTenantDetailNoEmployees;
+
+  /// No description provided for @adminTenantDetailActivity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atividade recente'**
+  String get adminTenantDetailActivity;
+
+  /// No description provided for @adminTenantDetailNoActivity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma atividade recente para este tenant'**
+  String get adminTenantDetailNoActivity;
+
+  /// No description provided for @adminTenantDetailActivityCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 ação recente} other{{count} ações recentes}}'**
+  String adminTenantDetailActivityCount(int count);
+
+  /// No description provided for @adminTenantDetailStoreAddress.
+  ///
+  /// In pt, this message translates to:
+  /// **'{city}'**
+  String adminTenantDetailStoreAddress(Object city);
+
+  /// No description provided for @adminTenantDetailEmployeeRole.
+  ///
+  /// In pt, this message translates to:
+  /// **'{role, select, manager{Gestor} other{Funcionário}}'**
+  String adminTenantDetailEmployeeRole(String role);
+
+  /// No description provided for @adminAuditLogAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ação'**
+  String get adminAuditLogAction;
+
+  /// No description provided for @adminAuditLogEntity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entidade'**
+  String get adminAuditLogEntity;
+
+  /// No description provided for @adminAuditLogDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data'**
+  String get adminAuditLogDate;
+
+  /// No description provided for @adminAuditLogActor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Responsável'**
+  String get adminAuditLogActor;
+
+  /// No description provided for @adminBulkSelectAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecionar todos'**
+  String get adminBulkSelectAll;
+
+  /// No description provided for @adminBulkDeselectAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desmarcar todos'**
+  String get adminBulkDeselectAll;
+
+  /// No description provided for @adminBulkApprove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovar ({count})'**
+  String adminBulkApprove(Object count);
+
+  /// No description provided for @adminBulkReject.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitar ({count})'**
+  String adminBulkReject(Object count);
+
+  /// No description provided for @adminBulkApproveConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovar {count} {count, plural, =1{tenant pendente} other{tenants pendentes}}?'**
+  String adminBulkApproveConfirm(int count);
+
+  /// No description provided for @adminBulkRejectTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitar {count} {count, plural, =1{tenant} other{tenants}}'**
+  String adminBulkRejectTitle(int count);
+
+  /// No description provided for @adminBulkApproveSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} {count, plural, =1{tenant aprovado} other{tenants aprovados}}'**
+  String adminBulkApproveSuccess(int count);
+
+  /// No description provided for @adminBulkRejectSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} {count, plural, =1{tenant rejeitado} other{tenants rejeitados}}'**
+  String adminBulkRejectSuccess(int count);
+
+  /// No description provided for @adminBulkApproveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao aprovar tenants. Alguns podem não ter sido processados.'**
+  String get adminBulkApproveError;
+
+  /// No description provided for @adminBulkRejectError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao rejeitar tenants. Alguns podem não ter sido processados.'**
+  String get adminBulkRejectError;
 }
 
 class _AppLocalizationsDelegate

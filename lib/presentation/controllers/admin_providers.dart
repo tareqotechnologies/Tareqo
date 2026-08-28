@@ -5,7 +5,9 @@ import '../../domain/entities/plan.dart';
 import '../../domain/repositories/i_admin_repository.dart';
 import '../../domain/entities/plan_request.dart';
 import '../../domain/entities/tenant.dart';
+import '../../domain/entities/audit_entry.dart';
 import '../../domain/usecases/decide_plan_request_use_case.dart';
+import '../../domain/usecases/get_audit_log_use_case.dart';
 import '../../domain/usecases/get_all_tenants_use_case.dart';
 import '../../domain/usecases/get_pending_plan_requests_use_case.dart';
 import '../../domain/usecases/get_all_plans_use_case.dart';
@@ -45,10 +47,12 @@ final getAllPlansUseCaseProvider = Provider<GetAllPlansUseCase>(
 final getPendingPlanRequestsUseCaseProvider =
  Provider<GetPendingPlanRequestsUseCase>(
  (ref) => ServiceLocator.instance<GetPendingPlanRequestsUseCase>(),
+);final decidePlanRequestUseCaseProvider = Provider<DecidePlanRequestUseCase>(
+  (ref) => ServiceLocator.instance<DecidePlanRequestUseCase>(),
 );
 
-final decidePlanRequestUseCaseProvider = Provider<DecidePlanRequestUseCase>(
- (ref) => ServiceLocator.instance<DecidePlanRequestUseCase>(),
+final getAuditLogUseCaseProvider = Provider<GetAuditLogUseCase>(
+  (ref) => ServiceLocator.instance<GetAuditLogUseCase>(),
 );
 
 /// Estado: solicitações de tenant aguardando aprovação.
@@ -105,15 +109,30 @@ class AllPlansNotifier extends AsyncNotifier<List<Plan>> {
 final pendingPlanRequestsProvider =
  AsyncNotifierProvider<PendingPlanRequestsNotifier, List<PlanRequest>>(
  PendingPlanRequestsNotifier.new,
+);class PendingPlanRequestsNotifier extends AsyncNotifier<List<PlanRequest>> {
+  @override
+  Future<List<PlanRequest>> build() =>
+      ref.watch(getPendingPlanRequestsUseCaseProvider).call();
+
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
+}
+
+/// Estado: registo de auditoria (ações admin).
+final auditLogProvider =
+    AsyncNotifierProvider<AuditLogNotifier, List<AuditEntry>>(
+  AuditLogNotifier.new,
 );
 
-class PendingPlanRequestsNotifier extends AsyncNotifier<List<PlanRequest>> {
- @override
- Future<List<PlanRequest>> build() =>
- ref.watch(getPendingPlanRequestsUseCaseProvider).call();
+class AuditLogNotifier extends AsyncNotifier<List<AuditEntry>> {
+  @override
+  Future<List<AuditEntry>> build() =>
+      ref.watch(getAuditLogUseCaseProvider).call();
 
- Future<void> refresh() async {
- ref.invalidateSelf();
- await future;
- }
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
 }
