@@ -15,7 +15,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Tenant {
 
- String get id; String get ownerUserId; String get businessName; String get planId; TenantStatus get status; String? get rejectionReason; DateTime? get approvedAt; DateTime get createdAt;/// Moeda padrão dos valores (BRL, USD, EUR, MZN) — escolhida pelo dono
+ String get id; String get ownerUserId; String get businessName; String get planId; TenantStatus get status; String? get rejectionReason; DateTime? get approvedAt; DateTime get createdAt;/// Data de expiração do plano actual (renovação mensal a partir de
+/// [approvedAt]). Quando atinge esta data, o plano do tenant expira
+/// e o acesso pode ser desactivado.
+ DateTime? get planExpiresAt;/// Data em que a próxima factura de renovação deve ser gerada.
+/// Normalmente 7 dias antes de [planExpiresAt]. O cronJob ou
+/// verificação no app compara com a data actual para gerar a factura.
+ DateTime? get nextInvoiceAt;/// Moeda padrão dos valores (BRL, USD, EUR, MZN) — escolhida pelo dono
 /// no onboarding e alterável em Lojas → Ajustes. Novos tenants nascem
 /// com MZN (mercado-alvo Moçambique).
  String get currencyCode;/// Idioma do aplicativo (`pt` ou `en`) — escolhido pelo dono.
@@ -32,16 +38,16 @@ $TenantCopyWith<Tenant> get copyWith => _$TenantCopyWithImpl<Tenant>(this as Ten
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.planExpiresAt, planExpiresAt) || other.planExpiresAt == planExpiresAt)&&(identical(other.nextInvoiceAt, nextInvoiceAt) || other.nextInvoiceAt == nextInvoiceAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,ownerUserId,businessName,planId,status,rejectionReason,approvedAt,createdAt,currencyCode,language);
+int get hashCode => Object.hash(runtimeType,id,ownerUserId,businessName,planId,status,rejectionReason,approvedAt,createdAt,planExpiresAt,nextInvoiceAt,currencyCode,language);
 
 @override
 String toString() {
-  return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, currencyCode: $currencyCode, language: $language)';
+  return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, planExpiresAt: $planExpiresAt, nextInvoiceAt: $nextInvoiceAt, currencyCode: $currencyCode, language: $language)';
 }
 
 
@@ -52,7 +58,7 @@ abstract mixin class $TenantCopyWith<$Res>  {
   factory $TenantCopyWith(Tenant value, $Res Function(Tenant) _then) = _$TenantCopyWithImpl;
 @useResult
 $Res call({
- String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, String currencyCode, String language
+ String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, DateTime? planExpiresAt, DateTime? nextInvoiceAt, String currencyCode, String language
 });
 
 
@@ -69,7 +75,7 @@ class _$TenantCopyWithImpl<$Res>
 
 /// Create a copy of Tenant
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? ownerUserId = null,Object? businessName = null,Object? planId = null,Object? status = null,Object? rejectionReason = freezed,Object? approvedAt = freezed,Object? createdAt = null,Object? currencyCode = null,Object? language = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? ownerUserId = null,Object? businessName = null,Object? planId = null,Object? status = null,Object? rejectionReason = freezed,Object? approvedAt = freezed,Object? createdAt = null,Object? planExpiresAt = freezed,Object? nextInvoiceAt = freezed,Object? currencyCode = null,Object? language = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,ownerUserId: null == ownerUserId ? _self.ownerUserId : ownerUserId // ignore: cast_nullable_to_non_nullable
@@ -79,7 +85,9 @@ as String,status: null == status ? _self.status : status // ignore: cast_nullabl
 as TenantStatus,rejectionReason: freezed == rejectionReason ? _self.rejectionReason : rejectionReason // ignore: cast_nullable_to_non_nullable
 as String?,approvedAt: freezed == approvedAt ? _self.approvedAt : approvedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
+as DateTime,planExpiresAt: freezed == planExpiresAt ? _self.planExpiresAt : planExpiresAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,nextInvoiceAt: freezed == nextInvoiceAt ? _self.nextInvoiceAt : nextInvoiceAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String,
   ));
@@ -166,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  String currencyCode,  String language)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  DateTime? planExpiresAt,  DateTime? nextInvoiceAt,  String currencyCode,  String language)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Tenant() when $default != null:
-return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.currencyCode,_that.language);case _:
+return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.planExpiresAt,_that.nextInvoiceAt,_that.currencyCode,_that.language);case _:
   return orElse();
 
 }
@@ -187,10 +195,10 @@ return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  String currencyCode,  String language)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  DateTime? planExpiresAt,  DateTime? nextInvoiceAt,  String currencyCode,  String language)  $default,) {final _that = this;
 switch (_that) {
 case _Tenant():
-return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.currencyCode,_that.language);case _:
+return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.planExpiresAt,_that.nextInvoiceAt,_that.currencyCode,_that.language);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +215,10 @@ return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  String currencyCode,  String language)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  DateTime? planExpiresAt,  DateTime? nextInvoiceAt,  String currencyCode,  String language)?  $default,) {final _that = this;
 switch (_that) {
 case _Tenant() when $default != null:
-return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.currencyCode,_that.language);case _:
+return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.planExpiresAt,_that.nextInvoiceAt,_that.currencyCode,_that.language);case _:
   return null;
 
 }
@@ -222,7 +230,7 @@ return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that
 @JsonSerializable()
 
 class _Tenant implements Tenant {
-  const _Tenant({required this.id, required this.ownerUserId, required this.businessName, required this.planId, required this.status, this.rejectionReason, this.approvedAt, required this.createdAt, this.currencyCode = 'MZN', this.language = 'pt'});
+  const _Tenant({required this.id, required this.ownerUserId, required this.businessName, required this.planId, required this.status, this.rejectionReason, this.approvedAt, required this.createdAt, this.planExpiresAt, this.nextInvoiceAt, this.currencyCode = 'MZN', this.language = 'pt'});
   factory _Tenant.fromJson(Map<String, dynamic> json) => _$TenantFromJson(json);
 
 @override final  String id;
@@ -233,6 +241,14 @@ class _Tenant implements Tenant {
 @override final  String? rejectionReason;
 @override final  DateTime? approvedAt;
 @override final  DateTime createdAt;
+/// Data de expiração do plano actual (renovação mensal a partir de
+/// [approvedAt]). Quando atinge esta data, o plano do tenant expira
+/// e o acesso pode ser desactivado.
+@override final  DateTime? planExpiresAt;
+/// Data em que a próxima factura de renovação deve ser gerada.
+/// Normalmente 7 dias antes de [planExpiresAt]. O cronJob ou
+/// verificação no app compara com a data actual para gerar a factura.
+@override final  DateTime? nextInvoiceAt;
 /// Moeda padrão dos valores (BRL, USD, EUR, MZN) — escolhida pelo dono
 /// no onboarding e alterável em Lojas → Ajustes. Novos tenants nascem
 /// com MZN (mercado-alvo Moçambique).
@@ -253,16 +269,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.planExpiresAt, planExpiresAt) || other.planExpiresAt == planExpiresAt)&&(identical(other.nextInvoiceAt, nextInvoiceAt) || other.nextInvoiceAt == nextInvoiceAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,ownerUserId,businessName,planId,status,rejectionReason,approvedAt,createdAt,currencyCode,language);
+int get hashCode => Object.hash(runtimeType,id,ownerUserId,businessName,planId,status,rejectionReason,approvedAt,createdAt,planExpiresAt,nextInvoiceAt,currencyCode,language);
 
 @override
 String toString() {
-  return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, currencyCode: $currencyCode, language: $language)';
+  return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, planExpiresAt: $planExpiresAt, nextInvoiceAt: $nextInvoiceAt, currencyCode: $currencyCode, language: $language)';
 }
 
 
@@ -273,7 +289,7 @@ abstract mixin class _$TenantCopyWith<$Res> implements $TenantCopyWith<$Res> {
   factory _$TenantCopyWith(_Tenant value, $Res Function(_Tenant) _then) = __$TenantCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, String currencyCode, String language
+ String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, DateTime? planExpiresAt, DateTime? nextInvoiceAt, String currencyCode, String language
 });
 
 
@@ -290,7 +306,7 @@ class __$TenantCopyWithImpl<$Res>
 
 /// Create a copy of Tenant
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? ownerUserId = null,Object? businessName = null,Object? planId = null,Object? status = null,Object? rejectionReason = freezed,Object? approvedAt = freezed,Object? createdAt = null,Object? currencyCode = null,Object? language = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? ownerUserId = null,Object? businessName = null,Object? planId = null,Object? status = null,Object? rejectionReason = freezed,Object? approvedAt = freezed,Object? createdAt = null,Object? planExpiresAt = freezed,Object? nextInvoiceAt = freezed,Object? currencyCode = null,Object? language = null,}) {
   return _then(_Tenant(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,ownerUserId: null == ownerUserId ? _self.ownerUserId : ownerUserId // ignore: cast_nullable_to_non_nullable
@@ -300,7 +316,9 @@ as String,status: null == status ? _self.status : status // ignore: cast_nullabl
 as TenantStatus,rejectionReason: freezed == rejectionReason ? _self.rejectionReason : rejectionReason // ignore: cast_nullable_to_non_nullable
 as String?,approvedAt: freezed == approvedAt ? _self.approvedAt : approvedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
+as DateTime,planExpiresAt: freezed == planExpiresAt ? _self.planExpiresAt : planExpiresAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,nextInvoiceAt: freezed == nextInvoiceAt ? _self.nextInvoiceAt : nextInvoiceAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String,
   ));

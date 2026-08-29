@@ -37,8 +37,13 @@ abstract interface class TenantLocalDataSource {
  Future<void> updatePlan(String id, String planId);
 
  /// Tenants pendentes (super admin).
- Future<List<Tenant>> getPending();
+ Future<List<Tenant>> getPending();  /// Todos os tenants (super admin).
+  Future<List<Tenant>> getAll();
 
- /// Todos os tenants (super admin).
- Future<List<Tenant>> getAll();
+  /// Actualiza os campos de facturacao do tenant.
+  Future<void> updateBilling(
+    String id, {
+    required DateTime planExpiresAt,
+    required DateTime nextInvoiceAt,
+  });
 }

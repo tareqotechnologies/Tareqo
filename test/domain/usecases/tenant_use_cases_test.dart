@@ -88,10 +88,21 @@ class _FakeTenantRepository implements ITenantRepository {
  @override
  Future<List<Tenant>> getPending() async => List.unmodifiable(
  _tenants.where((tenant) => tenant.status == TenantStatus.pending),
- );
+ );  @override
+  Future<List<Tenant>> getAll() async => List.unmodifiable(_tenants);
 
- @override
- Future<List<Tenant>> getAll() async => List.unmodifiable(_tenants);
+  @override
+  Future<void> updateBilling(
+    String id, {
+    required DateTime planExpiresAt,
+    required DateTime nextInvoiceAt,
+  }) async {
+    final index = _tenants.indexWhere((tenant) => tenant.id == id);
+    _tenants[index] = _tenants[index].copyWith(
+      planExpiresAt: planExpiresAt,
+      nextInvoiceAt: nextInvoiceAt,
+    );
+  }
 }
 
 void main() {

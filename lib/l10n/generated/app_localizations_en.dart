@@ -2754,4 +2754,124 @@ class AppLocalizationsEn extends AppLocalizations {
   String adminGrowthAvgPerWeek(String count) {
     return '$count/week avg';
   }
+
+  @override
+  String get adminNavInvoices => 'Invoices';
+
+  @override
+  String get adminInvoicesTitle => 'Billing Invoices';
+
+  @override
+  String get adminInvoicesEmpty => 'No invoices generated yet.';
+
+  @override
+  String get adminInvoicesEmptyPending => 'No pending invoices.';
+
+  @override
+  String get adminInvoicesLoadError => 'Could not load the invoices.';
+
+  @override
+  String get adminInvoiceSearchHint => 'Search invoices...';
+
+  @override
+  String get adminInvoiceAmount => 'Amount:';
+
+  @override
+  String get adminInvoiceDue => 'Due:';
+
+  @override
+  String get adminInvoicePaidAt => 'Paid on:';
+
+  @override
+  String get adminInvoiceMarkPaid => 'Mark as paid';
+
+  @override
+  String get adminInvoiceMarkedPaid => 'Invoice marked as paid!';
+
+  @override
+  String get adminInvoiceMarkPaidError => 'Could not mark as paid. Try again.';
+
+  @override
+  String get adminInvoiceCancel => 'Cancel';
+
+  @override
+  String get adminInvoiceCancelled => 'Invoice cancelled.';
+
+  @override
+  String get adminInvoiceCancelError =>
+      'Could not cancel the invoice. Try again.';
+
+  @override
+  String get adminInvoiceCancelTitle => 'Cancel invoice?';
+
+  @override
+  String adminInvoiceCancelConfirm(String period) {
+    return 'Cancel the invoice for $period?';
+  }
+
+  @override
+  String get adminInvoiceCancelConfirmButton => 'Yes, cancel';
+
+  @override
+  String get invoiceStatusPending => 'Pending';
+
+  @override
+  String get invoiceStatusPaid => 'Paid';
+
+  @override
+  String get invoiceStatusExpired => 'Expired';
+
+  @override
+  String get invoiceStatusCancelled => 'Cancelled';
+
+  @override
+  String get notificationInvoiceGenerated => 'New invoice generated';
+
+  @override
+  String get notificationInvoiceDueSoon => 'Invoice due soon';
+
+  @override
+  String get notificationInvoiceExpired => 'Invoice expired';
+
+  @override
+  String get notificationInvoicePaid => 'Invoice paid';
+
+  @override
+  String get notificationMarkAllRead => 'Mark all as read';
+
+  @override
+  String get notificationNoNotifications => 'No notifications';
+
+  @override
+  String get notificationNoNotificationsHint =>
+      'You\'ll see invoice notifications here.';
+
+  @override
+  String get notificationTabAll => 'All';
+
+  @override
+  String get notificationTabUnread => 'Unread';
+
+  @override
+  String get notificationTitle => 'Notifications';
+
+  @override
+  String get menuNotifications => 'Notifications';
+
+  @override
+  String get notificationMarkAsRead => 'Mark as read';
+
+  @override
+  String notificationSinceDaysAgo(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String get notificationToday => 'Today';
+
+  @override
+  String get notificationYesterday => 'Yesterday';
+
+  @override
+  String get notificationJustNow => 'Just now';
 }

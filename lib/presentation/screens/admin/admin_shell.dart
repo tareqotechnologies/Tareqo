@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../controllers/admin_providers.dart';
+import '../../controllers/invoice_providers.dart';
 import '../../widgets/fade_indexed_stack.dart';
 import '../../widgets/sign_out_button.dart';
 import 'admin_audit_log_screen.dart';
 import 'admin_dashboard_screen.dart';
+import 'admin_invoices_screen.dart';
 import 'admin_plan_requests_screen.dart';
 import 'admin_plans_screen.dart';
 import 'admin_tenants_screen.dart';
@@ -32,6 +34,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     const AdminTenantsScreen(),
     const AdminPlansScreen(),
     const AdminPlanRequestsScreen(),
+    const AdminInvoicesScreen(),
     const AdminAuditLogScreen(),
   ];
 
@@ -47,6 +50,10 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     final pendingUpgrades =
         ref.watch(pendingPlanRequestsProvider).value?.length ?? 0;
 
+    // Contadores de badge para facturas pendentes.
+    final pendingInvoices =
+        ref.watch(pendingInvoicesProvider).value?.length ?? 0;
+
     final destinations = [
       (
         Icons.dashboard_outlined,
@@ -61,6 +68,11 @@ class _AdminShellState extends ConsumerState<AdminShell> {
       (Icons.workspaces_outline, Icons.workspaces, l10n.adminNavPlans),
       (Icons.upgrade_outlined, Icons.upgrade, l10n.adminNavUpgrades),
       (
+        Icons.receipt_long_outlined,
+        Icons.receipt,
+        l10n.adminNavInvoices,
+      ),
+      (
         Icons.history_outlined,
         Icons.history,
         l10n.adminNavAuditLog,
@@ -68,8 +80,8 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     ];
 
     // Badges: tenant pendente no tab "Solicitações", upgrade pendente no
-    // tab "Upgrades".
-    final badges = [0, pendingTenants, 0, pendingUpgrades, 0];
+    // tab "Upgrades", factura pendente no tab "Facturas".
+    final badges = [0, pendingTenants, 0, pendingUpgrades, pendingInvoices, 0];
 
     final body = FadeIndexedStack(index: _index, children: _sections);
 

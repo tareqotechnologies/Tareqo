@@ -121,8 +121,7 @@ class _TenantOnboardingScreenState
  child: Column(
  mainAxisSize: MainAxisSize.min,
  crossAxisAlignment: CrossAxisAlignment.stretch,
- children: [                // Logo oficial da marca (sacola azul 3D + "D" branco) —
-                // squircle com glow suave, como no login.
+ children: [
                 Container(
                   width: 68,
                   height: 68,

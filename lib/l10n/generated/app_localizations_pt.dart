@@ -2796,4 +2796,125 @@ class AppLocalizationsPt extends AppLocalizations {
   String adminGrowthAvgPerWeek(String count) {
     return '$count/semana média';
   }
+
+  @override
+  String get adminNavInvoices => 'Facturas';
+
+  @override
+  String get adminInvoicesTitle => 'Facturas de Cobrança';
+
+  @override
+  String get adminInvoicesEmpty => 'Nenhuma factura gerada ainda.';
+
+  @override
+  String get adminInvoicesEmptyPending => 'Nenhuma factura pendente.';
+
+  @override
+  String get adminInvoicesLoadError => 'Não foi possível carregar as facturas.';
+
+  @override
+  String get adminInvoiceSearchHint => 'Pesquisar facturas...';
+
+  @override
+  String get adminInvoiceAmount => 'Valor:';
+
+  @override
+  String get adminInvoiceDue => 'Vencimento:';
+
+  @override
+  String get adminInvoicePaidAt => 'Pago em:';
+
+  @override
+  String get adminInvoiceMarkPaid => 'Marcar como paga';
+
+  @override
+  String get adminInvoiceMarkedPaid => 'Factura marcada como paga!';
+
+  @override
+  String get adminInvoiceMarkPaidError =>
+      'Não foi possível marcar como paga. Tente novamente.';
+
+  @override
+  String get adminInvoiceCancel => 'Cancelar';
+
+  @override
+  String get adminInvoiceCancelled => 'Factura cancelada.';
+
+  @override
+  String get adminInvoiceCancelError =>
+      'Não foi possível cancelar a factura. Tente novamente.';
+
+  @override
+  String get adminInvoiceCancelTitle => 'Cancelar factura?';
+
+  @override
+  String adminInvoiceCancelConfirm(String period) {
+    return 'Cancelar a factura de $period?';
+  }
+
+  @override
+  String get adminInvoiceCancelConfirmButton => 'Sim, cancelar';
+
+  @override
+  String get invoiceStatusPending => 'Pendente';
+
+  @override
+  String get invoiceStatusPaid => 'Paga';
+
+  @override
+  String get invoiceStatusExpired => 'Expirada';
+
+  @override
+  String get invoiceStatusCancelled => 'Cancelada';
+
+  @override
+  String get notificationInvoiceGenerated => 'Nova factura gerada';
+
+  @override
+  String get notificationInvoiceDueSoon => 'Factura para vencer';
+
+  @override
+  String get notificationInvoiceExpired => 'Factura expirada';
+
+  @override
+  String get notificationInvoicePaid => 'Factura paga';
+
+  @override
+  String get notificationMarkAllRead => 'Marcar todas como lidas';
+
+  @override
+  String get notificationNoNotifications => 'Sem notificações';
+
+  @override
+  String get notificationNoNotificationsHint =>
+      'As notificações de facturas aparecerão aqui.';
+
+  @override
+  String get notificationTabAll => 'Todas';
+
+  @override
+  String get notificationTabUnread => 'Não lidas';
+
+  @override
+  String get notificationTitle => 'Notificações';
+
+  @override
+  String get menuNotifications => 'Notificações';
+
+  @override
+  String get notificationMarkAsRead => 'Marcar como lida';
+
+  @override
+  String notificationSinceDaysAgo(int count) {
+    return '$count dias atrás';
+  }
+
+  @override
+  String get notificationToday => 'Hoje';
+
+  @override
+  String get notificationYesterday => 'Ontem';
+
+  @override
+  String get notificationJustNow => 'Agora mesmo';
 }

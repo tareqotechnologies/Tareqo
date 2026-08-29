@@ -10,6 +10,7 @@ import '../../../domain/entities/store.dart';
 import '../../../domain/entities/plan.dart';
 import '../../../domain/entities/store_employee.dart';
 import '../../../domain/entities/tenant.dart';
+import '../../../domain/usecases/approve_tenant_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
@@ -939,6 +940,25 @@ class _TenantDetailSheet extends ConsumerWidget {
                 ),
               ],
 
+              // ── Ciclo de Facturação ──
+              if (tenant.status == TenantStatus.approved &&
+                  tenant.planExpiresAt != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'FACTURAÇÃO',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                _BillingInfoCard(
+                  tenant: tenant,
+                  plan: plan,
+                  dateFormat: dateFormat,
+                ),
+              ],
+
               // ── Uso vs Limites ──
               if (plan != null) ...[
                 const SizedBox(height: AppSpacing.lg),
@@ -1536,6 +1556,118 @@ class _ActivityTile extends StatelessWidget {
       default:
         return Icons.info_outline;
     }
+  }
+}
+
+/// Card de informação de facturacao no detalhe do tenant.
+/// Mostra trial restante, data de expiração e próxima factura.
+class _BillingInfoCard extends StatelessWidget {
+  const _BillingInfoCard({
+    required this.tenant,
+    required this.plan,
+    required this.dateFormat,
+  });
+
+  final Tenant tenant;
+  final Plan? plan;
+  final DateFormat dateFormat;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final now = DateTime.now();
+
+    final expiresAt = tenant.planExpiresAt!;
+    final nextInvoice = tenant.nextInvoiceAt;
+
+    // Determina se está no trial (14 dias iniciais).
+    final isTrial = nextInvoice != null &&
+        expiresAt.difference(tenant.approvedAt ?? tenant.createdAt).inDays <=
+            kTrialDays + 1;
+
+    final daysLeft = expiresAt.difference(now).inDays;
+    final isExpiringSoon = daysLeft <= 7 && daysLeft >= 0;
+    final isExpired = daysLeft < 0;
+
+    final statusColor = isExpired
+        ? scheme.error
+        : isExpiringSoon
+            ? scheme.tertiary
+            : isTrial
+                ? scheme.primary
+                : scheme.primary;
+
+    final statusText = isExpired
+        ? 'Expirado'
+        : isExpiringSoon
+            ? 'Expira em $daysLeft dia(s)'
+            : isTrial
+                ? 'Trial: $daysLeft dia(s) restantes'
+                : 'Activo: $daysLeft dia(s) restantes';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.08),
+        borderRadius: AppRadius.smAll,
+        border: Border.all(
+          color: statusColor.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Status do ciclo
+          Row(
+            children: [
+              Icon(
+                isTrial ? Icons.science_outlined : Icons.autorenew,
+                size: 16,
+                color: statusColor,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                statusText,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: statusColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+
+          // Info rows
+          _InfoRow(
+            icon: Icons.calendar_today_outlined,
+            label: 'Aprovado em',
+            value: dateFormat.format(tenant.approvedAt ?? tenant.createdAt),
+          ),
+          _InfoRow(
+            icon: Icons.event_outlined,
+            label: isTrial ? 'Trial termina em' : 'Plano expira em',
+            value: dateFormat.format(expiresAt),
+          ),
+          if (nextInvoice != null)
+            _InfoRow(
+              icon: Icons.receipt_long_outlined,
+              label: 'Próxima factura',
+              value: dateFormat.format(nextInvoice),
+            ),
+          if (plan != null && plan!.priceMonthlyCents > 0) ...[
+            const SizedBox(height: AppSpacing.xs),
+            _InfoRow(
+              icon: Icons.attach_money,
+              label: 'Valor mensal',
+              value:
+                  '${(plan!.priceMonthlyCents / 100).toStringAsFixed(2)} MZN',
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 

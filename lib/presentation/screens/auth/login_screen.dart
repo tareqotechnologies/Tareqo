@@ -321,8 +321,7 @@ class _LoginHero extends StatelessWidget {
  final theme = Theme.of(context);
 
  return Column(
- children: [    // Logo oficial da marca (sacola azul 3D + "D" branco) —
-    // o squircle com glow sutil (estilo iOS) emoldura a imagem.
+ children: [
     Container(
       width: 72,
       height: 72,
@@ -346,8 +345,8 @@ class _LoginHero extends StatelessWidget {
         ),
       ),
     ),
- const SizedBox(height: AppSpacing.lg),
- FittedBox(
+    const SizedBox(height: AppSpacing.lg),
+    FittedBox(
  fit: BoxFit.scaleDown,
  child: Text(
  'Dumbhanengue',

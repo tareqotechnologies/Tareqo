@@ -2800,4 +2800,125 @@ class AppLocalizationsFr extends AppLocalizations {
   String adminGrowthAvgPerWeek(String count) {
     return '$count/semaine moy.';
   }
+
+  @override
+  String get adminNavInvoices => 'Factures';
+
+  @override
+  String get adminInvoicesTitle => 'Factures de facturation';
+
+  @override
+  String get adminInvoicesEmpty => 'Aucune facture générée.';
+
+  @override
+  String get adminInvoicesEmptyPending => 'Aucune facture en attente.';
+
+  @override
+  String get adminInvoicesLoadError => 'Impossible de charger les factures.';
+
+  @override
+  String get adminInvoiceSearchHint => 'Rechercher des factures...';
+
+  @override
+  String get adminInvoiceAmount => 'Montant :';
+
+  @override
+  String get adminInvoiceDue => 'Échéance :';
+
+  @override
+  String get adminInvoicePaidAt => 'Payée le :';
+
+  @override
+  String get adminInvoiceMarkPaid => 'Marquer comme payée';
+
+  @override
+  String get adminInvoiceMarkedPaid => 'Facture marquée comme payée !';
+
+  @override
+  String get adminInvoiceMarkPaidError =>
+      'Impossible de marquer comme payée. Réessayez.';
+
+  @override
+  String get adminInvoiceCancel => 'Annuler';
+
+  @override
+  String get adminInvoiceCancelled => 'Facture annulée.';
+
+  @override
+  String get adminInvoiceCancelError =>
+      'Impossible d\'annuler la facture. Réessayez.';
+
+  @override
+  String get adminInvoiceCancelTitle => 'Annuler la facture ?';
+
+  @override
+  String adminInvoiceCancelConfirm(String period) {
+    return 'Annuler la facture de $period ?';
+  }
+
+  @override
+  String get adminInvoiceCancelConfirmButton => 'Oui, annuler';
+
+  @override
+  String get invoiceStatusPending => 'En attente';
+
+  @override
+  String get invoiceStatusPaid => 'Payée';
+
+  @override
+  String get invoiceStatusExpired => 'Expirée';
+
+  @override
+  String get invoiceStatusCancelled => 'Annulée';
+
+  @override
+  String get notificationInvoiceGenerated => 'Nouvelle facture générée';
+
+  @override
+  String get notificationInvoiceDueSoon => 'Facture bientôt due';
+
+  @override
+  String get notificationInvoiceExpired => 'Facture expirée';
+
+  @override
+  String get notificationInvoicePaid => 'Facture payée';
+
+  @override
+  String get notificationMarkAllRead => 'Tout marquer comme lu';
+
+  @override
+  String get notificationNoNotifications => 'Aucune notification';
+
+  @override
+  String get notificationNoNotificationsHint =>
+      'Les notifications de factures apparaîtront ici.';
+
+  @override
+  String get notificationTabAll => 'Toutes';
+
+  @override
+  String get notificationTabUnread => 'Non lues';
+
+  @override
+  String get notificationTitle => 'Notifications';
+
+  @override
+  String get menuNotifications => 'Notifications';
+
+  @override
+  String get notificationMarkAsRead => 'Marquer comme lu';
+
+  @override
+  String notificationSinceDaysAgo(int count) {
+    return 'Il y a $count jours';
+  }
+
+  @override
+  String get notificationToday => 'Aujourd\'hui';
+
+  @override
+  String get notificationYesterday => 'Hier';
+
+  @override
+  String get notificationJustNow => 'À l\'instant';
 }

@@ -1441,5 +1441,55 @@
         "type": "String"
       }
     }
-  }
+  },
+  "adminNavInvoices": "Invoices",
+  "adminInvoicesTitle": "Billing Invoices",
+  "adminInvoicesEmpty": "No invoices generated yet.",
+  "adminInvoicesEmptyPending": "No pending invoices.",
+  "adminInvoicesLoadError": "Could not load the invoices.",
+  "adminInvoiceSearchHint": "Search invoices...",
+  "adminInvoiceAmount": "Amount:",
+  "adminInvoiceDue": "Due:",
+  "adminInvoicePaidAt": "Paid on:",
+  "adminInvoiceMarkPaid": "Mark as paid",
+  "adminInvoiceMarkedPaid": "Invoice marked as paid!",
+  "adminInvoiceMarkPaidError": "Could not mark as paid. Try again.",
+  "adminInvoiceCancel": "Cancel",
+  "adminInvoiceCancelled": "Invoice cancelled.",
+  "adminInvoiceCancelError": "Could not cancel the invoice. Try again.",
+  "adminInvoiceCancelTitle": "Cancel invoice?",
+  "adminInvoiceCancelConfirm": "Cancel the invoice for {period}?",
+  "@adminInvoiceCancelConfirm": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "adminInvoiceCancelConfirmButton": "Yes, cancel",
+  "invoiceStatusPending": "Pending",
+  "invoiceStatusPaid": "Paid",
+  "invoiceStatusExpired": "Expired",
+  "invoiceStatusCancelled": "Cancelled",
+  "notificationInvoiceGenerated": "New invoice generated",
+  "notificationInvoiceDueSoon": "Invoice due soon",
+  "notificationInvoiceExpired": "Invoice expired",
+  "notificationInvoicePaid": "Invoice paid",
+  "notificationMarkAllRead": "Mark all as read",
+  "notificationNoNotifications": "No notifications",
+  "notificationNoNotificationsHint": "You'll see invoice notifications here.",
+  "notificationTabAll": "All",
+  "notificationTabUnread": "Unread",
+  "notificationTitle": "Notifications",
+  "menuNotifications": "Notifications",
+  "notificationMarkAsRead": "Mark as read",
+  "notificationSinceDaysAgo": "{count} days ago",
+  "@notificationSinceDaysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "notificationToday": "Today",
+  "notificationYesterday": "Yesterday",
+  "notificationJustNow": "Just now"
 }

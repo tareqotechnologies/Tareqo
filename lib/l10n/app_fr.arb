@@ -1441,5 +1441,55 @@
         "type": "String"
       }
     }
-  }
+  },
+  "adminNavInvoices": "Factures",
+  "adminInvoicesTitle": "Factures de facturation",
+  "adminInvoicesEmpty": "Aucune facture générée.",
+  "adminInvoicesEmptyPending": "Aucune facture en attente.",
+  "adminInvoicesLoadError": "Impossible de charger les factures.",
+  "adminInvoiceSearchHint": "Rechercher des factures...",
+  "adminInvoiceAmount": "Montant :",
+  "adminInvoiceDue": "Échéance :",
+  "adminInvoicePaidAt": "Payée le :",
+  "adminInvoiceMarkPaid": "Marquer comme payée",
+  "adminInvoiceMarkedPaid": "Facture marquée comme payée !",
+  "adminInvoiceMarkPaidError": "Impossible de marquer comme payée. Réessayez.",
+  "adminInvoiceCancel": "Annuler",
+  "adminInvoiceCancelled": "Facture annulée.",
+  "adminInvoiceCancelError": "Impossible d'annuler la facture. Réessayez.",
+  "adminInvoiceCancelTitle": "Annuler la facture ?",
+  "adminInvoiceCancelConfirm": "Annuler la facture de {period} ?",
+  "@adminInvoiceCancelConfirm": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "adminInvoiceCancelConfirmButton": "Oui, annuler",
+  "invoiceStatusPending": "En attente",
+  "invoiceStatusPaid": "Payée",
+  "invoiceStatusExpired": "Expirée",
+  "invoiceStatusCancelled": "Annulée",
+  "notificationInvoiceGenerated": "Nouvelle facture générée",
+  "notificationInvoiceDueSoon": "Facture bientôt due",
+  "notificationInvoiceExpired": "Facture expirée",
+  "notificationInvoicePaid": "Facture payée",
+  "notificationMarkAllRead": "Tout marquer comme lu",
+  "notificationNoNotifications": "Aucune notification",
+  "notificationNoNotificationsHint": "Les notifications de factures apparaîtront ici.",
+  "notificationTabAll": "Toutes",
+  "notificationTabUnread": "Non lues",
+  "notificationTitle": "Notifications",
+  "menuNotifications": "Notifications",
+  "notificationMarkAsRead": "Marquer comme lu",
+  "notificationSinceDaysAgo": "Il y a {count} jours",
+  "@notificationSinceDaysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "notificationToday": "Aujourd'hui",
+  "notificationYesterday": "Hier",
+  "notificationJustNow": "À l'instant"
 }

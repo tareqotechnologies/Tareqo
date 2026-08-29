@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../widgets/pulse_badge.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/fade_indexed_stack.dart';
@@ -12,10 +13,12 @@ import '../credit/add_debt_sheet.dart';
 import '../credit/debts_screen.dart';
 import '../customers/customers_screen.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../dashboard/notifications_screen.dart';
 import '../financial/add_transaction_sheet.dart';
 import '../financial/financial_screen.dart';
 import '../../controllers/customers_providers.dart';
 import '../../controllers/dashboard_providers.dart';
+import '../../controllers/notification_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../products/product_list_screen.dart';
 import '../sales/new_sale_sheet.dart';
@@ -102,23 +105,43 @@ class AppShell extends ConsumerWidget {
 
  final content = StoreScopedContent(
  child: FadeIndexedStack(index: index, children: _sections),
- );
+ );    // Contagem de notificações não lidas para o badge.
+    final unreadCount = ref.watch(unreadNotificationsCountProvider).value ?? 0;
 
- return Scaffold(
- body: wide
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 48,
+        actions: [
+          // Badge de notificações com pulso
+          PulseBadge(
+            count: unreadCount,
+            child: IconButton(
+              icon: const Icon(Icons.notifications_outlined, size: 22),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const NotificationsScreen(),
+                  ),
+                );
+              },
+              tooltip: l10n.notificationTitle,
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: wide
  ? Row(
  children: [
  NavigationRail(
  selectedIndex: _barIndex(index),
  onDestinationSelected: onSelect,
- labelType: NavigationRailLabelType.all,
- leading: const Padding(
- padding: EdgeInsets.only(
- top: AppSpacing.md,
- bottom: AppSpacing.sm,
- ),
- child: _BrandMark(compact: true),
- ),
+ labelType: NavigationRailLabelType.all,        leading: const Padding(
+          padding: EdgeInsets.only(
+            top: AppSpacing.md,
+            bottom: AppSpacing.sm,
+          ),
+        ),
  destinations: [
  for (final (icon, selected, label) in destinations)
  NavigationRailDestination(
@@ -179,28 +202,6 @@ bool _hasOwnFab(int sectionIndex) {
  AppSection.customers,
  };
  return ownFabSections.contains(AppSection.values[sectionIndex]);
-}
-
-/// Marca visual compacta do app (rail desktop).
-class _BrandMark extends StatelessWidget {
-  const _BrandMark({this.compact = false});
-
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final size = compact ? 40.0 : 48.0;
-
-    return ClipRRect(
-      borderRadius: AppRadius.mdAll,
-      child: Image.asset(
-        'assets/branding/icon_fg.png',
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-      ),
-    );
-  }
 }
 
 /// Menu global de acções (FAB central).

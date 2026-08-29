@@ -17,6 +17,12 @@ _Tenant _$TenantFromJson(Map<String, dynamic> json) => _Tenant(
       ? null
       : DateTime.parse(json['approvedAt'] as String),
   createdAt: DateTime.parse(json['createdAt'] as String),
+  planExpiresAt: json['planExpiresAt'] == null
+      ? null
+      : DateTime.parse(json['planExpiresAt'] as String),
+  nextInvoiceAt: json['nextInvoiceAt'] == null
+      ? null
+      : DateTime.parse(json['nextInvoiceAt'] as String),
   currencyCode: json['currencyCode'] as String? ?? 'MZN',
   language: json['language'] as String? ?? 'pt',
 );
@@ -30,6 +36,8 @@ Map<String, dynamic> _$TenantToJson(_Tenant instance) => <String, dynamic>{
   'rejectionReason': instance.rejectionReason,
   'approvedAt': instance.approvedAt?.toIso8601String(),
   'createdAt': instance.createdAt.toIso8601String(),
+  'planExpiresAt': instance.planExpiresAt?.toIso8601String(),
+  'nextInvoiceAt': instance.nextInvoiceAt?.toIso8601String(),
   'currencyCode': instance.currencyCode,
   'language': instance.language,
 };

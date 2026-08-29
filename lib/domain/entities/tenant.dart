@@ -21,16 +21,25 @@ enum TenantStatus {
 /// admin aprova ou rejeita manualmente; aprovado, o dono passa a gerenciar
 /// lojas e funcionários dentro do tenant, limitados pelo [Plan] contratado.
 @freezed
-abstract class Tenant with _$Tenant {
- const factory Tenant({
- required String id,
- required String ownerUserId,
- required String businessName,
- required String planId,
- required TenantStatus status,
- String? rejectionReason,
- DateTime? approvedAt,
- required DateTime createdAt,
+abstract class Tenant with _$Tenant {  const factory Tenant({
+    required String id,
+    required String ownerUserId,
+    required String businessName,
+    required String planId,
+    required TenantStatus status,
+    String? rejectionReason,
+    DateTime? approvedAt,
+    required DateTime createdAt,
+
+    /// Data de expiração do plano actual (renovação mensal a partir de
+    /// [approvedAt]). Quando atinge esta data, o plano do tenant expira
+    /// e o acesso pode ser desactivado.
+    DateTime? planExpiresAt,
+
+    /// Data em que a próxima factura de renovação deve ser gerada.
+    /// Normalmente 7 dias antes de [planExpiresAt]. O cronJob ou
+    /// verificação no app compara com a data actual para gerar a factura.
+    DateTime? nextInvoiceAt,
 
  /// Moeda padrão dos valores (BRL, USD, EUR, MZN) — escolhida pelo dono
  /// no onboarding e alterável em Lojas → Ajustes. Novos tenants nascem

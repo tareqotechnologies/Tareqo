@@ -166,31 +166,53 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
  .order('created_at', ascending: true)
  .limit(SupabaseQueryLimits.pageSize);
  return List.unmodifiable([for (final row in rows) _map(row)]);
- }
+ }  @override
+  Future<List<Tenant>> getAll() async {
+    final rows = await supabaseClient
+        .from(_table)
+        .select(_columns)
+        .order('created_at', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
+    return List.unmodifiable([for (final row in rows) _map(row)]);
+  }
 
- @override
- Future<List<Tenant>> getAll() async {
- final rows = await supabaseClient
- .from(_table)
- .select(_columns)
- .order('created_at', ascending: true)
- .limit(SupabaseQueryLimits.pageSize);
- return List.unmodifiable([for (final row in rows) _map(row)]);
- }
-
- Tenant _map(Map<String, dynamic> row) => Tenant(
- id: row['id'] as String,
- ownerUserId: row['owner_user_id'] as String,
- businessName: row['business_name'] as String,
- planId: row['plan_id'] as String,
- status: TenantStatus.values.byName(row['status'] as String),
- rejectionReason: row['rejection_reason'] as String?,
- approvedAt: row['approved_at'] == null
- ? null
- : DateTime.parse(row['approved_at'] as String).toLocal(),
- createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
- // Defaults para bancos ainda sem a migração das colunas.
- currencyCode: (row['currency_code'] as String?) ?? 'MZN',
- language: (row['language'] as String?) ?? 'pt',
- );
+  @override
+  Future<void> updateBilling(
+    String id, {
+    required DateTime planExpiresAt,
+    required DateTime nextInvoiceAt,
+  }) async {
+    final rows = await supabaseClient
+        .from(_table)
+        .update({
+          'plan_expires_at': planExpiresAt.toUtc().toIso8601String(),
+          'next_invoice_at': nextInvoiceAt.toUtc().toIso8601String(),
+        })
+        .eq('id', id)
+        .select('id');
+    if (rows.isEmpty) {
+      throw StateError('Tenant $id não encontrado para actualização de billing.');
+    }
+  }  Tenant _map(Map<String, dynamic> row) => Tenant(
+        id: row['id'] as String,
+        ownerUserId: row['owner_user_id'] as String,
+        businessName: row['business_name'] as String,
+        planId: row['plan_id'] as String,
+        status: TenantStatus.values.byName(row['status'] as String),
+        rejectionReason: row['rejection_reason'] as String?,
+        approvedAt: row['approved_at'] == null
+            ? null
+            : DateTime.parse(row['approved_at'] as String).toLocal(),
+        createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
+        // Defaults para bancos ainda sem a migração das colunas.
+        currencyCode: (row['currency_code'] as String?) ?? 'MZN',
+        language: (row['language'] as String?) ?? 'pt',
+        // Campos de facturacao (podem ser null em tenants antigos).
+        planExpiresAt: row['plan_expires_at'] == null
+            ? null
+            : DateTime.parse(row['plan_expires_at'] as String).toLocal(),
+        nextInvoiceAt: row['next_invoice_at'] == null
+            ? null
+            : DateTime.parse(row['next_invoice_at'] as String).toLocal(),
+      );
 }

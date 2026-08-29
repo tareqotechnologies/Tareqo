@@ -55,8 +55,18 @@ final class TenantRepositoryImpl implements ITenantRepository {
  _localDataSource.updatePlan(id, planId);
 
  @override
- Future<List<Tenant>> getPending() => _localDataSource.getPending();
+ Future<List<Tenant>> getPending() => _localDataSource.getPending();  @override
+  Future<List<Tenant>> getAll() => _localDataSource.getAll();
 
- @override
- Future<List<Tenant>> getAll() => _localDataSource.getAll();
+  @override
+  Future<void> updateBilling(
+    String id, {
+    required DateTime planExpiresAt,
+    required DateTime nextInvoiceAt,
+  }) =>
+      _localDataSource.updateBilling(
+        id,
+        planExpiresAt: planExpiresAt,
+        nextInvoiceAt: nextInvoiceAt,
+      );
 }

@@ -1441,5 +1441,55 @@
         "type": "String"
       }
     }
-  }
+  },
+  "adminNavInvoices": "Facturas",
+  "adminInvoicesTitle": "Facturas de Cobrança",
+  "adminInvoicesEmpty": "Nenhuma factura gerada ainda.",
+  "adminInvoicesEmptyPending": "Nenhuma factura pendente.",
+  "adminInvoicesLoadError": "Não foi possível carregar as facturas.",
+  "adminInvoiceSearchHint": "Pesquisar facturas...",
+  "adminInvoiceAmount": "Valor:",
+  "adminInvoiceDue": "Vencimento:",
+  "adminInvoicePaidAt": "Pago em:",
+  "adminInvoiceMarkPaid": "Marcar como paga",
+  "adminInvoiceMarkedPaid": "Factura marcada como paga!",
+  "adminInvoiceMarkPaidError": "Não foi possível marcar como paga. Tente novamente.",
+  "adminInvoiceCancel": "Cancelar",
+  "adminInvoiceCancelled": "Factura cancelada.",
+  "adminInvoiceCancelError": "Não foi possível cancelar a factura. Tente novamente.",
+  "adminInvoiceCancelTitle": "Cancelar factura?",
+  "adminInvoiceCancelConfirm": "Cancelar a factura de {period}?",
+  "@adminInvoiceCancelConfirm": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "adminInvoiceCancelConfirmButton": "Sim, cancelar",
+  "invoiceStatusPending": "Pendente",
+  "invoiceStatusPaid": "Paga",
+  "invoiceStatusExpired": "Expirada",
+  "invoiceStatusCancelled": "Cancelada",
+  "notificationInvoiceGenerated": "Nova factura gerada",
+  "notificationInvoiceDueSoon": "Factura para vencer",
+  "notificationInvoiceExpired": "Factura expirada",
+  "notificationInvoicePaid": "Factura paga",
+  "notificationMarkAllRead": "Marcar todas como lidas",
+  "notificationNoNotifications": "Sem notificações",
+  "notificationNoNotificationsHint": "As notificações de facturas aparecerão aqui.",
+  "notificationTabAll": "Todas",
+  "notificationTabUnread": "Não lidas",
+  "notificationTitle": "Notificações",
+  "menuNotifications": "Notificações",
+  "notificationMarkAsRead": "Marcar como lida",
+  "notificationSinceDaysAgo": "{count} dias atrás",
+  "@notificationSinceDaysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "notificationToday": "Hoje",
+  "notificationYesterday": "Ontem",
+  "notificationJustNow": "Agora mesmo"
 }

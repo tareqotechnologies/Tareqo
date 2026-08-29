@@ -6,9 +6,12 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
+import '../../controllers/notification_providers.dart';
 import '../../controllers/purchases_providers.dart';
 import '../../controllers/reports_providers.dart';
 import '../../widgets/module_card.dart';
+import '../../widgets/pulse_badge.dart';
+import '../dashboard/notifications_screen.dart';
 import '../purchases/purchases_screen.dart';
 import '../reports/reports_screen.dart';
 import '../shell/app_shell.dart';
@@ -53,6 +56,14 @@ class MenuScreen extends ConsumerWidget {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => StoresScreen(tenant: tenant),
+        ),
+      );
+    }
+
+    void openNotifications() {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => const NotificationsScreen(),
         ),
       );
     }
@@ -165,6 +176,12 @@ class MenuScreen extends ConsumerWidget {
                   iconColor: ModuleColors.stores,
                   onTap: () => openStores(tenant),
                 ),
+              if (tenant != null &&
+                  tenant.status == TenantStatus.approved &&
+                  accessLevel == UserAccessLevel.owner)
+                _NotificationsModuleCard(
+                  onTap: openNotifications,
+                ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -206,6 +223,29 @@ class MenuScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Módulo de notificações com badge de não lidas.
+class _NotificationsModuleCard extends ConsumerWidget {
+  const _NotificationsModuleCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final unreadCount = ref.watch(unreadNotificationsCountProvider).value ?? 0;
+
+    return PulseBadge(
+      count: unreadCount,
+      child: ModuleCard(
+        icon: Icons.notifications_outlined,
+        label: l10n.menuNotifications,
+        iconColor: const Color(0xFFF59E0B), // amber
+        onTap: onTap,
       ),
     );
   }

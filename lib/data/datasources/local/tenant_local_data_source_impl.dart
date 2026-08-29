@@ -115,11 +115,24 @@ final class TenantLocalDataSourceImpl implements TenantLocalDataSource {
  .where((tenant) => tenant.status == TenantStatus.pending)
  .toList()
  ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
- );
+ );  @override
+  Future<List<Tenant>> getAll() async => List.unmodifiable(
+        [..._tenants]
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
+      );
 
- @override
- Future<List<Tenant>> getAll() async => List.unmodifiable(
- [..._tenants]
- ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
- );
+  @override
+  Future<void> updateBilling(
+    String id, {
+    required DateTime planExpiresAt,
+    required DateTime nextInvoiceAt,
+  }) async {
+    await _update(
+      id,
+      (tenant) => tenant.copyWith(
+        planExpiresAt: planExpiresAt,
+        nextInvoiceAt: nextInvoiceAt,
+      ),
+    );
+  }
 }

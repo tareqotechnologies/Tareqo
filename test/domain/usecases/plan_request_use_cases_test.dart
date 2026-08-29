@@ -104,10 +104,15 @@ class _FakeTenantRepository implements ITenantRepository {
  }
 
  @override
- Future<List<Tenant>> getPending() async => const [];
+ Future<List<Tenant>> getPending() async => const [];  @override
+  Future<List<Tenant>> getAll() async => [tenant];
 
- @override
- Future<List<Tenant>> getAll() async => [tenant];
+  @override
+  Future<void> updateBilling(
+    String id, {
+    required DateTime planExpiresAt,
+    required DateTime nextInvoiceAt,
+  }) async {}
 }
 
 void main() {

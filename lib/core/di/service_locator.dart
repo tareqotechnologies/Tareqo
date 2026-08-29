@@ -21,6 +21,11 @@ import '../../data/datasources/local/plan_local_data_source.dart';
 import '../../data/datasources/local/plan_local_data_source_impl.dart';
 import '../../data/datasources/local/plan_request_local_data_source.dart';
 import '../../data/datasources/local/plan_request_local_data_source_impl.dart';
+import '../../data/datasources/local/invoice_local_data_source.dart';
+import '../../data/datasources/local/invoice_local_data_source_impl.dart';
+import '../../data/datasources/local/invoice_notification_local_data_source.dart';
+import '../../data/datasources/local/invoice_notification_local_data_source_impl.dart';
+import '../../data/datasources/remote/supabase_invoice_notification_data_source.dart';
 import '../../data/datasources/local/product_local_data_source.dart';
 import '../../data/datasources/local/product_local_data_source_impl.dart';
 import '../../data/datasources/local/pending_op_queue.dart';
@@ -47,6 +52,7 @@ import '../../data/datasources/remote/supabase_employee_data_source.dart';
 import '../../data/datasources/remote/supabase_financial_transaction_data_source.dart';
 import '../../data/datasources/remote/supabase_plan_data_source.dart';
 import '../../data/datasources/remote/supabase_plan_request_data_source.dart';
+import '../../data/datasources/remote/supabase_invoice_data_source.dart';
 import '../../data/datasources/remote/supabase_product_data_source.dart';
 import '../../data/datasources/remote/supabase_purchase_data_source.dart';
 import '../../data/datasources/remote/supabase_sale_data_source.dart';
@@ -67,6 +73,9 @@ import '../../data/repositories/employee_repository_impl.dart';
 import '../../data/repositories/financial_transaction_repository_impl.dart';
 import '../../data/repositories/plan_repository_impl.dart';
 import '../../data/repositories/plan_request_repository_impl.dart';
+import '../../data/repositories/invoice_repository_impl.dart';
+import '../../data/repositories/invoice_notification_repository_impl.dart';
+
 import '../../data/repositories/product_repository_impl.dart';
 import '../../data/repositories/purchase_repository_impl.dart';
 import '../../data/repositories/sale_repository_impl.dart';
@@ -110,6 +119,8 @@ import '../../domain/repositories/i_financial_transaction_repository.dart';
 import '../../domain/repositories/i_sales_report_repository.dart';
 import '../../domain/repositories/i_plan_repository.dart';
 import '../../domain/repositories/i_plan_request_repository.dart';
+import '../../domain/repositories/i_invoice_repository.dart';
+import '../../domain/repositories/i_invoice_notification_repository.dart';
 import '../../domain/repositories/i_product_repository.dart';
 import '../../domain/repositories/i_purchase_processor.dart';
 import '../../domain/repositories/i_purchase_repository.dart';
@@ -133,6 +144,17 @@ import '../../domain/usecases/add_purchase_use_case.dart';
 import '../../domain/usecases/add_store_use_case.dart';
 import '../../domain/usecases/approve_tenant_use_case.dart';
 import '../../domain/usecases/decide_plan_request_use_case.dart';
+import '../../domain/usecases/generate_invoice_use_case.dart';
+import '../../domain/usecases/get_tenant_invoices_use_case.dart';
+import '../../domain/usecases/get_pending_invoices_use_case.dart';
+import '../../domain/usecases/get_all_invoices_use_case.dart';
+import '../../domain/usecases/mark_invoice_as_paid_use_case.dart';
+import '../../domain/usecases/cancel_invoice_use_case.dart';
+import '../../domain/usecases/notify_invoice_generated_use_case.dart';
+import '../../domain/usecases/get_tenant_notifications_use_case.dart';
+import '../../domain/usecases/mark_notification_as_read_use_case.dart';
+import '../../domain/usecases/mark_all_notifications_as_read_use_case.dart';
+import '../../domain/usecases/check_tenants_for_invoices_use_case.dart';
 import '../../domain/usecases/get_audit_log_use_case.dart';
 import '../../domain/usecases/get_all_tenants_use_case.dart';
 import '../../domain/usecases/get_cash_flow_use_case.dart';
@@ -166,6 +188,7 @@ import '../../domain/usecases/update_tenant_settings_use_case.dart';
 import '../../domain/usecases/update_plan_use_case.dart';
 import '../../domain/usecases/update_product_stock_use_case.dart';
 import '../../domain/usecases/update_product_use_case.dart';
+
 
 /// Registro central de dependências do aplicativo (Service Locator).
 ///
@@ -403,11 +426,16 @@ final class ServiceLocator {
  // postgres_changes em store_employees filtrado pelo usuário logado.
  ..registerLazySingleton<IEmployeeRealtimeSignalSource>(
  () => SupabaseEmployeeRealtimeSignalSource(),
- )
- ..registerLazySingleton<PlanRequestLocalDataSource>(
- () => const PlanRequestSupabaseDataSourceImpl(),
- )
- // Cadastro de funcionário ATÔMICO (RPC `create_employee_account`):
+ )    ..registerLazySingleton<PlanRequestLocalDataSource>(
+      () => const PlanRequestSupabaseDataSourceImpl(),
+    )
+    ..registerLazySingleton<InvoiceLocalDataSource>(
+      () => const InvoiceSupabaseDataSourceImpl(),
+    )
+    ..registerLazySingleton<InvoiceNotificationLocalDataSource>(
+      () => const InvoiceNotificationSupabaseDataSourceImpl(),
+    )
+    // Cadastro de funcionário ATÔMICO (RPC `create_employee_account`):
  // conta de acesso + vínculo em `store_employees` em UMA transação no
  // banco (sem contas órfãs se o limite do plano for atingido).
  ..registerLazySingleton<IEmployeeAccountProcessor>(
@@ -465,63 +493,74 @@ final class ServiceLocator {
  // AuthGate continua cobrindo o bloqueio reativo).
  ..registerLazySingleton<IEmployeeRealtimeSignalSource>(
  () => const EmptyEmployeeRealtimeSignalSource(),
- )
- ..registerLazySingleton<PlanRequestLocalDataSource>(
- () => PlanRequestLocalDataSourceImpl(),
- );
- }
+ )    ..registerLazySingleton<PlanRequestLocalDataSource>(
+      () => PlanRequestLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<InvoiceLocalDataSource>(
+      () => InvoiceLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<InvoiceNotificationLocalDataSource>(
+      () => InvoiceNotificationLocalDataSourceImpl(),
+    );
+  }
 
- /// Fallback em memória (web / falha da biblioteca nativa) — mesma
- /// estrutura dos testes: dados nascem VAZIOS, apenas com o catálogo de
- /// planos. Nenhum dado de demonstração.
- static void _registerInMemoryDatasources() {
- instance
- ..registerLazySingleton<IUnitOfWork>(() => const _DirectUnitOfWork())
- ..registerLazySingleton<ProductLocalDataSource>(
- () => ProductLocalDataSourceImpl(),
- )
- ..registerLazySingleton<SaleLocalDataSource>(
- () => SaleLocalDataSourceImpl(),
- )
- ..registerLazySingleton<FinancialTransactionLocalDataSource>(
- () => FinancialTransactionLocalDataSourceImpl(),
- )
- ..registerLazySingleton<CashClosingLocalDataSource>(
- () => CashClosingLocalDataSourceImpl(),
- )
- ..registerLazySingleton<DebtLocalDataSource>(
- () => DebtLocalDataSourceImpl(),
- )
- ..registerLazySingleton<CustomerLocalDataSource>(
- () => CustomerLocalDataSourceImpl(),
- )
- ..registerLazySingleton<PurchaseLocalDataSource>(
- () => PurchaseLocalDataSourceImpl(),
- )
- ..registerLazySingleton<StockLotLocalDataSource>(
- () => StockLotLocalDataSourceImpl(),
- )
- // Camada de Contas em memória — catálogo real de planos; tenant,
- // lojas, funcionários e upgrades nascem vazios (fluxo real).
- ..registerLazySingleton<PlanLocalDataSource>(
- () => PlanLocalDataSourceImpl(seed: PlanCatalog.plans()),
- )
- ..registerLazySingleton<TenantLocalDataSource>(
- () => TenantLocalDataSourceImpl(),
- )
- ..registerLazySingleton<StoreLocalDataSource>(
- () => StoreLocalDataSourceImpl(),
- )
- ..registerLazySingleton<EmployeeLocalDataSource>(
- () => EmployeeLocalDataSourceImpl(),
- )
- ..registerLazySingleton<IEmployeeRealtimeSignalSource>(
- () => const EmptyEmployeeRealtimeSignalSource(),
- )
- ..registerLazySingleton<PlanRequestLocalDataSource>(
- () => PlanRequestLocalDataSourceImpl(),
- );
- }
+  /// Fallback em memória (web / falha da biblioteca nativa) — mesma
+  /// estrutura dos testes: dados nascem VAZIOS, apenas com o catálogo de
+  /// planos. Nenhum dado de demonstração.
+  static void _registerInMemoryDatasources() {
+    instance
+    ..registerLazySingleton<IUnitOfWork>(() => const _DirectUnitOfWork())
+    ..registerLazySingleton<ProductLocalDataSource>(
+      () => ProductLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<SaleLocalDataSource>(
+      () => SaleLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<FinancialTransactionLocalDataSource>(
+      () => FinancialTransactionLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<CashClosingLocalDataSource>(
+      () => CashClosingLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<DebtLocalDataSource>(
+      () => DebtLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<CustomerLocalDataSource>(
+      () => CustomerLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<PurchaseLocalDataSource>(
+      () => PurchaseLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<StockLotLocalDataSource>(
+      () => StockLotLocalDataSourceImpl(),
+    )
+    // Camada de Contas em memória — catálogo real de planos; tenant,
+    // lojas, funcionários e upgrades nascem vazios (fluxo real).
+    ..registerLazySingleton<PlanLocalDataSource>(
+      () => PlanLocalDataSourceImpl(seed: PlanCatalog.plans()),
+    )
+    ..registerLazySingleton<TenantLocalDataSource>(
+      () => TenantLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<StoreLocalDataSource>(
+      () => StoreLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<EmployeeLocalDataSource>(
+      () => EmployeeLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<IEmployeeRealtimeSignalSource>(
+      () => const EmptyEmployeeRealtimeSignalSource(),
+    )
+    ..registerLazySingleton<PlanRequestLocalDataSource>(
+      () => PlanRequestLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<InvoiceLocalDataSource>(
+      () => InvoiceLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<InvoiceNotificationLocalDataSource>(
+      () => InvoiceNotificationLocalDataSourceImpl(),
+    );
+  }
 
  /// Repositórios + casos de uso — idênticos para SQLite e memória, pois
  /// dependem apenas dos contratos dos datasources.
@@ -571,11 +610,19 @@ final class ServiceLocator {
       () => PlanRequestRepositoryImpl(
         instance<PlanRequestLocalDataSource>(),
       ),
-    )
-    ..registerLazySingleton<IAuditLogRepository>(
+    )    ..registerLazySingleton<IAuditLogRepository>(
       () => AuditLogRepositoryImpl(instance<AuditLogLocalDataSource>()),
     )
- // Camada de Contas — casos de uso (planos/tenant/lojas/funcionários).
+    ..registerLazySingleton<IInvoiceRepository>(
+      () => InvoiceRepositoryImpl(instance<InvoiceLocalDataSource>()),
+    )
+    ..registerLazySingleton<IInvoiceNotificationRepository>(
+      () => InvoiceNotificationRepositoryImpl(
+        instance<InvoiceNotificationLocalDataSource>(),
+      ),
+    )
+
+    // Camada de Contas — casos de uso (planos/tenant/lojas/funcionários).
  ..registerLazySingleton<GetPlansUseCase>(
  () => GetPlansUseCase(instance<IPlanRepository>()),
  )
@@ -829,18 +876,68 @@ final class ServiceLocator {
  ? instance<IPurchaseAtomicProcessor>()
  : null,
  ),
- )
- ..registerLazySingleton<GetSalesReportUseCase>(
- () => GetSalesReportUseCase(
- instance<ISaleRepository>(),
- instance<IProductRepository>(),
- // Supabase: agregação server-side (H2). Local/testes: null.
- serverRepository: instance.isRegistered<ISalesReportRepository>()
- ? instance<ISalesReportRepository>()
- : null,
- ),
- );
- }
+ )    ..registerLazySingleton<GetSalesReportUseCase>(
+      () => GetSalesReportUseCase(
+        instance<ISaleRepository>(),
+        instance<IProductRepository>(),
+        // Supabase: agregação server-side (H2). Local/testes: null.
+        serverRepository: instance.isRegistered<ISalesReportRepository>()
+            ? instance<ISalesReportRepository>()
+            : null,
+      ),
+    )
+    // Camada de Facturas — casos de uso.
+    ..registerLazySingleton<GenerateInvoiceUseCase>(
+      () => GenerateInvoiceUseCase(
+        instance<IInvoiceRepository>(),
+        instance<ITenantRepository>(),
+        instance<IPlanRepository>(),
+      ),
+    )
+    ..registerLazySingleton<GetTenantInvoicesUseCase>(
+      () => GetTenantInvoicesUseCase(instance<IInvoiceRepository>()),
+    )
+    ..registerLazySingleton<GetPendingInvoicesUseCase>(
+      () => GetPendingInvoicesUseCase(instance<IInvoiceRepository>()),
+    )
+    ..registerLazySingleton<GetAllInvoicesUseCase>(
+      () => GetAllInvoicesUseCase(instance<IInvoiceRepository>()),
+    )
+    ..registerLazySingleton<MarkInvoiceAsPaidUseCase>(
+      () => MarkInvoiceAsPaidUseCase(instance<IInvoiceRepository>()),
+    )
+    ..registerLazySingleton<CancelInvoiceUseCase>(
+      () => CancelInvoiceUseCase(instance<IInvoiceRepository>()),
+    )
+    ..registerLazySingleton<NotifyInvoiceGeneratedUseCase>(
+      () => NotifyInvoiceGeneratedUseCase(
+        instance<IInvoiceNotificationRepository>(),
+        instance<IPlanRepository>(),
+      ),
+    )
+    ..registerLazySingleton<GetTenantNotificationsUseCase>(
+      () => GetTenantNotificationsUseCase(
+        instance<IInvoiceNotificationRepository>(),
+      ),
+    )
+    ..registerLazySingleton<MarkNotificationAsReadUseCase>(
+      () => MarkNotificationAsReadUseCase(
+        instance<IInvoiceNotificationRepository>(),
+      ),
+    )
+    ..registerLazySingleton<MarkAllNotificationsAsReadUseCase>(
+      () => MarkAllNotificationsAsReadUseCase(
+        instance<IInvoiceNotificationRepository>(),
+      ),
+    )
+    ..registerLazySingleton<CheckTenantsForInvoicesUseCase>(
+      () => CheckTenantsForInvoicesUseCase(
+        instance<GenerateInvoiceUseCase>(),
+        instance<ITenantRepository>(),
+        notifyInvoiceGenerated: instance<NotifyInvoiceGeneratedUseCase>(),
+      ),
+    );
+  }
 
 }
 

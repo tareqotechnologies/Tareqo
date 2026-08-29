@@ -4797,6 +4797,234 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{count}/semana média'**
   String adminGrowthAvgPerWeek(String count);
+
+  /// No description provided for @adminNavInvoices.
+  ///
+  /// In pt, this message translates to:
+  /// **'Facturas'**
+  String get adminNavInvoices;
+
+  /// No description provided for @adminInvoicesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Facturas de Cobrança'**
+  String get adminInvoicesTitle;
+
+  /// No description provided for @adminInvoicesEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma factura gerada ainda.'**
+  String get adminInvoicesEmpty;
+
+  /// No description provided for @adminInvoicesEmptyPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma factura pendente.'**
+  String get adminInvoicesEmptyPending;
+
+  /// No description provided for @adminInvoicesLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar as facturas.'**
+  String get adminInvoicesLoadError;
+
+  /// No description provided for @adminInvoiceSearchHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pesquisar facturas...'**
+  String get adminInvoiceSearchHint;
+
+  /// No description provided for @adminInvoiceAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor:'**
+  String get adminInvoiceAmount;
+
+  /// No description provided for @adminInvoiceDue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vencimento:'**
+  String get adminInvoiceDue;
+
+  /// No description provided for @adminInvoicePaidAt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pago em:'**
+  String get adminInvoicePaidAt;
+
+  /// No description provided for @adminInvoiceMarkPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como paga'**
+  String get adminInvoiceMarkPaid;
+
+  /// No description provided for @adminInvoiceMarkedPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Factura marcada como paga!'**
+  String get adminInvoiceMarkedPaid;
+
+  /// No description provided for @adminInvoiceMarkPaidError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível marcar como paga. Tente novamente.'**
+  String get adminInvoiceMarkPaidError;
+
+  /// No description provided for @adminInvoiceCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get adminInvoiceCancel;
+
+  /// No description provided for @adminInvoiceCancelled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Factura cancelada.'**
+  String get adminInvoiceCancelled;
+
+  /// No description provided for @adminInvoiceCancelError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível cancelar a factura. Tente novamente.'**
+  String get adminInvoiceCancelError;
+
+  /// No description provided for @adminInvoiceCancelTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar factura?'**
+  String get adminInvoiceCancelTitle;
+
+  /// No description provided for @adminInvoiceCancelConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar a factura de {period}?'**
+  String adminInvoiceCancelConfirm(String period);
+
+  /// No description provided for @adminInvoiceCancelConfirmButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, cancelar'**
+  String get adminInvoiceCancelConfirmButton;
+
+  /// No description provided for @invoiceStatusPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendente'**
+  String get invoiceStatusPending;
+
+  /// No description provided for @invoiceStatusPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Paga'**
+  String get invoiceStatusPaid;
+
+  /// No description provided for @invoiceStatusExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expirada'**
+  String get invoiceStatusExpired;
+
+  /// No description provided for @invoiceStatusCancelled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelada'**
+  String get invoiceStatusCancelled;
+
+  /// No description provided for @notificationInvoiceGenerated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova factura gerada'**
+  String get notificationInvoiceGenerated;
+
+  /// No description provided for @notificationInvoiceDueSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Factura para vencer'**
+  String get notificationInvoiceDueSoon;
+
+  /// No description provided for @notificationInvoiceExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Factura expirada'**
+  String get notificationInvoiceExpired;
+
+  /// No description provided for @notificationInvoicePaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Factura paga'**
+  String get notificationInvoicePaid;
+
+  /// No description provided for @notificationMarkAllRead.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar todas como lidas'**
+  String get notificationMarkAllRead;
+
+  /// No description provided for @notificationNoNotifications.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem notificações'**
+  String get notificationNoNotifications;
+
+  /// No description provided for @notificationNoNotificationsHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'As notificações de facturas aparecerão aqui.'**
+  String get notificationNoNotificationsHint;
+
+  /// No description provided for @notificationTabAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todas'**
+  String get notificationTabAll;
+
+  /// No description provided for @notificationTabUnread.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não lidas'**
+  String get notificationTabUnread;
+
+  /// No description provided for @notificationTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notificações'**
+  String get notificationTitle;
+
+  /// No description provided for @menuNotifications.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notificações'**
+  String get menuNotifications;
+
+  /// No description provided for @notificationMarkAsRead.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como lida'**
+  String get notificationMarkAsRead;
+
+  /// No description provided for @notificationSinceDaysAgo.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} dias atrás'**
+  String notificationSinceDaysAgo(int count);
+
+  /// No description provided for @notificationToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get notificationToday;
+
+  /// No description provided for @notificationYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ontem'**
+  String get notificationYesterday;
+
+  /// No description provided for @notificationJustNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora mesmo'**
+  String get notificationJustNow;
 }
 
 class _AppLocalizationsDelegate
