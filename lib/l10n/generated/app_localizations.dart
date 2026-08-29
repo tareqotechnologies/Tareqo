@@ -5025,6 +5025,132 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Agora mesmo'**
   String get notificationJustNow;
+
+  /// No description provided for @adminMessagesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mensagens para Tenants'**
+  String get adminMessagesTitle;
+
+  /// No description provided for @adminMessagesEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma mensagem enviada ainda.'**
+  String get adminMessagesEmpty;
+
+  /// No description provided for @adminMessagesSend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar mensagem'**
+  String get adminMessagesSend;
+
+  /// No description provided for @adminMessagesSendSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mensagem enviada!'**
+  String get adminMessagesSendSuccess;
+
+  /// No description provided for @adminMessagesSendError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível enviar a mensagem. Tente novamente.'**
+  String get adminMessagesSendError;
+
+  /// No description provided for @adminMessagesTenantLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tenant'**
+  String get adminMessagesTenantLabel;
+
+  /// No description provided for @adminMessagesTenantError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione um tenant.'**
+  String get adminMessagesTenantError;
+
+  /// No description provided for @adminMessagesTypeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo'**
+  String get adminMessagesTypeLabel;
+
+  /// No description provided for @adminMessagesTypeBillingQuote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cotação de Cobrança'**
+  String get adminMessagesTypeBillingQuote;
+
+  /// No description provided for @adminMessagesTypePlanExpiryChange.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alteração de Validade'**
+  String get adminMessagesTypePlanExpiryChange;
+
+  /// No description provided for @adminMessagesTypePlanExpiringSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano Expirando'**
+  String get adminMessagesTypePlanExpiringSoon;
+
+  /// No description provided for @adminMessagesTypeGeneral.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mensagem Geral'**
+  String get adminMessagesTypeGeneral;
+
+  /// No description provided for @adminMessagesTitleLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Título'**
+  String get adminMessagesTitleLabel;
+
+  /// No description provided for @adminMessagesTitleError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite um título.'**
+  String get adminMessagesTitleError;
+
+  /// No description provided for @adminMessagesBodyLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mensagem'**
+  String get adminMessagesBodyLabel;
+
+  /// No description provided for @adminMessagesBodyError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o corpo da mensagem.'**
+  String get adminMessagesBodyError;
+
+  /// No description provided for @adminMessagesSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar'**
+  String get adminMessagesSubmit;
+
+  /// No description provided for @adminNavMessages.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mensagens'**
+  String get adminNavMessages;
+
+  /// No description provided for @adminMessageSentTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviado para {tenant}'**
+  String adminMessageSentTo(String tenant);
+
+  /// No description provided for @menuMessages.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mensagens'**
+  String get menuMessages;
+
+  /// No description provided for @menuMessagesHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mensagens do super admin'**
+  String get menuMessagesHint;
 }
 
 class _AppLocalizationsDelegate

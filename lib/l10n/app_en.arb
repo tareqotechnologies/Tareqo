@@ -1491,5 +1491,31 @@
   },
   "notificationToday": "Today",
   "notificationYesterday": "Yesterday",
-  "notificationJustNow": "Just now"
+  "notificationJustNow": "Just now",
+  "adminMessagesTitle": "Messages to Tenants",
+  "adminMessagesEmpty": "No messages sent yet.",
+  "adminMessagesSend": "Send message",
+  "adminMessagesSendSuccess": "Message sent!",
+  "adminMessagesSendError": "Could not send the message. Try again.",
+  "adminMessagesTenantLabel": "Tenant",
+  "adminMessagesTenantError": "Select a tenant.",
+  "adminMessagesTypeLabel": "Type",
+  "adminMessagesTypeBillingQuote": "Billing Quote",
+  "adminMessagesTypePlanExpiryChange": "Plan Expiry Change",
+  "adminMessagesTypePlanExpiringSoon": "Plan Expiring Soon",
+  "adminMessagesTypeGeneral": "General Message",
+  "adminMessagesTitleLabel": "Title",
+  "adminMessagesTitleError": "Enter a title.",
+  "adminMessagesBodyLabel": "Message",
+  "adminMessagesBodyError": "Enter the message body.",
+  "adminMessagesSubmit": "Send",
+  "adminNavMessages": "Messages",
+  "adminMessageSentTo": "Sent to {tenant}",
+  "@adminMessageSentTo": {
+    "placeholders": {
+      "tenant": { "type": "String" }
+    }
+  },
+  "menuMessages": "Messages",
+  "menuMessagesHint": "Messages from super admin"
 }

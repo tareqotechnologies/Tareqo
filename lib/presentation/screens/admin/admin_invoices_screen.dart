@@ -345,12 +345,16 @@ class _InvoiceCard extends StatelessWidget {
                     Text(
                       tenantName,
                       style: theme.textTheme.bodySmall?.copyWith(),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                     Text(
                       '${invoice.period} · $planName',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ],
                 ),
@@ -362,44 +366,46 @@ class _InvoiceCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
             children: [
               _InfoPill(
                 icon: Icons.attach_money,
                 label: '${l10n.adminInvoiceAmount} $amount',
               ),
-              const SizedBox(width: AppSpacing.sm),
               _InfoPill(
                 icon: Icons.calendar_today_outlined,
                 label: '${l10n.adminInvoiceDue} ${dateFormat.format(invoice.dueDate)}',
               ),
+              if (invoice.paidAt != null)
+                _InfoPill(
+                  icon: Icons.check_circle_outline,
+                  label:
+                      '${l10n.adminInvoicePaidAt} ${dateFormat.format(invoice.paidAt!)}',
+                  color: scheme.primary,
+                ),
             ],
           ),
-          if (invoice.paidAt != null) ...[
-            const SizedBox(height: 6),
-            _InfoPill(
-              icon: Icons.check_circle_outline,
-              label:
-                  '${l10n.adminInvoicePaidAt} ${dateFormat.format(invoice.paidAt!)}',
-              color: scheme.primary,
-            ),
-          ],
           if (invoice.status == InvoiceStatus.pending) ...[
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 10,
+              runSpacing: 8,
               children: [
-                Expanded(
+                SizedBox(
+                  width: 160,
                   child: AppButton.primary(
                     onPressed: onMarkAsPaid,
-                    icon: const Icon(Icons.check),
+                    icon: const Icon(Icons.check, size: 16),
                     label: l10n.adminInvoiceMarkPaid,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
+                SizedBox(
+                  width: 160,
                   child: AppButton.secondary(
                     onPressed: onCancel,
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, size: 16),
                     label: l10n.adminInvoiceCancel,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: scheme.error,
@@ -443,11 +449,15 @@ class _InfoPill extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: effectiveColor),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: effectiveColor,
-                ),
+          Flexible(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: effectiveColor,
+                  ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
           ),
         ],
       ),

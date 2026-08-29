@@ -2874,4 +2874,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationJustNow => 'Just now';
+
+  @override
+  String get adminMessagesTitle => 'Messages to Tenants';
+
+  @override
+  String get adminMessagesEmpty => 'No messages sent yet.';
+
+  @override
+  String get adminMessagesSend => 'Send message';
+
+  @override
+  String get adminMessagesSendSuccess => 'Message sent!';
+
+  @override
+  String get adminMessagesSendError => 'Could not send the message. Try again.';
+
+  @override
+  String get adminMessagesTenantLabel => 'Tenant';
+
+  @override
+  String get adminMessagesTenantError => 'Select a tenant.';
+
+  @override
+  String get adminMessagesTypeLabel => 'Type';
+
+  @override
+  String get adminMessagesTypeBillingQuote => 'Billing Quote';
+
+  @override
+  String get adminMessagesTypePlanExpiryChange => 'Plan Expiry Change';
+
+  @override
+  String get adminMessagesTypePlanExpiringSoon => 'Plan Expiring Soon';
+
+  @override
+  String get adminMessagesTypeGeneral => 'General Message';
+
+  @override
+  String get adminMessagesTitleLabel => 'Title';
+
+  @override
+  String get adminMessagesTitleError => 'Enter a title.';
+
+  @override
+  String get adminMessagesBodyLabel => 'Message';
+
+  @override
+  String get adminMessagesBodyError => 'Enter the message body.';
+
+  @override
+  String get adminMessagesSubmit => 'Send';
+
+  @override
+  String get adminNavMessages => 'Messages';
+
+  @override
+  String adminMessageSentTo(String tenant) {
+    return 'Sent to $tenant';
+  }
+
+  @override
+  String get menuMessages => 'Messages';
+
+  @override
+  String get menuMessagesHint => 'Messages from super admin';
 }

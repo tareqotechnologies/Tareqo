@@ -10,6 +10,7 @@ import '../../widgets/sign_out_button.dart';
 import 'admin_audit_log_screen.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_invoices_screen.dart';
+import 'admin_messages_screen.dart';
 import 'admin_plan_requests_screen.dart';
 import 'admin_plans_screen.dart';
 import 'admin_tenants_screen.dart';
@@ -35,6 +36,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     const AdminPlansScreen(),
     const AdminPlanRequestsScreen(),
     const AdminInvoicesScreen(),
+    const AdminMessagesScreen(),
     const AdminAuditLogScreen(),
   ];
 
@@ -73,6 +75,11 @@ class _AdminShellState extends ConsumerState<AdminShell> {
         l10n.adminNavInvoices,
       ),
       (
+        Icons.mail_outline,
+        Icons.mail,
+        l10n.adminNavMessages,
+      ),
+      (
         Icons.history_outlined,
         Icons.history,
         l10n.adminNavAuditLog,
@@ -81,7 +88,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
 
     // Badges: tenant pendente no tab "Solicitações", upgrade pendente no
     // tab "Upgrades", factura pendente no tab "Facturas".
-    final badges = [0, pendingTenants, 0, pendingUpgrades, pendingInvoices, 0];
+    final badges = [0, pendingTenants, 0, pendingUpgrades, pendingInvoices, 0, 0];
 
     final body = FadeIndexedStack(index: _index, children: _sections);
 

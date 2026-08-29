@@ -407,12 +407,18 @@ class _SplashScreenState extends State<_SplashScreen>
   late final Animation<Offset> _textSlide;
   late final Animation<double> _spinnerFade;
   bool _animInitialized = false;
+  bool _timedOut = false;
 
   @override
   void initState() {
     super.initState();
-    // Cria o controller com um Vsync neutro — o廷可真provider (this) é
-    // usado em didChangeDependencies quando o contexto já está disponível.
+    // Timeout de segurança: se a sessão/tenant não resolver em 15s,
+    // mostra erro com retry em vez de ficar preso no splash.
+    Future.delayed(const Duration(seconds: 15), () {
+      if (mounted && !_timedOut) {
+        setState(() => _timedOut = true);
+      }
+    });
     _ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -485,16 +491,44 @@ class _SplashScreenState extends State<_SplashScreen>
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
+    if (_timedOut) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF0076F6),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.cloud_off, size: 48, color: Colors.white),
+              const SizedBox(height: 16),
+              Text(
+                l10n.authErrorCheckConnection,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () {
+                  setState(() => _timedOut = false);
+                  // Re-check auth state by forcing reload.
+                  // The parent AuthGate watches authStateProvider which
+                  // will re-evaluate automatically.
+                },
+                icon: const Icon(Icons.refresh),
+                label: Text(l10n.commonRetry),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Scaffold(
-      // Fundo azul oficial da marca — transição invisível entre
-      // o splash nativo Android/iOS e o Flutter.
       backgroundColor: const Color(0xFF0076F6),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Logotipo: escala + fade animados. O glow azul suave dá
-            // profundidade sobre o fundo escuro.
             AnimatedBuilder(
               animation: _ctrl,
               builder: (context, child) => Opacity(

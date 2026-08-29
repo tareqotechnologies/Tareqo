@@ -16,10 +16,10 @@ import 'supabase_datasource_helpers.dart';
 final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
  const TenantSupabaseDataSourceImpl();
 
- static const _table = 'tenants';
- static const _columns =
- 'id, owner_user_id, business_name, plan_id, status, '
- 'rejection_reason, approved_at, created_at, currency_code, language';
+ static const _table = 'tenants';  static const _columns =
+      'id, owner_user_id, business_name, plan_id, status, '
+      'rejection_reason, approved_at, created_at, currency_code, language, '
+      'plan_expires_at, next_invoice_at';
 
  @override
  Future<Tenant?> getMyTenant(String userId) async {

@@ -188,6 +188,15 @@ import '../../domain/usecases/update_tenant_settings_use_case.dart';
 import '../../domain/usecases/update_plan_use_case.dart';
 import '../../domain/usecases/update_product_stock_use_case.dart';
 import '../../domain/usecases/update_product_use_case.dart';
+import '../../data/datasources/local/admin_message_local_data_source.dart';
+import '../../data/datasources/local/admin_message_local_data_source_impl.dart';
+import '../../data/datasources/remote/supabase_admin_message_data_source.dart';
+import '../../data/repositories/admin_message_repository_impl.dart';
+import '../../domain/repositories/i_admin_message_repository.dart';
+import '../../domain/usecases/send_admin_message_use_case.dart';
+import '../../domain/usecases/get_tenant_admin_messages_use_case.dart';
+import '../../domain/usecases/mark_admin_message_as_read_use_case.dart';
+import '../../domain/usecases/mark_all_admin_messages_as_read_use_case.dart';
 
 
 /// Registro central de dependências do aplicativo (Service Locator).
@@ -435,6 +444,9 @@ final class ServiceLocator {
     ..registerLazySingleton<InvoiceNotificationLocalDataSource>(
       () => const InvoiceNotificationSupabaseDataSourceImpl(),
     )
+    ..registerLazySingleton<AdminMessageLocalDataSource>(
+      () => const AdminMessageSupabaseDataSourceImpl(),
+    )
     // Cadastro de funcionário ATÔMICO (RPC `create_employee_account`):
  // conta de acesso + vínculo em `store_employees` em UMA transação no
  // banco (sem contas órfãs se o limite do plano for atingido).
@@ -501,6 +513,9 @@ final class ServiceLocator {
     )
     ..registerLazySingleton<InvoiceNotificationLocalDataSource>(
       () => InvoiceNotificationLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<AdminMessageLocalDataSource>(
+      () => AdminMessageLocalDataSourceImpl(),
     );
   }
 
@@ -559,6 +574,9 @@ final class ServiceLocator {
     )
     ..registerLazySingleton<InvoiceNotificationLocalDataSource>(
       () => InvoiceNotificationLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<AdminMessageLocalDataSource>(
+      () => AdminMessageLocalDataSourceImpl(),
     );
   }
 
@@ -619,6 +637,11 @@ final class ServiceLocator {
     ..registerLazySingleton<IInvoiceNotificationRepository>(
       () => InvoiceNotificationRepositoryImpl(
         instance<InvoiceNotificationLocalDataSource>(),
+      ),
+    )
+    ..registerLazySingleton<IAdminMessageRepository>(
+      () => AdminMessageRepositoryImpl(
+        instance<AdminMessageLocalDataSource>(),
       ),
     )
 
@@ -935,6 +958,28 @@ final class ServiceLocator {
         instance<GenerateInvoiceUseCase>(),
         instance<ITenantRepository>(),
         notifyInvoiceGenerated: instance<NotifyInvoiceGeneratedUseCase>(),
+      ),
+    )
+    // Camada de Mensagens Admin→Tenant.
+    ..registerLazySingleton<SendAdminMessageUseCase>(
+      () => SendAdminMessageUseCase(
+        instance<IAdminMessageRepository>(),
+        instance<ITenantRepository>(),
+      ),
+    )
+    ..registerLazySingleton<GetTenantAdminMessagesUseCase>(
+      () => GetTenantAdminMessagesUseCase(
+        instance<IAdminMessageRepository>(),
+      ),
+    )
+    ..registerLazySingleton<MarkAdminMessageAsReadUseCase>(
+      () => MarkAdminMessageAsReadUseCase(
+        instance<IAdminMessageRepository>(),
+      ),
+    )
+    ..registerLazySingleton<MarkAllAdminMessagesAsReadUseCase>(
+      () => MarkAllAdminMessagesAsReadUseCase(
+        instance<IAdminMessageRepository>(),
       ),
     );
   }

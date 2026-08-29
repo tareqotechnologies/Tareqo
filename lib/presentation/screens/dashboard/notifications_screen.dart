@@ -9,6 +9,8 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/notification_providers.dart';
+import '../../controllers/admin_message_providers.dart';
+import '../../../domain/entities/admin_message.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
@@ -35,12 +37,19 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final notificationsAsync = ref.watch(tenantNotificationsProvider);
+    final adminMessagesAsync = ref.watch(tenantAdminMessagesProvider);
 
     final allNotifications = notificationsAsync.value ?? const <InvoiceNotification>[];
-    final filtered = _showUnreadOnly
+    final allAdminMessages = adminMessagesAsync.value ?? const <AdminMessage>[];
+    final filteredNotifications = _showUnreadOnly
         ? allNotifications.where((n) => !n.isRead).toList()
         : allNotifications;
-    final unreadCount = allNotifications.where((n) => !n.isRead).length;
+    final filteredAdminMessages = _showUnreadOnly
+        ? allAdminMessages.where((m) => !m.isRead).toList()
+        : allAdminMessages;
+    final unreadInvoiceCount = allNotifications.where((n) => !n.isRead).length;
+    final unreadAdminCount = allAdminMessages.where((m) => !m.isRead).length;
+    final unreadCount = unreadInvoiceCount + unreadAdminCount;
 
     return Scaffold(
       appBar: AppBar(
@@ -97,7 +106,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 onRetry: () => ref.invalidate(tenantNotificationsProvider),
               ),
               data: (_) {
-                if (filtered.isEmpty) {
+                if (filteredNotifications.isEmpty && filteredAdminMessages.isEmpty) {
                   return EmptyState(
                     icon: Icons.notifications_none_outlined,
                     title: _showUnreadOnly
@@ -111,22 +120,37 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     await ref
                         .read(tenantNotificationsProvider.notifier)
                         .refresh();
+                    await ref
+                        .read(tenantAdminMessagesProvider.notifier)
+                        .refresh();
                   },
-                  child: ListView.separated(
+                  child: ListView(
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                     physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: filtered.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final notification = filtered[index];
-                      return _NotificationCard(
-                        notification: notification,
-                        onMarkAsRead: notification.isRead
-                            ? null
-                            : () => _markAsRead(notification),
-                      );
-                    },
+                    children: [
+                      if (filteredAdminMessages.isNotEmpty) ...[
+                        for (final msg in filteredAdminMessages) ...[
+                          _AdminMessageCard(
+                            message: msg,
+                            onMarkAsRead: msg.isRead
+                                ? null
+                                : () => _markAdminMessageAsRead(msg),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ],
+                      if (filteredNotifications.isNotEmpty) ...[
+                        for (final notification in filteredNotifications) ...[
+                          _NotificationCard(
+                            notification: notification,
+                            onMarkAsRead: notification.isRead
+                                ? null
+                                : () => _markAsRead(notification),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ],
+                    ],
                   ),
                 );
               },
@@ -149,6 +173,18 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     }
   }
 
+  Future<void> _markAdminMessageAsRead(AdminMessage message) async {
+    try {
+      await ref
+          .read(markAdminMessageAsReadUseCaseProvider)
+          .call(message.id);
+      if (!mounted) return;
+      await ref.read(tenantAdminMessagesProvider.notifier).refresh();
+    } catch (_) {
+      // Silenciar erros
+    }
+  }
+
   Future<void> _markAllAsRead() async {
     final user = ref.read(authStateProvider).value;
     if (user == null) return;
@@ -157,10 +193,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     if (tenant == null) return;
     try {
       await ref.read(markAllNotificationsAsReadUseCaseProvider).call(tenant.id);
+      await ref.read(markAllAdminMessagesAsReadUseCaseProvider).call(tenant.id);
       if (!mounted) return;
       await ref.read(tenantNotificationsProvider.notifier).refresh();
+      await ref.read(tenantAdminMessagesProvider.notifier).refresh();
     } catch (_) {
-      // Silenciar erros — notificação é best-effort
+      // Silenciar erros
     }
   }
 }
@@ -339,6 +377,186 @@ class _NotificationCard extends StatelessWidget {
     if (diff.inDays == 0) return DateFormat.Hm().format(date);
     if (diff.inDays == 1) return l10n.notificationYesterday;
     if (diff.inDays < 7) return l10n.notificationSinceDaysAgo(diff.inDays);
+    return DateFormat.yMMMd().format(date);
+  }
+}
+
+/// Card de mensagem do admin para o tenant.
+class _AdminMessageCard extends StatelessWidget {
+  const _AdminMessageCard({
+    required this.message,
+    this.onMarkAsRead,
+  });
+
+  final AdminMessage message;
+  final VoidCallback? onMarkAsRead;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+
+    final (icon, color) = _iconAndColor(message.type);
+    final timeLabel = _formatTime(message.createdAt);
+
+    return AppCard(
+      elevated: true,
+      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderColor: message.isRead
+          ? scheme.outlineVariant.withValues(alpha: 0.3)
+          : color.withValues(alpha: 0.3),
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: AppRadius.smAll,
+            ),
+            child: Icon(icon, size: 18, color: color),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        message.title,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: message.isRead
+                              ? scheme.onSurfaceVariant
+                              : scheme.onSurface,
+                        ),
+                      ),
+                    ),
+                    if (!message.isRead)
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  message.body,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time_outlined,
+                      size: 12,
+                      color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      timeLabel,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Text(
+                        _typeLabel(message.type, l10n),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: color,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (onMarkAsRead != null)
+            IconButton(
+              onPressed: onMarkAsRead,
+              icon: Icon(
+                Icons.mark_email_read_outlined,
+                size: 18,
+                color: scheme.onSurfaceVariant,
+              ),
+              tooltip: l10n.notificationMarkAsRead,
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 32,
+                minHeight: 32,
+                maxWidth: 32,
+                maxHeight: 32,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  static (IconData, Color) _iconAndColor(AdminMessageType type) {
+    return switch (type) {
+      AdminMessageType.billingQuote => (
+        Icons.request_quote_outlined,
+        const Color(0xFF3B82F6), // blue
+      ),
+      AdminMessageType.planExpiryChange => (
+        Icons.calendar_month_outlined,
+        const Color(0xFF8B5CF6), // violet
+      ),
+      AdminMessageType.planExpiringSoon => (
+        Icons.schedule_outlined,
+        const Color(0xFFF59E0B), // amber
+      ),
+      AdminMessageType.general => (
+        Icons.mail_outline,
+        const Color(0xFF6366F1), // indigo
+      ),
+    };
+  }
+
+  static String _typeLabel(AdminMessageType type, AppLocalizations l10n) {
+    return switch (type) {
+      AdminMessageType.billingQuote => l10n.adminMessagesTypeBillingQuote,
+      AdminMessageType.planExpiryChange => l10n.adminMessagesTypePlanExpiryChange,
+      AdminMessageType.planExpiringSoon => l10n.adminMessagesTypePlanExpiringSoon,
+      AdminMessageType.general => l10n.adminMessagesTypeGeneral,
+    };
+  }
+
+  String _formatTime(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inMinutes < 1) return 'Agora';
+    if (diff.inHours < 1) return '${diff.inMinutes}m';
+    if (diff.inDays == 0) return DateFormat.Hm().format(date);
+    if (diff.inDays == 1) return 'Ontem';
+    if (diff.inDays < 7) return '${diff.inDays}d';
     return DateFormat.yMMMd().format(date);
   }
 }
