@@ -78,9 +78,9 @@ class AppShell extends ConsumerWidget {
  @override
  Widget build(BuildContext context, WidgetRef ref) {
  final index = ref.watch(shellIndexProvider);
- final wide = MediaQuery.sizeOf(context).width >= 880;
- final l10n = context.l10n;
- final scheme = Theme.of(context).colorScheme;
+ final wide = MediaQuery.sizeOf(context).width >= 880;    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
  final destinations = [
  (Icons.home_outlined, Icons.home_rounded, l10n.appNavHome),
@@ -111,12 +111,20 @@ class AppShell extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 48,
+        title: Text(
+          'Dumbhanengue',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
+          ),
+        ),
+        titleSpacing: 16,
         actions: [
           // Badge de notificações com pulso
           PulseBadge(
             count: unreadCount,
             child: IconButton(
-              icon: const Icon(Icons.notifications_outlined, size: 22),
+              icon: const Icon(Icons.notifications_outlined, size: 20),
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -127,7 +135,7 @@ class AppShell extends ConsumerWidget {
               tooltip: l10n.notificationTitle,
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
         ],
       ),
       body: wide
