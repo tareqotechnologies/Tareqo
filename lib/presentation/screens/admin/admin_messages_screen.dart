@@ -64,8 +64,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
               // Selecionar tenant
               Text(
                 l10n.adminMessagesTenantLabel,
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
+                  fontSize: 10,
                 ),
               ),
               const SizedBox(height: 8),
@@ -97,8 +98,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
               // Tipo de mensagem
               Text(
                 l10n.adminMessagesTypeLabel,
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
+                  fontSize: 10,
                 ),
               ),
               const SizedBox(height: 8),

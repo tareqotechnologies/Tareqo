@@ -809,7 +809,9 @@ class _TenantDetailSheet extends ConsumerWidget {
                       children: [
                         Text(
                           tenant.businessName,
-                          style: theme.textTheme.bodyMedium,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         GestureDetector(

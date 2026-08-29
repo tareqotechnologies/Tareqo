@@ -314,8 +314,9 @@ class _Pill extends StatelessWidget {
       children: [
         Text(
           '$count',
-          style: theme.textTheme.labelMedium?.copyWith(
+          style: theme.textTheme.labelSmall?.copyWith(
             color: color,
+            fontSize: 11,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
@@ -323,6 +324,7 @@ class _Pill extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 9,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
@@ -522,7 +524,9 @@ class _AuditTile extends StatelessWidget {
                   // Action + entity
                   Text.rich(
                     TextSpan(
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                       children: [
                         TextSpan(
                           text: entry.actionLabel,
@@ -707,13 +711,15 @@ class _AuditDetailSheet extends StatelessWidget {
             Text(
               entry.actionLabel,
               style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               '${entry.entityTypeLabel}  ${entry.entityId ?? '—'}',
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
+                fontSize: 10,
               ),
             ),
             if (status != null) ...[

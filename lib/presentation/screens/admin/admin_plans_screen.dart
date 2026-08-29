@@ -189,8 +189,9 @@ class _Pill extends StatelessWidget {
       children: [
         Text(
           '$count',
-          style: theme.textTheme.labelMedium?.copyWith(
+          style: theme.textTheme.labelSmall?.copyWith(
             color: color,
+            fontSize: 11,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
@@ -198,6 +199,7 @@ class _Pill extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 9,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
@@ -260,7 +262,9 @@ class _PlanTile extends ConsumerWidget {
                   // Name + price
                   Text.rich(
                     TextSpan(
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                       children: [
                         TextSpan(text: plan.name),
                         TextSpan(
@@ -268,7 +272,7 @@ class _PlanTile extends ConsumerWidget {
                               '  ${Formatters.currency(plan.priceMonthlyCents)}/mês',
                           style: TextStyle(
                             color: scheme.onSurfaceVariant,
-                            fontSize: 10,
+                            fontSize: 9,
                           ),
                         ),
                       ],
@@ -422,7 +426,9 @@ class _PlanDetailSheet extends ConsumerWidget {
                       children: [
                         Text(
                           plan.name,
-                          style: theme.textTheme.bodyMedium?.copyWith(),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         GestureDetector(
                           onTap: () {
@@ -653,7 +659,8 @@ class _InfoRow extends StatelessWidget {
           ),
           Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 11,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
@@ -736,7 +743,9 @@ class _TenantMiniTile extends StatelessWidget {
               children: [
                 Text(
                   tenant.businessName,
-                  style: theme.textTheme.bodyMedium?.copyWith(),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -959,7 +968,9 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
                       widget.plan == null
                           ? l10n.adminPlanNewTitle
                           : l10n.adminPlanEditTitle,
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                   IconButton(

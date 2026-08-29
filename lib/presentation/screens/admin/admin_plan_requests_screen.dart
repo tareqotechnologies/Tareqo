@@ -282,16 +282,15 @@ class _PlanBadge extends StatelessWidget {
  context,
  ).textTheme.labelSmall?.copyWith(color: color),
  ),
- const SizedBox(height: 2),
- Text(
- label,
- // Quebra em até 2 linhas — o nome do plano nunca é cortado.
- maxLines: 2,
- overflow: TextOverflow.ellipsis,
- style: Theme.of(context).textTheme.bodyMedium?.copyWith(
- color: color,
- ),
- ),
+ const SizedBox(height: 2),                Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
  ],
  ),
  );
