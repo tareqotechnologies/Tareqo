@@ -92,13 +92,16 @@ class _AdminShellState extends ConsumerState<AdminShell> {
 
     final body = FadeIndexedStack(index: _index, children: _sections);
 
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 48,
         title: Row(
           children: [
             Container(
-              width: 32,
-              height: 32,
+              width: 28,
+              height: 28,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: scheme.primary,
@@ -106,19 +109,21 @@ class _AdminShellState extends ConsumerState<AdminShell> {
               ),
               child: Icon(
                 Icons.admin_panel_settings_outlined,
-                size: 18,
+                size: 16,
                 color: scheme.onPrimary,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
               l10n.adminTitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    letterSpacing: -0.3,
-                  ),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
             ),
           ],
         ),
+        titleSpacing: 16,
         actions: const [SignOutButton(), SizedBox(width: 8)],
       ),
       body: wide
