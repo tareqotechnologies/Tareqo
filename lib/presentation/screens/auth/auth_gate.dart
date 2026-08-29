@@ -115,7 +115,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     // Cancelar timer quando auth resolver.
     authState.whenOrNull(
       data: (_) => _authTimer?.cancel(),
-      error: (_, __) => _authTimer?.cancel(),
+      error: (_, _) => _authTimer?.cancel(),
     );
     return authState.when(
       loading: () => const _SplashScreen(),
