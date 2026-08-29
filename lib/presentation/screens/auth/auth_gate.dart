@@ -427,95 +427,13 @@ class _TenantErrorScreen extends StatelessWidget {
   }
 }
 
-/// Tela de abertura animada (restaurando sessão / resolvendo papel e tenant).
+/// Tela de abertura (restaurando sessão / resolvendo papel e tenant).
 ///
-/// Splash animado profissional com fundo azul, logo que escala e fade-in
-/// suave, nome da marca com slide-up, e spinner. O timer de segurança é
-/// gerido pelo [AuthGate] (não por este widget) — este é apenas visual.
-class _SplashScreen extends StatefulWidget {
+/// Splash simples e estático: logo + spinner. Sem animações complexas
+/// para evitar crashes silenciosos. O timer de segurança é gerido pelo
+/// [AuthGate].
+class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
-
-  @override
-  State<_SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<_SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  late final Animation<double> _logoScale;
-  late final Animation<double> _logoFade;
-  late final Animation<double> _textFade;
-  late final Animation<Offset> _textSlide;
-  late final Animation<double> _spinnerFade;
-  bool _animInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-
-    // Logo: escala de 0.7 → 1.0 + fade-in (0 → 1) nos primeiros 500ms.
-    _logoScale = Tween<double>(begin: 0.7, end: 1).animate(
-      CurvedAnimation(
-        parent: _ctrl,
-        curve: const Interval(0, 0.42, curve: Curves.easeOutBack),
-      ),
-    );
-    _logoFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _ctrl,
-        curve: const Interval(0, 0.35, curve: Curves.easeOut),
-      ),
-    );
-
-    // Marca: fade-in + slide-up (20px) entre 300ms e 700ms.
-    _textFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _ctrl,
-        curve: const Interval(0.25, 0.58, curve: Curves.easeOut),
-      ),
-    );
-    _textSlide = Tween<Offset>(
-      begin: const Offset(0, 0.35),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _ctrl,
-        curve: const Interval(0.25, 0.58, curve: Curves.easeOutCubic),
-      ),
-    );
-
-    // Spinner + status: fade-in suave entre 500ms e 800ms.
-    _spinnerFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _ctrl,
-        curve: const Interval(0.42, 0.68, curve: Curves.easeOut),
-      ),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_animInitialized) {
-      _animInitialized = true;
-      final reduceMotion = MediaQuery.disableAnimationsOf(context);
-      if (reduceMotion) {
-        _ctrl.value = 1;
-      } else {
-        _ctrl.forward();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -528,89 +446,52 @@ class _SplashScreenState extends State<_SplashScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedBuilder(
-              animation: _ctrl,
-              builder: (context, child) => Opacity(
-                opacity: _logoFade.value,
-                child: Transform.scale(
-                  scale: _logoScale.value,
-                  child: child,
-                ),
-              ),
-              child: Container(
-                width: 101,
-                height: 101,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.white24,
-                      blurRadius: 48,
-                      spreadRadius: 8,
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child: Image.asset(
-                    'assets/branding/splash_logo.png',
-                    width: 81,
-                    height: 81,
-                    fit: BoxFit.contain,
+            Container(
+              width: 101,
+              height: 101,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.white24,
+                    blurRadius: 48,
+                    spreadRadius: 8,
                   ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: Image.asset(
+                  'assets/branding/splash_logo.png',
+                  width: 81,
+                  height: 81,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            // Marca: fade + slide-up animado.
-            AnimatedBuilder(
-              animation: _ctrl,
-              builder: (context, child) => Opacity(
-                opacity: _textFade.value,
-                child: FractionalTranslation(
-                  translation: _textSlide.value,
-                  child: child,
-                ),
-              ),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  'Dumbhanengue',
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                ),
+            Text(
+              'Dumbhanengue',
+              style: theme.textTheme.displaySmall?.copyWith(
+                color: Colors.white,
+                letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 40),
-            // Spinner + status: fade-in suave.
-            AnimatedBuilder(
-              animation: _ctrl,
-              builder: (context, child) => Opacity(
-                opacity: _spinnerFade.value,
-                child: child,
+            const SizedBox(
+              height: 22,
+              width: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Colors.white,
+                backgroundColor: Colors.white24,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white,
-                      backgroundColor: Colors.white24,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.splashLoading,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.splashLoading,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.white70,
               ),
             ),
           ],

@@ -72,20 +72,27 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
  @override
  Future<void> setNewPassword({required String newPassword}) =>
- _auth.updateUser(UserAttributes(password: newPassword));
-
- @override
- Stream<AppUser?> get authStateChanges => _auth.onAuthStateChange.map((state) {
- final user = state.session?.user;
- return user == null ? null : _toAppUser(user);
- });
-
- @override
- Stream<AuthEvent> get authEvents => _auth.onAuthStateChange.map(
- (state) => state.event == AuthChangeEvent.passwordRecovery
- ? AuthEvent.passwordRecovery
- : AuthEvent.other,
- );
+ _auth.updateUser(UserAttributes(password: newPassword));  @override
+  Stream<AppUser?> get authStateChanges async* {
+    // Emit the current session FIRST (synchronous) so the StreamProvider
+    // never stays stuck in loading when Supabase is reachable but slow.
+    final current = _auth.currentSession?.user;
+    yield current == null ? null : _toAppUser(current);
+    // Then listen for future changes.
+    yield* _auth.onAuthStateChange.map((state) {
+      final user = state.session?.user;
+      return user == null ? null : _toAppUser(user);
+    });
+  }  @override
+  Stream<AuthEvent> get authEvents async* {
+    // Emit non-recovery as initial event.
+    yield AuthEvent.other;
+    yield* _auth.onAuthStateChange.map(
+      (state) => state.event == AuthChangeEvent.passwordRecovery
+          ? AuthEvent.passwordRecovery
+          : AuthEvent.other,
+    );
+  }
 
  AppUser _toAppUser(
  User? user, {
