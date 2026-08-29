@@ -56,13 +56,14 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     _startAuthTimeout();
   }
 
+  /// Timer de segurança GLOBAL: cobre TODA a cadeia auth → admin → tenant.
+  /// Só é cancelado quando saímos definitivamente do splash (mostramos
+  /// LoginScreen, AppShell, AdminShell, etc.).
   void _startAuthTimeout() {
     _authTimer?.cancel();
     _authTimer = Timer(const Duration(seconds: 10), () {
       if (mounted && !_authTimedOut) {
         setState(() => _authTimedOut = true);
-        // Invalidar o provider para forçar nova tentativa.
-        ref.invalidate(authStateProvider);
       }
     });
   }
@@ -73,17 +74,34 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     super.dispose();
   }
 
+  /// Cancela o timer de segurança — chamado apenas quando o build retorna
+  /// uma tela REAL (não splash), garantindo que o timer cobre toda a
+  /// cadeia de loading (auth + super_admin + tenant + employees).
+  /// Cancela o timer de segurança quando saímos do splash.
+  void _cancelTimerIfResolved() {
+    if (_authTimer != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_authTimedOut) {
+          _authTimer?.cancel();
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // ── Tela de timeout global ──────────────────────────────────────
     if (_authTimedOut) {
       return _AuthErrorScreen(
         onRetry: () {
           setState(() => _authTimedOut = false);
+          // Invalidar TODOS os providers da cadeia.
           ref.invalidate(authStateProvider);
           _startAuthTimeout();
         },
       );
     }
+
     final authState = ref.watch(authStateProvider);
     // Sessão veio de um link de RECUPERAÇÃO de senha? O gotrue emite o
     // evento `passwordRecovery` ao trocar o token do e-mail — o AuthGate
@@ -107,16 +125,10 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     // (timer + Realtime). No sign-out (usuário null) o autoDispose
     // descarta o provider e CANCELA o timer de fallback e o canal
     // Realtime — nada roda em segundo plano durante a sessão inteira.
-    // (Dono/super admin/pendente continuam com o timer vivo, mas o guard
-    // de [refreshEmployeeLinksIfNeeded] torna cada tick um no-op barato.)
     if (authState.value != null) {
       ref.watch(employeesPollingProvider);
     }
-    // Cancelar timer quando auth resolver.
-    authState.whenOrNull(
-      data: (_) => _authTimer?.cancel(),
-      error: (_, _) => _authTimer?.cancel(),
-    );
+
     return authState.when(
       loading: () => const _SplashScreen(),
       // Erro no stream de sessão: mostra um estado explícito com retry em
@@ -128,6 +140,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
           stackTrace,
           hint: 'AuthGate: erro no stream de sessão',
         );
+        _cancelTimerIfResolved();
         return _AuthErrorScreen(
           onRetry: () => ref.invalidate(authStateProvider),
         );
@@ -135,7 +148,6 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       data: (user) {
         if (user == null) {
           // Sessão encerrada: o sinal de recuperação não faz mais sentido.
-          // (Escrita adiada — o branch roda durante o build.)
           if (ref.read(passwordRecoveryPendingProvider)) {
             Future.microtask(() {
               if (mounted) {
@@ -144,11 +156,15 @@ class _AuthGateState extends ConsumerState<AuthGate> {
               }
             });
           }
+          _cancelTimerIfResolved();
           return const LoginScreen();
         }
         // Recovery: sessão veio do link do e-mail — definir a nova senha
         // ANTES de entrar na área de gestão.
-        if (recoveryPending) return const SetNewPasswordScreen();
+        if (recoveryPending) {
+          _cancelTimerIfResolved();
+          return const SetNewPasswordScreen();
+        }
 
         // Super admin: papel baseado em BANCO (tabela `public.super_admins`
         // no Supabase via RPC `is_super_admin`) — não mais e-mail
@@ -168,8 +184,9 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                 );
                 return _tenantGate(ref, user);
               },
-              data: (isAdmin) =>
-                  isAdmin ? const AdminShell() : _tenantGate(ref, user),
+              data: (isAdmin) => isAdmin
+                  ?              const AdminShell()
+                  : _tenantGate(ref, user),
             );
           },
         );
@@ -198,6 +215,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       },
       data: (tenant) {
         if (tenant == null) {
+          _cancelTimerIfResolved();
           return TenantOnboardingScreen(user: user);
         }
         // Funcionário DESATIVADO pelo dono: bloqueio total — o app mostra
@@ -206,12 +224,6 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         if (tenant.status == TenantStatus.approved &&
             tenant.ownerUserId != user.id) {
           final employeesAsync = ref.watch(employeesProvider(tenant.id));
-          // Enquanto a PRIMEIRA busca dos vínculos não termina, `value` é
-          // null — NÃO decidir bloqueio (senão todo funcionário válido veria
-          // "Acesso suspenso" por um instante até a lista chegar). Mantém o
-          // splash; a decisão só acontece com dados reais. Num REFRESH
-          // (poll de 30s) o Riverpod mantém o valor anterior, então
-          // `value != null` e não há flash a cada poll.
           if (employeesAsync.isLoading && employeesAsync.value == null) {
             return const _SplashScreen();
           }
@@ -220,18 +232,13 @@ class _AuthGateState extends ConsumerState<AuthGate> {
             final myLinks = employees
                 .where((employee) => employee.userId == user.id)
                 .toList();
-            // Sem vínculo OU todos os vínculos desativados → conta suspensa.
             if (myLinks.isEmpty || myLinks.every((link) => !link.isActive)) {
+              _cancelTimerIfResolved();
               return _BlockedEmployeeScreen(
                 onSignOut: () => ref.read(signOutUseCaseProvider).call(),
               );
             }
           } else if (employeesAsync.hasError) {
-            // Falha transitória (ex.: rede) ao buscar os vínculos: fail-open
-            // — deixa seguir para o fluxo normal abaixo. O servidor
-            // permanece autoritativo (RLS/RPCs negam quem está realmente
-            // suspenso) e o polling central reavalia em breve. Sem dados de
-            // vínculo, nunca decidir um bloqueio: seria um falso positivo.
             final error = employeesAsync.error;
             final stackTrace = employeesAsync.stackTrace;
             if (error != null && stackTrace != null) {
@@ -243,11 +250,13 @@ class _AuthGateState extends ConsumerState<AuthGate> {
             }
           }
         }
-        return switch (tenant.status) {
+        final screen = switch (tenant.status) {
           TenantStatus.pending => TenantPendingScreen(tenant: tenant),
           TenantStatus.rejected => TenantRejectedScreen(tenant: tenant),
           TenantStatus.approved => const AppShell(),
         };
+        _cancelTimerIfResolved();
+        return screen;
       },
     );
   }
@@ -420,11 +429,9 @@ class _TenantErrorScreen extends StatelessWidget {
 
 /// Tela de abertura animada (restaurando sessão / resolvendo papel e tenant).
 ///
-/// V6: splash animado profissional com fundo escuro (tema dark-first V3),
-/// logo que escala e fade-in suave, nome da marca com slide-up, e
-/// shimmer sutil no spinner. A transição do splash nativo para o
-/// Flutter é sem flash — ambos usam o mesmo fundo escuro #121218.
-/// Respeita "reduzir movimento" do sistema.
+/// Splash animado profissional com fundo azul, logo que escala e fade-in
+/// suave, nome da marca com slide-up, e spinner. O timer de segurança é
+/// gerido pelo [AuthGate] (não por este widget) — este é apenas visual.
 class _SplashScreen extends StatefulWidget {
   const _SplashScreen();
 
@@ -441,18 +448,10 @@ class _SplashScreenState extends State<_SplashScreen>
   late final Animation<Offset> _textSlide;
   late final Animation<double> _spinnerFade;
   bool _animInitialized = false;
-  bool _timedOut = false;
 
   @override
   void initState() {
     super.initState();
-    // Timeout de segurança: se a sessão/tenant não resolver em 15s,
-    // mostra erro com retry em vez de ficar preso no splash.
-    Future.delayed(const Duration(seconds: 15), () {
-      if (mounted && !_timedOut) {
-        setState(() => _timedOut = true);
-      }
-    });
     _ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -501,13 +500,11 @@ class _SplashScreenState extends State<_SplashScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Acessa MediaQuery APENAS aqui (não em initState) — o inherited widget
-    // só está disponível depois que o widget está montado na árvore.
     if (!_animInitialized) {
       _animInitialized = true;
       final reduceMotion = MediaQuery.disableAnimationsOf(context);
       if (reduceMotion) {
-        _ctrl.value = 1; // Instantâneo: todos os valores ao final.
+        _ctrl.value = 1;
       } else {
         _ctrl.forward();
       }
@@ -525,38 +522,6 @@ class _SplashScreenState extends State<_SplashScreen>
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    if (_timedOut) {
-      return Scaffold(
-        backgroundColor: const Color(0xFF0076F6),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.cloud_off, size: 48, color: Colors.white),
-              const SizedBox(height: 16),
-              Text(
-                l10n.authErrorCheckConnection,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: () {
-                  setState(() => _timedOut = false);
-                  // Re-check auth state by forcing reload.
-                  // The parent AuthGate watches authStateProvider which
-                  // will re-evaluate automatically.
-                },
-                icon: const Icon(Icons.refresh),
-                label: Text(l10n.commonRetry),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
     return Scaffold(
       backgroundColor: const Color(0xFF0076F6),
       body: Center(
@@ -629,7 +594,7 @@ class _SplashScreenState extends State<_SplashScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 22,
                     width: 22,
                     child: CircularProgressIndicator(
