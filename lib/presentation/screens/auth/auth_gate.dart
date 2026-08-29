@@ -22,22 +22,6 @@ import 'set_new_password_screen.dart';
 
 /// Portão de autenticação e de **acesso**: decide a tela raiz com base na
 /// sessão e no papel do usuário logado.
-///
-/// - `loading` (restaurando sessão persistida) → splash;
-/// - deslogado → [LoginScreen];
-/// - **super admin** (papel baseado em banco — `public.super_admins` via
-///   RPC `is_super_admin`) → [AdminShell];
-/// - logado sem tenant → [TenantOnboardingScreen] (escolher plano + negócio);
-/// - tenant `pending` → [TenantPendingScreen] (aguardando aprovação ≤ 24h);
-/// - tenant `rejected` → [TenantRejectedScreen] (motivo da rejeição);
-/// - tenant `approved` → [AppShell] (área de gestão do dono).
-///
-/// **Bloqueio REATIVO de funcionários desativados:** o polling CENTRAL
-/// ([employeesPollingProvider]) re-busca os vínculos no Realtime (Supabase
-/// — bloqueio INSTANTÂNEO quando o dono desativa em outro dispositivo) e
-/// num timer de fallback de 30s ([employeePollIntervalProvider], modo
-/// local/websocket fora do ar). O servidor segue sendo a autoridade:
-/// RLS/RPCs negam as operações imediatamente.
 class AuthGate extends ConsumerStatefulWidget {
   const AuthGate({super.key});
 
@@ -56,9 +40,8 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     _startAuthTimeout();
   }
 
-  /// Timer de segurança GLOBAL: cobre TODA a cadeia auth → admin → tenant.
-  /// Só é cancelado quando saímos definitivamente do splash (mostramos
-  /// LoginScreen, AppShell, AdminShell, etc.).
+  /// Timer de segurança GLOBAL: 10s para toda a cadeia auth → admin → tenant.
+  /// Só é cancelado quando saímos definitivamente do splash.
   void _startAuthTimeout() {
     _authTimer?.cancel();
     _authTimer = Timer(const Duration(seconds: 10), () {
@@ -75,17 +58,11 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   }
 
   /// Cancela o timer de segurança — chamado apenas quando o build retorna
-  /// uma tela REAL (não splash), garantindo que o timer cobre toda a
-  /// cadeia de loading (auth + super_admin + tenant + employees).
-  /// Cancela o timer de segurança quando saímos do splash.
-  void _cancelTimerIfResolved() {
-    if (_authTimer != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && !_authTimedOut) {
-          _authTimer?.cancel();
-        }
-      });
-    }
+  /// uma tela REAL (LoginScreen, AppShell, AdminShell, etc.), nunca quando
+  /// volta ao splash.
+  void _cancelTimer() {
+    _authTimer?.cancel();
+    _authTimer = null;
   }
 
   @override
@@ -97,22 +74,17 @@ class _AuthGateState extends ConsumerState<AuthGate> {
           setState(() => _authTimedOut = false);
           // Invalidar TODOS os providers da cadeia.
           ref.invalidate(authStateProvider);
+          ref.invalidate(isSuperAdminProvider);
           _startAuthTimeout();
         },
       );
     }
 
     final authState = ref.watch(authStateProvider);
-    // Sessão veio de um link de RECUPERAÇÃO de senha? O gotrue emite o
-    // evento `passwordRecovery` ao trocar o token do e-mail — o AuthGate
-    // então exige definir a nova senha antes de entrar.
+    // Sessão veio de um link de RECUPERAÇÃO de senha?
     final recoveryPending = ref.watch(passwordRecoveryPendingProvider);
     ref.listen(authEventsProvider, (previous, next) {
       if (next.value == AuthEvent.passwordRecovery) {
-        // Escrita ADIADA para o próximo microtask: o listener pode rodar
-        // DURANTE a construção da árvore (ex.: evento de recovery chegando
-        // junto com o primeiro frame após o deep link) e o Riverpod 3
-        // proíbe modificar um provider nessa fase.
         Future.microtask(() {
           if (mounted) {
             ref.read(passwordRecoveryPendingProvider.notifier).state = true;
@@ -120,34 +92,26 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         });
       }
     });
-    // POLLING CENTRAL: mantém o provider vivo APENAS com usuário logado —
-    // o refresh dos vínculos acontece dentro do provider a cada sinal
-    // (timer + Realtime). No sign-out (usuário null) o autoDispose
-    // descarta o provider e CANCELA o timer de fallback e o canal
-    // Realtime — nada roda em segundo plano durante a sessão inteira.
-    if (authState.value != null) {
-      ref.watch(employeesPollingProvider);
-    }
 
     return authState.when(
       loading: () => const _SplashScreen(),
-      // Erro no stream de sessão: mostra um estado explícito com retry em
-      // vez de voltar silenciosamente para o login (evita confundir uma
-      // falha transitória com "sessão encerrada").
       error: (error, stackTrace) {
         CrashReporting.capture(
           error,
           stackTrace,
           hint: 'AuthGate: erro no stream de sessão',
         );
-        _cancelTimerIfResolved();
+        // NÃO cancelar o timer aqui — o timeout continua como safety net.
         return _AuthErrorScreen(
-          onRetry: () => ref.invalidate(authStateProvider),
+          onRetry: () {
+            ref.invalidate(authStateProvider);
+            _startAuthTimeout();
+          },
         );
       },
       data: (user) {
         if (user == null) {
-          // Sessão encerrada: o sinal de recuperação não faz mais sentido.
+          // Sessão encerrada.
           if (ref.read(passwordRecoveryPendingProvider)) {
             Future.microtask(() {
               if (mounted) {
@@ -156,21 +120,16 @@ class _AuthGateState extends ConsumerState<AuthGate> {
               }
             });
           }
-          _cancelTimerIfResolved();
+          // NÃO cancelar o timer — pode ser que o Supabase ainda vá
+          // emitir a sessão restaurada via onAuthStateChange.
           return const LoginScreen();
         }
-        // Recovery: sessão veio do link do e-mail — definir a nova senha
-        // ANTES de entrar na área de gestão.
+        // Recovery: sessão veio do link do e-mail.
         if (recoveryPending) {
-          _cancelTimerIfResolved();
           return const SetNewPasswordScreen();
         }
 
-        // Super admin: papel baseado em BANCO (tabela `public.super_admins`
-        // no Supabase via RPC `is_super_admin`) — não mais e-mail
-        // hardcoded. Enquanto o papel carrega, mostra o splash; numa falha
-        // transitória, segue para o fluxo do tenant (o banco permanece
-        // autoritativo e negará ações de admin sem o papel).
+        // Super admin check.
         return Consumer(
           builder: (context, ref, _) {
             final adminAsync = ref.watch(isSuperAdminProvider(user.id));
@@ -185,7 +144,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                 return _tenantGate(ref, user);
               },
               data: (isAdmin) => isAdmin
-                  ?              const AdminShell()
+                  ? const AdminShell()
                   : _tenantGate(ref, user),
             );
           },
@@ -194,8 +153,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     );
   }
 
-  /// Portão do tenant (dono/funcionário): resolve o tenant do usuário e
-  /// decide entre onboarding, pendente, rejeitado ou área de gestão.
+  /// Portão do tenant (dono/funcionário).
   Widget _tenantGate(WidgetRef ref, AppUser user) {
     final tenantAsync = ref.watch(myTenantProvider(user.id));
     return tenantAsync.when(
@@ -206,21 +164,19 @@ class _AuthGateState extends ConsumerState<AuthGate> {
           stackTrace,
           hint: 'AuthGate: erro ao resolver tenant',
         );
-        // Não voltar para o login (usuário já logado): mostra um estado de
-        // erro com tentar novamente.
         return _TenantErrorScreen(
           onRetry: () => ref.invalidate(myTenantProvider(user.id)),
           onSignOut: () => ref.read(signOutUseCaseProvider).call(),
         );
       },
       data: (tenant) {
+        // Chegámos a um ecrã real — cancelar o timer.
+        _cancelTimer();
+
         if (tenant == null) {
-          _cancelTimerIfResolved();
           return TenantOnboardingScreen(user: user);
         }
-        // Funcionário DESATIVADO pelo dono: bloqueio total — o app mostra
-        // a tela de acesso suspenso (o servidor também nega as operações,
-        // via is_my_store exigindo vínculo ativo). O dono nunca passa aqui.
+        // Funcionário DESATIVADO pelo dono.
         if (tenant.status == TenantStatus.approved &&
             tenant.ownerUserId != user.id) {
           final employeesAsync = ref.watch(employeesProvider(tenant.id));
@@ -233,7 +189,6 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                 .where((employee) => employee.userId == user.id)
                 .toList();
             if (myLinks.isEmpty || myLinks.every((link) => !link.isActive)) {
-              _cancelTimerIfResolved();
               return _BlockedEmployeeScreen(
                 onSignOut: () => ref.read(signOutUseCaseProvider).call(),
               );
@@ -250,22 +205,17 @@ class _AuthGateState extends ConsumerState<AuthGate> {
             }
           }
         }
-        final screen = switch (tenant.status) {
+        return switch (tenant.status) {
           TenantStatus.pending => TenantPendingScreen(tenant: tenant),
           TenantStatus.rejected => TenantRejectedScreen(tenant: tenant),
           TenantStatus.approved => const AppShell(),
         };
-        _cancelTimerIfResolved();
-        return screen;
       },
     );
   }
 }
 
-/// Funcionário com acesso suspenso pelo dono (conta desativada).
-///
-/// Mostra um estado explícito com sair da conta — espelha o bloqueio do
-/// servidor (vínculo `is_active = false` nega toda operação nas lojas).
+/// Funcionário com acesso suspenso pelo dono.
 class _BlockedEmployeeScreen extends StatelessWidget {
   const _BlockedEmployeeScreen({required this.onSignOut});
 
@@ -316,8 +266,7 @@ class _BlockedEmployeeScreen extends StatelessWidget {
   }
 }
 
-/// Estado de erro no stream de autenticação: oferece "tentar novamente"
-/// (recarrega o provider) — sem usuário logado, não há sessão para sair.
+/// Estado de erro no stream de autenticação.
 class _AuthErrorScreen extends StatelessWidget {
   const _AuthErrorScreen({required this.onRetry});
 
@@ -368,8 +317,7 @@ class _AuthErrorScreen extends StatelessWidget {
   }
 }
 
-/// Estado de erro na resolução do tenant: mantém o usuário logado e
-/// oferece "tentar novamente" e "sair da conta".
+/// Estado de erro na resolução do tenant.
 class _TenantErrorScreen extends StatelessWidget {
   const _TenantErrorScreen({required this.onRetry, required this.onSignOut});
 
@@ -427,11 +375,7 @@ class _TenantErrorScreen extends StatelessWidget {
   }
 }
 
-/// Tela de abertura (restaurando sessão / resolvendo papel e tenant).
-///
-/// Splash simples e estático: logo + spinner. Sem animações complexas
-/// para evitar crashes silenciosos. O timer de segurança é gerido pelo
-/// [AuthGate].
+/// Splash screen — visual estático. Timer é gerido pelo [AuthGate].
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
 

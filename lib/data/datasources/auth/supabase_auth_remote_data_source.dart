@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../domain/entities/app_user.dart';
@@ -73,25 +75,35 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
  @override
  Future<void> setNewPassword({required String newPassword}) =>
  _auth.updateUser(UserAttributes(password: newPassword));  @override
-  Stream<AppUser?> get authStateChanges async* {
-    // Emit the current session FIRST (synchronous) so the StreamProvider
-    // never stays stuck in loading when Supabase is reachable but slow.
+  Stream<AppUser?> get authStateChanges {
+    final controller = StreamController<AppUser?>.broadcast();
+    // Emit the current session FIRST so the StreamProvider never stays
+    // stuck in loading.
     final current = _auth.currentSession?.user;
-    yield current == null ? null : _toAppUser(current);
-    // Then listen for future changes.
-    yield* _auth.onAuthStateChange.map((state) {
+    controller.add(current == null ? null : _toAppUser(current));
+    // Forward future changes from onAuthStateChange.
+    final sub = _auth.onAuthStateChange.listen((state) {
       final user = state.session?.user;
-      return user == null ? null : _toAppUser(user);
+      controller.add(user == null ? null : _toAppUser(user));
     });
-  }  @override
-  Stream<AuthEvent> get authEvents async* {
-    // Emit non-recovery as initial event.
-    yield AuthEvent.other;
-    yield* _auth.onAuthStateChange.map(
-      (state) => state.event == AuthChangeEvent.passwordRecovery
-          ? AuthEvent.passwordRecovery
-          : AuthEvent.other,
+    controller.onCancel = () => sub.cancel();
+    return controller.stream;
+  }
+
+  @override
+  Stream<AuthEvent> get authEvents {
+    final controller = StreamController<AuthEvent>.broadcast();
+    controller.add(AuthEvent.other);
+    final sub = _auth.onAuthStateChange.listen(
+      (state) {
+        final event = state.event == AuthChangeEvent.passwordRecovery
+            ? AuthEvent.passwordRecovery
+            : AuthEvent.other;
+        controller.add(event);
+      },
     );
+    controller.onCancel = () => sub.cancel();
+    return controller.stream;
   }
 
  AppUser _toAppUser(
