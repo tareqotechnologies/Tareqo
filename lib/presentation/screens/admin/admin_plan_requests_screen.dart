@@ -44,8 +44,7 @@ class _AdminPlanRequestsScreenState
  appBar: AppBar(
  title: Text(
  l10n.adminUpgradesTitle,
- style: Theme.of(context).textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w500,
+ style: Theme.of(context).textTheme.labelMedium?.copyWith(
  letterSpacing: -0.5,
  ),
  ),
@@ -176,8 +175,7 @@ class _AdminPlanRequestsScreenState
                   children: [
                     Text(
                       tenantName,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                      style: theme.textTheme.bodySmall?.copyWith(
                       ),
                     ),
                     Text(
@@ -291,7 +289,6 @@ class _PlanBadge extends StatelessWidget {
  maxLines: 2,
  overflow: TextOverflow.ellipsis,
  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
- fontWeight: FontWeight.w500,
  color: color,
  ),
  ),

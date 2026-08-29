@@ -389,6 +389,7 @@
   "upgradeError": "Could not send the request. Try again.",
   "upgradeSubmit": "Request upgrade",
   "commonCancel": "Cancel",
+  "commonCopied": "Copied to clipboard",
   "commonConfirm": "Confirm",
   "commonDelete": "Delete",
   "commonDescription": "Description",

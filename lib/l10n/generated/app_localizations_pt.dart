@@ -902,6 +902,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get commonCancel => 'Cancelar';
 
   @override
+  String get commonCopied => 'Copiado para a área de transferência';
+
+  @override
   String get commonConfirm => 'Confirmar';
 
   @override

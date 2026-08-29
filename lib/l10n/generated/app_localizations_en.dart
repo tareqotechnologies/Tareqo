@@ -892,6 +892,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonCancel => 'Cancel';
 
   @override
+  String get commonCopied => 'Copied to clipboard';
+
+  @override
   String get commonConfirm => 'Confirm';
 
   @override

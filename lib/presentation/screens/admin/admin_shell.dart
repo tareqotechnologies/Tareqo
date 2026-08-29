@@ -94,8 +94,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
             const SizedBox(width: AppSpacing.sm),
             Text(
               l10n.adminTitle,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     letterSpacing: -0.3,
                   ),
             ),
@@ -188,7 +187,6 @@ class _NavIcon extends StatelessWidget {
         '$badgeCount',
         style: const TextStyle(
           fontSize: 10,
-          fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
       ),

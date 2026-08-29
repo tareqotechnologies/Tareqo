@@ -389,6 +389,7 @@
   "upgradeError": "Impossible d'envoyer la demande. Réessayez.",
   "upgradeSubmit": "Demander l'évolution",
   "commonCancel": "Annuler",
+  "commonCopied": "Copié dans le presse-papiers",
   "commonConfirm": "Confirmer",
   "commonDelete": "Supprimer",
   "commonDescription": "Description",

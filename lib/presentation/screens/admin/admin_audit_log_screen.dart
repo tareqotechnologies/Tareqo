@@ -7,12 +7,10 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/audit_entry.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/admin_providers.dart';
-import '../../widgets/app_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 
-/// Tela do registro de auditoria — exibe o histórico de ações
-/// administrativas com filtros, agrupamento por data e resumo estatístico.
+/// Registro de auditoria — visual minimalista com detalhes claros.
 class AdminAuditLogScreen extends ConsumerStatefulWidget {
   const AdminAuditLogScreen({super.key});
 
@@ -22,7 +20,7 @@ class AdminAuditLogScreen extends ConsumerStatefulWidget {
 }
 
 class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
-  int _selectedFilter = 0; // 0=All, 1=Tenants, 2=Plans, 3=Upgrades
+  int _selectedFilter = 0;
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -39,22 +37,7 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
     final auditLogAsync = ref.watch(auditLogProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.adminAuditLogTitle,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_outlined),
-            tooltip: l10n.commonRetry,
-            onPressed: () => ref.read(auditLogProvider.notifier).refresh(),
-          ),
-        ],
-      ),
+      backgroundColor: theme.colorScheme.surface,
       body: auditLogAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => ErrorView(
@@ -69,54 +52,78 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
           return RefreshIndicator(
             onRefresh: () =>
                 ref.read(auditLogProvider.notifier).refresh(),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.xxl,
-              ),
+            child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                // ── Stats Summary ──
-                _StatsSummary(stats: stats, l10n: l10n),
-                const SizedBox(height: AppSpacing.lg),
-
-                // ── Search Bar ──
-                _SearchBar(
-                  controller: _searchController,
-                  hintText: l10n.adminAuditLogSearchHint,
-                  onChanged: (v) => setState(() => _searchQuery = v),
+              slivers: [
+                // ── Compact Stats Strip ──
+                SliverToBoxAdapter(
+                  child: _CompactStats(stats: stats, l10n: l10n),
                 ),
-                const SizedBox(height: AppSpacing.sm),
 
-                // ── Filter Chips ──
-                _FilterChips(
-                  selected: _selectedFilter,
-                  l10n: l10n,
-                  onSelected: (i) => setState(() => _selectedFilter = i),
+                // ── Search + Filters ──
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: AppSpacing.sm),
+                        _SearchField(
+                          controller: _searchController,
+                          hintText: l10n.adminAuditLogSearchHint,
+                          onChanged: (v) =>
+                              setState(() => _searchQuery = v),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        _FilterRow(
+                          selected: _selectedFilter,
+                          l10n: l10n,
+                          onSelected: (i) =>
+                              setState(() => _selectedFilter = i),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
 
-                // ── Grouped Entries ──
+                // ── Entries ──
                 if (filtered.isEmpty)
-                  EmptyState(
-                    icon: Icons.history_outlined,
-                    title: _searchQuery.isNotEmpty || _selectedFilter > 0
-                        ? l10n.adminAuditLogNoResults
-                        : l10n.adminAuditLogEmpty,
-                    subtitle: _searchQuery.isEmpty && _selectedFilter == 0
-                        ? l10n.adminAuditLogEmptySubtitle
-                        : null,
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      icon: Icons.history_outlined,
+                      title: _searchQuery.isNotEmpty || _selectedFilter > 0
+                          ? l10n.adminAuditLogNoResults
+                          : l10n.adminAuditLogEmpty,
+                      subtitle:
+                          _searchQuery.isEmpty && _selectedFilter == 0
+                              ? l10n.adminAuditLogEmptySubtitle
+                              : null,
+                    ),
                   )
                 else
                   for (final group in grouped.entries) ...[
-                    _DateHeader(label: group.key),
-                    const SizedBox(height: AppSpacing.xs),
-                    for (final entry in group.value)
-                      _AuditLogTile(entry: entry),
-                    const SizedBox(height: AppSpacing.sm),
+                    SliverToBoxAdapter(
+                      child: _DateHeader(label: group.key),
+                    ),
+                    SliverList.separated(
+                      itemCount: group.value.length,
+                      separatorBuilder: (_, _) => const Divider(
+                        height: 1,
+                        indent: 72,
+                        endIndent: AppSpacing.lg,
+                      ),
+                      itemBuilder: (_, i) =>
+                          _AuditTile(entry: group.value[i]),
+                    ),
                   ],
+
+                // ── Bottom padding ──
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: AppSpacing.xxl),
+                ),
               ],
             ),
           );
@@ -128,7 +135,6 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
   List<AuditEntry> _filterEntries(List<AuditEntry> entries) {
     var result = entries;
 
-    // Filter by action type
     if (_selectedFilter > 0) {
       final actionMap = {
         1: 'tenant_decision',
@@ -141,14 +147,13 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
       }
     }
 
-    // Filter by search query
     if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
+      final q = _searchQuery.toLowerCase();
       result = result
           .where((e) =>
-              e.actionLabel.toLowerCase().contains(query) ||
-              e.entityTypeLabel.toLowerCase().contains(query) ||
-              (e.entityId?.toLowerCase().contains(query) ?? false))
+              e.actionLabel.toLowerCase().contains(q) ||
+              e.entityTypeLabel.toLowerCase().contains(q) ||
+              (e.entityId?.toLowerCase().contains(q) ?? false))
           .toList();
     }
 
@@ -166,27 +171,25 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
 
     final groups = <String, List<AuditEntry>>{};
     for (final entry in entries) {
-      final entryDate = DateTime(
+      final d = DateTime(
         entry.createdAt.year,
         entry.createdAt.month,
         entry.createdAt.day,
       );
 
       String key;
-      if (!entryDate.isBefore(today)) {
+      if (!d.isBefore(today)) {
         key = l10n.adminAuditLogToday;
-      } else if (!entryDate.isBefore(yesterday)) {
+      } else if (!d.isBefore(yesterday)) {
         key = l10n.adminAuditLogYesterday;
-      } else if (!entryDate.isBefore(weekAgo)) {
+      } else if (!d.isBefore(weekAgo)) {
         key = l10n.adminAuditLogThisWeek;
       } else {
         key = l10n.adminAuditLogOlder;
       }
-
       groups.putIfAbsent(key, () => []).add(entry);
     }
 
-    // Reorder: today first, then yesterday, this week, older
     final ordered = <String, List<AuditEntry>>{};
     for (final key in [
       l10n.adminAuditLogToday,
@@ -194,141 +197,133 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
       l10n.adminAuditLogThisWeek,
       l10n.adminAuditLogOlder,
     ]) {
-      if (groups.containsKey(key)) {
-        ordered[key] = groups[key]!;
-      }
+      if (groups.containsKey(key)) ordered[key] = groups[key]!;
     }
-
     return ordered;
   }
 
   _AuditStats _computeStats(List<AuditEntry> entries) {
-    final now = DateTime.now();
-    final sevenDaysAgo = now.subtract(const Duration(days: 7));
-
     final total = entries.length;
-    final approved = entries
-        .where((e) => e.detail?['status'] == 'approved')
-        .length;
-    final rejected = entries
-        .where((e) => e.detail?['status'] == 'rejected')
-        .length;
-    final recent = entries
-        .where((e) => e.createdAt.isAfter(sevenDaysAgo))
-        .length;
-
-    final approvalRate = total > 0 ? ((approved / total) * 100).round() : 0;
-
+    final approved =
+        entries.where((e) => e.detail?['status'] == 'approved').length;
+    final rejected =
+        entries.where((e) => e.detail?['status'] == 'rejected').length;
+    final rate = total > 0 ? ((approved / total) * 100).round() : 0;
     return _AuditStats(
-      total: total,
-      approved: approved,
-      rejected: rejected,
-      recent: recent,
-      approvalRate: approvalRate,
-    );
+        total: total, approved: approved, rejected: rejected, rate: rate);
   }
 }
+
+// ─── Stats ───────────────────────────────────────────────────────────────────
 
 class _AuditStats {
   const _AuditStats({
     required this.total,
     required this.approved,
     required this.rejected,
-    required this.recent,
-    required this.approvalRate,
+    required this.rate,
   });
 
   final int total;
   final int approved;
   final int rejected;
-  final int recent;
-  final int approvalRate;
+  final int rate;
 }
 
-/// Stats summary row — total actions, approved, rejected, approval rate.
-class _StatsSummary extends StatelessWidget {
-  const _StatsSummary({required this.stats, required this.l10n});
+/// Stats compactas — pills inline sem card.
+class _CompactStats extends StatelessWidget {
+  const _CompactStats({required this.stats, required this.l10n});
 
   final _AuditStats stats;
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
 
-    return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      height: 44,
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        0,
+      ),
+      child: Row(
         children: [
-          Text(
-            l10n.adminAuditLogTotalActions,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
+          _Pill(
+            count: stats.total,
+            label: l10n.adminAuditLogAll,
+            color: scheme.onSurface,
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              _StatItem(
-                value: '${stats.total}',
-                label: l10n.adminAuditLogAll,
-                color: scheme.onSurface,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              _StatItem(
-                value: '${stats.approved}',
-                label: l10n.adminAuditLogApproved,
-                color: scheme.primary,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              _StatItem(
-                value: '${stats.rejected}',
-                label: l10n.adminAuditLogRejected,
-                color: scheme.error,
-              ),
-              const Spacer(),
-              _ApprovalRateBadge(rate: stats.approvalRate, l10n: l10n),
-            ],
+          const SizedBox(width: AppSpacing.xs),
+          _Pill(
+            count: stats.approved,
+            label: l10n.adminAuditLogApproved,
+            color: const Color(0xFF16A34A),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          _Pill(
+            count: stats.rejected,
+            label: l10n.adminAuditLogRejected,
+            color: const Color(0xFFDC2626),
+          ),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: _rateColor(stats.rate).withValues(alpha: 0.1),
+              borderRadius: AppRadius.smAll,
+            ),
+            child: Text(
+              '${stats.rate}%',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: _rateColor(stats.rate),
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+            ),
           ),
         ],
       ),
     );
   }
+
+  Color _rateColor(int rate) {
+    if (rate >= 70) return const Color(0xFF16A34A);
+    if (rate >= 40) return const Color(0xFFD97706);
+    return const Color(0xFFDC2626);
+  }
 }
 
-class _StatItem extends StatelessWidget {
-  const _StatItem({
-    required this.value,
+class _Pill extends StatelessWidget {
+  const _Pill({
+    required this.count,
     required this.label,
     required this.color,
   });
 
-  final String value;
+  final int count;
   final String label;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
+          '$count',
+          style: theme.textTheme.labelMedium?.copyWith(
             color: color,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
+        const SizedBox(width: 3),
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -336,54 +331,10 @@ class _StatItem extends StatelessWidget {
   }
 }
 
-class _ApprovalRateBadge extends StatelessWidget {
-  const _ApprovalRateBadge({required this.rate, required this.l10n});
+// ─── Search + Filters ────────────────────────────────────────────────────────
 
-  final int rate;
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = rate >= 70
-        ? Colors.green
-        : rate >= 40
-            ? Colors.orange
-            : Colors.red;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: AppRadius.smAll,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            '$rate%',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-          Text(
-            l10n.adminDashboardApprovalRate,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: color,
-              fontSize: 10,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Search bar for filtering audit entries.
-class _SearchBar extends StatelessWidget {
-  const _SearchBar({
+class _SearchField extends StatelessWidget {
+  const _SearchField({
     required this.controller,
     required this.hintText,
     required this.onChanged,
@@ -397,47 +348,56 @@ class _SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        hintText: hintText,
-        prefixIcon: const Icon(Icons.search, size: 20),
-        suffixIcon: controller.text.isNotEmpty
-            ? IconButton(
-                icon: const Icon(Icons.clear, size: 18),
-                onPressed: () {
-                  controller.clear();
-                  onChanged('');
-                },
-              )
-            : null,
-        filled: true,
-        fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: AppRadius.mdAll,
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: AppRadius.mdAll,
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: AppRadius.mdAll,
-          borderSide: BorderSide(color: scheme.primary, width: 1.5),
+    return SizedBox(
+      height: 40,
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        style: Theme.of(context).textTheme.bodyMedium,
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: TextStyle(
+            color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+            fontSize: 10,
+          ),
+          prefixIcon: Icon(Icons.search, size: 18, color: scheme.onSurfaceVariant),
+          prefixIconConstraints:
+              const BoxConstraints(minWidth: 40, minHeight: 0),
+          suffixIcon: controller.text.isNotEmpty
+              ? GestureDetector(
+                  onTap: () {
+                    controller.clear();
+                    onChanged('');
+                  },
+                  child: Icon(Icons.close, size: 16, color: scheme.onSurfaceVariant),
+                )
+              : null,
+          suffixIconConstraints:
+              const BoxConstraints(minWidth: 36, minHeight: 0),
+          filled: true,
+          fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.full),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.full),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.full),
+            borderSide: BorderSide(color: scheme.primary.withValues(alpha: 0.4)),
+          ),
         ),
       ),
     );
   }
 }
 
-/// Filter chips for action type selection.
-class _FilterChips extends StatelessWidget {
-  const _FilterChips({
+class _FilterRow extends StatelessWidget {
+  const _FilterRow({
     required this.selected,
     required this.l10n,
     required this.onSelected,
@@ -458,33 +418,33 @@ class _FilterChips extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 36,
+      height: 32,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: labels.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
-        itemBuilder: (context, index) {
-          final isSelected = selected == index;
-          return FilterChip(
-            label: Text(labels[index]),
-            selected: isSelected,
-            onSelected: (_) => onSelected(index),
-            selectedColor: scheme.primaryContainer,
-            checkmarkColor: scheme.primary,
-            labelStyle: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
+        separatorBuilder: (_, _) => const SizedBox(width: 6),
+        itemBuilder: (_, i) {
+          final active = selected == i;
+          return GestureDetector(
+            onTap: () => onSelected(i),
+            child: AnimatedContainer(
+              duration: AppDurations.fast,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: active
+                    ? scheme.primary
+                    : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(AppRadius.full),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                labels[i],
+                style: TextStyle(
+                  fontSize: 10,
+                  color: active ? scheme.onPrimary : scheme.onSurfaceVariant,
+                ),
+              ),
             ),
-            shape: const StadiumBorder(),
-            side: BorderSide(
-              color: isSelected
-                  ? scheme.primary.withValues(alpha: 0.3)
-                  : scheme.outlineVariant,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            visualDensity: VisualDensity.compact,
           );
         },
       ),
@@ -492,7 +452,8 @@ class _FilterChips extends StatelessWidget {
   }
 }
 
-/// Date header for grouped entries.
+// ─── Date Header ─────────────────────────────────────────────────────────────
+
 class _DateHeader extends StatelessWidget {
   const _DateHeader({required this.label});
 
@@ -500,25 +461,29 @@ class _DateHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.xxs,
+      ),
       child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: scheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
+        label.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              letterSpacing: 0.8,
             ),
       ),
     );
   }
 }
 
-/// Tile individual de uma entrada de auditoria — ícone + ação + entidade +
-/// timestamp formatado.
-class _AuditLogTile extends StatelessWidget {
-  const _AuditLogTile({required this.entry});
+// ─── Tile ────────────────────────────────────────────────────────────────────
+
+/// Tile minimalista — linha com acento de cor, texto de ação, e tempo relativo.
+class _AuditTile extends StatelessWidget {
+  const _AuditTile({required this.entry});
 
   final AuditEntry entry;
 
@@ -526,106 +491,89 @@ class _AuditLogTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final dateFormat = DateFormat.yMMMd();
-    final timeFormat = DateFormat.Hm();
-
     final status = entry.detail?['status'] as String?;
-    final actionColor = _actionColor(entry.action, status);
+    final accent = _accentColor(entry.action, status);
 
-    return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(14)),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Ícone da ação com cor do status
-          Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: actionColor.withValues(alpha: 0.12),
-              borderRadius: AppRadius.smAll,
+    return InkWell(
+      onTap: () => _showDetail(context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: 10,
+        ),
+        child: Row(
+          children: [
+            // ── Color accent dot ──
+            Container(
+              width: 4,
+              height: 36,
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-            child: Icon(
-              _actionIcon(entry.action),
-              size: 20,
-              color: actionColor,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
+            const SizedBox(width: AppSpacing.sm),
 
-          // Conteúdo
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Linha principal: ação + entidade
-                RichText(
-                  text: TextSpan(
-                    style: theme.textTheme.bodyMedium,
-                    children: [
-                      TextSpan(
-                        text: entry.actionLabel,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: scheme.onSurface,
-                        ),
-                      ),
-                      TextSpan(
-                        text: ' · ${entry.entityTypeLabel}',
-                        style: TextStyle(color: scheme.onSurfaceVariant),
-                      ),
-                      if (entry.entityId != null)
+            // ── Content ──
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Action + entity
+                  Text.rich(
+                    TextSpan(
+                      style: theme.textTheme.bodyMedium,
+                      children: [
                         TextSpan(
-                          text: ' (${entry.entityId})',
+                          text: entry.actionLabel,
+                        ),
+                        TextSpan(
+                          text: '  ${entry.entityTypeLabel}',
                           style: TextStyle(
                             color: scheme.onSurfaceVariant,
-                            fontSize: 12,
+                            fontSize: 10,
                           ),
                         ),
-                    ],
+                        if (entry.entityId != null)
+                          TextSpan(
+                            text: '  ${entry.entityId}',
+                            style: TextStyle(
+                              color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                              fontSize: 10,
+                            ),
+                          ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 4),
-
-                // Detalhe + status badge
-                if (entry.detail != null)
-                  _DetailSummary(entry: entry)
-                else
-                  const SizedBox.shrink(),
-              ],
+                  if (status != null) ...[
+                    const SizedBox(height: 2),
+                    _StatusDot(status: status, l10n: context.l10n),
+                  ],
+                ],
+              ),
             ),
-          ),
 
-          // Timestamp
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                dateFormat.format(entry.createdAt),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
+            const SizedBox(width: AppSpacing.sm),
+
+            // ── Relative time ──
+            Text(
+              _relativeTime(entry.createdAt),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
-              Text(
-                timeFormat.format(entry.createdAt),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Color _actionColor(String action, String? status) {
-    if (status == 'approved') return Colors.green;
-    if (status == 'rejected') return Colors.red;
-
+  Color _accentColor(String action, String? status) {
+    if (status == 'approved') return const Color(0xFF16A34A);
+    if (status == 'rejected') return const Color(0xFFDC2626);
     switch (action) {
       case 'tenant_decision':
         return const Color(0xFF3B82F6);
@@ -638,64 +586,244 @@ class _AuditLogTile extends StatelessWidget {
     }
   }
 
-  IconData _actionIcon(String action) {
-    switch (action) {
-      case 'tenant_decision':
-        return Icons.person_add_outlined;
-      case 'plan_request_decision':
-        return Icons.upgrade_outlined;
-      case 'plan_change':
-        return Icons.workspaces_outlined;
+  String _relativeTime(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 1) return 'agora';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
+    if (diff.inHours < 24) return '${diff.inHours}h';
+    if (diff.inDays < 7) return '${diff.inDays}d';
+    return DateFormat('dd/MM').format(dt);
+  }
+
+  void _showDetail(BuildContext context) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _AuditDetailSheet(entry: entry),
+    );
+  }
+}
+
+// ─── Status Dot ──────────────────────────────────────────────────────────────
+
+class _StatusDot extends StatelessWidget {
+  const _StatusDot({required this.status, required this.l10n});
+
+  final String status;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _color(status);
+    final label = status.toUpperCase();
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: color,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _color(String s) {
+    switch (s) {
+      case 'approved':
+        return const Color(0xFF16A34A);
+      case 'rejected':
+        return const Color(0xFFDC2626);
+      case 'pending':
+        return const Color(0xFFD97706);
       default:
-        return Icons.info_outline;
+        return Colors.grey;
     }
   }
 }
 
-/// Resumo do campo `detail` JSONB — extrai o status novo para exibição.
-class _DetailSummary extends StatelessWidget {
-  const _DetailSummary({required this.entry});
+// ─── Detail Sheet ────────────────────────────────────────────────────────────
+
+/// Bottom sheet minimalista com todos os detalhes da entrada.
+class _AuditDetailSheet extends StatelessWidget {
+  const _AuditDetailSheet({required this.entry});
 
   final AuditEntry entry;
 
   @override
   Widget build(BuildContext context) {
-    final detail = entry.detail;
-    if (detail == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final status = entry.detail?['status'] as String?;
+    final l10n = context.l10n;
 
-    final status = detail['status'] as String?;
-    if (status == null) return const SizedBox.shrink();
+    return DraggableScrollableSheet(
+      initialChildSize: 0.45,
+      minChildSize: 0.3,
+      maxChildSize: 0.7,
+      expand: false,
+      builder: (ctx, scrollController) {
+        return ListView(
+          controller: scrollController,
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.xxl,
+          ),
+          children: [
+            // ── Handle ──
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
 
-    final color = _statusColor(status);
+            // ── Header ──
+            Text(
+              entry.actionLabel,
+              style: theme.textTheme.bodySmall?.copyWith(
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '${entry.entityTypeLabel}  ${entry.entityId ?? '—'}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            if (status != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              _StatusDot(status: status, l10n: context.l10n),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            const Divider(height: 1),
+            const SizedBox(height: AppSpacing.md),
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        status.toUpperCase(),
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: color,
-          letterSpacing: 0.5,
-        ),
-      ),
+            // ── Fields ──
+            _DetailRow(
+              label: 'ID',
+              value: '#${entry.id}',
+            ),
+            _DetailRow(
+              label: l10n.adminAuditLogDate,
+              value: DateFormat.yMMMd().add_Hm().format(entry.createdAt),
+            ),
+            if (entry.actorUserId != null)
+              _DetailRow(
+                label: l10n.adminAuditLogActor,
+                value: entry.actorUserId!,
+              ),
+            _DetailRow(
+              label: l10n.adminAuditLogEntity,
+              value: entry.entityTypeLabel,
+            ),
+            if (entry.entityId != null)
+              _DetailRow(
+                label: l10n.adminAuditLogAction,
+                value: entry.entityId!,
+              ),
+
+            // ── Detail JSON ──
+            if (entry.detail != null && entry.detail!.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              const Divider(height: 1),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Detail',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              ...entry.detail!.entries.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${e.key}: ',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          '${e.value}',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
+}
 
-  Color _statusColor(String status) {
-    switch (status) {
-      case 'approved':
-        return Colors.green;
-      case 'rejected':
-        return Colors.red;
-      case 'pending':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodySmall,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

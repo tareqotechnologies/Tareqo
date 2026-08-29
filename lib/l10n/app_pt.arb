@@ -389,6 +389,7 @@
   "upgradeError": "Não foi possível enviar o pedido. Tente novamente.",
   "upgradeSubmit": "Solicitar upgrade",
   "commonCancel": "Cancelar",
+  "commonCopied": "Copiado para a área de transferência",
   "commonConfirm": "Confirmar",
   "commonDelete": "Apagar",
   "commonDescription": "Descrição",

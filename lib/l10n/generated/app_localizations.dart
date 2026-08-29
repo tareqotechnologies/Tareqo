@@ -1678,6 +1678,12 @@ abstract class AppLocalizations {
   /// **'Cancelar'**
   String get commonCancel;
 
+  /// No description provided for @commonCopied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiado para a área de transferência'**
+  String get commonCopied;
+
   /// No description provided for @commonConfirm.
   ///
   /// In pt, this message translates to:

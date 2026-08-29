@@ -102,8 +102,7 @@ class AdminDashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           l10n.adminDashboardTitle,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
+          style: theme.textTheme.labelMedium?.copyWith(
             letterSpacing: -0.5,
           ),
         ),
@@ -146,7 +145,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                   // ── KPI Grid ──
                   Text(
                     l10n.adminPlatformStatus,
-                    style: theme.textTheme.labelLarge?.copyWith(
+                    style: theme.textTheme.labelSmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -203,7 +202,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.xl),
                     Text(
                       l10n.adminGrowthTrends,
-                      style: theme.textTheme.labelLarge?.copyWith(
+                      style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
@@ -276,7 +275,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.xl),
                   Text(
                     l10n.adminDashboardTenantDistribution,
-                    style: theme.textTheme.labelLarge?.copyWith(
+                    style: theme.textTheme.labelSmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -304,7 +303,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.xl),
                   Text(
                     l10n.adminDashboardPlanDistribution,
-                    style: theme.textTheme.labelLarge?.copyWith(
+                    style: theme.textTheme.labelSmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -323,7 +322,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           l10n.adminDashboardRecentActivity,
-                          style: theme.textTheme.labelLarge?.copyWith(
+                          style: theme.textTheme.labelSmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
@@ -347,7 +346,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.xl),
                     Text(
                       l10n.dashboardQuickActions,
-                      style: theme.textTheme.labelLarge?.copyWith(
+                      style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
@@ -466,41 +465,45 @@ class _GrowthComparisonRow extends StatelessWidget {
 
     return AppCard(
       borderRadius: const BorderRadius.all(Radius.circular(16)),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 32,
+            height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
-              borderRadius: AppRadius.smAll,
+              borderRadius: AppRadius.xsAll,
             ),
-            child: Icon(icon, size: 20, color: color),
+            child: Icon(icon, size: 16, color: color),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: theme.textTheme.labelSmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 1),
                 Text(
-                  '$thisLabel: $thisPeriod  ·  $lastLabel: $lastPeriod',
+                  '$thisLabel: $thisPeriod · $lastLabel: $lastPeriod',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
+                    fontSize: 10,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.xs),
           _TrendBadge(
             count: diffStr,
             trend: trend,
@@ -536,7 +539,7 @@ class _TrendBadge extends StatelessWidget {
             : l10n.adminGrowthFlat;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
@@ -550,15 +553,15 @@ class _TrendBadge extends StatelessWidget {
                 : trend == 'down'
                     ? Icons.trending_down
                     : Icons.trending_flat,
-            size: 14,
+            size: 12,
             color: color,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 2),
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
               color: color,
-              fontWeight: FontWeight.w600,
+              fontSize: 10,
             ),
           ),
         ],
@@ -610,8 +613,7 @@ class _SparklineChart extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                  style: theme.textTheme.labelMedium?.copyWith(
                   ),
                 ),
               ),
@@ -619,7 +621,6 @@ class _SparklineChart extends StatelessWidget {
                 l10n.adminGrowthAvgPerWeek(avg),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -671,7 +672,6 @@ class _SparklineChart extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 9,
                           color: Colors.grey.shade500,
-                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
@@ -719,7 +719,6 @@ class _BarColumn extends StatelessWidget {
             '$value',
             style: TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.w700,
               color: labelColor,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
@@ -778,28 +777,32 @@ class _VelocityCard extends StatelessWidget {
 
     return AppCard(
       borderRadius: const BorderRadius.all(Radius.circular(16)),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
       child: Row(
         children: [
-          _VelocityItem(
-            label: l10n.adminGrowthNewTenants,
-            avg: regAvg,
-            trend: regTrend,
-            color: scheme.primary,
-            l10n: l10n,
+          Expanded(
+            child: _VelocityItem(
+              label: l10n.adminGrowthNewTenants,
+              avg: regAvg,
+              trend: regTrend,
+              color: scheme.primary,
+              l10n: l10n,
+            ),
           ),
           Container(
             width: 1,
-            height: 36,
-            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            height: 28,
+            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
             color: scheme.outlineVariant.withValues(alpha: 0.5),
           ),
-          _VelocityItem(
-            label: l10n.adminGrowthApprovals,
-            avg: actAvg,
-            trend: actTrend,
-            color: Colors.green,
-            l10n: l10n,
+          Expanded(
+            child: _VelocityItem(
+              label: l10n.adminGrowthApprovals,
+              avg: actAvg,
+              trend: actTrend,
+              color: Colors.green,
+              l10n: l10n,
+            ),
           ),
         ],
       ),
@@ -832,41 +835,48 @@ class _VelocityItem extends StatelessWidget {
             ? scheme.error
             : scheme.onSurfaceVariant;
 
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+            fontSize: 10,
           ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Text(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 2),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
                 l10n.adminGrowthAvgPerWeek(avg),
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: color,
+                  fontSize: 11,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(width: 6),
-              Icon(
-                trend > 0
-                    ? Icons.arrow_upward
-                    : trend < 0
-                        ? Icons.arrow_downward
-                        : Icons.remove,
-                size: 14,
-                color: trendColor,
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              trend > 0
+                  ? Icons.arrow_upward
+                  : trend < 0
+                      ? Icons.arrow_downward
+                      : Icons.remove,
+              size: 12,
+              color: trendColor,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -932,8 +942,7 @@ class _StatusBanner extends StatelessWidget {
               children: [
                 Text(
                   l10n.adminPlatformSummary('$totalPlans', '$totalTenants'),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: theme.textTheme.bodySmall?.copyWith(
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -955,8 +964,6 @@ class _StatusBanner extends StatelessWidget {
                       color: hasUrgent
                           ? scheme.tertiary
                           : scheme.onSurfaceVariant,
-                      fontWeight:
-                          hasUrgent ? FontWeight.w500 : FontWeight.w400,
                     ),
                   ),
               ],
@@ -972,8 +979,7 @@ class _StatusBanner extends StatelessWidget {
               child: Text(
                 '$totalPending',
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 10,
                   color: scheme.onTertiary,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
@@ -1095,7 +1101,6 @@ class _TenantDistributionBar extends StatelessWidget {
                 l10n.adminDashboardActivePercent(activePct),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.primary,
-                  fontWeight: FontWeight.w600,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
@@ -1130,7 +1135,6 @@ class _LegendDot extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w500,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
         ),
@@ -1194,7 +1198,6 @@ class _ApprovalRateCard extends StatelessWidget {
                   Text(
                     '$rate%',
                     style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
                       color: color,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
@@ -1209,8 +1212,7 @@ class _ApprovalRateCard extends StatelessWidget {
               children: [
                 Text(
                   l10n.adminDashboardApprovalRate,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                  style: theme.textTheme.labelMedium?.copyWith(
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1342,7 +1344,6 @@ class _PlanBarRow extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -1362,7 +1363,6 @@ class _PlanBarRow extends StatelessWidget {
         Text(
           '$count',
           style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
@@ -1493,7 +1493,6 @@ class _ActivityRow extends StatelessWidget {
             child: Text(
               entry.actionLabel,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w500,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1503,7 +1502,7 @@ class _ActivityRow extends StatelessWidget {
             timeFormat.format(entry.createdAt),
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
-              fontSize: 11,
+              fontSize: 10,
             ),
           ),
         ],
@@ -1627,8 +1626,7 @@ class _AdminKpiCard extends StatelessWidget {
           else
             Text(
               value ?? '—',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
+              style: theme.textTheme.labelMedium?.copyWith(
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
@@ -1738,8 +1736,7 @@ class _QuickActionCard extends StatelessWidget {
                   child: Text(
                     '${action.badge}',
                     style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 10,
                       color: scheme.onTertiary,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
@@ -1752,7 +1749,6 @@ class _QuickActionCard extends StatelessWidget {
           Text(
             action.label,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w500,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,

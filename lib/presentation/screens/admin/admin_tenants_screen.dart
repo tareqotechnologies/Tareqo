@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -6,6 +7,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/audit_entry.dart';
 import '../../../domain/entities/store.dart';
+import '../../../domain/entities/plan.dart';
 import '../../../domain/entities/store_employee.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
@@ -151,8 +153,7 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
    appBar: AppBar(
      title: Text(
        l10n.adminTenantsTitle,
-       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-             fontWeight: FontWeight.w500,
+       style: Theme.of(context).textTheme.labelMedium?.copyWith(
              letterSpacing: -0.5,
            ),
      ),
@@ -206,7 +207,7 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
                   Expanded(
                     child: Text(
                       l10n.adminAwaitingCount(pending.length),
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: Theme.of(context).colorScheme.tertiary,
                           ),
                     ),
@@ -372,8 +373,7 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
                   children: [
                     Text(
                       tenant.businessName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w500,
+                      style: theme.textTheme.labelMedium?.copyWith(
                       ),
                     ),
                     Text(
@@ -385,11 +385,31 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: AppSpacing.xs),
               StatusChip(label: label, color: color),
+              const SizedBox(width: AppSpacing.xs),
+              GestureDetector(
+                onTap: () {
+                  Clipboard.setData(
+                    ClipboardData(text: tenant.ownerUserId),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.commonCopied),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+                child: Icon(
+                  Icons.copy,
+                  size: 16,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
         );
- },
+    },
  );
  },
  );
@@ -405,9 +425,9 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
  await ref.read(rejectTenantUseCaseProvider).call(tenant.id, reason);
  } catch (error, stackTrace) {
  CrashReporting.capture(
- error,
- stackTrace,
- hint: 'Erro ao rejeitar tenant',
+   error,
+   stackTrace,
+   hint: 'Erro ao rejeitar tenant',
  );
  messenger.showSnackBar(SnackBar(content: Text(l10n.adminRejectError)));
  return;
@@ -417,9 +437,9 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
  await ref.read(approveTenantUseCaseProvider).call(tenant.id);
  } catch (error, stackTrace) {
  CrashReporting.capture(
- error,
- stackTrace,
- hint: 'Erro ao aprovar tenant',
+   error,
+   stackTrace,
+   hint: 'Erro ao aprovar tenant',
  );
  messenger.showSnackBar(SnackBar(content: Text(l10n.adminApproveError)));
  return;
@@ -431,11 +451,11 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
  await ref.read(allTenantsProvider.notifier).refresh();
  messenger.showSnackBar(
  SnackBar(
- content: Text(
- approve
- ? l10n.adminAccessApproved(tenant.businessName)
- : l10n.adminRequestRejected(tenant.businessName),
- ),
+   content: Text(
+     approve
+         ? l10n.adminAccessApproved(tenant.businessName)
+         : l10n.adminRequestRejected(tenant.businessName),
+   ),
  ),
  );
  }  Future<String?> _askRejectionReason(String businessName) {
@@ -570,8 +590,7 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
                 Expanded(
                   child: Text(
                     tenant.businessName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
+                    style: theme.textTheme.bodySmall?.copyWith(
                     ),
                   ),
                 ),
@@ -579,6 +598,25 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
                   label: l10n.statusPending,
                   color: scheme.tertiary,
                   icon: Icons.hourglass_top,
+                ),
+                const SizedBox(width: 4),
+                GestureDetector(
+                  onTap: () {
+                    Clipboard.setData(
+                      ClipboardData(text: tenant.ownerUserId),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.commonCopied),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                  child: Icon(
+                    Icons.copy,
+                    size: 16,
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -658,10 +696,14 @@ class _TenantDetailSheet extends ConsumerWidget {
         .take(10)
         .toList();
 
+    // Buscar plano para mostrar limits vs uso.
+    final plans = ref.watch(allPlansProvider).value ?? const <Plan>[];
+    final plan = plans.where((p) => p.id == tenant.planId).firstOrNull;
+
     return DraggableScrollableSheet(
-      initialChildSize: 0.75,
+      initialChildSize: 0.82,
       minChildSize: 0.3,
-      maxChildSize: 0.92,
+      maxChildSize: 0.95,
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
@@ -686,13 +728,41 @@ class _TenantDetailSheet extends ConsumerWidget {
                   ),
                 ),
               ),
-              // Header
+
+              // ── Header com nome + ID copiável ──
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      l10n.adminTenantDetailTitle,
-                      style: theme.textTheme.titleLarge,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          tenant.businessName,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 2),
+                        GestureDetector(
+                          onTap: () {
+                            Clipboard.setData(
+                              ClipboardData(text: tenant.id),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.commonCopied),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            tenant.id,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                              fontFamily: 'monospace',
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   IconButton(
@@ -701,13 +771,6 @@ class _TenantDetailSheet extends ConsumerWidget {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                tenant.businessName,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
               ),
               const SizedBox(height: AppSpacing.lg),
 
@@ -742,6 +805,17 @@ class _TenantDetailSheet extends ConsumerWidget {
                 icon: Icons.person_outline,
                 label: l10n.adminTenantDetailOwner,
                 value: tenant.ownerUserId.substring(0, 8),
+                onTap: () {
+                  Clipboard.setData(
+                    ClipboardData(text: tenant.ownerUserId),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.commonCopied),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
               ),
               _InfoRow(
                 icon: Icons.calendar_today_outlined,
@@ -792,6 +866,32 @@ class _TenantDetailSheet extends ConsumerWidget {
                       ),
                     ],
                   ),
+                ),
+              ],
+
+              // ── Uso vs Limites ──
+              if (plan != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'USO vs LIMITES',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                _UsageBar(
+                  label: l10n.adminTenantDetailStores,
+                  current: stores.length,
+                  max: plan.maxStores,
+                  color: scheme.primary,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                _UsageBar(
+                  label: l10n.adminTenantDetailEmployees,
+                  current: employees.length,
+                  max: plan.maxEmployees,
+                  color: scheme.tertiary,
                 ),
               ],
 
@@ -900,7 +1000,6 @@ class _DetailChip extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
               color: color,
             ),
           ),
@@ -915,39 +1014,109 @@ class _InfoRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: scheme.onSurfaceVariant),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppRadius.smAll,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: scheme.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Text(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+            if (onTap != null) ...[
+              const SizedBox(width: 4),
+              Icon(Icons.copy, size: 14, color: scheme.onSurfaceVariant),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Barra de progresso de uso vs limite.
+class _UsageBar extends StatelessWidget {
+  const _UsageBar({
+    required this.label,
+    required this.current,
+    required this.max,
+    required this.color,
+  });
+
+  final String label;
+  final int current;
+  final int max;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final ratio = max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0;
+    final isFull = current >= max;
+
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.full),
+            child: LinearProgressIndicator(
+              value: ratio,
+              minHeight: 6,
+              backgroundColor: scheme.surfaceContainerHighest
+                  .withValues(alpha: 0.5),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isFull ? scheme.error : color,
               ),
             ),
           ),
-          Text(
-            value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          '$current/$max',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: isFull ? scheme.error : scheme.onSurfaceVariant,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -978,8 +1147,7 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
+            style: theme.textTheme.labelMedium?.copyWith(
             ),
           ),
         ),
@@ -1100,7 +1268,6 @@ class _StoreTile extends StatelessWidget {
                 Text(
                   store.name,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1154,8 +1321,7 @@ class _EmployeeTile extends StatelessWidget {
                   ? employee.fullName[0].toUpperCase()
                   : '?',
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontSize: 10,
                 color: isActive ? scheme.primary : scheme.outline,
               ),
             ),
@@ -1168,7 +1334,6 @@ class _EmployeeTile extends StatelessWidget {
                 Text(
                   employee.fullName,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
                     color: isActive ? null : scheme.outline,
                   ),
                   maxLines: 1,
@@ -1237,7 +1402,6 @@ class _ActivityTile extends StatelessWidget {
                 Text(
                   entry.actionLabel,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1247,8 +1411,7 @@ class _ActivityTile extends StatelessWidget {
                     status.toUpperCase(),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: color,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 11,
+                      fontSize: 10,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -1262,7 +1425,7 @@ class _ActivityTile extends StatelessWidget {
                 dateFormat.format(entry.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
-                  fontSize: 11,
+                  fontSize: 10,
                 ),
               ),
               Text(
@@ -1358,8 +1521,7 @@ class _SelectionBar extends StatelessWidget {
           // Count
           Text(
             '$selectedCount / $totalCount',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
+            style: theme.textTheme.labelMedium?.copyWith(
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),

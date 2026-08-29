@@ -900,6 +900,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commonCancel => 'Annuler';
 
   @override
+  String get commonCopied => 'Copié dans le presse-papiers';
+
+  @override
   String get commonConfirm => 'Confirmer';
 
   @override
