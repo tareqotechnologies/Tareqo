@@ -2,7 +2,7 @@ name: dumbhanengue
 description: "ERP Dumbhanengue — sistema de gestão empresarial (estoque, vendas, clientes, compras e relatórios) construído em Flutter com Clean Architecture."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.8.0+16
+version: 1.9.0+17
 
 environment:
   sdk: ^3.12.2
