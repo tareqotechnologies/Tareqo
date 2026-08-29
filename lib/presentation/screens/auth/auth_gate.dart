@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,17 +46,44 @@ class AuthGate extends ConsumerStatefulWidget {
 }
 
 class _AuthGateState extends ConsumerState<AuthGate> {
+  bool _authTimedOut = false;
+  Timer? _authTimer;
+
   @override
   void initState() {
     super.initState();
-    // Deep links de autenticação: o link de confirmação de e-mail
-    // (dumbhanengue://callback) reabre o app e conclui o fluxo no gotrue.
-    // Idempotente e à prova de falhas (no-op sem Supabase / em testes).
     DeepLinkHandler.init();
+    _startAuthTimeout();
+  }
+
+  void _startAuthTimeout() {
+    _authTimer?.cancel();
+    _authTimer = Timer(const Duration(seconds: 10), () {
+      if (mounted && !_authTimedOut) {
+        setState(() => _authTimedOut = true);
+        // Invalidar o provider para forçar nova tentativa.
+        ref.invalidate(authStateProvider);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authTimer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_authTimedOut) {
+      return _AuthErrorScreen(
+        onRetry: () {
+          setState(() => _authTimedOut = false);
+          ref.invalidate(authStateProvider);
+          _startAuthTimeout();
+        },
+      );
+    }
     final authState = ref.watch(authStateProvider);
     // Sessão veio de um link de RECUPERAÇÃO de senha? O gotrue emite o
     // evento `passwordRecovery` ao trocar o token do e-mail — o AuthGate
@@ -83,6 +112,11 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     if (authState.value != null) {
       ref.watch(employeesPollingProvider);
     }
+    // Cancelar timer quando auth resolver.
+    authState.whenOrNull(
+      data: (_) => _authTimer?.cancel(),
+      error: (_, __) => _authTimer?.cancel(),
+    );
     return authState.when(
       loading: () => const _SplashScreen(),
       // Erro no stream de sessão: mostra um estado explícito com retry em
