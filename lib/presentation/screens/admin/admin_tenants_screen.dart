@@ -139,49 +139,98 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
         ),
       ),
     );
-  }
+  }  @override
+  Widget build(BuildContext context) {
+    final pendingAsync = ref.watch(pendingTenantsProvider);
+    final allAsync = ref.watch(allTenantsProvider);
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
- @override
- Widget build(BuildContext context) {
- final pendingAsync = ref.watch(pendingTenantsProvider);
- final allAsync = ref.watch(allTenantsProvider);
- final l10n = context.l10n;
+    final pending = pendingAsync.value ?? const <Tenant>[];
+    final allTenants = allAsync.value ?? const <Tenant>[];
+    final displayList = _showAll ? allTenants : pending;
+    final filteredCount = _searchQuery.isNotEmpty
+        ? _filterTenants(displayList).length
+        : displayList.length;
 
- final pending = pendingAsync.value ?? const <Tenant>[];
-
- return Scaffold(
-   appBar: AppBar(
-     title: Text(
-       l10n.adminTenantsTitle,
-       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-             letterSpacing: -0.5,
-           ),
-     ),
-     actions: [
-       TextButton(
-         onPressed: () => setState(() => _showAll = !_showAll),
-         child: Text(_showAll ? l10n.adminPendingOnly : l10n.adminAll),
-       ),
-     ],
-   ),
-  body: Stack(
-    children: [
-      Column(
-        children: [
-          // Barra de busca
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.xs,
-              AppSpacing.lg,
-              AppSpacing.xs,
-            ),
-            child: SearchField(
-              controller: _searchController,
-              hintText: l10n.adminTenantSearchHint,
-              onChanged: (value) => setState(() => _searchQuery = value),
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          l10n.adminTenantsTitle,
+          style: theme.textTheme.labelMedium?.copyWith(
+            letterSpacing: -0.5,
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => setState(() => _showAll = !_showAll),
+            child: Text(_showAll ? l10n.adminPendingOnly : l10n.adminAll),
+          ),
+        ],
+      ),
+     body: Stack(
+       children: [
+         Column(
+           children: [
+             // Barra de busca com contagem
+             Padding(
+               padding: const EdgeInsets.fromLTRB(
+                 AppSpacing.lg,
+                 AppSpacing.xs,
+                 AppSpacing.lg,
+                 AppSpacing.xs,
+               ),
+               child: Row(
+                 children: [
+                   Expanded(
+                     child: SearchField(
+                       controller: _searchController,
+                       hintText: l10n.adminTenantSearchHint,
+                       onChanged: (value) => setState(() => _searchQuery = value),
+                     ),
+                   ),
+                   if (_searchQuery.isNotEmpty) ...[
+                     const SizedBox(width: AppSpacing.xs),
+                     GestureDetector(
+                       onTap: () {
+                         _searchController.clear();
+                         setState(() => _searchQuery = '');
+                       },
+                       child: Container(
+                         padding: const EdgeInsets.all(6),
+                         decoration: BoxDecoration(
+                           color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                           borderRadius: BorderRadius.circular(999),
+                         ),
+                         child: Icon(
+                           Icons.close,
+                           size: 16,
+                           color: scheme.onSurfaceVariant,
+                         ),
+                       ),
+                     ),
+                   ],
+                   if (_searchQuery.isNotEmpty) ...[
+                     const SizedBox(width: AppSpacing.xs),
+                     Container(
+                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                       decoration: BoxDecoration(
+                         color: scheme.primaryContainer.withValues(alpha: 0.5),
+                         borderRadius: BorderRadius.circular(999),
+                       ),
+                       child: Text(
+                         '$filteredCount',
+                         style: theme.textTheme.labelSmall?.copyWith(
+                           color: scheme.primary,
+                           fontFeatures: const [FontFeature.tabularFigures()],
+                         ),
+                       ),
+                     ),
+                   ],
+                 ],
+               ),
+             ),
           if (!_showAll && pending.isNotEmpty && !_selectionMode)
             Container(
               margin: const EdgeInsets.fromLTRB(20, 4, 20, 4),
@@ -486,13 +535,34 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
     );
   }
 
-  /// Filtra a lista de tenants por nome (busca).
+  /// Filtra a lista de tenants por nome, ID, ownerUserId, plano ou status.
   List<Tenant> _filterTenants(List<Tenant> tenants) {
     if (_searchQuery.isEmpty) return tenants;
     final query = _searchQuery.toLowerCase();
-    return tenants
-        .where((t) => t.businessName.toLowerCase().contains(query))
-        .toList();
+    final plans = ref.read(allPlansProvider).value ?? const <Plan>[];
+    return tenants.where((t) {
+      // Busca por nome do negócio
+      if (t.businessName.toLowerCase().contains(query)) return true;
+      // Busca por ID do tenant
+      if (t.id.toLowerCase().contains(query)) return true;
+      // Busca por ownerUserId
+      if (t.ownerUserId.toLowerCase().contains(query)) return true;
+      // Busca por nome do plano
+      final planName = plans
+              .where((p) => p.id == t.planId)
+              .firstOrNull
+              ?.name ??
+          '';
+      if (planName.toLowerCase().contains(query)) return true;
+      // Busca por status
+      final statusLabel = switch (t.status) {
+        TenantStatus.pending => 'pending pendente',
+        TenantStatus.approved => 'approved ativo',
+        TenantStatus.rejected => 'rejected rejeitado',
+      };
+      if (statusLabel.contains(query)) return true;
+      return false;
+    }).toList();
   }
 
   Future<String?> _askBulkRejectionReason(int count) {
