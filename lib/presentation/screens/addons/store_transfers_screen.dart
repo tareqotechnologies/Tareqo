@@ -71,7 +71,15 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
               separatorBuilder: (_, __) =>
                   const SizedBox(height: AppSpacing.xs),
               itemBuilder: (context, index) =>
-                  _TransferCard(transfer: _transfers[index]),
+                  _TransferCard(
+                    transfer: _transfers[index],
+                    onStatusChange: (newStatus) {
+                      setState(() {
+                        final idx = _transfers.indexOf(_transfers[index]);
+                        _transfers[idx] = _transfers[idx].copyWith(status: newStatus);
+                      });
+                    },
+                  ),
             ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-transfer',
@@ -111,12 +119,26 @@ class _TransferRecord {
   final int items;
   final String status;
   final String date;
+
+  _TransferRecord copyWith({String? status}) {
+    return _TransferRecord(
+      fromStore: fromStore,
+      toStore: toStore,
+      items: items,
+      status: status ?? this.status,
+      date: date,
+    );
+  }
 }
 
 class _TransferCard extends StatelessWidget {
-  const _TransferCard({required this.transfer});
+  const _TransferCard({
+    required this.transfer,
+    this.onStatusChange,
+  });
 
   final _TransferRecord transfer;
+  final ValueChanged<String>? onStatusChange;
 
   @override
   Widget build(BuildContext context) {
@@ -179,6 +201,36 @@ class _TransferCard extends StatelessWidget {
                 color: scheme.onSurfaceVariant,
               ),
             ),
+            if (transfer.status == 'Pendente' && onStatusChange != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton.secondary(
+                      label: 'Despachar',
+                      icon: const Icon(Icons.local_shipping_outlined, size: 16),
+                      onPressed: () => onStatusChange!('Em Trânsito'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: AppButton.danger(
+                      label: 'Cancelar',
+                      onPressed: () => onStatusChange!('Cancelada'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (transfer.status == 'Em Trânsito' && onStatusChange != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              AppButton.primary(
+                expanded: true,
+                label: 'Confirmar Recebimento',
+                icon: const Icon(Icons.check_circle_outline, size: 16),
+                onPressed: () => onStatusChange!('Recebida'),
+              ),
+            ],
           ],
         ),
       ),
