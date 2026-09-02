@@ -15,7 +15,9 @@ import '../account/tenant_pending_screen.dart';
 import '../account/tenant_rejected_screen.dart';
 import '../admin/admin_shell.dart';
 import '../shell/app_shell.dart';
+import '../../widgets/app_sheet.dart';
 import 'login_screen.dart';
+import 'mfa_verification_sheet.dart';
 import 'set_new_password_screen.dart';
 
 /// Portão de autenticação e de **acesso**: decide a tela raiz com base na
@@ -75,10 +77,99 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         }
         if (recoveryPending) return const SetNewPasswordScreen();
 
-        // Auth OK → admin/tenant.
-        return _AdminTenantGate(user: user);
+        // Auth OK → MFA gate → admin/tenant.
+        return _MFAGate(user: user);
       },
     );
+  }
+}
+
+// ─── MFA Gate ─────────────────────────────────────────────────────────
+
+class _MFAGate extends ConsumerStatefulWidget {
+  const _MFAGate({required this.user});
+  final AppUser user;
+
+  @override
+  ConsumerState<_MFAGate> createState() => _MFAGateState();
+}
+
+class _MFAGateState extends ConsumerState<_MFAGate> {
+  bool _mfaChecked = false;
+  bool _mfaEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkMFA();
+  }
+
+  Future<void> _checkMFA() async {
+    final enabled = await ref.read(mfaAuthUseCaseProvider).isEnabled();
+    if (mounted) {
+      setState(() {
+        _mfaEnabled = enabled;
+        _mfaChecked = true;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_mfaChecked) return const _SplashScreen();
+
+    if (_mfaEnabled) {
+      return _MFAVerificationGate(user: widget.user);
+    }
+
+    return _AdminTenantGate(user: widget.user);
+  }
+}
+
+// ─── MFA Verification Gate ──────────────────────────────────────────────
+
+class _MFAVerificationGate extends ConsumerStatefulWidget {
+  const _MFAVerificationGate({required this.user});
+  final AppUser user;
+
+  @override
+  ConsumerState<_MFAVerificationGate> createState() =>
+      _MFAVerificationGateState();
+}
+
+class _MFAVerificationGateState extends ConsumerState<_MFAVerificationGate> {
+  bool _verified = false;
+  bool _showing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showMFA());
+  }
+
+  Future<void> _showMFA() async {
+    if (_showing || !mounted) return;
+    _showing = true;
+
+    final result = await showAppSheet<bool>(
+      context,
+      isDismissible: false,
+      builder: (_) => const MFAVerificationSheet(),
+    );
+
+    if (!mounted) return;
+
+    if (result == true) {
+      setState(() => _verified = true);
+    } else {
+      ref.read(signOutUseCaseProvider).call();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_verified) return _AdminTenantGate(user: widget.user);
+    return const _SplashScreen();
   }
 }
 
