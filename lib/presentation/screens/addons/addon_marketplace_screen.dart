@@ -18,7 +18,7 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final addOns = ref.watch(addOnCatalogProvider);
-    final activeIds = ref.watch(activeAddOnIdsProvider);
+    final activeIds = ref.watch(activeAddOnIdsProvider).value ?? {};
 
     final horizontal = AppSpacing.pagePaddingForWidth(
       MediaQuery.sizeOf(context).width,

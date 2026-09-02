@@ -12,6 +12,8 @@ import '../../data/datasources/local/customer_local_data_source.dart';
 import '../../data/datasources/local/customer_local_data_source_impl.dart';
 import '../../data/datasources/local/debt_local_data_source.dart';
 import '../../data/datasources/local/debt_local_data_source_impl.dart';
+import '../../data/datasources/local/addon_local_data_source.dart';
+import '../../data/datasources/local/addon_local_data_source_impl.dart';
 import '../../data/datasources/local/plan_catalog.dart';
 import '../../data/datasources/local/employee_local_data_source.dart';
 import '../../data/datasources/local/employee_local_data_source_impl.dart';
@@ -190,6 +192,7 @@ import '../../domain/usecases/update_product_stock_use_case.dart';
 import '../../domain/usecases/update_product_use_case.dart';
 import '../../data/datasources/local/admin_message_local_data_source.dart';
 import '../../data/datasources/local/admin_message_local_data_source_impl.dart';
+import '../../data/datasources/remote/supabase_addon_data_source.dart';
 import '../../data/datasources/remote/supabase_admin_message_data_source.dart';
 import '../../data/repositories/admin_message_repository_impl.dart';
 import '../../domain/repositories/i_admin_message_repository.dart';
@@ -447,6 +450,10 @@ final class ServiceLocator {
     ..registerLazySingleton<AdminMessageLocalDataSource>(
       () => const AdminMessageSupabaseDataSourceImpl(),
     )
+    // Add-ons: persistência por tenant (RLS filtra automaticamente).
+    ..registerLazySingleton<AddOnLocalDataSource>(
+      () => const SupabaseAddOnDataSourceImpl(),
+    )
     // Cadastro de funcionário ATÔMICO (RPC `create_employee_account`):
  // conta de acesso + vínculo em `store_employees` em UMA transação no
  // banco (sem contas órfãs se o limite do plano for atingido).
@@ -516,6 +523,9 @@ final class ServiceLocator {
     )
     ..registerLazySingleton<AdminMessageLocalDataSource>(
       () => AdminMessageLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<AddOnLocalDataSource>(
+      AddOnLocalDataSourceImpl.new,
     );
   }
 
@@ -577,6 +587,9 @@ final class ServiceLocator {
     )
     ..registerLazySingleton<AdminMessageLocalDataSource>(
       () => AdminMessageLocalDataSourceImpl(),
+    )
+    ..registerLazySingleton<AddOnLocalDataSource>(
+      AddOnLocalDataSourceImpl.new,
     );
   }
 
