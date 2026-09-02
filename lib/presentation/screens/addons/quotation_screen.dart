@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/share/quotation_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../domain/entities/quotation.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 
@@ -15,6 +17,7 @@ class QuotationScreen extends ConsumerStatefulWidget {
 
 class _QuotationScreenState extends ConsumerState<QuotationScreen> {
   final List<_QuotationDraft> _drafts = [];
+  int _quotationCounter = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +74,10 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                   const SizedBox(height: AppSpacing.xs),
               itemBuilder: (context, index) {
                 final draft = _drafts[index];
-                return _QuotationCard(draft: draft);
+                return _QuotationCard(
+                  draft: draft,
+                  quotationNumber: _quotationCounter - index,
+                );
               },
             ),
       floatingActionButton: FloatingActionButton(
@@ -90,7 +96,10 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
       useSafeArea: true,
       builder: (_) => _NewQuotationSheet(
         onSave: (draft) {
-          setState(() => _drafts.insert(0, draft));
+          setState(() {
+            _quotationCounter++;
+            _drafts.insert(0, draft);
+          });
           Navigator.of(context).pop();
         },
       ),
@@ -113,9 +122,10 @@ class _QuotationDraft {
 }
 
 class _QuotationCard extends StatelessWidget {
-  const _QuotationCard({required this.draft});
+  const _QuotationCard({required this.draft, this.quotationNumber = 0});
 
   final _QuotationDraft draft;
+  final int quotationNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -172,9 +182,42 @@ class _QuotationCard extends StatelessWidget {
                 color: scheme.primary,
               ),
             ),
+            const SizedBox(height: AppSpacing.sm),
+            AppButton.secondary(
+              label: 'Exportar PDF',
+              icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
+              onPressed: () => _exportPdf(context),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _exportPdf(BuildContext context) async {
+    final quotation = Quotation(
+      id: '',
+      number: quotationNumber,
+      storeId: '',
+      customerId: '',
+      customerName: draft.clientName,
+      items: [
+        for (var i = 0; i < draft.items.length; i++)
+          QuotationItem(
+            productId: '',
+            productName: draft.items[i],
+            quantity: 1000,
+            unitPriceCents: draft.totalCents ~/ draft.items.length,
+          ),
+      ],
+      totalAmountCents: draft.totalCents,
+      validUntil: DateTime.now().add(Duration(days: draft.validityDays)),
+      createdAt: DateTime.now(),
+    );
+
+    await const QuotationPdfExporter().sharePdf(
+      quotation,
+      businessName: 'Minha Empresa',
     );
   }
 

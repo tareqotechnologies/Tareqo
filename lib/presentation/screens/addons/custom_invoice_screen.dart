@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/share/invoice_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../domain/entities/custom_invoice.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 
@@ -17,6 +19,7 @@ class CustomInvoiceScreen extends ConsumerStatefulWidget {
 
 class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
   final List<_InvoiceData> _invoices = [];
+  int _invoiceCounter = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -79,8 +82,10 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
               itemCount: _invoices.length,
               separatorBuilder: (_, __) =>
                   const SizedBox(height: AppSpacing.xs),
-              itemBuilder: (context, index) =>
-                  _InvoiceCard(invoice: _invoices[index]),
+              itemBuilder: (context, index) => _InvoiceCard(
+                    invoice: _invoices[index],
+                    invoiceNumber: _invoiceCounter - index,
+                  ),
             ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-invoice',
@@ -98,7 +103,10 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
       useSafeArea: true,
       builder: (_) => _NewInvoiceSheet(
         onSave: (data) {
-          setState(() => _invoices.insert(0, data));
+          setState(() {
+            _invoiceCounter++;
+            _invoices.insert(0, data);
+          });
           Navigator.of(context).pop();
         },
       ),
@@ -146,9 +154,10 @@ class _InvoiceItemData {
 }
 
 class _InvoiceCard extends StatelessWidget {
-  const _InvoiceCard({required this.invoice});
+  const _InvoiceCard({required this.invoice, this.invoiceNumber = 0});
 
   final _InvoiceData invoice;
+  final int invoiceNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -198,8 +207,9 @@ class _InvoiceCard extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 AppButton.secondary(
-                  label: 'Enviar',
-                  onPressed: () {},
+                  label: 'Exportar PDF',
+                  icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
+                  onPressed: () => _exportPdf(context),
                 ),
               ],
             ),
@@ -212,6 +222,34 @@ class _InvoiceCard extends StatelessWidget {
   String _formatMoney(int cents) {
     final v = cents / 100;
     return '${v.toStringAsFixed(2)} MT';
+  }
+
+  Future<void> _exportPdf(BuildContext context) async {
+    final invoiceEntity = CustomInvoice(
+      id: '',
+      number: invoiceNumber,
+      storeId: '',
+      clientName: invoice.clientName,
+      clientPhone: invoice.clientPhone,
+      items: [
+        for (final item in invoice.items)
+          CustomInvoiceItem(
+            productName: item.name,
+            quantity: item.qty,
+            unitPriceCents: item.unitPriceCents,
+            subtotalCents: item.qty * item.unitPriceCents,
+          ),
+      ],
+      totalAmountCents: invoice.totalCents,
+      discountCents: invoice.discountCents,
+      taxCents: invoice.taxCents,
+      createdAt: DateTime.now(),
+    );
+
+    await const InvoicePdfExporter().sharePdf(
+      invoiceEntity,
+      businessName: 'Minha Empresa',
+    );
   }
 }
 
