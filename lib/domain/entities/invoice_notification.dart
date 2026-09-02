@@ -15,7 +15,13 @@ enum InvoiceNotificationType {
   invoiceExpired,
 
   /// Factura marcada como paga.
-  invoicePaid;
+  invoicePaid,
+
+  /// Add-on está para expirar (7, 3 ou 1 dia antes).
+  addOnExpiringSoon,
+
+  /// Add-on expirou.
+  addOnExpired;
 }
 
 /// Notificação in-app para o dono do tenant quando uma factura é gerada

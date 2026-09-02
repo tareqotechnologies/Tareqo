@@ -18,6 +18,7 @@ import '../financial/add_transaction_sheet.dart';
 import '../financial/financial_screen.dart';
 import '../../controllers/customers_providers.dart';
 import '../../controllers/dashboard_providers.dart';
+import '../../controllers/addon_expiry_provider.dart';
 import '../../controllers/notification_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../products/product_list_screen.dart';
@@ -78,7 +79,10 @@ class AppShell extends ConsumerWidget {
  @override
  Widget build(BuildContext context, WidgetRef ref) {
  final index = ref.watch(shellIndexProvider);
- final wide = MediaQuery.sizeOf(context).width >= 880;    final l10n = context.l10n;
+ final wide = MediaQuery.sizeOf(context).width >= 880;    // Trigger add-on expiry check when tenant is known.
+    ref.watch(addonExpiryCheckProvider);
+
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -112,7 +116,7 @@ class AppShell extends ConsumerWidget {
       appBar: AppBar(
         toolbarHeight: 48,
         title: Text(
-          'Dumbhanengue',
+          'TAREQO',
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
             letterSpacing: 0.2,
