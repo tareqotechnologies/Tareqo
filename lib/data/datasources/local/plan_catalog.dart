@@ -26,6 +26,8 @@ abstract final class PlanCatalog {
  priceMonthlyCents: 100000,
  maxStores: 3,
  maxEmployees: 10,
+ // Inclui cotação e factura personalizada.
+ bundledAddOns: ['ao_quotation', 'ao_custom_invoice'],
  ),
  Plan(
  id: 'pl3',
@@ -34,6 +36,15 @@ abstract final class PlanCatalog {
  priceMonthlyCents: 200000,
  maxStores: 10,
  maxEmployees: 50,
+ // Inclui TODOS os add-ons — plano premium.
+ bundledAddOns: [
+ 'ao_custom_invoice',
+ 'ao_quotation',
+ 'ao_advanced_reports',
+ 'ao_employee_mgmt',
+ 'ao_multi_store',
+ 'ao_mobile_money',
+ ],
  ),
  ];
  }

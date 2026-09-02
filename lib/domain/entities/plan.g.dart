@@ -14,6 +14,11 @@ _Plan _$PlanFromJson(Map<String, dynamic> json) => _Plan(
   maxStores: (json['maxStores'] as num?)?.toInt() ?? 1,
   maxEmployees: (json['maxEmployees'] as num?)?.toInt() ?? 1,
   isActive: json['isActive'] as bool? ?? true,
+  bundledAddOns:
+      (json['bundledAddOns'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const <String>[],
 );
 
 Map<String, dynamic> _$PlanToJson(_Plan instance) => <String, dynamic>{
@@ -24,4 +29,5 @@ Map<String, dynamic> _$PlanToJson(_Plan instance) => <String, dynamic>{
   'maxStores': instance.maxStores,
   'maxEmployees': instance.maxEmployees,
   'isActive': instance.isActive,
+  'bundledAddOns': instance.bundledAddOns,
 };

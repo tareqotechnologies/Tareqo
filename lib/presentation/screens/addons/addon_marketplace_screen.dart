@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
+import '../../controllers/account_providers.dart';
 import '../../controllers/addon_providers.dart';
+import '../../controllers/auth_providers.dart';
 import 'custom_invoice_screen.dart';
 import 'quotation_screen.dart';
 import 'employee_management_screen.dart';
@@ -19,6 +21,13 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final addOns = ref.watch(addOnCatalogProvider);
     final activeIds = ref.watch(activeAddOnIdsProvider).value ?? {};
+
+    // Add-ons incluídos no plano do tenant.
+    final user = ref.watch(authStateProvider).value;
+    final tenant = user == null
+        ? null
+        : ref.watch(myTenantProvider(user.id)).value;
+    final bundledAddOns = tenant != null ? _getBundledAddOns(ref, tenant.planId) : <String>{};
 
     final horizontal = AppSpacing.pagePaddingForWidth(
       MediaQuery.sizeOf(context).width,
@@ -56,10 +65,13 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
           for (final addon in addOns) ...[
             _AddOnCard(
               addon: addon,
-              isActive: activeIds.contains(addon.id),
-              onToggle: () {
-                ref.read(activeAddOnIdsProvider.notifier).toggle(addon.id);
-              },
+              isActive: activeIds.contains(addon.id) || bundledAddOns.contains(addon.id),
+              isIncluded: bundledAddOns.contains(addon.id),
+              onToggle: bundledAddOns.contains(addon.id)
+                  ? null // Não pode desactivar add-ons incluídos
+                  : () {
+                      ref.read(activeAddOnIdsProvider.notifier).toggle(addon.id);
+                    },
               onOpen: () => _openAddOn(context, addon.id),
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -109,19 +121,28 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
         );
     }
   }
+
+  Set<String> _getBundledAddOns(WidgetRef ref, String planId) {
+    final plans = ref.read(plansProvider).value ?? [];
+    final plan = plans.where((p) => p.id == planId).toList();
+    if (plan.isEmpty) return {};
+    return Set<String>.from(plan.first.bundledAddOns);
+  }
 }
 
 class _AddOnCard extends StatelessWidget {
   const _AddOnCard({
     required this.addon,
     required this.isActive,
-    required this.onToggle,
+    this.isIncluded = false,
+    this.onToggle,
     required this.onOpen,
   });
 
   final dynamic addon;
   final bool isActive;
-  final VoidCallback onToggle;
+  final bool isIncluded;
+  final VoidCallback? onToggle;
   final VoidCallback onOpen;
 
   @override
@@ -174,7 +195,25 @@ class _AddOnCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (isActive)
+                        if (isIncluded)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF16A34A).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'Incluído no plano',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: const Color(0xFF16A34A),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        if (!isIncluded && isActive)
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -205,9 +244,9 @@ class _AddOnCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _formatPrice(addon.priceMonthlyCents),
+                      isIncluded ? 'Incluído no plano' : _formatPrice(addon.priceMonthlyCents),
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.primary,
+                        color: isIncluded ? const Color(0xFF16A34A) : scheme.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

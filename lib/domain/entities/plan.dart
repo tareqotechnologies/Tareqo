@@ -21,6 +21,9 @@ abstract class Plan with _$Plan {
  @Default(1) int maxStores,
  @Default(1) int maxEmployees,
  @Default(true) bool isActive,
+ // IDs dos add-ons incluídos neste plano (ex.: ['ao_advanced_reports']).
+ // Tenants neste plano recebem estes add-ons automaticamente.
+ @Default(<String>[]) List<String> bundledAddOns,
  }) = _Plan;
 
  factory Plan.fromJson(Map<String, dynamic> json) => _$PlanFromJson(json);
