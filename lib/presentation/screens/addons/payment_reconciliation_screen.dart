@@ -213,10 +213,15 @@ class _SummaryCard extends StatelessWidget {
 }
 
 class _PaymentCard extends StatelessWidget {
-  const _PaymentCard({required this.payment, required this.onConfirm});
+  const _PaymentCard({
+    required this.payment,
+    required this.onConfirm,
+    this.onReject,
+  });
 
   final _PaymentRecord payment;
   final VoidCallback onConfirm;
+  final VoidCallback? onReject;
 
   @override
   Widget build(BuildContext context) {
@@ -313,7 +318,7 @@ class _PaymentCard extends StatelessWidget {
                     color: scheme.primary,
                   ),
                 ),
-                if (payment.status == 'Pendente')
+                if (payment.status == 'Pendente') ...[
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: GestureDetector(
@@ -321,12 +326,27 @@ class _PaymentCard extends StatelessWidget {
                       child: Text(
                         'Confirmar',
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: scheme.primary,
+                          color: const Color(0xFF16A34A),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                   ),
+                  if (onReject != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: GestureDetector(
+                        onTap: onReject,
+                        child: Text(
+                          'Rejeitar',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.error,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ],
             ),
           ],
