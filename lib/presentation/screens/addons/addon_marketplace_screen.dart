@@ -166,17 +166,17 @@ class _AddOnCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   color: isActive
-                      ? scheme.primary.withValues(alpha: 0.15)
+                      ? scheme.primary.withValues(alpha: 0.12)
                       : scheme.surfaceContainerHighest,
-                  borderRadius: AppRadius.smAll,
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(
                   iconData,
-                  size: 22,
+                  size: 20,
                   color: isActive ? scheme.primary : scheme.onSurfaceVariant,
                 ),
               ),
@@ -185,53 +185,14 @@ class _AddOnCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            addon.name,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        if (isIncluded)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF16A34A).withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'Incluído no plano',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: const Color(0xFF16A34A),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        if (!isIncluded && isActive)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: scheme.primary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'Activo',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: scheme.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                      ],
+                    Text(
+                      addon.name,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -239,16 +200,62 @@ class _AddOnCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
+                        fontSize: 12,
+                        height: 1.3,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      isIncluded ? 'Incluído no plano' : _formatPrice(addon.priceMonthlyCents),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: isIncluded ? const Color(0xFF16A34A) : scheme.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      children: [
+                        if (isIncluded)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF16A34A).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Incluído',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: const Color(0xFF16A34A),
+                                fontWeight: FontWeight.w400,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        if (!isIncluded && isActive)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Activo',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: scheme.primary,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        if (isIncluded || isActive) const SizedBox(width: 6),
+                        Text(
+                          isIncluded ? '' : _formatPrice(addon.priceMonthlyCents),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                            fontWeight: FontWeight.w300,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
