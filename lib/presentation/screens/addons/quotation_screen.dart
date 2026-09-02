@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/share/quotation_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
@@ -181,7 +182,15 @@ class _QuotationCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: AppButton.secondary(
-                    label: 'Exportar PDF',
+                    label: 'WhatsApp',
+                    icon: const Icon(Icons.share_outlined, size: 16),
+                    onPressed: () => _shareWhatsApp(),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: AppButton.secondary(
+                    label: 'PDF',
                     icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
                     onPressed: () => _exportPdf(context),
                   ),
@@ -217,6 +226,25 @@ class _QuotationCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _shareWhatsApp() async {
+    final buffer = StringBuffer();
+    buffer.writeln('═══ COTAÇÃO ═══');
+    buffer.writeln('Nº: ${quotationNumber.toString().padLeft(5, '0')}');
+    buffer.writeln('Cliente: ${draft.clientName}');
+    buffer.writeln('Validade: ${draft.validityDays} dias');
+    buffer.writeln();
+    for (final item in draft.items) {
+      buffer.writeln('• $item');
+    }
+    buffer.writeln();
+    buffer.writeln('TOTAL: ${_formatMoney(draft.totalCents)}');
+
+    final uri = Uri.parse(
+      'https://wa.me/?text=${Uri.encodeComponent(buffer.toString())}',
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _exportPdf(BuildContext context) async {

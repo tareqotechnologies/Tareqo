@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/share/invoice_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
@@ -212,12 +213,13 @@ class _InvoiceCard extends StatelessWidget {
             Row(
               children: [
                 AppButton.secondary(
-                  label: 'Ver Factura',
-                  onPressed: () {},
+                  label: 'WhatsApp',
+                  icon: const Icon(Icons.share_outlined, size: 16),
+                  onPressed: () => _shareWhatsApp(),
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 AppButton.secondary(
-                  label: 'Exportar PDF',
+                  label: 'PDF',
                   icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
                   onPressed: () => _exportPdf(context),
                 ),
@@ -232,6 +234,27 @@ class _InvoiceCard extends StatelessWidget {
   String _formatMoney(int cents) {
     final v = cents / 100;
     return '${v.toStringAsFixed(2)} MT';
+  }
+
+  Future<void> _shareWhatsApp() async {
+    final buffer = StringBuffer();
+    buffer.writeln('═══ FACTURA ═══');
+    buffer.writeln('Nº: ${invoiceNumber.toString().padLeft(5, '0')}');
+    buffer.writeln('Cliente: ${invoice.clientName}');
+    if (invoice.clientPhone.isNotEmpty) {
+      buffer.writeln('Tel: ${invoice.clientPhone}');
+    }
+    buffer.writeln();
+    for (final item in invoice.items) {
+      buffer.writeln('• ${item.name} x${item.qty} — ${_formatMoney(item.unitPriceCents)}');
+    }
+    buffer.writeln();
+    buffer.writeln('TOTAL: ${_formatMoney(invoice.totalCents)}');
+
+    final uri = Uri.parse(
+      'https://wa.me/?text=${Uri.encodeComponent(buffer.toString())}',
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _exportPdf(BuildContext context) async {
