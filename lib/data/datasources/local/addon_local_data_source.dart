@@ -25,4 +25,11 @@ abstract interface class AddOnLocalDataSource {
 
   /// Lista todos os TenantAddOns de um tenant.
   Future<List<TenantAddOn>> getByTenant(String tenantId);
+
+  /// Desactiva todos os add-ons expirados (expiresAt < now).
+  /// Retorna o número de add-ons desactivados.
+  Future<int> deactivateExpired();
+
+  /// Retorna todos os add-ons expirados (para facturamento/relatórios).
+  Future<List<TenantAddOn>> getExpired();
 }

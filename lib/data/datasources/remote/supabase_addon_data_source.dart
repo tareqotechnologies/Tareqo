@@ -101,6 +101,32 @@ final class SupabaseAddOnDataSourceImpl implements AddOnLocalDataSource {
     return List.unmodifiable([for (final row in rows) _map(row)]);
   }
 
+  @override
+  Future<int> deactivateExpired() async {
+    final now = DateTime.now().toUtc().toIso8601String();
+    final rows = await supabaseClient
+        .from(_table)
+        .update({'is_active': false})
+        .eq('is_active', true)
+        .not('expires_at', 'is', null)
+        .lt('expires_at', now)
+        .select('id');
+    return rows.length;
+  }
+
+  @override
+  Future<List<TenantAddOn>> getExpired() async {
+    final now = DateTime.now().toUtc().toIso8601String();
+    final rows = await supabaseClient
+        .from(_table)
+        .select(_columns)
+        .eq('is_active', true)
+        .not('expires_at', 'is', null)
+        .lt('expires_at', now)
+        .limit(SupabaseQueryLimits.pageSize);
+    return List.unmodifiable([for (final row in rows) _map(row)]);
+  }
+
   TenantAddOn _map(Map<String, dynamic> row) => TenantAddOn(
         id: row['id'] as String,
         tenantId: row['tenant_id'] as String,

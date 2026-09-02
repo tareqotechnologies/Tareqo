@@ -9,6 +9,7 @@ import '../../controllers/invoice_providers.dart';
 import '../../widgets/fade_indexed_stack.dart';
 import '../../widgets/sign_out_button.dart';
 import 'admin_addons_screen.dart';
+import 'admin_addon_revenue_screen.dart';
 import 'admin_audit_log_screen.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_invoices_screen.dart';
@@ -38,6 +39,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     const AdminPlanRequestsScreen(),
     const AdminInvoicesScreen(),
     const AdminAddOnsScreen(),
+    const AdminAddOnRevenueScreen(),
     const AdminMessagesScreen(),
     const AdminAuditLogScreen(),
   ];
@@ -165,6 +167,11 @@ class _AdminShellState extends ConsumerState<AdminShell> {
         icon: Icons.extension_outlined,
         selectedIcon: Icons.extension_rounded,
         label: 'Add-ons',
+      ),
+      _NavItem(
+        icon: Icons.payments_outlined,
+        selectedIcon: Icons.payments_rounded,
+        label: 'Receitas',
       ),
       _NavItem(
         icon: Icons.mail_outline_rounded,

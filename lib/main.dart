@@ -7,6 +7,7 @@ import 'core/config/app_flavor.dart';
 import 'core/di/service_locator.dart';
 import 'core/network/supabase_bootstrap.dart';
 import 'core/observability/crash_reporting.dart';
+import 'data/services/addon_expiry_service.dart';
 
 Future<void> main() async {
  WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +36,12 @@ Future<void> main() async {
  // Inicializa o Service Locator (GetIt) com as dependências.
  await ServiceLocator.initialize();
 
+ // Verificar add-ons expirados no arranque e iniciar verificação periódica.
+ registerAddOnExpiryService();
+ final expiryService = ServiceLocator.instance<AddOnExpiryService>();
+ await expiryService.checkAndDeactivateExpired();
+ expiryService.startPeriodicCheck();
+
  // ProviderScope expõe o estado gerenciado pelo Riverpod à árvore de widgets.
- runApp(const ProviderScope(child: DumbhanengueApp()));
+ runApp(const ProviderScope(child: TareqoApp()));
 }

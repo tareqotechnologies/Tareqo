@@ -86,6 +86,33 @@ final class AddOnLocalDataSourceImpl implements AddOnLocalDataSource {
     );
   }
 
+  @override
+  Future<int> deactivateExpired() async {
+    final now = DateTime.now();
+    var count = 0;
+    for (var i = 0; i < _records.length; i++) {
+      final r = _records[i];
+      if (r.isActive &&
+          r.expiresAt != null &&
+          now.isAfter(r.expiresAt!)) {
+        _records[i] = r.copyWith(isActive: false);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  @override
+  Future<List<TenantAddOn>> getExpired() async {
+    final now = DateTime.now();
+    return List.unmodifiable(
+      _records.where((r) =>
+          r.expiresAt != null &&
+          r.isActive &&
+          now.isAfter(r.expiresAt!)),
+    );
+  }
+
   TenantAddOn? _find(String tenantId, String addOnId) {
     for (final r in _records) {
       if (r.tenantId == tenantId && r.addOnId == addOnId) return r;
