@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
@@ -16,6 +17,8 @@ import '../purchases/purchases_screen.dart';
 import '../reports/reports_screen.dart';
 import '../shell/app_shell.dart';
 import '../stores/stores_screen.dart';
+import '../account/security_settings_screen.dart';
+import '../addons/addon_marketplace_screen.dart';
 
 /// Aba Menu V5 — hub dos módulos secundários e acções de conta.
 ///
@@ -182,6 +185,33 @@ class MenuScreen extends ConsumerWidget {
                 _NotificationsModuleCard(
                   onTap: openNotifications,
                 ),
+              if (tenant != null &&
+                  tenant.status == TenantStatus.approved &&
+                  accessLevel == UserAccessLevel.owner)
+                ModuleCard(
+                  icon: Icons.extension_outlined,
+                  label: 'Add-ons',
+                  iconColor: const Color(0xFF7C3AED),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const AddOnMarketplaceScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ModuleCard(
+                icon: Icons.shield_outlined,
+                label: 'Segurança',
+                iconColor: AppColors.statusIndigo,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const SecuritySettingsScreen(),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
