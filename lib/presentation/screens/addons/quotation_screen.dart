@@ -107,18 +107,26 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
   }
 }
 
+enum _QuotationStatus { draft, sent, accepted, rejected }
+
 class _QuotationDraft {
   _QuotationDraft({
     required this.clientName,
+    this.clientPhone = '',
     required this.items,
     required this.totalCents,
     required this.validityDays,
+    this.notes = '',
   });
 
   final String clientName;
+  final String clientPhone;
   final List<String> items;
   final int totalCents;
   final int validityDays;
+  final String notes;
+  _QuotationStatus status = _QuotationStatus.draft;
+  DateTime createdAt = DateTime.now();
 }
 
 class _QuotationCard extends StatelessWidget {
@@ -150,21 +158,7 @@ class _QuotationCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Rascunho',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: const Color(0xFFF59E0B),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+                _StatusChip(status: draft.status),
               ],
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -183,10 +177,41 @@ class _QuotationCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            AppButton.secondary(
-              label: 'Exportar PDF',
-              icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
-              onPressed: () => _exportPdf(context),
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton.secondary(
+                    label: 'Exportar PDF',
+                    icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
+                    onPressed: () => _exportPdf(context),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                if (draft.status == _QuotationStatus.draft)
+                  Expanded(
+                    child: AppButton.primary(
+                      label: 'Enviar',
+                      icon: const Icon(Icons.send_outlined, size: 16),
+                      onPressed: () => draft.status = _QuotationStatus.sent,
+                    ),
+                  ),
+                if (draft.status == _QuotationStatus.sent) ...[
+                  Expanded(
+                    child: AppButton.primary(
+                      label: 'Aceitar',
+                      icon: const Icon(Icons.check_circle_outline, size: 16),
+                      onPressed: () => draft.status = _QuotationStatus.accepted,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: AppButton.danger(
+                      label: 'Rejeitar',
+                      onPressed: () => draft.status = _QuotationStatus.rejected,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
@@ -348,20 +373,52 @@ class _NewQuotationSheetState extends State<_NewQuotationSheet> {
                       _QuotationDraft(
                         clientName: _clientController.text.trim(),
                         items: List.from(_items),
-                        totalCents: _totalCents,
-                        validityDays: 7,
-                      ),
-                    );
-                  }
-                : null,
-          ),
-        ],
+                        totalCents: _totalCents,                    validityDays: 7,
+                  ),
+                );
+              }
+            : null,
+      ),
+    ],
+  ),
+);
+}
+
+String _formatMoney(int cents) {
+  final v = cents / 100;
+  return '${v.toStringAsFixed(2)} MT';
+}
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.status});
+
+  final _QuotationStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final (label, color) = switch (status) {
+      _QuotationStatus.draft => ('Rascunho', const Color(0xFFF59E0B)),
+      _QuotationStatus.sent => ('Enviada', const Color(0xFF3B82F6)),
+      _QuotationStatus.accepted => ('Aceite', const Color(0xFF16A34A)),
+      _QuotationStatus.rejected => ('Rejeitada', const Color(0xFFDC2626)),
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
-  }
-
-  String _formatMoney(int cents) {
-    final v = cents / 100;
-    return '${v.toStringAsFixed(2)} MT';
   }
 }
