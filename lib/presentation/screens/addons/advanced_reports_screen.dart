@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/share/advanced_reports_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../widgets/app_button.dart';
 
@@ -63,13 +64,12 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
             Tab(text: 'Estoque'),
           ],
         ),
-      ),
-      body: TabBarView(
+      ),        body: TabBarView(
         controller: _tabController,
-        children: const [
-          _SalesReportTab(),
-          _FinancialReportTab(),
-          _StockReportTab(),
+        children: [
+          _SalesReportTab(selectedPeriod: _selectedPeriod),
+          _FinancialReportTab(selectedPeriod: _selectedPeriod),
+          _StockReportTab(selectedPeriod: _selectedPeriod),
         ],
       ),
     );
@@ -79,7 +79,9 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
 // ─── Vendas ─────────────────────────────────────────────────────────────
 
 class _SalesReportTab extends StatelessWidget {
-  const _SalesReportTab();
+  const _SalesReportTab({required this.selectedPeriod});
+
+  final String selectedPeriod;
 
   @override
   Widget build(BuildContext context) {
@@ -209,7 +211,15 @@ class _SalesReportTab extends StatelessWidget {
           expanded: true,
           label: 'Exportar Relatório (PDF)',
           icon: const Icon(Icons.download_outlined, size: 18),
-          onPressed: () {},
+          onPressed: () => const AdvancedReportsPdfExporter().shareSalesReport(
+            period: selectedPeriod,
+            kpis: {
+              'Total de Vendas': '0,00 MT',
+              'Ticket Médio': '0,00 MT',
+              'Nº de Vendas': '0',
+              'Itens Vendidos': '0',
+            },
+          ),
         ),
       ],
     );
@@ -219,7 +229,9 @@ class _SalesReportTab extends StatelessWidget {
 // ─── Financeiro ─────────────────────────────────────────────────────────
 
 class _FinancialReportTab extends StatelessWidget {
-  const _FinancialReportTab();
+  const _FinancialReportTab({required this.selectedPeriod});
+
+  final String selectedPeriod;
 
   @override
   Widget build(BuildContext context) {
@@ -301,22 +313,33 @@ class _FinancialReportTab extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        AppButton.secondary(
+        const SizedBox(height: AppSpacing.lg),        AppButton.secondary(
           expanded: true,
           label: 'Exportar Financeiro (PDF)',
           icon: const Icon(Icons.download_outlined, size: 18),
-          onPressed: () {},
+          onPressed: () => const AdvancedReportsPdfExporter().shareFinancialReport(
+            period: selectedPeriod,
+            kpis: {
+              'Receitas': '0,00 MT',
+              'Despesas': '0,00 MT',
+              'Lucro Líquido': '0,00 MT',
+            },
+          ),
         ),
       ],
     );
   }
 }
 
+
+
+
 // ─── Estoque ────────────────────────────────────────────────────────────
 
 class _StockReportTab extends StatelessWidget {
-  const _StockReportTab();
+  const _StockReportTab({required this.selectedPeriod});
+
+  final String selectedPeriod;
 
   @override
   Widget build(BuildContext context) {
@@ -368,17 +391,27 @@ class _StockReportTab extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
-        AppButton.secondary(
+        const SizedBox(height: AppSpacing.lg),        AppButton.secondary(
           expanded: true,
           label: 'Exportar Estoque (PDF)',
           icon: const Icon(Icons.download_outlined, size: 18),
-          onPressed: () {},
+          onPressed: () => const AdvancedReportsPdfExporter().shareStockReport(
+            period: selectedPeriod,
+            kpis: {
+              'Total Produtos': '0',
+              'Estoque Baixo': '0',
+              'Valor em Estoque': '0,00 MT',
+              'Próx. Validade': '0',
+            },
+          ),
         ),
       ],
     );
   }
 }
+
+
+
 
 // ─── Componentes compartilhados ─────────────────────────────────────────
 
