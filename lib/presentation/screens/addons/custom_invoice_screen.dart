@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/share/invoice_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/custom_invoice.dart';
+import '../../controllers/customers_providers.dart';
+import '../../controllers/products_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 
@@ -85,7 +87,7 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
           : ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: _invoices.length,
-              separatorBuilder: (_, __) =>
+              separatorBuilder: (_, _) =>
                   const SizedBox(height: AppSpacing.xs),
               itemBuilder: (context, index) => _InvoiceCard(
                     invoice: _invoices[index],
@@ -290,32 +292,32 @@ class _InvoiceCard extends StatelessWidget {
   }
 }
 
-class _NewInvoiceSheet extends StatefulWidget {
+class _NewInvoiceSheet extends ConsumerStatefulWidget {
   const _NewInvoiceSheet({required this.onSave});
 
   final ValueChanged<_InvoiceData> onSave;
 
   @override
-  State<_NewInvoiceSheet> createState() => _NewInvoiceSheetState();
+  ConsumerState<_NewInvoiceSheet> createState() => _NewInvoiceSheetState();
 }
 
-class _NewInvoiceSheetState extends State<_NewInvoiceSheet> {
+class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
   final _clientController = TextEditingController();
   final _phoneController = TextEditingController();
   final _taxIdController = TextEditingController();
-  final _productController = TextEditingController();
   final _priceController = TextEditingController();
   final _qtyController = TextEditingController(text: '1');
   final _discountController = TextEditingController(text: '0');
   final _taxController = TextEditingController(text: '0');
   final List<_InvoiceItemData> _items = [];
+  String? _selectedProductId;
+  String? _selectedCustomerId;
 
   @override
   void dispose() {
     _clientController.dispose();
     _phoneController.dispose();
     _taxIdController.dispose();
-    _productController.dispose();
     _priceController.dispose();
     _qtyController.dispose();
     _discountController.dispose();
@@ -323,22 +325,36 @@ class _NewInvoiceSheetState extends State<_NewInvoiceSheet> {
     super.dispose();
   }
 
+  Widget _sectionLabel(String text) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
   int get _subtotalCents => _items.fold(
-      0, (sum, item) => sum + item.qty * 1000 * item.unitPriceCents ~/ 1000);
+      0, (sum, item) => sum + (item.qty * item.unitPriceCents));
 
   void _addItem() {
-    final name = _productController.text.trim();
     final price = double.tryParse(_priceController.text) ?? 0;
     final qty = int.tryParse(_qtyController.text) ?? 1;
-    if (name.isEmpty || price <= 0) return;
+    if (_selectedProductId == null || price <= 0) return;
+
+    final products = ref.read(productsProvider).value ?? [];
+    final product = products.firstWhere(
+      (p) => p.id == _selectedProductId,
+      orElse: () => products.first,
+    );
 
     setState(() {
       _items.add(_InvoiceItemData(
-        name: name,
+        name: product.name,
         qty: qty,
         unitPriceCents: (price * 100).round(),
       ));
-      _productController.clear();
+      _selectedProductId = null;
       _priceController.clear();
       _qtyController.text = '1';
     });
@@ -347,6 +363,10 @@ class _NewInvoiceSheetState extends State<_NewInvoiceSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final products = ref.watch(productsProvider).value ?? [];
+    final customers = ref.watch(customersProvider).value ?? [];
+    final activeProducts = products.where((p) => p.isActive).toList();
     final discount = (double.tryParse(_discountController.text) ?? 0 * 100).round();
     final tax = (double.tryParse(_taxController.text) ?? 0 * 100).round();
     final total = _subtotalCents - discount + tax;
@@ -370,11 +390,53 @@ class _NewInvoiceSheetState extends State<_NewInvoiceSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            AppTextField(
-              controller: _clientController,
-              label: 'Nome do cliente',
-              prefixIcon: Icons.person_outline,
-            ),
+
+            // ─── Cliente (picker do catálogo) ──
+            _sectionLabel('Cliente'),
+            const SizedBox(height: 6),
+            if (customers.isNotEmpty)
+              Container(
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  borderRadius: AppRadius.mdAll,
+                ),
+                child: DropdownButtonFormField<String>(
+                  initialValue: _selectedCustomerId,
+                  isExpanded: true,
+                  menuMaxHeight: 250,
+                  decoration: InputDecoration(
+                    hintText: 'Selecionar cliente...',
+                    prefixIcon: const Icon(Icons.person_outline, size: 20),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12,
+                    ),
+                  ),
+                  items: customers.map((c) => DropdownMenuItem(
+                    value: c.id,
+                    child: Text(
+                      '${c.name}${c.phone.isNotEmpty ? ' (${c.phone})' : ''}',
+                      style: theme.textTheme.bodyMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  )).toList(),
+                  onChanged: (id) {
+                    setState(() {
+                      _selectedCustomerId = id;
+                      final c = customers.firstWhere((x) => x.id == id);
+                      _clientController.text = c.name;
+                      _phoneController.text = c.phone;
+                    });
+                  },
+                ),
+              )
+            else ...[
+              AppTextField(
+                controller: _clientController,
+                label: 'Nome do cliente',
+                prefixIcon: Icons.person_outline,
+              ),
+            ],
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _phoneController,
@@ -391,11 +453,72 @@ class _NewInvoiceSheetState extends State<_NewInvoiceSheet> {
             const SizedBox(height: AppSpacing.md),
             const Divider(),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(
-              controller: _productController,
-              label: 'Produto',
-              prefixIcon: Icons.inventory_2_outlined,
-            ),
+
+            // ─── Produto (picker do estoque) ──
+            _sectionLabel('Produto'),
+            const SizedBox(height: 6),
+            if (activeProducts.isNotEmpty)
+              Container(
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  borderRadius: AppRadius.mdAll,
+                ),
+                child: DropdownButtonFormField<String>(
+                  initialValue: _selectedProductId,
+                  isExpanded: true,
+                  menuMaxHeight: 250,
+                  decoration: InputDecoration(
+                    hintText: 'Selecionar produto...',
+                    prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12,
+                    ),
+                  ),
+                  items: activeProducts.map((p) => DropdownMenuItem(
+                    value: p.id,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          p.name,
+                          style: theme.textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          'Estoque: ${p.stockQuantity ~/ 1000} ${p.unitLabel}  •  ${_formatMoney(p.salePriceCents)}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )).toList(),
+                  onChanged: (id) {
+                    setState(() {
+                      _selectedProductId = id;
+                      final p = activeProducts.firstWhere((x) => x.id == id);
+                      _priceController.text =
+                          (p.salePriceCents / 100).toStringAsFixed(2);
+                    });
+                  },
+                ),
+              )
+            else
+              InputDecorator(
+                decoration: InputDecoration(
+                  hintText: 'Sem produtos cadastrados',
+                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 12,
+                  ),
+                  enabled: false,
+                ),
+                child: const Text(''),
+              ),
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
@@ -423,7 +546,7 @@ class _NewInvoiceSheetState extends State<_NewInvoiceSheet> {
               alignment: Alignment.centerRight,
               child: AppButton.secondary(
                 label: 'Adicionar',
-                onPressed: _addItem,
+                onPressed: _selectedProductId != null ? _addItem : null,
               ),
             ),
             if (_items.isNotEmpty) ...[
@@ -440,7 +563,7 @@ class _NewInvoiceSheetState extends State<_NewInvoiceSheet> {
                             ),
                           ),
                           Text(
-                            _formatMoney(entry.value.unitPriceCents),
+                            _formatMoney(entry.value.unitPriceCents * entry.value.qty),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w500,
                             ),

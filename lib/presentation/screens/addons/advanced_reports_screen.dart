@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/share/advanced_reports_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../controllers/products_providers.dart';
 import '../../widgets/app_button.dart';
 
 /// Ecra de relatórios avançados — dashboards, filtros e exportação.
@@ -78,26 +79,33 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
 
 // ─── Vendas ─────────────────────────────────────────────────────────────
 
-class _SalesReportTab extends StatelessWidget {
+class _SalesReportTab extends ConsumerWidget {
   const _SalesReportTab({required this.selectedPeriod});
 
   final String selectedPeriod;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final products = ref.watch(productsProvider).value ?? [];
+    final totalProducts = products.length;
+    final totalStockValue = products.fold<int>(
+        0, (sum, p) => sum + (p.stockQuantity ~/ 1000) * (p.salePriceCents ~/ 100));
+    final lowStock = products.where((p) => (p.stockQuantity ~/ 1000) <= 10).length;
+    final totalItems = products.fold<int>(0, (sum, p) => sum + (p.stockQuantity ~/ 1000));
+
+    String formatMoney(int v) => '${v.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')},00 MT';
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        // KPI Cards
         Row(
           children: [
             Expanded(
               child: _KpiCard(
-                label: 'Total de Vendas',
-                value: '0,00 MT',
+                label: 'Produtos Ativos',
+                value: '$totalProducts',
                 icon: Icons.trending_up,
                 color: const Color(0xFF16A34A),
               ),
@@ -105,10 +113,10 @@ class _SalesReportTab extends StatelessWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _KpiCard(
-                label: 'Ticket Médio',
-                value: '0,00 MT',
-                icon: Icons.receipt_long,
-                color: const Color(0xFF3B82F6),
+                label: 'Estoque Baixo',
+                value: '$lowStock',
+                icon: Icons.warning_amber,
+                color: const Color(0xFFF59E0B),
               ),
             ),
           ],
@@ -118,8 +126,8 @@ class _SalesReportTab extends StatelessWidget {
           children: [
             Expanded(
               child: _KpiCard(
-                label: 'Nº de Vendas',
-                value: '0',
+                label: 'Total Itens',
+                value: '$totalItems',
                 icon: Icons.shopping_cart_outlined,
                 color: const Color(0xFF7C3AED),
               ),
@@ -127,60 +135,16 @@ class _SalesReportTab extends StatelessWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _KpiCard(
-                label: 'Itens Vendidos',
-                value: '0',
-                icon: Icons.inventory_2_outlined,
-                color: const Color(0xFFF59E0B),
+                label: 'Valor Estoque',
+                value: formatMoney(totalStockValue),
+                icon: Icons.attach_money,
+                color: const Color(0xFF3B82F6),
               ),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
-        // Gráfico placeholder
-        Material(
-          color: scheme.surfaceContainerLow,
-          borderRadius: AppRadius.lgAll,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Vendas por Dia',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                SizedBox(
-                  height: 160,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.bar_chart_outlined,
-                          size: 40,
-                          color: scheme.onSurfaceVariant
-                              .withValues(alpha: 0.3),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          'Gráfico de vendas diárias',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        // Top produtos
+        // Top produtos por estoque
         Material(
           color: scheme.surfaceContainerLow,
           borderRadius: AppRadius.lgAll,
@@ -190,18 +154,41 @@ class _SalesReportTab extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Top Produtos',
+                  'Produtos por Estoque',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Sem dados para o período seleccionado',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
+                if (products.isEmpty)
+                  Text(
+                    'Sem produtos cadastrados',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  )
+                else
+                  ...products.take(5).map((p) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            p.name,
+                            style: theme.textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '${p.stockQuantity ~/ 1000} ${p.unitLabel}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
               ],
             ),
           ),
@@ -214,10 +201,10 @@ class _SalesReportTab extends StatelessWidget {
           onPressed: () => const AdvancedReportsPdfExporter().shareSalesReport(
             period: selectedPeriod,
             kpis: {
-              'Total de Vendas': '0,00 MT',
-              'Ticket Médio': '0,00 MT',
-              'Nº de Vendas': '0',
-              'Itens Vendidos': '0',
+              'Produtos Ativos': '$totalProducts',
+              'Estoque Baixo': '$lowStock',
+              'Total Itens': '$totalItems',
+              'Valor Estoque': formatMoney(totalStockValue),
             },
           ),
         ),
@@ -336,14 +323,23 @@ class _FinancialReportTab extends StatelessWidget {
 
 // ─── Estoque ────────────────────────────────────────────────────────────
 
-class _StockReportTab extends StatelessWidget {
+class _StockReportTab extends ConsumerWidget {
   const _StockReportTab({required this.selectedPeriod});
 
   final String selectedPeriod;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final products = ref.watch(productsProvider).value ?? [];
+    final totalProducts = products.length;
+    final lowStock = products.where((p) => (p.stockQuantity ~/ 1000) <= 10).length;
+    final totalStockValue = products.fold<int>(
+        0, (sum, p) => sum + (p.stockQuantity ~/ 1000) * (p.salePriceCents ~/ 100));
+    final outOfStock = products.where((p) => (p.stockQuantity ~/ 1000) == 0).length;
+
+    String formatMoney(int v) => '${v.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')},00 MT';
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -353,7 +349,7 @@ class _StockReportTab extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 label: 'Total Produtos',
-                value: '0',
+                value: '$totalProducts',
                 icon: Icons.inventory_2_outlined,
                 color: const Color(0xFF3B82F6),
               ),
@@ -362,7 +358,7 @@ class _StockReportTab extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 label: 'Estoque Baixo',
-                value: '0',
+                value: '$lowStock',
                 icon: Icons.warning_amber,
                 color: const Color(0xFFF59E0B),
               ),
@@ -375,7 +371,7 @@ class _StockReportTab extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 label: 'Valor em Estoque',
-                value: '0,00 MT',
+                value: formatMoney(totalStockValue),
                 icon: Icons.attach_money,
                 color: const Color(0xFF7C3AED),
               ),
@@ -383,25 +379,81 @@ class _StockReportTab extends StatelessWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _KpiCard(
-                label: 'Próx. Validade',
-                value: '0',
+                label: 'Sem Estoque',
+                value: '$outOfStock',
                 icon: Icons.event_busy,
                 color: const Color(0xFFDC2626),
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),        AppButton.secondary(
+        const SizedBox(height: AppSpacing.lg),
+        // Lista de produtos com estoque baixo
+        Material(
+          color: scheme.surfaceContainerLow,
+          borderRadius: AppRadius.lgAll,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Produtos com Estoque Baixo',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                if (lowStock == 0)
+                  Text(
+                    'Todos os produtos com estoque adequado',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  )
+                else
+                  ...products
+                      .where((p) => (p.stockQuantity ~/ 1000) <= 10)
+                      .take(5)
+                      .map((p) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.warning_amber, size: 14, color: const Color(0xFFF59E0B)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            p.name,
+                            style: theme.textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '${p.stockQuantity ~/ 1000} ${p.unitLabel}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: const Color(0xFFF59E0B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        AppButton.secondary(
           expanded: true,
           label: 'Exportar Estoque (PDF)',
           icon: const Icon(Icons.download_outlined, size: 18),
           onPressed: () => const AdvancedReportsPdfExporter().shareStockReport(
             period: selectedPeriod,
             kpis: {
-              'Total Produtos': '0',
-              'Estoque Baixo': '0',
-              'Valor em Estoque': '0,00 MT',
-              'Próx. Validade': '0',
+              'Total Produtos': '$totalProducts',
+              'Estoque Baixo': '$lowStock',
+              'Valor em Estoque': formatMoney(totalStockValue),
+              'Sem Estoque': '$outOfStock',
             },
           ),
         ),

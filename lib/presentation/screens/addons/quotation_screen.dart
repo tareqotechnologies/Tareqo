@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/share/quotation_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/quotation.dart';
+import '../../controllers/customers_providers.dart';
+import '../../controllers/products_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 
@@ -71,7 +73,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
           : ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: _drafts.length,
-              separatorBuilder: (_, __) =>
+              separatorBuilder: (_, _) =>
                   const SizedBox(height: AppSpacing.xs),
               itemBuilder: (context, index) {
                 final draft = _drafts[index];
@@ -117,17 +119,28 @@ class _QuotationDraft {
     required this.items,
     required this.totalCents,
     required this.validityDays,
-    this.notes = '',
   });
 
   final String clientName;
   final String clientPhone;
-  final List<String> items;
+  final List<_QuotationItemData> items;
   final int totalCents;
   final int validityDays;
-  final String notes;
+
   _QuotationStatus status = _QuotationStatus.draft;
   DateTime createdAt = DateTime.now();
+}
+
+class _QuotationItemData {
+  _QuotationItemData({
+    required this.name,
+    required this.qty,
+    required this.unitPriceCents,
+  });
+
+  final String name;
+  final int qty;
+  final int unitPriceCents;
 }
 
 class _QuotationCard extends StatelessWidget {
@@ -164,7 +177,7 @@ class _QuotationCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              '${draft.items.length} itens  •  Validade: ${draft.validityDays} dias',
+              '${draft.items.length} itens  •  Validade: ${draft.validityDays} dias${draft.clientPhone.isNotEmpty ? '  •  ${draft.clientPhone}' : ''}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -233,10 +246,13 @@ class _QuotationCard extends StatelessWidget {
     buffer.writeln('═══ COTAÇÃO ═══');
     buffer.writeln('Nº: ${quotationNumber.toString().padLeft(5, '0')}');
     buffer.writeln('Cliente: ${draft.clientName}');
+    if (draft.clientPhone.isNotEmpty) {
+      buffer.writeln('Tel: ${draft.clientPhone}');
+    }
     buffer.writeln('Validade: ${draft.validityDays} dias');
     buffer.writeln();
     for (final item in draft.items) {
-      buffer.writeln('• $item');
+      buffer.writeln('• ${item.name} x${item.qty} — ${_formatMoney(item.unitPriceCents)}');
     }
     buffer.writeln();
     buffer.writeln('TOTAL: ${_formatMoney(draft.totalCents)}');
@@ -255,12 +271,12 @@ class _QuotationCard extends StatelessWidget {
       customerId: '',
       customerName: draft.clientName,
       items: [
-        for (var i = 0; i < draft.items.length; i++)
+        for (final item in draft.items)
           QuotationItem(
             productId: '',
-            productName: draft.items[i],
-            quantity: 1000,
-            unitPriceCents: draft.totalCents ~/ draft.items.length,
+            productName: item.name,
+            quantity: item.qty * 1000,
+            unitPriceCents: item.unitPriceCents,
           ),
       ],
       totalAmountCents: draft.totalCents,
@@ -280,46 +296,68 @@ class _QuotationCard extends StatelessWidget {
   }
 }
 
-class _NewQuotationSheet extends StatefulWidget {
+class _NewQuotationSheet extends ConsumerStatefulWidget {
   const _NewQuotationSheet({required this.onSave});
 
   final ValueChanged<_QuotationDraft> onSave;
 
   @override
-  State<_NewQuotationSheet> createState() => _NewQuotationSheetState();
+  ConsumerState<_NewQuotationSheet> createState() => _NewQuotationSheetState();
 }
 
-class _NewQuotationSheetState extends State<_NewQuotationSheet> {
+class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
   final _clientController = TextEditingController();
-  final _productController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _priceController = TextEditingController();
-  final List<String> _items = [];
-  int _totalCents = 0;
+  final _qtyController = TextEditingController(text: '1');
+  final List<_QuotationItemData> _items = [];
+  String? _selectedProductId;
+  String? _selectedCustomerId;
 
   @override
   void dispose() {
     _clientController.dispose();
-    _productController.dispose();
+    _phoneController.dispose();
     _priceController.dispose();
+    _qtyController.dispose();
     super.dispose();
   }
 
+  int get _totalCents =>
+      _items.fold(0, (sum, item) => sum + (item.qty * item.unitPriceCents));
+
   void _addItem() {
-    final product = _productController.text.trim();
     final price = double.tryParse(_priceController.text) ?? 0;
-    if (product.isEmpty) return;
+    final qty = int.tryParse(_qtyController.text) ?? 1;
+    if (_selectedProductId == null || price <= 0) return;
+
+    final products = ref.read(productsProvider).value ?? [];
+    final product = products.firstWhere(
+      (p) => p.id == _selectedProductId,
+      orElse: () => products.first,
+    );
 
     setState(() {
-      _items.add(product);
-      _totalCents += (price * 100).round();
-      _productController.clear();
+      _items.add(_QuotationItemData(
+        name: product.name,
+        qty: qty,
+        unitPriceCents: (price * 100).round(),
+      ));
+      _selectedProductId = null;
       _priceController.clear();
+      _qtyController.text = '1';
     });
   }
+
+  void _removeItem(int index) => setState(() => _items.removeAt(index));
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final products = ref.watch(productsProvider).value ?? [];
+    final customers = ref.watch(customersProvider).value ?? [];
+    final activeProducts = products.where((p) => p.isActive).toList();
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -328,94 +366,250 @@ class _NewQuotationSheetState extends State<_NewQuotationSheet> {
         AppSpacing.lg,
         MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Nova Cotação',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          AppTextField(
-            controller: _clientController,
-            label: 'Nome do cliente',
-            prefixIcon: Icons.person_outline,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          AppTextField(
-            controller: _productController,
-            label: 'Produto',
-            prefixIcon: Icons.inventory_2_outlined,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          AppTextField(
-            controller: _priceController,
-            label: 'Preço unitário (MT)',
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            prefixIcon: Icons.attach_money,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Align(
-            alignment: Alignment.centerRight,
-            child: AppButton.secondary(
-              label: 'Adicionar Item',
-              onPressed: _addItem,
-            ),
-          ),
-          if (_items.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            ..._items.map(
-              (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      size: 16,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(item, style: theme.textTheme.bodyMedium)),
-                  ],
-                ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Nova Cotação',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w500,
               ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // ─── Cliente ──
+            _sectionLabel('Cliente'),
+            const SizedBox(height: 6),
+            if (customers.isNotEmpty)
+              Container(
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  borderRadius: AppRadius.mdAll,
+                ),
+                child: DropdownButtonFormField<String>(
+                  initialValue: _selectedCustomerId,
+                  isExpanded: true,
+                  menuMaxHeight: 250,
+                  decoration: InputDecoration(
+                    hintText: 'Selecionar cliente...',
+                    prefixIcon: const Icon(Icons.person_outline, size: 20),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12,
+                    ),
+                  ),
+                  items: customers
+                      .map((c) => DropdownMenuItem(
+                            value: c.id,
+                            child: Text(
+                              '${c.name}${c.phone.isNotEmpty ? ' (${c.phone})' : ''}',
+                              style: theme.textTheme.bodyMedium,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ))
+                      .toList(),
+                  onChanged: (id) {
+                    setState(() {
+                      _selectedCustomerId = id;
+                      final c = customers.firstWhere((x) => x.id == id);
+                      _clientController.text = c.name;
+                      _phoneController.text = c.phone;
+                    });
+                  },
+                ),
+              )
+            else
+              AppTextField(
+                controller: _clientController,
+                label: 'Nome do cliente',
+                prefixIcon: Icons.person_outline,
+              ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _phoneController,
+              label: 'Telefone (opcional)',
+              keyboardType: TextInputType.phone,
+              prefixIcon: Icons.phone_outlined,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            const Divider(),
+            const SizedBox(height: AppSpacing.sm),
+
+            // ─── Produto ──
+            _sectionLabel('Produto'),
+            const SizedBox(height: 6),
+            if (activeProducts.isNotEmpty)
+              Container(
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  borderRadius: AppRadius.mdAll,
+                ),
+                child: DropdownButtonFormField<String>(
+                  initialValue: _selectedProductId,
+                  isExpanded: true,
+                  menuMaxHeight: 250,
+                  decoration: InputDecoration(
+                    hintText: 'Selecionar produto...',
+                    prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12,
+                    ),
+                  ),
+                  items: activeProducts
+                      .map((p) => DropdownMenuItem(
+                            value: p.id,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(p.name,
+                                    style: theme.textTheme.bodyMedium,
+                                    overflow: TextOverflow.ellipsis),
+                                Text(
+                                  'Estoque: ${p.stockQuantity ~/ 1000} ${p.unitLabel}  •  ${_formatMoney(p.salePriceCents)}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: scheme.onSurfaceVariant
+                                        .withValues(alpha: 0.6),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                  onChanged: (id) {
+                    setState(() {
+                      _selectedProductId = id;
+                      final p = activeProducts.firstWhere((x) => x.id == id);
+                      _priceController.text =
+                          (p.salePriceCents / 100).toStringAsFixed(2);
+                    });
+                  },
+                ),
+              )
+            else
+              InputDecorator(
+                decoration: InputDecoration(
+                  hintText: 'Sem produtos cadastrados',
+                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                ),
+                child: const Text(''),
+              ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: AppTextField(
+                    controller: _priceController,
+                    label: 'Preço (MT)',
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: AppTextField(
+                    controller: _qtyController,
+                    label: 'Qtd',
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Total: ${_formatMoney(_totalCents)}',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+            Align(
+              alignment: Alignment.centerRight,
+              child: AppButton.secondary(
+                label: 'Adicionar',
+                onPressed: _selectedProductId != null ? _addItem : null,
               ),
             ),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          AppButton.primary(
-            expanded: true,
-            label: 'Guardar Cotação',
-            onPressed: _clientController.text.trim().isNotEmpty && _items.isNotEmpty
-                ? () {
-                    widget.onSave(
-                      _QuotationDraft(
-                        clientName: _clientController.text.trim(),
-                        items: List.from(_items),
-                        totalCents: _totalCents,                    validityDays: 7,
+            if (_items.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              ..._items.asMap().entries.map(
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle_outline,
+                          size: 16, color: scheme.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${entry.value.name} x${entry.value.qty}',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                      Text(
+                        _formatMoney(
+                            entry.value.unitPriceCents * entry.value.qty),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: () => _removeItem(entry.key),
+                        child: Icon(Icons.close,
+                            size: 16, color: scheme.error),
+                      ),
+                    ],
                   ),
-                );
-              }
-            : null,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Total: ${_formatMoney(_totalCents)}',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: scheme.primary,
+                ),
+                textAlign: TextAlign.end,
+              ),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            AppButton.primary(
+              expanded: true,
+              label: 'Guardar Cotação',
+              onPressed: _clientController.text.trim().isNotEmpty &&
+                      _items.isNotEmpty
+                  ? () {
+                      widget.onSave(_QuotationDraft(
+                        clientName: _clientController.text.trim(),
+                        clientPhone: _phoneController.text.trim(),
+                        items: List.from(_items),
+                        totalCents: _totalCents,
+                        validityDays: 7,
+                      ));
+                    }
+                  : null,
+            ),
+          ],
+        ),
       ),
-    ],
-  ),
-);
-}
+    );
+  }
 
-String _formatMoney(int cents) {
-  final v = cents / 100;
-  return '${v.toStringAsFixed(2)} MT';
-}
+  Widget _sectionLabel(String text) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  String _formatMoney(int cents) {
+    final v = cents / 100;
+    return '${v.toStringAsFixed(2)} MT';
+  }
 }
 
 class _StatusChip extends StatelessWidget {

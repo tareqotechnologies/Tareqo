@@ -110,6 +110,16 @@ class _PaymentReconciliationScreenState
                           );
                         });
                       },
+                      onReject: payment.status == 'Pendente'
+                          ? () {
+                              setState(() {
+                                final idx = _payments.indexOf(payment);
+                                _payments[idx] = payment.copyWith(
+                                  status: 'Rejeitada',
+                                );
+                              });
+                            }
+                          : null,
                     ),
                   ),
                 ),
@@ -276,8 +286,10 @@ class _PaymentCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: payment.status == 'Confirmada'
                               ? const Color(0xFF16A34A).withValues(alpha: 0.15)
-                              : const Color(0xFFF59E0B)
-                                  .withValues(alpha: 0.15),
+                              : payment.status == 'Rejeitada'
+                                  ? scheme.error.withValues(alpha: 0.15)
+                                  : const Color(0xFFF59E0B)
+                                      .withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -285,7 +297,9 @@ class _PaymentCard extends StatelessWidget {
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: payment.status == 'Confirmada'
                                 ? const Color(0xFF16A34A)
-                                : const Color(0xFFF59E0B),
+                                : payment.status == 'Rejeitada'
+                                    ? scheme.error
+                                    : const Color(0xFFF59E0B),
                             fontWeight: FontWeight.w500,
                           ),
                         ),

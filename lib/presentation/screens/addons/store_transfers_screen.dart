@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
+import '../../controllers/products_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 
@@ -68,7 +69,7 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
           : ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: _transfers.length,
-              separatorBuilder: (_, __) =>
+              separatorBuilder: (_, _) =>
                   const SizedBox(height: AppSpacing.xs),
               itemBuilder: (context, index) =>
                   _TransferCard(
@@ -238,34 +239,63 @@ class _TransferCard extends StatelessWidget {
   }
 }
 
-class _NewTransferSheet extends StatefulWidget {
+class _TransferItem {
+  _TransferItem({
+    required this.name,
+    required this.qty,
+  });
+
+  final String name;
+  final int qty;
+}
+
+class _NewTransferSheet extends ConsumerStatefulWidget {
   const _NewTransferSheet({required this.onSave});
 
   final ValueChanged<_TransferRecord> onSave;
 
   @override
-  State<_NewTransferSheet> createState() => _NewTransferSheetState();
+  ConsumerState<_NewTransferSheet> createState() => _NewTransferSheetState();
 }
 
-class _NewTransferSheetState extends State<_NewTransferSheet> {
+class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
   String? _fromStore;
   String? _toStore;
-  final _productController = TextEditingController();
+  String? _selectedProductId;
   final _qtyController = TextEditingController(text: '1');
-  int _itemCount = 0;
+  final List<_TransferItem> _items = [];
 
   final _stores = const ['Loja Central', 'Loja Norte', 'Loja Sul'];
 
   @override
   void dispose() {
-    _productController.dispose();
     _qtyController.dispose();
     super.dispose();
+  }
+
+  void _addItem() {
+    final qty = int.tryParse(_qtyController.text) ?? 1;
+    if (_selectedProductId == null || qty <= 0) return;
+
+    final products = ref.read(productsProvider).value ?? [];
+    final product = products.firstWhere(
+      (p) => p.id == _selectedProductId,
+      orElse: () => products.first,
+    );
+
+    setState(() {
+      _items.add(_TransferItem(name: product.name, qty: qty));
+      _selectedProductId = null;
+      _qtyController.text = '1';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final products = ref.watch(productsProvider).value ?? [];
+    final activeProducts = products.where((p) => p.isActive).toList();
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -312,39 +342,96 @@ class _NewTransferSheetState extends State<_NewTransferSheet> {
             const SizedBox(height: AppSpacing.md),
             const Divider(),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(
-              controller: _productController,
-              label: 'Produto',
-              prefixIcon: Icons.inventory_2_outlined,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            AppTextField(
-              controller: _qtyController,
-              label: 'Quantidade',
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Align(
-              alignment: Alignment.centerRight,
-              child: AppButton.secondary(
-                label: 'Adicionar Item',
-                onPressed: () {
-                  if (_productController.text.trim().isNotEmpty) {
-                    setState(() => _itemCount++);
-                    _productController.clear();
-                    _qtyController.text = '1';
-                  }
-                },
-              ),
-            ),
-            if (_itemCount > 0) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                '$_itemCount item(ns) adicionado(s)',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.primary,
+
+            // ─── Produto (picker do estoque) ──
+            Text('Produto', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            if (activeProducts.isNotEmpty)
+              Container(
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  borderRadius: AppRadius.mdAll,
                 ),
+                child: DropdownButtonFormField<String>(
+                  initialValue: _selectedProductId,
+                  isExpanded: true,
+                  menuMaxHeight: 250,
+                  decoration: InputDecoration(
+                    hintText: 'Selecionar produto...',
+                    prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  items: activeProducts
+                      .map((p) => DropdownMenuItem(
+                            value: p.id,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(p.name, style: theme.textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
+                                Text(
+                                  'Estoque: ${p.stockQuantity ~/ 1000} ${p.unitLabel}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                  onChanged: (id) => setState(() => _selectedProductId = id),
+                ),
+              )
+            else
+              InputDecorator(
+                decoration: InputDecoration(
+                  hintText: 'Sem produtos cadastrados',
+                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                child: const Text(''),
               ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: AppTextField(
+                    controller: _qtyController,
+                    label: 'Quantidade',
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: AppButton.secondary(
+                    label: 'Adicionar',
+                    onPressed: _selectedProductId != null ? _addItem : null,
+                  ),
+                ),
+              ],
+            ),
+            if (_items.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              ..._items.asMap().entries.map((entry) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.check_circle_outline, size: 16, color: scheme.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text('${entry.value.name} x${entry.value.qty}', style: theme.textTheme.bodyMedium),
+                        ),
+                        InkWell(
+                          onTap: () => setState(() => _items.removeAt(entry.key)),
+                          child: Icon(Icons.close, size: 16, color: scheme.error),
+                        ),
+                      ],
+                    ),
+                  )),
             ],
             const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
@@ -353,13 +440,13 @@ class _NewTransferSheetState extends State<_NewTransferSheet> {
               onPressed: _fromStore != null &&
                       _toStore != null &&
                       _fromStore != _toStore &&
-                      _itemCount > 0
+                      _items.isNotEmpty
                   ? () {
                       widget.onSave(
                         _TransferRecord(
                           fromStore: _fromStore!,
                           toStore: _toStore!,
-                          items: _itemCount,
+                          items: _items.length,
                           status: 'Pendente',
                           date: DateTime.now().toString().substring(0, 10),
                         ),

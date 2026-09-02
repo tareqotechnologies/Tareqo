@@ -76,15 +76,42 @@ class _AttendanceTab extends StatefulWidget {
 }
 
 class _AttendanceTabState extends State<_AttendanceTab> {
-  final List<_AttendanceRecord> _records = [
-    _AttendanceRecord(
-      employeeName: 'Funcionário 1',
-      clockIn: '08:00',
-      clockOut: '17:00',
-      totalHours: '9h 00min',
-      isPresent: true,
-    ),
-  ];
+  final List<_AttendanceRecord> _records = [];
+  bool _isClockedIn = false;
+
+  void _clockIn() {
+    final now = TimeOfDay.now();
+    final timeStr = now.format(context);
+    setState(() {
+      _isClockedIn = true;
+      _records.insert(0, _AttendanceRecord(
+        employeeName: 'Você',
+        clockIn: timeStr,
+        clockOut: '—',
+        totalHours: 'Em curso...',
+        isPresent: true,
+      ));
+    });
+  }
+
+  void _clockOut() {
+    if (!_isClockedIn) return;
+    final now = TimeOfDay.now();
+    final timeStr = now.format(context);
+    setState(() {
+      _isClockedIn = false;
+      if (_records.isNotEmpty) {
+        final first = _records.first;
+        _records[0] = _AttendanceRecord(
+          employeeName: first.employeeName,
+          clockIn: first.clockIn,
+          clockOut: timeStr,
+          totalHours: '—',
+          isPresent: false,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,20 +129,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
                 icon: Icons.login_rounded,
                 label: 'Entrada',
                 color: const Color(0xFF16A34A),
-                onPressed: () {
-                  setState(() {
-                    _records.insert(
-                      0,
-                      _AttendanceRecord(
-                        employeeName: 'Você',
-                        clockIn: TimeOfDay.now().format(context),
-                        clockOut: '—',
-                        totalHours: 'Em curso...',
-                        isPresent: true,
-                      ),
-                    );
-                  });
-                },
+                onPressed: _isClockedIn ? null : _clockIn,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -124,7 +138,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
                 icon: Icons.logout_rounded,
                 label: 'Saída',
                 color: scheme.error,
-                onPressed: () {},
+                onPressed: _isClockedIn ? _clockOut : null,
               ),
             ),
           ],
@@ -221,7 +235,7 @@ class _ClockButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
