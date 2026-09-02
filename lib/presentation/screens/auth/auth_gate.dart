@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,58 +28,15 @@ class AuthGate extends ConsumerStatefulWidget {
 }
 
 class _AuthGateState extends ConsumerState<AuthGate> {
-  bool _authTimedOut = false;
-  Timer? _authTimer;
-
   @override
   void initState() {
     super.initState();
     DeepLinkHandler.init();
-    _startAuthTimeout();
-  }
-
-  /// Timer de segurança GLOBAL: 10s para toda a cadeia auth → admin → tenant.
-  /// Só é cancelado quando saímos definitivamente do splash.
-  void _startAuthTimeout() {
-    _authTimer?.cancel();
-    _authTimer = Timer(const Duration(seconds: 10), () {
-      if (mounted && !_authTimedOut) {
-        setState(() => _authTimedOut = true);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _authTimer?.cancel();
-    super.dispose();
-  }
-
-  /// Cancela o timer de segurança — chamado apenas quando o build retorna
-  /// uma tela REAL (LoginScreen, AppShell, AdminShell, etc.), nunca quando
-  /// volta ao splash.
-  void _cancelTimer() {
-    _authTimer?.cancel();
-    _authTimer = null;
   }
 
   @override
   Widget build(BuildContext context) {
-    // ── Tela de timeout global ──────────────────────────────────────
-    if (_authTimedOut) {
-      return _AuthErrorScreen(
-        onRetry: () {
-          setState(() => _authTimedOut = false);
-          // Invalidar TODOS os providers da cadeia.
-          ref.invalidate(authStateProvider);
-          ref.invalidate(isSuperAdminProvider);
-          _startAuthTimeout();
-        },
-      );
-    }
-
     final authState = ref.watch(authStateProvider);
-    // Sessão veio de um link de RECUPERAÇÃO de senha?
     final recoveryPending = ref.watch(passwordRecoveryPendingProvider);
     ref.listen(authEventsProvider, (previous, next) {
       if (next.value == AuthEvent.passwordRecovery) {
@@ -101,17 +56,13 @@ class _AuthGateState extends ConsumerState<AuthGate> {
           stackTrace,
           hint: 'AuthGate: erro no stream de sessão',
         );
-        // NÃO cancelar o timer aqui — o timeout continua como safety net.
-        return _AuthErrorScreen(
-          onRetry: () {
-            ref.invalidate(authStateProvider);
-            _startAuthTimeout();
-          },
-        );
+        Future.microtask(() {
+          if (mounted) ref.invalidate(authStateProvider);
+        });
+        return const LoginScreen();
       },
       data: (user) {
         if (user == null) {
-          // Sessão encerrada.
           if (ref.read(passwordRecoveryPendingProvider)) {
             Future.microtask(() {
               if (mounted) {
@@ -120,41 +71,50 @@ class _AuthGateState extends ConsumerState<AuthGate> {
               }
             });
           }
-          // NÃO cancelar o timer — pode ser que o Supabase ainda vá
-          // emitir a sessão restaurada via onAuthStateChange.
           return const LoginScreen();
         }
-        // Recovery: sessão veio do link do e-mail.
-        if (recoveryPending) {
-          return const SetNewPasswordScreen();
-        }
+        if (recoveryPending) return const SetNewPasswordScreen();
 
-        // Super admin check.
-        return Consumer(
-          builder: (context, ref, _) {
-            final adminAsync = ref.watch(isSuperAdminProvider(user.id));
-            return adminAsync.when(
-              loading: () => const _SplashScreen(),
-              error: (error, stackTrace) {
-                CrashReporting.capture(
-                  error,
-                  stackTrace,
-                  hint: 'AuthGate: erro ao verificar papel de super admin',
-                );
-                return _tenantGate(ref, user);
-              },
-              data: (isAdmin) => isAdmin
-                  ? const AdminShell()
-                  : _tenantGate(ref, user),
-            );
-          },
-        );
+        // Auth OK → admin/tenant.
+        return _AdminTenantGate(user: user);
       },
     );
   }
+}
 
-  /// Portão do tenant (dono/funcionário).
-  Widget _tenantGate(WidgetRef ref, AppUser user) {
+// ─── Admin / Tenant Gate ────────────────────────────────────────────────
+
+class _AdminTenantGate extends ConsumerWidget {
+  const _AdminTenantGate({required this.user});
+  final AppUser user;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final adminAsync = ref.watch(isSuperAdminProvider(user.id));
+    return adminAsync.when(
+      loading: () => const _SplashScreen(),
+      error: (error, stackTrace) {
+        CrashReporting.capture(
+          error,
+          stackTrace,
+          hint: 'AuthGate: erro ao verificar papel de super admin',
+        );
+        return _TenantGate(user: user);
+      },
+      data: (isAdmin) {
+        if (isAdmin) return const AdminShell();
+        return _TenantGate(user: user);
+      },
+    );
+  }
+}
+
+class _TenantGate extends ConsumerWidget {
+  const _TenantGate({required this.user});
+  final AppUser user;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final tenantAsync = ref.watch(myTenantProvider(user.id));
     return tenantAsync.when(
       loading: () => const _SplashScreen(),
@@ -170,13 +130,9 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         );
       },
       data: (tenant) {
-        // Chegámos a um ecrã real — cancelar o timer.
-        _cancelTimer();
-
         if (tenant == null) {
           return TenantOnboardingScreen(user: user);
         }
-        // Funcionário DESATIVADO pelo dono.
         if (tenant.status == TenantStatus.approved &&
             tenant.ownerUserId != user.id) {
           final employeesAsync = ref.watch(employeesProvider(tenant.id));
@@ -186,9 +142,9 @@ class _AuthGateState extends ConsumerState<AuthGate> {
           final employees = employeesAsync.value;
           if (employees != null) {
             final myLinks = employees
-                .where((employee) => employee.userId == user.id)
+                .where((e) => e.userId == user.id)
                 .toList();
-            if (myLinks.isEmpty || myLinks.every((link) => !link.isActive)) {
+            if (myLinks.isEmpty || myLinks.every((l) => !l.isActive)) {
               return _BlockedEmployeeScreen(
                 onSignOut: () => ref.read(signOutUseCaseProvider).call(),
               );
@@ -215,10 +171,10 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   }
 }
 
-/// Funcionário com acesso suspenso pelo dono.
+// ─── Error / Blocked screens ────────────────────────────────────────────
+
 class _BlockedEmployeeScreen extends StatelessWidget {
   const _BlockedEmployeeScreen({required this.onSignOut});
-
   final VoidCallback onSignOut;
 
   @override
@@ -266,61 +222,8 @@ class _BlockedEmployeeScreen extends StatelessWidget {
   }
 }
 
-/// Estado de erro no stream de autenticação.
-class _AuthErrorScreen extends StatelessWidget {
-  const _AuthErrorScreen({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final l10n = context.l10n;
-
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.cloud_off, size: 48, color: scheme.error),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.authErrorRestoreSession,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.authErrorCheckConnection,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                FilledButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: Text(l10n.commonRetry),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Estado de erro na resolução do tenant.
 class _TenantErrorScreen extends StatelessWidget {
   const _TenantErrorScreen({required this.onRetry, required this.onSignOut});
-
   final VoidCallback onRetry;
   final VoidCallback onSignOut;
 
@@ -375,67 +278,64 @@ class _TenantErrorScreen extends StatelessWidget {
   }
 }
 
-/// Splash screen — visual estático. Timer é gerido pelo [AuthGate].
+// ─── Splash ─────────────────────────────────────────────────────────────
+
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final backgroundColor = isDark ? const Color(0xFF121212) : scheme.surface;
+    final textColor = isDark ? Colors.white : scheme.onSurface;
+    final spinnerColor = isDark ? Colors.white70 : scheme.primary;
+    final spinnerBg =
+        isDark ? Colors.white24 : scheme.primary.withValues(alpha: 0.2);
+    final subtitleColor =
+        isDark ? Colors.white54 : scheme.onSurfaceVariant;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0076F6),
+      backgroundColor: backgroundColor,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 101,
-              height: 101,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.white24,
-                    blurRadius: 48,
-                    spreadRadius: 8,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28),
-                child: Image.asset(
-                  'assets/branding/splash_logo.png',
-                  width: 81,
-                  height: 81,
-                  fit: BoxFit.contain,
-                ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+                'assets/branding/splash_logo.png',
+                width: 120,
+                height: 120,
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Dumbhanengue',
+              'TAREQO',
               style: theme.textTheme.displaySmall?.copyWith(
-                color: Colors.white,
+                color: textColor,
                 letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 40),
-            const SizedBox(
+            SizedBox(
               height: 22,
               width: 22,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                color: Colors.white,
-                backgroundColor: Colors.white24,
+                color: spinnerColor,
+                backgroundColor: spinnerBg,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               l10n.splashLoading,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.white70,
+                color: subtitleColor,
               ),
             ),
           ],
