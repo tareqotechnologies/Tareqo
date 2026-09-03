@@ -407,23 +407,14 @@ class _SplashScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Logo em container com borda (mesmo padrão do login).
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: _surface,
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: _border, width: 1),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(22),
-                child: Image.asset(
-                  'assets/branding/icon_official.png',
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
+            // Logo direto (TQ monograma branco sobre fundo preto).
+            ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Image.asset(
+                'assets/branding/icon_official.png',
+                width: 88,
+                height: 88,
+                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(height: 28),

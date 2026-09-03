@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Fundo do splash no light mode: branco. -->
-    <color name="ic_launcher_background">#0076F6</color>
+    <color name="ic_launcher_background">#000000</color>
 </resources>

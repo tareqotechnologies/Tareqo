@@ -159,7 +159,7 @@ flutter_launcher_icons:
   image_path: "assets/branding/icon_legacy.png"
   # Fundo BRANCO do adaptativo — a mesma cara do .ico oficial (fundo branco
   # + logotipo azul no foreground, keyado).
-  adaptive_icon_background: "#0076F6"
+  adaptive_icon_background: "#000000"
   adaptive_icon_foreground: "assets/branding/icon_fg.png"
   adaptive_icon_monochrome: "assets/branding/icon_mono.png"
   remove_alpha_ios: true
