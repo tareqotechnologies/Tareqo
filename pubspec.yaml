@@ -130,6 +130,7 @@ flutter:
     - assets/branding/icon_official.png
     - assets/branding/splash_logo.png
     - assets/branding/icon_fg.png
+    - assets/branding/play_store_icon.png
     # Guias de suporte embutidos (ecrã Ajuda — Lojas → Ajustes → Suporte):
     # os mesmos documentos de docs/, empacotados no app para leitura offline.
     - docs/pt/GUIA_DO_USUARIO.md
