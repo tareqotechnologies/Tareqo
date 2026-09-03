@@ -190,12 +190,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // ── Logo ──
                     Center(
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(24),
                         child: Image.asset(
                           'assets/branding/icon_official.png',
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.contain,
                         ),
                       ),
                     ),

@@ -38,10 +38,10 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     super.initState();
     DeepLinkHandler.init();
     _splashStartMs = DateTime.now().millisecondsSinceEpoch;
-    // Se o auth state não resolver em 5 segundos, mostrar login em vez de
+    // Se o auth state não resolver em 3 segundos, mostrar login em vez de
     // ficar preso no splash (problema comum em release quando o Supabase
     // demora ou falha silenciosamente).
-    Future.delayed(const Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted && !_timeoutReached) {
         setState(() => _timeoutReached = true);
       }
@@ -126,7 +126,7 @@ class _MFAGateState extends ConsumerState<_MFAGate> {
     super.initState();
     _checkMFA();
     // Timeout de 5 segundos — se MFA check não resolver, assumir desabilitado.
-    Future.delayed(const Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted && !_mfaChecked) {
         setState(() {
           _mfaChecked = true;
@@ -223,7 +223,7 @@ class _AdminTenantGateState extends ConsumerState<_AdminTenantGate> {
   void initState() {
     super.initState();
     // Timeout de 5 segundos para este gate também.
-    Future.delayed(const Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted && !_timedOut) setState(() => _timedOut = true);
     });
   }
@@ -267,7 +267,7 @@ class _TenantGateState extends ConsumerState<_TenantGate> {
   void initState() {
     super.initState();
     // Timeout de 5 segundos — mostrar tela de erro em vez de ficar preso.
-    Future.delayed(const Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted && !_timedOut) setState(() => _timedOut = true);
     });
   }
@@ -472,12 +472,12 @@ class _SplashScreen extends StatelessWidget {
           children: [
             // Logo direto (TQ monograma branco sobre fundo preto).
             ClipRRect(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(24),
               child: Image.asset(
                 'assets/branding/icon_official.png',
-                width: 88,
-                height: 88,
-                fit: BoxFit.cover,
+                width: 120,
+                height: 120,
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(height: 28),
