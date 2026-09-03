@@ -30,10 +30,20 @@ class AuthGate extends ConsumerStatefulWidget {
 }
 
 class _AuthGateState extends ConsumerState<AuthGate> {
+  bool _timeoutReached = false;
+
   @override
   void initState() {
     super.initState();
     DeepLinkHandler.init();
+    // Se o auth state não resolver em 8 segundos, mostrar login em vez de
+    // ficar preso no splash (problema comum em release quando o Supabase
+    // demora ou falha silenciosamente).
+    Future.delayed(const Duration(seconds: 8), () {
+      if (mounted && !_timeoutReached) {
+        setState(() => _timeoutReached = true);
+      }
+    });
   }
 
   @override
@@ -50,8 +60,13 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       }
     });
 
+    // Se o auth state resolveu, resetar o flag.
+    authState.whenData((_) => _timeoutReached = false);
+
     return authState.when(
-      loading: () => const _SplashScreen(),
+      loading: () => _timeoutReached
+          ? const LoginScreen()
+          : const _SplashScreen(),
       error: (error, stackTrace) {
         CrashReporting.capture(
           error,
