@@ -4,17 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/plan.dart';
-import 'package:dumbhanengue/domain/entities/plan_request.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/usecases/decide_plan_request_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_all_tenants_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_plan_requests_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_all_plans_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_plans_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
-import 'package:dumbhanengue/presentation/screens/admin/admin_plan_requests_screen.dart';
+import 'package:tareqo/domain/entities/plan.dart';
+import 'package:tareqo/domain/entities/plan_request.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/usecases/decide_plan_request_use_case.dart';
+import 'package:tareqo/domain/usecases/get_all_tenants_use_case.dart';
+import 'package:tareqo/domain/usecases/get_pending_plan_requests_use_case.dart';
+import 'package:tareqo/domain/usecases/get_all_plans_use_case.dart';
+import 'package:tareqo/domain/usecases/get_plans_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/admin_providers.dart';
+import 'package:tareqo/presentation/screens/admin/admin_plan_requests_screen.dart';
 
 class _FakeGetPendingPlanRequestsUseCase
  implements GetPendingPlanRequestsUseCase {

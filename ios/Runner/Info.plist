@@ -7,15 +7,14 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Dumbhanengue</string>
+	<string>TAREQO</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>dumbhanengue</string>
+	<key>CFBundleName</key>					<string>tareqo</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -29,11 +28,10 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleURLName</key>
-			<string>com.dumbhanengue.dumbhanengue</string>
+			<key>CFBundleURLName</key>				<string>com.tareqo.tareqo</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>dumbhanengue</string>
+				<string>tareqo</string>
 			</array>
 		</dict>
 	</array>

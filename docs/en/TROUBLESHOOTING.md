@@ -1,4 +1,4 @@
-# Troubleshooting — Dumbhanengue ERP
+# Troubleshooting — TAREQO ERP
 
 A practical guide to solving the most common day-to-day app problems. To learn how to use the system, see the [User Guide](USER_GUIDE.md).
 
@@ -38,7 +38,7 @@ A practical guide to solving the most common day-to-day app problems. To learn h
 2. Make sure the photo was actually selected (the preview shows before saving).
 
 ### "Nothing happens when I take/pick a photo"
-1. The phone asks for **camera/storage permission** — accept it. If you declined earlier: **Phone settings → Apps → Dumbhanengue → Permissions** and enable Camera/Files.
+1. The phone asks for **camera/storage permission** — accept it. If you declined earlier: **Phone settings → Apps → TAREQO → Permissions** and enable Camera/Files.
 2. Close and reopen the app and try again.
 
 ### "Product added! (photo not uploaded...)" appears
@@ -179,7 +179,7 @@ Contact support when:
 **To help support, have ready:**
 1. The **exact message** on the screen (or a screenshot).
 2. What you were doing when the error happened (e.g., "registering a 3-item sale").
-3. Your **phone/model** and the **app version** (Phone settings → Apps → Dumbhanengue).
+3. Your **phone/model** and the **app version** (Phone settings → Apps → TAREQO).
 4. The **store** and the approximate **time** of the problem.
 
 ---

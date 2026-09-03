@@ -55,7 +55,7 @@ final updateTenantSettingsUseCaseProvider = Provider<UpdateTenantSettingsUseCase
 );
 
 /// Preferências do tenant (**moeda** e **idioma**) escolhidas pelo dono —
-/// o [DumbhanengueApp] as aplica no locale do MaterialApp e na
+/// o [TareqoApp] as aplica no locale do MaterialApp e na
 /// formatação de moeda ([Formatters]). Funcionários herdam a escolha.
 final tenantSettingsProvider = Provider<AppSettings?>((ref) {
  final user = ref.watch(authStateProvider).value;

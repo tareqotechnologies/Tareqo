@@ -39,7 +39,7 @@
 #
 # Uso (com `psql` no PATH — já disponível nos runners do GitHub Actions):
 #   PGPASSWORD=... bash scripts/sql_check.sh [PGHOST] [PGUSER] [PGDATABASE]
-#   (padrões: localhost / postgres / dumbhanengue)
+#   (padrões: localhost / postgres / tareqo)
 #
 # ⚠️ DESTRUTIVO: o script recria o schema `public` do zero (banco de teste
 # efêmero) — pode ser reexecutado à vontade contra o mesmo banco.
@@ -48,7 +48,7 @@ set -euo pipefail
 
 PGHOST="${1:-localhost}"
 PGUSER="${2:-postgres}"
-PGDATABASE="${3:-dumbhanengue}"
+PGDATABASE="${3:-tareqo}"
 
 export PGHOST PGUSER PGDATABASE
 

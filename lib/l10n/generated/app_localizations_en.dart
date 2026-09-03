@@ -582,6 +582,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String dashboardTransferItem(String product) {
+    return 'Transfer · $product';
+  }
+
+  @override
   String get dashboardFiadoPayment => 'Credit payment';
 
   @override

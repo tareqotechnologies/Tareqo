@@ -57,7 +57,7 @@
 6. **SMTP customizado em produção (plano: Resend + domínio próprio):** o free
  tier também limita os e-mails de confirmação (2/h e 4/dia) — inaceitável em
  produção com cadastros reais. Antes do go-live:
- 1. **Resend** → adicionar o domínio próprio (ex.: `dumbhanengue.com`) e
+ 1. **Resend** → adicionar o domínio próprio (ex.: `tareqo.com`) e
  concluir a verificação de DNS (SPF + DKIM + DMARC). Atenção: O domínio de
  teste `onboarding@resend.dev` só entrega para o e-mail da conta — não
  serve para remetentes reais.
@@ -70,8 +70,8 @@
  | Porta | `587` |
  | Username | `resend` (fixo — a API key vai no Password) |
  | Password | a API key (`re_…`) |
- | From e-mail | `no-reply@dumbhanengue.com` |
- | From name | `Dumbhanengue` |
+ | From e-mail | `no-reply@tareqo.com` |
+ | From name | `TAREQO` |
  | Admin e-mail | e-mail do super admin (recuperação) |
 
  4. **Alternativa programática (Management API):** `PATCH
@@ -85,7 +85,7 @@
  confirmação; a chave Resend também pode ser testada com um POST direto
  em `https://api.resend.com/emails`.
 
- > **Decisão registrada (Aug 8):** `dumbhanengue.com` **não está registrado**
+ > **Decisão registrada (Aug 8):** `tareqo.com` **não está registrado**
  > (RDAP 404 — domínio disponível) e o time optou por **não comprar domínio
  > por enquanto** — o e-mail de confirmação segue pelo SMTP do Resend com o
  > domínio de teste `onboarding@resend.dev`, que **só entrega para o e-mail
@@ -108,7 +108,7 @@
 
 ## 3. Google Play Console
 
-1. Criar o app com o Application ID **`com.dumbhanengue.dumbhanengue`**
+1. Criar o app com o Application ID **`com.tareqo.tareqo`**
  (imutável após o primeiro upload).
 2. Ativar o **Play App Signing** e registar o SHA-256 da chave de upload
  (de `keytool -list -v -keystore upload-keystore.jks`).
@@ -121,7 +121,7 @@
 
 ## 4. Apple (iOS)
 
-1. **Apple Developer Program** ativo + App ID `com.dumbhanengue.dumbhanengue`.
+1. **Apple Developer Program** ativo + App ID `com.tareqo.tareqo`.
 2. Configurar a assinatura automática no Xcode (team) OU usar `match`
  (alternativa documentada na lane `ios beta`).
 3. Criar a API key da App Store Connect (ficheiro `.p8`) e adicionar os 3

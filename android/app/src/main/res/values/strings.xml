@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Label padrão (flavor prod e base). O flavor dev sobrescreve em
-         android/app/src/dev/res/values/strings.xml. -->
-    <string name="app_name">Dumbhanengue</string>
+    <string name="app_name">TAREQO</string>
 </resources>

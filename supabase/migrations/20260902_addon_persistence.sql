@@ -5,8 +5,8 @@
 -- RLS: cada tenant só vê os seus próprios add-ons (row-level security).
 
 CREATE TABLE IF NOT EXISTS public.tenant_addons (
-  id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  tenant_id     UUID NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
+  id            TEXT DEFAULT ('ao_' || substr(md5(random()::text), 1, 12)) PRIMARY KEY,
+  tenant_id     TEXT NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
   add_on_id     TEXT NOT NULL,  -- ID do catálogo (ex.: ao_custom_invoice)
   activated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   expires_at    TIMESTAMPTZ,    -- NULL = sem expiração (assinatura mensal recorrente)
@@ -33,7 +33,7 @@ CREATE POLICY "tenant_addons_select_own"
   USING (
     tenant_id IN (
       SELECT id FROM public.tenants
-      WHERE owner_users_id = auth.uid()
+      WHERE owner_user_id = auth.uid()
     )
   );
 
@@ -43,7 +43,7 @@ CREATE POLICY "tenant_addons_insert_own"
   WITH CHECK (
     tenant_id IN (
       SELECT id FROM public.tenants
-      WHERE owner_users_id = auth.uid()
+      WHERE owner_user_id = auth.uid()
     )
   );
 
@@ -53,7 +53,7 @@ CREATE POLICY "tenant_addons_update_own"
   USING (
     tenant_id IN (
       SELECT id FROM public.tenants
-      WHERE owner_users_id = auth.uid()
+      WHERE owner_user_id = auth.uid()
     )
   );
 
@@ -63,14 +63,20 @@ CREATE POLICY "tenant_addons_delete_own"
   USING (
     tenant_id IN (
       SELECT id FROM public.tenants
-      WHERE owner_users_id = auth.uid()
+      WHERE owner_user_id = auth.uid()
     )
   );
 
--- Super admin pode ver e gerir todos os add-ons.
+-- Super admin pode ver e gerir TODOS os add-ons de TODOS os tenants.
+-- Sem esta política, o super admin não consegue activar/desactivar
+-- add-ons no painel admin (RLS bloqueia por tenant_id).
+DROP POLICY IF EXISTS "tenant_addons_super_admin_all" ON public.tenant_addons;
 CREATE POLICY "tenant_addons_super_admin_all"
   ON public.tenant_addons
   FOR ALL
   USING (
+    auth.uid() IN (SELECT user_id FROM public.super_admins)
+  )
+  WITH CHECK (
     auth.uid() IN (SELECT user_id FROM public.super_admins)
   );

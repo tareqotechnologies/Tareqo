@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/audit_entry.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -260,13 +261,13 @@ class _CompactStats extends StatelessWidget {
           _Pill(
             count: stats.approved,
             label: l10n.adminAuditLogApproved,
-            color: const Color(0xFF16A34A),
+            color: AppColors.success,
           ),
           const SizedBox(width: AppSpacing.xs),
           _Pill(
             count: stats.rejected,
             label: l10n.adminAuditLogRejected,
-            color: const Color(0xFFDC2626),
+            color: AppColors.statusError,
           ),
           const Spacer(),
           Container(
@@ -289,9 +290,9 @@ class _CompactStats extends StatelessWidget {
   }
 
   Color _rateColor(int rate) {
-    if (rate >= 70) return const Color(0xFF16A34A);
-    if (rate >= 40) return const Color(0xFFD97706);
-    return const Color(0xFFDC2626);
+    if (rate >= 70) return AppColors.success;
+    if (rate >= 40) return AppColors.statusWarning;
+    return AppColors.statusError;
   }
 }
 
@@ -316,7 +317,7 @@ class _Pill extends StatelessWidget {
           '$count',
           style: theme.textTheme.labelSmall?.copyWith(
             color: color,
-            fontSize: 11,
+            fontSize: 12,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
@@ -324,7 +325,7 @@ class _Pill extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 9,
+            fontSize: 12,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
@@ -360,7 +361,7 @@ class _SearchField extends StatelessWidget {
           hintText: hintText,
           hintStyle: TextStyle(
             color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
-            fontSize: 10,
+            fontSize: 12,
           ),
           prefixIcon: Icon(Icons.search, size: 18, color: scheme.onSurfaceVariant),
           prefixIconConstraints:
@@ -442,7 +443,7 @@ class _FilterRow extends StatelessWidget {
               child: Text(
                 labels[i],
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 12,
                   color: active ? scheme.onPrimary : scheme.onSurfaceVariant,
                 ),
               ),
@@ -535,7 +536,7 @@ class _AuditTile extends StatelessWidget {
                           text: '  ${entry.entityTypeLabel}',
                           style: TextStyle(
                             color: scheme.onSurfaceVariant,
-                            fontSize: 10,
+                            fontSize: 12,
                           ),
                         ),
                         if (entry.entityId != null)
@@ -543,7 +544,7 @@ class _AuditTile extends StatelessWidget {
                             text: '  ${entry.entityId}',
                             style: TextStyle(
                               color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
-                              fontSize: 10,
+                              fontSize: 12,
                             ),
                           ),
                       ],
@@ -576,8 +577,8 @@ class _AuditTile extends StatelessWidget {
   }
 
   Color _accentColor(String action, String? status) {
-    if (status == 'approved') return const Color(0xFF16A34A);
-    if (status == 'rejected') return const Color(0xFFDC2626);
+    if (status == 'approved') return AppColors.success;
+    if (status == 'rejected') return AppColors.statusError;
     switch (action) {
       case 'tenant_decision':
         return const Color(0xFF3B82F6);
@@ -641,7 +642,7 @@ class _StatusDot extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 10,
+            fontSize: 12,
             color: color,
             letterSpacing: 0.5,
           ),
@@ -653,11 +654,11 @@ class _StatusDot extends StatelessWidget {
   Color _color(String s) {
     switch (s) {
       case 'approved':
-        return const Color(0xFF16A34A);
+        return AppColors.success;
       case 'rejected':
-        return const Color(0xFFDC2626);
+        return AppColors.statusError;
       case 'pending':
-        return const Color(0xFFD97706);
+        return AppColors.statusWarning;
       default:
         return Colors.grey;
     }
@@ -719,7 +720,7 @@ class _AuditDetailSheet extends StatelessWidget {
               '${entry.entityTypeLabel}  ${entry.entityId ?? '—'}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
-                fontSize: 10,
+                fontSize: 12,
               ),
             ),
             if (status != null) ...[

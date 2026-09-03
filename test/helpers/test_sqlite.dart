@@ -2,7 +2,7 @@ import 'package:sqlite3/sqlite3.dart';
 
 // Testes rodam na VM: importa a implementação io (com dart:ffi) em vez da
 // facade condicional, que o analyzer resolveria para a stub.
-import 'package:dumbhanengue/core/database/app_database_io.dart';
+import 'package:tareqo/core/database/app_database_io.dart';
 
 /// Abre um banco SQLite **em memória** com o schema do app (sem seed),
 /// para testes de datasources/repositórios.

@@ -1,12 +1,12 @@
-# Architecture Decisions — Dumbhanengue ERP
+# Architecture Decisions — TAREQO ERP
 
-> This document records the **"why"** behind the main technical decisions of Dumbhanengue ERP: every architecture, modeling and security choice is justified here. For the overview and the full catalog, see documents [01-overview](01-overview.md) through [11-multitenancy](11-multitenancy.md).
+> This document records the **"why"** behind the main technical decisions of TAREQO ERP: every architecture, modeling and security choice is justified here. For the overview and the full catalog, see documents [01-overview](01-overview.md) through [11-multitenancy](11-multitenancy.md).
 
 ---
 
 ## Why Clean Architecture?
 
-We adopted Clean Architecture for Dumbhanengue because an ERP is, by nature, a long-lived system with complex, constantly evolving business rules: modules such as inventory, sales, purchases, finance and reports need to be developed, tested and replaced independently, without changes in one module causing side effects in others.
+We adopted Clean Architecture for TAREQO because an ERP is, by nature, a long-lived system with complex, constantly evolving business rules: modules such as inventory, sales, purchases, finance and reports need to be developed, tested and replaced independently, without changes in one module causing side effects in others.
 
 By splitting the code into three layers — **domain** (entities, repository contracts and use cases, free from any framework dependency), **data** (concrete implementations of remote and local data sources, such as Supabase and SQLite) and **presentation** (screens, widgets and state via Riverpod) — the architecture keeps the business rules at the center of the system, independent of infrastructure details. This brings four direct gains:
 
@@ -98,7 +98,7 @@ if (database != null) {
 
 Implementation details:
 
-- **`lib/core/database/app_database.dart`** — opens `dumbhanengue.db` in `getApplicationDocumentsDirectory()`, creates the schema (`CREATE TABLE IF NOT EXISTS` with non-negativity `CHECK`s as a final safeguard), never seeds data (the database starts empty — only real data) and exposes `runInTransaction` (BEGIN/COMMIT/ROLLBACK) for atomic writes (e.g. sale + items).
+- **`lib/core/database/app_database.dart`** — opens `tareqo.db` in `getApplicationDocumentsDirectory()`, creates the schema (`CREATE TABLE IF NOT EXISTS` with non-negativity `CHECK`s as a final safeguard), never seeds data (the database starts empty — only real data) and exposes `runInTransaction` (BEGIN/COMMIT/ROLLBACK) for atomic writes (e.g. sale + items).
 - **Sales** are persisted in normalized tables (`sales` + `sale_items`) in a **single transaction**.
 - **Enums** are persisted by name; **dates** as epoch millis; **booleans** as 0/1.
 - **Web**: the native sqlite3 does not run in the browser (`dart:ffi` does not exist there), so `AppDatabase` uses a **conditional import** and the app falls back to the in-memory datasources (same contracts — the UI stays identical).

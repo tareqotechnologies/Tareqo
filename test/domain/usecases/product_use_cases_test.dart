@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/utils/quantity.dart';
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_unit_of_work.dart';
-import 'package:dumbhanengue/domain/usecases/add_product_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/update_product_stock_use_case.dart';
+import 'package:tareqo/core/utils/quantity.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/repositories/i_product_repository.dart';
+import 'package:tareqo/domain/repositories/i_unit_of_work.dart';
+import 'package:tareqo/domain/usecases/add_product_use_case.dart';
+import 'package:tareqo/domain/usecases/get_products_use_case.dart';
+import 'package:tareqo/domain/usecases/update_product_stock_use_case.dart';
 
 import '../../helpers/fake_stock_lot_repository.dart';
 

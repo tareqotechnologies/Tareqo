@@ -3,9 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/theme/app_theme.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/presentation/widgets/payment_filter.dart';
+import 'package:tareqo/core/theme/app_theme.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/presentation/widgets/payment_filter.dart';
 
 /// Auditoria de contraste dos temas claro e escuro (WCAG 2.x).
 ///

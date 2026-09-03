@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/purchase.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart' show PaymentMethod;
+import 'package:tareqo/domain/entities/purchase.dart';
+import 'package:tareqo/domain/entities/sale.dart' show PaymentMethod;
 
 void main() {
  final purchase = Purchase(

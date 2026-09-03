@@ -1,4 +1,4 @@
-import 'package:dumbhanengue/core/config/app_flavor.dart';
+import 'package:tareqo/core/config/app_flavor.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

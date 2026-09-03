@@ -1,5 +1,5 @@
-import 'package:dumbhanengue/domain/repositories/i_admin_repository.dart';
-import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
+import 'package:tareqo/domain/repositories/i_admin_repository.dart';
+import 'package:tareqo/presentation/controllers/admin_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

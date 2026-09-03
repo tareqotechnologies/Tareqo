@@ -1,4 +1,4 @@
-# Dépannage — Dumbhanengue ERP (résolution de problèmes)
+# Dépannage — TAREQO ERP (résolution de problèmes)
 
 Guide pratique pour résoudre les problèmes les plus courants de l'app au quotidien. Pour apprendre à utiliser le système, consultez le [Guide de l'utilisateur](GUIDE_DE_L_UTILISATEUR.md).
 
@@ -38,7 +38,7 @@ Guide pratique pour résoudre les problèmes les plus courants de l'app au quoti
 2. Vérifiez que la photo a bien été sélectionnée (l'aperçu apparaît avant d'enregistrer).
 
 ### « Quand je prends une photo / choisis dans la galerie, rien ne se passe »
-1. Le téléphone demande **l'autorisation caméra/stockage** — acceptez. Si vous l'avez refusée avant : **Réglages du téléphone → Applications → Dumbhanengue → Autorisations** et activez Caméra/Fichiers.
+1. Le téléphone demande **l'autorisation caméra/stockage** — acceptez. Si vous l'avez refusée avant : **Réglages du téléphone → Applications → TAREQO → Autorisations** et activez Caméra/Fichiers.
 2. Fermez et rouvrez l'app, puis réessayez.
 
 ### « Il apparaît « Produit ajouté ! (photo non envoyée…) » »
@@ -179,7 +179,7 @@ Contactez le support lorsque :
 **Pour aider le support, ayez sous la main :**
 1. Le **message exact** affiché à l'écran (ou une capture d'écran).
 2. Ce que vous étiez en train de faire quand l'erreur est survenue (ex. : « enregistrer une vente de 3 produits »).
-3. Le **téléphone/modèle** et la **version de l'app** (Réglages du téléphone → Applications → Dumbhanengue).
+3. Le **téléphone/modèle** et la **version de l'app** (Réglages du téléphone → Applications → TAREQO).
 4. Le **magasin** et l'**heure approximative** du problème.
 
 ---

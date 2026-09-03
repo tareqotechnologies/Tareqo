@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-import 'package:dumbhanengue/core/network/cert_pinning_io.dart';
+import 'package:tareqo/core/network/cert_pinning_io.dart';
 
 /// E2E do certificate pinning (auditoria 2026-08 — V2) CONTRA O SUPABASE
 /// REAL. Não precisa de credenciais: usa apenas o endpoint público de saúde

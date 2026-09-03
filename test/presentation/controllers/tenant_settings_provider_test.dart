@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/config/app_settings.dart';
-import 'package:dumbhanengue/domain/entities/app_user.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/core/config/app_settings.dart';
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/auth_providers.dart';
 
 import '../../helpers/store_context.dart';
 
 /// Propagação das preferências do dono (moeda + idioma) no lado da LEITURA:
-/// [tenantSettingsProvider] é o provider que o `DumbhanengueApp` observa
+/// [tenantSettingsProvider] é o provider que o `TareqoApp` observa
 /// para trocar o locale do MaterialApp e a formatação de moeda. Se o tenant
 /// foi salvo com `language = en` e `currencyCode = MZN`, o provider deve
 /// expor exatamente isso (e o `Locale` derivado).

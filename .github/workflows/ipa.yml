@@ -80,7 +80,7 @@ jobs:
  APPDIR=$(dirname "$APP")
  mkdir -p build/ios/ipa
  (cd "$APPDIR" && mkdir -p Payload && cp -R Runner.app Payload/ \
- && zip -qry "$OLDPWD/build/ios/ipa/dumbhanengue-${VERSION}-unsigned.ipa" Payload \
+ && zip -qry "$OLDPWD/build/ios/ipa/tareqo-${VERSION}-unsigned.ipa" Payload \
  && rm -rf Payload)
  fi
  ls -la build/ios/ipa/

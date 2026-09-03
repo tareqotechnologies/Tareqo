@@ -2,28 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/app.dart';
-import 'package:dumbhanengue/domain/entities/customer.dart';
-import 'package:dumbhanengue/domain/entities/debt.dart';
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/entities/purchase.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
-import 'package:dumbhanengue/domain/entities/sale_item.dart';
-import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_cash_flow_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_customers_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_debts_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_purchases_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_settled_debts_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/customers_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/purchases_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/debts_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/finance_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/products_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/sales_providers.dart';
+import 'package:tareqo/app.dart';
+import 'package:tareqo/domain/entities/customer.dart';
+import 'package:tareqo/domain/entities/debt.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/entities/purchase.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_lot_consumption.dart';
+import 'package:tareqo/domain/entities/sale_item.dart';
+import 'package:tareqo/domain/repositories/i_sale_repository.dart';
+import 'package:tareqo/domain/repositories/i_cash_flow_repository.dart';
+import 'package:tareqo/domain/usecases/get_cash_flow_use_case.dart';
+import 'package:tareqo/domain/usecases/get_customers_use_case.dart';
+import 'package:tareqo/domain/usecases/get_pending_debts_use_case.dart';
+import 'package:tareqo/domain/usecases/get_products_use_case.dart';
+import 'package:tareqo/domain/usecases/get_purchases_use_case.dart';
+import 'package:tareqo/domain/usecases/get_settled_debts_use_case.dart';
+import 'package:tareqo/presentation/controllers/customers_providers.dart';
+import 'package:tareqo/presentation/controllers/purchases_providers.dart';
+import 'package:tareqo/presentation/controllers/debts_providers.dart';
+import 'package:tareqo/presentation/controllers/finance_providers.dart';
+import 'package:tareqo/presentation/controllers/products_providers.dart';
+import 'package:tareqo/presentation/controllers/sales_providers.dart';
 
 import 'helpers/store_context.dart';
 
@@ -148,7 +148,7 @@ void main() {
  getPurchasesUseCaseProvider
  .overrideWithValue(_FakeGetPurchasesUseCase()),
  ],
- child: const DumbhanengueApp(),
+ child: const TareqoApp(),
  ),
  );
 

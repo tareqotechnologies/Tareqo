@@ -816,7 +816,7 @@ class _CartProductRow extends StatelessWidget {
                     '${Quantity.format(product.stockQuantity, unitLabel: isWeight ? product.unitLabel : null, language: Formatters.currentLanguage)}'
                     '${isWeight ? '' : ' ${l10n.commonUnits}'}',
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 11,
+            fontSize: 12,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
@@ -935,7 +935,7 @@ class _CartPill extends StatelessWidget {
           '${Formatters.currency(product.salePriceCents)} '
               '${isWeight ? product.unitLabel : l10n.commonUnits}',
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 11,
+            fontSize: 12,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),

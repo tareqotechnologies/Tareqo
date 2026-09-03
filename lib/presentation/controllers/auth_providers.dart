@@ -11,7 +11,9 @@ import '../../domain/repositories/i_auth_repository.dart';
 import '../../domain/usecases/change_password_use_case.dart';
 import '../../domain/usecases/reset_password_use_case.dart';
 import '../../domain/usecases/set_new_password_use_case.dart';
+import '../../core/security/biometric_service.dart';
 import '../../core/security/mfa_service.dart';
+import '../../domain/usecases/biometric_auth_use_case.dart';
 import '../../domain/usecases/mfa_auth_use_case.dart';
 import '../../domain/usecases/sign_in_use_case.dart';
 import '../../domain/usecases/sign_out_use_case.dart';
@@ -76,11 +78,23 @@ final authStateProvider = StreamProvider<AppUser?>(
       : Stream.value(null),
 );
 
+/// Sinaliza que o utilizador está logado mas ainda NÃO verificou MFA.
+/// O [AuthGate] usa para mostrar a sheet de verificação em vez do AppShell.
+final mfaPendingProvider = StateProvider<bool>((ref) => false);
+
 /// Caso de uso MFA (Multi-Factor Authentication / TOTP).
 /// Requer SecureStorageService já registrado no ServiceLocator.
 final mfaAuthUseCaseProvider = Provider<MFAAuthUseCase>(
   (ref) => MFAAuthUseCase(
     MFAService(),
+    ServiceLocator.instance<SecureStorageService>(),
+  ),
+);
+
+/// Caso de uso de autenticação biométrica (fingerprint, face ID).
+final biometricAuthUseCaseProvider = Provider<BiometricAuthUseCase>(
+  (ref) => BiometricAuthUseCase(
+    BiometricService(),
     ServiceLocator.instance<SecureStorageService>(),
   ),
 );

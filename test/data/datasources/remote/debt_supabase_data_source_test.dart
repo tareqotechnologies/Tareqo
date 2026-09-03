@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:postgrest/postgrest.dart';
 
-import 'package:dumbhanengue/data/datasources/remote/supabase_debt_data_source.dart';
-import 'package:dumbhanengue/domain/entities/debt.dart';
+import 'package:tareqo/data/datasources/remote/supabase_debt_data_source.dart';
+import 'package:tareqo/domain/entities/debt.dart';
 
 /// Teste de CONTRATO das RPCs atômicas do datasource remoto de fiado:
 /// `settle_debt` e `register_debt` — verifica os payloads exatos enviados

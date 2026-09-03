@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:dumbhanengue/core/theme/app_theme.dart';
-import 'package:dumbhanengue/l10n/generated/app_localizations.dart';
+import 'package:tareqo/core/theme/app_theme.dart';
+import 'package:tareqo/l10n/generated/app_localizations.dart';
 
 /// [MaterialApp] de teste com o delegate de localização do app e o locale
 /// fixado em **pt** — as telas agora consomem `context.l10n` (AppLocalizations)

@@ -12,7 +12,11 @@ import 'store_transfers_screen.dart';
 import 'advanced_reports_screen.dart';
 import 'payment_reconciliation_screen.dart';
 
-/// Ecra do marketplace de add-ons — permite activar/desactivar serviços extras.
+/// Ecra do marketplace de add-ons — apenas visualização.
+///
+/// A activação/desactivação de add-ons é exclusiva do super admin
+/// (AdminAddOnsScreen). O tenant apenas visualiza os add-ons que
+/// o super admin activou para o seu tenant e os incluídos no plano.
 class AddOnMarketplaceScreen extends ConsumerWidget {
   const AddOnMarketplaceScreen({super.key});
 
@@ -56,26 +60,49 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: Text(
-              'Serviços extras para potenciar o seu negócio',
+              'Add-ons activos e disponíveis no seu plano',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
-          for (final addon in addOns) ...[
-            _AddOnCard(
-              addon: addon,
-              isActive: activeIds.contains(addon.id) || bundledAddOns.contains(addon.id),
-              isIncluded: bundledAddOns.contains(addon.id),
-              onToggle: bundledAddOns.contains(addon.id)
-                  ? null // Não pode desactivar add-ons incluídos
-                  : () {
-                      ref.read(activeAddOnIdsProvider.notifier).toggle(addon.id);
-                    },
-              onOpen: () => _openAddOn(context, addon.id),
+          // Aviso: apenas visualização
+          Container(
+            margin: const EdgeInsets.only(bottom: AppSpacing.md),
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+              borderRadius: AppRadius.smAll,
             ),
-            const SizedBox(height: AppSpacing.xs),
-          ],
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: theme.colorScheme.tertiary,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: Text(
+                    'A activação de add-ons é gerida pelo administrador do sistema.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.tertiary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          for (final addon in addOns)
+            if (activeIds.contains(addon.id) || bundledAddOns.contains(addon.id)) ...[
+              _AddOnCard(
+                addon: addon,
+                isActive: activeIds.contains(addon.id),
+                isIncluded: bundledAddOns.contains(addon.id),
+                onOpen: () => _openAddOn(context, addon.id),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+            ],
         ],
       ),
     );
@@ -135,14 +162,12 @@ class _AddOnCard extends StatelessWidget {
     required this.addon,
     required this.isActive,
     this.isIncluded = false,
-    this.onToggle,
     required this.onOpen,
   });
 
   final dynamic addon;
   final bool isActive;
   final bool isIncluded;
-  final VoidCallback? onToggle;
   final VoidCallback onOpen;
 
   @override

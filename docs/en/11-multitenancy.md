@@ -1,6 +1,6 @@
 # 11 — Multi-tenancy, Plans and Super Admin
 
-The **Accounts** layer turns Dumbhanengue into a SaaS with manual approval: owners sign up, pick a plan and **wait for the super admin to approve** (within 24h) before they can manage stores and employees.
+The **Accounts** layer turns TAREQO into a SaaS with manual approval: owners sign up, pick a plan and **wait for the super admin to approve** (within 24h) before they can manage stores and employees.
 
 ```text
 Owner signs up → picks plan + business name → tenant PENDING

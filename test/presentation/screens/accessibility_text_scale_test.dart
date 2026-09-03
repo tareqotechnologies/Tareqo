@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:dumbhanengue/domain/entities/auth_event.dart';
+import 'package:tareqo/domain/entities/auth_event.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
-import 'package:dumbhanengue/domain/entities/app_user.dart';
-import 'package:dumbhanengue/domain/repositories/i_auth_repository.dart';
-import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
-import 'package:dumbhanengue/presentation/screens/auth/login_screen.dart';
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/repositories/i_auth_repository.dart';
+import 'package:tareqo/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/presentation/screens/auth/login_screen.dart';
 
 class _FakeAuthRepository implements IAuthRepository {
  final _controller = StreamController<AppUser?>.broadcast();
@@ -76,7 +76,7 @@ void main() {
  await tester.pumpWidget(_buildApp());
  await tester.pump();
 
- expect(find.text('Dumbhanengue'), findsOneWidget);
+ expect(find.text('TAREQO'), findsOneWidget);
  expect(find.text('Entrar'), findsOneWidget);
  expect(find.byType(SingleChildScrollView), findsOneWidget);
  expect(tester.takeException(), isNull);

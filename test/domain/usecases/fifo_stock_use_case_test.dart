@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/entities/stock_lot.dart';
-import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
-import 'package:dumbhanengue/domain/usecases/fifo_stock_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/update_product_stock_use_case.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/entities/stock_lot.dart';
+import 'package:tareqo/domain/repositories/i_product_repository.dart';
+import 'package:tareqo/domain/usecases/fifo_stock_use_case.dart';
+import 'package:tareqo/domain/usecases/update_product_stock_use_case.dart';
 
 import '../../helpers/fake_stock_lot_repository.dart';
 

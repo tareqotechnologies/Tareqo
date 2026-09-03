@@ -1,15 +1,15 @@
 # 01 — Visão Geral
 
-## O que é o Dumbhanengue ERP?
+## O que é o TAREQO ERP?
 
-O **Dumbhanengue ERP** é um sistema de gestão empresarial voltado para **pequenos comerciantes**. Ele concentra em um único aplicativo as operações do dia a dia de uma loja:
+O **TAREQO ERP** é um sistema de gestão empresarial voltado para **pequenos comerciantes**. Ele concentra em um único aplicativo as operações do dia a dia de uma loja:
 
 - **Estoque** — cadastro e controle de produtos com **lotes FIFO e validade** (compra, venda, quantidade disponível, vencimento);
 - **Vendas** — registro de vendas com carrinho, forma de pagamento e baixa automática de estoque;
 - **Financeiro** — fluxo de caixa (entradas × saídas), movimentações e pendências;
 - **Crédito ("fiado")** — controle de quem deve ao comerciante, quando vence e histórico de quitações.
 
-O nome *Dumbhanengue* é o apelido do projeto; o produto em si é um ERP enxuto, com foco em usabilidade e simplicidade.
+O nome *TAREQO* é o apelido do projeto; o produto em si é um ERP enxuto, com foco em usabilidade e simplicidade.
 
 ---
 

@@ -16,8 +16,8 @@ import 'presentation/screens/auth/auth_gate.dart';
 /// [MaterialApp] e a formatação de moeda seguem [tenantSettingsProvider]
 /// — definidos no onboarding e alteráveis em Lojas → Ajustes. Sem tenant
 /// (login / super admin) o padrão é pt + MZN (mercado-alvo Moçambique).
-class DumbhanengueApp extends ConsumerWidget {
- const DumbhanengueApp({super.key});
+class TareqoApp extends ConsumerWidget {
+ const TareqoApp({super.key});
 
  @override
  Widget build(BuildContext context, WidgetRef ref) {
@@ -29,7 +29,7 @@ class DumbhanengueApp extends ConsumerWidget {
  );
 
  return MaterialApp(
- title: 'Dumbhanengue ERP',
+ title: 'TAREQO',
  debugShowCheckedModeBanner: false,    theme: AppTheme.light,
     darkTheme: AppTheme.dark,
     themeMode: ThemeMode.system,

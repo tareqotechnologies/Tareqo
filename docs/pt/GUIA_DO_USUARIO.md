@@ -1,4 +1,4 @@
-# Guia do Usuário — Dumbhanengue ERP
+# Guia do Usuário — TAREQO ERP
 
 Um guia simples e completo para usar o seu sistema de gestão do dia a dia: estoque, vendas, clientes, dinheiro e relatórios — tudo em um só lugar.
 
@@ -8,7 +8,7 @@ Um guia simples e completo para usar o seu sistema de gestão do dia a dia: esto
 
 ## 1. Entrar no sistema
 
-1. Abra o app **Dumbhanengue** no seu telefone.
+1. Abra o app **TAREQO** no seu telefone.
 2. Digite o seu **e-mail** e a sua **senha**.
 3. Toque em **Entrar**.
 

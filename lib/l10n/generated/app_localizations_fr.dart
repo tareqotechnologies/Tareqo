@@ -588,6 +588,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String dashboardTransferItem(String product) {
+    return 'Transfert · $product';
+  }
+
+  @override
   String get dashboardFiadoPayment => 'Paiement à crédit';
 
   @override

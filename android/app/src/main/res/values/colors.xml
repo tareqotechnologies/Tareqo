@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Fundo do splash: azul oficial da marca (#0076F6).
-         A mesma cor aparece no iOS LaunchScreen e no splash in-app. -->
+    <!-- Fundo do splash no light mode: branco. -->
     <color name="ic_launcher_background">#0076F6</color>
 </resources>

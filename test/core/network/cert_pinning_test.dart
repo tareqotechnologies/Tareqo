@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/network/cert_pinning_io.dart';
+import 'package:tareqo/core/network/cert_pinning_io.dart';
 
 /// Extrai o DER de um certificado PEM (strip dos marcadores + base64).
 List<int> _pemToDer(String pem) {

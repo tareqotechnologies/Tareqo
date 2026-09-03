@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../core/utils/quantity.dart';
+import '../../../domain/entities/product.dart';
+import '../../../domain/entities/stock_transfer.dart';
+import '../../controllers/account_providers.dart';
+import '../../controllers/auth_providers.dart';
 import '../../controllers/products_providers.dart';
+import '../../controllers/stock_transfers_provider.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/empty_state.dart';
 
 /// Ecra de transferências entre lojas — envio, recebimento e histórico.
 class StoreTransfersScreen extends ConsumerStatefulWidget {
@@ -16,12 +25,10 @@ class StoreTransfersScreen extends ConsumerStatefulWidget {
 }
 
 class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
-  final List<_TransferRecord> _transfers = [];
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final transfers = ref.watch(stockTransfersProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -35,52 +42,21 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
           ),
         ),
       ),
-      body: _transfers.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.swap_horiz_outlined,
-                      size: 48,
-                      color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      'Sem transferências',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'Transfira estoque entre lojas do\nmesmo tenant de forma rastreável',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      body: transfers.isEmpty
+          ? EmptyState(
+              icon: Icons.swap_horiz_outlined,
+              title: 'Sem transferências',
+              subtitle:
+                  'Transfira estoque entre lojas do\nmesmo tenant de forma rastreável',
             )
           : ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              itemCount: _transfers.length,
+              itemCount: transfers.length,
               separatorBuilder: (_, _) =>
                   const SizedBox(height: AppSpacing.xs),
-              itemBuilder: (context, index) =>
-                  _TransferCard(
-                    transfer: _transfers[index],
-                    onStatusChange: (newStatus) {
-                      setState(() {
-                        final idx = _transfers.indexOf(_transfers[index]);
-                        _transfers[idx] = _transfers[idx].copyWith(status: newStatus);
-                      });
-                    },
-                  ),
+              itemBuilder: (context, index) => _TransferCard(
+                transfer: transfers[index],
+              ),
             ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-transfer',
@@ -96,176 +72,150 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => _NewTransferSheet(
-        onSave: (record) {
-          setState(() => _transfers.insert(0, record));
-          Navigator.of(context).pop();
-        },
-      ),
+      builder: (_) => const _NewTransferSheet(),
     );
   }
 }
 
-class _TransferRecord {
-  _TransferRecord({
-    required this.fromStore,
-    required this.toStore,
-    required this.items,
-    required this.status,
-    required this.date,
-  });
-
-  final String fromStore;
-  final String toStore;
-  final int items;
-  final String status;
-  final String date;
-
-  _TransferRecord copyWith({String? status}) {
-    return _TransferRecord(
-      fromStore: fromStore,
-      toStore: toStore,
-      items: items,
-      status: status ?? this.status,
-      date: date,
-    );
-  }
-}
+// ═══════════════════════════════════════════════════════════════════════════════
+// Transfer Card
+// ═══════════════════════════════════════════════════════════════════════════════
 
 class _TransferCard extends StatelessWidget {
-  const _TransferCard({
-    required this.transfer,
-    this.onStatusChange,
-  });
+  const _TransferCard({required this.transfer});
 
-  final _TransferRecord transfer;
-  final ValueChanged<String>? onStatusChange;
+  final StockTransfer transfer;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    final statusColor = switch (transfer.status) {
-      'Pendente' => const Color(0xFFF59E0B),
-      'Em Trânsito' => const Color(0xFF3B82F6),
-      'Recebida' => const Color(0xFF16A34A),
-      'Cancelada' => scheme.error,
-      _ => scheme.onSurfaceVariant,
+    final (statusColor, statusIcon) = switch (transfer.status) {
+      StockTransferStatus.pending =>
+        (ModuleColors.credit, Icons.schedule_outlined),
+      StockTransferStatus.inTransit =>
+        (ModuleColors.reports, Icons.local_shipping_outlined),
+      StockTransferStatus.received =>
+        (IconTone.green, Icons.check_circle_outline),
+      StockTransferStatus.cancelled =>
+        (IconTone.red, Icons.cancel_outlined),
     };
 
-    return Material(
-      color: scheme.surfaceContainerLow,
-      borderRadius: AppRadius.lgAll,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
+    final formattedQty = Quantity.format(
+      transfer.quantityMilli,
+      unitLabel: transfer.unitLabel,
+    );
+
+    return AppCard(
+      elevated: true,
+      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: IconTone.darkBackground(ModuleColors.stores),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
                   Icons.swap_horiz,
-                  size: 20,
-                  color: scheme.primary,
+                  size: 16,
+                  color: IconTone.lightForeground(ModuleColors.stores),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    '${transfer.fromStore}  →  ${transfer.toStore}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    transfer.status,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              '${transfer.items} itens  •  ${transfer.date}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
               ),
-            ),
-            if (transfer.status == 'Pendente' && onStatusChange != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton.secondary(
-                      label: 'Despachar',
-                      icon: const Icon(Icons.local_shipping_outlined, size: 16),
-                      onPressed: () => onStatusChange!('Em Trânsito'),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${transfer.fromStoreName}  →  ${transfer.toStoreName}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: AppButton.danger(
-                      label: 'Cancelar',
-                      onPressed: () => onStatusChange!('Cancelada'),
+                    const SizedBox(height: 1),
+                    Text(
+                      '${transfer.productName}  ·  $formattedQty  ·  ${Formatters.date(transfer.createdAt)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(statusIcon, size: 12, color: statusColor),
+                    const SizedBox(width: 3),
+                    Text(
+                      transfer.status.label,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: statusColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
-            if (transfer.status == 'Em Trânsito' && onStatusChange != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              AppButton.primary(
-                expanded: true,
-                label: 'Confirmar Recebimento',
-                icon: const Icon(Icons.check_circle_outline, size: 16),
-                onPressed: () => onStatusChange!('Recebida'),
-              ),
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _TransferItem {
-  _TransferItem({
-    required this.name,
-    required this.qty,
+// ═══════════════════════════════════════════════════════════════════════════════
+// New Transfer Sheet
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _NewTransferItem {
+  _NewTransferItem({
+    required this.product,
+    required this.qtyMilli,
   });
 
-  final String name;
-  final int qty;
+  final Product product;
+  final int qtyMilli;
 }
 
 class _NewTransferSheet extends ConsumerStatefulWidget {
-  const _NewTransferSheet({required this.onSave});
-
-  final ValueChanged<_TransferRecord> onSave;
+  const _NewTransferSheet();
 
   @override
   ConsumerState<_NewTransferSheet> createState() => _NewTransferSheetState();
 }
 
 class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
-  String? _fromStore;
-  String? _toStore;
+  String? _fromStoreId;
+  String? _toStoreId;
   String? _selectedProductId;
   final _qtyController = TextEditingController(text: '1');
-  final List<_TransferItem> _items = [];
-
-  final _stores = const ['Loja Central', 'Loja Norte', 'Loja Sul'];
+  final List<_NewTransferItem> _items = [];
+  bool _executing = false;
 
   @override
   void dispose() {
@@ -274,7 +224,8 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
   }
 
   void _addItem() {
-    final qty = int.tryParse(_qtyController.text) ?? 1;
+    final qtyText = _qtyController.text.trim();
+    final qty = double.tryParse(qtyText.replaceAll(',', '.')) ?? 0;
     if (_selectedProductId == null || qty <= 0) return;
 
     final products = ref.read(productsProvider).value ?? [];
@@ -283,11 +234,66 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
       orElse: () => products.first,
     );
 
+    // Converter para milésimos
+    final qtyMilli = (qty * 1000).round();
+
     setState(() {
-      _items.add(_TransferItem(name: product.name, qty: qty));
+      _items.add(_NewTransferItem(product: product, qtyMilli: qtyMilli));
       _selectedProductId = null;
       _qtyController.text = '1';
     });
+  }
+
+  Future<void> _executeTransfer() async {
+    if (_fromStoreId == null || _toStoreId == null || _items.isEmpty) return;
+
+    setState(() => _executing = true);
+
+    final stores = ref.read(storesProvider(
+      ref.read(myTenantProvider(ref.read(authStateProvider).value!.id)).value!.id,
+    )).value ?? [];
+
+    final fromName = stores.firstWhere((s) => s.id == _fromStoreId).name;
+    final toName = stores.firstWhere((s) => s.id == _toStoreId).name;
+
+    final transfersNotifier = ref.read(stockTransfersProvider.notifier);
+
+    try {
+      for (final item in _items) {
+        await transfersNotifier.executeTransfer(
+          productId: item.product.id,
+          productName: item.product.name,
+          fromStoreId: _fromStoreId!,
+          fromStoreName: fromName,
+          toStoreId: _toStoreId!,
+          toStoreName: toName,
+          quantityMilli: item.qtyMilli,
+          unitLabel: item.product.unitLabel,
+        );
+      }
+
+      // Refresh products to reflect new stock.
+      ref.invalidate(productsProvider);
+
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${_items.length} produto(s) transferido(s) com sucesso',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro na transferência: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _executing = false);
+    }
   }
 
   @override
@@ -296,6 +302,66 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
     final scheme = theme.colorScheme;
     final products = ref.watch(productsProvider).value ?? [];
     final activeProducts = products.where((p) => p.isActive).toList();
+
+    // Buscar lojas reais do tenant.
+    final user = ref.watch(authStateProvider).value;
+    final tenant = user == null
+        ? null
+        : ref.watch(myTenantProvider(user.id)).value;
+    final stores = tenant != null
+        ? ref.watch(storesProvider(tenant.id)).value ?? []
+        : [];
+
+    // Loja ativa como origem padrão.
+    final activeStoreId = user == null
+        ? null
+        : ref.watch(activeStoreIdProvider(user.id));
+
+    // Filtrar loja de destino (não pode ser igual à origem).
+    final destStores = stores
+        .where((s) => s.id != _fromStoreId)
+        .toList();
+
+    // Definir origem padrão se ainda não selecionada.
+    if (_fromStoreId == null &&
+        activeStoreId != null &&
+        stores.any((s) => s.id == activeStoreId)) {
+      _fromStoreId = activeStoreId;
+    }
+
+    if (stores.length < 2) {
+      return Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.store_outlined,
+                size: 40,
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.3),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Cadastre pelo menos 2 lojas',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'É necessário ter 2+ lojas para\ntransferir estoque entre elas',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -317,80 +383,78 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             ),
             const SizedBox(height: AppSpacing.lg),
             DropdownButtonFormField<String>(
-              initialValue: _fromStore,
+              initialValue: _fromStoreId,
               decoration: const InputDecoration(
                 labelText: 'Loja de Origem',
                 prefixIcon: Icon(Icons.store_outlined),
               ),
-              items: _stores
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+              items: stores
+                  .map<DropdownMenuItem<String>>((s) => DropdownMenuItem(
+                        value: s.id,
+                        child: Text(s.name, style: theme.textTheme.bodySmall),
+                      ))
                   .toList(),
-              onChanged: (v) => setState(() => _fromStore = v),
+              onChanged: (v) => setState(() {
+                _fromStoreId = v;
+                if (_toStoreId == v) _toStoreId = null;
+              }),
             ),
             const SizedBox(height: AppSpacing.sm),
             DropdownButtonFormField<String>(
-              initialValue: _toStore,
+              initialValue: _toStoreId,
               decoration: const InputDecoration(
                 labelText: 'Loja de Destino',
                 prefixIcon: Icon(Icons.storefront_outlined),
               ),
-              items: _stores
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+              items: destStores
+                  .map<DropdownMenuItem<String>>((s) => DropdownMenuItem(
+                        value: s.id,
+                        child: Text(s.name, style: theme.textTheme.bodySmall),
+                      ))
                   .toList(),
-              onChanged: (v) => setState(() => _toStore = v),
+              onChanged: (v) => setState(() => _toStoreId = v),
             ),
             const SizedBox(height: AppSpacing.md),
             const Divider(),
             const SizedBox(height: AppSpacing.sm),
-
-            // ─── Produto (picker do estoque) ──
-            Text('Produto', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+            _SectionLabel(text: 'Produto'),
             const SizedBox(height: 6),
             if (activeProducts.isNotEmpty)
-              Container(
-                decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  borderRadius: AppRadius.mdAll,
+              DropdownButtonFormField<String>(
+                initialValue: _selectedProductId,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  labelText: 'Produto',
+                  prefixIcon: Icon(Icons.inventory_2_outlined),
                 ),
-                child: DropdownButtonFormField<String>(
-                  initialValue: _selectedProductId,
-                  isExpanded: true,
-                  menuMaxHeight: 250,
-                  decoration: InputDecoration(
-                    hintText: 'Selecionar produto...',
-                    prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
-                  items: activeProducts
-                      .map((p) => DropdownMenuItem(
-                            value: p.id,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(p.name, style: theme.textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
-                                Text(
-                                  'Estoque: ${p.stockQuantity ~/ 1000} ${p.unitLabel}',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ))
-                      .toList(),
-                  onChanged: (id) => setState(() => _selectedProductId = id),
-                ),
+                items: activeProducts
+                    .map<DropdownMenuItem<String>>(
+                      (p) => DropdownMenuItem(
+                        value: p.id,
+                        child: Text(
+                          '${p.name}  ·  ${Quantity.format(p.stockQuantity, unitLabel: p.vendaPorFracao ? p.unitLabel : null)}',
+                          style: theme.textTheme.bodySmall,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (id) =>
+                    setState(() => _selectedProductId = id),
               )
             else
               InputDecorator(
                 decoration: InputDecoration(
                   hintText: 'Sem produtos cadastrados',
-                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                  prefixIcon: const Icon(
+                    Icons.inventory_2_outlined,
+                    size: 20,
+                  ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
                 child: const Text(''),
               ),
@@ -401,7 +465,9 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                   child: AppTextField(
                     controller: _qtyController,
                     label: 'Quantidade',
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -409,54 +475,75 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                   alignment: Alignment.bottomCenter,
                   child: AppButton.secondary(
                     label: 'Adicionar',
-                    onPressed: _selectedProductId != null ? _addItem : null,
+                    onPressed:
+                        _selectedProductId != null ? _addItem : null,
                   ),
                 ),
               ],
             ),
             if (_items.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
-              ..._items.asMap().entries.map((entry) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      children: [
-                        Icon(Icons.check_circle_outline, size: 16, color: scheme.primary),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text('${entry.value.name} x${entry.value.qty}', style: theme.textTheme.bodyMedium),
-                        ),
-                        InkWell(
-                          onTap: () => setState(() => _items.removeAt(entry.key)),
-                          child: Icon(Icons.close, size: 16, color: scheme.error),
-                        ),
-                      ],
+              ..._items.asMap().entries.map(
+                    (entry) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle_outline,
+                              size: 16, color: scheme.primary),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${entry.value.product.name}  ·  ${Quantity.format(entry.value.qtyMilli, unitLabel: entry.value.product.vendaPorFracao ? entry.value.product.unitLabel : null)}',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => setState(
+                                () => _items.removeAt(entry.key)),
+                            child: Icon(Icons.close,
+                                size: 16, color: scheme.error),
+                          ),
+                        ],
+                      ),
                     ),
-                  )),
+                  ),
             ],
             const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               expanded: true,
-              label: 'Criar Transferência',
-              onPressed: _fromStore != null &&
-                      _toStore != null &&
-                      _fromStore != _toStore &&
-                      _items.isNotEmpty
-                  ? () {
-                      widget.onSave(
-                        _TransferRecord(
-                          fromStore: _fromStore!,
-                          toStore: _toStore!,
-                          items: _items.length,
-                          status: 'Pendente',
-                          date: DateTime.now().toString().substring(0, 10),
-                        ),
-                      );
-                    }
-                  : null,
+              label: _executing ? 'A transferir...' : 'Executar Transferência',
+              onPressed: _executing ||
+                      _fromStoreId == null ||
+                      _toStoreId == null ||
+                      _fromStoreId == _toStoreId ||
+                      _items.isEmpty
+                  ? null
+                  : _executeTransfer,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Shared widgets
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.2,
+          ),
     );
   }
 }

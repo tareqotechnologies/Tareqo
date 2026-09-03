@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
-import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_financial_transaction_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_cash_flow_use_case.dart';
+import 'package:tareqo/domain/entities/financial_transaction.dart';
+import 'package:tareqo/domain/repositories/i_cash_flow_repository.dart';
+import 'package:tareqo/domain/repositories/i_financial_transaction_repository.dart';
+import 'package:tareqo/domain/usecases/get_cash_flow_use_case.dart';
 
 /// Fake que simula a consulta por período (como o SQL faria).
 /// Fake do repositório de agregação server-side (H2) — simula a RPC.

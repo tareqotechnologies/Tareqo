@@ -34,13 +34,7 @@ class BiometricAuthUseCase {
   Future<bool> authenticate({
     String localizedReason = 'Autenticação biométrica',
   }) async {
-    // Check if biometric auth is enabled
-    final enabled = await isEnabled();
-    if (!enabled) {
-      return false;
-    }
-
-    // Check if biometric is available
+    // Check if biometric is available on the device
     final available = await _biometricService.isAvailable;
     if (!available) {
       return false;

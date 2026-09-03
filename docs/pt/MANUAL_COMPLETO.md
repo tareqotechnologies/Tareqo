@@ -1,4 +1,4 @@
-# Dumbhanengue ERP
+# TAREQO ERP
 
 ## Manual completo de utilização
 
@@ -14,9 +14,9 @@
 
 ## Página de apresentação
 
-O **Dumbhanengue ERP** é uma aplicação de gestão empresarial feita para pequenos e médios negócios em Moçambique. Foi pensada para comerciantes, donos de lojas, gerentes e funcionários que precisam de controlar estoque, vendas, clientes, caixa e dinheiro de forma simples e organizada.
+O **TAREQO ERP** é uma aplicação de gestão empresarial feita para pequenos e médios negócios em Moçambique. Foi pensada para comerciantes, donos de lojas, gerentes e funcionários que precisam de controlar estoque, vendas, clientes, caixa e dinheiro de forma simples e organizada.
 
-O Dumbhanengue ERP ajuda-o a:
+O TAREQO ERP ajuda-o a:
 
 - Saber quanto vendeu hoje, esta semana e este mês
 - Controlar o estoque e saber quando um produto está para vencer
@@ -54,7 +54,7 @@ Os nomes dos menus e botões são escritos **em negrito** e devem ser seguidos c
 
 ### Requisitos básicos
 
-Para usar o Dumbhanengue ERP, precisa de:
+Para usar o TAREQO ERP, precisa de:
 
 | Requisito | Detalhe |
 |-----------|---------|
@@ -91,7 +91,7 @@ O sistema tem três níveis de acesso:
 
 **Passos:**
 
-1. Abra o aplicativo **Dumbhanengue** no telemóvel
+1. Abra o aplicativo **TAREQO** no telemóvel
 2. Toque em **"Não tenho conta — cadastrar"**
 3. Preencha os dados:
    - Nome completo
@@ -109,7 +109,7 @@ O sistema tem três níveis de acesso:
 
 **Passos:**
 
-1. Abra o aplicativo **Dumbhanengue**
+1. Abra o aplicativo **TAREQO**
 2. Digite o seu **e-mail** e a sua **palavra-passe**
 3. Toque em **Entrar**
 
@@ -611,7 +611,7 @@ O acesso é bloqueado imediatamente. Se a sessão antiga ainda estiver aberta, o
 
 ## Capítulo 14 — Boas práticas de operação
 
-Para tirar o máximo partido do Dumbhanengue ERP, siga estas recomendações:
+Para tirar o máximo partido do TAREQO ERP, siga estas recomendações:
 
 ### Produtos
 - Cadastre todos os produtos com dados corretos (nome, preço, quantidade)
@@ -794,9 +794,9 @@ As seguintes informações ainda não foram confirmadas e devem ser verificadas 
 
 ## Versão resumida — Guia rápido para novos utilizadores
 
-### Bem-vindo ao Dumbhanengue ERP
+### Bem-vindo ao TAREQO ERP
 
-O Dumbhanengue ERP é o seu sistema de gestão. Aqui está tudo o que precisa para começar:
+O TAREQO ERP é o seu sistema de gestão. Aqui está tudo o que precisa para começar:
 
 ### 1. Entrar no sistema
 - Abra o aplicativo → digite e-mail e palavra-passe → toque em **Entrar**
@@ -831,4 +831,4 @@ O Dumbhanengue ERP é o seu sistema de gestão. Aqui está tudo o que precisa pa
 
 ---
 
-*Manual versão 1.0 — Agosto 2026 — Dumbhanengue ERP*
+*Manual versão 1.0 — Agosto 2026 — TAREQO ERP*

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/theme/app_theme.dart';
+import 'package:tareqo/core/theme/app_theme.dart';
 
 /// Auditoria da ESCALA TIPOGRÁFICA (Apple HIG / SF Pro, adaptada ao ERP
 /// — ver docs/pt/05-apresentacao.md): trava os tamanhos

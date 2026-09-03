@@ -35,7 +35,7 @@ flutter build appbundle --flavor prod --release \
 | ---------- | ------------------- | --------------------- | ------------------ | --------------- |
 | **Android** | Windows, macOS, Linux | JDK 17 + Android SDK | `flutter build appbundle --flavor prod --release --dart-define-from-file=env/prod.env` | `app-prod-release.aab` |
 | **iOS** | **macOS** (obrigatório) | Xcode + CocoaPods + conta Apple Developer | `flutter build ios --release` | `Runner.app` (ou `.ipa` via Xcode) |
-| **Windows** | Windows 10/11 | Visual Studio 2022 (workload C++) | `flutter build windows --release` | `dumbhanengue.exe` |
+| **Windows** | Windows 10/11 | Visual Studio 2022 (workload C++) | `flutter build windows --release` | `tareqo.exe` |
 | **Web** | Qualquer SO | Navegador (para testar) | `flutter build web --release` | `build/web/` (site estático) |
 
 ---
@@ -61,8 +61,8 @@ A assinatura de produção lê `android/key.properties` (nunca versionado — ve
 
 ```bash
 # ── Flavors (auditoria 2.4) ────────────────────────────────────────────
-# dev → applicationId com.dumbhanengue.dumbhanengue.dev, label "Dev"
-# prod → applicationId de produção com.dumbhanengue.dumbhanengue
+# dev → applicationId com.tareqo.tareqo.dev, label "Dev"
+# prod → applicationId de produção com.tareqo.tareqo
 
 # APK dev (distribuição direta / testes)
 flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
@@ -82,7 +82,7 @@ flutter build appbundle --flavor prod --release \
 flutter run --flavor dev --dart-define-from-file=env/dev.env
 ```
 
-> **R8/minify estão ATIVADOS** (auditoria S7, Aug 5): `isMinifyEnabled`/`isShrinkResources` no `build.gradle.kts`. Para ofuscar também o código **Dart**, adicione ao comando de release: `flutter build apk --release --obfuscate --split-debug-info=build/symbols` (e faça o upload dos símbolos ao Sentry: `sentry-cli debug-files upload`). Para reduzir o APK de 61 MB, use `--split-per-abi` (ou `flutter build appbundle` — formato exigido pela Play). Com os flavors (Aug 5), `prod` mantém o Application ID `com.dumbhanengue.dumbhanengue` e `dev` ganhou o sufixo `.dev`. Atenção: **O package de produção é imutável após o primeiro upload ao Play** — se um dia decidir mudá-lo, será um app NOVO no console (sem herdar reviews/installs).
+> **R8/minify estão ATIVADOS** (auditoria S7, Aug 5): `isMinifyEnabled`/`isShrinkResources` no `build.gradle.kts`. Para ofuscar também o código **Dart**, adicione ao comando de release: `flutter build apk --release --obfuscate --split-debug-info=build/symbols` (e faça o upload dos símbolos ao Sentry: `sentry-cli debug-files upload`). Para reduzir o APK de 61 MB, use `--split-per-abi` (ou `flutter build appbundle` — formato exigido pela Play). Com os flavors (Aug 5), `prod` mantém o Application ID `com.tareqo.tareqo` e `dev` ganhou o sufixo `.dev`. Atenção: **O package de produção é imutável após o primeiro upload ao Play** — se um dia decidir mudá-lo, será um app NOVO no console (sem herdar reviews/installs).
 
 #### Aviso conhecido no build (sentry_flutter + KGP) — rastreado upstream
 
@@ -116,7 +116,7 @@ O workflow roda `flutter analyze` + `flutter test` e, em seguida, o **Fastlane**
 
 **Secrets exigidos** (GitHub → Settings → Secrets and variables → Actions): `SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`, `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `PLAY_SERVICE_ACCOUNT_JSON`, e `SENTRY_DSN` (opcional).
 
-**Pré-requisito único manual:** o app `com.dumbhanengue.dumbhanengue` tem de existir no Play Console com o primeiro AAB/APK enviado e o **Play App Signing** ativado (upload key registada). Depois disso, todas as atualizações podem sair pela tag `v*`. Para enviar os símbolos Dart ao Sentry: `sentry-cli debug-files upload --org <org> --project <proj> build/symbols`.
+**Pré-requisito único manual:** o app `com.tareqo.tareqo` tem de existir no Play Console com o primeiro AAB/APK enviado e o **Play App Signing** ativado (upload key registada). Depois disso, todas as atualizações podem sair pela tag `v*`. Para enviar os símbolos Dart ao Sentry: `sentry-cli debug-files upload --org <org> --project <proj> build/symbols`.
 
 #### Preparação dos secrets do GitHub
 
@@ -181,7 +181,7 @@ flutter run
 ```bash
 # Build de release (exe nativo)
 flutter build windows --release
-# → build/windows/x64/runner/Release/dumbhanengue.exe
+# → build/windows/x64/runner/Release/tareqo.exe
 
 # Rodar em modo debug com hot reload
 flutter run -d windows

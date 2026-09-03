@@ -3,10 +3,10 @@ import 'package:intl/intl.dart';
 /// Formatação para a UI (moeda, datas e dias relativos).
 ///
 /// A moeda e o idioma são configurados pelo **dono do tenant** (Ajustes)
-/// via [applySettings] — o [AppSettings] é aplicado no `DumbhanengueApp`
+/// via [applySettings] — o [AppSettings] é aplicado no `TareqoApp`
 /// sempre que o tenant carrega/altera (novos tenants nascem com **MZN** —
 /// mercado-alvo Moçambique). Sem configuração (testes, antes do login), o
-/// padrão ESTÁTICO continua BRL + pt-BR — o `DumbhanengueApp` sempre
+/// padrão ESTÁTICO continua BRL + pt-BR — o `TareqoApp` sempre
 /// aplica os ajustes, então esse default só vale em testes/edge cases;
 /// o onboarding usa [currencyFor] com a moeda selecionada ao vivo.
 ///

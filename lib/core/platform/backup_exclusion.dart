@@ -1,7 +1,7 @@
 /// Exclusão de backup dos arquivos locais do app (auditoria 2026-08 — V9).
 ///
 /// No iOS, o iCloud/iTunes faz backup do diretório Documents por padrão —
-/// o `dumbhanengue.db` (dados financeiros + PII) e as fotos dos produtos
+/// o `tareqo.db` (dados financeiros + PII) e as fotos dos produtos
 /// iriam para o backup do usuário sem necessidade. Este helper marca esses
 /// caminhos como excluídos (`NSURLIsExcludedFromBackupKey`) via method
 /// channel. No Android a exclusão já é global (`allowBackup=false`); aqui

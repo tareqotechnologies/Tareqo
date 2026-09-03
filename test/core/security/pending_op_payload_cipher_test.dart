@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cryptography/cryptography.dart';
 
-import 'package:dumbhanengue/core/security/pending_op_payload_cipher.dart';
-import 'package:dumbhanengue/core/security/secure_storage_service.dart';
+import 'package:tareqo/core/security/pending_op_payload_cipher.dart';
+import 'package:tareqo/core/security/secure_storage_service.dart';
 
 /// Backend de armazenamento em memória (sem plataforma) — mesmo padrão dos
 /// testes de `SecureStorageService`.

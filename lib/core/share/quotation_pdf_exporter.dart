@@ -23,13 +23,17 @@ class QuotationPdfExporter {
     required String businessName,
     String? businessAddress,
     String? businessPhone,
+    String? businessTaxId,
+    Uint8List? logoBytes,
+    PdfColor primaryColor = PdfColors.amber700,
   }) async {
     final data = await rootBundle.load('assets/fonts/Inter-Variable.ttf');
     final doc = pw.Document(
       theme: pw.ThemeData.withFont(base: pw.Font.ttf(data)),
     );
 
-    final daysRemaining = quotation.validUntil.difference(DateTime.now()).inDays;
+    final daysRemaining =
+        quotation.validUntil.difference(DateTime.now()).inDays;
     final statusLabel = switch (quotation.status) {
       QuotationStatus.draft => 'Rascunho',
       QuotationStatus.sent => 'Enviada',
@@ -38,6 +42,15 @@ class QuotationPdfExporter {
       QuotationStatus.expired => 'Expirada',
       QuotationStatus.converted => 'Convertida em Venda',
     };
+
+    // Pré-carregar o logotipo se fornecido.
+    pw.ImageProvider? logoImage;
+    if (logoBytes != null && logoBytes.isNotEmpty) {
+      logoImage = pw.MemoryImage(logoBytes);
+    }
+
+    // Cor escura para texto sobre fundo claro.
+    final primaryDark = _darken(primaryColor);
 
     doc.addPage(
       pw.MultiPage(
@@ -49,35 +62,66 @@ class QuotationPdfExporter {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    businessName,
-                    style: pw.TextStyle(
-                      fontSize: 20,
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.indigo900,
-                    ),
-                  ),
-                  if (businessAddress != null && businessAddress.isNotEmpty)
-                    pw.Text(
-                      businessAddress,
-                      style: const pw.TextStyle(
-                        fontSize: 9,
-                        color: PdfColors.grey700,
+              // Lado esquerdo: logotipo + dados da empresa
+              pw.Expanded(
+                child: pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    if (logoImage != null) ...[
+                      pw.Container(
+                        width: 48,
+                        height: 48,
+                        child:
+                            pw.Image(logoImage, fit: pw.BoxFit.contain),
+                      ),
+                      pw.SizedBox(width: 12),
+                    ],
+                    pw.Expanded(
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            businessName,
+                            style: pw.TextStyle(
+                              fontSize: 20,
+                              fontWeight: pw.FontWeight.bold,
+                              color: primaryDark,
+                            ),
+                          ),
+                          if (businessAddress != null &&
+                              businessAddress.isNotEmpty)
+                            pw.Text(
+                              businessAddress,
+                              style: const pw.TextStyle(
+                                fontSize: 9,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                          if (businessPhone != null &&
+                              businessPhone.isNotEmpty)
+                            pw.Text(
+                              businessPhone,
+                              style: const pw.TextStyle(
+                                fontSize: 9,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                          if (businessTaxId != null &&
+                              businessTaxId.isNotEmpty)
+                            pw.Text(
+                              'NIF: $businessTaxId',
+                              style: const pw.TextStyle(
+                                fontSize: 9,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                  if (businessPhone != null && businessPhone.isNotEmpty)
-                    pw.Text(
-                      businessPhone,
-                      style: const pw.TextStyle(
-                        fontSize: 9,
-                        color: PdfColors.grey700,
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
+              // Lado direito: badge COTAÇÃO + nº + data + estado
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
@@ -87,7 +131,7 @@ class QuotationPdfExporter {
                       vertical: 8,
                     ),
                     decoration: pw.BoxDecoration(
-                      color: PdfColors.amber700,
+                      color: primaryColor,
                       borderRadius: pw.BorderRadius.circular(6),
                     ),
                     child: pw.Text(
@@ -121,7 +165,11 @@ class QuotationPdfExporter {
                       vertical: 2,
                     ),
                     decoration: pw.BoxDecoration(
-                      color: PdfColors.amber50,
+                      color: PdfColor(
+                        primaryColor.red,
+                        primaryColor.green,
+                        primaryColor.blue,
+                      ),
                       borderRadius: pw.BorderRadius.circular(4),
                     ),
                     child: pw.Text(
@@ -129,7 +177,7 @@ class QuotationPdfExporter {
                       style: pw.TextStyle(
                         fontSize: 8,
                         fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.amber900,
+                        color: primaryColor,
                       ),
                     ),
                   ),
@@ -225,7 +273,9 @@ class QuotationPdfExporter {
                   item.productName,
                   _formatQty(item.quantity),
                   Formatters.currency(item.unitPriceCents),
-                  Formatters.currency(item.quantity * item.unitPriceCents ~/ 1000),
+                  Formatters.currency(
+                    item.quantity * item.unitPriceCents ~/ 1000,
+                  ),
                 ],
             ],
             columnWidths: const {
@@ -239,8 +289,8 @@ class QuotationPdfExporter {
               fontWeight: pw.FontWeight.bold,
               color: PdfColors.white,
             ),
-            headerDecoration: const pw.BoxDecoration(
-              color: PdfColors.amber700,
+            headerDecoration: pw.BoxDecoration(
+              color: primaryColor,
             ),
             cellStyle: const pw.TextStyle(fontSize: 9),
             cellPadding: const pw.EdgeInsets.all(6),
@@ -271,7 +321,7 @@ class QuotationPdfExporter {
                     _totalRow(
                       'TOTAL',
                       Formatters.currency(quotation.totalAmountCents),
-                      PdfColors.amber900,
+                      primaryDark,
                       isBold: true,
                     ),
                   ],
@@ -372,12 +422,18 @@ class QuotationPdfExporter {
     required String businessName,
     String? businessAddress,
     String? businessPhone,
+    String? businessTaxId,
+    Uint8List? logoBytes,
+    PdfColor primaryColor = PdfColors.amber700,
   }) async {
     final bytes = await buildPdf(
       quotation,
       businessName: businessName,
       businessAddress: businessAddress,
       businessPhone: businessPhone,
+      businessTaxId: businessTaxId,
+      logoBytes: logoBytes,
+      primaryColor: primaryColor,
     );
     final fileName =
         'cotacao_${quotation.number.toString().padLeft(5, '0')}.pdf';
@@ -389,7 +445,11 @@ class QuotationPdfExporter {
       await SharePlus.instance.share(
         ShareParams(
           files: [
-            XFile.fromData(bytes, mimeType: 'application/pdf', name: fileName),
+            XFile.fromData(
+              bytes,
+              mimeType: 'application/pdf',
+              name: fileName,
+            ),
           ],
           subject: 'Cotação $fileName',
         ),
@@ -426,7 +486,8 @@ class QuotationPdfExporter {
             label,
             style: pw.TextStyle(
               fontSize: isBold ? 12 : 9,
-              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontWeight:
+                  isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
               color: color,
             ),
           ),
@@ -434,12 +495,22 @@ class QuotationPdfExporter {
             value,
             style: pw.TextStyle(
               fontSize: isBold ? 14 : 10,
-              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontWeight:
+                  isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
               color: color,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  /// Escurece uma cor PDF para usar como texto sobre fundo claro.
+  PdfColor _darken(PdfColor color) {
+    return PdfColor(
+      (color.red * 0.7).clamp(0, 1),
+      (color.green * 0.7).clamp(0, 1),
+      (color.blue * 0.7).clamp(0, 1),
     );
   }
 }

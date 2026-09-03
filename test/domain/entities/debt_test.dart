@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/debt.dart';
+import 'package:tareqo/domain/entities/debt.dart';
 
 void main() {
  final debt = Debt(

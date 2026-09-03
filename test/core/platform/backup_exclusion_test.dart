@@ -1,18 +1,18 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/platform/backup_exclusion_io.dart';
+import 'package:tareqo/core/platform/backup_exclusion_io.dart';
 
 /// V9 (auditoria 2026-08) — exclusão de backup dos arquivos locais.
 ///
 /// Cobre o núcleo testável (`_excludePathFromBackup` com `isIOS` injetado):
 /// fora do iOS é no-op imediato; no iOS chama o channel
-/// `dev.dumbhanengue/backup_exclusion` com o caminho exato; falha do
+/// `dev.tareqo/backup_exclusion` com o caminho exato; falha do
 /// channel nunca propaga (best-effort).
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const channel = MethodChannel('dev.dumbhanengue/backup_exclusion');
+  const channel = MethodChannel('dev.tareqo/backup_exclusion');
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
@@ -39,11 +39,11 @@ void main() {
       return true;
     });
 
-    await excludeFromBackupOnPlatform('/data/foo/dumbhanengue.db', isIOS: true);
+    await excludeFromBackupOnPlatform('/data/foo/tareqo.db', isIOS: true);
 
     expect(calls, hasLength(1));
     expect(calls.single.method, 'excludeFromBackup');
-    expect(calls.single.arguments, {'path': '/data/foo/dumbhanengue.db'});
+    expect(calls.single.arguments, {'path': '/data/foo/tareqo.db'});
   });
 
   test('falha do channel nativo NUNCA propaga (best-effort)', () async {

@@ -112,7 +112,7 @@ jobs:
  image: postgres:16
  env:
  POSTGRES_PASSWORD: postgres
- POSTGRES_DB: dumbhanengue
+ POSTGRES_DB: tareqo
  ports:
  - 5432:5432
  options: >-
@@ -130,4 +130,4 @@ jobs:
  - name: Run SQL/RLS smoke test (W4/H2/upgrade)
  env:
  PGPASSWORD: postgres
- run: bash scripts/sql_check.sh localhost postgres dumbhanengue
+ run: bash scripts/sql_check.sh localhost postgres tareqo

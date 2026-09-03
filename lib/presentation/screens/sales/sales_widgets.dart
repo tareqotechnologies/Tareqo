@@ -147,7 +147,7 @@ class _CompactDelta extends StatelessWidget {
           Text(
             '$sign$percent%',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: color,
               fontFeatures: const [FontFeature.tabularFigures()],

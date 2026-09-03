@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/data/datasources/local/plan_local_data_source_impl.dart';
-import 'package:dumbhanengue/domain/entities/plan.dart';
+import 'package:tareqo/data/datasources/local/plan_local_data_source_impl.dart';
+import 'package:tareqo/domain/entities/plan.dart';
 
 void main() {
  group('PlanLocalDataSourceImpl', () {

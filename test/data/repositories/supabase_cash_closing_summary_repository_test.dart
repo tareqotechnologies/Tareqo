@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:postgrest/postgrest.dart';
 
-import 'package:dumbhanengue/data/repositories/supabase_cash_closing_summary_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_cash_closing_summary_use_case.dart';
+import 'package:tareqo/data/repositories/supabase_cash_closing_summary_repository.dart';
+import 'package:tareqo/domain/usecases/get_cash_closing_summary_use_case.dart';
 
 /// Teste de CONTRATO da RPC `get_cash_closing_summary` (prévia do Z-report
 /// agregada no servidor, H2) — verifica o payload EXATO enviado (loja e

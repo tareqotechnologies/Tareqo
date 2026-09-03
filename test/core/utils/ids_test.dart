@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/utils/ids.dart';
+import 'package:tareqo/core/utils/ids.dart';
 
 void main() {
  test('newId gera ids distintos entre chamadas consecutivas', () {

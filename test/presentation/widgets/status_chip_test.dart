@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/presentation/widgets/status_chip.dart';
+import 'package:tareqo/presentation/widgets/status_chip.dart';
 
 void main() {
   // Regressão (âncoras): o rótulo do StatusChip fica SEMPRE numa única

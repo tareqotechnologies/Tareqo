@@ -91,3 +91,11 @@ final isAddOnActiveProvider = Provider.family<bool, String>((ref, addOnId) {
   final activeIds = ref.watch(activeAddOnIdsProvider).value ?? {};
   return activeIds.contains(addOnId);
 });
+
+/// IDs dos add-ons activos de um tenant específico (usado no painel admin
+/// para mostrar a contagem de add-ons activos no card do tenant).
+final tenantActiveAddOnIdsProvider =
+    FutureProvider.family<Set<String>, String>((ref, tenantId) async {
+  final ds = ref.watch(addOnDataSourceProvider);
+  return ds.getActiveAddOnIds(tenantId);
+});

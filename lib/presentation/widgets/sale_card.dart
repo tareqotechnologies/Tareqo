@@ -125,7 +125,7 @@ class _SalesCardState extends State<SalesCard> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: scheme.onSurfaceVariant,
                               ),
                             ),

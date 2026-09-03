@@ -3,16 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:postgrest/postgrest.dart';
 
-import 'package:dumbhanengue/core/di/service_locator.dart';
-import 'package:dumbhanengue/data/datasources/remote/supabase_datasource_helpers.dart';
-import 'package:dumbhanengue/data/repositories/supabase_cash_closing_summary_repository.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/repositories/i_cash_closing_summary_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_cash_closing_summary_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_my_tenant_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_stores_use_case.dart';
-import 'package:dumbhanengue/l10n/generated/app_localizations.dart';
-import 'package:dumbhanengue/main.dart' as app;
+import 'package:tareqo/core/di/service_locator.dart';
+import 'package:tareqo/data/datasources/remote/supabase_datasource_helpers.dart';
+import 'package:tareqo/data/repositories/supabase_cash_closing_summary_repository.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/repositories/i_cash_closing_summary_repository.dart';
+import 'package:tareqo/domain/usecases/get_cash_closing_summary_use_case.dart';
+import 'package:tareqo/domain/usecases/get_my_tenant_use_case.dart';
+import 'package:tareqo/domain/usecases/get_stores_use_case.dart';
+import 'package:tareqo/l10n/generated/app_localizations.dart';
+import 'package:tareqo/main.dart' as app;
 
 /// E2E do PAYLOAD REAL da RPC `get_cash_closing_summary` (prévia do
 /// Z-report, H2) CONTRA O SUPABASE REAL.
@@ -42,7 +42,7 @@ const _ownerEmail = String.fromEnvironment('TEST_OWNER_EMAIL');
 const _ownerPassword = String.fromEnvironment('TEST_OWNER_PASSWORD');
 
 /// Marcador do ecrã de login, independente de idioma (título da app).
-const _loginTitle = 'Dumbhanengue';
+const _loginTitle = 'TAREQO';
 
 Future<void> _pumpUntil(
   WidgetTester tester,

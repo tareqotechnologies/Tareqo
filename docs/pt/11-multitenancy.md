@@ -1,6 +1,6 @@
 # 11 — Multi-tenancy, Planos e Super Admin
 
-A camada de **Contas** transforma o Dumbhanengue em um SaaS com aprovação manual: donos se cadastram, escolhem um plano e **aguardam a aprovação do super admin** (prazo de até 24h) antes de gerenciar lojas e funcionários.
+A camada de **Contas** transforma o TAREQO em um SaaS com aprovação manual: donos se cadastram, escolhem um plano e **aguardam a aprovação do super admin** (prazo de até 24h) antes de gerenciar lojas e funcionários.
 
 ```text
 Dono se cadastra → escolhe plano + nome do negócio → tenant PENDING

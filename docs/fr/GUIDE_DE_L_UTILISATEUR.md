@@ -1,4 +1,4 @@
-# Guide de l'utilisateur — Dumbhanengue ERP
+# Guide de l'utilisateur — TAREQO ERP
 
 Un guide simple et complet pour utiliser votre système de gestion au quotidien : stock, ventes, clients, argent et rapports — tout au même endroit.
 
@@ -8,7 +8,7 @@ Un guide simple et complet pour utiliser votre système de gestion au quotidien 
 
 ## 1. Se connecter au système
 
-1. Ouvrez l'app **Dumbhanengue** sur votre téléphone.
+1. Ouvrez l'app **TAREQO** sur votre téléphone.
 2. Saisissez votre **e-mail** et votre **mot de passe**.
 3. Touchez **Se connecter**.
 

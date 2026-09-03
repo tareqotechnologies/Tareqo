@@ -4,23 +4,23 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/entities/purchase.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
-import 'package:dumbhanengue/domain/entities/store.dart';
-import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_cash_flow_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_purchases_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/finance_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/products_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/purchases_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/sales_providers.dart';
-import 'package:dumbhanengue/presentation/screens/purchases/purchases_screen.dart';
-import 'package:dumbhanengue/presentation/screens/shell/app_shell.dart';
-import 'package:dumbhanengue/presentation/widgets/store_switcher.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/entities/purchase.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_lot_consumption.dart';
+import 'package:tareqo/domain/entities/store.dart';
+import 'package:tareqo/domain/repositories/i_sale_repository.dart';
+import 'package:tareqo/domain/repositories/i_cash_flow_repository.dart';
+import 'package:tareqo/domain/usecases/get_cash_flow_use_case.dart';
+import 'package:tareqo/domain/usecases/get_products_use_case.dart';
+import 'package:tareqo/domain/usecases/get_purchases_use_case.dart';
+import 'package:tareqo/presentation/controllers/finance_providers.dart';
+import 'package:tareqo/presentation/controllers/products_providers.dart';
+import 'package:tareqo/presentation/controllers/purchases_providers.dart';
+import 'package:tareqo/presentation/controllers/sales_providers.dart';
+import 'package:tareqo/presentation/screens/purchases/purchases_screen.dart';
+import 'package:tareqo/presentation/screens/shell/app_shell.dart';
+import 'package:tareqo/presentation/widgets/store_switcher.dart';
 
 import '../../helpers/store_context.dart';
 

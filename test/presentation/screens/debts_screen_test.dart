@@ -5,14 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 
-import 'package:dumbhanengue/domain/entities/debt.dart';
-import 'package:dumbhanengue/domain/repositories/i_debt_processor.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_debts_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_settled_debts_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/settle_debt_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/debts_providers.dart';
-import 'package:dumbhanengue/presentation/screens/credit/debts_screen.dart';
-import 'package:dumbhanengue/presentation/widgets/app_card.dart';
+import 'package:tareqo/domain/entities/debt.dart';
+import 'package:tareqo/domain/repositories/i_debt_processor.dart';
+import 'package:tareqo/domain/usecases/get_pending_debts_use_case.dart';
+import 'package:tareqo/domain/usecases/get_settled_debts_use_case.dart';
+import 'package:tareqo/domain/usecases/settle_debt_use_case.dart';
+import 'package:tareqo/presentation/controllers/debts_providers.dart';
+import 'package:tareqo/presentation/screens/credit/debts_screen.dart';
+import 'package:tareqo/presentation/widgets/app_card.dart';
 
 import '../../helpers/store_context.dart';
 

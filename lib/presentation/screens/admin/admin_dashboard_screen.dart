@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/audit_entry.dart';
 import '../../../domain/entities/tenant.dart';
@@ -278,7 +279,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                           icon: Icons.upgrade_outlined,
                           label: l10n.adminPlanUpgrades,
                           badge: pendingUpgrades.length,
-                          color: const Color(0xFF7C3AED),
+                          color: AppColors.statusPurple,
                           onTap: () => onNavigateToTab?.call(3),
                         ),
                         _QuickAction(
@@ -445,7 +446,7 @@ class _StatCell extends StatelessWidget {
         Text(
           stat.label,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 9,
+            fontSize: 12,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           maxLines: 1,
@@ -565,46 +566,52 @@ class _GrowthSummary extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
 
-          // Mini comparison rows
-          _MiniComparisonRow(
-            label: l10n.adminGrowthNewTenants,
-            thisValue: newThisWeek,
-            lastValue: lastWeek,
-            thisLabel: l10n.adminGrowthThisWeek,
-            lastLabel: l10n.adminGrowthLastWeek,
-            diff: weekDiff,
-            color: scheme.primary,
-            l10n: l10n,
+          // KPI comparison cards
+          Row(
+            children: [
+              Expanded(
+                child: _GrowthKpi(
+                  label: l10n.adminGrowthNewTenants,
+                  sublabel: '${l10n.adminGrowthThisWeek}: $newThisWeek · ${l10n.adminGrowthLastWeek}: $lastWeek',
+                  diff: weekDiff,
+                  color: scheme.primary,
+                  l10n: l10n,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _GrowthKpi(
+                  label: l10n.adminGrowthApprovals,
+                  sublabel: '${l10n.adminGrowthThisWeek}: $approvalsThisWeek · ${l10n.adminGrowthLastWeek}: $approvalsLastWeek',
+                  diff: approvalDiff,
+                  color: scheme.secondary,
+                  l10n: l10n,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          _MiniComparisonRow(
-            label: l10n.adminGrowthApprovals,
-            thisValue: approvalsThisWeek,
-            lastValue: approvalsLastWeek,
-            thisLabel: l10n.adminGrowthThisWeek,
-            lastLabel: l10n.adminGrowthLastWeek,
-            diff: approvalDiff,
-            color: Colors.green,
-            l10n: l10n,
-          ),
-          const SizedBox(height: 6),
-          _MiniComparisonRow(
+          const SizedBox(height: 8),
+          _GrowthKpi(
             label: l10n.adminGrowthNewTenants,
-            thisValue: newThisMonth,
-            lastValue: lastMonth,
-            thisLabel: l10n.adminGrowthThisMonth,
-            lastLabel: l10n.adminGrowthLastMonth,
+            sublabel: '${l10n.adminGrowthThisMonth}: $newThisMonth · ${l10n.adminGrowthLastMonth}: $lastMonth',
             diff: monthDiff,
             color: scheme.tertiary,
             l10n: l10n,
           ),
 
-          // Mini sparklines
+          // Charts
           const SizedBox(height: AppSpacing.md),
+          Text(
+            'Tendências (8 semanas)',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
           Row(
             children: [
               Expanded(
-                child: _MiniSparkline(
+                child: _TrendChart(
                   title: l10n.adminGrowthRegistrationsTrend,
                   buckets: regBuckets,
                   color: scheme.primary,
@@ -614,10 +621,10 @@ class _GrowthSummary extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: _MiniSparkline(
+                child: _TrendChart(
                   title: l10n.adminGrowthActivityTrend,
                   buckets: actBuckets,
-                  color: scheme.tertiary,
+                  color: scheme.secondary,
                   now: now,
                   l10n: l10n,
                 ),
@@ -630,23 +637,17 @@ class _GrowthSummary extends StatelessWidget {
   }
 }
 
-class _MiniComparisonRow extends StatelessWidget {
-  const _MiniComparisonRow({
+class _GrowthKpi extends StatelessWidget {
+  const _GrowthKpi({
     required this.label,
-    required this.thisValue,
-    required this.lastValue,
-    required this.thisLabel,
-    required this.lastLabel,
+    required this.sublabel,
     required this.diff,
     required this.color,
     required this.l10n,
   });
 
   final String label;
-  final int thisValue;
-  final int lastValue;
-  final String thisLabel;
-  final String lastLabel;
+  final String sublabel;
   final int diff;
   final Color color;
   final AppLocalizations l10n;
@@ -656,64 +657,81 @@ class _MiniComparisonRow extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final trendColor = diff > 0
-        ? Colors.green
+        ? const Color(0xFF16A34A)
         : diff < 0
             ? scheme.error
             : scheme.onSurfaceVariant;
+    final trendIcon = diff > 0
+        ? Icons.trending_up
+        : diff < 0
+            ? Icons.trending_down
+            : Icons.trending_flat;
     final trendLabel = diff > 0
         ? l10n.adminGrowthUp('$diff')
         : diff < 0
             ? l10n.adminGrowthDown('${diff.abs()}')
             : l10n.adminGrowthFlat;
 
-    return Row(
-      children: [
-        Container(
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(999),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(trendIcon, size: 14, color: trendColor),
+              const SizedBox(width: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(
+                  color: trendColor,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  trendLabel,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        Expanded(
-          child: Text(
-            '$label · $thisLabel: $thisValue · $lastLabel: $lastValue',
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 11,
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.onSurfaceVariant,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            sublabel,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 12,
+              color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-          decoration: BoxDecoration(
-            color: trendColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Text(
-            trendLabel,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 10,
-              color: trendColor,
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// Mini Sparkline
+// Trend Chart — barras verticais com labels de semana
 // ═════════════════════════════════════════════════════════════════════════════
 
-class _MiniSparkline extends StatelessWidget {
-  const _MiniSparkline({
+class _TrendChart extends StatelessWidget {
+  const _TrendChart({
     required this.title,
     required this.buckets,
     required this.color,
@@ -739,17 +757,35 @@ class _MiniSparkline extends StatelessWidget {
         ? '0'
         : (total / buckets.length).toStringAsFixed(1);
 
+    // Week labels (last 4 chars of abbreviated month)
+    final weekStarts = <String>[];
+    final thisWeekStart = _startOfWeek(now);
+    for (var i = buckets.length - 1; i >= 0; i--) {
+      final ws = thisWeekStart.subtract(Duration(days: i * 7));
+      weekStarts.add(DateFormat('dd/MM').format(ws));
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 6),
             Expanded(
               child: Text(
                 title,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 10,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
                   color: scheme.onSurfaceVariant,
                 ),
                 maxLines: 1,
@@ -757,78 +793,138 @@ class _MiniSparkline extends StatelessWidget {
               ),
             ),
             Text(
-              l10n.adminGrowthAvgPerWeek(avg),
+              'μ $avg/sem',
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 9,
-                color: scheme.onSurfaceVariant,
+                fontSize: 12,
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         if (total == 0)
           Container(
-            height: 32,
+            height: 48,
             alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Text(
               l10n.adminGrowthNoData,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 9,
-                color: scheme.onSurfaceVariant,
+                fontSize: 12,
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
               ),
             ),
           )
         else
-          SizedBox(
-            height: 32,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (var i = 0; i < buckets.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 3),
-                  Expanded(
-                    child: _MiniBar(
-                      value: buckets[i],
-                      maxValue: maxVal,
-                      color: i == buckets.length - 1
-                          ? color
-                          : color.withValues(alpha: 0.35),
-                    ),
-                  ),
-                ],
-              ],
-            ),
+          Column(
+            children: [
+              // Bars
+              SizedBox(
+                height: 80,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    for (var i = 0; i < buckets.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 3),
+                      Expanded(
+                        child: _TrendBar(
+                          value: buckets[i],
+                          maxValue: maxVal,
+                          color: color,
+                          isLast: i == buckets.length - 1,
+                          valueLabel: '${buckets[i]}',
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
+              // Week labels
+              SizedBox(
+                height: 14,
+                child: Row(
+                  children: [
+                    for (var i = 0; i < weekStarts.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          i == 0 || i == weekStarts.length - 1
+                              ? weekStarts[i]
+                              : '',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 12,
+                            color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
+                          ),
+                          textAlign: i == 0 ? TextAlign.left : TextAlign.right,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
       ],
     );
   }
 }
 
-class _MiniBar extends StatelessWidget {
-  const _MiniBar({
+class _TrendBar extends StatelessWidget {
+  const _TrendBar({
     required this.value,
     required this.maxValue,
     required this.color,
+    required this.isLast,
+    required this.valueLabel,
   });
 
   final int value;
   final int maxValue;
   final Color color;
+  final bool isLast;
+  final String valueLabel;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final fraction = maxValue > 0 ? value / maxValue : 0.0;
-    final barHeight = (fraction * 28).clamp(3.0, 28.0);
+    final barHeight = (fraction * 56).clamp(2.0, 56.0);
+    final barColor = isLast ? color : color.withValues(alpha: 0.3);
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        height: barHeight,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(2),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Value label on top
+        if (value > 0)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Text(
+              valueLabel,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 12,
+                fontWeight: isLast ? FontWeight.w700 : FontWeight.w400,
+                color: isLast ? color : scheme.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+        // Bar
+        Container(
+          height: barHeight,
+          decoration: BoxDecoration(
+            color: barColor,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(value > 0 ? 3 : 0),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -910,9 +1006,9 @@ class _DistributionCard extends StatelessWidget {
         sorted.isNotEmpty ? sorted.first.value : 1;
     final planColors = [
       scheme.primary,
-      const Color(0xFF7C3AED),
-      const Color(0xFFF59E0B),
-      const Color(0xFF3B82F6),
+      AppColors.statusPurple,
+      AppColors.statusWarning,
+      AppColors.statusInfo,
       scheme.secondary,
     ];
 
@@ -970,7 +1066,7 @@ class _DistributionCard extends StatelessWidget {
                     '$approvalRate%',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: rateColor,
-                      fontSize: 11,
+                      fontSize: 12,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
@@ -991,7 +1087,7 @@ class _DistributionCard extends StatelessWidget {
             Text(
               l10n.adminDashboardPlanDistribution,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 10,
+                fontSize: 12,
                 color: scheme.onSurfaceVariant,
               ),
             ),
@@ -1040,7 +1136,7 @@ class _LegendDot extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 10,
+                fontSize: 12,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
         ),
@@ -1094,7 +1190,7 @@ class _PlanBarRow extends StatelessWidget {
         Text(
           '$count',
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 10,
+            fontSize: 12,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
@@ -1234,7 +1330,7 @@ class _ActivityRow extends StatelessWidget {
             timeFormat.format(entry.createdAt),
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
-              fontSize: 10,
+              fontSize: 12,
             ),
           ),
         ],
@@ -1347,7 +1443,7 @@ class _QuickActionCard extends StatelessWidget {
                   child: Text(
                     '${action.badge}',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       color: scheme.onTertiary,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),

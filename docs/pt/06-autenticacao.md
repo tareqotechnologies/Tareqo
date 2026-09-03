@@ -72,7 +72,7 @@ flutter run --dart-define=SUPABASE_URL=https://seu-projeto.supabase.co \
 2. `signUp(email, password, data: {'full_name': ...})`;
 3. Com **confirmação de e-mail ativa** (padrão no Supabase), `response.user` pode ser `null` — a conta é criada mas a sessão só vem após confirmar. A UI mostra: *"Conta criada! Confirme seu e-mail para entrar."*
 4. Nesse caso o datasource retorna um `AppUser` com **id placeholder** (`fallbackEmail`) — **nenhum dado deve ser associado a esse id**; a sessão real chega após a confirmação.
-5. **Deep link (Aug 8):** o link de confirmação do e-mail aponta para `dumbhanengue://callback` (`site_url` do projeto) — o OS abre o app, e o `DeepLinkHandler` (`lib/core/network/deep_link_handler.dart`, package `app_links`) entrega a URI ao gotrue (`getSessionFromUrl`), que conclui a confirmação e o stream de sessão reage sozinho. Sem isso, o link caía em `http://localhost:3000` (default) e a confirmação nunca completava.
+5. **Deep link (Aug 8):** o link de confirmação do e-mail aponta para `tareqo://callback` (`site_url` do projeto) — o OS abre o app, e o `DeepLinkHandler` (`lib/core/network/deep_link_handler.dart`, package `app_links`) entrega a URI ao gotrue (`getSessionFromUrl`), que conclui a confirmação e o stream de sessão reage sozinho. Sem isso, o link caía em `http://localhost:3000` (default) e a confirmação nunca completava.
 
 > **Limite de envio de e-mails (Aug 8):** no plano free, quando a cota de
 > envio esgota (~2/h), o GoTrue responde **429 "email rate limit exceeded"**

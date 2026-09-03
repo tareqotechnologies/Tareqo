@@ -343,7 +343,7 @@ class _ItemRow extends ConsumerWidget {
                   '${Quantity.format(item.quantity, language: Formatters.currentLanguage)} × '
                   '${Formatters.currency(item.unitPriceCents)}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 11,
+                    fontSize: 12,
                     color: scheme.onSurfaceVariant,
                   ),
                 ),

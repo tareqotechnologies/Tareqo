@@ -1,4 +1,4 @@
-# E2E Production-Readiness Audit — Dumbhanengue ERP
+# E2E Production-Readiness Audit — TAREQO ERP
 
 **Audit date:** Aug 4, 2026 · **Stack:** Flutter 3.44.6 / Dart 3.12.2 · **Size:** 211 files / ~20k LOC in `lib/`, 73 test files (Aug 7)
 
@@ -73,7 +73,7 @@ Top findings use the full 9-point format; the long tail is condensed into tables
 3. **Location:** `android/app/build.gradle.kts` (lines 30–31, `signingConfigs.getByName("debug")`)
 4. **Problem:** The release build uses `signingConfigs.getByName("debug")`, and the file still contains Flutter's template TODOs ("Specify your own unique Application ID", "Add your own signing config"). Every Flutter debug keystore is created with a **well-known default password** (`android`) and the same key — any APK you ship is effectively signed with a public key, enabling impersonation/repackaging attacks.
 5. **Business impact:** Cannot upload to Google Play at all; if leaked/shipped, users could install tampered builds (banking app).
-6. **Technical impact:** Zero signature integrity; also `applicationId` `com.dumbhanengue.dumbhanengue` is a placeholder (doubled name, not reverse-DNS).
+6. **Technical impact:** Zero signature integrity; also `applicationId` `com.tareqo.tareqo` is a placeholder (doubled name, not reverse-DNS).
 7. **Recommended solution:** Generate a real upload keystore, store it **outside the repo**, wire `key.properties` (gitignored), set up Play App Signing.
 8. **Implementation steps:** (1) `keytool -genkey -v -keystore upload.jks`; (2) add `key.properties` + signingConfigs.release; (3) add `*.jks`/`key.properties` to `.gitignore`; (4) verify with `flutter build apk --release` + `apksigner verify`.
 9. **Code example:**
@@ -126,8 +126,8 @@ CREATE POLICY products_select ON public.products
 
 1. **Category:** Security / Authorization
 2. **Severity:** **High (Critical if email confirmation is OFF)**
-3. **Location:** `lib/core/config/super_admin_config.dart` (`admin@dumbhanengue.com`), `supabase/schema.sql` → `is_super_admin()` (line ~555), `lib/presentation/screens/auth/auth_gate.dart`
-4. **Problem:** Both client (`SuperAdminConfig.isSuperAdmin(email)`) and server (`is_super_admin()` reads `auth.jwt()->>'email'`) treat a **string equality on a hardcoded email** as super-admin. Authorization is derived from a JWT claim that reflects the signup email — so the ONLY thing protecting the admin panel is that nobody can register `admin@dumbhanengue.com`. If email confirmation is disabled in the Supabase project, **anyone can claim that email and become super admin** — approving tenants, editing plans, deleting data. If email confirmation is ON, an attacker would need to own that mailbox (likely not registered). This cannot be verified from the repo → must be checked in the dashboard.
+3. **Location:** `lib/core/config/super_admin_config.dart` (`admin@tareqo.com`), `supabase/schema.sql` → `is_super_admin()` (line ~555), `lib/presentation/screens/auth/auth_gate.dart`
+4. **Problem:** Both client (`SuperAdminConfig.isSuperAdmin(email)`) and server (`is_super_admin()` reads `auth.jwt()->>'email'`) treat a **string equality on a hardcoded email** as super-admin. Authorization is derived from a JWT claim that reflects the signup email — so the ONLY thing protecting the admin panel is that nobody can register `admin@tareqo.com`. If email confirmation is disabled in the Supabase project, **anyone can claim that email and become super admin** — approving tenants, editing plans, deleting data. If email confirmation is ON, an attacker would need to own that mailbox (likely not registered). This cannot be verified from the repo → must be checked in the dashboard.
 5. **Business impact:** Full tenant-control compromise = data of all customers at risk.
 6. **Technical impact:** No database-backed role; email string duplicated in two places that can drift.
 7. **Recommended solution:** Store a super-admin flag in `auth.users` metadata (`app_metadata` or a `roles` table) set by a trusted bootstrap process; change `is_super_admin()` to read metadata; keep client gating as UX only.
@@ -194,7 +194,7 @@ END; $$;
 | # | Category | Location | Problem | Fix |
 |---|---|---|---|---|
 | M1 | Data | `supabase/schema.sql` seed | Demo seed works **only for the first user** (PKs `p1`…`tn_demo` conflict → `DO NOTHING`). Documented, but confusing in a multi-tenant prod | ✓ Seed demo removido do schema (Parte 2 agora só insere o catálogo de planos); bases existentes são limpas com `supabase/cleanup_demo_data.sql` |
-| M2 | Ops | `web/index.html`, `web/manifest.json`, `ios/Runner/Info.plist`, Android label | Placeholder branding everywhere: meta description *"A new Flutter project."*, title `dumbhanengue`, default icons, no CSP — **metadata + full icon set done (W7, Aug 6)**; CSP still open (only if web ships) | ✓ metadata + icon set (W7); ○ `Content-Security-Policy` meta (só se web ship) |
+| M2 | Ops | `web/index.html`, `web/manifest.json`, `ios/Runner/Info.plist`, Android label | Placeholder branding everywhere: meta description *"A new Flutter project."*, title `tareqo`, default icons, no CSP — **metadata + full icon set done (W7, Aug 6)**; CSP still open (only if web ships) | ✓ metadata + icon set (W7); ○ `Content-Security-Policy` meta (só se web ship) |
 | M3 | Perf | `lib/presentation/screens/shell/app_shell.dart` | `IndexedStack` keeps all 6 sections alive (memory + build cost); dashboard folds on every list change | Acceptable at this scale; if growing, lazy-load tabs / use `AutomaticKeepAlive` |
 | M4 | Deps | `pubspec.yaml` | **✓ FIXED (Aug 6, W10):** `sqlite3` → ^3.5.1 (build hooks/native assets), `sqlite3_flutter_libs` (EOL) removed | Done (checklist 8.2) |
 | M5 | Code | `supabase_tenant_data_source.dart` L63, `supabase_plan_request_data_source.dart` L54, `admin_plans_screen.dart` L197 | `AppIds` migration **incomplete** — tenant/plan-request/plan creation still uses `microsecondsSinceEpoch` (checklist 1.10 claims ✓) | Replace remaining call sites with `AppIds.newId('tn'/'pr'/'pl')` |
@@ -210,7 +210,7 @@ END; $$;
 
 | # | Location | Issue |
 |---|---|---|
-| L1 | `app.dart`, package name | Product name "Dumbhanengue" + doubled applicationId read as template placeholders — confirm the final brand before store submission |
+| L1 | `app.dart`, package name | Product name "TAREQO" + doubled applicationId read as template placeholders — confirm the final brand before store submission |
 | L2 | `finance_providers.dart` / `reports_providers.dart` | Duplicated `_startOfDay` helper → **fixed (W11, Aug 6)** via `core/utils/period_utils.dart` |
 | L3 | `supabase_auth_remote_data_source.dart` | Signup-without-confirmation returns placeholder `AppUser(id: email)` — guarded by flow, but fragile; assert real uid |
 | L4 | `AppIds.newId` | Format `p<ts36>_<hex6>` is fine, but a `_` in PKs is awkward for URL/key usage — cosmetic |

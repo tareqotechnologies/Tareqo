@@ -13,6 +13,7 @@ import '../../../domain/entities/financial_transaction.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/purchase.dart';
 import '../../../domain/entities/sale.dart';
+import '../../../domain/entities/stock_transfer.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/dashboard_providers.dart';
@@ -22,10 +23,15 @@ import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/purchases_providers.dart';
 import '../../controllers/sales_providers.dart';
+import '../../controllers/stock_transfers_provider.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/inline_error_card.dart';
 import '../../widgets/store_switcher.dart';
+import '../credit/debts_screen.dart';
+import '../financial/financial_screen.dart';
+import '../products/product_list_screen.dart';
+import '../purchases/purchases_screen.dart';
 import '../sales/sale_detail_screen.dart';
 
 /// Limiar de "stock baixo" (W8 + W11): produtos com estoque inferior a
@@ -146,6 +152,9 @@ class DashboardScreen extends ConsumerWidget {
  .toList();
 
  // Feed: eventos datados de hoje ordenados por hora + alertas no fim.
+ final todayTransfers = ref.watch(stockTransfersProvider)
+     .where((t) => !t.createdAt.isBefore(todayStart))
+     .toList();
  final events = <_ActivityItem>[
  for (final sale in todaySales)
  _ActivityItem.sale(
@@ -161,20 +170,57 @@ class DashboardScreen extends ConsumerWidget {
  ),
  for (final purchase in todayPurchases)
  for (final item in purchase.items)
- _ActivityItem.stockEntry(purchase: purchase, item: item, l10n: l10n),
+ _ActivityItem.stockEntry(
+   purchase: purchase,
+   item: item,
+   l10n: l10n,
+   onTap: () => Navigator.of(context).push(
+     MaterialPageRoute<void>(builder: (_) => const PurchasesScreen()),
+   ),
+ ),
  for (final debt in todaySettled)
- _ActivityItem.fiadoPayment(debt: debt, l10n: l10n),
+ _ActivityItem.fiadoPayment(
+   debt: debt,
+   l10n: l10n,
+   onTap: () => Navigator.of(context).push(
+     MaterialPageRoute<void>(builder: (_) => const DebtsScreen()),
+   ),
+ ),
  for (final transaction in todayExpenses)
- _ActivityItem.expense(transaction: transaction, l10n: l10n),
+ _ActivityItem.expense(
+   transaction: transaction,
+   l10n: l10n,
+   onTap: () => Navigator.of(context).push(
+     MaterialPageRoute<void>(builder: (_) => const FinancialScreen()),
+   ),
+ ),
+ for (final transfer in todayTransfers)
+ _ActivityItem.transfer(
+   transfer: transfer,
+   l10n: l10n,
+   onTap: () => _showTransferDetails(context, transfer),
+ ),
  ]..sort((a, b) => b.dateTime.compareTo(a.dateTime));
 
  final expiryAlerts = expiryAlertsAsync.value ?? const <ExpiryAlert>[];
  final activity = <_ActivityItem>[
  ...events.take(6),
  for (final product in lowStock)
- _ActivityItem.lowStock(product: product, l10n: l10n),
+ _ActivityItem.lowStock(
+   product: product,
+   l10n: l10n,
+   onTap: () => Navigator.of(context).push(
+     MaterialPageRoute<void>(builder: (_) => const ProductListScreen()),
+   ),
+ ),
  for (final alert in expiryAlerts)
- _ActivityItem.expiry(alert: alert, l10n: l10n),
+ _ActivityItem.expiry(
+   alert: alert,
+   l10n: l10n,
+   onTap: () => Navigator.of(context).push(
+     MaterialPageRoute<void>(builder: (_) => const ProductListScreen()),
+   ),
+ ),
  ];
 
  final displayName = (user?.fullName.isNotEmpty ?? false)
@@ -743,6 +789,7 @@ class _ActivityItem {
     required Purchase purchase,
     required PurchaseItem item,
     required AppLocalizations l10n,
+    VoidCallback? onTap,
   }) =>
       _ActivityItem(
         title: l10n.dashboardStockEntry(item.productName),
@@ -756,9 +803,11 @@ class _ActivityItem {
         iconColor: Colors.white,
         amount: '+${Quantity.format(item.quantity)}',
         amountColor: Colors.white,
+        onTap: onTap,
       );  factory _ActivityItem.fiadoPayment({
     required Debt debt,
     required AppLocalizations l10n,
+    VoidCallback? onTap,
   }) {
     final paidAt = debt.paidAt ?? debt.dueDate;
     return _ActivityItem(
@@ -771,10 +820,12 @@ class _ActivityItem {
       amount: Formatters.signedAmount(debt.amountCents),
       amountColor: IconTone.green,
       dashedBorder: true,
+      onTap: onTap,
     );
   }  factory _ActivityItem.expense({
     required FinancialTransaction transaction,
     required AppLocalizations l10n,
+    VoidCallback? onTap,
   }) =>
       _ActivityItem(
         title: l10n.dashboardExpenseRow(transaction.description),
@@ -785,9 +836,11 @@ class _ActivityItem {
         iconColor: IconTone.red,
         amount: Formatters.signedAmount(-transaction.amountCents),
         amountColor: IconTone.red,
+        onTap: onTap,
       );  factory _ActivityItem.lowStock({
     required Product product,
     required AppLocalizations l10n,
+    VoidCallback? onTap,
   }) =>
       _ActivityItem(
         title: l10n.dashboardLowStock,
@@ -802,9 +855,11 @@ class _ActivityItem {
         badge: l10n.dashboardAlertBadge,
         badgeColor: IconTone.amber,
         badgeBackground: IconTone.amber,
+        onTap: onTap,
       );  factory _ActivityItem.expiry({
     required ExpiryAlert alert,
     required AppLocalizations l10n,
+    VoidCallback? onTap,
   }) {
     final expired = alert.isExpired;
     final color = expired ? IconTone.red : IconTone.amber;
@@ -825,8 +880,28 @@ class _ActivityItem {
             ? alert.product.unitLabel
             : null,
         language: Formatters.currentLanguage,
-      ),
-      badgeColor: color,
+      ),      badgeColor: color,
+      onTap: onTap,
+    );
+  }
+  factory _ActivityItem.transfer({
+    required StockTransfer transfer,
+    required AppLocalizations l10n,
+    VoidCallback? onTap,
+  }) {
+    final formattedQty = Quantity.format(
+      transfer.quantityMilli,
+      unitLabel: transfer.unitLabel,
+      language: Formatters.currentLanguage,
+    );
+    return _ActivityItem(
+      title: '${transfer.productName}  ·  $formattedQty',
+      details: '${transfer.fromStoreName} → ${transfer.toStoreName}',
+      dateTime: transfer.createdAt,
+      icon: Icons.swap_horiz_outlined,
+      iconBackground: IconTone.darkBackground(ModuleColors.stores),
+      iconColor: IconTone.lightForeground(ModuleColors.stores),
+      onTap: onTap,
     );
   }
 
@@ -852,6 +927,146 @@ class _ActivityItem {
  final bool dashedBorder;
 
  final VoidCallback? onTap;
+}
+
+/// Mostra detalhes da transferência num bottom sheet.
+void _showTransferDetails(BuildContext context, StockTransfer transfer) {
+  final theme = Theme.of(context);
+  final scheme = theme.colorScheme;
+  final formattedQty = Quantity.format(
+    transfer.quantityMilli,
+    unitLabel: transfer.unitLabel,
+    language: Formatters.currentLanguage,
+  );
+
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (_) => Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(top: 12, bottom: 20),
+              decoration: BoxDecoration(
+                color: scheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: IconTone.darkBackground(ModuleColors.stores),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.swap_horiz,
+                  size: 18,
+                  color: IconTone.lightForeground(ModuleColors.stores),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  transfer.productName,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _DetailRow(
+            icon: Icons.store_outlined,
+            label: 'Origem',
+            value: transfer.fromStoreName,
+          ),
+          const SizedBox(height: 8),
+          _DetailRow(
+            icon: Icons.storefront_outlined,
+            label: 'Destino',
+            value: transfer.toStoreName,
+          ),
+          const SizedBox(height: 8),
+          _DetailRow(
+            icon: Icons.inventory_2_outlined,
+            label: 'Quantidade',
+            value: formattedQty,
+          ),
+          const SizedBox(height: 8),
+          _DetailRow(
+            icon: Icons.calendar_today_outlined,
+            label: 'Data',
+            value: Formatters.date(transfer.createdAt),
+          ),
+          const SizedBox(height: 8),
+          _DetailRow(
+            icon: Icons.info_outline,
+            label: 'Estado',
+            value: transfer.status.label,
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Linha de detalhe para o bottom sheet de transferência.
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: scheme.onSurfaceVariant),
+        const SizedBox(width: 8),
+        Text(
+          '$label:',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            value,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 /// Rótulo de tempo do feed: < 1h → "há X min"; senão → hora absoluta.

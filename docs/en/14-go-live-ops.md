@@ -50,7 +50,7 @@
 6. **Custom SMTP in production (plan: Resend + own domain):** the free tier
  also caps confirmation emails (2/hour and 4/day) — unacceptable in
  production with real sign-ups. Before go-live:
- 1. **Resend** → add your own domain (e.g. `dumbhanengue.com`) and complete
+ 1. **Resend** → add your own domain (e.g. `tareqo.com`) and complete
  the DNS verification (SPF + DKIM + DMARC). Warning: The test domain
  `onboarding@resend.dev` only delivers to the account email — not usable
  for real senders.
@@ -63,8 +63,8 @@
  | Port | `587` |
  | Username | `resend` (fixed — the API key goes in Password) |
  | Password | the API key (`re_…`) |
- | From email | `no-reply@dumbhanengue.com` |
- | From name | `Dumbhanengue` |
+ | From email | `no-reply@tareqo.com` |
+ | From name | `TAREQO` |
  | Admin email | super admin email (recovery) |
 
  4. **Programmatic alternative (Management API):** `PATCH
@@ -77,7 +77,7 @@
  delivered; the Resend key can also be tested with a direct POST to
  `https://api.resend.com/emails`.
 
- > **Decision recorded (Aug 8):** `dumbhanengue.com` is **not registered**
+ > **Decision recorded (Aug 8):** `tareqo.com` is **not registered**
  > (RDAP 404 — domain available) and the team chose **not to buy a domain
  > for now** — the confirmation email keeps going through the Resend SMTP
  > with the test domain `onboarding@resend.dev`, which **only delivers to
@@ -100,7 +100,7 @@
 
 ## 3. Google Play Console
 
-1. Create the app with Application ID **`com.dumbhanengue.dumbhanengue`**
+1. Create the app with Application ID **`com.tareqo.tareqo`**
  (immutable after the first upload).
 2. Enable **Play App Signing** and register the upload key SHA-256
  (from `keytool -list -v -keystore upload-keystore.jks`).
@@ -113,7 +113,7 @@
 
 ## 4. Apple (iOS)
 
-1. **Apple Developer Program** active + App ID `com.dumbhanengue.dumbhanengue`.
+1. **Apple Developer Program** active + App ID `com.tareqo.tareqo`.
 2. Configure automatic signing in Xcode (team) OR use `match`
  (alternative documented in the `ios beta` lane).
 3. Create the App Store Connect API key (`.p8` file) and add the 3 Apple

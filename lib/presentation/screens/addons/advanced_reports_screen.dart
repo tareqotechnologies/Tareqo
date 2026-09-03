@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/share/advanced_reports_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/utils/formatters.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
 
 /// Ecra de relatórios avançados — dashboards, filtros e exportação.
 class AdvancedReportsScreen extends ConsumerStatefulWidget {
@@ -48,7 +50,6 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
           ),
         ),
         actions: [
-          // Filtro de período
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: _PeriodChip(
@@ -65,7 +66,8 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
             Tab(text: 'Estoque'),
           ],
         ),
-      ),        body: TabBarView(
+      ),
+      body: TabBarView(
         controller: _tabController,
         children: [
           _SalesReportTab(selectedPeriod: _selectedPeriod),
@@ -91,32 +93,36 @@ class _SalesReportTab extends ConsumerWidget {
     final products = ref.watch(productsProvider).value ?? [];
     final totalProducts = products.length;
     final totalStockValue = products.fold<int>(
-        0, (sum, p) => sum + (p.stockQuantity ~/ 1000) * (p.salePriceCents ~/ 100));
-    final lowStock = products.where((p) => (p.stockQuantity ~/ 1000) <= 10).length;
-    final totalItems = products.fold<int>(0, (sum, p) => sum + (p.stockQuantity ~/ 1000));
-
-    String formatMoney(int v) => '${v.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')},00 MT';
+      0,
+      (sum, p) =>
+          sum + (p.stockQuantity ~/ 1000) * (p.salePriceCents ~/ 100),
+    );
+    final lowStock =
+        products.where((p) => (p.stockQuantity ~/ 1000) <= 10).length;
+    final totalItems =
+        products.fold<int>(0, (sum, p) => sum + (p.stockQuantity ~/ 1000));
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        // KPIs
         Row(
           children: [
             Expanded(
-              child: _KpiCard(
-                label: 'Produtos Ativos',
+              child: _KpiTile(
+                label: 'Produtos',
                 value: '$totalProducts',
-                icon: Icons.trending_up,
-                color: const Color(0xFF16A34A),
+                icon: Icons.inventory_2_outlined,
+                color: ModuleColors.products,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
-              child: _KpiCard(
+              child: _KpiTile(
                 label: 'Estoque Baixo',
                 value: '$lowStock',
-                icon: Icons.warning_amber,
-                color: const Color(0xFFF59E0B),
+                icon: Icons.warning_amber_rounded,
+                color: ModuleColors.credit,
               ),
             ),
           ],
@@ -125,72 +131,127 @@ class _SalesReportTab extends ConsumerWidget {
         Row(
           children: [
             Expanded(
-              child: _KpiCard(
+              child: _KpiTile(
                 label: 'Total Itens',
-                value: '$totalItems',
+                value: Formatters.compact(totalItems),
                 icon: Icons.shopping_cart_outlined,
-                color: const Color(0xFF7C3AED),
+                color: ModuleColors.purchases,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
-              child: _KpiCard(
+              child: _KpiTile(
                 label: 'Valor Estoque',
-                value: formatMoney(totalStockValue),
+                value: Formatters.currency(totalStockValue * 100),
                 icon: Icons.attach_money,
-                color: const Color(0xFF3B82F6),
+                color: ModuleColors.reports,
               ),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
-        // Top produtos por estoque
-        Material(
-          color: scheme.surfaceContainerLow,
-          borderRadius: AppRadius.lgAll,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Produtos por Estoque',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                if (products.isEmpty)
-                  Text(
-                    'Sem produtos cadastrados',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+
+        // Top produtos
+        AppCard(
+          elevated: true,
+          borderRadius: const BorderRadius.all(Radius.circular(18)),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: IconTone.darkBackground(ModuleColors.products),
+                      shape: BoxShape.circle,
                     ),
-                  )
-                else
-                  ...products.take(5).map((p) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Icon(
+                      Icons.leaderboard_outlined,
+                      size: 14,
+                      color: IconTone.lightForeground(ModuleColors.products),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      'Produtos por Estoque',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                    ),
+                    child: Text(
+                      '${products.length}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              if (products.isEmpty)
+                Text(
+                  'Sem produtos cadastrados',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                )
+              else
+                for (final p in products.take(5)) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
                     child: Row(
                       children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: p.stockQuantity ~/ 1000 <= 10
+                                ? ModuleColors.credit
+                                : ModuleColors.products,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
                             p.name,
                             style: theme.textTheme.bodySmall,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           '${p.stockQuantity ~/ 1000} ${p.unitLabel}',
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: theme.textTheme.labelSmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
+                            fontFeatures: const [
+                              FontFeature.tabularFigures(),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  )),
-              ],
-            ),
+                  ),
+                ],
+            ],
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -198,13 +259,14 @@ class _SalesReportTab extends ConsumerWidget {
           expanded: true,
           label: 'Exportar Relatório (PDF)',
           icon: const Icon(Icons.download_outlined, size: 18),
-          onPressed: () => const AdvancedReportsPdfExporter().shareSalesReport(
+          onPressed: () =>
+              const AdvancedReportsPdfExporter().shareSalesReport(
             period: selectedPeriod,
             kpis: {
               'Produtos Ativos': '$totalProducts',
               'Estoque Baixo': '$lowStock',
               'Total Itens': '$totalItems',
-              'Valor Estoque': formatMoney(totalStockValue),
+              'Valor Estoque': Formatters.currency(totalStockValue * 100),
             },
           ),
         ),
@@ -228,83 +290,107 @@ class _FinancialReportTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        // KPIs
         Row(
           children: [
             Expanded(
-              child: _KpiCard(
+              child: _KpiTile(
                 label: 'Receitas',
-                value: '0,00 MT',
-                icon: Icons.arrow_downward,
-                color: const Color(0xFF16A34A),
+                value: '0,00',
+                icon: Icons.arrow_downward_rounded,
+                color: IconTone.green,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
-              child: _KpiCard(
+              child: _KpiTile(
                 label: 'Despesas',
-                value: '0,00 MT',
-                icon: Icons.arrow_upward,
-                color: const Color(0xFFDC2626),
+                value: '0,00',
+                icon: Icons.arrow_upward_rounded,
+                color: IconTone.red,
               ),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.xs),
-        _KpiCard(
+        _KpiTile(
           label: 'Lucro Líquido',
-          value: '0,00 MT',
+          value: '0,00',
           icon: Icons.account_balance_wallet_outlined,
-          color: const Color(0xFF3B82F6),
+          color: ModuleColors.reports,
           fullWidth: true,
         ),
         const SizedBox(height: AppSpacing.lg),
-        Material(
-          color: scheme.surfaceContainerLow,
-          borderRadius: AppRadius.lgAll,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Fluxo de Caixa',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                SizedBox(
-                  height: 160,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.show_chart,
-                          size: 40,
-                          color: scheme.onSurfaceVariant
-                              .withValues(alpha: 0.3),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          'Gráfico de fluxo de caixa',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+
+        // Gráfico placeholder
+        AppCard(
+          elevated: true,
+          borderRadius: const BorderRadius.all(Radius.circular(18)),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: IconTone.darkBackground(ModuleColors.reports),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.show_chart_rounded,
+                      size: 14,
+                      color:
+                          IconTone.lightForeground(ModuleColors.reports),
                     ),
                   ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    'Fluxo de Caixa',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              SizedBox(
+                height: 140,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.show_chart,
+                        size: 32,
+                        color: scheme.onSurfaceVariant
+                            .withValues(alpha: 0.25),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Gráfico de fluxo de caixa',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),        AppButton.secondary(
+        const SizedBox(height: AppSpacing.lg),
+        AppButton.secondary(
           expanded: true,
           label: 'Exportar Financeiro (PDF)',
           icon: const Icon(Icons.download_outlined, size: 18),
-          onPressed: () => const AdvancedReportsPdfExporter().shareFinancialReport(
+          onPressed: () =>
+              const AdvancedReportsPdfExporter().shareFinancialReport(
             period: selectedPeriod,
             kpis: {
               'Receitas': '0,00 MT',
@@ -317,9 +403,6 @@ class _FinancialReportTab extends StatelessWidget {
     );
   }
 }
-
-
-
 
 // ─── Estoque ────────────────────────────────────────────────────────────
 
@@ -334,33 +417,37 @@ class _StockReportTab extends ConsumerWidget {
     final scheme = theme.colorScheme;
     final products = ref.watch(productsProvider).value ?? [];
     final totalProducts = products.length;
-    final lowStock = products.where((p) => (p.stockQuantity ~/ 1000) <= 10).length;
+    final lowStock =
+        products.where((p) => (p.stockQuantity ~/ 1000) <= 10).length;
     final totalStockValue = products.fold<int>(
-        0, (sum, p) => sum + (p.stockQuantity ~/ 1000) * (p.salePriceCents ~/ 100));
-    final outOfStock = products.where((p) => (p.stockQuantity ~/ 1000) == 0).length;
-
-    String formatMoney(int v) => '${v.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')},00 MT';
+      0,
+      (sum, p) =>
+          sum + (p.stockQuantity ~/ 1000) * (p.salePriceCents ~/ 100),
+    );
+    final outOfStock =
+        products.where((p) => (p.stockQuantity ~/ 1000) == 0).length;
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        // KPIs
         Row(
           children: [
             Expanded(
-              child: _KpiCard(
-                label: 'Total Produtos',
+              child: _KpiTile(
+                label: 'Produtos',
                 value: '$totalProducts',
                 icon: Icons.inventory_2_outlined,
-                color: const Color(0xFF3B82F6),
+                color: ModuleColors.products,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
-              child: _KpiCard(
+              child: _KpiTile(
                 label: 'Estoque Baixo',
                 value: '$lowStock',
-                icon: Icons.warning_amber,
-                color: const Color(0xFFF59E0B),
+                icon: Icons.warning_amber_rounded,
+                color: ModuleColors.credit,
               ),
             ),
           ],
@@ -369,77 +456,132 @@ class _StockReportTab extends ConsumerWidget {
         Row(
           children: [
             Expanded(
-              child: _KpiCard(
+              child: _KpiTile(
                 label: 'Valor em Estoque',
-                value: formatMoney(totalStockValue),
+                value: Formatters.currency(totalStockValue * 100),
                 icon: Icons.attach_money,
-                color: const Color(0xFF7C3AED),
+                color: ModuleColors.purchases,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
-              child: _KpiCard(
+              child: _KpiTile(
                 label: 'Sem Estoque',
                 value: '$outOfStock',
-                icon: Icons.event_busy,
-                color: const Color(0xFFDC2626),
+                icon: Icons.inventory_2,
+                color: IconTone.red,
               ),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
-        // Lista de produtos com estoque baixo
-        Material(
-          color: scheme.surfaceContainerLow,
-          borderRadius: AppRadius.lgAll,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Produtos com Estoque Baixo',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                if (lowStock == 0)
-                  Text(
-                    'Todos os produtos com estoque adequado',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+
+        // Lista de estoque baixo
+        AppCard(
+          elevated: true,
+          borderRadius: const BorderRadius.all(Radius.circular(18)),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: IconTone.darkBackground(ModuleColors.credit),
+                      shape: BoxShape.circle,
                     ),
-                  )
-                else
-                  ...products
-                      .where((p) => (p.stockQuantity ~/ 1000) <= 10)
-                      .take(5)
-                      .map((p) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Icon(
+                      Icons.warning_amber_rounded,
+                      size: 14,
+                      color:
+                          IconTone.lightForeground(ModuleColors.credit),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      'Estoque Baixo',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  if (lowStock > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: ModuleColors.credit.withValues(alpha: 0.12),
+                        borderRadius:
+                            BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Text(
+                        '$lowStock',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: ModuleColors.credit,
+                          fontWeight: FontWeight.w500,
+                          fontFeatures: const [
+                            FontFeature.tabularFigures(),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              if (lowStock == 0)
+                Text(
+                  'Todos os produtos com estoque adequado',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontSize: 11,
+                  ),
+                )
+              else
+                for (final p in products
+                    .where((p) => (p.stockQuantity ~/ 1000) <= 10)
+                    .take(5)) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
                     child: Row(
                       children: [
-                        Icon(Icons.warning_amber, size: 14, color: const Color(0xFFF59E0B)),
-                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.circle,
+                          size: 6,
+                          color: ModuleColors.credit,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
                             p.name,
-                            style: theme.textTheme.bodySmall,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           '${p.stockQuantity ~/ 1000} ${p.unitLabel}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFFF59E0B),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: ModuleColors.credit,
                             fontWeight: FontWeight.w500,
+                            fontFeatures: const [
+                              FontFeature.tabularFigures(),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  )),
-              ],
-            ),
+                  ),
+                ],
+            ],
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -447,12 +589,14 @@ class _StockReportTab extends ConsumerWidget {
           expanded: true,
           label: 'Exportar Estoque (PDF)',
           icon: const Icon(Icons.download_outlined, size: 18),
-          onPressed: () => const AdvancedReportsPdfExporter().shareStockReport(
+          onPressed: () =>
+              const AdvancedReportsPdfExporter().shareStockReport(
             period: selectedPeriod,
             kpis: {
               'Total Produtos': '$totalProducts',
               'Estoque Baixo': '$lowStock',
-              'Valor em Estoque': formatMoney(totalStockValue),
+              'Valor em Estoque':
+                  Formatters.currency(totalStockValue * 100),
               'Sem Estoque': '$outOfStock',
             },
           ),
@@ -462,13 +606,15 @@ class _StockReportTab extends ConsumerWidget {
   }
 }
 
-
-
-
 // ─── Componentes compartilhados ─────────────────────────────────────────
 
-class _KpiCard extends StatelessWidget {
-  const _KpiCard({
+/// KPI tile compacto — ícone tingido (IconTone) + label + valor.
+///
+/// Segue o padrão do dashboard: fundo `surfaceContainerHighest`,
+/// ícone em container circular escuro, label em `bodySmall`,
+/// valor em `labelMedium` com cor do módulo.
+class _KpiTile extends StatelessWidget {
+  const _KpiTile({
     required this.label,
     required this.value,
     required this.icon,
@@ -488,35 +634,56 @@ class _KpiCard extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Material(
-      color: scheme.surfaceContainerLow,
+      color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
       borderRadius: AppRadius.lgAll,
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        child: Row(
           children: [
-            Row(
-              children: [
-                Icon(icon, size: 16, color: color),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
+            Container(
+              width: 28,
+              height: 28,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: IconTone.darkBackground(color),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 14,
+                color: IconTone.lightForeground(color),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
                     label,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
+                      fontSize: 11,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              value,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: color,
+                  const SizedBox(height: 1),
+                  Text(
+                    value,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: color,
+                      letterSpacing: -0.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
           ],
@@ -526,6 +693,7 @@ class _KpiCard extends StatelessWidget {
   }
 }
 
+/// Chip de período minimalista — mesmo padrão do dashboard.
 class _PeriodChip extends StatelessWidget {
   const _PeriodChip({required this.selected, required this.onChanged});
 
@@ -539,22 +707,22 @@ class _PeriodChip extends StatelessWidget {
 
     return PopupMenuButton<String>(
       onSelected: onChanged,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(8),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               selected,
-              style: theme.textTheme.labelMedium,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.2,
+              ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 2),
             Icon(
-              Icons.arrow_drop_down,
+              Icons.keyboard_arrow_down_rounded,
               size: 16,
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -563,8 +731,9 @@ class _PeriodChip extends StatelessWidget {
       ),
       itemBuilder: (ctx) => periods
           .map(
-            (p) => PopupMenuItem(
+            (p) => CheckedPopupMenuItem(
               value: p,
+              checked: p == selected,
               child: Text(p),
             ),
           )

@@ -1,19 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/invoice.dart';
-import 'package:dumbhanengue/domain/entities/plan.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/repositories/i_invoice_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_plan_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_tenant_repository.dart';
-import 'package:dumbhanengue/domain/usecases/approve_tenant_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/cancel_invoice_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/check_tenants_for_invoices_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/generate_invoice_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_all_invoices_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_invoices_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_tenant_invoices_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/mark_invoice_as_paid_use_case.dart';
+import 'package:tareqo/domain/entities/invoice.dart';
+import 'package:tareqo/domain/entities/plan.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/repositories/i_invoice_repository.dart';
+import 'package:tareqo/domain/repositories/i_plan_repository.dart';
+import 'package:tareqo/domain/repositories/i_tenant_repository.dart';
+import 'package:tareqo/domain/usecases/approve_tenant_use_case.dart';
+import 'package:tareqo/domain/usecases/cancel_invoice_use_case.dart';
+import 'package:tareqo/domain/usecases/check_tenants_for_invoices_use_case.dart';
+import 'package:tareqo/domain/usecases/generate_invoice_use_case.dart';
+import 'package:tareqo/domain/usecases/get_all_invoices_use_case.dart';
+import 'package:tareqo/domain/usecases/get_pending_invoices_use_case.dart';
+import 'package:tareqo/domain/usecases/get_tenant_invoices_use_case.dart';
+import 'package:tareqo/domain/usecases/mark_invoice_as_paid_use_case.dart';
 
 // ---------------------------------------------------------------------------
 // Fake repositories

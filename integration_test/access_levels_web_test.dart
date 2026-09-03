@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-import 'package:dumbhanengue/l10n/generated/app_localizations.dart';
-import 'package:dumbhanengue/main.dart' as app;
+import 'package:tareqo/l10n/generated/app_localizations.dart';
+import 'package:tareqo/main.dart' as app;
 
 /// Credenciais REAIS fornecidas em tempo de execução via --dart-define
 /// (nunca versionadas — o ficheiro só contém os nomes dos defines):
@@ -22,7 +22,7 @@ const _employeeEmail = String.fromEnvironment('TEST_EMPLOYEE_EMAIL');
 const _employeePassword = String.fromEnvironment('TEST_EMPLOYEE_PASSWORD');
 
 /// Marcador do ecrã de login, independente de idioma (título da app).
-const _loginTitle = 'Dumbhanengue';
+const _loginTitle = 'TAREQO';
 
 Future<void> _pumpUntil(
   WidgetTester tester,

@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/plan.dart';
-import 'package:dumbhanengue/domain/repositories/i_plan_repository.dart';
-import 'package:dumbhanengue/domain/usecases/add_plan_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_all_plans_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_plans_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/update_plan_use_case.dart';
+import 'package:tareqo/domain/entities/plan.dart';
+import 'package:tareqo/domain/repositories/i_plan_repository.dart';
+import 'package:tareqo/domain/usecases/add_plan_use_case.dart';
+import 'package:tareqo/domain/usecases/get_all_plans_use_case.dart';
+import 'package:tareqo/domain/usecases/get_plans_use_case.dart';
+import 'package:tareqo/domain/usecases/update_plan_use_case.dart';
 
 class _FakePlanRepository implements IPlanRepository {
  final List<Plan> _plans = [];

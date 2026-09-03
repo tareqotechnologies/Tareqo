@@ -163,7 +163,7 @@ class DocModel {
  required this.toc,
  });
 
- /// Título do documento (H1, sem o sufixo "— Dumbhanengue ERP").
+ /// Título do documento (H1, sem o sufixo "— TAREQO").
  final String title;
 
  /// Parágrafo de apresentação logo após o H1 (vira subtítulo da capa).
@@ -384,7 +384,7 @@ DocModel parseMarkdown(String source) {
  }
 
  return DocModel(
- title: title ?? 'Dumbhanengue ERP',
+ title: title ?? 'TAREQO',
  intro: intro,
  blocks: blocks,
  toc: toc,
@@ -548,7 +548,7 @@ pw.Document buildDoc({
  ),
  pw.SizedBox(height: 6),
  pw.Text(
- 'Dumbhanengue ERP',
+ 'TAREQO',
  style: const pw.TextStyle(fontSize: 9, color: onCoverMuted),
  ),
  ],
@@ -713,7 +713,7 @@ pw.Widget _footer(String docName) => pw.Container(
  alignment: pw.Alignment.center,
  padding: const pw.EdgeInsets.only(top: 6),
  child: pw.Text(
- '$docName · Dumbhanengue ERP',
+ '$docName · TAREQO',
  style: const pw.TextStyle(fontSize: 8.5, color: textMuted),
  ),
 );

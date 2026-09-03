@@ -184,7 +184,7 @@ The theme is applied in `app.dart`:
 
 ```dart
 MaterialApp(
- title: 'Dumbhanengue ERP',
+ title: 'TAREQO ERP',
  debugShowCheckedModeBanner: false,
  theme: AppTheme.dark,
  darkTheme: AppTheme.dark,

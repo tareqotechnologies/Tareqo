@@ -6,16 +6,16 @@ import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 import '../../helpers/store_context.dart';
 
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/entities/purchase.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart' show PaymentMethod;
-import 'package:dumbhanengue/domain/repositories/i_purchase_processor.dart';
-import 'package:dumbhanengue/domain/usecases/add_purchase_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/products_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/purchases_providers.dart';
-import 'package:dumbhanengue/presentation/screens/purchases/add_purchase_sheet.dart';
-import 'package:dumbhanengue/presentation/widgets/app_sheet.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/entities/purchase.dart';
+import 'package:tareqo/domain/entities/sale.dart' show PaymentMethod;
+import 'package:tareqo/domain/repositories/i_purchase_processor.dart';
+import 'package:tareqo/domain/usecases/add_purchase_use_case.dart';
+import 'package:tareqo/domain/usecases/get_products_use_case.dart';
+import 'package:tareqo/presentation/controllers/products_providers.dart';
+import 'package:tareqo/presentation/controllers/purchases_providers.dart';
+import 'package:tareqo/presentation/screens/purchases/add_purchase_sheet.dart';
+import 'package:tareqo/presentation/widgets/app_sheet.dart';
 
 class _FakeGetProductsUseCase implements GetProductsUseCase {
  _FakeGetProductsUseCase(this._products);

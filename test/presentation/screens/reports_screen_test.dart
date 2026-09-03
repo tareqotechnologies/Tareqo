@@ -7,12 +7,12 @@ import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 import '../../helpers/store_context.dart';
 
-import 'package:dumbhanengue/core/share/report_exporter.dart';
-import 'package:dumbhanengue/domain/repositories/i_sales_report_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_sales_report_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/reports_providers.dart';
-import 'package:dumbhanengue/presentation/screens/reports/reports_screen.dart';
-import 'package:dumbhanengue/presentation/widgets/inline_error_card.dart';
+import 'package:tareqo/core/share/report_exporter.dart';
+import 'package:tareqo/domain/repositories/i_sales_report_repository.dart';
+import 'package:tareqo/domain/usecases/get_sales_report_use_case.dart';
+import 'package:tareqo/presentation/controllers/reports_providers.dart';
+import 'package:tareqo/presentation/screens/reports/reports_screen.dart';
+import 'package:tareqo/presentation/widgets/inline_error_card.dart';
 
 class _FakeGetSalesReportUseCase implements GetSalesReportUseCase {
  _FakeGetSalesReportUseCase(this._report);

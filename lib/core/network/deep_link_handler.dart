@@ -6,7 +6,7 @@ import '../observability/crash_reporting.dart';
 
 /// Trata os deep links de autenticação (confirmação de e-mail / magic link /
 /// OAuth com PKCE): quando o usuário toca no link do e-mail
-/// (`dumbhanengue://callback`), o OS abre o app e esta URI é entregue ao
+/// (`tareqo://callback`), o OS abre o app e esta URI é entregue ao
 /// gotrue via [AuthClient.getSessionFromUrl] — que troca o code PKCE, grava
 /// a sessão e o stream de sessão reage sozinho (o [AuthGate] troca de tela).
 ///
@@ -16,20 +16,20 @@ import '../observability/crash_reporting.dart';
 /// (`email_confirmed_at` ficava NULL, sem tenant pending no painel do admin).
 ///
 /// O registro do scheme vive em:
-/// - Android: `AndroidManifest.xml` (intent-filter `dumbhanengue://callback`);
-/// - iOS: `Info.plist` (`CFBundleURLTypes` → `dumbhanengue`);
-/// - Supabase: `site_url` = `dumbhanengue://callback` (Authentication).
+/// - Android: `AndroidManifest.xml` (intent-filter `tareqo://callback`);
+/// - iOS: `Info.plist` (`CFBundleURLTypes` → `tareqo`);
+/// - Supabase: `site_url` = `tareqo://callback` (Authentication).
 abstract final class DeepLinkHandler {
   /// Scheme do app registrado no AndroidManifest.xml / Info.plist.
-  static const String _scheme = 'dumbhanengue';
+  static const String _scheme = 'tareqo';
 
   /// Host de callback do gotrue (OAuth PKCE / magic link).
   static const String _callbackHost = 'callback';
 
   /// Valida se [uri] é um deep link de autenticação legítimo.
   ///
-  /// Aceita apenas `dumbhanengue://callback?code=...` ou
-  /// `dumbhanengue://callback?error=...`. Qualquer outro scheme ou host
+  /// Aceita apenas `tareqo://callback?code=...` ou
+  /// `tareqo://callback?error=...`. Qualquer outro scheme ou host
   /// é rejeitado — protege contra hijack de scheme (auditoria 2026-08, V12).
   static bool isAuthCallbackUri(Uri uri) {
     return uri.scheme == _scheme && uri.host == _callbackHost;

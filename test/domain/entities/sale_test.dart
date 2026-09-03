@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_item.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_item.dart';
 
 void main() {
  final sale = Sale(

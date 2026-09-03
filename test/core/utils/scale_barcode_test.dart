@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/utils/scale_barcode.dart';
+import 'package:tareqo/core/utils/scale_barcode.dart';
 
 void main() {
  group('ScaleBarcode.tryParse', () {

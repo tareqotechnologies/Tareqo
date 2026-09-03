@@ -6,27 +6,27 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/app_user.dart';
-import 'package:dumbhanengue/domain/entities/auth_event.dart';
-import 'package:dumbhanengue/domain/entities/plan.dart';
-import 'package:dumbhanengue/domain/entities/plan_request.dart';
-import 'package:dumbhanengue/domain/entities/store_employee.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/repositories/i_admin_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_all_plans_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_all_tenants_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_employees_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_my_tenant_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_plan_requests_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_tenants_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_plans_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
-import 'package:dumbhanengue/presentation/screens/auth/auth_gate.dart';
-import 'package:dumbhanengue/presentation/screens/auth/login_screen.dart';
-import 'package:dumbhanengue/presentation/screens/auth/set_new_password_screen.dart';
-import 'package:dumbhanengue/presentation/screens/shell/app_shell.dart';
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/entities/auth_event.dart';
+import 'package:tareqo/domain/entities/plan.dart';
+import 'package:tareqo/domain/entities/plan_request.dart';
+import 'package:tareqo/domain/entities/store_employee.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/repositories/i_admin_repository.dart';
+import 'package:tareqo/domain/usecases/get_all_plans_use_case.dart';
+import 'package:tareqo/domain/usecases/get_all_tenants_use_case.dart';
+import 'package:tareqo/domain/usecases/get_employees_use_case.dart';
+import 'package:tareqo/domain/usecases/get_my_tenant_use_case.dart';
+import 'package:tareqo/domain/usecases/get_pending_plan_requests_use_case.dart';
+import 'package:tareqo/domain/usecases/get_pending_tenants_use_case.dart';
+import 'package:tareqo/domain/usecases/get_plans_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/admin_providers.dart';
+import 'package:tareqo/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/presentation/screens/auth/auth_gate.dart';
+import 'package:tareqo/presentation/screens/auth/login_screen.dart';
+import 'package:tareqo/presentation/screens/auth/set_new_password_screen.dart';
+import 'package:tareqo/presentation/screens/shell/app_shell.dart';
 
 import '../../helpers/store_context.dart';
 
@@ -239,7 +239,7 @@ void main() {
  // O caso inverso do teste anterior: e-mail que seria admin no
  // esquema antigo NÃO abre o painel — o banco é a autoridade.
  authStream: Stream.value(
- AppUser(id: 'u1', email: 'admin@dumbhanengue.com'),
+ AppUser(id: 'u1', email: 'admin@tareqo.com'),
  ),
  adminRepository: const FakeAdminRepository(isAdmin: false),
  getMyTenant: FakeGetMyTenantUseCase(_pendingTenant(ownerUserId: 'u1')),
@@ -276,7 +276,7 @@ void main() {
  // (que levaria um dono comum à tela de espera), o super admin vai
  // direto ao painel — o ramo admin precede o _tenantGate no AuthGate.
  authStream: Stream.value(
- AppUser(id: 'admin-1', email: 'admin@dumbhanengue.com'),
+ AppUser(id: 'admin-1', email: 'admin@tareqo.com'),
  ),
  adminRepository: const FakeAdminRepository(isAdmin: true),
  getMyTenant: FakeGetMyTenantUseCase(

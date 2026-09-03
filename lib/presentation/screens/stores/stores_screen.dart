@@ -1761,7 +1761,7 @@ class _DetailRow extends StatelessWidget {
               label,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: scheme.onSurfaceVariant,
-                fontSize: 10,
+                fontSize: 12,
               ),
             ),
           ),

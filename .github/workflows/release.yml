@@ -14,7 +14,7 @@
 # PLAY_SERVICE_ACCOUNT_JSON — service account do Play (upload)
 # SENTRY_DSN (opcional) — observabilidade
 #
-# Atenção: Pré-requisito único (manual): o app `com.dumbhanengue.dumbhanengue`
+# Atenção: Pré-requisito único (manual): o app `com.tareqo.tareqo`
 # precisa de existir no Play Console com o primeiro AAB/APK enviado e o
 # "Play App Signing" ativado (ver docs/13-build-e-publicacao.md).
 name: Release (Play Internal)
@@ -62,7 +62,7 @@ jobs:
  image: postgres:16
  env:
  POSTGRES_PASSWORD: postgres
- POSTGRES_DB: dumbhanengue
+ POSTGRES_DB: tareqo
  ports:
  - 5432:5432
  options: >-
@@ -80,7 +80,7 @@ jobs:
  - name: Run SQL/RLS smoke test (W4/H2/upgrade)
  env:
  PGPASSWORD: postgres
- run: bash scripts/sql_check.sh localhost postgres dumbhanengue
+ run: bash scripts/sql_check.sh localhost postgres tareqo
 
  deploy:
  name: Build AAB + upload (Internal testing)

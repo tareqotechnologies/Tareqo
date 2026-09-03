@@ -247,6 +247,14 @@
       }
     }
   },
+  "dashboardTransferItem": "Transfer · {product}",
+  "@dashboardTransferItem": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
   "dashboardFiadoPayment": "Credit payment",
   "dashboardExpenseRow": "Expense · {description}",
   "@dashboardExpenseRow": {

@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/invoice.dart';
-import 'package:dumbhanengue/domain/entities/invoice_notification.dart';
-import 'package:dumbhanengue/domain/entities/plan.dart';
-import 'package:dumbhanengue/domain/repositories/i_invoice_notification_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_plan_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_tenant_notifications_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/mark_all_notifications_as_read_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/mark_notification_as_read_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/notify_invoice_generated_use_case.dart';
+import 'package:tareqo/domain/entities/invoice.dart';
+import 'package:tareqo/domain/entities/invoice_notification.dart';
+import 'package:tareqo/domain/entities/plan.dart';
+import 'package:tareqo/domain/repositories/i_invoice_notification_repository.dart';
+import 'package:tareqo/domain/repositories/i_plan_repository.dart';
+import 'package:tareqo/domain/usecases/get_tenant_notifications_use_case.dart';
+import 'package:tareqo/domain/usecases/mark_all_notifications_as_read_use_case.dart';
+import 'package:tareqo/domain/usecases/mark_notification_as_read_use_case.dart';
+import 'package:tareqo/domain/usecases/notify_invoice_generated_use_case.dart';
 
 // ---------------------------------------------------------------------------
 // Fake repositories

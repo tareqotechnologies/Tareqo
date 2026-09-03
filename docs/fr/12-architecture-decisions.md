@@ -1,12 +1,12 @@
-# Décisions d'architecture — Dumbhanengue ERP
+# Décisions d'architecture — TAREQO ERP
 
-> Ce document enregistre le **« pourquoi »** derrière les principales décisions techniques de Dumbhanengue ERP : chaque choix d'architecture, de modélisation et de sécurité est justifié ici. Pour la vue d'ensemble et le catalogue complet, voir les documents [01-overview](01-overview.md) à [11-multitenancy](11-multitenancy.md).
+> Ce document enregistre le **« pourquoi »** derrière les principales décisions techniques de TAREQO ERP : chaque choix d'architecture, de modélisation et de sécurité est justifié ici. Pour la vue d'ensemble et le catalogue complet, voir les documents [01-overview](01-overview.md) à [11-multitenancy](11-multitenancy.md).
 
 ---
 
 ## Pourquoi la Clean Architecture ?
 
-Nous avons adopté la Clean Architecture pour Dumbhanengue parce qu'un ERP est, par nature, un système durable avec des règles métier complexes et en constante évolution : les modules tels que le stock, les ventes, les achats, les finances et les rapports doivent être développés, testés et remplacés indépendamment, sans que les changements d'un module n'aient des effets secondaires sur les autres.
+Nous avons adopté la Clean Architecture pour TAREQO parce qu'un ERP est, par nature, un système durable avec des règles métier complexes et en constante évolution : les modules tels que le stock, les ventes, les achats, les finances et les rapports doivent être développés, testés et remplacés indépendamment, sans que les changements d'un module n'aient des effets secondaires sur les autres.
 
 En divisant le code en trois couches — **domaine** (entités, contrats de repository et cas d'usage, libres de toute dépendance framework), **données** (implémentations concrètes des sources de données distantes et locales, comme Supabase et SQLite) et **présentation** (écrans, widgets et état via Riverpod) — l'architecture garde les règles métier au centre du système, indépendantes des détails d'infrastructure. Cela apporte quatre gains directs :
 
@@ -98,7 +98,7 @@ if (database != null) {
 
 Détails d'implémentation :
 
-- **`lib/core/database/app_database.dart`** — ouvre `dumbhanengue.db` dans `getApplicationDocumentsDirectory()`, crée le schéma (`CREATE TABLE IF NOT EXISTS` avec `CHECK` de non-négativité comme garde finale), ne seed jamais de données (la base démarre vide — uniquement des données réelles) et expose `runInTransaction` (BEGIN/COMMIT/ROLLBACK) pour les écritures atomiques (ex. vente + articles).
+- **`lib/core/database/app_database.dart`** — ouvre `tareqo.db` dans `getApplicationDocumentsDirectory()`, crée le schéma (`CREATE TABLE IF NOT EXISTS` avec `CHECK` de non-négativité comme garde finale), ne seed jamais de données (la base démarre vide — uniquement des données réelles) et expose `runInTransaction` (BEGIN/COMMIT/ROLLBACK) pour les écritures atomiques (ex. vente + articles).
 - **Les ventes** sont persistées dans des tables normalisées (`sales` + `sale_items`) dans **une seule transaction**.
 - **Les enums** sont persistées par nom ; **les dates** en millis epoch ; **les booléens** en 0/1.
 - **Web :** le sqlite3 natif ne s'exécute pas dans le navigateur (`dart:ffi` n'existe pas), donc `AppDatabase` utilise un **import conditionnel** et l'app retombe sur les datasources en mémoire (mêmes contrats — l'UI reste identique).

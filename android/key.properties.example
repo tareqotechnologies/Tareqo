@@ -20,7 +20,7 @@
 #     -e STORE_PW='SUA_SENHA' eclipse-temurin:17-jre keytool -genkey -v \
 #     -keystore /workspace/android/app/upload-keystore.jks -alias upload \
 #     -keyalg RSA -keysize 2048 -validity 10000 \
-#     -storepass "$STORE_PW" -dname "CN=Dumbhanengue ERP, O=Dumbhanengue, C=BR"
+#     -storepass "$STORE_PW" -dname "CN=TAREQO ERP, O=TAREQO, C=BR"
 
 # ── 2. Backup (CRÍTICO) ─────────────────────────────────────────────────
 # Guarde o arquivo `upload-keystore.jks` E estas senhas num cofre de senhas

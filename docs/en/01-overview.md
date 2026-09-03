@@ -1,15 +1,15 @@
 # 01 — Overview
 
-## What is Dumbhanengue ERP?
+## What is TAREQO ERP?
 
-**Dumbhanengue ERP** is a business management system aimed at **small merchants**. It brings together the day-to-day operations of a store in a single app:
+**TAREQO ERP** is a business management system aimed at **small merchants**. It brings together the day-to-day operations of a store in a single app:
 
 - **Inventory** — product registration and control with **FIFO lots and expiry** (purchase, sale, available quantity, expiry);
 - **Sales** — sale registration with a cart, payment method and automatic stock deduction;
 - **Finance** — cash flow (income × expenses), transactions and pending entries;
 - **Credit ("fiado")** — tracking who owes the merchant, when it's due and the settlement history.
 
-*Dumbhanengue* is the project's nickname; the product itself is a lean ERP focused on usability and simplicity.
+*TAREQO* is the project's nickname; the product itself is a lean ERP focused on usability and simplicity.
 
 ---
 

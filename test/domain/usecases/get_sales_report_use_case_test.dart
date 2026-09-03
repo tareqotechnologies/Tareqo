@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
-import 'package:dumbhanengue/domain/entities/sale_item.dart';
-import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_sales_report_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_sales_report_use_case.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_lot_consumption.dart';
+import 'package:tareqo/domain/entities/sale_item.dart';
+import 'package:tareqo/domain/repositories/i_product_repository.dart';
+import 'package:tareqo/domain/repositories/i_sale_repository.dart';
+import 'package:tareqo/domain/repositories/i_sales_report_repository.dart';
+import 'package:tareqo/domain/usecases/get_sales_report_use_case.dart';
 
 class _FakeSaleRepository implements ISaleRepository {
  _FakeSaleRepository(this._sales);

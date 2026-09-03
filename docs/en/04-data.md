@@ -124,7 +124,7 @@ The schema (tables, RLS, policies, indexes, triggers, functions and seed) lives 
 
 ### Where the database lives
 
-- File: **`dumbhanengue.db`** in `getApplicationDocumentsDirectory()` (via `path_provider`).
+- File: **`tareqo.db`** in `getApplicationDocumentsDirectory()` (via `path_provider`).
 - `PRAGMA foreign_keys = ON` on open.
 - On web SQLite **does not run** (`dart:ffi` does not exist) → conditional import to `app_database_stub.dart` → in-memory. In tests on the Windows VM, `package:sqlite3` falls back to the system `winsqlite3.dll` (see `test/helpers/test_sqlite.dart`).
 

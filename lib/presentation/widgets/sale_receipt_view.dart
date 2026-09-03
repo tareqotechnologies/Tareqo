@@ -50,7 +50,7 @@ class SaleReceiptView extends StatelessWidget {
  Text(
  storeName!.toUpperCase(),
  textAlign: TextAlign.center,
- style: _headerStyle.copyWith(fontSize: 15),
+ style: _headerStyle.copyWith(fontSize: 16),
  ),
  if (storeAddress != null && storeAddress!.trim().isNotEmpty) ...[
  const SizedBox(height: 2),
@@ -100,7 +100,7 @@ class SaleReceiptView extends StatelessWidget {
  Formatters.currency(sale.totalAmountCents),
  style: _bodyStyle.copyWith(
  fontWeight: FontWeight.w700,
- fontSize: 15,
+ fontSize: 16,
  ),
  ),
  ],
@@ -147,7 +147,7 @@ class SaleReceiptView extends StatelessWidget {
 /// Título do cabeçalho (estabelecimento / título do recibo).
 final TextStyle _headerStyle = const TextStyle(
  color: Color(0xFF1B1B1B),
- fontSize: 13,
+ fontSize: 12,
  fontWeight: FontWeight.w700,
  letterSpacing: 1.2,
  height: 1.4,
@@ -157,7 +157,7 @@ final TextStyle _headerStyle = const TextStyle(
 /// algarismos tabulares, como uma impressora térmica.
 final TextStyle _bodyStyle = const TextStyle(
  color: Color(0xFF1B1B1B),
- fontSize: 12.5,
+ fontSize: 12,
  height: 1.5,
  fontFeatures: [FontFeature.tabularFigures()],
 );
@@ -165,7 +165,7 @@ final TextStyle _bodyStyle = const TextStyle(
 /// Texto secundário (endereço, data, agradecimento).
 final TextStyle _mutedStyle = const TextStyle(
  color: Color(0xFF6B6B6B),
- fontSize: 11.5,
+ fontSize: 12,
  height: 1.5,
 );
 

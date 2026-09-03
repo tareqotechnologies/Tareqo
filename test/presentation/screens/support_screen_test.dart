@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/presentation/screens/support/doc_reader_screen.dart';
-import 'package:dumbhanengue/presentation/screens/support/support_screen.dart';
+import 'package:tareqo/presentation/screens/support/doc_reader_screen.dart';
+import 'package:tareqo/presentation/screens/support/support_screen.dart';
 
 import '../../helpers/test_app.dart';
 
@@ -96,7 +96,7 @@ void main() {
  expect(find.byType(DocReaderScreen), findsOneWidget);
  // Markdown embutido renderizado: h1 do guia em português.
  expect(
- find.textContaining('Guia do Usuário — Dumbhanengue ERP'),
+ find.textContaining('Guia do Usuário — TAREQO'),
  findsOneWidget,
  );
  });
@@ -109,7 +109,7 @@ void main() {
  await settleAfterTap(tester);
 
  expect(find.byType(DocReaderScreen), findsOneWidget);
- expect(find.textContaining('Troubleshooting — Dumbhanengue ERP'),
+ expect(find.textContaining('Troubleshooting — TAREQO'),
  findsOneWidget);
  });
 
@@ -125,7 +125,7 @@ void main() {
 
  // h1 do troubleshooting em inglês.
  expect(
- find.textContaining('Troubleshooting — Dumbhanengue ERP'),
+ find.textContaining('Troubleshooting — TAREQO'),
  findsOneWidget,
  );
  });

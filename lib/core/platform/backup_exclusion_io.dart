@@ -25,7 +25,7 @@ Future<void> excludeFromBackupOnPlatform(
 }) async {
   if (!isIOS) return;
   try {
-    const channel = MethodChannel('dev.dumbhanengue/backup_exclusion');
+    const channel = MethodChannel('dev.tareqo/backup_exclusion');
     await channel.invokeMethod<void>('excludeFromBackup', {'path': path});
   } catch (_) {
     // Ignorado de propósito — exclusão de backup é melhoria, não requisito.

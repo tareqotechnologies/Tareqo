@@ -124,7 +124,7 @@ O schema (tabelas, RLS, políticas, índices, triggers e seed) está em [`supaba
 
 ### Onde o banco vive
 
-- Arquivo: **`dumbhanengue.db`** em `getApplicationDocumentsDirectory()` (via `path_provider`).
+- Arquivo: **`tareqo.db`** em `getApplicationDocumentsDirectory()` (via `path_provider`).
 - `PRAGMA foreign_keys = ON` ao abrir.
 - Na web o SQLite **não roda** (`dart:ffi` inexistente) → import condicional para `app_database_stub.dart` → memória. Em testes na VM Windows, o `package:sqlite3` cai para a `winsqlite3.dll` do sistema (ver `test/helpers/test_sqlite.dart`).
 

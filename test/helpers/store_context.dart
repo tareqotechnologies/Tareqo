@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:dumbhanengue/domain/entities/app_user.dart';
-import 'package:dumbhanengue/domain/entities/store.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/repositories/i_admin_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_my_tenant_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_stores_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/entities/store.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/repositories/i_admin_repository.dart';
+import 'package:tareqo/domain/usecases/get_my_tenant_use_case.dart';
+import 'package:tareqo/domain/usecases/get_stores_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/admin_providers.dart';
+import 'package:tareqo/presentation/controllers/auth_providers.dart';
 
 /// Fake do [GetMyTenantUseCase] que retorna um tenant aprovado.
 class FakeGetMyTenantUseCase implements GetMyTenantUseCase {

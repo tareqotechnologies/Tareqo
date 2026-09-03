@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/customer.dart';
-import 'package:dumbhanengue/domain/repositories/i_customer_repository.dart';
-import 'package:dumbhanengue/domain/usecases/add_customer_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_customers_use_case.dart';
+import 'package:tareqo/domain/entities/customer.dart';
+import 'package:tareqo/domain/repositories/i_customer_repository.dart';
+import 'package:tareqo/domain/usecases/add_customer_use_case.dart';
+import 'package:tareqo/domain/usecases/get_customers_use_case.dart';
 
 /// Fake em memória do [ICustomerRepository].
 class _FakeCustomerRepository implements ICustomerRepository {

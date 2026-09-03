@@ -3,16 +3,16 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import 'package:dumbhanengue/core/database/app_database_io.dart';
-import 'package:dumbhanengue/data/datasources/local/product_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/domain/entities/product.dart';
+import 'package:tareqo/core/database/app_database_io.dart';
+import 'package:tareqo/data/datasources/local/product_sqlite_data_source_impl.dart';
+import 'package:tareqo/domain/entities/product.dart';
 
 void main() {
  late Directory tempDirectory;
  late String dbPath;
 
  setUp(() async {
- tempDirectory = await Directory.systemTemp.createTemp('dumbhanengue_test');
+ tempDirectory = await Directory.systemTemp.createTemp('tareqo_test');
  dbPath = '${tempDirectory.path}${Platform.pathSeparator}test.db';
  });
 

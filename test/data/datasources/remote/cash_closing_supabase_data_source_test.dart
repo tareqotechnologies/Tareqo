@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:postgrest/postgrest.dart';
 
-import 'package:dumbhanengue/data/datasources/remote/supabase_cash_closing_data_source.dart';
-import 'package:dumbhanengue/domain/entities/cash_closing.dart';
+import 'package:tareqo/data/datasources/remote/supabase_cash_closing_data_source.dart';
+import 'package:tareqo/domain/entities/cash_closing.dart';
 
 /// Teste de CONTRATO da RPC `close_cash_register` do datasource remoto de
 /// fecho de caixa — verifica o payload EXATO enviado ao servidor (loja,

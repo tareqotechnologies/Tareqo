@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/utils/formatters.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_card.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/empty_state.dart';
 
 /// Ecra de reconciliação de pagamentos mobile money — M-Pesa e E-Mola.
 class PaymentReconciliationScreen extends ConsumerStatefulWidget {
@@ -21,7 +24,6 @@ class _PaymentReconciliationScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,67 +38,49 @@ class _PaymentReconciliationScreenState
         ),
       ),
       body: _payments.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.phone_android_outlined,
-                      size: 48,
-                      color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      'Sem transacções',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'Registe pagamentos recebidos via\nM-Pesa ou E-Mola para reconciliação automática',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          ? EmptyState(
+              icon: Icons.phone_android_outlined,
+              title: 'Sem transacções',
+              subtitle:
+                  'Registe pagamentos recebidos via\nM-Pesa ou E-Mola para reconciliação',
             )
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
-                // Resumo
+                // ─── Resumo ───
                 Row(
                   children: [
                     Expanded(
-                      child: _SummaryCard(
-                        label: 'Reconciliadas',
-                        count: _payments
-                            .where((p) => p.status == 'Confirmada')
-                            .length
-                            .toString(),
-                        color: const Color(0xFF16A34A),
+                      child: _MiniStat(
+                        label: 'Confirmadas',
+                        value:
+                            '${_payments.where((p) => p.status == 'Confirmada').length}',
+                        color: IconTone.green,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
-                      child: _SummaryCard(
+                      child: _MiniStat(
                         label: 'Pendentes',
-                        count: _payments
-                            .where((p) => p.status == 'Pendente')
-                            .length
-                            .toString(),
-                        color: const Color(0xFFF59E0B),
+                        value:
+                            '${_payments.where((p) => p.status == 'Pendente').length}',
+                        color: ModuleColors.credit,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: _MiniStat(
+                        label: 'Rejeitadas',
+                        value:
+                            '${_payments.where((p) => p.status == 'Rejeitada').length}',
+                        color: IconTone.red,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                // Lista de transacções
+
+                // ─── Lista de transacções ───
                 ..._payments.map(
                   (payment) => Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.xs),
@@ -105,18 +89,16 @@ class _PaymentReconciliationScreenState
                       onConfirm: () {
                         setState(() {
                           final idx = _payments.indexOf(payment);
-                          _payments[idx] = payment.copyWith(
-                            status: 'Confirmada',
-                          );
+                          _payments[idx] =
+                              payment.copyWith(status: 'Confirmada');
                         });
                       },
                       onReject: payment.status == 'Pendente'
                           ? () {
                               setState(() {
                                 final idx = _payments.indexOf(payment);
-                                _payments[idx] = payment.copyWith(
-                                  status: 'Rejeitada',
-                                );
+                                _payments[idx] =
+                                    payment.copyWith(status: 'Rejeitada');
                               });
                             }
                           : null,
@@ -153,7 +135,7 @@ class _PaymentRecord {
   _PaymentRecord({
     required this.provider,
     required this.phone,
-    required this.amount,
+    required this.amountCents,
     required this.confirmationCode,
     required this.status,
     required this.date,
@@ -161,7 +143,7 @@ class _PaymentRecord {
 
   final String provider;
   final String phone;
-  final String amount;
+  final int amountCents;
   final String confirmationCode;
   final String status;
   final String date;
@@ -170,7 +152,7 @@ class _PaymentRecord {
     return _PaymentRecord(
       provider: provider,
       phone: phone,
-      amount: amount,
+      amountCents: amountCents,
       confirmationCode: confirmationCode,
       status: status ?? this.status,
       date: date,
@@ -178,15 +160,19 @@ class _PaymentRecord {
   }
 }
 
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({
+// ═══════════════════════════════════════════════════════════════════════════════
+// Componentes
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({
     required this.label,
-    required this.count,
+    required this.value,
     required this.color,
   });
 
   final String label;
-  final String count;
+  final String value;
   final Color color;
 
   @override
@@ -195,24 +181,31 @@ class _SummaryCard extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Material(
-      color: color.withValues(alpha: 0.08),
+      color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
       borderRadius: AppRadius.lgAll,
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               label,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
+                fontSize: 11,
               ),
             ),
+            const SizedBox(height: 1),
             Text(
-              count,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
+              value,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w500,
                 color: color,
+                letterSpacing: -0.2,
               ),
             ),
           ],
@@ -239,136 +232,131 @@ class _PaymentCard extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     final isMpesa = payment.provider == 'M-Pesa';
-    final providerColor = isMpesa
-        ? const Color(0xFFDC2626)
-        : const Color(0xFF03754F);
+    final providerColor = isMpesa ? IconTone.red : const Color(0xFF03754F);
 
-    return Material(
-      color: scheme.surfaceContainerLow,
-      borderRadius: AppRadius.lgAll,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          children: [
-            // Provider badge
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: providerColor.withValues(alpha: 0.12),
-                borderRadius: AppRadius.smAll,
-              ),
-              child: Icon(
-                Icons.phone_android,
-                size: 20,
-                color: providerColor,
-              ),
+    final (statusColor, statusLabel) = switch (payment.status) {
+      'Confirmada' => (IconTone.green, 'Confirmada'),
+      'Rejeitada' => (IconTone.red, 'Rejeitada'),
+      _ => (ModuleColors.credit, 'Pendente'),
+    };
+
+    return AppCard(
+      elevated: true,
+      borderRadius: const BorderRadius.all(Radius.circular(14)),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: IconTone.darkBackground(providerColor),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        payment.provider,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: payment.status == 'Confirmada'
-                              ? const Color(0xFF16A34A).withValues(alpha: 0.15)
-                              : payment.status == 'Rejeitada'
-                                  ? scheme.error.withValues(alpha: 0.15)
-                                  : const Color(0xFFF59E0B)
-                                      .withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          payment.status,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: payment.status == 'Confirmada'
-                                ? const Color(0xFF16A34A)
-                                : payment.status == 'Rejeitada'
-                                    ? scheme.error
-                                    : const Color(0xFFF59E0B),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    payment.phone,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                  if (payment.confirmationCode.isNotEmpty)
-                    Text(
-                      'Ref: ${payment.confirmationCode}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                ],
-              ),
+            child: Icon(
+              Icons.phone_android,
+              size: 16,
+              color: IconTone.lightForeground(providerColor),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  children: [
+                    Text(
+                      payment.provider,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        statusLabel,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: statusColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 1),
                 Text(
-                  payment.amount,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: scheme.primary,
+                  payment.phone,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontSize: 11,
                   ),
                 ),
-                if (payment.status == 'Pendente') ...[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: GestureDetector(
-                      onTap: onConfirm,
-                      child: Text(
-                        'Confirmar',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: const Color(0xFF16A34A),
-                          fontWeight: FontWeight.w500,
-                        ),
+                if (payment.confirmationCode.isNotEmpty)
+                  Text(
+                    'Ref: ${payment.confirmationCode}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                Formatters.currency(payment.amountCents),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (payment.status == 'Pendente') ...[
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: onConfirm,
+                  child: Text(
+                    'Confirmar',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: IconTone.green,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                if (onReject != null)
+                  GestureDetector(
+                    onTap: onReject,
+                    child: Text(
+                      'Rejeitar',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: IconTone.red,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  if (onReject != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: GestureDetector(
-                        onTap: onReject,
-                        child: Text(
-                          'Rejeitar',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.error,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
               ],
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Sheet: Registar Pagamento
+// ═══════════════════════════════════════════════════════════════════════════════
 
 class _NewPaymentSheet extends StatefulWidget {
   const _NewPaymentSheet({required this.onSave});
@@ -422,7 +410,7 @@ class _NewPaymentSheetState extends State<_NewPaymentSheet> {
                 Expanded(
                   child: _ProviderButton(
                     label: 'M-Pesa',
-                    color: const Color(0xFFDC2626),
+                    color: IconTone.red,
                     isSelected: _provider == 'M-Pesa',
                     onTap: () => setState(() => _provider = 'M-Pesa'),
                   ),
@@ -449,8 +437,9 @@ class _NewPaymentSheetState extends State<_NewPaymentSheet> {
             AppTextField(
               controller: _amountController,
               label: 'Valor (MT)',
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               prefixIcon: Icons.attach_money,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -466,16 +455,17 @@ class _NewPaymentSheetState extends State<_NewPaymentSheet> {
               onPressed: _phoneController.text.trim().isNotEmpty &&
                       _amountController.text.trim().isNotEmpty
                   ? () {
+                      final amount =
+                          (double.tryParse(_amountController.text) ?? 0);
                       widget.onSave(
                         _PaymentRecord(
                           provider: _provider,
                           phone: _phoneController.text.trim(),
-                          amount:
-                              '${double.tryParse(_amountController.text) ?? 0} MT',
+                          amountCents: (amount * 100).toInt(),
                           confirmationCode:
                               _confirmationController.text.trim(),
                           status: 'Pendente',
-                          date: DateTime.now().toString().substring(0, 10),
+                          date: Formatters.date(DateTime.now()),
                         ),
                       );
                     }
@@ -508,20 +498,25 @@ class _ProviderButton extends StatelessWidget {
     return Material(
       color: isSelected
           ? color.withValues(alpha: 0.12)
-          : theme.colorScheme.surfaceContainerLow,
+          : theme.colorScheme.surfaceContainerHighest
+              .withValues(alpha: 0.5),
       borderRadius: AppRadius.lgAll,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         borderRadius: AppRadius.lgAll,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+          padding:
+              const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Center(
             child: Text(
               label,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: isSelected ? color : theme.colorScheme.onSurfaceVariant,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected
+                    ? color
+                    : theme.colorScheme.onSurfaceVariant,
+                fontWeight:
+                    isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ),

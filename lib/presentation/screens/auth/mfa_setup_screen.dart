@@ -40,10 +40,10 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
 
   Future<void> _initializeMFA() async {
     try {
-      final secret = await ref.read(mfaAuthUseCaseProvider).enable();
+      final secret = await ref.read(mfaAuthUseCaseProvider).generateSecret();
       final user = ref.read(authStateProvider).value;
       final qrData = await ref.read(mfaAuthUseCaseProvider).generateQRCodeData(
-        issuer: 'Dumbhanengue',
+        issuer: 'TAREQO',
         account: user?.email ?? 'user',
       );
 
@@ -91,6 +91,8 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
       final isValid = await ref.read(mfaAuthUseCaseProvider).verifyCode(code);
       
       if (isValid) {
+        // Confirmar ativação — só agora gravamos mfa_enabled.
+        await ref.read(mfaAuthUseCaseProvider).confirmEnable();
         setState(() => _isVerifying = false);
         
         if (mounted) {

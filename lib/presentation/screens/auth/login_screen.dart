@@ -1,365 +1,526 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
-import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
-import '../../widgets/app_button.dart';
-import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
-import '../../widgets/app_text_field.dart';
 import '../../../core/observability/crash_reporting.dart';
 import 'forgot_password_sheet.dart';
 
-/// Tela de autenticação V4 — login e cadastro num único formulário.
-class LoginScreen extends ConsumerStatefulWidget {
- const LoginScreen({super.key});
+/// Paleta de cores da tela de login — dark premium.
+class _LoginColors {
+  static const background = Color(0xFF101112);
+  static const surface = Color(0xFF1D1E22);
+  static const border = Color(0xFF303238);
+  static const borderFocus = Color(0xFF16A34A);
+  static const textPrimary = Color(0xFFFFFFFF);
+  static const textSecondary = Color(0xFFA1A1AA);
+  static const green = Color(0xFF22C55E);
+  static const greenDark = Color(0xFF16A34A);
+}
 
- @override
- ConsumerState<LoginScreen> createState() => _LoginScreenState();
+/// Tela de login — design dark premium, minimalista e profissional.
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
- final _emailController = TextEditingController();
- final _passwordController = TextEditingController();
- final _confirmController = TextEditingController();
- final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
+  final _nameController = TextEditingController();
 
- bool _isSignUpMode = false;
- bool _isSubmitting = false;
- bool _obscurePassword = true;
- bool _obscureConfirm = true;
+  bool _isSignUpMode = false;
+  bool _isSubmitting = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
 
- @override
- void dispose() {
- _emailController.dispose();
- _passwordController.dispose();
- _confirmController.dispose();
- _nameController.dispose();
- super.dispose();
- }
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
 
- Future<void> _openForgotPassword() async {
- await showAppSheet<void>(
- context,
- builder: (_) => const ForgotPasswordSheet(),
- );
- }
+  bool _emailFocused = false;
+  bool _passwordFocused = false;
 
- Future<void> _submit() async {
- final messenger = ScaffoldMessenger.of(context);
- final l10n = context.l10n;
+  @override
+  void initState() {
+    super.initState();
+    _emailFocus.addListener(() {
+      setState(() => _emailFocused = _emailFocus.hasFocus);
+    });
+    _passwordFocus.addListener(() {
+      setState(() => _passwordFocused = _passwordFocus.hasFocus);
+    });
+  }
 
- final email = _emailController.text.trim();
- final password = _passwordController.text;
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    _nameController.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
+    super.dispose();
+  }
 
- String? validationError;
- if (email.isEmpty || !emailRegExp.hasMatch(email)) {
- validationError = l10n.loginEmailError;
- } else {
- validationError = switch (passwordIssue(
- password,
- requireStrong: _isSignUpMode,
- )) {
- PasswordIssue.tooShort => l10n.loginPasswordError,
- PasswordIssue.weak => l10n.loginWeakPasswordError,
- null => null,
- };
- }
- if (validationError == null &&
- _isSignUpMode &&
- _confirmController.text != password) {
- validationError = l10n.loginConfirmError;
- }
+  Future<void> _openForgotPassword() async {
+    await showAppSheet<void>(
+      context,
+      builder: (_) => const ForgotPasswordSheet(),
+    );
+  }
 
- if (validationError != null) {
- messenger.showSnackBar(SnackBar(content: Text(validationError)));
- return;
- }
+  Future<void> _submit() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
 
- setState(() => _isSubmitting = true);
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
 
- try {
- if (_isSignUpMode) {
- await ref.read(signUpUseCaseProvider).call(
- email: email,
- password: password,
- fullName: _nameController.text.trim(),
- );
- messenger.showSnackBar(
- SnackBar(content: Text(l10n.loginSignUpSuccess)),
- );
- } else {
- await ref
- .read(signInUseCaseProvider)
- .call(email: email, password: password);
- }
- } on AuthWeakPasswordException {
- messenger.showSnackBar(
- SnackBar(content: Text(l10n.loginWeakPasswordError)),
- );
- } on AuthApiException catch (error) {
- if (error.statusCode == '429') {
- messenger.showSnackBar(
- SnackBar(content: Text(l10n.loginRateLimitError)),
- );
- } else {
- CrashReporting.capture(
- error,
- StackTrace.current,
- hint: 'Erro de autenticação (API)',
- );
- messenger.showSnackBar(
- SnackBar(
- content: Text(
- _isSignUpMode ? l10n.loginSignUpError : l10n.loginSignInError,
- ),
- ),
- );
- }
- } catch (error, stackTrace) {
- CrashReporting.capture(error, stackTrace, hint: 'Erro de autenticação');
- messenger.showSnackBar(
- SnackBar(
- content: Text(
- _isSignUpMode ? l10n.loginSignUpError : l10n.loginSignInError,
- ),
- ),
- );
- } finally {
- if (mounted) setState(() => _isSubmitting = false);
- }
- }
+    String? validationError;
+    if (email.isEmpty || !emailRegExp.hasMatch(email)) {
+      validationError = l10n.loginEmailError;
+    } else {
+      validationError = switch (passwordIssue(
+        password,
+        requireStrong: _isSignUpMode,
+      )) {
+        PasswordIssue.tooShort => l10n.loginPasswordError,
+        PasswordIssue.weak => l10n.loginWeakPasswordError,
+        null => null,
+      };
+    }
+    if (validationError == null &&
+        _isSignUpMode &&
+        _confirmController.text != password) {
+      validationError = l10n.loginConfirmError;
+    }
 
- @override
- Widget build(BuildContext context) {
- final theme = Theme.of(context);
- final scheme = theme.colorScheme;
- final l10n = context.l10n;
+    if (validationError != null) {
+      messenger.showSnackBar(SnackBar(content: Text(validationError)));
+      return;
+    }
 
- return Scaffold(
- body: SafeArea(
- child: Center(
- child: SingleChildScrollView(
- padding: const EdgeInsets.symmetric(
- horizontal: AppSpacing.xl,
- vertical: AppSpacing.xxl,
- ),
- child: ConstrainedBox(
- constraints: const BoxConstraints(maxWidth: 420),
- child: Column(
- mainAxisSize: MainAxisSize.min,
- crossAxisAlignment: CrossAxisAlignment.stretch,
- children: [
- const _LoginHero(),
- const SizedBox(height: AppSpacing.xxl),
- Text(
- _isSignUpMode
- ? l10n.loginSubtitleSignUp
- : l10n.loginSubtitleSignIn,
- textAlign: TextAlign.center,
- style: theme.textTheme.bodyMedium?.copyWith(
- color: scheme.onSurfaceVariant,
- ),
- ),
- const SizedBox(height: AppSpacing.lg),
- // Card premium (estilo Apple): cantos 20 + superfície
- // elevada — o formulário flutua sobre o fundo contínuo.
- AppCard(
- elevated: true,
- borderRadius: AppRadius.xlAll,
- padding: const EdgeInsets.all(AppSpacing.lg),
- child: Column(
- mainAxisSize: MainAxisSize.min,
- crossAxisAlignment: CrossAxisAlignment.stretch,
- children: [
- if (_isSignUpMode) ...[
- AppTextField(
- controller: _nameController,
- textInputAction: TextInputAction.next,
- autofillHints: const [AutofillHints.name],
- label: l10n.loginNameLabel,
- prefixIcon: Icons.person_outline_rounded,
- ),
- const SizedBox(height: AppSpacing.md),
- ],
- AppTextField(
- controller: _emailController,
- keyboardType: TextInputType.emailAddress,
- textInputAction: TextInputAction.next,
- autofillHints: const [AutofillHints.email],
- label: l10n.loginEmailLabel,
- prefixIcon: Icons.mail_outline_rounded,
- ),
- const SizedBox(height: AppSpacing.md),
- AppTextField(
- controller: _passwordController,
- obscureText: _obscurePassword,
- textInputAction: _isSignUpMode
- ? TextInputAction.next
- : TextInputAction.done,
- onSubmitted: (_) {
- if (!_isSignUpMode) _submit();
- },
- autofillHints: [
- _isSignUpMode
- ? AutofillHints.newPassword
- : AutofillHints.password,
- ],
- label: l10n.loginPasswordLabel,
- prefixIcon: Icons.lock_outline_rounded,
- suffixIcon: IconButton(
- tooltip: _obscurePassword
- ? l10n.loginShowPassword
- : l10n.loginHidePassword,
- icon: Icon(
- _obscurePassword
- ? Icons.visibility_outlined
- : Icons.visibility_off_outlined,
- ),
- onPressed: () => setState(() {
- _obscurePassword = !_obscurePassword;
- }),
- ),
- ),
- if (_isSignUpMode) ...[
- const SizedBox(height: AppSpacing.md),
- AppTextField(
- controller: _confirmController,
- obscureText: _obscureConfirm,
- textInputAction: TextInputAction.done,
- onSubmitted: (_) => _submit(),
- autofillHints: const [AutofillHints.newPassword],
- label: l10n.loginConfirmLabel,
- prefixIcon: Icons.lock_outline_rounded,
- suffixIcon: IconButton(
- tooltip: _obscureConfirm
- ? l10n.loginShowPassword
- : l10n.loginHidePassword,
- icon: Icon(
- _obscureConfirm
- ? Icons.visibility_outlined
- : Icons.visibility_off_outlined,
- ),
- onPressed: () => setState(() {
- _obscureConfirm = !_obscureConfirm;
- }),
- ),
- ),
- ],
- const SizedBox(height: AppSpacing.xl),
- AppButton.primary(
- expanded: true,
- onPressed: _isSubmitting ? null : _submit,
- icon: _isSubmitting
- ? SizedBox(
- height: 20,
- width: 20,
- child: CircularProgressIndicator(
- strokeWidth: 2,
- color: scheme.onPrimary,
- ),
- )
- : null,
- label: _isSignUpMode
- ? l10n.loginSignUp
- : l10n.loginSignIn,
- ),
- if (!_isSignUpMode) ...[
- const SizedBox(height: AppSpacing.xxs),
- Center(
- child: TextButton(
- onPressed: _isSubmitting
- ? null
- : _openForgotPassword,
- child: Text(l10n.loginForgotPassword),
- ),
- ),
- ],
- const SizedBox(height: AppSpacing.xs),
- Center(
- child: TextButton(
- onPressed: _isSubmitting
- ? null
- : () => setState(() {
- _isSignUpMode = !_isSignUpMode;
- _confirmController.clear();
- }),
- child: Text(
- _isSignUpMode
- ? l10n.loginSwitchToSignIn
- : l10n.loginSwitchToSignUp,
- ),
- ),
- ),
- ],
- ),
- ),
- const SizedBox(height: AppSpacing.lg),
- Text(
- l10n.loginSecurityNote,
- textAlign: TextAlign.center,
- style: theme.textTheme.bodySmall,
- ),
- ],
- ),
- ),
- ),
- ),
- ),
- );
- }
-}
+    setState(() => _isSubmitting = true);
 
-class _LoginHero extends StatelessWidget {
- const _LoginHero();
-
- @override
- Widget build(BuildContext context) {
- final theme = Theme.of(context);
-
- return Column(
- children: [
-    Container(
-      width: 72,
-      height: 72,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.35),
-            blurRadius: 28,
-            offset: const Offset(0, 10),
+    try {
+      if (_isSignUpMode) {
+        await ref.read(signUpUseCaseProvider).call(
+          email: email,
+          password: password,
+          fullName: _nameController.text.trim(),
+        );
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.loginSignUpSuccess)),
+        );
+      } else {
+        await ref
+            .read(signInUseCaseProvider)
+            .call(email: email, password: password);
+      }
+    } on AuthWeakPasswordException {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.loginWeakPasswordError)),
+      );
+    } on AuthApiException catch (error) {
+      if (error.statusCode == '429') {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.loginRateLimitError)),
+        );
+      } else {
+        CrashReporting.capture(
+          error,
+          StackTrace.current,
+          hint: 'Erro de autenticação (API)',
+        );
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              _isSignUpMode ? l10n.loginSignUpError : l10n.loginSignInError,
+            ),
           ),
-        ],
+        );
+      }
+    } catch (error, stackTrace) {
+      CrashReporting.capture(error, stackTrace, hint: 'Erro de autenticação');
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            _isSignUpMode ? l10n.loginSignUpError : l10n.loginSignInError,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: _LoginColors.background,
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Image.asset(
-          'assets/branding/icon_official.png',
-          width: 72,
-          height: 72,
-          fit: BoxFit.cover,
+      child: Scaffold(
+        backgroundColor: _LoginColors.background,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 28,
+                vertical: 24,
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 380),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ── Logo ──
+                    Center(
+                      child: Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: _LoginColors.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _LoginColors.border,
+                            width: 1,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.asset(
+                            'assets/branding/icon_official.png',
+                            width: 72,
+                            height: 72,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    // ── Título + subtítulo ──
+                    Text(
+                      'TAREQO',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 2,
+                        color: _LoginColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _isSignUpMode
+                          ? l10n.loginSubtitleSignUp
+                          : 'Gestão simples para o seu negócio',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: _LoginColors.textSecondary,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+
+                    // ── Nome (modo cadastro) ──
+                    if (_isSignUpMode) ...[
+                      _buildLabel('Nome'),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        controller: _nameController,
+                        hint: 'Digite seu nome',
+                        icon: Icons.person_outline_rounded,
+                        textInputAction: TextInputAction.next,
+                        obscure: false,
+                        focusNode: null,
+                        focused: false,
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+
+                    // ── Email ──
+                    _buildLabel('Email'),
+                    const SizedBox(height: 8),
+                    _buildTextField(
+                      controller: _emailController,
+                      hint: 'Digite seu email',
+                      icon: Icons.mail_outline_rounded,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      obscure: false,
+                      focusNode: _emailFocus,
+                      focused: _emailFocused,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // ── Senha ──
+                    _buildLabel('Senha'),
+                    const SizedBox(height: 8),
+                    _buildTextField(
+                      controller: _passwordController,
+                      hint: 'Digite sua senha',
+                      icon: Icons.lock_outline_rounded,
+                      obscure: _obscurePassword,
+                      textInputAction: _isSignUpMode
+                          ? TextInputAction.next
+                          : TextInputAction.done,
+                      onSubmitted: (_) {
+                        if (!_isSignUpMode) _submit();
+                      },
+                      focusNode: _passwordFocus,
+                      focused: _passwordFocused,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          size: 20,
+                          color: _LoginColors.textSecondary,
+                        ),
+                        onPressed: () => setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        }),
+                      ),
+                    ),
+
+                    // ── Confirmar senha (modo cadastro) ──
+                    if (_isSignUpMode) ...[
+                      const SizedBox(height: 20),
+                      _buildLabel('Confirmar senha'),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        controller: _confirmController,
+                        hint: 'Repita a senha',
+                        icon: Icons.lock_outline_rounded,
+                        obscure: _obscureConfirm,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _submit(),
+                        focusNode: null,
+                        focused: false,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirm
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            size: 20,
+                            color: _LoginColors.textSecondary,
+                          ),
+                          onPressed: () => setState(() {
+                            _obscureConfirm = !_obscureConfirm;
+                          }),
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 32),
+
+                    // ── Botão Entrar ──
+                    SizedBox(
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: _isSubmitting ? null : _submit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _LoginColors.greenDark,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor:
+                              _LoginColors.greenDark.withValues(alpha: 0.5),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                _isSignUpMode
+                                    ? l10n.loginSignUp
+                                    : 'Entrar',
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // ── Links ──
+                    if (!_isSignUpMode)
+                      Center(
+                        child: GestureDetector(
+                          onTap: _isSubmitting ? null : _openForgotPassword,
+                          child: const Text(
+                            'Esqueceu sua senha?',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: _LoginColors.green,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: GestureDetector(
+                        onTap: _isSubmitting
+                            ? null
+                            : () => setState(() {
+                                  _isSignUpMode = !_isSignUpMode;
+                                  _confirmController.clear();
+                                }),
+                        child: RichText(
+                          text: TextSpan(
+                            text: _isSignUpMode
+                                ? 'Já tem uma conta? '
+                                : 'Ainda não tem uma conta? ',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: _LoginColors.textSecondary,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: _isSignUpMode ? 'Entrar' : 'Criar conta',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: _LoginColors.green,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 48),
+
+                    // ── Rodapé de segurança ──
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.lock_outline_rounded,
+                          size: 14,
+                          color: _LoginColors.textSecondary
+                              .withValues(alpha: 0.6),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Seus dados são protegidos com criptografia.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _LoginColors.textSecondary
+                                .withValues(alpha: 0.6),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
-    ),
-    const SizedBox(height: AppSpacing.lg),
-    FittedBox(
- fit: BoxFit.scaleDown,
- child: Text(
- 'Dumbhanengue',
- textAlign: TextAlign.center,
- // Tipografia apertada (estilo Apple): peso pesado + tracking
- // negativo — a marca tem presença de wordmark.
- style: theme.textTheme.displaySmall?.copyWith(
- fontWeight: FontWeight.w500,
- letterSpacing: -1.0,
- ),
- ),
- ),
- ],
- );
- }
+    );
+  }
+
+  // ── Helpers ──
+
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: _LoginColors.textPrimary,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool obscure = false,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
+    ValueChanged<String>? onSubmitted,
+    FocusNode? focusNode,
+    bool focused = false,
+    Widget? suffixIcon,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: _LoginColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: focused ? _LoginColors.borderFocus : _LoginColors.border,
+          width: focused ? 1.5 : 1,
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        obscureText: obscure,
+        keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        onSubmitted: onSubmitted,
+        style: const TextStyle(
+          fontSize: 15,
+          color: _LoginColors.textPrimary,
+          fontWeight: FontWeight.w400,
+        ),
+        cursorColor: _LoginColors.green,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(
+            fontSize: 15,
+            color: _LoginColors.textSecondary.withValues(alpha: 0.5),
+            fontWeight: FontWeight.w400,
+          ),
+          prefixIcon: Icon(
+            icon,
+            size: 20,
+            color: focused
+                ? _LoginColors.green
+                : _LoginColors.textSecondary.withValues(alpha: 0.7),
+          ),
+          suffixIcon: suffixIcon,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+        ),
+      ),
+    );
+  }
 }

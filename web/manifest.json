@@ -1,11 +1,11 @@
 {
-    "name": "Dumbhanengue ERP",
-    "short_name": "Dumbhanengue",
+    "name": "TAREQO",
+    "short_name": "TAREQO",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0076F6",
-    "theme_color": "#0076F6",
-    "description": "Dumbhanengue ERP — gestão empresarial multi-tenant (estoque, vendas, fiado, compras e relatórios).",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF",
+    "description": "TAREQO — gestão empresarial multi-tenant (estoque, vendas, fiado, compras e relatórios).",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

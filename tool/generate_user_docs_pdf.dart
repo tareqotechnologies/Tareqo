@@ -18,7 +18,7 @@ import 'package:pdf/pdf.dart' show TtfParser;
 
 import 'user_docs_pdf/markdown_pdf.dart';
 
-const _appName = 'Dumbhanengue ERP';
+const _appName = 'TAREQO';
 const _fontPath = 'assets/fonts/Inter-Variable.ttf';
 
 Future<void> main() async {
@@ -211,11 +211,11 @@ Future<void> main() async {
  for (final job in jobs) {
  final doc = parseMarkdown(await File(job.src).readAsString());
  final sanitized = sanitizeDoc(doc, (s) => _filter(s, ttf));
- // Título da capa: remove APENAS o sufixo "— Dumbhanengue ERP" (os
+ // Título da capa: remove APENAS o sufixo "— TAREQO" (os
  // capítulos técnicos têm travessões significativos no título, ex.
  // "01 — Vue d'ensemble" — não podem ser cortados).
  final coverTitle = sanitized.title
- .replaceFirst(RegExp(r'\s+[—–]\s*Dumbhanengue ERP\s*$'), '')
+ .replaceFirst(RegExp(r'\s+[—–]\s*TAREQO\s*$'), '')
  .trim();
  // Subtitle: primeira linha da intro, sem a sintaxe de link do markdown
  // (no PDF impresso o texto do link vale sozinho — sem URL visível).

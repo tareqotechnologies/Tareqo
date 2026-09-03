@@ -1,4 +1,4 @@
-# Auditoria de Segurança End-to-End — Dumbhanengue ERP
+# Auditoria de Segurança End-to-End — TAREQO ERP
 
 **Data:** 18 de agosto de 2026
 **Escopo:** código-fonte Flutter/Dart, configuração Android/iOS, backend Supabase (schema + RLS + RPCs), CI/CD, supply chain, privacidade.
@@ -9,18 +9,18 @@
 
 ## 1. Executive Summary
 
-O Dumbhanengue é um ERP financeiro multi-tenant (vendas, caixa, fiado, compras, relatórios) com modo **offline-first** (SQLite + outbox) e modo **SaaS** (Supabase), autenticação GoTrue, e um backend PostgreSQL com **Row Level Security em todas as tabelas** e RPCs `SECURITY DEFINER` idempotentes.
+O TAREQO é um ERP financeiro multi-tenant (vendas, caixa, fiado, compras, relatórios) com modo **offline-first** (SQLite + outbox) e modo **SaaS** (Supabase), autenticação GoTrue, e um backend PostgreSQL com **Row Level Security em todas as tabelas** e RPCs `SECURITY DEFINER` idempotentes.
 
 **Postura geral: acima da média para apps Flutter da mesma classe.** Os fundamentos estão corretos: sessão criptografada no Keychain/Keystore (não em SharedPreferences em claro), RLS por tenant+loja com triggers anti-forja, RPCs do dinheiro validadas no servidor (total = Σ itens, estoque travado com `FOR UPDATE`, idempotência por id), super-admin por tabela (não por e-mail hardcoded), backups Android desativados (`allowBackup=false` + regras de extração), R8/minify + ofuscação Dart no release, sem analytics/tracking, e CI com gate de cobertura e teste SQL/RLS real.
 
 **Riscos mais relevantes encontrados (nem todos são "falhas" — alguns são decisões com trade-off):**
 
-1. **SQLite local com criptografia parcial (corrigido em 18/08)** — o outbox `pending_ops` (vendas/fiado/compras offline) era o dado mais sensível em repouso e agora é cifrado com AES-256-GCM (chave no Keystore/Keychain). **Pendente:** o banco principal (`dumbhanengue.db`) ainda é texto claro — SQLCipher completo na Fase 1/2 (MSTG-STORAGE-1/2/8).
+1. **SQLite local com criptografia parcial (corrigido em 18/08)** — o outbox `pending_ops` (vendas/fiado/compras offline) era o dado mais sensível em repouso e agora é cifrado com AES-256-GCM (chave no Keystore/Keychain). **Pendente:** o banco principal (`tareqo.db`) ainda é texto claro — SQLCipher completo na Fase 1/2 (MSTG-STORAGE-1/2/8).
 2. **Sem pinning de certificado (corrigido em 18/08)** — o client do Supabase agora é ancorado no intermediário WE1 (`SecurityContext(withTrustedRoots: false)`): MITM com CA user-installed é rejeitado no handshake (fail-closed), verificado E2E no dispositivo real contra o Supabase. O leaf pode rotacionar (set/2026) sem quebrar o app.
 3. **`create_employee_account` grava senha via RPC e o dono a define em texto** — fluxo documentado e justificado (atomicidade), mas a senha trafega como parâmetro e o dono a vê/define. Sem email de confirmação para funcionários (decisão de produto).
 4. **Sem MFA/biometria** para uma app que movimenta dinheiro.
 5. **Sem detecção de root/jailbreak, debugger ou tampering** — a app roda em dispositivos comprometidos sem aviso.
-6. **iOS: sem exclusão de backup explícita dos arquivos locais (corrigido em 18/08)** — `BackupExclusion` marca `dumbhanengue.db` + `product_images` como excluídos do backup do iCloud/iTunes (`NSURLIsExcludedFromBackupKey`) via channel nativo; no-op fora do iOS.
+6. **iOS: sem exclusão de backup explícita dos arquivos locais (corrigido em 18/08)** — `BackupExclusion` marca `tareqo.db` + `product_images` como excluídos do backup do iCloud/iTunes (`NSURLIsExcludedFromBackupKey`) via channel nativo; no-op fora do iOS.
 7. **Web: sessão no localStorage** (limitação documentada do `flutter_secure_storage` 10.x) — a web é superfície adicional com criptografia fraca.
 8. **Rate limiting** — dependente do plano/configuração do Supabase (GoTrue tem limites por IP por padrão; RPCs customizadas dependem de configuração externa). Necessita validação no dashboard.
 
@@ -32,13 +32,13 @@ O Dumbhanengue é um ERP financeiro multi-tenant (vendas, caixa, fiado, compras,
 
 | Superfície | Descrição | Exposição |
 |---|---|---|
-| **App Android/iOS** | APK/IPA com secrets embutidos (anon key, SENTRY_DSN, URL Supabase), SQLite local, outbox offline, deep links `dumbhanengue://callback` | Atacante com o binário: extração de secrets, engenharia reversa, repackaging |
-| **Armazenamento local** | `dumbhanengue.db` (SQLite), `product_images/*.jpg`, outbox `pending_ops` (payloads JSON de vendas/fiado/compras) | Root/JB, backup não cifrado, malware com acesso ao sandbox, extração de dados |
+| **App Android/iOS** | APK/IPA com secrets embutidos (anon key, SENTRY_DSN, URL Supabase), SQLite local, outbox offline, deep links `tareqo://callback` | Atacante com o binário: extração de secrets, engenharia reversa, repackaging |
+| **Armazenamento local** | `tareqo.db` (SQLite), `product_images/*.jpg`, outbox `pending_ops` (payloads JSON de vendas/fiado/compras) | Root/JB, backup não cifrado, malware com acesso ao sandbox, extração de dados |
 | **Rede** | HTTPS para `*.supabase.co` (GoTrue, PostgREST, Storage, Realtime WebSocket), Sentry | MITM ativo (CA malicioso/proxy), sniffer passivo, downgrade |
 | **API Supabase** | ~17 RPCs `SECURITY DEFINER` (process_sale, register_debt, settle_debt, process_purchase, cancel_sale, close_cash_register, adjust_product_stock, create_employee_account, set_employee_active, update_tenant_settings, get_*...) + PostgREST CRUD com RLS | Atacante autenticado (cliente adulterado), IDOR/BOLA, mass assignment, race conditions |
 | **Admin console** | Super admin (tabela `super_admins`), decisões de tenant/plano, audit log | Comprometimento da conta admin = controle total multi-tenant |
 | **CI/CD** | GitHub Actions (ci/release/ios/ipa), Fastlane, secrets (keystore, Play, Apple, Supabase prod) | Supply chain, secrets vazados em logs/artefatos |
-| **Deep links** | `dumbhanengue://callback` (Android intent-filter + iOS CFBundleURLTypes) | Aplicativo malicioso registrando o mesmo scheme (Android) |
+| **Deep links** | `tareqo://callback` (Android intent-filter + iOS CFBundleURLTypes) | Aplicativo malicioso registrando o mesmo scheme (Android) |
 | **Web** | Build web (session em localStorage, sem secure storage) | XSS na origem, roubo de sessão via localStorage |
 
 ---
@@ -89,11 +89,11 @@ Auth (login/senha/recovery) · sessão persistida · RPCs de dinheiro · RLS/tri
 | **V5** | Senha de funcionário definida/visível pelo dono e trafegada via RPC | **Média** | 4.8 | `create_employee_account`, `stores_screen.dart` | Aberta (decisão documentada) |
 | **V6** | Web: sessão em localStorage (sem secure storage) | **Média** | 4.3 | `SupabaseBootstrap` (kIsWeb) | Limitação documentada |
 | **V7** | Rate limiting de RPCs/endpoints não verificável do repo | **Média** | — | Supabase dashboard | **Necessita validação** |
-| **V8** | Deep link custom scheme `dumbhanengue://` — hijack em Android | **Baixa** | 3.7 | `AndroidManifest.xml`, `Info.plist`, `DeepLinkHandler` | **Parcialmente corrigida (18/08):** URI validada (scheme+host exatos) antes do gotrue; registro do scheme no SO inalterado |
+| **V8** | Deep link custom scheme `tareqo://` — hijack em Android | **Baixa** | 3.7 | `AndroidManifest.xml`, `Info.plist`, `DeepLinkHandler` | **Parcialmente corrigida (18/08):** URI validada (scheme+host exatos) antes do gotrue; registro do scheme no SO inalterado |
 | **V9** | iOS sem exclusão explícita de backup dos arquivos locais | **Baixa** | 3.3 | `app_database_io.dart`, `product_image_store_local.dart` | **Corrigida (18/08):** `BackupExclusion` (facade condicional) + channel nativo no `AppDelegate.swift` setando `NSURLIsExcludedFromBackupKey` no DB e no diretório de fotos; no-op fora do iOS; best-effort (falha nunca derruba o boot) |
 | **V10** | `changePassword` reautentica e troca senha (correto) — mas sem rate limit visível no client | **Baixa** | 3.1 | `supabase_auth_remote_data_source.dart` | Parcialmente mitigada (GoTrue limita) |
 | **V11** | Secrets embutidos no binário (anon key, SENTRY_DSN, URL) — esperado, mas enumerável | **Info** | 2.0 | `supabase_config.dart`, `crash_reporting.dart` | Aceito por design |
-| **V12** | `app_links` recebe qualquer URI `dumbhanengue://` e passa a `getSessionFromUrl` | **Baixa** | 3.1 | `deep_link_handler.dart` | **Corrigida (18/08):** `isAuthCallbackUri` (scheme+host exatos) filtra cold e warm start |
+| **V12** | `app_links` recebe qualquer URI `tareqo://` e passa a `getSessionFromUrl` | **Baixa** | 3.1 | `deep_link_handler.dart` | **Corrigida (18/08):** `isAuthCallbackUri` (scheme+host exatos) filtra cold e warm start |
 | **V13** | Audit log não cobre operações de negócio (só decisões de admin) | **Info** | 2.6 | `schema.sql` (triggers) | Melhoria |
 | **V14** | Artefatos de release do CI carregam símbolos (`build/symbols`) no GitHub Actions | **Info** | 2.2 | `release.yml`, `ipa.yml` | **Corrigida (18/08):** `retention-days: 14` no artefato de símbolos |
 
@@ -103,10 +103,10 @@ Auth (login/senha/recovery) · sessão persistida · RPCs de dinheiro · RLS/tri
 
 > **Implementado em 18/08/2026:** V1 (outbox) · V2 (pinning) · V8 (parcial — validação de URI) · V9 · V12 · V14. Os itens marcados como **pendente** continuam abertos.
 
-1. **V1 (parcial — FEITO):** o outbox `pending_ops` agora é cifrado com **AES-256-GCM** (`PendingOpPayloadCipher`, chave no Keystore/Keychain) — `pending_op_queue_sqlite_impl.dart` + wire no `ServiceLocator`. **Pendente:** DB principal (`dumbhanengue.db`) com SQLCipher (Fase 1/2).
-2. **V8 (parcial — FEITO):** `DeepLinkHandler.isAuthCallbackUri` valida scheme+host exatos (`dumbhanengue://callback`) antes de tocar o gotrue. **Pendente:** verificação de handler padrão no Android (App Links).
+1. **V1 (parcial — FEITO):** o outbox `pending_ops` agora é cifrado com **AES-256-GCM** (`PendingOpPayloadCipher`, chave no Keystore/Keychain) — `pending_op_queue_sqlite_impl.dart` + wire no `ServiceLocator`. **Pendente:** DB principal (`tareqo.db`) com SQLCipher (Fase 1/2).
+2. **V8 (parcial — FEITO):** `DeepLinkHandler.isAuthCallbackUri` valida scheme+host exatos (`tareqo://callback`) antes de tocar o gotrue. **Pendente:** verificação de handler padrão no Android (App Links).
 3. **V12 (FEITO):** `initialUri` (cold start) e URIs do stream (warm start) filtrados pela mesma validação antes de `getSessionFromUrl`.
-4. **V9 (FEITO):** `BackupExclusion` (facade condicional + channel nativo no `AppDelegate.swift`) seta `NSURLIsExcludedFromBackupKey` no `dumbhanengue.db` e no diretório `product_images`; no-op fora do iOS; best-effort.
+4. **V9 (FEITO):** `BackupExclusion` (facade condicional + channel nativo no `AppDelegate.swift`) seta `NSURLIsExcludedFromBackupKey` no `tareqo.db` e no diretório `product_images`; no-op fora do iOS; best-effort.
 5. **V5 (parcial):** forçar `ChangePasswordSheet`/troca de senha no primeiro login do funcionário (senha temporária). Esforço: ~1 dia.
 6. **V13:** estender o audit log com triggers de escrita nas tabelas de dinheiro (ou pelo menos `sales`/`financial_transactions`). Esforço: ~1 dia.
 7. **V14 (FEITO):** artefato `dart-symbols` com `retention-days: 14` (janela curta de re-engenharia a partir do CI).
@@ -117,7 +117,7 @@ Auth (login/senha/recovery) · sessão persistida · RPCs de dinheiro · RLS/tri
 
 ### V1 — SQLite sem criptografia (Alta)
 
-**Evidência:** `app_database_io.dart` abre `sqlite3.open(documents/dumbhanengue.db)` sem SQLCipher; `_schemaV1/_schemaV2` criam tabelas de vendas, caixa, fiado e `pending_ops` (outbox com payload JSON completo) em texto claro. Tokens **estão** protegidos (Keychain/Keystore — correto), mas os dados de negócio não.
+**Evidência:** `app_database_io.dart` abre `sqlite3.open(documents/tareqo.db)` sem SQLCipher; `_schemaV1/_schemaV2` criam tabelas de vendas, caixa, fiado e `pending_ops` (outbox com payload JSON completo) em texto claro. Tokens **estão** protegidos (Keychain/Keystore — correto), mas os dados de negócio não.
 
 **Cenário:** dispositivo com root/JB, ou backup (Android/iOS) extraído, ou malware com acesso ao sandbox → lê histórico de vendas, fiado com nomes de clientes, valores, NUIT.
 
@@ -180,7 +180,7 @@ Future<Database> openEncryptedDb(String path, SecureStorageService secure) async
 // local_auth: ^2.x — gate biométrico antes de revelar a sessão restaurada
 final auth = LocalAuthentication();
 final ok = await auth.authenticate(
-  localizedReason: 'Desbloqueie o Dumbhanengue com sua digital/Face ID',
+  localizedReason: 'Desbloqueie o TAREQO com sua digital/Face ID',
   options: const AuthenticationOptions(biometricOnly: true, stickyAuth: true),
 );
 if (!ok) return; // permanece na tela de login
@@ -340,7 +340,7 @@ if (isRooted || isDebug) {
 1. **Dinâmico — MITM:** mitmproxy com CA próprio → handshake deve falhar após pinning (ou, hoje, deve falhar se a CA não estiver no trust store — verificar que **nenhum** cleartext é aceito).
 2. **Estático — secrets:** `grep -r "service_role\|SUPABASE_SERVICE"` no APK extraído (`unzip -p app.apk` + `strings`) → nenhum secret privado.
 3. **Armazenamento:** `adb backup` / iCloud → nenhum arquivo financeiro em backup (após V9); `hexdump` do DB → ilegível (após V1).
-4. **Deep links:** `adb shell am start -a android.intent.action.VIEW -d "dumbhanengue://callback?code=..."` → fluxo correto; `dumbhanengue://evil` → rejeitado.
+4. **Deep links:** `adb shell am start -a android.intent.action.VIEW -d "tareqo://callback?code=..."` → fluxo correto; `tareqo://evil` → rejeitado.
 5. **IDOR/BOLA:** com JWT de um funcionário da loja A, tentar ler/gravar dados da loja B via PostgREST direto (fora do app) → RLS deve negar.
 6. **RPC abuse:** chamar `process_sale` com total adulterado, estoque insuficiente, id duplicado → rejeitado/idempotente.
 7. **Privilege escalation:** funcionário `employee` chama `process_purchase`/`close_cash_register`/`adjust_product_stock` → negado; `manager` → permitido.

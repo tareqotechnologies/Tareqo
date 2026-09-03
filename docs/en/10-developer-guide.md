@@ -1,6 +1,6 @@
 # 10 — Developer Guide
 
-Practical guide to run, test and evolve Dumbhanengue ERP.
+Practical guide to run, test and evolve TAREQO ERP.
 
 ---
 

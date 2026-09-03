@@ -1,4 +1,4 @@
-# Troubleshooting — Dumbhanengue ERP (resolução de problemas)
+# Troubleshooting — TAREQO ERP (resolução de problemas)
 
 Guia prático para resolver os problemas mais comuns do app no dia a dia. Para aprender a usar o sistema, veja o [Guia do Usuário](GUIA_DO_USUARIO.md).
 
@@ -38,7 +38,7 @@ Guia prático para resolver os problemas mais comuns do app no dia a dia. Para a
 2. Confirme que a foto foi mesmo selecionada (a pré-visualização aparece antes de guardar).
 
 ### "Ao tirar foto / escolher da galeria, nada acontece"
-1. O telefone pede **permissão de câmara/armazenamento** — aceite. Se recusou antes: **Definições do telefone → Aplicações → Dumbhanengue → Permissões** e ative Câmara/Arquivos.
+1. O telefone pede **permissão de câmara/armazenamento** — aceite. Se recusou antes: **Definições do telefone → Aplicações → TAREQO → Permissões** e ative Câmara/Arquivos.
 2. Feche e abra o app e tente de novo.
 
 ### "Aparece 'Produto adicionado! (foto não enviada…)'"
@@ -179,7 +179,7 @@ Contacte o suporte quando:
 **Para ajudar o suporte, tenha à mão:**
 1. A **mensagem exata** que aparece no ecrã (ou um print/ecrã).
 2. O que estava a fazer quando o erro aconteceu (ex.: "registar venda de 3 produtos").
-3. O **telefone/modelo** e a **versão do app** (Definições do telefone → Aplicações → Dumbhanengue).
+3. O **telefone/modelo** e a **versão do app** (Definições do telefone → Aplicações → TAREQO).
 4. A **loja** e o **horário** aproximado do problema.
 
 ---

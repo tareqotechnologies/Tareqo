@@ -5,11 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/store_context.dart';
 
-import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
-import 'package:dumbhanengue/domain/usecases/add_financial_transaction_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/finance_providers.dart';
-import 'package:dumbhanengue/presentation/screens/financial/add_transaction_sheet.dart';
-import 'package:dumbhanengue/presentation/widgets/app_sheet.dart';
+import 'package:tareqo/domain/entities/financial_transaction.dart';
+import 'package:tareqo/domain/usecases/add_financial_transaction_use_case.dart';
+import 'package:tareqo/presentation/controllers/finance_providers.dart';
+import 'package:tareqo/presentation/screens/financial/add_transaction_sheet.dart';
+import 'package:tareqo/presentation/widgets/app_sheet.dart';
 
 /// Fake do [AddFinancialTransactionUseCase] que registra a chamada.
 class _FakeAddTransactionUseCase implements AddFinancialTransactionUseCase {

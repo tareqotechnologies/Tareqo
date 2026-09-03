@@ -27,7 +27,7 @@ if (hasReleaseKeystore) {
 }
 
 android {
-    namespace = "com.dumbhanengue.dumbhanengue"
+    namespace = "com.tareqo.tareqo"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -44,7 +44,7 @@ android {
         // sufixo `.dev` — os dois podem coexistir no mesmo dispositivo.
         // ⚠️ O package de produção é imutável após o primeiro upload ao Play
         // Console (a Play associa o app ao applicationId).
-        applicationId = "com.dumbhanengue.dumbhanengue"
+        applicationId = "com.tareqo.tareqo"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -91,9 +91,9 @@ android {
     }
 
     // Flavors de ambiente (auditoria 2.4 — configuração por ambiente):
-    //   dev  → applicationId `com.dumbhanengue.dumbhanengue.dev`, label
-    //          "Dumbhanengue Dev"; nunca publicável no Play.
-    //   prod → applicationId de produção `com.dumbhanengue.dumbhanengue`.
+    //   dev  → applicationId `com.tareqo.tareqo.dev`, label
+    //          "TAREQO Dev"; nunca publicável no Play.
+    //   prod → applicationId de produção `com.tareqo.tareqo`.
     // Os dart-defines obrigatórios (SUPABASE_URL, SUPABASE_ANON_KEY,
     // FLUTTER_APP_FLAVOR) são fornecidos via --dart-define-from-file
     // (env/dev.env e env/prod.env) ou --dart-define no build.

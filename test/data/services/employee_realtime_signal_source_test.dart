@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/data/services/empty_employee_realtime_signal_source.dart';
-import 'package:dumbhanengue/data/services/supabase_employee_realtime_signal_source.dart';
+import 'package:tareqo/data/services/empty_employee_realtime_signal_source.dart';
+import 'package:tareqo/data/services/supabase_employee_realtime_signal_source.dart';
 
 void main() {
  group('EmptyEmployeeRealtimeSignalSource (modo local)', () {

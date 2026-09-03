@@ -6,12 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/app_user.dart';
-import 'package:dumbhanengue/domain/entities/auth_event.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/repositories/i_auth_repository.dart';
-import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
-import 'package:dumbhanengue/presentation/screens/account/tenant_rejected_screen.dart';
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/entities/auth_event.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/repositories/i_auth_repository.dart';
+import 'package:tareqo/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/presentation/screens/account/tenant_rejected_screen.dart';
 
 /// Fake do [IAuthRepository] para exercitar o botão "Sair da conta".
 class _FakeAuthRepository implements IAuthRepository {

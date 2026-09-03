@@ -27,6 +27,26 @@ abstract final class AppColors {
 
  static Color of(Brightness brightness, Color dark, Color light) =>
  brightness == Brightness.light ? light : dark;
+
+ // ── Status semânticos (centralizados) ──
+ static const Color success = Color(0xFF16A34A);
+ static const Color successLight = Color(0xFF15803D);
+ static const Color statusError = Color(0xFFDC2626);
+ static const Color statusWarning = Color(0xFFF59E0B);
+ static const Color statusInfo = Color(0xFF3B82F6);
+ static const Color statusPurple = Color(0xFF7C3AED);
+ static const Color statusIndigo = Color(0xFF6366F1);
+ static const Color statusTeal = Color(0xFF10B981);
+
+ // ── Cores de erro (modo claro/escuro) ──
+ static Color errorOf(Brightness brightness) =>
+ brightness == Brightness.light ? statusError : const Color(0xFFF87171);
+
+ static Color successOf(Brightness brightness) =>
+ brightness == Brightness.light ? success : successLight;
+
+ static Color warningOf(Brightness brightness) =>
+ brightness == Brightness.light ? statusWarning : const Color(0xFFFBBF24);
 }
 
 extension AppColorsTheme on ThemeData {
@@ -136,10 +156,10 @@ abstract final class AppTheme {
       titleSpacing: AppSpacing.lg,
       toolbarHeight: 56,
       titleTextStyle: TextStyle(
-        fontSize: 22,
-        fontWeight: FontWeight.w500,
-        letterSpacing: -0.35,
-        height: 1.25,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.3,
+        height: 1.3,
         color: scheme.onSurface,
       ),
  iconTheme: IconThemeData(color: scheme.onSurface, size: 22),
@@ -164,15 +184,14 @@ abstract final class AppTheme {
  horizontal: AppSpacing.md,
  vertical: AppSpacing.md,
  ),
- prefixIconColor: scheme.onSurfaceVariant,
- labelStyle: TextStyle(
- fontSize: 13,
- fontWeight: FontWeight.w400,
- color: scheme.onSurfaceVariant,
+ prefixIconColor: scheme.onSurfaceVariant, labelStyle: TextStyle(
+   fontSize: 12,
+   fontWeight: FontWeight.w400,
+   color: scheme.onSurfaceVariant,
  ),
  floatingLabelStyle: const TextStyle(
- fontSize: 13,
- fontWeight: FontWeight.w500,
+   fontSize: 12,
+   fontWeight: FontWeight.w500,
  ),
  hintStyle: TextStyle(fontSize: 14, color: scheme.onSurfaceVariant),
  border: OutlineInputBorder(
@@ -201,13 +220,12 @@ abstract final class AppTheme {
  style: FilledButton.styleFrom(
  minimumSize: const Size(0, AppSizes.touchTarget),
  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
- shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
- textStyle: const TextStyle(
- fontSize: 15,
- fontWeight: FontWeight.w400,
- letterSpacing: -0.1,
- ),
- ),
+ shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),     textStyle: const TextStyle(
+       fontSize: 14,
+       fontWeight: FontWeight.w500,
+       letterSpacing: 0,
+     ),
+   ),
  ),    outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(0, AppSizes.touchTarget),
@@ -215,9 +233,9 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
         side: BorderSide(color: scheme.outlineVariant),
         textStyle: const TextStyle(
-          fontSize: 15,
+          fontSize: 14,
           fontWeight: FontWeight.w500,
-          letterSpacing: -0.1,
+          letterSpacing: 0,
         ),
       ),
     ),
@@ -248,7 +266,7 @@ abstract final class AppTheme {
       shape: const StadiumBorder(),
       side: BorderSide.none,
       labelStyle: TextStyle(
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: FontWeight.w500,
         color: scheme.onSurfaceVariant,
       ),
@@ -318,10 +336,10 @@ abstract final class AppTheme {
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.xlAll),
       titleTextStyle: TextStyle(
-        fontSize: 22,
-        fontWeight: FontWeight.w500,
-        letterSpacing: -0.35,
-        height: 1.27,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.3,
+        height: 1.3,
         color: scheme.onSurface,
         fontFeatures: const [FontFeature.tabularFigures()],
       ),
@@ -333,11 +351,11 @@ abstract final class AppTheme {
  shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
  backgroundColor: isLight
  ? const Color(0xFF18181B)
- : const Color(0xFFFAFAFA),
- contentTextStyle: TextStyle(
- fontSize: 14,
- fontWeight: FontWeight.w500,
- color: isLight ? Colors.white : const Color(0xFF18181B),
+ : const Color(0xFFFAFAFA), contentTextStyle: TextStyle(
+   fontSize: 14,
+   fontWeight: FontWeight.w500,
+   letterSpacing: 0,
+   color: isLight ? Colors.white : const Color(0xFF18181B),
  ),
  ),
 
@@ -363,108 +381,107 @@ abstract final class AppTheme {
  RoundedRectangleBorder(borderRadius: AppRadius.smAll),
  ),
  ),
- ),
-
- textTheme: TextTheme(
- // Escala modular Apple HIG/SF Pro (spec executável — ver
- // test/core/theme/typography_scale_test.dart): 34/28/24/22/20/17/15/
- // 14/13/12/11; títulos ≥20px usam o corte Display da Inter (opsz).
+ ),textTheme: TextTheme(
+ // Escala minimalista padronizada: 32/24/20/18/16/14/12/11.
+ // Pesos: w400 (corpo), w500 (labels), w600 (títulos).
  displaySmall: TextStyle(
- fontSize: 34,
- fontWeight: FontWeight.w300,
- letterSpacing: -0.6,
- height: 1.2,
- color: scheme.onSurface,
- fontFeatures: const [FontFeature.tabularFigures()],
- fontVariations: const [FontVariation('opsz', 32)],
+   fontSize: 32,
+   fontWeight: FontWeight.w400,
+   letterSpacing: -0.5,
+   height: 1.2,
+   color: scheme.onSurface,
+   fontFeatures: const [FontFeature.tabularFigures()],
+   fontVariations: const [FontVariation('opsz', 32)],
  ),
  headlineMedium: TextStyle(
- fontSize: 28,
- fontWeight: FontWeight.w300,
- letterSpacing: -0.5,
- height: 1.2,
- color: scheme.onSurface,
- fontFeatures: const [FontFeature.tabularFigures()],
- fontVariations: const [FontVariation('opsz', 32)],
- ),    headlineSmall: TextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.w400,
-      letterSpacing: -0.4,
-      height: 1.25,
-      color: scheme.onSurface,
-      fontFeatures: const [FontFeature.tabularFigures()],
-      fontVariations: const [FontVariation('opsz', 32)],
-    ),
-    titleLarge: TextStyle(
-      fontSize: 22,
-      fontWeight: FontWeight.w400,
-      letterSpacing: -0.35,
-      height: 1.27,
-      color: scheme.onSurface,
-      fontFeatures: const [FontFeature.tabularFigures()],
-      fontVariations: const [FontVariation('opsz', 24)],
-    ),
-    titleMedium: TextStyle(
-      fontSize: 20,
-      fontWeight: FontWeight.w400,
-      letterSpacing: -0.3,
-      height: 1.3,
-      color: scheme.onSurface,
-      fontFeatures: const [FontFeature.tabularFigures()],
-      fontVariations: const [FontVariation('opsz', 24)],
-    ),
-    titleSmall: TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      letterSpacing: -0.15,
-      height: 1.35,
-      color: scheme.onSurface,
-    ),
+   fontSize: 24,
+   fontWeight: FontWeight.w600,
+   letterSpacing: -0.4,
+   height: 1.25,
+   color: scheme.onSurface,
+   fontFeatures: const [FontFeature.tabularFigures()],
+   fontVariations: const [FontVariation('opsz', 32)],
+ ),
+ headlineSmall: TextStyle(
+   fontSize: 20,
+   fontWeight: FontWeight.w600,
+   letterSpacing: -0.3,
+   height: 1.3,
+   color: scheme.onSurface,
+   fontFeatures: const [FontFeature.tabularFigures()],
+   fontVariations: const [FontVariation('opsz', 24)],
+ ),
+ titleLarge: TextStyle(
+   fontSize: 20,
+   fontWeight: FontWeight.w500,
+   letterSpacing: -0.3,
+   height: 1.3,
+   color: scheme.onSurface,
+   fontFeatures: const [FontFeature.tabularFigures()],
+   fontVariations: const [FontVariation('opsz', 24)],
+ ),
+ titleMedium: TextStyle(
+   fontSize: 18,
+   fontWeight: FontWeight.w500,
+   letterSpacing: -0.2,
+   height: 1.35,
+   color: scheme.onSurface,
+   fontFeatures: const [FontFeature.tabularFigures()],
+   fontVariations: const [FontVariation('opsz', 20)],
+ ),
+ titleSmall: TextStyle(
+   fontSize: 14,
+   fontWeight: FontWeight.w500,
+   letterSpacing: -0.1,
+   height: 1.35,
+   color: scheme.onSurface,
+ ),
  bodyLarge: TextStyle(
- fontSize: 17,
- fontWeight: FontWeight.w400,
- letterSpacing: -0.1,
- height: 1.4,
- color: scheme.onSurface,
- fontFeatures: const [FontFeature.tabularFigures()],
+   fontSize: 16,
+   fontWeight: FontWeight.w400,
+   letterSpacing: 0,
+   height: 1.4,
+   color: scheme.onSurface,
+   fontFeatures: const [FontFeature.tabularFigures()],
  ),
  bodyMedium: TextStyle(
- fontSize: 15,
- fontWeight: FontWeight.w400,
- letterSpacing: -0.1,
- height: 1.4,
- color: scheme.onSurface,
- fontFeatures: const [FontFeature.tabularFigures()],
+   fontSize: 14,
+   fontWeight: FontWeight.w400,
+   letterSpacing: 0,
+   height: 1.4,
+   color: scheme.onSurface,
+   fontFeatures: const [FontFeature.tabularFigures()],
  ),
  bodySmall: TextStyle(
- fontSize: 13,
- fontWeight: FontWeight.w400,
- letterSpacing: 0,
- height: 1.35,
- color: scheme.onSurfaceVariant,
- fontFeatures: const [FontFeature.tabularFigures()],
- ),    labelLarge: TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0,
-      height: 1.25,
-      color: scheme.onSurface,
-    ),
-    labelMedium: TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0,
-      height: 1.25,
-      color: scheme.onSurfaceVariant,
-    ),
+   fontSize: 12,
+   fontWeight: FontWeight.w400,
+   letterSpacing: 0,
+   height: 1.35,
+   color: scheme.onSurfaceVariant,
+   fontFeatures: const [FontFeature.tabularFigures()],
+ ),
+ labelLarge: TextStyle(
+   fontSize: 14,
+   fontWeight: FontWeight.w500,
+   letterSpacing: 0,
+   height: 1.25,
+   color: scheme.onSurface,
+ ),
+ labelMedium: TextStyle(
+   fontSize: 12,
+   fontWeight: FontWeight.w500,
+   letterSpacing: 0,
+   height: 1.25,
+   color: scheme.onSurfaceVariant,
+ ),
  labelSmall: TextStyle(
- fontSize: 11,
- fontWeight: FontWeight.w500,
- letterSpacing: 0.2,
- height: 1.25,
- color: scheme.onSurfaceVariant,
+   fontSize: 11,
+   fontWeight: FontWeight.w500,
+   letterSpacing: 0.2,
+   height: 1.25,
+   color: scheme.onSurfaceVariant,
  ),
- ),
+),
  );
  }
 }

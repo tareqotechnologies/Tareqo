@@ -4,13 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/app_user.dart';
-import 'package:dumbhanengue/domain/entities/plan.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/usecases/get_plans_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/request_tenant_access_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/screens/account/tenant_onboarding_screen.dart';
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/entities/plan.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/usecases/get_plans_use_case.dart';
+import 'package:tareqo/domain/usecases/request_tenant_access_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/screens/account/tenant_onboarding_screen.dart';
 
 class _FakeGetPlansUseCase implements GetPlansUseCase {
  @override

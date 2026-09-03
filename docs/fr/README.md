@@ -1,6 +1,6 @@
-# Documentation du Dumbhanengue ERP (français)
+# Documentation du TAREQO ERP (français)
 
-Bienvenue dans la documentation complète du **Dumbhanengue ERP** — système de gestion d'entreprise (stock, ventes, finances et suivi du crédit/« fiado ») construit en Flutter avec **Clean Architecture**.
+Bienvenue dans la documentation complète du **TAREQO ERP** — système de gestion d'entreprise (stock, ventes, finances et suivi du crédit/« fiado ») construit en Flutter avec **Clean Architecture**.
 
 > **Langue :** ceci est la version française. La documentation portugaise vit dans ([`docs/pt/`](../pt/README.md)) et la version anglaise dans ([`docs/en/`](../en/README.md)).
 >

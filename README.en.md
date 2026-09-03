@@ -1,4 +1,4 @@
-# Dumbhanengue ERP
+# TAREQO ERP
 
 > Multi-tenant business management system (inventory, sales, purchases, finance, credit and reports) built in **Flutter** with **Clean Architecture** — with local persistence (SQLite), authenticated SaaS (Supabase + RLS) and a **pt/en/fr** interface.
 
@@ -13,7 +13,7 @@
 
 ## Overview
 
-**Dumbhanengue ERP** is an app for small merchants to run their business: **inventory** control, **sales** (with atomic stock decrement and cash inflow), **purchases**, **cash flow**, **customers**, **credit ("fiado")** and **reports**. The owner manages **stores and employees** per tenant, chooses the **language (pt/en/fr)** and **currency (BRL, USD, EUR, MZN)**, and each store has its own data scope — everything isolated by authentication and server-side *Row Level Security*.
+**TAREQO ERP** is an app for small merchants to run their business: **inventory** control, **sales** (with atomic stock decrement and cash inflow), **purchases**, **cash flow**, **customers**, **credit ("fiado")** and **reports**. The owner manages **stores and employees** per tenant, chooses the **language (pt/en/fr)** and **currency (BRL, USD, EUR, MZN)**, and each store has its own data scope — everything isolated by authentication and server-side *Row Level Security*.
 
 ## Features
 

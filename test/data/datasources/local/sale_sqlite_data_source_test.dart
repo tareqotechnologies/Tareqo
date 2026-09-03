@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import 'package:dumbhanengue/data/datasources/local/sale_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_item.dart';
+import 'package:tareqo/data/datasources/local/sale_sqlite_data_source_impl.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_item.dart';
 
 import '../../../helpers/test_sqlite.dart';
 

@@ -74,7 +74,7 @@ flutter build appbundle --flavor prod --release \
 2. `signUp(email, password, data: {'full_name': ...})`;
 3. With **email confirmation enabled** (Supabase default), `response.user` may be `null` — the account is created but the session only comes after confirmation. The UI shows: *"Conta criada! Confirme seu e-mail para entrar."*
 4. In that case the datasource returns an `AppUser` with a **placeholder id** (`fallbackEmail`) — **no data must be associated with this id**; the real session arrives after confirmation.
-5. **Deep link (Aug 8):** the confirmation link in the email points to `dumbhanengue://callback` (the project `site_url`) — the OS opens the app, and the `DeepLinkHandler` (`lib/core/network/deep_link_handler.dart`, `app_links` package) hands the URI to gotrue (`getSessionFromUrl`), which completes the confirmation and the session stream reacts on its own. Without this, the link landed on `http://localhost:3000` (default) and the confirmation never completed.
+5. **Deep link (Aug 8):** the confirmation link in the email points to `tareqo://callback` (the project `site_url`) — the OS opens the app, and the `DeepLinkHandler` (`lib/core/network/deep_link_handler.dart`, `app_links` package) hands the URI to gotrue (`getSessionFromUrl`), which completes the confirmation and the session stream reacts on its own. Without this, the link landed on `http://localhost:3000` (default) and the confirmation never completed.
 
 > **Email send rate limit (Aug 8):** on the free plan, when the sending quota
 > is exhausted (~2/hour), GoTrue answers **429 "email rate limit exceeded"** —

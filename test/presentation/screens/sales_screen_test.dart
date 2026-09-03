@@ -6,15 +6,15 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
-import 'package:dumbhanengue/domain/entities/sale_item.dart';
-import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
-import 'package:dumbhanengue/presentation/controllers/sales_providers.dart';
-import 'package:dumbhanengue/presentation/screens/sales/sales_screen.dart';
-import 'package:dumbhanengue/presentation/widgets/payment_filter.dart';
-import 'package:dumbhanengue/presentation/widgets/period_filter.dart';
-import 'package:dumbhanengue/presentation/widgets/sale_card.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_lot_consumption.dart';
+import 'package:tareqo/domain/entities/sale_item.dart';
+import 'package:tareqo/domain/repositories/i_sale_repository.dart';
+import 'package:tareqo/presentation/controllers/sales_providers.dart';
+import 'package:tareqo/presentation/screens/sales/sales_screen.dart';
+import 'package:tareqo/presentation/widgets/payment_filter.dart';
+import 'package:tareqo/presentation/widgets/period_filter.dart';
+import 'package:tareqo/presentation/widgets/sale_card.dart';
 
 import '../../helpers/store_context.dart';
 

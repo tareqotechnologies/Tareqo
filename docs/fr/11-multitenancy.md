@@ -1,6 +1,6 @@
 # 11 — Multi-tenant, Forfaits et Super Admin
 
-La couche **Comptes** transforme Dumbhanengue en SaaS avec approbation manuelle : les propriétaires s'inscrivent, choisissent un forfait et **attendent l'approbation du super administrateur** (dans les 24 h) avant de pouvoir gérer magasins et employés.
+La couche **Comptes** transforme TAREQO en SaaS avec approbation manuelle : les propriétaires s'inscrivent, choisissent un forfait et **attendent l'approbation du super administrateur** (dans les 24 h) avant de pouvoir gérer magasins et employés.
 
 ```text
 Le propriétaire s'inscrit → choisit forfait + nom de l'entreprise → tenant PENDING

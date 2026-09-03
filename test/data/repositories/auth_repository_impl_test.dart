@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/data/datasources/auth/auth_remote_data_source.dart';
-import 'package:dumbhanengue/data/repositories/auth_repository_impl.dart';
-import 'package:dumbhanengue/domain/entities/app_user.dart';
-import 'package:dumbhanengue/domain/entities/auth_event.dart';
+import 'package:tareqo/data/datasources/auth/auth_remote_data_source.dart';
+import 'package:tareqo/data/repositories/auth_repository_impl.dart';
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/entities/auth_event.dart';
 
 class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
  final _controller = StreamController<AppUser?>.broadcast();

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Android 12+ (API 31+): tela de abertura SISTÊMICA usa as novas APIs de
-     splash (windowSplashScreen*) em vez do windowBackground. Alinhada com a
-     identidade OFICIAL (v4, Aug 8): fundo @color/ic_launcher_background
-     (branco #FFFFFF) + o ícone adaptativo oficial (azul/branco). -->
+     splash (windowSplashScreen*) em vez do windowBackground. -->
 <resources>
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowSplashScreenBackground">@color/ic_launcher_background</item>

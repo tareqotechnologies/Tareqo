@@ -2,7 +2,7 @@
 
 ## Résumé
 
-Dumbhanengue suit la **Clean Architecture** en trois couches, le tout dans `lib/` :
+TAREQO suit la **Clean Architecture** en trois couches, le tout dans `lib/` :
 
 ```text
 lib/
@@ -64,7 +64,7 @@ IProductRepository (contrat du domaine)
  ↓ (implémentation injectée via GetIt)
 ProductRepositoryImpl → ProductLocalDataSource (couche data)
  ↓ (SQLite sur natif / en mémoire sur web)
-base de données dumbhanengue.db
+base de données tareqo.db
 ```
 
 La couche `presentation` ne connaît **que des abstractions** — `Product`, `GetProductsUseCase`, `IProductRepository` — jamais de datasources, de SQL ni d'implémentations concrètes.
@@ -125,7 +125,7 @@ Dans les **tests**, ces providers sont surchargés avec `overrideWithValue`/`ove
 export 'app_database_stub.dart' if (dart.library.io) 'app_database_io.dart';
 ```
 
-- **`app_database_io.dart`** — ouvre `dumbhanengue.db`, crée le schéma, ne seed jamais de données (la base démarre vide), expose des transactions réentrantes ;
+- **`app_database_io.dart`** — ouvre `tareqo.db`, crée le schéma, ne seed jamais de données (la base démarre vide), expose des transactions réentrantes ;
 - **`app_database_stub.dart`** — `openAppDatabase()` renvoie toujours `false` (le web retombe sur la mémoire).
 
 > **Attention :** **Gardez les signatures de `openAppDatabase()` et `registerDatasources()` synchronisées** entre les deux fichiers (un commentaire à ce sujet existe dans le code).

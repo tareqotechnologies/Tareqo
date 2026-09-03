@@ -146,7 +146,7 @@ class _PulseBadgeState extends State<PulseBadge>
               child: Text(
                 displayText,
                 style: const TextStyle(
-                  fontSize: 9,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),

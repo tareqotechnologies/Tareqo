@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:postgrest/postgrest.dart';
 
-import 'package:dumbhanengue/data/datasources/remote/supabase_product_data_source.dart';
+import 'package:tareqo/data/datasources/remote/supabase_product_data_source.dart';
 
 /// Teste de CONTRATO da RPC `adjust_product_stock` do datasource remoto de
 /// produtos — verifica o payload EXATO enviado ao servidor (id do produto,

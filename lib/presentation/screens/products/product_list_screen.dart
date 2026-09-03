@@ -772,6 +772,7 @@ class _ProductPhotoPicker extends StatelessWidget {
  @override
  Widget build(BuildContext context) {
  final theme = Theme.of(context);
+ final scheme = theme.colorScheme;
  final l10n = context.l10n;
  final hasImage = bytes != null || imagePath.isNotEmpty;
 
@@ -787,68 +788,79 @@ class _ProductPhotoPicker extends StatelessWidget {
  )
  : ProductImage(imagePath: imagePath, size: 76, iconSize: 30);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Preview maior (76) com borda sutil — destaque discreto da foto.
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: theme.colorScheme.outlineVariant,
-              width: 1,
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          // Preview
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: scheme.outlineVariant.withValues(alpha: 0.5),
+              ),
             ),
+            child: preview,
           ),
-          child: preview,
-        ),
-        const SizedBox(width: 12),
-        // Botões minimalistas: apenas ícones, sem texto — horizontais.
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Câmera
-            IconButton(
-              onPressed: onTakePhoto,
-              icon: const Icon(Icons.photo_camera_outlined, size: 22),
-              tooltip: l10n.productsPhotoTake,
-              style: IconButton.styleFrom(
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            // Galeria
-            IconButton(
-              onPressed: onPickGallery,
-              icon: const Icon(Icons.photo_library_outlined, size: 22),
-              tooltip: l10n.productsPhotoGallery,
-              style: IconButton.styleFrom(
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            if (hasImage) ...[
-              const SizedBox(width: 6),
-              // Remover
-              IconButton(
-                onPressed: onRemove,
-                icon: const Icon(Icons.delete_outline, size: 18),
-                tooltip: l10n.productsPhotoRemove,
-                style: IconButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+          const SizedBox(width: 14),
+          // Labels + botões
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  hasImage ? 'Foto do produto' : 'Adicionar foto',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
                   ),
                 ),
-              ),
-            ],
-          ],
-        ),
-      ],
+                const SizedBox(height: 1),
+                Text(
+                  hasImage
+                      ? 'Toque para alterar'
+                      : 'Opcional — câmera ou galeria',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _PhotoActionButton(
+                      icon: Icons.photo_camera_outlined,
+                      tooltip: l10n.productsPhotoTake,
+                      onTap: onTakePhoto,
+                    ),
+                    const SizedBox(width: 6),
+                    _PhotoActionButton(
+                      icon: Icons.photo_library_outlined,
+                      tooltip: l10n.productsPhotoGallery,
+                      onTap: onPickGallery,
+                    ),
+                    if (hasImage) ...[
+                      const SizedBox(width: 6),
+                      _PhotoActionButton(
+                        icon: Icons.delete_outline,
+                        tooltip: l10n.productsPhotoRemove,
+                        onTap: onRemove,
+                        isDestructive: true,
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
  }
 }
@@ -863,38 +875,151 @@ const _kLabelStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.w400);
 const _kFloatingLabelStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.w500);
 const _kHintStyle = TextStyle(fontSize: 11);
 
+/// Botão de ação minimalista para o seletor de foto.
+class _PhotoActionButton extends StatelessWidget {
+  const _PhotoActionButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = isDestructive
+        ? scheme.error
+        : scheme.onSurfaceVariant;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 32,
+        height: 32,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isDestructive
+              ? scheme.error.withValues(alpha: 0.08)
+              : scheme.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isDestructive
+                ? scheme.error.withValues(alpha: 0.2)
+                : scheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Icon(icon, size: 16, color: color),
+      ),
+    );
+  }
+}
+
 class _SectionLabel extends StatelessWidget {
  const _SectionLabel({required this.icon, required this.title});
 
- final IconData icon;  final String title;
+ final IconData icon;
+ final String title;
+
+ @override
+ Widget build(BuildContext context) {
+   final theme = Theme.of(context);
+   return Row(
+     mainAxisSize: MainAxisSize.min,
+     children: [
+       Container(
+         width: 24,
+         height: 24,
+         alignment: Alignment.center,
+         decoration: BoxDecoration(
+           color: IconTone.darkBackground(ModuleColors.products),
+           borderRadius: BorderRadius.circular(6),
+         ),
+         child: Icon(
+           icon,
+           size: 12,
+           color: IconTone.lightForeground(ModuleColors.products),
+         ),
+       ),
+       const SizedBox(width: 8),
+       Flexible(
+         child: FittedBox(
+           fit: BoxFit.scaleDown,
+           alignment: Alignment.centerLeft,
+           child: Text(
+             title,
+             maxLines: 1,
+             style: theme.textTheme.labelMedium?.copyWith(
+               fontWeight: FontWeight.w600,
+               letterSpacing: 0.2,
+             ),
+           ),
+         ),
+       ),
+     ],
+   );
+ }
+}
+
+class _CompactSwitch extends StatelessWidget {
+  const _CompactSwitch({
+    required this.label,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 16, color: theme.colorScheme.primary),
-        const SizedBox(width: 8),
-        // Capitalização NATURAL (nunca caixa alta): rótulos de seção
-        // legíveis, sem o grito visual de letras maiúsculas.
-        // FittedBox: encolhe em vez de estourar em telas estreitas.
-        Flexible(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              title,
-              maxLines: 1,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.4,
-              ),
+    final scheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-      ],
+          Switch(
+            value: value,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1265,23 +1390,14 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
  // (DecoratedBox) o Flutter emite a assertion "ListTile
  // background color or ink splashes may be invisible" (mesmo
  // padrão já usado no add_transaction_sheet).
- Material(
- type: MaterialType.transparency,
- child: SwitchListTile(
- contentPadding: EdgeInsets.zero,
- title: Text(l10n.productsWeighLabel),
- subtitle: Text(l10n.productsWeighHint),
+ _CompactSwitch(
+ label: l10n.productsWeighLabel,
+ subtitle: l10n.productsWeighHint,
  value: _vendaPorFracao,
  onChanged: (value) => setState(() {
  _vendaPorFracao = value;
- // W11: ao alternar, a unidade volta a um valor VÁLIDO da
- // lista do dropdown (kg/g/l/ml). Se ficasse 'un' (padrão
- // de unidade), o DropdownButtonFormField renderizaria com
- // um valor fora dos itens e lançaria a asserção "exactly
- // one item with value 'un'" — crash em produção.
  _unitLabel = value ? 'kg' : 'un';
  }),
- ),
  ),
  if (_vendaPorFracao) ...[DropdownButtonFormField<String>(
                   initialValue: _unitLabel,
@@ -1703,18 +1819,14 @@ class _EditProductSheetState extends ConsumerState<_EditProductSheet> {
         },
       ),
  const SizedBox(height: 4),
- Material(
- type: MaterialType.transparency,
- child: SwitchListTile(
- contentPadding: EdgeInsets.zero,
- title: Text(l10n.productsWeighLabel),
- subtitle: Text(l10n.productsWeighHint),
+ _CompactSwitch(
+ label: l10n.productsWeighLabel,
+ subtitle: l10n.productsWeighHint,
  value: _vendaPorFracao,
  onChanged: (value) => setState(() {
  _vendaPorFracao = value;
  _unitLabel = value ? 'kg' : 'un';
  }),
- ),
  ),
  if (_vendaPorFracao) ...[DropdownButtonFormField<String>(
                   initialValue: _unitLabel,
@@ -1739,15 +1851,11 @@ class _EditProductSheetState extends ConsumerState<_EditProductSheet> {
  title: l10n.productsSectionStatus,
  ),
  const SizedBox(height: 10),
- Material(
- type: MaterialType.transparency,
- child: SwitchListTile(
- contentPadding: EdgeInsets.zero,
- title: Text(l10n.productsActiveLabel),
- subtitle: Text(l10n.productsActiveHint),
+ _CompactSwitch(
+ label: l10n.productsActiveLabel,
+ subtitle: l10n.productsActiveHint,
  value: _isActive,
  onChanged: (value) => setState(() => _isActive = value),
- ),
  ),
  if (_formError != null) ...[
  const SizedBox(height: 14),

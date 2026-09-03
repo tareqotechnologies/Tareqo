@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
+import 'package:tareqo/domain/entities/financial_transaction.dart';
 
 void main() {
  test('status padrão é pago quando não informado', () {

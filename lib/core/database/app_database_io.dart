@@ -32,9 +32,7 @@ import '../../domain/repositories/i_unit_of_work.dart';
 /// SQLite implementam **os mesmos contratos** que os de memória — apenas
 /// o registro no ServiceLocator muda.
 abstract final class AppDatabase {
- static Database? _database;
-
- /// Abre o banco persistente (`dumbhanengue.db` em documentos) e prepara
+ static Database? _database;  /// Abre o banco persistente (`tareqo.db` em documentos) e prepara
  /// o schema. Retorna `true` quando o SQLite está ativo; `false`
  /// (sem efeitos colaterais) se a biblioteca nativa falhar — nesse caso
  /// o ServiceLocator usa os datasources em memória.
@@ -47,8 +45,7 @@ abstract final class AppDatabase {
 
  Database? db;
  try {
- final directory = await getApplicationDocumentsDirectory();
- db = sqlite3.open(p.join(directory.path, 'dumbhanengue.db'));
+ final directory = await getApplicationDocumentsDirectory();    db = sqlite3.open(p.join(directory.path, 'tareqo.db'));
  db.execute('PRAGMA foreign_keys = ON;');
  initialize(db);
  _database = db;

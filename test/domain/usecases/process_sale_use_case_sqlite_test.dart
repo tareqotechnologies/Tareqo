@@ -1,25 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import 'package:dumbhanengue/core/utils/quantity.dart';
-import 'package:dumbhanengue/data/datasources/local/financial_transaction_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/data/datasources/local/product_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/data/datasources/local/sale_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/data/datasources/local/sqlite_unit_of_work.dart';
-import 'package:dumbhanengue/data/datasources/local/stock_lot_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/data/repositories/financial_transaction_repository_impl.dart';
-import 'package:dumbhanengue/data/repositories/product_repository_impl.dart';
-import 'package:dumbhanengue/data/repositories/sale_repository_impl.dart';
-import 'package:dumbhanengue/data/repositories/stock_lot_repository_impl.dart';
-import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_item.dart';
-import 'package:dumbhanengue/domain/entities/stock_lot.dart';
-import 'package:dumbhanengue/domain/repositories/i_financial_transaction_repository.dart';
-import 'package:dumbhanengue/domain/usecases/fifo_stock_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/process_sale_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/update_product_stock_use_case.dart';
+import 'package:tareqo/core/utils/quantity.dart';
+import 'package:tareqo/data/datasources/local/financial_transaction_sqlite_data_source_impl.dart';
+import 'package:tareqo/data/datasources/local/product_sqlite_data_source_impl.dart';
+import 'package:tareqo/data/datasources/local/sale_sqlite_data_source_impl.dart';
+import 'package:tareqo/data/datasources/local/sqlite_unit_of_work.dart';
+import 'package:tareqo/data/datasources/local/stock_lot_sqlite_data_source_impl.dart';
+import 'package:tareqo/data/repositories/financial_transaction_repository_impl.dart';
+import 'package:tareqo/data/repositories/product_repository_impl.dart';
+import 'package:tareqo/data/repositories/sale_repository_impl.dart';
+import 'package:tareqo/data/repositories/stock_lot_repository_impl.dart';
+import 'package:tareqo/domain/entities/financial_transaction.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_item.dart';
+import 'package:tareqo/domain/entities/stock_lot.dart';
+import 'package:tareqo/domain/repositories/i_financial_transaction_repository.dart';
+import 'package:tareqo/domain/usecases/fifo_stock_use_case.dart';
+import 'package:tareqo/domain/usecases/process_sale_use_case.dart';
+import 'package:tareqo/domain/usecases/update_product_stock_use_case.dart';
 
 import '../../helpers/test_sqlite.dart';
 

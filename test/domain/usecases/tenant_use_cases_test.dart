@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/repositories/i_tenant_repository.dart';
-import 'package:dumbhanengue/domain/usecases/approve_tenant_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_all_tenants_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_my_tenant_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_tenants_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/reject_tenant_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/request_tenant_access_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/update_tenant_settings_use_case.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/repositories/i_tenant_repository.dart';
+import 'package:tareqo/domain/usecases/approve_tenant_use_case.dart';
+import 'package:tareqo/domain/usecases/get_all_tenants_use_case.dart';
+import 'package:tareqo/domain/usecases/get_my_tenant_use_case.dart';
+import 'package:tareqo/domain/usecases/get_pending_tenants_use_case.dart';
+import 'package:tareqo/domain/usecases/reject_tenant_use_case.dart';
+import 'package:tareqo/domain/usecases/request_tenant_access_use_case.dart';
+import 'package:tareqo/domain/usecases/update_tenant_settings_use_case.dart';
 
 class _FakeTenantRepository implements ITenantRepository {
  final List<Tenant> _tenants = [];

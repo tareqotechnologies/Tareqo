@@ -17,13 +17,19 @@ class MFAAuthUseCase {
     return enabled == 'true';
   }
 
-  /// Enable MFA for the user
-  /// Returns the secret key that should be stored in the authenticator app
-  Future<String> enable() async {
+  /// Start MFA setup: generate and store the secret, but do NOT
+  /// mark as enabled yet. The user must verify a TOTP code first.
+  /// Returns the secret key for the QR code.
+  Future<String> generateSecret() async {
     final secret = await _mfaService.generateSecret();
     await _secureStorage.write(SecureStorageKeys.mfaSecret, secret);
-    await _secureStorage.write(SecureStorageKeys.mfaEnabled, 'true');
     return secret;
+  }
+
+  /// Complete MFA setup after the user verifies a code.
+  /// Only now do we mark MFA as enabled.
+  Future<void> confirmEnable() async {
+    await _secureStorage.write(SecureStorageKeys.mfaEnabled, 'true');
   }
 
   /// Disable MFA for the user

@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:dumbhanengue/data/datasources/local/pending_op_queue.dart';
-import 'package:dumbhanengue/data/datasources/local/pending_op_queue_memory_impl.dart';
-import 'package:dumbhanengue/data/services/offline_sync_service.dart';
+import 'package:tareqo/data/datasources/local/pending_op_queue.dart';
+import 'package:tareqo/data/datasources/local/pending_op_queue_memory_impl.dart';
+import 'package:tareqo/data/services/offline_sync_service.dart';
 
 void main() {
  late PendingOpQueueMemoryImpl queue;

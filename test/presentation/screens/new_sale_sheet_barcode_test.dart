@@ -4,17 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
-import 'package:dumbhanengue/domain/repositories/i_sale_processor.dart';
-import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/process_sale_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/products_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/sales_providers.dart';
-import 'package:dumbhanengue/presentation/screens/sales/new_sale_sheet.dart';
-import 'package:dumbhanengue/presentation/widgets/app_card.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_lot_consumption.dart';
+import 'package:tareqo/domain/repositories/i_sale_processor.dart';
+import 'package:tareqo/domain/repositories/i_sale_repository.dart';
+import 'package:tareqo/domain/usecases/get_products_use_case.dart';
+import 'package:tareqo/domain/usecases/process_sale_use_case.dart';
+import 'package:tareqo/presentation/controllers/products_providers.dart';
+import 'package:tareqo/presentation/controllers/sales_providers.dart';
+import 'package:tareqo/presentation/screens/sales/new_sale_sheet.dart';
+import 'package:tareqo/presentation/widgets/app_card.dart';
 
 import '../../helpers/store_context.dart';
 

@@ -1,4 +1,4 @@
-# User Guide — Dumbhanengue ERP
+# User Guide — TAREQO ERP
 
 A simple and complete guide to using your day-to-day management system: stock, sales, customers, money and reports — all in one place.
 
@@ -8,7 +8,7 @@ A simple and complete guide to using your day-to-day management system: stock, s
 
 ## 1. Signing in
 
-1. Open the **Dumbhanengue** app on your phone.
+1. Open the **TAREQO** app on your phone.
 2. Type your **e-mail** and **password**.
 3. Tap **Sign in**.
 

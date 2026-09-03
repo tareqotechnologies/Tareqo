@@ -4,14 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/usecases/approve_tenant_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_all_tenants_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_tenants_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/reject_tenant_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
-import 'package:dumbhanengue/presentation/screens/admin/admin_tenants_screen.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/usecases/approve_tenant_use_case.dart';
+import 'package:tareqo/domain/usecases/get_all_tenants_use_case.dart';
+import 'package:tareqo/domain/usecases/get_pending_tenants_use_case.dart';
+import 'package:tareqo/domain/usecases/reject_tenant_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/admin_providers.dart';
+import 'package:tareqo/presentation/screens/admin/admin_tenants_screen.dart';
 
 class _FakeGetPendingTenantsUseCase implements GetPendingTenantsUseCase {
  _FakeGetPendingTenantsUseCase(this._tenants);

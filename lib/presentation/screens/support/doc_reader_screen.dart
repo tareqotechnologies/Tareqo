@@ -180,7 +180,7 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
  // Código inline — chip discreto, texto com contraste.
  code: theme.textTheme.bodySmall?.copyWith(
  fontFamily: 'monospace',
- fontSize: 13,
+ fontSize: 12,
  color: scheme.onSurfaceVariant,
  fontWeight: FontWeight.w500,
  backgroundColor: scheme.surfaceContainerHighest,

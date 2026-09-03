@@ -1,18 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/plan.dart';
-import 'package:dumbhanengue/domain/entities/store.dart';
-import 'package:dumbhanengue/domain/entities/store_employee.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/repositories/i_employee_account_processor.dart';
-import 'package:dumbhanengue/domain/repositories/i_employee_account_service.dart';
-import 'package:dumbhanengue/domain/repositories/i_employee_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_plan_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_store_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_tenant_repository.dart';
-import 'package:dumbhanengue/domain/usecases/add_employee_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/add_store_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/set_employee_active_use_case.dart';
+import 'package:tareqo/domain/entities/plan.dart';
+import 'package:tareqo/domain/entities/store.dart';
+import 'package:tareqo/domain/entities/store_employee.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/repositories/i_employee_account_processor.dart';
+import 'package:tareqo/domain/repositories/i_employee_account_service.dart';
+import 'package:tareqo/domain/repositories/i_employee_repository.dart';
+import 'package:tareqo/domain/repositories/i_plan_repository.dart';
+import 'package:tareqo/domain/repositories/i_store_repository.dart';
+import 'package:tareqo/domain/repositories/i_tenant_repository.dart';
+import 'package:tareqo/domain/usecases/add_employee_use_case.dart';
+import 'package:tareqo/domain/usecases/add_store_use_case.dart';
+import 'package:tareqo/domain/usecases/set_employee_active_use_case.dart';
 
 class _FakeTenantRepository implements ITenantRepository {
  final Tenant tenant;

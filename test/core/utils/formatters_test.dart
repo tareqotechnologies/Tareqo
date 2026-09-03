@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/utils/formatters.dart';
+import 'package:tareqo/core/utils/formatters.dart';
 
 void main() {
  tearDown(() {

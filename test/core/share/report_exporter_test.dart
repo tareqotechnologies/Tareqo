@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/share/report_exporter.dart';
-import 'package:dumbhanengue/domain/usecases/get_sales_report_use_case.dart';
+import 'package:tareqo/core/share/report_exporter.dart';
+import 'package:tareqo/domain/usecases/get_sales_report_use_case.dart';
 
 ReportExportLabels _labels() => const ReportExportLabels(
  title: 'Relatório de vendas',

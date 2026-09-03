@@ -33,7 +33,7 @@ flutter build appbundle --flavor prod --release \
 | -------- | ------------------------ | ----------------- | --------------- | ------------------ |
 | **Android** | Windows, macOS, Linux | JDK 17 + Android SDK + `key.properties` | `flutter build appbundle --flavor prod --release --dart-define-from-file=env/prod.env` | `app-prod-release.aab` |
 | **iOS** | **macOS** (obligatoire) | Xcode + CocoaPods + compte Apple Developer | `flutter build ios --release` | `Runner.app` (ou `.ipa` via Xcode) |
-| **Windows** | Windows 10/11 | Visual Studio 2022 (workload C++) | `flutter build windows --release` | `dumbhanengue.exe` |
+| **Windows** | Windows 10/11 | Visual Studio 2022 (workload C++) | `flutter build windows --release` | `tareqo.exe` |
 | **Web** | Tout OS | Un navigateur (pour les tests) | `flutter build web --release` | `build/web/` (site statique) |
 
 ---
@@ -52,14 +52,14 @@ La signature de release lit `android/key.properties` (jamais versionné — voir
 
 - Avec `key.properties` présent → signature **production** (upload keystore + Play App Signing) ;
 - Sans le fichier (CI/dev) → le build de release retombe sur le keystore **debug** (non publiable) ;
-- **Garde Gradle (Aug 5) :** un build `prodRelease` **échoue à la configuration** sans `key.properties` — un AAB de production ne peut jamais être signé debug. Le build CI (`ci.yml`) utilise donc le flavor **dev** (`com.dumbhanengue.dumbhanengue.dev`) purement comme validation de compilation.
+- **Garde Gradle (Aug 5) :** un build `prodRelease` **échoue à la configuration** sans `key.properties` — un AAB de production ne peut jamais être signé debug. Le build CI (`ci.yml`) utilise donc le flavor **dev** (`com.tareqo.tareqo.dev`) purement comme validation de compilation.
 
 ### Commandes
 
 ```bash
 # ── Flavors ────────────────────────────────────────────────────────────
-# dev → applicationId com.dumbhanengue.dumbhanengue.dev, libellé « Dev »
-# prod → applicationId de production com.dumbhanengue.dumbhanengue
+# dev → applicationId com.tareqo.tareqo.dev, libellé « Dev »
+# prod → applicationId de production com.tareqo.tareqo
 
 # APK dev (distribution directe / test)
 flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
@@ -79,7 +79,7 @@ flutter build appbundle --flavor prod --release \
 flutter run --flavor dev --dart-define-from-file=env/dev.env
 ```
 
-> **R8/minify sont ACTIVÉS** (`isMinifyEnabled`/`isShrinkResources`, Aug 5) — le code Dart peut en plus être obfusqué avec `--obfuscate --split-debug-info` (uploadez les symboles vers Sentry : `sentry-cli debug-files upload`). Le flavor prod garde l'`applicationId` immuable `com.dumbhanengue.dumbhanengue` ; le flavor dev a le suffixe `.dev` pour que les deux coexistent sur un appareil.
+> **R8/minify sont ACTIVÉS** (`isMinifyEnabled`/`isShrinkResources`, Aug 5) — le code Dart peut en plus être obfusqué avec `--obfuscate --split-debug-info` (uploadez les symboles vers Sentry : `sentry-cli debug-files upload`). Le flavor prod garde l'`applicationId` immuable `com.tareqo.tareqo` ; le flavor dev a le suffixe `.dev` pour que les deux coexistent sur un appareil.
 
 #### Avertissement de build connu (sentry_flutter + KGP) — suivi upstream
 
@@ -142,7 +142,7 @@ flutter run
 ```bash
 # Build de release (exe natif)
 flutter build windows --release
-# → build/windows/x64/runner/Release/dumbhanengue.exe
+# → build/windows/x64/runner/Release/tareqo.exe
 
 # Exécuter en mode debug avec hot reload
 flutter run -d windows

@@ -247,6 +247,14 @@
       }
     }
   },
+  "dashboardTransferItem": "Transferência · {product}",
+  "@dashboardTransferItem": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
   "dashboardFiadoPayment": "Pagamento fiado",
   "dashboardExpenseRow": "Despesa · {description}",
   "@dashboardExpenseRow": {

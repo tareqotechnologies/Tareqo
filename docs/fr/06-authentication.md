@@ -74,7 +74,7 @@ flutter build appbundle --flavor prod --release \
 2. `signUp(email, password, data: {'full_name': ...})` ;
 3. Avec la **confirmation d'e-mail activée** (défaut Supabase), `response.user` peut être `null` — le compte est créé mais la session n'arrive qu'après confirmation. L'UI affiche : *« Conta criada! Confirme seu e-mail para entrar. »*
 4. Dans ce cas, le datasource renvoie un `AppUser` avec un **id placeholder** (`fallbackEmail`) — **aucune donnée ne doit être associée à cet id** ; la vraie session arrive après confirmation.
-5. **Deep link (Aug 8) :** le lien de confirmation de l'e-mail pointe vers `dumbhanengue://callback` (le `site_url` du projet) — l'OS ouvre l'app, et le `DeepLinkHandler` (`lib/core/network/deep_link_handler.dart`, package `app_links`) transmet l'URI à gotrue (`getSessionFromUrl`), qui termine la confirmation et le flux de session réagit tout seul. Sans cela, le lien atterrissait sur `http://localhost:3000` (défaut) et la confirmation ne se terminait jamais.
+5. **Deep link (Aug 8) :** le lien de confirmation de l'e-mail pointe vers `tareqo://callback` (le `site_url` du projet) — l'OS ouvre l'app, et le `DeepLinkHandler` (`lib/core/network/deep_link_handler.dart`, package `app_links`) transmet l'URI à gotrue (`getSessionFromUrl`), qui termine la confirmation et le flux de session réagit tout seul. Sans cela, le lien atterrissait sur `http://localhost:3000` (défaut) et la confirmation ne se terminait jamais.
 
 > **Limite d'envoi d'e-mails (Aug 8) :** sur le plan gratuit, quand la quota
 > d'envoi est épuisée (~2/heure), GoTrue répond **429 « email rate limit

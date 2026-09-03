@@ -33,7 +33,7 @@ class StatusChip extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
  color: scheme.brightness == Brightness.dark
  ? color.withValues(alpha: 0.9)

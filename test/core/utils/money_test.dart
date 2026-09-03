@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/utils/money.dart';
+import 'package:tareqo/core/utils/money.dart';
 
 void main() {
  group('Money.fromReais', () {

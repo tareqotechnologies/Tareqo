@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/debt.dart';
-import 'package:dumbhanengue/domain/repositories/i_debt_repository.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_debts_use_case.dart';
+import 'package:tareqo/domain/entities/debt.dart';
+import 'package:tareqo/domain/repositories/i_debt_repository.dart';
+import 'package:tareqo/domain/usecases/get_pending_debts_use_case.dart';
 
 class _FakeDebtRepository implements IDebtRepository {
  _FakeDebtRepository(this._debts);

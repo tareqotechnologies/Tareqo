@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:postgrest/postgrest.dart';
 
-import 'package:dumbhanengue/domain/entities/store_employee.dart';
-import 'package:dumbhanengue/domain/repositories/i_employee_account_service.dart';
-import 'package:dumbhanengue/data/services/supabase_employee_processor.dart';
+import 'package:tareqo/domain/entities/store_employee.dart';
+import 'package:tareqo/domain/repositories/i_employee_account_service.dart';
+import 'package:tareqo/data/services/supabase_employee_processor.dart';
 
 StoreEmployee _employee({String role = 'employee'}) => StoreEmployee(
  id: 'e1',

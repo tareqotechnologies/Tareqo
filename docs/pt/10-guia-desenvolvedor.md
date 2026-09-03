@@ -1,6 +1,6 @@
 # 10 — Guia do Desenvolvedor
 
-Guia prático para rodar, testar e evoluir o Dumbhanengue ERP.
+Guia prático para rodar, testar e evoluir o TAREQO ERP.
 
 ---
 

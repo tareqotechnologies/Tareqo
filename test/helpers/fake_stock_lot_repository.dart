@@ -1,5 +1,5 @@
-import 'package:dumbhanengue/domain/entities/stock_lot.dart';
-import 'package:dumbhanengue/domain/repositories/i_stock_lot_repository.dart';
+import 'package:tareqo/domain/entities/stock_lot.dart';
+import 'package:tareqo/domain/repositories/i_stock_lot_repository.dart';
 
 /// Fake em memória do [IStockLotRepository] com a MESMA ordenação FIFO do
 /// SQLite: validade mais próxima primeiro; sem validade no fim (por data

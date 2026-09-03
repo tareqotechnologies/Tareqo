@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/entities/stock_lot.dart';
-import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_stock_lots_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/expiry_alerts_provider.dart';
-import 'package:dumbhanengue/presentation/controllers/products_providers.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/entities/stock_lot.dart';
+import 'package:tareqo/domain/usecases/get_products_use_case.dart';
+import 'package:tareqo/domain/usecases/get_stock_lots_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/presentation/controllers/expiry_alerts_provider.dart';
+import 'package:tareqo/presentation/controllers/products_providers.dart';
 
 import '../../helpers/fake_stock_lot_repository.dart';
 import '../../helpers/store_context.dart';

@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/presentation/widgets/app_button.dart';
+import 'package:tareqo/presentation/widgets/app_button.dart';
 
 import '../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_unit_of_work.dart';
-import 'package:dumbhanengue/domain/usecases/fifo_stock_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_products_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/update_product_stock_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/update_product_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/data/services/product_image_store_noop.dart';
-import 'package:dumbhanengue/presentation/controllers/products_providers.dart';
-import 'package:dumbhanengue/presentation/screens/products/product_list_screen.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/repositories/i_product_repository.dart';
+import 'package:tareqo/domain/repositories/i_unit_of_work.dart';
+import 'package:tareqo/domain/usecases/fifo_stock_use_case.dart';
+import 'package:tareqo/domain/usecases/get_products_use_case.dart';
+import 'package:tareqo/domain/usecases/update_product_stock_use_case.dart';
+import 'package:tareqo/domain/usecases/update_product_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/data/services/product_image_store_noop.dart';
+import 'package:tareqo/presentation/controllers/products_providers.dart';
+import 'package:tareqo/presentation/screens/products/product_list_screen.dart';
 
 import '../../helpers/fake_stock_lot_repository.dart';
 import '../../helpers/store_context.dart';

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../domain/entities/admin_message.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/admin_message_providers.dart';
@@ -33,7 +34,7 @@ class _MessageTemplates {
             'para garantir a continuidade do serviço.\n\n'
             'Em caso de dúvidas, entre em contacto com o nosso suporte.\n\n'
             'Cumprimentos,\n'
-            'Equipa Dumbhanengue',
+            'Equipa TAREQO',
       };
 
   /// Alteração de validade — nova data de expiração.
@@ -50,7 +51,7 @@ class _MessageTemplates {
             '• Motivo: $reason\n\n'
             'Caso tenha alguma questão, não hesite em contactar-nos.\n\n'
             'Cumprimentos,\n'
-            'Equipa Dumbhanengue',
+            'Equipa TAREQO',
       };
 
   /// Aviso de plano expirando em breve.
@@ -69,7 +70,7 @@ class _MessageTemplates {
             'aplicativo para verificar a cotação.\n\n'
             'Se já efetuou o pagamento, pode ignorar esta mensagem.\n\n'
             'Cumprimentos,\n'
-            'Equipa Dumbhanengue',
+            'Equipa TAREQO',
       };
 
   /// Mensagem geral — templates pré-definidos por categoria.
@@ -200,7 +201,11 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                       value: tenant,
                       child: Text(
                         tenant.businessName,
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                 ],
@@ -232,7 +237,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
               Text(
                 'Selecionar um tipo preenche automaticamente os campos',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 10,
+                  fontSize: 12,
                   color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
               ),
@@ -263,7 +268,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   hintText: 'Ex: Cotação de Plano Pro',
                   hintStyle: TextStyle(
                     color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
-                    fontSize: 11,
+                    fontSize: 12,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -293,7 +298,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   hintText: 'Escreva a mensagem ou selecione um tipo acima...',
                   hintStyle: TextStyle(
                     color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
-                    fontSize: 11,
+                    fontSize: 12,
                   ),
                   alignLabelWithHint: true,
                   border: OutlineInputBorder(
@@ -324,7 +329,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                     Text(
                       'Template aplicado — edite conforme necessário',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontSize: 10,
+                        fontSize: 12,
                         color: scheme.primary,
                       ),
                     ),
@@ -412,7 +417,7 @@ class _SectionLabel extends StatelessWidget {
       label,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: 10,
+            fontSize: 12,
           ),
     );
   }
@@ -447,7 +452,7 @@ class _TenantInfoChip extends StatelessWidget {
             child: Text(
               '${tenant.businessName} · ${planName(tenant.planId)}',
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 11,
+                fontSize: 12,
                 color: scheme.onSurface,
               ),
               maxLines: 1,
@@ -461,7 +466,7 @@ class _TenantInfoChip extends StatelessWidget {
             Text(
               DateFormat('dd/MM').format(tenant.planExpiresAt!),
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 10,
+                fontSize: 12,
                 color: scheme.onSurfaceVariant,
               ),
             ),
@@ -492,28 +497,28 @@ class _TemplateGrid extends StatelessWidget {
         Icons.request_quote_outlined,
         'Cotação',
         'Valor, período e vencimento',
-        const Color(0xFF3B82F6),
+        AppColors.statusInfo,
       ),
       (
         AdminMessageType.planExpiryChange,
         Icons.calendar_month_outlined,
         'Alterar Validade',
         'Nova data de expiração',
-        const Color(0xFF8B5CF6),
+        AppColors.statusPurple,
       ),
       (
         AdminMessageType.planExpiringSoon,
         Icons.schedule_outlined,
         'Plano a Expirar',
         'Aviso antecipado ao tenant',
-        const Color(0xFFF59E0B),
+        AppColors.statusWarning,
       ),
       (
         AdminMessageType.general,
         Icons.mail_outline,
         'Mensagem Livre',
         'Texto personalizado',
-        const Color(0xFF6366F1),
+        AppColors.statusIndigo,
       ),
     ];
 
@@ -606,7 +611,7 @@ class _TemplateCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
+                      fontSize: 12,
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -661,7 +666,7 @@ class _MessagePreview extends StatelessWidget {
               Text(
                 'Preview',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: scheme.onSurfaceVariant,
                 ),
@@ -673,14 +678,14 @@ class _MessagePreview extends StatelessWidget {
             title,
             style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,
-              fontSize: 11,
+              fontSize: 12,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             body,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 10,
+              fontSize: 12,
               color: scheme.onSurfaceVariant,
               height: 1.5,
             ),

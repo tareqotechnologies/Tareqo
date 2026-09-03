@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/app.dart';
-import 'package:dumbhanengue/core/utils/formatters.dart';
-import 'package:dumbhanengue/domain/entities/app_user.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/app.dart';
+import 'package:tareqo/core/utils/formatters.dart';
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/admin_providers.dart';
+import 'package:tareqo/presentation/controllers/auth_providers.dart';
 
 import '../helpers/store_context.dart';
 
-/// Propagação de PONTA A PONTA: o [DumbhanengueApp] observa o
+/// Propagação de PONTA A PONTA: o [TareqoApp] observa o
 /// [tenantSettingsProvider] — derivado do tenant (moeda + idioma escolhidos
 /// pelo dono) — e aplica no `MaterialApp.locale` e no [Formatters].
 ///
@@ -55,7 +55,7 @@ void main() {
  FakeGetMyTenantUseCase(tenant),
  ),
  ],
- child: const DumbhanengueApp(),
+ child: const TareqoApp(),
  ),
  );
  await tester.pumpAndSettle();
@@ -82,7 +82,7 @@ void main() {
  const FakeAdminRepository(),
  ),
  ],
- child: const DumbhanengueApp(),
+ child: const TareqoApp(),
  ),
  );
  await tester.pumpAndSettle();

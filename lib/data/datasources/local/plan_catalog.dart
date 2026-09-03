@@ -18,34 +18,22 @@ abstract final class PlanCatalog {
  priceMonthlyCents: 50000,
  maxStores: 1,
  maxEmployees: 3,
- ),
- Plan(
- id: 'pl2',
- name: 'Profissional',
- description: 'Para crescer: 3 lojas e até 10 funcionários.',
- priceMonthlyCents: 100000,
- maxStores: 3,
- maxEmployees: 10,
- // Inclui cotação e factura personalizada.
- bundledAddOns: ['ao_quotation', 'ao_custom_invoice'],
- ),
- Plan(
- id: 'pl3',
- name: 'Empresa',
- description: 'Para expandir: 10 lojas e até 50 funcionários.',
- priceMonthlyCents: 200000,
- maxStores: 10,
- maxEmployees: 50,
- // Inclui TODOS os add-ons — plano premium.
- bundledAddOns: [
- 'ao_custom_invoice',
- 'ao_quotation',
- 'ao_advanced_reports',
- 'ao_employee_mgmt',
- 'ao_multi_store',
- 'ao_mobile_money',
- ],
- ),
+ ),      Plan(
+        id: 'pl2',
+        name: 'Profissional',
+        description: 'Para crescer: 3 lojas e até 10 funcionários.',
+        priceMonthlyCents: 100000,
+        maxStores: 3,
+        maxEmployees: 10,
+      ),
+      Plan(
+        id: 'pl3',
+        name: 'Empresa',
+        description: 'Para expandir: 10 lojas e até 50 funcionários.',
+        priceMonthlyCents: 200000,
+        maxStores: 10,
+        maxEmployees: 50,
+      ),
  ];
  }
 }

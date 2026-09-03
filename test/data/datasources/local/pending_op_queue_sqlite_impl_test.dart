@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import 'package:dumbhanengue/core/database/app_database_io.dart';
-import 'package:dumbhanengue/data/datasources/local/pending_op_queue.dart';
-import 'package:dumbhanengue/data/datasources/local/pending_op_queue_sqlite_impl.dart';
+import 'package:tareqo/core/database/app_database_io.dart';
+import 'package:tareqo/data/datasources/local/pending_op_queue.dart';
+import 'package:tareqo/data/datasources/local/pending_op_queue_sqlite_impl.dart';
 
 void main() {
  late Directory tempDirectory;

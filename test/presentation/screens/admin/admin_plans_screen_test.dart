@@ -4,13 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/plan.dart';
-import 'package:dumbhanengue/domain/usecases/add_plan_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_all_plans_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/update_plan_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
-import 'package:dumbhanengue/presentation/screens/admin/admin_plans_screen.dart';
+import 'package:tareqo/domain/entities/plan.dart';
+import 'package:tareqo/domain/usecases/add_plan_use_case.dart';
+import 'package:tareqo/domain/usecases/get_all_plans_use_case.dart';
+import 'package:tareqo/domain/usecases/update_plan_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/admin_providers.dart';
+import 'package:tareqo/presentation/screens/admin/admin_plans_screen.dart';
 
 /// Fake do [GetAllPlansUseCase] — a tela nunca toca em GetIt nem em
 /// datasources; o provider é sobrescrito no [ProviderScope].

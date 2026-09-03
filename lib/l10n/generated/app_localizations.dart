@@ -1114,6 +1114,12 @@ abstract class AppLocalizations {
   /// **'Entrada de {quantity} · {time}'**
   String dashboardStockEntryDetail(String quantity, String time);
 
+  /// No description provided for @dashboardTransferItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Transferência · {product}'**
+  String dashboardTransferItem(String product);
+
   /// No description provided for @dashboardFiadoPayment.
   ///
   /// In pt, this message translates to:

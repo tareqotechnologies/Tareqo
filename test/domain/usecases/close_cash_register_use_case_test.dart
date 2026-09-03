@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/cash_closing.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_lot_consumption.dart';
-import 'package:dumbhanengue/domain/repositories/i_cash_closing_processor.dart';
-import 'package:dumbhanengue/domain/repositories/i_cash_closing_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_sale_repository.dart';
-import 'package:dumbhanengue/domain/usecases/close_cash_register_use_case.dart';
+import 'package:tareqo/domain/entities/cash_closing.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_lot_consumption.dart';
+import 'package:tareqo/domain/repositories/i_cash_closing_processor.dart';
+import 'package:tareqo/domain/repositories/i_cash_closing_repository.dart';
+import 'package:tareqo/domain/repositories/i_sale_repository.dart';
+import 'package:tareqo/domain/usecases/close_cash_register_use_case.dart';
 
 class _FakeSaleRepository implements ISaleRepository {
  _FakeSaleRepository(this._sales);

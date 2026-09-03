@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/utils/quantity.dart';
+import 'package:tareqo/core/utils/quantity.dart';
 
 void main() {
  group('Quantity (W11 — milésimos de unidade)', () {

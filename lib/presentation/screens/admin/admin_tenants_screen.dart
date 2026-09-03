@@ -12,6 +12,7 @@ import '../../../domain/entities/store_employee.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../../domain/usecases/approve_tenant_use_case.dart';
 import '../../controllers/account_providers.dart';
+import '../../controllers/addon_providers.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
@@ -394,70 +395,12 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
  TenantStatus.pending => (scheme.tertiary, l10n.statusPending),
  TenantStatus.approved => (scheme.primary, l10n.statusApproved),
  TenantStatus.rejected => (scheme.error, l10n.statusRejected),
- };        return AppCard(
-          elevated: true,
-          borderRadius: const BorderRadius.all(Radius.circular(18)),
-          padding: const EdgeInsets.all(14),
-          borderColor: color.withValues(alpha: 0.3),
+ };        return _AdminTenantCard(
+          tenant: tenant,
+          color: color,
+          label: label,
+          planName: _plansById(tenant.planId),
           onTap: () => _showTenantDetail(tenant),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: AppRadius.smAll,
-                ),
-                child: Icon(
-                  Icons.business_outlined,
-                  size: 20,
-                  color: color,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tenant.businessName,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                      ),
-                    ),
-                    Text(
-                      '${_plansById(tenant.planId)} · ${tenant.createdAt.day}/${tenant.createdAt.month}/${tenant.createdAt.year}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              StatusChip(label: label, color: color),
-              const SizedBox(width: AppSpacing.xs),
-              GestureDetector(
-                onTap: () {
-                  Clipboard.setData(
-                    ClipboardData(text: tenant.ownerUserId),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.commonCopied),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-                },
-                child: Icon(
-                  Icons.copy,
-                  size: 16,
-                  color: scheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
         );
     },
  );
@@ -606,7 +549,129 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
       ),
     );
   }
-}class _PendingTenantCard extends StatelessWidget {
+}
+
+class _AdminTenantCard extends ConsumerWidget {
+  const _AdminTenantCard({
+    required this.tenant,
+    required this.color,
+    required this.label,
+    required this.planName,
+    required this.onTap,
+  });
+
+  final Tenant tenant;
+  final Color color;
+  final String label;
+  final String planName;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    final addOnCountAsync = ref.watch(tenantActiveAddOnIdsProvider(tenant.id));
+    final addOnCount = addOnCountAsync.value?.length ?? 0;
+
+    return AppCard(
+      elevated: true,
+      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      padding: const EdgeInsets.all(14),
+      borderColor: color.withValues(alpha: 0.3),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: AppRadius.smAll,
+            ),
+            child: Icon(
+              Icons.business_outlined,
+              size: 20,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tenant.businessName,
+                  style: theme.textTheme.labelMedium?.copyWith(),
+                ),
+                Text(
+                  '$planName · ${tenant.createdAt.day}/${tenant.createdAt.month}/${tenant.createdAt.year}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          StatusChip(label: label, color: color),
+          if (addOnCount > 0) ...[
+            const SizedBox(width: AppSpacing.xs),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFF7C3AED).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.extension_outlined,
+                    size: 12,
+                    color: const Color(0xFF7C3AED),
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    '$addOnCount',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: const Color(0xFF7C3AED),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(width: AppSpacing.xs),
+          GestureDetector(
+            onTap: () {
+              Clipboard.setData(
+                ClipboardData(text: tenant.ownerUserId),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.l10n.commonCopied),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            },
+            child: Icon(
+              Icons.copy,
+              size: 16,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PendingTenantCard extends StatelessWidget {
   const _PendingTenantCard({
     required this.tenant,
     required this.planName,
@@ -831,7 +896,7 @@ class _TenantDetailSheet extends ConsumerWidget {
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurfaceVariant,
                               fontFamily: 'monospace',
-                              fontSize: 11,
+                              fontSize: 12,
                             ),
                           ),
                         ),
@@ -1413,7 +1478,7 @@ class _EmployeeTile extends StatelessWidget {
                   ? employee.fullName[0].toUpperCase()
                   : '?',
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 12,
                 color: isActive ? scheme.primary : scheme.outline,
               ),
             ),
@@ -1503,7 +1568,7 @@ class _ActivityTile extends StatelessWidget {
                     status.toUpperCase(),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: color,
-                      fontSize: 10,
+                      fontSize: 12,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -1517,14 +1582,14 @@ class _ActivityTile extends StatelessWidget {
                 dateFormat.format(entry.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
-                  fontSize: 10,
+                  fontSize: 12,
                 ),
               ),
               Text(
                 timeFormat.format(entry.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
-                  fontSize: 10,
+                  fontSize: 12,
                 ),
               ),
             ],

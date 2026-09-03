@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-import 'package:dumbhanengue/core/network/timeout_retry_http_client.dart';
+import 'package:tareqo/core/network/timeout_retry_http_client.dart';
 
 void main() {
  group('TimeoutRetryHttpClient', () {

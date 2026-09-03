@@ -7,14 +7,14 @@ import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 import '../../helpers/store_context.dart';
 
-import 'package:dumbhanengue/domain/entities/purchase.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart' show PaymentMethod;
-import 'package:dumbhanengue/domain/usecases/get_purchases_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/purchases_providers.dart';
-import 'package:dumbhanengue/presentation/screens/purchases/purchases_screen.dart';
-import 'package:dumbhanengue/presentation/widgets/payment_filter.dart';
-import 'package:dumbhanengue/presentation/widgets/period_filter.dart';
-import 'package:dumbhanengue/presentation/widgets/skeleton.dart';
+import 'package:tareqo/domain/entities/purchase.dart';
+import 'package:tareqo/domain/entities/sale.dart' show PaymentMethod;
+import 'package:tareqo/domain/usecases/get_purchases_use_case.dart';
+import 'package:tareqo/presentation/controllers/purchases_providers.dart';
+import 'package:tareqo/presentation/screens/purchases/purchases_screen.dart';
+import 'package:tareqo/presentation/widgets/payment_filter.dart';
+import 'package:tareqo/presentation/widgets/period_filter.dart';
+import 'package:tareqo/presentation/widgets/skeleton.dart';
 
 /// Fake do [GetPurchasesUseCase] — a tela nunca toca em GetIt nem em
 /// datasources; o provider é sobrescrito no [ProviderScope].

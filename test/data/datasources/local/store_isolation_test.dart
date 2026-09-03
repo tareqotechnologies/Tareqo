@@ -1,19 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import 'package:dumbhanengue/data/datasources/local/customer_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/data/datasources/local/debt_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/data/datasources/local/financial_transaction_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/data/datasources/local/product_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/data/datasources/local/purchase_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/data/datasources/local/sale_sqlite_data_source_impl.dart';
-import 'package:dumbhanengue/domain/entities/customer.dart';
-import 'package:dumbhanengue/domain/entities/debt.dart';
-import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/entities/purchase.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_item.dart';
+import 'package:tareqo/data/datasources/local/customer_sqlite_data_source_impl.dart';
+import 'package:tareqo/data/datasources/local/debt_sqlite_data_source_impl.dart';
+import 'package:tareqo/data/datasources/local/financial_transaction_sqlite_data_source_impl.dart';
+import 'package:tareqo/data/datasources/local/product_sqlite_data_source_impl.dart';
+import 'package:tareqo/data/datasources/local/purchase_sqlite_data_source_impl.dart';
+import 'package:tareqo/data/datasources/local/sale_sqlite_data_source_impl.dart';
+import 'package:tareqo/domain/entities/customer.dart';
+import 'package:tareqo/domain/entities/debt.dart';
+import 'package:tareqo/domain/entities/financial_transaction.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/entities/purchase.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_item.dart';
 
 import '../../../helpers/test_sqlite.dart';
 

@@ -247,6 +247,14 @@
       }
     }
   },
+  "dashboardTransferItem": "Transfert · {product}",
+  "@dashboardTransferItem": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
   "dashboardFiadoPayment": "Paiement à crédit",
   "dashboardExpenseRow": "Dépense · {description}",
   "@dashboardExpenseRow": {

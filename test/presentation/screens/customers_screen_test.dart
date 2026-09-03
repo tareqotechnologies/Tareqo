@@ -6,13 +6,13 @@ import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 import '../../helpers/store_context.dart';
 
-import 'package:dumbhanengue/domain/entities/customer.dart';
-import 'package:dumbhanengue/domain/entities/debt.dart';
-import 'package:dumbhanengue/domain/usecases/get_customers_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_debts_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/customers_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/debts_providers.dart';
-import 'package:dumbhanengue/presentation/screens/customers/customers_screen.dart';
+import 'package:tareqo/domain/entities/customer.dart';
+import 'package:tareqo/domain/entities/debt.dart';
+import 'package:tareqo/domain/usecases/get_customers_use_case.dart';
+import 'package:tareqo/domain/usecases/get_pending_debts_use_case.dart';
+import 'package:tareqo/presentation/controllers/customers_providers.dart';
+import 'package:tareqo/presentation/controllers/debts_providers.dart';
+import 'package:tareqo/presentation/screens/customers/customers_screen.dart';
 
 class _FakeGetCustomersUseCase implements GetCustomersUseCase {
  _FakeGetCustomersUseCase(this._customers);

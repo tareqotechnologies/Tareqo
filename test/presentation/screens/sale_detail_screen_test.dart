@@ -7,19 +7,19 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/store_context.dart';
 import '../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/core/share/receipt_sharer.dart';
-import 'package:dumbhanengue/domain/entities/app_user.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_item.dart';
-import 'package:dumbhanengue/domain/entities/store.dart';
-import 'package:dumbhanengue/domain/entities/store_employee.dart';
-import 'package:dumbhanengue/domain/repositories/i_sale_processor.dart';
-import 'package:dumbhanengue/domain/usecases/cancel_sale_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/admin_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/sales_providers.dart';
-import 'package:dumbhanengue/presentation/screens/sales/sale_detail_screen.dart';
+import 'package:tareqo/core/share/receipt_sharer.dart';
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_item.dart';
+import 'package:tareqo/domain/entities/store.dart';
+import 'package:tareqo/domain/entities/store_employee.dart';
+import 'package:tareqo/domain/repositories/i_sale_processor.dart';
+import 'package:tareqo/domain/usecases/cancel_sale_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/admin_providers.dart';
+import 'package:tareqo/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/presentation/controllers/sales_providers.dart';
+import 'package:tareqo/presentation/screens/sales/sale_detail_screen.dart';
 
 /// Fake do [ReceiptSharer] — grava as chamadas (share_plus/url_launcher
 /// não rodam no ambiente de teste).

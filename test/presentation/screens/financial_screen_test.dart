@@ -5,21 +5,21 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 
-import 'package:dumbhanengue/core/theme/app_theme.dart';
-import 'package:dumbhanengue/domain/entities/cash_closing.dart';
-import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
-import 'package:dumbhanengue/domain/repositories/i_cash_closing_summary_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_cash_flow_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_cash_closing_processor.dart';
-import 'package:dumbhanengue/domain/repositories/i_financial_transaction_repository.dart';
-import 'package:dumbhanengue/domain/usecases/close_cash_register_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_cash_closing_summary_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_cash_flow_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/mark_transaction_as_paid_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/finance_providers.dart';
-import 'package:dumbhanengue/presentation/screens/financial/financial_screen.dart';
-import 'package:dumbhanengue/presentation/widgets/skeleton.dart';
+import 'package:tareqo/core/theme/app_theme.dart';
+import 'package:tareqo/domain/entities/cash_closing.dart';
+import 'package:tareqo/domain/entities/financial_transaction.dart';
+import 'package:tareqo/domain/repositories/i_cash_closing_summary_repository.dart';
+import 'package:tareqo/domain/repositories/i_cash_flow_repository.dart';
+import 'package:tareqo/domain/repositories/i_cash_closing_processor.dart';
+import 'package:tareqo/domain/repositories/i_financial_transaction_repository.dart';
+import 'package:tareqo/domain/usecases/close_cash_register_use_case.dart';
+import 'package:tareqo/domain/usecases/get_cash_closing_summary_use_case.dart';
+import 'package:tareqo/domain/usecases/get_cash_flow_use_case.dart';
+import 'package:tareqo/domain/usecases/mark_transaction_as_paid_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/finance_providers.dart';
+import 'package:tareqo/presentation/screens/financial/financial_screen.dart';
+import 'package:tareqo/presentation/widgets/skeleton.dart';
 
 import '../../helpers/store_context.dart';
 

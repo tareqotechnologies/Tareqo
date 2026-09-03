@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/data/datasources/local/financial_transaction_local_data_source_impl.dart';
-import 'package:dumbhanengue/data/repositories/financial_transaction_repository_impl.dart';
-import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
+import 'package:tareqo/data/datasources/local/financial_transaction_local_data_source_impl.dart';
+import 'package:tareqo/data/repositories/financial_transaction_repository_impl.dart';
+import 'package:tareqo/domain/entities/financial_transaction.dart';
 
 FinancialTransaction _transaction(String id, DateTime date) =>
  FinancialTransaction(

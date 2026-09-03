@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/data/datasources/local/product_local_data_source_impl.dart';
-import 'package:dumbhanengue/data/repositories/product_repository_impl.dart';
-import 'package:dumbhanengue/domain/entities/product.dart';
+import 'package:tareqo/data/datasources/local/product_local_data_source_impl.dart';
+import 'package:tareqo/data/repositories/product_repository_impl.dart';
+import 'package:tareqo/domain/entities/product.dart';
 
 void main() {
  late ProductRepositoryImpl repository;

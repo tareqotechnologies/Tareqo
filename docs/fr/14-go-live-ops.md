@@ -51,7 +51,7 @@
  tier gratuit plafonne aussi les e-mails de confirmation (2/heure et
  4/jour) — inacceptable en production avec de vraies inscriptions. Avant
  le go-live :
- 1. **Resend** → ajoutez votre propre domaine (ex. `dumbhanengue.com`) et
+ 1. **Resend** → ajoutez votre propre domaine (ex. `tareqo.com`) et
  terminez la vérification DNS (SPF + DKIM + DMARC). Attention : Le domaine de
  test `onboarding@resend.dev` ne délivre qu'à l'e-mail du compte — pas
  utilisable pour de vrais expéditeurs.
@@ -64,8 +64,8 @@
  | Port | `587` |
  | Username | `resend` (fixe — la clé API va dans Password) |
  | Password | la clé API (`re_…`) |
- | From email | `no-reply@dumbhanengue.com` |
- | From name | `Dumbhanengue` |
+ | From email | `no-reply@tareqo.com` |
+ | From name | `TAREQO` |
  | Admin email | e-mail du super admin (récupération) |
 
  4. **Alternative programmatique (Management API) :** `PATCH
@@ -79,7 +79,7 @@
  confirmation est délivré ; la clé Resend peut aussi être testée avec un
  POST direct vers `https://api.resend.com/emails`.
 
- > **Décision enregistrée (Aug 8) :** `dumbhanengue.com` **n'est pas
+ > **Décision enregistrée (Aug 8) :** `tareqo.com` **n'est pas
  > enregistré** (RDAP 404 — domaine disponible) et l'équipe a choisi **de ne
  > pas acheter de domaine pour l'instant** — l'e-mail de confirmation
  > continue via le SMTP Resend avec le domaine de test
@@ -106,7 +106,7 @@
 
 ## 3. Google Play Console
 
-1. Créez l'app avec l'Application ID **`com.dumbhanengue.dumbhanengue`**
+1. Créez l'app avec l'Application ID **`com.tareqo.tareqo`**
  (immuable après le premier upload).
 2. Activez **Play App Signing** et enregistrez le SHA-256 de la clé d'upload
  (depuis `keytool -list -v -keystore upload-keystore.jks`).
@@ -119,7 +119,7 @@
 
 ## 4. Apple (iOS)
 
-1. **Apple Developer Program** actif + App ID `com.dumbhanengue.dumbhanengue`.
+1. **Apple Developer Program** actif + App ID `com.tareqo.tareqo`.
 2. Configurez la signature automatique dans Xcode (équipe) OU utilisez `match`
  (alternative documentée dans la lane `ios beta`).
 3. Créez la clé API App Store Connect (fichier `.p8`) et ajoutez les 3 secrets

@@ -6,22 +6,22 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/app_user.dart';
-import 'package:dumbhanengue/domain/entities/plan.dart';
-import 'package:dumbhanengue/domain/entities/plan_request.dart';
-import 'package:dumbhanengue/domain/entities/store.dart';
-import 'package:dumbhanengue/domain/entities/store_employee.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/usecases/get_my_plan_requests_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_plans_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_stores_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_employees_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/set_employee_active_use_case.dart';
-import 'package:dumbhanengue/core/theme/app_theme.dart';
-import 'package:dumbhanengue/presentation/controllers/account_providers.dart';
-import 'package:dumbhanengue/presentation/controllers/auth_providers.dart';
-import 'package:dumbhanengue/presentation/screens/stores/stores_screen.dart';
-import 'package:dumbhanengue/presentation/widgets/status_chip.dart';
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/entities/plan.dart';
+import 'package:tareqo/domain/entities/plan_request.dart';
+import 'package:tareqo/domain/entities/store.dart';
+import 'package:tareqo/domain/entities/store_employee.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/usecases/get_my_plan_requests_use_case.dart';
+import 'package:tareqo/domain/usecases/get_plans_use_case.dart';
+import 'package:tareqo/domain/usecases/get_stores_use_case.dart';
+import 'package:tareqo/domain/usecases/get_employees_use_case.dart';
+import 'package:tareqo/domain/usecases/set_employee_active_use_case.dart';
+import 'package:tareqo/core/theme/app_theme.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/presentation/screens/stores/stores_screen.dart';
+import 'package:tareqo/presentation/widgets/status_chip.dart';
 
 class _FakeGetPlansUseCase implements GetPlansUseCase {
  @override

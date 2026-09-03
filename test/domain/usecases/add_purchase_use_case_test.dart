@@ -1,18 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/utils/quantity.dart';
-import 'package:dumbhanengue/domain/entities/financial_transaction.dart';
-import 'package:dumbhanengue/domain/entities/product.dart';
-import 'package:dumbhanengue/domain/entities/purchase.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart' show PaymentMethod;
-import 'package:dumbhanengue/domain/repositories/i_financial_transaction_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_product_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_purchase_processor.dart';
-import 'package:dumbhanengue/domain/repositories/i_purchase_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_unit_of_work.dart';
-import 'package:dumbhanengue/domain/usecases/add_purchase_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/fifo_stock_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/update_product_stock_use_case.dart';
+import 'package:tareqo/core/utils/quantity.dart';
+import 'package:tareqo/domain/entities/financial_transaction.dart';
+import 'package:tareqo/domain/entities/product.dart';
+import 'package:tareqo/domain/entities/purchase.dart';
+import 'package:tareqo/domain/entities/sale.dart' show PaymentMethod;
+import 'package:tareqo/domain/repositories/i_financial_transaction_repository.dart';
+import 'package:tareqo/domain/repositories/i_product_repository.dart';
+import 'package:tareqo/domain/repositories/i_purchase_processor.dart';
+import 'package:tareqo/domain/repositories/i_purchase_repository.dart';
+import 'package:tareqo/domain/repositories/i_unit_of_work.dart';
+import 'package:tareqo/domain/usecases/add_purchase_use_case.dart';
+import 'package:tareqo/domain/usecases/fifo_stock_use_case.dart';
+import 'package:tareqo/domain/usecases/update_product_stock_use_case.dart';
 
 import '../../helpers/fake_stock_lot_repository.dart';
 

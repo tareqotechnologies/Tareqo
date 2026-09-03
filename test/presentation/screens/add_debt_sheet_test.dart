@@ -4,11 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
 
-import 'package:dumbhanengue/domain/entities/debt.dart';
-import 'package:dumbhanengue/domain/repositories/i_debt_processor.dart';
-import 'package:dumbhanengue/domain/usecases/add_debt_use_case.dart';
-import 'package:dumbhanengue/presentation/controllers/debts_providers.dart';
-import 'package:dumbhanengue/presentation/screens/credit/add_debt_sheet.dart';
+import 'package:tareqo/domain/entities/debt.dart';
+import 'package:tareqo/domain/repositories/i_debt_processor.dart';
+import 'package:tareqo/domain/usecases/add_debt_use_case.dart';
+import 'package:tareqo/presentation/controllers/debts_providers.dart';
+import 'package:tareqo/presentation/screens/credit/add_debt_sheet.dart';
 
 /// Registra a dívida sem tocar em infraestrutura (o AddDebtUseCase já é
 /// coberto por testes de domínio — aqui validamos apenas a orquestração da UI).

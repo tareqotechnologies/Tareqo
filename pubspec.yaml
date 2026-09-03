@@ -1,8 +1,8 @@
-name: dumbhanengue
-description: "ERP Dumbhanengue — sistema de gestão empresarial (estoque, vendas, clientes, compras e relatórios) construído em Flutter com Clean Architecture."
+name: tareqo
+description: "TAREQO — sistema de gestão empresarial (estoque, vendas, clientes, compras e relatórios) construído em Flutter com Clean Architecture."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.10.0+18
+version: 2.0.0+19
 
 environment:
   sdk: ^3.12.2
@@ -27,7 +27,7 @@ dependencies:
   json_annotation: ^4.12.0
   supabase_flutter: ^2.16.0
   # Deep links de autenticação (confirmação de e-mail / OAuth com PKCE): o
-  # link do e-mail (dumbhanengue://callback) reabre o app e conclui o fluxo
+  # link do e-mail (tareqo://callback) reabre o app e conclui o fluxo
   # — ver core/network/deep_link_handler.dart e o site_url no Supabase.
   app_links: ^7.2.1
   # postgrest: exceções do cliente do Supabase — usada em PRODUÇÃO agora

@@ -1,4 +1,4 @@
-import 'package:dumbhanengue/core/config/supabase_config.dart';
+import 'package:tareqo/core/config/supabase_config.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

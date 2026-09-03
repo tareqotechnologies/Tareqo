@@ -12,7 +12,7 @@
 # Store Connect (conteúdo base64 da .p8)
 # APPLE_TEAM_ID — team da Apple Developer
 #
-# Atenção: Pré-requisito manual único: App ID `com.dumbhanengue.dumbhanengue`
+# Atenção: Pré-requisito manual único: App ID `com.tareqo.tareqo`
 # criado no Apple Developer + assinatura automática configurada no Xcode
 # (ver docs/14-go-live-ops.md).
 name: iOS (TestFlight)

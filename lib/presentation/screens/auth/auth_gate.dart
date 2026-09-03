@@ -374,59 +374,83 @@ class _TenantErrorScreen extends StatelessWidget {
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
 
+  // Mesma paleta da tela de login.
+  static const _bg = Color(0xFF101112);
+  static const _surface = Color(0xFF1D1E22);
+  static const _border = Color(0xFF303238);
+  static const _textPrimary = Color(0xFFFFFFFF);
+  static const _textSecondary = Color(0xFFA1A1AA);
+  static const _green = Color(0xFF16A34A);
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final l10n = context.l10n;
-    final isDark = theme.brightness == Brightness.dark;
-
-    final backgroundColor = isDark ? const Color(0xFF121212) : scheme.surface;
-    final textColor = isDark ? Colors.white : scheme.onSurface;
-    final spinnerColor = isDark ? Colors.white70 : scheme.primary;
-    final spinnerBg =
-        isDark ? Colors.white24 : scheme.primary.withValues(alpha: 0.2);
-    final subtitleColor =
-        isDark ? Colors.white54 : scheme.onSurfaceVariant;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: _bg,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.asset(
-                'assets/branding/splash_logo.png',
-                width: 120,
-                height: 120,
-                fit: BoxFit.contain,
+            // Logo em container com borda (mesmo padrão do login).
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: _surface,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: _border, width: 1),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: Image.asset(
+                  'assets/branding/icon_official.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-            const SizedBox(height: 24),
-            Text(
+            const SizedBox(height: 28),
+            // Título.
+            const Text(
               'TAREQO',
-              style: theme.textTheme.displaySmall?.copyWith(
-                color: textColor,
-                letterSpacing: -0.5,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 2,
+                color: _textPrimary,
               ),
             ),
-            const SizedBox(height: 40),
-            SizedBox(
-              height: 22,
-              width: 22,
+            const SizedBox(height: 8),
+            // Subtítulo.
+            Text(
+              'Gestão simples para o seu negócio',
+              style: TextStyle(
+                fontSize: 14,
+                color: _textSecondary.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            const SizedBox(height: 48),
+            // Spinner verde.
+            const SizedBox(
+              height: 24,
+              width: 24,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                color: spinnerColor,
-                backgroundColor: spinnerBg,
+                color: _green,
+                backgroundColor: Color(0x2016A34A),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
+            // Texto de loading.
             Text(
               l10n.splashLoading,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: subtitleColor,
+              style: const TextStyle(
+                fontSize: 14,
+                color: _textSecondary,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ],

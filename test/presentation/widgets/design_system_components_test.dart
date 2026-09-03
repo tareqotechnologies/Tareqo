@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/theme/app_theme.dart';
-import 'package:dumbhanengue/presentation/widgets/app_button.dart';
-import 'package:dumbhanengue/presentation/widgets/app_card.dart';
-import 'package:dumbhanengue/presentation/widgets/app_text_field.dart';
-import 'package:dumbhanengue/presentation/widgets/fade_indexed_stack.dart';
-import 'package:dumbhanengue/presentation/widgets/kpi_card.dart';
-import 'package:dumbhanengue/presentation/widgets/smart_amount.dart';
+import 'package:tareqo/core/theme/app_theme.dart';
+import 'package:tareqo/presentation/widgets/app_button.dart';
+import 'package:tareqo/presentation/widgets/app_card.dart';
+import 'package:tareqo/presentation/widgets/app_text_field.dart';
+import 'package:tareqo/presentation/widgets/fade_indexed_stack.dart';
+import 'package:tareqo/presentation/widgets/kpi_card.dart';
+import 'package:tareqo/presentation/widgets/smart_amount.dart';
 
 import '../../helpers/test_app.dart';
 

@@ -1,4 +1,4 @@
-# pt/en/fr Glossary — Dumbhanengue ERP technical terms
+# pt/en/fr Glossary — TAREQO ERP technical terms
 
 > Glossary of the technical terms used throughout the documentation, with the equivalent in the three languages: **Portuguese** (the variant used in the docs — pt-BR), **English** and **French**. Entries follow the actual usage of the chapters (`docs/pt/`, `docs/en/`, `docs/fr/`).
 >

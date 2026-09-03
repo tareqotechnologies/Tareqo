@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/domain/entities/plan_request.dart';
-import 'package:dumbhanengue/domain/entities/tenant.dart';
-import 'package:dumbhanengue/domain/repositories/i_plan_request_repository.dart';
-import 'package:dumbhanengue/domain/repositories/i_tenant_repository.dart';
-import 'package:dumbhanengue/domain/usecases/decide_plan_request_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/get_pending_plan_requests_use_case.dart';
-import 'package:dumbhanengue/domain/usecases/request_plan_upgrade_use_case.dart';
+import 'package:tareqo/domain/entities/plan_request.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/repositories/i_plan_request_repository.dart';
+import 'package:tareqo/domain/repositories/i_tenant_repository.dart';
+import 'package:tareqo/domain/usecases/decide_plan_request_use_case.dart';
+import 'package:tareqo/domain/usecases/get_pending_plan_requests_use_case.dart';
+import 'package:tareqo/domain/usecases/request_plan_upgrade_use_case.dart';
 
 class _FakePlanRequestRepository implements IPlanRequestRepository {
  final List<PlanRequest> _requests = [];

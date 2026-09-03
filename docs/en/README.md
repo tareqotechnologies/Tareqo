@@ -1,6 +1,6 @@
-# Dumbhanengue ERP Documentation (English)
+# TAREQO ERP Documentation (English)
 
-Welcome to the complete documentation of **Dumbhanengue ERP** — a business management system (inventory, sales, finance and credit/"fiado" tracking) built in Flutter with **Clean Architecture**.
+Welcome to the complete documentation of **TAREQO ERP** — a business management system (inventory, sales, finance and credit/"fiado" tracking) built in Flutter with **Clean Architecture**.
 
 > **Language:** This is the English version. The Portuguese documentation lives in ([`docs/pt/`](../pt/README.md)) and the French one in ([`docs/fr/`](../fr/README.md)).
 >

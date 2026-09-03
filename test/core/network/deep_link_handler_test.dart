@@ -1,22 +1,22 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/network/deep_link_handler.dart';
+import 'package:tareqo/core/network/deep_link_handler.dart';
 
 void main() {
   group('DeepLinkHandler.isAuthCallbackUri (auditoria 2026-08 — V8/V12)', () {
-    test('aceita dumbhanengue://callback com query PKCE (code)', () {
+    test('aceita tareqo://callback com query PKCE (code)', () {
       expect(
         DeepLinkHandler.isAuthCallbackUri(
-          Uri.parse('dumbhanengue://callback?code=abc123&state=xyz'),
+          Uri.parse('tareqo://callback?code=abc123&state=xyz'),
         ),
         isTrue,
       );
     });
 
-    test('aceita dumbhanengue://callback com error (fluxo rejeitado)', () {
+    test('aceita tareqo://callback com error (fluxo rejeitado)', () {
       expect(
         DeepLinkHandler.isAuthCallbackUri(
-          Uri.parse('dumbhanengue://callback?error=access_denied'),
+          Uri.parse('tareqo://callback?error=access_denied'),
         ),
         isTrue,
       );
@@ -25,13 +25,13 @@ void main() {
     test('rejeita outro HOST no mesmo scheme (hijack de scheme)', () {
       expect(
         DeepLinkHandler.isAuthCallbackUri(
-          Uri.parse('dumbhanengue://outra-coisa?code=abc'),
+          Uri.parse('tareqo://outra-coisa?code=abc'),
         ),
         isFalse,
       );
       expect(
         DeepLinkHandler.isAuthCallbackUri(
-          Uri.parse('dumbhanengue://evil?code=abc'),
+          Uri.parse('tareqo://evil?code=abc'),
         ),
         isFalse,
       );
@@ -50,14 +50,14 @@ void main() {
         ),
         isFalse,
       );
-      // Nota: Uri NORMALIZA o scheme para minúsculas — 'dumbhanenguE' seria
-      // aceito (vira 'dumbhanengue'); a validação compara o scheme
+      // Nota: Uri NORMALIZA o scheme para minúsculas — 'tareqoE' seria
+      // aceito (vira 'tareqo'); a validação compara o scheme
       // normalizado, comportamento correto.
     });
 
     test('rejeita URI sem host/scheme (malformada)', () {
       expect(
-        DeepLinkHandler.isAuthCallbackUri(Uri.parse('dumbhanengue:callback')),
+        DeepLinkHandler.isAuthCallbackUri(Uri.parse('tareqo:callback')),
         isFalse,
       );
       expect(DeepLinkHandler.isAuthCallbackUri(Uri.parse('callback')), isFalse);

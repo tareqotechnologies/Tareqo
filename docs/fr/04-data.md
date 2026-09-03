@@ -124,7 +124,7 @@ Le schéma (tables, RLS, politiques, index, triggers, fonctions et seed) vit dan
 
 ### Où vit la base de données
 
-- Fichier : **`dumbhanengue.db`** dans `getApplicationDocumentsDirectory()` (via `path_provider`).
+- Fichier : **`tareqo.db`** dans `getApplicationDocumentsDirectory()` (via `path_provider`).
 - `PRAGMA foreign_keys = ON` à l'ouverture.
 - Sur le web SQLite **ne s'exécute pas** (`dart:ffi` n'existe pas) → import conditionnel vers `app_database_stub.dart` → en mémoire. Dans les tests sur la VM Windows, `package:sqlite3` retombe sur la `winsqlite3.dll` système (voir `test/helpers/test_sqlite.dart`).
 

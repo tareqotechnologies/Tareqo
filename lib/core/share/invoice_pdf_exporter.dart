@@ -19,17 +19,32 @@ class InvoicePdfExporter {
   const InvoicePdfExporter();
 
   /// Gera os bytes do PDF da factura.
+  ///
+  /// [logoBytes] — bytes da imagem do logotipo (PNG/JPEG).
+  /// [primaryColor] — cor principal do template (usada no cabeçalho,
+  /// tabela e totais).
   Future<Uint8List> buildPdf(
     CustomInvoice invoice, {
     required String businessName,
     String? businessAddress,
     String? businessPhone,
     String? businessTaxId,
+    Uint8List? logoBytes,
+    PdfColor primaryColor = PdfColors.indigo700,
   }) async {
     final data = await rootBundle.load('assets/fonts/Inter-Variable.ttf');
     final doc = pw.Document(
       theme: pw.ThemeData.withFont(base: pw.Font.ttf(data)),
     );
+
+    // Pré-carregar o logotipo se fornecido.
+    pw.ImageProvider? logoImage;
+    if (logoBytes != null && logoBytes.isNotEmpty) {
+      logoImage = pw.MemoryImage(logoBytes);
+    }
+
+    // Cor escura para texto sobre fundo claro.
+    final primaryDark = _darken(primaryColor);
 
     doc.addPage(
       pw.MultiPage(
@@ -41,43 +56,67 @@ class InvoicePdfExporter {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    businessName,
-                    style: pw.TextStyle(
-                      fontSize: 20,
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.indigo900,
-                    ),
-                  ),
-                  if (businessAddress != null && businessAddress.isNotEmpty)
-                    pw.Text(
-                      businessAddress,
-                      style: const pw.TextStyle(
-                        fontSize: 9,
-                        color: PdfColors.grey700,
+              // Lado esquerdo: logotipo + dados da empresa
+              pw.Expanded(
+                child: pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    // Logotipo (se fornecido)
+                    if (logoImage != null) ...[
+                      pw.Container(
+                        width: 48,
+                        height: 48,
+                        child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+                      ),
+                      pw.SizedBox(width: 12),
+                    ],
+                    // Dados da empresa
+                    pw.Expanded(
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            businessName,
+                            style: pw.TextStyle(
+                              fontSize: 20,
+                              fontWeight: pw.FontWeight.bold,
+                              color: primaryDark,
+                            ),
+                          ),
+                          if (businessAddress != null &&
+                              businessAddress.isNotEmpty)
+                            pw.Text(
+                              businessAddress,
+                              style: const pw.TextStyle(
+                                fontSize: 9,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                          if (businessPhone != null &&
+                              businessPhone.isNotEmpty)
+                            pw.Text(
+                              businessPhone,
+                              style: const pw.TextStyle(
+                                fontSize: 9,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                          if (businessTaxId != null &&
+                              businessTaxId.isNotEmpty)
+                            pw.Text(
+                              'NIF: $businessTaxId',
+                              style: const pw.TextStyle(
+                                fontSize: 9,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                  if (businessPhone != null && businessPhone.isNotEmpty)
-                    pw.Text(
-                      businessPhone,
-                      style: const pw.TextStyle(
-                        fontSize: 9,
-                        color: PdfColors.grey700,
-                      ),
-                    ),
-                  if (businessTaxId != null && businessTaxId.isNotEmpty)
-                    pw.Text(
-                      'NIF: $businessTaxId',
-                      style: const pw.TextStyle(
-                        fontSize: 9,
-                        color: PdfColors.grey700,
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
+              // Lado direito: badge FACTURA + nº + data
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
@@ -87,7 +126,7 @@ class InvoicePdfExporter {
                       vertical: 8,
                     ),
                     decoration: pw.BoxDecoration(
-                      color: PdfColors.indigo700,
+                      color: primaryColor,
                       borderRadius: pw.BorderRadius.circular(6),
                     ),
                     child: pw.Text(
@@ -143,22 +182,34 @@ class InvoicePdfExporter {
           if (invoice.clientPhone.isNotEmpty)
             pw.Text(
               'Tel: ${invoice.clientPhone}',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+              style: const pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.grey700,
+              ),
             ),
           if (invoice.clientEmail.isNotEmpty)
             pw.Text(
               'Email: ${invoice.clientEmail}',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+              style: const pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.grey700,
+              ),
             ),
           if (invoice.clientAddress.isNotEmpty)
             pw.Text(
               invoice.clientAddress,
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+              style: const pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.grey700,
+              ),
             ),
           if (invoice.clientTaxId.isNotEmpty)
             pw.Text(
               'NIF: ${invoice.clientTaxId}',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+              style: const pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.grey700,
+              ),
             ),
 
           pw.SizedBox(height: 20),
@@ -186,8 +237,8 @@ class InvoicePdfExporter {
               fontWeight: pw.FontWeight.bold,
               color: PdfColors.white,
             ),
-            headerDecoration: const pw.BoxDecoration(
-              color: PdfColors.indigo700,
+            headerDecoration: pw.BoxDecoration(
+              color: primaryColor,
             ),
             cellStyle: const pw.TextStyle(fontSize: 9),
             cellPadding: const pw.EdgeInsets.all(6),
@@ -224,7 +275,7 @@ class InvoicePdfExporter {
                     _totalRow(
                       'TOTAL',
                       Formatters.currency(invoice.totalAmountCents),
-                      PdfColors.indigo900,
+                      primaryDark,
                       isBold: true,
                     ),
                   ],
@@ -315,6 +366,8 @@ class InvoicePdfExporter {
     String? businessAddress,
     String? businessPhone,
     String? businessTaxId,
+    Uint8List? logoBytes,
+    PdfColor primaryColor = PdfColors.indigo700,
   }) async {
     final bytes = await buildPdf(
       invoice,
@@ -322,8 +375,11 @@ class InvoicePdfExporter {
       businessAddress: businessAddress,
       businessPhone: businessPhone,
       businessTaxId: businessTaxId,
+      logoBytes: logoBytes,
+      primaryColor: primaryColor,
     );
-    final fileName = 'factura_${invoice.number.toString().padLeft(5, '0')}.pdf';
+    final fileName =
+        'factura_${invoice.number.toString().padLeft(5, '0')}.pdf';
     await _share(bytes, fileName);
   }
 
@@ -332,7 +388,11 @@ class InvoicePdfExporter {
       await SharePlus.instance.share(
         ShareParams(
           files: [
-            XFile.fromData(bytes, mimeType: 'application/pdf', name: fileName),
+            XFile.fromData(
+              bytes,
+              mimeType: 'application/pdf',
+              name: fileName,
+            ),
           ],
           subject: 'Factura $fileName',
         ),
@@ -369,7 +429,8 @@ class InvoicePdfExporter {
             label,
             style: pw.TextStyle(
               fontSize: isBold ? 12 : 9,
-              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontWeight:
+                  isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
               color: color,
             ),
           ),
@@ -377,7 +438,8 @@ class InvoicePdfExporter {
             value,
             style: pw.TextStyle(
               fontSize: isBold ? 14 : 10,
-              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontWeight:
+                  isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
               color: color,
             ),
           ),
@@ -385,4 +447,15 @@ class InvoicePdfExporter {
       ),
     );
   }
+
+  /// Escurece uma cor PDF para usar como texto sobre fundo claro.
+  PdfColor _darken(PdfColor color) {
+    return PdfColor(
+      (color.red * 0.7).clamp(0, 1),
+      (color.green * 0.7).clamp(0, 1),
+      (color.blue * 0.7).clamp(0, 1),
+    );
+  }
+
+
 }

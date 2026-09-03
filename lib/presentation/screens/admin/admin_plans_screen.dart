@@ -5,6 +5,7 @@ import '../../../core/utils/ids.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/money.dart';
@@ -156,13 +157,13 @@ class _CompactStats extends StatelessWidget {
           _Pill(
             count: active,
             label: 'Ativos',
-            color: const Color(0xFF16A34A),
+            color: AppColors.success,
           ),
           const SizedBox(width: AppSpacing.xs),
           _Pill(
             count: inactive,
             label: 'Inativos',
-            color: const Color(0xFFDC2626),
+            color: AppColors.statusError,
           ),
         ],
       ),
@@ -191,7 +192,7 @@ class _Pill extends StatelessWidget {
           '$count',
           style: theme.textTheme.labelSmall?.copyWith(
             color: color,
-            fontSize: 11,
+            fontSize: 12,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
@@ -199,7 +200,7 @@ class _Pill extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 9,
+            fontSize: 12,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
@@ -272,7 +273,7 @@ class _PlanTile extends ConsumerWidget {
                               '  ${Formatters.currency(plan.priceMonthlyCents)}/mês',
                           style: TextStyle(
                             color: scheme.onSurfaceVariant,
-                            fontSize: 9,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -305,7 +306,7 @@ class _PlanTile extends ConsumerWidget {
                           '$tenantCount ${tenantCount == 1 ? "tenant" : "tenants"}',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: scheme.primary,
-                            fontSize: 9,
+                            fontSize: 12,
                           ),
                         ),
                       ),
@@ -332,7 +333,7 @@ class _PlanTile extends ConsumerWidget {
                   l10n.adminPlanInactive,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: scheme.onErrorContainer,
-                    fontSize: 10,
+                    fontSize: 12,
                   ),
                 ),
               ),
@@ -447,7 +448,7 @@ class _PlanDetailSheet extends ConsumerWidget {
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurfaceVariant,
                               fontFamily: 'monospace',
-                              fontSize: 11,
+                              fontSize: 12,
                             ),
                           ),
                         ),
@@ -660,7 +661,7 @@ class _InfoRow extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 11,
+              fontSize: 12,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
@@ -754,7 +755,7 @@ class _TenantMiniTile extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                     fontFamily: 'monospace',
-                    fontSize: 10,
+                    fontSize: 12,
                   ),
                 ),
               ],
@@ -770,7 +771,7 @@ class _TenantMiniTile extends StatelessWidget {
               statusLabel,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: color,
-                fontSize: 9,
+                fontSize: 12,
               ),
             ),
           ),

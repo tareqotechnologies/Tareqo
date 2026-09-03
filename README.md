@@ -1,4 +1,4 @@
-# Dumbhanengue ERP
+# TAREQO ERP
 
 > Sistema de gestão empresarial multi-tenant (estoque, vendas, compras, financeiro, crédito e relatórios) construído em **Flutter** com **Clean Architecture** — com persistência local (SQLite), SaaS autenticado (Supabase + RLS) e interface **pt/en/fr**.
 
@@ -13,7 +13,7 @@
 
 ## Visão geral
 
-O **Dumbhanengue ERP** é um aplicativo para pequenos comerciantes administrarem o negócio: controle de **estoque**, **vendas** (com baixa atômica de estoque e entrada no caixa), **compras**, **fluxo de caixa**, **clientes**, **crédito/fiado** e **relatórios**. O dono gerencia **lojas e funcionários** por tenant, escolhe o **idioma (pt/en/fr)** e a **moeda (BRL, USD, EUR, MZN)**, e cada loja tem escopo próprio de dados — tudo isolado por autenticação e *Row Level Security* no servidor.
+O **TAREQO ERP** é um aplicativo para pequenos comerciantes administrarem o negócio: controle de **estoque**, **vendas** (com baixa atômica de estoque e entrada no caixa), **compras**, **fluxo de caixa**, **clientes**, **crédito/fiado** e **relatórios**. O dono gerencia **lojas e funcionários** por tenant, escolhe o **idioma (pt/en/fr)** e a **moeda (BRL, USD, EUR, MZN)**, e cada loja tem escopo próprio de dados — tudo isolado por autenticação e *Row Level Security* no servidor.
 
 ## Funcionalidades
 

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/i18n/transaction_descriptions.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
+import 'package:tareqo/core/i18n/transaction_descriptions.dart';
+import 'package:tareqo/domain/entities/sale.dart';
 
 void main() {
  group('TransactionDescriptions (pt/en na gravação)', () {

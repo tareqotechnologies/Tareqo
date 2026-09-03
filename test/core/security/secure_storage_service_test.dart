@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dumbhanengue/core/security/secure_storage_service.dart';
+import 'package:tareqo/core/security/secure_storage_service.dart';
 
 /// Backend em memória — simula o Keychain/Keystore sem plataforma.
 class _InMemoryBackend implements SecureStorageBackend {

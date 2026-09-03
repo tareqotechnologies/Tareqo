@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:postgrest/postgrest.dart';
 
-import 'package:dumbhanengue/data/datasources/remote/supabase_sale_data_source.dart';
-import 'package:dumbhanengue/domain/entities/sale.dart';
-import 'package:dumbhanengue/domain/entities/sale_item.dart';
+import 'package:tareqo/data/datasources/remote/supabase_sale_data_source.dart';
+import 'package:tareqo/domain/entities/sale.dart';
+import 'package:tareqo/domain/entities/sale_item.dart';
 
 /// Teste de CONTRATO da RPC atômica `process_sale` do datasource remoto de
 /// vendas — verifica o payload EXATO enviado ao servidor (venda + itens em
