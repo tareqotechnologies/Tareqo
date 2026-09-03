@@ -31,19 +31,26 @@ class AuthGate extends ConsumerStatefulWidget {
 
 class _AuthGateState extends ConsumerState<AuthGate> {
   bool _timeoutReached = false;
+  int _splashStartMs = 0;
 
   @override
   void initState() {
     super.initState();
     DeepLinkHandler.init();
-    // Se o auth state não resolver em 8 segundos, mostrar login em vez de
+    _splashStartMs = DateTime.now().millisecondsSinceEpoch;
+    // Se o auth state não resolver em 5 segundos, mostrar login em vez de
     // ficar preso no splash (problema comum em release quando o Supabase
     // demora ou falha silenciosamente).
-    Future.delayed(const Duration(seconds: 8), () {
+    Future.delayed(const Duration(seconds: 5), () {
       if (mounted && !_timeoutReached) {
         setState(() => _timeoutReached = true);
       }
     });
+  }
+
+  /// Verifica se já passou do tempo máximo no splash.
+  bool get _splashTimedOut {
+    return DateTime.now().millisecondsSinceEpoch - _splashStartMs > 5000;
   }
 
   @override
@@ -112,11 +119,22 @@ class _MFAGate extends ConsumerStatefulWidget {
 class _MFAGateState extends ConsumerState<_MFAGate> {
   bool _mfaChecked = false;
   bool _mfaEnabled = false;
+  bool _timedOut = false;
 
   @override
   void initState() {
     super.initState();
     _checkMFA();
+    // Timeout de 5 segundos — se MFA check não resolver, assumir desabilitado.
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted && !_mfaChecked) {
+        setState(() {
+          _mfaChecked = true;
+          _mfaEnabled = false;
+          _timedOut = true;
+        });
+      }
+    });
   }
 
   Future<void> _checkMFA() async {
@@ -131,7 +149,7 @@ class _MFAGateState extends ConsumerState<_MFAGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_mfaChecked) return const _SplashScreen();
+    if (!_mfaChecked && !_timedOut) return const _SplashScreen();
 
     if (_mfaEnabled) {
       return _MFAVerificationGate(user: widget.user);
@@ -190,13 +208,32 @@ class _MFAVerificationGateState extends ConsumerState<_MFAVerificationGate> {
 
 // ─── Admin / Tenant Gate ────────────────────────────────────────────────
 
-class _AdminTenantGate extends ConsumerWidget {
+class _AdminTenantGate extends ConsumerStatefulWidget {
   const _AdminTenantGate({required this.user});
   final AppUser user;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final adminAsync = ref.watch(isSuperAdminProvider(user.id));
+  ConsumerState<_AdminTenantGate> createState() => _AdminTenantGateState();
+}
+
+class _AdminTenantGateState extends ConsumerState<_AdminTenantGate> {
+  bool _timedOut = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Timeout de 5 segundos para este gate também.
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted && !_timedOut) setState(() => _timedOut = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final adminAsync = ref.watch(isSuperAdminProvider(widget.user.id));
+    if (_timedOut && adminAsync.isLoading) {
+      return _TenantGate(user: widget.user);
+    }
     return adminAsync.when(
       loading: () => const _SplashScreen(),
       error: (error, stackTrace) {
@@ -205,23 +242,49 @@ class _AdminTenantGate extends ConsumerWidget {
           stackTrace,
           hint: 'AuthGate: erro ao verificar papel de super admin',
         );
-        return _TenantGate(user: user);
+        return _TenantGate(user: widget.user);
       },
       data: (isAdmin) {
         if (isAdmin) return const AdminShell();
-        return _TenantGate(user: user);
+        return _TenantGate(user: widget.user);
       },
     );
   }
 }
 
-class _TenantGate extends ConsumerWidget {
+class _TenantGate extends ConsumerStatefulWidget {
   const _TenantGate({required this.user});
   final AppUser user;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tenantAsync = ref.watch(myTenantProvider(user.id));
+  ConsumerState<_TenantGate> createState() => _TenantGateState();
+}
+
+class _TenantGateState extends ConsumerState<_TenantGate> {
+  bool _timedOut = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Timeout de 5 segundos — mostrar tela de erro em vez de ficar preso.
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted && !_timedOut) setState(() => _timedOut = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tenantAsync = ref.watch(myTenantProvider(widget.user.id));
+    // Se excedeu o timeout e ainda está loading, mostrar erro com retry.
+    if (_timedOut && tenantAsync.isLoading) {
+      return _TenantErrorScreen(
+        onRetry: () {
+          setState(() => _timedOut = false);
+          ref.invalidate(myTenantProvider(widget.user.id));
+        },
+        onSignOut: () => ref.read(signOutUseCaseProvider).call(),
+      );
+    }
     return tenantAsync.when(
       loading: () => const _SplashScreen(),
       error: (error, stackTrace) {
@@ -231,16 +294,16 @@ class _TenantGate extends ConsumerWidget {
           hint: 'AuthGate: erro ao resolver tenant',
         );
         return _TenantErrorScreen(
-          onRetry: () => ref.invalidate(myTenantProvider(user.id)),
+          onRetry: () => ref.invalidate(myTenantProvider(widget.user.id)),
           onSignOut: () => ref.read(signOutUseCaseProvider).call(),
         );
       },
       data: (tenant) {
         if (tenant == null) {
-          return TenantOnboardingScreen(user: user);
+          return TenantOnboardingScreen(user: widget.user);
         }
         if (tenant.status == TenantStatus.approved &&
-            tenant.ownerUserId != user.id) {
+            tenant.ownerUserId != widget.user.id) {
           final employeesAsync = ref.watch(employeesProvider(tenant.id));
           if (employeesAsync.isLoading && employeesAsync.value == null) {
             return const _SplashScreen();
@@ -248,7 +311,7 @@ class _TenantGate extends ConsumerWidget {
           final employees = employeesAsync.value;
           if (employees != null) {
             final myLinks = employees
-                .where((e) => e.userId == user.id)
+                .where((e) => e.userId == widget.user.id)
                 .toList();
             if (myLinks.isEmpty || myLinks.every((l) => !l.isActive)) {
               return _BlockedEmployeeScreen(
