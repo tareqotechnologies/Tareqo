@@ -13,6 +13,7 @@ import 'package:tareqo/presentation/controllers/admin_providers.dart';
 import 'package:tareqo/presentation/controllers/auth_providers.dart';
 
 import '../helpers/store_context.dart';
+import '../helpers/test_app.dart';
 
 /// Propagação de PONTA A PONTA: o [TareqoApp] observa o
 /// [tenantSettingsProvider] — derivado do tenant (moeda + idioma escolhidos
@@ -23,6 +24,10 @@ import '../helpers/store_context.dart';
 /// em inglês e formata em Metical (MZN) — a escolha vale da tela de espera
 /// em diante.
 void main() {
+ // O [TareqoApp] roteia pelo [AuthGate], que resolve o MFA via GetIt.
+ // Sem o bootstrap real, registra o SecureStorageService em memória.
+ setUpAll(registerTestSecureStorage);
+
  // [Formatters] é estado global estático — cada teste começa do padrão,
  // mesmo que um teste anterior do arquivo tenha falhado no meio.
  setUp(() {

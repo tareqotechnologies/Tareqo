@@ -18,6 +18,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/dialogs.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/payment_method_picker.dart';
 import '../../widgets/search_field.dart';
@@ -127,39 +128,19 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
  /// Diálogo de quantidade decimal (produtos por peso — ex.: 1,75).
  Future<void> _editFraction(Product product) async {
  final l10n = context.l10n;
- final controller = TextEditingController(
- text: Quantity.format(
- _cart[product.id] ?? 0,
- unitLabel: product.unitLabel,
- language: Formatters.currentLanguage,
- ).split(' ').first,
- );
- final result = await showDialog<String>(
- context: context,
- builder: (context) => AlertDialog(
- title: Text(product.name),
- content: AppTextField(
- controller: controller,
- autofocus: true,
+ final result = await showInputDialog(
+ context,
+ title: product.name,
  label: l10n.salesQuantityLabel,
  hintText: l10n.salesQuantityHint,
  suffixText: product.unitLabel,
  keyboardType: const TextInputType.numberWithOptions(decimal: true),
- onSubmitted: (value) => Navigator.of(context).pop(value),
- ),
- actions: [
- TextButton(
- onPressed: () => Navigator.of(context).pop(),
- child: Text(l10n.commonCancel),
- ),
- // AppButton (design system ultra-clean): altura 48, cantos 12,
- // texto w400 — a confirmação segue o padrão dos diálogos.
- AppButton.primary(
- onPressed: () => Navigator.of(context).pop(controller.text),
- label: l10n.commonConfirm,
- ),
- ],
- ),
+ initialValue: Quantity.format(
+ _cart[product.id] ?? 0,
+ unitLabel: product.unitLabel,
+ language: Formatters.currentLanguage,
+ ).split(' ').first,
+ confirmLabel: l10n.commonConfirm,
  );
  if (result == null) return;
  final milli = Quantity.parse(result);

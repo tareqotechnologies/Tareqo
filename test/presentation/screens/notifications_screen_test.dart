@@ -241,8 +241,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Badge com contagem de não lidas (2)
-      expect(find.text('2'), findsOneWidget);
+      // Badge com contagem de não lidas (2) — aparece no AppBar e na pílula.
+      expect(find.text('2'), findsWidgets);
     });
 
     testWidgets('mostra dot indicator para notificações não lidas',
@@ -272,7 +272,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // IconButton com ícone mark_email_read_outlined
-      expect(find.byIcon(Icons.mark_email_read_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.done_all_outlined), findsOneWidget);
     });
 
     testWidgets('esconde botão marcar como lida para notificações já lidas',
@@ -287,7 +287,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Não há botão marcar como lida
-      expect(find.byIcon(Icons.mark_email_read_outlined), findsNothing);
+      expect(find.byIcon(Icons.done_all_outlined), findsNothing);
     });
 
     testWidgets('alterna para filtro "Não lidas" e mostra apenas não lidas',
@@ -379,7 +379,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Toca no botão marcar como lida
-      await tester.tap(find.byIcon(Icons.mark_email_read_outlined));
+      await tester.tap(find.byIcon(Icons.done_all_outlined));
       await tester.pumpAndSettle();
 
       expect(markAsRead.calls, 1);
@@ -443,7 +443,7 @@ void main() {
       expect(find.text('Não lida'), findsOneWidget);
 
       // Apenas a não lida tem botão de marcar como lida
-      expect(find.byIcon(Icons.mark_email_read_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.done_all_outlined), findsOneWidget);
     });
 
     testWidgets('mostra empty state no filtro "Não lidas" quando todas são lidas',
@@ -484,11 +484,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Ícones de tipo de notificação
-      expect(find.byIcon(Icons.receipt_long_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.add_circle_outline), findsOneWidget);
       expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
     });
 
-    testWidgets('mostra ícone de relógio para timestamp', (tester) async {
+    testWidgets('mostra timestamp relativo do card', (tester) async {
       final notifications = [
         _notif(id: 'n1'),
       ];
@@ -498,7 +498,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.access_time_outlined), findsOneWidget);
+      // Timestamp recém-criado renderiza como "Agora mesmo".
+      expect(find.text('Agora mesmo'), findsOneWidget);
     });
   });
 }

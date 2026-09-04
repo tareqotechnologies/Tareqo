@@ -17,6 +17,9 @@ import '../../controllers/auth_providers.dart';
 import '../../controllers/reports_providers.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../widgets/app_page.dart';
+import '../../widgets/skeleton.dart';
 import '../../widgets/inline_error_card.dart';
 import '../../widgets/kpi_card.dart';
 import '../../widgets/section_header.dart';
@@ -51,16 +54,9 @@ class ReportsScreen extends ConsumerWidget {
  final storeName =
  stores.where((s) => s.id == activeStoreId).firstOrNull?.name ?? '';
 
- return Scaffold(
- // AppBar estilo iOS large title — mesmo padrão das demais telas.
- appBar: AppBar(
- title: Text(
- l10n.reportsTitle,
- style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w500,
- letterSpacing: -0.5,
- ),
- ),
+ return AppPage(
+ title: l10n.reportsTitle,
+ useSafeArea: false,
  // Exportação do relatório (CSV/PDF) — só com dados carregados; o
  // relatório é o que está na tela (período selecionado + loja ativa).
  // `!reportAsync.hasError`: em erro o `.value` do Riverpod devolve o
@@ -92,7 +88,6 @@ class ReportsScreen extends ConsumerWidget {
  ],
  ),
  ],
- ),
  // A tela é empurrada por cima do AppShell (fora da casca): o seletor
  // de loja ativa é re-adicionado e o relatório reflete a loja
  // selecionada.
@@ -105,7 +100,12 @@ class ReportsScreen extends ConsumerWidget {
  },
  child: ListView(
  physics: const AlwaysScrollableScrollPhysics(),
- padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
+ padding: EdgeInsets.fromLTRB(
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 4,
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 32,
+ ),
  children: [        Center(
           child: FittedBox(
             fit: BoxFit.scaleDown,
@@ -197,9 +197,16 @@ class ReportsScreen extends ConsumerWidget {
  SectionHeader(title: l10n.reportsBestSellers),
  const SizedBox(height: 12),
  reportAsync.when(
- loading: () => const Padding(
- padding: EdgeInsets.all(32),
- child: Center(child: CircularProgressIndicator()),
+ loading: () => Skeleton(
+ child: Column(
+ children: List.generate(
+ 4,
+ (_) => const Padding(
+ padding: EdgeInsets.only(bottom: 8),
+ child: SkeletonBlock(height: 56, radius: 16),
+ ),
+ ),
+ ),
  ),
  error: (error, _) => ErrorView(
  message: l10n.reportsLoadError,

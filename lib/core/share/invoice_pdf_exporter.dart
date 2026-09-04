@@ -10,6 +10,79 @@ import 'package:share_plus/share_plus.dart';
 import '../../domain/entities/custom_invoice.dart';
 import '../utils/formatters.dart';
 
+/// Rótulos LOCALIZADOS do PDF da factura personalizada.
+///
+/// Montados pela tela a partir do `AppLocalizations` — o exporter é 100%
+/// livre de UI; só recebe textos prontos (pt/en/fr) e valores.
+///
+/// Templates (`{value}`/`{number}`/`{date}`) são preenchidos pelo exporter
+/// com os dados do documento (telefone, NIF, número, data).
+class InvoicePdfLabels {
+  const InvoicePdfLabels({
+    required this.docWord,
+    required this.numberLabelTemplate,
+    required this.clientHeading,
+    required this.phoneLabelTemplate,
+    required this.emailLabelTemplate,
+    required this.taxIdLabelTemplate,
+    required this.itemHeader,
+    required this.qtyHeader,
+    required this.unitPriceHeader,
+    required this.subtotalHeader,
+    required this.discountLabel,
+    required this.taxLabel,
+    required this.totalLabel,
+    required this.paymentLabelTemplate,
+    required this.referenceLabelTemplate,
+    required this.notesHeading,
+    required this.footerTemplate,
+    required this.fileNameBase,
+    required this.subjectWord,
+  });
+
+  /// Tipo de documento exibido no selo (ex.: 'FACTURA'/'INVOICE').
+  final String docWord;
+
+  /// Template do número com marcador `{number}` (ex.: 'Nº {number}').
+  final String numberLabelTemplate;
+
+  /// Cabeçalho da secção do cliente (ex.: 'CLIENTE'/'CLIENT').
+  final String clientHeading;
+
+  /// Template 'Tel: {value}' com marcador `{value}`.
+  final String phoneLabelTemplate;
+
+  /// Template 'Email: {value}' com marcador `{value}`.
+  final String emailLabelTemplate;
+
+  /// Template 'NIF: {value}' com marcador `{value}`.
+  final String taxIdLabelTemplate;
+
+  final String itemHeader;
+  final String qtyHeader;
+  final String unitPriceHeader;
+  final String subtotalHeader;
+  final String discountLabel;
+  final String taxLabel;
+  final String totalLabel;
+
+  /// Template 'Pagamento: {value}' com marcador `{value}`.
+  final String paymentLabelTemplate;
+
+  /// Template 'Ref: {value}' com marcador `{value}`.
+  final String referenceLabelTemplate;
+  final String notesHeading;
+
+  /// Template do rodapé com marcador `{date}`.
+  final String footerTemplate;
+
+  /// Base do nome do arquivo (ex.: 'factura'/'invoice').
+  final String fileNameBase;
+
+  /// Palavra do assunto da partilha (ex.: 'Factura'/'Invoice').
+  final String subjectWord;
+}
+
 /// Exportação de facturas personalizadas para PDF.
 ///
 /// Gera um documento A4 profissional com cabeçalho (logotipo/nome da loja),
@@ -25,6 +98,7 @@ class InvoicePdfExporter {
   /// tabela e totais).
   Future<Uint8List> buildPdf(
     CustomInvoice invoice, {
+    required InvoicePdfLabels labels,
     required String businessName,
     String? businessAddress,
     String? businessPhone,
@@ -45,6 +119,9 @@ class InvoicePdfExporter {
 
     // Cor escura para texto sobre fundo claro.
     final primaryDark = _darken(primaryColor);
+
+    final invoiceNumber = invoice.number.toString().padLeft(5, '0');
+    final dateLine = _formatDate(invoice.createdAt);
 
     doc.addPage(
       pw.MultiPage(
@@ -104,7 +181,10 @@ class InvoicePdfExporter {
                           if (businessTaxId != null &&
                               businessTaxId.isNotEmpty)
                             pw.Text(
-                              'NIF: $businessTaxId',
+                              _fill(
+                                labels.taxIdLabelTemplate,
+                                businessTaxId,
+                              ),
                               style: const pw.TextStyle(
                                 fontSize: 9,
                                 color: PdfColors.grey700,
@@ -116,7 +196,7 @@ class InvoicePdfExporter {
                   ],
                 ),
               ),
-              // Lado direito: badge FACTURA + nº + data
+              // Lado direito: selo do documento + nº + data
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
@@ -130,7 +210,7 @@ class InvoicePdfExporter {
                       borderRadius: pw.BorderRadius.circular(6),
                     ),
                     child: pw.Text(
-                      'FACTURA',
+                      labels.docWord,
                       style: pw.TextStyle(
                         fontSize: 14,
                         fontWeight: pw.FontWeight.bold,
@@ -140,14 +220,15 @@ class InvoicePdfExporter {
                   ),
                   pw.SizedBox(height: 8),
                   pw.Text(
-                    'Nº ${invoice.number.toString().padLeft(5, '0')}',
+                    labels.numberLabelTemplate
+                        .replaceFirst('{number}', invoiceNumber),
                     style: pw.TextStyle(
                       fontSize: 12,
                       fontWeight: pw.FontWeight.bold,
                     ),
                   ),
                   pw.Text(
-                    _formatDate(invoice.createdAt),
+                    dateLine,
                     style: const pw.TextStyle(
                       fontSize: 9,
                       color: PdfColors.grey700,
@@ -164,7 +245,7 @@ class InvoicePdfExporter {
 
           // ─── Dados do Cliente ────────────────────────────────
           pw.Text(
-            'CLIENTE',
+            labels.clientHeading,
             style: pw.TextStyle(
               fontSize: 10,
               fontWeight: pw.FontWeight.bold,
@@ -181,7 +262,7 @@ class InvoicePdfExporter {
           ),
           if (invoice.clientPhone.isNotEmpty)
             pw.Text(
-              'Tel: ${invoice.clientPhone}',
+              _fill(labels.phoneLabelTemplate, invoice.clientPhone),
               style: const pw.TextStyle(
                 fontSize: 9,
                 color: PdfColors.grey700,
@@ -189,7 +270,7 @@ class InvoicePdfExporter {
             ),
           if (invoice.clientEmail.isNotEmpty)
             pw.Text(
-              'Email: ${invoice.clientEmail}',
+              _fill(labels.emailLabelTemplate, invoice.clientEmail),
               style: const pw.TextStyle(
                 fontSize: 9,
                 color: PdfColors.grey700,
@@ -205,7 +286,7 @@ class InvoicePdfExporter {
             ),
           if (invoice.clientTaxId.isNotEmpty)
             pw.Text(
-              'NIF: ${invoice.clientTaxId}',
+              _fill(labels.taxIdLabelTemplate, invoice.clientTaxId),
               style: const pw.TextStyle(
                 fontSize: 9,
                 color: PdfColors.grey700,
@@ -216,7 +297,12 @@ class InvoicePdfExporter {
 
           // ─── Tabela de Itens ─────────────────────────────────
           pw.TableHelper.fromTextArray(
-            headers: ['Item', 'Qtd', 'Preço Unit.', 'Subtotal'],
+            headers: [
+              labels.itemHeader,
+              labels.qtyHeader,
+              labels.unitPriceHeader,
+              labels.subtotalHeader,
+            ],
             data: [
               for (final item in invoice.items)
                 [
@@ -261,19 +347,19 @@ class InvoicePdfExporter {
                   children: [
                     if (invoice.discountCents > 0)
                       _totalRow(
-                        'Desconto',
+                        labels.discountLabel,
                         '-${Formatters.currency(invoice.discountCents)}',
                         PdfColors.red700,
                       ),
                     if (invoice.taxCents > 0)
                       _totalRow(
-                        'IVA',
+                        labels.taxLabel,
                         '+${Formatters.currency(invoice.taxCents)}',
                         PdfColors.grey700,
                       ),
                     pw.Divider(color: PdfColors.grey300),
                     _totalRow(
-                      'TOTAL',
+                      labels.totalLabel,
                       Formatters.currency(invoice.totalAmountCents),
                       primaryDark,
                       isBold: true,
@@ -296,7 +382,7 @@ class InvoicePdfExporter {
               child: pw.Row(
                 children: [
                   pw.Text(
-                    'Pagamento: ${invoice.paymentMethod}',
+                    _fill(labels.paymentLabelTemplate, invoice.paymentMethod),
                     style: pw.TextStyle(
                       fontSize: 9,
                       fontWeight: pw.FontWeight.bold,
@@ -306,7 +392,10 @@ class InvoicePdfExporter {
                   if (invoice.paymentReference.isNotEmpty) ...[
                     pw.SizedBox(width: 12),
                     pw.Text(
-                      'Ref: ${invoice.paymentReference}',
+                      _fill(
+                        labels.referenceLabelTemplate,
+                        invoice.paymentReference,
+                      ),
                       style: const pw.TextStyle(
                         fontSize: 9,
                         color: PdfColors.green800,
@@ -322,7 +411,7 @@ class InvoicePdfExporter {
           if (invoice.notes.isNotEmpty) ...[
             pw.SizedBox(height: 16),
             pw.Text(
-              'Notas',
+              labels.notesHeading,
               style: pw.TextStyle(
                 fontSize: 9,
                 fontWeight: pw.FontWeight.bold,
@@ -345,7 +434,7 @@ class InvoicePdfExporter {
           pw.SizedBox(height: 8),
           pw.Center(
             child: pw.Text(
-              'Documento gerado pelo TAREQO — ${_formatDate(invoice.createdAt)}',
+              labels.footerTemplate.replaceFirst('{date}', dateLine),
               style: const pw.TextStyle(
                 fontSize: 8,
                 color: PdfColors.grey500,
@@ -362,6 +451,7 @@ class InvoicePdfExporter {
   /// Gera e partilha o PDF da factura.
   Future<void> sharePdf(
     CustomInvoice invoice, {
+    required InvoicePdfLabels labels,
     required String businessName,
     String? businessAddress,
     String? businessPhone,
@@ -371,6 +461,7 @@ class InvoicePdfExporter {
   }) async {
     final bytes = await buildPdf(
       invoice,
+      labels: labels,
       businessName: businessName,
       businessAddress: businessAddress,
       businessPhone: businessPhone,
@@ -378,12 +469,14 @@ class InvoicePdfExporter {
       logoBytes: logoBytes,
       primaryColor: primaryColor,
     );
-    final fileName =
-        'factura_${invoice.number.toString().padLeft(5, '0')}.pdf';
-    await _share(bytes, fileName);
+    final number = invoice.number.toString().padLeft(5, '0');
+    final fileName = '${labels.fileNameBase}_$number.pdf';
+    final subject = '${labels.subjectWord} '
+        '${labels.numberLabelTemplate.replaceFirst('{number}', number)}';
+    await _share(bytes, fileName, subject);
   }
 
-  Future<void> _share(Uint8List bytes, String fileName) async {
+  Future<void> _share(Uint8List bytes, String fileName, String subject) async {
     if (kIsWeb) {
       await SharePlus.instance.share(
         ShareParams(
@@ -394,7 +487,7 @@ class InvoicePdfExporter {
               name: fileName,
             ),
           ],
-          subject: 'Factura $fileName',
+          subject: subject,
         ),
       );
       return;
@@ -405,10 +498,14 @@ class InvoicePdfExporter {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/pdf')],
-        subject: 'Factura $fileName',
+        subject: subject,
       ),
     );
   }
+
+  /// Substitui o marcador `{value}` pelo valor fornecido.
+  String _fill(String template, String value) =>
+      template.replaceFirst('{value}', value);
 
   String _formatDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
@@ -456,6 +553,5 @@ class InvoicePdfExporter {
       (color.blue * 0.7).clamp(0, 1),
     );
   }
-
 
 }

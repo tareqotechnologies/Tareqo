@@ -207,18 +207,18 @@ void main() {
  category: 'Vendas',
  date: DateTime(2024, 1, 10, 10),
  ),
- ]),
- ),
- );
+ ]),  ),
+  );
+    // Estado inicial: carregando (skeleton do card stack + das
+    // movimentações).
+    expect(find.byType(Skeleton), findsNWidgets(2));
 
- // Estado inicial: carregando (skeleton do card stack + das
- // movimentações).
- expect(find.byType(Skeleton), findsNWidgets(2));
+    await tester.pumpAndSettle();
 
- await tester.pumpAndSettle();
-
- expect(find.text('Venda PIX'), findsOneWidget);
- expect(find.byType(Skeleton), findsNothing);
+    // O card da lista mostra a CATEGORIA (a descrição só aparece no sheet
+    // de detalhes, ao tocar no card).
+    expect(find.text('Vendas'), findsOneWidget);
+    expect(find.byType(Skeleton), findsNothing);
  });
 
  testWidgets('mostra entradas, saídas, saldo e as movimentações', (
@@ -270,33 +270,32 @@ void main() {
  expect(find.text('+1.500,00'), findsOneWidget);
  expect(find.text('-450,00'), findsOneWidget);
  expect(find.text('R\$ 1.050,00'), findsOneWidget);
+    // Movimentações — o card stack é mais alto que a antiga linha de KPIs,
+    // então a lista fica abaixo do fold no viewport do teste (800×600).
+    await tester.scrollUntilVisible(
+      find.text('Fiado'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    // Cada card da lista mostra a categoria da transação.
+    expect(find.text('Vendas'), findsOneWidget);
+    expect(find.text('Contas'), findsOneWidget);
+    expect(find.text('Fiado'), findsOneWidget);
+    // Valores com sinal e moeda em cada card.
+    expect(find.text('+ R\$ 1.000,00'), findsOneWidget);
+    expect(find.text('- R\$ 200,00'), findsOneWidget);
+    expect(find.text('+ R\$ 25,00'), findsOneWidget);
+    // A pendência é sinalizada no subtítulo da seção.
+    expect(find.text('Pendente (fiado) · 1'), findsOneWidget);
+    // Hora do movimento em cada card.
+    expect(find.text('10:00'), findsNWidgets(3));
 
- // Movimentações — o card stack é mais alto que a antiga linha de KPIs,
- // então a lista fica abaixo do fold no viewport do teste (800×600).
- await tester.scrollUntilVisible(
- find.text('Venda fiado (João)'),
- 200,
- scrollable: find.byType(Scrollable).first,
- );
- expect(find.text('Venda PIX'), findsOneWidget);
- expect(find.text('Aluguel da loja'), findsOneWidget);
- expect(find.text('Venda fiado (João)'), findsOneWidget);
- // Número amigável (derivado do id) em cada movimentação.
- expect(find.textContaining('#734806'), findsOneWidget); // t1
- expect(find.textContaining('#957187'), findsOneWidget); // t2
- expect(find.textContaining('#179568'), findsOneWidget); // t3
- expect(find.text('Pendente'), findsOneWidget);
- // Entrada pendente oferece o recebimento.
- expect(find.text('Receber'), findsOneWidget);
- // Data inteligente em cada card: '10/01 • 10:00' (dia + hora).
- expect(find.text('10/01 • 10:00'), findsNWidgets(3));
-
- // As cores semânticas resolvem para a variante ESCURA no tema escuro
- // (testApp aplica AppTheme.dark — V3) — texto de valor com AA sobre o card.
- final incomeText = tester.widget<Text>(find.text('+ R\$ 1.000,00'));
- expect(incomeText.style?.color, AppColors.income);
- final expenseText = tester.widget<Text>(find.text('- R\$ 200,00'));
- expect(expenseText.style?.color, AppColors.expense);
+    // As cores semânticas resolvem para a variante ESCURA no tema escuro
+    // (testApp aplica AppTheme.dark — V3) — texto de valor com AA sobre o card.
+    final incomeText = tester.widget<Text>(find.text('+ R\$ 1.000,00'));
+    expect(incomeText.style?.color, AppColors.income);
+    final expenseText = tester.widget<Text>(find.text('- R\$ 200,00'));
+    expect(expenseText.style?.color, AppColors.expense);
  });
 
  testWidgets('botão Pagar marca a saída pendente como paga', (tester) async {
@@ -309,32 +308,42 @@ void main() {
  type: TransactionType.expense,
  category: 'Contas',
  date: now,
- status: TransactionStatus.pending,
- ),
- ]);
- await tester.pumpWidget(_buildApp(repository));
- await tester.pumpAndSettle();
+ status: TransactionStatus.pending,  ),
+  ]);
+    await tester.pumpWidget(_buildApp(repository));
+    await tester.pumpAndSettle();
 
- expect(find.text('Pendente'), findsOneWidget);
- // A saída pendente oferece a quitação (não o recebimento).
- expect(find.text('Pagar'), findsOneWidget);
- expect(find.text('Receber'), findsNothing);
+    // A saída pendente é sinalizada no subtítulo da seção.
+    expect(find.text('Pendente (fiado) · 1'), findsOneWidget);
+    expect(find.text('Receber'), findsNothing);
 
- // Abre a confirmação.
- await tester.tap(find.text('Pagar'));
- await tester.pumpAndSettle();
- expect(find.text('Pagar pendência?'), findsOneWidget);
+    // Abre o detalhe da pendência (a descrição e o estado ficam no sheet).
+    await tester.tap(find.text('Contas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Conta de luz'), findsOneWidget);
+    expect(find.text('Pendente'), findsOneWidget);
+    // A saída pendente oferece a quitação (não o recebimento).
+    expect(find.text('Pagar'), findsOneWidget);
+    expect(find.text('Receber'), findsNothing);
 
- // Confirma o pagamento.
- await tester.tap(find.widgetWithText(FilledButton, 'Pagar'));
- await tester.pumpAndSettle();
+    // A ação fecha o sheet e abre a confirmação.
+    await tester.tap(find.text('Pagar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pagar pendência?'), findsOneWidget);
 
- expect(find.text('Saída paga!'), findsOneWidget);
+    // Confirma o pagamento.
+    await tester.tap(find.widgetWithText(FilledButton, 'Pagar'));
+    await tester.pumpAndSettle();
 
- // Após invalidar, a transação está paga — o chip 'Pendente' some e o
- // botão de quitação também (sem ação para transações pagas).
- expect(find.text('Pendente'), findsNothing);
- expect(find.text('Pagar'), findsNothing);
+    expect(find.text('Saída paga!'), findsOneWidget);
+
+    // Após invalidar, a transação está paga — reabre o detalhe: estado
+    // 'Pago' e sem ação de quitação (sem botão para transações pagas).
+    await tester.tap(find.text('Contas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pendente'), findsNothing);
+    expect(find.text('Pagar'), findsNothing);
+    expect(find.text('Pago'), findsOneWidget);
  });
 
  testWidgets('erro ao pagar mostra a mensagem de falha', (tester) async {
@@ -369,22 +378,26 @@ void main() {
  _FakeCloseCashRegisterUseCase(),
  ),
  ],
- child: testApp(home: FinancialScreen()),
- ),
- );
- await tester.pumpAndSettle();
+ child: testApp(home: FinancialScreen()),  ),
+  );
+    await tester.pumpAndSettle();
 
- await tester.tap(find.text('Pagar'));
- await tester.pumpAndSettle();
- await tester.tap(find.widgetWithText(FilledButton, 'Pagar'));
- await tester.pumpAndSettle();
+    // Abre o detalhe da saída pendente e tenta quitar.
+    await tester.tap(find.text('Contas'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Pagar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Pagar'));
+    await tester.pumpAndSettle();
 
- // A pendência continua pendente (não foi quitada) e o erro aparece.
- expect(find.text('Pendente'), findsOneWidget);
- expect(
- find.text('Não foi possível pagar a pendência. Tente novamente.'),
- findsOneWidget,
- );
+    // O erro aparece e a pendência continua pendente (não foi quitada).
+    expect(
+      find.text('Não foi possível pagar a pendência. Tente novamente.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Contas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pendente'), findsOneWidget);
  });
 
  testWidgets('botão Receber marca a entrada pendente como paga', (
@@ -399,27 +412,36 @@ void main() {
  type: TransactionType.income,
  category: 'Fiado',
  date: now,
- status: TransactionStatus.pending,
- ),
- ]);
- await tester.pumpWidget(_buildApp(repository));
- await tester.pumpAndSettle();
+ status: TransactionStatus.pending,  ),
+  ]);
+    await tester.pumpWidget(_buildApp(repository));
+    await tester.pumpAndSettle();
 
- expect(find.text('Pendente'), findsOneWidget);
+    expect(find.text('Pendente (fiado) · 1'), findsOneWidget);
 
- // Abre a confirmação.
- await tester.tap(find.text('Receber'));
- await tester.pumpAndSettle();
- expect(find.text('Receber pendência?'), findsOneWidget);
+    // Abre o detalhe da entrada pendente.
+    await tester.tap(find.text('Fiado'));
+    await tester.pumpAndSettle();
+    expect(find.text('Venda fiado (João)'), findsOneWidget);
+    expect(find.text('Pendente'), findsOneWidget);
 
- // Confirma o recebimento.
- await tester.tap(find.widgetWithText(FilledButton, 'Receber'));
- await tester.pumpAndSettle();
+    // A ação fecha o sheet e abre a confirmação.
+    await tester.tap(find.text('Receber'));
+    await tester.pumpAndSettle();
+    expect(find.text('Receber pendência?'), findsOneWidget);
 
- expect(find.text('Movimentação recebida!'), findsOneWidget);
+    // Confirma o recebimento.
+    await tester.tap(find.widgetWithText(FilledButton, 'Receber'));
+    await tester.pumpAndSettle();
 
- // Após invalidar, a transação está paga — o chip 'Pendente' some.
- expect(find.text('Pendente'), findsNothing);
+    expect(find.text('Movimentação recebida!'), findsOneWidget);
+
+    // Após invalidar, a transação está paga — reabre o detalhe: estado
+    // 'Pago' e o estado pendente some.
+    await tester.tap(find.text('Fiado'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pendente'), findsNothing);
+    expect(find.text('Pago'), findsOneWidget);
  });
 
  // Semântica de caixa (UI): o valor da faixa de saldo segue o SINAL —
@@ -515,11 +537,12 @@ void main() {
  expect(find.text('Entradas'), findsNothing);
  expect(find.text('Saídas'), findsNothing);
  expect(find.text('Saldo do período'), findsNothing);
- // As movimentações continuam funcionando (provider próprio).
- expect(find.text('Venda PIX'), findsOneWidget);
- expect(tester.takeException(), isNull);
- },
- );
+    // As movimentações continuam funcionando (provider próprio) — o card
+    // da lista mostra a categoria.
+    expect(find.text('Vendas'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  },
+);
 
  // Rotação (UI): em paisagem a largura maior permite o SegmentedButton de
  // período renderizar sem o FittedBox encolher (escala natural) e os três

@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:tareqo/presentation/widgets/app_button.dart';
+import 'package:tareqo/presentation/widgets/app_sheet.dart';
 
 import '../../helpers/test_app.dart';
 
 import 'package:tareqo/domain/entities/product.dart';
 import 'package:tareqo/domain/repositories/i_product_repository.dart';
 import 'package:tareqo/domain/repositories/i_unit_of_work.dart';
+import 'package:tareqo/domain/usecases/add_product_use_case.dart';
 import 'package:tareqo/domain/usecases/fifo_stock_use_case.dart';
 import 'package:tareqo/domain/usecases/get_products_use_case.dart';
 import 'package:tareqo/domain/usecases/update_product_stock_use_case.dart';
@@ -84,18 +86,25 @@ class _DirectUnitOfWork implements IUnitOfWork {
 
   @override
   Future<T> run<T>(Future<T> Function() action) => action();
+}/// Constrói o [UpdateProductUseCase] real sobre o repositório em memória.
+UpdateProductUseCase _updateUseCase(_InMemoryProductRepository repository) {
+ return UpdateProductUseCase(
+  repository,
+  FifoStockUseCase(
+   FakeStockLotRepository(),
+   UpdateProductStockUseCase(repository),
+  ),
+  const _DirectUnitOfWork(),
+ );
 }
 
-/// Constrói o [UpdateProductUseCase] real sobre o repositório em memória.
-UpdateProductUseCase _updateUseCase(_InMemoryProductRepository repository) {
-  return UpdateProductUseCase(
-    repository,
-    FifoStockUseCase(
-      FakeStockLotRepository(),
-      UpdateProductStockUseCase(repository),
-    ),
-    const _DirectUnitOfWork(),
-  );
+/// Constrói o [AddProductUseCase] real sobre o repositório em memória.
+AddProductUseCase _addUseCase(_InMemoryProductRepository repository) {
+ return AddProductUseCase(
+  repository,
+  FakeStockLotRepository(),
+  const _DirectUnitOfWork(),
+ );
 }
 
 /// Fake que sempre falha, para exercitar o estado de erro.
@@ -114,8 +123,11 @@ Widget _buildApp(
       // Contexto de loja — a lista de produtos escopa pela loja ativa.
       ...storeContextOverrides(),
       getProductsUseCaseProvider.overrideWithValue(useCase),
-      // Edição: use case real sobre fakes em memória (a tela nunca toca
-      // em GetIt — o provider é sobrescrito no ProviderScope).
+      // Cadastro/edição: use cases reais sobre fakes em memória (a tela
+      // nunca toca em GetIt — o provider é sobrescrito no ProviderScope).
+      addProductUseCaseProvider.overrideWithValue(
+        _addUseCase(_InMemoryProductRepository()),
+      ),
       updateProductUseCaseProvider.overrideWithValue(
         updateUseCase ?? _updateUseCase(_InMemoryProductRepository()),
       ),
@@ -207,7 +219,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // A busca agora vive no sheet de filtros avançados (AppBar →
+      // botão "Filtrar"): digita a query e aplica.
+      await tester.tap(find.byIcon(Icons.tune_rounded));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField).first, 'CANETA');
+      await tester.tap(find.text('Aplicar'));
       await tester.pumpAndSettle();
 
       expect(find.text('Caneta Azul'), findsOneWidget);
@@ -229,7 +246,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.tap(find.byIcon(Icons.tune_rounded));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField).first, 'Inexistente');
+      await tester.tap(find.text('Aplicar'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nenhum produto encontrado'), findsOneWidget);
@@ -260,8 +280,19 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Seleciona o chip "Stock baixo"
-      await tester.tap(find.text('Stock baixo · 1'));
+      // Abre o sheet avançado e seleciona o chip "Estoque baixo" da
+      // seção STATUS (a seção Disponibilidade tem um chip homônimo —
+      // escopa pela primeira SheetSection para acertar o status).
+      await tester.tap(find.byIcon(Icons.tune_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(SheetSection).first,
+          matching: find.text('Estoque baixo'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Aplicar'));
       await tester.pumpAndSettle();
 
       expect(find.text('Caneta'), findsOneWidget);
@@ -283,8 +314,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // O chip "Todos" mostra "Todos os produtos · N" (não "Tudo")
-      expect(find.text('Todos os produtos · 1'), findsOneWidget);
+      // Abre o sheet de filtros: o filtro padrão é o chip "Todos"
+      // (não "Tudo") — aparece nas seções Status e Disponibilidade.
+      await tester.tap(find.byIcon(Icons.tune_rounded));
+      await tester.pumpAndSettle();
+      expect(find.text('Todos'), findsWidgets);
+
+      // Aplica sem mudanças e verifica a contagem do cabeçalho.
+      await tester.tap(find.text('Aplicar'));
+      await tester.pumpAndSettle();
+      expect(find.text('1 produto'), findsOneWidget);
     });
 
     testWidgets('ativar venda por peso não quebra o dropdown de unidade', (tester) async {
@@ -300,7 +339,10 @@ void main() {
       await tester.tap(find.text('Novo produto'));
       await tester.pumpAndSettle();
 
-      // Ativa "Vender por peso"
+      // Ativa "Venda por peso (fração)" — o switch pode ficar abaixo da
+      // dobra na sheet; garante visibilidade antes do tap.
+      await tester.ensureVisible(find.byType(Switch).first);
+      await tester.pumpAndSettle();
       await tester.tap(find.byType(Switch).first);
       await tester.pumpAndSettle();
 
@@ -330,13 +372,18 @@ void main() {
       await tester.tap(find.text('Novo produto'));
       await tester.pumpAndSettle();
 
-      // Preenche campos obrigatórios
-      await tester.enterText(find.widgetWithText(TextFormField, 'Nome do produto'), 'Arroz');
-      await tester.enterText(find.widgetWithText(TextFormField, 'Preço de compra (MT)'), '10,00');
-      await tester.enterText(find.widgetWithText(TextFormField, 'Preço de venda (MT)'), '15,00');
-      await tester.enterText(find.widgetWithText(TextFormField, 'Quantidade em stock'), '50');
+      // Preenche campos obrigatórios (rótulos atuais do design system).
+      await tester.enterText(find.widgetWithText(TextFormField, 'Nome'), 'Arroz');
+      await tester.enterText(find.widgetWithText(TextFormField, 'Preço de compra'), '10,00');
+      await tester.enterText(find.widgetWithText(TextFormField, 'Preço de venda'), '15,00');
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Quantidade em estoque'),
+        '50',
+      );
 
-      // Abre seletor de validade
+      // Abre seletor de validade (pode ficar abaixo da dobra).
+      await tester.ensureVisible(find.text('Definir validade'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Definir validade'));
       await tester.pumpAndSettle();
 
@@ -344,12 +391,20 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
 
-      // Submete
-      await tester.tap(find.byType(AppButton).first);
+      // Submete — o AppButton DENTRO da sheet de cadastro (a tela de
+      // fundo também tem um AppButton: o CTA "Novo produto" do estado
+      // vazio, então não dá para usar `find.byType(AppButton).first`).
+      final submit = find.descendant(
+        of: find.byType(AddProductSheet),
+        matching: find.byType(AppButton),
+      );
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
+      await tester.tap(submit);
       await tester.pumpAndSettle();
 
       // Verifica sucesso
-      expect(find.text('Produto guardado com sucesso'), findsOneWidget);
+      expect(find.text('Produto adicionado!'), findsOneWidget);
     });
 
     testWidgets('tocar no produto abre a edição (dono/gerente)', (tester) async {
@@ -383,7 +438,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Editar produto'), findsOneWidget);
-      expect(find.text('Guardar'), findsOneWidget);
+      expect(find.text('Salvar alterações'), findsOneWidget);
       // Pré-preenchido com os valores atuais.
       expect(find.widgetWithText(TextFormField, 'Caneta'), findsOneWidget);
       expect(find.text('2.00'), findsOneWidget); // preço de venda pré-preenchido
@@ -425,10 +480,10 @@ void main() {
       );
       await tester.enterText(find.widgetWithText(TextFormField, '2.00'), '2.50');
 
-      // O botão "Guardar" está no cabeçalho da sheet.
-      await tester.ensureVisible(find.text('Guardar'));
+      // O botão "Salvar alterações" fica no rodapé da sheet.
+      await tester.ensureVisible(find.text('Salvar alterações'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Guardar'), warnIfMissed: false);
+      await tester.tap(find.text('Salvar alterações'), warnIfMissed: false);
       await tester.pumpAndSettle();
       await tester.pumpAndSettle(); // Extra wait for async operations
 
@@ -469,16 +524,16 @@ void main() {
       await tester.tap(find.text('Caneta'));
       await tester.pumpAndSettle();
 
-      // Desativa o produto (switch "Produto ativo" → off) e salva.
-      await tester.ensureVisible(find.text('Produto ativo'));
+      // Desativa o produto (switch "Produto activo" → off) e salva.
+      await tester.ensureVisible(find.text('Produto activo'));
       await tester.pumpAndSettle();
       await tester.tap(find.byType(Switch).last);
       await tester.pumpAndSettle();
 
-      // O botão "Guardar" está no cabeçalho da sheet.
-      await tester.ensureVisible(find.text('Guardar'));
+      // O botão "Salvar alterações" fica no rodapé da sheet.
+      await tester.ensureVisible(find.text('Salvar alterações'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Guardar'), warnIfMissed: false);
+      await tester.tap(find.text('Salvar alterações'), warnIfMissed: false);
       await tester.pumpAndSettle();
       await tester.pumpAndSettle(); // Extra wait for async operations
 
@@ -503,7 +558,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Inativo'), findsOneWidget);
+      expect(find.text('Inactivo'), findsOneWidget);
     });
 
     testWidgets('exibe erro e permite tentar novamente', (tester) async {

@@ -38,12 +38,15 @@ class AdminDashboardScreen extends ConsumerWidget {
     final auditEntries = auditLogAsync.value ?? const [];
 
     final totalTenants = allTenants.length;
-    final activeTenants =
-        allTenants.where((t) => t.status == TenantStatus.approved).length;
-    final pendingTenants =
-        allTenants.where((t) => t.status == TenantStatus.pending).length;
-    final rejectedTenants =
-        allTenants.where((t) => t.status == TenantStatus.rejected).length;
+    final activeTenants = allTenants
+        .where((t) => t.status == TenantStatus.approved)
+        .length;
+    final pendingTenants = allTenants
+        .where((t) => t.status == TenantStatus.pending)
+        .length;
+    final rejectedTenants = allTenants
+        .where((t) => t.status == TenantStatus.rejected)
+        .length;
     final totalPlans = allPlans.length;
     final totalPending = pendingTenants + pendingUpgrades.length;
 
@@ -107,10 +110,12 @@ class AdminDashboardScreen extends ConsumerWidget {
       8,
     );
 
-    final hasError = allTenantsAsync.hasError ||
+    final hasError =
+        allTenantsAsync.hasError ||
         allPlansAsync.hasError ||
         pendingUpgradesAsync.hasError;
-    final isLoading = allTenantsAsync.isLoading ||
+    final isLoading =
+        allTenantsAsync.isLoading ||
         allPlansAsync.isLoading ||
         pendingUpgradesAsync.isLoading;
 
@@ -118,9 +123,6 @@ class AdminDashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           l10n.adminDashboardTitle,
-          style: theme.textTheme.labelMedium?.copyWith(
-            letterSpacing: -0.5,
-          ),
         ),
       ),
       body: hasError && !isLoading
@@ -160,7 +162,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                       _StatItem(
                         value: '$activeTenants',
                         label: l10n.adminDashboardActiveTenants,
-                        color: Colors.green,
+                        // Acento verde do tema (AA sobre superfícies claras) —
+                        // Colors.green dava ~2.5:1 no modo claro.
+                        color: Theme.of(context).accent,
                       ),
                       _StatItem(
                         value: '$pendingTenants',
@@ -310,8 +314,11 @@ class AdminDashboardScreen extends ConsumerWidget {
 
 DateTime _startOfWeek(DateTime date) {
   final weekday = date.weekday;
-  return DateTime(date.year, date.month, date.day)
-      .subtract(Duration(days: weekday - 1));
+  return DateTime(
+    date.year,
+    date.month,
+    date.day,
+  ).subtract(Duration(days: weekday - 1));
 }
 
 List<int> _buildWeeklyBuckets(List<DateTime> dates, DateTime now, int weeks) {
@@ -332,8 +339,6 @@ List<int> _buildWeeklyBuckets(List<DateTime> dates, DateTime now, int weeks) {
   }
   return buckets;
 }
-
-
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Stats Strip — horizontal scrollable key metrics
@@ -374,9 +379,7 @@ class _StatsStrip extends StatelessWidget {
                 5,
                 (i) => Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(
-                      left: i == 0 ? 0 : AppSpacing.sm,
-                    ),
+                    padding: EdgeInsets.only(left: i == 0 ? 0 : AppSpacing.sm),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -413,9 +416,7 @@ class _StatsStrip extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(horizontal: 2),
                       color: scheme.outlineVariant.withValues(alpha: 0.4),
                     ),
-                  Expanded(
-                    child: _StatCell(stat: stats[i]),
-                  ),
+                  Expanded(child: _StatCell(stat: stats[i])),
                 ],
               ],
             ),
@@ -503,11 +504,7 @@ class _PendingBanner extends StatelessWidget {
               ),
             ),
           ),
-          Icon(
-            Icons.chevron_right,
-            size: 18,
-            color: scheme.tertiary,
-          ),
+          Icon(Icons.chevron_right, size: 18, color: scheme.tertiary),
         ],
       ),
     );
@@ -572,7 +569,8 @@ class _GrowthSummary extends StatelessWidget {
               Expanded(
                 child: _GrowthKpi(
                   label: l10n.adminGrowthNewTenants,
-                  sublabel: '${l10n.adminGrowthThisWeek}: $newThisWeek · ${l10n.adminGrowthLastWeek}: $lastWeek',
+                  sublabel:
+                      '${l10n.adminGrowthThisWeek}: $newThisWeek · ${l10n.adminGrowthLastWeek}: $lastWeek',
                   diff: weekDiff,
                   color: scheme.primary,
                   l10n: l10n,
@@ -582,7 +580,8 @@ class _GrowthSummary extends StatelessWidget {
               Expanded(
                 child: _GrowthKpi(
                   label: l10n.adminGrowthApprovals,
-                  sublabel: '${l10n.adminGrowthThisWeek}: $approvalsThisWeek · ${l10n.adminGrowthLastWeek}: $approvalsLastWeek',
+                  sublabel:
+                      '${l10n.adminGrowthThisWeek}: $approvalsThisWeek · ${l10n.adminGrowthLastWeek}: $approvalsLastWeek',
                   diff: approvalDiff,
                   color: scheme.secondary,
                   l10n: l10n,
@@ -593,7 +592,8 @@ class _GrowthSummary extends StatelessWidget {
           const SizedBox(height: 8),
           _GrowthKpi(
             label: l10n.adminGrowthNewTenants,
-            sublabel: '${l10n.adminGrowthThisMonth}: $newThisMonth · ${l10n.adminGrowthLastMonth}: $lastMonth',
+            sublabel:
+                '${l10n.adminGrowthThisMonth}: $newThisMonth · ${l10n.adminGrowthLastMonth}: $lastMonth',
             diff: monthDiff,
             color: scheme.tertiary,
             l10n: l10n,
@@ -657,20 +657,20 @@ class _GrowthKpi extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final trendColor = diff > 0
-        ? const Color(0xFF16A34A)
+        ? AppColors.success
         : diff < 0
-            ? scheme.error
-            : scheme.onSurfaceVariant;
+        ? scheme.error
+        : scheme.onSurfaceVariant;
     final trendIcon = diff > 0
         ? Icons.trending_up
         : diff < 0
-            ? Icons.trending_down
-            : Icons.trending_flat;
+        ? Icons.trending_down
+        : Icons.trending_flat;
     final trendLabel = diff > 0
         ? l10n.adminGrowthUp('$diff')
         : diff < 0
-            ? l10n.adminGrowthDown('${diff.abs()}')
-            : l10n.adminGrowthFlat;
+        ? l10n.adminGrowthDown('${diff.abs()}')
+        : l10n.adminGrowthFlat;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -857,7 +857,9 @@ class _TrendChart extends StatelessWidget {
                               : '',
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontSize: 12,
-                            color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
+                            color: scheme.onSurfaceVariant.withValues(
+                              alpha: 0.4,
+                            ),
                           ),
                           textAlign: i == 0 ? TextAlign.left : TextAlign.right,
                           overflow: TextOverflow.ellipsis,
@@ -910,7 +912,9 @@ class _TrendBar extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 12,
                 fontWeight: isLast ? FontWeight.w700 : FontWeight.w400,
-                color: isLast ? color : scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                color: isLast
+                    ? color
+                    : scheme.onSurfaceVariant.withValues(alpha: 0.5),
               ),
             ),
           ),
@@ -986,13 +990,14 @@ class _DistributionCard extends StatelessWidget {
         : 0;
 
     // Approval rate
-    final approvalRate =
-        totalTenants > 0 ? (activeTenants / totalTenants * 100).round() : 0;
+    final approvalRate = totalTenants > 0
+        ? (activeTenants / totalTenants * 100).round()
+        : 0;
     final rateColor = approvalRate >= 70
-        ? Colors.green
+        ? AppColors.success
         : approvalRate >= 40
-            ? Colors.orange
-            : Colors.red;
+        ? AppColors.statusWarning
+        : AppColors.statusError;
 
     // Plan distribution
     final planCounts = <String, int>{};
@@ -1002,8 +1007,7 @@ class _DistributionCard extends StatelessWidget {
     }
     final sorted = planCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    final maxPlanCount =
-        sorted.isNotEmpty ? sorted.first.value : 1;
+    final maxPlanCount = sorted.isNotEmpty ? sorted.first.value : 1;
     final planColors = [
       scheme.primary,
       AppColors.statusPurple,
@@ -1056,8 +1060,10 @@ class _DistributionCard extends StatelessWidget {
                 const Spacer(),
                 // Approval rate inline
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: rateColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
@@ -1095,14 +1101,14 @@ class _DistributionCard extends StatelessWidget {
             for (var i = 0; i < sorted.length; i++) ...[
               if (i > 0) const SizedBox(height: 4),
               _PlanBarRow(
-                planName: plans
+                planName:
+                    plans
                         .where((p) => p.id == sorted[i].key)
                         .firstOrNull
                         ?.name ??
                     sorted[i].key,
                 count: sorted[i].value,
-                fraction:
-                    maxPlanCount > 0 ? sorted[i].value / maxPlanCount : 0,
+                fraction: maxPlanCount > 0 ? sorted[i].value / maxPlanCount : 0,
                 color: planColors[i % planColors.length],
               ),
             ],
@@ -1136,9 +1142,9 @@ class _LegendDot extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 12,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
+            fontSize: 12,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
         ),
       ],
     );
@@ -1180,8 +1186,7 @@ class _PlanBarRow extends StatelessWidget {
             child: LinearProgressIndicator(
               value: fraction,
               minHeight: 6,
-              backgroundColor:
-                  theme.colorScheme.surfaceContainerHighest,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -1230,8 +1235,7 @@ class _RecentActivityFeed extends StatelessWidget {
                 width: double.infinity,
                 height: 36,
                 decoration: BoxDecoration(
-                  color:
-                      scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: AppRadius.xsAll,
                 ),
               ),
@@ -1300,7 +1304,7 @@ class _ActivityRow extends StatelessWidget {
     final timeFormat = DateFormat.Hm();
 
     final status = entry.detail?['status'] as String?;
-    final color = _statusColor(status);
+    final color = AppColors.decisionStatusColor(status);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -1338,18 +1342,6 @@ class _ActivityRow extends StatelessWidget {
     );
   }
 
-  Color _statusColor(String? status) {
-    switch (status) {
-      case 'approved':
-        return Colors.green;
-      case 'rejected':
-        return Colors.red;
-      case 'pending':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -1388,7 +1380,7 @@ class _QuickActionGrid extends StatelessWidget {
       children: actions.map((action) {
         final itemWidth =
             (width - AppSpacing.lg * 2 - AppSpacing.sm * (columns - 1)) /
-                columns;
+            columns;
         return SizedBox(
           width: itemWidth,
           child: _QuickActionCard(action: action),
@@ -1434,8 +1426,10 @@ class _QuickActionCard extends StatelessWidget {
               if (action.badge > 0) ...[
                 const Spacer(),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: action.color,
                     borderRadius: BorderRadius.circular(999),

@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
+
+/// Resolve o rótulo localizado de um papel de funcionário (token interno).
+String _roleLabel(String role, AppLocalizations l10n) {
+  return role == 'manager' ? l10n.roleManager : l10n.employeeRoleSales;
+}
 
 /// Ecra de gestão de funcionários — ponto, comissões e metas.
 class EmployeeManagementScreen extends ConsumerStatefulWidget {
@@ -23,10 +30,11 @@ class _EmployeeManagementScreenState
   late final TabController _tabController;
 
   // ─── Estado partilhado ───
-  final List<_Employee> _employees = [
-    _Employee(id: '1', name: 'Carlos Silva', role: 'Vendedor'),
-    _Employee(id: '2', name: 'Ana Santos', role: 'Gerente'),
-    _Employee(id: '3', name: 'Miguel Costa', role: 'Vendedor'),
+  // Papéis são tokens resolvidos via l10n no build (demo local).
+  late final List<_Employee> _employees = [
+    _Employee(id: '1', name: 'Carlos Silva', role: 'sales'),
+    _Employee(id: '2', name: 'Ana Santos', role: 'manager'),
+    _Employee(id: '3', name: 'Miguel Costa', role: 'sales'),
   ];
 
   @override
@@ -43,25 +51,19 @@ class _EmployeeManagementScreenState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 64,
-        titleSpacing: AppSpacing.lg,
         title: Text(
-          'Gestão de Funcionários',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
+          l10n.employeeMgmtTitle,
         ),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Ponto'),
-            Tab(text: 'Comissões'),
-            Tab(text: 'Metas'),
+          tabs: [
+            Tab(text: l10n.employeeMgmtTabAttendance),
+            Tab(text: l10n.employeeMgmtTabCommissions),
+            Tab(text: l10n.employeeMgmtTabTargets),
           ],
         ),
       ),
@@ -185,6 +187,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -194,7 +197,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
           children: [
             Expanded(
               child: _MiniStat(
-                label: 'Presentes',
+                label: l10n.employeePresentCount,
                 value: '${_clockedIn.length}',
                 color: IconTone.green,
               ),
@@ -202,7 +205,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _MiniStat(
-                label: 'Ausentes',
+                label: l10n.employeeAbsentCount,
                 value: '${widget.employees.length - _clockedIn.length}',
                 color: IconTone.red,
               ),
@@ -210,7 +213,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _MiniStat(
-                label: 'Total',
+                label: l10n.commonTotal,
                 value: '${widget.employees.length}',
                 color: ModuleColors.reports,
               ),
@@ -221,7 +224,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
 
         // ─── Botões de ponto rápido ───
         Text(
-          'Registo de Ponto',
+          l10n.employeeAttendanceSection,
           style: theme.textTheme.labelMedium?.copyWith(
             fontWeight: FontWeight.w500,
           ),
@@ -272,7 +275,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
                           ),
                         ),
                         Text(
-                          emp.role,
+                          _roleLabel(emp.role, context.l10n),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                             fontSize: 11,
@@ -283,7 +286,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
                   ),
                   if (isClocked)
                     AppButton.secondary(
-                      label: 'Sair',
+                      label: l10n.employeeClockOutAction,
                       onPressed: () => _clockOut(emp.id),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: IconTone.red,
@@ -293,7 +296,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
                     )
                   else
                     AppButton.primary(
-                      label: 'Entrar',
+                      label: l10n.employeeClockInAction,
                       onPressed: () => _clockIn(emp.id),
                     ),
                 ],
@@ -309,7 +312,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
           Row(
             children: [
               Text(
-                'Registos de Hoje',
+                l10n.employeeRecordsSection,
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
@@ -369,7 +372,7 @@ class _AttendanceTabState extends State<_AttendanceTab> {
                       ),
                     ),
                     Text(
-                      '${r.clockIn} — ${r.clockOut ?? "Em curso"}',
+                      '${r.clockIn} — ${r.clockOut ?? l10n.employeeClockOutInProgress}',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                         fontFeatures: const [
@@ -401,6 +404,7 @@ class _CommissionsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     // Dados de exemplo (seriam calculados a partir de vendas reais)
     final totalSalesCents = 2450000; // 24.500,00 MT
@@ -428,7 +432,7 @@ class _CommissionsTab extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Vendas do Mês',
+                      l10n.employeeSalesMonth,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                         fontSize: 11,
@@ -456,7 +460,7 @@ class _CommissionsTab extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Comissões',
+                      l10n.employeeCommissionTitle,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                         fontSize: 11,
@@ -481,7 +485,7 @@ class _CommissionsTab extends StatelessWidget {
 
         // ─── Lista por funcionário ───
         Text(
-          'Comissão por Funcionário',
+          l10n.employeeCommissionPerEmployee,
           style: theme.textTheme.labelMedium?.copyWith(
             fontWeight: FontWeight.w500,
           ),
@@ -522,7 +526,10 @@ class _CommissionsTab extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '${entry.$3}% sobre ${Formatters.currency(entry.$2)}',
+                          l10n.employeeCommissionRate(
+                            '${entry.$3}',
+                            Formatters.currency(entry.$2),
+                          ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                             fontSize: 11,
@@ -605,6 +612,7 @@ class _TargetsTabState extends State<_TargetsTab> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -614,7 +622,7 @@ class _TargetsTabState extends State<_TargetsTab> {
           children: [
             Expanded(
               child: _MiniStat(
-                label: 'Metas Activas',
+                label: l10n.employeeTargetsActive,
                 value: '${_targets.length}',
                 color: ModuleColors.credit,
               ),
@@ -622,7 +630,7 @@ class _TargetsTabState extends State<_TargetsTab> {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _MiniStat(
-                label: 'Atingidas',
+                label: l10n.employeeTargetsReached,
                 value:
                     '${_targets.where((t) => t.progress >= 1.0).length}',
                 color: IconTone.green,
@@ -631,7 +639,7 @@ class _TargetsTabState extends State<_TargetsTab> {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _MiniStat(
-                label: 'Pendentes',
+                label: l10n.employeeTargetsPending,
                 value:
                     '${_targets.where((t) => t.progress < 1.0).length}',
                 color: IconTone.amber,
@@ -645,15 +653,14 @@ class _TargetsTabState extends State<_TargetsTab> {
         if (_targets.isEmpty)
           EmptyState(
             icon: Icons.flag_outlined,
-            title: 'Nenhuma meta definida',
-            subtitle:
-                'Defina metas mensais de vendas para cada funcionário',
+            title: l10n.employeeTargetsEmptyTitle,
+            subtitle: l10n.employeeTargetsEmptySubtitle,
           )
         else ...[
           Row(
             children: [
               Text(
-                'Metas do Mês',
+                l10n.employeeTargetsMonth,
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
@@ -695,7 +702,7 @@ class _TargetsTabState extends State<_TargetsTab> {
         if (widget.employees.isNotEmpty)
           AppButton.secondary(
             expanded: true,
-            label: 'Adicionar Meta',
+            label: l10n.employeeTargetAdd,
             icon: const Icon(Icons.add_outlined, size: 18),
             onPressed: _openAddTarget,
           ),
@@ -849,14 +856,18 @@ class _TargetCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Meta: ${Formatters.currency(target.targetCents)}',
+                context.l10n.employeeTargetMeta(
+                  Formatters.currency(target.targetCents),
+                ),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                   fontSize: 11,
                 ),
               ),
               Text(
-                'Realizado: ${Formatters.currency(target.achievedCents)}',
+                context.l10n.employeeTargetAchieved(
+                  Formatters.currency(target.achievedCents),
+                ),
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w500,
                   fontSize: 11,
@@ -902,6 +913,7 @@ class _AddTargetSheetState extends State<_AddTargetSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final available = widget.employees
         .where((e) => !widget.existingTargetEmployeeIds.contains(e.id))
         .toList();
@@ -919,7 +931,7 @@ class _AddTargetSheetState extends State<_AddTargetSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Nova Meta',
+              l10n.employeeTargetNewTitle,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -927,14 +939,14 @@ class _AddTargetSheetState extends State<_AddTargetSheet> {
             const SizedBox(height: AppSpacing.lg),
             if (available.isEmpty)
               Text(
-                'Todos os funcionários já possuem meta definida',
+                l10n.employeeTargetAllHave,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               )
             else ...[
               Text(
-                'Funcionário',
+                l10n.employeeTargetEmployee,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
@@ -956,7 +968,7 @@ class _AddTargetSheetState extends State<_AddTargetSheet> {
               const SizedBox(height: AppSpacing.md),
               AppTextField(
                 controller: _targetController,
-                label: 'Meta Mensal (MT)',
+                label: l10n.employeeTargetMonthly,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 prefixIcon: Icons.flag_outlined,
@@ -965,7 +977,7 @@ class _AddTargetSheetState extends State<_AddTargetSheet> {
             const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               expanded: true,
-              label: 'Guardar Meta',
+              label: l10n.employeeTargetSave,
               onPressed: _selectedEmployeeId != null &&
                       _targetController.text.isNotEmpty
                   ? () {

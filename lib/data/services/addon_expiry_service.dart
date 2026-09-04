@@ -21,8 +21,8 @@ const _warningDays = [7, 3, 1];
 class AddOnExpiryService {
   AddOnExpiryService(
     this._dataSource, {
-    IInvoiceNotificationRepository? notificationRepository,
-  }) : _notificationRepository = notificationRepository;
+    this._notificationRepository,
+  });
 
   final AddOnLocalDataSource _dataSource;
   final IInvoiceNotificationRepository? _notificationRepository;

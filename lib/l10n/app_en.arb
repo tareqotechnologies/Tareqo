@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-  "appTitle": "Dumbhanengue ERP",
   "onboardingTitle": "Welcome!",
   "onboardingHeading": "Set up your business",
   "onboardingSubtitle": "Choose a plan, name and currency. Approval within 24h.",
@@ -33,9 +32,7 @@
   "onboardingChoosePlanError": "Choose a plan to continue.",
   "onboardingGenericError": "Could not send the request. Try again.",
   "onboardingLanguageLabel": "Language",
-  "onboardingLanguageHint": "App language",
   "onboardingCurrencyLabel": "Currency",
-  "onboardingCurrencyHint": "Currency used for amounts",
   "languagePortuguese": "Portuguese",
   "languageEnglish": "English",
   "languageFrench": "Français",
@@ -62,7 +59,6 @@
   "appSheetClose": "Close",
   "storeSwitcherTooltip": "Switch store",
   "storeSelectorSectionTitle": "Active store",
-  "storeSelectorSectionHint": "Choose the active store.",
   "tenantPendingTitle": "Waiting for approval",
   "tenantPendingSubtitle": "Request for \"{business}\" sent. Wait up to 24h.",
   "@tenantPendingSubtitle": {
@@ -85,33 +81,25 @@
   "authBlockedTitle": "Access suspended",
   "authBlockedMessage": "Your account was deactivated by the owner.",
   "authBlockedSignOut": "Sign out",
-  "authErrorRestoreSession": "Session not restored",
   "authErrorCheckConnection": "Check your connection and try again.",
   "authErrorLoadAccount": "Account not loaded",
   "splashLoading": "Opening your session…",
   "loginSubtitleSignUp": "Create your account to get started",
-  "loginSubtitleSignIn": "Simple management for your business",
   "loginNameLabel": "Name",
   "loginEmailLabel": "Email",
   "loginEmailError": "Enter a valid email.",
   "loginPasswordLabel": "Password",
   "loginPasswordError": "Password must be at least 8 characters.",
-  "loginPasswordHint": "Min. 8 characters with lowercase, uppercase, number and symbol.",
   "loginWeakPasswordError": "Password must include letters, numbers and symbols.",
   "loginRateLimitError": "Too many attempts. Wait 1 hour and try again.",
   "loginShowPassword": "Show password",
   "loginHidePassword": "Hide password",
-  "loginConfirmLabel": "Confirm password",
   "loginConfirmError": "Passwords do not match.",
   "loginSignUp": "Sign up",
   "loginSignIn": "Sign in",
-  "loginSwitchToSignIn": "Already have an account — sign in",
-  "loginSwitchToSignUp": "No account yet — sign up",
   "loginSignUpSuccess": "Account created! Confirm your email to sign in.",
   "loginSignUpError": "Could not create the account. Try again.",
   "loginSignInError": "Could not sign in. Check your email and password.",
-  "loginSecurityNote": "Data protected with encryption.",
-  "loginForgotPassword": "Forgot your password?",
   "forgotPasswordTitle": "Reset password",
   "forgotPasswordHint": "Enter your email. We'll send a reset link.",
   "forgotPasswordSubmit": "Send link",
@@ -139,7 +127,6 @@
   "appNavWallet": "Wallet",
   "appNavMenu": "Menu",
   "appNavProducts": "Products",
-  "appNavFinancial": "Finance",
   "appNavCredit": "Credit",
   "appNavCustomers": "Customers",
   "fabMenuTitle": "New action",
@@ -185,36 +172,18 @@
       }
     }
   },
-  "dashboardSignOutTooltip": "Sign out",
   "dashboardOwnerFallback": "Owner",
-  "dashboardTotalSales": "Total sales",
-  "dashboardAllTime": "All time",
-  "dashboardCashBalance": "Cash balance",
-  "dashboardReceivables": "Receivables (credit)",
-  "dashboardStockLabel": "Stock in products",
   "commonUnits": "u.",
   "dashboardQuickActions": "Quick actions",
-  "dashboardQuickNewSale": "New sale",
-  "dashboardQuickAddProduct": "Add product",
-  "dashboardQuickAddTransaction": "Add transaction",
-  "dashboardQuickAddDebt": "Add credit",
-  "dashboardModules": "Modules",
   "dashboardModuleCustomers": "Customers",
   "dashboardModulePurchases": "Purchases",
   "dashboardModuleReports": "Reports",
   "dashboardModuleStores": "Stores",
-  "dashboardRecentSales": "Recent sales",
-  "dashboardViewAll": "View all",
-  "dashboardNoSales": "No sales yet — record your first one!",
-  "dashboardRecentPurchases": "Recent purchases",
-  "dashboardNoPurchases": "No purchases yet — record your first one!",
   "dashboardLowStock": "Low stock",
   "dashboardKpisError": "Could not load indicators.",
   "dashboardActivityTitle": "Today's activity",
   "dashboardActivityEvents": "{count, plural, =1{1 event} other{{count} events}}",
   "dashboardActivityMinutesAgo": "{count} min ago",
-  "dashboardActivityHoursAgo": "{count} h ago",
-  "dashboardDateToday": "Today",
   "dashboardMetricSales": "Sales",
   "dashboardMetricCash": "Cash",
   "dashboardMetricReceivables": "Receivables",
@@ -227,7 +196,6 @@
     }
   },
   "dashboardActivityEmpty": "No activity recorded yet.",
-  "dashboardActivitySeeAll": "View all",
   "dashboardStockEntry": "Stock · {product}",
   "@dashboardStockEntry": {
     "placeholders": {
@@ -243,14 +211,6 @@
         "type": "String"
       },
       "time": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardTransferItem": "Transfer · {product}",
-  "@dashboardTransferItem": {
-    "placeholders": {
-      "product": {
         "type": "String"
       }
     }
@@ -302,26 +262,23 @@
   "storesEmptyTitle": "No stores created",
   "storesEmptySubtitle": "Create the first store of your business.",
   "employeesLoadError": "Could not load the employees.",
-  "employeesEmptyTitle": "No employees linked",
+  "employeesUpdateError": "Could not update the employee. Try again.",
+    "employeesEmptyTitle": "No employees linked",
   "employeesEmptySubtitle": "Create the employee account and pick a store.",
   "roleManager": "Manager",
   "roleEmployee": "Employee",
-  "employeeActive": "Active",
-  "employeeInactive": "Inactive",
   "employeeDeactivateConfirm": "Deactivate {name}? Loses access immediately.",
   "employeeReactivateConfirm": "Reactivate {name}? Gets store access again.",
   "employeeDeactivated": "Employee deactivated.",
   "employeeReactivated": "Employee reactivated.",
   "employeeDeactivateAction": "Deactivate",
   "employeeReactivateAction": "Reactivate",
-  "employeeDetailTitle": "Employee details",
   "employeeDetailEmail": "Email",
   "employeeDetailStore": "Store",
   "employeeDetailRole": "Access level",
   "employeeDetailStatus": "Status",
   "employeeDetailActive": "Active",
   "employeeDetailInactive": "Inactive",
-  "employeeDetailActions": "Actions",
   "upgradesLoadError": "Could not load the plan upgrade requests.",
   "upgradesEmptyTitle": "No upgrade requests",
   "upgradesEmptySubtitle": "Request a bigger plan in the card above.",
@@ -359,13 +316,11 @@
   "addStoreEmailLabel": "Email (optional)",
   "addStoreNuitLabel": "Tax ID (optional)",
   "addStoreCityLabel": "City (optional)",
-  "storeDetailTitle": "Store details",
   "storeDetailPhone": "Phone",
   "storeDetailEmail": "Email",
   "storeDetailNuit": "Tax ID",
   "storeDetailCity": "City",
   "storeDetailAddress": "Address",
-  "storeDetailActions": "Actions",
   "addStoreSuccess": "Store {name} created!",
   "@addStoreSuccess": {
     "placeholders": {
@@ -406,7 +361,6 @@
   "commonSave": "Save",
   "commonSoldOut": "Sold out",
   "periodToday": "Today",
-  "periodWeek": "7 days",
   "periodMonth": "This month",
   "periodAll": "All",
   "paymentCash": "Cash",
@@ -416,69 +370,29 @@
   "paymentMPesa": "M-Pesa",
   "paymentTransfer": "Transfer",
   "purchasesSearchHint": "Search purchases...",
-  "productsFilterTooltip": "Filter products",
   "productsFilterAll": "All",
-  "productsFilterAllCount": "All · {count}",
-  "@productsFilterAllCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "productsFilterLowCount": "Low stock · {count}",
-  "@productsFilterLowCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "productsColProduct": "Product / SKU",
-  "productsColPrice": "Price · Stock",
   "productsSearchHint": "Search product...",
   "productsLoadError": "Could not load the products.",
   "productsEmptyTitle": "No products yet",
   "productsEmptySubtitle": "Tap \"New product\" to get started.",
   "productsAddNew": "New product",
-  "productsBuySell": "Buy: {buy} · Sell: {sell}",
-  "@productsBuySell": {
-    "placeholders": {
-      "buy": {
-        "type": "String"
-      },
-      "sell": {
-        "type": "String"
-      }
-    }
-  },
   "productsAdded": "Product added!",
   "productsAddedNoPhoto": "Product added! (no storage permission)",
   "productsAddError": "Could not add the product. Try again.",
   "productsNameError": "Enter the product name.",
   "productsDescriptionLabel": "Description (optional)",
   "productsPurchasePrice": "Purchase price",
-  "productsPurchasePriceError": "Enter the purchase price.",
   "productsSalePrice": "Sale price",
-  "productsSalePriceError": "Enter the sale price.",
   "productsStockQuantity": "Stock quantity",
-  "productsStockError": "Enter a valid quantity.",
   "productsAddSubmit": "Add product",
   "productsEditTitle": "Edit product",
   "productsEditSubmit": "Save changes",
   "productsEditSaved": "Product updated!",
   "productsEditSavedNoPhoto": "Product updated! (no storage permission)",
   "productsEditError": "Could not update the product. Try again.",
-  "productsPhotoLabel": "Product photo",
-  "productsPhotoTake": "Take photo",
-  "productsPhotoGallery": "From gallery",
-  "productsPhotoRemove": "Remove photo",
   "productsInactive": "Inactive",
-  "productsStockOut": "Out of stock",
-  "productsStockLow": "Low stock",
   "productsFilterTooltip": "Filter",
   "productsFilterAdvanced": "Advanced filters",
-  "productsFilterClear": "Clear all",
   "productsFilterStockType": "Stock type",
   "productsFilterStockTypeAll": "All",
   "productsFilterStockTypeWeight": "Weight (kg/g/l/ml)",
@@ -492,14 +406,6 @@
   "productsFilterMaxPrice": "Max price",
   "productsFilterApply": "Apply",
   "productsFilterInactive": "Inactive",
-  "productsFilterInactiveCount": "Inactive · {count}",
-  "@productsFilterInactiveCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "productsHeaderCount": "{count, plural, =1{1 product} other{{count} products}}",
   "@productsHeaderCount": {
     "placeholders": {
@@ -519,9 +425,6 @@
       }
     }
   },
-  "productsSummaryActive": "Active",
-  "productsSummaryLowStock": "Low stock",
-  "productsSummaryInactive": "Inactive",
   "productsActiveLabel": "Active product",
   "productsActiveHint": "Disable to remove from POS and purchases.",
   "productsStockAdjustHint": "Manual adjustment: sets exact stock (FIFO).",
@@ -529,43 +432,12 @@
   "productsSectionPricing": "Pricing",
   "productsSectionStock": "Stock",
   "productsSectionStatus": "Status",
-  "productsAddNewTitle": "New product",
-  "productsSave": "Save",
-  "productsSaving": "Saving...",
-  "productsSaved": "Product saved successfully",
-  "productsSavedNoPhoto": "Product saved! (no storage permission)",
-  "productsPhotoLabelNew": "Product photo",
   "productsPhotoTake": "Take photo",
   "productsPhotoGallery": "Choose from gallery",
   "productsPhotoRemove": "Remove photo",
-  "productsPhotoHint": "Tap to add",
-  "productsSectionBasic": "Basic information",
-  "productsSectionPricingNew": "Pricing",
-  "productsSectionStockNew": "Stock",
-  "productsNameLabel": "Product name",
-  "productsNameHint": "E.g., Rice type 1",
-  "productsNameErrorMsg": "Required",
-  "productsDescriptionLabelNew": "Description",
-  "productsDescriptionHint": "Optional",
-  "productsCodeLabel": "PLU or barcode",
-  "productsCodeHint": "Code used on label scale. Example: 12345",
-  "productsCodeError": "Use up to 5 digits",
-  "productsPurchasePriceLabel": "Purchase price",
   "productsPurchasePriceError": "Enter purchase price",
-  "productsSalePriceLabel": "Sale price",
   "productsSalePriceError": "Enter sale price",
-  "productsPriceValidationError": "Sale price must be higher than purchase price",
-  "productsStockQuantityLabel": "Stock quantity",
-  "productsStockHint": "E.g., 50",
-  "productsStockWeightHint": "In kg (e.g., 1.75)",
   "productsStockError": "Invalid quantity",
-  "productsExpiryLabel": "Expiry date",
-  "productsExpiryHint": "Optional",
-  "productsExpiryAdd": "Select date",
-  "productsExpiryClear": "Remove expiry",
-  "productsWeighLabel": "Sell by weight",
-  "productsWeighHint": "Allows selling decimal quantities, e.g., 1.75 kg",
-  "productsUnitLabel": "Unit of measure",
   "customersHeaderCount": "{count, plural, =1{1 customer} other{{count} customers}}",
   "@customersHeaderCount": {
     "placeholders": {
@@ -574,8 +446,6 @@
       }
     }
   },
-  "customersColCustomer": "Customer",
-  "customersColContact": "Contact / Credit",
   "customersSearchHint": "Search customer...",
   "customersLoadError": "Could not load the customers.",
   "customersEmptyTitle": "No customers yet",
@@ -718,9 +588,7 @@
   "financialRegister": "Register",
   "financialIncome": "Income",
   "financialExpense": "Expenses",
-  "financialBalance": "Balance",
   "financialPeriodBalance": "Net period balance",
-  "financialSwipeHint": "Swipe for expenses →",
   "financialTransactions": "Period transactions",
   "financialLoadError": "Could not load the transactions.",
   "financialCashFlowError": "Could not load the cash flow.",
@@ -778,7 +646,6 @@
   "cashClosingByMethod": "By payment method",
   "cashClosingCountedCash": "Cash counted",
   "cashClosingCountedCashHint": "Count the cash in the drawer and enter here.",
-  "cashClosingDifference": "Difference",
   "cashClosingConfers": "Cash matches",
   "cashClosingSurplus": "Surplus of {amount}",
   "@cashClosingSurplus": {
@@ -803,8 +670,6 @@
   "cashClosingUpdated": "Closing updated!",
   "cashClosingError": "Could not close the cash. Try again.",
   "cashClosingEmpty": "No sales recorded this day.",
-  "cashClosingHistory": "Closing history",
-  "cashClosingHistoryEmpty": "No closings recorded yet.",
   "debtsTitle": "Credit",
   "debtsHeaderSubtitle": "Credit to receive and pay",
   "debtsAddDebt": "Register credit",
@@ -814,28 +679,11 @@
   "debtsTotalPending": "Total to receive",
   "debtsOverdueStat": "Overdue",
   "debtsSettledStat": "Settled",
-  "debtsNoPendingCustomers": "No pending customers",
-  "debtsPendingCustomers": "{count, plural, =1{1 pending customer} other{{count} pending customers}}",
-  "@debtsPendingCustomers": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "debtsPendingSection": "Pending debts",
   "debtsLoadError": "Could not load the debts.",
   "debtsEmptyPendingTitle": "No pending credit",
   "debtsEmptyPendingSubtitle": "Pending credit will appear here.",
   "debtsTotalSettled": "Total settled",
-  "debtsSettledCount": "{count, plural, =1{1 settlement recorded} other{{count} settlements recorded}}",
-  "@debtsSettledCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "debtsSettledSection": "Settlement history",
   "debtsHistoryLoadError": "Could not load the history.",
   "debtsEmptySettledTitle": "No settlements yet",
@@ -925,15 +773,11 @@
   "salesLoadError": "Could not load the sales.",
   "salesEmptyTitle": "No sales yet",
   "salesEmptySubtitle": "Tap \"New sale\" to record your first.",
-  "salesSearchHint": "Search sales...",
   "periodYesterday": "Yesterday",
   "periodWeek": "This week",
   "paymentFilterCard": "Card",
   "paymentFilterAll": "All",
   "salesStatusPaid": "Paid",
-  "salesFilterAll": "All",
-  "salesFilterActive": "Active",
-  "salesFilterCancelled": "Cancelled",
   "salesHeaderTransactions": "{count, plural, =0{0 transactions} =1{1 transaction} other{{count} transactions}}",
   "@salesHeaderTransactions": {
     "description": "Number of today's transactions in the sales screen summary",
@@ -1107,37 +951,10 @@
       }
     }
   },
-  "adminPlanSolicited": "Plan: {plan} · Requested: {date}",
-  "@adminPlanSolicited": {
-    "placeholders": {
-      "plan": {
-        "type": "String"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "adminPlansTitle": "Plans",
-  "adminPlanNewTooltip": "New plan",
   "adminPlansLoadError": "Could not load the plans.",
   "adminPlansEmptyTitle": "No plans created",
   "adminPlansEmptySubtitle": "Create the first plan to enable subscriptions.",
   "adminPlanInactive": "Inactive",
-  "adminPlanDetails": "{price}/mo · {stores} store(s) · {employees} employee(s)",
-  "@adminPlanDetails": {
-    "placeholders": {
-      "price": {
-        "type": "String"
-      },
-      "stores": {
-        "type": "int"
-      },
-      "employees": {
-        "type": "int"
-      }
-    }
-  },
   "adminPlanNameError": "Enter the plan name.",
   "adminPlanPriceError": "Enter a valid price (≥ 0).",
   "adminPlanStoresError": "Plan must allow at least 1 store.",
@@ -1207,7 +1024,6 @@
   "purchasesExpiryLabel": "Expiry",
   "purchasesExpiryAdd": "Set expiry",
   "purchasesExpiryHelp": "Batch expiry date",
-  "dashboardExpiryAlerts": "Expiry",
   "dashboardExpiredIn": "Expired {days} day(s) ago",
   "@dashboardExpiredIn": {
     "description": "Expired batch — days since expiry",
@@ -1235,11 +1051,8 @@
   "adminDashboardPendingUpgrades": "Pending upgrades",
   "adminDashboardTotalPlans": "Plans",
   "adminDashboardLoadError": "Could not load overview.",
-  "adminAuditLogTitle": "Audit Log",
   "adminAuditLogEmpty": "No actions recorded yet.",
   "adminAuditLogEmptySubtitle": "Admin actions will appear here.",
-  "adminAuditLogLoadError": "Could not load the audit log.",
-  "adminTenantDetailTitle": "Tenant details",
   "adminTenantDetailOwner": "Owner ID",
   "adminTenantDetailPlan": "Plan",
   "adminTenantDetailStores": "Stores",
@@ -1267,7 +1080,6 @@
     }
   },
   "adminTenantSearchHint": "Search tenants...",
-  "adminTenantDetailLoadError": "Could not load tenant details.",
   "adminTenantDetailNoStores": "No stores created",
   "adminTenantDetailNoEmployees": "No employees linked",
   "adminTenantDetailActivity": "Recent activity",
@@ -1280,7 +1092,6 @@
       }
     }
   },
-  "adminTenantDetailStoreAddress": "{city}",
   "adminTenantDetailEmployeeRole": "{role, select, manager{Manager} other{Employee}}",
   "@adminTenantDetailEmployeeRole": {
     "placeholders": {
@@ -1297,14 +1108,6 @@
   "adminBulkDeselectAll": "Deselect all",
   "adminBulkApprove": "Approve ({count})",
   "adminBulkReject": "Reject ({count})",
-  "adminBulkApproveConfirm": "Approve {count} pending {count, plural, =1{tenant} other{tenants}}?",
-  "@adminBulkApproveConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "adminBulkRejectTitle": "Reject {count} {count, plural, =1{tenant} other{tenants}}",
   "@adminBulkRejectTitle": {
     "placeholders": {
@@ -1331,15 +1134,10 @@
   },
   "adminBulkApproveError": "Error approving tenants. Some may not have been processed.",
   "adminBulkRejectError": "Error rejecting tenants. Some may not have been processed.",
-  "adminWelcomeMessage": "Super Admin",
-  "adminPlatformStatus": "Platform Status",
-  "adminActionApproveTenant": "Approve Tenant",
-  "adminActionRejectTenant": "Reject Tenant",
   "adminActionManagePlans": "Manage Plans",
   "adminActionViewAuditLog": "View Audit Log",
   "adminTenantRequests": "Tenant Requests",
   "adminPlanUpgrades": "Plan Upgrades",
-  "adminRecentActivity": "Recent Activity",
   "adminPendingActionRequired": "{count, plural, =1{1 action required} other{{count} actions required}}",
   "@adminPendingActionRequired": {
     "placeholders": {
@@ -1348,13 +1146,10 @@
       }
     }
   },
-  "adminNoPendingActions": "All caught up!",
-  "adminPlatformSummary": "{tenants} tenants · {plans} plans",
   "adminAuditLogAll": "All",
   "adminAuditLogTenants": "Tenants",
   "adminAuditLogPlans": "Plans",
   "adminAuditLogUpgrades": "Upgrades",
-  "adminAuditLogTotalActions": "Total actions",
   "adminAuditLogApproved": "Approved",
   "adminAuditLogRejected": "Rejected",
   "adminAuditLogToday": "Today",
@@ -1363,34 +1158,8 @@
   "adminAuditLogOlder": "Older",
   "adminAuditLogSearchHint": "Search audit log...",
   "adminAuditLogNoResults": "No entries match your filter.",
-  "adminDashboardApprovalRate": "Approval rate",
-  "adminDashboardTenantDistribution": "Tenant distribution",
   "adminDashboardPlanDistribution": "Plan distribution",
   "adminDashboardRecentActivity": "Recent activity",
-  "adminDashboardActivityCount": "{count, plural, =0{No recent actions} =1{1 action in the last 7 days} other{{count} actions in the last 7 days}}",
-  "@adminDashboardActivityCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "adminDashboardActivePercent": "{percent}% active",
-  "@adminDashboardActivePercent": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "adminDashboardDaysSinceLastActivity": "{days, plural, =0{Active today} =1{Last action 1 day ago} other{Last action {days} days ago}}",
-  "@adminDashboardDaysSinceLastActivity": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
   "adminGrowthTrends": "Growth Trends",
   "adminGrowthThisWeek": "This week",
   "adminGrowthLastWeek": "Last week",
@@ -1398,22 +1167,6 @@
   "adminGrowthLastMonth": "Last month",
   "adminGrowthNewTenants": "New tenants",
   "adminGrowthApprovals": "Approvals",
-  "adminGrowthVsLastWeek": "{count} vs last week",
-  "@adminGrowthVsLastWeek": {
-    "placeholders": {
-      "count": {
-        "type": "String"
-      }
-    }
-  },
-  "adminGrowthVsLastMonth": "{count} vs last month",
-  "@adminGrowthVsLastMonth": {
-    "placeholders": {
-      "count": {
-        "type": "String"
-      }
-    }
-  },
   "adminGrowthUp": "+{count}",
   "@adminGrowthUp": {
     "placeholders": {
@@ -1434,22 +1187,6 @@
   "adminGrowthRegistrationsTrend": "Registrations (last 8 weeks)",
   "adminGrowthActivityTrend": "Activity (last 8 weeks)",
   "adminGrowthNoData": "Not enough data to show trends",
-  "adminGrowthWeekLabel": "W{week}",
-  "@adminGrowthWeekLabel": {
-    "placeholders": {
-      "week": {
-        "type": "String"
-      }
-    }
-  },
-  "adminGrowthAvgPerWeek": "{count}/week avg",
-  "@adminGrowthAvgPerWeek": {
-    "placeholders": {
-      "count": {
-        "type": "String"
-      }
-    }
-  },
   "adminNavInvoices": "Invoices",
   "adminInvoicesTitle": "Billing Invoices",
   "adminInvoicesEmpty": "No invoices generated yet.",
@@ -1490,40 +1227,326 @@
   "notificationTabUnread": "Unread",
   "notificationTitle": "Notifications",
   "menuNotifications": "Notifications",
-  "notificationMarkAsRead": "Mark as read",
   "notificationSinceDaysAgo": "{count} days ago",
   "@notificationSinceDaysAgo": {
     "placeholders": {
       "count": { "type": "int" }
     }
   },
-  "notificationToday": "Today",
   "notificationYesterday": "Yesterday",
   "notificationJustNow": "Just now",
   "adminMessagesTitle": "Messages to Tenants",
-  "adminMessagesEmpty": "No messages sent yet.",
-  "adminMessagesSend": "Send message",
   "adminMessagesSendSuccess": "Message sent!",
   "adminMessagesSendError": "Could not send the message. Try again.",
   "adminMessagesTenantLabel": "Tenant",
   "adminMessagesTenantError": "Select a tenant.",
   "adminMessagesTypeLabel": "Type",
-  "adminMessagesTypeBillingQuote": "Billing Quote",
-  "adminMessagesTypePlanExpiryChange": "Plan Expiry Change",
-  "adminMessagesTypePlanExpiringSoon": "Plan Expiring Soon",
-  "adminMessagesTypeGeneral": "General Message",
   "adminMessagesTitleLabel": "Title",
   "adminMessagesTitleError": "Enter a title.",
   "adminMessagesBodyLabel": "Message",
   "adminMessagesBodyError": "Enter the message body.",
   "adminMessagesSubmit": "Send",
   "adminNavMessages": "Messages",
-  "adminMessageSentTo": "Sent to {tenant}",
-  "@adminMessageSentTo": {
-    "placeholders": {
-      "tenant": { "type": "String" }
-    }
-  },
-  "menuMessages": "Messages",
-  "menuMessagesHint": "Messages from super admin"
+  "customInvoiceTitle": "Custom Invoice",
+  "customInvoiceEmpty": "No invoices",
+  "customInvoiceEmptySubtitle": "Create professional invoices with a custom\nlayout for your clients",
+  "customInvoiceTemplateTooltip": "Invoice template",
+  "customInvoiceNewFab": "New Invoice",
+  "customInvoiceItemsCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "customInvoiceWhatsApp": "WhatsApp",
+  "customInvoiceCreate": "Create Invoice",
+  "customInvoiceClientSection": "Client",
+  "customInvoiceClientName": "Client name",
+  "customInvoicePhone": "Phone",
+  "customInvoiceTaxIdOptional": "Tax ID / NUIT (optional)",
+  "customInvoiceProductSection": "Product",
+  "customInvoiceProductPlaceholder": "No products registered",
+  "customInvoiceProductOption": "Stock: {stock} {unit}  •  {price}",
+  "customInvoicePrice": "Price (MT)",
+  "customInvoiceQty": "Qty",
+  "customInvoiceAddItem": "Add",
+  "customInvoiceDiscount": "Discount (MT)",
+  "customInvoiceTax": "VAT (MT)",
+  "customInvoiceBillTotal": "Total: {total}",
+  "customInvoiceNumberPrefix": "No. {number}",
+  "customInvoiceTemplateSaved": "Template saved successfully",
+  "customInvoiceTemplateLogoSection": "Company logo",
+  "customInvoiceTemplateLogoHint": "Tap to upload a logo",
+  "customInvoiceTemplateColorSection": "Primary colour",
+  "customInvoiceTemplateCompanySection": "Company details",
+  "customInvoiceTemplateCompanyName": "Company name",
+  "customInvoiceTemplateAddress": "Address",
+  "customInvoiceTemplateTaxId": "Tax ID / NUIT",
+  "customInvoiceTemplateStyle": "Style",
+  "customInvoiceTemplateStyleClassic": "Classic",
+  "customInvoiceTemplateStyleModern": "Modern",
+  "customInvoiceTemplateStyleCompact": "Compact",
+  "customInvoiceTemplateSave": "Save Template",
+  "customInvoicePreviewCompanyFallback": "Company name",
+  "quotationTitle": "Quotations",
+  "quotationEmpty": "No quotations",
+  "quotationEmptySubtitle": "Create quotations and estimates for your clients",
+  "quotationTemplateTooltip": "Quotation template",
+  "quotationNewFab": "New Quotation",
+  "quotationItemsCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "quotationValidity": "Validity",
+  "quotationDays": "{days, plural, =1{1 day} other{{days} days}}",
+  "quotationSend": "Send",
+  "quotationAccept": "Accept",
+  "quotationReject": "Reject",
+  "quotationStatusDraft": "Draft",
+  "quotationStatusSent": "Sent",
+  "quotationStatusAccepted": "Accepted",
+  "quotationStatusRejected": "Rejected",
+  "quotationPhoneOptional": "Phone (optional)",
+  "quotationNumberPrefix": "No. {number}",
+  "quotationSave": "Save Quotation",
+  "quotationTemplatePhone": "Phone",
+  "quotationTemplatePreview": "Quotation • Preview",
+  "quotationTemplatePreviewBadge": "Preview",
+  "paletteBlue": "Blue",
+  "paletteGreen": "Green",
+  "paletteRed": "Red",
+  "paletteAmber": "Amber",
+  "paletteSlate": "Slate",
+  "paletteViolet": "Violet",
+  "paletteTeal": "Teal",
+  "paletteIndigo": "Indigo",
+  "customInvoicePdf": "PDF",
+  "imageSourceGallery": "Gallery",
+  "imageSourceCamera": "Camera",
+  "businessFallbackName": "My Business",
+  "customInvoiceWhatsAppHeader": "═══ INVOICE ═══",
+  "customInvoiceNumberShort": "No.",
+  "customInvoiceClientLabel": "Client",
+  "customInvoicePhoneLabel": "Tel",
+  "customInvoiceTotalLabel": "TOTAL",
+  "customInvoiceNew": "New Invoice",
+  "customInvoiceTemplateTitle": "Invoice template",
+  "commonPreview": "Preview",
+  "quotationWhatsAppHeader": "═══ QUOTATION ═══",
+  "quotationTemplateTitle": "Quotation template",
+  "employeeMgmtTitle": "Employee Management",
+  "employeeMgmtTabAttendance": "Attendance",
+  "employeeMgmtTabCommissions": "Commissions",
+  "employeeMgmtTabTargets": "Targets",
+  "employeePresentCount": "Present",
+  "employeeAbsentCount": "Absent",
+  "employeeClockInAction": "Clock in",
+  "employeeClockOutAction": "Clock out",
+  "employeeClockOutInProgress": "In progress",
+  "employeeAttendanceSection": "Time Records",
+  "employeeRecordsSection": "Today's Records",
+  "employeeSalesMonth": "Monthly Sales",
+  "employeeCommissionTitle": "Commissions",
+  "employeeCommissionPerEmployee": "Commission per Employee",
+  "employeeCommissionRate": "{rate}% of {amount}",
+  "employeeTargetsActive": "Active Targets",
+  "employeeTargetsReached": "Reached",
+  "employeeTargetsPending": "Pending",
+  "employeeTargetsMonth": "Month's Targets",
+  "employeeTargetsEmptyTitle": "No targets set",
+  "employeeTargetsEmptySubtitle": "Set monthly sales targets for each employee",
+  "employeeTargetAdd": "Add Target",
+  "employeeTargetMeta": "Target: {amount}",
+  "employeeTargetAchieved": "Achieved: {amount}",
+  "employeeTargetNewTitle": "New Target",
+  "employeeTargetEmployee": "Employee",
+  "employeeTargetAllHave": "All employees already have a target set",
+  "employeeTargetMonthly": "Monthly Target (MT)",
+  "employeeTargetSave": "Save Target",
+  "employeeRoleSales": "Salesperson",
+  "addonsTitle": "Add-ons",
+  "addonsSubtitle": "Active add-ons and add-ons in your plan",
+  "addonsManagedByAdmin": "Add-on activation is managed by the system administrator.",
+  "addonsIncluded": "Included",
+  "addonsActive": "Active",
+  "addonsPerMonth": "{amount} MT/month",
+  "addonCategoryInvoicing": "Invoicing",
+  "addonCategoryQuotation": "Quotations",
+  "addonCategoryReports": "Reports",
+  "addonCategoryEmployees": "Employees",
+  "addonCategoryMultiStore": "Multi-store",
+  "addonCategoryPayments": "Payments",
+  "commonTotal": "Total",
+  "addonCustomInvoiceName": "Custom Invoice",
+  "addonCustomInvoiceDesc": "Create professional invoices with a logo, custom layout and PDF export. Includes ready-made templates and customization of colours, fonts and fields.",
+  "addonQuotationName": "Quotation / Estimate",
+  "addonQuotationDesc": "Create and send quotations and estimates to clients before the sale. Includes automatic conversion to a sale, configurable validity and SMS/WhatsApp delivery.",
+  "addonReportsName": "Advanced Reports",
+  "addonReportsDesc": "Financial, sales and stock reports with advanced filters, period-over-period comparisons and PDF/Excel export. Includes interactive charts and custom dashboards.",
+  "addonEmployeesName": "Employee Management",
+  "addonEmployeesDesc": "Time tracking (clock in/out), automatic sales-commission calculation, monthly target setting and individual performance reports.",
+  "addonMultiStoreName": "Advanced Multi-store",
+  "addonMultiStoreDesc": "Stock transfers between stores, consolidated store-comparison reports, centralised price and promotion management and automatic restock alerts.",
+  "addonMobileMoneyName": "M-Pesa / E-Mola Integration",
+  "addonMobileMoneyDesc": "Automatic mobile-money payments with automatic reconciliation, real-time receipt notifications and a mobile-money transaction report.",
+  "transfersTitle": "Store Transfers",
+  "transfersEmpty": "No transfers",
+  "transfersEmptySubtitle": "Transfer stock between stores of the\nsame tenant with full traceability",
+  "transfersNewFab": "New Transfer",
+  "transfersOriginStore": "Origin store",
+  "transfersDestStore": "Destination store",
+  "transfersProduct": "Product",
+  "transfersProductPlaceholder": "No products registered",
+  "transfersQuantity": "Quantity",
+  "transfersAddItem": "Add",
+  "transfersExecuting": "Transferring...",
+  "transfersExecute": "Execute Transfer",
+  "transfersNoStoresTitle": "Register at least 2 stores",
+  "transfersNoStoresSubtitle": "You need 2+ stores to\ntransfer stock between them",
+  "transfersSuccess": "{count, plural, =1{1 product transferred} other{{count} products transferred}} successfully",
+  "transfersError": "Transfer error: {error}",
+  "transferStatusPending": "Pending",
+  "transferStatusInTransit": "In transit",
+  "transferStatusReceived": "Received",
+  "transferStatusCancelled": "Cancelled",
+  "paymentsTitle": "M-Pesa / E-Mola",
+  "paymentsEmpty": "No transactions",
+  "paymentsEmptySubtitle": "Register payments received via\nM-Pesa or E-Mola for reconciliation",
+  "paymentsNewFab": "Register Payment",
+  "paymentsStatusConfirmed": "Confirmed",
+  "paymentsStatusPending": "Pending",
+  "paymentsStatusRejected": "Rejected",
+  "paymentsConfirm": "Confirm",
+  "paymentsReject": "Reject",
+  "paymentsReference": "Ref: {code}",
+  "paymentsSheetTitle": "Register Payment",
+  "paymentsSenderPhone": "Sender's phone",
+  "paymentsAmount": "Amount (MT)",
+  "paymentsConfirmationCode": "Confirmation code",
+  "reportsAdvancedTitle": "Advanced Reports",
+  "reportsTabSales": "Sales",
+  "reportsTabFinancial": "Financial",
+  "reportsTabStock": "Stock",
+  "reportsKpiProducts": "Products",
+  "reportsKpiLowStock": "Low Stock",
+  "reportsKpiTotalItems": "Total Items",
+  "reportsKpiStockValue": "Stock Value",
+  "reportsKpiRevenue": "Revenue",
+  "reportsKpiExpenses": "Expenses",
+  "reportsKpiNetProfit": "Net Profit",
+  "reportsStockByQty": "Products by Stock",
+  "reportsCashFlow": "Cash Flow",
+  "reportsCashFlowChart": "Cash flow chart",
+  "reportsNoProducts": "No products registered",
+  "reportsStockHealthy": "All products have adequate stock",
+  "reportsExportSales": "Export Report (PDF)",
+  "reportsExportFinancial": "Export Financial (PDF)",
+  "reportsExportStock": "Export Stock (PDF)",
+  "reportsNoSalesData": "No data for this period",
+  "reportsPeriodYear": "This Year",
+  "reportsKpiStockOut": "Out of Stock",
+  "reportsKpiTotalProducts": "Total Products",
+  "pdfGeneratedOn": "Generated: {date}",
+  "pdfIndicators": "Indicators",
+  "pdfFooter": "Document generated by TAREQO — {date}",
+  "pdfInvoiceDocWord": "INVOICE",
+  "pdfInvoiceSubjectWord": "Invoice",
+  "pdfInvoiceFileBase": "invoice",
+  "pdfQuotationDocWord": "QUOTATION",
+  "pdfQuotationSubjectWord": "Quotation",
+  "pdfQuotationFileBase": "quotation",
+  "pdfClientHeading": "CLIENT",
+  "pdfPhoneLine": "Phone: {value}",
+  "pdfEmailLine": "Email: {value}",
+  "pdfNifLine": "Tax ID: {value}",
+  "pdfItemHeader": "Item",
+  "pdfUnitPriceHeader": "Unit Price",
+  "pdfSubtotalHeader": "Subtotal",
+  "pdfDiscountLabel": "Discount",
+  "pdfTaxLabel": "VAT",
+  "pdfPaymentLine": "Payment: {value}",
+  "pdfReferenceLine": "Ref: {value}",
+  "pdfNotesHeading": "Notes",
+  "pdfGeneralConditionsHeading": "General Conditions",
+  "pdfValidityDaysLeft": "{days, plural, =1{1 day left} other{{days} days left}}",
+  "pdfConditionValidBullet": "This quotation is valid until {date}.",
+  "pdfConditionPricesBullet": "Prices are subject to change after the validity period.",
+  "pdfConditionContactBullet": "To accept this quotation, please contact us.",
+  "quotationStatusExpired": "Expired",
+  "quotationStatusConverted": "Converted to Sale",
+  "pdfConditionsNotesHeading": "Conditions / Notes",
+  "adminAddonsActivateBtn": "Activate",
+  "adminAddonsActivateBulk": "Activate add-on",
+  "adminAddonsActivePill": "Active",
+  "adminAddonsDeactivateBtn": "Deactivate",
+  "adminAddonsInactivePill": "Inactive",
+  "adminAddonsLoadError": "Error: {error}",
+  "adminAddonsNoTenantsSearchSub": "Try another search term",
+  "adminAddonsNoTenantsTitle": "No tenant found",
+  "adminAddonsNoTenantsYetSub": "No approved tenants yet",
+  "adminAddonsUpdateError": "Error updating add-on: {error}",
+  "adminBackToList": "Back to list",
+  "adminMessagesBodyHint": "Write your message…",
+  "adminMessagesTenantHint": "Select tenant...",
+  "adminMessagesTitleExample": "E.g.: Pro Plan Quote",
+  "adminNavRevenue": "Revenue",
+  "adminPlansActive": "Active",
+  "adminPlansInactive": "Inactive",
+  "adminRevenueActiveTenants": "Active Tenants",
+  "adminRevenueActiveTenantsSub": "Total on the platform",
+  "adminRevenueAvailableAddOns": "Available Add-ons",
+  "adminRevenueAvailableAddOnsSub": "In the active catalog",
+  "adminRevenueMaxMonthly": "Max monthly revenue",
+  "adminRevenueMaxMonthlySub": "If all activated everything",
+  "adminRevenuePotential": "Potential Revenue",
+  "adminRevenuePotentialSub": "Per tenant/month (all add-ons)",
+  "adminTenantsMonthlyValue": "Monthly value",
+  "adminTenantsNextInvoice": "Next invoice",
+  "adminTenantsPlanExpiresOn": "Plan expires on",
+  "adminTenantsTrialEndsOn": "Trial ends on",
+  "commonId": "ID",
+  "dashboardSaleEntry": "Sale {number}",
+  "loginConfirmPasswordHint": "Repeat your password",
+  "loginConfirmPasswordLabel": "Confirm password",
+  "loginEmailHint": "Enter your email",
+  "loginForgotPassword": "Forgot your password?",
+  "loginNameHint": "Enter your name",
+  "loginPasswordHint": "Enter your password",
+  "loginPromptHaveAccount": "Already have an account?",
+  "loginPromptNoAccount": "Don't have an account?",
+  "loginTagline": "Simple management for your business",
+  "mfaCodeFieldLabel": "MFA Code",
+  "mfaCodeHint": "Enter the 6-digit code from your authenticator app:",
+  "mfaCodeLengthError": "Enter the 6-digit code",
+  "mfaConfirmPrompt": "Enter the app code to confirm:",
+  "mfaDigitsFieldLabel": "6-digit code",
+  "mfaExpiresIn": "Code expires in {seconds, plural, =1{1 second} other{{seconds} seconds}}",
+  "mfaInitError": "Error initializing MFA: {error}",
+  "mfaInvalidCode": "Invalid code. Try again.",
+  "mfaManualEntryTitle": "Or enter this code manually:",
+  "mfaQrScanHelp": "Use your authenticator app (Google Authenticator, Authy, etc.) to scan this QR code:",
+  "mfaQrScanTitle": "Scan the QR Code",
+  "mfaSetupSuccess": "MFA set up successfully!",
+  "mfaSetupTitle": "Set Up Two-Factor Authentication",
+  "mfaVerify": "Verify",
+  "mfaVerifyAndEnable": "Verify and Enable",
+  "mfaVerifyError": "Error verifying code: {error}",
+  "securityBiometricDisabledSub": "Use fingerprint or facial recognition",
+  "securityBiometricEnabledSub": "Enabled — Fingerprint or face",
+  "securityBiometricTitle": "Biometric Authentication",
+  "securityBiometricUnavailable": "Not available on this device",
+  "securityTwoFactorDisabledSub": "Add an extra security layer",
+  "securityTwoFactorEnabledSub": "Enabled — Use an authenticator app",
+  "securityTwoFactorTitle": "Two-Factor Authentication",
+  "transfersRowDate": "Date",
+  "transfersRowDest": "Destination",
+  "transfersRowOrigin": "Origin",
+  "transfersRowStatus": "Status",
+  "adminAddonsBulkActivated": "{addonName} activated for {count, plural, =1{1 tenant} other{{count} tenants}}",
+  "adminAddonsBulkDeactivated": "{addonName} deactivated for {count, plural, =1{1 tenant} other{{count} tenants}}",
+  "adminAddonsBulkSheetCount": "{count, plural, =1{1 tenant selected} other{{count} tenants selected}}",
+  "adminAddonsBulkSheetTitle": "Activate add-on in bulk",
+  "adminAddonsListHint": "Tap a tenant to manage its add-ons. Tap the ✓ icon for multi-select.",
+  "adminAddOnsCount": "{count, plural, =1{1 add-on} other{{count} add-ons}}",
+  "adminRevenueByAddOn": "Revenue by Add-on",
+  "adminRevenueByCategory": "Distribution by Category",
+  "adminRevenuePerMonth": "potential/month",
+  "adminPlanPerMonthSuffix": "/mo",
+  "adminTenantCount": "{count, plural, =1{1 tenant} other{{count} tenants}}",
+  "adminTenantCycleActiveLeft": "Active: {days, plural, =1{1 day left} other{{days} days left}}",
+  "adminTenantCycleExpired": "Expired",
+  "adminTenantCycleExpiresIn": "Expires in {days, plural, =1{1 day} other{{days} days}}",
+  "adminTenantCycleTrialLeft": "Trial: {days, plural, =1{1 day left} other{{days} days left}}"
 }

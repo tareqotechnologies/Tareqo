@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../widgets/app_button.dart';
@@ -23,26 +24,19 @@ class _PaymentReconciliationScreenState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 64,
-        titleSpacing: AppSpacing.lg,
         title: Text(
-          'M-Pesa / E-Mola',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
+          l10n.paymentsTitle,
         ),
       ),
       body: _payments.isEmpty
           ? EmptyState(
               icon: Icons.phone_android_outlined,
-              title: 'Sem transacções',
-              subtitle:
-                  'Registe pagamentos recebidos via\nM-Pesa ou E-Mola para reconciliação',
+              title: l10n.paymentsEmpty,
+              subtitle: l10n.paymentsEmptySubtitle,
             )
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -52,7 +46,7 @@ class _PaymentReconciliationScreenState
                   children: [
                     Expanded(
                       child: _MiniStat(
-                        label: 'Confirmadas',
+                        label: l10n.paymentsStatusConfirmed,
                         value:
                             '${_payments.where((p) => p.status == 'Confirmada').length}',
                         color: IconTone.green,
@@ -61,7 +55,7 @@ class _PaymentReconciliationScreenState
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: _MiniStat(
-                        label: 'Pendentes',
+                        label: l10n.paymentsStatusPending,
                         value:
                             '${_payments.where((p) => p.status == 'Pendente').length}',
                         color: ModuleColors.credit,
@@ -70,7 +64,7 @@ class _PaymentReconciliationScreenState
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: _MiniStat(
-                        label: 'Rejeitadas',
+                        label: l10n.paymentsStatusRejected,
                         value:
                             '${_payments.where((p) => p.status == 'Rejeitada').length}',
                         color: IconTone.red,
@@ -110,7 +104,7 @@ class _PaymentReconciliationScreenState
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-payment',
         onPressed: _openNewPayment,
-        tooltip: 'Registar Pagamento',
+        tooltip: l10n.paymentsNewFab,
         child: const Icon(Icons.add_rounded, size: 28),
       ),
     );
@@ -233,11 +227,12 @@ class _PaymentCard extends StatelessWidget {
 
     final isMpesa = payment.provider == 'M-Pesa';
     final providerColor = isMpesa ? IconTone.red : const Color(0xFF03754F);
+    final l10n = context.l10n;
 
     final (statusColor, statusLabel) = switch (payment.status) {
-      'Confirmada' => (IconTone.green, 'Confirmada'),
-      'Rejeitada' => (IconTone.red, 'Rejeitada'),
-      _ => (ModuleColors.credit, 'Pendente'),
+      'Confirmada' => (IconTone.green, l10n.paymentsStatusConfirmed),
+      'Rejeitada' => (IconTone.red, l10n.paymentsStatusRejected),
+      _ => (ModuleColors.credit, l10n.paymentsStatusPending),
     };
 
     return AppCard(
@@ -304,7 +299,7 @@ class _PaymentCard extends StatelessWidget {
                 ),
                 if (payment.confirmationCode.isNotEmpty)
                   Text(
-                    'Ref: ${payment.confirmationCode}',
+                    l10n.paymentsReference(payment.confirmationCode),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                       fontSize: 11,
@@ -327,7 +322,7 @@ class _PaymentCard extends StatelessWidget {
                 GestureDetector(
                   onTap: onConfirm,
                   child: Text(
-                    'Confirmar',
+                    l10n.paymentsConfirm,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: IconTone.green,
                       fontWeight: FontWeight.w500,
@@ -338,7 +333,7 @@ class _PaymentCard extends StatelessWidget {
                   GestureDetector(
                     onTap: onReject,
                     child: Text(
-                      'Rejeitar',
+                      l10n.paymentsReject,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: IconTone.red,
                         fontWeight: FontWeight.w500,
@@ -398,7 +393,7 @@ class _NewPaymentSheetState extends State<_NewPaymentSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Registar Pagamento',
+              context.l10n.paymentsSheetTitle,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -429,14 +424,14 @@ class _NewPaymentSheetState extends State<_NewPaymentSheet> {
             const SizedBox(height: AppSpacing.md),
             AppTextField(
               controller: _phoneController,
-              label: 'Telefone do remetente',
+              label: context.l10n.paymentsSenderPhone,
               keyboardType: TextInputType.phone,
               prefixIcon: Icons.phone_outlined,
             ),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _amountController,
-              label: 'Valor (MT)',
+              label: context.l10n.paymentsAmount,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
@@ -445,13 +440,13 @@ class _NewPaymentSheetState extends State<_NewPaymentSheet> {
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _confirmationController,
-              label: 'Código de confirmação',
+              label: context.l10n.paymentsConfirmationCode,
               prefixIcon: Icons.confirmation_number_outlined,
             ),
             const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               expanded: true,
-              label: 'Registar Pagamento',
+              label: context.l10n.paymentsSheetTitle,
               onPressed: _phoneController.text.trim().isNotEmpty &&
                       _amountController.text.trim().isNotEmpty
                   ? () {

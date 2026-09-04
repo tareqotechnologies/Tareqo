@@ -107,10 +107,6 @@ class _TenantOnboardingScreenState
  appBar: AppBar(
  title: Text(
  l10n.onboardingTitle,
- style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w500,
- letterSpacing: -0.5,
- ),
  ),
  ),
  body: Center(

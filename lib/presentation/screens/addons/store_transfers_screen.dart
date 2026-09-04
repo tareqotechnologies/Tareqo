@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
@@ -27,27 +28,20 @@ class StoreTransfersScreen extends ConsumerStatefulWidget {
 class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = context.l10n;
     final transfers = ref.watch(stockTransfersProvider);
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 64,
-        titleSpacing: AppSpacing.lg,
         title: Text(
-          'Transferências entre Lojas',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
+          l10n.transfersTitle,
         ),
       ),
       body: transfers.isEmpty
           ? EmptyState(
               icon: Icons.swap_horiz_outlined,
-              title: 'Sem transferências',
-              subtitle:
-                  'Transfira estoque entre lojas do\nmesmo tenant de forma rastreável',
+              title: l10n.transfersEmpty,
+              subtitle: l10n.transfersEmptySubtitle,
             )
           : ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -61,7 +55,7 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-transfer',
         onPressed: _openNewTransfer,
-        tooltip: 'Nova Transferência',
+        tooltip: l10n.transfersNewFab,
         child: const Icon(Icons.add_rounded, size: 28),
       ),
     );
@@ -106,6 +100,13 @@ class _TransferCard extends StatelessWidget {
       transfer.quantityMilli,
       unitLabel: transfer.unitLabel,
     );
+    final l10n = context.l10n;
+    final statusLabel = switch (transfer.status) {
+      StockTransferStatus.pending => l10n.transferStatusPending,
+      StockTransferStatus.inTransit => l10n.transferStatusInTransit,
+      StockTransferStatus.received => l10n.transferStatusReceived,
+      StockTransferStatus.cancelled => l10n.transferStatusCancelled,
+    };
 
     return AppCard(
       elevated: true,
@@ -171,7 +172,7 @@ class _TransferCard extends StatelessWidget {
                     Icon(statusIcon, size: 12, color: statusColor),
                     const SizedBox(width: 3),
                     Text(
-                      transfer.status.label,
+                      statusLabel,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: statusColor,
                         fontWeight: FontWeight.w500,
@@ -280,7 +281,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '${_items.length} produto(s) transferido(s) com sucesso',
+              context.l10n.transfersSuccess(_items.length),
             ),
           ),
         );
@@ -288,7 +289,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro na transferência: $e')),
+          SnackBar(content: Text(context.l10n.transfersError('$e'))),
         );
       }
     } finally {
@@ -300,6 +301,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
     final products = ref.watch(productsProvider).value ?? [];
     final activeProducts = products.where((p) => p.isActive).toList();
 
@@ -343,14 +345,14 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                'Cadastre pelo menos 2 lojas',
+                l10n.transfersNoStoresTitle,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'É necessário ter 2+ lojas para\ntransferir estoque entre elas',
+                l10n.transfersNoStoresSubtitle,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
@@ -376,7 +378,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Nova Transferência',
+              l10n.transfersNewFab,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -384,9 +386,9 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             const SizedBox(height: AppSpacing.lg),
             DropdownButtonFormField<String>(
               initialValue: _fromStoreId,
-              decoration: const InputDecoration(
-                labelText: 'Loja de Origem',
-                prefixIcon: Icon(Icons.store_outlined),
+              decoration: InputDecoration(
+                labelText: l10n.transfersOriginStore,
+                prefixIcon: const Icon(Icons.store_outlined),
               ),
               items: stores
                   .map<DropdownMenuItem<String>>((s) => DropdownMenuItem(
@@ -402,9 +404,9 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             const SizedBox(height: AppSpacing.sm),
             DropdownButtonFormField<String>(
               initialValue: _toStoreId,
-              decoration: const InputDecoration(
-                labelText: 'Loja de Destino',
-                prefixIcon: Icon(Icons.storefront_outlined),
+              decoration: InputDecoration(
+                labelText: l10n.transfersDestStore,
+                prefixIcon: const Icon(Icons.storefront_outlined),
               ),
               items: destStores
                   .map<DropdownMenuItem<String>>((s) => DropdownMenuItem(
@@ -417,15 +419,15 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             const SizedBox(height: AppSpacing.md),
             const Divider(),
             const SizedBox(height: AppSpacing.sm),
-            _SectionLabel(text: 'Produto'),
+            _SectionLabel(text: l10n.transfersProduct),
             const SizedBox(height: 6),
             if (activeProducts.isNotEmpty)
               DropdownButtonFormField<String>(
                 initialValue: _selectedProductId,
                 isExpanded: true,
-                decoration: const InputDecoration(
-                  labelText: 'Produto',
-                  prefixIcon: Icon(Icons.inventory_2_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.transfersProduct,
+                  prefixIcon: const Icon(Icons.inventory_2_outlined),
                 ),
                 items: activeProducts
                     .map<DropdownMenuItem<String>>(
@@ -445,7 +447,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             else
               InputDecorator(
                 decoration: InputDecoration(
-                  hintText: 'Sem produtos cadastrados',
+                  hintText: l10n.transfersProductPlaceholder,
                   prefixIcon: const Icon(
                     Icons.inventory_2_outlined,
                     size: 20,
@@ -464,7 +466,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                 Expanded(
                   child: AppTextField(
                     controller: _qtyController,
-                    label: 'Quantidade',
+                    label: l10n.transfersQuantity,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
@@ -474,7 +476,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: AppButton.secondary(
-                    label: 'Adicionar',
+                    label: l10n.transfersAddItem,
                     onPressed:
                         _selectedProductId != null ? _addItem : null,
                   ),
@@ -511,7 +513,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               expanded: true,
-              label: _executing ? 'A transferir...' : 'Executar Transferência',
+              label: _executing ? l10n.transfersExecuting : l10n.transfersExecute,
               onPressed: _executing ||
                       _fromStoreId == null ||
                       _toStoreId == null ||

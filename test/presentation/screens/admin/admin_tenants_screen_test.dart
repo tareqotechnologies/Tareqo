@@ -110,8 +110,8 @@ void main() {
  testWidgets('mostra estado vazio quando não há pendentes', (tester) async {
  await tester.pumpWidget(_buildApp(pending: const [], all: const []));
  await tester.pumpAndSettle();
-
- expect(find.text('Nada aguardando aprovação'), findsOneWidget);
+    expect(find.text('Nada pendente'), findsOneWidget);
+    expect(find.text('Novas solicitações aparecem aqui.'), findsOneWidget);
  });
 
  testWidgets('aprovar chama o ApproveTenantUseCase e atualiza',

@@ -9,9 +9,6 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'Dumbhanengue ERP';
-
-  @override
   String get onboardingTitle => 'Bienvenue !';
 
   @override
@@ -58,13 +55,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingLanguageLabel => 'Langue';
 
   @override
-  String get onboardingLanguageHint => 'Langue de l\'application';
-
-  @override
   String get onboardingCurrencyLabel => 'Devise';
-
-  @override
-  String get onboardingCurrencyHint => 'Devise utilisée pour les montants';
 
   @override
   String get languagePortuguese => 'Português';
@@ -147,9 +138,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get storeSelectorSectionTitle => 'Magasin actif';
 
   @override
-  String get storeSelectorSectionHint => 'Choisissez le magasin actif.';
-
-  @override
   String get tenantPendingTitle => 'En attente d\'approbation';
 
   @override
@@ -180,9 +168,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authBlockedSignOut => 'Se déconnecter';
 
   @override
-  String get authErrorRestoreSession => 'Session non restaurée';
-
-  @override
   String get authErrorCheckConnection =>
       'Vérifiez votre connexion et réessayez.';
 
@@ -194,9 +179,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loginSubtitleSignUp => 'Créez votre compte pour commencer';
-
-  @override
-  String get loginSubtitleSignIn => 'Une gestion simple pour votre entreprise';
 
   @override
   String get loginNameLabel => 'Nom';
@@ -215,10 +197,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le mot de passe doit contenir au moins 8 caractères.';
 
   @override
-  String get loginPasswordHint =>
-      'Min. 8 caractères avec minuscule, majuscule, chiffre et symbole.';
-
-  @override
   String get loginWeakPasswordError =>
       'Le mot de passe doit contenir lettres, chiffres et symboles.';
 
@@ -233,9 +211,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loginHidePassword => 'Masquer le mot de passe';
 
   @override
-  String get loginConfirmLabel => 'Confirmer le mot de passe';
-
-  @override
   String get loginConfirmError => 'Les mots de passe ne correspondent pas.';
 
   @override
@@ -243,12 +218,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loginSignIn => 'Se connecter';
-
-  @override
-  String get loginSwitchToSignIn => 'J\'ai déjà un compte — se connecter';
-
-  @override
-  String get loginSwitchToSignUp => 'Pas encore de compte — s\'inscrire';
 
   @override
   String get loginSignUpSuccess =>
@@ -260,12 +229,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get loginSignInError =>
       'Impossible de se connecter. Vérifiez l\'e-mail et le mot de passe.';
-
-  @override
-  String get loginSecurityNote => 'Données protégées par chiffrement.';
-
-  @override
-  String get loginForgotPassword => 'Mot de passe oublié ?';
 
   @override
   String get forgotPasswordTitle => 'Réinitialiser le mot de passe';
@@ -353,9 +316,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get appNavProducts => 'Produits';
-
-  @override
-  String get appNavFinancial => 'Finances';
 
   @override
   String get appNavCredit => 'Crédit';
@@ -450,46 +410,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get dashboardSignOutTooltip => 'Se déconnecter';
-
-  @override
   String get dashboardOwnerFallback => 'Propriétaire';
-
-  @override
-  String get dashboardTotalSales => 'Total des ventes';
-
-  @override
-  String get dashboardAllTime => 'Tout l\'historique';
-
-  @override
-  String get dashboardCashBalance => 'Solde en caisse';
-
-  @override
-  String get dashboardReceivables => 'À recevoir (crédit)';
-
-  @override
-  String get dashboardStockLabel => 'Stock en produits';
 
   @override
   String get commonUnits => 'un.';
 
   @override
   String get dashboardQuickActions => 'Actions rapides';
-
-  @override
-  String get dashboardQuickNewSale => 'Nouvelle vente';
-
-  @override
-  String get dashboardQuickAddProduct => 'Ajouter un produit';
-
-  @override
-  String get dashboardQuickAddTransaction => 'Enregistrer une transaction';
-
-  @override
-  String get dashboardQuickAddDebt => 'Enregistrer un crédit';
-
-  @override
-  String get dashboardModules => 'Modules';
 
   @override
   String get dashboardModuleCustomers => 'Clients';
@@ -502,21 +429,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dashboardModuleStores => 'Magasins';
-
-  @override
-  String get dashboardRecentSales => 'Ventes récentes';
-
-  @override
-  String get dashboardViewAll => 'Tout voir';
-
-  @override
-  String get dashboardNoSales => 'Aucune vente — enregistrez la première !';
-
-  @override
-  String get dashboardRecentPurchases => 'Achats récents';
-
-  @override
-  String get dashboardNoPurchases => 'Aucun achat — enregistrez le premier !';
 
   @override
   String get dashboardLowStock => 'Stock faible';
@@ -544,14 +456,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String dashboardActivityHoursAgo(Object count) {
-    return 'il y a $count h';
-  }
-
-  @override
-  String get dashboardDateToday => 'Aujourd\'hui';
-
-  @override
   String get dashboardMetricSales => 'Ventes';
 
   @override
@@ -575,9 +479,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardActivityEmpty => 'Aucune activité enregistrée.';
 
   @override
-  String get dashboardActivitySeeAll => 'Tout voir';
-
-  @override
   String dashboardStockEntry(String product) {
     return 'Stock · $product';
   }
@@ -585,11 +486,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String dashboardStockEntryDetail(String quantity, String time) {
     return 'Entrée de $quantity · $time';
-  }
-
-  @override
-  String dashboardTransferItem(String product) {
-    return 'Transfert · $product';
   }
 
   @override
@@ -675,6 +571,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get employeesLoadError => 'Impossible de charger les employés.';
 
   @override
+  String get employeesUpdateError =>
+      'Impossible de mettre à jour l\'employé. Réessayez.';
+
+  @override
   String get employeesEmptyTitle => 'Aucun employé lié';
 
   @override
@@ -686,12 +586,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get roleEmployee => 'Employé';
-
-  @override
-  String get employeeActive => 'Actif';
-
-  @override
-  String get employeeInactive => 'Inactif';
 
   @override
   String employeeDeactivateConfirm(Object name) {
@@ -716,9 +610,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get employeeReactivateAction => 'Réactiver';
 
   @override
-  String get employeeDetailTitle => 'Détails de l\'employé';
-
-  @override
   String get employeeDetailEmail => 'E-mail';
 
   @override
@@ -735,9 +626,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get employeeDetailInactive => 'Inactif';
-
-  @override
-  String get employeeDetailActions => 'Actions';
 
   @override
   String get upgradesLoadError =>
@@ -806,9 +694,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addStoreCityLabel => 'Ville (facultatif)';
 
   @override
-  String get storeDetailTitle => 'Détails du magasin';
-
-  @override
   String get storeDetailPhone => 'Téléphone';
 
   @override
@@ -822,9 +707,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get storeDetailAddress => 'Adresse';
-
-  @override
-  String get storeDetailActions => 'Actions';
 
   @override
   String addStoreSuccess(String name) {
@@ -932,9 +814,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get periodToday => 'Aujourd\'hui';
 
   @override
-  String get periodWeek => 'Cette semaine';
-
-  @override
   String get periodMonth => 'Ce mois-ci';
 
   @override
@@ -962,26 +841,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get purchasesSearchHint => 'Rechercher un achat...';
 
   @override
-  String get productsFilterTooltip => 'Filtrer';
-
-  @override
   String get productsFilterAll => 'Tous';
-
-  @override
-  String productsFilterAllCount(int count) {
-    return 'Tous · $count';
-  }
-
-  @override
-  String productsFilterLowCount(int count) {
-    return 'Stock faible · $count';
-  }
-
-  @override
-  String get productsColProduct => 'Produit / SKU';
-
-  @override
-  String get productsColPrice => 'Prix · Stock';
 
   @override
   String get productsSearchHint => 'Rechercher un produit...';
@@ -998,11 +858,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productsAddNew => 'Nouveau produit';
-
-  @override
-  String productsBuySell(String buy, String sell) {
-    return 'Achat : $buy · Vente : $sell';
-  }
 
   @override
   String get productsAdded => 'Produit ajouté !';
@@ -1024,19 +879,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsPurchasePrice => 'Prix d\'achat';
 
   @override
-  String get productsPurchasePriceError => 'Indiquez le prix d\'achat';
-
-  @override
   String get productsSalePrice => 'Prix de vente';
 
   @override
-  String get productsSalePriceError => 'Indiquez le prix de vente';
-
-  @override
   String get productsStockQuantity => 'Quantité en stock';
-
-  @override
-  String get productsStockError => 'Quantité invalide';
 
   @override
   String get productsAddSubmit => 'Ajouter le produit';
@@ -1058,31 +904,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsEditError => 'Impossible de mettre à jour. Réessayez.';
 
   @override
-  String get productsPhotoLabel => 'Photo du produit';
-
-  @override
-  String get productsPhotoTake => 'Prendre une photo';
-
-  @override
-  String get productsPhotoGallery => 'Choisir depuis la galerie';
-
-  @override
-  String get productsPhotoRemove => 'Retirer la photo';
-
-  @override
   String get productsInactive => 'Inactif';
 
   @override
-  String get productsStockOut => 'Rupture';
-
-  @override
-  String get productsStockLow => 'Faible';
+  String get productsFilterTooltip => 'Filtrer';
 
   @override
   String get productsFilterAdvanced => 'Filtres avancés';
-
-  @override
-  String get productsFilterClear => 'Tout effacer';
 
   @override
   String get productsFilterStockType => 'Type de stock';
@@ -1124,11 +952,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsFilterInactive => 'Inactifs';
 
   @override
-  String productsFilterInactiveCount(int count) {
-    return 'Inactifs · $count';
-  }
-
-  @override
   String productsHeaderCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -1161,15 +984,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get productsSummaryActive => 'Actifs';
-
-  @override
-  String get productsSummaryLowStock => 'Stock faible';
-
-  @override
-  String get productsSummaryInactive => 'Inactifs';
-
-  @override
   String get productsActiveLabel => 'Produit actif';
 
   @override
@@ -1193,101 +1007,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsSectionStatus => 'Statut';
 
   @override
-  String get productsAddNewTitle => 'Nouveau produit';
+  String get productsPhotoTake => 'Prendre une photo';
 
   @override
-  String get productsSave => 'Enregistrer';
+  String get productsPhotoGallery => 'Choisir depuis la galerie';
 
   @override
-  String get productsSaving => 'Enregistrement...';
+  String get productsPhotoRemove => 'Retirer la photo';
 
   @override
-  String get productsSaved => 'Produit enregistré avec succès';
+  String get productsPurchasePriceError => 'Indiquez le prix d\'achat';
 
   @override
-  String get productsSavedNoPhoto =>
-      'Produit enregistré ! (pas de permission de stockage)';
+  String get productsSalePriceError => 'Indiquez le prix de vente';
 
   @override
-  String get productsPhotoLabelNew => 'Photo du produit';
-
-  @override
-  String get productsPhotoHint => 'Touchez pour ajouter';
-
-  @override
-  String get productsSectionBasic => 'Informations de base';
-
-  @override
-  String get productsSectionPricingNew => 'Prix';
-
-  @override
-  String get productsSectionStockNew => 'Stock';
-
-  @override
-  String get productsNameLabel => 'Nom du produit';
-
-  @override
-  String get productsNameHint => 'Ex. : Riz type 1';
-
-  @override
-  String get productsNameErrorMsg => 'Obligatoire';
-
-  @override
-  String get productsDescriptionLabelNew => 'Description';
-
-  @override
-  String get productsDescriptionHint => 'Facultatif';
-
-  @override
-  String get productsCodeLabel => 'Code-barres (PLU)';
-
-  @override
-  String get productsCodeHint => 'Balances étiqueteuses (ex. : 12345)';
-
-  @override
-  String get productsCodeError =>
-      'Code invalide : utilisez jusqu\'à 5 chiffres.';
-
-  @override
-  String get productsPurchasePriceLabel => 'Prix d\'achat';
-
-  @override
-  String get productsSalePriceLabel => 'Prix de vente';
-
-  @override
-  String get productsPriceValidationError =>
-      'Le prix de vente doit être supérieur au prix d\'achat';
-
-  @override
-  String get productsStockQuantityLabel => 'Quantité en stock';
-
-  @override
-  String get productsStockHint => 'Ex. : 50';
-
-  @override
-  String get productsStockWeightHint => 'En unités de vente (ex. : 1,75)';
-
-  @override
-  String get productsExpiryLabel => 'Date de péremption';
-
-  @override
-  String get productsExpiryHint => 'Facultatif';
-
-  @override
-  String get productsExpiryAdd => 'Définir la péremption';
-
-  @override
-  String get productsExpiryClear => 'Retirer la péremption';
-
-  @override
-  String get productsWeighLabel => 'Vente au poids (fraction)';
-
-  @override
-  String get productsWeighHint =>
-      'Accepte les quantités décimales (ex. : 1,75 kg)';
-
-  @override
-  String get productsUnitLabel => 'Unité de vente';
+  String get productsStockError => 'Quantité invalide';
 
   @override
   String customersHeaderCount(int count) {
@@ -1299,12 +1034,6 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get customersColCustomer => 'Client';
-
-  @override
-  String get customersColContact => 'Contact / Crédit';
 
   @override
   String get customersSearchHint => 'Rechercher un client...';
@@ -1560,13 +1289,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get financialExpense => 'Sorties';
 
   @override
-  String get financialBalance => 'Solde';
-
-  @override
   String get financialPeriodBalance => 'Solde net de la période';
-
-  @override
-  String get financialSwipeHint => 'Glissez pour les dépenses →';
 
   @override
   String get financialTransactions => 'Transactions de la période';
@@ -1707,9 +1430,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Comptez l\'argent du tiroir et indiquez-le ici.';
 
   @override
-  String get cashClosingDifference => 'Différence';
-
-  @override
   String get cashClosingConfers => 'Caisse juste';
 
   @override
@@ -1744,12 +1464,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cashClosingEmpty => 'Aucune vente enregistrée ce jour.';
 
   @override
-  String get cashClosingHistory => 'Historique des clôtures';
-
-  @override
-  String get cashClosingHistoryEmpty => 'Aucune clôture enregistrée.';
-
-  @override
   String get debtsTitle => 'Crédit';
 
   @override
@@ -1777,20 +1491,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtsSettledStat => 'Soldées';
 
   @override
-  String get debtsNoPendingCustomers => 'Aucun client en attente';
-
-  @override
-  String debtsPendingCustomers(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count clients en attente',
-      one: '1 client en attente',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get debtsPendingSection => 'Dettes en attente';
 
   @override
@@ -1805,17 +1505,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debtsTotalSettled => 'Total soldé';
-
-  @override
-  String debtsSettledCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count règlements enregistrés',
-      one: '1 règlement enregistré',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get debtsSettledSection => 'Historique des règlements';
@@ -1953,10 +1642,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Touchez \"Nouvelle vente\" pour enregistrer la première.';
 
   @override
-  String get salesSearchHint => 'Rechercher une vente...';
+  String get periodYesterday => 'Hier';
 
   @override
-  String get periodYesterday => 'Hier';
+  String get periodWeek => 'Cette semaine';
 
   @override
   String get paymentFilterCard => 'Carte';
@@ -1966,15 +1655,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get salesStatusPaid => 'Payée';
-
-  @override
-  String get salesFilterAll => 'Toutes';
-
-  @override
-  String get salesFilterActive => 'Actives';
-
-  @override
-  String get salesFilterCancelled => 'Annulées';
 
   @override
   String salesHeaderTransactions(int count) {
@@ -2227,17 +1907,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String adminPlanSolicited(String plan, String date) {
-    return 'Forfait : $plan · Demandé : $date';
-  }
-
-  @override
-  String get adminPlansTitle => 'Forfaits';
-
-  @override
-  String get adminPlanNewTooltip => 'Nouveau forfait';
-
-  @override
   String get adminPlansLoadError => 'Impossible de charger les forfaits.';
 
   @override
@@ -2249,11 +1918,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminPlanInactive => 'Inactif';
-
-  @override
-  String adminPlanDetails(String price, int stores, int employees) {
-    return '$price/mois · $stores magasin(s) · $employees employé(s)';
-  }
 
   @override
   String get adminPlanNameError => 'Indiquez le nom du forfait.';
@@ -2342,7 +2006,39 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adminPlanCurrent => 'Actuel';
 
   @override
+  String get productsCodeLabel => 'Code-barres (PLU)';
+
+  @override
+  String get productsCodeHint => 'Balances étiqueteuses (ex. : 12345)';
+
+  @override
+  String get productsCodeError =>
+      'Code invalide : utilisez jusqu\'à 5 chiffres.';
+
+  @override
+  String get productsWeighLabel => 'Vente au poids (fraction)';
+
+  @override
+  String get productsWeighHint =>
+      'Accepte les quantités décimales (ex. : 1,75 kg)';
+
+  @override
+  String get productsUnitLabel => 'Unité de vente';
+
+  @override
+  String get productsStockWeightHint => 'En unités de vente (ex. : 1,75)';
+
+  @override
+  String get productsExpiryLabel => 'Date de péremption';
+
+  @override
+  String get productsExpiryAdd => 'Définir la péremption';
+
+  @override
   String get productsExpiryHelp => 'Date de péremption du produit';
+
+  @override
+  String get productsExpiryClear => 'Retirer la péremption';
 
   @override
   String get salesBarcodeLabel => 'Code-barres';
@@ -2379,9 +2075,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get purchasesExpiryHelp => 'Date de péremption du lot';
-
-  @override
-  String get dashboardExpiryAlerts => 'Péremption';
 
   @override
   String dashboardExpiredIn(int days) {
@@ -2422,21 +2115,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible de charger la vue d\'ensemble.';
 
   @override
-  String get adminAuditLogTitle => 'Journal d\'audit';
-
-  @override
   String get adminAuditLogEmpty => 'Aucune action enregistrée.';
 
   @override
   String get adminAuditLogEmptySubtitle =>
       'Les actions admin apparaîtront ici.';
-
-  @override
-  String get adminAuditLogLoadError =>
-      'Impossible de charger le journal d\'audit.';
-
-  @override
-  String get adminTenantDetailTitle => 'Détails du tenant';
 
   @override
   String get adminTenantDetailOwner => 'ID du propriétaire';
@@ -2494,10 +2177,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adminTenantSearchHint => 'Rechercher tenants...';
 
   @override
-  String get adminTenantDetailLoadError =>
-      'Impossible de charger les détails du tenant.';
-
-  @override
   String get adminTenantDetailNoStores => 'Aucun magasin créé';
 
   @override
@@ -2519,11 +2198,6 @@ class AppLocalizationsFr extends AppLocalizations {
       one: '1 action récente',
     );
     return '$_temp0';
-  }
-
-  @override
-  String adminTenantDetailStoreAddress(Object city) {
-    return '$city';
   }
 
   @override
@@ -2561,17 +2235,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String adminBulkReject(Object count) {
     return 'Rejeter ($count)';
-  }
-
-  @override
-  String adminBulkApproveConfirm(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'tenants en attente',
-      one: 'tenant en attente',
-    );
-    return 'Approuver $count $_temp0 ?';
   }
 
   @override
@@ -2616,18 +2279,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Erreur lors du rejet. Certains tenants peuvent ne pas avoir été traités.';
 
   @override
-  String get adminWelcomeMessage => 'Super Admin';
-
-  @override
-  String get adminPlatformStatus => 'État de la plateforme';
-
-  @override
-  String get adminActionApproveTenant => 'Approuver le tenant';
-
-  @override
-  String get adminActionRejectTenant => 'Rejeter le tenant';
-
-  @override
   String get adminActionManagePlans => 'Gérer les forfaits';
 
   @override
@@ -2638,9 +2289,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminPlanUpgrades => 'Évolutions de forfait';
-
-  @override
-  String get adminRecentActivity => 'Activité récente';
 
   @override
   String adminPendingActionRequired(int count) {
@@ -2654,14 +2302,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get adminNoPendingActions => 'Tout est à jour !';
-
-  @override
-  String adminPlatformSummary(Object plans, Object tenants) {
-    return '$tenants tenants · $plans forfaits';
-  }
-
-  @override
   String get adminAuditLogAll => 'Tous';
 
   @override
@@ -2672,9 +2312,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminAuditLogUpgrades => 'Évolutions';
-
-  @override
-  String get adminAuditLogTotalActions => 'Total des actions';
 
   @override
   String get adminAuditLogApproved => 'Approuvés';
@@ -2702,45 +2339,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune entrée ne correspond à votre filtre.';
 
   @override
-  String get adminDashboardApprovalRate => 'Taux d\'approbation';
-
-  @override
-  String get adminDashboardTenantDistribution => 'Distribution des tenants';
-
-  @override
   String get adminDashboardPlanDistribution => 'Distribution des forfaits';
 
   @override
   String get adminDashboardRecentActivity => 'Activité récente';
-
-  @override
-  String adminDashboardActivityCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count actions ces 7 derniers jours',
-      one: '1 action ces 7 derniers jours',
-      zero: 'Aucune action récente',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String adminDashboardActivePercent(int percent) {
-    return '$percent% actifs';
-  }
-
-  @override
-  String adminDashboardDaysSinceLastActivity(int days) {
-    String _temp0 = intl.Intl.pluralLogic(
-      days,
-      locale: localeName,
-      other: 'Dernière action il y a $days jours',
-      one: 'Dernière action il y a 1 jour',
-      zero: 'Actif aujourd\'hui',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get adminGrowthTrends => 'Tendances de Croissance';
@@ -2764,16 +2366,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adminGrowthApprovals => 'Approbations';
 
   @override
-  String adminGrowthVsLastWeek(String count) {
-    return '$count vs semaine dernière';
-  }
-
-  @override
-  String adminGrowthVsLastMonth(String count) {
-    return '$count vs mois dernier';
-  }
-
-  @override
   String adminGrowthUp(String count) {
     return '+$count';
   }
@@ -2795,16 +2387,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminGrowthNoData => 'Pas assez de données pour les tendances';
-
-  @override
-  String adminGrowthWeekLabel(String week) {
-    return 'S$week';
-  }
-
-  @override
-  String adminGrowthAvgPerWeek(String count) {
-    return '$count/semaine moy.';
-  }
 
   @override
   String get adminNavInvoices => 'Factures';
@@ -2911,15 +2493,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuNotifications => 'Notifications';
 
   @override
-  String get notificationMarkAsRead => 'Marquer comme lu';
-
-  @override
   String notificationSinceDaysAgo(int count) {
     return 'Il y a $count jours';
   }
-
-  @override
-  String get notificationToday => 'Aujourd\'hui';
 
   @override
   String get notificationYesterday => 'Hier';
@@ -2929,12 +2505,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminMessagesTitle => 'Messages aux Tenants';
-
-  @override
-  String get adminMessagesEmpty => 'Aucun message envoyé.';
-
-  @override
-  String get adminMessagesSend => 'Envoyer un message';
 
   @override
   String get adminMessagesSendSuccess => 'Message envoyé !';
@@ -2951,18 +2521,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminMessagesTypeLabel => 'Type';
-
-  @override
-  String get adminMessagesTypeBillingQuote => 'Devis de facturation';
-
-  @override
-  String get adminMessagesTypePlanExpiryChange => 'Changement d\'échéance';
-
-  @override
-  String get adminMessagesTypePlanExpiringSoon => 'Plan bientôt expiré';
-
-  @override
-  String get adminMessagesTypeGeneral => 'Message général';
 
   @override
   String get adminMessagesTitleLabel => 'Titre';
@@ -2983,13 +2541,1096 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adminNavMessages => 'Messages';
 
   @override
-  String adminMessageSentTo(String tenant) {
-    return 'Envoyé à $tenant';
+  String get customInvoiceTitle => 'Facture personnalisée';
+
+  @override
+  String get customInvoiceEmpty => 'Aucune facture';
+
+  @override
+  String get customInvoiceEmptySubtitle =>
+      'Créez des factures professionnelles avec une mise\nen page personnalisée pour vos clients';
+
+  @override
+  String get customInvoiceTemplateTooltip => 'Modèle de facture';
+
+  @override
+  String get customInvoiceNewFab => 'Nouvelle facture';
+
+  @override
+  String customInvoiceItemsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+      zero: '0 article',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get menuMessages => 'Messages';
+  String get customInvoiceWhatsApp => 'WhatsApp';
 
   @override
-  String get menuMessagesHint => 'Messages du super admin';
+  String get customInvoiceCreate => 'Créer la facture';
+
+  @override
+  String get customInvoiceClientSection => 'Client';
+
+  @override
+  String get customInvoiceClientName => 'Nom du client';
+
+  @override
+  String get customInvoicePhone => 'Téléphone';
+
+  @override
+  String get customInvoiceTaxIdOptional => 'NIF / NUIT (facultatif)';
+
+  @override
+  String get customInvoiceProductSection => 'Produit';
+
+  @override
+  String get customInvoiceProductPlaceholder => 'Aucun produit enregistré';
+
+  @override
+  String customInvoiceProductOption(Object price, Object stock, Object unit) {
+    return 'Stock : $stock $unit  •  $price';
+  }
+
+  @override
+  String get customInvoicePrice => 'Prix (MT)';
+
+  @override
+  String get customInvoiceQty => 'Qté';
+
+  @override
+  String get customInvoiceAddItem => 'Ajouter';
+
+  @override
+  String get customInvoiceDiscount => 'Remise (MT)';
+
+  @override
+  String get customInvoiceTax => 'TVA (MT)';
+
+  @override
+  String customInvoiceBillTotal(Object total) {
+    return 'Total : $total';
+  }
+
+  @override
+  String customInvoiceNumberPrefix(Object number) {
+    return 'N° $number';
+  }
+
+  @override
+  String get customInvoiceTemplateSaved => 'Modèle enregistré avec succès';
+
+  @override
+  String get customInvoiceTemplateLogoSection => 'Logo de l\'entreprise';
+
+  @override
+  String get customInvoiceTemplateLogoHint => 'Touchez pour charger un logo';
+
+  @override
+  String get customInvoiceTemplateColorSection => 'Couleur principale';
+
+  @override
+  String get customInvoiceTemplateCompanySection =>
+      'Informations de l\'entreprise';
+
+  @override
+  String get customInvoiceTemplateCompanyName => 'Nom de l\'entreprise';
+
+  @override
+  String get customInvoiceTemplateAddress => 'Adresse';
+
+  @override
+  String get customInvoiceTemplateTaxId => 'NIF / NUIT';
+
+  @override
+  String get customInvoiceTemplateStyle => 'Style';
+
+  @override
+  String get customInvoiceTemplateStyleClassic => 'Classique';
+
+  @override
+  String get customInvoiceTemplateStyleModern => 'Moderne';
+
+  @override
+  String get customInvoiceTemplateStyleCompact => 'Compact';
+
+  @override
+  String get customInvoiceTemplateSave => 'Enregistrer le modèle';
+
+  @override
+  String get customInvoicePreviewCompanyFallback => 'Nom de l\'entreprise';
+
+  @override
+  String get quotationTitle => 'Devis';
+
+  @override
+  String get quotationEmpty => 'Aucun devis';
+
+  @override
+  String get quotationEmptySubtitle =>
+      'Créez des devis et des estimations pour vos clients';
+
+  @override
+  String get quotationTemplateTooltip => 'Modèle de devis';
+
+  @override
+  String get quotationNewFab => 'Nouveau devis';
+
+  @override
+  String quotationItemsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+      zero: '0 article',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get quotationValidity => 'Validité';
+
+  @override
+  String quotationDays(num days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours',
+      one: '1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get quotationSend => 'Envoyer';
+
+  @override
+  String get quotationAccept => 'Accepter';
+
+  @override
+  String get quotationReject => 'Refuser';
+
+  @override
+  String get quotationStatusDraft => 'Brouillon';
+
+  @override
+  String get quotationStatusSent => 'Envoyé';
+
+  @override
+  String get quotationStatusAccepted => 'Accepté';
+
+  @override
+  String get quotationStatusRejected => 'Refusé';
+
+  @override
+  String get quotationPhoneOptional => 'Téléphone (facultatif)';
+
+  @override
+  String quotationNumberPrefix(Object number) {
+    return 'N° $number';
+  }
+
+  @override
+  String get quotationSave => 'Enregistrer le devis';
+
+  @override
+  String get quotationTemplatePhone => 'Téléphone';
+
+  @override
+  String get quotationTemplatePreview => 'Devis • Aperçu';
+
+  @override
+  String get quotationTemplatePreviewBadge => 'Aperçu';
+
+  @override
+  String get paletteBlue => 'Bleu';
+
+  @override
+  String get paletteGreen => 'Vert';
+
+  @override
+  String get paletteRed => 'Rouge';
+
+  @override
+  String get paletteAmber => 'Ambre';
+
+  @override
+  String get paletteSlate => 'Ardoise';
+
+  @override
+  String get paletteViolet => 'Violet';
+
+  @override
+  String get paletteTeal => 'Sarcelle';
+
+  @override
+  String get paletteIndigo => 'Indigo';
+
+  @override
+  String get customInvoicePdf => 'PDF';
+
+  @override
+  String get imageSourceGallery => 'Galerie';
+
+  @override
+  String get imageSourceCamera => 'Caméra';
+
+  @override
+  String get businessFallbackName => 'Mon entreprise';
+
+  @override
+  String get customInvoiceWhatsAppHeader => '═══ FACTURE ═══';
+
+  @override
+  String get customInvoiceNumberShort => 'N°';
+
+  @override
+  String get customInvoiceClientLabel => 'Client';
+
+  @override
+  String get customInvoicePhoneLabel => 'Tél';
+
+  @override
+  String get customInvoiceTotalLabel => 'TOTAL';
+
+  @override
+  String get customInvoiceNew => 'Nouvelle facture';
+
+  @override
+  String get customInvoiceTemplateTitle => 'Modèle de facture';
+
+  @override
+  String get commonPreview => 'Aperçu';
+
+  @override
+  String get quotationWhatsAppHeader => '═══ DEVIS ═══';
+
+  @override
+  String get quotationTemplateTitle => 'Modèle de devis';
+
+  @override
+  String get employeeMgmtTitle => 'Gestion des employés';
+
+  @override
+  String get employeeMgmtTabAttendance => 'Pointage';
+
+  @override
+  String get employeeMgmtTabCommissions => 'Commissions';
+
+  @override
+  String get employeeMgmtTabTargets => 'Objectifs';
+
+  @override
+  String get employeePresentCount => 'Présents';
+
+  @override
+  String get employeeAbsentCount => 'Absents';
+
+  @override
+  String get employeeClockInAction => 'Entrer';
+
+  @override
+  String get employeeClockOutAction => 'Sortir';
+
+  @override
+  String get employeeClockOutInProgress => 'En cours';
+
+  @override
+  String get employeeAttendanceSection => 'Registre de pointage';
+
+  @override
+  String get employeeRecordsSection => 'Registres du jour';
+
+  @override
+  String get employeeSalesMonth => 'Ventes du mois';
+
+  @override
+  String get employeeCommissionTitle => 'Commissions';
+
+  @override
+  String get employeeCommissionPerEmployee => 'Commission par employé';
+
+  @override
+  String employeeCommissionRate(Object amount, Object rate) {
+    return '$rate% de $amount';
+  }
+
+  @override
+  String get employeeTargetsActive => 'Objectifs actifs';
+
+  @override
+  String get employeeTargetsReached => 'Atteints';
+
+  @override
+  String get employeeTargetsPending => 'En attente';
+
+  @override
+  String get employeeTargetsMonth => 'Objectifs du mois';
+
+  @override
+  String get employeeTargetsEmptyTitle => 'Aucun objectif défini';
+
+  @override
+  String get employeeTargetsEmptySubtitle =>
+      'Définissez des objectifs de vente mensuels pour chaque employé';
+
+  @override
+  String get employeeTargetAdd => 'Ajouter un objectif';
+
+  @override
+  String employeeTargetMeta(Object amount) {
+    return 'Objectif : $amount';
+  }
+
+  @override
+  String employeeTargetAchieved(Object amount) {
+    return 'Réalisé : $amount';
+  }
+
+  @override
+  String get employeeTargetNewTitle => 'Nouvel objectif';
+
+  @override
+  String get employeeTargetEmployee => 'Employé';
+
+  @override
+  String get employeeTargetAllHave =>
+      'Tous les employés ont déjà un objectif défini';
+
+  @override
+  String get employeeTargetMonthly => 'Objectif mensuel (MT)';
+
+  @override
+  String get employeeTargetSave => 'Enregistrer l\'objectif';
+
+  @override
+  String get employeeRoleSales => 'Vendeur';
+
+  @override
+  String get addonsTitle => 'Add-ons';
+
+  @override
+  String get addonsSubtitle =>
+      'Add-ons actifs et disponibles dans votre forfait';
+
+  @override
+  String get addonsManagedByAdmin =>
+      'L\'activation des add-ons est gérée par l\'administrateur du système.';
+
+  @override
+  String get addonsIncluded => 'Inclus';
+
+  @override
+  String get addonsActive => 'Actif';
+
+  @override
+  String addonsPerMonth(Object amount) {
+    return '$amount MT/mois';
+  }
+
+  @override
+  String get addonCategoryInvoicing => 'Facturation';
+
+  @override
+  String get addonCategoryQuotation => 'Devis';
+
+  @override
+  String get addonCategoryReports => 'Rapports';
+
+  @override
+  String get addonCategoryEmployees => 'Employés';
+
+  @override
+  String get addonCategoryMultiStore => 'Multi-magasins';
+
+  @override
+  String get addonCategoryPayments => 'Paiements';
+
+  @override
+  String get commonTotal => 'Total';
+
+  @override
+  String get addonCustomInvoiceName => 'Facture personnalisée';
+
+  @override
+  String get addonCustomInvoiceDesc =>
+      'Créez des factures professionnelles avec logo, mise en page personnalisable et export PDF. Modèles prêts à l\'emploi et personnalisation des couleurs, polices et champs.';
+
+  @override
+  String get addonQuotationName => 'Devis';
+
+  @override
+  String get addonQuotationDesc =>
+      'Créez et envoyez des devis à vos clients avant la vente. Conversion automatique en vente, validité configurable et envoi par SMS/WhatsApp.';
+
+  @override
+  String get addonReportsName => 'Rapports avancés';
+
+  @override
+  String get addonReportsDesc =>
+      'Rapports financiers, de ventes et de stock avec filtres avancés, comparaisons de période à période et export PDF/Excel. Graphiques interactifs et tableaux de bord personnalisés.';
+
+  @override
+  String get addonEmployeesName => 'Gestion des employés';
+
+  @override
+  String get addonEmployeesDesc =>
+      'Pointage (entrée/sortie), calcul automatique des commissions par vente, définition d\'objectifs mensuels et rapport de performance individuel.';
+
+  @override
+  String get addonMultiStoreName => 'Multi-magasins avancé';
+
+  @override
+  String get addonMultiStoreDesc =>
+      'Transferts de stock entre magasins, rapports consolidés comparant les magasins, gestion centralisée des prix et promotions et alertes de réapprovisionnement automatiques.';
+
+  @override
+  String get addonMobileMoneyName => 'Intégration M-Pesa / E-Mola';
+
+  @override
+  String get addonMobileMoneyDesc =>
+      'Paiements automatiques par mobile money avec réconciliation automatique, notifications de réception en temps réel et rapport des transactions mobile money.';
+
+  @override
+  String get transfersTitle => 'Transferts entre magasins';
+
+  @override
+  String get transfersEmpty => 'Aucun transfert';
+
+  @override
+  String get transfersEmptySubtitle =>
+      'Transférez du stock entre les magasins du\nmême tenant de manière traçable';
+
+  @override
+  String get transfersNewFab => 'Nouveau transfert';
+
+  @override
+  String get transfersOriginStore => 'Magasin d\'origine';
+
+  @override
+  String get transfersDestStore => 'Magasin de destination';
+
+  @override
+  String get transfersProduct => 'Produit';
+
+  @override
+  String get transfersProductPlaceholder => 'Aucun produit enregistré';
+
+  @override
+  String get transfersQuantity => 'Quantité';
+
+  @override
+  String get transfersAddItem => 'Ajouter';
+
+  @override
+  String get transfersExecuting => 'Transfert en cours...';
+
+  @override
+  String get transfersExecute => 'Exécuter le transfert';
+
+  @override
+  String get transfersNoStoresTitle => 'Enregistrez au moins 2 magasins';
+
+  @override
+  String get transfersNoStoresSubtitle =>
+      '2 magasins ou plus sont nécessaires\npour transférer du stock';
+
+  @override
+  String transfersSuccess(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count produits transférés',
+      one: '1 produit transféré',
+    );
+    return '$_temp0 avec succès';
+  }
+
+  @override
+  String transfersError(Object error) {
+    return 'Erreur de transfert : $error';
+  }
+
+  @override
+  String get transferStatusPending => 'En attente';
+
+  @override
+  String get transferStatusInTransit => 'En transit';
+
+  @override
+  String get transferStatusReceived => 'Reçu';
+
+  @override
+  String get transferStatusCancelled => 'Annulé';
+
+  @override
+  String get paymentsTitle => 'M-Pesa / E-Mola';
+
+  @override
+  String get paymentsEmpty => 'Aucune transaction';
+
+  @override
+  String get paymentsEmptySubtitle =>
+      'Enregistrez les paiements reçus via\nM-Pesa ou E-Mola pour réconciliation';
+
+  @override
+  String get paymentsNewFab => 'Enregistrer le paiement';
+
+  @override
+  String get paymentsStatusConfirmed => 'Confirmé';
+
+  @override
+  String get paymentsStatusPending => 'En attente';
+
+  @override
+  String get paymentsStatusRejected => 'Rejeté';
+
+  @override
+  String get paymentsConfirm => 'Confirmer';
+
+  @override
+  String get paymentsReject => 'Rejeter';
+
+  @override
+  String paymentsReference(Object code) {
+    return 'Réf. : $code';
+  }
+
+  @override
+  String get paymentsSheetTitle => 'Enregistrer le paiement';
+
+  @override
+  String get paymentsSenderPhone => 'Téléphone de l\'expéditeur';
+
+  @override
+  String get paymentsAmount => 'Montant (MT)';
+
+  @override
+  String get paymentsConfirmationCode => 'Code de confirmation';
+
+  @override
+  String get reportsAdvancedTitle => 'Rapports avancés';
+
+  @override
+  String get reportsTabSales => 'Ventes';
+
+  @override
+  String get reportsTabFinancial => 'Finances';
+
+  @override
+  String get reportsTabStock => 'Stock';
+
+  @override
+  String get reportsKpiProducts => 'Produits';
+
+  @override
+  String get reportsKpiLowStock => 'Stock faible';
+
+  @override
+  String get reportsKpiTotalItems => 'Articles au total';
+
+  @override
+  String get reportsKpiStockValue => 'Valeur du stock';
+
+  @override
+  String get reportsKpiRevenue => 'Revenus';
+
+  @override
+  String get reportsKpiExpenses => 'Dépenses';
+
+  @override
+  String get reportsKpiNetProfit => 'Bénéfice net';
+
+  @override
+  String get reportsStockByQty => 'Produits par stock';
+
+  @override
+  String get reportsCashFlow => 'Flux de trésorerie';
+
+  @override
+  String get reportsCashFlowChart => 'Graphique du flux de trésorerie';
+
+  @override
+  String get reportsNoProducts => 'Aucun produit enregistré';
+
+  @override
+  String get reportsStockHealthy => 'Tous les produits ont un stock adéquat';
+
+  @override
+  String get reportsExportSales => 'Exporter le rapport (PDF)';
+
+  @override
+  String get reportsExportFinancial => 'Exporter les finances (PDF)';
+
+  @override
+  String get reportsExportStock => 'Exporter le stock (PDF)';
+
+  @override
+  String get reportsNoSalesData => 'Aucune donnée pour cette période';
+
+  @override
+  String get reportsPeriodYear => 'Cette année';
+
+  @override
+  String get reportsKpiStockOut => 'Rupture de stock';
+
+  @override
+  String get reportsKpiTotalProducts => 'Total produits';
+
+  @override
+  String pdfGeneratedOn(Object date) {
+    return 'Généré : $date';
+  }
+
+  @override
+  String get pdfIndicators => 'Indicateurs';
+
+  @override
+  String pdfFooter(Object date) {
+    return 'Document généré par TAREQO — $date';
+  }
+
+  @override
+  String get pdfInvoiceDocWord => 'FACTURE';
+
+  @override
+  String get pdfInvoiceSubjectWord => 'Facture';
+
+  @override
+  String get pdfInvoiceFileBase => 'facture';
+
+  @override
+  String get pdfQuotationDocWord => 'DEVIS';
+
+  @override
+  String get pdfQuotationSubjectWord => 'Devis';
+
+  @override
+  String get pdfQuotationFileBase => 'devis';
+
+  @override
+  String get pdfClientHeading => 'CLIENT';
+
+  @override
+  String pdfPhoneLine(Object value) {
+    return 'Tél. : $value';
+  }
+
+  @override
+  String pdfEmailLine(Object value) {
+    return 'E-mail : $value';
+  }
+
+  @override
+  String pdfNifLine(Object value) {
+    return 'NIF : $value';
+  }
+
+  @override
+  String get pdfItemHeader => 'Article';
+
+  @override
+  String get pdfUnitPriceHeader => 'Prix unit.';
+
+  @override
+  String get pdfSubtotalHeader => 'Sous-total';
+
+  @override
+  String get pdfDiscountLabel => 'Remise';
+
+  @override
+  String get pdfTaxLabel => 'TVA';
+
+  @override
+  String pdfPaymentLine(Object value) {
+    return 'Paiement : $value';
+  }
+
+  @override
+  String pdfReferenceLine(Object value) {
+    return 'Réf. : $value';
+  }
+
+  @override
+  String get pdfNotesHeading => 'Notes';
+
+  @override
+  String get pdfGeneralConditionsHeading => 'Conditions générales';
+
+  @override
+  String pdfValidityDaysLeft(num days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours restants',
+      one: '1 jour restant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pdfConditionValidBullet(Object date) {
+    return 'Cette offre est valable jusqu\'au $date.';
+  }
+
+  @override
+  String get pdfConditionPricesBullet =>
+      'Les prix peuvent changer après la période de validité.';
+
+  @override
+  String get pdfConditionContactBullet =>
+      'Pour accepter cette offre, veuillez nous contacter.';
+
+  @override
+  String get quotationStatusExpired => 'Expirée';
+
+  @override
+  String get quotationStatusConverted => 'Convertie en vente';
+
+  @override
+  String get pdfConditionsNotesHeading => 'Conditions / Notes';
+
+  @override
+  String get adminAddonsActivateBtn => 'Activer';
+
+  @override
+  String get adminAddonsActivateBulk => 'Activer l\'add-on';
+
+  @override
+  String get adminAddonsActivePill => 'Actifs';
+
+  @override
+  String get adminAddonsDeactivateBtn => 'Désactiver';
+
+  @override
+  String get adminAddonsInactivePill => 'Inactifs';
+
+  @override
+  String adminAddonsLoadError(Object error) {
+    return 'Erreur : $error';
+  }
+
+  @override
+  String get adminAddonsNoTenantsSearchSub =>
+      'Essayez un autre terme de recherche';
+
+  @override
+  String get adminAddonsNoTenantsTitle => 'Aucun tenant trouvé';
+
+  @override
+  String get adminAddonsNoTenantsYetSub =>
+      'Aucun tenant approuvé pour l\'instant';
+
+  @override
+  String adminAddonsUpdateError(Object error) {
+    return 'Erreur lors de la mise à jour de l\'add-on : $error';
+  }
+
+  @override
+  String get adminBackToList => 'Retour à la liste';
+
+  @override
+  String get adminMessagesBodyHint => 'Rédigez votre message…';
+
+  @override
+  String get adminMessagesTenantHint => 'Sélectionner un tenant...';
+
+  @override
+  String get adminMessagesTitleExample => 'Ex. : Devis du forfait Pro';
+
+  @override
+  String get adminNavRevenue => 'Revenus';
+
+  @override
+  String get adminPlansActive => 'Actifs';
+
+  @override
+  String get adminPlansInactive => 'Inactifs';
+
+  @override
+  String get adminRevenueActiveTenants => 'Tenants actifs';
+
+  @override
+  String get adminRevenueActiveTenantsSub => 'Total sur la plateforme';
+
+  @override
+  String get adminRevenueAvailableAddOns => 'Add-ons disponibles';
+
+  @override
+  String get adminRevenueAvailableAddOnsSub => 'Dans le catalogue actif';
+
+  @override
+  String get adminRevenueMaxMonthly => 'Revenu mensuel maximal';
+
+  @override
+  String get adminRevenueMaxMonthlySub => 'Si tous activaient tout';
+
+  @override
+  String get adminRevenuePotential => 'Revenu potentiel';
+
+  @override
+  String get adminRevenuePotentialSub => 'Par tenant/mois (tous les add-ons)';
+
+  @override
+  String get adminTenantsMonthlyValue => 'Valeur mensuelle';
+
+  @override
+  String get adminTenantsNextInvoice => 'Prochaine facture';
+
+  @override
+  String get adminTenantsPlanExpiresOn => 'Le forfait expire le';
+
+  @override
+  String get adminTenantsTrialEndsOn => 'L\'essai se termine le';
+
+  @override
+  String get commonId => 'ID';
+
+  @override
+  String dashboardSaleEntry(Object number) {
+    return 'Vente $number';
+  }
+
+  @override
+  String get loginConfirmPasswordHint => 'Répétez votre mot de passe';
+
+  @override
+  String get loginConfirmPasswordLabel => 'Confirmer le mot de passe';
+
+  @override
+  String get loginEmailHint => 'Saisissez votre e-mail';
+
+  @override
+  String get loginForgotPassword => 'Mot de passe oublié ?';
+
+  @override
+  String get loginNameHint => 'Saisissez votre nom';
+
+  @override
+  String get loginPasswordHint => 'Saisissez votre mot de passe';
+
+  @override
+  String get loginPromptHaveAccount => 'Déjà un compte ?';
+
+  @override
+  String get loginPromptNoAccount => 'Pas encore de compte ?';
+
+  @override
+  String get loginTagline => 'Une gestion simple pour votre entreprise';
+
+  @override
+  String get mfaCodeFieldLabel => 'Code MFA';
+
+  @override
+  String get mfaCodeHint =>
+      'Saisissez le code à 6 chiffres de votre application d\'authentification :';
+
+  @override
+  String get mfaCodeLengthError => 'Saisissez le code à 6 chiffres';
+
+  @override
+  String get mfaConfirmPrompt =>
+      'Saisissez le code de l\'application pour confirmer :';
+
+  @override
+  String get mfaDigitsFieldLabel => 'Code à 6 chiffres';
+
+  @override
+  String mfaExpiresIn(num seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '$seconds secondes',
+      one: '1 seconde',
+    );
+    return 'Le code expire dans $_temp0';
+  }
+
+  @override
+  String mfaInitError(Object error) {
+    return 'Erreur lors de l\'initialisation du MFA : $error';
+  }
+
+  @override
+  String get mfaInvalidCode => 'Code invalide. Réessayez.';
+
+  @override
+  String get mfaManualEntryTitle => 'Ou saisissez ce code manuellement :';
+
+  @override
+  String get mfaQrScanHelp =>
+      'Utilisez votre application d\'authentification (Google Authenticator, Authy, etc.) pour scanner ce code QR :';
+
+  @override
+  String get mfaQrScanTitle => 'Scannez le code QR';
+
+  @override
+  String get mfaSetupSuccess => 'MFA configuré avec succès !';
+
+  @override
+  String get mfaSetupTitle => 'Configurer l\'authentification à deux facteurs';
+
+  @override
+  String get mfaVerify => 'Vérifier';
+
+  @override
+  String get mfaVerifyAndEnable => 'Vérifier et activer';
+
+  @override
+  String mfaVerifyError(Object error) {
+    return 'Erreur lors de la vérification du code : $error';
+  }
+
+  @override
+  String get securityBiometricDisabledSub =>
+      'Utilisez l\'empreinte digitale ou la reconnaissance faciale';
+
+  @override
+  String get securityBiometricEnabledSub =>
+      'Activée — Empreinte digitale ou visage';
+
+  @override
+  String get securityBiometricTitle => 'Authentification biométrique';
+
+  @override
+  String get securityBiometricUnavailable => 'Indisponible sur cet appareil';
+
+  @override
+  String get securityTwoFactorDisabledSub =>
+      'Ajoutez une couche de sécurité supplémentaire';
+
+  @override
+  String get securityTwoFactorEnabledSub =>
+      'Activée — Utilisez une appli d\'authentification';
+
+  @override
+  String get securityTwoFactorTitle => 'Authentification à deux facteurs';
+
+  @override
+  String get transfersRowDate => 'Date';
+
+  @override
+  String get transfersRowDest => 'Destination';
+
+  @override
+  String get transfersRowOrigin => 'Origine';
+
+  @override
+  String get transfersRowStatus => 'Statut';
+
+  @override
+  String adminAddonsBulkActivated(Object addonName, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tenants',
+      one: '1 tenant',
+    );
+    return '$addonName activé pour $_temp0';
+  }
+
+  @override
+  String adminAddonsBulkDeactivated(Object addonName, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tenants',
+      one: '1 tenant',
+    );
+    return '$addonName désactivé pour $_temp0';
+  }
+
+  @override
+  String adminAddonsBulkSheetCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tenants sélectionnés',
+      one: '1 tenant sélectionné',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminAddonsBulkSheetTitle => 'Activer des add-ons en masse';
+
+  @override
+  String get adminAddonsListHint =>
+      'Touchez un tenant pour gérer ses add-ons. Touchez l’icône ✓ pour la sélection multiple.';
+
+  @override
+  String adminAddOnsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count add-ons',
+      one: '1 add-on',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminRevenueByAddOn => 'Revenus par add-on';
+
+  @override
+  String get adminRevenueByCategory => 'Répartition par catégorie';
+
+  @override
+  String get adminRevenuePerMonth => 'potentiel/mois';
+
+  @override
+  String get adminPlanPerMonthSuffix => '/mois';
+
+  @override
+  String adminTenantCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tenants',
+      one: '1 tenant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String adminTenantCycleActiveLeft(num days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours restants',
+      one: '1 jour restant',
+    );
+    return 'Actif : $_temp0';
+  }
+
+  @override
+  String get adminTenantCycleExpired => 'Expiré';
+
+  @override
+  String adminTenantCycleExpiresIn(num days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours',
+      one: '1 jour',
+    );
+    return 'Expire dans $_temp0';
+  }
+
+  @override
+  String adminTenantCycleTrialLeft(num days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours restants',
+      one: '1 jour restant',
+    );
+    return 'Essai : $_temp0';
+  }
 }

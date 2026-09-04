@@ -22,6 +22,7 @@ import '../../controllers/auth_providers.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
@@ -86,36 +87,17 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {_Advance
  final canManageProducts =
  ref.watch(currentAccessLevelProvider) != UserAccessLevel.employee;
 
- return Scaffold(
-    appBar: AppBar(
-    toolbarHeight: 72,
-    titleSpacing: 20,
-    title: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.appNavProducts,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
-        ),
-        Text(
-          l10n.productsHeaderCount(productsAsync.value?.length ?? 0),
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    ),
-    actions: [
+ return AppPage(
+ title: l10n.appNavProducts,
+ subtitle: l10n.productsHeaderCount(productsAsync.value?.length ?? 0),
+ actions: [
       IconButton(
         tooltip: l10n.productsFilterTooltip,
         onPressed: _openFilterSheet,
         icon: const Icon(Icons.tune_rounded),
       ),
     ],
-  ),
+ useSafeArea: false,
  // CTA único: sem produtos, o FAB some — o estado vazio traz o botão
  // de cadastro centralizado (mantendo a regra canManageProducts).
  // FAB CIRCULAR verde (design system 2026 — igual ao app de
@@ -187,7 +169,12 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {_Advance
  if (isFiltering)
  SliverToBoxAdapter(
    child: Padding(
-     padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+     padding: EdgeInsets.fromLTRB(
+     AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+     4,
+     AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+     0,
+   ),
      child: Align(
        alignment: Alignment.centerRight,
        child: Text(
@@ -214,7 +201,12 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {_Advance
  )
  else
  SliverPadding(
-   padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
+   padding: EdgeInsets.fromLTRB(
+   AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+   8,
+   AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+   112,
+ ),
    sliver: SliverList.separated(
      itemCount: filtered.length,
      separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -478,6 +470,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
         children: [
           SheetHeader(
             title: l10n.productsFilterAdvanced,
+            actionLabel: l10n.productsFilterApply,
             onSave: _submit,
             onClose: _clear,
           ),
@@ -574,7 +567,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               label: l10n.productsFilterMinPrice,
                               hintText: '0,00',
-                              suffixText: 'MT',
+                              suffixText: Formatters.currencySymbol,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -584,7 +577,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               label: l10n.productsFilterMaxPrice,
                               hintText: '0,00',
-                              suffixText: 'MT',
+                              suffixText: Formatters.currencySymbol,
                             ),
                           ),
                         ],

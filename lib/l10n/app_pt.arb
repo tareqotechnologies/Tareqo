@@ -1,6 +1,5 @@
 {
   "@@locale": "pt",
-  "appTitle": "Dumbhanengue ERP",
   "onboardingTitle": "Bem-vindo!",
   "onboardingHeading": "Configure seu negócio",
   "onboardingSubtitle": "Escolha o plano, nome e moeda. Aprovação em até 24h.",
@@ -33,9 +32,7 @@
   "onboardingChoosePlanError": "Escolha um plano para continuar.",
   "onboardingGenericError": "Não foi possível enviar a solicitação. Tente novamente.",
   "onboardingLanguageLabel": "Idioma",
-  "onboardingLanguageHint": "Idioma do aplicativo",
   "onboardingCurrencyLabel": "Moeda",
-  "onboardingCurrencyHint": "Moeda usada nos valores",
   "languagePortuguese": "Português",
   "languageEnglish": "English",
   "languageFrench": "Français",
@@ -61,8 +58,7 @@
   "commonSignOut": "Terminar sess\u00e3o",
   "appSheetClose": "Fechar",
   "storeSwitcherTooltip": "Trocar de loja",
-  "storeSelectorSectionTitle": "Loja ativa",
-  "storeSelectorSectionHint": "Escolha a loja ativa.",
+  "storeSelectorSectionTitle": "Loja activa",
   "tenantPendingTitle": "Aguardando aprovação",
   "tenantPendingSubtitle": "Solicitação de \"{business}\" enviada. Aguarde até 24h.",
   "@tenantPendingSubtitle": {
@@ -83,35 +79,27 @@
     }
   },
   "authBlockedTitle": "Acesso suspenso",
-  "authBlockedMessage": "Sua conta foi desativada pelo proprietário.",
+  "authBlockedMessage": "Sua conta foi desactivada pelo proprietário.",
   "authBlockedSignOut": "Sair",
-  "authErrorRestoreSession": "Sessão não restaurada",
   "authErrorCheckConnection": "Verifique sua conexão e tente novamente.",
   "authErrorLoadAccount": "Conta não carregada",
   "splashLoading": "A abrir a sua sessão…",
   "loginSubtitleSignUp": "Crie sua conta para começar",
-  "loginSubtitleSignIn": "Gestão simples para o seu negócio",
   "loginNameLabel": "Nome",
   "loginEmailLabel": "E-mail",
   "loginEmailError": "Informe um e-mail válido.",
   "loginPasswordLabel": "Senha",
   "loginPasswordError": "A senha deve ter ao menos 8 caracteres.",
-  "loginPasswordHint": "Mín. 8 caracteres com minúscula, maiúscula, número e símbolo.",
   "loginWeakPasswordError": "A senha deve conter letras, números e símbolos.",
   "loginRateLimitError": "Muitas tentativas. Aguarde 1 hora e tente novamente.",
   "loginShowPassword": "Mostrar senha",
   "loginHidePassword": "Ocultar senha",
-  "loginConfirmLabel": "Confirmar senha",
   "loginConfirmError": "As senhas não coincidem.",
   "loginSignUp": "Cadastrar",
   "loginSignIn": "Entrar",
-  "loginSwitchToSignIn": "Já tenho conta — entrar",
-  "loginSwitchToSignUp": "Não tenho conta — cadastrar",
   "loginSignUpSuccess": "Conta criada! Confirme seu e-mail para entrar.",
   "loginSignUpError": "Não foi possível criar a conta. Tente novamente.",
   "loginSignInError": "Não foi possível entrar. Verifique e-mail e senha.",
-  "loginSecurityNote": "Dados protegidos com criptografia.",
-  "loginForgotPassword": "Esqueceu a senha?",
   "forgotPasswordTitle": "Redefinir senha",
   "forgotPasswordHint": "Informe seu e-mail. Enviaremos um link para redefinir.",
   "forgotPasswordSubmit": "Enviar link",
@@ -139,7 +127,6 @@
   "appNavWallet": "Carteira",
   "appNavMenu": "Menu",
   "appNavProducts": "Produtos",
-  "appNavFinancial": "Financeiro",
   "appNavCredit": "Crédito",
   "appNavCustomers": "Clientes",
   "fabMenuTitle": "Nova ação",
@@ -185,36 +172,18 @@
       }
     }
   },
-  "dashboardSignOutTooltip": "Sair",
   "dashboardOwnerFallback": "Dono",
-  "dashboardTotalSales": "Total de vendas",
-  "dashboardAllTime": "Todo o histórico",
-  "dashboardCashBalance": "Saldo em caixa",
-  "dashboardReceivables": "A receber (fiado)",
-  "dashboardStockLabel": "Estoque em produtos",
   "commonUnits": "un.",
   "dashboardQuickActions": "Ações rápidas",
-  "dashboardQuickNewSale": "Nova venda",
-  "dashboardQuickAddProduct": "Adicionar produto",
-  "dashboardQuickAddTransaction": "Registrar transação",
-  "dashboardQuickAddDebt": "Registrar fiado",
-  "dashboardModules": "Módulos",
   "dashboardModuleCustomers": "Clientes",
   "dashboardModulePurchases": "Compras",
   "dashboardModuleReports": "Relatórios",
   "dashboardModuleStores": "Lojas",
-  "dashboardRecentSales": "Vendas recentes",
-  "dashboardViewAll": "Ver todas",
-  "dashboardNoSales": "Nenhuma venda ainda — registre a primeira!",
-  "dashboardRecentPurchases": "Compras recentes",
-  "dashboardNoPurchases": "Nenhuma compra ainda — registre a primeira!",
   "dashboardLowStock": "Estoque baixo",
   "dashboardKpisError": "Não foi possível carregar os indicadores.",
   "dashboardActivityTitle": "Atividade de hoje",
   "dashboardActivityEvents": "{count, plural, =1{1 evento} other{{count} eventos}}",
   "dashboardActivityMinutesAgo": "há {count} min",
-  "dashboardActivityHoursAgo": "há {count} h",
-  "dashboardDateToday": "Hoje",
   "dashboardMetricSales": "Vendas",
   "dashboardMetricCash": "Caixa",
   "dashboardMetricReceivables": "A receber",
@@ -227,7 +196,6 @@
     }
   },
   "dashboardActivityEmpty": "Nenhuma atividade registrada ainda.",
-  "dashboardActivitySeeAll": "Ver todas",
   "dashboardStockEntry": "Estoque · {product}",
   "@dashboardStockEntry": {
     "placeholders": {
@@ -243,14 +211,6 @@
         "type": "String"
       },
       "time": {
-        "type": "String"
-      }
-    }
-  },
-  "dashboardTransferItem": "Transferência · {product}",
-  "@dashboardTransferItem": {
-    "placeholders": {
-      "product": {
         "type": "String"
       }
     }
@@ -302,26 +262,23 @@
   "storesEmptyTitle": "Nenhuma loja criada",
   "storesEmptySubtitle": "Crie a primeira loja do seu negócio.",
   "employeesLoadError": "Não foi possível carregar os funcionários.",
-  "employeesEmptyTitle": "Nenhum funcionário vinculado",
+  "employeesUpdateError": "Não foi possível atualizar o funcionário. Tente novamente.",
+    "employeesEmptyTitle": "Nenhum funcionário vinculado",
   "employeesEmptySubtitle": "Crie a conta do funcionário e escolha a loja.",
   "roleManager": "Gerente",
   "roleEmployee": "Funcionário",
-  "employeeActive": "Ativo",
-  "employeeInactive": "Inativo",
-  "employeeDeactivateConfirm": "Desativar {name}? Perde acesso imediatamente.",
-  "employeeReactivateConfirm": "Reativar {name}? Volta a ter acesso à loja.",
-  "employeeDeactivated": "Funcionário desativado.",
-  "employeeReactivated": "Funcionário reativado.",
-  "employeeDeactivateAction": "Desativar",
-  "employeeReactivateAction": "Reativar",
-  "employeeDetailTitle": "Detalhes do funcionário",
+  "employeeDeactivateConfirm": "Desactivar {name}? Perde acesso imediatamente.",
+  "employeeReactivateConfirm": "Reactivar {name}? Volta a ter acesso à loja.",
+  "employeeDeactivated": "Funcionário desactivado.",
+  "employeeReactivated": "Funcionário reactivado.",
+  "employeeDeactivateAction": "Desactivar",
+  "employeeReactivateAction": "Reactivar",
   "employeeDetailEmail": "E-mail",
   "employeeDetailStore": "Loja",
   "employeeDetailRole": "Nível de acesso",
   "employeeDetailStatus": "Estado",
-  "employeeDetailActive": "Ativo",
-  "employeeDetailInactive": "Inativo",
-  "employeeDetailActions": "Ações",
+  "employeeDetailActive": "Activo",
+  "employeeDetailInactive": "Inactivo",
   "upgradesLoadError": "Não foi possível carregar os pedidos de upgrade.",
   "upgradesEmptyTitle": "Nenhum pedido de upgrade",
   "upgradesEmptySubtitle": "Solicite um plano maior no card acima.",
@@ -359,13 +316,11 @@
   "addStoreEmailLabel": "E-mail (opcional)",
   "addStoreNuitLabel": "NUIT (opcional)",
   "addStoreCityLabel": "Cidade (opcional)",
-  "storeDetailTitle": "Detalhes da loja",
   "storeDetailPhone": "Telefone",
   "storeDetailEmail": "E-mail",
   "storeDetailNuit": "NUIT",
   "storeDetailCity": "Cidade",
   "storeDetailAddress": "Endereço",
-  "storeDetailActions": "Ações",
   "addStoreSuccess": "Loja {name} criada!",
   "@addStoreSuccess": {
     "placeholders": {
@@ -406,7 +361,6 @@
   "commonSave": "Salvar",
   "commonSoldOut": "Esgotado",
   "periodToday": "Hoje",
-  "periodWeek": "7 dias",
   "periodMonth": "Este mês",
   "periodAll": "Tudo",
   "paymentCash": "Dinheiro",
@@ -416,69 +370,29 @@
   "paymentMPesa": "M-Pesa",
   "paymentTransfer": "Transferência",
   "purchasesSearchHint": "Buscar compra...",
-  "productsFilterTooltip": "Filtrar produtos",
   "productsFilterAll": "Todos",
-  "productsFilterAllCount": "Todos os produtos · {count}",
-  "@productsFilterAllCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "productsFilterLowCount": "Stock baixo · {count}",
-  "@productsFilterLowCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "productsColProduct": "Produto / SKU",
-  "productsColPrice": "Preço · Stock",
   "productsSearchHint": "Pesquisar produto...",
   "productsLoadError": "Não foi possível carregar os produtos.",
   "productsEmptyTitle": "Nenhum produto cadastrado",
   "productsEmptySubtitle": "Toque em \"Novo produto\" para começar.",
   "productsAddNew": "Novo produto",
-  "productsBuySell": "Compra: {buy} · Venda: {sell}",
-  "@productsBuySell": {
-    "placeholders": {
-      "buy": {
-        "type": "String"
-      },
-      "sell": {
-        "type": "String"
-      }
-    }
-  },
   "productsAdded": "Produto adicionado!",
   "productsAddedNoPhoto": "Produto adicionado! (sem permissão de armazenamento)",
   "productsAddError": "Não foi possível adicionar o produto. Tente novamente.",
   "productsNameError": "Informe o nome do produto.",
   "productsDescriptionLabel": "Descrição (opcional)",
   "productsPurchasePrice": "Preço de compra",
-  "productsPurchasePriceError": "Informe o preço de compra.",
   "productsSalePrice": "Preço de venda",
-  "productsSalePriceError": "Informe o preço de venda.",
   "productsStockQuantity": "Quantidade em estoque",
-  "productsStockError": "Informe uma quantidade válida.",
   "productsAddSubmit": "Adicionar produto",
   "productsEditTitle": "Editar produto",
   "productsEditSubmit": "Salvar alterações",
   "productsEditSaved": "Produto atualizado!",
   "productsEditSavedNoPhoto": "Produto atualizado! (sem permissão de armazenamento)",
   "productsEditError": "Não foi possível atualizar o produto. Tente novamente.",
-  "productsPhotoLabel": "Foto do produto",
-  "productsPhotoTake": "Tirar foto",
-  "productsPhotoGallery": "Da galeria",
-  "productsPhotoRemove": "Remover foto",
-  "productsInactive": "Inativo",
-  "productsStockOut": "Esgotado",
-  "productsStockLow": "Baixo",
+  "productsInactive": "Inactivo",
   "productsFilterTooltip": "Filtrar",
   "productsFilterAdvanced": "Filtros avançados",
-  "productsFilterClear": "Limpar tudo",
   "productsFilterStockType": "Tipo de estoque",
   "productsFilterStockTypeAll": "Todos",
   "productsFilterStockTypeWeight": "Peso (kg/g/l/ml)",
@@ -492,14 +406,6 @@
   "productsFilterMaxPrice": "Preço máximo",
   "productsFilterApply": "Aplicar",
   "productsFilterInactive": "Inactivos",
-  "productsFilterInactiveCount": "Inactivos · {count}",
-  "@productsFilterInactiveCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "productsHeaderCount": "{count, plural, =1{1 produto} other{{count} produtos}}",
   "@productsHeaderCount": {
     "placeholders": {
@@ -519,53 +425,19 @@
       }
     }
   },
-  "productsSummaryActive": "Activos",
-  "productsSummaryLowStock": "Stock baixo",
-  "productsSummaryInactive": "Inactivos",
-  "productsActiveLabel": "Produto ativo",
-  "productsActiveHint": "Desative para tirar do PDV e compras.",
+  "productsActiveLabel": "Produto activo",
+  "productsActiveHint": "Desactive para tirar do PDV e compras.",
   "productsStockAdjustHint": "Ajuste manual: define o estoque exato (FIFO).",
   "productsSectionInfo": "Informações",
   "productsSectionPricing": "Preços",
   "productsSectionStock": "Estoque",
   "productsSectionStatus": "Status",
-  "productsAddNewTitle": "Novo produto",
-  "productsSave": "Guardar",
-  "productsSaving": "A guardar...",
-  "productsSaved": "Produto guardado com sucesso",
-  "productsSavedNoPhoto": "Produto guardado! (sem permissão de armazenamento)",
-  "productsPhotoLabelNew": "Fotografia do produto",
   "productsPhotoTake": "Tirar fotografia",
   "productsPhotoGallery": "Escolher da galeria",
   "productsPhotoRemove": "Remover fotografia",
-  "productsPhotoHint": "Toque para adicionar",
-  "productsSectionBasic": "Informações básicas",
-  "productsSectionPricingNew": "Preços",
-  "productsSectionStockNew": "Stock",
-  "productsNameLabel": "Nome do produto",
-  "productsNameHint": "Ex.: Arroz tipo 1",
-  "productsNameErrorMsg": "Obrigatório",
-  "productsDescriptionLabelNew": "Descrição",
-  "productsDescriptionHint": "Opcional",
-  "productsCodeLabel": "Código PLU ou código de barras",
-  "productsCodeHint": "Código usado na balança etiquetadora. Exemplo: 12345",
-  "productsCodeError": "Use até 5 dígitos",
-  "productsPurchasePriceLabel": "Preço de compra (MT)",
   "productsPurchasePriceError": "Informe o preço de compra",
-  "productsSalePriceLabel": "Preço de venda (MT)",
   "productsSalePriceError": "Informe o preço de venda",
-  "productsPriceValidationError": "O preço de venda deve ser superior ao de compra",
-  "productsStockQuantityLabel": "Quantidade em stock",
-  "productsStockHint": "Ex.: 50",
-  "productsStockWeightHint": "Em kg (ex.: 1,75)",
   "productsStockError": "Quantidade inválida",
-  "productsExpiryLabel": "Data de validade",
-  "productsExpiryHint": "Opcional",
-  "productsExpiryAdd": "Seleccionar data",
-  "productsExpiryClear": "Remover validade",
-  "productsWeighLabel": "Vender por peso",
-  "productsWeighHint": "Permite vender quantidades com casas decimais, exemplo: 1,75 kg",
-  "productsUnitLabel": "Unidade de medida",
   "customersHeaderCount": "{count, plural, =1{1 cliente} other{{count} clientes}}",
   "@customersHeaderCount": {
     "placeholders": {
@@ -574,8 +446,6 @@
       }
     }
   },
-  "customersColCustomer": "Cliente",
-  "customersColContact": "Contacto / Fiado",
   "customersSearchHint": "Buscar cliente...",
   "customersLoadError": "Não foi possível carregar os clientes.",
   "customersEmptyTitle": "Nenhum cliente cadastrado",
@@ -718,9 +588,7 @@
   "financialRegister": "Registrar",
   "financialIncome": "Entradas",
   "financialExpense": "Saídas",
-  "financialBalance": "Saldo",
   "financialPeriodBalance": "Saldo líquido do período",
-  "financialSwipeHint": "Deslize para saídas →",
   "financialTransactions": "Movimentos do período",
   "financialLoadError": "Não foi possível carregar as movimentações.",
   "financialCashFlowError": "Não foi possível carregar o fluxo de caixa.",
@@ -778,7 +646,6 @@
   "cashClosingByMethod": "Por forma de pagamento",
   "cashClosingCountedCash": "Dinheiro contado",
   "cashClosingCountedCashHint": "Conte o dinheiro da gaveta e informe aqui.",
-  "cashClosingDifference": "Diferença",
   "cashClosingConfers": "Caixa confere",
   "cashClosingSurplus": "Sobra de {amount}",
   "@cashClosingSurplus": {
@@ -803,8 +670,6 @@
   "cashClosingUpdated": "Fecho atualizado!",
   "cashClosingError": "Não foi possível fechar o caixa. Tente novamente.",
   "cashClosingEmpty": "Nenhuma venda registrada neste dia.",
-  "cashClosingHistory": "Histórico de fechos",
-  "cashClosingHistoryEmpty": "Nenhum fecho registrado ainda.",
   "debtsTitle": "Crédito (fiado)",
   "debtsHeaderSubtitle": "Fiado a receber e a pagar",
   "debtsAddDebt": "Registrar fiado",
@@ -814,28 +679,11 @@
   "debtsTotalPending": "Total a receber",
   "debtsOverdueStat": "Atrasados",
   "debtsSettledStat": "Baixas",
-  "debtsNoPendingCustomers": "Nenhum cliente pendente",
-  "debtsPendingCustomers": "{count, plural, =1{1 cliente pendente} other{{count} clientes pendentes}}",
-  "@debtsPendingCustomers": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "debtsPendingSection": "Dívidas pendentes",
   "debtsLoadError": "Não foi possível carregar as dívidas.",
   "debtsEmptyPendingTitle": "Nenhum fiado pendente",
   "debtsEmptyPendingSubtitle": "Fiados aparecerão aqui.",
   "debtsTotalSettled": "Total quitado",
-  "debtsSettledCount": "{count, plural, =1{1 baixa registrada} other{{count} baixas registradas}}",
-  "@debtsSettledCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "debtsSettledSection": "Histórico de quitações",
   "debtsHistoryLoadError": "Não foi possível carregar o histórico.",
   "debtsEmptySettledTitle": "Nenhuma quitação ainda",
@@ -925,15 +773,11 @@
   "salesLoadError": "Não foi possível carregar as vendas.",
   "salesEmptyTitle": "Nenhuma venda registrada",
   "salesEmptySubtitle": "Toque em \"Nova venda\" para registrar a primeira.",
-  "salesSearchHint": "Pesquisar venda...",
   "periodYesterday": "Ontem",
   "periodWeek": "Esta semana",
   "paymentFilterCard": "Cartão",
   "paymentFilterAll": "Todas",
   "salesStatusPaid": "Pago",
-  "salesFilterAll": "Todas",
-  "salesFilterActive": "Ativas",
-  "salesFilterCancelled": "Anuladas",
   "salesHeaderTransactions": "{count, plural, =0{0 transações} =1{1 transação} other{{count} transações}}",
   "@salesHeaderTransactions": {
     "description": "Contagem de transações de hoje no resumo da tela de vendas",
@@ -1107,37 +951,10 @@
       }
     }
   },
-  "adminPlanSolicited": "Plano: {plan} · Solicitado: {date}",
-  "@adminPlanSolicited": {
-    "placeholders": {
-      "plan": {
-        "type": "String"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "adminPlansTitle": "Planos",
-  "adminPlanNewTooltip": "Novo plano",
   "adminPlansLoadError": "Não foi possível carregar os planos.",
   "adminPlansEmptyTitle": "Nenhum plano criado",
   "adminPlansEmptySubtitle": "Crie o primeiro plano para liberar assinaturas.",
-  "adminPlanInactive": "Inativo",
-  "adminPlanDetails": "{price}/mês · {stores} loja(s) · {employees} funcionário(s)",
-  "@adminPlanDetails": {
-    "placeholders": {
-      "price": {
-        "type": "String"
-      },
-      "stores": {
-        "type": "int"
-      },
-      "employees": {
-        "type": "int"
-      }
-    }
-  },
+  "adminPlanInactive": "Inactivo",
   "adminPlanNameError": "Informe o nome do plano.",
   "adminPlanPriceError": "Informe um preço válido (≥ 0).",
   "adminPlanStoresError": "O plano deve permitir ao menos 1 loja.",
@@ -1165,8 +982,8 @@
   "adminPlanPriceLabel": "Preço mensal",
   "adminPlanMaxStores": "Máx. lojas",
   "adminPlanMaxEmployees": "Máx. funcionários",
-  "adminPlanActiveTitle": "Plano ativo",
-  "adminPlanActiveSubtitle": "Desative para impedir novas assinaturas.",
+  "adminPlanActiveTitle": "Plano activo",
+  "adminPlanActiveSubtitle": "Desactive para impedir novas assinaturas.",
   "adminPlanCreate": "Criar plano",
   "adminUpgradesTitle": "Upgrades de plano",
   "adminUpgradesLoadError": "Não foi possível carregar os pedidos de upgrade.",
@@ -1207,7 +1024,6 @@
   "purchasesExpiryLabel": "Validade",
   "purchasesExpiryAdd": "Definir validade",
   "purchasesExpiryHelp": "Data de validade do lote",
-  "dashboardExpiryAlerts": "Validade",
   "dashboardExpiredIn": "Venceu há {days} dia(s)",
   "@dashboardExpiredIn": {
     "description": "Lote vencido — dias desde o vencimento",
@@ -1230,16 +1046,13 @@
   "adminNavAuditLog": "Registo de Auditoria",
   "adminDashboardTitle": "Visão Geral",
   "adminDashboardTotalTenants": "Total de tenants",
-  "adminDashboardActiveTenants": "Ativos",
+  "adminDashboardActiveTenants": "Activos",
   "adminDashboardPendingTenants": "Aguardando aprovação",
   "adminDashboardPendingUpgrades": "Upgrades pendentes",
   "adminDashboardTotalPlans": "Planos",
   "adminDashboardLoadError": "Não foi possível carregar a visão geral.",
-  "adminAuditLogTitle": "Registo de Auditoria",
   "adminAuditLogEmpty": "Nenhuma ação registada.",
   "adminAuditLogEmptySubtitle": "Ações administrativas aparecerão aqui.",
-  "adminAuditLogLoadError": "Não foi possível carregar o registo de auditoria.",
-  "adminTenantDetailTitle": "Detalhes do tenant",
   "adminTenantDetailOwner": "ID do proprietário",
   "adminTenantDetailPlan": "Plano",
   "adminTenantDetailStores": "Lojas",
@@ -1267,7 +1080,6 @@
     }
   },
   "adminTenantSearchHint": "Buscar tenants...",
-  "adminTenantDetailLoadError": "Não foi possível carregar os detalhes do tenant.",
   "adminTenantDetailNoStores": "Nenhuma loja criada",
   "adminTenantDetailNoEmployees": "Nenhum funcionário vinculado",
   "adminTenantDetailActivity": "Atividade recente",
@@ -1280,7 +1092,6 @@
       }
     }
   },
-  "adminTenantDetailStoreAddress": "{city}",
   "adminTenantDetailEmployeeRole": "{role, select, manager{Gestor} other{Funcionário}}",
   "@adminTenantDetailEmployeeRole": {
     "placeholders": {
@@ -1297,14 +1108,6 @@
   "adminBulkDeselectAll": "Desmarcar todos",
   "adminBulkApprove": "Aprovar ({count})",
   "adminBulkReject": "Rejeitar ({count})",
-  "adminBulkApproveConfirm": "Aprovar {count} {count, plural, =1{tenant pendente} other{tenants pendentes}}?",
-  "@adminBulkApproveConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "adminBulkRejectTitle": "Rejeitar {count} {count, plural, =1{tenant} other{tenants}}",
   "@adminBulkRejectTitle": {
     "placeholders": {
@@ -1331,15 +1134,10 @@
   },
   "adminBulkApproveError": "Erro ao aprovar tenants. Alguns podem não ter sido processados.",
   "adminBulkRejectError": "Erro ao rejeitar tenants. Alguns podem não ter sido processados.",
-  "adminWelcomeMessage": "Super Admin",
-  "adminPlatformStatus": "Estado da Plataforma",
-  "adminActionApproveTenant": "Aprovar Tenant",
-  "adminActionRejectTenant": "Rejeitar Tenant",
   "adminActionManagePlans": "Gerir Planos",
   "adminActionViewAuditLog": "Ver Registo de Auditoria",
   "adminTenantRequests": "Solicitações de Tenant",
   "adminPlanUpgrades": "Upgrades de Plano",
-  "adminRecentActivity": "Atividade Recente",
   "adminPendingActionRequired": "{count, plural, =1{1 ação necessária} other{{count} ações necessárias}}",
   "@adminPendingActionRequired": {
     "placeholders": {
@@ -1348,13 +1146,10 @@
       }
     }
   },
-  "adminNoPendingActions": "Tudo em dia!",
-  "adminPlatformSummary": "{tenants} tenants · {plans} planos",
   "adminAuditLogAll": "Todos",
   "adminAuditLogTenants": "Tenants",
   "adminAuditLogPlans": "Planos",
   "adminAuditLogUpgrades": "Upgrades",
-  "adminAuditLogTotalActions": "Total de ações",
   "adminAuditLogApproved": "Aprovados",
   "adminAuditLogRejected": "Rejeitados",
   "adminAuditLogToday": "Hoje",
@@ -1363,34 +1158,8 @@
   "adminAuditLogOlder": "Mais antigo",
   "adminAuditLogSearchHint": "Pesquisar registo de auditoria...",
   "adminAuditLogNoResults": "Nenhuma entrada corresponde ao filtro.",
-  "adminDashboardApprovalRate": "Taxa de aprovação",
-  "adminDashboardTenantDistribution": "Distribuição de tenants",
   "adminDashboardPlanDistribution": "Distribuição de planos",
   "adminDashboardRecentActivity": "Atividade recente",
-  "adminDashboardActivityCount": "{count, plural, =0{Sem ações recentes} =1{1 ação nos últimos 7 dias} other{{count} ações nos últimos 7 dias}}",
-  "@adminDashboardActivityCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "adminDashboardActivePercent": "{percent}% ativos",
-  "@adminDashboardActivePercent": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "adminDashboardDaysSinceLastActivity": "{days, plural, =0{Ativo hoje} =1{Última ação há 1 dia} other{Última ação há {days} dias}}",
-  "@adminDashboardDaysSinceLastActivity": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
   "adminGrowthTrends": "Tendências de Crescimento",
   "adminGrowthThisWeek": "Esta semana",
   "adminGrowthLastWeek": "Semana passada",
@@ -1398,22 +1167,6 @@
   "adminGrowthLastMonth": "Mês passado",
   "adminGrowthNewTenants": "Novos tenants",
   "adminGrowthApprovals": "Aprovações",
-  "adminGrowthVsLastWeek": "{count} vs semana passada",
-  "@adminGrowthVsLastWeek": {
-    "placeholders": {
-      "count": {
-        "type": "String"
-      }
-    }
-  },
-  "adminGrowthVsLastMonth": "{count} vs mês passado",
-  "@adminGrowthVsLastMonth": {
-    "placeholders": {
-      "count": {
-        "type": "String"
-      }
-    }
-  },
   "adminGrowthUp": "+{count}",
   "@adminGrowthUp": {
     "placeholders": {
@@ -1434,22 +1187,6 @@
   "adminGrowthRegistrationsTrend": "Registos (últimas 8 semanas)",
   "adminGrowthActivityTrend": "Atividade (últimas 8 semanas)",
   "adminGrowthNoData": "Dados insuficientes para mostrar tendências",
-  "adminGrowthWeekLabel": "S{week}",
-  "@adminGrowthWeekLabel": {
-    "placeholders": {
-      "week": {
-        "type": "String"
-      }
-    }
-  },
-  "adminGrowthAvgPerWeek": "{count}/semana média",
-  "@adminGrowthAvgPerWeek": {
-    "placeholders": {
-      "count": {
-        "type": "String"
-      }
-    }
-  },
   "adminNavInvoices": "Facturas",
   "adminInvoicesTitle": "Facturas de Cobrança",
   "adminInvoicesEmpty": "Nenhuma factura gerada ainda.",
@@ -1490,40 +1227,326 @@
   "notificationTabUnread": "Não lidas",
   "notificationTitle": "Notificações",
   "menuNotifications": "Notificações",
-  "notificationMarkAsRead": "Marcar como lida",
   "notificationSinceDaysAgo": "{count} dias atrás",
   "@notificationSinceDaysAgo": {
     "placeholders": {
       "count": { "type": "int" }
     }
   },
-  "notificationToday": "Hoje",
   "notificationYesterday": "Ontem",
   "notificationJustNow": "Agora mesmo",
   "adminMessagesTitle": "Mensagens para Tenants",
-  "adminMessagesEmpty": "Nenhuma mensagem enviada ainda.",
-  "adminMessagesSend": "Enviar mensagem",
   "adminMessagesSendSuccess": "Mensagem enviada!",
   "adminMessagesSendError": "Não foi possível enviar a mensagem. Tente novamente.",
   "adminMessagesTenantLabel": "Tenant",
   "adminMessagesTenantError": "Selecione um tenant.",
   "adminMessagesTypeLabel": "Tipo",
-  "adminMessagesTypeBillingQuote": "Cotação de Cobrança",
-  "adminMessagesTypePlanExpiryChange": "Alteração de Validade",
-  "adminMessagesTypePlanExpiringSoon": "Plano Expirando",
-  "adminMessagesTypeGeneral": "Mensagem Geral",
   "adminMessagesTitleLabel": "Título",
   "adminMessagesTitleError": "Digite um título.",
   "adminMessagesBodyLabel": "Mensagem",
   "adminMessagesBodyError": "Digite o corpo da mensagem.",
   "adminMessagesSubmit": "Enviar",
   "adminNavMessages": "Mensagens",
-  "adminMessageSentTo": "Enviado para {tenant}",
-  "@adminMessageSentTo": {
-    "placeholders": {
-      "tenant": { "type": "String" }
-    }
-  },
-  "menuMessages": "Mensagens",
-  "menuMessagesHint": "Mensagens do super admin"
+  "customInvoiceTitle": "Factura Personalizada",
+  "customInvoiceEmpty": "Nenhuma factura",
+  "customInvoiceEmptySubtitle": "Crie facturas profissionais com layout\npersonalizado para os seus clientes",
+  "customInvoiceTemplateTooltip": "Modelo da Factura",
+  "customInvoiceNewFab": "Nova Factura",
+  "customInvoiceItemsCount": "{count, plural, =1{1 item} other{{count} itens}}",
+  "customInvoiceWhatsApp": "WhatsApp",
+  "customInvoiceCreate": "Criar Factura",
+  "customInvoiceClientSection": "Cliente",
+  "customInvoiceClientName": "Nome do cliente",
+  "customInvoicePhone": "Telefone",
+  "customInvoiceTaxIdOptional": "NIF / NUIT (opcional)",
+  "customInvoiceProductSection": "Produto",
+  "customInvoiceProductPlaceholder": "Sem produtos cadastrados",
+  "customInvoiceProductOption": "Estoque: {stock} {unit}  •  {price}",
+  "customInvoicePrice": "Preço (MT)",
+  "customInvoiceQty": "Qtd",
+  "customInvoiceAddItem": "Adicionar",
+  "customInvoiceDiscount": "Desconto (MT)",
+  "customInvoiceTax": "IVA (MT)",
+  "customInvoiceBillTotal": "Total: {total}",
+  "customInvoiceNumberPrefix": "Nº {number}",
+  "customInvoiceTemplateSaved": "Modelo guardado com sucesso",
+  "customInvoiceTemplateLogoSection": "Logotipo da Empresa",
+  "customInvoiceTemplateLogoHint": "Toque para carregar logotipo",
+  "customInvoiceTemplateColorSection": "Cor Principal",
+  "customInvoiceTemplateCompanySection": "Dados da Empresa",
+  "customInvoiceTemplateCompanyName": "Nome da Empresa",
+  "customInvoiceTemplateAddress": "Morada",
+  "customInvoiceTemplateTaxId": "NIF / NUIT",
+  "customInvoiceTemplateStyle": "Estilo",
+  "customInvoiceTemplateStyleClassic": "Clássico",
+  "customInvoiceTemplateStyleModern": "Moderno",
+  "customInvoiceTemplateStyleCompact": "Compacto",
+  "customInvoiceTemplateSave": "Salvar Modelo",
+  "customInvoicePreviewCompanyFallback": "Nome da Empresa",
+  "quotationTitle": "Cotações / Orçamentos",
+  "quotationEmpty": "Nenhuma cotação",
+  "quotationEmptySubtitle": "Crie cotações e orçamentos para os seus clientes",
+  "quotationTemplateTooltip": "Modelo da Cotação",
+  "quotationNewFab": "Nova Cotação",
+  "quotationItemsCount": "{count, plural, =1{1 item} other{{count} itens}}",
+  "quotationValidity": "Validade",
+  "quotationDays": "{days, plural, =1{1 dia} other{{days} dias}}",
+  "quotationSend": "Enviar",
+  "quotationAccept": "Aceitar",
+  "quotationReject": "Rejeitar",
+  "quotationStatusDraft": "Rascunho",
+  "quotationStatusSent": "Enviada",
+  "quotationStatusAccepted": "Aceite",
+  "quotationStatusRejected": "Rejeitada",
+  "quotationPhoneOptional": "Telefone (opcional)",
+  "quotationNumberPrefix": "Nº {number}",
+  "quotationSave": "Salvar Cotação",
+  "quotationTemplatePhone": "Telefone",
+  "quotationTemplatePreview": "Cotação • Preview",
+  "quotationTemplatePreviewBadge": "Preview",
+  "paletteBlue": "Azul",
+  "paletteGreen": "Verde",
+  "paletteRed": "Vermelho",
+  "paletteAmber": "Âmbar",
+  "paletteSlate": "Slate",
+  "paletteViolet": "Violeta",
+  "paletteTeal": "Teal",
+  "paletteIndigo": "Indigo",
+  "customInvoicePdf": "PDF",
+  "imageSourceGallery": "Galeria",
+  "imageSourceCamera": "Câmara",
+  "businessFallbackName": "Minha Empresa",
+  "customInvoiceWhatsAppHeader": "═══ FACTURA ═══",
+  "customInvoiceNumberShort": "Nº",
+  "customInvoiceClientLabel": "Cliente",
+  "customInvoicePhoneLabel": "Tel",
+  "customInvoiceTotalLabel": "TOTAL",
+  "customInvoiceNew": "Nova Factura",
+  "customInvoiceTemplateTitle": "Modelo da Factura",
+  "commonPreview": "Preview",
+  "quotationWhatsAppHeader": "═══ COTAÇÃO ═══",
+  "quotationTemplateTitle": "Modelo da Cotação",
+  "employeeMgmtTitle": "Gestão de Funcionários",
+  "employeeMgmtTabAttendance": "Ponto",
+  "employeeMgmtTabCommissions": "Comissões",
+  "employeeMgmtTabTargets": "Metas",
+  "employeePresentCount": "Presentes",
+  "employeeAbsentCount": "Ausentes",
+  "employeeClockInAction": "Entrar",
+  "employeeClockOutAction": "Sair",
+  "employeeClockOutInProgress": "Em curso",
+  "employeeAttendanceSection": "Registo de Ponto",
+  "employeeRecordsSection": "Registos de Hoje",
+  "employeeSalesMonth": "Vendas do Mês",
+  "employeeCommissionTitle": "Comissões",
+  "employeeCommissionPerEmployee": "Comissão por Funcionário",
+  "employeeCommissionRate": "{rate}% sobre {amount}",
+  "employeeTargetsActive": "Metas Activas",
+  "employeeTargetsReached": "Atingidas",
+  "employeeTargetsPending": "Pendentes",
+  "employeeTargetsMonth": "Metas do Mês",
+  "employeeTargetsEmptyTitle": "Nenhuma meta definida",
+  "employeeTargetsEmptySubtitle": "Defina metas mensais de vendas para cada funcionário",
+  "employeeTargetAdd": "Adicionar Meta",
+  "employeeTargetMeta": "Meta: {amount}",
+  "employeeTargetAchieved": "Realizado: {amount}",
+  "employeeTargetNewTitle": "Nova Meta",
+  "employeeTargetEmployee": "Funcionário",
+  "employeeTargetAllHave": "Todos os funcionários já possuem meta definida",
+  "employeeTargetMonthly": "Meta Mensal (MT)",
+  "employeeTargetSave": "Salvar Meta",
+  "employeeRoleSales": "Vendedor",
+  "addonsTitle": "Add-ons",
+  "addonsSubtitle": "Add-ons activos e disponíveis no seu plano",
+  "addonsManagedByAdmin": "A activação de add-ons é gerida pelo administrador do sistema.",
+  "addonsIncluded": "Incluído",
+  "addonsActive": "Activo",
+  "addonsPerMonth": "{amount} MT/mês",
+  "addonCategoryInvoicing": "Facturação",
+  "addonCategoryQuotation": "Cotação",
+  "addonCategoryReports": "Relatórios",
+  "addonCategoryEmployees": "Funcionários",
+  "addonCategoryMultiStore": "Multi-Loja",
+  "addonCategoryPayments": "Pagamentos",
+  "commonTotal": "Total",
+  "addonCustomInvoiceName": "Factura Personalizada",
+  "addonCustomInvoiceDesc": "Crie facturas profissionais com logotipo, layout customizável e exportação em PDF. Inclui templates prontos e personalização de cores, fontes e campos.",
+  "addonQuotationName": "Cotação / Orçamento",
+  "addonQuotationDesc": "Crie e envie cotações e orçamentos para clientes antes da venda. Inclui conversão automática para venda, validade configurável e envio por SMS/WhatsApp.",
+  "addonReportsName": "Relatórios Avançados",
+  "addonReportsDesc": "Relatórios financeiros, de vendas e estoque com filtros avançados, comparativos período a período e exportação em PDF/Excel. Inclui gráficos interativos e dashboards personalizados.",
+  "addonEmployeesName": "Gestão de Funcionários",
+  "addonEmployeesDesc": "Controle de ponto (entrada/saída), cálculo automático de comissões por venda, definição de metas mensais e relatório de desempenho individual.",
+  "addonMultiStoreName": "Multi-Loja Avançado",
+  "addonMultiStoreDesc": "Transferência de estoque entre lojas, relatórios consolidados comparando lojas, gestão centralizada de preços e promoções e alertas de reposição automática.",
+  "addonMobileMoneyName": "Integração M-Pesa / E-Mola",
+  "addonMobileMoneyDesc": "Pagamentos automáticos via mobile money com reconciliação automática, notificações de recebimento em tempo real e relatório de transações mobile money.",
+  "transfersTitle": "Transferências entre Lojas",
+  "transfersEmpty": "Sem transferências",
+  "transfersEmptySubtitle": "Transfira estoque entre lojas do\nmesmo tenant de forma rastreável",
+  "transfersNewFab": "Nova Transferência",
+  "transfersOriginStore": "Loja de Origem",
+  "transfersDestStore": "Loja de Destino",
+  "transfersProduct": "Produto",
+  "transfersProductPlaceholder": "Sem produtos cadastrados",
+  "transfersQuantity": "Quantidade",
+  "transfersAddItem": "Adicionar",
+  "transfersExecuting": "A transferir...",
+  "transfersExecute": "Executar Transferência",
+  "transfersNoStoresTitle": "Cadastre pelo menos 2 lojas",
+  "transfersNoStoresSubtitle": "É necessário ter 2+ lojas para\ntransferir estoque entre elas",
+  "transfersSuccess": "{count, plural, =1{1 produto transferido} other{{count} produtos transferidos}} com sucesso",
+  "transfersError": "Erro na transferência: {error}",
+  "transferStatusPending": "Pendente",
+  "transferStatusInTransit": "Em Trânsito",
+  "transferStatusReceived": "Recebida",
+  "transferStatusCancelled": "Cancelada",
+  "paymentsTitle": "M-Pesa / E-Mola",
+  "paymentsEmpty": "Sem transacções",
+  "paymentsEmptySubtitle": "Registe pagamentos recebidos via\nM-Pesa ou E-Mola para reconciliação",
+  "paymentsNewFab": "Registar Pagamento",
+  "paymentsStatusConfirmed": "Confirmada",
+  "paymentsStatusPending": "Pendente",
+  "paymentsStatusRejected": "Rejeitada",
+  "paymentsConfirm": "Confirmar",
+  "paymentsReject": "Rejeitar",
+  "paymentsReference": "Ref: {code}",
+  "paymentsSheetTitle": "Registar Pagamento",
+  "paymentsSenderPhone": "Telefone do remetente",
+  "paymentsAmount": "Valor (MT)",
+  "paymentsConfirmationCode": "Código de confirmação",
+  "reportsAdvancedTitle": "Relatórios Avançados",
+  "reportsTabSales": "Vendas",
+  "reportsTabFinancial": "Financeiro",
+  "reportsTabStock": "Estoque",
+  "reportsKpiProducts": "Produtos",
+  "reportsKpiLowStock": "Estoque Baixo",
+  "reportsKpiTotalItems": "Total Itens",
+  "reportsKpiStockValue": "Valor Estoque",
+  "reportsKpiRevenue": "Receitas",
+  "reportsKpiExpenses": "Despesas",
+  "reportsKpiNetProfit": "Lucro Líquido",
+  "reportsStockByQty": "Produtos por Estoque",
+  "reportsCashFlow": "Fluxo de Caixa",
+  "reportsCashFlowChart": "Gráfico de fluxo de caixa",
+  "reportsNoProducts": "Sem produtos cadastrados",
+  "reportsStockHealthy": "Todos os produtos com estoque adequado",
+  "reportsExportSales": "Exportar Relatório (PDF)",
+  "reportsExportFinancial": "Exportar Financeiro (PDF)",
+  "reportsExportStock": "Exportar Estoque (PDF)",
+  "reportsNoSalesData": "Sem dados para este período",
+  "reportsPeriodYear": "Este Ano",
+  "reportsKpiStockOut": "Sem Estoque",
+  "reportsKpiTotalProducts": "Total Produtos",
+  "pdfGeneratedOn": "Gerado: {date}",
+  "pdfIndicators": "Indicadores",
+  "pdfFooter": "Documento gerado pelo TAREQO — {date}",
+  "pdfInvoiceDocWord": "FACTURA",
+  "pdfInvoiceSubjectWord": "Factura",
+  "pdfInvoiceFileBase": "factura",
+  "pdfQuotationDocWord": "COTAÇÃO",
+  "pdfQuotationSubjectWord": "Cotação",
+  "pdfQuotationFileBase": "cotacao",
+  "pdfClientHeading": "CLIENTE",
+  "pdfPhoneLine": "Tel: {value}",
+  "pdfEmailLine": "Email: {value}",
+  "pdfNifLine": "NIF: {value}",
+  "pdfItemHeader": "Item",
+  "pdfUnitPriceHeader": "Preço Unit.",
+  "pdfSubtotalHeader": "Subtotal",
+  "pdfDiscountLabel": "Desconto",
+  "pdfTaxLabel": "IVA",
+  "pdfPaymentLine": "Pagamento: {value}",
+  "pdfReferenceLine": "Ref: {value}",
+  "pdfNotesHeading": "Notas",
+  "pdfGeneralConditionsHeading": "Condições Gerais",
+  "pdfValidityDaysLeft": "{days, plural, =1{1 dia restante} other{{days} dias restantes}}",
+  "pdfConditionValidBullet": "Esta cotação é válida até {date}.",
+  "pdfConditionPricesBullet": "Preços sujeitos a alteração após o prazo de validade.",
+  "pdfConditionContactBullet": "Para aceitar esta cotação, entre em contacto connosco.",
+  "quotationStatusExpired": "Expirada",
+  "quotationStatusConverted": "Convertida em Venda",
+  "pdfConditionsNotesHeading": "Condições / Notas",
+  "adminAddonsActivateBtn": "Activar",
+  "adminAddonsActivateBulk": "Activar add-on",
+  "adminAddonsActivePill": "Activos",
+  "adminAddonsDeactivateBtn": "Desactivar",
+  "adminAddonsInactivePill": "Inactivos",
+  "adminAddonsLoadError": "Erro: {error}",
+  "adminAddonsNoTenantsSearchSub": "Tente outro termo de busca",
+  "adminAddonsNoTenantsTitle": "Nenhum tenant encontrado",
+  "adminAddonsNoTenantsYetSub": "Nenhum tenant aprovado ainda",
+  "adminAddonsUpdateError": "Erro ao actualizar add-on: {error}",
+  "adminBackToList": "Voltar à lista",
+  "adminMessagesBodyHint": "Escreva a mensagem…",
+  "adminMessagesTenantHint": "Selecionar tenant...",
+  "adminMessagesTitleExample": "Ex: Cotação de Plano Pro",
+  "adminNavRevenue": "Receitas",
+  "adminPlansActive": "Activos",
+  "adminPlansInactive": "Inactivos",
+  "adminRevenueActiveTenants": "Tenants Activos",
+  "adminRevenueActiveTenantsSub": "Total na plataforma",
+  "adminRevenueAvailableAddOns": "Add-ons Disponíveis",
+  "adminRevenueAvailableAddOnsSub": "No catálogo activo",
+  "adminRevenueMaxMonthly": "Receita mensal máxima",
+  "adminRevenueMaxMonthlySub": "Se todos activassem todos",
+  "adminRevenuePotential": "Receita Potencial",
+  "adminRevenuePotentialSub": "Por tenant/mês (todos os add-ons)",
+  "adminTenantsMonthlyValue": "Valor mensal",
+  "adminTenantsNextInvoice": "Próxima factura",
+  "adminTenantsPlanExpiresOn": "Plano expira em",
+  "adminTenantsTrialEndsOn": "Trial termina em",
+  "commonId": "ID",
+  "dashboardSaleEntry": "Venda {number}",
+  "loginConfirmPasswordHint": "Repita a senha",
+  "loginConfirmPasswordLabel": "Confirmar senha",
+  "loginEmailHint": "Digite seu email",
+  "loginForgotPassword": "Esqueceu sua senha?",
+  "loginNameHint": "Digite seu nome",
+  "loginPasswordHint": "Digite sua senha",
+  "loginPromptHaveAccount": "Já tem uma conta?",
+  "loginPromptNoAccount": "Ainda não tem uma conta?",
+  "loginTagline": "Gestão simples para o seu negócio",
+  "mfaCodeFieldLabel": "Código MFA",
+  "mfaCodeHint": "Digite o código de 6 dígitos do seu aplicativo autenticador:",
+  "mfaCodeLengthError": "Digite o código de 6 dígitos",
+  "mfaConfirmPrompt": "Digite o código do aplicativo para confirmar:",
+  "mfaDigitsFieldLabel": "Código de 6 dígitos",
+  "mfaExpiresIn": "Código expira em {seconds, plural, =1{1 segundo} other{{seconds} segundos}}",
+  "mfaInitError": "Erro ao inicializar MFA: {error}",
+  "mfaInvalidCode": "Código inválido. Tente novamente.",
+  "mfaManualEntryTitle": "Ou digite este código manualmente:",
+  "mfaQrScanHelp": "Use seu aplicativo autenticador (Google Authenticator, Authy, etc.) para escanear este código QR:",
+  "mfaQrScanTitle": "Escaneie o QR Code",
+  "mfaSetupSuccess": "MFA configurado com sucesso!",
+  "mfaSetupTitle": "Configurar Autenticação em Dois Fatores",
+  "mfaVerify": "Verificar",
+  "mfaVerifyAndEnable": "Verificar e Activar",
+  "mfaVerifyError": "Erro ao verificar código: {error}",
+  "securityBiometricDisabledSub": "Use impressão digital ou reconhecimento facial",
+  "securityBiometricEnabledSub": "Activada — Impressão digital ou rosto",
+  "securityBiometricTitle": "Autenticação Biométrica",
+  "securityBiometricUnavailable": "Não disponível neste dispositivo",
+  "securityTwoFactorDisabledSub": "Adicione uma camada extra de segurança",
+  "securityTwoFactorEnabledSub": "Activada — Use um app autenticador",
+  "securityTwoFactorTitle": "Autenticação em Dois Fatores",
+  "transfersRowDate": "Data",
+  "transfersRowDest": "Destino",
+  "transfersRowOrigin": "Origem",
+  "transfersRowStatus": "Estado",
+  "adminAddonsBulkActivated": "{addonName} activado em {count, plural, =1{1 tenant} other{{count} tenants}}",
+  "adminAddonsBulkDeactivated": "{addonName} desactivado em {count, plural, =1{1 tenant} other{{count} tenants}}",
+  "adminAddonsBulkSheetCount": "{count, plural, =1{1 tenant selecionado} other{{count} tenants selecionados}}",
+  "adminAddonsBulkSheetTitle": "Activar add-on em lote",
+  "adminAddonsListHint": "Toque num tenant para gerir os seus add-ons. Toque no ícone ✓ para seleção múltipla.",
+  "adminAddOnsCount": "{count, plural, =1{1 add-on} other{{count} add-ons}}",
+  "adminRevenueByAddOn": "Receita por Add-on",
+  "adminRevenueByCategory": "Distribuição por Categoria",
+  "adminRevenuePerMonth": "potencial/mês",
+  "adminPlanPerMonthSuffix": "/mês",
+  "adminTenantCount": "{count, plural, =1{1 tenant} other{{count} tenants}}",
+  "adminTenantCycleActiveLeft": "Activo: {days, plural, =1{1 dia restante} other{{days} dias restantes}}",
+  "adminTenantCycleExpired": "Expirado",
+  "adminTenantCycleExpiresIn": "Expira em {days, plural, =1{1 dia} other{{days} dias}}",
+  "adminTenantCycleTrialLeft": "Trial: {days, plural, =1{1 dia restante} other{{days} dias restantes}}"
 }

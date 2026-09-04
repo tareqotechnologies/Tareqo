@@ -17,6 +17,8 @@ import '../../widgets/period_filter.dart';
 import '../../widgets/pinned_header.dart';
 import '../../widgets/purchase_card.dart';
 import '../../widgets/search_field.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/skeleton.dart';
 import '../../widgets/store_scoped_content.dart';
 import 'add_purchase_sheet.dart';
@@ -70,17 +72,9 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
  // Com dados, o FAB volta como ação rápida persistente.
  final hasPurchases = purchasesAsync.value?.isNotEmpty ?? false;
 
- return Scaffold(
- // AppBar estilo iOS large title — mesmo padrão das demais telas.
- appBar: AppBar(
- title: Text(
- l10n.purchasesTitle,
- style: Theme.of(context).textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w500,
- letterSpacing: -0.5,
- ),
- ),
- ),
+ return AppPage(
+ title: l10n.purchasesTitle,
+ useSafeArea: false,
  floatingActionButton: hasPurchases
  // FAB circular (design system — igual ao "Novo produto"): só o
  // sinal de +, com tooltip — o rótulo nunca é cortado pelo círculo.
@@ -203,6 +197,10 @@ class _PurchasesBody extends StatelessWidget {
  );
  }
 
+ final horizontal = AppSpacing.pagePaddingForWidth(
+ MediaQuery.sizeOf(context).width,
+ );
+
  return RefreshIndicator(
  onRefresh: onRefresh,
  child: CustomScrollView(
@@ -210,7 +208,7 @@ class _PurchasesBody extends StatelessWidget {
  slivers: [
  // Resumo do dia rola junto com o conteúdo.
  SliverPadding(
- padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+ padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 16),
  sliver: SliverToBoxAdapter(
  child: PurchasesSummaryHeader(purchases: purchases),
  ),
@@ -257,7 +255,7 @@ class _PurchasesBody extends StatelessWidget {
  )
  else
  SliverPadding(
- padding: const EdgeInsets.fromLTRB(20, 0, 20, 112),
+ padding: EdgeInsets.fromLTRB(horizontal, 0, horizontal, 112),
  // Folha única estilo Home (FeedCard): um só card com as
  // compras como linhas separadas por divisórias hairline.
  sliver: SliverToBoxAdapter(

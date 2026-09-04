@@ -100,12 +100,6 @@ abstract class AppLocalizations {
     Locale('pt'),
   ];
 
-  /// No description provided for @appTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dumbhanengue ERP'**
-  String get appTitle;
-
   /// No description provided for @onboardingTitle.
   ///
   /// In pt, this message translates to:
@@ -184,23 +178,11 @@ abstract class AppLocalizations {
   /// **'Idioma'**
   String get onboardingLanguageLabel;
 
-  /// No description provided for @onboardingLanguageHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Idioma do aplicativo'**
-  String get onboardingLanguageHint;
-
   /// No description provided for @onboardingCurrencyLabel.
   ///
   /// In pt, this message translates to:
   /// **'Moeda'**
   String get onboardingCurrencyLabel;
-
-  /// No description provided for @onboardingCurrencyHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Moeda usada nos valores'**
-  String get onboardingCurrencyHint;
 
   /// No description provided for @languagePortuguese.
   ///
@@ -355,14 +337,8 @@ abstract class AppLocalizations {
   /// No description provided for @storeSelectorSectionTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Loja ativa'**
+  /// **'Loja activa'**
   String get storeSelectorSectionTitle;
-
-  /// No description provided for @storeSelectorSectionHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Escolha a loja ativa.'**
-  String get storeSelectorSectionHint;
 
   /// No description provided for @tenantPendingTitle.
   ///
@@ -403,7 +379,7 @@ abstract class AppLocalizations {
   /// No description provided for @authBlockedMessage.
   ///
   /// In pt, this message translates to:
-  /// **'Sua conta foi desativada pelo proprietário.'**
+  /// **'Sua conta foi desactivada pelo proprietário.'**
   String get authBlockedMessage;
 
   /// No description provided for @authBlockedSignOut.
@@ -411,12 +387,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Sair'**
   String get authBlockedSignOut;
-
-  /// No description provided for @authErrorRestoreSession.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sessão não restaurada'**
-  String get authErrorRestoreSession;
 
   /// No description provided for @authErrorCheckConnection.
   ///
@@ -441,12 +411,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Crie sua conta para começar'**
   String get loginSubtitleSignUp;
-
-  /// No description provided for @loginSubtitleSignIn.
-  ///
-  /// In pt, this message translates to:
-  /// **'Gestão simples para o seu negócio'**
-  String get loginSubtitleSignIn;
 
   /// No description provided for @loginNameLabel.
   ///
@@ -478,12 +442,6 @@ abstract class AppLocalizations {
   /// **'A senha deve ter ao menos 8 caracteres.'**
   String get loginPasswordError;
 
-  /// No description provided for @loginPasswordHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mín. 8 caracteres com minúscula, maiúscula, número e símbolo.'**
-  String get loginPasswordHint;
-
   /// No description provided for @loginWeakPasswordError.
   ///
   /// In pt, this message translates to:
@@ -508,12 +466,6 @@ abstract class AppLocalizations {
   /// **'Ocultar senha'**
   String get loginHidePassword;
 
-  /// No description provided for @loginConfirmLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Confirmar senha'**
-  String get loginConfirmLabel;
-
   /// No description provided for @loginConfirmError.
   ///
   /// In pt, this message translates to:
@@ -532,18 +484,6 @@ abstract class AppLocalizations {
   /// **'Entrar'**
   String get loginSignIn;
 
-  /// No description provided for @loginSwitchToSignIn.
-  ///
-  /// In pt, this message translates to:
-  /// **'Já tenho conta — entrar'**
-  String get loginSwitchToSignIn;
-
-  /// No description provided for @loginSwitchToSignUp.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não tenho conta — cadastrar'**
-  String get loginSwitchToSignUp;
-
   /// No description provided for @loginSignUpSuccess.
   ///
   /// In pt, this message translates to:
@@ -561,18 +501,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível entrar. Verifique e-mail e senha.'**
   String get loginSignInError;
-
-  /// No description provided for @loginSecurityNote.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dados protegidos com criptografia.'**
-  String get loginSecurityNote;
-
-  /// No description provided for @loginForgotPassword.
-  ///
-  /// In pt, this message translates to:
-  /// **'Esqueceu a senha?'**
-  String get loginForgotPassword;
 
   /// No description provided for @forgotPasswordTitle.
   ///
@@ -736,12 +664,6 @@ abstract class AppLocalizations {
   /// **'Produtos'**
   String get appNavProducts;
 
-  /// No description provided for @appNavFinancial.
-  ///
-  /// In pt, this message translates to:
-  /// **'Financeiro'**
-  String get appNavFinancial;
-
   /// No description provided for @appNavCredit.
   ///
   /// In pt, this message translates to:
@@ -886,47 +808,11 @@ abstract class AppLocalizations {
   /// **'Olá, {name}'**
   String dashboardGreeting(String name);
 
-  /// No description provided for @dashboardSignOutTooltip.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sair'**
-  String get dashboardSignOutTooltip;
-
   /// No description provided for @dashboardOwnerFallback.
   ///
   /// In pt, this message translates to:
   /// **'Dono'**
   String get dashboardOwnerFallback;
-
-  /// No description provided for @dashboardTotalSales.
-  ///
-  /// In pt, this message translates to:
-  /// **'Total de vendas'**
-  String get dashboardTotalSales;
-
-  /// No description provided for @dashboardAllTime.
-  ///
-  /// In pt, this message translates to:
-  /// **'Todo o histórico'**
-  String get dashboardAllTime;
-
-  /// No description provided for @dashboardCashBalance.
-  ///
-  /// In pt, this message translates to:
-  /// **'Saldo em caixa'**
-  String get dashboardCashBalance;
-
-  /// No description provided for @dashboardReceivables.
-  ///
-  /// In pt, this message translates to:
-  /// **'A receber (fiado)'**
-  String get dashboardReceivables;
-
-  /// No description provided for @dashboardStockLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Estoque em produtos'**
-  String get dashboardStockLabel;
 
   /// No description provided for @commonUnits.
   ///
@@ -939,36 +825,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ações rápidas'**
   String get dashboardQuickActions;
-
-  /// No description provided for @dashboardQuickNewSale.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nova venda'**
-  String get dashboardQuickNewSale;
-
-  /// No description provided for @dashboardQuickAddProduct.
-  ///
-  /// In pt, this message translates to:
-  /// **'Adicionar produto'**
-  String get dashboardQuickAddProduct;
-
-  /// No description provided for @dashboardQuickAddTransaction.
-  ///
-  /// In pt, this message translates to:
-  /// **'Registrar transação'**
-  String get dashboardQuickAddTransaction;
-
-  /// No description provided for @dashboardQuickAddDebt.
-  ///
-  /// In pt, this message translates to:
-  /// **'Registrar fiado'**
-  String get dashboardQuickAddDebt;
-
-  /// No description provided for @dashboardModules.
-  ///
-  /// In pt, this message translates to:
-  /// **'Módulos'**
-  String get dashboardModules;
 
   /// No description provided for @dashboardModuleCustomers.
   ///
@@ -993,36 +849,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Lojas'**
   String get dashboardModuleStores;
-
-  /// No description provided for @dashboardRecentSales.
-  ///
-  /// In pt, this message translates to:
-  /// **'Vendas recentes'**
-  String get dashboardRecentSales;
-
-  /// No description provided for @dashboardViewAll.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver todas'**
-  String get dashboardViewAll;
-
-  /// No description provided for @dashboardNoSales.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhuma venda ainda — registre a primeira!'**
-  String get dashboardNoSales;
-
-  /// No description provided for @dashboardRecentPurchases.
-  ///
-  /// In pt, this message translates to:
-  /// **'Compras recentes'**
-  String get dashboardRecentPurchases;
-
-  /// No description provided for @dashboardNoPurchases.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhuma compra ainda — registre a primeira!'**
-  String get dashboardNoPurchases;
 
   /// No description provided for @dashboardLowStock.
   ///
@@ -1054,18 +880,6 @@ abstract class AppLocalizations {
   /// **'há {count} min'**
   String dashboardActivityMinutesAgo(Object count);
 
-  /// No description provided for @dashboardActivityHoursAgo.
-  ///
-  /// In pt, this message translates to:
-  /// **'há {count} h'**
-  String dashboardActivityHoursAgo(Object count);
-
-  /// No description provided for @dashboardDateToday.
-  ///
-  /// In pt, this message translates to:
-  /// **'Hoje'**
-  String get dashboardDateToday;
-
   /// No description provided for @dashboardMetricSales.
   ///
   /// In pt, this message translates to:
@@ -1096,12 +910,6 @@ abstract class AppLocalizations {
   /// **'Nenhuma atividade registrada ainda.'**
   String get dashboardActivityEmpty;
 
-  /// No description provided for @dashboardActivitySeeAll.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver todas'**
-  String get dashboardActivitySeeAll;
-
   /// No description provided for @dashboardStockEntry.
   ///
   /// In pt, this message translates to:
@@ -1113,12 +921,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Entrada de {quantity} · {time}'**
   String dashboardStockEntryDetail(String quantity, String time);
-
-  /// No description provided for @dashboardTransferItem.
-  ///
-  /// In pt, this message translates to:
-  /// **'Transferência · {product}'**
-  String dashboardTransferItem(String product);
 
   /// No description provided for @dashboardFiadoPayment.
   ///
@@ -1258,6 +1060,12 @@ abstract class AppLocalizations {
   /// **'Não foi possível carregar os funcionários.'**
   String get employeesLoadError;
 
+  /// No description provided for @employeesUpdateError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível atualizar o funcionário. Tente novamente.'**
+  String get employeesUpdateError;
+
   /// No description provided for @employeesEmptyTitle.
   ///
   /// In pt, this message translates to:
@@ -1282,59 +1090,41 @@ abstract class AppLocalizations {
   /// **'Funcionário'**
   String get roleEmployee;
 
-  /// No description provided for @employeeActive.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ativo'**
-  String get employeeActive;
-
-  /// No description provided for @employeeInactive.
-  ///
-  /// In pt, this message translates to:
-  /// **'Inativo'**
-  String get employeeInactive;
-
   /// No description provided for @employeeDeactivateConfirm.
   ///
   /// In pt, this message translates to:
-  /// **'Desativar {name}? Perde acesso imediatamente.'**
+  /// **'Desactivar {name}? Perde acesso imediatamente.'**
   String employeeDeactivateConfirm(Object name);
 
   /// No description provided for @employeeReactivateConfirm.
   ///
   /// In pt, this message translates to:
-  /// **'Reativar {name}? Volta a ter acesso à loja.'**
+  /// **'Reactivar {name}? Volta a ter acesso à loja.'**
   String employeeReactivateConfirm(Object name);
 
   /// No description provided for @employeeDeactivated.
   ///
   /// In pt, this message translates to:
-  /// **'Funcionário desativado.'**
+  /// **'Funcionário desactivado.'**
   String get employeeDeactivated;
 
   /// No description provided for @employeeReactivated.
   ///
   /// In pt, this message translates to:
-  /// **'Funcionário reativado.'**
+  /// **'Funcionário reactivado.'**
   String get employeeReactivated;
 
   /// No description provided for @employeeDeactivateAction.
   ///
   /// In pt, this message translates to:
-  /// **'Desativar'**
+  /// **'Desactivar'**
   String get employeeDeactivateAction;
 
   /// No description provided for @employeeReactivateAction.
   ///
   /// In pt, this message translates to:
-  /// **'Reativar'**
+  /// **'Reactivar'**
   String get employeeReactivateAction;
-
-  /// No description provided for @employeeDetailTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Detalhes do funcionário'**
-  String get employeeDetailTitle;
 
   /// No description provided for @employeeDetailEmail.
   ///
@@ -1363,20 +1153,14 @@ abstract class AppLocalizations {
   /// No description provided for @employeeDetailActive.
   ///
   /// In pt, this message translates to:
-  /// **'Ativo'**
+  /// **'Activo'**
   String get employeeDetailActive;
 
   /// No description provided for @employeeDetailInactive.
   ///
   /// In pt, this message translates to:
-  /// **'Inativo'**
+  /// **'Inactivo'**
   String get employeeDetailInactive;
-
-  /// No description provided for @employeeDetailActions.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ações'**
-  String get employeeDetailActions;
 
   /// No description provided for @upgradesLoadError.
   ///
@@ -1498,12 +1282,6 @@ abstract class AppLocalizations {
   /// **'Cidade (opcional)'**
   String get addStoreCityLabel;
 
-  /// No description provided for @storeDetailTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Detalhes da loja'**
-  String get storeDetailTitle;
-
   /// No description provided for @storeDetailPhone.
   ///
   /// In pt, this message translates to:
@@ -1533,12 +1311,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Endereço'**
   String get storeDetailAddress;
-
-  /// No description provided for @storeDetailActions.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ações'**
-  String get storeDetailActions;
 
   /// No description provided for @addStoreSuccess.
   ///
@@ -1738,12 +1510,6 @@ abstract class AppLocalizations {
   /// **'Hoje'**
   String get periodToday;
 
-  /// No description provided for @periodWeek.
-  ///
-  /// In pt, this message translates to:
-  /// **'Esta semana'**
-  String get periodWeek;
-
   /// No description provided for @periodMonth.
   ///
   /// In pt, this message translates to:
@@ -1798,41 +1564,11 @@ abstract class AppLocalizations {
   /// **'Buscar compra...'**
   String get purchasesSearchHint;
 
-  /// No description provided for @productsFilterTooltip.
-  ///
-  /// In pt, this message translates to:
-  /// **'Filtrar'**
-  String get productsFilterTooltip;
-
   /// No description provided for @productsFilterAll.
   ///
   /// In pt, this message translates to:
   /// **'Todos'**
   String get productsFilterAll;
-
-  /// No description provided for @productsFilterAllCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Todos os produtos · {count}'**
-  String productsFilterAllCount(int count);
-
-  /// No description provided for @productsFilterLowCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Stock baixo · {count}'**
-  String productsFilterLowCount(int count);
-
-  /// No description provided for @productsColProduct.
-  ///
-  /// In pt, this message translates to:
-  /// **'Produto / SKU'**
-  String get productsColProduct;
-
-  /// No description provided for @productsColPrice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preço · Stock'**
-  String get productsColPrice;
 
   /// No description provided for @productsSearchHint.
   ///
@@ -1863,12 +1599,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Novo produto'**
   String get productsAddNew;
-
-  /// No description provided for @productsBuySell.
-  ///
-  /// In pt, this message translates to:
-  /// **'Compra: {buy} · Venda: {sell}'**
-  String productsBuySell(String buy, String sell);
 
   /// No description provided for @productsAdded.
   ///
@@ -1906,35 +1636,17 @@ abstract class AppLocalizations {
   /// **'Preço de compra'**
   String get productsPurchasePrice;
 
-  /// No description provided for @productsPurchasePriceError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Informe o preço de compra'**
-  String get productsPurchasePriceError;
-
   /// No description provided for @productsSalePrice.
   ///
   /// In pt, this message translates to:
   /// **'Preço de venda'**
   String get productsSalePrice;
 
-  /// No description provided for @productsSalePriceError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Informe o preço de venda'**
-  String get productsSalePriceError;
-
   /// No description provided for @productsStockQuantity.
   ///
   /// In pt, this message translates to:
   /// **'Quantidade em estoque'**
   String get productsStockQuantity;
-
-  /// No description provided for @productsStockError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Quantidade inválida'**
-  String get productsStockError;
 
   /// No description provided for @productsAddSubmit.
   ///
@@ -1972,59 +1684,23 @@ abstract class AppLocalizations {
   /// **'Não foi possível atualizar o produto. Tente novamente.'**
   String get productsEditError;
 
-  /// No description provided for @productsPhotoLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Foto do produto'**
-  String get productsPhotoLabel;
-
-  /// No description provided for @productsPhotoTake.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tirar fotografia'**
-  String get productsPhotoTake;
-
-  /// No description provided for @productsPhotoGallery.
-  ///
-  /// In pt, this message translates to:
-  /// **'Escolher da galeria'**
-  String get productsPhotoGallery;
-
-  /// No description provided for @productsPhotoRemove.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover fotografia'**
-  String get productsPhotoRemove;
-
   /// No description provided for @productsInactive.
   ///
   /// In pt, this message translates to:
-  /// **'Inativo'**
+  /// **'Inactivo'**
   String get productsInactive;
 
-  /// No description provided for @productsStockOut.
+  /// No description provided for @productsFilterTooltip.
   ///
   /// In pt, this message translates to:
-  /// **'Esgotado'**
-  String get productsStockOut;
-
-  /// No description provided for @productsStockLow.
-  ///
-  /// In pt, this message translates to:
-  /// **'Baixo'**
-  String get productsStockLow;
+  /// **'Filtrar'**
+  String get productsFilterTooltip;
 
   /// No description provided for @productsFilterAdvanced.
   ///
   /// In pt, this message translates to:
   /// **'Filtros avançados'**
   String get productsFilterAdvanced;
-
-  /// No description provided for @productsFilterClear.
-  ///
-  /// In pt, this message translates to:
-  /// **'Limpar tudo'**
-  String get productsFilterClear;
 
   /// No description provided for @productsFilterStockType.
   ///
@@ -2104,12 +1780,6 @@ abstract class AppLocalizations {
   /// **'Inactivos'**
   String get productsFilterInactive;
 
-  /// No description provided for @productsFilterInactiveCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Inactivos · {count}'**
-  String productsFilterInactiveCount(int count);
-
   /// No description provided for @productsHeaderCount.
   ///
   /// In pt, this message translates to:
@@ -2140,34 +1810,16 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 produto} other{{count} produtos}}'**
   String productsFilteredCount(int count);
 
-  /// No description provided for @productsSummaryActive.
-  ///
-  /// In pt, this message translates to:
-  /// **'Activos'**
-  String get productsSummaryActive;
-
-  /// No description provided for @productsSummaryLowStock.
-  ///
-  /// In pt, this message translates to:
-  /// **'Stock baixo'**
-  String get productsSummaryLowStock;
-
-  /// No description provided for @productsSummaryInactive.
-  ///
-  /// In pt, this message translates to:
-  /// **'Inactivos'**
-  String get productsSummaryInactive;
-
   /// No description provided for @productsActiveLabel.
   ///
   /// In pt, this message translates to:
-  /// **'Produto ativo'**
+  /// **'Produto activo'**
   String get productsActiveLabel;
 
   /// No description provided for @productsActiveHint.
   ///
   /// In pt, this message translates to:
-  /// **'Desative para tirar do PDV e compras.'**
+  /// **'Desactive para tirar do PDV e compras.'**
   String get productsActiveHint;
 
   /// No description provided for @productsStockAdjustHint.
@@ -2200,209 +1852,47 @@ abstract class AppLocalizations {
   /// **'Status'**
   String get productsSectionStatus;
 
-  /// No description provided for @productsAddNewTitle.
+  /// No description provided for @productsPhotoTake.
   ///
   /// In pt, this message translates to:
-  /// **'Novo produto'**
-  String get productsAddNewTitle;
+  /// **'Tirar fotografia'**
+  String get productsPhotoTake;
 
-  /// No description provided for @productsSave.
+  /// No description provided for @productsPhotoGallery.
   ///
   /// In pt, this message translates to:
-  /// **'Guardar'**
-  String get productsSave;
+  /// **'Escolher da galeria'**
+  String get productsPhotoGallery;
 
-  /// No description provided for @productsSaving.
+  /// No description provided for @productsPhotoRemove.
   ///
   /// In pt, this message translates to:
-  /// **'A guardar...'**
-  String get productsSaving;
+  /// **'Remover fotografia'**
+  String get productsPhotoRemove;
 
-  /// No description provided for @productsSaved.
+  /// No description provided for @productsPurchasePriceError.
   ///
   /// In pt, this message translates to:
-  /// **'Produto guardado com sucesso'**
-  String get productsSaved;
+  /// **'Informe o preço de compra'**
+  String get productsPurchasePriceError;
 
-  /// No description provided for @productsSavedNoPhoto.
+  /// No description provided for @productsSalePriceError.
   ///
   /// In pt, this message translates to:
-  /// **'Produto guardado! (sem permissão de armazenamento)'**
-  String get productsSavedNoPhoto;
+  /// **'Informe o preço de venda'**
+  String get productsSalePriceError;
 
-  /// No description provided for @productsPhotoLabelNew.
+  /// No description provided for @productsStockError.
   ///
   /// In pt, this message translates to:
-  /// **'Fotografia do produto'**
-  String get productsPhotoLabelNew;
-
-  /// No description provided for @productsPhotoHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque para adicionar'**
-  String get productsPhotoHint;
-
-  /// No description provided for @productsSectionBasic.
-  ///
-  /// In pt, this message translates to:
-  /// **'Informações básicas'**
-  String get productsSectionBasic;
-
-  /// No description provided for @productsSectionPricingNew.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preços'**
-  String get productsSectionPricingNew;
-
-  /// No description provided for @productsSectionStockNew.
-  ///
-  /// In pt, this message translates to:
-  /// **'Stock'**
-  String get productsSectionStockNew;
-
-  /// No description provided for @productsNameLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nome do produto'**
-  String get productsNameLabel;
-
-  /// No description provided for @productsNameHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ex.: Arroz tipo 1'**
-  String get productsNameHint;
-
-  /// No description provided for @productsNameErrorMsg.
-  ///
-  /// In pt, this message translates to:
-  /// **'Obrigatório'**
-  String get productsNameErrorMsg;
-
-  /// No description provided for @productsDescriptionLabelNew.
-  ///
-  /// In pt, this message translates to:
-  /// **'Descrição'**
-  String get productsDescriptionLabelNew;
-
-  /// No description provided for @productsDescriptionHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Opcional'**
-  String get productsDescriptionHint;
-
-  /// No description provided for @productsCodeLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Código de barras (PLU)'**
-  String get productsCodeLabel;
-
-  /// No description provided for @productsCodeHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Balanças etiquetadoras (ex.: 12345)'**
-  String get productsCodeHint;
-
-  /// No description provided for @productsCodeError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Código inválido: use até 5 dígitos.'**
-  String get productsCodeError;
-
-  /// No description provided for @productsPurchasePriceLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preço de compra (MT)'**
-  String get productsPurchasePriceLabel;
-
-  /// No description provided for @productsSalePriceLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preço de venda (MT)'**
-  String get productsSalePriceLabel;
-
-  /// No description provided for @productsPriceValidationError.
-  ///
-  /// In pt, this message translates to:
-  /// **'O preço de venda deve ser superior ao de compra'**
-  String get productsPriceValidationError;
-
-  /// No description provided for @productsStockQuantityLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Quantidade em stock'**
-  String get productsStockQuantityLabel;
-
-  /// No description provided for @productsStockHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ex.: 50'**
-  String get productsStockHint;
-
-  /// No description provided for @productsStockWeightHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Em unidades da venda (ex.: 1,75)'**
-  String get productsStockWeightHint;
-
-  /// No description provided for @productsExpiryLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Validade'**
-  String get productsExpiryLabel;
-
-  /// No description provided for @productsExpiryHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Opcional'**
-  String get productsExpiryHint;
-
-  /// No description provided for @productsExpiryAdd.
-  ///
-  /// In pt, this message translates to:
-  /// **'Definir validade'**
-  String get productsExpiryAdd;
-
-  /// No description provided for @productsExpiryClear.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover validade'**
-  String get productsExpiryClear;
-
-  /// No description provided for @productsWeighLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Venda por peso (fração)'**
-  String get productsWeighLabel;
-
-  /// No description provided for @productsWeighHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aceita quantidades decimais (ex.: 1,75 kg)'**
-  String get productsWeighHint;
-
-  /// No description provided for @productsUnitLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Unidade de venda'**
-  String get productsUnitLabel;
+  /// **'Quantidade inválida'**
+  String get productsStockError;
 
   /// No description provided for @customersHeaderCount.
   ///
   /// In pt, this message translates to:
   /// **'{count, plural, =1{1 cliente} other{{count} clientes}}'**
   String customersHeaderCount(int count);
-
-  /// No description provided for @customersColCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cliente'**
-  String get customersColCustomer;
-
-  /// No description provided for @customersColContact.
-  ///
-  /// In pt, this message translates to:
-  /// **'Contacto / Fiado'**
-  String get customersColContact;
 
   /// No description provided for @customersSearchHint.
   ///
@@ -2836,23 +2326,11 @@ abstract class AppLocalizations {
   /// **'Saídas'**
   String get financialExpense;
 
-  /// No description provided for @financialBalance.
-  ///
-  /// In pt, this message translates to:
-  /// **'Saldo'**
-  String get financialBalance;
-
   /// No description provided for @financialPeriodBalance.
   ///
   /// In pt, this message translates to:
   /// **'Saldo líquido do período'**
   String get financialPeriodBalance;
-
-  /// No description provided for @financialSwipeHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Deslize para saídas →'**
-  String get financialSwipeHint;
 
   /// No description provided for @financialTransactions.
   ///
@@ -3112,12 +2590,6 @@ abstract class AppLocalizations {
   /// **'Conte o dinheiro da gaveta e informe aqui.'**
   String get cashClosingCountedCashHint;
 
-  /// No description provided for @cashClosingDifference.
-  ///
-  /// In pt, this message translates to:
-  /// **'Diferença'**
-  String get cashClosingDifference;
-
   /// No description provided for @cashClosingConfers.
   ///
   /// In pt, this message translates to:
@@ -3178,18 +2650,6 @@ abstract class AppLocalizations {
   /// **'Nenhuma venda registrada neste dia.'**
   String get cashClosingEmpty;
 
-  /// No description provided for @cashClosingHistory.
-  ///
-  /// In pt, this message translates to:
-  /// **'Histórico de fechos'**
-  String get cashClosingHistory;
-
-  /// No description provided for @cashClosingHistoryEmpty.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum fecho registrado ainda.'**
-  String get cashClosingHistoryEmpty;
-
   /// No description provided for @debtsTitle.
   ///
   /// In pt, this message translates to:
@@ -3244,18 +2704,6 @@ abstract class AppLocalizations {
   /// **'Baixas'**
   String get debtsSettledStat;
 
-  /// No description provided for @debtsNoPendingCustomers.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum cliente pendente'**
-  String get debtsNoPendingCustomers;
-
-  /// No description provided for @debtsPendingCustomers.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 cliente pendente} other{{count} clientes pendentes}}'**
-  String debtsPendingCustomers(int count);
-
   /// No description provided for @debtsPendingSection.
   ///
   /// In pt, this message translates to:
@@ -3285,12 +2733,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Total quitado'**
   String get debtsTotalSettled;
-
-  /// No description provided for @debtsSettledCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 baixa registrada} other{{count} baixas registradas}}'**
-  String debtsSettledCount(int count);
 
   /// No description provided for @debtsSettledSection.
   ///
@@ -3490,17 +2932,17 @@ abstract class AppLocalizations {
   /// **'Toque em \"Nova venda\" para registrar a primeira.'**
   String get salesEmptySubtitle;
 
-  /// No description provided for @salesSearchHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pesquisar venda...'**
-  String get salesSearchHint;
-
   /// No description provided for @periodYesterday.
   ///
   /// In pt, this message translates to:
   /// **'Ontem'**
   String get periodYesterday;
+
+  /// No description provided for @periodWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta semana'**
+  String get periodWeek;
 
   /// No description provided for @paymentFilterCard.
   ///
@@ -3519,24 +2961,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Pago'**
   String get salesStatusPaid;
-
-  /// No description provided for @salesFilterAll.
-  ///
-  /// In pt, this message translates to:
-  /// **'Todas'**
-  String get salesFilterAll;
-
-  /// No description provided for @salesFilterActive.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ativas'**
-  String get salesFilterActive;
-
-  /// No description provided for @salesFilterCancelled.
-  ///
-  /// In pt, this message translates to:
-  /// **'Anuladas'**
-  String get salesFilterCancelled;
 
   /// Contagem de transações de hoje no resumo da tela de vendas
   ///
@@ -3928,24 +3352,6 @@ abstract class AppLocalizations {
   /// **'Plano: {plan}'**
   String adminPlanLabel(String plan);
 
-  /// No description provided for @adminPlanSolicited.
-  ///
-  /// In pt, this message translates to:
-  /// **'Plano: {plan} · Solicitado: {date}'**
-  String adminPlanSolicited(String plan, String date);
-
-  /// No description provided for @adminPlansTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Planos'**
-  String get adminPlansTitle;
-
-  /// No description provided for @adminPlanNewTooltip.
-  ///
-  /// In pt, this message translates to:
-  /// **'Novo plano'**
-  String get adminPlanNewTooltip;
-
   /// No description provided for @adminPlansLoadError.
   ///
   /// In pt, this message translates to:
@@ -3967,14 +3373,8 @@ abstract class AppLocalizations {
   /// No description provided for @adminPlanInactive.
   ///
   /// In pt, this message translates to:
-  /// **'Inativo'**
+  /// **'Inactivo'**
   String get adminPlanInactive;
-
-  /// No description provided for @adminPlanDetails.
-  ///
-  /// In pt, this message translates to:
-  /// **'{price}/mês · {stores} loja(s) · {employees} funcionário(s)'**
-  String adminPlanDetails(String price, int stores, int employees);
 
   /// No description provided for @adminPlanNameError.
   ///
@@ -4057,13 +3457,13 @@ abstract class AppLocalizations {
   /// No description provided for @adminPlanActiveTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Plano ativo'**
+  /// **'Plano activo'**
   String get adminPlanActiveTitle;
 
   /// No description provided for @adminPlanActiveSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Desative para impedir novas assinaturas.'**
+  /// **'Desactive para impedir novas assinaturas.'**
   String get adminPlanActiveSubtitle;
 
   /// No description provided for @adminPlanCreate.
@@ -4126,11 +3526,71 @@ abstract class AppLocalizations {
   /// **'Atual'**
   String get adminPlanCurrent;
 
+  /// No description provided for @productsCodeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de barras (PLU)'**
+  String get productsCodeLabel;
+
+  /// No description provided for @productsCodeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Balanças etiquetadoras (ex.: 12345)'**
+  String get productsCodeHint;
+
+  /// No description provided for @productsCodeError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código inválido: use até 5 dígitos.'**
+  String get productsCodeError;
+
+  /// No description provided for @productsWeighLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Venda por peso (fração)'**
+  String get productsWeighLabel;
+
+  /// No description provided for @productsWeighHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aceita quantidades decimais (ex.: 1,75 kg)'**
+  String get productsWeighHint;
+
+  /// No description provided for @productsUnitLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Unidade de venda'**
+  String get productsUnitLabel;
+
+  /// No description provided for @productsStockWeightHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em unidades da venda (ex.: 1,75)'**
+  String get productsStockWeightHint;
+
+  /// No description provided for @productsExpiryLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Validade'**
+  String get productsExpiryLabel;
+
+  /// No description provided for @productsExpiryAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir validade'**
+  String get productsExpiryAdd;
+
   /// No description provided for @productsExpiryHelp.
   ///
   /// In pt, this message translates to:
   /// **'Data de validade do produto'**
   String get productsExpiryHelp;
+
+  /// No description provided for @productsExpiryClear.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover validade'**
+  String get productsExpiryClear;
 
   /// No description provided for @salesBarcodeLabel.
   ///
@@ -4198,12 +3658,6 @@ abstract class AppLocalizations {
   /// **'Data de validade do lote'**
   String get purchasesExpiryHelp;
 
-  /// No description provided for @dashboardExpiryAlerts.
-  ///
-  /// In pt, this message translates to:
-  /// **'Validade'**
-  String get dashboardExpiryAlerts;
-
   /// Lote vencido — dias desde o vencimento
   ///
   /// In pt, this message translates to:
@@ -4243,7 +3697,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminDashboardActiveTenants.
   ///
   /// In pt, this message translates to:
-  /// **'Ativos'**
+  /// **'Activos'**
   String get adminDashboardActiveTenants;
 
   /// No description provided for @adminDashboardPendingTenants.
@@ -4270,12 +3724,6 @@ abstract class AppLocalizations {
   /// **'Não foi possível carregar a visão geral.'**
   String get adminDashboardLoadError;
 
-  /// No description provided for @adminAuditLogTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Registo de Auditoria'**
-  String get adminAuditLogTitle;
-
   /// No description provided for @adminAuditLogEmpty.
   ///
   /// In pt, this message translates to:
@@ -4287,18 +3735,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ações administrativas aparecerão aqui.'**
   String get adminAuditLogEmptySubtitle;
-
-  /// No description provided for @adminAuditLogLoadError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não foi possível carregar o registo de auditoria.'**
-  String get adminAuditLogLoadError;
-
-  /// No description provided for @adminTenantDetailTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Detalhes do tenant'**
-  String get adminTenantDetailTitle;
 
   /// No description provided for @adminTenantDetailOwner.
   ///
@@ -4378,12 +3814,6 @@ abstract class AppLocalizations {
   /// **'Buscar tenants...'**
   String get adminTenantSearchHint;
 
-  /// No description provided for @adminTenantDetailLoadError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não foi possível carregar os detalhes do tenant.'**
-  String get adminTenantDetailLoadError;
-
   /// No description provided for @adminTenantDetailNoStores.
   ///
   /// In pt, this message translates to:
@@ -4413,12 +3843,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{count, plural, =1{1 ação recente} other{{count} ações recentes}}'**
   String adminTenantDetailActivityCount(int count);
-
-  /// No description provided for @adminTenantDetailStoreAddress.
-  ///
-  /// In pt, this message translates to:
-  /// **'{city}'**
-  String adminTenantDetailStoreAddress(Object city);
 
   /// No description provided for @adminTenantDetailEmployeeRole.
   ///
@@ -4474,12 +3898,6 @@ abstract class AppLocalizations {
   /// **'Rejeitar ({count})'**
   String adminBulkReject(Object count);
 
-  /// No description provided for @adminBulkApproveConfirm.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aprovar {count} {count, plural, =1{tenant pendente} other{tenants pendentes}}?'**
-  String adminBulkApproveConfirm(int count);
-
   /// No description provided for @adminBulkRejectTitle.
   ///
   /// In pt, this message translates to:
@@ -4510,30 +3928,6 @@ abstract class AppLocalizations {
   /// **'Erro ao rejeitar tenants. Alguns podem não ter sido processados.'**
   String get adminBulkRejectError;
 
-  /// No description provided for @adminWelcomeMessage.
-  ///
-  /// In pt, this message translates to:
-  /// **'Super Admin'**
-  String get adminWelcomeMessage;
-
-  /// No description provided for @adminPlatformStatus.
-  ///
-  /// In pt, this message translates to:
-  /// **'Estado da Plataforma'**
-  String get adminPlatformStatus;
-
-  /// No description provided for @adminActionApproveTenant.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aprovar Tenant'**
-  String get adminActionApproveTenant;
-
-  /// No description provided for @adminActionRejectTenant.
-  ///
-  /// In pt, this message translates to:
-  /// **'Rejeitar Tenant'**
-  String get adminActionRejectTenant;
-
   /// No description provided for @adminActionManagePlans.
   ///
   /// In pt, this message translates to:
@@ -4558,29 +3952,11 @@ abstract class AppLocalizations {
   /// **'Upgrades de Plano'**
   String get adminPlanUpgrades;
 
-  /// No description provided for @adminRecentActivity.
-  ///
-  /// In pt, this message translates to:
-  /// **'Atividade Recente'**
-  String get adminRecentActivity;
-
   /// No description provided for @adminPendingActionRequired.
   ///
   /// In pt, this message translates to:
   /// **'{count, plural, =1{1 ação necessária} other{{count} ações necessárias}}'**
   String adminPendingActionRequired(int count);
-
-  /// No description provided for @adminNoPendingActions.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tudo em dia!'**
-  String get adminNoPendingActions;
-
-  /// No description provided for @adminPlatformSummary.
-  ///
-  /// In pt, this message translates to:
-  /// **'{tenants} tenants · {plans} planos'**
-  String adminPlatformSummary(Object plans, Object tenants);
 
   /// No description provided for @adminAuditLogAll.
   ///
@@ -4605,12 +3981,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Upgrades'**
   String get adminAuditLogUpgrades;
-
-  /// No description provided for @adminAuditLogTotalActions.
-  ///
-  /// In pt, this message translates to:
-  /// **'Total de ações'**
-  String get adminAuditLogTotalActions;
 
   /// No description provided for @adminAuditLogApproved.
   ///
@@ -4660,18 +4030,6 @@ abstract class AppLocalizations {
   /// **'Nenhuma entrada corresponde ao filtro.'**
   String get adminAuditLogNoResults;
 
-  /// No description provided for @adminDashboardApprovalRate.
-  ///
-  /// In pt, this message translates to:
-  /// **'Taxa de aprovação'**
-  String get adminDashboardApprovalRate;
-
-  /// No description provided for @adminDashboardTenantDistribution.
-  ///
-  /// In pt, this message translates to:
-  /// **'Distribuição de tenants'**
-  String get adminDashboardTenantDistribution;
-
   /// No description provided for @adminDashboardPlanDistribution.
   ///
   /// In pt, this message translates to:
@@ -4683,24 +4041,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Atividade recente'**
   String get adminDashboardRecentActivity;
-
-  /// No description provided for @adminDashboardActivityCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =0{Sem ações recentes} =1{1 ação nos últimos 7 dias} other{{count} ações nos últimos 7 dias}}'**
-  String adminDashboardActivityCount(int count);
-
-  /// No description provided for @adminDashboardActivePercent.
-  ///
-  /// In pt, this message translates to:
-  /// **'{percent}% ativos'**
-  String adminDashboardActivePercent(int percent);
-
-  /// No description provided for @adminDashboardDaysSinceLastActivity.
-  ///
-  /// In pt, this message translates to:
-  /// **'{days, plural, =0{Ativo hoje} =1{Última ação há 1 dia} other{Última ação há {days} dias}}'**
-  String adminDashboardDaysSinceLastActivity(int days);
 
   /// No description provided for @adminGrowthTrends.
   ///
@@ -4744,18 +4084,6 @@ abstract class AppLocalizations {
   /// **'Aprovações'**
   String get adminGrowthApprovals;
 
-  /// No description provided for @adminGrowthVsLastWeek.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count} vs semana passada'**
-  String adminGrowthVsLastWeek(String count);
-
-  /// No description provided for @adminGrowthVsLastMonth.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count} vs mês passado'**
-  String adminGrowthVsLastMonth(String count);
-
   /// No description provided for @adminGrowthUp.
   ///
   /// In pt, this message translates to:
@@ -4791,18 +4119,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Dados insuficientes para mostrar tendências'**
   String get adminGrowthNoData;
-
-  /// No description provided for @adminGrowthWeekLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'S{week}'**
-  String adminGrowthWeekLabel(String week);
-
-  /// No description provided for @adminGrowthAvgPerWeek.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count}/semana média'**
-  String adminGrowthAvgPerWeek(String count);
 
   /// No description provided for @adminNavInvoices.
   ///
@@ -5002,23 +4318,11 @@ abstract class AppLocalizations {
   /// **'Notificações'**
   String get menuNotifications;
 
-  /// No description provided for @notificationMarkAsRead.
-  ///
-  /// In pt, this message translates to:
-  /// **'Marcar como lida'**
-  String get notificationMarkAsRead;
-
   /// No description provided for @notificationSinceDaysAgo.
   ///
   /// In pt, this message translates to:
   /// **'{count} dias atrás'**
   String notificationSinceDaysAgo(int count);
-
-  /// No description provided for @notificationToday.
-  ///
-  /// In pt, this message translates to:
-  /// **'Hoje'**
-  String get notificationToday;
 
   /// No description provided for @notificationYesterday.
   ///
@@ -5037,18 +4341,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Mensagens para Tenants'**
   String get adminMessagesTitle;
-
-  /// No description provided for @adminMessagesEmpty.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhuma mensagem enviada ainda.'**
-  String get adminMessagesEmpty;
-
-  /// No description provided for @adminMessagesSend.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviar mensagem'**
-  String get adminMessagesSend;
 
   /// No description provided for @adminMessagesSendSuccess.
   ///
@@ -5079,30 +4371,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Tipo'**
   String get adminMessagesTypeLabel;
-
-  /// No description provided for @adminMessagesTypeBillingQuote.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cotação de Cobrança'**
-  String get adminMessagesTypeBillingQuote;
-
-  /// No description provided for @adminMessagesTypePlanExpiryChange.
-  ///
-  /// In pt, this message translates to:
-  /// **'Alteração de Validade'**
-  String get adminMessagesTypePlanExpiryChange;
-
-  /// No description provided for @adminMessagesTypePlanExpiringSoon.
-  ///
-  /// In pt, this message translates to:
-  /// **'Plano Expirando'**
-  String get adminMessagesTypePlanExpiringSoon;
-
-  /// No description provided for @adminMessagesTypeGeneral.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mensagem Geral'**
-  String get adminMessagesTypeGeneral;
 
   /// No description provided for @adminMessagesTitleLabel.
   ///
@@ -5140,23 +4408,1817 @@ abstract class AppLocalizations {
   /// **'Mensagens'**
   String get adminNavMessages;
 
-  /// No description provided for @adminMessageSentTo.
+  /// No description provided for @customInvoiceTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Enviado para {tenant}'**
-  String adminMessageSentTo(String tenant);
+  /// **'Factura Personalizada'**
+  String get customInvoiceTitle;
 
-  /// No description provided for @menuMessages.
+  /// No description provided for @customInvoiceEmpty.
   ///
   /// In pt, this message translates to:
-  /// **'Mensagens'**
-  String get menuMessages;
+  /// **'Nenhuma factura'**
+  String get customInvoiceEmpty;
 
-  /// No description provided for @menuMessagesHint.
+  /// No description provided for @customInvoiceEmptySubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Mensagens do super admin'**
-  String get menuMessagesHint;
+  /// **'Crie facturas profissionais com layout\npersonalizado para os seus clientes'**
+  String get customInvoiceEmptySubtitle;
+
+  /// No description provided for @customInvoiceTemplateTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Modelo da Factura'**
+  String get customInvoiceTemplateTooltip;
+
+  /// No description provided for @customInvoiceNewFab.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Factura'**
+  String get customInvoiceNewFab;
+
+  /// No description provided for @customInvoiceItemsCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} itens}}'**
+  String customInvoiceItemsCount(num count);
+
+  /// No description provided for @customInvoiceWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'WhatsApp'**
+  String get customInvoiceWhatsApp;
+
+  /// No description provided for @customInvoiceCreate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar Factura'**
+  String get customInvoiceCreate;
+
+  /// No description provided for @customInvoiceClientSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente'**
+  String get customInvoiceClientSection;
+
+  /// No description provided for @customInvoiceClientName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome do cliente'**
+  String get customInvoiceClientName;
+
+  /// No description provided for @customInvoicePhone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone'**
+  String get customInvoicePhone;
+
+  /// No description provided for @customInvoiceTaxIdOptional.
+  ///
+  /// In pt, this message translates to:
+  /// **'NIF / NUIT (opcional)'**
+  String get customInvoiceTaxIdOptional;
+
+  /// No description provided for @customInvoiceProductSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto'**
+  String get customInvoiceProductSection;
+
+  /// No description provided for @customInvoiceProductPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem produtos cadastrados'**
+  String get customInvoiceProductPlaceholder;
+
+  /// No description provided for @customInvoiceProductOption.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque: {stock} {unit}  •  {price}'**
+  String customInvoiceProductOption(Object price, Object stock, Object unit);
+
+  /// No description provided for @customInvoicePrice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço (MT)'**
+  String get customInvoicePrice;
+
+  /// No description provided for @customInvoiceQty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qtd'**
+  String get customInvoiceQty;
+
+  /// No description provided for @customInvoiceAddItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar'**
+  String get customInvoiceAddItem;
+
+  /// No description provided for @customInvoiceDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto (MT)'**
+  String get customInvoiceDiscount;
+
+  /// No description provided for @customInvoiceTax.
+  ///
+  /// In pt, this message translates to:
+  /// **'IVA (MT)'**
+  String get customInvoiceTax;
+
+  /// No description provided for @customInvoiceBillTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total: {total}'**
+  String customInvoiceBillTotal(Object total);
+
+  /// No description provided for @customInvoiceNumberPrefix.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nº {number}'**
+  String customInvoiceNumberPrefix(Object number);
+
+  /// No description provided for @customInvoiceTemplateSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Modelo guardado com sucesso'**
+  String get customInvoiceTemplateSaved;
+
+  /// No description provided for @customInvoiceTemplateLogoSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Logotipo da Empresa'**
+  String get customInvoiceTemplateLogoSection;
+
+  /// No description provided for @customInvoiceTemplateLogoHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para carregar logotipo'**
+  String get customInvoiceTemplateLogoHint;
+
+  /// No description provided for @customInvoiceTemplateColorSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cor Principal'**
+  String get customInvoiceTemplateColorSection;
+
+  /// No description provided for @customInvoiceTemplateCompanySection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados da Empresa'**
+  String get customInvoiceTemplateCompanySection;
+
+  /// No description provided for @customInvoiceTemplateCompanyName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome da Empresa'**
+  String get customInvoiceTemplateCompanyName;
+
+  /// No description provided for @customInvoiceTemplateAddress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Morada'**
+  String get customInvoiceTemplateAddress;
+
+  /// No description provided for @customInvoiceTemplateTaxId.
+  ///
+  /// In pt, this message translates to:
+  /// **'NIF / NUIT'**
+  String get customInvoiceTemplateTaxId;
+
+  /// No description provided for @customInvoiceTemplateStyle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estilo'**
+  String get customInvoiceTemplateStyle;
+
+  /// No description provided for @customInvoiceTemplateStyleClassic.
+  ///
+  /// In pt, this message translates to:
+  /// **'Clássico'**
+  String get customInvoiceTemplateStyleClassic;
+
+  /// No description provided for @customInvoiceTemplateStyleModern.
+  ///
+  /// In pt, this message translates to:
+  /// **'Moderno'**
+  String get customInvoiceTemplateStyleModern;
+
+  /// No description provided for @customInvoiceTemplateStyleCompact.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compacto'**
+  String get customInvoiceTemplateStyleCompact;
+
+  /// No description provided for @customInvoiceTemplateSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar Modelo'**
+  String get customInvoiceTemplateSave;
+
+  /// No description provided for @customInvoicePreviewCompanyFallback.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome da Empresa'**
+  String get customInvoicePreviewCompanyFallback;
+
+  /// No description provided for @quotationTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cotações / Orçamentos'**
+  String get quotationTitle;
+
+  /// No description provided for @quotationEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma cotação'**
+  String get quotationEmpty;
+
+  /// No description provided for @quotationEmptySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Crie cotações e orçamentos para os seus clientes'**
+  String get quotationEmptySubtitle;
+
+  /// No description provided for @quotationTemplateTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Modelo da Cotação'**
+  String get quotationTemplateTooltip;
+
+  /// No description provided for @quotationNewFab.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Cotação'**
+  String get quotationNewFab;
+
+  /// No description provided for @quotationItemsCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} itens}}'**
+  String quotationItemsCount(num count);
+
+  /// No description provided for @quotationValidity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Validade'**
+  String get quotationValidity;
+
+  /// No description provided for @quotationDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{days, plural, =1{1 dia} other{{days} dias}}'**
+  String quotationDays(num days);
+
+  /// No description provided for @quotationSend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar'**
+  String get quotationSend;
+
+  /// No description provided for @quotationAccept.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aceitar'**
+  String get quotationAccept;
+
+  /// No description provided for @quotationReject.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitar'**
+  String get quotationReject;
+
+  /// No description provided for @quotationStatusDraft.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rascunho'**
+  String get quotationStatusDraft;
+
+  /// No description provided for @quotationStatusSent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviada'**
+  String get quotationStatusSent;
+
+  /// No description provided for @quotationStatusAccepted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aceite'**
+  String get quotationStatusAccepted;
+
+  /// No description provided for @quotationStatusRejected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitada'**
+  String get quotationStatusRejected;
+
+  /// No description provided for @quotationPhoneOptional.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone (opcional)'**
+  String get quotationPhoneOptional;
+
+  /// No description provided for @quotationNumberPrefix.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nº {number}'**
+  String quotationNumberPrefix(Object number);
+
+  /// No description provided for @quotationSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar Cotação'**
+  String get quotationSave;
+
+  /// No description provided for @quotationTemplatePhone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone'**
+  String get quotationTemplatePhone;
+
+  /// No description provided for @quotationTemplatePreview.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cotação • Preview'**
+  String get quotationTemplatePreview;
+
+  /// No description provided for @quotationTemplatePreviewBadge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preview'**
+  String get quotationTemplatePreviewBadge;
+
+  /// No description provided for @paletteBlue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Azul'**
+  String get paletteBlue;
+
+  /// No description provided for @paletteGreen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Verde'**
+  String get paletteGreen;
+
+  /// No description provided for @paletteRed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vermelho'**
+  String get paletteRed;
+
+  /// No description provided for @paletteAmber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Âmbar'**
+  String get paletteAmber;
+
+  /// No description provided for @paletteSlate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Slate'**
+  String get paletteSlate;
+
+  /// No description provided for @paletteViolet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Violeta'**
+  String get paletteViolet;
+
+  /// No description provided for @paletteTeal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Teal'**
+  String get paletteTeal;
+
+  /// No description provided for @paletteIndigo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Indigo'**
+  String get paletteIndigo;
+
+  /// No description provided for @customInvoicePdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'PDF'**
+  String get customInvoicePdf;
+
+  /// No description provided for @imageSourceGallery.
+  ///
+  /// In pt, this message translates to:
+  /// **'Galeria'**
+  String get imageSourceGallery;
+
+  /// No description provided for @imageSourceCamera.
+  ///
+  /// In pt, this message translates to:
+  /// **'Câmara'**
+  String get imageSourceCamera;
+
+  /// No description provided for @businessFallbackName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Minha Empresa'**
+  String get businessFallbackName;
+
+  /// No description provided for @customInvoiceWhatsAppHeader.
+  ///
+  /// In pt, this message translates to:
+  /// **'═══ FACTURA ═══'**
+  String get customInvoiceWhatsAppHeader;
+
+  /// No description provided for @customInvoiceNumberShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nº'**
+  String get customInvoiceNumberShort;
+
+  /// No description provided for @customInvoiceClientLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente'**
+  String get customInvoiceClientLabel;
+
+  /// No description provided for @customInvoicePhoneLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tel'**
+  String get customInvoicePhoneLabel;
+
+  /// No description provided for @customInvoiceTotalLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'TOTAL'**
+  String get customInvoiceTotalLabel;
+
+  /// No description provided for @customInvoiceNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Factura'**
+  String get customInvoiceNew;
+
+  /// No description provided for @customInvoiceTemplateTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Modelo da Factura'**
+  String get customInvoiceTemplateTitle;
+
+  /// No description provided for @commonPreview.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preview'**
+  String get commonPreview;
+
+  /// No description provided for @quotationWhatsAppHeader.
+  ///
+  /// In pt, this message translates to:
+  /// **'═══ COTAÇÃO ═══'**
+  String get quotationWhatsAppHeader;
+
+  /// No description provided for @quotationTemplateTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Modelo da Cotação'**
+  String get quotationTemplateTitle;
+
+  /// No description provided for @employeeMgmtTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gestão de Funcionários'**
+  String get employeeMgmtTitle;
+
+  /// No description provided for @employeeMgmtTabAttendance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ponto'**
+  String get employeeMgmtTabAttendance;
+
+  /// No description provided for @employeeMgmtTabCommissions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comissões'**
+  String get employeeMgmtTabCommissions;
+
+  /// No description provided for @employeeMgmtTabTargets.
+  ///
+  /// In pt, this message translates to:
+  /// **'Metas'**
+  String get employeeMgmtTabTargets;
+
+  /// No description provided for @employeePresentCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Presentes'**
+  String get employeePresentCount;
+
+  /// No description provided for @employeeAbsentCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ausentes'**
+  String get employeeAbsentCount;
+
+  /// No description provided for @employeeClockInAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar'**
+  String get employeeClockInAction;
+
+  /// No description provided for @employeeClockOutAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair'**
+  String get employeeClockOutAction;
+
+  /// No description provided for @employeeClockOutInProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em curso'**
+  String get employeeClockOutInProgress;
+
+  /// No description provided for @employeeAttendanceSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registo de Ponto'**
+  String get employeeAttendanceSection;
+
+  /// No description provided for @employeeRecordsSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registos de Hoje'**
+  String get employeeRecordsSection;
+
+  /// No description provided for @employeeSalesMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vendas do Mês'**
+  String get employeeSalesMonth;
+
+  /// No description provided for @employeeCommissionTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comissões'**
+  String get employeeCommissionTitle;
+
+  /// No description provided for @employeeCommissionPerEmployee.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comissão por Funcionário'**
+  String get employeeCommissionPerEmployee;
+
+  /// No description provided for @employeeCommissionRate.
+  ///
+  /// In pt, this message translates to:
+  /// **'{rate}% sobre {amount}'**
+  String employeeCommissionRate(Object amount, Object rate);
+
+  /// No description provided for @employeeTargetsActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Metas Activas'**
+  String get employeeTargetsActive;
+
+  /// No description provided for @employeeTargetsReached.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atingidas'**
+  String get employeeTargetsReached;
+
+  /// No description provided for @employeeTargetsPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendentes'**
+  String get employeeTargetsPending;
+
+  /// No description provided for @employeeTargetsMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Metas do Mês'**
+  String get employeeTargetsMonth;
+
+  /// No description provided for @employeeTargetsEmptyTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma meta definida'**
+  String get employeeTargetsEmptyTitle;
+
+  /// No description provided for @employeeTargetsEmptySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Defina metas mensais de vendas para cada funcionário'**
+  String get employeeTargetsEmptySubtitle;
+
+  /// No description provided for @employeeTargetAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar Meta'**
+  String get employeeTargetAdd;
+
+  /// No description provided for @employeeTargetMeta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meta: {amount}'**
+  String employeeTargetMeta(Object amount);
+
+  /// No description provided for @employeeTargetAchieved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Realizado: {amount}'**
+  String employeeTargetAchieved(Object amount);
+
+  /// No description provided for @employeeTargetNewTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Meta'**
+  String get employeeTargetNewTitle;
+
+  /// No description provided for @employeeTargetEmployee.
+  ///
+  /// In pt, this message translates to:
+  /// **'Funcionário'**
+  String get employeeTargetEmployee;
+
+  /// No description provided for @employeeTargetAllHave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os funcionários já possuem meta definida'**
+  String get employeeTargetAllHave;
+
+  /// No description provided for @employeeTargetMonthly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meta Mensal (MT)'**
+  String get employeeTargetMonthly;
+
+  /// No description provided for @employeeTargetSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar Meta'**
+  String get employeeTargetSave;
+
+  /// No description provided for @employeeRoleSales.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vendedor'**
+  String get employeeRoleSales;
+
+  /// No description provided for @addonsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Add-ons'**
+  String get addonsTitle;
+
+  /// No description provided for @addonsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Add-ons activos e disponíveis no seu plano'**
+  String get addonsSubtitle;
+
+  /// No description provided for @addonsManagedByAdmin.
+  ///
+  /// In pt, this message translates to:
+  /// **'A activação de add-ons é gerida pelo administrador do sistema.'**
+  String get addonsManagedByAdmin;
+
+  /// No description provided for @addonsIncluded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Incluído'**
+  String get addonsIncluded;
+
+  /// No description provided for @addonsActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Activo'**
+  String get addonsActive;
+
+  /// No description provided for @addonsPerMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'{amount} MT/mês'**
+  String addonsPerMonth(Object amount);
+
+  /// No description provided for @addonCategoryInvoicing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Facturação'**
+  String get addonCategoryInvoicing;
+
+  /// No description provided for @addonCategoryQuotation.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cotação'**
+  String get addonCategoryQuotation;
+
+  /// No description provided for @addonCategoryReports.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatórios'**
+  String get addonCategoryReports;
+
+  /// No description provided for @addonCategoryEmployees.
+  ///
+  /// In pt, this message translates to:
+  /// **'Funcionários'**
+  String get addonCategoryEmployees;
+
+  /// No description provided for @addonCategoryMultiStore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Multi-Loja'**
+  String get addonCategoryMultiStore;
+
+  /// No description provided for @addonCategoryPayments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamentos'**
+  String get addonCategoryPayments;
+
+  /// No description provided for @commonTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total'**
+  String get commonTotal;
+
+  /// No description provided for @addonCustomInvoiceName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Factura Personalizada'**
+  String get addonCustomInvoiceName;
+
+  /// No description provided for @addonCustomInvoiceDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Crie facturas profissionais com logotipo, layout customizável e exportação em PDF. Inclui templates prontos e personalização de cores, fontes e campos.'**
+  String get addonCustomInvoiceDesc;
+
+  /// No description provided for @addonQuotationName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cotação / Orçamento'**
+  String get addonQuotationName;
+
+  /// No description provided for @addonQuotationDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Crie e envie cotações e orçamentos para clientes antes da venda. Inclui conversão automática para venda, validade configurável e envio por SMS/WhatsApp.'**
+  String get addonQuotationDesc;
+
+  /// No description provided for @addonReportsName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatórios Avançados'**
+  String get addonReportsName;
+
+  /// No description provided for @addonReportsDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatórios financeiros, de vendas e estoque com filtros avançados, comparativos período a período e exportação em PDF/Excel. Inclui gráficos interativos e dashboards personalizados.'**
+  String get addonReportsDesc;
+
+  /// No description provided for @addonEmployeesName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gestão de Funcionários'**
+  String get addonEmployeesName;
+
+  /// No description provided for @addonEmployeesDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Controle de ponto (entrada/saída), cálculo automático de comissões por venda, definição de metas mensais e relatório de desempenho individual.'**
+  String get addonEmployeesDesc;
+
+  /// No description provided for @addonMultiStoreName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Multi-Loja Avançado'**
+  String get addonMultiStoreName;
+
+  /// No description provided for @addonMultiStoreDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Transferência de estoque entre lojas, relatórios consolidados comparando lojas, gestão centralizada de preços e promoções e alertas de reposição automática.'**
+  String get addonMultiStoreDesc;
+
+  /// No description provided for @addonMobileMoneyName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Integração M-Pesa / E-Mola'**
+  String get addonMobileMoneyName;
+
+  /// No description provided for @addonMobileMoneyDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamentos automáticos via mobile money com reconciliação automática, notificações de recebimento em tempo real e relatório de transações mobile money.'**
+  String get addonMobileMoneyDesc;
+
+  /// No description provided for @transfersTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Transferências entre Lojas'**
+  String get transfersTitle;
+
+  /// No description provided for @transfersEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem transferências'**
+  String get transfersEmpty;
+
+  /// No description provided for @transfersEmptySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Transfira estoque entre lojas do\nmesmo tenant de forma rastreável'**
+  String get transfersEmptySubtitle;
+
+  /// No description provided for @transfersNewFab.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Transferência'**
+  String get transfersNewFab;
+
+  /// No description provided for @transfersOriginStore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Loja de Origem'**
+  String get transfersOriginStore;
+
+  /// No description provided for @transfersDestStore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Loja de Destino'**
+  String get transfersDestStore;
+
+  /// No description provided for @transfersProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto'**
+  String get transfersProduct;
+
+  /// No description provided for @transfersProductPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem produtos cadastrados'**
+  String get transfersProductPlaceholder;
+
+  /// No description provided for @transfersQuantity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantidade'**
+  String get transfersQuantity;
+
+  /// No description provided for @transfersAddItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar'**
+  String get transfersAddItem;
+
+  /// No description provided for @transfersExecuting.
+  ///
+  /// In pt, this message translates to:
+  /// **'A transferir...'**
+  String get transfersExecuting;
+
+  /// No description provided for @transfersExecute.
+  ///
+  /// In pt, this message translates to:
+  /// **'Executar Transferência'**
+  String get transfersExecute;
+
+  /// No description provided for @transfersNoStoresTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre pelo menos 2 lojas'**
+  String get transfersNoStoresTitle;
+
+  /// No description provided for @transfersNoStoresSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'É necessário ter 2+ lojas para\ntransferir estoque entre elas'**
+  String get transfersNoStoresSubtitle;
+
+  /// No description provided for @transfersSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 produto transferido} other{{count} produtos transferidos}} com sucesso'**
+  String transfersSuccess(num count);
+
+  /// No description provided for @transfersError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro na transferência: {error}'**
+  String transfersError(Object error);
+
+  /// No description provided for @transferStatusPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendente'**
+  String get transferStatusPending;
+
+  /// No description provided for @transferStatusInTransit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em Trânsito'**
+  String get transferStatusInTransit;
+
+  /// No description provided for @transferStatusReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebida'**
+  String get transferStatusReceived;
+
+  /// No description provided for @transferStatusCancelled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelada'**
+  String get transferStatusCancelled;
+
+  /// No description provided for @paymentsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'M-Pesa / E-Mola'**
+  String get paymentsTitle;
+
+  /// No description provided for @paymentsEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem transacções'**
+  String get paymentsEmpty;
+
+  /// No description provided for @paymentsEmptySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registe pagamentos recebidos via\nM-Pesa ou E-Mola para reconciliação'**
+  String get paymentsEmptySubtitle;
+
+  /// No description provided for @paymentsNewFab.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registar Pagamento'**
+  String get paymentsNewFab;
+
+  /// No description provided for @paymentsStatusConfirmed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmada'**
+  String get paymentsStatusConfirmed;
+
+  /// No description provided for @paymentsStatusPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendente'**
+  String get paymentsStatusPending;
+
+  /// No description provided for @paymentsStatusRejected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitada'**
+  String get paymentsStatusRejected;
+
+  /// No description provided for @paymentsConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar'**
+  String get paymentsConfirm;
+
+  /// No description provided for @paymentsReject.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitar'**
+  String get paymentsReject;
+
+  /// No description provided for @paymentsReference.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ref: {code}'**
+  String paymentsReference(Object code);
+
+  /// No description provided for @paymentsSheetTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registar Pagamento'**
+  String get paymentsSheetTitle;
+
+  /// No description provided for @paymentsSenderPhone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone do remetente'**
+  String get paymentsSenderPhone;
+
+  /// No description provided for @paymentsAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor (MT)'**
+  String get paymentsAmount;
+
+  /// No description provided for @paymentsConfirmationCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de confirmação'**
+  String get paymentsConfirmationCode;
+
+  /// No description provided for @reportsAdvancedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatórios Avançados'**
+  String get reportsAdvancedTitle;
+
+  /// No description provided for @reportsTabSales.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vendas'**
+  String get reportsTabSales;
+
+  /// No description provided for @reportsTabFinancial.
+  ///
+  /// In pt, this message translates to:
+  /// **'Financeiro'**
+  String get reportsTabFinancial;
+
+  /// No description provided for @reportsTabStock.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque'**
+  String get reportsTabStock;
+
+  /// No description provided for @reportsKpiProducts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produtos'**
+  String get reportsKpiProducts;
+
+  /// No description provided for @reportsKpiLowStock.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque Baixo'**
+  String get reportsKpiLowStock;
+
+  /// No description provided for @reportsKpiTotalItems.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total Itens'**
+  String get reportsKpiTotalItems;
+
+  /// No description provided for @reportsKpiStockValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor Estoque'**
+  String get reportsKpiStockValue;
+
+  /// No description provided for @reportsKpiRevenue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receitas'**
+  String get reportsKpiRevenue;
+
+  /// No description provided for @reportsKpiExpenses.
+  ///
+  /// In pt, this message translates to:
+  /// **'Despesas'**
+  String get reportsKpiExpenses;
+
+  /// No description provided for @reportsKpiNetProfit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lucro Líquido'**
+  String get reportsKpiNetProfit;
+
+  /// No description provided for @reportsStockByQty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produtos por Estoque'**
+  String get reportsStockByQty;
+
+  /// No description provided for @reportsCashFlow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fluxo de Caixa'**
+  String get reportsCashFlow;
+
+  /// No description provided for @reportsCashFlowChart.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gráfico de fluxo de caixa'**
+  String get reportsCashFlowChart;
+
+  /// No description provided for @reportsNoProducts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem produtos cadastrados'**
+  String get reportsNoProducts;
+
+  /// No description provided for @reportsStockHealthy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os produtos com estoque adequado'**
+  String get reportsStockHealthy;
+
+  /// No description provided for @reportsExportSales.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar Relatório (PDF)'**
+  String get reportsExportSales;
+
+  /// No description provided for @reportsExportFinancial.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar Financeiro (PDF)'**
+  String get reportsExportFinancial;
+
+  /// No description provided for @reportsExportStock.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar Estoque (PDF)'**
+  String get reportsExportStock;
+
+  /// No description provided for @reportsNoSalesData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem dados para este período'**
+  String get reportsNoSalesData;
+
+  /// No description provided for @reportsPeriodYear.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este Ano'**
+  String get reportsPeriodYear;
+
+  /// No description provided for @reportsKpiStockOut.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem Estoque'**
+  String get reportsKpiStockOut;
+
+  /// No description provided for @reportsKpiTotalProducts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total Produtos'**
+  String get reportsKpiTotalProducts;
+
+  /// No description provided for @pdfGeneratedOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerado: {date}'**
+  String pdfGeneratedOn(Object date);
+
+  /// No description provided for @pdfIndicators.
+  ///
+  /// In pt, this message translates to:
+  /// **'Indicadores'**
+  String get pdfIndicators;
+
+  /// No description provided for @pdfFooter.
+  ///
+  /// In pt, this message translates to:
+  /// **'Documento gerado pelo TAREQO — {date}'**
+  String pdfFooter(Object date);
+
+  /// No description provided for @pdfInvoiceDocWord.
+  ///
+  /// In pt, this message translates to:
+  /// **'FACTURA'**
+  String get pdfInvoiceDocWord;
+
+  /// No description provided for @pdfInvoiceSubjectWord.
+  ///
+  /// In pt, this message translates to:
+  /// **'Factura'**
+  String get pdfInvoiceSubjectWord;
+
+  /// No description provided for @pdfInvoiceFileBase.
+  ///
+  /// In pt, this message translates to:
+  /// **'factura'**
+  String get pdfInvoiceFileBase;
+
+  /// No description provided for @pdfQuotationDocWord.
+  ///
+  /// In pt, this message translates to:
+  /// **'COTAÇÃO'**
+  String get pdfQuotationDocWord;
+
+  /// No description provided for @pdfQuotationSubjectWord.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cotação'**
+  String get pdfQuotationSubjectWord;
+
+  /// No description provided for @pdfQuotationFileBase.
+  ///
+  /// In pt, this message translates to:
+  /// **'cotacao'**
+  String get pdfQuotationFileBase;
+
+  /// No description provided for @pdfClientHeading.
+  ///
+  /// In pt, this message translates to:
+  /// **'CLIENTE'**
+  String get pdfClientHeading;
+
+  /// No description provided for @pdfPhoneLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tel: {value}'**
+  String pdfPhoneLine(Object value);
+
+  /// No description provided for @pdfEmailLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Email: {value}'**
+  String pdfEmailLine(Object value);
+
+  /// No description provided for @pdfNifLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'NIF: {value}'**
+  String pdfNifLine(Object value);
+
+  /// No description provided for @pdfItemHeader.
+  ///
+  /// In pt, this message translates to:
+  /// **'Item'**
+  String get pdfItemHeader;
+
+  /// No description provided for @pdfUnitPriceHeader.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço Unit.'**
+  String get pdfUnitPriceHeader;
+
+  /// No description provided for @pdfSubtotalHeader.
+  ///
+  /// In pt, this message translates to:
+  /// **'Subtotal'**
+  String get pdfSubtotalHeader;
+
+  /// No description provided for @pdfDiscountLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto'**
+  String get pdfDiscountLabel;
+
+  /// No description provided for @pdfTaxLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'IVA'**
+  String get pdfTaxLabel;
+
+  /// No description provided for @pdfPaymentLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento: {value}'**
+  String pdfPaymentLine(Object value);
+
+  /// No description provided for @pdfReferenceLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ref: {value}'**
+  String pdfReferenceLine(Object value);
+
+  /// No description provided for @pdfNotesHeading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notas'**
+  String get pdfNotesHeading;
+
+  /// No description provided for @pdfGeneralConditionsHeading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Condições Gerais'**
+  String get pdfGeneralConditionsHeading;
+
+  /// No description provided for @pdfValidityDaysLeft.
+  ///
+  /// In pt, this message translates to:
+  /// **'{days, plural, =1{1 dia restante} other{{days} dias restantes}}'**
+  String pdfValidityDaysLeft(num days);
+
+  /// No description provided for @pdfConditionValidBullet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta cotação é válida até {date}.'**
+  String pdfConditionValidBullet(Object date);
+
+  /// No description provided for @pdfConditionPricesBullet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preços sujeitos a alteração após o prazo de validade.'**
+  String get pdfConditionPricesBullet;
+
+  /// No description provided for @pdfConditionContactBullet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para aceitar esta cotação, entre em contacto connosco.'**
+  String get pdfConditionContactBullet;
+
+  /// No description provided for @quotationStatusExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expirada'**
+  String get quotationStatusExpired;
+
+  /// No description provided for @quotationStatusConverted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convertida em Venda'**
+  String get quotationStatusConverted;
+
+  /// No description provided for @pdfConditionsNotesHeading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Condições / Notas'**
+  String get pdfConditionsNotesHeading;
+
+  /// No description provided for @adminAddonsActivateBtn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Activar'**
+  String get adminAddonsActivateBtn;
+
+  /// No description provided for @adminAddonsActivateBulk.
+  ///
+  /// In pt, this message translates to:
+  /// **'Activar add-on'**
+  String get adminAddonsActivateBulk;
+
+  /// No description provided for @adminAddonsActivePill.
+  ///
+  /// In pt, this message translates to:
+  /// **'Activos'**
+  String get adminAddonsActivePill;
+
+  /// No description provided for @adminAddonsDeactivateBtn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desactivar'**
+  String get adminAddonsDeactivateBtn;
+
+  /// No description provided for @adminAddonsInactivePill.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inactivos'**
+  String get adminAddonsInactivePill;
+
+  /// No description provided for @adminAddonsLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro: {error}'**
+  String adminAddonsLoadError(Object error);
+
+  /// No description provided for @adminAddonsNoTenantsSearchSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tente outro termo de busca'**
+  String get adminAddonsNoTenantsSearchSub;
+
+  /// No description provided for @adminAddonsNoTenantsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum tenant encontrado'**
+  String get adminAddonsNoTenantsTitle;
+
+  /// No description provided for @adminAddonsNoTenantsYetSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum tenant aprovado ainda'**
+  String get adminAddonsNoTenantsYetSub;
+
+  /// No description provided for @adminAddonsUpdateError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao actualizar add-on: {error}'**
+  String adminAddonsUpdateError(Object error);
+
+  /// No description provided for @adminBackToList.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar à lista'**
+  String get adminBackToList;
+
+  /// No description provided for @adminMessagesBodyHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva a mensagem…'**
+  String get adminMessagesBodyHint;
+
+  /// No description provided for @adminMessagesTenantHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecionar tenant...'**
+  String get adminMessagesTenantHint;
+
+  /// No description provided for @adminMessagesTitleExample.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Cotação de Plano Pro'**
+  String get adminMessagesTitleExample;
+
+  /// No description provided for @adminNavRevenue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receitas'**
+  String get adminNavRevenue;
+
+  /// No description provided for @adminPlansActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Activos'**
+  String get adminPlansActive;
+
+  /// No description provided for @adminPlansInactive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inactivos'**
+  String get adminPlansInactive;
+
+  /// No description provided for @adminRevenueActiveTenants.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tenants Activos'**
+  String get adminRevenueActiveTenants;
+
+  /// No description provided for @adminRevenueActiveTenantsSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total na plataforma'**
+  String get adminRevenueActiveTenantsSub;
+
+  /// No description provided for @adminRevenueAvailableAddOns.
+  ///
+  /// In pt, this message translates to:
+  /// **'Add-ons Disponíveis'**
+  String get adminRevenueAvailableAddOns;
+
+  /// No description provided for @adminRevenueAvailableAddOnsSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'No catálogo activo'**
+  String get adminRevenueAvailableAddOnsSub;
+
+  /// No description provided for @adminRevenueMaxMonthly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receita mensal máxima'**
+  String get adminRevenueMaxMonthly;
+
+  /// No description provided for @adminRevenueMaxMonthlySub.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se todos activassem todos'**
+  String get adminRevenueMaxMonthlySub;
+
+  /// No description provided for @adminRevenuePotential.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receita Potencial'**
+  String get adminRevenuePotential;
+
+  /// No description provided for @adminRevenuePotentialSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por tenant/mês (todos os add-ons)'**
+  String get adminRevenuePotentialSub;
+
+  /// No description provided for @adminTenantsMonthlyValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor mensal'**
+  String get adminTenantsMonthlyValue;
+
+  /// No description provided for @adminTenantsNextInvoice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima factura'**
+  String get adminTenantsNextInvoice;
+
+  /// No description provided for @adminTenantsPlanExpiresOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano expira em'**
+  String get adminTenantsPlanExpiresOn;
+
+  /// No description provided for @adminTenantsTrialEndsOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trial termina em'**
+  String get adminTenantsTrialEndsOn;
+
+  /// No description provided for @commonId.
+  ///
+  /// In pt, this message translates to:
+  /// **'ID'**
+  String get commonId;
+
+  /// No description provided for @dashboardSaleEntry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Venda {number}'**
+  String dashboardSaleEntry(Object number);
+
+  /// No description provided for @loginConfirmPasswordHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Repita a senha'**
+  String get loginConfirmPasswordHint;
+
+  /// No description provided for @loginConfirmPasswordLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar senha'**
+  String get loginConfirmPasswordLabel;
+
+  /// No description provided for @loginEmailHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite seu email'**
+  String get loginEmailHint;
+
+  /// No description provided for @loginForgotPassword.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esqueceu sua senha?'**
+  String get loginForgotPassword;
+
+  /// No description provided for @loginNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite seu nome'**
+  String get loginNameHint;
+
+  /// No description provided for @loginPasswordHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite sua senha'**
+  String get loginPasswordHint;
+
+  /// No description provided for @loginPromptHaveAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já tem uma conta?'**
+  String get loginPromptHaveAccount;
+
+  /// No description provided for @loginPromptNoAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda não tem uma conta?'**
+  String get loginPromptNoAccount;
+
+  /// No description provided for @loginTagline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gestão simples para o seu negócio'**
+  String get loginTagline;
+
+  /// No description provided for @mfaCodeFieldLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código MFA'**
+  String get mfaCodeFieldLabel;
+
+  /// No description provided for @mfaCodeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o código de 6 dígitos do seu aplicativo autenticador:'**
+  String get mfaCodeHint;
+
+  /// No description provided for @mfaCodeLengthError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o código de 6 dígitos'**
+  String get mfaCodeLengthError;
+
+  /// No description provided for @mfaConfirmPrompt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o código do aplicativo para confirmar:'**
+  String get mfaConfirmPrompt;
+
+  /// No description provided for @mfaDigitsFieldLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de 6 dígitos'**
+  String get mfaDigitsFieldLabel;
+
+  /// No description provided for @mfaExpiresIn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código expira em {seconds, plural, =1{1 segundo} other{{seconds} segundos}}'**
+  String mfaExpiresIn(num seconds);
+
+  /// No description provided for @mfaInitError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao inicializar MFA: {error}'**
+  String mfaInitError(Object error);
+
+  /// No description provided for @mfaInvalidCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código inválido. Tente novamente.'**
+  String get mfaInvalidCode;
+
+  /// No description provided for @mfaManualEntryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ou digite este código manualmente:'**
+  String get mfaManualEntryTitle;
+
+  /// No description provided for @mfaQrScanHelp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use seu aplicativo autenticador (Google Authenticator, Authy, etc.) para escanear este código QR:'**
+  String get mfaQrScanHelp;
+
+  /// No description provided for @mfaQrScanTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escaneie o QR Code'**
+  String get mfaQrScanTitle;
+
+  /// No description provided for @mfaSetupSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'MFA configurado com sucesso!'**
+  String get mfaSetupSuccess;
+
+  /// No description provided for @mfaSetupTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurar Autenticação em Dois Fatores'**
+  String get mfaSetupTitle;
+
+  /// No description provided for @mfaVerify.
+  ///
+  /// In pt, this message translates to:
+  /// **'Verificar'**
+  String get mfaVerify;
+
+  /// No description provided for @mfaVerifyAndEnable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Verificar e Activar'**
+  String get mfaVerifyAndEnable;
+
+  /// No description provided for @mfaVerifyError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao verificar código: {error}'**
+  String mfaVerifyError(Object error);
+
+  /// No description provided for @securityBiometricDisabledSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use impressão digital ou reconhecimento facial'**
+  String get securityBiometricDisabledSub;
+
+  /// No description provided for @securityBiometricEnabledSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'Activada — Impressão digital ou rosto'**
+  String get securityBiometricEnabledSub;
+
+  /// No description provided for @securityBiometricTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Autenticação Biométrica'**
+  String get securityBiometricTitle;
+
+  /// No description provided for @securityBiometricUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não disponível neste dispositivo'**
+  String get securityBiometricUnavailable;
+
+  /// No description provided for @securityTwoFactorDisabledSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicione uma camada extra de segurança'**
+  String get securityTwoFactorDisabledSub;
+
+  /// No description provided for @securityTwoFactorEnabledSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'Activada — Use um app autenticador'**
+  String get securityTwoFactorEnabledSub;
+
+  /// No description provided for @securityTwoFactorTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Autenticação em Dois Fatores'**
+  String get securityTwoFactorTitle;
+
+  /// No description provided for @transfersRowDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data'**
+  String get transfersRowDate;
+
+  /// No description provided for @transfersRowDest.
+  ///
+  /// In pt, this message translates to:
+  /// **'Destino'**
+  String get transfersRowDest;
+
+  /// No description provided for @transfersRowOrigin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Origem'**
+  String get transfersRowOrigin;
+
+  /// No description provided for @transfersRowStatus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estado'**
+  String get transfersRowStatus;
+
+  /// No description provided for @adminAddonsBulkActivated.
+  ///
+  /// In pt, this message translates to:
+  /// **'{addonName} activado em {count, plural, =1{1 tenant} other{{count} tenants}}'**
+  String adminAddonsBulkActivated(Object addonName, num count);
+
+  /// No description provided for @adminAddonsBulkDeactivated.
+  ///
+  /// In pt, this message translates to:
+  /// **'{addonName} desactivado em {count, plural, =1{1 tenant} other{{count} tenants}}'**
+  String adminAddonsBulkDeactivated(Object addonName, num count);
+
+  /// No description provided for @adminAddonsBulkSheetCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 tenant selecionado} other{{count} tenants selecionados}}'**
+  String adminAddonsBulkSheetCount(num count);
+
+  /// No description provided for @adminAddonsBulkSheetTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Activar add-on em lote'**
+  String get adminAddonsBulkSheetTitle;
+
+  /// No description provided for @adminAddonsListHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque num tenant para gerir os seus add-ons. Toque no ícone ✓ para seleção múltipla.'**
+  String get adminAddonsListHint;
+
+  /// No description provided for @adminAddOnsCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 add-on} other{{count} add-ons}}'**
+  String adminAddOnsCount(num count);
+
+  /// No description provided for @adminRevenueByAddOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receita por Add-on'**
+  String get adminRevenueByAddOn;
+
+  /// No description provided for @adminRevenueByCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Distribuição por Categoria'**
+  String get adminRevenueByCategory;
+
+  /// No description provided for @adminRevenuePerMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'potencial/mês'**
+  String get adminRevenuePerMonth;
+
+  /// No description provided for @adminPlanPerMonthSuffix.
+  ///
+  /// In pt, this message translates to:
+  /// **'/mês'**
+  String get adminPlanPerMonthSuffix;
+
+  /// No description provided for @adminTenantCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 tenant} other{{count} tenants}}'**
+  String adminTenantCount(num count);
+
+  /// No description provided for @adminTenantCycleActiveLeft.
+  ///
+  /// In pt, this message translates to:
+  /// **'Activo: {days, plural, =1{1 dia restante} other{{days} dias restantes}}'**
+  String adminTenantCycleActiveLeft(num days);
+
+  /// No description provided for @adminTenantCycleExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expirado'**
+  String get adminTenantCycleExpired;
+
+  /// No description provided for @adminTenantCycleExpiresIn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expira em {days, plural, =1{1 dia} other{{days} dias}}'**
+  String adminTenantCycleExpiresIn(num days);
+
+  /// No description provided for @adminTenantCycleTrialLeft.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trial: {days, plural, =1{1 dia restante} other{{days} dias restantes}}'**
+  String adminTenantCycleTrialLeft(num days);
 }
 
 class _AppLocalizationsDelegate

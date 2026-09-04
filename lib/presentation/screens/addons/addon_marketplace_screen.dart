@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/addon_localization.dart';
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../widgets/app_page.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/addon_providers.dart';
 import '../../controllers/auth_providers.dart';
@@ -23,6 +28,7 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final addOns = ref.watch(addOnCatalogProvider);
     final activeIds = ref.watch(activeAddOnIdsProvider).value ?? {};
 
@@ -37,18 +43,9 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
       MediaQuery.sizeOf(context).width,
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 64,
-        titleSpacing: AppSpacing.lg,
-        title: Text(
-          'Add-ons',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
-        ),
-      ),
+    return AppPage(
+      title: l10n.addonsTitle,
+      useSafeArea: false,
       body: ListView(
         padding: EdgeInsets.fromLTRB(
           horizontal,
@@ -60,7 +57,7 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: Text(
-              'Add-ons activos e disponíveis no seu plano',
+              l10n.addonsSubtitle,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -84,7 +81,7 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
-                    'A activação de add-ons é gerida pelo administrador do sistema.',
+                    l10n.addonsManagedByAdmin,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.tertiary,
                     ),
@@ -211,7 +208,7 @@ class _AddOnCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      addon.name,
+                      addonDisplayName(context.l10n, addon),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w400,
                         fontSize: 14,
@@ -221,7 +218,7 @@ class _AddOnCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      addon.description,
+                      addonDescription(context.l10n, addon),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -240,13 +237,13 @@ class _AddOnCard extends StatelessWidget {
                               vertical: 1,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF16A34A).withValues(alpha: 0.1),
+                              color: AppColors.success.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              'Incluído',
+                              context.l10n.addonsIncluded,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: const Color(0xFF16A34A),
+                                color: AppColors.success,
                                 fontWeight: FontWeight.w400,
                                 fontSize: 11,
                               ),
@@ -263,7 +260,7 @@ class _AddOnCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              'Activo',
+                              context.l10n.addonsActive,
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: scheme.primary,
                                 fontWeight: FontWeight.w400,
@@ -273,7 +270,7 @@ class _AddOnCard extends StatelessWidget {
                           ),
                         if (isIncluded || isActive) const SizedBox(width: 6),
                         Text(
-                          isIncluded ? '' : _formatPrice(addon.priceMonthlyCents),
+                          isIncluded ? '' : _formatPrice(addon.priceMonthlyCents, context.l10n),
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
                             fontWeight: FontWeight.w300,
@@ -298,10 +295,11 @@ class _AddOnCard extends StatelessWidget {
     );
   }
 
-  String _formatPrice(int cents) {
+  String _formatPrice(int cents, AppLocalizations l10n) {
     final value = cents / 100;
-    return '${value.toStringAsFixed(0)} MT/mês';
+    return l10n.addonsPerMonth(value.toStringAsFixed(0));
   }
+
 
   IconData _iconForName(String name) {
     switch (name) {

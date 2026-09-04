@@ -193,10 +193,12 @@ void main() {
  );
  await tester.tap(find.widgetWithText(FilledButton, 'Cadastrar cliente'));
  await tester.pumpAndSettle();
-
- expect(find.text('Informe um e-mail válido.'), findsOneWidget);
- // O sheet continua aberto (não submeteu).
- expect(find.text('Novo cliente'), findsOneWidget);
+    expect(find.text('Informe um e-mail válido.'), findsOneWidget);
+    // O sheet continua aberto (não submeteu) — o botão de envio segue lá.
+    expect(
+      find.widgetWithText(FilledButton, 'Cadastrar cliente'),
+      findsOneWidget,
+    );
  });
 
  // Rotação (UI): aba Clientes em paisagem — busca e lista seguem

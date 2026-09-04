@@ -84,9 +84,8 @@ void main() {
  testWidgets('chama o signIn com as credenciais informadas', (tester) async {
  final repository = _FakeAuthRepository();
  await tester.pumpWidget(_buildApp(repository));
-
- await tester.enterText(find.byType(TextFormField).at(0), 'dono@loja.com');
- await tester.enterText(find.byType(TextFormField).at(1), 'segredo123');
+    await tester.enterText(find.byType(TextField).at(0), 'dono@loja.com');
+    await tester.enterText(find.byType(TextField).at(1), 'segredo123');
 
  await tester.tap(find.text('Entrar'));
  await tester.pumpAndSettle();
@@ -99,9 +98,8 @@ void main() {
  final repository = _FakeAuthRepository()
  ..errorToThrow = Exception('credenciais inválidas');
  await tester.pumpWidget(_buildApp(repository));
-
- await tester.enterText(find.byType(TextFormField).at(0), 'dono@loja.com');
- await tester.enterText(find.byType(TextFormField).at(1), 'segredo123');
+    await tester.enterText(find.byType(TextField).at(0), 'dono@loja.com');
+    await tester.enterText(find.byType(TextField).at(1), 'segredo123');
 
  await tester.tap(find.text('Entrar'));
  await tester.pumpAndSettle();
@@ -127,32 +125,33 @@ void main() {
  tester,
  ) async {
  final repository = _FakeAuthRepository();
- await tester.pumpWidget(_buildApp(repository));
+ await tester.pumpWidget(_buildApp(repository));    // Muda para o modo cadastro (link é um RichText; pode estar abaixo da
+    // viewport de teste — rola até ele antes de tocar).
+    final signUpLink = find.textContaining(
+      'Ainda não tem uma conta?',
+      findRichText: true,
+    );
+    await tester.ensureVisible(signUpLink);
+    await tester.tap(signUpLink);
+    await tester.pumpAndSettle();
 
- // Muda para o modo cadastro.
- await tester.tap(find.text('Não tenho conta — cadastrar'));
- await tester.pumpAndSettle();
-
- await tester.enterText(find.byType(TextFormField).at(0), 'Dono Teste');
- await tester.enterText(find.byType(TextFormField).at(1), 'dono@loja.com');
- // sem maiúscula e sem símbolo → falha a política do provedor.
- await tester.enterText(find.byType(TextFormField).at(2), 'senha123');
- await tester.enterText(find.byType(TextFormField).at(3), 'senha123');
+    await tester.enterText(find.byType(TextField).at(0), 'Dono Teste');
+    await tester.enterText(find.byType(TextField).at(1), 'dono@loja.com');
+    // sem maiúscula e sem símbolo → falha a política do provedor.
+    await tester.enterText(find.byType(TextField).at(2), 'senha123');
+    await tester.enterText(find.byType(TextField).at(3), 'senha123');
 
  // O formulário de cadastro fica num SingleChildScrollView e o botão pode
  // estar abaixo da viewport de teste (600px) — rola até ele antes de tocar.
  await tester.ensureVisible(find.text('Cadastrar'));
  await tester.tap(find.text('Cadastrar'));
  await tester.pumpAndSettle();
-
- expect(
- find.text(
- 'A senha deve conter letras minúsculas, maiúsculas, números e símbolos.',
- ),
- findsOneWidget,
- );
- // Nada foi enviado ao repositório.
- expect(repository.signUpErrorToThrow, isNull);
+    expect(
+      find.text('A senha deve conter letras, números e símbolos.'),
+      findsOneWidget,
+    );
+    // Nada foi enviado ao repositório.
+    expect(repository.signUpErrorToThrow, isNull);
  });
 
  testWidgets(
@@ -165,49 +164,57 @@ void main() {
  statusCode: '422',
  reasons: ['characters'],
  );
- await tester.pumpWidget(_buildApp(repository));
+ await tester.pumpWidget(_buildApp(repository));    // Muda para o modo cadastro (link é um RichText; pode estar abaixo da
+    // viewport de teste — rola até ele antes de tocar).
+    final signUpLink = find.textContaining(
+      'Ainda não tem uma conta?',
+      findRichText: true,
+    );
+    await tester.ensureVisible(signUpLink);
+    await tester.tap(signUpLink);
+    await tester.pumpAndSettle();
 
- // Muda para o modo cadastro.
- await tester.tap(find.text('Não tenho conta — cadastrar'));
- await tester.pumpAndSettle();
-
- await tester.enterText(find.byType(TextFormField).at(0), 'Dono Teste');
- await tester.enterText(find.byType(TextFormField).at(1), 'dono@loja.com');
- // Senha forte passa na validação local; o servidor (fake) rejeita.
- await tester.enterText(find.byType(TextFormField).at(2), 'Senha1234!');
- await tester.enterText(find.byType(TextFormField).at(3), 'Senha1234!');
+    await tester.enterText(find.byType(TextField).at(0), 'Dono Teste');
+    await tester.enterText(find.byType(TextField).at(1), 'dono@loja.com');
+    // Senha forte passa na validação local; o servidor (fake) rejeita.
+    await tester.enterText(find.byType(TextField).at(2), 'Senha1234!');
+    await tester.enterText(find.byType(TextField).at(3), 'Senha1234!');
 
  await tester.ensureVisible(find.text('Cadastrar'));
  await tester.tap(find.text('Cadastrar'));
  await tester.pumpAndSettle();
-
- expect(
- find.text(
- 'A senha deve conter letras minúsculas, maiúsculas, números e símbolos.',
- ),
- findsOneWidget,
- );
- },
- );
+    expect(
+      find.text('A senha deve conter letras, números e símbolos.'),
+      findsOneWidget,
+    );
+  },
+);
 
  testWidgets(
  'Esqueceu a senha? envia o link de redefinição (e valida o e-mail)',
  (tester) async {
  final repository = _FakeAuthRepository();
- await tester.pumpWidget(_buildApp(repository));
+ await tester.pumpWidget(_buildApp(repository));    // O link só existe no modo login (cadastro não tem redefinição).
+    // O link é um RichText — busca por trecho do texto.
+    await tester.ensureVisible(
+      find.textContaining('Ainda não tem uma conta?', findRichText: true),
+    );
+    await tester.tap(
+      find.textContaining('Ainda não tem uma conta?', findRichText: true),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Esqueceu sua senha?'), findsNothing);
 
- // O link só existe no modo login (cadastro não tem redefinição).
- await tester.ensureVisible(find.text('Não tenho conta — cadastrar'));
- await tester.tap(find.text('Não tenho conta — cadastrar'));
+    // De volta ao login: o link aparece e abre a sheet.
+    await tester.ensureVisible(
+      find.textContaining('Já tem uma conta?', findRichText: true),
+    );
+    await tester.tap(
+      find.textContaining('Já tem uma conta?', findRichText: true),
+    );
  await tester.pumpAndSettle();
- expect(find.text('Esqueceu a senha?'), findsNothing);
-
- // De volta ao login: o link aparece e abre a sheet.
- await tester.ensureVisible(find.text('Já tenho conta — entrar'));
- await tester.tap(find.text('Já tenho conta — entrar'));
- await tester.pumpAndSettle();
- await tester.ensureVisible(find.text('Esqueceu a senha?'));
- await tester.tap(find.text('Esqueceu a senha?'));
+ await tester.ensureVisible(find.text('Esqueceu sua senha?'));
+ await tester.tap(find.text('Esqueceu sua senha?'));
  await tester.pumpAndSettle();
 
  expect(find.byType(ForgotPasswordSheet), findsOneWidget);
@@ -237,10 +244,10 @@ void main() {
  await tester.pumpAndSettle();
 
  expect(repository.lastResetEmail, 'dono@loja.com');
- expect(
- find.textContaining('enviamos um link para redefinir a senha'),
- findsOneWidget,
- );
+    expect(
+      find.textContaining('Se existir uma conta, enviamos um link'),
+      findsOneWidget,
+    );
  },
  );
 
@@ -252,26 +259,27 @@ void main() {
  'email rate limit exceeded',
  statusCode: '429',
  );
- await tester.pumpWidget(_buildApp(repository));
+ await tester.pumpWidget(_buildApp(repository));    // Muda para o modo cadastro (link é um RichText; pode estar abaixo da
+    // viewport de teste — rola até ele antes de tocar).
+    final signUpLink = find.textContaining(
+      'Ainda não tem uma conta?',
+      findRichText: true,
+    );
+    await tester.ensureVisible(signUpLink);
+    await tester.tap(signUpLink);
+    await tester.pumpAndSettle();
 
- // Muda para o modo cadastro.
- await tester.tap(find.text('Não tenho conta — cadastrar'));
- await tester.pumpAndSettle();
-
- await tester.enterText(find.byType(TextFormField).at(0), 'Dono Teste');
- await tester.enterText(find.byType(TextFormField).at(1), 'dono@loja.com');
- await tester.enterText(find.byType(TextFormField).at(2), 'Senha1234!');
- await tester.enterText(find.byType(TextFormField).at(3), 'Senha1234!');
+    await tester.enterText(find.byType(TextField).at(0), 'Dono Teste');
+    await tester.enterText(find.byType(TextField).at(1), 'dono@loja.com');
+    await tester.enterText(find.byType(TextField).at(2), 'Senha1234!');
+    await tester.enterText(find.byType(TextField).at(3), 'Senha1234!');
 
  await tester.ensureVisible(find.text('Cadastrar'));
  await tester.tap(find.text('Cadastrar'));
  await tester.pumpAndSettle();
-
- expect(
- find.text(
- 'Muitas tentativas seguidas. Aguarde cerca de 1 hora e tente novamente.',
- ),
- findsOneWidget,
- );
+    expect(
+      find.text('Muitas tentativas. Aguarde 1 hora e tente novamente.'),
+      findsOneWidget,
+    );
  });
 }

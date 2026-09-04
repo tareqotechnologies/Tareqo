@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/app_settings.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../domain/entities/plan.dart';
@@ -20,6 +21,8 @@ import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_page.dart';
+import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
@@ -116,17 +119,9 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  final index = _tabController.index;
  final showFab = index != 2 && index != 3;
 
- return Scaffold(
- // AppBar estilo iOS large title — mesmo padrão das demais telas.
- appBar: AppBar(
- title: Text(
- l10n.storesTitle,
- style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w500,
- letterSpacing: -0.5,
- ),
- ),
- ),
+ return AppPage(
+ title: l10n.storesTitle,
+ useSafeArea: false,
  // A tela é empurrada por cima do AppShell (fora da casca). A escolha
  // da loja ativa ficou na aba Ajustes (seção "Loja ativa" abaixo).
  body: StoreScopedContent(
@@ -222,7 +217,12 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  );
  }
  return ListView.separated(
- padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
+ padding: EdgeInsets.fromLTRB(
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 12,
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 96,
+ ),
  itemCount: stores.length,
  separatorBuilder: (_, _) => const SizedBox(height: 8),      itemBuilder: (context, index) {
  final store = stores[index];
@@ -322,7 +322,12 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  }
 
  return ListView.separated(
- padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
+ padding: EdgeInsets.fromLTRB(
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 12,
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 96,
+ ),
  itemCount: employees.length,
  separatorBuilder: (_, _) => const SizedBox(height: 8),      itemBuilder: (context, index) {
           final employee = employees[index];
@@ -415,29 +420,14 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
   /// Confirma e ativa/desativa o funcionário (só o dono chega aqui).
  Future<void> _toggleEmployee(StoreEmployee employee, bool isActive) async {
  final l10n = context.l10n;
- final confirmed = await showDialog<bool>(
- context: context,
- builder: (context) => AlertDialog(
- title: Text(
- isActive
+ final confirmed = await showConfirmDialog(
+ context,
+ title: isActive
  ? l10n.employeeReactivateConfirm(employee.fullName)
  : l10n.employeeDeactivateConfirm(employee.fullName),
- ),
- actions: [
- TextButton(
- onPressed: () => Navigator.of(context).pop(false),
- child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
- ),
- // AppButton (design system ultra-clean): altura 48, cantos 12,
- // texto w400 — a confirmação segue o padrão dos demais diálogos.
- AppButton.primary(
- onPressed: () => Navigator.of(context).pop(true),
- label: isActive
+ confirmLabel: isActive
  ? l10n.employeeReactivateAction
  : l10n.employeeDeactivateAction,
- ),
- ],
- ),
  );
  if (confirmed != true || !mounted) return;
 
@@ -458,18 +448,28 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  ),
  ),
  );
- } on EmployeeNotFoundException catch (error) {
+ } on EmployeeNotFoundException catch (error, stackTrace) {
+ CrashReporting.capture(
+ error,
+ stackTrace,
+ hint: 'Funcionário não encontrado ao alterar estado',
+ );
  if (!mounted) return;
  ScaffoldMessenger.of(
  context,
- ).showSnackBar(SnackBar(content: Text(error.message)));
- } catch (error) {
- // Supabase: o RPC pode rejeitar (não-dono, rede) — a mensagem já
- // vem amigável do datasource; cai aqui sem derrubar a tela.
+ ).showSnackBar(SnackBar(content: Text(l10n.employeesUpdateError)));
+ } catch (error, stackTrace) {
+ // Supabase: o RPC pode rejeitar (não-dono, rede) — cai aqui sem
+ // derrubar a tela; mensagem amigável em vez de erro cru.
+ CrashReporting.capture(
+ error,
+ stackTrace,
+ hint: 'Falha ao alterar estado do funcionário',
+ );
  if (!mounted) return;
  ScaffoldMessenger.of(
  context,
- ).showSnackBar(SnackBar(content: Text('$error')));
+ ).showSnackBar(SnackBar(content: Text(l10n.employeesUpdateError)));
  }
  }
 
@@ -498,7 +498,12 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
  );
  }
  return ListView.separated(
- padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
+ padding: EdgeInsets.fromLTRB(
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 12,
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 96,
+ ),
  itemCount: requests.length,
  separatorBuilder: (_, _) => const SizedBox(height: 8),
  itemBuilder: (context, index) {
@@ -567,7 +572,12 @@ class _PlanCard extends StatelessWidget {
  final scheme = theme.colorScheme;
  final l10n = context.l10n;    return Container(
       width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+      margin: EdgeInsets.fromLTRB(
+      AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+      12,
+      AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+      4,
+    ),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: scheme.primaryContainer.withValues(alpha: 0.5),
@@ -1413,25 +1423,22 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
  : ref.watch(activeStoreIdProvider(user.id));
 
  return ListView(
- padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+ padding: EdgeInsets.fromLTRB(
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 16,
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 96,
+ ),
  children: [
  // LOJA ATIVA — só com 2+ lojas E usuário logado há o que escolher
  // (com uma única loja não existe seletor, o mesmo critério do
  // banner antigo). O guard `user != null` espelha a linha do
  // `activeStoreId` acima — sem `!` no callback.
- if (user != null && stores.length > 1) ...[
- Text(
- l10n.storeSelectorSectionTitle,
- style: theme.textTheme.titleSmall,
- ),
- const SizedBox(height: 4),
- Text(
- l10n.storeSelectorSectionHint,
- style: theme.textTheme.bodySmall?.copyWith(
- color: theme.colorScheme.onSurfaceVariant,
- ),
- ),
- const SizedBox(height: 8),
+ if (user != null && stores.length > 1) ...[            Text(
+              l10n.storeSelectorSectionTitle,
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
  Wrap(
  spacing: 8,
  runSpacing: 8,

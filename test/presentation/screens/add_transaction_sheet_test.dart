@@ -85,12 +85,10 @@ void main() {
  'Venda à vista',
  );
  await tester.enterText(
- find.widgetWithText(TextFormField, 'Valor').first,
- '120,50',
- );
-
- await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
- await tester.pumpAndSettle();
+ find.widgetWithText(TextFormField, 'Valor').first,  '120,50',
+  );
+  await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
+  await tester.pumpAndSettle();
 
  expect(useCase.calls, 1);
  expect(useCase.lastTransaction?.description, 'Venda à vista');
@@ -106,9 +104,8 @@ void main() {
 
  await tester.pumpWidget(_buildApp(useCase));
  await _openSheet(tester);
-
- await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
- await tester.pumpAndSettle();
+  await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
+  await tester.pumpAndSettle();
 
  expect(find.text('Informe a descrição.'), findsOneWidget);
  expect(find.text('Informe um valor maior que zero.'), findsOneWidget);
@@ -124,12 +121,10 @@ void main() {
  'Compra de material',
  );
  await tester.enterText(
- find.widgetWithText(TextFormField, 'Valor').first,
- '10',
- );
-
- await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
- await tester.pumpAndSettle();
+ find.widgetWithText(TextFormField, 'Valor').first,  '10',
+  );
+  await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
+  await tester.pumpAndSettle();
 
  expect(find.text('Valor inválido.'), findsOneWidget);
  });
@@ -148,13 +143,11 @@ void main() {
  '10',
  );
 
- await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
- await tester.pumpAndSettle();
-
- expect(
- find.text('Não foi possível registrar a movimentação. Tente novamente.'),
- findsOneWidget,
- );
+ await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));  await tester.pumpAndSettle();
+  expect(
+      find.text('Não foi possível registrar. Tente novamente.'),
+      findsOneWidget,
+    );
  });
 
  testWidgets('marcar como pendente envia status pending', (tester) async {
@@ -175,9 +168,8 @@ void main() {
  // Ativa o switch "Pendente (fiado)".
  await tester.tap(find.text('Pendente (fiado)'));
  await tester.pumpAndSettle();
-
- await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
- await tester.pumpAndSettle();
+  await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
+  await tester.pumpAndSettle();
 
  expect(useCase.lastTransaction?.status, TransactionStatus.pending);
  });

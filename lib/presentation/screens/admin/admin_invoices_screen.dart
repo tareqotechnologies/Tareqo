@@ -9,9 +9,12 @@ import '../../../domain/entities/plan.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/admin_providers.dart';
 import '../../controllers/invoice_providers.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/list_skeleton.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/status_chip.dart';
@@ -53,23 +56,17 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
         : (allAsync.value ?? const <Invoice>[]);
     final filtered = _filterInvoices(invoices, tenants, plans);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.adminInvoicesTitle,
-          style: theme.textTheme.labelMedium?.copyWith(
-            letterSpacing: -0.5,
+    return AppPage(
+      title: l10n.adminInvoicesTitle,
+      useSafeArea: false,
+      actions: [
+        TextButton(
+          onPressed: () => setState(() => _showPendingOnly = !_showPendingOnly),
+          child: Text(
+            _showPendingOnly ? l10n.adminAll : l10n.adminPendingOnly,
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => setState(() => _showPendingOnly = !_showPendingOnly),
-            child: Text(
-              _showPendingOnly ? l10n.adminAll : l10n.adminPendingOnly,
-            ),
-          ),
-        ],
-      ),
+      ],
       body: Column(
         children: [
           // Barra de busca
@@ -158,7 +155,7 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
     String emptyMessage,
   ) {
     return asyncValue.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const ListSkeleton(items: 5),
       error: (error, _) => ErrorView(
         message: context.l10n.adminInvoicesLoadError,
         details: error.toString(),
@@ -259,22 +256,11 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
 
   Future<bool?> _confirmCancel(Invoice invoice) {
     final l10n = context.l10n;
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.adminInvoiceCancelTitle),
-        content: Text(l10n.adminInvoiceCancelConfirm(invoice.period)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.commonCancel),
-          ),
-          AppButton.primary(
-            onPressed: () => Navigator.of(context).pop(true),
-            label: l10n.adminInvoiceCancelConfirmButton,
-          ),
-        ],
-      ),
+    return showConfirmDialog(
+      context,
+      title: l10n.adminInvoiceCancelTitle,
+      message: l10n.adminInvoiceCancelConfirm(invoice.period),
+      confirmLabel: l10n.adminInvoiceCancelConfirmButton,
     );
   }
 

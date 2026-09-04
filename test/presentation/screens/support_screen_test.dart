@@ -79,11 +79,10 @@ void main() {
 
  expect(find.text('Ajuda'), findsOneWidget); // AppBar
  expect(find.text('Guia do Usuário'), findsOneWidget);
- expect(find.text('Troubleshooting'), findsOneWidget);
- // Dicas de cada documento (hints) presentes.
- expect(find.textContaining('Manual simples e completo'), findsOneWidget);
- expect(find.textContaining('Resolução de problemas comuns'),
- findsOneWidget);
+ expect(find.text('Troubleshooting'), findsOneWidget);    // Dicas de cada documento (hints) presentes.
+    expect(find.textContaining('Login, lojas, produtos'), findsOneWidget);
+    expect(find.textContaining('Problemas comuns: login'),
+        findsOneWidget);
  });
 
  testWidgets('abre o Guia do Usuário (pt) no leitor interno',

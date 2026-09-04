@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/audit_entry.dart';
 import '../../../domain/entities/store.dart';
@@ -16,8 +18,10 @@ import '../../controllers/addon_providers.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
-import '../../widgets/app_text_field.dart';
+import '../../widgets/app_page.dart';
+import '../../widgets/dialogs.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/list_skeleton.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/status_chip.dart';
@@ -26,16 +30,19 @@ import '../../../core/observability/crash_reporting.dart';
 /// Painel do super admin — aprovar/rejeitar solicitações de acesso de
 /// novos tenants e acompanhar o histórico de decisões.
 class AdminTenantsScreen extends ConsumerStatefulWidget {
- const AdminTenantsScreen({super.key});
+  const AdminTenantsScreen({super.key});
 
- @override
- ConsumerState<AdminTenantsScreen> createState() => _AdminTenantsScreenState();
-}class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
+  @override
+  ConsumerState<AdminTenantsScreen> createState() => _AdminTenantsScreenState();
+}
+
+class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
   bool _showAll = false;
   bool _selectionMode = false;
   final _selectedIds = <String>{};
   final _searchController = TextEditingController();
-  String _searchQuery = '';  @override
+  String _searchQuery = '';
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -141,7 +148,9 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
         ),
       ),
     );
-  }  @override
+  }
+
+  @override
   Widget build(BuildContext context) {
     final pendingAsync = ref.watch(pendingTenantsProvider);
     final allAsync = ref.watch(allTenantsProvider);
@@ -156,326 +165,312 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
         ? _filterTenants(displayList).length
         : displayList.length;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.adminTenantsTitle,
-          style: theme.textTheme.labelMedium?.copyWith(
-            letterSpacing: -0.5,
-          ),
+    return AppPage(
+      title: l10n.adminTenantsTitle,
+      actions: [
+        TextButton(
+          onPressed: () => setState(() => _showAll = !_showAll),
+          child: Text(_showAll ? l10n.adminPendingOnly : l10n.adminAll),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => setState(() => _showAll = !_showAll),
-            child: Text(_showAll ? l10n.adminPendingOnly : l10n.adminAll),
-          ),
-        ],
-      ),
-     body: Stack(
-       children: [
-         Column(
-           children: [
-             // Barra de busca com contagem
-             Padding(
-               padding: const EdgeInsets.fromLTRB(
-                 AppSpacing.lg,
-                 AppSpacing.xs,
-                 AppSpacing.lg,
-                 AppSpacing.xs,
-               ),
-               child: Row(
-                 children: [
-                   Expanded(
-                     child: SearchField(
-                       controller: _searchController,
-                       hintText: l10n.adminTenantSearchHint,
-                       onChanged: (value) => setState(() => _searchQuery = value),
-                     ),
-                   ),
-                   if (_searchQuery.isNotEmpty) ...[
-                     const SizedBox(width: AppSpacing.xs),
-                     GestureDetector(
-                       onTap: () {
-                         _searchController.clear();
-                         setState(() => _searchQuery = '');
-                       },
-                       child: Container(
-                         padding: const EdgeInsets.all(6),
-                         decoration: BoxDecoration(
-                           color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                           borderRadius: BorderRadius.circular(999),
-                         ),
-                         child: Icon(
-                           Icons.close,
-                           size: 16,
-                           color: scheme.onSurfaceVariant,
-                         ),
-                       ),
-                     ),
-                   ],
-                   if (_searchQuery.isNotEmpty) ...[
-                     const SizedBox(width: AppSpacing.xs),
-                     Container(
-                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                       decoration: BoxDecoration(
-                         color: scheme.primaryContainer.withValues(alpha: 0.5),
-                         borderRadius: BorderRadius.circular(999),
-                       ),
-                       child: Text(
-                         '$filteredCount',
-                         style: theme.textTheme.labelSmall?.copyWith(
-                           color: scheme.primary,
-                           fontFeatures: const [FontFeature.tabularFigures()],
-                         ),
-                       ),
-                     ),
-                   ],
-                 ],
-               ),
-             ),
-          if (!_showAll && pending.isNotEmpty && !_selectionMode)
-            Container(
-              margin: const EdgeInsets.fromLTRB(20, 4, 20, 4),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .tertiaryContainer
-                    .withValues(alpha: 0.4),
-                borderRadius: AppRadius.smAll,
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.tertiary,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: Text(
-                      l10n.adminAwaitingCount(pending.length),
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.tertiary,
-                          ),
+      ],
+      useSafeArea: false,
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              // Barra de busca com contagem
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.xs,
+                  AppSpacing.lg,
+                  AppSpacing.xs,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SearchField(
+                        controller: _searchController,
+                        hintText: l10n.adminTenantSearchHint,
+                        onChanged: (value) =>
+                            setState(() => _searchQuery = value),
+                      ),
                     ),
+                    if (_searchQuery.isNotEmpty) ...[
+                      const SizedBox(width: AppSpacing.xs),
+                      GestureDetector(
+                        onTap: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: scheme.surfaceContainerHighest.withValues(
+                              alpha: 0.5,
+                            ),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            size: 16,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (_searchQuery.isNotEmpty) ...[
+                      const SizedBox(width: AppSpacing.xs),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: scheme.primaryContainer.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          '$filteredCount',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.primary,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (!_showAll && pending.isNotEmpty && !_selectionMode)
+                Container(
+                  margin: const EdgeInsets.fromLTRB(20, 4, 20, 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
                   ),
-                ],
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+                    borderRadius: AppRadius.smAll,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.tertiary,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Expanded(
+                        child: Text(
+                          l10n.adminAwaitingCount(pending.length),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.tertiary,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (_selectionMode && !_showAll)
+                _SelectionBar(
+                  selectedCount: _selectedIds.length,
+                  totalCount: pending.length,
+                  onSelectAll: () => _selectAll(_filterTenants(pending)),
+                  onApprove: _bulkApprove,
+                  onReject: _bulkReject,
+                  onCancel: _exitSelectionMode,
+                ),
+              Expanded(
+                child: _showAll
+                    ? _buildList(context, allAsync, l10n.adminTenantsEmpty)
+                    : _buildPendingList(context, pendingAsync),
               ),
-            ),
-          if (_selectionMode && !_showAll)
-            _SelectionBar(
-              selectedCount: _selectedIds.length,
-              totalCount: pending.length,
-              onSelectAll: () => _selectAll(
-                _filterTenants(pending),
-              ),
-              onApprove: _bulkApprove,
-              onReject: _bulkReject,
-              onCancel: _exitSelectionMode,
-            ),
-          Expanded(
-            child: _showAll
-                ? _buildList(context, allAsync, l10n.adminTenantsEmpty)
-                : _buildPendingList(context, pendingAsync),
+            ],
           ),
         ],
       ),
-    ],
-  ),
- );
- }
+    );
+  }
 
- /// Nome do plano pelo id (usa o provider de todos os planos).
- String _plansById(String id) =>
- ref
- .watch(allPlansProvider)
- .value
- ?.where((plan) => plan.id == id)
- .firstOrNull
- ?.name ??
- id;
+  /// Nome do plano pelo id (usa o provider de todos os planos).
+  String _plansById(String id) =>
+      ref
+          .watch(allPlansProvider)
+          .value
+          ?.where((plan) => plan.id == id)
+          .firstOrNull
+          ?.name ??
+      id;
 
- Widget _buildPendingList(
- BuildContext context,
- AsyncValue<List<Tenant>> async,
- ) {
- final l10n = context.l10n;
+  Widget _buildPendingList(
+    BuildContext context,
+    AsyncValue<List<Tenant>> async,
+  ) {
+    final l10n = context.l10n;
 
- return async.when(
- loading: () => const Center(child: CircularProgressIndicator()),
- error: (error, _) => ErrorView(
- message: l10n.adminRequestsLoadError,
- details: error.toString(),
- onRetry: () => ref.invalidate(pendingTenantsProvider),
- ),
- data: (tenants) {
- final filtered = _filterTenants(tenants);
- if (filtered.isEmpty) {
- return EmptyState(
- icon: Icons.task_alt,
- title: _searchQuery.isNotEmpty
- ? l10n.commonNoResults
-           : l10n.adminNothingPendingTitle,
- subtitle: _searchQuery.isNotEmpty
- ? l10n.commonNoResultsHint
-           : l10n.adminNothingPendingSubtitle,
- );
- }
- return RefreshIndicator(
- onRefresh: () => ref.read(pendingTenantsProvider.notifier).refresh(),
- child: ListView.separated(
- padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
- physics: const AlwaysScrollableScrollPhysics(),
- itemCount: filtered.length,
- separatorBuilder: (_, _) => const SizedBox(height: 8),      itemBuilder: (context, index) {
-        final tenant = filtered[index];
-        final isSelected = _selectedIds.contains(tenant.id);
-        return _PendingTenantCard(
-          tenant: tenant,
-          planName: _plansById(tenant.planId),
-          selected: isSelected,
-          selectionMode: _selectionMode,
-          onSelect: () => _toggleSelection(tenant.id),
-          onLongPress: () => _enterSelectionMode(tenant.id),
-          onApprove: _selectionMode
-              ? null
-              : () => _decide(tenant, approve: true),
-          onReject: _selectionMode
-              ? null
-              : () => _decide(tenant, approve: false),
-          onTap: _selectionMode
-              ? () => _toggleSelection(tenant.id)
-              : () => _showTenantDetail(tenant),
+    return async.when(
+      loading: () => const ListSkeleton(items: 5),
+      error: (error, _) => ErrorView(
+        message: l10n.adminRequestsLoadError,
+        details: error.toString(),
+        onRetry: () => ref.invalidate(pendingTenantsProvider),
+      ),
+      data: (tenants) {
+        final filtered = _filterTenants(tenants);
+        if (filtered.isEmpty) {
+          return EmptyState(
+            icon: Icons.task_alt,
+            title: _searchQuery.isNotEmpty
+                ? l10n.commonNoResults
+                : l10n.adminNothingPendingTitle,
+            subtitle: _searchQuery.isNotEmpty
+                ? l10n.commonNoResultsHint
+                : l10n.adminNothingPendingSubtitle,
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: () => ref.read(pendingTenantsProvider.notifier).refresh(),
+          child: ListView.separated(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: filtered.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final tenant = filtered[index];
+              final isSelected = _selectedIds.contains(tenant.id);
+              return _PendingTenantCard(
+                tenant: tenant,
+                planName: _plansById(tenant.planId),
+                selected: isSelected,
+                selectionMode: _selectionMode,
+                onSelect: () => _toggleSelection(tenant.id),
+                onLongPress: () => _enterSelectionMode(tenant.id),
+                onApprove: _selectionMode
+                    ? null
+                    : () => _decide(tenant, approve: true),
+                onReject: _selectionMode
+                    ? null
+                    : () => _decide(tenant, approve: false),
+                onTap: _selectionMode
+                    ? () => _toggleSelection(tenant.id)
+                    : () => _showTenantDetail(tenant),
+              );
+            },
+          ),
         );
       },
- ),
- );
- },
- );
- }
+    );
+  }
 
- Widget _buildList(
- BuildContext context,
- AsyncValue<List<Tenant>> async,
- String emptyMessage,
- ) {
- final theme = Theme.of(context);
- final scheme = theme.colorScheme;
- final l10n = context.l10n;
-
- return async.when(
- loading: () => const Center(child: CircularProgressIndicator()),
- error: (error, _) => ErrorView(
- message: l10n.adminTenantsLoadError,
- details: error.toString(),
- onRetry: () => ref.invalidate(allTenantsProvider),
- ),
- data: (tenants) {
- final filtered = _filterTenants(tenants);
- if (filtered.isEmpty) {
- return EmptyState(
- icon: Icons.business_outlined,
- title: _searchQuery.isNotEmpty
- ? l10n.commonNoResults
-           : emptyMessage,
- subtitle: _searchQuery.isNotEmpty ? l10n.commonNoResultsHint : null,
- );
- }
- return ListView.separated(
- padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
- itemCount: filtered.length,
- separatorBuilder: (_, _) => const SizedBox(height: 8),
- itemBuilder: (context, index) {
- final tenant = filtered[index];
- final (color, label) = switch (tenant.status) {
- TenantStatus.pending => (scheme.tertiary, l10n.statusPending),
- TenantStatus.approved => (scheme.primary, l10n.statusApproved),
- TenantStatus.rejected => (scheme.error, l10n.statusRejected),
- };        return _AdminTenantCard(
-          tenant: tenant,
-          color: color,
-          label: label,
-          planName: _plansById(tenant.planId),
-          onTap: () => _showTenantDetail(tenant),
-        );
-    },
- );
- },
- );
- }
-
- Future<void> _decide(Tenant tenant, {required bool approve}) async {
- final messenger = ScaffoldMessenger.of(context);
- final l10n = context.l10n;
- if (!approve) {
- final reason = await _askRejectionReason(tenant.businessName);
- if (reason == null) return;
- try {
- await ref.read(rejectTenantUseCaseProvider).call(tenant.id, reason);
- } catch (error, stackTrace) {
- CrashReporting.capture(
-   error,
-   stackTrace,
-   hint: 'Erro ao rejeitar tenant',
- );
- messenger.showSnackBar(SnackBar(content: Text(l10n.adminRejectError)));
- return;
- }
- } else {
- try {
- await ref.read(approveTenantUseCaseProvider).call(tenant.id);
- } catch (error, stackTrace) {
- CrashReporting.capture(
-   error,
-   stackTrace,
-   hint: 'Erro ao aprovar tenant',
- );
- messenger.showSnackBar(SnackBar(content: Text(l10n.adminApproveError)));
- return;
- }
- }
-
- if (!mounted) return;
- await ref.read(pendingTenantsProvider.notifier).refresh();
- await ref.read(allTenantsProvider.notifier).refresh();
- messenger.showSnackBar(
- SnackBar(
-   content: Text(
-     approve
-         ? l10n.adminAccessApproved(tenant.businessName)
-         : l10n.adminRequestRejected(tenant.businessName),
-   ),
- ),
- );
- }  Future<String?> _askRejectionReason(String businessName) {
+  Widget _buildList(
+    BuildContext context,
+    AsyncValue<List<Tenant>> async,
+    String emptyMessage,
+  ) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
-    final controller = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.adminRejectTitle(businessName)),
-        content: AppTextField(
-          controller: controller,
-          maxLines: 3,
-          autofocus: true,
-          label: l10n.adminRejectReasonLabel,
-          hintText: l10n.adminRejectReasonHint,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.commonCancel),
-          ),
-          AppButton.primary(
-            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-            label: l10n.adminReject,
-          ),
-        ],
+
+    return async.when(
+      loading: () => const ListSkeleton(items: 5),
+      error: (error, _) => ErrorView(
+        message: l10n.adminTenantsLoadError,
+        details: error.toString(),
+        onRetry: () => ref.invalidate(allTenantsProvider),
       ),
+      data: (tenants) {
+        final filtered = _filterTenants(tenants);
+        if (filtered.isEmpty) {
+          return EmptyState(
+            icon: Icons.business_outlined,
+            title: _searchQuery.isNotEmpty
+                ? l10n.commonNoResults
+                : emptyMessage,
+            subtitle: _searchQuery.isNotEmpty ? l10n.commonNoResultsHint : null,
+          );
+        }
+        return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          itemCount: filtered.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            final tenant = filtered[index];
+            final (color, label) = switch (tenant.status) {
+              TenantStatus.pending => (scheme.tertiary, l10n.statusPending),
+              TenantStatus.approved => (scheme.primary, l10n.statusApproved),
+              TenantStatus.rejected => (scheme.error, l10n.statusRejected),
+            };
+            return _AdminTenantCard(
+              tenant: tenant,
+              color: color,
+              label: label,
+              planName: _plansById(tenant.planId),
+              onTap: () => _showTenantDetail(tenant),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _decide(Tenant tenant, {required bool approve}) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    if (!approve) {
+      final reason = await _askRejectionReason(tenant.businessName);
+      if (reason == null) return;
+      try {
+        await ref.read(rejectTenantUseCaseProvider).call(tenant.id, reason);
+      } catch (error, stackTrace) {
+        CrashReporting.capture(
+          error,
+          stackTrace,
+          hint: 'Erro ao rejeitar tenant',
+        );
+        messenger.showSnackBar(SnackBar(content: Text(l10n.adminRejectError)));
+        return;
+      }
+    } else {
+      try {
+        await ref.read(approveTenantUseCaseProvider).call(tenant.id);
+      } catch (error, stackTrace) {
+        CrashReporting.capture(
+          error,
+          stackTrace,
+          hint: 'Erro ao aprovar tenant',
+        );
+        messenger.showSnackBar(SnackBar(content: Text(l10n.adminApproveError)));
+        return;
+      }
+    }
+
+    if (!mounted) return;
+    await ref.read(pendingTenantsProvider.notifier).refresh();
+    await ref.read(allTenantsProvider.notifier).refresh();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          approve
+              ? l10n.adminAccessApproved(tenant.businessName)
+              : l10n.adminRequestRejected(tenant.businessName),
+        ),
+      ),
+    );
+  }
+
+  Future<String?> _askRejectionReason(String businessName) {
+    final l10n = context.l10n;
+    return showInputDialog(
+      context,
+      title: l10n.adminRejectTitle(businessName),
+      label: l10n.adminRejectReasonLabel,
+      hintText: l10n.adminRejectReasonHint,
+      maxLines: 3,
+      confirmLabel: l10n.adminReject,
     );
   }
 
@@ -492,11 +487,8 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
       // Busca por ownerUserId
       if (t.ownerUserId.toLowerCase().contains(query)) return true;
       // Busca por nome do plano
-      final planName = plans
-              .where((p) => p.id == t.planId)
-              .firstOrNull
-              ?.name ??
-          '';
+      final planName =
+          plans.where((p) => p.id == t.planId).firstOrNull?.name ?? '';
       if (planName.toLowerCase().contains(query)) return true;
       // Busca por status
       final statusLabel = switch (t.status) {
@@ -511,29 +503,13 @@ class AdminTenantsScreen extends ConsumerStatefulWidget {
 
   Future<String?> _askBulkRejectionReason(int count) {
     final l10n = context.l10n;
-    final controller = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.adminBulkRejectTitle(count)),
-        content: AppTextField(
-          controller: controller,
-          maxLines: 3,
-          autofocus: true,
-          label: l10n.adminRejectReasonLabel,
-          hintText: l10n.adminRejectReasonHint,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.commonCancel),
-          ),
-          AppButton.primary(
-            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-            label: l10n.adminReject,
-          ),
-        ],
-      ),
+    return showInputDialog(
+      context,
+      title: l10n.adminBulkRejectTitle(count),
+      label: l10n.adminRejectReasonLabel,
+      hintText: l10n.adminRejectReasonHint,
+      maxLines: 3,
+      confirmLabel: l10n.adminReject,
     );
   }
 
@@ -590,11 +566,7 @@ class _AdminTenantCard extends ConsumerWidget {
               color: color.withValues(alpha: 0.12),
               borderRadius: AppRadius.smAll,
             ),
-            child: Icon(
-              Icons.business_outlined,
-              size: 20,
-              color: color,
-            ),
+            child: Icon(Icons.business_outlined, size: 20, color: color),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -621,7 +593,7 @@ class _AdminTenantCard extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
               decoration: BoxDecoration(
-                color: const Color(0xFF7C3AED).withValues(alpha: 0.1),
+                color: AppColors.statusPurple.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
@@ -630,13 +602,13 @@ class _AdminTenantCard extends ConsumerWidget {
                   Icon(
                     Icons.extension_outlined,
                     size: 12,
-                    color: const Color(0xFF7C3AED),
+                    color: AppColors.statusPurple,
                   ),
                   const SizedBox(width: 3),
                   Text(
                     '$addOnCount',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: const Color(0xFF7C3AED),
+                      color: AppColors.statusPurple,
                       fontWeight: FontWeight.w600,
                       fontSize: 11,
                       fontFeatures: const [FontFeature.tabularFigures()],
@@ -649,9 +621,7 @@ class _AdminTenantCard extends ConsumerWidget {
           const SizedBox(width: AppSpacing.xs),
           GestureDetector(
             onTap: () {
-              Clipboard.setData(
-                ClipboardData(text: tenant.ownerUserId),
-              );
+              Clipboard.setData(ClipboardData(text: tenant.ownerUserId));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(context.l10n.commonCopied),
@@ -659,11 +629,7 @@ class _AdminTenantCard extends ConsumerWidget {
                 ),
               );
             },
-            child: Icon(
-              Icons.copy,
-              size: 16,
-              color: scheme.onSurfaceVariant,
-            ),
+            child: Icon(Icons.copy, size: 16, color: scheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -726,8 +692,7 @@ class _PendingTenantCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     tenant.businessName,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                    ),
+                    style: theme.textTheme.bodySmall?.copyWith(),
                   ),
                 ),
                 StatusChip(
@@ -738,9 +703,7 @@ class _PendingTenantCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 GestureDetector(
                   onTap: () {
-                    Clipboard.setData(
-                      ClipboardData(text: tenant.ownerUserId),
-                    );
+                    Clipboard.setData(ClipboardData(text: tenant.ownerUserId));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(l10n.commonCopied),
@@ -805,10 +768,7 @@ class _PendingTenantCard extends StatelessWidget {
 /// atividade recente, estado, data de criação, moeda, idioma e motivo de
 /// rejeição.
 class _TenantDetailSheet extends ConsumerWidget {
-  const _TenantDetailSheet({
-    required this.tenant,
-    required this.planName,
-  });
+  const _TenantDetailSheet({required this.tenant, required this.planName});
 
   final Tenant tenant;
   final String planName;
@@ -844,9 +804,7 @@ class _TenantDetailSheet extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: scheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: ListView(
             controller: scrollController,
@@ -881,9 +839,7 @@ class _TenantDetailSheet extends ConsumerWidget {
                         const SizedBox(height: 2),
                         GestureDetector(
                           onTap: () {
-                            Clipboard.setData(
-                              ClipboardData(text: tenant.id),
-                            );
+                            Clipboard.setData(ClipboardData(text: tenant.id));
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(l10n.commonCopied),
@@ -944,9 +900,7 @@ class _TenantDetailSheet extends ConsumerWidget {
                 label: l10n.adminTenantDetailOwner,
                 value: tenant.ownerUserId.substring(0, 8),
                 onTap: () {
-                  Clipboard.setData(
-                    ClipboardData(text: tenant.ownerUserId),
-                  );
+                  Clipboard.setData(ClipboardData(text: tenant.ownerUserId));
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(l10n.commonCopied),
@@ -1069,8 +1023,7 @@ class _TenantDetailSheet extends ConsumerWidget {
                   message: l10n.adminTenantDetailNoStores,
                 )
               else
-                for (final store in stores)
-                  _StoreTile(store: store),
+                for (final store in stores) _StoreTile(store: store),
 
               // ── Funcionários ──
               const SizedBox(height: AppSpacing.lg),
@@ -1078,8 +1031,9 @@ class _TenantDetailSheet extends ConsumerWidget {
                 icon: Icons.people_outline,
                 label: l10n.adminTenantDetailEmployees,
                 count: employees.length,
-                countLabel:
-                    l10n.adminTenantDetailEmployeesCount(employees.length),
+                countLabel: l10n.adminTenantDetailEmployeesCount(
+                  employees.length,
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               if (employeesAsync.isLoading)
@@ -1112,8 +1066,7 @@ class _TenantDetailSheet extends ConsumerWidget {
                   message: l10n.adminTenantDetailNoActivity,
                 )
               else
-                for (final entry in recentActivity)
-                  _ActivityTile(entry: entry),
+                for (final entry in recentActivity) _ActivityTile(entry: entry),
 
               const SizedBox(height: AppSpacing.lg),
             ],
@@ -1156,9 +1109,7 @@ class _DetailChip extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: color,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(color: color),
           ),
         ],
       ),
@@ -1257,8 +1208,9 @@ class _UsageBar extends StatelessWidget {
             child: LinearProgressIndicator(
               value: ratio,
               minHeight: 6,
-              backgroundColor: scheme.surfaceContainerHighest
-                  .withValues(alpha: 0.5),
+              backgroundColor: scheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
               valueColor: AlwaysStoppedAnimation<Color>(
                 isFull ? scheme.error : color,
               ),
@@ -1302,11 +1254,7 @@ class _SectionHeader extends StatelessWidget {
         Icon(icon, size: 18, color: scheme.onSurfaceVariant),
         const SizedBox(width: AppSpacing.xs),
         Expanded(
-          child: Text(
-            label,
-            style: theme.textTheme.labelMedium?.copyWith(
-            ),
-          ),
+          child: Text(label, style: theme.textTheme.labelMedium?.copyWith()),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -1329,10 +1277,7 @@ class _SectionHeader extends StatelessWidget {
 
 /// Estado vazio de uma seção (lojas/funcionários/atividade).
 class _SectionEmpty extends StatelessWidget {
-  const _SectionEmpty({
-    required this.icon,
-    required this.message,
-  });
+  const _SectionEmpty({required this.icon, required this.message});
 
   final IconData icon;
   final String message;
@@ -1411,11 +1356,7 @@ class _StoreTile extends StatelessWidget {
               color: scheme.primaryContainer.withValues(alpha: 0.5),
               borderRadius: AppRadius.xsAll,
             ),
-            child: Icon(
-              Icons.store_outlined,
-              size: 16,
-              color: scheme.primary,
-            ),
+            child: Icon(Icons.store_outlined, size: 16, color: scheme.primary),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -1424,8 +1365,7 @@ class _StoreTile extends StatelessWidget {
               children: [
                 Text(
                   store.name,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1460,9 +1400,7 @@ class _EmployeeTile extends StatelessWidget {
     final l10n = context.l10n;
 
     final isActive = employee.isActive;
-    final roleLabel = l10n.adminTenantDetailEmployeeRole(
-      employee.role.name,
-    );
+    final roleLabel = l10n.adminTenantDetailEmployeeRole(employee.role.name);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -1506,11 +1444,7 @@ class _EmployeeTile extends StatelessWidget {
             ),
           ),
           if (!isActive)
-            Icon(
-              Icons.block_outlined,
-              size: 16,
-              color: scheme.error,
-            ),
+            Icon(Icons.block_outlined, size: 16, color: scheme.error),
         ],
       ),
     );
@@ -1531,7 +1465,7 @@ class _ActivityTile extends StatelessWidget {
     final timeFormat = DateFormat.Hm();
 
     final status = entry.detail?['status'] as String?;
-    final color = _statusColor(status);
+    final color = AppColors.decisionStatusColor(status);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -1545,11 +1479,7 @@ class _ActivityTile extends StatelessWidget {
               color: color.withValues(alpha: 0.1),
               borderRadius: AppRadius.xsAll,
             ),
-            child: Icon(
-              _actionIcon(entry.action),
-              size: 16,
-              color: color,
-            ),
+            child: Icon(_actionIcon(entry.action), size: 16, color: color),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -1558,8 +1488,7 @@ class _ActivityTile extends StatelessWidget {
               children: [
                 Text(
                   entry.actionLabel,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1599,18 +1528,6 @@ class _ActivityTile extends StatelessWidget {
     );
   }
 
-  Color _statusColor(String? status) {
-    switch (status) {
-      case 'approved':
-        return Colors.green;
-      case 'rejected':
-        return Colors.red;
-      case 'pending':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
 
   IconData _actionIcon(String action) {
     switch (action) {
@@ -1649,7 +1566,8 @@ class _BillingInfoCard extends StatelessWidget {
     final nextInvoice = tenant.nextInvoiceAt;
 
     // Determina se está no trial (14 dias iniciais).
-    final isTrial = nextInvoice != null &&
+    final isTrial =
+        nextInvoice != null &&
         expiresAt.difference(tenant.approvedAt ?? tenant.createdAt).inDays <=
             kTrialDays + 1;
 
@@ -1660,18 +1578,18 @@ class _BillingInfoCard extends StatelessWidget {
     final statusColor = isExpired
         ? scheme.error
         : isExpiringSoon
-            ? scheme.tertiary
-            : isTrial
-                ? scheme.primary
-                : scheme.primary;
+        ? scheme.tertiary
+        : isTrial
+        ? scheme.primary
+        : scheme.primary;
 
     final statusText = isExpired
-        ? 'Expirado'
+        ? context.l10n.adminTenantCycleExpired
         : isExpiringSoon
-            ? 'Expira em $daysLeft dia(s)'
-            : isTrial
-                ? 'Trial: $daysLeft dia(s) restantes'
-                : 'Activo: $daysLeft dia(s) restantes';
+        ? context.l10n.adminTenantCycleExpiresIn(daysLeft)
+        : isTrial
+        ? context.l10n.adminTenantCycleTrialLeft(daysLeft)
+        : context.l10n.adminTenantCycleActiveLeft(daysLeft);
 
     return Container(
       width: double.infinity,
@@ -1679,9 +1597,7 @@ class _BillingInfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: statusColor.withValues(alpha: 0.08),
         borderRadius: AppRadius.smAll,
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1709,27 +1625,29 @@ class _BillingInfoCard extends StatelessWidget {
           // Info rows
           _InfoRow(
             icon: Icons.calendar_today_outlined,
-            label: 'Aprovado em',
+            label: context.l10n.adminTenantDetailApprovedAt,
             value: dateFormat.format(tenant.approvedAt ?? tenant.createdAt),
           ),
           _InfoRow(
             icon: Icons.event_outlined,
-            label: isTrial ? 'Trial termina em' : 'Plano expira em',
+            label: isTrial
+                ? context.l10n.adminTenantsTrialEndsOn
+                : context.l10n.adminTenantsPlanExpiresOn,
             value: dateFormat.format(expiresAt),
           ),
           if (nextInvoice != null)
             _InfoRow(
               icon: Icons.receipt_long_outlined,
-              label: 'Próxima factura',
+              label: context.l10n.adminTenantsNextInvoice,
               value: dateFormat.format(nextInvoice),
             ),
           if (plan != null && plan!.priceMonthlyCents > 0) ...[
             const SizedBox(height: AppSpacing.xs),
             _InfoRow(
               icon: Icons.attach_money,
-              label: 'Valor mensal',
+              label: context.l10n.adminTenantsMonthlyValue,
               value:
-                  '${(plan!.priceMonthlyCents / 100).toStringAsFixed(2)} MZN',
+                  Formatters.currency(plan!.priceMonthlyCents),
             ),
           ],
         ],
@@ -1811,9 +1729,7 @@ class _SelectionBar extends StatelessWidget {
             AppButton.secondary(
               onPressed: onReject,
               label: l10n.adminBulkReject(selectedCount),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: scheme.error,
-              ),
+              style: OutlinedButton.styleFrom(foregroundColor: scheme.error),
             ),
           if (selectedCount > 0) const SizedBox(width: AppSpacing.sm),
 

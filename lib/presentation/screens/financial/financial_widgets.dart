@@ -76,14 +76,21 @@ class TransactionCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               // ── Valor ──
-              Text(
-                '$sign ${Formatters.currency(transaction.amountCents)}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+              // FittedBox scaleDown: com fonte grande (Dynamic Type) o
+              // valor encolhe em vez de estourar a Row — nunca é truncado.
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '$sign ${Formatters.currency(transaction.amountCents)}',
+                    maxLines: 1,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -155,10 +162,25 @@ class DateSectionHeader extends StatelessWidget {
 }
 
 /// Sheet de detalhes de uma transação — exibida ao tocar num [TransactionCard].
+///
+/// Transações pendentes oferecem a ação de quitação ([onReceive] para
+/// entradas fiadas, [onPay] para saídas a pagar) — a confirmação e a baixa
+/// ficam no chamador (a tela), que fecha a sheet antes de abrir o diálogo.
 class TransactionDetailSheet extends StatelessWidget {
-  const TransactionDetailSheet({super.key, required this.transaction});
+  const TransactionDetailSheet({
+    super.key,
+    required this.transaction,
+    this.onReceive,
+    this.onPay,
+  });
 
   final FinancialTransaction transaction;
+
+  /// Aciona a quitação de uma entrada pendente (fiado recebido).
+  final VoidCallback? onReceive;
+
+  /// Aciona o pagamento de uma saída pendente.
+  final VoidCallback? onPay;
 
   @override
   Widget build(BuildContext context) {
@@ -245,22 +267,25 @@ class TransactionDetailSheet extends StatelessWidget {
           ),
 
           // ── Ação pendente ──
-          if (pending && (isIncome)) ...[
+          if (pending && isIncome && onReceive != null) ...[
             const SizedBox(height: 20),
             AppButton.primary(
               onPressed: () {
                 Navigator.of(context).pop();
-                // O onReceive já está ligado no pai
+                // Confirmação + baixa no chamador (depois de fechar a sheet).
+                onReceive?.call();
               },
               label: l10n.financialReceive,
               icon: const Icon(Icons.done_all, size: 18),
             ),
           ],
-          if (pending && !isIncome) ...[
+          if (pending && !isIncome && onPay != null) ...[
             const SizedBox(height: 20),
             AppButton.primary(
               onPressed: () {
                 Navigator.of(context).pop();
+                // Confirmação + baixa no chamador (depois de fechar a sheet).
+                onPay?.call();
               },
               label: l10n.financialPay,
               icon: const Icon(Icons.payments_outlined, size: 18),

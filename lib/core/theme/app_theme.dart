@@ -1,487 +1,430 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
 import 'app_tokens.dart';
+import 'app_typography.dart';
 
-/// Cores semânticas usadas em várias telas (entradas/saídas, alertas).
-abstract final class AppColors {
- static const Color income = Color(0xFF34D399);
+// Re-exporta a paleta semântica: mantém `AppColors`, `AppColorsTheme` e
+// `AppStatusColors` acessíveis para quem importa apenas `app_theme.dart`.
+export 'app_colors.dart';
 
- /// Verde claro AA (≥4.5:1 sobre branco e chip@14% — W4 calibrado).
- static const Color incomeLight = Color(0xFF03754F);
-
- static const Color expense = Color(0xFFF87171);
-
- /// Vermelho claro AA (≥4.5:1 sobre branco e chip@14% — W4 calibrado).
- static const Color expenseLight = Color(0xFFC81E1E);
-
- static const Color warning = Color(0xFFFBBF24);
-
- /// Âmbar claro AA (≥4.5:1 sobre branco e chip@14% — W4 calibrado).
- static const Color warningLight = Color(0xFF9A5308);  static const Color accent = Color(0xFF16A34A);
-  static const Color accentLight = Color(0xFF15803D);
-
- static const Color surfaceDark = Color(0xFF131316);
- static const Color surfaceElevatedDark = Color(0xFF1A1A1F);
- static const Color backgroundDark = Color(0xFF09090B);
- static const Color borderDark = Color(0xFF27272A);
-
- static Color of(Brightness brightness, Color dark, Color light) =>
- brightness == Brightness.light ? light : dark;
-
- // ── Status semânticos (centralizados) ──
- static const Color success = Color(0xFF16A34A);
- static const Color successLight = Color(0xFF15803D);
- static const Color statusError = Color(0xFFDC2626);
- static const Color statusWarning = Color(0xFFF59E0B);
- static const Color statusInfo = Color(0xFF3B82F6);
- static const Color statusPurple = Color(0xFF7C3AED);
- static const Color statusIndigo = Color(0xFF6366F1);
- static const Color statusTeal = Color(0xFF10B981);
-
- // ── Cores de erro (modo claro/escuro) ──
- static Color errorOf(Brightness brightness) =>
- brightness == Brightness.light ? statusError : const Color(0xFFF87171);
-
- static Color successOf(Brightness brightness) =>
- brightness == Brightness.light ? success : successLight;
-
- static Color warningOf(Brightness brightness) =>
- brightness == Brightness.light ? statusWarning : const Color(0xFFFBBF24);
-}
-
-extension AppColorsTheme on ThemeData {
- Color get income =>
- AppColors.of(brightness, AppColors.income, AppColors.incomeLight);
-
- Color get expense =>
- AppColors.of(brightness, AppColors.expense, AppColors.expenseLight);
-
- Color get warning =>
- AppColors.of(brightness, AppColors.warning, AppColors.warningLight);
-
- Color get accent =>
- AppColors.of(brightness, AppColors.accent, AppColors.accentLight);
-}
-
-/// Tema central V4 — Material 3, dark-first, acento verde profissional.
+/// Tema central — Material 3, dark-first, acento verde profissional.
+///
+/// Arquitetura:
+/// * `AppTheme` — constrói os dois [ThemeData] (light/dark) sobre um único
+///   [ColorScheme] por brilho, com as variantes de cada papel definidas
+///   por função (ver `AppColors`).
+/// * Cores fora do [ColorScheme] (income/expense/warning/accent) vivem em
+///   [AppStatusColors] (ThemeExtension) e são interpoladas na troca de tema.
+/// * Tipografia em `AppTypography`; espaçamento/raios/tamanhos em `AppTokens`.
 abstract final class AppTheme {
- static const Color _seed = Color(0xFF16A34A);
+  /// Tema claro — superfícies brancas/cinza-claro, texto quase-preto.
+  static final ThemeData light = _base(Brightness.light);
 
- static final ThemeData light = _base(Brightness.light);
- static final ThemeData dark = _base(Brightness.dark);
+  /// Tema escuro — superfícies quase-pretas azuladas, texto quase-branco.
+  static final ThemeData dark = _base(Brightness.dark);
 
- static ThemeData _base(Brightness brightness) {
- final isLight = brightness == Brightness.light;
- final scheme = ColorScheme.fromSeed(
- seedColor: _seed,
- brightness: brightness,
- ).copyWith(
- // Primary: verde-médio AA (branco sobre ele = 5.0:1) nos DOIS temas —
- // o verde vivo (#22C55E) fica para ícones/bordas via `theme.accent` e
- // para o FAB (que usa cor própria), nunca para texto sobre superfície.
- primary: const Color(0xFF15803D),
- onPrimary: Colors.white,
- primaryContainer: isLight
- ? const Color(0xFFD1FAE5)
- : const Color(0xFF14532D),
- onPrimaryContainer: isLight
- ? const Color(0xFF064E3B)
- : const Color(0xFFBBF7D0),
- secondary: isLight ? const Color(0xFF64748B) : const Color(0xFF71717A),
- secondaryContainer: isLight
- ? const Color(0xFFF1F5F9)
- : const Color(0xFF27272A),
- onSecondaryContainer: isLight
- ? const Color(0xFF334155)
- : const Color(0xFFE4E4E7),
- surface: isLight ? Colors.white : AppColors.surfaceDark,
- onSurface: isLight
- ? const Color(0xFF18181B)
- : const Color(0xFFFAFAFA),
- onSurfaceVariant: isLight
- ? const Color(0xFF6E6E77)
- : const Color(0xFFA1A1AA),
- surfaceContainerHighest: isLight
- ? const Color(0xFFF4F4F5)
- : AppColors.surfaceElevatedDark,
- surfaceContainerHigh: isLight
- ? const Color(0xFFE4E4E7)
- : const Color(0xFF232328),
- surfaceContainerLow: isLight
- ? const Color(0xFFFAFAFA)
- : const Color(0xFF111114),
- outlineVariant: isLight
- ? const Color(0xFFE4E4E7)
- : AppColors.borderDark,
- outline: isLight ? const Color(0xFFA1A1AA) : const Color(0xFF52525B),
- error: isLight ? const Color(0xFFDC2626) : const Color(0xFFF87171),
- errorContainer: isLight
- ? const Color(0xFFFEE2E2)
- : const Color(0xFF450A0A),
- onErrorContainer: isLight
- ? const Color(0xFF991B1B)
- : const Color(0xFFFECACA),
- );
+  static ThemeData _base(Brightness brightness) {
+    final isLight = brightness == Brightness.light;
 
- final surface = scheme.surface;
- final border = scheme.outlineVariant;
- final fieldFill = isLight
- ? const Color(0xFFF4F4F5)
- : const Color(0xFF1F1F23);
- final navBackground = isLight ? Colors.white : AppColors.backgroundDark;
- final accent = AppColors.of(
- brightness,
- AppColors.accent,
- AppColors.accentLight,
- );
- final navSelectedColor = accent;
- final navIndicator = isLight
- ? const Color(0xFFD1FAE5)
- : const Color(0xFF14532D);
-
- return ThemeData(
- useMaterial3: true,
- // Inter (variável) — tipografia do ERP, aplicada em todos os textos.
- fontFamily: 'Inter',
- colorScheme: scheme,
- scaffoldBackgroundColor: isLight
- ? const Color(0xFFFAFAFA)
- : AppColors.backgroundDark,
- splashFactory: InkRipple.splashFactory,
- visualDensity: VisualDensity.standard,    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
-      scrolledUnderElevation: 0,
-      elevation: 0,
-      centerTitle: false,
-      titleSpacing: AppSpacing.lg,
-      toolbarHeight: 56,
-      titleTextStyle: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.3,
-        height: 1.3,
-        color: scheme.onSurface,
-      ),
- iconTheme: IconThemeData(color: scheme.onSurface, size: 22),
- ),
-
- cardTheme: CardThemeData(
- elevation: 0,
- color: surface,
- surfaceTintColor: Colors.transparent,
- margin: EdgeInsets.zero,
- clipBehavior: Clip.antiAlias,
- shape: RoundedRectangleBorder(
- borderRadius: AppRadius.mdAll,
- side: BorderSide(color: border, width: 1),
- ),
- ),
-
- inputDecorationTheme: InputDecorationTheme(
- filled: true,
- fillColor: fieldFill,
- contentPadding: const EdgeInsets.symmetric(
- horizontal: AppSpacing.md,
- vertical: AppSpacing.md,
- ),
- prefixIconColor: scheme.onSurfaceVariant, labelStyle: TextStyle(
-   fontSize: 12,
-   fontWeight: FontWeight.w400,
-   color: scheme.onSurfaceVariant,
- ),
- floatingLabelStyle: const TextStyle(
-   fontSize: 12,
-   fontWeight: FontWeight.w500,
- ),
- hintStyle: TextStyle(fontSize: 14, color: scheme.onSurfaceVariant),
- border: OutlineInputBorder(
- borderRadius: AppRadius.mdAll,
- borderSide: BorderSide(color: scheme.outlineVariant),
- ),
- enabledBorder: OutlineInputBorder(
- borderRadius: AppRadius.mdAll,
- borderSide: BorderSide(color: scheme.outlineVariant),
- ),
- focusedBorder: OutlineInputBorder(
- borderRadius: AppRadius.mdAll,
- borderSide: BorderSide(color: scheme.primary, width: 1.5),
- ),
- errorBorder: OutlineInputBorder(
- borderRadius: AppRadius.mdAll,
- borderSide: BorderSide(color: scheme.error),
- ),
- focusedErrorBorder: OutlineInputBorder(
- borderRadius: AppRadius.mdAll,
- borderSide: BorderSide(color: scheme.error, width: 1.5),
- ),
- ),
-
- filledButtonTheme: FilledButtonThemeData(
- style: FilledButton.styleFrom(
- minimumSize: const Size(0, AppSizes.touchTarget),
- padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
- shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),     textStyle: const TextStyle(
-       fontSize: 14,
-       fontWeight: FontWeight.w500,
-       letterSpacing: 0,
-     ),
-   ),
- ),    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size(0, AppSizes.touchTarget),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
-        side: BorderSide(color: scheme.outlineVariant),
-        textStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0,
-        ),
-      ),
-    ),
-
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        minimumSize: const Size(0, AppSizes.touchTarget),
-        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
-        textStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    ),
-
- iconButtonTheme: IconButtonThemeData(
- style: IconButton.styleFrom(
- minimumSize: const Size(AppSizes.touchTarget, AppSizes.touchTarget),
- shape: RoundedRectangleBorder(borderRadius: AppRadius.smAll),
- ),
- ),    chipTheme: ChipThemeData(
-      backgroundColor: fieldFill,
-      selectedColor: isLight
-          ? const Color(0xFFD1FAE5)
-          : const Color(0xFF14532D),
-      // Pílula completa (Apple): os chips de filtro viram cápsulas — o
-      // mesmo shape StadiumBorder da navegação.
-      shape: const StadiumBorder(),
-      side: BorderSide.none,
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: scheme.onSurfaceVariant,
-      ),
- padding: const EdgeInsets.symmetric(
- horizontal: AppSpacing.sm + 2,
- vertical: AppSpacing.xs,
- ),
- ),
-
- navigationBarTheme: NavigationBarThemeData(
- backgroundColor: navBackground,
- surfaceTintColor: Colors.transparent,
- elevation: 0,
- height: AppSizes.navBarHeight,
- indicatorColor: navIndicator,
- indicatorShape: const StadiumBorder(),
- labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
- iconTheme: WidgetStateProperty.resolveWith((states) {
- final selected = states.contains(WidgetState.selected);
- return IconThemeData(
- size: 22,
- color: selected ? navSelectedColor : scheme.onSurfaceVariant,
- );
- }),      labelTextStyle: WidgetStateProperty.resolveWith((states) {
-        final selected = states.contains(WidgetState.selected);
-        return TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          height: 1.15,
-          letterSpacing: 0,
-          color: selected ? navSelectedColor : scheme.onSurfaceVariant,
+    // ── ColorScheme M3 (funções do Material 3) ─────────────────────────────
+    // Calibração AA (WCAG 2.x):
+    // * primary = verde-médio (#15803D): branco sobre ele = 5.0:1 nos DOIS
+    //   temas — o verde vivo (#16A34A) fica para ícones/destaques/FAB.
+    // * onSurfaceVariant sobre fieldFill ≥ 4.5:1 (auditado em teste).
+    // * outline ≥ 3:1 sobre superfícies (bordas de controles interativos).
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: AppColors.brand,
+          brightness: brightness,
+        ).copyWith(
+          primary: AppColors.brandMuted,
+          onPrimary: Colors.white,
+          primaryContainer: isLight
+              ? AppColors.brandContainerLight
+              : AppColors.brandContainerDark,
+          onPrimaryContainer: isLight
+              ? AppColors.onBrandContainerLight
+              : AppColors.onBrandContainerDark,
+          secondary: isLight
+              ? const Color(0xFF64748B)
+              : const Color(0xFF71717A),
+          secondaryContainer: isLight
+              ? const Color(0xFFF1F5F9)
+              : const Color(0xFF27272A),
+          onSecondaryContainer: isLight
+              ? const Color(0xFF334155)
+              : const Color(0xFFE4E4E7),
+          surface: isLight ? Colors.white : AppColors.surfaceDark,
+          onSurface: isLight
+              ? const Color(0xFF18181B)
+              : const Color(0xFFFAFAFA),
+          onSurfaceVariant: isLight
+              ? const Color(0xFF6E6E77)
+              : const Color(0xFFA1A1AA),
+          surfaceContainerHighest: isLight
+              ? const Color(0xFFF4F4F5)
+              : AppColors.surfaceElevatedDark,
+          surfaceContainerHigh: isLight
+              ? const Color(0xFFE4E4E7)
+              : const Color(0xFF232328),
+          surfaceContainerLow: isLight
+              ? const Color(0xFFFAFAFA)
+              : const Color(0xFF111114),
+          outlineVariant: isLight
+              ? const Color(0xFFE4E4E7)
+              : AppColors.borderDark,
+          // outline: bordas de CONTROLES interativos (botões outline) — ≥ 3:1
+          // sobre as superfícies. No claro é um cinza médio; no escuro é mais
+          // claro que o antigo #52525B para não sumir sobre #131316.
+          outline: isLight ? const Color(0xFF8A8A94) : const Color(0xFF71717A),
+          error: isLight ? const Color(0xFFDC2626) : const Color(0xFFF87171),
+          // onError explícito: texto/ícones sobre a cor de erro. No escuro o
+          // branco daria só 2.8:1 sobre #F87171 — usa-se o vermelho-escuro.
+          onError: isLight ? Colors.white : const Color(0xFF450A0A),
+          errorContainer: isLight
+              ? const Color(0xFFFEE2E2)
+              : const Color(0xFF450A0A),
+          onErrorContainer: isLight
+              ? const Color(0xFF991B1B)
+              : const Color(0xFFFECACA),
         );
-      }),
- labelPadding: const EdgeInsets.only(top: 2),
- ),    navigationRailTheme: NavigationRailThemeData(
-      backgroundColor: navBackground,
-      indicatorColor: navIndicator,
-      indicatorShape: const StadiumBorder(),
-      minWidth: 72,
-      groupAlignment: -0.85,
-      selectedLabelTextStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: navSelectedColor,
+
+    // ── Papéis derivados do scheme (fonte única — sem repetir hex) ────────
+    final surface = scheme.surface;
+    final border = scheme.outlineVariant;
+    final fieldFill = isLight
+        ? const Color(0xFFF4F4F5)
+        : const Color(0xFF1F1F23);
+    final navBackground = isLight ? Colors.white : AppColors.backgroundDark;
+    // Indicador de navegação/chips selecionados = container do verde de marca.
+    final selectionFill = scheme.primaryContainer;
+    // Conteúdo sobre o indicador: o "on" do container — legível nos dois temas.
+    final selectionContent = scheme.onPrimaryContainer;
+
+    // Estados dos botões outline: a borda descansa em `outline` (≥3:1) e
+    // perde força quando desabilitado (padrão M3).
+    final outlinedSide = WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.disabled)) {
+        return BorderSide(color: scheme.outlineVariant);
+      }
+      return BorderSide(color: scheme.outline);
+    });
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      // Inter (variável) — tipografia do ERP, aplicada em todos os textos.
+      fontFamily: 'Inter',
+      colorScheme: scheme,
+      scaffoldBackgroundColor: isLight
+          ? const Color(0xFFFAFAFA)
+          : AppColors.backgroundDark,
+      splashFactory: InkRipple.splashFactory,
+      visualDensity: VisualDensity.standard,
+      extensions: [isLight ? AppStatusColors.light : AppStatusColors.dark],
+
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        elevation: 0,
+        centerTitle: false,
+        titleSpacing: AppSpacing.lg,
+        toolbarHeight: 56,
+        // Título 2 da escala (22/w600) — hierarquia conversa com titleLarge.
+        titleTextStyle: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.35,
+          height: 1.25,
+          color: scheme.onSurface,
+        ),
+        iconTheme: IconThemeData(color: scheme.onSurface, size: 22),
       ),
-      unselectedLabelTextStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-        color: scheme.onSurfaceVariant,
+
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: surface,
+        surfaceTintColor: Colors.transparent,
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.mdAll,
+          side: BorderSide(color: border, width: 1),
+        ),
       ),
-    ),    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: isLight
-          ? const Color(0xFF15803D)
-          : const Color(0xFF16A34A),
-      foregroundColor: isLight ? Colors.white : const Color(0xFF052E16),
- elevation: 2,
- highlightElevation: 4,
- shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
- sizeConstraints: const BoxConstraints.tightFor(
- width: 56,
- height: 56,
- ),
- ),
 
- dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),    dialogTheme: DialogThemeData(
-      backgroundColor: surface,
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.xlAll),
-      titleTextStyle: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.3,
-        height: 1.3,
-        color: scheme.onSurface,
-        fontFeatures: const [FontFeature.tabularFigures()],
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: fieldFill,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
+        prefixIconColor: scheme.onSurfaceVariant,
+        labelStyle: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w400,
+          color: scheme.onSurfaceVariant,
+        ),
+        floatingLabelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+        hintStyle: TextStyle(fontSize: 14, color: scheme.onSurfaceVariant),
+        border: OutlineInputBorder(
+          borderRadius: AppRadius.mdAll,
+          borderSide: BorderSide(color: scheme.outlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppRadius.mdAll,
+          borderSide: BorderSide(color: scheme.outlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppRadius.mdAll,
+          borderSide: BorderSide(color: scheme.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: AppRadius.mdAll,
+          borderSide: BorderSide(color: scheme.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: AppRadius.mdAll,
+          borderSide: BorderSide(color: scheme.error, width: 1.5),
+        ),
       ),
-    ),
 
- snackBarTheme: SnackBarThemeData(
- behavior: SnackBarBehavior.floating,
- elevation: 4,
- shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
- backgroundColor: isLight
- ? const Color(0xFF18181B)
- : const Color(0xFFFAFAFA), contentTextStyle: TextStyle(
-   fontSize: 14,
-   fontWeight: FontWeight.w500,
-   letterSpacing: 0,
-   color: isLight ? Colors.white : const Color(0xFF18181B),
- ),
- ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(0, AppSizes.touchTarget),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+          // Texto de ação ultra-clean: 15/w400 — o peso vem da superfície
+          // (Filled) e da hierarquia, não do peso da fonte.
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            letterSpacing: 0,
+          ),
+        ),
+      ),
 
- listTileTheme: ListTileThemeData(
- contentPadding: const EdgeInsets.symmetric(
- horizontal: AppSpacing.md,
- vertical: AppSpacing.xxs,
- ),
- minVerticalPadding: AppSpacing.sm,
- shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
- ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(0, AppSizes.touchTarget),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+          backgroundColor: scheme.surfaceContainerLow,
+          foregroundColor: scheme.primary,
+          elevation: 1,
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            letterSpacing: 0,
+          ),
+        ),
+      ),
 
- segmentedButtonTheme: SegmentedButtonThemeData(
- style: ButtonStyle(
- visualDensity: VisualDensity.compact,
- padding: WidgetStateProperty.all(
- const EdgeInsets.symmetric(
- horizontal: AppSpacing.sm,
- vertical: AppSpacing.xs,
- ),
- ),
- shape: WidgetStateProperty.all(
- RoundedRectangleBorder(borderRadius: AppRadius.smAll),
- ),
- ),
- ),textTheme: TextTheme(
- // Escala minimalista padronizada: 32/24/20/18/16/14/12/11.
- // Pesos: w400 (corpo), w500 (labels), w600 (títulos).
- displaySmall: TextStyle(
-   fontSize: 32,
-   fontWeight: FontWeight.w400,
-   letterSpacing: -0.5,
-   height: 1.2,
-   color: scheme.onSurface,
-   fontFeatures: const [FontFeature.tabularFigures()],
-   fontVariations: const [FontVariation('opsz', 32)],
- ),
- headlineMedium: TextStyle(
-   fontSize: 24,
-   fontWeight: FontWeight.w600,
-   letterSpacing: -0.4,
-   height: 1.25,
-   color: scheme.onSurface,
-   fontFeatures: const [FontFeature.tabularFigures()],
-   fontVariations: const [FontVariation('opsz', 32)],
- ),
- headlineSmall: TextStyle(
-   fontSize: 20,
-   fontWeight: FontWeight.w600,
-   letterSpacing: -0.3,
-   height: 1.3,
-   color: scheme.onSurface,
-   fontFeatures: const [FontFeature.tabularFigures()],
-   fontVariations: const [FontVariation('opsz', 24)],
- ),
- titleLarge: TextStyle(
-   fontSize: 20,
-   fontWeight: FontWeight.w500,
-   letterSpacing: -0.3,
-   height: 1.3,
-   color: scheme.onSurface,
-   fontFeatures: const [FontFeature.tabularFigures()],
-   fontVariations: const [FontVariation('opsz', 24)],
- ),
- titleMedium: TextStyle(
-   fontSize: 18,
-   fontWeight: FontWeight.w500,
-   letterSpacing: -0.2,
-   height: 1.35,
-   color: scheme.onSurface,
-   fontFeatures: const [FontFeature.tabularFigures()],
-   fontVariations: const [FontVariation('opsz', 20)],
- ),
- titleSmall: TextStyle(
-   fontSize: 14,
-   fontWeight: FontWeight.w500,
-   letterSpacing: -0.1,
-   height: 1.35,
-   color: scheme.onSurface,
- ),
- bodyLarge: TextStyle(
-   fontSize: 16,
-   fontWeight: FontWeight.w400,
-   letterSpacing: 0,
-   height: 1.4,
-   color: scheme.onSurface,
-   fontFeatures: const [FontFeature.tabularFigures()],
- ),
- bodyMedium: TextStyle(
-   fontSize: 14,
-   fontWeight: FontWeight.w400,
-   letterSpacing: 0,
-   height: 1.4,
-   color: scheme.onSurface,
-   fontFeatures: const [FontFeature.tabularFigures()],
- ),
- bodySmall: TextStyle(
-   fontSize: 12,
-   fontWeight: FontWeight.w400,
-   letterSpacing: 0,
-   height: 1.35,
-   color: scheme.onSurfaceVariant,
-   fontFeatures: const [FontFeature.tabularFigures()],
- ),
- labelLarge: TextStyle(
-   fontSize: 14,
-   fontWeight: FontWeight.w500,
-   letterSpacing: 0,
-   height: 1.25,
-   color: scheme.onSurface,
- ),
- labelMedium: TextStyle(
-   fontSize: 12,
-   fontWeight: FontWeight.w500,
-   letterSpacing: 0,
-   height: 1.25,
-   color: scheme.onSurfaceVariant,
- ),
- labelSmall: TextStyle(
-   fontSize: 11,
-   fontWeight: FontWeight.w500,
-   letterSpacing: 0.2,
-   height: 1.25,
-   color: scheme.onSurfaceVariant,
- ),
-),
- );
- }
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        // A borda varia por estado; como o styleFrom só aceita BorderSide
+        // fixa, aplica-se a propriedade por cima com copyWith.
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, AppSizes.touchTarget),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            letterSpacing: 0,
+          ),
+        ).copyWith(side: outlinedSide),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          minimumSize: const Size(0, AppSizes.touchTarget),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            letterSpacing: 0,
+          ),
+        ),
+      ),
+
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          minimumSize: const Size(AppSizes.touchTarget, AppSizes.touchTarget),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.smAll),
+        ),
+      ),
+
+      chipTheme: ChipThemeData(
+        backgroundColor: fieldFill,
+        selectedColor: selectionFill,
+        // Pílula completa (Apple): os chips de filtro viram cápsulas — o
+        // mesmo shape StadiumBorder da navegação.
+        shape: const StadiumBorder(),
+        side: BorderSide.none,
+        // Rótulo em onSurface (≥ 13:1 sobre fieldFill E sobre o container
+        // selecionado, nos dois temas): o antigo onSurfaceVariant dava só
+        // 4.45:1 (claro) e 3.55:1 (escuro) quando o chip estava selecionado.
+        // (Neste SDK o labelStyle do chip é fixo — sem estados por tema.)
+        // Rótulo do chip em corpo/nota da escala (13/w600): legível e
+        // consistente com os textos inline de status (StatusChip).
+        labelStyle: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: scheme.onSurface,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm + 2,
+          vertical: AppSpacing.xs,
+        ),
+      ),
+
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: navBackground,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        height: AppSizes.navBarHeight,
+        indicatorColor: selectionFill,
+        indicatorShape: const StadiumBorder(),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            size: 22,
+            color: selected ? selectionContent : scheme.onSurfaceVariant,
+          );
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            height: 1.15,
+            letterSpacing: 0,
+            color: selected ? selectionContent : scheme.onSurfaceVariant,
+          );
+        }),
+        labelPadding: const EdgeInsets.only(top: 2),
+      ),
+
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: navBackground,
+        indicatorColor: selectionFill,
+        indicatorShape: const StadiumBorder(),
+        minWidth: 72,
+        groupAlignment: -0.85,
+        selectedIconTheme: IconThemeData(color: selectionContent),
+        selectedLabelTextStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: selectionContent,
+        ),
+        unselectedIconTheme: IconThemeData(color: scheme.onSurfaceVariant),
+        unselectedLabelTextStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: scheme.onSurfaceVariant,
+        ),
+      ),
+
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: isLight ? AppColors.brandMuted : AppColors.brand,
+        foregroundColor: isLight ? Colors.white : const Color(0xFF052E16),
+        elevation: 2,
+        highlightElevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
+        sizeConstraints: const BoxConstraints.tightFor(width: 56, height: 56),
+      ),
+
+      dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
+
+      dialogTheme: DialogThemeData(
+        backgroundColor: surface,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.xlAll),
+        // Título 2 da escala (22/w600) — mesmo corpo do titleLarge.
+        titleTextStyle: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.35,
+          height: 1.27,
+          color: scheme.onSurface,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+      ),
+
+      // Bottom sheet: mesmo papel de superfície do M3 (surfaceContainerLow)
+      // com cantos superiores do design system (20) e sombra suave.
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        modalBackgroundColor: scheme.surfaceContainerLow,
+        modalElevation: 2,
+        showDragHandle: false,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xl),
+          ),
+        ),
+      ),
+
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
+        backgroundColor: isLight
+            ? const Color(0xFF18181B)
+            : const Color(0xFFFAFAFA),
+        contentTextStyle: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0,
+          color: isLight ? Colors.white : const Color(0xFF18181B),
+        ),
+        // Ação explícita (padrão M3 usa inversePrimary não auditado):
+        // snackbar claro = fundo escuro → verde-claro; escuro = fundo claro
+        // → verde-médio da marca. Ambos ≥ 4.5:1 (testado).
+        actionTextColor: isLight
+            ? const Color(0xFF34D399)
+            : AppColors.brandMuted,
+      ),
+
+      listTileTheme: ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xxs,
+        ),
+        minVerticalPadding: AppSpacing.sm,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+      ),
+
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
+          ),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: AppRadius.smAll),
+          ),
+        ),
+      ),
+
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        // No escuro o primary (#15803D) é pouco visível sobre as superfícies
+        // escuras; o verde vivo da marca garante ≥ 3:1 (não-texto).
+        color: isLight ? scheme.primary : AppColors.brand,
+        linearTrackColor: scheme.surfaceContainerHighest,
+      ),
+
+      textTheme: AppTypography.forScheme(scheme),
+    );
+  }
 }

@@ -251,11 +251,14 @@ void main() {
  await tester.enterText(
  find.byType(TextFormField).at(1),
  'ana@loja.com',
+ ); await tester.enterText(
+   find.byType(TextFormField).at(2),
+   'abc123',
  );
- await tester.enterText(
- find.byType(TextFormField).at(2),
- 'abc123',
- );
+ // A sheet é scrollável — garante que o botão está visível antes de tocar
+ // (mesmo padrão dos demais formulários em sheet do projeto).
+ await tester.ensureVisible(find.text('Cadastrar funcionário'));
+ await tester.pumpAndSettle();
  await tester.tap(find.text('Cadastrar funcionário'));
  await tester.pumpAndSettle();
 
@@ -271,29 +274,29 @@ void main() {
  await tester.tap(find.byType(Tab).at(1));
  await tester.pumpAndSettle();
 
- // O card mostra o cargo (Gerente) e o interruptor FINO do DONO (o
- // Switch M3 grosso foi substituído pelo _ThinToggle do design system).
+ // A lista mostra só o nome (redesign: sem chips inline). O cargo
+ // "Gerente" e o botão de desativar ficam na sheet de detalhes.
  expect(find.text('Carlos'), findsOneWidget);
- expect(find.text('Gerente'), findsOneWidget);
- expect(
- find.byKey(const ValueKey('employee-toggle-e1')),
- findsOneWidget,
- );
 
- // Desativa: confirma o diálogo (botão de ação = "Desativar").
- await tester.tap(find.byKey(const ValueKey('employee-toggle-e1')));
+ // Abre a sheet de detalhes → o cargo aparece.
+ await tester.tap(find.text('Carlos'));
+ await tester.pumpAndSettle();
+ expect(find.text('Gerente'), findsOneWidget);
+
+ // Desativa pelo botão "Desactivar" da sheet → confirma o diálogo.
+ await tester.tap(find.text('Desactivar'));
  await tester.pumpAndSettle();
  expect(
- find.textContaining('Desativar Carlos?'),
- findsOneWidget,
+  find.textContaining('Desactivar Carlos?'),
+  findsOneWidget,
  );
- await tester.tap(find.text('Desativar')); // botão de confirmação
+ await tester.tap(find.text('Desactivar')); // botão de confirmação
  await tester.pumpAndSettle();
 
  expect(setActiveUseCase.calls, 1);
  expect(setActiveUseCase.lastEmployeeId, 'e1');
  expect(setActiveUseCase.lastIsActive, isFalse);
- expect(find.text('Funcionário desativado.'), findsOneWidget); // snack
+ expect(find.text('Funcionário desactivado.'), findsOneWidget); // snack
  });
 
  testWidgets(
@@ -333,29 +336,14 @@ void main() {
  );
  await tester.pumpAndSettle();
  await tester.tap(find.byType(Tab).at(1));
+ await tester.pumpAndSettle(); // A lista mostra o nome (dot discreto, sem chip) — abre a sheet: o
+ // status "Inactivo" e o botão "Reactivar" (dono) ficam na sheet.
+ expect(find.text('Berto Longo'), findsOneWidget);
+ await tester.tap(find.text('Berto Longo'));
  await tester.pumpAndSettle();
 
- // Chip "Inativo" + interruptor fino presente.
- expect(find.text('Inativo'), findsOneWidget);
- expect(
- find.byKey(const ValueKey('employee-toggle-e9')),
- findsOneWidget,
- );
- // O toggle fino reflete o estado DESLIGADO: a semântica anota toggled
- // = false e o thumb fica ancorado à ESQUERDA (AnimatedAlign centerLeft).
- final semanticsWidget = tester.widget<Semantics>(
- find.descendant(
- of: find.byKey(const ValueKey('employee-toggle-e9')),
- matching: find.byType(Semantics),
- ),
- );
- expect(semanticsWidget.properties.toggled, isFalse);
- final align = tester.widget<AnimatedAlign>(
- find.descendant(
- of: find.byKey(const ValueKey('employee-toggle-e9')),
- matching: find.byType(AnimatedAlign),
- ),
- );
- expect(align.alignment, Alignment.centerLeft);
+ expect(find.text('Inactivo'), findsOneWidget);
+ expect(find.text('Reactivar'), findsOneWidget);
+ expect(find.text('Desactivar'), findsNothing); // não há como desativar de novo
  });
 }

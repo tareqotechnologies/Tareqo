@@ -84,14 +84,14 @@ void main() {
  await tester.pumpAndSettle();
 
  expect(find.text('Solicitação rejeitada'), findsOneWidget);
- expect(
- find.text(
- 'A solicitação de acesso de "Comercial Demo" não foi aprovada.',
- ),
- findsOneWidget,
- );
- expect(find.text('Dados de identificação incompletos.'), findsOneWidget);
- expect(find.text('Sair da conta'), findsOneWidget);
+    expect(
+      find.text(
+        'A solicitação de "Comercial Demo" não foi aprovada.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Dados de identificação incompletos.'), findsOneWidget);
+    expect(find.text('Terminar sessão'), findsOneWidget);
  });
 
  testWidgets('não exibe o motivo quando ausente', (tester) async {
@@ -110,10 +110,9 @@ void main() {
 
  await tester.pumpWidget(_buildApp(_rejectedTenant(reason: 'Razão'), auth));
  await tester.pumpAndSettle();
+    await tester.tap(find.text('Terminar sessão'));
+    await tester.pumpAndSettle();
 
- await tester.tap(find.text('Sair da conta'));
- await tester.pumpAndSettle();
-
- expect(auth.signOutCalls, 1);
+    expect(auth.signOutCalls, 1);
  });
 }

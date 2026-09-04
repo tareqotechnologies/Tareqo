@@ -275,23 +275,42 @@ void main() {
 
  // Só a venda de hoje permanece.
  expect(find.text('S-00001 · 1 item'), findsOneWidget);
- expect(find.text('S-00002 · 1 item'), findsNothing);
- });
+  expect(find.text('S-00002 · 1 item'), findsNothing);
+  });
 
- testWidgets('busca por número da venda', (tester) async {
+  testWidgets('filtra por período Ontem', (tester) async {
  await tester.pumpWidget(
- _buildApp(
- _FakeSalesRepository([
- _pastSale(id: 's1', number: 1),
- _pastSale(id: 's2', number: 2, totalAmountCents: 200),
- ]),
- ),
+  _buildApp(
+   _FakeSalesRepository([
+    // Hoje.
+    _pastSale(
+     id: 's1',
+     number: 1,
+     totalAmountCents: 100,
+     dateTime: DateTime.now(),
+    ),
+    // Ontem.
+    _pastSale(
+     id: 's2',
+     number: 2,
+     totalAmountCents: 200,
+     dateTime:
+      DateTime.now().subtract(const Duration(days: 1)),
+    ),
+   ]),
+  ),
  );
 
  await tester.pumpAndSettle();
 
- await tester.enterText(find.byType(TextField), 'S-00002');
- await tester.pump();
+ // A busca por número saiu do redesign — o filtro de período cobre a
+ // mesma intenção de estreitar a lista.
+ await tester.tap(find.text('Tudo'));
+ await tester.pumpAndSettle();
+ await tester.tap(
+  find.widgetWithText(PopupMenuItem<PeriodFilter>, 'Ontem'),
+ );
+ await tester.pumpAndSettle();
 
  expect(find.text('S-00002 · 1 item'), findsOneWidget);
  expect(find.text('S-00001 · 1 item'), findsNothing);
@@ -338,48 +357,55 @@ void main() {
  expect(find.text('Tudo'), findsOneWidget);
  });
 
- testWidgets('busca sem resultado mostra estado vazio e limpa filtros', (
+ testWidgets('filtro sem resultados mostra estado vazio e limpa filtros', (
  tester,
  ) async {
+ // Venda com data fixa (2024) — o filtro "Hoje" não a encontra.
  await tester.pumpWidget(_buildApp(_FakeSalesRepository([_pastSale()])));
 
  await tester.pumpAndSettle();
 
- await tester.enterText(find.byType(TextField), 'zzz');
- await tester.pump();
+ await tester.tap(find.text('Tudo'));
+ await tester.pumpAndSettle();
+ await tester.tap(
+  find.widgetWithText(PopupMenuItem<PeriodFilter>, 'Hoje'),
+ );
+ await tester.pumpAndSettle();
 
  expect(find.text('Nenhuma venda encontrada'), findsOneWidget);
 
  // O estado vazio fica abaixo do fold na viewport 800×600 com a barra
- // fixa de 10 chips — rola até o botão antes de tocar.
+ // de filtros fixa — rola até o botão antes de tocar.
  await tester.ensureVisible(find.text('Limpar filtros'));
  await tester.pumpAndSettle();
  await tester.tap(find.text('Limpar filtros'));
  await tester.pump();
 
  expect(find.text('S-00001 · 1 item'), findsOneWidget);
- expect(find.text('Nenhuma venda encontrada'), findsNothing);
- });
+  expect(find.text('Nenhuma venda encontrada'), findsNothing);
+  });
 
- testWidgets('busca e filtros ficam fixos ao rolar a lista', (tester) async {
+  testWidgets('filtros ficam fixos ao rolar a lista', (tester) async {
  // Várias vendas para permitir rolagem real.
  final sales = [
- for (var i = 1; i <= 15; i++)
- _pastSale(id: 's$i', number: i, totalAmountCents: 100 + i),
+  for (var i = 1; i <= 15; i++)
+  _pastSale(id: 's$i', number: i, totalAmountCents: 100 + i),
  ];
  await tester.pumpWidget(_buildApp(_FakeSalesRepository(sales)));
  await tester.pumpAndSettle();
 
- // Busca visível no topo, junto com o resumo do dia.
- expect(find.byType(TextField), findsOneWidget);
+ // Chips de filtro visíveis no topo, junto com o resumo do dia.
+ expect(find.text('Tudo'), findsOneWidget);
+ expect(find.text('Todas'), findsOneWidget);
  expect(find.text('R\$ 0,00'), findsOneWidget);
 
  // Rola a lista até o fim.
  await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
  await tester.pumpAndSettle();
 
- // A busca continua FIXA (pinned), mas o resumo rolou para fora.
- expect(find.byType(TextField), findsOneWidget);
+ // Os filtros continuam FIXOS (pinned), mas o resumo rolou para fora.
+ expect(find.text('Tudo'), findsOneWidget);
+ expect(find.text('Todas'), findsOneWidget);
  expect(find.text('R\$ 0,00'), findsNothing);
  });
 
@@ -412,7 +438,7 @@ void main() {
 
  final after = headerHeight();
  expect(after, greaterThan(before));
- expect(find.byType(TextField), findsOneWidget);
+ expect(find.text('Tudo'), findsOneWidget);
  expect(tester.takeException(), isNull);
  });
 
@@ -432,23 +458,24 @@ void main() {
  await tester.pumpWidget(_buildApp(_FakeSalesRepository(sales)));
  await tester.pumpAndSettle();
 
- // Busca fixa no topo, junto com o resumo do dia.
- expect(find.byType(TextField), findsOneWidget);
+ // Chips de filtro fixos no topo, junto com o resumo do dia.
+ expect(find.text('Tudo'), findsOneWidget);
+ expect(find.text('Todas'), findsOneWidget);
  expect(find.text('R\$ 0,00'), findsOneWidget);
 
  // Gira para paisagem (800×600): a largura maior pode quebrar os chips
  // em menos linhas — a barra precisa re-medir o próprio extent.
  await rotateToLandscape(tester);
 
- // Sem overflow e a busca continua fixa após o giro.
+ // Sem overflow e os filtros continuam fixos após o giro.
  expect(tester.takeException(), isNull);
- expect(find.byType(TextField), findsOneWidget);
+ expect(find.text('Tudo'), findsOneWidget);
 
- // Rolando até o fim, a busca permanece FIXA e o resumo rolou para fora.
+ // Rolando até o fim, os filtros permanecem FIXOS e o resumo rolou fora.
  await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
  await tester.pumpAndSettle();
 
- expect(find.byType(TextField), findsOneWidget);
+ expect(find.text('Tudo'), findsOneWidget);
  expect(find.text('R\$ 0,00'), findsNothing);
  expect(tester.takeException(), isNull);
  });
@@ -458,43 +485,43 @@ void main() {
  // estourava. Agora ela encolhe com ellipsis; overflows de RenderFlex
  // falham o teste via takeException.
  testWidgets('não estoura com escala de texto 2.0 em tela estreita', (
- tester,
+   tester,
  ) async {
- tester.platformDispatcher.textScaleFactorTestValue = 2.0;
- addTearDown(tester.platformDispatcher.clearAllTestValues);
+   tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+   addTearDown(tester.platformDispatcher.clearAllTestValues);
 
- // Estreita (360) porém alta: garante que o card seja construído/pintado
- // com escala 2.0 (abaixo do fold o overflow ficaria mascarado).
- tester.view.physicalSize = const Size(360, 2000);
- tester.view.devicePixelRatio = 1.0;
- addTearDown(tester.view.reset);
+   // Estreita (360) porém alta: garante que o card seja construído/pintado
+   // com escala 2.0 (abaixo do fold o overflow ficaria mascarado).
+   tester.view.physicalSize = const Size(360, 2000);
+   tester.view.devicePixelRatio = 1.0;
+   addTearDown(tester.view.reset);
 
- await tester.pumpWidget(
- _buildApp(
- _FakeSalesRepository([
- _pastSale(
- items: [
- for (var i = 0; i < 12; i++)
- SaleItem(
- productId: 'p$i',
- productName: 'Produto $i',
- quantity: 3,
- unitPriceCents: 99999,
- ),
- ],
- totalAmountCents: 999999999,
- // Cartão de crédito = pior caso (rótulo localizado longo +
- // ícone de cartão) na linha superior do card com o chip 'Pago'.
- paymentMethod: PaymentMethod.creditCard,
- ),
- ]),
- ),
- );
- await tester.pumpAndSettle();
+   await tester.pumpWidget(
+     _buildApp(
+       _FakeSalesRepository([
+         _pastSale(
+           items: [
+             for (var i = 0; i < 12; i++)
+               SaleItem(
+                 productId: 'p$i',
+                 productName: 'Produto $i',
+                 quantity: 3,
+                 unitPriceCents: 99999,
+               ),
+           ],
+           totalAmountCents: 999999999,
+           // Cartão de crédito = pior caso (rótulo localizado longo +
+           // ícone de cartão) na linha superior do card com o chip 'Pago'.
+           paymentMethod: PaymentMethod.creditCard,
+         ),
+       ]),
+     ),
+   );
+   await tester.pumpAndSettle();
 
- // O card segue renderizado e nenhum overflow foi registrado.
- expect(find.byType(FloatingActionButton), findsOneWidget);
- expect(tester.takeException(), isNull);
+   // O card segue renderizado e nenhum overflow foi registrado.
+   expect(find.byType(FloatingActionButton), findsOneWidget);
+   expect(tester.takeException(), isNull);
  });
 
  testWidgets('venda anulada: selo Anulada no card e fora do resumo do dia', (

@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/network/deep_link_handler.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../domain/entities/app_user.dart';
 import '../../../domain/entities/auth_event.dart';
@@ -31,26 +34,26 @@ class AuthGate extends ConsumerStatefulWidget {
 
 class _AuthGateState extends ConsumerState<AuthGate> {
   bool _timeoutReached = false;
-  int _splashStartMs = 0;
+  Timer? _timeoutTimer;
 
   @override
   void initState() {
     super.initState();
     DeepLinkHandler.init();
-    _splashStartMs = DateTime.now().millisecondsSinceEpoch;
     // Se o auth state não resolver em 3 segundos, mostrar login em vez de
     // ficar preso no splash (problema comum em release quando o Supabase
     // demora ou falha silenciosamente).
-    Future.delayed(const Duration(seconds: 3), () {
+    _timeoutTimer = Timer(const Duration(seconds: 3), () {
       if (mounted && !_timeoutReached) {
         setState(() => _timeoutReached = true);
       }
     });
   }
 
-  /// Verifica se já passou do tempo máximo no splash.
-  bool get _splashTimedOut {
-    return DateTime.now().millisecondsSinceEpoch - _splashStartMs > 5000;
+  @override
+  void dispose() {
+    _timeoutTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -120,13 +123,14 @@ class _MFAGateState extends ConsumerState<_MFAGate> {
   bool _mfaChecked = false;
   bool _mfaEnabled = false;
   bool _timedOut = false;
+  Timer? _timeoutTimer;
 
   @override
   void initState() {
     super.initState();
     _checkMFA();
     // Timeout de 5 segundos — se MFA check não resolver, assumir desabilitado.
-    Future.delayed(const Duration(seconds: 3), () {
+    _timeoutTimer = Timer(const Duration(seconds: 3), () {
       if (mounted && !_mfaChecked) {
         setState(() {
           _mfaChecked = true;
@@ -135,6 +139,12 @@ class _MFAGateState extends ConsumerState<_MFAGate> {
         });
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _timeoutTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _checkMFA() async {
@@ -218,14 +228,21 @@ class _AdminTenantGate extends ConsumerStatefulWidget {
 
 class _AdminTenantGateState extends ConsumerState<_AdminTenantGate> {
   bool _timedOut = false;
+  Timer? _timeoutTimer;
 
   @override
   void initState() {
     super.initState();
     // Timeout de 5 segundos para este gate também.
-    Future.delayed(const Duration(seconds: 3), () {
+    _timeoutTimer = Timer(const Duration(seconds: 3), () {
       if (mounted && !_timedOut) setState(() => _timedOut = true);
     });
+  }
+
+  @override
+  void dispose() {
+    _timeoutTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -262,18 +279,30 @@ class _TenantGate extends ConsumerStatefulWidget {
 
 class _TenantGateState extends ConsumerState<_TenantGate> {
   bool _timedOut = false;
+  Timer? _timeoutTimer;
 
   @override
   void initState() {
     super.initState();
     // Timeout de 5 segundos — mostrar tela de erro em vez de ficar preso.
-    Future.delayed(const Duration(seconds: 3), () {
+    _timeoutTimer = Timer(const Duration(seconds: 3), () {
       if (mounted && !_timedOut) setState(() => _timedOut = true);
     });
   }
 
   @override
+  void dispose() {
+    _timeoutTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Mantém vivo o polling CENTRAL do bloqueio reativo de funcionários
+    // (Realtime + timer de fallback): enquanto este gate existe (usuário
+    // logado no fluxo do tenant), os vínculos são reavaliados. autoDispose
+    // cancela tudo no sign-out.
+    ref.watch(employeesPollingProvider);
     final tenantAsync = ref.watch(myTenantProvider(widget.user.id));
     // Se excedeu o timeout e ainda está loading, mostrar erro com retry.
     if (_timedOut && tenantAsync.isLoading) {
@@ -452,13 +481,12 @@ class _TenantErrorScreen extends StatelessWidget {
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
 
-  // Mesma paleta da tela de login.
-  static const _bg = Color(0xFF101112);
-  static const _surface = Color(0xFF1D1E22);
-  static const _border = Color(0xFF303238);
+  // Mesma paleta da tela de login — auth sempre-escura (decisão de
+  // marca); neutros alinhados aos tokens AppColors.*Dark do design system.
+  static const _bg = AppColors.backgroundDark;
   static const _textPrimary = Color(0xFFFFFFFF);
   static const _textSecondary = Color(0xFFA1A1AA);
-  static const _green = Color(0xFF16A34A);
+  static const _green = AppColors.brand;
 
   @override
   Widget build(BuildContext context) {

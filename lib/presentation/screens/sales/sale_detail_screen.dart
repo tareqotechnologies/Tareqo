@@ -19,7 +19,9 @@ import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/sales_providers.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/confirm_dialog.dart';
 import '../../widgets/payment_filter.dart' show PaymentMethodAccent, PaymentMethodIcon;
 import '../../widgets/product_image.dart';
 import '../../widgets/section_header.dart';
@@ -73,26 +75,14 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.saleDetailCancelConfirmTitle),
-        content: Text(
-          l10n.saleDetailCancelConfirmBody(
-            Formatters.currency(sale.totalAmountCents),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.commonCancel),
-          ),
-          AppButton.danger(
-            label: l10n.saleDetailCancelConfirm,
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.saleDetailCancelConfirmTitle,
+      message: l10n.saleDetailCancelConfirmBody(
+        Formatters.currency(sale.totalAmountCents),
       ),
+      confirmLabel: l10n.saleDetailCancelConfirm,
+      destructive: true,
     );
     if (confirmed != true || !mounted) return;
 
@@ -144,19 +134,15 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     final activeStore = _activeStore();
     final accent = sale.paymentMethod.accent(theme);
     final itemsLabel = l10n.dashboardSaleItems(sale.items.length);
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.saleDetailTitle,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
-        ),
-      ),
+    return AppPage(
+      title: l10n.saleDetailTitle,
+      useSafeArea: false,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 32),
         children: [
           // ── Header: sale ID + date + payment chip ──
           Text(

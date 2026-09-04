@@ -314,15 +314,15 @@ void main() {
  testWidgets('labels da navegação usam peso leve (w500) — hierarquia '
  'pela cor', (tester) async {
  final theme = AppTheme.dark;
- // Estado NÃO selecionado (set vazio) e o SELECIONADO — hierarquia
- // pela cor + peso (w500 neutro, w600 quando ativo); travar ambos
- // evita regressão silenciosa.
- final unselected =
- theme.navigationBarTheme.labelTextStyle!.resolve({});
- final selected = theme.navigationBarTheme.labelTextStyle!
- .resolve({WidgetState.selected});
- expect(unselected?.fontWeight, FontWeight.w500);
- expect(selected?.fontWeight, FontWeight.w600);
+    // Estado NÃO selecionado (set vazio) e o SELECIONADO — a hierarquia
+    // é pela COR (peso leve w500 nos dois estados); travar ambos evita
+    // regressão silenciosa.
+    final unselected =
+        theme.navigationBarTheme.labelTextStyle!.resolve({});
+    final selected = theme.navigationBarTheme.labelTextStyle!
+        .resolve({WidgetState.selected});
+    expect(unselected?.fontWeight, FontWeight.w500);
+    expect(selected?.fontWeight, FontWeight.w500);
  });
 
  testWidgets('pílula do NavigationRail é StadiumBorder (igual à barra)',

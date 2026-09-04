@@ -6,14 +6,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pdf/pdf.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/share/invoice_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/custom_invoice.dart';
 import '../../controllers/customers_providers.dart';
 import '../../controllers/products_providers.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/color_palette.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 
@@ -34,36 +37,34 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
 
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 64,
-        titleSpacing: AppSpacing.lg,
-        title: Text(
-          'Factura Personalizada',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
+    return AppPage(
+      title: l10n.customInvoiceTitle,
+      useSafeArea: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.settings_outlined, size: 20),
+          onPressed: _openTemplateSettings,
+          tooltip: l10n.customInvoiceTemplateTooltip,
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined, size: 20),
-            onPressed: _openTemplateSettings,
-            tooltip: 'Modelo da Factura',
-          ),
-        ],
-      ),
+      ],
       body: _invoices.isEmpty
           ? EmptyState(
               icon: Icons.receipt_long_outlined,
-              title: 'Nenhuma factura',
-              subtitle:
-                  'Crie facturas profissionais com layout\npersonalizado para os seus clientes',
+              title: l10n.customInvoiceEmpty,
+              subtitle: l10n.customInvoiceEmptySubtitle,
             )
           : ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: EdgeInsets.fromLTRB(
+                horizontal,
+                AppSpacing.lg,
+                horizontal,
+                AppSpacing.lg,
+              ),
               itemCount: _invoices.length,
               separatorBuilder: (_, _) =>
                   const SizedBox(height: AppSpacing.xs),
@@ -76,7 +77,7 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-invoice',
         onPressed: _openNewInvoice,
-        tooltip: 'Nova Factura',
+        tooltip: l10n.customInvoiceNewFab,
         child: const Icon(Icons.add_rounded, size: 28),
       ),
     );
@@ -158,6 +159,7 @@ class _InvoiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return AppCard(
       elevated: true,
@@ -199,8 +201,11 @@ class _InvoiceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Nº ${invoiceNumber.toString().padLeft(5, '0')}'
-                      '${invoice.clientPhone.isNotEmpty ? '  •  ${invoice.clientPhone}' : ''}',
+                      l10n.customInvoiceNumberPrefix(invoiceNumber.toString()
+                              .padLeft(5, '0')) +
+                          (invoice.clientPhone.isNotEmpty
+                              ? '  •  ${invoice.clientPhone}'
+                              : ''),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -220,7 +225,7 @@ class _InvoiceCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           // Detalhes: contagem de itens
           Text(
-            '${invoice.items.length} ${invoice.items.length == 1 ? 'item' : 'itens'}',
+            l10n.customInvoiceItemsCount(invoice.items.length),
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -230,13 +235,13 @@ class _InvoiceCard extends StatelessWidget {
           Row(
             children: [
               AppButton.secondary(
-                label: 'WhatsApp',
+                label: l10n.customInvoiceWhatsApp,
                 icon: const Icon(Icons.share_outlined, size: 16),
-                onPressed: _shareWhatsApp,
+                onPressed: () => _shareWhatsApp(context),
               ),
               const SizedBox(width: AppSpacing.xs),
               AppButton.secondary(
-                label: 'PDF',
+                label: l10n.customInvoicePdf,
                 icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
                 onPressed: () => _exportPdf(context),
               ),
@@ -247,13 +252,15 @@ class _InvoiceCard extends StatelessWidget {
     );
   }
 
-  Future<void> _shareWhatsApp() async {
+  Future<void> _shareWhatsApp(BuildContext context) async {
+    final l10n = context.l10n;
     final buffer = StringBuffer();
-    buffer.writeln('═══ FACTURA ═══');
-    buffer.writeln('Nº: ${invoiceNumber.toString().padLeft(5, '0')}');
-    buffer.writeln('Cliente: ${invoice.clientName}');
+    buffer.writeln(l10n.customInvoiceWhatsAppHeader);
+    buffer
+        .writeln('${l10n.customInvoiceNumberShort}: ${invoiceNumber.toString().padLeft(5, '0')}');
+    buffer.writeln('${l10n.customInvoiceClientLabel}: ${invoice.clientName}');
     if (invoice.clientPhone.isNotEmpty) {
-      buffer.writeln('Tel: ${invoice.clientPhone}');
+      buffer.writeln('${l10n.customInvoicePhoneLabel}: ${invoice.clientPhone}');
     }
     buffer.writeln();
     for (final item in invoice.items) {
@@ -262,7 +269,7 @@ class _InvoiceCard extends StatelessWidget {
       );
     }
     buffer.writeln();
-    buffer.writeln('TOTAL: ${Formatters.currency(invoice.totalCents)}');
+    buffer.writeln('${l10n.customInvoiceTotalLabel}: ${Formatters.currency(invoice.totalCents)}');
 
     final uri = Uri.parse(
       'https://wa.me/?text=${Uri.encodeComponent(buffer.toString())}',
@@ -293,10 +300,33 @@ class _InvoiceCard extends StatelessWidget {
     );
 
     final config = templateConfig ?? InvoiceTemplateConfig();
+    final l10n = context.l10n;
     await InvoicePdfExporter().sharePdf(
       invoiceEntity,
-      businessName:
-          config.businessName.isNotEmpty ? config.businessName : 'Minha Empresa',
+      labels: InvoicePdfLabels(
+        docWord: l10n.pdfInvoiceDocWord,
+        numberLabelTemplate: l10n.customInvoiceNumberPrefix('{number}'),
+        clientHeading: l10n.pdfClientHeading,
+        phoneLabelTemplate: l10n.pdfPhoneLine('{value}'),
+        emailLabelTemplate: l10n.pdfEmailLine('{value}'),
+        taxIdLabelTemplate: l10n.pdfNifLine('{value}'),
+        itemHeader: l10n.pdfItemHeader,
+        qtyHeader: l10n.customInvoiceQty,
+        unitPriceHeader: l10n.pdfUnitPriceHeader,
+        subtotalHeader: l10n.pdfSubtotalHeader,
+        discountLabel: l10n.pdfDiscountLabel,
+        taxLabel: l10n.pdfTaxLabel,
+        totalLabel: l10n.customInvoiceTotalLabel,
+        paymentLabelTemplate: l10n.pdfPaymentLine('{value}'),
+        referenceLabelTemplate: l10n.pdfReferenceLine('{value}'),
+        notesHeading: l10n.pdfNotesHeading,
+        footerTemplate: l10n.pdfFooter('{date}'),
+        fileNameBase: l10n.pdfInvoiceFileBase,
+        subjectWord: l10n.pdfInvoiceSubjectWord,
+      ),
+      businessName: config.businessName.isNotEmpty
+          ? config.businessName
+          : l10n.businessFallbackName,
       businessAddress:
           config.businessAddress.isNotEmpty ? config.businessAddress : null,
       businessPhone:
@@ -376,6 +406,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
     final products = ref.watch(productsProvider).value ?? [];
     final customers = ref.watch(customersProvider).value ?? [];
     final activeProducts = products.where((p) => p.isActive).toList();
@@ -397,7 +428,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Nova Factura',
+              l10n.customInvoiceNew,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -405,16 +436,16 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             const SizedBox(height: AppSpacing.lg),
 
             // ─── Cliente ──
-            _SectionLabel(text: 'Cliente'),
+            _SectionLabel(text: l10n.customInvoiceClientSection),
             const SizedBox(height: 6),
             if (customers.isNotEmpty)
               DropdownButtonFormField<String>(
                   initialValue: _selectedCustomerId,
                   isExpanded: true,
                   menuMaxHeight: 250,
-                  decoration: const InputDecoration(
-                    labelText: 'Cliente',
-                    prefixIcon: Icon(Icons.person_outline, size: 20),
+                  decoration: InputDecoration(
+                    labelText: l10n.customInvoiceClientSection,
+                    prefixIcon: const Icon(Icons.person_outline, size: 20),
                   ),
                   items: customers
                       .map(
@@ -440,20 +471,20 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             else
               AppTextField(
                 controller: _clientController,
-                label: 'Nome do cliente',
+                label: l10n.customInvoiceClientName,
                 prefixIcon: Icons.person_outline,
               ),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _phoneController,
-              label: 'Telefone',
+              label: l10n.customInvoicePhone,
               keyboardType: TextInputType.phone,
               prefixIcon: Icons.phone_outlined,
             ),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _taxIdController,
-              label: 'NIF / NUIT (opcional)',
+              label: l10n.customInvoiceTaxIdOptional,
               prefixIcon: Icons.badge_outlined,
             ),
             const SizedBox(height: AppSpacing.md),
@@ -461,16 +492,17 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             const SizedBox(height: AppSpacing.sm),
 
             // ─── Produto ──
-            _SectionLabel(text: 'Produto'),
+            _SectionLabel(text: l10n.customInvoiceProductSection),
             const SizedBox(height: 6),
             if (activeProducts.isNotEmpty)
               DropdownButtonFormField<String>(
                   initialValue: _selectedProductId,
                   isExpanded: true,
                   menuMaxHeight: 250,
-                  decoration: const InputDecoration(
-                    labelText: 'Produto',
-                    prefixIcon: Icon(Icons.inventory_2_outlined, size: 20),
+                  decoration: InputDecoration(
+                    labelText: l10n.customInvoiceProductSection,
+                    prefixIcon:
+                        const Icon(Icons.inventory_2_outlined, size: 20),
                   ),
                   items: activeProducts
                       .map(
@@ -487,7 +519,11 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
-                                'Estoque: ${p.stockQuantity ~/ 1000} ${p.unitLabel}  •  ${Formatters.currency(p.salePriceCents)}',
+                                l10n.customInvoiceProductOption(
+                                  (p.stockQuantity ~/ 1000).toString(),
+                                  p.unitLabel,
+                                  Formatters.currency(p.salePriceCents),
+                                ),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: scheme.onSurfaceVariant
                                       .withValues(alpha: 0.6),
@@ -512,7 +548,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             else
               InputDecorator(
                 decoration: InputDecoration(
-                  hintText: 'Sem produtos cadastrados',
+                  hintText: l10n.customInvoiceProductPlaceholder,
                   prefixIcon:
                       const Icon(Icons.inventory_2_outlined, size: 20),
                   border: InputBorder.none,
@@ -531,7 +567,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
                   flex: 2,
                   child: AppTextField(
                     controller: _priceController,
-                    label: 'Preço (MT)',
+                    label: l10n.customInvoicePrice,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
@@ -541,7 +577,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
                 Expanded(
                   child: AppTextField(
                     controller: _qtyController,
-                    label: 'Qtd',
+                    label: l10n.customInvoiceQty,
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -551,7 +587,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             Align(
               alignment: Alignment.centerRight,
               child: AppButton.secondary(
-                label: 'Adicionar',
+                label: l10n.customInvoiceAddItem,
                 onPressed: _selectedProductId != null ? _addItem : null,
               ),
             ),
@@ -593,7 +629,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
               const SizedBox(height: AppSpacing.sm),
               AppTextField(
                 controller: _discountController,
-                label: 'Desconto (MT)',
+                label: l10n.customInvoiceDiscount,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -602,7 +638,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
               const SizedBox(height: AppSpacing.sm),
               AppTextField(
                 controller: _taxController,
-                label: 'IVA (MT)',
+                label: l10n.customInvoiceTax,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -610,7 +646,9 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                'Total: ${Formatters.currency(total > 0 ? total : 0)}',
+                l10n.customInvoiceBillTotal(
+                  Formatters.currency(total > 0 ? total : 0),
+                ),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                   letterSpacing: -0.3,
@@ -621,7 +659,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               expanded: true,
-              label: 'Criar Factura',
+              label: l10n.customInvoiceCreate,
               onPressed: _clientController.text.trim().isNotEmpty &&
                       _items.isNotEmpty
                   ? () {
@@ -658,7 +696,7 @@ class InvoiceTemplateConfig {
     this.businessPhone = '',
     this.businessTaxId = '',
     this.primaryColor = const Color(0xFF2563EB),
-    this.templateStyle = 'Clássico',
+    this.templateStyle = 'Classic',
   });
 
   Uint8List? logoBytes;
@@ -670,18 +708,6 @@ class InvoiceTemplateConfig {
   String templateStyle;
 }
 
-/// Paleta de cores profissional — tonalidades sóbrias e consistentes
-/// com o design system do app (sem cores de tendência/AI).
-const _kColorPalettes = <String, Color>{
-  'Azul': Color(0xFF2563EB),
-  'Verde': Color(0xFF16A34A),
-  'Vermelho': Color(0xFFDC2626),
-  'Âmbar': Color(0xFFD97706),
-  'Slate': Color(0xFF475569),
-  'Violeta': Color(0xFF7C3AED),
-  'Teal': Color(0xFF0D9488),
-  'Indigo': Color(0xFF4338CA),
-};
 
 class _TemplateSettingsSheet extends StatefulWidget {
   const _TemplateSettingsSheet({required this.config});
@@ -734,12 +760,12 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Galeria'),
+              title: Text(ctx.l10n.imageSourceGallery),
               onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt_outlined),
-              title: const Text('Câmara'),
+              title: Text(ctx.l10n.imageSourceCamera),
               onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
             ),
           ],
@@ -772,7 +798,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
       ..logoBytes = _logoBytes;
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Modelo guardado com sucesso')),
+      SnackBar(content: Text(context.l10n.customInvoiceTemplateSaved)),
     );
   }
 
@@ -780,6 +806,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -794,7 +821,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Modelo da Factura',
+              l10n.customInvoiceTemplateTitle,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -802,7 +829,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
             const SizedBox(height: AppSpacing.md),
 
             // ─── Logotipo ──
-            _SectionLabel(text: 'Logotipo da Empresa'),
+            _SectionLabel(text: l10n.customInvoiceTemplateLogoSection),
             const SizedBox(height: AppSpacing.sm),
             GestureDetector(
               onTap: _pickLogo,
@@ -860,7 +887,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Toque para carregar logotipo',
+                            l10n.customInvoiceTemplateLogoHint,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
@@ -872,37 +899,39 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
             const SizedBox(height: AppSpacing.lg),
 
             // ─── Cor Principal ──
-            _SectionLabel(text: 'Cor Principal'),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
+            _SectionLabel(text: l10n.customInvoiceTemplateColorSection),
+            const SizedBox(height: AppSpacing.sm),              Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
-              children: _kColorPalettes.entries.map((entry) {
+              children: kColorPalettes.entries.map((entry) {
                 final isSelected =
                     entry.value.toARGB32() == _selectedColor.toARGB32();
-                return GestureDetector(
-                  onTap: () =>
-                      setState(() => _selectedColor = entry.value),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: entry.value,
-                      shape: BoxShape.circle,
-                      border: isSelected
-                          ? Border.all(
-                              color: scheme.onSurface,
-                              width: 3,
+                return Tooltip(
+                  message: paletteColorName(entry.key, l10n),
+                  child: GestureDetector(
+                    onTap: () =>
+                        setState(() => _selectedColor = entry.value),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: entry.value,
+                        shape: BoxShape.circle,
+                        border: isSelected
+                            ? Border.all(
+                                color: scheme.onSurface,
+                                width: 3,
+                              )
+                            : null,
+                      ),
+                      child: isSelected
+                          ? Icon(
+                              Icons.check,
+                              size: 18,
+                              color: scheme.surface,
                             )
                           : null,
                     ),
-                    child: isSelected
-                        ? Icon(
-                            Icons.check,
-                            size: 18,
-                            color: scheme.surface,
-                          )
-                        : null,
                   ),
                 );
               }).toList(),
@@ -910,37 +939,37 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
             const SizedBox(height: AppSpacing.lg),
 
             // ─── Estilo ──
-            _SectionLabel(text: 'Estilo'),
+            _SectionLabel(text: l10n.customInvoiceTemplateStyle),
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
                 Expanded(
                   child: _TemplateStyleChip(
-                    name: 'Clássico',
+                    name: l10n.customInvoiceTemplateStyleClassic,
                     icon: Icons.receipt_long_outlined,
-                    isSelected: _selectedTemplate == 'Clássico',
+                    isSelected: _selectedTemplate == 'Classic',
                     onTap: () =>
-                        setState(() => _selectedTemplate = 'Clássico'),
+                        setState(() => _selectedTemplate = 'Classic'),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: _TemplateStyleChip(
-                    name: 'Moderno',
+                    name: l10n.customInvoiceTemplateStyleModern,
                     icon: Icons.auto_awesome_outlined,
-                    isSelected: _selectedTemplate == 'Moderno',
+                    isSelected: _selectedTemplate == 'Modern',
                     onTap: () =>
-                        setState(() => _selectedTemplate = 'Moderno'),
+                        setState(() => _selectedTemplate = 'Modern'),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: _TemplateStyleChip(
-                    name: 'Compacto',
+                    name: l10n.customInvoiceTemplateStyleCompact,
                     icon: Icons.view_stream_outlined,
-                    isSelected: _selectedTemplate == 'Compacto',
+                    isSelected: _selectedTemplate == 'Compact',
                     onTap: () =>
-                        setState(() => _selectedTemplate = 'Compacto'),
+                        setState(() => _selectedTemplate = 'Compact'),
                   ),
                 ),
               ],
@@ -948,17 +977,17 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
             const SizedBox(height: AppSpacing.lg),
 
             // ─── Dados da Empresa ──
-            _SectionLabel(text: 'Dados da Empresa'),
+            _SectionLabel(text: l10n.customInvoiceTemplateCompanySection),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _nameController,
-              label: 'Nome da Empresa',
+              label: l10n.customInvoiceTemplateCompanyName,
               prefixIcon: Icons.business_outlined,
             ),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _addressController,
-              label: 'Morada',
+              label: l10n.customInvoiceTemplateAddress,
               prefixIcon: Icons.location_on_outlined,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -967,7 +996,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
                 Expanded(
                   child: AppTextField(
                     controller: _phoneController,
-                    label: 'Telefone',
+                    label: l10n.customInvoicePhone,
                     keyboardType: TextInputType.phone,
                     prefixIcon: Icons.phone_outlined,
                   ),
@@ -976,7 +1005,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
                 Expanded(
                   child: AppTextField(
                     controller: _taxIdController,
-                    label: 'NIF / NUIT',
+                    label: l10n.customInvoiceTemplateTaxId,
                     prefixIcon: Icons.badge_outlined,
                   ),
                 ),
@@ -985,7 +1014,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
             const SizedBox(height: AppSpacing.lg),
 
             // ─── Preview ──
-            _SectionLabel(text: 'Preview'),
+            _SectionLabel(text: l10n.commonPreview),
             const SizedBox(height: AppSpacing.sm),
             _InvoicePreview(
               businessName: _nameController.text,
@@ -1001,13 +1030,13 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
             // ─── Botões ──
             AppButton.primary(
               expanded: true,
-              label: 'Guardar Modelo',
+              label: l10n.customInvoiceTemplateSave,
               onPressed: _save,
             ),
             const SizedBox(height: AppSpacing.sm),
             AppButton.secondary(
               expanded: true,
-              label: 'Cancelar',
+              label: l10n.commonCancel,
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],

@@ -10,8 +10,9 @@ import '../../../domain/entities/financial_transaction.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
-import '../../widgets/app_button.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
@@ -43,27 +44,21 @@ class FinancialScreen extends ConsumerWidget {
 
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
 
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 56,
-        titleSpacing: AppSpacing.lg,
-        title: Text(
-          l10n.financialTitle,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
+    return AppPage(
+      title: l10n.financialTitle,
+      useSafeArea: false,
+      actions: [
+        if (canClose)
+          IconButton(
+            tooltip: l10n.cashClosingAction,
+            icon: const Icon(Icons.lock_clock_outlined),
+            onPressed: () => _openCashClosing(context, ref),
           ),
-        ),
-        actions: [
-          if (canClose)
-            IconButton(
-              tooltip: l10n.cashClosingAction,
-              icon: const Icon(Icons.lock_clock_outlined),
-              onPressed: () => _openCashClosing(context, ref),
-            ),
-        ],
-      ),
+      ],
       floatingActionButton: transactions.isNotEmpty
           ? FloatingActionButton(
               heroTag: 'fab-financial',
@@ -86,7 +81,7 @@ class FinancialScreen extends ConsumerWidget {
             slivers: [
               // ── Period selector + date range ──
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+                padding: EdgeInsets.fromLTRB(horizontal, 4, horizontal, 0),
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -146,7 +141,7 @@ class FinancialScreen extends ConsumerWidget {
 
               // ── Cash flow card stack ──
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                padding: EdgeInsets.fromLTRB(horizontal, 16, horizontal, 0),
                 sliver: SliverToBoxAdapter(
                   child: cashFlowAsync.hasError
                       ? InlineErrorCard(
@@ -168,7 +163,7 @@ class FinancialScreen extends ConsumerWidget {
 
               // ── Transactions section header ──
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                padding: EdgeInsets.fromLTRB(horizontal, 24, horizontal, 0),
                 sliver: SliverToBoxAdapter(
                   child: SectionHeader(
                     title: l10n.financialTransactions,
@@ -218,7 +213,8 @@ class FinancialScreen extends ConsumerWidget {
                             label: group.label,
                             totalCents: group.totalCents,
                             transactions: group.transactions,
-                            onTap: (tx) => _openTransactionDetail(context, tx),
+                            onTap: (tx) =>
+                                _openTransactionDetail(context, ref, tx),
                             onReceive: (tx) => _settlePending(
                               context,
                               ref,
@@ -269,23 +265,11 @@ class FinancialScreen extends ConsumerWidget {
   }) async {
     final messenger = ScaffoldMessenger.of(context);
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content:
-            Text(body(Formatters.currency(transaction.amountCents))),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(context.l10n.commonCancel),
-          ),
-          AppButton.primary(
-            onPressed: () => Navigator.of(context).pop(true),
-            label: confirmLabel,
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: title,
+      message: body(Formatters.currency(transaction.amountCents)),
+      confirmLabel: confirmLabel,
     );
     if (confirmed != true || !context.mounted) return;
 
@@ -329,10 +313,40 @@ class FinancialScreen extends ConsumerWidget {
   }
 
   void _openTransactionDetail(
-      BuildContext context, FinancialTransaction tx) {
+      BuildContext context, WidgetRef ref, FinancialTransaction tx) {
+    final l10n = context.l10n;
+    final pending = tx.status == TransactionStatus.pending;
     showAppSheet<void>(
       context,
-      builder: (_) => TransactionDetailSheet(transaction: tx),
+      builder: (_) => TransactionDetailSheet(
+        transaction: tx,
+        onReceive: pending && tx.type == TransactionType.income
+            ? () => _settlePending(
+                  context,
+                  ref,
+                  tx,
+                  title: l10n.financialReceivePendingTitle,
+                  body: l10n.financialReceivePendingBody,
+                  confirmLabel: l10n.financialReceive,
+                  success: l10n.financialReceived,
+                  failure: l10n.financialReceiveError,
+                  hint: 'Erro ao receber pendência',
+                )
+            : null,
+        onPay: pending && tx.type == TransactionType.expense
+            ? () => _settlePending(
+                  context,
+                  ref,
+                  tx,
+                  title: l10n.financialPayPendingTitle,
+                  body: l10n.financialPayPendingBody,
+                  confirmLabel: l10n.financialPay,
+                  success: l10n.financialPaid,
+                  failure: l10n.financialPayError,
+                  hint: 'Erro ao pagar saída pendente',
+                )
+            : null,
+      ),
     );
   }
 }
@@ -503,7 +517,7 @@ class _CashStack extends StatelessWidget {
                 builder: (context, constraints) {
                   final text = Formatters.currency(balance);
                   final baseSize =
-                      theme.textTheme.displaySmall?.fontSize ?? 32.0;
+                      theme.textTheme.displaySmall?.fontSize ?? 34.0;
                   final scale = (constraints.maxWidth /
                           (text.length * baseSize * 0.52))
                       .clamp(0.55, 1.0);
@@ -644,13 +658,16 @@ class _DateGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DateSectionHeader(label: label, totalCents: totalCents),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: EdgeInsets.symmetric(horizontal: horizontal),
           child: Material(
             color: scheme.surfaceContainerHighest,
             elevation: 0,

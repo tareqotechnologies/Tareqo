@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
@@ -18,6 +19,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     final addOns = AddOnCatalog.addOns();
     final tenants = ref.watch(allTenantsProvider).value ?? const [];
@@ -49,9 +51,9 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: _KpiCard(
-                      label: 'Receita Potencial',
+                      label: l10n.adminRevenuePotential,
                       value: Formatters.currency(totalPotentialRevenue),
-                      subtitle: 'Por tenant/mês (todos os add-ons)',
+                      subtitle: l10n.adminRevenuePotentialSub,
                       icon: Icons.trending_up,
                       color: AppColors.success,
                     ),
@@ -59,9 +61,9 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: _KpiCard(
-                      label: 'Add-ons Disponíveis',
+                      label: l10n.adminRevenueAvailableAddOns,
                       value: '${addOns.length}',
-                      subtitle: 'No catálogo activo',
+                      subtitle: l10n.adminRevenueAvailableAddOnsSub,
                       icon: Icons.extension_outlined,
                       color: scheme.primary,
                     ),
@@ -80,23 +82,23 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: _KpiCard(
-                      label: 'Tenants Activos',
+                      label: l10n.adminRevenueActiveTenants,
                       value: '${tenants.length}',
-                      subtitle: 'Total na plataforma',
+                      subtitle: l10n.adminRevenueActiveTenantsSub,
                       icon: Icons.business_outlined,
-                      color: const Color(0xFF3B82F6),
+                      color: AppColors.statusInfo,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: _KpiCard(
-                      label: 'Receita Mensal Max',
+                      label: l10n.adminRevenueMaxMonthly,
                       value: Formatters.currency(
                         totalPotentialRevenue * tenants.length,
                       ),
-                      subtitle: 'Se todos activassem todos',
+                      subtitle: l10n.adminRevenueMaxMonthlySub,
                       icon: Icons.account_balance_wallet_outlined,
-                      color: const Color(0xFFF59E0B),
+                      color: AppColors.statusWarning,
                     ),
                   ),
                 ],
@@ -112,7 +114,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Text(
-                'Receita por Add-on',
+                l10n.adminRevenueByAddOn,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -146,7 +148,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Text(
-                'Distribuição por Categoria',
+                l10n.adminRevenueByCategory,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -326,7 +328,7 @@ class _AddOnRevenueTile extends StatelessWidget {
                 ),
               ),
               Text(
-                'potencial/mês',
+                context.l10n.adminRevenuePerMonth,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                   fontSize: 11,
@@ -388,7 +390,7 @@ class _CategoryTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$addOnCount add-on${addOnCount == 1 ? '' : 's'}',
+                  context.l10n.adminAddOnsCount(addOnCount),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                     fontSize: 12,

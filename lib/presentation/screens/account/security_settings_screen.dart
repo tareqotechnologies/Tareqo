@@ -32,10 +32,10 @@ class _SecuritySettingsScreenState
 
   Future<void> _loadSettings() async {
     final mfa = await ref.read(mfaAuthUseCaseProvider).isEnabled();
-    final bioAvailable =
-        await ref.read(biometricAuthUseCaseProvider).isAvailable();
-    final bioEnabled =
-        await ref.read(biometricAuthUseCaseProvider).isEnabled();
+    final bioAvailable = await ref
+        .read(biometricAuthUseCaseProvider)
+        .isAvailable();
+    final bioEnabled = await ref.read(biometricAuthUseCaseProvider).isEnabled();
 
     if (mounted) {
       setState(() {
@@ -78,9 +78,7 @@ class _SecuritySettingsScreenState
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Segurança'),
-      ),
+      appBar: AppBar(title: Text(l10n.securitySectionTitle)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -89,10 +87,10 @@ class _SecuritySettingsScreenState
                 // MFA.
                 _SecurityTile(
                   icon: Icons.security_outlined,
-                  title: 'Autenticação em Dois Fatores',
+                  title: l10n.securityTwoFactorTitle,
                   subtitle: _mfaEnabled
-                      ? 'Ativada — Use um app autenticador'
-                      : 'Adicione uma camada extra de segurança',
+                      ? l10n.securityTwoFactorEnabledSub
+                      : l10n.securityTwoFactorDisabledSub,
                   trailing: Switch(
                     value: _mfaEnabled,
                     onChanged: (_) => _toggleMFA(),
@@ -116,10 +114,10 @@ class _SecuritySettingsScreenState
                 if (_biometricAvailable)
                   _SecurityTile(
                     icon: Icons.fingerprint_outlined,
-                    title: 'Autenticação Biométrica',
+                    title: l10n.securityBiometricTitle,
                     subtitle: _biometricEnabled
-                        ? 'Ativada — Impressão digital ou rosto'
-                        : 'Use impressão digital ou reconhecimento facial',
+                        ? l10n.securityBiometricEnabledSub
+                        : l10n.securityBiometricDisabledSub,
                     trailing: Switch(
                       value: _biometricEnabled,
                       onChanged: (_) => _toggleBiometric(),
@@ -129,12 +127,12 @@ class _SecuritySettingsScreenState
                   const SizedBox(height: AppSpacing.xs),
                   _SecurityTile(
                     icon: Icons.fingerprint_outlined,
-                    title: 'Autenticação Biométrica',
-                    subtitle: 'Não disponível neste dispositivo',
-                    trailing: const Icon(
+                    title: l10n.securityBiometricTitle,
+                    subtitle: l10n.securityBiometricUnavailable,
+                    trailing: Icon(
                       Icons.info_outline,
                       size: 20,
-                      color: Colors.grey,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

@@ -17,51 +17,97 @@ class AdvancedReportsPdfExporter {
   const AdvancedReportsPdfExporter();
 
   /// Gera e partilha o relatório de vendas.
+  ///
+  /// [title] é o título localizado exibido no documento e usado como base
+  /// do nome do arquivo; o exporter nunca hardcoda textos.
   Future<void> shareSalesReport({
+    required String title,
     required String period,
     required Map<String, String> kpis,
-    String? businessName,
+    required String businessName,
+    required String generatedOnLabel,
+    required String indicatorsLabel,
+    required String noDataLabel,
+    required String footerLabel,
   }) async {
     final bytes = await _buildReport(
-      title: 'Relatório de Vendas',
+      title: title,
       period: period,
       kpis: kpis,
       sections: [],
       businessName: businessName,
+      generatedOnLabel: generatedOnLabel,
+      indicatorsLabel: indicatorsLabel,
+      noDataLabel: noDataLabel,
+      footerLabel: footerLabel,
     );
-    await _share(bytes, 'relatorio_vendas.pdf', 'Relatório de Vendas');
+    await _share(bytes, '${_slug(title)}.pdf', title);
   }
 
   /// Gera e partilha o relatório financeiro.
   Future<void> shareFinancialReport({
+    required String title,
     required String period,
     required Map<String, String> kpis,
-    String? businessName,
+    required String businessName,
+    required String generatedOnLabel,
+    required String indicatorsLabel,
+    required String noDataLabel,
+    required String footerLabel,
   }) async {
     final bytes = await _buildReport(
-      title: 'Relatório Financeiro',
+      title: title,
       period: period,
       kpis: kpis,
       sections: [],
       businessName: businessName,
+      generatedOnLabel: generatedOnLabel,
+      indicatorsLabel: indicatorsLabel,
+      noDataLabel: noDataLabel,
+      footerLabel: footerLabel,
     );
-    await _share(bytes, 'relatorio_financeiro.pdf', 'Relatório Financeiro');
+    await _share(bytes, '${_slug(title)}.pdf', title);
   }
 
   /// Gera e partilha o relatório de estoque.
   Future<void> shareStockReport({
+    required String title,
     required String period,
     required Map<String, String> kpis,
-    String? businessName,
+    required String businessName,
+    required String generatedOnLabel,
+    required String indicatorsLabel,
+    required String noDataLabel,
+    required String footerLabel,
   }) async {
     final bytes = await _buildReport(
-      title: 'Relatório de Estoque',
+      title: title,
       period: period,
       kpis: kpis,
       sections: [],
       businessName: businessName,
+      generatedOnLabel: generatedOnLabel,
+      indicatorsLabel: indicatorsLabel,
+      noDataLabel: noDataLabel,
+      footerLabel: footerLabel,
     );
-    await _share(bytes, 'relatorio_estoque.pdf', 'Relatório de Estoque');
+    await _share(bytes, '${_slug(title)}.pdf', title);
+  }
+
+  /// Converte o título localizado em base de nome de arquivo segura.
+  String _slug(String title) {
+    const accents = 'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ';
+    const plain = 'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC';
+    final sb = StringBuffer();
+    for (final ch in title.toLowerCase().split('')) {
+      final idx = accents.indexOf(ch);
+      sb.write(idx >= 0 ? plain[idx] : ch);
+    }
+    return sb
+        .toString()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
   }
 
   Future<Uint8List> _buildReport({
@@ -69,7 +115,11 @@ class AdvancedReportsPdfExporter {
     required String period,
     required Map<String, String> kpis,
     required List<_ReportSection> sections,
-    String? businessName,
+    required String businessName,
+    required String generatedOnLabel,
+    required String indicatorsLabel,
+    required String noDataLabel,
+    required String footerLabel,
   }) async {
     final data = await rootBundle.load('assets/fonts/Inter-Variable.ttf');
     final doc = pw.Document(
@@ -94,7 +144,7 @@ class AdvancedReportsPdfExporter {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    businessName ?? 'TAREQO',
+                    businessName,
                     style: pw.TextStyle(
                       fontSize: 18,
                       fontWeight: pw.FontWeight.bold,
@@ -134,7 +184,7 @@ class AdvancedReportsPdfExporter {
                   ),
                   pw.SizedBox(height: 4),
                   pw.Text(
-                    'Gerado: $dateStr',
+                    generatedOnLabel.replaceFirst('{date}', dateStr),
                     style: const pw.TextStyle(
                       fontSize: 9,
                       color: PdfColors.grey600,
@@ -151,7 +201,7 @@ class AdvancedReportsPdfExporter {
 
           // ─── KPI Cards ──────────────────────────────────
           pw.Text(
-            'Indicadores',
+            indicatorsLabel,
             style: pw.TextStyle(
               fontSize: 12,
               fontWeight: pw.FontWeight.bold,
@@ -173,7 +223,7 @@ class AdvancedReportsPdfExporter {
             pw.SizedBox(height: 8),
             if (section.rows.isEmpty)
               pw.Text(
-                'Sem dados para este período',
+                noDataLabel,
                 style: const pw.TextStyle(
                   fontSize: 9,
                   color: PdfColors.grey500,
@@ -202,7 +252,7 @@ class AdvancedReportsPdfExporter {
           pw.SizedBox(height: 8),
           pw.Center(
             child: pw.Text(
-              'Documento gerado pelo TAREQO — $dateStr',
+              footerLabel.replaceFirst('{date}', dateStr),
               style: const pw.TextStyle(
                 fontSize: 8,
                 color: PdfColors.grey500,

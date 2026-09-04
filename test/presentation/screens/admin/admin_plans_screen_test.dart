@@ -5,8 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../helpers/test_app.dart';
 
 import 'package:tareqo/domain/entities/plan.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
 import 'package:tareqo/domain/usecases/add_plan_use_case.dart';
 import 'package:tareqo/domain/usecases/get_all_plans_use_case.dart';
+import 'package:tareqo/domain/usecases/get_all_tenants_use_case.dart';
 import 'package:tareqo/domain/usecases/update_plan_use_case.dart';
 import 'package:tareqo/presentation/controllers/account_providers.dart';
 import 'package:tareqo/presentation/controllers/admin_providers.dart';
@@ -21,6 +23,16 @@ class _FakeGetAllPlansUseCase implements GetAllPlansUseCase {
 
  @override
  Future<List<Plan>> call() async => _plans;
+}
+
+/// Fake do [GetAllTenantsUseCase] — o tile de cada plano conta os tenants
+/// do plano (`ref.watch(allTenantsProvider)`); sem o override o provider
+/// resolveria o GetIt (vazio nos testes) e a tela inteira quebraria.
+class _FakeGetAllTenantsUseCase implements GetAllTenantsUseCase {
+ const _FakeGetAllTenantsUseCase();
+
+ @override
+ Future<List<Tenant>> call() async => const [];
 }
 
 class _FakeAddPlanUseCase implements AddPlanUseCase {
@@ -50,10 +62,13 @@ Widget _buildApp({
 }) {
  return ProviderScope(
  overrides: [
- getAllPlansUseCaseProvider.overrideWithValue(
- _FakeGetAllPlansUseCase(plans),
- ),
- addPlanUseCaseProvider.overrideWithValue(
+    getAllPlansUseCaseProvider.overrideWithValue(
+      _FakeGetAllPlansUseCase(plans),
+    ),
+   getAllTenantsUseCaseProvider.overrideWithValue(
+    const _FakeGetAllTenantsUseCase(),
+   ),
+   addPlanUseCaseProvider.overrideWithValue(
  addPlan ?? _FakeAddPlanUseCase(),
  ),
  updatePlanUseCaseProvider.overrideWithValue(
@@ -102,15 +117,21 @@ void main() {
  ],
  ),
  );
-
- expect(find.text('Essencial'), findsOneWidget);
- expect(find.text('Comercial'), findsOneWidget);
- // Plano inativo exibe o chip "Inativo".
- expect(find.text('Inativo'), findsOneWidget);
- expect(
- find.text('R\$ 29,90/mês · 1 loja(s) · 2 funcionário(s)'),
- findsOneWidget,
- );
+   // O nome + preço do plano ficam num Text.rich (span único); o texto
+   // completo é "Essencial  R$ 29,90/mês", então o finder usa
+   // `textContaining` + `findRichText: true`.
+   expect(find.textContaining('Essencial', findRichText: true), findsOneWidget);
+   expect(find.textContaining('Comercial', findRichText: true), findsOneWidget);
+   // Plano inativo exibe o chip "Inactivo".
+   expect(find.text('Inactivo'), findsOneWidget);
+   expect(
+    find.textContaining('R\$ 29,90/mês', findRichText: true),
+    findsOneWidget,
+   );
+   expect(
+    find.text('1 máx. lojas · 2 máx. funcionários'),
+    findsOneWidget,
+   );
  });
 
  testWidgets('exibe estado vazio quando não há planos', (tester) async {

@@ -14,6 +14,9 @@ import '../../controllers/debts_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_page.dart';
+import '../../widgets/skeleton.dart';
+import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/search_field.dart';
@@ -104,32 +107,10 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
  // CTA único: o "Registrar fiado" vive no menu do FAB central do shell
  // (canvas V3 — a tela de Crédito não tem FAB próprio); o estado vazio
  // da aba Pendentes traz o botão "Registrar fiado" centralizado.
- return Scaffold(
- // AppBar estilo iOS large title: título grande com subtítulo
- // discreto abaixo — mesmo padrão das demais telas.
- appBar: AppBar(
- toolbarHeight: 72,
- titleSpacing: AppSpacing.lg,
- title: Column(
- crossAxisAlignment: CrossAxisAlignment.start,
- mainAxisSize: MainAxisSize.min,
- children: [
- Text(
- l10n.debtsTitle,
- style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w500,
- letterSpacing: -0.5,
- ),
- ),
- Text(
- l10n.debtsHeaderSubtitle,
- style: theme.textTheme.labelSmall?.copyWith(
- color: theme.colorScheme.onSurfaceVariant,
- ),
- ),
- ],
- ),
- ),
+ return AppPage(
+ title: l10n.debtsTitle,
+ subtitle: l10n.debtsHeaderSubtitle,
+ useSafeArea: false,
  body: RefreshIndicator(
  // W8: puxar para atualizar — recarrega fiado (pendente e histórico).
  onRefresh: () async {
@@ -139,7 +120,12 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
  },
  child: ListView(
  physics: const AlwaysScrollableScrollPhysics(),
- padding: const EdgeInsets.fromLTRB(20, 8, 20, 96),
+ padding: EdgeInsets.fromLTRB(
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 8,
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 96,
+ ),
  children: [
  // FittedBox: as abas Pendentes/Quitadas encolhem em telas
  // estreitas com escala de texto alta (o SegmentedButton não
@@ -212,10 +198,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
  SectionHeader(title: l10n.debtsPendingSection),
  const SizedBox(height: 12),
  debtsAsync.when(
- loading: () => const Padding(
- padding: EdgeInsets.all(32),
- child: Center(child: CircularProgressIndicator()),
- ),
+ loading: () => const _DebtsListSkeleton(),
  error: (error, _) => ErrorView(
  message: l10n.debtsLoadError,
  details: error.toString(),
@@ -273,10 +256,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
  SectionHeader(title: l10n.debtsSettledSection),
  const SizedBox(height: 12),
  settledAsync.when(
- loading: () => const Padding(
- padding: EdgeInsets.all(32),
- child: Center(child: CircularProgressIndicator()),
- ),
+ loading: () => const _DebtsListSkeleton(),
  error: (error, _) => ErrorView(
  message: l10n.debtsHistoryLoadError,
  details: error.toString(),
@@ -331,29 +311,14 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
  final messenger = ScaffoldMessenger.of(context);
  final l10n = context.l10n;
 
- final confirmed = await showDialog<bool>(
- context: context,
- builder: (context) => AlertDialog(
- title: Text(l10n.debtsSettleTitle),
- content: Text(
- l10n.debtsSettleBody(
+ final confirmed = await showConfirmDialog(
+ context,
+ title: l10n.debtsSettleTitle,
+ message: l10n.debtsSettleBody(
  Formatters.currency(debt.amountCents),
  debt.personName,
  ),
- ),
- actions: [
- TextButton(
- onPressed: () => Navigator.of(context).pop(false),
- child: Text(l10n.commonCancel),
- ),
- // AppButton (design system ultra-clean): altura 48, cantos 12,
- // texto w400 — a confirmação segue o padrão dos diálogos.
- AppButton.primary(
- onPressed: () => Navigator.of(context).pop(true),
- label: l10n.debtsSettle,
- ),
- ],
- ),
+ confirmLabel: l10n.debtsSettle,
  );
  if (confirmed != true || !context.mounted) return;
 
@@ -688,3 +653,26 @@ class _SettledDebtCard extends StatelessWidget {
  );
  }
 }
+
+/// Skeleton das listas de fiado (pendente/histórico) — blocos NÃO-roláveis:
+/// as seções vivem dentro do ListView da tela, então um `ListSkeleton`
+/// (que é um ListView) criaria scroll aninhado inválido.
+class _DebtsListSkeleton extends StatelessWidget {
+ const _DebtsListSkeleton();
+
+ @override
+ Widget build(BuildContext context) {
+ return const Skeleton(
+ child: Column(
+ children: [
+ SkeletonBlock(height: 64, radius: 16),
+ SizedBox(height: 8),
+ SkeletonBlock(height: 64, radius: 16),
+ SizedBox(height: 8),
+ SkeletonBlock(height: 64, radius: 16),
+ ],
+ ),
+ );
+ }
+}
+

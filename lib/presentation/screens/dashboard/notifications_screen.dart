@@ -12,6 +12,7 @@ import '../../controllers/auth_providers.dart';
 import '../../controllers/notification_providers.dart';
 import '../../controllers/admin_message_providers.dart';
 import '../../../domain/entities/admin_message.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/empty_state.dart';
 
 /// Tela de notificações do tenant — lista as notificações de facturas
@@ -35,7 +36,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final notificationsAsync = ref.watch(tenantNotificationsProvider);
     final adminMessagesAsync = ref.watch(tenantAdminMessagesProvider);
 
-    final allNotifications = notificationsAsync.value ?? const <InvoiceNotification>[];
+    final allNotifications =
+        notificationsAsync.value ?? const <InvoiceNotification>[];
     final allAdminMessages = adminMessagesAsync.value ?? const <AdminMessage>[];
     final filteredNotifications = _showUnreadOnly
         ? allNotifications.where((n) => !n.isRead).toList()
@@ -46,69 +48,45 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final unreadInvoiceCount = allNotifications.where((n) => !n.isRead).length;
     final unreadAdminCount = allAdminMessages.where((m) => !m.isRead).length;
     final unreadCount = unreadInvoiceCount + unreadAdminCount;
-    final totalCount = filteredNotifications.length + filteredAdminMessages.length;
+    final totalCount =
+        filteredNotifications.length + filteredAdminMessages.length;
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
 
-    return Scaffold(
+    return AppPage(
       backgroundColor: scheme.surface,
-      appBar: AppBar(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: scheme.surface,
-        title: Row(
-          children: [
-            Text(
-              l10n.notificationTitle,
-              style: theme.textTheme.titleMedium?.copyWith(
+      title: l10n.notificationTitle,
+      badge: unreadCount,
+      useSafeArea: false,
+      actions: [
+        if (unreadCount > 0)
+          TextButton(
+            onPressed: _markAllAsRead,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              l10n.notificationMarkAllRead,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: scheme.primary,
                 fontWeight: FontWeight.w600,
-                letterSpacing: -0.3,
               ),
             ),
-            if (unreadCount > 0) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                decoration: BoxDecoration(
-                  color: scheme.error,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Text(
-                  '$unreadCount',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          if (unreadCount > 0)
-            TextButton(
-              onPressed: _markAllAsRead,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                l10n.notificationMarkAllRead,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: scheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          const SizedBox(width: 8),
-        ],
-      ),
+          ),
+        const SizedBox(width: 8),
+      ],
       body: Column(
         children: [
           // ── Filtros + contadores ──
           Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs,
+            padding: EdgeInsets.fromLTRB(
+              horizontal,
+              0,
+              horizontal,
+              AppSpacing.xs,
             ),
             child: Row(
               children: [
@@ -153,7 +131,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     )
                   : ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                      padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 24),
                       itemCount: _buildItemList(
                         filteredAdminMessages,
                         filteredNotifications,
@@ -255,10 +233,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     required Color typeColor,
     required IconData icon,
   }) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final l10n = context.l10n;
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -288,9 +262,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   Future<void> _markAdminMessageAsRead(AdminMessage message) async {
     try {
-      await ref
-          .read(markAdminMessageAsReadUseCaseProvider)
-          .call(message.id);
+      await ref.read(markAdminMessageAsReadUseCaseProvider).call(message.id);
       if (!mounted) return;
       await ref.read(tenantAdminMessagesProvider.notifier).refresh();
     } catch (_) {}
@@ -438,7 +410,9 @@ class _NotificationTile extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: isRead ? FontWeight.w400 : FontWeight.w600,
+                                  fontWeight: isRead
+                                      ? FontWeight.w400
+                                      : FontWeight.w600,
                                   color: isRead
                                       ? scheme.onSurfaceVariant
                                       : scheme.onSurface,
@@ -466,7 +440,9 @@ class _NotificationTile extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            color: scheme.onSurfaceVariant.withValues(
+                              alpha: 0.7,
+                            ),
                             fontSize: 12,
                             height: 1.35,
                           ),
@@ -477,18 +453,23 @@ class _NotificationTile extends StatelessWidget {
                             Text(
                               _formatTime(time, l10n),
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                                color: scheme.onSurfaceVariant.withValues(
+                                  alpha: 0.5,
+                                ),
                                 fontSize: 12,
                               ),
                             ),
                             const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2,
+                                horizontal: 6,
+                                vertical: 2,
                               ),
                               decoration: BoxDecoration(
                                 color: typeColor.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(AppRadius.full),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.full,
+                                ),
                               ),
                               child: Text(
                                 typeLabel,
@@ -508,14 +489,18 @@ class _NotificationTile extends StatelessWidget {
                                   child: Icon(
                                     Icons.done_all_outlined,
                                     size: 16,
-                                    color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
+                                    color: scheme.onSurfaceVariant.withValues(
+                                      alpha: 0.4,
+                                    ),
                                   ),
                                 ),
                               ),
                             Icon(
                               Icons.chevron_right_rounded,
                               size: 18,
-                              color: scheme.onSurfaceVariant.withValues(alpha: 0.3),
+                              color: scheme.onSurfaceVariant.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
                           ],
                         ),
@@ -540,16 +525,19 @@ class _NotificationTile extends StatelessWidget {
 
   static Color _deriveFg(Color base) {
     final hsl = HSLColor.fromColor(base);
-    return hsl.withLightness(0.55).withSaturation(
-      (hsl.saturation * 0.85).clamp(0.0, 1.0),
-    ).toColor();
+    return hsl
+        .withLightness(0.55)
+        .withSaturation((hsl.saturation * 0.85).clamp(0.0, 1.0))
+        .toColor();
   }
 
   static String _formatTime(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(date);
     if (diff.inMinutes < 1) return l10n.notificationJustNow;
-    if (diff.inHours < 1) return l10n.dashboardActivityMinutesAgo(diff.inMinutes);
+    if (diff.inHours < 1) {
+      return l10n.dashboardActivityMinutesAgo(diff.inMinutes);
+    }
     if (diff.inDays == 0) return DateFormat.Hm().format(date);
     if (diff.inDays == 1) return l10n.notificationYesterday;
     if (diff.inDays < 7) return l10n.notificationSinceDaysAgo(diff.inDays);
@@ -643,11 +631,14 @@ class _DetailBottomSheet extends StatelessWidget {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2,
+                              horizontal: 7,
+                              vertical: 2,
                             ),
                             decoration: BoxDecoration(
                               color: typeColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(AppRadius.full),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.full,
+                              ),
                             ),
                             child: Text(
                               typeLabel,
@@ -662,7 +653,9 @@ class _DetailBottomSheet extends StatelessWidget {
                           Text(
                             _DetailBottomSheet._formatTime(time, l10n),
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                              color: scheme.onSurfaceVariant.withValues(
+                                alpha: 0.5,
+                              ),
                               fontSize: 12,
                             ),
                           ),
@@ -680,7 +673,8 @@ class _DetailBottomSheet extends StatelessWidget {
                   ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
-                    minWidth: 32, minHeight: 32,
+                    minWidth: 32,
+                    minHeight: 32,
                   ),
                 ),
               ],
@@ -773,7 +767,10 @@ class _Pill extends StatelessWidget {
             Text(
               label,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: selected ? activeColor : scheme.onSurfaceVariant,
+                // Rótulo sempre legível (onSurface/onSurfaceVariant ≥ 4.5:1):
+                // a seleção é sinalizada pela pílula, borda e badge — o
+                // rótulo em activeColor dava ~4.4:1 (claro) e 3.6:1 (escuro).
+                color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                 fontSize: 12,
               ),
@@ -781,7 +778,10 @@ class _Pill extends StatelessWidget {
             if (count > 0) ...[
               const SizedBox(width: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0.5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 5,
+                  vertical: 0.5,
+                ),
                 decoration: BoxDecoration(
                   color: selected
                       ? activeColor
@@ -791,7 +791,12 @@ class _Pill extends StatelessWidget {
                 child: Text(
                   '$count',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: selected ? Colors.white : scheme.onSurfaceVariant,
+                    color: selected
+                        // Badge sólido: usa o "on" do papel de fundo
+                        // (primary ou error) — branco puro falhava 3:1 no
+                        // escuro sobre #F87171.
+                        ? (accent ? scheme.onError : scheme.onPrimary)
+                        : scheme.onSurfaceVariant,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
@@ -851,18 +856,18 @@ abstract final class _InvoiceTypeLabel {
     InvoiceNotificationType.addOnExpired => AppColors.statusError,
   };
 
-  static String label(InvoiceNotificationType type, AppLocalizations l10n) =>
-      switch (type) {
-        InvoiceNotificationType.invoiceGenerated =>
-          l10n.notificationInvoiceGenerated,
-        InvoiceNotificationType.invoiceDueSoon =>
-          l10n.notificationInvoiceDueSoon,
-        InvoiceNotificationType.invoiceExpired =>
-          l10n.notificationInvoiceExpired,
-        InvoiceNotificationType.invoicePaid => l10n.notificationInvoicePaid,
-        InvoiceNotificationType.addOnExpiringSoon => 'Add-on a expirar',
-        InvoiceNotificationType.addOnExpired => 'Add-on expirado',
-      };
+  static String label(
+    InvoiceNotificationType type,
+    AppLocalizations l10n,
+  ) => switch (type) {
+    InvoiceNotificationType.invoiceGenerated =>
+      l10n.notificationInvoiceGenerated,
+    InvoiceNotificationType.invoiceDueSoon => l10n.notificationInvoiceDueSoon,
+    InvoiceNotificationType.invoiceExpired => l10n.notificationInvoiceExpired,
+    InvoiceNotificationType.invoicePaid => l10n.notificationInvoicePaid,
+    InvoiceNotificationType.addOnExpiringSoon => 'Add-on a expirar',
+    InvoiceNotificationType.addOnExpired => 'Add-on expirado',
+  };
 
   static String iconLabel(InvoiceNotificationType type) => switch (type) {
     InvoiceNotificationType.invoiceGenerated => 'Factura',

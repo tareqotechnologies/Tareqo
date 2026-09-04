@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../domain/entities/customer.dart';
@@ -13,7 +14,9 @@ import '../../controllers/auth_providers.dart';
 import '../../controllers/customers_providers.dart';
 import '../../controllers/debts_providers.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/app_sheet.dart';
+import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
@@ -62,25 +65,12 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 
   Future<void> _deleteCustomer(Customer customer) async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.customersDeleteConfirmTitle),
-        content: Text(l10n.customersDeleteConfirmMessage(customer.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              l10n.commonConfirm,
-              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.customersDeleteConfirmTitle,
+      message: l10n.customersDeleteConfirmMessage(customer.name),
+      confirmLabel: l10n.commonDelete,
+      destructive: true,
     );
     if (confirmed != true || !mounted) return;
 
@@ -106,7 +96,6 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final customersAsync = ref.watch(customersProvider);
     final debtsAsync = ref.watch(pendingDebtsProvider);
     final l10n = context.l10n;
@@ -129,31 +118,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     final canManage =
         ref.watch(currentAccessLevelProvider) != UserAccessLevel.employee;
 
-    return Scaffold(
-      // AppBar estilo iOS large title — mesmo padrão das demais telas.
-      appBar: AppBar(
-        toolbarHeight: 72,
-        titleSpacing: 20,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.appNavCustomers,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.5,
-              ),
-            ),
-            // Subtítulo do header — rótulo pequeno (design system: label).
-            Text(
-              l10n.customersHeaderCount(customerCount),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return AppPage(
+      title: l10n.appNavCustomers,
+      subtitle: l10n.customersHeaderCount(customerCount),
+      useSafeArea: false,
       // CTA único: sem clientes, o FAB some — o estado vazio traz o botão
       // "Novo cliente" centralizado.
       floatingActionButton: customersAsync.value?.isNotEmpty ?? false
@@ -170,7 +138,12 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+              4,
+              AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+              12,
+            ),
             child: SearchField(
               controller: _searchController,
               hintText: l10n.customersSearchHint,
@@ -226,7 +199,12 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   // Lista premium (V3): cards individuais com cantos 18 e
                   // superfície elevada — mesmo padrão de Vendas/Produtos.
                   child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
+                    padding: EdgeInsets.fromLTRB(
+                    AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+                    4,
+                    AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+                    96,
+                  ),
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: filtered.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),

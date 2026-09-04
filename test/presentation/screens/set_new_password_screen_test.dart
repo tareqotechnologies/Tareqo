@@ -92,7 +92,7 @@ void main() {
 
  expect(
  find.text(
- 'A senha deve conter letras minúsculas, maiúsculas, números e símbolos.',
+ 'A senha deve conter letras, números e símbolos.',
  ),
  findsOneWidget,
  );

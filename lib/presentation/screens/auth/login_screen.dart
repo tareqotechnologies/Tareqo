@@ -4,22 +4,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_sheet.dart';
 import '../../../core/observability/crash_reporting.dart';
 import 'forgot_password_sheet.dart';
 
-/// Paleta de cores da tela de login — dark premium.
+/// Paleta da tela de login — dark premium.
+///
+/// Decisão de marca: a auth é SEMPRE escura, mesmo quando o app está em
+/// light mode. Os neutros vêm dos tokens do design system
+/// (`AppColors.backgroundDark`/`surfaceDark`/`borderDark`) para o dark
+/// mode ser coerente com o resto do app; `textSecondary`/`green` não têm
+/// token equivalente (neutro de texto e acento de link) e ficam locais.
 class _LoginColors {
-  static const background = Color(0xFF101112);
-  static const surface = Color(0xFF1D1E22);
-  static const border = Color(0xFF303238);
-  static const borderFocus = Color(0xFF16A34A);
+  static const background = AppColors.backgroundDark;
+  static const surface = AppColors.surfaceDark;
+  static const border = AppColors.borderDark;
+  static const borderFocus = AppColors.brand;
   static const textPrimary = Color(0xFFFFFFFF);
   static const textSecondary = Color(0xFFA1A1AA);
   static const green = Color(0xFF22C55E);
-  static const greenDark = Color(0xFF16A34A);
+  static const greenDark = AppColors.brand;
 }
 
 /// Tela de login — design dark premium, minimalista e profissional.
@@ -216,7 +223,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       _isSignUpMode
                           ? l10n.loginSubtitleSignUp
-                          : 'Gestão simples para o seu negócio',
+                          : l10n.loginTagline,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 14,
@@ -228,11 +235,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     // ── Nome (modo cadastro) ──
                     if (_isSignUpMode) ...[
-                      _buildLabel('Nome'),
+                      _buildLabel(l10n.loginNameLabel),
                       const SizedBox(height: 8),
                       _buildTextField(
                         controller: _nameController,
-                        hint: 'Digite seu nome',
+                        hint: l10n.loginNameHint,
                         icon: Icons.person_outline_rounded,
                         textInputAction: TextInputAction.next,
                         obscure: false,
@@ -243,11 +250,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ],
 
                     // ── Email ──
-                    _buildLabel('Email'),
+                    _buildLabel(l10n.loginEmailLabel),
                     const SizedBox(height: 8),
                     _buildTextField(
                       controller: _emailController,
-                      hint: 'Digite seu email',
+                      hint: l10n.loginEmailHint,
                       icon: Icons.mail_outline_rounded,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
@@ -258,11 +265,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 20),
 
                     // ── Senha ──
-                    _buildLabel('Senha'),
+                    _buildLabel(l10n.loginPasswordLabel),
                     const SizedBox(height: 8),
                     _buildTextField(
                       controller: _passwordController,
-                      hint: 'Digite sua senha',
+                      hint: l10n.loginPasswordHint,
                       icon: Icons.lock_outline_rounded,
                       obscure: _obscurePassword,
                       textInputAction: _isSignUpMode
@@ -290,11 +297,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // ── Confirmar senha (modo cadastro) ──
                     if (_isSignUpMode) ...[
                       const SizedBox(height: 20),
-                      _buildLabel('Confirmar senha'),
+                      _buildLabel(l10n.loginConfirmPasswordLabel),
                       const SizedBox(height: 8),
                       _buildTextField(
                         controller: _confirmController,
-                        hint: 'Repita a senha',
+                        hint: l10n.loginConfirmPasswordHint,
                         icon: Icons.lock_outline_rounded,
                         obscure: _obscureConfirm,
                         textInputAction: TextInputAction.done,
@@ -350,7 +357,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             : Text(
                                 _isSignUpMode
                                     ? l10n.loginSignUp
-                                    : 'Entrar',
+                                    : l10n.loginSignIn,
                               ),
                       ),
                     ),
@@ -361,8 +368,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Center(
                         child: GestureDetector(
                           onTap: _isSubmitting ? null : _openForgotPassword,
-                          child: const Text(
-                            'Esqueceu sua senha?',
+                          child: Text(
+                            l10n.loginForgotPassword,
                             style: TextStyle(
                               fontSize: 14,
                               color: _LoginColors.green,
@@ -383,8 +390,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: RichText(
                           text: TextSpan(
                             text: _isSignUpMode
-                                ? 'Já tem uma conta? '
-                                : 'Ainda não tem uma conta? ',
+                                ? '${l10n.loginPromptHaveAccount} '
+                                : '${l10n.loginPromptNoAccount} ',
                             style: const TextStyle(
                               fontSize: 14,
                               color: _LoginColors.textSecondary,
@@ -392,7 +399,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             children: [
                               TextSpan(
-                                text: _isSignUpMode ? 'Entrar' : 'Criar conta',
+                                text: _isSignUpMode                                ? l10n.loginSignIn : l10n.loginSignUp,
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: _LoginColors.green,
@@ -408,23 +415,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 48),
 
                     // ── Rodapé de segurança ──
+                    // Quebra linha em telas estreitas/escala de texto alta
+                    // (o texto NUNCA estoura o container — acessibilidade).
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.lock_outline_rounded,
-                          size: 14,
-                          color: _LoginColors.textSecondary
-                              .withValues(alpha: 0.6),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Seus dados são protegidos com criptografia.',
-                          style: TextStyle(
-                            fontSize: 12,
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Icon(
+                            Icons.lock_outline_rounded,
+                            size: 14,
                             color: _LoginColors.textSecondary
                                 .withValues(alpha: 0.6),
-                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Seus dados são protegidos com criptografia.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _LoginColors.textSecondary
+                                  .withValues(alpha: 0.6),
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                         ),
                       ],

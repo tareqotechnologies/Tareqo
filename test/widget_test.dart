@@ -26,6 +26,7 @@ import 'package:tareqo/presentation/controllers/products_providers.dart';
 import 'package:tareqo/presentation/controllers/sales_providers.dart';
 
 import 'helpers/store_context.dart';
+import 'helpers/test_app.dart';
 
 class _FakeGetProductsUseCase implements GetProductsUseCase {
  @override
@@ -126,6 +127,10 @@ class _FakeGetCustomersUseCase implements GetCustomersUseCase {
 }
 
 void main() {
+ // O [TareqoApp] roteia pelo [AuthGate], que resolve o MFA via GetIt.
+ // Sem o bootstrap real, registra o SecureStorageService em memória.
+ setUpAll(registerTestSecureStorage);
+
  testWidgets('Dashboard renderiza o ERP: KPIs, ações e navegação',
  (tester) async {
  await tester.pumpWidget(

@@ -18,6 +18,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
+import '../../widgets/list_skeleton.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Painel do super admin — gestão de planos (criar, editar, ativar/desativar).
@@ -63,8 +64,16 @@ class _AdminPlansScreenState extends ConsumerState<AdminPlansScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
+      // Criar plano — a entrada voltou após a reformulação do painel
+      // (o FAB é o padrão das telas de gestão; a lista vazia também
+      // oferece a ação no EmptyState).
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _openEditor(),
+        tooltip: l10n.adminPlanNewTitle,
+        child: const Icon(Icons.add),
+      ),
       body: plansAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ListSkeleton(items: 5),
         error: (error, _) => ErrorView(
           message: l10n.adminPlansLoadError,
           details: error.toString(),
@@ -152,17 +161,17 @@ class _CompactStats extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _Pill(count: total, label: 'Total', color: scheme.onSurface),
+          _Pill(count: total, label: context.l10n.commonTotal, color: scheme.onSurface),
           const SizedBox(width: AppSpacing.xs),
           _Pill(
             count: active,
-            label: 'Ativos',
+            label: context.l10n.adminPlansActive,
             color: AppColors.success,
           ),
           const SizedBox(width: AppSpacing.xs),
           _Pill(
             count: inactive,
-            label: 'Inativos',
+            label: context.l10n.adminPlansInactive,
             color: AppColors.statusError,
           ),
         ],
@@ -270,7 +279,7 @@ class _PlanTile extends ConsumerWidget {
                         TextSpan(text: plan.name),
                         TextSpan(
                           text:
-                              '  ${Formatters.currency(plan.priceMonthlyCents)}/mês',
+                              '  ${Formatters.currency(plan.priceMonthlyCents)}${context.l10n.adminPlanPerMonthSuffix}',
                           style: TextStyle(
                             color: scheme.onSurfaceVariant,
                             fontSize: 12,
@@ -303,7 +312,7 @@ class _PlanTile extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
-                          '$tenantCount ${tenantCount == 1 ? "tenant" : "tenants"}',
+                          context.l10n.adminTenantCount(tenantCount),
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: scheme.primary,
                             fontSize: 12,
@@ -500,7 +509,7 @@ class _PlanDetailSheet extends ConsumerWidget {
               _InfoRow(
                 icon: Icons.attach_money,
                 label: l10n.adminPlanPriceLabel,
-                value: '${Formatters.currency(plan.priceMonthlyCents)}/mês',
+                value: '${Formatters.currency(plan.priceMonthlyCents)}${context.l10n.adminPlanPerMonthSuffix}',
               ),
               _InfoRow(
                 icon: Icons.store_outlined,
@@ -558,7 +567,7 @@ class _PlanDetailSheet extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      '${planTenants.length} ${planTenants.length == 1 ? "tenant" : "tenants"}',
+                      context.l10n.adminTenantCount(planTenants.length),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                         fontFeatures: const [FontFeature.tabularFigures()],
@@ -1027,12 +1036,20 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.adminPlanActiveTitle),
-                subtitle: Text(l10n.adminPlanActiveSubtitle),
-                value: _isActive,
-                onChanged: (value) => setState(() => _isActive = value),
+              // Material próprio: sem ele, o ListTile pinta fundo/ink no
+              // Material ANCESTRAL (fora do DecoratedBox da sheet) e o
+              // Flutter emite a assertion "ListTile background color or
+              // ink splashes may be invisible" (mesmo padrão do
+              // _CompactSwitch em product_list).
+              Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.adminPlanActiveTitle),
+                  subtitle: Text(l10n.adminPlanActiveSubtitle),
+                  value: _isActive,
+                  onChanged: (value) => setState(() => _isActive = value),
+                ),
               ),
               if (_formError != null) ...[
                 const SizedBox(height: AppSpacing.xs),

@@ -163,9 +163,6 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
       appBar: AppBar(
         title: Text(
           l10n.adminMessagesTitle,
-          style: theme.textTheme.labelMedium?.copyWith(
-            letterSpacing: -0.5,
-          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -189,7 +186,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                     horizontal: 16,
                     vertical: 12,
                   ),
-                  hintText: 'Selecionar tenant...',
+                  hintText: context.l10n.adminMessagesTenantHint,
                   hintStyle: TextStyle(
                     color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                     fontSize: 12,
@@ -265,7 +262,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                 controller: _titleController,
                 style: theme.textTheme.bodySmall,
                 decoration: InputDecoration(
-                  hintText: 'Ex: Cotação de Plano Pro',
+                  hintText: context.l10n.adminMessagesTitleExample,
                   hintStyle: TextStyle(
                     color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                     fontSize: 12,
@@ -295,7 +292,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   height: 1.6,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Escreva a mensagem ou selecione um tipo acima...',
+                  hintText: context.l10n.adminMessagesBodyHint,
                   hintStyle: TextStyle(
                     color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                     fontSize: 12,

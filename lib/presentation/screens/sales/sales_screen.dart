@@ -14,6 +14,7 @@ import '../../widgets/payment_filter.dart' show PaymentFilter, PaymentFilterBar;
 import '../../widgets/period_filter.dart' show PeriodFilter, PeriodFilterBar;
 import '../../widgets/pinned_header.dart';
 import '../../widgets/sale_card.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/skeleton.dart';
 import 'new_sale_sheet.dart';
 import 'sales_widgets.dart';
@@ -51,20 +52,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
     final salesAsync = ref.watch(salesListProvider);
     final l10n = context.l10n;
     final hasSales = salesAsync.value?.isNotEmpty ?? false;
-    final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 56,
-        titleSpacing: AppSpacing.lg,
-        title: Text(
-          l10n.salesTitle,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
-        ),
-      ),
+    return AppPage(
+      title: l10n.salesTitle,
+      useSafeArea: false,
       floatingActionButton: hasSales
           ? FloatingActionButton(
               heroTag: 'fab-sales',
@@ -164,6 +155,10 @@ class _SalesBody extends StatelessWidget {
       );
     }
 
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
+
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: CustomScrollView(
@@ -171,22 +166,26 @@ class _SalesBody extends StatelessWidget {
         slivers: [
           // ── Resumo do dia ──
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+            padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 16),
             sliver: SliverToBoxAdapter(
               child: SalesSummaryHeader(sales: sales),
             ),
           ),
           // ── Filtros dropdown FIXOS ──
+          // Wrap (não Row): em telas estreitas / escala de texto alta os
+          // dois seletores fluem para a 2.ª linha — o PinnedHeader mede a
+          // altura em runtime, então a barra cresce sem estourar.
           PinnedHeader(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
                 children: [
                   PeriodFilterBar(
                     value: period,
                     onChanged: onPeriodChanged,
                   ),
-                  const SizedBox(width: 8),
                   PaymentFilterBar(
                     value: payment,
                     onChanged: onPaymentChanged,
@@ -202,7 +201,7 @@ class _SalesBody extends StatelessWidget {
               child: isFiltering && filtered.isNotEmpty
                   ? Padding(
                       key: const ValueKey('sales-filtered-summary'),
-                      padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+                      padding: EdgeInsets.fromLTRB(horizontal, 6, horizontal, 0),
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
@@ -238,7 +237,7 @@ class _SalesBody extends StatelessWidget {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
+              padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 112),
               sliver: SliverList.separated(
                 itemCount: filtered.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),

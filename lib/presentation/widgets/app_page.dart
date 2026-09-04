@@ -9,30 +9,46 @@ class AppPage extends StatelessWidget {
  const AppPage({
  super.key,
  this.title,
+ this.subtitle,
+ this.badge,
  this.actions,
  this.leading,
  this.floatingActionButton,
- this.bottom,
- this.padding,
- this.useSafeArea = true,
- required this.body,
+ this.bottom,  this.padding,
+  this.backgroundColor,
+  this.useSafeArea = true,
+  required this.body,
  });
 
+ /// Título do AppBar (escala do tema — `titleLarge` 22/w600).
  final String? title;
+
+ /// Subtítulo discreto abaixo do título (ex.: contagem de itens) —
+ /// renderizado quando presente com o cabeçalho de duas linhas (altura 72)
+ /// que as telas de módulo usavam inline.
+ final String? subtitle;
+
+ /// Contador exibido como pílula de erro ao lado do título (ex.: não
+ /// lidas). Só se aplica ao título de linha única (sem [subtitle]).
+ final int? badge;
+
  final List<Widget>? actions;
  final Widget? leading;
  final Widget? floatingActionButton;
- final PreferredSizeWidget? bottom;
- final EdgeInsetsGeometry? padding;
- final bool useSafeArea;
- final Widget body;
+ final PreferredSizeWidget? bottom;  final EdgeInsetsGeometry? padding;
+  final Color? backgroundColor;
+  final bool useSafeArea;
+  final Widget body;
 
  @override
  Widget build(BuildContext context) {
- return Scaffold(
- appBar: title != null
+ final theme = Theme.of(context);
+ final scheme = theme.colorScheme;    return Scaffold(
+      backgroundColor: backgroundColor,
+      appBar: title != null
  ? AppBar(
- title: Text(title!),
+ toolbarHeight: subtitle != null ? 72 : null,
+ title: _titleContent(theme, scheme),
  actions: actions,
  leading: leading,
  bottom: bottom,
@@ -50,11 +66,54 @@ class AppPage extends StatelessWidget {
  padding: padding ?? EdgeInsets.zero,
  child: body,
  ),
- );
- }
+ );    }
 
- /// Padding horizontal padrão para conteúdo scrollável.
- static EdgeInsets horizontalPadding(BuildContext context) {
+  /// Conteúdo do título: texto simples, texto + badge ou coluna com
+  /// subtítulo — nunca combinado com [badge] (linha única apenas).
+  Widget _titleContent(ThemeData theme, ColorScheme scheme) {
+    final Widget titleWidget = Text(title!);
+    if (subtitle != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          titleWidget,
+          Text(
+            subtitle!,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      );
+    }
+    if (badge == null || badge == 0) return titleWidget;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        titleWidget,
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+          decoration: BoxDecoration(
+            color: scheme.error,
+            borderRadius: BorderRadius.circular(AppRadius.full),
+          ),
+          child: Text(
+            '$badge',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: scheme.onError,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Padding horizontal padrão para conteúdo scrollável.
+  static EdgeInsets horizontalPadding(BuildContext context) {
  final width = MediaQuery.sizeOf(context).width;
  return EdgeInsets.symmetric(
  horizontal: AppSpacing.pagePaddingForWidth(width),

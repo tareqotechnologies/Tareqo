@@ -23,6 +23,7 @@ import 'package:tareqo/domain/usecases/get_plans_use_case.dart';
 import 'package:tareqo/presentation/controllers/account_providers.dart';
 import 'package:tareqo/presentation/controllers/admin_providers.dart';
 import 'package:tareqo/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/presentation/screens/account/tenant_pending_screen.dart';
 import 'package:tareqo/presentation/screens/auth/auth_gate.dart';
 import 'package:tareqo/presentation/screens/auth/login_screen.dart';
 import 'package:tareqo/presentation/screens/auth/set_new_password_screen.dart';
@@ -224,12 +225,22 @@ void main() {
  await tester.pumpAndSettle();
 
  expect(find.text('Painel do Super Admin'), findsOneWidget);
- // Abas do painel administrativo.
- expect(find.text('Solicitações'), findsOneWidget);
- expect(find.text('Planos'), findsOneWidget);
- expect(find.text('Upgrades'), findsOneWidget);
- // Não caiu no fluxo do tenant.
- expect(find.text('Aguardando aprovação'), findsNothing);
+ // Navegação do painel: o FAB mostra a secção atual ("Visão Geral") e
+ // abre o bottom sheet com TODAS as secções (o redesign substituiu a
+ // barra de abas inferior).
+ // O FAB do AdminShell é identificável pela seta acima do rótulo
+ // (Icons.keyboard_arrow_up_rounded) — único na tela.
+ await tester.tap(find.byIcon(Icons.keyboard_arrow_up_rounded));
+ await tester.pumpAndSettle();
+ // O IndexedStack mantém todas as secções montadas, então rótulos
+ // como "Planos" podem aparecer mais de uma vez — basta existir.
+ expect(find.text('Solicitações'), findsWidgets);
+ expect(find.text('Planos'), findsWidgets);
+ expect(find.text('Upgrades'), findsWidgets);
+ // Não caiu no fluxo do tenant (o dashboard mostra um chip
+ // "Aguardando aprovação" com a contagem — o que não pode aparecer
+ // é a tela de espera do dono pendente).
+ expect(find.byType(TenantPendingScreen), findsNothing);
  });
 
  testWidgets('sem o papel de super admin, segue para o fluxo do tenant — '
@@ -287,7 +298,10 @@ void main() {
  await tester.pumpAndSettle();
 
  expect(find.text('Painel do Super Admin'), findsOneWidget);
- expect(find.text('Aguardando aprovação'), findsNothing);
+ // Não caiu no fluxo do tenant (a tela de espera do dono pendente).
+ // Obs.: o painel mostra um chip "Aguardando aprovação" no dashboard
+ // (contagem de pendentes) — o que NÃO pode aparecer é o TenantPendingScreen.
+ expect(find.byType(TenantPendingScreen), findsNothing);
  });
 
  testWidgets('deslogado vê o LoginScreen', (tester) async {
@@ -321,7 +335,7 @@ void main() {
  await tester.pumpAndSettle();
 
  expect(find.text('Acesso suspenso'), findsOneWidget);
- expect(find.textContaining('desativada pelo dono'), findsOneWidget);
+ expect(find.textContaining('desactivada pelo proprietário'), findsOneWidget);
  // NÃO cai no AppShell (bloqueio total).
  expect(find.byType(AppShell), findsNothing);
  });
@@ -564,9 +578,10 @@ void main() {
  // Novo login NORMAL (sem evento de recovery) entra direto na gestão —
  // o sinal não vazou do sign-out anterior.
  auth.add(AppUser(id: 'u1', email: 'dono@loja.com'));
- await tester.pump();
- await tester.pump();
- await tester.pump();
+ await tester.pump(const Duration(milliseconds: 50));
+ await tester.pump(const Duration(milliseconds: 50));
+ await tester.pump(const Duration(milliseconds: 50));
+ await tester.pump(const Duration(milliseconds: 50));
 
  expect(find.byType(SetNewPasswordScreen), findsNothing);
  expect(find.byType(AppShell), findsOneWidget);

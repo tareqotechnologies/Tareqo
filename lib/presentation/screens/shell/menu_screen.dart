@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../widgets/app_page.dart';
+import '../../widgets/confirm_dialog.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
@@ -42,55 +44,38 @@ class MenuScreen extends ConsumerWidget {
 
     void openPurchases() {
       ref.invalidate(purchasesProvider);
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const PurchasesScreen()),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const PurchasesScreen()));
     }
 
     void openReports() {
       ref.invalidate(salesReportProvider);
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const ReportsScreen()),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const ReportsScreen()));
     }
 
     void openStores(Tenant tenant) {
       ref.invalidate(storesProvider(tenant.id));
       Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => StoresScreen(tenant: tenant),
-        ),
+        MaterialPageRoute<void>(builder: (_) => StoresScreen(tenant: tenant)),
       );
     }
 
     void openNotifications() {
       Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => const NotificationsScreen(),
-        ),
+        MaterialPageRoute<void>(builder: (_) => const NotificationsScreen()),
       );
     }
 
     Future<void> confirmSignOut() async {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(l10n.commonSignOutConfirmTitle),
-          content: Text(l10n.commonSignOutConfirmMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.error,
-              ),
-              child: Text(l10n.commonSignOut),
-            ),
-          ],
-        ),
+      final confirmed = await showConfirmDialog(
+        context,
+        title: l10n.commonSignOutConfirmTitle,
+        message: l10n.commonSignOutConfirmMessage,
+        confirmLabel: l10n.commonSignOut,
+        destructive: true,
       );
       if (confirmed == true) {
         // ignore: use_build_context_synchronously
@@ -102,19 +87,9 @@ class MenuScreen extends ConsumerWidget {
       MediaQuery.sizeOf(context).width,
     );
 
-    return Scaffold(
-      // AppBar estilo iOS large title — mesmo padrão das demais telas.
-      appBar: AppBar(
-        toolbarHeight: 64,
-        titleSpacing: AppSpacing.lg,
-        title: Text(
-          l10n.appNavMenu,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
-        ),
-      ),
+    return AppPage(
+      title: l10n.appNavMenu,
+      useSafeArea: false,
       body: ListView(
         padding: EdgeInsets.fromLTRB(
           horizontal,
@@ -182,16 +157,14 @@ class MenuScreen extends ConsumerWidget {
               if (tenant != null &&
                   tenant.status == TenantStatus.approved &&
                   accessLevel == UserAccessLevel.owner)
-                _NotificationsModuleCard(
-                  onTap: openNotifications,
-                ),
+                _NotificationsModuleCard(onTap: openNotifications),
               if (tenant != null &&
                   tenant.status == TenantStatus.approved &&
                   accessLevel == UserAccessLevel.owner)
                 ModuleCard(
                   icon: Icons.extension_outlined,
-                  label: 'Add-ons',
-                  iconColor: const Color(0xFF7C3AED),
+                  label: l10n.addonsTitle,
+                  iconColor: AppColors.statusPurple,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -202,7 +175,7 @@ class MenuScreen extends ConsumerWidget {
                 ),
               ModuleCard(
                 icon: Icons.shield_outlined,
-                label: 'Segurança',
+                label: l10n.securitySectionTitle,
                 iconColor: AppColors.statusIndigo,
                 onTap: () {
                   Navigator.of(context).push(
@@ -274,7 +247,7 @@ class _NotificationsModuleCard extends ConsumerWidget {
       child: ModuleCard(
         icon: Icons.notifications_outlined,
         label: l10n.menuNotifications,
-        iconColor: const Color(0xFFF59E0B), // amber
+        iconColor: AppColors.statusWarning,
         onTap: onTap,
       ),
     );

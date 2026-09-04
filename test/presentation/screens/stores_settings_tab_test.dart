@@ -144,7 +144,7 @@ void main() {
 
  expect(find.text('Idioma'), findsOneWidget);
  expect(find.text('Moeda'), findsOneWidget);
- expect(find.text('Salvar ajustes'), findsOneWidget);
+ expect(find.text('Salvar'), findsOneWidget);
 
  // Tenant atual é pt + BRL → selecionados por padrão.
  expect(_chipSelected(tester, 'Português'), isTrue);
@@ -164,7 +164,7 @@ void main() {
  await tester.tap(find.text('Metical (MZN)'));
  await tester.pumpAndSettle();
 
- await tester.tap(find.text('Salvar ajustes'));
+ await tester.tap(find.text('Salvar'));
  await tester.pumpAndSettle();
 
  // A escolha foi persistida (repositório recebeu en + MZN).
@@ -182,12 +182,11 @@ void main() {
  await openSettingsTab(tester);
 
  await tester.tap(find.text('English'));
- await tester.tap(find.text('Salvar ajustes'));
- await tester.pumpAndSettle();
+ await tester.tap(find.text('Salvar'));
+ await tester.pumpAndSettle(); expect(
+  find.text('Não foi possível salvar. Tente novamente.'),
+  findsOneWidget,
 
- expect(
- find.text('Não foi possível salvar os ajustes. Tente novamente.'),
- findsOneWidget,
  );
  expect(find.text('Ajustes salvos!'), findsNothing);
  expect(settings.language, isNull);
@@ -205,8 +204,8 @@ void main() {
  await tester.pumpAndSettle();
  await openSettingsTab(tester);
 
- // Seção "Loja ativa" com as duas lojas — a primeira é a ativa.
- expect(find.text('Loja ativa'), findsOneWidget);
+ // Seção "Loja activa" (pt-PT) com as duas lojas — a primeira é a ativa.
+ expect(find.text('Loja activa'), findsOneWidget);
  expect(_chipSelected(tester, 'Loja Centro'), isTrue);
  expect(_chipSelected(tester, 'Loja Shopping'), isFalse);
 
@@ -218,7 +217,7 @@ void main() {
  expect(_chipSelected(tester, 'Loja Shopping'), isTrue);
  });
 
- testWidgets('aba Ajustes: sem seção Loja ativa com uma única loja', (
+ testWidgets('aba Ajustes: sem seção Loja activa com uma única loja', (
  tester,
  ) async {
  final settings = _CapturingUpdateTenantSettings();
@@ -226,7 +225,7 @@ void main() {
  await tester.pumpAndSettle();
  await openSettingsTab(tester);
 
- expect(find.text('Loja ativa'), findsNothing);
+ expect(find.text('Loja activa'), findsNothing);
  expect(find.text('Idioma'), findsOneWidget);
  });
 
@@ -282,7 +281,7 @@ void main() {
  await openSettingsTab(tester);
  expect(find.text('Idioma'), findsOneWidget);
  expect(find.text('Moeda'), findsOneWidget);
- expect(find.text('Salvar ajustes'), findsOneWidget);
+ expect(find.text('Salvar'), findsOneWidget);
  expect(tester.takeException(), isNull);
 
  // Voltar para a aba Lojas em paisagem também funciona.

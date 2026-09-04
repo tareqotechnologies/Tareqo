@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
@@ -56,7 +57,7 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao inicializar MFA: $e')),
+          SnackBar(content: Text(context.l10n.mfaInitError('$e'))),
         );
       }
     }
@@ -80,7 +81,7 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
     final code = _codeController.text.trim();
     if (code.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Digite o código de 6 dígitos')),
+        SnackBar(content: Text(context.l10n.mfaCodeLengthError)),
       );
       return;
     }
@@ -97,7 +98,7 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('MFA configurado com sucesso!')),
+            SnackBar(content: Text(context.l10n.mfaSetupSuccess)),
           );
           Navigator.of(context).pop(true);
         }
@@ -105,7 +106,7 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
         setState(() => _isVerifying = false);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Código inválido. Tente novamente.')),
+            SnackBar(content: Text(context.l10n.mfaInvalidCode)),
           );
         }
       }
@@ -113,7 +114,7 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
       setState(() => _isVerifying = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao verificar código: $e')),
+          SnackBar(content: Text(context.l10n.mfaVerifyError('$e'))),
         );
       }
     }
@@ -123,10 +124,11 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Configurar Autenticação em Dois Fatores'),
+        title: Text(l10n.mfaSetupTitle),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -139,15 +141,15 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (_qrCodeData != null) ...[
-                const Text(
-                  'Escaneie o QR Code',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.mfaQrScanTitle,
+                  style: theme.textTheme.titleMedium,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                const Text(
-                  'Use seu aplicativo autenticador (Google Authenticator, Authy, etc.) para escanear este código QR:',
-                  style: TextStyle(fontSize: 14),
+                Text(
+                  l10n.mfaQrScanHelp,
+                  style: theme.textTheme.bodySmall,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -162,9 +164,11 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                const Text(
-                  'Ou digite este código manualmente:',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.mfaManualEntryTitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -179,9 +183,11 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
                     textAlign: TextAlign.center,
                   ),
                 const SizedBox(height: AppSpacing.xl),
-                const Text(
-                  'Digite o código do aplicativo para confirmar:',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.mfaConfirmPrompt,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -190,15 +196,14 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
                   keyboardType: TextInputType.number,
                   maxLength: 6,
                   textInputAction: TextInputAction.done,
-                  label: 'Código de 6 dígitos',
+                  label: l10n.mfaDigitsFieldLabel,
                   prefixIcon: Icons.security,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Center(
                   child: Text(
-                    'Código expira em $_timeRemaining segundos',
-                    style: TextStyle(
-                      fontSize: 12,
+                    l10n.mfaExpiresIn(_timeRemaining),
+                    style: theme.textTheme.labelSmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -217,7 +222,7 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
                           ),
                         )
                       : null,
-                  label: 'Verificar e Ativar',
+                  label: l10n.mfaVerifyAndEnable,
                 ),
               ] else
                 const Center(

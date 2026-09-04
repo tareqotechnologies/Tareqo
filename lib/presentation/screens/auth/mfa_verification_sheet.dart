@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
@@ -28,7 +29,7 @@ class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
     final code = _codeController.text.trim();
     if (code.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Digite o código de 6 dígitos')),
+        SnackBar(content: Text(context.l10n.mfaCodeLengthError)),
       );
       return;
     }
@@ -47,7 +48,7 @@ class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
         setState(() => _isVerifying = false);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Código inválido. Tente novamente.')),
+            SnackBar(content: Text(context.l10n.mfaInvalidCode)),
           );
         }
       }
@@ -55,7 +56,7 @@ class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
       setState(() => _isVerifying = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao verificar código: $e')),
+          SnackBar(content: Text(context.l10n.mfaVerifyError('$e'))),
         );
       }
     }
@@ -77,14 +78,14 @@ class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Autenticação em Dois Fatores',
+                context.l10n.securityTwoFactorTitle,
                 style: theme.textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.md),
-              const Text(
-                'Digite o código de 6 dígitos do seu aplicativo autenticador:',
-                style: TextStyle(fontSize: 14),
+              Text(
+                context.l10n.mfaCodeHint,
+                style: theme.textTheme.bodySmall,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -94,7 +95,7 @@ class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
                 maxLength: 6,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _verifyCode(),
-                label: 'Código MFA',
+                label: context.l10n.mfaCodeFieldLabel,
                 prefixIcon: Icons.security,
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -111,13 +112,13 @@ class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
                         ),
                       )
                     : null,
-                label: 'Verificar',
+                label: context.l10n.mfaVerify,
               ),
               const SizedBox(height: AppSpacing.md),
               AppButton.secondary(
                 expanded: true,
                 onPressed: () => Navigator.of(context).pop(false),
-                label: 'Cancelar',
+                label: context.l10n.commonCancel,
               ),
             ],
           ),

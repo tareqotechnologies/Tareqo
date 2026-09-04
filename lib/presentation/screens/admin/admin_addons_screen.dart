@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
@@ -12,6 +13,7 @@ import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/list_skeleton.dart';
 import '../../widgets/search_field.dart';
 
 /// Painel do super admin — gestão de add-ons por tenant.
@@ -147,8 +149,8 @@ class _AdminAddOnsScreenState extends ConsumerState<AdminAddOnsScreen> {
       SnackBar(
         content: Text(
           activate
-              ? '$addonName activado em $success tenant(s)'
-              : '$addonName desactivado em $success tenant(s)',
+              ? context.l10n.adminAddonsBulkActivated(addonName, success)
+              : context.l10n.adminAddonsBulkDeactivated(addonName, success),
         ),
       ),
     );
@@ -211,7 +213,7 @@ class _TenantPicker extends ConsumerWidget {
                 Expanded(
                   child: SearchField(
                     controller: searchController,
-                    hintText: 'Buscar tenant...',
+                    hintText: context.l10n.adminTenantSearchHint,
                     onChanged: onSearchChanged,
                   ),
                 ),
@@ -286,7 +288,7 @@ class _TenantPicker extends ConsumerWidget {
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
-                        'Toque num tenant para gerir os seus add-ons. Toque no ícone ✓ para seleção múltipla.',
+                        context.l10n.adminAddonsListHint,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.primary,
                         ),
@@ -301,18 +303,17 @@ class _TenantPicker extends ConsumerWidget {
           // Tenant list
           Expanded(
             child: allAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Erro: $e')),
+              loading: () => const ListSkeleton(items: 4),
+              error: (e, _) => Center(child: Text(context.l10n.adminAddonsLoadError('$e'))),
               data: (tenants) {
                 final filtered = _filterTenants(tenants);
                 if (filtered.isEmpty) {
                   return EmptyState(
                     icon: Icons.business_outlined,
-                    title: 'Nenhum tenant encontrado',
+                    title: context.l10n.adminAddonsNoTenantsTitle,
                     subtitle: searchQuery.isNotEmpty
-                        ? 'Tente outro termo de busca'
-                        : 'Nenhum tenant aprovado ainda',
+                        ? context.l10n.adminAddonsNoTenantsSearchSub
+                        : context.l10n.adminAddonsNoTenantsYetSub,
                   );
                 }
                 return ListView.separated(
@@ -402,7 +403,7 @@ class _BulkSelectionBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            tooltip: 'Cancelar',
+            tooltip: context.l10n.commonCancel,
             icon: const Icon(Icons.close, size: 20),
             onPressed: onCancel,
           ),
@@ -416,13 +417,13 @@ class _BulkSelectionBar extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           TextButton(
             onPressed: onSelectAll,
-            child: Text(allSelected ? 'Desseleccionar' : 'Selecionar todos'),
+            child: Text(allSelected ? context.l10n.adminBulkDeselectAll : context.l10n.adminBulkSelectAll),
           ),
           const Spacer(),
           if (selectedCount > 0)
             AppButton.primary(
               onPressed: onActivate,
-              label: 'Activar add-on',
+              label: context.l10n.adminAddonsActivateBulk,
             ),
         ],
       ),
@@ -512,7 +513,7 @@ class _TenantTile extends ConsumerWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Plano: $planName',
+                    context.l10n.adminPlanLabel(planName),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -584,14 +585,14 @@ class _BulkAddOnSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Activar add-on em lote',
+                        context.l10n.adminAddonsBulkSheetTitle,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '$tenantCount tenant(s) selecionado(s)',
+                        context.l10n.adminAddonsBulkSheetCount(tenantCount),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
@@ -600,7 +601,7 @@ class _BulkAddOnSheet extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Fechar',
+                  tooltip: context.l10n.appSheetClose,
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
@@ -719,7 +720,7 @@ class _BulkAddOnOption extends StatelessWidget {
           // Buttons
           AppButton.secondary(
             onPressed: onActivate,
-            label: 'Activar',
+            label: context.l10n.adminAddonsActivateBtn,
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.success,
               padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -729,7 +730,7 @@ class _BulkAddOnOption extends StatelessWidget {
           const SizedBox(width: 6),
           AppButton.secondary(
             onPressed: onDeactivate,
-            label: 'Desactivar',
+            label: context.l10n.adminAddonsDeactivateBtn,
             style: OutlinedButton.styleFrom(
               foregroundColor: scheme.error,
               padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -828,7 +829,7 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao actualizar add-on: $e')),
+          SnackBar(content: Text(context.l10n.adminAddonsUpdateError('$e'))),
         );
       }
     }
@@ -865,7 +866,7 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
                 IconButton(
                   icon: const Icon(Icons.arrow_back_rounded, size: 20),
                   onPressed: widget.onBack,
-                  tooltip: 'Voltar à lista',
+                  tooltip: context.l10n.adminBackToList,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
@@ -881,7 +882,7 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        'ID: ${widget.tenant.id.length > 8 ? widget.tenant.id.substring(0, 8) : widget.tenant.id}...',
+                        '${context.l10n.commonId}: ${widget.tenant.id.length > 8 ? widget.tenant.id.substring(0, 8) : widget.tenant.id}...',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                           fontSize: 11,
@@ -951,17 +952,17 @@ class _CompactStats extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _Pill(count: total, label: 'Total', color: scheme.onSurface),
+          _Pill(count: total,            label: context.l10n.commonTotal, color: scheme.onSurface),
           const SizedBox(width: AppSpacing.xs),
           _Pill(
             count: active,
-            label: 'Activos',
+            label: context.l10n.adminAddonsActivePill,
             color: AppColors.success,
           ),
           const SizedBox(width: AppSpacing.xs),
           _Pill(
             count: total - active,
-            label: 'Inactivos',
+            label: context.l10n.adminAddonsInactivePill,
             color: AppColors.statusError,
           ),
         ],

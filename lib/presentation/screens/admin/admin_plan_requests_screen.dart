@@ -11,6 +11,7 @@ import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/list_skeleton.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/status_chip.dart';
 import '../../../core/observability/crash_reporting.dart';
@@ -44,13 +45,10 @@ class _AdminPlanRequestsScreenState
  appBar: AppBar(
  title: Text(
  l10n.adminUpgradesTitle,
- style: Theme.of(context).textTheme.labelMedium?.copyWith(
- letterSpacing: -0.5,
- ),
  ),
  ),
  body: requestsAsync.when(
- loading: () => const Center(child: CircularProgressIndicator()),
+ loading: () => const ListSkeleton(items: 5),
  error: (error, _) => ErrorView(
  message: l10n.adminUpgradesLoadError,
  details: error.toString(),

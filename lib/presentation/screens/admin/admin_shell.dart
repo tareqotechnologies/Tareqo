@@ -166,12 +166,12 @@ class _AdminShellState extends ConsumerState<AdminShell> {
       _NavItem(
         icon: Icons.extension_outlined,
         selectedIcon: Icons.extension_rounded,
-        label: 'Add-ons',
+        label: l10n.addonsTitle,
       ),
       _NavItem(
         icon: Icons.payments_outlined,
         selectedIcon: Icons.payments_rounded,
-        label: 'Receitas',
+        label: l10n.adminNavRevenue,
       ),
       _NavItem(
         icon: Icons.mail_outline_rounded,
@@ -187,8 +187,6 @@ class _AdminShellState extends ConsumerState<AdminShell> {
   }
 
   void _openNavSheet(BuildContext context, List<_NavItem> items) {
-    final scheme = Theme.of(context).colorScheme;
-
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/share/advanced_reports_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
@@ -36,18 +37,12 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 64,
-        titleSpacing: AppSpacing.lg,
         title: Text(
-          'Relatórios Avançados',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
+          l10n.reportsAdvancedTitle,
         ),
         actions: [
           Padding(
@@ -60,10 +55,10 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Vendas'),
-            Tab(text: 'Financeiro'),
-            Tab(text: 'Estoque'),
+          tabs: [
+            Tab(text: l10n.reportsTabSales),
+            Tab(text: l10n.reportsTabFinancial),
+            Tab(text: l10n.reportsTabStock),
           ],
         ),
       ),
@@ -90,6 +85,7 @@ class _SalesReportTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
     final products = ref.watch(productsProvider).value ?? [];
     final totalProducts = products.length;
     final totalStockValue = products.fold<int>(
@@ -110,7 +106,7 @@ class _SalesReportTab extends ConsumerWidget {
           children: [
             Expanded(
               child: _KpiTile(
-                label: 'Produtos',
+                label: l10n.reportsKpiProducts,
                 value: '$totalProducts',
                 icon: Icons.inventory_2_outlined,
                 color: ModuleColors.products,
@@ -119,7 +115,7 @@ class _SalesReportTab extends ConsumerWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _KpiTile(
-                label: 'Estoque Baixo',
+                label: l10n.reportsKpiLowStock,
                 value: '$lowStock',
                 icon: Icons.warning_amber_rounded,
                 color: ModuleColors.credit,
@@ -132,7 +128,7 @@ class _SalesReportTab extends ConsumerWidget {
           children: [
             Expanded(
               child: _KpiTile(
-                label: 'Total Itens',
+                label: l10n.reportsKpiTotalItems,
                 value: Formatters.compact(totalItems),
                 icon: Icons.shopping_cart_outlined,
                 color: ModuleColors.purchases,
@@ -141,7 +137,7 @@ class _SalesReportTab extends ConsumerWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _KpiTile(
-                label: 'Valor Estoque',
+                label: l10n.reportsKpiStockValue,
                 value: Formatters.currency(totalStockValue * 100),
                 icon: Icons.attach_money,
                 color: ModuleColors.reports,
@@ -178,7 +174,7 @@ class _SalesReportTab extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
-                      'Produtos por Estoque',
+                      l10n.reportsStockByQty,
                       style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -207,7 +203,7 @@ class _SalesReportTab extends ConsumerWidget {
               const SizedBox(height: AppSpacing.sm),
               if (products.isEmpty)
                 Text(
-                  'Sem produtos cadastrados',
+                  l10n.reportsNoProducts,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
@@ -257,16 +253,23 @@ class _SalesReportTab extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
         AppButton.secondary(
           expanded: true,
-          label: 'Exportar Relatório (PDF)',
+          label: l10n.reportsExportSales,
           icon: const Icon(Icons.download_outlined, size: 18),
           onPressed: () =>
               const AdvancedReportsPdfExporter().shareSalesReport(
+            title: context.l10n.reportsTabSales,
             period: selectedPeriod,
+            businessName: l10n.businessFallbackName,
+            generatedOnLabel: context.l10n.pdfGeneratedOn('{date}'),
+            indicatorsLabel: context.l10n.pdfIndicators,
+            noDataLabel: context.l10n.reportsNoSalesData,
+            footerLabel: context.l10n.pdfFooter('{date}'),
             kpis: {
-              'Produtos Ativos': '$totalProducts',
-              'Estoque Baixo': '$lowStock',
-              'Total Itens': '$totalItems',
-              'Valor Estoque': Formatters.currency(totalStockValue * 100),
+              l10n.reportsKpiProducts: '$totalProducts',
+              l10n.reportsKpiLowStock: '$lowStock',
+              l10n.reportsKpiTotalItems: '$totalItems',
+              l10n.reportsKpiStockValue:
+                  Formatters.currency(totalStockValue * 100),
             },
           ),
         ),
@@ -286,6 +289,7 @@ class _FinancialReportTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -295,8 +299,8 @@ class _FinancialReportTab extends StatelessWidget {
           children: [
             Expanded(
               child: _KpiTile(
-                label: 'Receitas',
-                value: '0,00',
+                label: l10n.reportsKpiRevenue,
+                value: Formatters.currency(0),
                 icon: Icons.arrow_downward_rounded,
                 color: IconTone.green,
               ),
@@ -304,8 +308,8 @@ class _FinancialReportTab extends StatelessWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _KpiTile(
-                label: 'Despesas',
-                value: '0,00',
+                label: l10n.reportsKpiExpenses,
+                value: Formatters.currency(0),
                 icon: Icons.arrow_upward_rounded,
                 color: IconTone.red,
               ),
@@ -314,8 +318,8 @@ class _FinancialReportTab extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         _KpiTile(
-          label: 'Lucro Líquido',
-          value: '0,00',
+          label: l10n.reportsKpiNetProfit,
+          value: Formatters.currency(0),
           icon: Icons.account_balance_wallet_outlined,
           color: ModuleColors.reports,
           fullWidth: true,
@@ -349,7 +353,7 @@ class _FinancialReportTab extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    'Fluxo de Caixa',
+                    l10n.reportsCashFlow,
                     style: theme.textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
@@ -371,7 +375,7 @@ class _FinancialReportTab extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        'Gráfico de fluxo de caixa',
+                        l10n.reportsCashFlowChart,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                           fontSize: 11,
@@ -387,15 +391,21 @@ class _FinancialReportTab extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         AppButton.secondary(
           expanded: true,
-          label: 'Exportar Financeiro (PDF)',
+          label: l10n.reportsExportFinancial,
           icon: const Icon(Icons.download_outlined, size: 18),
           onPressed: () =>
               const AdvancedReportsPdfExporter().shareFinancialReport(
+            title: context.l10n.reportsTabFinancial,
             period: selectedPeriod,
+            businessName: l10n.businessFallbackName,
+            generatedOnLabel: context.l10n.pdfGeneratedOn('{date}'),
+            indicatorsLabel: context.l10n.pdfIndicators,
+            noDataLabel: context.l10n.reportsNoSalesData,
+            footerLabel: context.l10n.pdfFooter('{date}'),
             kpis: {
-              'Receitas': '0,00 MT',
-              'Despesas': '0,00 MT',
-              'Lucro Líquido': '0,00 MT',
+              l10n.reportsKpiRevenue: Formatters.currency(0),
+              l10n.reportsKpiExpenses: Formatters.currency(0),
+              l10n.reportsKpiNetProfit: Formatters.currency(0),
             },
           ),
         ),
@@ -415,6 +425,7 @@ class _StockReportTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
     final products = ref.watch(productsProvider).value ?? [];
     final totalProducts = products.length;
     final lowStock =
@@ -435,7 +446,7 @@ class _StockReportTab extends ConsumerWidget {
           children: [
             Expanded(
               child: _KpiTile(
-                label: 'Produtos',
+                label: l10n.reportsKpiProducts,
                 value: '$totalProducts',
                 icon: Icons.inventory_2_outlined,
                 color: ModuleColors.products,
@@ -444,7 +455,7 @@ class _StockReportTab extends ConsumerWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _KpiTile(
-                label: 'Estoque Baixo',
+                label: l10n.reportsKpiLowStock,
                 value: '$lowStock',
                 icon: Icons.warning_amber_rounded,
                 color: ModuleColors.credit,
@@ -457,7 +468,7 @@ class _StockReportTab extends ConsumerWidget {
           children: [
             Expanded(
               child: _KpiTile(
-                label: 'Valor em Estoque',
+                label: l10n.reportsKpiStockValue,
                 value: Formatters.currency(totalStockValue * 100),
                 icon: Icons.attach_money,
                 color: ModuleColors.purchases,
@@ -466,7 +477,7 @@ class _StockReportTab extends ConsumerWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _KpiTile(
-                label: 'Sem Estoque',
+                label: l10n.reportsKpiStockOut,
                 value: '$outOfStock',
                 icon: Icons.inventory_2,
                 color: IconTone.red,
@@ -504,7 +515,7 @@ class _StockReportTab extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
-                      'Estoque Baixo',
+                      l10n.reportsKpiLowStock,
                       style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -537,7 +548,7 @@ class _StockReportTab extends ConsumerWidget {
               const SizedBox(height: AppSpacing.sm),
               if (lowStock == 0)
                 Text(
-                  'Todos os produtos com estoque adequado',
+                  l10n.reportsStockHealthy,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                     fontSize: 11,
@@ -587,17 +598,23 @@ class _StockReportTab extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
         AppButton.secondary(
           expanded: true,
-          label: 'Exportar Estoque (PDF)',
+          label: l10n.reportsExportStock,
           icon: const Icon(Icons.download_outlined, size: 18),
           onPressed: () =>
               const AdvancedReportsPdfExporter().shareStockReport(
+            title: context.l10n.reportsTabStock,
             period: selectedPeriod,
+            businessName: l10n.businessFallbackName,
+            generatedOnLabel: context.l10n.pdfGeneratedOn('{date}'),
+            indicatorsLabel: context.l10n.pdfIndicators,
+            noDataLabel: context.l10n.reportsNoSalesData,
+            footerLabel: context.l10n.pdfFooter('{date}'),
             kpis: {
-              'Total Produtos': '$totalProducts',
-              'Estoque Baixo': '$lowStock',
-              'Valor em Estoque':
+              l10n.reportsKpiTotalProducts: '$totalProducts',
+              l10n.reportsKpiLowStock: '$lowStock',
+              l10n.reportsKpiStockValue:
                   Formatters.currency(totalStockValue * 100),
-              'Sem Estoque': '$outOfStock',
+              l10n.reportsKpiStockOut: '$outOfStock',
             },
           ),
         ),
@@ -703,7 +720,13 @@ class _PeriodChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final periods = ['Hoje', 'Esta Semana', 'Este Mês', 'Este Ano'];
+    final l10n = context.l10n;
+    final periods = <String, String>{
+      'Hoje': l10n.periodToday,
+      'Esta Semana': l10n.periodWeek,
+      'Este Mês': l10n.periodMonth,
+      'Este Ano': l10n.reportsPeriodYear,
+    };
 
     return PopupMenuButton<String>(
       onSelected: onChanged,
@@ -713,7 +736,7 @@ class _PeriodChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              selected,
+              periods[selected] ?? selected,
               style: theme.textTheme.labelLarge?.copyWith(
                 color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w500,
@@ -729,12 +752,12 @@ class _PeriodChip extends StatelessWidget {
           ],
         ),
       ),
-      itemBuilder: (ctx) => periods
+      itemBuilder: (ctx) => periods.entries
           .map(
-            (p) => CheckedPopupMenuItem(
-              value: p,
-              checked: p == selected,
-              child: Text(p),
+            (entry) => CheckedPopupMenuItem(
+              value: entry.key,
+              checked: entry.key == selected,
+              child: Text(entry.value),
             ),
           )
           .toList(),

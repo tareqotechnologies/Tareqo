@@ -1,7 +1,8 @@
 # CI — Dumbhanengue ERP (auditoria H3/C1)
 #
 # Jobs:
-# analyze — flutter analyze (zero erros/avisos);
+# analyze — flutter analyze (zero erros/avisos) + testes de chaves l10n
+# (mortas e paridade pt/en/fr — falham cedo, junto da análise);
 # test — flutter test --coverage + resumo de cobertura;
 # build — APK release do flavor DEV (sem key.properties no CI →
 # fallback de assinatura debug). O artefato é apenas de
@@ -43,6 +44,13 @@ jobs:
  cache: true
  - run: flutter pub get
  - run: flutter analyze
+ # Garantias l10n (test/core/l10n): nenhuma chave órfã
+ # (arb_keys_referenced_test) e paridade pt/en/fr — adições,
+ # remoções, renames, duplicatas e metadata @key
+ # (arb_locale_parity_test). Também correm no job 'test', mas aqui
+ # falham imediatamente após a análise, sem esperar a suite inteira.
+ - name: L10n key tests (dead keys + parity)
+   run: flutter test test/core/l10n
 
  test:
  name: Test

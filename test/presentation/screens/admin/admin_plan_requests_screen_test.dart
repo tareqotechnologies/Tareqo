@@ -157,8 +157,7 @@ void main() {
  expect(decide.calls, 1);
  expect(decide.lastRequestId, 'r1');
  expect(decide.lastApprove, isTrue);
- expect(
- find.text('Upgrade aprovado — plano do tenant atualizado!'),
+ expect(      find.text('Upgrade aprovado — plano atualizado!'),
  findsOneWidget,
  );
  });

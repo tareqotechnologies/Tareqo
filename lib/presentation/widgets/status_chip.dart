@@ -30,17 +30,22 @@ class StatusChip extends StatelessWidget {
             const SizedBox(width: 3),
           ],
           Flexible(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
  color: scheme.brightness == Brightness.dark
  ? color.withValues(alpha: 0.9)
  : color,
  // Chips carregam quantidades/valores/datas — dígitos
  // alinhados em colunas de chips.
  fontFeatures: [FontFeature.tabularFigures()],
+ ),
  ),
  ),
  ),

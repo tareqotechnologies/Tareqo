@@ -774,7 +774,7 @@ class _ActivityItem {
     required VoidCallback onTap,
   }) {
     return _ActivityItem(
-      title: 'Venda ${Formatters.saleLabel(sale.number)}',
+      title: l10n.dashboardSaleEntry(Formatters.saleLabel(sale.number)),
       details: '${sale.paymentMethod.labelFor(l10n)} · '
           '${_timeLabel(sale.dateTime, l10n)}',
       dateTime: sale.dateTime,
@@ -939,6 +939,13 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
     language: Formatters.currentLanguage,
   );
 
+  String transferStatusLabel(StockTransferStatus status) => switch (status) {
+        StockTransferStatus.pending => context.l10n.transferStatusPending,
+        StockTransferStatus.inTransit => context.l10n.transferStatusInTransit,
+        StockTransferStatus.received => context.l10n.transferStatusReceived,
+        StockTransferStatus.cancelled => context.l10n.transferStatusCancelled,
+      };
+
   showModalBottomSheet<void>(
     context: context,
     builder: (_) => Padding(
@@ -990,32 +997,32 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
           const SizedBox(height: 16),
           _DetailRow(
             icon: Icons.store_outlined,
-            label: 'Origem',
+            label: context.l10n.transfersRowOrigin,
             value: transfer.fromStoreName,
           ),
           const SizedBox(height: 8),
           _DetailRow(
             icon: Icons.storefront_outlined,
-            label: 'Destino',
+            label: context.l10n.transfersRowDest,
             value: transfer.toStoreName,
           ),
           const SizedBox(height: 8),
           _DetailRow(
             icon: Icons.inventory_2_outlined,
-            label: 'Quantidade',
+            label: context.l10n.transfersQuantity,
             value: formattedQty,
           ),
           const SizedBox(height: 8),
           _DetailRow(
             icon: Icons.calendar_today_outlined,
-            label: 'Data',
+            label: context.l10n.transfersRowDate,
             value: Formatters.date(transfer.createdAt),
           ),
           const SizedBox(height: 8),
           _DetailRow(
             icon: Icons.info_outline,
-            label: 'Estado',
-            value: transfer.status.label,
+            label: context.l10n.transfersRowStatus,
+            value: transferStatusLabel(transfer.status),
           ),
           const SizedBox(height: 20),
         ],

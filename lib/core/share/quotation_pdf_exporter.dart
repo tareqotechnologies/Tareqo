@@ -10,6 +10,91 @@ import 'package:share_plus/share_plus.dart';
 import '../../domain/entities/quotation.dart';
 import '../utils/formatters.dart';
 
+/// Rótulos LOCALIZADOS do PDF da cotação/orçamento.
+///
+/// Montados pela tela a partir do `AppLocalizations` — o exporter é 100%
+/// livre de UI; só recebe textos prontos (pt/en/fr), templates com
+/// marcadores (`{value}`/`{number}`/`{date}`) e resolvers localizados.
+class QuotationPdfLabels {
+  const QuotationPdfLabels({
+    required this.docWord,
+    required this.numberLabelTemplate,
+    required this.clientHeading,
+    required this.phoneLabelTemplate,
+    required this.taxIdLabelTemplate,
+    required this.itemHeader,
+    required this.qtyHeader,
+    required this.unitPriceHeader,
+    required this.subtotalHeader,
+    required this.discountLabel,
+    required this.totalLabel,
+    required this.validityHeading,
+    required this.notesHeading,
+    required this.generalConditionsHeading,
+    required this.validConditionTemplate,
+    required this.pricesConditionText,
+    required this.contactConditionText,
+    required this.footerTemplate,
+    required this.fileNameBase,
+    required this.subjectWord,
+    required this.statusText,
+    required this.daysLeftText,
+  });
+
+  /// Tipo de documento exibido no selo (ex.: 'COTAÇÃO'/'QUOTATION').
+  final String docWord;
+
+  /// Template do número com marcador `{number}` (ex.: 'Nº {number}').
+  final String numberLabelTemplate;
+
+  /// Cabeçalho da secção do cliente (ex.: 'CLIENTE'/'CLIENT').
+  final String clientHeading;
+
+  /// Template 'Tel: {value}' com marcador `{value}`.
+  final String phoneLabelTemplate;
+
+  /// Template 'NIF: {value}' com marcador `{value}`.
+  final String taxIdLabelTemplate;
+
+  final String itemHeader;
+  final String qtyHeader;
+  final String unitPriceHeader;
+  final String subtotalHeader;
+  final String discountLabel;
+  final String totalLabel;
+
+  /// Cabeçalho da validade (ex.: 'Validade'/'Validity').
+  final String validityHeading;
+
+  /// Cabeçalho das notas quando presentes (ex.: 'Condições / Notas').
+  final String notesHeading;
+
+  /// Cabeçalho da caixa de condições gerais.
+  final String generalConditionsHeading;
+
+  /// Template da 1ª condição com marcador `{date}` (validade até ...).
+  final String validConditionTemplate;
+
+  final String pricesConditionText;
+  final String contactConditionText;
+
+  /// Template do rodapé com marcador `{date}`.
+  final String footerTemplate;
+
+  /// Base do nome do arquivo (ex.: 'cotacao'/'quotation').
+  final String fileNameBase;
+
+  /// Palavra do assunto da partilha (ex.: 'Cotação'/'Quotation').
+  final String subjectWord;
+
+  /// Resolve o rótulo do estado da cotação a partir do enum.
+  final String Function(QuotationStatus status) statusText;
+
+  /// Resolve o texto de dias restantes/vencida a partir dos dias restantes
+  /// (pluralização e 'Expirada' decididas no chamador via l10n).
+  final String Function(int daysRemaining) daysLeftText;
+}
+
 /// Exportação de cotações/orçamentos para PDF.
 ///
 /// Gera um documento A4 profissional com validade, condições e tabela de
@@ -20,6 +105,7 @@ class QuotationPdfExporter {
   /// Gera os bytes do PDF da cotação.
   Future<Uint8List> buildPdf(
     Quotation quotation, {
+    required QuotationPdfLabels labels,
     required String businessName,
     String? businessAddress,
     String? businessPhone,
@@ -34,14 +120,8 @@ class QuotationPdfExporter {
 
     final daysRemaining =
         quotation.validUntil.difference(DateTime.now()).inDays;
-    final statusLabel = switch (quotation.status) {
-      QuotationStatus.draft => 'Rascunho',
-      QuotationStatus.sent => 'Enviada',
-      QuotationStatus.accepted => 'Aceite',
-      QuotationStatus.rejected => 'Rejeitada',
-      QuotationStatus.expired => 'Expirada',
-      QuotationStatus.converted => 'Convertida em Venda',
-    };
+    final statusLabel = labels.statusText(quotation.status);
+    final validityDaysLabel = labels.daysLeftText(daysRemaining);
 
     // Pré-carregar o logotipo se fornecido.
     pw.ImageProvider? logoImage;
@@ -51,6 +131,10 @@ class QuotationPdfExporter {
 
     // Cor escura para texto sobre fundo claro.
     final primaryDark = _darken(primaryColor);
+
+    final quotationNumber = quotation.number.toString().padLeft(5, '0');
+    final dateLine = _formatDate(quotation.createdAt);
+    final validUntilLine = _formatDate(quotation.validUntil);
 
     doc.addPage(
       pw.MultiPage(
@@ -109,7 +193,10 @@ class QuotationPdfExporter {
                           if (businessTaxId != null &&
                               businessTaxId.isNotEmpty)
                             pw.Text(
-                              'NIF: $businessTaxId',
+                              _fill(
+                                labels.taxIdLabelTemplate,
+                                businessTaxId,
+                              ),
                               style: const pw.TextStyle(
                                 fontSize: 9,
                                 color: PdfColors.grey700,
@@ -121,7 +208,7 @@ class QuotationPdfExporter {
                   ],
                 ),
               ),
-              // Lado direito: badge COTAÇÃO + nº + data + estado
+              // Lado direito: selo COTAÇÃO + nº + data + estado
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
@@ -135,7 +222,7 @@ class QuotationPdfExporter {
                       borderRadius: pw.BorderRadius.circular(6),
                     ),
                     child: pw.Text(
-                      'COTAÇÃO',
+                      labels.docWord,
                       style: pw.TextStyle(
                         fontSize: 14,
                         fontWeight: pw.FontWeight.bold,
@@ -145,14 +232,15 @@ class QuotationPdfExporter {
                   ),
                   pw.SizedBox(height: 8),
                   pw.Text(
-                    'Nº ${quotation.number.toString().padLeft(5, '0')}',
+                    labels.numberLabelTemplate
+                        .replaceFirst('{number}', quotationNumber),
                     style: pw.TextStyle(
                       fontSize: 12,
                       fontWeight: pw.FontWeight.bold,
                     ),
                   ),
                   pw.Text(
-                    _formatDate(quotation.createdAt),
+                    dateLine,
                     style: const pw.TextStyle(
                       fontSize: 9,
                       color: PdfColors.grey700,
@@ -199,7 +287,7 @@ class QuotationPdfExporter {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'CLIENTE',
+                      labels.clientHeading,
                       style: pw.TextStyle(
                         fontSize: 10,
                         fontWeight: pw.FontWeight.bold,
@@ -216,7 +304,10 @@ class QuotationPdfExporter {
                     ),
                     if (quotation.customerPhone.isNotEmpty)
                       pw.Text(
-                        'Tel: ${quotation.customerPhone}',
+                        _fill(
+                          labels.phoneLabelTemplate,
+                          quotation.customerPhone,
+                        ),
                         style: const pw.TextStyle(
                           fontSize: 9,
                           color: PdfColors.grey700,
@@ -229,7 +320,7 @@ class QuotationPdfExporter {
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
                   pw.Text(
-                    'Validade',
+                    labels.validityHeading,
                     style: pw.TextStyle(
                       fontSize: 10,
                       fontWeight: pw.FontWeight.bold,
@@ -237,7 +328,7 @@ class QuotationPdfExporter {
                     ),
                   ),
                   pw.Text(
-                    _formatDate(quotation.validUntil),
+                    validUntilLine,
                     style: pw.TextStyle(
                       fontSize: 11,
                       fontWeight: pw.FontWeight.bold,
@@ -247,9 +338,7 @@ class QuotationPdfExporter {
                     ),
                   ),
                   pw.Text(
-                    daysRemaining > 0
-                        ? '$daysRemaining dias restantes'
-                        : 'Expirada',
+                    validityDaysLabel,
                     style: pw.TextStyle(
                       fontSize: 9,
                       color: daysRemaining <= 3
@@ -266,7 +355,12 @@ class QuotationPdfExporter {
 
           // ─── Tabela de Itens ─────────────────────────────────
           pw.TableHelper.fromTextArray(
-            headers: ['Item', 'Qtd', 'Preço Unit.', 'Subtotal'],
+            headers: [
+              labels.itemHeader,
+              labels.qtyHeader,
+              labels.unitPriceHeader,
+              labels.subtotalHeader,
+            ],
             data: [
               for (final item in quotation.items)
                 [
@@ -313,13 +407,13 @@ class QuotationPdfExporter {
                   children: [
                     if (quotation.discountCents > 0)
                       _totalRow(
-                        'Desconto',
+                        labels.discountLabel,
                         '-${Formatters.currency(quotation.discountCents)}',
                         PdfColors.red700,
                       ),
                     pw.Divider(color: PdfColors.grey300),
                     _totalRow(
-                      'TOTAL',
+                      labels.totalLabel,
                       Formatters.currency(quotation.totalAmountCents),
                       primaryDark,
                       isBold: true,
@@ -334,7 +428,7 @@ class QuotationPdfExporter {
           if (quotation.notes.isNotEmpty) ...[
             pw.SizedBox(height: 16),
             pw.Text(
-              'Condições / Notas',
+              labels.notesHeading,
               style: pw.TextStyle(
                 fontSize: 9,
                 fontWeight: pw.FontWeight.bold,
@@ -363,7 +457,7 @@ class QuotationPdfExporter {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text(
-                  'Condições Gerais',
+                  labels.generalConditionsHeading,
                   style: pw.TextStyle(
                     fontSize: 9,
                     fontWeight: pw.FontWeight.bold,
@@ -372,21 +466,21 @@ class QuotationPdfExporter {
                 ),
                 pw.SizedBox(height: 4),
                 pw.Text(
-                  '• Esta cotação é válida até ${_formatDate(quotation.validUntil)}.',
+                  '• ${labels.validConditionTemplate.replaceFirst('{date}', validUntilLine)}',
                   style: const pw.TextStyle(
                     fontSize: 8,
                     color: PdfColors.grey600,
                   ),
                 ),
                 pw.Text(
-                  '• Preços sujeitos a alteração após o prazo de validade.',
+                  '• ${labels.pricesConditionText}',
                   style: const pw.TextStyle(
                     fontSize: 8,
                     color: PdfColors.grey600,
                   ),
                 ),
                 pw.Text(
-                  '• Para aceitar esta cotação, entre em contacto connosco.',
+                  '• ${labels.contactConditionText}',
                   style: const pw.TextStyle(
                     fontSize: 8,
                     color: PdfColors.grey600,
@@ -402,7 +496,7 @@ class QuotationPdfExporter {
           pw.SizedBox(height: 8),
           pw.Center(
             child: pw.Text(
-              'Documento gerado pelo TAREQO — ${_formatDate(quotation.createdAt)}',
+              labels.footerTemplate.replaceFirst('{date}', dateLine),
               style: const pw.TextStyle(
                 fontSize: 8,
                 color: PdfColors.grey500,
@@ -419,6 +513,7 @@ class QuotationPdfExporter {
   /// Gera e partilha o PDF da cotação.
   Future<void> sharePdf(
     Quotation quotation, {
+    required QuotationPdfLabels labels,
     required String businessName,
     String? businessAddress,
     String? businessPhone,
@@ -428,6 +523,7 @@ class QuotationPdfExporter {
   }) async {
     final bytes = await buildPdf(
       quotation,
+      labels: labels,
       businessName: businessName,
       businessAddress: businessAddress,
       businessPhone: businessPhone,
@@ -435,12 +531,14 @@ class QuotationPdfExporter {
       logoBytes: logoBytes,
       primaryColor: primaryColor,
     );
-    final fileName =
-        'cotacao_${quotation.number.toString().padLeft(5, '0')}.pdf';
-    await _share(bytes, fileName);
+    final number = quotation.number.toString().padLeft(5, '0');
+    final fileName = '${labels.fileNameBase}_$number.pdf';
+    final subject = '${labels.subjectWord} '
+        '${labels.numberLabelTemplate.replaceFirst('{number}', number)}';
+    await _share(bytes, fileName, subject);
   }
 
-  Future<void> _share(Uint8List bytes, String fileName) async {
+  Future<void> _share(Uint8List bytes, String fileName, String subject) async {
     if (kIsWeb) {
       await SharePlus.instance.share(
         ShareParams(
@@ -451,7 +549,7 @@ class QuotationPdfExporter {
               name: fileName,
             ),
           ],
-          subject: 'Cotação $fileName',
+          subject: subject,
         ),
       );
       return;
@@ -462,10 +560,14 @@ class QuotationPdfExporter {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/pdf')],
-        subject: 'Cotação $fileName',
+        subject: subject,
       ),
     );
   }
+
+  /// Substitui o marcador `{value}` pelo valor fornecido.
+  String _fill(String template, String value) =>
+      template.replaceFirst('{value}', value);
 
   String _formatDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';

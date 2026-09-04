@@ -98,17 +98,24 @@ class _SalesCardState extends State<SalesCard> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              Formatters.currency(_sale.totalAmountCents),
-                              maxLines: 1,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
+                          // FittedBox scaleDown: com fonte grande (Dynamic
+                          // Type) o valor encolhe em vez de estourar a Row —
+                          // nunca é truncado (Flexible dá constraints
+                          // limitadas ao FittedBox, senão ele usa a largura
+                          // natural do texto).
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                Formatters.currency(_sale.totalAmountCents),
+                                maxLines: 1,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -121,7 +128,7 @@ class _SalesCardState extends State<SalesCard> {
                           Expanded(
                             child: Text(
                               '${Formatters.saleLabel(_sale.number)}'
-                              '  ·  $itemsLabel',
+                              ' · $itemsLabel',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(

@@ -10,6 +10,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
+import '../../widgets/list_skeleton.dart';
 
 /// Registro de auditoria — visual minimalista com detalhes claros.
 class AdminAuditLogScreen extends ConsumerStatefulWidget {
@@ -40,7 +41,7 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: auditLogAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ListSkeleton(items: 8),
         error: (error, _) => ErrorView(
           message: error.toString(),
           onRetry: () => ref.read(auditLogProvider.notifier).refresh(),
@@ -51,8 +52,7 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
           final stats = _computeStats(entries);
 
           return RefreshIndicator(
-            onRefresh: () =>
-                ref.read(auditLogProvider.notifier).refresh(),
+            onRefresh: () => ref.read(auditLogProvider.notifier).refresh(),
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
@@ -73,8 +73,7 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
                         _SearchField(
                           controller: _searchController,
                           hintText: l10n.adminAuditLogSearchHint,
-                          onChanged: (v) =>
-                              setState(() => _searchQuery = v),
+                          onChanged: (v) => setState(() => _searchQuery = v),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         _FilterRow(
@@ -98,17 +97,14 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
                       title: _searchQuery.isNotEmpty || _selectedFilter > 0
                           ? l10n.adminAuditLogNoResults
                           : l10n.adminAuditLogEmpty,
-                      subtitle:
-                          _searchQuery.isEmpty && _selectedFilter == 0
-                              ? l10n.adminAuditLogEmptySubtitle
-                              : null,
+                      subtitle: _searchQuery.isEmpty && _selectedFilter == 0
+                          ? l10n.adminAuditLogEmptySubtitle
+                          : null,
                     ),
                   )
                 else
                   for (final group in grouped.entries) ...[
-                    SliverToBoxAdapter(
-                      child: _DateHeader(label: group.key),
-                    ),
+                    SliverToBoxAdapter(child: _DateHeader(label: group.key)),
                     SliverList.separated(
                       itemCount: group.value.length,
                       separatorBuilder: (_, _) => const Divider(
@@ -116,8 +112,7 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
                         indent: 72,
                         endIndent: AppSpacing.lg,
                       ),
-                      itemBuilder: (_, i) =>
-                          _AuditTile(entry: group.value[i]),
+                      itemBuilder: (_, i) => _AuditTile(entry: group.value[i]),
                     ),
                   ],
 
@@ -151,10 +146,12 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
       result = result
-          .where((e) =>
-              e.actionLabel.toLowerCase().contains(q) ||
-              e.entityTypeLabel.toLowerCase().contains(q) ||
-              (e.entityId?.toLowerCase().contains(q) ?? false))
+          .where(
+            (e) =>
+                e.actionLabel.toLowerCase().contains(q) ||
+                e.entityTypeLabel.toLowerCase().contains(q) ||
+                (e.entityId?.toLowerCase().contains(q) ?? false),
+          )
           .toList();
     }
 
@@ -205,13 +202,19 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
 
   _AuditStats _computeStats(List<AuditEntry> entries) {
     final total = entries.length;
-    final approved =
-        entries.where((e) => e.detail?['status'] == 'approved').length;
-    final rejected =
-        entries.where((e) => e.detail?['status'] == 'rejected').length;
+    final approved = entries
+        .where((e) => e.detail?['status'] == 'approved')
+        .length;
+    final rejected = entries
+        .where((e) => e.detail?['status'] == 'rejected')
+        .length;
     final rate = total > 0 ? ((approved / total) * 100).round() : 0;
     return _AuditStats(
-        total: total, approved: approved, rejected: rejected, rate: rate);
+      total: total,
+      approved: approved,
+      rejected: rejected,
+      rate: rate,
+    );
   }
 }
 
@@ -279,9 +282,9 @@ class _CompactStats extends StatelessWidget {
             child: Text(
               '${stats.rate}%',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: _rateColor(stats.rate),
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+                color: _rateColor(stats.rate),
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ],
@@ -297,11 +300,7 @@ class _CompactStats extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({
-    required this.count,
-    required this.label,
-    required this.color,
-  });
+  const _Pill({required this.count, required this.label, required this.color});
 
   final int count;
   final String label;
@@ -363,24 +362,35 @@ class _SearchField extends StatelessWidget {
             color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
             fontSize: 12,
           ),
-          prefixIcon: Icon(Icons.search, size: 18, color: scheme.onSurfaceVariant),
-          prefixIconConstraints:
-              const BoxConstraints(minWidth: 40, minHeight: 0),
+          prefixIcon: Icon(
+            Icons.search,
+            size: 18,
+            color: scheme.onSurfaceVariant,
+          ),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 40,
+            minHeight: 0,
+          ),
           suffixIcon: controller.text.isNotEmpty
               ? GestureDetector(
                   onTap: () {
                     controller.clear();
                     onChanged('');
                   },
-                  child: Icon(Icons.close, size: 16, color: scheme.onSurfaceVariant),
+                  child: Icon(
+                    Icons.close,
+                    size: 16,
+                    color: scheme.onSurfaceVariant,
+                  ),
                 )
               : null,
-          suffixIconConstraints:
-              const BoxConstraints(minWidth: 36, minHeight: 0),
+          suffixIconConstraints: const BoxConstraints(
+            minWidth: 36,
+            minHeight: 0,
+          ),
           filled: true,
           fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.full),
             borderSide: BorderSide.none,
@@ -391,7 +401,9 @@ class _SearchField extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.full),
-            borderSide: BorderSide(color: scheme.primary.withValues(alpha: 0.4)),
+            borderSide: BorderSide(
+              color: scheme.primary.withValues(alpha: 0.4),
+            ),
           ),
         ),
       ),
@@ -474,9 +486,9 @@ class _DateHeader extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              letterSpacing: 0.8,
-            ),
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          letterSpacing: 0.8,
+        ),
       ),
     );
   }
@@ -529,9 +541,7 @@ class _AuditTile extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                       children: [
-                        TextSpan(
-                          text: entry.actionLabel,
-                        ),
+                        TextSpan(text: entry.actionLabel),
                         TextSpan(
                           text: '  ${entry.entityTypeLabel}',
                           style: TextStyle(
@@ -543,7 +553,9 @@ class _AuditTile extends StatelessWidget {
                           TextSpan(
                             text: '  ${entry.entityId}',
                             style: TextStyle(
-                              color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                              color: scheme.onSurfaceVariant.withValues(
+                                alpha: 0.6,
+                              ),
                               fontSize: 12,
                             ),
                           ),
@@ -581,12 +593,13 @@ class _AuditTile extends StatelessWidget {
     if (status == 'rejected') return AppColors.statusError;
     switch (action) {
       case 'tenant_decision':
-        return const Color(0xFF3B82F6);
+        return AppColors.statusInfo;
       case 'plan_request_decision':
-        return const Color(0xFFF59E0B);
+        return AppColors.statusWarning;
       case 'plan_change':
-        return const Color(0xFF7C3AED);
+        return AppColors.statusPurple;
       default:
+        // Neutro semântico (sem papel de cor): mantém cinza neutro.
         return Colors.grey;
     }
   }
@@ -624,7 +637,7 @@ class _StatusDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _color(status);
+    final color = AppColors.decisionStatusColor(status);
     final label = status.toUpperCase();
 
     return Row(
@@ -633,36 +646,17 @@ class _StatusDot extends StatelessWidget {
         Container(
           width: 6,
           height: 6,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: color,
-            letterSpacing: 0.5,
-          ),
+          style: TextStyle(fontSize: 12, color: color, letterSpacing: 0.5),
         ),
       ],
     );
   }
 
-  Color _color(String s) {
-    switch (s) {
-      case 'approved':
-        return AppColors.success;
-      case 'rejected':
-        return AppColors.statusError;
-      case 'pending':
-        return AppColors.statusWarning;
-      default:
-        return Colors.grey;
-    }
-  }
 }
 
 // ─── Detail Sheet ────────────────────────────────────────────────────────────
@@ -732,10 +726,7 @@ class _AuditDetailSheet extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
 
             // ── Fields ──
-            _DetailRow(
-              label: 'ID',
-              value: '#${entry.id}',
-            ),
+            _DetailRow(label: context.l10n.commonId, value: '#${entry.id}'),
             _DetailRow(
               label: l10n.adminAuditLogDate,
               value: DateFormat.yMMMd().add_Hm().format(entry.createdAt),

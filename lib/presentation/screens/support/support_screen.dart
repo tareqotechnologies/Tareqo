@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../widgets/app_card.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../widgets/app_page.dart';
 import 'doc_reader_screen.dart';
 
 /// Ecrã Ajuda — hub do fluxo de suporte (Lojas → Ajustes → Suporte → Ajuda).
@@ -82,19 +84,16 @@ class SupportScreen extends StatelessWidget {
  Widget build(BuildContext context) {
  final theme = Theme.of(context);
  final l10n = context.l10n;
- return Scaffold(
- // AppBar estilo iOS large title — mesmo padrão das demais telas.
- appBar: AppBar(
- title: Text(
- l10n.supportTitle,
- style: theme.textTheme.headlineSmall?.copyWith(
- fontWeight: FontWeight.w500,
- letterSpacing: -0.5,
- ),
- ),
- ),
+ return AppPage(
+ title: l10n.supportTitle,
+ useSafeArea: false,
  body: ListView(
- padding: const EdgeInsets.fromLTRB(20, 8, 20, 48),
+ padding: EdgeInsets.fromLTRB(
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 8,
+ AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
+ 48,
+ ),
  children: [
  Text(
  l10n.supportSubtitle,

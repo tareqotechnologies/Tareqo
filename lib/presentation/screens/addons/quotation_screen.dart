@@ -6,14 +6,18 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pdf/pdf.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/share/quotation_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/quotation.dart';
 import '../../controllers/customers_providers.dart';
 import '../../controllers/products_providers.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/color_palette.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 
@@ -32,36 +36,34 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
 
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 64,
-        titleSpacing: AppSpacing.lg,
-        title: Text(
-          'Cotações / Orçamentos',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.5,
-          ),
+    return AppPage(
+      title: l10n.quotationTitle,
+      useSafeArea: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.settings_outlined, size: 20),
+          onPressed: _openTemplateSettings,
+          tooltip: l10n.quotationTemplateTooltip,
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined, size: 20),
-            onPressed: _openTemplateSettings,
-            tooltip: 'Modelo da Cotação',
-          ),
-        ],
-      ),
+      ],
       body: _drafts.isEmpty
           ? EmptyState(
               icon: Icons.request_quote_outlined,
-              title: 'Nenhuma cotação',
-              subtitle:
-                  'Crie cotações e orçamentos para os seus clientes',
+              title: l10n.quotationEmpty,
+              subtitle: l10n.quotationEmptySubtitle,
             )
           : ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: EdgeInsets.fromLTRB(
+                horizontal,
+                AppSpacing.lg,
+                horizontal,
+                AppSpacing.lg,
+              ),
               itemCount: _drafts.length,
               separatorBuilder: (_, _) =>
                   const SizedBox(height: AppSpacing.xs),
@@ -77,7 +79,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-quotation',
         onPressed: _openNewQuotation,
-        tooltip: 'Nova Cotação',
+        tooltip: l10n.quotationNewFab,
         child: const Icon(Icons.add_rounded, size: 28),
       ),
     );
@@ -163,6 +165,7 @@ class _QuotationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return AppCard(
       elevated: true,
@@ -203,8 +206,11 @@ class _QuotationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Nº ${quotationNumber.toString().padLeft(5, '0')}'
-                      '${draft.clientPhone.isNotEmpty ? '  •  ${draft.clientPhone}' : ''}',
+                      l10n.quotationNumberPrefix(quotationNumber.toString()
+                              .padLeft(5, '0')) +
+                          (draft.clientPhone.isNotEmpty
+                              ? '  •  ${draft.clientPhone}'
+                              : ''),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -218,8 +224,8 @@ class _QuotationCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           // Detalhes
           Text(
-            '${draft.items.length} ${draft.items.length == 1 ? 'item' : 'itens'}'
-            '  •  Validade: ${draft.validityDays} dias'
+            '${l10n.quotationItemsCount(draft.items.length)}'
+            '  •  ${l10n.quotationValidity}: ${l10n.quotationDays(draft.validityDays)}'
             '  •  ${Formatters.currency(draft.totalCents)}',
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
@@ -230,34 +236,34 @@ class _QuotationCard extends StatelessWidget {
           Row(
             children: [
               AppButton.secondary(
-                label: 'WhatsApp',
+                label: l10n.customInvoiceWhatsApp,
                 icon: const Icon(Icons.share_outlined, size: 16),
-                onPressed: _shareWhatsApp,
+                onPressed: () => _shareWhatsApp(context),
               ),
               const SizedBox(width: AppSpacing.xs),
               AppButton.secondary(
-                label: 'PDF',
+                label: l10n.customInvoicePdf,
                 icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
                 onPressed: () => _exportPdf(context),
               ),
               const SizedBox(width: AppSpacing.xs),
               if (draft.status == _QuotationStatus.draft)
                 AppButton.primary(
-                  label: 'Enviar',
+                  label: l10n.quotationSend,
                   icon: const Icon(Icons.send_outlined, size: 16),
                   onPressed: () =>
                       draft.status = _QuotationStatus.sent,
                 ),
               if (draft.status == _QuotationStatus.sent) ...[
                 AppButton.primary(
-                  label: 'Aceitar',
+                  label: l10n.quotationAccept,
                   icon: const Icon(Icons.check_circle_outline, size: 16),
                   onPressed: () =>
                       draft.status = _QuotationStatus.accepted,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 AppButton.danger(
-                  label: 'Rejeitar',
+                  label: l10n.quotationReject,
                   onPressed: () =>
                       draft.status = _QuotationStatus.rejected,
                 ),
@@ -269,15 +275,18 @@ class _QuotationCard extends StatelessWidget {
     );
   }
 
-  Future<void> _shareWhatsApp() async {
+  Future<void> _shareWhatsApp(BuildContext context) async {
+    final l10n = context.l10n;
     final buffer = StringBuffer();
-    buffer.writeln('═══ COTAÇÃO ═══');
-    buffer.writeln('Nº: ${quotationNumber.toString().padLeft(5, '0')}');
-    buffer.writeln('Cliente: ${draft.clientName}');
+    buffer.writeln(l10n.quotationWhatsAppHeader);
+    buffer.writeln('${l10n.customInvoiceNumberShort}: '
+        '${quotationNumber.toString().padLeft(5, '0')}');
+    buffer.writeln('${l10n.customInvoiceClientLabel}: ${draft.clientName}');
     if (draft.clientPhone.isNotEmpty) {
-      buffer.writeln('Tel: ${draft.clientPhone}');
+      buffer.writeln('${l10n.customInvoicePhoneLabel}: ${draft.clientPhone}');
     }
-    buffer.writeln('Validade: ${draft.validityDays} dias');
+    buffer.writeln('${l10n.quotationValidity}: '
+        '${l10n.quotationDays(draft.validityDays)}');
     buffer.writeln();
     for (final item in draft.items) {
       buffer.writeln(
@@ -285,7 +294,8 @@ class _QuotationCard extends StatelessWidget {
       );
     }
     buffer.writeln();
-    buffer.writeln('TOTAL: ${Formatters.currency(draft.totalCents)}');
+    buffer.writeln('${l10n.customInvoiceTotalLabel}: '
+        '${Formatters.currency(draft.totalCents)}');
 
     final uri = Uri.parse(
       'https://wa.me/?text=${Uri.encodeComponent(buffer.toString())}',
@@ -315,10 +325,46 @@ class _QuotationCard extends StatelessWidget {
     );
 
     final config = templateConfig ?? _QuotationTemplateConfig();
+    final l10n = context.l10n;
     await QuotationPdfExporter().sharePdf(
       quotation,
-      businessName:
-          config.businessName.isNotEmpty ? config.businessName : 'Minha Empresa',
+      labels: QuotationPdfLabels(
+        docWord: l10n.pdfQuotationDocWord,
+        numberLabelTemplate: l10n.quotationNumberPrefix('{number}'),
+        clientHeading: l10n.pdfClientHeading,
+        phoneLabelTemplate: l10n.pdfPhoneLine('{value}'),
+        taxIdLabelTemplate: l10n.pdfNifLine('{value}'),
+        itemHeader: l10n.pdfItemHeader,
+        qtyHeader: l10n.customInvoiceQty,
+        unitPriceHeader: l10n.pdfUnitPriceHeader,
+        subtotalHeader: l10n.pdfSubtotalHeader,
+        discountLabel: l10n.pdfDiscountLabel,
+        totalLabel: l10n.customInvoiceTotalLabel,
+        validityHeading: l10n.quotationValidity,
+        notesHeading: l10n.pdfConditionsNotesHeading,
+        generalConditionsHeading: l10n.pdfGeneralConditionsHeading,
+        validConditionTemplate:
+            l10n.pdfConditionValidBullet('{date}'),
+        pricesConditionText: l10n.pdfConditionPricesBullet,
+        contactConditionText: l10n.pdfConditionContactBullet,
+        footerTemplate: l10n.pdfFooter('{date}'),
+        fileNameBase: l10n.pdfQuotationFileBase,
+        subjectWord: l10n.pdfQuotationSubjectWord,
+        statusText: (status) => switch (status) {
+          QuotationStatus.draft => l10n.quotationStatusDraft,
+          QuotationStatus.sent => l10n.quotationStatusSent,
+          QuotationStatus.accepted => l10n.quotationStatusAccepted,
+          QuotationStatus.rejected => l10n.quotationStatusRejected,
+          QuotationStatus.expired => l10n.quotationStatusExpired,
+          QuotationStatus.converted => l10n.quotationStatusConverted,
+        },
+        daysLeftText: (days) => days > 0
+            ? l10n.pdfValidityDaysLeft(days)
+            : l10n.quotationStatusExpired,
+      ),
+      businessName: config.businessName.isNotEmpty
+          ? config.businessName
+          : l10n.businessFallbackName,
       businessAddress:
           config.businessAddress.isNotEmpty ? config.businessAddress : null,
       businessPhone:
@@ -395,6 +441,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
     final products = ref.watch(productsProvider).value ?? [];
     final customers = ref.watch(customersProvider).value ?? [];
     final activeProducts = products.where((p) => p.isActive).toList();
@@ -412,7 +459,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Nova Cotação',
+              l10n.customInvoiceNew,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -420,16 +467,16 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             const SizedBox(height: AppSpacing.lg),
 
             // ─── Cliente ──
-            _SectionLabel(text: 'Cliente'),
+            _SectionLabel(text: l10n.customInvoiceClientSection),
             const SizedBox(height: 6),
             if (customers.isNotEmpty)
               DropdownButtonFormField<String>(
                   initialValue: _selectedCustomerId,
                   isExpanded: true,
                   menuMaxHeight: 250,
-                  decoration: const InputDecoration(
-                    labelText: 'Cliente',
-                    prefixIcon: Icon(Icons.person_outline, size: 20),
+                  decoration: InputDecoration(
+                    labelText: l10n.customInvoiceClientSection,
+                    prefixIcon: const Icon(Icons.person_outline, size: 20),
                   ),
                   items: customers
                       .map(
@@ -455,13 +502,13 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             else
               AppTextField(
                 controller: _clientController,
-                label: 'Nome do cliente',
+                label: l10n.customInvoiceClientName,
                 prefixIcon: Icons.person_outline,
               ),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _phoneController,
-              label: 'Telefone (opcional)',
+              label: l10n.quotationPhoneOptional,
               keyboardType: TextInputType.phone,
               prefixIcon: Icons.phone_outlined,
             ),
@@ -470,17 +517,17 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             const SizedBox(height: AppSpacing.sm),
 
             // ─── Produto ──
-            _SectionLabel(text: 'Produto'),
+            _SectionLabel(text: l10n.customInvoiceProductSection),
             const SizedBox(height: 6),
             if (activeProducts.isNotEmpty)
               DropdownButtonFormField<String>(
                   initialValue: _selectedProductId,
                   isExpanded: true,
                   menuMaxHeight: 250,
-                  decoration: const InputDecoration(
-                    labelText: 'Produto',
+                  decoration: InputDecoration(
+                    labelText: l10n.customInvoiceProductSection,
                     prefixIcon:
-                        Icon(Icons.inventory_2_outlined, size: 20),
+                        const Icon(Icons.inventory_2_outlined, size: 20),
                   ),
                   items: activeProducts
                       .map(
@@ -497,7 +544,11 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
-                                'Estoque: ${p.stockQuantity ~/ 1000} ${p.unitLabel}  •  ${Formatters.currency(p.salePriceCents)}',
+                                l10n.customInvoiceProductOption(
+                                  (p.stockQuantity ~/ 1000).toString(),
+                                  p.unitLabel,
+                                  Formatters.currency(p.salePriceCents),
+                                ),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: scheme.onSurfaceVariant
                                       .withValues(alpha: 0.6),
@@ -522,7 +573,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             else
               InputDecorator(
                 decoration: InputDecoration(
-                  hintText: 'Sem produtos cadastrados',
+                  hintText: l10n.customInvoiceProductPlaceholder,
                   prefixIcon:
                       const Icon(Icons.inventory_2_outlined, size: 20),
                   border: InputBorder.none,
@@ -540,7 +591,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
                   flex: 2,
                   child: AppTextField(
                     controller: _priceController,
-                    label: 'Preço (MT)',
+                    label: l10n.customInvoicePrice,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
@@ -550,7 +601,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
                 Expanded(
                   child: AppTextField(
                     controller: _qtyController,
-                    label: 'Qtd',
+                    label: l10n.customInvoiceQty,
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -560,7 +611,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             Align(
               alignment: Alignment.centerRight,
               child: AppButton.secondary(
-                label: 'Adicionar',
+                label: l10n.customInvoiceAddItem,
                 onPressed: _selectedProductId != null ? _addItem : null,
               ),
             ),
@@ -600,7 +651,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
                   ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Total: ${Formatters.currency(_totalCents)}',
+                l10n.customInvoiceBillTotal(Formatters.currency(_totalCents)),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                   letterSpacing: -0.3,
@@ -611,7 +662,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               expanded: true,
-              label: 'Guardar Cotação',
+              label: l10n.quotationSave,
               onPressed: _clientController.text.trim().isNotEmpty &&
                       _items.isNotEmpty
                   ? () {
@@ -644,18 +695,6 @@ class _QuotationTemplateConfig {
   String businessTaxId = '';
   Color primaryColor = const Color(0xFFD97706);
 }
-
-/// Paleta de cores profissional — a mesma usada na factura.
-const _kColorPalettes = <String, Color>{
-  'Azul': Color(0xFF2563EB),
-  'Verde': Color(0xFF16A34A),
-  'Vermelho': Color(0xFFDC2626),
-  'Âmbar': Color(0xFFD97706),
-  'Slate': Color(0xFF475569),
-  'Violeta': Color(0xFF7C3AED),
-  'Teal': Color(0xFF0D9488),
-  'Indigo': Color(0xFF4338CA),
-};
 
 class _QuotationTemplateSettingsSheet extends StatefulWidget {
   const _QuotationTemplateSettingsSheet({required this.config});
@@ -708,12 +747,12 @@ class _QuotationTemplateSettingsSheetState
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Galeria'),
+              title: Text(ctx.l10n.imageSourceGallery),
               onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt_outlined),
-              title: const Text('Câmara'),
+              title: Text(ctx.l10n.imageSourceCamera),
               onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
             ),
           ],
@@ -745,7 +784,7 @@ class _QuotationTemplateSettingsSheetState
       ..logoBytes = _logoBytes;
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Modelo guardado com sucesso')),
+      SnackBar(content: Text(context.l10n.customInvoiceTemplateSaved)),
     );
   }
 
@@ -753,6 +792,7 @@ class _QuotationTemplateSettingsSheetState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -767,7 +807,7 @@ class _QuotationTemplateSettingsSheetState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Modelo da Cotação',
+              l10n.quotationTemplateTitle,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -775,7 +815,7 @@ class _QuotationTemplateSettingsSheetState
             const SizedBox(height: AppSpacing.md),
 
             // ─── Logotipo ──
-            _SectionLabel(text: 'Logotipo da Empresa'),
+            _SectionLabel(text: l10n.customInvoiceTemplateLogoSection),
             const SizedBox(height: AppSpacing.sm),
             GestureDetector(
               onTap: _pickLogo,
@@ -833,7 +873,7 @@ class _QuotationTemplateSettingsSheetState
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Toque para carregar logotipo',
+                            l10n.customInvoiceTemplateLogoHint,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
@@ -845,37 +885,40 @@ class _QuotationTemplateSettingsSheetState
             const SizedBox(height: AppSpacing.lg),
 
             // ─── Cor Principal ──
-            _SectionLabel(text: 'Cor Principal'),
+            _SectionLabel(text: l10n.customInvoiceTemplateColorSection),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
-              children: _kColorPalettes.entries.map((entry) {
+              children: kColorPalettes.entries.map((entry) {
                 final isSelected =
                     entry.value.toARGB32() == _selectedColor.toARGB32();
-                return GestureDetector(
-                  onTap: () =>
-                      setState(() => _selectedColor = entry.value),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: entry.value,
-                      shape: BoxShape.circle,
-                      border: isSelected
-                          ? Border.all(
-                              color: scheme.onSurface,
-                              width: 3,
+                return Tooltip(
+                  message: paletteColorName(entry.key, l10n),
+                  child: GestureDetector(
+                    onTap: () =>
+                        setState(() => _selectedColor = entry.value),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: entry.value,
+                        shape: BoxShape.circle,
+                        border: isSelected
+                            ? Border.all(
+                                color: scheme.onSurface,
+                                width: 3,
+                              )
+                            : null,
+                      ),
+                      child: isSelected
+                          ? Icon(
+                              Icons.check,
+                              size: 18,
+                              color: scheme.surface,
                             )
                           : null,
                     ),
-                    child: isSelected
-                        ? Icon(
-                            Icons.check,
-                            size: 18,
-                            color: scheme.surface,
-                          )
-                        : null,
                   ),
                 );
               }).toList(),
@@ -883,17 +926,17 @@ class _QuotationTemplateSettingsSheetState
             const SizedBox(height: AppSpacing.lg),
 
             // ─── Dados da Empresa ──
-            _SectionLabel(text: 'Dados da Empresa'),
+            _SectionLabel(text: l10n.customInvoiceTemplateCompanySection),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _nameController,
-              label: 'Nome da Empresa',
+              label: l10n.customInvoiceTemplateCompanyName,
               prefixIcon: Icons.business_outlined,
             ),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _addressController,
-              label: 'Morada',
+              label: l10n.customInvoiceTemplateAddress,
               prefixIcon: Icons.location_on_outlined,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -902,7 +945,7 @@ class _QuotationTemplateSettingsSheetState
                 Expanded(
                   child: AppTextField(
                     controller: _phoneController,
-                    label: 'Telefone',
+                    label: l10n.quotationTemplatePhone,
                     keyboardType: TextInputType.phone,
                     prefixIcon: Icons.phone_outlined,
                   ),
@@ -911,7 +954,7 @@ class _QuotationTemplateSettingsSheetState
                 Expanded(
                   child: AppTextField(
                     controller: _taxIdController,
-                    label: 'NIF / NUIT',
+                    label: l10n.customInvoiceTemplateTaxId,
                     prefixIcon: Icons.badge_outlined,
                   ),
                 ),
@@ -957,13 +1000,13 @@ class _QuotationTemplateSettingsSheetState
                         Text(
                           _nameController.text.isNotEmpty
                               ? _nameController.text
-                              : 'Nome da Empresa',
+                              : l10n.customInvoicePreviewCompanyFallback,
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
-                          'Cotação • Preview',
+                          l10n.quotationTemplatePreview,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                             fontSize: 11,
@@ -982,7 +1025,7 @@ class _QuotationTemplateSettingsSheetState
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'Preview',
+                      l10n.quotationTemplatePreviewBadge,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: _selectedColor,
                       ),
@@ -996,13 +1039,13 @@ class _QuotationTemplateSettingsSheetState
             // ─── Botões ──
             AppButton.primary(
               expanded: true,
-              label: 'Guardar Modelo',
+              label: l10n.customInvoiceTemplateSave,
               onPressed: _save,
             ),
             const SizedBox(height: AppSpacing.sm),
             AppButton.secondary(
               expanded: true,
-              label: 'Cancelar',
+              label: l10n.commonCancel,
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -1024,12 +1067,13 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     final (label, color) = switch (status) {
-      _QuotationStatus.draft => ('Rascunho', const Color(0xFFF59E0B)),
-      _QuotationStatus.sent => ('Enviada', const Color(0xFF3B82F6)),
-      _QuotationStatus.accepted => ('Aceite', const Color(0xFF16A34A)),
-      _QuotationStatus.rejected => ('Rejeitada', const Color(0xFFDC2626)),
+      _QuotationStatus.draft => (l10n.quotationStatusDraft, AppColors.statusWarning),
+      _QuotationStatus.sent => (l10n.quotationStatusSent, AppColors.statusInfo),
+      _QuotationStatus.accepted => (l10n.quotationStatusAccepted, AppColors.success),
+      _QuotationStatus.rejected => (l10n.quotationStatusRejected, AppColors.statusError),
     };
 
     return Container(

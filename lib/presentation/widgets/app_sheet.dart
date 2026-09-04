@@ -131,18 +131,21 @@ class SheetSection extends StatelessWidget {
 }
 
 /// Cabeçalho unificado das sheets V4 — título centrado, fechar à esquerda,
-/// acção principal (Guardar) à direita.
+/// acção principal à direita. O rótulo da acção é passado por quem usa
+/// (ex.: "Aplicar" num filtro) em vez de um default genérico de produto.
 class SheetHeader extends StatelessWidget {
   const SheetHeader({
     super.key,
     required this.title,
     required this.onSave,
+    this.actionLabel,
     this.isSaving = false,
     this.onClose,
   });
 
   final String title;
   final VoidCallback onSave;
+  final String? actionLabel;
   final bool isSaving;
   final VoidCallback? onClose;
 
@@ -175,7 +178,7 @@ class SheetHeader extends StatelessWidget {
             ),
           ),
           AppButton.primary(
-            label: l10n.productsSave,
+            label: actionLabel ?? l10n.commonSave,
             onPressed: isSaving ? null : onSave,
             icon: isSaving
                 ? const SizedBox(

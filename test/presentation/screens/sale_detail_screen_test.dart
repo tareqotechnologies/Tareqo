@@ -114,10 +114,8 @@ void main() {
  expect(find.text('2 × R\$ 2,00'), findsOneWidget);
  expect(find.text('R\$ 4,00'), findsOneWidget); // subtotal de Caneta
  expect(find.text('Caderno'), findsOneWidget);
- expect(find.text('1 × R\$ 9,90'), findsOneWidget);
-
- // Total (resumo + rodapé) e nota de snapshot.
- expect(find.text('R\$ 13,90'), findsNWidgets(2));
+ expect(find.text('1 × R\$ 9,90'), findsOneWidget);    // Total em destaque e nota de snapshot.
+    expect(find.text('R\$ 13,90'), findsOneWidget);
  expect(find.text('Preços congelados no momento da venda.'), findsOneWidget);
  });
 
