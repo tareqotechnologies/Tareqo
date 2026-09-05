@@ -32,75 +32,88 @@ class _PaymentReconciliationScreenState
           l10n.paymentsTitle,
         ),
       ),
-      body: _payments.isEmpty
-          ? EmptyState(
-              icon: Icons.phone_android_outlined,
-              title: l10n.paymentsEmpty,
-              subtitle: l10n.paymentsEmptySubtitle,
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        children: [
+          // ─── Aviso honesto ───
+          // A reconciliação REAL exige a API do provedor de mobile money.
+          // Até essa integração existir, os registos são locais/demonstrativos
+          // e o add-on está marcado como indisponível no marketplace.
+          _IntegrationBlockedBanner(
+            message: l10n.paymentsIntegrationBlocked,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          if (_payments.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xxl),
+              child: EmptyState(
+                icon: Icons.phone_android_outlined,
+                title: l10n.paymentsEmpty,
+                subtitle: l10n.paymentsEmptySubtitle,
+              ),
             )
-          : ListView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+          else ...[
+            // ─── Resumo ───
+            Row(
               children: [
-                // ─── Resumo ───
-                Row(
-                  children: [
-                    Expanded(
-                      child: _MiniStat(
-                        label: l10n.paymentsStatusConfirmed,
-                        value:
-                            '${_payments.where((p) => p.status == 'Confirmada').length}',
-                        color: IconTone.green,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: _MiniStat(
-                        label: l10n.paymentsStatusPending,
-                        value:
-                            '${_payments.where((p) => p.status == 'Pendente').length}',
-                        color: ModuleColors.credit,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: _MiniStat(
-                        label: l10n.paymentsStatusRejected,
-                        value:
-                            '${_payments.where((p) => p.status == 'Rejeitada').length}',
-                        color: IconTone.red,
-                      ),
-                    ),
-                  ],
+                Expanded(
+                  child: _MiniStat(
+                    label: l10n.paymentsStatusConfirmed,
+                    value:
+                        '${_payments.where((p) => p.status == _PaymentStatus.confirmed).length}',
+                    color: IconTone.green,
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // ─── Lista de transacções ───
-                ..._payments.map(
-                  (payment) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                    child: _PaymentCard(
-                      payment: payment,
-                      onConfirm: () {
-                        setState(() {
-                          final idx = _payments.indexOf(payment);
-                          _payments[idx] =
-                              payment.copyWith(status: 'Confirmada');
-                        });
-                      },
-                      onReject: payment.status == 'Pendente'
-                          ? () {
-                              setState(() {
-                                final idx = _payments.indexOf(payment);
-                                _payments[idx] =
-                                    payment.copyWith(status: 'Rejeitada');
-                              });
-                            }
-                          : null,
-                    ),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: _MiniStat(
+                    label: l10n.paymentsStatusPending,
+                    value:
+                        '${_payments.where((p) => p.status == _PaymentStatus.pending).length}',
+                    color: ModuleColors.credit,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: _MiniStat(
+                    label: l10n.paymentsStatusRejected,
+                    value:
+                        '${_payments.where((p) => p.status == _PaymentStatus.rejected).length}',
+                    color: IconTone.red,
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // ─── Lista de transacções ───
+            ..._payments.map(
+              (payment) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: _PaymentCard(
+                  payment: payment,
+                  onConfirm: () {
+                    setState(() {
+                      final idx = _payments.indexOf(payment);
+                      _payments[idx] =
+                          payment.copyWith(status: _PaymentStatus.confirmed);
+                    });
+                  },
+                  onReject: payment.status == _PaymentStatus.pending
+                      ? () {
+                          setState(() {
+                            final idx = _payments.indexOf(payment);
+                            _payments[idx] =
+                                payment.copyWith(status: _PaymentStatus.rejected);
+                          });
+                        }
+                      : null,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-payment',
         onPressed: _openNewPayment,
@@ -125,6 +138,9 @@ class _PaymentReconciliationScreenState
   }
 }
 
+/// Estado de reconciliação de um pagamento.
+enum _PaymentStatus { pending, confirmed, rejected }
+
 class _PaymentRecord {
   _PaymentRecord({
     required this.provider,
@@ -139,10 +155,10 @@ class _PaymentRecord {
   final String phone;
   final int amountCents;
   final String confirmationCode;
-  final String status;
+  final _PaymentStatus status;
   final String date;
 
-  _PaymentRecord copyWith({String? status}) {
+  _PaymentRecord copyWith({_PaymentStatus? status}) {
     return _PaymentRecord(
       provider: provider,
       phone: phone,
@@ -230,9 +246,12 @@ class _PaymentCard extends StatelessWidget {
     final l10n = context.l10n;
 
     final (statusColor, statusLabel) = switch (payment.status) {
-      'Confirmada' => (IconTone.green, l10n.paymentsStatusConfirmed),
-      'Rejeitada' => (IconTone.red, l10n.paymentsStatusRejected),
-      _ => (ModuleColors.credit, l10n.paymentsStatusPending),
+      _PaymentStatus.confirmed =>
+        (IconTone.green, l10n.paymentsStatusConfirmed),
+      _PaymentStatus.rejected =>
+        (IconTone.red, l10n.paymentsStatusRejected),
+      _PaymentStatus.pending =>
+        (ModuleColors.credit, l10n.paymentsStatusPending),
     };
 
     return AppCard(
@@ -317,7 +336,7 @@ class _PaymentCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              if (payment.status == 'Pendente') ...[
+              if (payment.status == _PaymentStatus.pending) ...[
                 const SizedBox(height: 4),
                 GestureDetector(
                   onTap: onConfirm,
@@ -446,20 +465,23 @@ class _NewPaymentSheetState extends State<_NewPaymentSheet> {
             const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               expanded: true,
-              label: context.l10n.paymentsSheetTitle,
+              label: context.l10n.paymentsConfirm,
               onPressed: _phoneController.text.trim().isNotEmpty &&
                       _amountController.text.trim().isNotEmpty
                   ? () {
+                      // Montante em CENTAVOS com arredondamento (antes:
+                      // toInt() truncava — 0,29 × 100 virava 28 cêntimos).
                       final amount =
-                          (double.tryParse(_amountController.text) ?? 0);
+                          (double.tryParse(_amountController.text) ?? 0) * 100;
+                      if (amount <= 0) return;
                       widget.onSave(
                         _PaymentRecord(
                           provider: _provider,
                           phone: _phoneController.text.trim(),
-                          amountCents: (amount * 100).toInt(),
+                          amountCents: amount.round(),
                           confirmationCode:
                               _confirmationController.text.trim(),
-                          status: 'Pendente',
+                          status: _PaymentStatus.pending,
                           date: Formatters.date(DateTime.now()),
                         ),
                       );
@@ -468,6 +490,45 @@ class _NewPaymentSheetState extends State<_NewPaymentSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Banner honesto: integração real ainda não existe (API externa).
+class _IntegrationBlockedBanner extends StatelessWidget {
+  const _IntegrationBlockedBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final warning = IconTone.amber;
+
+    return AppCard(
+      color: warning.withValues(alpha: 0.08),
+      borderColor: warning.withValues(alpha: 0.30),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.info_outline_rounded,
+            color: warning,
+            size: 20,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

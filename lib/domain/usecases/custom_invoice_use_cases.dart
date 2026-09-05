@@ -20,6 +20,28 @@ class CreateCustomInvoiceUseCase {
     if (items.isEmpty) {
       throw ArgumentError('A factura deve ter pelo menos um item.');
     }
+    if (clientName.trim().isEmpty) {
+      throw ArgumentError('O nome do cliente é obrigatório.');
+    }
+    if (discountCents < 0) {
+      throw ArgumentError('O desconto não pode ser negativo.');
+    }
+    if (taxCents < 0) {
+      throw ArgumentError('O imposto não pode ser negativo.');
+    }
+    for (final item in items) {
+      if (item.productName.trim().isEmpty) {
+        throw ArgumentError('Todo item deve ter um nome.');
+      }
+      if (item.quantity <= 0) {
+        throw ArgumentError(
+          'A quantidade de cada item deve ser maior que zero.',
+        );
+      }
+      if (item.unitPriceCents < 0) {
+        throw ArgumentError('O preço unitário não pode ser negativo.');
+      }
+    }
 
     final invoiceItems = <CustomInvoiceItem>[];
     int totalCents = 0;

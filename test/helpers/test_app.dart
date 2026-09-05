@@ -52,14 +52,19 @@ void registerTestSecureStorage() {
 /// por brilho (ver `theme_contrast_test.dart`, que valida as duas variantes).
 ///
 /// Uso: `testApp(home: MinhaTela())` dentro do `ProviderScope`.
+///
+/// `theme` opcional: padrão [AppTheme.dark]; passe [AppTheme.light] para
+/// testes que verificam o comportamento no modo claro (ex.: telas que
+/// seguem o brilho do tema).
 Widget testApp({
  required Widget home,
  Locale locale = const Locale('pt'),
+ ThemeData? theme,
 }) {
  registerTestSecureStorage();
  return MaterialApp(
  locale: locale,
- theme: AppTheme.dark,
+ theme: theme ?? AppTheme.dark,
  localizationsDelegates: AppLocalizations.localizationsDelegates,
  supportedLocales: AppLocalizations.supportedLocales,
  home: home,

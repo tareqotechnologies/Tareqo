@@ -16,7 +16,8 @@ final class AddOnLocalDataSourceImpl implements AddOnLocalDataSource {
   Future<Set<String>> getActiveAddOnIds(String tenantId) async {
     return Set.unmodifiable(
       _records
-          .where((r) => r.tenantId == tenantId && r.isActive)
+          .where((r) =>
+              r.tenantId == tenantId && r.isActive && !_isExpired(r))
           .map((r) => r.addOnId),
     );
   }
@@ -25,9 +26,15 @@ final class AddOnLocalDataSourceImpl implements AddOnLocalDataSource {
   Future<void> activate(String tenantId, String addOnId) async {
     final existing = _find(tenantId, addOnId);
     if (existing != null) {
-      // Re-activar se estava expirado/desactivado.
+      // Re-activar/renovar: limpa a expiração antiga — senão um add-on
+      // que já expirou continuaria "inactivo" (o expires_at antigo fica
+      // no passado e o isActive() rejeita o registo).
       final idx = _records.indexOf(existing);
-      _records[idx] = existing.copyWith(isActive: true);
+      _records[idx] = existing.copyWith(
+        isActive: true,
+        expiresAt: null,
+        activatedAt: DateTime.now(),
+      );
       return;
     }
     _records.add(
@@ -56,6 +63,18 @@ final class AddOnLocalDataSourceImpl implements AddOnLocalDataSource {
     required String addOnId,
     DateTime? expiresAt,
   }) async {
+    final existing = _find(tenantId, addOnId);
+    if (existing != null) {
+      // Renovação/subscrição nova para o mesmo par: substitui o registo
+      // (nunca duplica) com a nova validade.
+      final idx = _records.indexOf(existing);
+      _records[idx] = existing.copyWith(
+        isActive: true,
+        activatedAt: DateTime.now(),
+        expiresAt: expiresAt,
+      );
+      return;
+    }
     _records.add(
       TenantAddOn(
         id: AppIds.newId('ao'),
@@ -73,10 +92,7 @@ final class AddOnLocalDataSourceImpl implements AddOnLocalDataSource {
     final record = _find(tenantId, addOnId);
     if (record == null || !record.isActive) return false;
     // Verificar expiração.
-    if (record.expiresAt != null && DateTime.now().isAfter(record.expiresAt!)) {
-      return false;
-    }
-    return true;
+    return !_isExpired(record);
   }
 
   @override
@@ -92,9 +108,7 @@ final class AddOnLocalDataSourceImpl implements AddOnLocalDataSource {
     var count = 0;
     for (var i = 0; i < _records.length; i++) {
       final r = _records[i];
-      if (r.isActive &&
-          r.expiresAt != null &&
-          now.isAfter(r.expiresAt!)) {
+      if (r.isActive && _isExpiredAt(r, now)) {
         _records[i] = r.copyWith(isActive: false);
         count++;
       }
@@ -106,10 +120,7 @@ final class AddOnLocalDataSourceImpl implements AddOnLocalDataSource {
   Future<List<TenantAddOn>> getExpired() async {
     final now = DateTime.now();
     return List.unmodifiable(
-      _records.where((r) =>
-          r.expiresAt != null &&
-          r.isActive &&
-          now.isAfter(r.expiresAt!)),
+      _records.where((r) => r.isActive && _isExpiredAt(r, now)),
     );
   }
 
@@ -119,4 +130,9 @@ final class AddOnLocalDataSourceImpl implements AddOnLocalDataSource {
     }
     return null;
   }
+
+  bool _isExpired(TenantAddOn record) => _isExpiredAt(record, DateTime.now());
+
+  bool _isExpiredAt(TenantAddOn record, DateTime now) =>
+      record.expiresAt != null && now.isAfter(record.expiresAt!);
 }

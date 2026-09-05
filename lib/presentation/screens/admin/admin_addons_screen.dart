@@ -551,7 +551,12 @@ class _BulkAddOnSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final addOns = AddOnCatalog.addOns();
+    // Só add-ons com funcionalidade REAL podem ser activados (os
+    // BLOCKED — ex.: dependência externa/schema inexistente — ficam
+    // fora do catálogo operável: nunca vender/activar o que não existe).
+    final addOns = AddOnCatalog.addOns()
+        .where((a) => a.isAvailable)
+        .toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -839,7 +844,10 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final addOns = AddOnCatalog.addOns();
+    // Só add-ons com funcionalidade REAL (os BLOCKED não são activáveis).
+    final addOns = AddOnCatalog.addOns()
+        .where((a) => a.isAvailable)
+        .toList();
 
     return Scaffold(
       backgroundColor: scheme.surface,

@@ -57,7 +57,12 @@ abstract final class AddOnCatalog {
         category: AddOnCategory.employees,
         priceMonthlyCents: 40000, // MZN 400,00/mês
         iconName: 'groups',
-
+        // BLOCKED — FUNCIONALIDADE SEM BACKEND: ponto, comissões e metas
+        // não têm tabelas/repositórios reais (só entidades + use cases
+        // puros); a gestão REAL de funcionários (contas, lojas, cargos)
+        // já existe no módulo Lojas. Fora do marketplace até o schema
+        // real existir — nunca vender funcionalidade falsa.
+        isAvailable: false,
       ),
 
       // ─── Multi-Loja Avançado ──────────────────────────
@@ -84,6 +89,10 @@ abstract final class AddOnCatalog {
         category: AddOnCategory.payments,
         priceMonthlyCents: 45000, // MZN 450,00/mês
         iconName: 'phone_android',
+        // BLOCKED — DEPENDÊNCIA EXTERNA: requer API/webhook do provedor
+        // (M-Pesa/E-Mola) ainda inexistente; fora do marketplace até a
+        // integração real existir (nunca vender funcionalidade falsa).
+        isAvailable: false,
       ),
     ];
   }

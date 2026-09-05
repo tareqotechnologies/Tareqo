@@ -17,6 +17,30 @@ class CreateQuotationUseCase {
     if (items.isEmpty) {
       throw ArgumentError('A cotação deve ter pelo menos um item.');
     }
+    if (customer.name.trim().isEmpty) {
+      throw ArgumentError('O nome do cliente é obrigatório.');
+    }
+    if (discountCents < 0) {
+      throw ArgumentError('O desconto não pode ser negativo.');
+    }
+    if (validityDays <= 0) {
+      throw ArgumentError(
+        'A validade da cotação deve ser de pelo menos 1 dia.',
+      );
+    }
+    for (final item in items) {
+      if (item.productName.trim().isEmpty) {
+        throw ArgumentError('Todo item deve ter um nome.');
+      }
+      if (item.quantity <= 0) {
+        throw ArgumentError(
+          'A quantidade de cada item deve ser maior que zero.',
+        );
+      }
+      if (item.unitPriceCents < 0) {
+        throw ArgumentError('O preço unitário não pode ser negativo.');
+      }
+    }
 
     int totalCents = 0;
     final quotationItems = <QuotationItem>[];
@@ -80,6 +104,14 @@ class ConvertQuotationToSaleUseCase {
       throw StateError(
         'Só é possível converter cotações com status "Aceite".',
       );
+    }
+    if (quotation.items.isEmpty) {
+      throw StateError('A cotação aceite deve ter itens para converter.');
+    }
+    for (final item in quotation.items) {
+      if (item.quantity <= 0 || item.unitPriceCents < 0) {
+        throw StateError('Item inválido na cotação aceite.');
+      }
     }
     return quotation.items
         .map(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
@@ -66,6 +67,11 @@ class _EmployeeManagementScreenState
             Tab(text: l10n.employeeMgmtTabTargets),
           ],
         ),
+      ),
+      // Aviso honesto: ponto/comissões/metas ainda não têm backend real.
+      // A gestão REAL de funcionários está no módulo Lojas.
+      bottomNavigationBar: _EmployeeBlockedBanner(
+        message: l10n.employeeMgmtBlockedBanner,
       ),
       body: TabBarView(
         controller: _tabController,
@@ -981,20 +987,71 @@ class _AddTargetSheetState extends State<_AddTargetSheet> {
               onPressed: _selectedEmployeeId != null &&
                       _targetController.text.isNotEmpty
                   ? () {
-                      final target =
-                          double.tryParse(_targetController.text) ?? 0;
+                      // Meta em CENTAVOS com arredondamento (antes: toInt()
+                      // truncava) e nunca negativa/zero.
+                      final raw = double.tryParse(_targetController.text) ?? 0;
+                      if (raw <= 0) return;
                       final emp = widget.employees.firstWhere(
                         (e) => e.id == _selectedEmployeeId,
                       );
                       widget.onSave(_Target(
                         employeeId: emp.id,
                         employeeName: emp.name,
-                        targetCents: (target * 100).toInt(),
+                        targetCents: (raw * 100).round(),
                         achievedCents: 0,
-                        month: 'Set 2026',
+                        // Mês REAL da criação (antes ficava fixo em
+                        // 'Set 2026' independentemente da data).
+                        month: DateFormat(
+                          'MMM yyyy',
+                          Formatters.currentLanguage,
+                        ).format(DateTime.now()),
                       ));
                     }
                   : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Banner honesto: ponto/comissões/metas ainda sem backend real — a
+/// gestão REAL de funcionários vive no módulo Lojas.
+class _EmployeeBlockedBanner extends StatelessWidget {
+  const _EmployeeBlockedBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final warning = IconTone.amber;
+
+    return SafeArea(
+      top: false,
+      child: AppCard(
+        color: warning.withValues(alpha: 0.08),
+        borderColor: warning.withValues(alpha: 0.30),
+        borderRadius: const BorderRadius.all(Radius.circular(0)),
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.info_outline_rounded,
+              color: warning,
+              size: 20,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                message,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         ),

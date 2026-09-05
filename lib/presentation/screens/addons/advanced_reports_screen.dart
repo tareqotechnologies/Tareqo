@@ -5,9 +5,25 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/share/advanced_reports_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../domain/usecases/get_cash_flow_use_case.dart';
+import '../../../l10n/generated/app_localizations.dart';
+import '../../controllers/account_providers.dart';
+import '../../controllers/auth_providers.dart';
+import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+
+/// Fluxo de caixa REAL do período seleccionado (entradas/saídas pagas),
+/// via [GetCashFlowUseCase] — o tab financeiro usava zeros fixos antes.
+final advancedReportCashFlowProvider =
+    FutureProvider.family<CashFlow, (String, String)>((ref, key) {
+  final (storeId, periodKey) = key;
+  final (start, end) = _periodRange(periodKey, DateTime.now());
+  return ref
+      .watch(getCashFlowUseCaseProvider)
+      .call(storeId: storeId, start: start, end: end);
+});
 
 /// Ecra de relatórios avançados — dashboards, filtros e exportação.
 class AdvancedReportsScreen extends ConsumerStatefulWidget {
@@ -88,10 +104,12 @@ class _SalesReportTab extends ConsumerWidget {
     final l10n = context.l10n;
     final products = ref.watch(productsProvider).value ?? [];
     final totalProducts = products.length;
-    final totalStockValue = products.fold<int>(
+    // Valor de estoque em CENTAVOS — exacto (antes truncava quantidade e
+    // preço para inteiros: 2,7 un × 15,99 saía 2 × 15 = MT 30,00 em vez
+    // de ≈ MT 43,17).
+    final totalStockValueCents = products.fold<int>(
       0,
-      (sum, p) =>
-          sum + (p.stockQuantity ~/ 1000) * (p.salePriceCents ~/ 100),
+      (sum, p) => sum + ((p.stockQuantity * p.salePriceCents) ~/ 1000),
     );
     final lowStock =
         products.where((p) => (p.stockQuantity ~/ 1000) <= 10).length;
@@ -138,7 +156,7 @@ class _SalesReportTab extends ConsumerWidget {
             Expanded(
               child: _KpiTile(
                 label: l10n.reportsKpiStockValue,
-                value: Formatters.currency(totalStockValue * 100),
+                value: Formatters.currency(totalStockValueCents),
                 icon: Icons.attach_money,
                 color: ModuleColors.reports,
               ),
@@ -269,7 +287,7 @@ class _SalesReportTab extends ConsumerWidget {
               l10n.reportsKpiLowStock: '$lowStock',
               l10n.reportsKpiTotalItems: '$totalItems',
               l10n.reportsKpiStockValue:
-                  Formatters.currency(totalStockValue * 100),
+                  Formatters.currency(totalStockValueCents),
             },
           ),
         ),
@@ -280,27 +298,73 @@ class _SalesReportTab extends ConsumerWidget {
 
 // ─── Financeiro ─────────────────────────────────────────────────────────
 
-class _FinancialReportTab extends StatelessWidget {
+class _FinancialReportTab extends ConsumerWidget {
   const _FinancialReportTab({required this.selectedPeriod});
 
   final String selectedPeriod;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
+    final user = ref.watch(authStateProvider).value;
+    final storeId = user == null
+        ? null
+        : ref.watch(activeStoreIdProvider(user.id));
+    final cashFlowAsync = storeId == null
+        ? null
+        : ref.watch(
+            advancedReportCashFlowProvider((storeId, selectedPeriod)),
+          );
+    final cashFlow = cashFlowAsync?.value;
+
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        // KPIs
+        // Erro real (rede/banco) com retry — nunca silencia falha.
+        if (storeId != null && (cashFlowAsync?.hasError ?? false))
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Row(
+              children: [
+                Icon(Icons.error_outline, size: 16, color: scheme.error),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    l10n.reportsLoadError,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.error,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => ref.invalidate(
+                    advancedReportCashFlowProvider(
+                      (storeId, selectedPeriod),
+                    ),
+                  ),
+                  child: Text(l10n.commonRetry),
+                ),
+              ],
+            ),
+          ),
+        // Loading real enquanto busca o fluxo de caixa.
+        if (cashFlowAsync?.isLoading ?? false)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          ),
+        // KPIs (reais — fluxo de caixa do período, em centavos).
         Row(
           children: [
             Expanded(
               child: _KpiTile(
                 label: l10n.reportsKpiRevenue,
-                value: Formatters.currency(0),
+                value: cashFlow != null
+                    ? Formatters.currency(cashFlow.incomeCents)
+                    : '—',
                 icon: Icons.arrow_downward_rounded,
                 color: IconTone.green,
               ),
@@ -309,7 +373,9 @@ class _FinancialReportTab extends StatelessWidget {
             Expanded(
               child: _KpiTile(
                 label: l10n.reportsKpiExpenses,
-                value: Formatters.currency(0),
+                value: cashFlow != null
+                    ? Formatters.currency(cashFlow.expenseCents)
+                    : '—',
                 icon: Icons.arrow_upward_rounded,
                 color: IconTone.red,
               ),
@@ -319,14 +385,16 @@ class _FinancialReportTab extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         _KpiTile(
           label: l10n.reportsKpiNetProfit,
-          value: Formatters.currency(0),
+          value: cashFlow != null
+              ? Formatters.currency(cashFlow.balanceCents)
+              : '—',
           icon: Icons.account_balance_wallet_outlined,
           color: ModuleColors.reports,
           fullWidth: true,
         ),
         const SizedBox(height: AppSpacing.lg),
 
-        // Gráfico placeholder
+        // Comparativo de fluxo de caixa do período (dados reais).
         AppCard(
           elevated: true,
           borderRadius: const BorderRadius.all(Radius.circular(18)),
@@ -361,9 +429,10 @@ class _FinancialReportTab extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
-              SizedBox(
-                height: 140,
-                child: Center(
+              // Comparativo REAL do período: barras proporcionais com os
+              // valores de entradas/saídas (antes: gráfico placeholder).
+              if (cashFlow == null)
+                Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -383,8 +452,14 @@ class _FinancialReportTab extends StatelessWidget {
                       ),
                     ],
                   ),
+                )
+              else
+                _CashFlowBars(
+                  cashFlow: cashFlow,
+                  theme: theme,
+                  scheme: scheme,
+                  l10n: l10n,
                 ),
-              ),
             ],
           ),
         ),
@@ -403,9 +478,12 @@ class _FinancialReportTab extends StatelessWidget {
             noDataLabel: context.l10n.reportsNoSalesData,
             footerLabel: context.l10n.pdfFooter('{date}'),
             kpis: {
-              l10n.reportsKpiRevenue: Formatters.currency(0),
-              l10n.reportsKpiExpenses: Formatters.currency(0),
-              l10n.reportsKpiNetProfit: Formatters.currency(0),
+              l10n.reportsKpiRevenue:
+                  Formatters.currency(cashFlow?.incomeCents ?? 0),
+              l10n.reportsKpiExpenses:
+                  Formatters.currency(cashFlow?.expenseCents ?? 0),
+              l10n.reportsKpiNetProfit:
+                  Formatters.currency(cashFlow?.balanceCents ?? 0),
             },
           ),
         ),
@@ -430,10 +508,12 @@ class _StockReportTab extends ConsumerWidget {
     final totalProducts = products.length;
     final lowStock =
         products.where((p) => (p.stockQuantity ~/ 1000) <= 10).length;
-    final totalStockValue = products.fold<int>(
+    // Valor de estoque em CENTAVOS — exacto (antes truncava quantidade e
+    // preço para inteiros: 2,7 un × 15,99 saía 2 × 15 = MT 30,00 em vez
+    // de ≈ MT 43,17).
+    final totalStockValueCents = products.fold<int>(
       0,
-      (sum, p) =>
-          sum + (p.stockQuantity ~/ 1000) * (p.salePriceCents ~/ 100),
+      (sum, p) => sum + ((p.stockQuantity * p.salePriceCents) ~/ 1000),
     );
     final outOfStock =
         products.where((p) => (p.stockQuantity ~/ 1000) == 0).length;
@@ -469,7 +549,7 @@ class _StockReportTab extends ConsumerWidget {
             Expanded(
               child: _KpiTile(
                 label: l10n.reportsKpiStockValue,
-                value: Formatters.currency(totalStockValue * 100),
+                value: Formatters.currency(totalStockValueCents),
                 icon: Icons.attach_money,
                 color: ModuleColors.purchases,
               ),
@@ -613,7 +693,7 @@ class _StockReportTab extends ConsumerWidget {
               l10n.reportsKpiTotalProducts: '$totalProducts',
               l10n.reportsKpiLowStock: '$lowStock',
               l10n.reportsKpiStockValue:
-                  Formatters.currency(totalStockValue * 100),
+                  Formatters.currency(totalStockValueCents),
               l10n.reportsKpiStockOut: '$outOfStock',
             },
           ),
@@ -761,6 +841,110 @@ class _PeriodChip extends StatelessWidget {
             ),
           )
           .toList(),
+    );
+  }
+}
+
+/// Janela [start, end] do período seleccionado no chip de relatórios
+/// avançados (chaves internas do `_PeriodChip` — não user-facing).
+(DateTime, DateTime) _periodRange(String periodKey, DateTime now) {
+  final today = DateTime(now.year, now.month, now.day);
+  switch (periodKey) {
+    case 'Hoje':
+      return (today, now);
+    case 'Esta Semana':
+      final weekStart = today.subtract(Duration(days: today.weekday - 1));
+      return (weekStart, now);
+    case 'Este Mês':
+      return (DateTime(now.year, now.month), now);
+    default: // 'Este Ano' (ou chave desconhecida)
+      return (DateTime(now.year), now);
+  }
+}
+
+/// Barras comparativas REAIS (entradas vs saídas) do fluxo de caixa do
+/// período — substitui o antigo gráfico placeholder.
+class _CashFlowBars extends StatelessWidget {
+  const _CashFlowBars({
+    required this.cashFlow,
+    required this.theme,
+    required this.scheme,
+    required this.l10n,
+  });
+
+  final CashFlow cashFlow;
+  final ThemeData theme;
+  final ColorScheme scheme;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxCents =
+        cashFlow.incomeCents > cashFlow.expenseCents
+            ? cashFlow.incomeCents
+            : cashFlow.expenseCents;
+
+    Widget bar({
+      required String label,
+      required int cents,
+      required Color color,
+    }) {
+      final fraction = maxCents == 0 ? 0.0 : (cents / maxCents).clamp(0.0, 1.0);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+              Text(
+                Formatters.currency(cents),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              height: 8,
+              width: double.infinity,
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: fraction,
+                child: ColoredBox(color: color),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        bar(
+          label: l10n.reportsKpiRevenue,
+          cents: cashFlow.incomeCents,
+          color: IconTone.green,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        bar(
+          label: l10n.reportsKpiExpenses,
+          cents: cashFlow.expenseCents,
+          color: IconTone.red,
+        ),
+      ],
     );
   }
 }

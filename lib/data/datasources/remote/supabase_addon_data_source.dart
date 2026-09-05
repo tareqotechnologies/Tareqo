@@ -38,11 +38,15 @@ final class SupabaseAddOnDataSourceImpl implements AddOnLocalDataSource {
 
   @override
   Future<void> activate(String tenantId, String addOnId) async {
-    // Upsert: se já existe, re-activa; senão, insere.
+    // Upsert: se já existe, re-activa/renova; senão, insere.
+    // `expires_at: null` limpa uma validade antiga — senão um add-on
+    // expirado continuaria inactivo (a linha re-activada mantinha o
+    // expires_at no passado e o isActive() rejeitava o registo).
     await supabaseClient.from(_table).upsert({
       'tenant_id': tenantId,
       'add_on_id': addOnId,
       'activated_at': DateTime.now().toUtc().toIso8601String(),
+      'expires_at': null,
       'is_active': true,
     }, onConflict: 'tenant_id,add_on_id');
   }
@@ -62,13 +66,16 @@ final class SupabaseAddOnDataSourceImpl implements AddOnLocalDataSource {
     required String addOnId,
     DateTime? expiresAt,
   }) async {
-    await supabaseClient.from(_table).insert({
+    // Upsert idempotente (renovação/subscrição nova para o mesmo par):
+    // nunca cria linhas duplicadas — substitui a linha existente com a
+    // nova validade.
+    await supabaseClient.from(_table).upsert({
       'tenant_id': tenantId,
       'add_on_id': addOnId,
       'activated_at': DateTime.now().toUtc().toIso8601String(),
       'expires_at': expiresAt?.toUtc().toIso8601String(),
       'is_active': true,
-    });
+    }, onConflict: 'tenant_id,add_on_id');
   }
 
   @override

@@ -413,15 +413,17 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
       _items.fold(0, (sum, item) => sum + (item.qty * item.unitPriceCents));
 
   void _addItem() {
-    final price = double.tryParse(_priceController.text) ?? 0;
-    final qty = int.tryParse(_qtyController.text) ?? 1;
-    if (_selectedProductId == null || price <= 0) return;
-
     final products = ref.read(productsProvider).value ?? [];
-    final product = products.firstWhere(
-      (p) => p.id == _selectedProductId,
-      orElse: () => products.first,
-    );
+    final product = products
+        .where((p) => p.id == _selectedProductId)
+        .firstOrNull;
+    // Produto não encontrado → ignora (antes o fallback caía no PRIMEIRO
+    // produto da lista, adicionando um item errado à cotação).
+    if (product == null) return;
+
+    final price = double.tryParse(_priceController.text) ?? 0;
+    final qty = int.tryParse(_qtyController.text) ?? 0;
+    if (price <= 0 || qty <= 0) return;
 
     setState(() {
       _items.add(_QuotationItemData(

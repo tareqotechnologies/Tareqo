@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../helpers/test_app.dart';
 
+import 'package:tareqo/core/theme/app_theme.dart';
 import 'package:tareqo/domain/entities/app_user.dart';
 import 'package:tareqo/domain/entities/auth_event.dart';
 import 'package:tareqo/domain/repositories/i_auth_repository.dart';
@@ -73,10 +75,10 @@ class _FakeAuthRepository implements IAuthRepository {
  Stream<AuthEvent> get authEvents => const Stream.empty();
 }
 
-Widget _buildApp(IAuthRepository repository) {
+Widget _buildApp(IAuthRepository repository, {ThemeData? theme}) {
  return ProviderScope(
  overrides: [authRepositoryProvider.overrideWithValue(repository)],
- child: testApp(home: LoginScreen()),
+ child: testApp(theme: theme, home: LoginScreen()),
  );
 }
 
@@ -282,4 +284,57 @@ void main() {
       findsOneWidget,
     );
  });
+
+ testWidgets(
+ 'modo claro: fundo claro, texto escuro e ícones de sistema escuros',
+ (tester) async {
+ final repository = _FakeAuthRepository();
+ await tester.pumpWidget(_buildApp(repository, theme: AppTheme.light));
+ await tester.pumpAndSettle();
+
+ // Fundo do scaffold = neutro claro do AppTheme.light.
+ final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+ expect(scaffold.backgroundColor, const Color(0xFFFAFAFA));
+
+ // Título em texto escuro (não o branco do dark premium).
+ final title = tester.widget<Text>(find.text('TAREQO'));
+ expect(title.style?.color, const Color(0xFF18181B));
+
+ // System UI (status bar / navegação) com ícones escuros sobre claro.
+ final overlay = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+ find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
+ );
+ expect(overlay.value.statusBarIconBrightness, Brightness.dark);
+ expect(overlay.value.systemNavigationBarColor, const Color(0xFFFAFAFA));
+ expect(
+ overlay.value.systemNavigationBarIconBrightness,
+ Brightness.dark,
+ );
+ },
+ );
+
+ testWidgets('modo escuro: mantém o dark premium e ícones claros', (
+ tester,
+ ) async {
+ final repository = _FakeAuthRepository();
+ await tester.pumpWidget(_buildApp(repository, theme: AppTheme.dark));
+ await tester.pumpAndSettle();
+
+ final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+ expect(scaffold.backgroundColor, AppColors.backgroundDark);
+
+ final title = tester.widget<Text>(find.text('TAREQO'));
+ expect(title.style?.color, Colors.white);
+
+ final overlay = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+ find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
+ );
+ expect(overlay.value.statusBarIconBrightness, Brightness.light);
+ expect(overlay.value.systemNavigationBarColor, AppColors.backgroundDark);
+ expect(
+ overlay.value.systemNavigationBarIconBrightness,
+ Brightness.light,
+ );
+ },
+ );
 }

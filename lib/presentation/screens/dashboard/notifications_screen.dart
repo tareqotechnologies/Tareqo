@@ -165,6 +165,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       items.add(
         _NotificationTile.admin(
           message: adminMessages[i],
+          l10n: context.l10n,
           showDivider: i < adminMessages.length - 1 || notifications.isNotEmpty,
           onTap: () => _showAdminMessageDetail(adminMessages[i]),
           onMarkAsRead: adminMessages[i].isRead
@@ -178,6 +179,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       items.add(
         _NotificationTile.invoice(
           notification: notifications[i],
+          l10n: context.l10n,
           showDivider: i < notifications.length - 1,
           onTap: () => _showNotificationDetail(notifications[i]),
           onMarkAsRead: notifications[i].isRead
@@ -207,7 +209,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       title: message.title,
       body: message.body,
       time: message.createdAt,
-      typeLabel: _AdminMessageTypeLabel.label(message.type),
+      typeLabel: _AdminMessageTypeLabel.label(message.type, context.l10n),
       typeColor: _AdminMessageTypeLabel.color(message.type),
       icon: _AdminMessageTypeLabel.icon(message.type),
     );
@@ -307,6 +309,7 @@ class _NotificationTile extends StatelessWidget {
 
   factory _NotificationTile.admin({
     required AdminMessage message,
+    required AppLocalizations l10n,
     required VoidCallback? onTap,
     required VoidCallback? onMarkAsRead,
     bool showDivider = true,
@@ -320,7 +323,7 @@ class _NotificationTile extends StatelessWidget {
       title: message.title,
       subtitle: message.body,
       time: message.createdAt,
-      typeLabel: _AdminMessageTypeLabel.label(message.type),
+      typeLabel: _AdminMessageTypeLabel.label(message.type, l10n),
       typeColor: color,
       isRead: message.isRead,
       onTap: onTap,
@@ -331,6 +334,7 @@ class _NotificationTile extends StatelessWidget {
 
   factory _NotificationTile.invoice({
     required InvoiceNotification notification,
+    required AppLocalizations l10n,
     required VoidCallback? onTap,
     required VoidCallback? onMarkAsRead,
     bool showDivider = true,
@@ -344,7 +348,7 @@ class _NotificationTile extends StatelessWidget {
       title: notification.title,
       subtitle: notification.body,
       time: notification.createdAt,
-      typeLabel: _InvoiceTypeLabel.iconLabel(notification.type),
+      typeLabel: _InvoiceTypeLabel.iconLabel(notification.type, l10n),
       typeColor: color,
       isRead: notification.isRead,
       onTap: onTap,
@@ -541,7 +545,7 @@ class _NotificationTile extends StatelessWidget {
     if (diff.inDays == 0) return DateFormat.Hm().format(date);
     if (diff.inDays == 1) return l10n.notificationYesterday;
     if (diff.inDays < 7) return l10n.notificationSinceDaysAgo(diff.inDays);
-    return DateFormat('dd MMM', 'pt').format(date);
+    return DateFormat('dd MMM', l10n.localeName).format(date);
   }
 }
 
@@ -716,9 +720,9 @@ class _DetailBottomSheet extends StatelessWidget {
     if (diff.inMinutes < 1) return l10n.notificationJustNow;
     if (diff.inHours < 1) return '${diff.inMinutes}m';
     if (diff.inDays == 0) return DateFormat.Hm().format(date);
-    if (diff.inDays == 1) return 'Ontem';
-    if (diff.inDays < 7) return '${diff.inDays}d';
-    return DateFormat.yMMMd().format(date);
+    if (diff.inDays == 1) return l10n.notificationYesterday;
+    if (diff.inDays < 7) return l10n.notificationDaysShort(diff.inDays);
+    return DateFormat.yMMMd(l10n.localeName).format(date);
   }
 }
 
@@ -829,12 +833,15 @@ abstract final class _AdminMessageTypeLabel {
     AdminMessageType.general => AppColors.statusIndigo,
   };
 
-  static String label(AdminMessageType type) => switch (type) {
-    AdminMessageType.billingQuote => 'Cotação',
-    AdminMessageType.planExpiryChange => 'Validade',
-    AdminMessageType.planExpiringSoon => 'Expira',
-    AdminMessageType.general => 'Geral',
-  };
+  static String label(AdminMessageType type, AppLocalizations l10n) =>
+      switch (type) {
+        AdminMessageType.billingQuote => l10n.notificationAdminLabelQuote,
+        AdminMessageType.planExpiryChange =>
+          l10n.notificationAdminLabelValidity,
+        AdminMessageType.planExpiringSoon =>
+          l10n.notificationAdminLabelExpiring,
+        AdminMessageType.general => l10n.notificationAdminLabelGeneral,
+      };
 }
 
 abstract final class _InvoiceTypeLabel {
@@ -865,16 +872,20 @@ abstract final class _InvoiceTypeLabel {
     InvoiceNotificationType.invoiceDueSoon => l10n.notificationInvoiceDueSoon,
     InvoiceNotificationType.invoiceExpired => l10n.notificationInvoiceExpired,
     InvoiceNotificationType.invoicePaid => l10n.notificationInvoicePaid,
-    InvoiceNotificationType.addOnExpiringSoon => 'Add-on a expirar',
-    InvoiceNotificationType.addOnExpired => 'Add-on expirado',
+    InvoiceNotificationType.addOnExpiringSoon =>
+      l10n.notificationAddonExpiringTitle,
+    InvoiceNotificationType.addOnExpired => l10n.notificationAddonExpiredTitle,
   };
 
-  static String iconLabel(InvoiceNotificationType type) => switch (type) {
-    InvoiceNotificationType.invoiceGenerated => 'Factura',
-    InvoiceNotificationType.invoiceDueSoon => 'Vence',
-    InvoiceNotificationType.invoiceExpired => 'Expirada',
-    InvoiceNotificationType.invoicePaid => 'Paga',
-    InvoiceNotificationType.addOnExpiringSoon => 'A expirar',
-    InvoiceNotificationType.addOnExpired => 'Expirado',
+  static String iconLabel(
+    InvoiceNotificationType type,
+    AppLocalizations l10n,
+  ) => switch (type) {
+    InvoiceNotificationType.invoiceGenerated => l10n.notificationIconInvoice,
+    InvoiceNotificationType.invoiceDueSoon => l10n.notificationIconDue,
+    InvoiceNotificationType.invoiceExpired => l10n.notificationIconExpired,
+    InvoiceNotificationType.invoicePaid => l10n.notificationIconPaid,
+    InvoiceNotificationType.addOnExpiringSoon => l10n.notificationIconExpiring,
+    InvoiceNotificationType.addOnExpired => l10n.notificationIconExpiredShort,
   };
 }

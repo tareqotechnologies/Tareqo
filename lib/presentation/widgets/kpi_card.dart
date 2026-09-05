@@ -69,13 +69,14 @@ class KpiCard extends StatelessWidget {
  amountCents: amountCents,
  color: valueColor,
  ),
- const SizedBox(height: AppSpacing.xxs),
- Text(
- label,
- maxLines: 2,
- overflow: TextOverflow.ellipsis,
- style: theme.textTheme.bodySmall,
- ),
+ const SizedBox(height: AppSpacing.xxs),  Text(
+   label,
+   maxLines: 2,
+   overflow: TextOverflow.ellipsis,
+   // Rótulo do indicador ligeiramente menor que a nota padrão (13 → 12)
+   // para o rótulo não competir com o valor do card (pedido de UI).
+   style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
+  ),
  if (caption != null) ...[
  const SizedBox(height: AppSpacing.xs),
  Text(

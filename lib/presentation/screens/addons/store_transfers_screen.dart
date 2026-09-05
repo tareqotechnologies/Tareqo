@@ -230,10 +230,12 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
     if (_selectedProductId == null || qty <= 0) return;
 
     final products = ref.read(productsProvider).value ?? [];
-    final product = products.firstWhere(
-      (p) => p.id == _selectedProductId,
-      orElse: () => products.first,
-    );
+    final product = products
+        .where((p) => p.id == _selectedProductId)
+        .firstOrNull;
+    // Produto não encontrado → ignora (antes o fallback caía no PRIMEIRO
+    // produto da lista, transferindo o produto errado).
+    if (product == null) return;
 
     // Converter para milésimos
     final qtyMilli = (qty * 1000).round();
@@ -248,14 +250,24 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
   Future<void> _executeTransfer() async {
     if (_fromStoreId == null || _toStoreId == null || _items.isEmpty) return;
 
-    setState(() => _executing = true);
-
     final stores = ref.read(storesProvider(
       ref.read(myTenantProvider(ref.read(authStateProvider).value!.id)).value!.id,
     )).value ?? [];
 
-    final fromName = stores.firstWhere((s) => s.id == _fromStoreId).name;
-    final toName = stores.firstWhere((s) => s.id == _toStoreId).name;
+    // Resolve os NOMES antes de executar: se uma loja selecionada sumir da
+    // lista (ex.: refresh/stale), aborta sem crashar (o antigo firstWhere
+    // sem fallback lançava StateError fora do try).
+    final fromName = stores
+        .where((s) => s.id == _fromStoreId)
+        .firstOrNull
+        ?.name;
+    final toName = stores
+        .where((s) => s.id == _toStoreId)
+        .firstOrNull
+        ?.name;
+    if (fromName == null || toName == null) return;
+
+    setState(() => _executing = true);
 
     final transfersNotifier = ref.read(stockTransfersProvider.notifier);
 

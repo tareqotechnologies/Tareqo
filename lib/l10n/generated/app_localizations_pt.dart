@@ -2499,6 +2499,47 @@ class AppLocalizationsPt extends AppLocalizations {
   String get notificationJustNow => 'Agora mesmo';
 
   @override
+  String get notificationAdminLabelQuote => 'Cotação';
+
+  @override
+  String get notificationAdminLabelValidity => 'Validade';
+
+  @override
+  String get notificationAdminLabelExpiring => 'Expira';
+
+  @override
+  String get notificationAdminLabelGeneral => 'Geral';
+
+  @override
+  String get notificationAddonExpiringTitle => 'Add-on a expirar';
+
+  @override
+  String get notificationAddonExpiredTitle => 'Add-on expirado';
+
+  @override
+  String get notificationIconInvoice => 'Factura';
+
+  @override
+  String get notificationIconDue => 'Vence';
+
+  @override
+  String get notificationIconExpired => 'Expirada';
+
+  @override
+  String get notificationIconPaid => 'Paga';
+
+  @override
+  String get notificationIconExpiring => 'A expirar';
+
+  @override
+  String get notificationIconExpiredShort => 'Expirado';
+
+  @override
+  String notificationDaysShort(int days) {
+    return '${days}d';
+  }
+
+  @override
   String get adminMessagesTitle => 'Mensagens para Tenants';
 
   @override
@@ -2810,6 +2851,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get employeeMgmtTitle => 'Gestão de Funcionários';
 
   @override
+  String get employeeMgmtBlockedBanner =>
+      'Controle de ponto, comissões e metas exigem um backend ainda não implementado. A gestão real de funcionários (contas, lojas e cargos) já está disponível no módulo Lojas.';
+
+  @override
   String get employeeMgmtTabAttendance => 'Ponto';
 
   @override
@@ -3104,6 +3149,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get paymentsConfirmationCode => 'Código de confirmação';
+
+  @override
+  String get paymentsIntegrationBlocked =>
+      'Integração M-Pesa/E-Mola ainda não configurada — a reconciliação real exige a API do provedor. Até lá, os dados apresentados aqui são locais e demonstrativos.';
 
   @override
   String get reportsAdvancedTitle => 'Relatórios Avançados';
@@ -3412,6 +3461,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get loginTagline => 'Gestão simples para o seu negócio';
+
+  @override
+  String get loginSecurityFooter =>
+      'Seus dados são protegidos com criptografia.';
 
   @override
   String get mfaCodeFieldLabel => 'Código MFA';

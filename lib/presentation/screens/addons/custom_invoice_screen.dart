@@ -380,15 +380,17 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
       _items.fold(0, (sum, item) => sum + (item.qty * item.unitPriceCents));
 
   void _addItem() {
-    final price = double.tryParse(_priceController.text) ?? 0;
-    final qty = int.tryParse(_qtyController.text) ?? 1;
-    if (_selectedProductId == null || price <= 0) return;
-
     final products = ref.read(productsProvider).value ?? [];
-    final product = products.firstWhere(
-      (p) => p.id == _selectedProductId,
-      orElse: () => products.first,
-    );
+    final product = products
+        .where((p) => p.id == _selectedProductId)
+        .firstOrNull;
+    // Produto não encontrado → ignora (antes o fallback caía no PRIMEIRO
+    // produto da lista, adicionando um item errado à factura).
+    if (product == null) return;
+
+    final price = double.tryParse(_priceController.text) ?? 0;
+    final qty = int.tryParse(_qtyController.text) ?? 0;
+    if (price <= 0 || qty <= 0) return;
 
     setState(() {
       _items.add(_InvoiceItemData(
@@ -402,6 +404,14 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
     });
   }
 
+  /// Lê um valor monetário (MZN) digitado e devolve em CENTAVOS inteiros,
+  /// nunca negativo (vazio/inválido/negativo = 0).
+  int _toCents(String raw) {
+    final value = double.tryParse(raw) ?? 0;
+    if (value <= 0) return 0;
+    return (value * 100).round();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -410,9 +420,11 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
     final products = ref.watch(productsProvider).value ?? [];
     final customers = ref.watch(customersProvider).value ?? [];
     final activeProducts = products.where((p) => p.isActive).toList();
-    final discount =
-        (double.tryParse(_discountController.text) ?? 0 * 100).round();
-    final tax = (double.tryParse(_taxController.text) ?? 0 * 100).round();
+    // Desconto/IVA digitados em MZN → centavos inteiros. Bug anterior:
+    // `?? 0 * 100` (precedência do `??`) devolvia o valor digitado SEM o
+    // ×100 — um desconto de 10 saía como 10 CENTAVOS (e não 1.000).
+    final discount = _toCents(_discountController.text);
+    final tax = _toCents(_taxController.text);
     final total = _subtotalCents - discount + tax;
 
     return Padding(

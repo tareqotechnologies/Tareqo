@@ -16,9 +16,12 @@ final addonExpiryCheckProvider = FutureProvider<void>((ref) async {
 
   final service = ServiceLocator.instance<AddOnExpiryService>();
 
-  // Primeiro: desactivar os expirados.
-  await service.checkAndDeactivateExpired();
-
-  // Depois: criar notificações de aviso/expiração.
+  // 1) Notificações ANTES da desactivação em lote: o aviso de "expirado"
+  // só faz sentido enquanto o registo ainda está activo — depois da
+  // desactivação a notificação perder-se-ia (e o dono não saberia que o
+  // serviço parou por expiração).
   await service.checkAndNotifyForTenant(tenant.id);
+
+  // 2) Desactivar os expirados (global, escopado por RLS no SaaS).
+  await service.checkAndDeactivateExpired();
 });

@@ -11,25 +11,84 @@ import '../../widgets/app_sheet.dart';
 import '../../../core/observability/crash_reporting.dart';
 import 'forgot_password_sheet.dart';
 
-/// Paleta da tela de login — dark premium.
+/// Paleta da tela de login — variante clara e escura.
 ///
-/// Decisão de marca: a auth é SEMPRE escura, mesmo quando o app está em
-/// light mode. Os neutros vêm dos tokens do design system
-/// (`AppColors.backgroundDark`/`surfaceDark`/`borderDark`) para o dark
-/// mode ser coerente com o resto do app; `textSecondary`/`green` não têm
-/// token equivalente (neutro de texto e acento de link) e ficam locais.
-class _LoginColors {
-  static const background = AppColors.backgroundDark;
-  static const surface = AppColors.surfaceDark;
-  static const border = AppColors.borderDark;
-  static const borderFocus = AppColors.brand;
-  static const textPrimary = Color(0xFFFFFFFF);
-  static const textSecondary = Color(0xFFA1A1AA);
-  static const green = Color(0xFF22C55E);
-  static const greenDark = AppColors.brand;
+/// Decisão de produto: o login acompanha o brilho do tema do app
+/// (`ThemeMode.system`), como as demais telas — no modo claro usa
+/// superfícies claras/texto escuro e no escuro mantém o dark premium
+/// (antes, a auth era SEMPRE escura mesmo no light mode).
+///
+/// Os neutros vêm dos tokens do design system: no escuro,
+/// `AppColors.backgroundDark`/`surfaceDark`/`borderDark`; no claro, os
+/// valores espelham os do `AppTheme.light` (scaffold #FAFAFA, superfície
+/// branca, texto #18181B/#6E6E77, borda #E4E4E7). O verde de link/texto
+/// segue a regra AA do design system: no claro é o `brandMuted` (#15803D,
+/// ≥ 4.5:1 sobre branco) — o vivo #16A34A fica só para a borda de foco
+/// (não-texto) no escuro.
+@immutable
+class _LoginPalette {
+  const _LoginPalette({
+    required this.background,
+    required this.surface,
+    required this.border,
+    required this.borderFocus,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.green,
+    required this.greenDark,
+  });
+
+  /// Fundo da página (atrás dos campos).
+  final Color background;
+
+  /// Preenchimento dos campos.
+  final Color surface;
+
+  /// Borda dos campos em repouso.
+  final Color border;
+
+  /// Borda dos campos com foco.
+  final Color borderFocus;
+
+  /// Texto principal (título, rótulos, input).
+  final Color textPrimary;
+
+  /// Texto secundário (subtítulo, dicas, rodapé).
+  final Color textSecondary;
+
+  /// Acento: links, cursor e ícone dos campos com foco.
+  final Color green;
+
+  /// Fundo do botão principal (CTA).
+  final Color greenDark;
+
+  /// Modo escuro — dark premium (mesma paleta da v2.0.0).
+  static const _LoginPalette dark = _LoginPalette(
+    background: AppColors.backgroundDark,
+    surface: AppColors.surfaceDark,
+    border: AppColors.borderDark,
+    borderFocus: AppColors.brand,
+    textPrimary: Color(0xFFFFFFFF),
+    textSecondary: Color(0xFFA1A1AA),
+    green: Color(0xFF22C55E),
+    greenDark: AppColors.brand,
+  );
+
+  /// Modo claro — espelha os neutros do `AppTheme.light`.
+  static const _LoginPalette light = _LoginPalette(
+    background: Color(0xFFFAFAFA),
+    surface: Color(0xFFFFFFFF),
+    border: Color(0xFFE4E4E7),
+    borderFocus: Color(0xFF15803D),
+    textPrimary: Color(0xFF18181B),
+    textSecondary: Color(0xFF6E6E77),
+    green: Color(0xFF15803D),
+    greenDark: Color(0xFF15803D),
+  );
 }
 
-/// Tela de login — design dark premium, minimalista e profissional.
+/// Tela de login — premium, com variantes clara e escura (segue o brilho do
+/// tema do sistema, como o resto do app).
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -171,16 +230,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = isDark ? _LoginPalette.dark : _LoginPalette.light;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: _LoginColors.background,
-        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: palette.background,
+        systemNavigationBarIconBrightness:
+            isDark ? Brightness.light : Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: _LoginColors.background,
+        backgroundColor: palette.background,
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -212,11 +274,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       'TAREQO',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 2,
-                        color: _LoginColors.textPrimary,
+                        color: palette.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -225,9 +287,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? l10n.loginSubtitleSignUp
                           : l10n.loginTagline,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: _LoginColors.textSecondary,
+                        color: palette.textSecondary,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -235,9 +297,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     // ── Nome (modo cadastro) ──
                     if (_isSignUpMode) ...[
-                      _buildLabel(l10n.loginNameLabel),
+                      _buildLabel(palette, l10n.loginNameLabel),
                       const SizedBox(height: 8),
                       _buildTextField(
+                        palette,
                         controller: _nameController,
                         hint: l10n.loginNameHint,
                         icon: Icons.person_outline_rounded,
@@ -250,9 +313,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ],
 
                     // ── Email ──
-                    _buildLabel(l10n.loginEmailLabel),
+                    _buildLabel(palette, l10n.loginEmailLabel),
                     const SizedBox(height: 8),
                     _buildTextField(
+                      palette,
                       controller: _emailController,
                       hint: l10n.loginEmailHint,
                       icon: Icons.mail_outline_rounded,
@@ -265,9 +329,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 20),
 
                     // ── Senha ──
-                    _buildLabel(l10n.loginPasswordLabel),
+                    _buildLabel(palette, l10n.loginPasswordLabel),
                     const SizedBox(height: 8),
                     _buildTextField(
+                      palette,
                       controller: _passwordController,
                       hint: l10n.loginPasswordHint,
                       icon: Icons.lock_outline_rounded,
@@ -286,7 +351,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
                           size: 20,
-                          color: _LoginColors.textSecondary,
+                          color: palette.textSecondary,
                         ),
                         onPressed: () => setState(() {
                           _obscurePassword = !_obscurePassword;
@@ -297,9 +362,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // ── Confirmar senha (modo cadastro) ──
                     if (_isSignUpMode) ...[
                       const SizedBox(height: 20),
-                      _buildLabel(l10n.loginConfirmPasswordLabel),
+                      _buildLabel(palette, l10n.loginConfirmPasswordLabel),
                       const SizedBox(height: 8),
                       _buildTextField(
+                        palette,
                         controller: _confirmController,
                         hint: l10n.loginConfirmPasswordHint,
                         icon: Icons.lock_outline_rounded,
@@ -314,7 +380,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
                             size: 20,
-                            color: _LoginColors.textSecondary,
+                            color: palette.textSecondary,
                           ),
                           onPressed: () => setState(() {
                             _obscureConfirm = !_obscureConfirm;
@@ -331,10 +397,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: ElevatedButton(
                         onPressed: _isSubmitting ? null : _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _LoginColors.greenDark,
+                          backgroundColor: palette.greenDark,
                           foregroundColor: Colors.white,
                           disabledBackgroundColor:
-                              _LoginColors.greenDark.withValues(alpha: 0.5),
+                              palette.greenDark.withValues(alpha: 0.5),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -372,7 +438,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             l10n.loginForgotPassword,
                             style: TextStyle(
                               fontSize: 14,
-                              color: _LoginColors.green,
+                              color: palette.green,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -392,17 +458,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             text: _isSignUpMode
                                 ? '${l10n.loginPromptHaveAccount} '
                                 : '${l10n.loginPromptNoAccount} ',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
-                              color: _LoginColors.textSecondary,
+                              color: palette.textSecondary,
                               fontWeight: FontWeight.w400,
                             ),
                             children: [
                               TextSpan(
-                                text: _isSignUpMode                                ? l10n.loginSignIn : l10n.loginSignUp,
-                                style: const TextStyle(
+                                text: _isSignUpMode
+                                    ? l10n.loginSignIn
+                                    : l10n.loginSignUp,
+                                style: TextStyle(
                                   fontSize: 14,
-                                  color: _LoginColors.green,
+                                  color: palette.green,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -426,18 +494,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: Icon(
                             Icons.lock_outline_rounded,
                             size: 14,
-                            color: _LoginColors.textSecondary
+                            color: palette.textSecondary
                                 .withValues(alpha: 0.6),
                           ),
                         ),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            'Seus dados são protegidos com criptografia.',
+                            l10n.loginSecurityFooter,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 12,
-                              color: _LoginColors.textSecondary
+                              color: palette.textSecondary
                                   .withValues(alpha: 0.6),
                               fontWeight: FontWeight.w400,
                             ),
@@ -458,18 +526,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   // ── Helpers ──
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(_LoginPalette palette, String text) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: _LoginColors.textPrimary,
+        color: palette.textPrimary,
       ),
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildTextField(
+    _LoginPalette palette, {
     required TextEditingController controller,
     required String hint,
     required IconData icon,
@@ -483,10 +552,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: _LoginColors.surface,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: focused ? _LoginColors.borderFocus : _LoginColors.border,
+          color: focused ? palette.borderFocus : palette.border,
           width: focused ? 1.5 : 1,
         ),
       ),
@@ -497,25 +566,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         keyboardType: keyboardType,
         textInputAction: textInputAction,
         onSubmitted: onSubmitted,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 15,
-          color: _LoginColors.textPrimary,
+          color: palette.textPrimary,
           fontWeight: FontWeight.w400,
         ),
-        cursorColor: _LoginColors.green,
+        cursorColor: palette.green,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
             fontSize: 15,
-            color: _LoginColors.textSecondary.withValues(alpha: 0.5),
+            color: palette.textSecondary.withValues(alpha: 0.5),
             fontWeight: FontWeight.w400,
           ),
           prefixIcon: Icon(
             icon,
             size: 20,
             color: focused
-                ? _LoginColors.green
-                : _LoginColors.textSecondary.withValues(alpha: 0.7),
+                ? palette.green
+                : palette.textSecondary.withValues(alpha: 0.7),
           ),
           suffixIcon: suffixIcon,
           border: InputBorder.none,

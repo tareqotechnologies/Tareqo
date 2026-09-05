@@ -4336,6 +4336,84 @@ abstract class AppLocalizations {
   /// **'Agora mesmo'**
   String get notificationJustNow;
 
+  /// No description provided for @notificationAdminLabelQuote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cotação'**
+  String get notificationAdminLabelQuote;
+
+  /// No description provided for @notificationAdminLabelValidity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Validade'**
+  String get notificationAdminLabelValidity;
+
+  /// No description provided for @notificationAdminLabelExpiring.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expira'**
+  String get notificationAdminLabelExpiring;
+
+  /// No description provided for @notificationAdminLabelGeneral.
+  ///
+  /// In pt, this message translates to:
+  /// **'Geral'**
+  String get notificationAdminLabelGeneral;
+
+  /// No description provided for @notificationAddonExpiringTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Add-on a expirar'**
+  String get notificationAddonExpiringTitle;
+
+  /// No description provided for @notificationAddonExpiredTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Add-on expirado'**
+  String get notificationAddonExpiredTitle;
+
+  /// No description provided for @notificationIconInvoice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Factura'**
+  String get notificationIconInvoice;
+
+  /// No description provided for @notificationIconDue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vence'**
+  String get notificationIconDue;
+
+  /// No description provided for @notificationIconExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expirada'**
+  String get notificationIconExpired;
+
+  /// No description provided for @notificationIconPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Paga'**
+  String get notificationIconPaid;
+
+  /// No description provided for @notificationIconExpiring.
+  ///
+  /// In pt, this message translates to:
+  /// **'A expirar'**
+  String get notificationIconExpiring;
+
+  /// No description provided for @notificationIconExpiredShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expirado'**
+  String get notificationIconExpiredShort;
+
+  /// No description provided for @notificationDaysShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'{days}d'**
+  String notificationDaysShort(int days);
+
   /// No description provided for @adminMessagesTitle.
   ///
   /// In pt, this message translates to:
@@ -4888,6 +4966,12 @@ abstract class AppLocalizations {
   /// **'Gestão de Funcionários'**
   String get employeeMgmtTitle;
 
+  /// No description provided for @employeeMgmtBlockedBanner.
+  ///
+  /// In pt, this message translates to:
+  /// **'Controle de ponto, comissões e metas exigem um backend ainda não implementado. A gestão real de funcionários (contas, lojas e cargos) já está disponível no módulo Lojas.'**
+  String get employeeMgmtBlockedBanner;
+
   /// No description provided for @employeeMgmtTabAttendance.
   ///
   /// In pt, this message translates to:
@@ -5415,6 +5499,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Código de confirmação'**
   String get paymentsConfirmationCode;
+
+  /// No description provided for @paymentsIntegrationBlocked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Integração M-Pesa/E-Mola ainda não configurada — a reconciliação real exige a API do provedor. Até lá, os dados apresentados aqui são locais e demonstrativos.'**
+  String get paymentsIntegrationBlocked;
 
   /// No description provided for @reportsAdvancedTitle.
   ///
@@ -5967,6 +6057,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Gestão simples para o seu negócio'**
   String get loginTagline;
+
+  /// No description provided for @loginSecurityFooter.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus dados são protegidos com criptografia.'**
+  String get loginSecurityFooter;
 
   /// No description provided for @mfaCodeFieldLabel.
   ///

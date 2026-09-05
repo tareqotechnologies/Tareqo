@@ -481,19 +481,25 @@ class _TenantErrorScreen extends StatelessWidget {
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
 
-  // Mesma paleta da tela de login — auth sempre-escura (decisão de
-  // marca); neutros alinhados aos tokens AppColors.*Dark do design system.
-  static const _bg = AppColors.backgroundDark;
-  static const _textPrimary = Color(0xFFFFFFFF);
-  static const _textSecondary = Color(0xFFA1A1AA);
-  static const _green = AppColors.brand;
-
+  // Mesma paleta da tela de login: segue o brilho do tema do app
+  // (light/dark) — no escuro os tokens AppColors.*Dark; no claro os
+  // neutros do AppTheme.light (ver `login_screen.dart`).
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark
+        ? AppColors.backgroundDark
+        : const Color(0xFFFAFAFA);
+    final textPrimary =
+        isDark ? const Color(0xFFFFFFFF) : const Color(0xFF18181B);
+    final textSecondary =
+        isDark ? const Color(0xFFA1A1AA) : const Color(0xFF6E6E77);
+    final green =
+        isDark ? AppColors.brand : const Color(0xFF15803D);
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: bg,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -510,43 +516,43 @@ class _SplashScreen extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             // Título.
-            const Text(
+            Text(
               'TAREQO',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 2,
-                color: _textPrimary,
+                color: textPrimary,
               ),
             ),
             const SizedBox(height: 8),
-            // Subtítulo.
+            // Subtítulo (localizado).
             Text(
-              'Gestão simples para o seu negócio',
+              l10n.loginTagline,
               style: TextStyle(
                 fontSize: 14,
-                color: _textSecondary.withValues(alpha: 0.7),
+                color: textSecondary.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w400,
               ),
             ),
             const SizedBox(height: 48),
             // Spinner verde.
-            const SizedBox(
+            SizedBox(
               height: 24,
               width: 24,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                color: _green,
-                backgroundColor: Color(0x2016A34A),
+                color: green,
+                backgroundColor: green.withValues(alpha: 0.125),
               ),
             ),
             const SizedBox(height: 20),
             // Texto de loading.
             Text(
               l10n.splashLoading,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: _textSecondary,
+                color: textSecondary,
                 fontWeight: FontWeight.w400,
               ),
             ),

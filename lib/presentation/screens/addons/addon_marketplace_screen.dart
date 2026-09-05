@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/addon_localization.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/observability/crash_reporting.dart';
 import '../../widgets/app_page.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../domain/entities/addon.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/addon_providers.dart';
@@ -90,8 +92,13 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
               ],
             ),
           ),
+          // `isAvailable: false` = BLOCKED por dependência externa (ex.:
+          // API de mobile money inexistente) — nunca se oferece/vende um
+          // add-on cuja funcionalidade real não existe.
           for (final addon in addOns)
-            if (activeIds.contains(addon.id) || bundledAddOns.contains(addon.id)) ...[
+            if (addon.isAvailable &&
+                (activeIds.contains(addon.id) ||
+                    bundledAddOns.contains(addon.id))) ...[
               _AddOnCard(
                 addon: addon,
                 isActive: activeIds.contains(addon.id),
@@ -143,6 +150,14 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
             builder: (_) => const PaymentReconciliationScreen(),
           ),
         );
+      default:
+        // Add-on do catálogo sem tela ligada (drift futuro de ids): nunca
+        // deixa o toque falhar em silêncio — regista para o backoffice.
+        CrashReporting.capture(
+          StateError('Add-on sem rota de navegação: $addOnId'),
+          StackTrace.current,
+          hint: 'Marketplace: add-on sem tela mapeada',
+        );
     }
   }
 
@@ -162,7 +177,7 @@ class _AddOnCard extends StatelessWidget {
     required this.onOpen,
   });
 
-  final dynamic addon;
+  final AddOn addon;
   final bool isActive;
   final bool isIncluded;
   final VoidCallback onOpen;
