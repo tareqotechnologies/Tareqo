@@ -34,6 +34,7 @@ class AppTextField extends StatelessWidget {
     this.labelStyle,
     this.floatingLabelStyle,
     this.decorationHintStyle,
+    this.helperStyle,
   });
 
   /// Rótulo do campo (estilo leve — sem peso visual). Nulo para campos
@@ -84,6 +85,11 @@ class AppTextField extends StatelessWidget {
   /// Estilo do hintText — sobrepõe o tema global quando fornecido.
   final TextStyle? decorationHintStyle;
 
+  /// Estilo do helperText — sobrepõe o tema global quando fornecido.
+  /// Útil quando o helper é longo (ex.: "Balanças etiquetadoras...") e
+  /// disputa espaço com o counter do `maxLength` na mesma linha.
+  final TextStyle? helperStyle;
+
   @override
   Widget build(BuildContext context) {
     final radius = borderRadius;
@@ -113,6 +119,7 @@ class AppTextField extends StatelessWidget {
         suffixIcon: suffixIcon,
         suffixText: suffixText,
         helperText: helperText,
+        helperStyle: helperStyle,
         errorText: errorText,
         // Cantos customizados (Apple): os 4 borders (repouso, foco, erro)
         // herdam o raio pedido — mesma borda do tema, só o shape muda.

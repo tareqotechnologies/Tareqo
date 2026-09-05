@@ -14,7 +14,7 @@ flutter doctor -v
 flutter pub get
 ```
 
-- **Versão do app:** `version: 2.1.0+20` em `pubspec.yaml` (aplicada automaticamente ao `versionCode`/`versionName` no Android e ao CFBundleVersion no iOS).
+- **Versão do app:** `version: 2.1.1+21` em `pubspec.yaml` (aplicada automaticamente ao `versionCode`/`versionName` no Android e ao CFBundleVersion no iOS).
 
 > **Atenção:** **Modo SaaS vs. local:** o app usa as credenciais do Supabase **embutidas** (`lib/core/config/supabase_config.dart`) apontando para o projeto de DESENVOLVIMENTO — em produção isso é erro de configuração (guarda S2). Desde a auditoria (Aug 5) o projeto tem **flavors `dev`/`prod`** com dart-defines **obrigatórios** fornecidos via `--dart-define-from-file` (o `main.dart` bloqueia release sem `--flavor prod`). **Aug 9:** o deployment usa projeto Supabase **ÚNICO** (`dotklbpqmlnhcdifiukd`) compartilhado dev/prod — a guarda S2 foi ajustada para aceitar release `prod` com as credenciais do próprio projeto (`SupabaseBootstrap` só lança em release NÃO-prod com defaults embutidos):
 

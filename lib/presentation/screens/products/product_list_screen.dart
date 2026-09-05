@@ -1276,6 +1276,8 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
         labelStyle: _kLabelStyle,
         floatingLabelStyle: _kFloatingLabelStyle,
         decorationHintStyle: _kHintStyle,
+        // Helper longo + counter (0/5): fonte menor para não truncar.
+        helperStyle: const TextStyle(fontSize: 10),
         isDense: true,
         validator: (value) {
           final digits = value?.trim() ?? '';
@@ -1721,6 +1723,8 @@ class _EditProductSheetState extends ConsumerState<_EditProductSheet> {
         labelStyle: _kLabelStyle,
         floatingLabelStyle: _kFloatingLabelStyle,
         decorationHintStyle: _kHintStyle,
+        // Helper longo + counter (0/5): fonte menor para não truncar.
+        helperStyle: const TextStyle(fontSize: 10),
         isDense: true,
         validator: (value) {
           final digits = value?.trim() ?? '';

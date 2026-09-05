@@ -2946,11 +2946,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String employeeTargetAchieved(String amount) {
-    return 'Achieved: $amount';
-  }
-
-  @override
   String get employeeTargetNewTitle => 'New Target';
 
   @override

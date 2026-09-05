@@ -3,6 +3,12 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.1.1+21] — 2026-09-05
+
+### Corrigido
+- **Tela MFA — título truncado**: "Configurar Autenticação em Dois Fatores" cortava em ecrãs estreitos (AppBar a 22px) → fonte menor (15px) com quebra em 2 linhas — a frase completa fica sempre visível.
+- **Produtos — helper do campo Código/PLU truncado**: "Balanças etiquetadoras (ex.: 12345)" disputava espaço com o counter (0/5) e cortava → fonte menor (10px, era ~12px) nas sheets de novo/editar produto via novo parâmetro `helperStyle` do `AppTextField`.
+
 ## [2.1.0+20] — 2026-09-05
 
 ### Novo

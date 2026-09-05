@@ -128,7 +128,20 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.mfaSetupTitle),
+        // Título longo ("Configurar Autenticação em Dois Fatores") a 22px
+        // truncava em ecrãs estreitos — fonte menor e quebra em 2 linhas
+        // (nunca ellipsis) para a frase completa ficar visível.
+        title: Text(
+          l10n.mfaSetupTitle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.2,
+            height: 1.2,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),

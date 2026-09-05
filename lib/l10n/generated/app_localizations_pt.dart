@@ -2989,11 +2989,6 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String employeeTargetAchieved(String amount) {
-    return 'Realizado: $amount';
-  }
-
-  @override
   String get employeeTargetNewTitle => 'Nova Meta';
 
   @override

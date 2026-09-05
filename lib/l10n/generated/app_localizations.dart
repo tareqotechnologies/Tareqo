@@ -5212,12 +5212,6 @@ abstract class AppLocalizations {
   /// **'Meta: {amount}'**
   String employeeTargetMeta(String amount);
 
-  /// No description provided for @employeeTargetAchieved.
-  ///
-  /// In pt, this message translates to:
-  /// **'Realizado: {amount}'**
-  String employeeTargetAchieved(String amount);
-
   /// No description provided for @employeeTargetNewTitle.
   ///
   /// In pt, this message translates to:
