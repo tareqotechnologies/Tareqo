@@ -76,7 +76,9 @@ test/
 │ ├── sale_detail_screen_test.dart
 │ ├── financial_screen_test.dart
 │ ├── add_debt_sheet_test.dart
-│ └── debts_screen_test.dart
+│ ├── debts_screen_test.dart
+│ ├── custom_invoice_screen_test.dart # Fluxo PERSISTIDO da factura (SQLite real)
+│ └── quotation_screen_test.dart # Fluxo PERSISTIDO da cotação + transição de estado
 └── widget_test.dart # Dashboard end-to-end com overrides (raiz de test/)
 ```
 
@@ -112,6 +114,7 @@ test/
 - Exemplo (`test/widget_test.dart`): simula sessão ativa (`authStateProvider.overrideWith(Stream.value(AppUser(...)))`), fakes de casos de uso e verifica KPIs + navegação do shell;
 - Padrão: `await tester.pumpAndSettle()` + `expect(find.text(...), findsOneWidget)`;
 - `expiry_alerts_provider_test.dart` valida a classificação dos alertas (vencido = vermelho, vencimento < 30 dias = amarelo) e a ordenação por urgência.
+- **Fluxos persistidos de add-ons** (`custom_invoice_screen_test.dart`/`quotation_screen_test.dart`): criam facturas/cotações PELA UI contra o repositório real sobre `openTestDatabase()`, provam a persistência re-montando a árvore com o MESMO banco (o dado vem do SQLite, não de estado do widget) e validam a numeração sequencial (MAX+1) e a transição rascunho → enviada gravada no repositório.
 
 ---
 

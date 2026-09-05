@@ -3,6 +3,25 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.1.0+20] — 2026-09-05
+
+### Novo
+- **Factura Personalizada — persistência real**: facturas gravadas de verdade (SQLite schema v3 + migração Supabase `20260905_custom_invoice_persistence.sql` com RLS), número SEQUENCIAL por loja atribuído pelo banco (MAX+1, `UNIQUE(store_id, invoice_number)`), tela carrega as facturas persistidas com estados de loading/erro/retry.
+- **Cotação / Orçamento — persistência real**: mesmo padrão (SQLite v4 + migração `20260905_quotation_persistence.sql`), com transições de estado (**rascunho → enviada → aceite/rejeitada**) gravadas no repositório — não somem ao fechar o app.
+- **Gestão de Funcionários — add-on desbloqueado**: volta ao marketplace com schema real (SQLite v5 + migração `20260905_employee_mgmt_persistence.sql`): registo de ponto (entrada/saída, uma linha por funcionário/dia), taxas de comissão por funcionário (pontos-base, 500 = 5%) e metas mensais com progresso. **Comissões calculadas de vendas REAIS** (`sales.user_id` = vendedor; RPC `get_employee_commission_summary` agrega no servidor — nunca armazenadas).
+- **`Sale.userId`**: atribuição de vendedor persistida (SQLite e Supabase) e carimbada na criação da venda — base das comissões por funcionário; vendas legadas sem atribuição contam para ninguém (zeros honestos).
+- **Widget tests de fluxo persistido** (factura/cotação): criação pela UI contra o repositório REAL (SQLite em memória), prova de persistência re-montando a árvore com o mesmo banco, numeração sequencial pela UI e transição de estado da cotação.
+
+### Alterado
+- **Add-ons bloqueados honestos**: Integração M-Pesa/E-Mola continua fora do marketplace (bloqueada por dependência externa — API do provedor + runtime de servidor inexistentes); a tela mostra apenas o banner de bloqueio — zero funcionalidade falsa.
+- **Marketplace e painel admin** passam a listar apenas add-ons reais/desbloqueados.
+
+### Corrigido
+- **SaaS: gravação de facturas/cotações falhava (NOT NULL em `id`)**: os datasources remotos (Supabase) não enviavam o `id` no INSERT e a migração declara `id TEXT PRIMARY KEY` sem DEFAULT — corrigido nos dois datasources (bug P0 apenas em modo SaaS, exposto pela verificação ao vivo via REST).
+- **Overflow do dropdown de produto (7px)**: o item de duas linhas (nome + estoque/preço) estourava o campo compacto ao seleccionar o produto nas sheets de factura/cotação → item em linha única com ellipsis.
+- **42 chaves l10n órfãs** (pt/en/fr) removidas após a remoção das UIs demo das telas bloqueadas.
+- **Splash logo**: logo original do usuário reaplicado em todas as plataformas (várias correções de assets/branding).
+
 ## [2.0.0+19] — 2026-09-03
 
 ### Novo

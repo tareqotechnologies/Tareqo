@@ -583,17 +583,25 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
                   items: activeProducts
                       .map(
                         (p) => DropdownMenuItem(
-                          value: p.id,                              child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          value: p.id,
+                          // Linha ÚNICA: o item seleccionado é exibido no
+                          // campo de altura compacta — uma Column de duas
+                          // linhas estourava o InputDecorator em 7px
+                          // (RenderFlex overflow) ao seleccionar o produto.
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                p.name,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w400,
+                              Flexible(
+                                child: Text(
+                                  p.name,
+                                  style: theme.textTheme.bodySmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
+                              const SizedBox(width: AppSpacing.xs),
                               Text(
                                 l10n.customInvoiceProductOption(
                                   (p.stockQuantity ~/ 1000).toString(),
