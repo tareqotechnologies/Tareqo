@@ -1268,6 +1268,15 @@
   "customInvoiceTitle": "Facture personnalisée",
   "customInvoiceEmpty": "Aucune facture",
   "customInvoiceEmptySubtitle": "Créez des factures professionnelles avec une mise\nen page personnalisée pour vos clients",
+  "customInvoiceLoadError": "Impossible de charger les factures.",
+  "customInvoiceLoadErrorHint": "Vérifiez votre connexion et réessayez.",
+  "customInvoiceCreated": "Facture n° {number} créée !",
+  "@customInvoiceCreated": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "customInvoiceSaveError": "Impossible de créer la facture. Réessayez.",
   "customInvoiceTemplateTooltip": "Modèle de facture",
   "customInvoiceNewFab": "Nouvelle facture",
   "customInvoiceItemsCount": "{count, plural, =0{0 article} =1{1 article} other{{count} articles}}",

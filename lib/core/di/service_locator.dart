@@ -192,9 +192,14 @@ import '../../domain/usecases/update_product_stock_use_case.dart';
 import '../../domain/usecases/update_product_use_case.dart';
 import '../../data/datasources/local/admin_message_local_data_source.dart';
 import '../../data/datasources/local/admin_message_local_data_source_impl.dart';
+import '../../data/datasources/local/custom_invoice_local_data_source.dart';
+import '../../data/datasources/local/custom_invoice_local_data_source_impl.dart';
 import '../../data/datasources/remote/supabase_addon_data_source.dart';
 import '../../data/datasources/remote/supabase_admin_message_data_source.dart';
+import '../../data/datasources/remote/supabase_custom_invoice_data_source.dart';
 import '../../data/repositories/admin_message_repository_impl.dart';
+import '../../data/repositories/custom_invoice_repository_impl.dart';
+import '../../domain/repositories/i_custom_invoice_repository.dart';
 import '../../domain/repositories/i_admin_message_repository.dart';
 import '../../domain/usecases/send_admin_message_use_case.dart';
 import '../../domain/usecases/get_tenant_admin_messages_use_case.dart';
@@ -454,6 +459,11 @@ final class ServiceLocator {
     ..registerLazySingleton<AddOnLocalDataSource>(
       () => const SupabaseAddOnDataSourceImpl(),
     )
+    // Facturas personalizadas (add-on) — documento por loja, RLS por
+    // is_my_store; número sequencial atribuído por trigger no servidor.
+    ..registerLazySingleton<CustomInvoiceLocalDataSource>(
+      () => const CustomInvoiceSupabaseDataSourceImpl(),
+    )
     // Cadastro de funcionário ATÔMICO (RPC `create_employee_account`):
  // conta de acesso + vínculo em `store_employees` em UMA transação no
  // banco (sem contas órfãs se o limite do plano for atingido).
@@ -590,6 +600,9 @@ final class ServiceLocator {
     )
     ..registerLazySingleton<AddOnLocalDataSource>(
       AddOnLocalDataSourceImpl.new,
+    )
+    ..registerLazySingleton<CustomInvoiceLocalDataSource>(
+      CustomInvoiceLocalDataSourceImpl.new,
     );
   }
 
@@ -615,10 +628,14 @@ final class ServiceLocator {
  )
  ..registerLazySingleton<IDebtRepository>(
  () => DebtRepositoryImpl(instance<DebtLocalDataSource>()),
- )
- ..registerLazySingleton<ICustomerRepository>(
- () => CustomerRepositoryImpl(instance<CustomerLocalDataSource>()),
- )
+ )  ..registerLazySingleton<ICustomerRepository>(
+    () => CustomerRepositoryImpl(instance<CustomerLocalDataSource>()),
+  )
+  ..registerLazySingleton<ICustomInvoiceRepository>(
+    () => CustomInvoiceRepositoryImpl(
+      instance<CustomInvoiceLocalDataSource>(),
+    ),
+  )
  ..registerLazySingleton<IPurchaseRepository>(
  () => PurchaseRepositoryImpl(instance<PurchaseLocalDataSource>()),
  )

@@ -2587,6 +2587,22 @@ class AppLocalizationsPt extends AppLocalizations {
       'Crie facturas profissionais com layout\npersonalizado para os seus clientes';
 
   @override
+  String get customInvoiceLoadError => 'Não foi possível carregar as facturas.';
+
+  @override
+  String get customInvoiceLoadErrorHint =>
+      'Verifique a conexão e tente novamente.';
+
+  @override
+  String customInvoiceCreated(int number) {
+    return 'Factura nº $number criada!';
+  }
+
+  @override
+  String get customInvoiceSaveError =>
+      'Não foi possível criar a factura. Tente novamente.';
+
+  @override
   String get customInvoiceTemplateTooltip => 'Modelo da Factura';
 
   @override

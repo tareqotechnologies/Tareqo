@@ -4504,6 +4504,30 @@ abstract class AppLocalizations {
   /// **'Crie facturas profissionais com layout\npersonalizado para os seus clientes'**
   String get customInvoiceEmptySubtitle;
 
+  /// No description provided for @customInvoiceLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar as facturas.'**
+  String get customInvoiceLoadError;
+
+  /// No description provided for @customInvoiceLoadErrorHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Verifique a conexão e tente novamente.'**
+  String get customInvoiceLoadErrorHint;
+
+  /// No description provided for @customInvoiceCreated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Factura nº {number} criada!'**
+  String customInvoiceCreated(int number);
+
+  /// No description provided for @customInvoiceSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível criar a factura. Tente novamente.'**
+  String get customInvoiceSaveError;
+
   /// No description provided for @customInvoiceTemplateTooltip.
   ///
   /// In pt, this message translates to:

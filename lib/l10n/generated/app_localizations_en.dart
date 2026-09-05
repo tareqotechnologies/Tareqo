@@ -2546,6 +2546,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create professional invoices with a custom\nlayout for your clients';
 
   @override
+  String get customInvoiceLoadError => 'Couldn\'t load the invoices.';
+
+  @override
+  String get customInvoiceLoadErrorHint =>
+      'Check your connection and try again.';
+
+  @override
+  String customInvoiceCreated(int number) {
+    return 'Invoice #$number created!';
+  }
+
+  @override
+  String get customInvoiceSaveError =>
+      'Couldn\'t create the invoice. Try again.';
+
+  @override
   String get customInvoiceTemplateTooltip => 'Invoice template';
 
   @override

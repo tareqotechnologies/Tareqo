@@ -10,7 +10,13 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/share/invoice_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/ids.dart';
 import '../../../domain/entities/custom_invoice.dart';
+import '../../../domain/entities/store.dart';
+import '../../../domain/usecases/custom_invoice_use_cases.dart';
+import '../../controllers/account_providers.dart';
+import '../../controllers/auth_providers.dart';
+import '../../controllers/custom_invoice_providers.dart';
 import '../../controllers/customers_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_page.dart';
@@ -31,9 +37,22 @@ class CustomInvoiceScreen extends ConsumerStatefulWidget {
 }
 
 class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
-  final List<_InvoiceData> _invoices = [];
-  int _invoiceCounter = 0;
   final _templateConfig = InvoiceTemplateConfig();
+
+  /// Loja activa (as facturas são documento POR loja — número sequencial
+  /// dentro da loja). Resolvida como nas demais telas de dados.
+  String? _activeStoreId() {
+    final user = ref.watch(authStateProvider).value;
+    if (user == null) return null;
+    final tenant = ref.watch(myTenantProvider(user.id)).value;
+    if (tenant == null) return null;
+    final storeId = ref.watch(activeStoreIdProvider(user.id));
+    if (storeId != null) return storeId;
+    // Sem loja activa: cai para a primeira loja do tenant (como vendas).
+    final stores =
+        ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
+    return stores.isEmpty ? null : stores.first.id;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +60,13 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
     final horizontal = AppSpacing.pagePaddingForWidth(
       MediaQuery.sizeOf(context).width,
     );
+    final storeId = _activeStoreId();
+
+    // Facturas PERSISTIDAS desta loja (estado real, não lista local).
+    // Sem loja (ex.: onboarding incompleto) a tela mostra vazio honesto.
+    final invoicesAsync =
+        storeId == null ? null : ref.watch(customInvoicesProvider(storeId));
+    final invoices = invoicesAsync?.value ?? const <CustomInvoice>[];
 
     return AppPage(
       title: l10n.customInvoiceTitle,
@@ -52,28 +78,39 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
           tooltip: l10n.customInvoiceTemplateTooltip,
         ),
       ],
-      body: _invoices.isEmpty
+      body: invoicesAsync?.hasError ?? false
           ? EmptyState(
-              icon: Icons.receipt_long_outlined,
-              title: l10n.customInvoiceEmpty,
-              subtitle: l10n.customInvoiceEmptySubtitle,
+              icon: Icons.error_outline,
+              title: l10n.customInvoiceLoadError,
+              subtitle: l10n.customInvoiceLoadErrorHint,
+              actionLabel: l10n.commonRetry,
+              onAction: () {
+                if (storeId != null) {
+                  ref.invalidate(customInvoicesProvider(storeId));
+                }
+              },
             )
-          : ListView.separated(
-              padding: EdgeInsets.fromLTRB(
-                horizontal,
-                AppSpacing.lg,
-                horizontal,
-                AppSpacing.lg,
-              ),
-              itemCount: _invoices.length,
-              separatorBuilder: (_, _) =>
-                  const SizedBox(height: AppSpacing.xs),
-              itemBuilder: (context, index) => _InvoiceCard(
-                invoice: _invoices[index],
-                invoiceNumber: _invoiceCounter - index,
-                templateConfig: _templateConfig,
-              ),
-            ),
+          : invoices.isEmpty
+              ? EmptyState(
+                  icon: Icons.receipt_long_outlined,
+                  title: l10n.customInvoiceEmpty,
+                  subtitle: l10n.customInvoiceEmptySubtitle,
+                )
+              : ListView.separated(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontal,
+                    AppSpacing.lg,
+                    horizontal,
+                    AppSpacing.lg,
+                  ),
+                  itemCount: invoices.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.xs),
+                  itemBuilder: (context, index) => _InvoiceCard(
+                    invoice: invoices[index],
+                    templateConfig: _templateConfig,
+                  ),
+                ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-invoice',
         onPressed: _openNewInvoice,
@@ -89,15 +126,58 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) => _NewInvoiceSheet(
-        onSave: (data) {
-          setState(() {
-            _invoiceCounter++;
-            _invoices.insert(0, data);
-          });
-          Navigator.of(context).pop();
-        },
+        onSave: _saveInvoice,
       ),
     );
+  }
+
+  /// Persiste a factura de VERDADE (nunca lista em memória): valida via
+  /// use case de domínio e grava no repositório da loja activa.
+  Future<void> _saveInvoice(_InvoiceData data) async {
+    final l10n = context.l10n;
+    final storeId = _activeStoreId();
+    if (storeId == null) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    // Fecha a sheet só após a gravação confirmada (loading honesto).
+    final navigator = Navigator.of(context);
+
+    try {
+      final entity = CreateCustomInvoiceUseCase().call(
+        storeId: storeId,
+        clientName: data.clientName,
+        clientPhone: data.clientPhone,
+        clientTaxId: data.clientTaxId,
+        items: [
+          for (final item in data.items)
+            CustomInvoiceItemInput(
+              productName: item.name,
+              quantity: item.qty,
+              unitPriceCents: item.unitPriceCents,
+            ),
+        ],
+        discountCents: data.discountCents,
+        taxCents: data.taxCents,
+      );
+      final saved = await ref
+          .read(customInvoiceRepositoryProvider)
+          .add(entity.copyWith(id: AppIds.newId('ci')));
+      if (!mounted) return;
+      navigator.pop();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.customInvoiceCreated(saved.number),
+          ),
+        ),
+      );
+      ref.invalidate(customInvoicesProvider(storeId));
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.customInvoiceSaveError)),
+      );
+    }
   }
 
   void _openTemplateSettings() {
@@ -114,6 +194,7 @@ class _InvoiceData {
   _InvoiceData({
     required this.clientName,
     required this.clientPhone,
+    this.clientTaxId = '',
     required this.items,
     required this.totalCents,
     required this.discountCents,
@@ -122,6 +203,7 @@ class _InvoiceData {
 
   final String clientName;
   final String clientPhone;
+  final String clientTaxId;
   final List<_InvoiceItemData> items;
   final int totalCents;
   final int discountCents;
@@ -147,12 +229,11 @@ class _InvoiceItemData {
 class _InvoiceCard extends StatelessWidget {
   const _InvoiceCard({
     required this.invoice,
-    this.invoiceNumber = 0,
     this.templateConfig,
   });
 
-  final _InvoiceData invoice;
-  final int invoiceNumber;
+  /// Factura PERSISTIDA (número sequencial real da loja vem da entidade).
+  final CustomInvoice invoice;
   final InvoiceTemplateConfig? templateConfig;
 
   @override
@@ -201,7 +282,7 @@ class _InvoiceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.customInvoiceNumberPrefix(invoiceNumber.toString()
+                      l10n.customInvoiceNumberPrefix(invoice.number.toString()
                               .padLeft(5, '0')) +
                           (invoice.clientPhone.isNotEmpty
                               ? '  •  ${invoice.clientPhone}'
@@ -214,7 +295,7 @@ class _InvoiceCard extends StatelessWidget {
                 ),
               ),
               Text(
-                Formatters.currency(invoice.totalCents),
+                Formatters.currency(invoice.totalAmountCents),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                   letterSpacing: -0.3,
@@ -257,7 +338,7 @@ class _InvoiceCard extends StatelessWidget {
     final buffer = StringBuffer();
     buffer.writeln(l10n.customInvoiceWhatsAppHeader);
     buffer
-        .writeln('${l10n.customInvoiceNumberShort}: ${invoiceNumber.toString().padLeft(5, '0')}');
+        .writeln('${l10n.customInvoiceNumberShort}: ${invoice.number.toString().padLeft(5, '0')}');
     buffer.writeln('${l10n.customInvoiceClientLabel}: ${invoice.clientName}');
     if (invoice.clientPhone.isNotEmpty) {
       buffer.writeln('${l10n.customInvoicePhoneLabel}: ${invoice.clientPhone}');
@@ -265,11 +346,11 @@ class _InvoiceCard extends StatelessWidget {
     buffer.writeln();
     for (final item in invoice.items) {
       buffer.writeln(
-        '• ${item.name} x${item.qty} — ${Formatters.currency(item.unitPriceCents * item.qty)}',
+        '• ${item.productName} x${item.quantity} — ${Formatters.currency(item.unitPriceCents * item.quantity)}',
       );
     }
     buffer.writeln();
-    buffer.writeln('${l10n.customInvoiceTotalLabel}: ${Formatters.currency(invoice.totalCents)}');
+    buffer.writeln('${l10n.customInvoiceTotalLabel}: ${Formatters.currency(invoice.totalAmountCents)}');
 
     final uri = Uri.parse(
       'https://wa.me/?text=${Uri.encodeComponent(buffer.toString())}',
@@ -278,26 +359,9 @@ class _InvoiceCard extends StatelessWidget {
   }
 
   Future<void> _exportPdf(BuildContext context) async {
-    final invoiceEntity = CustomInvoice(
-      id: '',
-      number: invoiceNumber,
-      storeId: '',
-      clientName: invoice.clientName,
-      clientPhone: invoice.clientPhone,
-      items: [
-        for (final item in invoice.items)
-          CustomInvoiceItem(
-            productName: item.name,
-            quantity: item.qty,
-            unitPriceCents: item.unitPriceCents,
-            subtotalCents: item.qty * item.unitPriceCents,
-          ),
-      ],
-      totalAmountCents: invoice.totalCents,
-      discountCents: invoice.discountCents,
-      taxCents: invoice.taxCents,
-      createdAt: DateTime.now(),
-    );
+    // Exporta a factura PERSISTIDA tal como está (número, itens, data
+    // reais) — sem reconstruir uma entidade sintética.
+    final invoiceEntity = invoice;
 
     final config = templateConfig ?? InvoiceTemplateConfig();
     final l10n = context.l10n;
@@ -679,6 +743,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
                         _InvoiceData(
                           clientName: _clientController.text.trim(),
                           clientPhone: _phoneController.text.trim(),
+                          clientTaxId: _taxIdController.text.trim(),
                           items: List.from(_items),
                           totalCents: total > 0 ? total : 0,
                           discountCents: discount,

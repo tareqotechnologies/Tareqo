@@ -2592,6 +2592,22 @@ class AppLocalizationsFr extends AppLocalizations {
       'Créez des factures professionnelles avec une mise\nen page personnalisée pour vos clients';
 
   @override
+  String get customInvoiceLoadError => 'Impossible de charger les factures.';
+
+  @override
+  String get customInvoiceLoadErrorHint =>
+      'Vérifiez votre connexion et réessayez.';
+
+  @override
+  String customInvoiceCreated(int number) {
+    return 'Facture n° $number créée !';
+  }
+
+  @override
+  String get customInvoiceSaveError =>
+      'Impossible de créer la facture. Réessayez.';
+
+  @override
   String get customInvoiceTemplateTooltip => 'Modèle de facture';
 
   @override

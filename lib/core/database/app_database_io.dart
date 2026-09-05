@@ -8,6 +8,8 @@ import '../../data/datasources/local/pending_op_queue.dart';
 import '../../data/datasources/local/pending_op_queue_sqlite_impl.dart';
 import '../../data/datasources/local/cash_closing_local_data_source.dart';
 import '../../data/datasources/local/cash_closing_sqlite_data_source_impl.dart';
+import '../../data/datasources/local/custom_invoice_local_data_source.dart';
+import '../../data/datasources/local/custom_invoice_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/customer_local_data_source.dart';
 import '../../data/datasources/local/customer_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/debt_local_data_source.dart';
@@ -91,10 +93,12 @@ abstract final class AppDatabase {
  )
  ..registerLazySingleton<StockLotLocalDataSource>(
  () => StockLotSqliteDataSourceImpl(db),
- )
- ..registerLazySingleton<CashClosingLocalDataSource>(
- () => CashClosingSqliteDataSourceImpl(db),
- );
+ )  ..registerLazySingleton<CashClosingLocalDataSource>(
+    () => CashClosingSqliteDataSourceImpl(db),
+  )
+  ..registerLazySingleton<CustomInvoiceLocalDataSource>(
+    () => CustomInvoiceSqliteDataSourceImpl(db),
+  );
  }
 
  /// Registra a fila offline (outbox) sobre o MESMO banco SQLite.
@@ -124,7 +128,7 @@ abstract final class AppDatabase {
  static void initialize(Database db) => _migrate(db);
 
  /// Versão atual do schema (`PRAGMA user_version`).
- static const int currentSchemaVersion = 2;
+ static const int currentSchemaVersion = 3;
 
  /// Migrações versionadas, em ordem crescente de versão.
  ///
@@ -142,6 +146,11 @@ abstract final class AppDatabase {
  version: 2,
  description: 'fila offline (outbox) — tabela pending_ops',
  up: _schemaV2,
+ ),
+ _Migration(
+ version: 3,
+ description: 'facturas personalizadas (add-on) — tabela custom_invoices',
+ up: _schemaV3,
  ),
  ];
 
@@ -745,6 +754,30 @@ abstract final class AppDatabase {
  attempt_count INTEGER NOT NULL DEFAULT 0,
  last_error TEXT
  );
+ ''');
+ }
+
+ /// v3 — Facturas personalizadas (add-on `ao_custom_invoice`).
+ ///
+ /// Documento por loja com número sequencial dentro da loja
+ /// (`UNIQUE(store_id, invoice_number)` garante que MAX+1 nunca duplica).
+ /// O corpo completo é guardado como JSON (items snapshot, descontos,
+ /// notas, método de pagamento) — a factura é um documento, não um
+ /// agregado com RPCs de dinheiro.
+ static void _schemaV3(Database db) {
+ db.execute('''
+ CREATE TABLE IF NOT EXISTS custom_invoices (
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL,
+ invoice_number INTEGER NOT NULL,
+ payload TEXT NOT NULL,
+ created_at INTEGER NOT NULL,
+ UNIQUE (store_id, invoice_number)
+ );
+ ''');
+ db.execute('''
+ CREATE INDEX IF NOT EXISTS idx_custom_invoices_store
+ ON custom_invoices (store_id, created_at DESC);
  ''');
  }
 

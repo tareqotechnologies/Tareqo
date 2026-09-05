@@ -1268,6 +1268,15 @@
   "customInvoiceTitle": "Custom Invoice",
   "customInvoiceEmpty": "No invoices",
   "customInvoiceEmptySubtitle": "Create professional invoices with a custom\nlayout for your clients",
+  "customInvoiceLoadError": "Couldn't load the invoices.",
+  "customInvoiceLoadErrorHint": "Check your connection and try again.",
+  "customInvoiceCreated": "Invoice #{number} created!",
+  "@customInvoiceCreated": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "customInvoiceSaveError": "Couldn't create the invoice. Try again.",
   "customInvoiceTemplateTooltip": "Invoice template",
   "customInvoiceNewFab": "New Invoice",
   "customInvoiceItemsCount": "{count, plural, =1{1 item} other{{count} items}}",
