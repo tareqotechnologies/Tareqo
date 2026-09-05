@@ -1365,7 +1365,71 @@
   "quotationWhatsAppHeader": "═══ COTAÇÃO ═══",
   "quotationTemplateTitle": "Modelo da Cotação",
   "employeeMgmtTitle": "Gestão de Funcionários",
-  "employeeMgmtBlockedBanner": "Controle de ponto, comissões e metas exigem um backend ainda não implementado. A gestão real de funcionários (contas, lojas e cargos) já está disponível no módulo Lojas.",
+  "employeeMgmtTabAttendance": "Ponto",
+  "employeeMgmtTabCommissions": "Comissões",
+  "employeeMgmtTabTargets": "Metas",
+  "employeePresentCount": "Presentes",
+  "employeeAbsentCount": "Ausentes",
+  "employeeClockInAction": "Entrar",
+  "employeeClockOutAction": "Sair",
+  "employeeClockOutInProgress": "Em curso",
+  "employeeAttendanceSection": "Registo de Ponto",
+  "employeeRecordsSection": "Registos de Hoje",
+  "employeeAttendanceEmpty": "Nenhum funcionário vinculado a esta loja. Crie contas no módulo Lojas.",
+  "employeeMgmtLoadError": "Não foi possível carregar os dados de funcionários.",
+  "employeeClockInError": "Não foi possível registar a entrada.",
+  "employeeClockOutError": "Não foi possível registar a saída.",
+  "employeeSalesMonth": "Vendas do Mês",
+  "employeeCommissionTitle": "Comissões",
+  "employeeCommissionPerEmployee": "Comissão por Funcionário",
+  "employeeCommissionRate": "{rate}% sobre {amount}",
+  "@employeeCommissionRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeCommissionNoRate": "Sem taxa definida",
+  "employeeCommissionSetRate": "Definir Taxa",
+  "employeeCommissionRateLabel": "Taxa de comissão (%)",
+  "employeeCommissionRateSaved": "Taxa de comissão actualizada.",
+  "employeeCommissionRateError": "Não foi possível guardar a taxa.",
+  "employeeTargetsActive": "Metas Activas",
+  "employeeTargetsReached": "Atingidas",
+  "employeeTargetsPending": "Pendentes",
+  "employeeTargetsMonth": "Metas do Mês",
+  "employeeTargetsEmptyTitle": "Nenhuma meta definida",
+  "employeeTargetsEmptySubtitle": "Defina metas mensais de vendas para cada funcionário",
+  "employeeTargetAdd": "Adicionar Meta",
+  "employeeTargetMeta": "Meta: {amount}",
+  "@employeeTargetMeta": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeTargetNewTitle": "Nova Meta",
+  "employeeTargetEmployee": "Funcionário",
+  "employeeTargetAllHave": "Todos os funcionários já possuem meta definida",
+  "employeeTargetMonthly": "Meta Mensal (MT)",
+  "employeeTargetSave": "Salvar Meta",
+  "employeeTargetProgress": "{progress}% da meta",
+  "@employeeTargetProgress": {
+    "placeholders": {
+      "progress": {
+        "type": "int"
+      }
+    }
+  },
+  "employeeTargetSaved": "Meta definida.",
+  "employeeTargetRemoved": "Meta removida.",
+  "employeeTargetError": "Não foi possível guardar a meta.",
+  "employeeRoleSales": "Vendedor",
   "addonsTitle": "Add-ons",
   "addonsSubtitle": "Add-ons activos e disponíveis no seu plano",
   "addonsManagedByAdmin": "A activação de add-ons é gerida pelo administrador do sistema.",

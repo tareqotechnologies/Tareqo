@@ -34,6 +34,7 @@ final class QuotationSupabaseDataSourceImpl implements QuotationLocalDataSource 
     final rows = await supabaseClient
         .from(_table)
         .insert({
+          'id': quotation.id,
           'store_id': quotation.storeId,
           'payload': jsonEncode(quotation.toJson()),
         })

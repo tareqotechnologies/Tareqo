@@ -40,4 +40,6 @@ const _$InvoiceNotificationTypeEnumMap = {
   InvoiceNotificationType.invoiceDueSoon: 'invoiceDueSoon',
   InvoiceNotificationType.invoiceExpired: 'invoiceExpired',
   InvoiceNotificationType.invoicePaid: 'invoicePaid',
+  InvoiceNotificationType.addOnExpiringSoon: 'addOnExpiringSoon',
+  InvoiceNotificationType.addOnExpired: 'addOnExpired',
 };

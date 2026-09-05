@@ -44,8 +44,7 @@ enum SaleStatus {
 
 /// Entidade de domínio que representa uma venda registrada.
 @freezed
-abstract class Sale with _$Sale {
- const factory Sale({
+abstract class Sale with _$Sale {  const factory Sale({
  required String id,
  // Número SEQUENCIAL da venda DENTRO da loja (ex.: S-00001, S-00002).
  // Atribuído pelo banco no insert — SQLite: MAX+1 por loja dentro da
@@ -55,6 +54,14 @@ abstract class Sale with _$Sale {
  // Loja onde a venda foi realizada (Fase 2 do multi-tenancy). Cada
  // loja tem seu próprio histórico de vendas.
  @Default('st1') String storeId,
+ // Caixa (funcionário) que registrou a venda — UUID do usuário
+ // autenticado. No Supabase a coluna `user_id` é preenchida pelo
+ // trigger `set_tenant_user_id` (auth.uid()); localmente é carimbada
+ // pelo fluxo de venda. Usada pelo add-on de gestão de funcionários
+ // para calcular COMISSÕES e progresso de METAS a partir das vendas
+ // reais. Vazio = venda legada sem atribuição (não conta para
+ // comissões, nunca gera números falsos).
+ @Default('') String userId,
  required List<SaleItem> items,
  // Valor TOTAL da venda em CENTAVOS inteiros (W4 — migração de
  // dinheiro para centavos; o banco persiste BIGINT/INTEGER).

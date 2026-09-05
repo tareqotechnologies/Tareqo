@@ -10,6 +10,8 @@ import '../../data/datasources/local/cash_closing_local_data_source.dart';
 import '../../data/datasources/local/cash_closing_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/custom_invoice_local_data_source.dart';
 import '../../data/datasources/local/custom_invoice_sqlite_data_source_impl.dart';
+import '../../data/datasources/local/employee_management_local_data_source.dart';
+import '../../data/datasources/local/employee_management_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/quotation_local_data_source.dart';
 import '../../data/datasources/local/quotation_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/customer_local_data_source.dart';
@@ -103,6 +105,9 @@ abstract final class AppDatabase {
   )
   ..registerLazySingleton<QuotationLocalDataSource>(
     () => QuotationSqliteDataSourceImpl(db),
+  )
+  ..registerLazySingleton<EmployeeManagementLocalDataSource>(
+    () => EmployeeManagementSqliteDataSourceImpl(db),
   );
  }
 
@@ -130,10 +135,8 @@ abstract final class AppDatabase {
  /// antigas NUNCA reexecutam (startup rápido e determinístico). Mudanças
  /// futuras de schema entram como NOVAS migrações (v2, v3...) — nunca
  /// editar a v1.
- static void initialize(Database db) => _migrate(db);
-
- /// Versão atual do schema (`PRAGMA user_version`).
- static const int currentSchemaVersion = 4;
+ static void initialize(Database db) => _migrate(db);  /// Versão atual do schema (`PRAGMA user_version`).
+  static const int currentSchemaVersion = 5;
 
  /// Migrações versionadas, em ordem crescente de versão.
  ///
@@ -160,6 +163,11 @@ abstract final class AppDatabase {
    version: 4,
    description: 'cotações (add-on) — tabela quotations',
    up: _schemaV4,
+ ),
+ _Migration(
+   version: 5,
+   description: 'gestão de funcionários (add-on) — ponto, comissões, metas',
+   up: _schemaV5,
  ),
  ];
 
@@ -811,6 +819,80 @@ abstract final class AppDatabase {
   db.execute('''
   CREATE INDEX IF NOT EXISTS idx_quotations_store
   ON quotations (store_id, created_at DESC);
+  ''');
+ }
+
+ /// v5 — Gestão de funcionários (add-on `ao_employee_mgmt`).
+ ///
+ /// Três tabelas por loja:
+ ///  - `employee_attendance` — ponto: UMA linha por funcionário por dia
+ ///    (`UNIQUE(store_id, user_id, work_date)`); a entrada insere, a
+ ///    saída atualiza a mesma linha (clock_out NULL = presente).
+ ///  - `employee_commission_rates` — taxa de comissão por funcionário em
+ ///    pontos base (`UNIQUE(store_id, user_id)`; 500 = 5%).
+ ///  - `employee_targets` — meta mensal de vendas por funcionário
+ ///    (`UNIQUE(store_id, user_id, month)`; month = `YYYY-MM`).
+ ///
+ /// As COMISSÕES nunca são armazenadas: são CALCULADAS das vendas reais
+ /// (`sales.user_id` = caixa) × taxa. A coluna `sales.user_id` é
+ /// adicionada aqui para bancos legados e novos (a v1 não a tem — o
+ /// guard de presença cobre ambos).
+ static void _schemaV5(Database db) {
+  // Caixa da venda (atribuição de comissões/metas): bancos novos e
+  // legados recebem a coluna via ALTER (a v1 não a tem). NULL = venda
+  // legada sem atribuição (não conta para comissões — nunca inventa
+  // números).
+  final saleColumns = db.select('PRAGMA table_info(sales)');
+  final hasUserId = saleColumns.any((row) => row['name'] == 'user_id');
+  if (!hasUserId) {
+   db.execute('ALTER TABLE sales ADD COLUMN user_id TEXT');
+  }
+  db.execute('CREATE INDEX IF NOT EXISTS idx_sales_user_store '
+   'ON sales(user_id, store_id)');
+
+  db.execute('''
+  CREATE TABLE IF NOT EXISTS employee_attendance (
+   id TEXT PRIMARY KEY,
+   store_id TEXT NOT NULL,
+   user_id TEXT NOT NULL,
+   work_date TEXT NOT NULL,
+   clock_in INTEGER NOT NULL,
+   clock_out INTEGER,
+   recorded_by TEXT NOT NULL DEFAULT '',
+   created_at INTEGER NOT NULL,
+   UNIQUE (store_id, user_id, work_date)
+  );
+  ''');
+  db.execute('''
+  CREATE INDEX IF NOT EXISTS idx_employee_attendance_store
+  ON employee_attendance (store_id, work_date DESC);
+  ''');
+
+  db.execute('''
+  CREATE TABLE IF NOT EXISTS employee_commission_rates (
+   id TEXT PRIMARY KEY,
+   store_id TEXT NOT NULL,
+   user_id TEXT NOT NULL,
+   rate_bps INTEGER NOT NULL CHECK (rate_bps >= 0 AND rate_bps <= 10000),
+   created_at INTEGER NOT NULL,
+   UNIQUE (store_id, user_id)
+  );
+  ''');
+
+  db.execute('''
+  CREATE TABLE IF NOT EXISTS employee_targets (
+   id TEXT PRIMARY KEY,
+   store_id TEXT NOT NULL,
+   user_id TEXT NOT NULL,
+   month TEXT NOT NULL,
+   target_cents INTEGER NOT NULL CHECK (target_cents >= 0),
+   created_at INTEGER NOT NULL,
+   UNIQUE (store_id, user_id, month)
+  );
+  ''');
+  db.execute('''
+  CREATE INDEX IF NOT EXISTS idx_employee_targets_store
+  ON employee_targets (store_id, month);
   ''');
  }
 

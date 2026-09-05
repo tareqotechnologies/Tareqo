@@ -2889,8 +2889,142 @@ class AppLocalizationsPt extends AppLocalizations {
   String get employeeMgmtTitle => 'Gestão de Funcionários';
 
   @override
-  String get employeeMgmtBlockedBanner =>
-      'Controle de ponto, comissões e metas exigem um backend ainda não implementado. A gestão real de funcionários (contas, lojas e cargos) já está disponível no módulo Lojas.';
+  String get employeeMgmtTabAttendance => 'Ponto';
+
+  @override
+  String get employeeMgmtTabCommissions => 'Comissões';
+
+  @override
+  String get employeeMgmtTabTargets => 'Metas';
+
+  @override
+  String get employeePresentCount => 'Presentes';
+
+  @override
+  String get employeeAbsentCount => 'Ausentes';
+
+  @override
+  String get employeeClockInAction => 'Entrar';
+
+  @override
+  String get employeeClockOutAction => 'Sair';
+
+  @override
+  String get employeeClockOutInProgress => 'Em curso';
+
+  @override
+  String get employeeAttendanceSection => 'Registo de Ponto';
+
+  @override
+  String get employeeRecordsSection => 'Registos de Hoje';
+
+  @override
+  String get employeeAttendanceEmpty =>
+      'Nenhum funcionário vinculado a esta loja. Crie contas no módulo Lojas.';
+
+  @override
+  String get employeeMgmtLoadError =>
+      'Não foi possível carregar os dados de funcionários.';
+
+  @override
+  String get employeeClockInError => 'Não foi possível registar a entrada.';
+
+  @override
+  String get employeeClockOutError => 'Não foi possível registar a saída.';
+
+  @override
+  String get employeeSalesMonth => 'Vendas do Mês';
+
+  @override
+  String get employeeCommissionTitle => 'Comissões';
+
+  @override
+  String get employeeCommissionPerEmployee => 'Comissão por Funcionário';
+
+  @override
+  String employeeCommissionRate(int rate, String amount) {
+    return '$rate% sobre $amount';
+  }
+
+  @override
+  String get employeeCommissionNoRate => 'Sem taxa definida';
+
+  @override
+  String get employeeCommissionSetRate => 'Definir Taxa';
+
+  @override
+  String get employeeCommissionRateLabel => 'Taxa de comissão (%)';
+
+  @override
+  String get employeeCommissionRateSaved => 'Taxa de comissão actualizada.';
+
+  @override
+  String get employeeCommissionRateError => 'Não foi possível guardar a taxa.';
+
+  @override
+  String get employeeTargetsActive => 'Metas Activas';
+
+  @override
+  String get employeeTargetsReached => 'Atingidas';
+
+  @override
+  String get employeeTargetsPending => 'Pendentes';
+
+  @override
+  String get employeeTargetsMonth => 'Metas do Mês';
+
+  @override
+  String get employeeTargetsEmptyTitle => 'Nenhuma meta definida';
+
+  @override
+  String get employeeTargetsEmptySubtitle =>
+      'Defina metas mensais de vendas para cada funcionário';
+
+  @override
+  String get employeeTargetAdd => 'Adicionar Meta';
+
+  @override
+  String employeeTargetMeta(String amount) {
+    return 'Meta: $amount';
+  }
+
+  @override
+  String employeeTargetAchieved(String amount) {
+    return 'Realizado: $amount';
+  }
+
+  @override
+  String get employeeTargetNewTitle => 'Nova Meta';
+
+  @override
+  String get employeeTargetEmployee => 'Funcionário';
+
+  @override
+  String get employeeTargetAllHave =>
+      'Todos os funcionários já possuem meta definida';
+
+  @override
+  String get employeeTargetMonthly => 'Meta Mensal (MT)';
+
+  @override
+  String get employeeTargetSave => 'Salvar Meta';
+
+  @override
+  String employeeTargetProgress(int progress) {
+    return '$progress% da meta';
+  }
+
+  @override
+  String get employeeTargetSaved => 'Meta definida.';
+
+  @override
+  String get employeeTargetRemoved => 'Meta removida.';
+
+  @override
+  String get employeeTargetError => 'Não foi possível guardar a meta.';
+
+  @override
+  String get employeeRoleSales => 'Vendedor';
 
   @override
   String get addonsTitle => 'Add-ons';

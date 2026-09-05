@@ -2896,8 +2896,143 @@ class AppLocalizationsFr extends AppLocalizations {
   String get employeeMgmtTitle => 'Gestion des employés';
 
   @override
-  String get employeeMgmtBlockedBanner =>
-      'Le pointage, les commissions et les objectifs nécessitent un backend pas encore implémenté. La gestion réelle des employés (comptes, magasins et rôles) est déjà disponible dans le module Magasins.';
+  String get employeeMgmtTabAttendance => 'Pointage';
+
+  @override
+  String get employeeMgmtTabCommissions => 'Commissions';
+
+  @override
+  String get employeeMgmtTabTargets => 'Objectifs';
+
+  @override
+  String get employeePresentCount => 'Présents';
+
+  @override
+  String get employeeAbsentCount => 'Absents';
+
+  @override
+  String get employeeClockInAction => 'Entrer';
+
+  @override
+  String get employeeClockOutAction => 'Sortir';
+
+  @override
+  String get employeeClockOutInProgress => 'En cours';
+
+  @override
+  String get employeeAttendanceSection => 'Registre de pointage';
+
+  @override
+  String get employeeRecordsSection => 'Registres du jour';
+
+  @override
+  String get employeeAttendanceEmpty =>
+      'Aucun employé lié à ce magasin. Créez des comptes dans le module Magasins.';
+
+  @override
+  String get employeeMgmtLoadError =>
+      'Impossible de charger les données des employés.';
+
+  @override
+  String get employeeClockInError => 'Impossible d\'enregistrer l\'entrée.';
+
+  @override
+  String get employeeClockOutError => 'Impossible d\'enregistrer la sortie.';
+
+  @override
+  String get employeeSalesMonth => 'Ventes du mois';
+
+  @override
+  String get employeeCommissionTitle => 'Commissions';
+
+  @override
+  String get employeeCommissionPerEmployee => 'Commission par employé';
+
+  @override
+  String employeeCommissionRate(int rate, String amount) {
+    return '$rate% de $amount';
+  }
+
+  @override
+  String get employeeCommissionNoRate => 'Aucun taux défini';
+
+  @override
+  String get employeeCommissionSetRate => 'Définir le taux';
+
+  @override
+  String get employeeCommissionRateLabel => 'Taux de commission (%)';
+
+  @override
+  String get employeeCommissionRateSaved => 'Taux de commission mis à jour.';
+
+  @override
+  String get employeeCommissionRateError =>
+      'Impossible d\'enregistrer le taux.';
+
+  @override
+  String get employeeTargetsActive => 'Objectifs actifs';
+
+  @override
+  String get employeeTargetsReached => 'Atteints';
+
+  @override
+  String get employeeTargetsPending => 'En attente';
+
+  @override
+  String get employeeTargetsMonth => 'Objectifs du mois';
+
+  @override
+  String get employeeTargetsEmptyTitle => 'Aucun objectif défini';
+
+  @override
+  String get employeeTargetsEmptySubtitle =>
+      'Définissez des objectifs de vente mensuels pour chaque employé';
+
+  @override
+  String get employeeTargetAdd => 'Ajouter un objectif';
+
+  @override
+  String employeeTargetMeta(String amount) {
+    return 'Objectif : $amount';
+  }
+
+  @override
+  String employeeTargetAchieved(String amount) {
+    return 'Réalisé : $amount';
+  }
+
+  @override
+  String get employeeTargetNewTitle => 'Nouvel objectif';
+
+  @override
+  String get employeeTargetEmployee => 'Employé';
+
+  @override
+  String get employeeTargetAllHave =>
+      'Tous les employés ont déjà un objectif défini';
+
+  @override
+  String get employeeTargetMonthly => 'Objectif mensuel (MT)';
+
+  @override
+  String get employeeTargetSave => 'Enregistrer l\'objectif';
+
+  @override
+  String employeeTargetProgress(int progress) {
+    return '$progress% de l\'objectif';
+  }
+
+  @override
+  String get employeeTargetSaved => 'Objectif défini.';
+
+  @override
+  String get employeeTargetRemoved => 'Objectif supprimé.';
+
+  @override
+  String get employeeTargetError => 'Impossible d\'enregistrer l\'objectif.';
+
+  @override
+  String get employeeRoleSales => 'Vendeur';
 
   @override
   String get addonsTitle => 'Add-ons';

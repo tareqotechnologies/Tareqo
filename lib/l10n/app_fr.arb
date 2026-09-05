@@ -1365,7 +1365,71 @@
   "quotationWhatsAppHeader": "═══ DEVIS ═══",
   "quotationTemplateTitle": "Modèle de devis",
   "employeeMgmtTitle": "Gestion des employés",
-  "employeeMgmtBlockedBanner": "Le pointage, les commissions et les objectifs nécessitent un backend pas encore implémenté. La gestion réelle des employés (comptes, magasins et rôles) est déjà disponible dans le module Magasins.",
+  "employeeMgmtTabAttendance": "Pointage",
+  "employeeMgmtTabCommissions": "Commissions",
+  "employeeMgmtTabTargets": "Objectifs",
+  "employeePresentCount": "Présents",
+  "employeeAbsentCount": "Absents",
+  "employeeClockInAction": "Entrer",
+  "employeeClockOutAction": "Sortir",
+  "employeeClockOutInProgress": "En cours",
+  "employeeAttendanceSection": "Registre de pointage",
+  "employeeRecordsSection": "Registres du jour",
+  "employeeAttendanceEmpty": "Aucun employé lié à ce magasin. Créez des comptes dans le module Magasins.",
+  "employeeMgmtLoadError": "Impossible de charger les données des employés.",
+  "employeeClockInError": "Impossible d'enregistrer l'entrée.",
+  "employeeClockOutError": "Impossible d'enregistrer la sortie.",
+  "employeeSalesMonth": "Ventes du mois",
+  "employeeCommissionTitle": "Commissions",
+  "employeeCommissionPerEmployee": "Commission par employé",
+  "employeeCommissionRate": "{rate}% de {amount}",
+  "@employeeCommissionRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeCommissionNoRate": "Aucun taux défini",
+  "employeeCommissionSetRate": "Définir le taux",
+  "employeeCommissionRateLabel": "Taux de commission (%)",
+  "employeeCommissionRateSaved": "Taux de commission mis à jour.",
+  "employeeCommissionRateError": "Impossible d'enregistrer le taux.",
+  "employeeTargetsActive": "Objectifs actifs",
+  "employeeTargetsReached": "Atteints",
+  "employeeTargetsPending": "En attente",
+  "employeeTargetsMonth": "Objectifs du mois",
+  "employeeTargetsEmptyTitle": "Aucun objectif défini",
+  "employeeTargetsEmptySubtitle": "Définissez des objectifs de vente mensuels pour chaque employé",
+  "employeeTargetAdd": "Ajouter un objectif",
+  "employeeTargetMeta": "Objectif : {amount}",
+  "@employeeTargetMeta": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeTargetNewTitle": "Nouvel objectif",
+  "employeeTargetEmployee": "Employé",
+  "employeeTargetAllHave": "Tous les employés ont déjà un objectif défini",
+  "employeeTargetMonthly": "Objectif mensuel (MT)",
+  "employeeTargetSave": "Enregistrer l'objectif",
+  "employeeTargetProgress": "{progress}% de l'objectif",
+  "@employeeTargetProgress": {
+    "placeholders": {
+      "progress": {
+        "type": "int"
+      }
+    }
+  },
+  "employeeTargetSaved": "Objectif défini.",
+  "employeeTargetRemoved": "Objectif supprimé.",
+  "employeeTargetError": "Impossible d'enregistrer l'objectif.",
+  "employeeRoleSales": "Vendeur",
   "addonsTitle": "Add-ons",
   "addonsSubtitle": "Add-ons actifs et disponibles dans votre forfait",
   "addonsManagedByAdmin": "L'activation des add-ons est gérée par l'administrateur du système.",

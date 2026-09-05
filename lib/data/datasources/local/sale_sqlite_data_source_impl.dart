@@ -16,11 +16,9 @@ import 'sale_local_data_source.dart';
 final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
  const SaleSqliteDataSourceImpl(this._db);
 
- final Database _db;
-
- static const _saleColumns =
+ final Database _db;  static const _saleColumns =
  'id, store_id, sale_number, total_amount, payment_method, date_time, '
- 'status, cancelled_at';
+ 'status, cancelled_at, user_id';
 
  @override
  Future<List<Sale>> getAll({required String storeId}) async {
@@ -40,9 +38,7 @@ final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
  );
  if (rows.isEmpty) return null;
  return _mapSale(rows.first);
- }
-
- Sale _mapSale(Row row) => Sale(
+ }  Sale _mapSale(Row row) => Sale(
  id: row['id'] as String,
  storeId: row['store_id'] as String,
  number: (row['sale_number'] as num).toInt(),
@@ -54,6 +50,7 @@ final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
  cancelledAt: row['cancelled_at'] == null
  ? null
  : DateTime.fromMillisecondsSinceEpoch(row['cancelled_at'] as int),
+ userId: row['user_id'] as String? ?? '',
  );
 
  List<SaleItem> _itemsOf(String saleId) {
@@ -84,23 +81,22 @@ final class SaleSqliteDataSourceImpl implements SaleLocalDataSource {
  'SELECT COALESCE(MAX(sale_number), 0) + 1 AS next '
  'FROM sales WHERE store_id = ?',
  [sale.storeId],
- ).first['next'] as int;
-
- _db.execute(
- 'INSERT INTO sales '
- '(id, store_id, sale_number, total_amount, payment_method, '
- 'date_time, status, cancelled_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
- [
- sale.id,
- sale.storeId,
- nextNumber,
- sale.totalAmountCents,
- sale.paymentMethod.name,
- sale.dateTime.millisecondsSinceEpoch,
- sale.status.name,
- sale.cancelledAt?.millisecondsSinceEpoch,
- ],
- );
+ ).first['next'] as int;  _db.execute(
+   'INSERT INTO sales '
+   '(id, store_id, sale_number, total_amount, payment_method, '
+   'date_time, status, cancelled_at, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+   [
+    sale.id,
+    sale.storeId,
+    nextNumber,
+    sale.totalAmountCents,
+    sale.paymentMethod.name,
+    sale.dateTime.millisecondsSinceEpoch,
+    sale.status.name,
+    sale.cancelledAt?.millisecondsSinceEpoch,
+    sale.userId.isEmpty ? null : sale.userId,
+   ],
+  );
  for (final item in sale.items) {
  _db.execute(
  'INSERT INTO sale_items '

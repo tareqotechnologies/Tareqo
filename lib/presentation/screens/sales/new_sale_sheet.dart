@@ -293,16 +293,18 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
  final user = ref.read(authStateProvider).value;
  final storeId = user == null
  ? null
- : ref.read(activeStoreIdProvider(user.id));
-
- final sale = Sale(
- id: AppIds.newId('s'),
- storeId: storeId ?? 'st1',
- items: items,
- totalAmountCents: _totalCents,
- paymentMethod: _paymentMethod,
- dateTime: DateTime.now(),
- );
+ : ref.read(activeStoreIdProvider(user.id));  final sale = Sale(
+   id: AppIds.newId('s'),
+   storeId: storeId ?? 'st1',
+   items: items,
+   totalAmountCents: _totalCents,
+   paymentMethod: _paymentMethod,
+   dateTime: DateTime.now(),
+   // Caixa que registrou a venda — base das comissões/metas do add-on
+   // de funcionários (a coluna user_id do Supabase também é preenchida
+   // pelo trigger set_tenant_user_id). Vazio = sem atribuição.
+   userId: user?.id ?? '',
+  );
 
  final messenger = ScaffoldMessenger.of(context);
  final navigator = Navigator.of(context);

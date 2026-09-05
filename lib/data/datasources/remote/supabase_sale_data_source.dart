@@ -205,13 +205,13 @@ final class SaleSupabaseDataSourceImpl implements SaleLocalDataSource {
  dateTime: DateTime.parse(row['date_time'] as String).toLocal(),
  status: row['status'] == null
  ? SaleStatus.active
- : SaleStatus.values.byName(row['status'] as String),
- cancelledAt: row['cancelled_at'] == null
- ? null
- : DateTime.parse(row['cancelled_at'] as String).toLocal(),
+ : SaleStatus.values.byName(row['status'] as String),  cancelledAt: row['cancelled_at'] == null
+   ? null
+   : DateTime.parse(row['cancelled_at'] as String).toLocal(),
+ userId: row['user_id'] as String? ?? '',
  );
 
- SaleItem _mapItem(Map<String, dynamic> row) => SaleItem(
+  SaleItem _mapItem(Map<String, dynamic> row) => SaleItem(
  productId: row['product_id'] as String,
  productName: row['product_name'] as String,
  quantity: (row['quantity'] as num).toInt(),

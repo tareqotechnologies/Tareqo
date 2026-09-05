@@ -194,16 +194,23 @@ import '../../data/datasources/local/admin_message_local_data_source.dart';
 import '../../data/datasources/local/admin_message_local_data_source_impl.dart';
 import '../../data/datasources/local/custom_invoice_local_data_source.dart';
 import '../../data/datasources/local/custom_invoice_local_data_source_impl.dart';
+import '../../data/datasources/local/employee_management_local_data_source.dart';
+import '../../data/datasources/local/employee_management_local_data_source_impl.dart';
 import '../../data/datasources/local/quotation_local_data_source.dart';
 import '../../data/datasources/local/quotation_local_data_source_impl.dart';
 import '../../data/datasources/remote/supabase_addon_data_source.dart';
 import '../../data/datasources/remote/supabase_admin_message_data_source.dart';
 import '../../data/datasources/remote/supabase_custom_invoice_data_source.dart';
+import '../../data/datasources/remote/supabase_employee_management_data_source.dart';
 import '../../data/datasources/remote/supabase_quotation_data_source.dart';
 import '../../data/repositories/admin_message_repository_impl.dart';
 import '../../data/repositories/custom_invoice_repository_impl.dart';
+import '../../data/repositories/employee_management_repository_impl.dart';
 import '../../data/repositories/quotation_repository_impl.dart';
+import '../../data/repositories/supabase_employee_commission_summary_repository.dart';
 import '../../domain/repositories/i_custom_invoice_repository.dart';
+import '../../domain/repositories/i_employee_commission_summary_repository.dart';
+import '../../domain/repositories/i_employee_management_repository.dart';
 import '../../domain/repositories/i_quotation_repository.dart';
 import '../../domain/repositories/i_admin_message_repository.dart';
 import '../../domain/usecases/send_admin_message_use_case.dart';
@@ -475,6 +482,17 @@ final class ServiceLocator {
     ..registerLazySingleton<QuotationLocalDataSource>(
       () => const QuotationSupabaseDataSourceImpl(),
     )
+    // Gestão de funcionários (add-on) — ponto, taxas de comissão e
+    // metas por loja, RLS por is_my_store + is_store_employee_active.
+    ..registerLazySingleton<EmployeeManagementLocalDataSource>(
+      () => const EmployeeManagementSupabaseDataSourceImpl(),
+    )
+    // Resumo de comissões CALCULADO no servidor (RPC com guarda
+    // is_my_store) — registrado APENAS no modo remoto; no local o
+    // provider calcula das vendas reais (mesma semântica).
+    ..registerLazySingleton<IEmployeeCommissionSummaryRepository>(
+      () => const SupabaseEmployeeCommissionSummaryRepository(),
+    )
     // Cadastro de funcionário ATÔMICO (RPC `create_employee_account`):
  // conta de acesso + vínculo em `store_employees` em UMA transação no
  // banco (sem contas órfãs se o limite do plano for atingido).
@@ -617,6 +635,9 @@ final class ServiceLocator {
     )
     ..registerLazySingleton<QuotationLocalDataSource>(
       QuotationLocalDataSourceImpl.new,
+    )
+    ..registerLazySingleton<EmployeeManagementLocalDataSource>(
+      EmployeeManagementLocalDataSourceImpl.new,
     );
   }
 
@@ -653,6 +674,11 @@ final class ServiceLocator {
   ..registerLazySingleton<IQuotationRepository>(
     () => QuotationRepositoryImpl(
       instance<QuotationLocalDataSource>(),
+    ),
+  )
+  ..registerLazySingleton<IEmployeeManagementRepository>(
+    () => EmployeeManagementRepositoryImpl(
+      instance<EmployeeManagementLocalDataSource>(),
     ),
   )
  ..registerLazySingleton<IPurchaseRepository>(

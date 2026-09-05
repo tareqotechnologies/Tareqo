@@ -33,6 +33,7 @@ final class CustomInvoiceSupabaseDataSourceImpl
     final rows = await supabaseClient
         .from(_table)
         .insert({
+          'id': invoice.id,
           'store_id': invoice.storeId,
           'payload': jsonEncode(invoice.toJson()),
         })

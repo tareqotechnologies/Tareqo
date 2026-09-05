@@ -5026,11 +5026,257 @@ abstract class AppLocalizations {
   /// **'Gestão de Funcionários'**
   String get employeeMgmtTitle;
 
-  /// No description provided for @employeeMgmtBlockedBanner.
+  /// No description provided for @employeeMgmtTabAttendance.
   ///
   /// In pt, this message translates to:
-  /// **'Controle de ponto, comissões e metas exigem um backend ainda não implementado. A gestão real de funcionários (contas, lojas e cargos) já está disponível no módulo Lojas.'**
-  String get employeeMgmtBlockedBanner;
+  /// **'Ponto'**
+  String get employeeMgmtTabAttendance;
+
+  /// No description provided for @employeeMgmtTabCommissions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comissões'**
+  String get employeeMgmtTabCommissions;
+
+  /// No description provided for @employeeMgmtTabTargets.
+  ///
+  /// In pt, this message translates to:
+  /// **'Metas'**
+  String get employeeMgmtTabTargets;
+
+  /// No description provided for @employeePresentCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Presentes'**
+  String get employeePresentCount;
+
+  /// No description provided for @employeeAbsentCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ausentes'**
+  String get employeeAbsentCount;
+
+  /// No description provided for @employeeClockInAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar'**
+  String get employeeClockInAction;
+
+  /// No description provided for @employeeClockOutAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair'**
+  String get employeeClockOutAction;
+
+  /// No description provided for @employeeClockOutInProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em curso'**
+  String get employeeClockOutInProgress;
+
+  /// No description provided for @employeeAttendanceSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registo de Ponto'**
+  String get employeeAttendanceSection;
+
+  /// No description provided for @employeeRecordsSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registos de Hoje'**
+  String get employeeRecordsSection;
+
+  /// No description provided for @employeeAttendanceEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum funcionário vinculado a esta loja. Crie contas no módulo Lojas.'**
+  String get employeeAttendanceEmpty;
+
+  /// No description provided for @employeeMgmtLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar os dados de funcionários.'**
+  String get employeeMgmtLoadError;
+
+  /// No description provided for @employeeClockInError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível registar a entrada.'**
+  String get employeeClockInError;
+
+  /// No description provided for @employeeClockOutError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível registar a saída.'**
+  String get employeeClockOutError;
+
+  /// No description provided for @employeeSalesMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vendas do Mês'**
+  String get employeeSalesMonth;
+
+  /// No description provided for @employeeCommissionTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comissões'**
+  String get employeeCommissionTitle;
+
+  /// No description provided for @employeeCommissionPerEmployee.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comissão por Funcionário'**
+  String get employeeCommissionPerEmployee;
+
+  /// No description provided for @employeeCommissionRate.
+  ///
+  /// In pt, this message translates to:
+  /// **'{rate}% sobre {amount}'**
+  String employeeCommissionRate(int rate, String amount);
+
+  /// No description provided for @employeeCommissionNoRate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem taxa definida'**
+  String get employeeCommissionNoRate;
+
+  /// No description provided for @employeeCommissionSetRate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir Taxa'**
+  String get employeeCommissionSetRate;
+
+  /// No description provided for @employeeCommissionRateLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Taxa de comissão (%)'**
+  String get employeeCommissionRateLabel;
+
+  /// No description provided for @employeeCommissionRateSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Taxa de comissão actualizada.'**
+  String get employeeCommissionRateSaved;
+
+  /// No description provided for @employeeCommissionRateError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível guardar a taxa.'**
+  String get employeeCommissionRateError;
+
+  /// No description provided for @employeeTargetsActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Metas Activas'**
+  String get employeeTargetsActive;
+
+  /// No description provided for @employeeTargetsReached.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atingidas'**
+  String get employeeTargetsReached;
+
+  /// No description provided for @employeeTargetsPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendentes'**
+  String get employeeTargetsPending;
+
+  /// No description provided for @employeeTargetsMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Metas do Mês'**
+  String get employeeTargetsMonth;
+
+  /// No description provided for @employeeTargetsEmptyTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma meta definida'**
+  String get employeeTargetsEmptyTitle;
+
+  /// No description provided for @employeeTargetsEmptySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Defina metas mensais de vendas para cada funcionário'**
+  String get employeeTargetsEmptySubtitle;
+
+  /// No description provided for @employeeTargetAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar Meta'**
+  String get employeeTargetAdd;
+
+  /// No description provided for @employeeTargetMeta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meta: {amount}'**
+  String employeeTargetMeta(String amount);
+
+  /// No description provided for @employeeTargetAchieved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Realizado: {amount}'**
+  String employeeTargetAchieved(String amount);
+
+  /// No description provided for @employeeTargetNewTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Meta'**
+  String get employeeTargetNewTitle;
+
+  /// No description provided for @employeeTargetEmployee.
+  ///
+  /// In pt, this message translates to:
+  /// **'Funcionário'**
+  String get employeeTargetEmployee;
+
+  /// No description provided for @employeeTargetAllHave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os funcionários já possuem meta definida'**
+  String get employeeTargetAllHave;
+
+  /// No description provided for @employeeTargetMonthly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meta Mensal (MT)'**
+  String get employeeTargetMonthly;
+
+  /// No description provided for @employeeTargetSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar Meta'**
+  String get employeeTargetSave;
+
+  /// No description provided for @employeeTargetProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'{progress}% da meta'**
+  String employeeTargetProgress(int progress);
+
+  /// No description provided for @employeeTargetSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meta definida.'**
+  String get employeeTargetSaved;
+
+  /// No description provided for @employeeTargetRemoved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meta removida.'**
+  String get employeeTargetRemoved;
+
+  /// No description provided for @employeeTargetError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível guardar a meta.'**
+  String get employeeTargetError;
+
+  /// No description provided for @employeeRoleSales.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vendedor'**
+  String get employeeRoleSales;
 
   /// No description provided for @addonsTitle.
   ///

@@ -2847,8 +2847,140 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeMgmtTitle => 'Employee Management';
 
   @override
-  String get employeeMgmtBlockedBanner =>
-      'Clock-in/out, commissions and targets require a backend that is not implemented yet. Real employee management (accounts, stores and roles) is already available in the Stores module.';
+  String get employeeMgmtTabAttendance => 'Attendance';
+
+  @override
+  String get employeeMgmtTabCommissions => 'Commissions';
+
+  @override
+  String get employeeMgmtTabTargets => 'Targets';
+
+  @override
+  String get employeePresentCount => 'Present';
+
+  @override
+  String get employeeAbsentCount => 'Absent';
+
+  @override
+  String get employeeClockInAction => 'Clock in';
+
+  @override
+  String get employeeClockOutAction => 'Clock out';
+
+  @override
+  String get employeeClockOutInProgress => 'In progress';
+
+  @override
+  String get employeeAttendanceSection => 'Time Records';
+
+  @override
+  String get employeeRecordsSection => 'Today\'s Records';
+
+  @override
+  String get employeeAttendanceEmpty =>
+      'No employees linked to this store. Create accounts in the Stores module.';
+
+  @override
+  String get employeeMgmtLoadError => 'Unable to load employee data.';
+
+  @override
+  String get employeeClockInError => 'Unable to record clock in.';
+
+  @override
+  String get employeeClockOutError => 'Unable to record clock out.';
+
+  @override
+  String get employeeSalesMonth => 'Monthly Sales';
+
+  @override
+  String get employeeCommissionTitle => 'Commissions';
+
+  @override
+  String get employeeCommissionPerEmployee => 'Commission per Employee';
+
+  @override
+  String employeeCommissionRate(int rate, String amount) {
+    return '$rate% of $amount';
+  }
+
+  @override
+  String get employeeCommissionNoRate => 'No rate set';
+
+  @override
+  String get employeeCommissionSetRate => 'Set Rate';
+
+  @override
+  String get employeeCommissionRateLabel => 'Commission rate (%)';
+
+  @override
+  String get employeeCommissionRateSaved => 'Commission rate updated.';
+
+  @override
+  String get employeeCommissionRateError => 'Unable to save the rate.';
+
+  @override
+  String get employeeTargetsActive => 'Active Targets';
+
+  @override
+  String get employeeTargetsReached => 'Reached';
+
+  @override
+  String get employeeTargetsPending => 'Pending';
+
+  @override
+  String get employeeTargetsMonth => 'Month\'s Targets';
+
+  @override
+  String get employeeTargetsEmptyTitle => 'No targets set';
+
+  @override
+  String get employeeTargetsEmptySubtitle =>
+      'Set monthly sales targets for each employee';
+
+  @override
+  String get employeeTargetAdd => 'Add Target';
+
+  @override
+  String employeeTargetMeta(String amount) {
+    return 'Target: $amount';
+  }
+
+  @override
+  String employeeTargetAchieved(String amount) {
+    return 'Achieved: $amount';
+  }
+
+  @override
+  String get employeeTargetNewTitle => 'New Target';
+
+  @override
+  String get employeeTargetEmployee => 'Employee';
+
+  @override
+  String get employeeTargetAllHave => 'All employees already have a target set';
+
+  @override
+  String get employeeTargetMonthly => 'Monthly Target (MT)';
+
+  @override
+  String get employeeTargetSave => 'Save Target';
+
+  @override
+  String employeeTargetProgress(int progress) {
+    return '$progress% of target';
+  }
+
+  @override
+  String get employeeTargetSaved => 'Target set.';
+
+  @override
+  String get employeeTargetRemoved => 'Target removed.';
+
+  @override
+  String get employeeTargetError => 'Unable to save the target.';
+
+  @override
+  String get employeeRoleSales => 'Salesperson';
 
   @override
   String get addonsTitle => 'Add-ons';

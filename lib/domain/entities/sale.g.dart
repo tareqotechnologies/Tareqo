@@ -10,6 +10,7 @@ _Sale _$SaleFromJson(Map<String, dynamic> json) => _Sale(
   id: json['id'] as String,
   number: (json['number'] as num?)?.toInt() ?? 0,
   storeId: json['storeId'] as String? ?? 'st1',
+  userId: json['userId'] as String? ?? '',
   items: (json['items'] as List<dynamic>)
       .map((e) => SaleItem.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -28,6 +29,7 @@ Map<String, dynamic> _$SaleToJson(_Sale instance) => <String, dynamic>{
   'id': instance.id,
   'number': instance.number,
   'storeId': instance.storeId,
+  'userId': instance.userId,
   'items': instance.items.map((e) => e.toJson()).toList(),
   'totalAmountCents': instance.totalAmountCents,
   'paymentMethod': _$PaymentMethodEnumMap[instance.paymentMethod]!,

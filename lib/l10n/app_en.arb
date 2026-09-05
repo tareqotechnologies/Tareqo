@@ -1365,7 +1365,71 @@
   "quotationWhatsAppHeader": "═══ QUOTATION ═══",
   "quotationTemplateTitle": "Quotation template",
   "employeeMgmtTitle": "Employee Management",
-  "employeeMgmtBlockedBanner": "Clock-in/out, commissions and targets require a backend that is not implemented yet. Real employee management (accounts, stores and roles) is already available in the Stores module.",
+  "employeeMgmtTabAttendance": "Attendance",
+  "employeeMgmtTabCommissions": "Commissions",
+  "employeeMgmtTabTargets": "Targets",
+  "employeePresentCount": "Present",
+  "employeeAbsentCount": "Absent",
+  "employeeClockInAction": "Clock in",
+  "employeeClockOutAction": "Clock out",
+  "employeeClockOutInProgress": "In progress",
+  "employeeAttendanceSection": "Time Records",
+  "employeeRecordsSection": "Today's Records",
+  "employeeAttendanceEmpty": "No employees linked to this store. Create accounts in the Stores module.",
+  "employeeMgmtLoadError": "Unable to load employee data.",
+  "employeeClockInError": "Unable to record clock in.",
+  "employeeClockOutError": "Unable to record clock out.",
+  "employeeSalesMonth": "Monthly Sales",
+  "employeeCommissionTitle": "Commissions",
+  "employeeCommissionPerEmployee": "Commission per Employee",
+  "employeeCommissionRate": "{rate}% of {amount}",
+  "@employeeCommissionRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeCommissionNoRate": "No rate set",
+  "employeeCommissionSetRate": "Set Rate",
+  "employeeCommissionRateLabel": "Commission rate (%)",
+  "employeeCommissionRateSaved": "Commission rate updated.",
+  "employeeCommissionRateError": "Unable to save the rate.",
+  "employeeTargetsActive": "Active Targets",
+  "employeeTargetsReached": "Reached",
+  "employeeTargetsPending": "Pending",
+  "employeeTargetsMonth": "Month's Targets",
+  "employeeTargetsEmptyTitle": "No targets set",
+  "employeeTargetsEmptySubtitle": "Set monthly sales targets for each employee",
+  "employeeTargetAdd": "Add Target",
+  "employeeTargetMeta": "Target: {amount}",
+  "@employeeTargetMeta": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeTargetNewTitle": "New Target",
+  "employeeTargetEmployee": "Employee",
+  "employeeTargetAllHave": "All employees already have a target set",
+  "employeeTargetMonthly": "Monthly Target (MT)",
+  "employeeTargetSave": "Save Target",
+  "employeeTargetProgress": "{progress}% of target",
+  "@employeeTargetProgress": {
+    "placeholders": {
+      "progress": {
+        "type": "int"
+      }
+    }
+  },
+  "employeeTargetSaved": "Target set.",
+  "employeeTargetRemoved": "Target removed.",
+  "employeeTargetError": "Unable to save the target.",
+  "employeeRoleSales": "Salesperson",
   "addonsTitle": "Add-ons",
   "addonsSubtitle": "Active add-ons and add-ons in your plan",
   "addonsManagedByAdmin": "Add-on activation is managed by the system administrator.",
