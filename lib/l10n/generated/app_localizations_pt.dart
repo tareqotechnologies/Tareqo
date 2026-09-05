@@ -2726,6 +2726,28 @@ class AppLocalizationsPt extends AppLocalizations {
       'Crie cotações e orçamentos para os seus clientes';
 
   @override
+  String get quotationLoadError => 'Não foi possível carregar as cotações.';
+
+  @override
+  String get quotationLoadErrorHint => 'Verifique a conexão e tente novamente.';
+
+  @override
+  String quotationCreated(int number) {
+    return 'Cotação nº $number criada!';
+  }
+
+  @override
+  String get quotationSaveError =>
+      'Não foi possível criar a cotação. Tente novamente.';
+
+  @override
+  String get quotationStatusSaved => 'Estado da cotação actualizado';
+
+  @override
+  String get quotationStatusError =>
+      'Não foi possível actualizar a cotação. Tente novamente.';
+
+  @override
   String get quotationTemplateTooltip => 'Modelo da Cotação';
 
   @override

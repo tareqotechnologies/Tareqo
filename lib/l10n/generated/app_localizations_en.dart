@@ -2685,6 +2685,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create quotations and estimates for your clients';
 
   @override
+  String get quotationLoadError => 'Couldn\'t load the quotations.';
+
+  @override
+  String get quotationLoadErrorHint => 'Check your connection and try again.';
+
+  @override
+  String quotationCreated(int number) {
+    return 'Quotation #$number created!';
+  }
+
+  @override
+  String get quotationSaveError => 'Couldn\'t create the quotation. Try again.';
+
+  @override
+  String get quotationStatusSaved => 'Quotation status updated';
+
+  @override
+  String get quotationStatusError =>
+      'Couldn\'t update the quotation. Try again.';
+
+  @override
   String get quotationTemplateTooltip => 'Quotation template';
 
   @override

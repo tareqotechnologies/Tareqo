@@ -4744,6 +4744,42 @@ abstract class AppLocalizations {
   /// **'Crie cotações e orçamentos para os seus clientes'**
   String get quotationEmptySubtitle;
 
+  /// No description provided for @quotationLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar as cotações.'**
+  String get quotationLoadError;
+
+  /// No description provided for @quotationLoadErrorHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Verifique a conexão e tente novamente.'**
+  String get quotationLoadErrorHint;
+
+  /// No description provided for @quotationCreated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cotação nº {number} criada!'**
+  String quotationCreated(int number);
+
+  /// No description provided for @quotationSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível criar a cotação. Tente novamente.'**
+  String get quotationSaveError;
+
+  /// No description provided for @quotationStatusSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estado da cotação actualizado'**
+  String get quotationStatusSaved;
+
+  /// No description provided for @quotationStatusError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível actualizar a cotação. Tente novamente.'**
+  String get quotationStatusError;
+
   /// No description provided for @quotationTemplateTooltip.
   ///
   /// In pt, this message translates to:

@@ -1313,6 +1313,17 @@
   "quotationTitle": "Devis",
   "quotationEmpty": "Aucun devis",
   "quotationEmptySubtitle": "Créez des devis et des estimations pour vos clients",
+  "quotationLoadError": "Impossible de charger les devis.",
+  "quotationLoadErrorHint": "Vérifiez votre connexion et réessayez.",
+  "quotationCreated": "Devis n° {number} créé !",
+  "@quotationCreated": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "quotationSaveError": "Impossible de créer le devis. Réessayez.",
+  "quotationStatusSaved": "Statut du devis mis à jour",
+  "quotationStatusError": "Impossible de mettre à jour le devis. Réessayez.",
   "quotationTemplateTooltip": "Modèle de devis",
   "quotationNewFab": "Nouveau devis",
   "quotationItemsCount": "{count, plural, =0{0 article} =1{1 article} other{{count} articles}}",

@@ -10,6 +10,8 @@ import '../../data/datasources/local/cash_closing_local_data_source.dart';
 import '../../data/datasources/local/cash_closing_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/custom_invoice_local_data_source.dart';
 import '../../data/datasources/local/custom_invoice_sqlite_data_source_impl.dart';
+import '../../data/datasources/local/quotation_local_data_source.dart';
+import '../../data/datasources/local/quotation_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/customer_local_data_source.dart';
 import '../../data/datasources/local/customer_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/debt_local_data_source.dart';
@@ -98,6 +100,9 @@ abstract final class AppDatabase {
   )
   ..registerLazySingleton<CustomInvoiceLocalDataSource>(
     () => CustomInvoiceSqliteDataSourceImpl(db),
+  )
+  ..registerLazySingleton<QuotationLocalDataSource>(
+    () => QuotationSqliteDataSourceImpl(db),
   );
  }
 
@@ -128,7 +133,7 @@ abstract final class AppDatabase {
  static void initialize(Database db) => _migrate(db);
 
  /// Versão atual do schema (`PRAGMA user_version`).
- static const int currentSchemaVersion = 3;
+ static const int currentSchemaVersion = 4;
 
  /// Migrações versionadas, em ordem crescente de versão.
  ///
@@ -146,11 +151,15 @@ abstract final class AppDatabase {
  version: 2,
  description: 'fila offline (outbox) — tabela pending_ops',
  up: _schemaV2,
+ ), _Migration(
+   version: 3,
+   description: 'facturas personalizadas (add-on) — tabela custom_invoices',
+   up: _schemaV3,
  ),
  _Migration(
- version: 3,
- description: 'facturas personalizadas (add-on) — tabela custom_invoices',
- up: _schemaV3,
+   version: 4,
+   description: 'cotações (add-on) — tabela quotations',
+   up: _schemaV4,
  ),
  ];
 
@@ -765,20 +774,44 @@ abstract final class AppDatabase {
  /// notas, método de pagamento) — a factura é um documento, não um
  /// agregado com RPCs de dinheiro.
  static void _schemaV3(Database db) {
- db.execute('''
- CREATE TABLE IF NOT EXISTS custom_invoices (
- id TEXT PRIMARY KEY,
- store_id TEXT NOT NULL,
- invoice_number INTEGER NOT NULL,
- payload TEXT NOT NULL,
- created_at INTEGER NOT NULL,
- UNIQUE (store_id, invoice_number)
- );
- ''');
- db.execute('''
- CREATE INDEX IF NOT EXISTS idx_custom_invoices_store
- ON custom_invoices (store_id, created_at DESC);
- ''');
+  db.execute('''
+  CREATE TABLE IF NOT EXISTS custom_invoices (
+   id TEXT PRIMARY KEY,
+   store_id TEXT NOT NULL,
+   invoice_number INTEGER NOT NULL,
+   payload TEXT NOT NULL,
+   created_at INTEGER NOT NULL,
+   UNIQUE (store_id, invoice_number)
+  );
+  ''');
+  db.execute('''
+  CREATE INDEX IF NOT EXISTS idx_custom_invoices_store
+  ON custom_invoices (store_id, created_at DESC);
+  ''');
+ }
+
+ /// v4 — Cotações/orçamentos (add-on `ao_quotation`).
+ ///
+ /// Documento por loja com número sequencial dentro da loja
+ /// (`UNIQUE(store_id, quotation_number)` garante que MAX+1 nunca
+ /// duplica). O corpo completo é guardado como JSON (items snapshot,
+ /// estado, desconto, validade) — a cotação é um documento, não um
+ /// agregado com RPCs de dinheiro.
+ static void _schemaV4(Database db) {
+  db.execute('''
+  CREATE TABLE IF NOT EXISTS quotations (
+   id TEXT PRIMARY KEY,
+   store_id TEXT NOT NULL,
+   quotation_number INTEGER NOT NULL,
+   payload TEXT NOT NULL,
+   created_at INTEGER NOT NULL,
+   UNIQUE (store_id, quotation_number)
+  );
+  ''');
+  db.execute('''
+  CREATE INDEX IF NOT EXISTS idx_quotations_store
+  ON quotations (store_id, created_at DESC);
+  ''');
  }
 
 }

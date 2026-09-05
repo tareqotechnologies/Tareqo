@@ -1313,6 +1313,17 @@
   "quotationTitle": "Quotations",
   "quotationEmpty": "No quotations",
   "quotationEmptySubtitle": "Create quotations and estimates for your clients",
+  "quotationLoadError": "Couldn't load the quotations.",
+  "quotationLoadErrorHint": "Check your connection and try again.",
+  "quotationCreated": "Quotation #{number} created!",
+  "@quotationCreated": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "quotationSaveError": "Couldn't create the quotation. Try again.",
+  "quotationStatusSaved": "Quotation status updated",
+  "quotationStatusError": "Couldn't update the quotation. Try again.",
   "quotationTemplateTooltip": "Quotation template",
   "quotationNewFab": "New Quotation",
   "quotationItemsCount": "{count, plural, =1{1 item} other{{count} items}}",

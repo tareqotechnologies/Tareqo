@@ -2733,6 +2733,27 @@ class AppLocalizationsFr extends AppLocalizations {
       'Créez des devis et des estimations pour vos clients';
 
   @override
+  String get quotationLoadError => 'Impossible de charger les devis.';
+
+  @override
+  String get quotationLoadErrorHint => 'Vérifiez votre connexion et réessayez.';
+
+  @override
+  String quotationCreated(int number) {
+    return 'Devis n° $number créé !';
+  }
+
+  @override
+  String get quotationSaveError => 'Impossible de créer le devis. Réessayez.';
+
+  @override
+  String get quotationStatusSaved => 'Statut du devis mis à jour';
+
+  @override
+  String get quotationStatusError =>
+      'Impossible de mettre à jour le devis. Réessayez.';
+
+  @override
   String get quotationTemplateTooltip => 'Modèle de devis';
 
   @override

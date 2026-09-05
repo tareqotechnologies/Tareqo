@@ -1313,6 +1313,17 @@
   "quotationTitle": "Cotações / Orçamentos",
   "quotationEmpty": "Nenhuma cotação",
   "quotationEmptySubtitle": "Crie cotações e orçamentos para os seus clientes",
+  "quotationLoadError": "Não foi possível carregar as cotações.",
+  "quotationLoadErrorHint": "Verifique a conexão e tente novamente.",
+  "quotationCreated": "Cotação nº {number} criada!",
+  "@quotationCreated": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "quotationSaveError": "Não foi possível criar a cotação. Tente novamente.",
+  "quotationStatusSaved": "Estado da cotação actualizado",
+  "quotationStatusError": "Não foi possível actualizar a cotação. Tente novamente.",
   "quotationTemplateTooltip": "Modelo da Cotação",
   "quotationNewFab": "Nova Cotação",
   "quotationItemsCount": "{count, plural, =1{1 item} other{{count} itens}}",

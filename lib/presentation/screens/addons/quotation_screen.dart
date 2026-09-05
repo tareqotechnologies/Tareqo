@@ -11,9 +11,16 @@ import '../../../core/share/quotation_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/ids.dart';
+import '../../../domain/entities/customer.dart';
 import '../../../domain/entities/quotation.dart';
+import '../../../domain/entities/store.dart';
+import '../../../domain/usecases/quotation_use_cases.dart';
+import '../../controllers/account_providers.dart';
+import '../../controllers/auth_providers.dart';
 import '../../controllers/customers_providers.dart';
 import '../../controllers/products_providers.dart';
+import '../../controllers/quotation_providers.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
@@ -30,9 +37,22 @@ class QuotationScreen extends ConsumerStatefulWidget {
 }
 
 class _QuotationScreenState extends ConsumerState<QuotationScreen> {
-  final List<_QuotationDraft> _drafts = [];
-  int _quotationCounter = 0;
   final _templateConfig = _QuotationTemplateConfig();
+
+  /// Loja activa (as cotações são documento POR loja — número sequencial
+  /// dentro da loja). Resolvida como nas demais telas de dados.
+  String? _activeStoreId() {
+    final user = ref.watch(authStateProvider).value;
+    if (user == null) return null;
+    final tenant = ref.watch(myTenantProvider(user.id)).value;
+    if (tenant == null) return null;
+    final storeId = ref.watch(activeStoreIdProvider(user.id));
+    if (storeId != null) return storeId;
+    // Sem loja activa: cai para a primeira loja do tenant (como vendas).
+    final stores =
+        ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
+    return stores.isEmpty ? null : stores.first.id;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +60,13 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
     final horizontal = AppSpacing.pagePaddingForWidth(
       MediaQuery.sizeOf(context).width,
     );
+    final storeId = _activeStoreId();
+
+    // Cotações PERSISTIDAS desta loja (estado real, não lista local).
+    // Sem loja (ex.: onboarding incompleto) a tela mostra vazio honesto.
+    final quotationsAsync =
+        storeId == null ? null : ref.watch(quotationsProvider(storeId));
+    final quotations = quotationsAsync?.value ?? const <Quotation>[];
 
     return AppPage(
       title: l10n.quotationTitle,
@@ -51,31 +78,40 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
           tooltip: l10n.quotationTemplateTooltip,
         ),
       ],
-      body: _drafts.isEmpty
+      body: quotationsAsync?.hasError ?? false
           ? EmptyState(
-              icon: Icons.request_quote_outlined,
-              title: l10n.quotationEmpty,
-              subtitle: l10n.quotationEmptySubtitle,
-            )
-          : ListView.separated(
-              padding: EdgeInsets.fromLTRB(
-                horizontal,
-                AppSpacing.lg,
-                horizontal,
-                AppSpacing.lg,
-              ),
-              itemCount: _drafts.length,
-              separatorBuilder: (_, _) =>
-                  const SizedBox(height: AppSpacing.xs),
-              itemBuilder: (context, index) {
-                final draft = _drafts[index];
-                return _QuotationCard(
-                  draft: draft,
-                  quotationNumber: _quotationCounter - index,
-                  templateConfig: _templateConfig,
-                );
+              icon: Icons.error_outline,
+              title: l10n.quotationLoadError,
+              subtitle: l10n.quotationLoadErrorHint,
+              actionLabel: l10n.commonRetry,
+              onAction: () {
+                if (storeId != null) {
+                  ref.invalidate(quotationsProvider(storeId));
+                }
               },
-            ),
+            )
+          : quotations.isEmpty
+              ? EmptyState(
+                  icon: Icons.request_quote_outlined,
+                  title: l10n.quotationEmpty,
+                  subtitle: l10n.quotationEmptySubtitle,
+                )
+              : ListView.separated(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontal,
+                    AppSpacing.lg,
+                    horizontal,
+                    AppSpacing.lg,
+                  ),
+                  itemCount: quotations.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.xs),
+                  itemBuilder: (context, index) => _QuotationCard(
+                    quotation: quotations[index],
+                    templateConfig: _templateConfig,
+                    onStatusChanged: _updateStatus,
+                  ),
+                ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-quotation',
         onPressed: _openNewQuotation,
@@ -91,15 +127,97 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) => _NewQuotationSheet(
-        onSave: (draft) {
-          setState(() {
-            _quotationCounter++;
-            _drafts.insert(0, draft);
-          });
-          Navigator.of(context).pop();
-        },
+        onSave: _saveQuotation,
       ),
     );
+  }
+
+  /// Persiste a cotação de VERDADE (nunca lista em memória): valida via
+  /// use case de domínio e grava no repositório da loja activa.
+  Future<void> _saveQuotation(_QuotationDraft data) async {
+    final l10n = context.l10n;
+    final storeId = _activeStoreId();
+    if (storeId == null) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    // Fecha a sheet só após a gravação confirmada (loading honesto).
+    final navigator = Navigator.of(context);
+
+    try {
+      final entity = CreateQuotationUseCase().call(
+        storeId: storeId,
+        customer: Customer(
+          id: data.customerId ?? '',
+          storeId: storeId,
+          name: data.clientName,
+          phone: data.clientPhone,
+        ),
+        items: [
+          for (final item in data.items)
+            QuotationItemInput(
+              productId: '',
+              productName: item.name,
+              quantity: item.qty * 1000,
+              unitPriceCents: item.unitPriceCents,
+            ),
+        ],
+        validityDays: data.validityDays,
+      );
+      final saved = await ref
+          .read(quotationRepositoryProvider)
+          .add(entity.copyWith(id: AppIds.newId('qt')));
+      if (!mounted) return;
+      navigator.pop();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.quotationCreated(saved.number),
+          ),
+        ),
+      );
+      ref.invalidate(quotationsProvider(storeId));
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.quotationSaveError)),
+      );
+    }
+  }
+
+  /// Grava uma transição de estado (rascunho → enviada → aceite/rejeitada)
+  /// de VERDADE no repositório — nunca mutação local que some ao sair.
+  Future<void> _updateStatus(
+    Quotation quotation,
+    QuotationStatus status,
+  ) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final now = DateTime.now();
+
+    try {
+      final updated = quotation.copyWith(
+        status: status,
+        sentAt: status == QuotationStatus.sent ? now : quotation.sentAt,
+        acceptedAt:
+            status == QuotationStatus.accepted ? now : quotation.acceptedAt,
+        rejectedAt:
+            status == QuotationStatus.rejected ? now : quotation.rejectedAt,
+      );
+      await ref.read(quotationRepositoryProvider).update(updated);
+      final storeId = _activeStoreId();
+      if (storeId != null) {
+        ref.invalidate(quotationsProvider(storeId));
+      }
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.quotationStatusSaved)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.quotationStatusError)),
+      );
+    }
   }
 
   void _openTemplateSettings() {
@@ -113,12 +231,11 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
   }
 }
 
-enum _QuotationStatus { draft, sent, accepted, rejected }
-
 class _QuotationDraft {
   _QuotationDraft({
     required this.clientName,
     this.clientPhone = '',
+    this.customerId,
     required this.items,
     required this.totalCents,
     required this.validityDays,
@@ -126,12 +243,13 @@ class _QuotationDraft {
 
   final String clientName;
   final String clientPhone;
+
+  /// Cliente REAL seleccionado na sheet (null = nome digitado manualmente).
+  final String? customerId;
+
   final List<_QuotationItemData> items;
   final int totalCents;
   final int validityDays;
-
-  _QuotationStatus status = _QuotationStatus.draft;
-  DateTime createdAt = DateTime.now();
 }
 
 class _QuotationItemData {
@@ -152,20 +270,26 @@ class _QuotationItemData {
 
 class _QuotationCard extends StatelessWidget {
   const _QuotationCard({
-    required this.draft,
-    this.quotationNumber = 0,
+    required this.quotation,
     this.templateConfig,
+    required this.onStatusChanged,
   });
 
-  final _QuotationDraft draft;
-  final int quotationNumber;
+  /// Cotação PERSISTIDA (número sequencial real da loja vem da entidade).
+  final Quotation quotation;
   final _QuotationTemplateConfig? templateConfig;
+  final void Function(Quotation quotation, QuotationStatus status)
+  onStatusChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
+    final validityDays = quotation.validUntil
+        .difference(DateTime.now())
+        .inDays
+        .clamp(0, 365);
 
     return AppCard(
       elevated: true,
@@ -197,7 +321,7 @@ class _QuotationCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      draft.clientName,
+                      quotation.customerName,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -206,10 +330,10 @@ class _QuotationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.quotationNumberPrefix(quotationNumber.toString()
+                      l10n.quotationNumberPrefix(quotation.number.toString()
                               .padLeft(5, '0')) +
-                          (draft.clientPhone.isNotEmpty
-                              ? '  •  ${draft.clientPhone}'
+                          (quotation.customerPhone.isNotEmpty
+                              ? '  •  ${quotation.customerPhone}'
                               : ''),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
@@ -218,15 +342,16 @@ class _QuotationCard extends StatelessWidget {
                   ],
                 ),
               ),
-              _StatusChip(status: draft.status),
+              _StatusChip(status: quotation.status),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
           // Detalhes
           Text(
-            '${l10n.quotationItemsCount(draft.items.length)}'
-            '  •  ${l10n.quotationValidity}: ${l10n.quotationDays(draft.validityDays)}'
-            '  •  ${Formatters.currency(draft.totalCents)}',
+            '${l10n.quotationItemsCount(quotation.items.length)}'
+            '  •  ${l10n.quotationValidity}: '
+            '${l10n.quotationDays(validityDays)}'
+            '  •  ${Formatters.currency(quotation.totalAmountCents)}',
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -247,25 +372,29 @@ class _QuotationCard extends StatelessWidget {
                 onPressed: () => _exportPdf(context),
               ),
               const SizedBox(width: AppSpacing.xs),
-              if (draft.status == _QuotationStatus.draft)
+              if (quotation.status == QuotationStatus.draft)
                 AppButton.primary(
                   label: l10n.quotationSend,
                   icon: const Icon(Icons.send_outlined, size: 16),
                   onPressed: () =>
-                      draft.status = _QuotationStatus.sent,
+                      onStatusChanged(quotation, QuotationStatus.sent),
                 ),
-              if (draft.status == _QuotationStatus.sent) ...[
+              if (quotation.status == QuotationStatus.sent) ...[
                 AppButton.primary(
                   label: l10n.quotationAccept,
                   icon: const Icon(Icons.check_circle_outline, size: 16),
-                  onPressed: () =>
-                      draft.status = _QuotationStatus.accepted,
+                  onPressed: () => onStatusChanged(
+                    quotation,
+                    QuotationStatus.accepted,
+                  ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 AppButton.danger(
                   label: l10n.quotationReject,
-                  onPressed: () =>
-                      draft.status = _QuotationStatus.rejected,
+                  onPressed: () => onStatusChanged(
+                    quotation,
+                    QuotationStatus.rejected,
+                  ),
                 ),
               ],
             ],
@@ -280,22 +409,34 @@ class _QuotationCard extends StatelessWidget {
     final buffer = StringBuffer();
     buffer.writeln(l10n.quotationWhatsAppHeader);
     buffer.writeln('${l10n.customInvoiceNumberShort}: '
-        '${quotationNumber.toString().padLeft(5, '0')}');
-    buffer.writeln('${l10n.customInvoiceClientLabel}: ${draft.clientName}');
-    if (draft.clientPhone.isNotEmpty) {
-      buffer.writeln('${l10n.customInvoicePhoneLabel}: ${draft.clientPhone}');
-    }
-    buffer.writeln('${l10n.quotationValidity}: '
-        '${l10n.quotationDays(draft.validityDays)}');
-    buffer.writeln();
-    for (final item in draft.items) {
+        '${quotation.number.toString().padLeft(5, '0')}');
+    buffer.writeln(
+        '${l10n.customInvoiceClientLabel}: ${quotation.customerName}');
+    if (quotation.customerPhone.isNotEmpty) {
       buffer.writeln(
-        '• ${item.name} x${item.qty} — ${Formatters.currency(item.unitPriceCents * item.qty)}',
+          '${l10n.customInvoicePhoneLabel}: ${quotation.customerPhone}');
+    }
+    final validityDays = quotation.validUntil
+        .difference(DateTime.now())
+        .inDays
+        .clamp(0, 365);
+    buffer.writeln('${l10n.quotationValidity}: '
+        '${l10n.quotationDays(validityDays)}');
+    buffer.writeln();
+    for (final item in quotation.items) {
+      // Quantidade guardada em MILÉSIMOS (1000 = 1 unidade).
+      final units = item.quantity / 1000;
+      final unitsText = units == units.roundToDouble()
+          ? units.toStringAsFixed(0)
+          : units.toStringAsFixed(2);
+      buffer.writeln(
+        '• ${item.productName} x$unitsText — '
+        '${Formatters.currency((item.unitPriceCents * item.quantity / 1000).round())}',
       );
     }
     buffer.writeln();
     buffer.writeln('${l10n.customInvoiceTotalLabel}: '
-        '${Formatters.currency(draft.totalCents)}');
+        '${Formatters.currency(quotation.totalAmountCents)}');
 
     final uri = Uri.parse(
       'https://wa.me/?text=${Uri.encodeComponent(buffer.toString())}',
@@ -304,30 +445,14 @@ class _QuotationCard extends StatelessWidget {
   }
 
   Future<void> _exportPdf(BuildContext context) async {
-    final quotation = Quotation(
-      id: '',
-      number: quotationNumber,
-      storeId: '',
-      customerId: '',
-      customerName: draft.clientName,
-      items: [
-        for (final item in draft.items)
-          QuotationItem(
-            productId: '',
-            productName: item.name,
-            quantity: item.qty * 1000,
-            unitPriceCents: item.unitPriceCents,
-          ),
-      ],
-      totalAmountCents: draft.totalCents,
-      validUntil: DateTime.now().add(Duration(days: draft.validityDays)),
-      createdAt: DateTime.now(),
-    );
+    // Exporta a cotação PERSISTIDA tal como está (número, itens, estado,
+    // validade reais) — sem reconstruir uma entidade sintética.
+    final quotationEntity = quotation;
 
     final config = templateConfig ?? _QuotationTemplateConfig();
     final l10n = context.l10n;
     await QuotationPdfExporter().sharePdf(
-      quotation,
+      quotationEntity,
       labels: QuotationPdfLabels(
         docWord: l10n.pdfQuotationDocWord,
         numberLabelTemplate: l10n.quotationNumberPrefix('{number}'),
@@ -671,6 +796,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
                       widget.onSave(_QuotationDraft(
                         clientName: _clientController.text.trim(),
                         clientPhone: _phoneController.text.trim(),
+                        customerId: _selectedCustomerId,
                         items: List.from(_items),
                         totalCents: _totalCents,
                         validityDays: 7,
@@ -1064,7 +1190,7 @@ class _QuotationTemplateSettingsSheetState
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.status});
 
-  final _QuotationStatus status;
+  final QuotationStatus status;
 
   @override
   Widget build(BuildContext context) {
@@ -1072,10 +1198,18 @@ class _StatusChip extends StatelessWidget {
     final l10n = context.l10n;
 
     final (label, color) = switch (status) {
-      _QuotationStatus.draft => (l10n.quotationStatusDraft, AppColors.statusWarning),
-      _QuotationStatus.sent => (l10n.quotationStatusSent, AppColors.statusInfo),
-      _QuotationStatus.accepted => (l10n.quotationStatusAccepted, AppColors.success),
-      _QuotationStatus.rejected => (l10n.quotationStatusRejected, AppColors.statusError),
+      QuotationStatus.draft =>
+        (l10n.quotationStatusDraft, AppColors.statusWarning),
+      QuotationStatus.sent =>
+        (l10n.quotationStatusSent, AppColors.statusInfo),
+      QuotationStatus.accepted =>
+        (l10n.quotationStatusAccepted, AppColors.success),
+      QuotationStatus.rejected =>
+        (l10n.quotationStatusRejected, AppColors.statusError),
+      QuotationStatus.expired =>
+        (l10n.quotationStatusExpired, AppColors.statusError),
+      QuotationStatus.converted =>
+        (l10n.quotationStatusConverted, AppColors.success),
     };
 
     return Container(
