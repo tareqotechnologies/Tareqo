@@ -78,15 +78,15 @@ final class AdminMessageSupabaseDataSourceImpl
   }
 
   AdminMessage _map(Map<String, dynamic> row) => AdminMessage(
-        id: row['id'] as String,
-        tenantId: row['tenant_id'] as String,
-        type: AdminMessageType.values.byName(row['type'] as String),
-        title: row['title'] as String,
-        body: row['body'] as String,
-        isRead: row['is_read'] as bool? ?? false,
-        createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
-        readAt: row['read_at'] == null
-            ? null
-            : DateTime.parse(row['read_at'] as String).toLocal(),
-      );
+    id: row['id'] as String,
+    tenantId: row['tenant_id'] as String,
+    type: AdminMessageType.values.byName(row['type'] as String),
+    title: row['title'] as String,
+    body: row['body'] as String,
+    isRead: row['is_read'] as bool? ?? false,
+    createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
+    readAt: row['read_at'] == null
+        ? null
+        : DateTime.parse(row['read_at'] as String).toLocal(),
+  );
 }

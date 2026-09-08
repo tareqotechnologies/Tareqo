@@ -17,8 +17,7 @@ final class EmployeeManagementRepositoryImpl
   Future<List<EmployeeAttendance>> getAttendance({
     required String storeId,
     required String workDate,
-  }) =>
-      _dataSource.getAttendance(storeId: storeId, workDate: workDate);
+  }) => _dataSource.getAttendance(storeId: storeId, workDate: workDate);
 
   @override
   Future<EmployeeAttendance> clockIn({
@@ -27,14 +26,13 @@ final class EmployeeManagementRepositoryImpl
     required String workDate,
     required DateTime clockIn,
     String? recordedBy,
-  }) =>
-      _dataSource.clockIn(
-        storeId: storeId,
-        userId: userId,
-        workDate: workDate,
-        clockIn: clockIn,
-        recordedBy: recordedBy,
-      );
+  }) => _dataSource.clockIn(
+    storeId: storeId,
+    userId: userId,
+    workDate: workDate,
+    clockIn: clockIn,
+    recordedBy: recordedBy,
+  );
 
   @override
   Future<EmployeeAttendance> clockOut({
@@ -42,38 +40,34 @@ final class EmployeeManagementRepositoryImpl
     required String userId,
     required String workDate,
     required DateTime clockOut,
-  }) =>
-      _dataSource.clockOut(
-        storeId: storeId,
-        userId: userId,
-        workDate: workDate,
-        clockOut: clockOut,
-      );
+  }) => _dataSource.clockOut(
+    storeId: storeId,
+    userId: userId,
+    workDate: workDate,
+    clockOut: clockOut,
+  );
 
   @override
   Future<List<EmployeeCommissionRate>> getCommissionRates({
     required String storeId,
-  }) =>
-      _dataSource.getCommissionRates(storeId: storeId);
+  }) => _dataSource.getCommissionRates(storeId: storeId);
 
   @override
   Future<void> setCommissionRate({
     required String storeId,
     required String userId,
     required int rateBps,
-  }) =>
-      _dataSource.setCommissionRate(
-        storeId: storeId,
-        userId: userId,
-        rateBps: rateBps,
-      );
+  }) => _dataSource.setCommissionRate(
+    storeId: storeId,
+    userId: userId,
+    rateBps: rateBps,
+  );
 
   @override
   Future<List<EmployeeTarget>> getTargets({
     required String storeId,
     String? month,
-  }) =>
-      _dataSource.getTargets(storeId: storeId, month: month);
+  }) => _dataSource.getTargets(storeId: storeId, month: month);
 
   @override
   Future<void> setTarget({
@@ -81,13 +75,12 @@ final class EmployeeManagementRepositoryImpl
     required String userId,
     required String month,
     required int targetCents,
-  }) =>
-      _dataSource.setTarget(
-        storeId: storeId,
-        userId: userId,
-        month: month,
-        targetCents: targetCents,
-      );
+  }) => _dataSource.setTarget(
+    storeId: storeId,
+    userId: userId,
+    month: month,
+    targetCents: targetCents,
+  );
 
   @override
   Future<void> removeTarget(String id, {required String storeId}) =>

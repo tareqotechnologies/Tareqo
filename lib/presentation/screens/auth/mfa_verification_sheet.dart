@@ -12,7 +12,8 @@ class MFAVerificationSheet extends ConsumerStatefulWidget {
   const MFAVerificationSheet({super.key});
 
   @override
-  ConsumerState<MFAVerificationSheet> createState() => _MFAVerificationSheetState();
+  ConsumerState<MFAVerificationSheet> createState() =>
+      _MFAVerificationSheetState();
 }
 
 class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
@@ -28,9 +29,9 @@ class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
   Future<void> _verifyCode() async {
     final code = _codeController.text.trim();
     if (code.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.mfaCodeLengthError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.mfaCodeLengthError)));
       return;
     }
 
@@ -38,7 +39,7 @@ class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
 
     try {
       final isValid = await ref.read(mfaAuthUseCaseProvider).verifyCode(code);
-      
+
       if (isValid) {
         setState(() => _isVerifying = false);
         if (mounted) {
@@ -47,9 +48,9 @@ class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
       } else {
         setState(() => _isVerifying = false);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.mfaInvalidCode)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(context.l10n.mfaInvalidCode)));
         }
       }
     } catch (e) {

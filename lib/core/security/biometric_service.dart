@@ -31,8 +31,20 @@ class BiometricService {
 
   /// Authenticate with biometrics
   /// Returns true if authentication succeeds, false otherwise
+  ///
+  /// As mensagens do prompt (sistema Android/iOS) são parametrizáveis para
+  /// seguir o idioma ativo do app (auditoria M3): os callers passam os
+  /// valores de `context.l10n`. Os defaults em pt preservam o
+  /// comportamento anterior para chamadas sem localização.
   Future<bool> authenticate({
     String localizedReason = 'Autenticação biométrica',
+    String signInTitle = 'Autenticação Biométrica',
+    String biometricHint = 'Toque no sensor',
+    String cancelButton = 'Cancelar',
+    String fallbackTitle = 'Usar senha',
+    String goToSettingsButton = 'Configurações',
+    String goToSettingsDescription = 'Configure a autenticação biométrica',
+    String lockOut = 'Tente novamente mais tarde',
     bool useErrorDialogs = true,
     bool stickyAuth = true,
     bool biometricOnly = false,
@@ -47,16 +59,16 @@ class BiometricService {
         ),
         authMessages: [
           AndroidAuthMessages(
-            signInTitle: 'Autenticação Biométrica',
-            biometricHint: 'Toque no sensor',
-            cancelButton: 'Cancelar',
+            signInTitle: signInTitle,
+            biometricHint: biometricHint,
+            cancelButton: cancelButton,
           ),
           IOSAuthMessages(
-            cancelButton: 'Cancelar',
-            localizedFallbackTitle: 'Usar senha',
-            goToSettingsButton: 'Configurações',
-            goToSettingsDescription: 'Configure a autenticação biométrica',
-            lockOut: 'Tente novamente mais tarde',
+            cancelButton: cancelButton,
+            localizedFallbackTitle: fallbackTitle,
+            goToSettingsButton: goToSettingsButton,
+            goToSettingsDescription: goToSettingsDescription,
+            lockOut: lockOut,
           ),
         ],
       );

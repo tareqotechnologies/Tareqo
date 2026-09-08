@@ -23,14 +23,14 @@ import '../../helpers/test_sqlite.dart';
 class _FakeGetProductsUseCase implements GetProductsUseCase {
   @override
   Future<List<Product>> call({required String storeId}) async => const [
-        Product(
-          id: 'p1',
-          name: 'Caneta',
-          purchasePriceCents: 100,
-          salePriceCents: 200,
-          stockQuantity: 1000,
-        ),
-      ];
+    Product(
+      id: 'p1',
+      name: 'Caneta',
+      purchasePriceCents: 100,
+      salePriceCents: 200,
+      stockQuantity: 1000,
+    ),
+  ];
 }
 
 /// Sem clientes cadastrados — a sheet cai no campo manual "Nome do
@@ -95,30 +95,33 @@ void main() {
   setUp(() => db = openTestDatabase());
   tearDown(() => db.close());
 
-  testWidgets('cria factura pela UI e PERSISTE no SQLite (reabre e continua lá)',
-      (tester) async {
-    await _pumpInvoice(tester, db);
+  testWidgets(
+    'cria factura pela UI e PERSISTE no SQLite (reabre e continua lá)',
+    (tester) async {
+      await _pumpInvoice(tester, db);
 
-    // Estado vazio honesto (nada em memória).
-    expect(find.text('Nenhuma factura'), findsOneWidget);
+      // Estado vazio honesto (nada em memória).
+      expect(find.text('Nenhuma factura'), findsOneWidget);
 
-    await _createInvoice(tester, clientName: 'João Silva');
+      await _createInvoice(tester, clientName: 'João Silva');
 
-    // Snackbar com o número SEQUENCIAL real (1 = primeira da loja).
-    expect(find.text('Factura nº 1 criada!'), findsOneWidget);
-    expect(find.text('João Silva'), findsOneWidget);
-    expect(find.text('Nº 00001'), findsOneWidget);
+      // Snackbar com o número SEQUENCIAL real (1 = primeira da loja).
+      expect(find.text('Factura nº 1 criada!'), findsOneWidget);
+      expect(find.text('João Silva'), findsOneWidget);
+      expect(find.text('Nº 00001'), findsOneWidget);
 
-    // ── Prova de persistência: árvore NOVA, mesmo banco → a factura vem
-    // do SQLite (não de estado do widget). Número e cliente intactos.
-    await _pumpInvoice(tester, db);
-    expect(find.text('Nenhuma factura'), findsNothing);
-    expect(find.text('João Silva'), findsOneWidget);
-    expect(find.text('Nº 00001'), findsOneWidget);
-  });
+      // ── Prova de persistência: árvore NOVA, mesmo banco → a factura vem
+      // do SQLite (não de estado do widget). Número e cliente intactos.
+      await _pumpInvoice(tester, db);
+      expect(find.text('Nenhuma factura'), findsNothing);
+      expect(find.text('João Silva'), findsOneWidget);
+      expect(find.text('Nº 00001'), findsOneWidget);
+    },
+  );
 
-  testWidgets('números sequenciais por loja (MAX+1 real no banco)',
-      (tester) async {
+  testWidgets('números sequenciais por loja (MAX+1 real no banco)', (
+    tester,
+  ) async {
     await _pumpInvoice(tester, db);
 
     await _createInvoice(tester, clientName: 'Ana Souza');
@@ -138,8 +141,9 @@ void main() {
     expect(find.text('Nº 00002'), findsOneWidget);
   });
 
-  testWidgets('botão criar só habilita com cliente e item válidos',
-      (tester) async {
+  testWidgets('botão criar só habilita com cliente e item válidos', (
+    tester,
+  ) async {
     await _pumpInvoice(tester, db);
 
     await tester.tap(find.byType(FloatingActionButton));
@@ -153,5 +157,20 @@ void main() {
       ),
     );
     expect(createButton.onPressed, isNull);
+  });
+
+  testWidgets('nome de cliente longo nunca trunca nem estoura o card', (
+    tester,
+  ) async {
+    await _pumpInvoice(tester, db);
+
+    // Nome suficientemente longo para expor truncatura/overflow — o card
+    // deve quebrar o texto em linhas e renderizar SEM excessões de layout.
+    const longName =
+        'Cliente Comercial de Teste de Moçambique Limitada — Filial da Avenida';
+    await _createInvoice(tester, clientName: longName);
+
+    expect(tester.takeException(), isNull);
+    expect(find.text(longName), findsOneWidget);
   });
 }

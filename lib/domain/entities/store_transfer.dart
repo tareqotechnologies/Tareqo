@@ -29,10 +29,12 @@ abstract class StoreTransfer with _$StoreTransfer {
     required String toStoreName,
     @Default(<StoreTransferItem>[]) List<StoreTransferItem> items,
     @Default(TransferStatus.pending) TransferStatus status,
+
     /// Notas/justificativa da transferência.
     @Default('') String notes,
     DateTime? shippedAt,
     DateTime? receivedAt,
+
     /// ID do funcionário que autorizou.
     @Default('') String authorizedByUserId,
     required DateTime createdAt,
@@ -48,6 +50,7 @@ abstract class StoreTransferItem with _$StoreTransferItem {
   const factory StoreTransferItem({
     required String productId,
     required String productName,
+
     /// Quantidade em milésimos.
     required int quantity,
   }) = _StoreTransferItem;

@@ -25,6 +25,7 @@ import '../../widgets/app_card.dart';
 import '../../widgets/color_palette.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
+import 'custom_invoice_preview.dart';
 
 /// Ecra de facturas personalizadas — criação e gestão de facturas
 /// com layout customizável.
@@ -37,6 +38,8 @@ class CustomInvoiceScreen extends ConsumerStatefulWidget {
 }
 
 class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
+  /// Template salvo ao longo da sessão (configuração do PDF / ícones).
+  /// Template salvo ao longo da sessão (configuração do PDF / ícones).
   final _templateConfig = InvoiceTemplateConfig();
 
   /// Loja activa (as facturas são documento POR loja — número sequencial
@@ -64,8 +67,9 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
 
     // Facturas PERSISTIDAS desta loja (estado real, não lista local).
     // Sem loja (ex.: onboarding incompleto) a tela mostra vazio honesto.
-    final invoicesAsync =
-        storeId == null ? null : ref.watch(customInvoicesProvider(storeId));
+    final invoicesAsync = storeId == null
+        ? null
+        : ref.watch(customInvoicesProvider(storeId));
     final invoices = invoicesAsync?.value ?? const <CustomInvoice>[];
 
     return AppPage(
@@ -91,26 +95,25 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
               },
             )
           : invoices.isEmpty
-              ? EmptyState(
-                  icon: Icons.receipt_long_outlined,
-                  title: l10n.customInvoiceEmpty,
-                  subtitle: l10n.customInvoiceEmptySubtitle,
-                )
-              : ListView.separated(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontal,
-                    AppSpacing.lg,
-                    horizontal,
-                    AppSpacing.lg,
-                  ),
-                  itemCount: invoices.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.xs),
-                  itemBuilder: (context, index) => _InvoiceCard(
-                    invoice: invoices[index],
-                    templateConfig: _templateConfig,
-                  ),
-                ),
+          ? EmptyState(
+              icon: Icons.receipt_long_outlined,
+              title: l10n.customInvoiceEmpty,
+              subtitle: l10n.customInvoiceEmptySubtitle,
+            )
+          : ListView.separated(
+              padding: EdgeInsets.fromLTRB(
+                horizontal,
+                AppSpacing.lg,
+                horizontal,
+                AppSpacing.lg,
+              ),
+              itemCount: invoices.length,
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
+              itemBuilder: (context, index) => _InvoiceCard(
+                invoice: invoices[index],
+                templateConfig: _templateConfig,
+              ),
+            ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-invoice',
         onPressed: _openNewInvoice,
@@ -125,9 +128,7 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => _NewInvoiceSheet(
-        onSave: _saveInvoice,
-      ),
+      builder: (_) => _NewInvoiceSheet(onSave: _saveInvoice),
     );
   }
 
@@ -165,11 +166,7 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
       if (!mounted) return;
       navigator.pop();
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.customInvoiceCreated(saved.number),
-          ),
-        ),
+        SnackBar(content: Text(l10n.customInvoiceCreated(saved.number))),
       );
       ref.invalidate(customInvoicesProvider(storeId));
     } catch (_) {
@@ -227,10 +224,7 @@ class _InvoiceItemData {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _InvoiceCard extends StatelessWidget {
-  const _InvoiceCard({
-    required this.invoice,
-    this.templateConfig,
-  });
+  const _InvoiceCard({required this.invoice, this.templateConfig});
 
   /// Factura PERSISTIDA (número sequencial real da loja vem da entidade).
   final CustomInvoice invoice;
@@ -273,17 +267,18 @@ class _InvoiceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+                      // Nome COMPLETO — quebra em linhas quando necessário
+                      // (nunca truncar o nome do cliente).
                       invoice.clientName,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.customInvoiceNumberPrefix(invoice.number.toString()
-                              .padLeft(5, '0')) +
+                      l10n.customInvoiceNumberPrefix(
+                            invoice.number.toString().padLeft(5, '0'),
+                          ) +
                           (invoice.clientPhone.isNotEmpty
                               ? '  •  ${invoice.clientPhone}'
                               : ''),
@@ -312,15 +307,17 @@ class _InvoiceCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          // Acções
-          Row(
+          // Acções — Wrap (não Row): em ecrãs estreitos os botões fluem
+          // para a linha seguinte em vez de estourarem/cortarem o rótulo.
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             children: [
               AppButton.secondary(
                 label: l10n.customInvoiceWhatsApp,
                 icon: const Icon(Icons.share_outlined, size: 16),
                 onPressed: () => _shareWhatsApp(context),
               ),
-              const SizedBox(width: AppSpacing.xs),
               AppButton.secondary(
                 label: l10n.customInvoicePdf,
                 icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
@@ -337,8 +334,9 @@ class _InvoiceCard extends StatelessWidget {
     final l10n = context.l10n;
     final buffer = StringBuffer();
     buffer.writeln(l10n.customInvoiceWhatsAppHeader);
-    buffer
-        .writeln('${l10n.customInvoiceNumberShort}: ${invoice.number.toString().padLeft(5, '0')}');
+    buffer.writeln(
+      '${l10n.customInvoiceNumberShort}: ${invoice.number.toString().padLeft(5, '0')}',
+    );
     buffer.writeln('${l10n.customInvoiceClientLabel}: ${invoice.clientName}');
     if (invoice.clientPhone.isNotEmpty) {
       buffer.writeln('${l10n.customInvoicePhoneLabel}: ${invoice.clientPhone}');
@@ -350,7 +348,9 @@ class _InvoiceCard extends StatelessWidget {
       );
     }
     buffer.writeln();
-    buffer.writeln('${l10n.customInvoiceTotalLabel}: ${Formatters.currency(invoice.totalAmountCents)}');
+    buffer.writeln(
+      '${l10n.customInvoiceTotalLabel}: ${Formatters.currency(invoice.totalAmountCents)}',
+    );
 
     final uri = Uri.parse(
       'https://wa.me/?text=${Uri.encodeComponent(buffer.toString())}',
@@ -391,12 +391,15 @@ class _InvoiceCard extends StatelessWidget {
       businessName: config.businessName.isNotEmpty
           ? config.businessName
           : l10n.businessFallbackName,
-      businessAddress:
-          config.businessAddress.isNotEmpty ? config.businessAddress : null,
-      businessPhone:
-          config.businessPhone.isNotEmpty ? config.businessPhone : null,
-      businessTaxId:
-          config.businessTaxId.isNotEmpty ? config.businessTaxId : null,
+      businessAddress: config.businessAddress.isNotEmpty
+          ? config.businessAddress
+          : null,
+      businessPhone: config.businessPhone.isNotEmpty
+          ? config.businessPhone
+          : null,
+      businessTaxId: config.businessTaxId.isNotEmpty
+          ? config.businessTaxId
+          : null,
       logoBytes: config.logoBytes,
       primaryColor: _flutterColorToPdf(config.primaryColor),
     );
@@ -457,11 +460,13 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
     if (price <= 0 || qty <= 0) return;
 
     setState(() {
-      _items.add(_InvoiceItemData(
-        name: product.name,
-        qty: qty,
-        unitPriceCents: (price * 100).round(),
-      ));
+      _items.add(
+        _InvoiceItemData(
+          name: product.name,
+          qty: qty,
+          unitPriceCents: (price * 100).round(),
+        ),
+      );
       _selectedProductId = null;
       _priceController.clear();
       _qtyController.text = '1';
@@ -516,34 +521,34 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             const SizedBox(height: 6),
             if (customers.isNotEmpty)
               DropdownButtonFormField<String>(
-                  initialValue: _selectedCustomerId,
-                  isExpanded: true,
-                  menuMaxHeight: 250,
-                  decoration: InputDecoration(
-                    labelText: l10n.customInvoiceClientSection,
-                    prefixIcon: const Icon(Icons.person_outline, size: 20),
-                  ),
-                  items: customers
-                      .map(
-                        (c) => DropdownMenuItem(
-                          value: c.id,
-                          child: Text(
-                            '${c.name}${c.phone.isNotEmpty ? ' (${c.phone})' : ''}',
-                            style: theme.textTheme.bodySmall,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                initialValue: _selectedCustomerId,
+                isExpanded: true,
+                menuMaxHeight: 250,
+                decoration: InputDecoration(
+                  labelText: l10n.customInvoiceClientSection,
+                  prefixIcon: const Icon(Icons.person_outline, size: 20),
+                ),
+                items: customers
+                    .map(
+                      (c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Text(
+                          '${c.name}${c.phone.isNotEmpty ? ' (${c.phone})' : ''}',
+                          style: theme.textTheme.bodySmall,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      )
-                      .toList(),
-                  onChanged: (id) {
-                    setState(() {
-                      _selectedCustomerId = id;
-                      final c = customers.firstWhere((x) => x.id == id);
-                      _clientController.text = c.name;
-                      _phoneController.text = c.phone;
-                    });
-                  },
-                )
+                      ),
+                    )
+                    .toList(),
+                onChanged: (id) {
+                  setState(() {
+                    _selectedCustomerId = id;
+                    final c = customers.firstWhere((x) => x.id == id);
+                    _clientController.text = c.name;
+                    _phoneController.text = c.phone;
+                  });
+                },
+              )
             else
               AppTextField(
                 controller: _clientController,
@@ -572,69 +577,66 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             const SizedBox(height: 6),
             if (activeProducts.isNotEmpty)
               DropdownButtonFormField<String>(
-                  initialValue: _selectedProductId,
-                  isExpanded: true,
-                  menuMaxHeight: 250,
-                  decoration: InputDecoration(
-                    labelText: l10n.customInvoiceProductSection,
-                    prefixIcon:
-                        const Icon(Icons.inventory_2_outlined, size: 20),
-                  ),
-                  items: activeProducts
-                      .map(
-                        (p) => DropdownMenuItem(
-                          value: p.id,
-                          // Linha ÚNICA: o item seleccionado é exibido no
-                          // campo de altura compacta — uma Column de duas
-                          // linhas estourava o InputDecorator em 7px
-                          // (RenderFlex overflow) ao seleccionar o produto.
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  p.name,
-                                  style: theme.textTheme.bodySmall
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Text(
-                                l10n.customInvoiceProductOption(
-                                  (p.stockQuantity ~/ 1000).toString(),
-                                  p.unitLabel,
-                                  Formatters.currency(p.salePriceCents),
-                                ),
+                initialValue: _selectedProductId,
+                isExpanded: true,
+                menuMaxHeight: 250,
+                decoration: InputDecoration(
+                  labelText: l10n.customInvoiceProductSection,
+                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                ),
+                items: activeProducts
+                    .map(
+                      (p) => DropdownMenuItem(
+                        value: p.id,
+                        // Linha ÚNICA: o item seleccionado é exibido no
+                        // campo de altura compacta — uma Column de duas
+                        // linhas estourava o InputDecorator em 7px
+                        // (RenderFlex overflow) ao seleccionar o produto.
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                p.name,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: scheme.onSurfaceVariant
-                                      .withValues(alpha: 0.6),
-                                  fontSize: 11,
+                                  fontWeight: FontWeight.w400,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(
+                              l10n.customInvoiceProductOption(
+                                (p.stockQuantity ~/ 1000).toString(),
+                                p.unitLabel,
+                                Formatters.currency(p.salePriceCents),
+                              ),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurfaceVariant.withValues(
+                                  alpha: 0.6,
+                                ),
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
                         ),
-                      )
-                      .toList(),
-                  onChanged: (id) {
-                    setState(() {
-                      _selectedProductId = id;
-                      final p =
-                          activeProducts.firstWhere((x) => x.id == id);
-                      _priceController.text =
-                          (p.salePriceCents / 100).toStringAsFixed(2);
-                    });
-                  },
-                )
+                      ),
+                    )
+                    .toList(),
+                onChanged: (id) {
+                  setState(() {
+                    _selectedProductId = id;
+                    final p = activeProducts.firstWhere((x) => x.id == id);
+                    _priceController.text = (p.salePriceCents / 100)
+                        .toStringAsFixed(2);
+                  });
+                },
+              )
             else
               InputDecorator(
                 decoration: InputDecoration(
                   hintText: l10n.customInvoiceProductPlaceholder,
-                  prefixIcon:
-                      const Icon(Icons.inventory_2_outlined, size: 20),
+                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -678,38 +680,33 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             if (_items.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
               ..._items.asMap().entries.map(
-                    (entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${entry.value.name} x${entry.value.qty}',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                          ),
-                          Text(
-                            Formatters.currency(
-                              entry.value.unitPriceCents * entry.value.qty,
-                            ),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          InkWell(
-                            onTap: () =>
-                                setState(() => _items.removeAt(entry.key)),
-                            child: Icon(
-                              Icons.close,
-                              size: 16,
-                              color: scheme.error,
-                            ),
-                          ),
-                        ],
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${entry.value.name} x${entry.value.qty}',
+                          style: theme.textTheme.bodyMedium,
+                        ),
                       ),
-                    ),
+                      Text(
+                        Formatters.currency(
+                          entry.value.unitPriceCents * entry.value.qty,
+                        ),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: () => setState(() => _items.removeAt(entry.key)),
+                        child: Icon(Icons.close, size: 16, color: scheme.error),
+                      ),
+                    ],
                   ),
+                ),
+              ),
               const SizedBox(height: AppSpacing.sm),
               AppTextField(
                 controller: _discountController,
@@ -744,8 +741,8 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             AppButton.primary(
               expanded: true,
               label: l10n.customInvoiceCreate,
-              onPressed: _clientController.text.trim().isNotEmpty &&
-                      _items.isNotEmpty
+              onPressed:
+                  _clientController.text.trim().isNotEmpty && _items.isNotEmpty
                   ? () {
                       widget.onSave(
                         _InvoiceData(
@@ -792,7 +789,6 @@ class InvoiceTemplateConfig {
   Color primaryColor;
   String templateStyle;
 }
-
 
 class _TemplateSettingsSheet extends StatefulWidget {
   const _TemplateSettingsSheet({required this.config});
@@ -921,8 +917,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
               child: Container(
                 height: 100,
                 decoration: BoxDecoration(
-                  color:
-                      scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   borderRadius: AppRadius.lgAll,
                   border: Border.all(
                     color: scheme.outlineVariant,
@@ -967,8 +962,9 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
                           Icon(
                             Icons.add_a_photo_outlined,
                             size: 28,
-                            color: scheme.onSurfaceVariant
-                                .withValues(alpha: 0.5),
+                            color: scheme.onSurfaceVariant.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -985,7 +981,8 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
 
             // ─── Cor Principal ──
             _SectionLabel(text: l10n.customInvoiceTemplateColorSection),
-            const SizedBox(height: AppSpacing.sm),              Wrap(
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
               children: kColorPalettes.entries.map((entry) {
@@ -994,8 +991,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
                 return Tooltip(
                   message: paletteColorName(entry.key, l10n),
                   child: GestureDetector(
-                    onTap: () =>
-                        setState(() => _selectedColor = entry.value),
+                    onTap: () => setState(() => _selectedColor = entry.value),
                     child: Container(
                       width: 48,
                       height: 48,
@@ -1003,18 +999,11 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
                         color: entry.value,
                         shape: BoxShape.circle,
                         border: isSelected
-                            ? Border.all(
-                                color: scheme.onSurface,
-                                width: 3,
-                              )
+                            ? Border.all(color: scheme.onSurface, width: 3)
                             : null,
                       ),
                       child: isSelected
-                          ? Icon(
-                              Icons.check,
-                              size: 18,
-                              color: scheme.surface,
-                            )
+                          ? Icon(Icons.check, size: 18, color: scheme.surface)
                           : null,
                     ),
                   ),
@@ -1033,8 +1022,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
                     name: l10n.customInvoiceTemplateStyleClassic,
                     icon: Icons.receipt_long_outlined,
                     isSelected: _selectedTemplate == 'Classic',
-                    onTap: () =>
-                        setState(() => _selectedTemplate = 'Classic'),
+                    onTap: () => setState(() => _selectedTemplate = 'Classic'),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
@@ -1043,8 +1031,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
                     name: l10n.customInvoiceTemplateStyleModern,
                     icon: Icons.auto_awesome_outlined,
                     isSelected: _selectedTemplate == 'Modern',
-                    onTap: () =>
-                        setState(() => _selectedTemplate = 'Modern'),
+                    onTap: () => setState(() => _selectedTemplate = 'Modern'),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
@@ -1053,8 +1040,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
                     name: l10n.customInvoiceTemplateStyleCompact,
                     icon: Icons.view_stream_outlined,
                     isSelected: _selectedTemplate == 'Compact',
-                    onTap: () =>
-                        setState(() => _selectedTemplate = 'Compact'),
+                    onTap: () => setState(() => _selectedTemplate = 'Compact'),
                   ),
                 ),
               ],
@@ -1101,14 +1087,13 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
             // ─── Preview ──
             _SectionLabel(text: l10n.commonPreview),
             const SizedBox(height: AppSpacing.sm),
-            _InvoicePreview(
+            CustomInvoicePreview(
               businessName: _nameController.text,
               businessAddress: _addressController.text,
               businessPhone: _phoneController.text,
               businessTaxId: _taxIdController.text,
               logoBytes: _logoBytes,
               primaryColor: _selectedColor,
-              templateStyle: _selectedTemplate,
             ),
             const SizedBox(height: AppSpacing.lg),
 
@@ -1137,11 +1122,7 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
 
 /// Converte uma [Color] do Flutter para [PdfColor] do pdf package.
 PdfColor _flutterColorToPdf(Color color) {
-  return PdfColor(
-    color.r / 255,
-    color.g / 255,
-    color.b / 255,
-  );
+  return PdfColor(color.r / 255, color.g / 255, color.b / 255);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1158,9 +1139,9 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.2,
-          ),
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.2,
+      ),
     );
   }
 }
@@ -1168,373 +1149,6 @@ class _SectionLabel extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════════
 // Invoice Preview — miniatura profissional do PDF
 // ═══════════════════════════════════════════════════════════════════════════════
-
-class _InvoicePreview extends StatelessWidget {
-  const _InvoicePreview({
-    required this.businessName,
-    required this.businessAddress,
-    required this.businessPhone,
-    required this.businessTaxId,
-    this.logoBytes,
-    required this.primaryColor,
-    required this.templateStyle,
-  });
-
-  final String businessName;
-  final String businessAddress;
-  final String businessPhone;
-  final String businessTaxId;
-  final Uint8List? logoBytes;
-  final Color primaryColor;
-  final String templateStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final displayName = businessName.isNotEmpty ? businessName : 'Nome da Empresa';
-
-    // Cor escura para texto (mesma lógica do PDF exporter).
-    final primaryDark = HSLColor.fromColor(primaryColor)
-        .withLightness((HSLColor.fromColor(primaryColor).lightness * 0.7).clamp(0.0, 1.0))
-        .toColor();
-
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.4),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Barra superior simulando o topo da página PDF
-          Container(
-            height: 4,
-            color: primaryColor,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ─── Cabeçalho: empresa + badge FACTURA ──
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Logotipo + dados da empresa
-                    Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (logoBytes != null) ...[
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: Image.memory(
-                                logoBytes!,
-                                width: 32,
-                                height: 32,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  displayName,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: primaryDark,
-                                    fontSize: 13,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (businessAddress.isNotEmpty)
-                                  Text(
-                                    businessAddress,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: scheme.onSurfaceVariant,
-                                      fontSize: 9,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                if (businessPhone.isNotEmpty)
-                                  Text(
-                                    businessPhone,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: scheme.onSurfaceVariant,
-                                      fontSize: 9,
-                                    ),
-                                  ),
-                                if (businessTaxId.isNotEmpty)
-                                  Text(
-                                    'NIF: $businessTaxId',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: scheme.onSurfaceVariant,
-                                      fontSize: 9,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Badge FACTURA
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'FACTURA',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                // Nº + data
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    'Nº 00001  •  03/09/2026',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      fontSize: 9,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Divisor
-                Divider(height: 1, color: scheme.outlineVariant.withValues(alpha: 0.4)),
-                const SizedBox(height: 8),
-                // ─── Cliente ──
-                Text(
-                  'CLIENTE',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 8,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurfaceVariant,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'João Silva',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 11,
-                  ),
-                ),
-                Text(
-                  'Tel: 84 123 4567',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    fontSize: 9,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // ─── Tabela de itens (miniatura) ──
-                // Header
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: primaryColor,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(4),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Item',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 8,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 36,
-                        child: Text(
-                          'Qtd',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 8,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 52,
-                        child: Text(
-                          'Preço',
-                          textAlign: TextAlign.right,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Rows
-                _PreviewRow(
-                  name: 'Produto A',
-                  qty: '2',
-                  price: '150,00',
-                  primaryColor: primaryColor,
-                ),
-                _PreviewRow(
-                  name: 'Produto B',
-                  qty: '1',
-                  price: '250,00',
-                  primaryColor: primaryColor,
-                  last: true,
-                ),
-                const SizedBox(height: 8),
-                // ─── Total ──
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: primaryColor.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'TOTAL: 550,00 MT',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: primaryDark,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // Rodapé
-                Divider(height: 1, color: scheme.outlineVariant.withValues(alpha: 0.4)),
-                const SizedBox(height: 6),
-                Center(
-                  child: Text(
-                    'Gerado pelo TAREQO',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
-                      fontSize: 8,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Linha de item no preview da factura.
-class _PreviewRow extends StatelessWidget {
-  const _PreviewRow({
-    required this.name,
-    required this.qty,
-    required this.price,
-    required this.primaryColor,
-    this.last = false,
-  });
-
-  final String name;
-  final String qty;
-  final String price;
-  final Color primaryColor;
-  final bool last;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: last ? null : scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: last
-            ? const BorderRadius.vertical(bottom: Radius.circular(4))
-            : null,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              name,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 9,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          SizedBox(
-            width: 36,
-            child: Text(
-              qty,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 9,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 52,
-            child: Text(
-              '$price MT',
-              textAlign: TextAlign.right,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _TemplateStyleChip extends StatelessWidget {
   const _TemplateStyleChip({
@@ -1570,19 +1184,14 @@ class _TemplateStyleChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 20,
-                color: isSelected
-                    ? scheme.primary
-                    : scheme.onSurfaceVariant,
+                color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
               ),
               const SizedBox(height: 4),
               Text(
                 name,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: isSelected
-                      ? scheme.primary
-                      : scheme.onSurfaceVariant,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
             ],

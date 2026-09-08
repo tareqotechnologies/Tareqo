@@ -39,13 +39,17 @@ jobs:
  cache: true
  - run: flutter pub get
  - run: flutter analyze
+ # M1: formatação obrigatória também no pipeline de release.
+ - name: Format check (dart format)
+ run: dart format --output=none --set-exit-if-changed .
  - run: flutter test --coverage
  - name: Coverage summary
  run: |
  if [ -f coverage/lcov.info ]; then
  pct=$(awk -F: '/^LF:/{lf+=$2} /^LH:/{lh+=$2} END {printf "%.1f", (lf>0 ? 100*lh/lf : 0)}' coverage/lcov.info)
  echo "Line coverage: ${pct}%"
- threshold=45.0
+ # Gate M2: 50% (Set 2026) — subir conforme novos testes.
+ threshold=50.0
  below=$(awk -v p="$pct" -v t="$threshold" 'BEGIN { print (p < t) ? 1 : 0 }')
  if [ "$below" = "1" ]; then
  echo "::error::Coverage ${pct}% is below the ${threshold}% threshold"

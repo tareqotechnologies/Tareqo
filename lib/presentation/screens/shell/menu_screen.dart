@@ -78,7 +78,8 @@ class MenuScreen extends ConsumerWidget {
         destructive: true,
       );
       if (confirmed == true) {
-        // ignore: use_build_context_synchronously
+        // B4: apenas `ref` é usado após o await (nada de context) — o
+        // ignore era desnecessário.
         ref.read(signOutUseCaseProvider).call();
       }
     }

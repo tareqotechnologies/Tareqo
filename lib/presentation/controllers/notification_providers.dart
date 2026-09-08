@@ -12,29 +12,30 @@ import 'auth_providers.dart';
 /// Ponte com o ServiceLocator: casos de uso de notificações como providers.
 final getTenantNotificationsUseCaseProvider =
     Provider<GetTenantNotificationsUseCase>(
-  (ref) => ServiceLocator.instance<GetTenantNotificationsUseCase>(),
-);
+      (ref) => ServiceLocator.instance<GetTenantNotificationsUseCase>(),
+    );
 
 final markNotificationAsReadUseCaseProvider =
     Provider<MarkNotificationAsReadUseCase>(
-  (ref) => ServiceLocator.instance<MarkNotificationAsReadUseCase>(),
-);
+      (ref) => ServiceLocator.instance<MarkNotificationAsReadUseCase>(),
+    );
 
 final markAllNotificationsAsReadUseCaseProvider =
     Provider<MarkAllNotificationsAsReadUseCase>(
-  (ref) => ServiceLocator.instance<MarkAllNotificationsAsReadUseCase>(),
-);
+      (ref) => ServiceLocator.instance<MarkAllNotificationsAsReadUseCase>(),
+    );
 
 final notifyInvoiceGeneratedUseCaseProvider =
     Provider<NotifyInvoiceGeneratedUseCase>(
-  (ref) => ServiceLocator.instance<NotifyInvoiceGeneratedUseCase>(),
-);
+      (ref) => ServiceLocator.instance<NotifyInvoiceGeneratedUseCase>(),
+    );
 
 /// Estado: notificações do tenant logado.
-final tenantNotificationsProvider = AsyncNotifierProvider<
-    TenantNotificationsNotifier, List<InvoiceNotification>>(
-  TenantNotificationsNotifier.new,
-);
+final tenantNotificationsProvider =
+    AsyncNotifierProvider<
+      TenantNotificationsNotifier,
+      List<InvoiceNotification>
+    >(TenantNotificationsNotifier.new);
 
 class TenantNotificationsNotifier
     extends AsyncNotifier<List<InvoiceNotification>> {
@@ -48,9 +49,7 @@ class TenantNotificationsNotifier
     final tenant = tenantAsync.value;
     if (tenant == null) return const [];
 
-    return ref
-        .watch(getTenantNotificationsUseCaseProvider)
-        .call(tenant.id);
+    return ref.watch(getTenantNotificationsUseCaseProvider).call(tenant.id);
   }
 
   Future<void> refresh() async {
@@ -60,8 +59,7 @@ class TenantNotificationsNotifier
 }
 
 /// Estado: contagem de notificações não lidas do tenant logado.
-final unreadNotificationsCountProvider =
-    FutureProvider<int>((ref) async {
+final unreadNotificationsCountProvider = FutureProvider<int>((ref) async {
   final user = ref.watch(authStateProvider).value;
   if (user == null) return 0;
 

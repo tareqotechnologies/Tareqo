@@ -16,32 +16,31 @@ void main() {
     required String id,
     String storeId = 'st1',
     String clientName = 'Cliente A',
-  }) =>
-      CustomInvoice(
-        id: id,
-        storeId: storeId,
-        clientName: clientName,
-        clientPhone: '84 123 4567',
-        clientTaxId: '123456789',
-        items: const [
-          CustomInvoiceItem(
-            productName: 'Caneta',
-            quantity: 2,
-            unitPriceCents: 200,
-            subtotalCents: 400,
-          ),
-          CustomInvoiceItem(
-            productName: 'Caderno',
-            quantity: 1,
-            unitPriceCents: 990,
-            subtotalCents: 990,
-          ),
-        ],
-        totalAmountCents: 1390,
-        discountCents: 0,
-        taxCents: 0,
-        createdAt: DateTime(2026, 8, 3, 14, 30),
-      );
+  }) => CustomInvoice(
+    id: id,
+    storeId: storeId,
+    clientName: clientName,
+    clientPhone: '84 123 4567',
+    clientTaxId: '123456789',
+    items: const [
+      CustomInvoiceItem(
+        productName: 'Caneta',
+        quantity: 2,
+        unitPriceCents: 200,
+        subtotalCents: 400,
+      ),
+      CustomInvoiceItem(
+        productName: 'Caderno',
+        quantity: 1,
+        unitPriceCents: 990,
+        subtotalCents: 990,
+      ),
+    ],
+    totalAmountCents: 1390,
+    discountCents: 0,
+    taxCents: 0,
+    createdAt: DateTime(2026, 8, 3, 14, 30),
+  );
 
   test('add persiste e reconstrói a factura completa com items', () async {
     final dataSource = CustomInvoiceSqliteDataSourceImpl(db);

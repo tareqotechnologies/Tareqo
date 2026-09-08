@@ -18,66 +18,73 @@ import '../../../core/observability/crash_reporting.dart';
 /// editar antes de enviar.
 class _MessageTemplates {
   /// Cotação de cobrança — valor, período e detalhes do plano.
-  static Map<String, String> billingQuote(String planName, String amount,
-          String period, String dueDate) =>
-      {
-        'title': 'Cotação de Plano — $planName',
-        'body': 'Olá!\n\n'
-            'Segue a cotação para renovação do seu plano *$planName* '
-            'referente ao período de $period.\n\n'
-            '📋 *Detalhes:*\n'
-            '• Plano: $planName\n'
-            '• Valor: $amount\n'
-            '• Período: $period\n'
-            '• Data de vencimento: $dueDate\n\n'
-            'Por favor, efetue o pagamento até à data de vencimento '
-            'para garantir a continuidade do serviço.\n\n'
-            'Em caso de dúvidas, entre em contacto com o nosso suporte.\n\n'
-            'Cumprimentos,\n'
-            'Equipa TAREQO',
-      };
+  static Map<String, String> billingQuote(
+    String planName,
+    String amount,
+    String period,
+    String dueDate,
+  ) => {
+    'title': 'Cotação de Plano — $planName',
+    'body':
+        'Olá!\n\n'
+        'Segue a cotação para renovação do seu plano *$planName* '
+        'referente ao período de $period.\n\n'
+        '📋 *Detalhes:*\n'
+        '• Plano: $planName\n'
+        '• Valor: $amount\n'
+        '• Período: $period\n'
+        '• Data de vencimento: $dueDate\n\n'
+        'Por favor, efetue o pagamento até à data de vencimento '
+        'para garantir a continuidade do serviço.\n\n'
+        'Em caso de dúvidas, entre em contacto com o nosso suporte.\n\n'
+        'Cumprimentos,\n'
+        'Equipa TAREQO',
+  };
 
   /// Alteração de validade — nova data de expiração.
   static Map<String, String> planExpiryChange(
-          String planName, String newExpiryDate, String reason) =>
-      {
-        'title': 'Alteração de Validade — $planName',
-        'body': 'Olá!\n\n'
-            'Informamos que a validade do seu plano *$planName* foi '
-            'actualizada.\n\n'
-            '📋 *Nova validade:*\n'
-            '• Plano: $planName\n'
-            '• Nova data de expiração: $newExpiryDate\n'
-            '• Motivo: $reason\n\n'
-            'Caso tenha alguma questão, não hesite em contactar-nos.\n\n'
-            'Cumprimentos,\n'
-            'Equipa TAREQO',
-      };
+    String planName,
+    String newExpiryDate,
+    String reason,
+  ) => {
+    'title': 'Alteração de Validade — $planName',
+    'body':
+        'Olá!\n\n'
+        'Informamos que a validade do seu plano *$planName* foi '
+        'actualizada.\n\n'
+        '📋 *Nova validade:*\n'
+        '• Plano: $planName\n'
+        '• Nova data de expiração: $newExpiryDate\n'
+        '• Motivo: $reason\n\n'
+        'Caso tenha alguma questão, não hesite em contactar-nos.\n\n'
+        'Cumprimentos,\n'
+        'Equipa TAREQO',
+  };
 
   /// Aviso de plano expirando em breve.
   static Map<String, String> planExpiringSoon(
-          String planName, String expiryDate, String daysLeft) =>
-      {
-        'title': '⚠️ Plano a Expirar — $planName',
-        'body': 'Olá!\n\n'
-            'O seu plano *$planName* está prestes a expirar em '
-            '*$daysLeft dias*.\n\n'
-            '📋 *Detalhes:*\n'
-            '• Plano: $planName\n'
-            '• Data de expiração: $expiryDate\n\n'
-            'Para evitar a interrupção do serviço, recomendamos a '
-            'renovação antecipada. Acesse a secção de Facturas no '
-            'aplicativo para verificar a cotação.\n\n'
-            'Se já efetuou o pagamento, pode ignorar esta mensagem.\n\n'
-            'Cumprimentos,\n'
-            'Equipa TAREQO',
-      };
+    String planName,
+    String expiryDate,
+    String daysLeft,
+  ) => {
+    'title': '⚠️ Plano a Expirar — $planName',
+    'body':
+        'Olá!\n\n'
+        'O seu plano *$planName* está prestes a expirar em '
+        '*$daysLeft dias*.\n\n'
+        '📋 *Detalhes:*\n'
+        '• Plano: $planName\n'
+        '• Data de expiração: $expiryDate\n\n'
+        'Para evitar a interrupção do serviço, recomendamos a '
+        'renovação antecipada. Acesse a secção de Facturas no '
+        'aplicativo para verificar a cotação.\n\n'
+        'Se já efetuou o pagamento, pode ignorar esta mensagem.\n\n'
+        'Cumprimentos,\n'
+        'Equipa TAREQO',
+  };
 
   /// Mensagem geral — templates pré-definidos por categoria.
-  static Map<String, String> general() => {
-        'title': '',
-        'body': '',
-      };
+  static Map<String, String> general() => {'title': '', 'body': ''};
 }
 
 /// Painel do super admin — enviar mensagens/cotações para tenants.
@@ -115,7 +122,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
     final now = DateTime.now();
     final period = DateFormat('MMMM yyyy', 'pt').format(now);
     final amount = '5,000.00 MZN';
-    final dueDate = DateFormat('dd/MM/yyyy').format(now.add(const Duration(days: 7)));
+    final dueDate = DateFormat(
+      'dd/MM/yyyy',
+    ).format(now.add(const Duration(days: 7)));
     final expiryDate = _selectedTenant!.planExpiresAt != null
         ? DateFormat('dd/MM/yyyy').format(_selectedTenant!.planExpiresAt!)
         : dueDate;
@@ -124,12 +133,22 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
         : '7';
 
     final template = switch (type) {
-      AdminMessageType.billingQuote =>
-        _MessageTemplates.billingQuote(planName, amount, period, dueDate),
-      AdminMessageType.planExpiryChange =>
-        _MessageTemplates.planExpiryChange(planName, expiryDate, 'Ajuste administrativo'),
-      AdminMessageType.planExpiringSoon =>
-        _MessageTemplates.planExpiringSoon(planName, expiryDate, daysLeft),
+      AdminMessageType.billingQuote => _MessageTemplates.billingQuote(
+        planName,
+        amount,
+        period,
+        dueDate,
+      ),
+      AdminMessageType.planExpiryChange => _MessageTemplates.planExpiryChange(
+        planName,
+        expiryDate,
+        'Ajuste administrativo',
+      ),
+      AdminMessageType.planExpiringSoon => _MessageTemplates.planExpiringSoon(
+        planName,
+        expiryDate,
+        daysLeft,
+      ),
       AdminMessageType.general => _MessageTemplates.general(),
     };
 
@@ -154,17 +173,13 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final tenants =
-        ref.watch(allTenantsProvider).value ?? const <Tenant>[];
-    final approvedTenants =
-        tenants.where((t) => t.status == TenantStatus.approved).toList();
+    final tenants = ref.watch(allTenantsProvider).value ?? const <Tenant>[];
+    final approvedTenants = tenants
+        .where((t) => t.status == TenantStatus.approved)
+        .toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.adminMessagesTitle,
-        ),
-      ),
+      appBar: AppBar(title: Text(l10n.adminMessagesTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -212,12 +227,14 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                     _templateApplied = false;
                   });
                   // Auto-aplicar template se tipo já selecionado.
-                  if (_selectedType != AdminMessageType.general && value != null) {
+                  if (_selectedType != AdminMessageType.general &&
+                      value != null) {
                     _applyTemplate(_selectedType);
                   }
                 },
-                validator: (_) =>
-                    _selectedTenant == null ? l10n.adminMessagesTenantError : null,
+                validator: (_) => _selectedTenant == null
+                    ? l10n.adminMessagesTenantError
+                    : null,
               ),
 
               // ── Info do tenant seleccionado ──
@@ -275,10 +292,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                     vertical: 12,
                   ),
                 ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty)
-                        ? l10n.adminMessagesTitleError
-                        : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? l10n.adminMessagesTitleError
+                    : null,
               ),
               const SizedBox(height: 16),
 
@@ -288,9 +304,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
               TextFormField(
                 controller: _bodyController,
                 maxLines: 8,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  height: 1.6,
-                ),
+                style: theme.textTheme.bodySmall?.copyWith(height: 1.6),
                 decoration: InputDecoration(
                   hintText: context.l10n.adminMessagesBodyHint,
                   hintStyle: TextStyle(
@@ -306,10 +320,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                     vertical: 12,
                   ),
                 ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty)
-                        ? l10n.adminMessagesBodyError
-                        : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? l10n.adminMessagesBodyError
+                    : null,
               ),
 
               // ── Indicador de template aplicado ──
@@ -317,11 +330,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(
-                      Icons.auto_awesome,
-                      size: 12,
-                      color: scheme.primary,
-                    ),
+                    Icon(Icons.auto_awesome, size: 12, color: scheme.primary),
                     const SizedBox(width: 4),
                     Text(
                       'Template aplicado — edite conforme necessário',
@@ -370,7 +379,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
     final tenant = _selectedTenant!;
 
     try {
-      await ref.read(sendAdminMessageUseCaseProvider).call(
+      await ref
+          .read(sendAdminMessageUseCaseProvider)
+          .call(
             tenantId: tenant.id,
             type: _selectedType,
             title: _titleController.text.trim(),
@@ -413,19 +424,16 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       label,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
-          ),
+        fontWeight: FontWeight.w600,
+        fontSize: 12,
+      ),
     );
   }
 }
 
 /// Chip informativo do tenant selecionado.
 class _TenantInfoChip extends StatelessWidget {
-  const _TenantInfoChip({
-    required this.tenant,
-    required this.planName,
-  });
+  const _TenantInfoChip({required this.tenant, required this.planName});
 
   final Tenant tenant;
   final String Function(String) planName;
@@ -458,7 +466,11 @@ class _TenantInfoChip extends StatelessWidget {
           ),
           if (tenant.planExpiresAt != null) ...[
             const SizedBox(width: 8),
-            Icon(Icons.calendar_today_outlined, size: 12, color: scheme.onSurfaceVariant),
+            Icon(
+              Icons.calendar_today_outlined,
+              size: 12,
+              color: scheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 4),
             Text(
               DateFormat('dd/MM').format(tenant.planExpiresAt!),
@@ -615,12 +627,7 @@ class _TemplateCard extends StatelessWidget {
                 ],
               ),
             ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                size: 18,
-                color: color,
-              ),
+            if (isSelected) Icon(Icons.check_circle, size: 18, color: color),
           ],
         ),
       ),
@@ -630,10 +637,7 @@ class _TemplateCard extends StatelessWidget {
 
 /// Preview da mensagem antes de enviar.
 class _MessagePreview extends StatelessWidget {
-  const _MessagePreview({
-    required this.title,
-    required this.body,
-  });
+  const _MessagePreview({required this.title, required this.body});
 
   final String title;
   final String body;
@@ -649,16 +653,18 @@ class _MessagePreview extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.visibility_outlined, size: 14, color: scheme.onSurfaceVariant),
+              Icon(
+                Icons.visibility_outlined,
+                size: 14,
+                color: scheme.onSurfaceVariant,
+              ),
               const SizedBox(width: 6),
               Text(
                 'Preview',

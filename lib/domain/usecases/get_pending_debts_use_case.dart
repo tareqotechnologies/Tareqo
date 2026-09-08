@@ -8,14 +8,14 @@ import '../repositories/i_debt_repository.dart';
 /// comerciante tem para receber. Dívidas a pagar a fornecedores
 /// (`isCustomerDebt: false`) e já quitadas ficam de fora.
 class GetPendingDebtsUseCase {
- const GetPendingDebtsUseCase(this._repository);
+  const GetPendingDebtsUseCase(this._repository);
 
- final IDebtRepository _repository;
+  final IDebtRepository _repository;
 
- /// Retorna as dívidas a receber de clientes ainda pendentes da loja
- /// [storeId].
- Future<List<Debt>> call({required String storeId}) async {
- final debts = await _repository.getAll(storeId: storeId);
- return debts.where((debt) => debt.isCustomerDebt && !debt.isPaid).toList();
- }
+  /// Retorna as dívidas a receber de clientes ainda pendentes da loja
+  /// [storeId].
+  Future<List<Debt>> call({required String storeId}) async {
+    final debts = await _repository.getAll(storeId: storeId);
+    return debts.where((debt) => debt.isCustomerDebt && !debt.isPaid).toList();
+  }
 }

@@ -50,10 +50,7 @@ class ModuleCard extends StatelessWidget {
               width: AppSizes.avatarSm,
               height: AppSizes.avatarSm,
               alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: bg,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
               child: Icon(icon, size: 20, color: fg),
             ),
             const SizedBox(height: AppSpacing.sm),

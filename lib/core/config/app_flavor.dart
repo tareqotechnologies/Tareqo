@@ -13,19 +13,19 @@
 enum AppFlavor { dev, prod }
 
 abstract final class AppFlavorConfig {
- /// Valor cru do dart-define (`dev` ou `prod`).
- static const String rawFlavor = String.fromEnvironment(
- 'FLUTTER_APP_FLAVOR',
- defaultValue: String.fromEnvironment('APP_FLAVOR', defaultValue: 'dev'),
- );
+  /// Valor cru do dart-define (`dev` ou `prod`).
+  static const String rawFlavor = String.fromEnvironment(
+    'FLUTTER_APP_FLAVOR',
+    defaultValue: String.fromEnvironment('APP_FLAVOR', defaultValue: 'dev'),
+  );
 
- /// Flavor atual, derivado de [rawFlavor].
- static AppFlavor get current =>
- rawFlavor == 'prod' ? AppFlavor.prod : AppFlavor.dev;
+  /// Flavor atual, derivado de [rawFlavor].
+  static AppFlavor get current =>
+      rawFlavor == 'prod' ? AppFlavor.prod : AppFlavor.dev;
 
- /// O build é de produção?
- static bool get isProd => current == AppFlavor.prod;
+  /// O build é de produção?
+  static bool get isProd => current == AppFlavor.prod;
 
- /// Rótulo curto do flavor (`dev` / `prod`) para logs e relatórios.
- static String get label => current.name;
+  /// Rótulo curto do flavor (`dev` / `prod`) para logs e relatórios.
+  static String get label => current.name;
 }

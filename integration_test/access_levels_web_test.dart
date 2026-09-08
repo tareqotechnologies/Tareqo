@@ -122,67 +122,73 @@ void main() {
     );
   }
 
-  testWidgets(
-    'matriz de acesso no dashboard: dono vê tudo, gerente vê compras/'
-    'relatórios sem lojas, funcionário vê só a operação',
-    (tester) async {
-      await app.main();
-      await tester.pump(const Duration(seconds: 3));
+  testWidgets('matriz de acesso no dashboard: dono vê tudo, gerente vê compras/'
+      'relatórios sem lojas, funcionário vê só a operação', (tester) async {
+    await app.main();
+    await tester.pump(const Duration(seconds: 3));
 
-      // ── DONO: todos os módulos, incluindo Lojas (gestão) ──
-      await doLogin(tester, _ownerEmail, _ownerPassword);
-      await waitForLabel(
-        tester,
-        (l) => l.dashboardModuleStores,
-        reason: 'dono vê o card Lojas',
-      );
-      await waitForLabel(
-        tester,
-        (l) => l.dashboardModulePurchases,
-        reason: 'dono vê o card Compras',
-      );
-      await waitForLabel(
-        tester,
-        (l) => l.dashboardModuleReports,
-        reason: 'dono vê o card Relatórios',
-      );
+    // ── DONO: todos os módulos, incluindo Lojas (gestão) ──
+    await doLogin(tester, _ownerEmail, _ownerPassword);
+    await waitForLabel(
+      tester,
+      (l) => l.dashboardModuleStores,
+      reason: 'dono vê o card Lojas',
+    );
+    await waitForLabel(
+      tester,
+      (l) => l.dashboardModulePurchases,
+      reason: 'dono vê o card Compras',
+    );
+    await waitForLabel(
+      tester,
+      (l) => l.dashboardModuleReports,
+      reason: 'dono vê o card Relatórios',
+    );
 
-      // ── GERENTE: compras + relatórios sim; gestão (Lojas) NÃO ──
-      await doSignOut(tester);
-      await doLogin(tester, _managerEmail, _managerPassword);
-      await waitForLabel(
-        tester,
-        (l) => l.dashboardModulePurchases,
-        reason: 'gerente vê o card Compras',
-      );
-      await waitForLabel(
-        tester,
-        (l) => l.dashboardModuleReports,
-        reason: 'gerente vê o card Relatórios',
-      );
-      // Após o dashboard renderizado com o papel do gerente resolvido,
-      // Lojas não pode existir (findsNothing é robusto ao idioma).
-      expect(
-        find.text(l10nOf(tester).dashboardModuleStores),
-        findsNothing,
-        reason: 'gerente NÃO vê o card Lojas',
-      );
+    // ── GERENTE: compras + relatórios sim; gestão (Lojas) NÃO ──
+    await doSignOut(tester);
+    await doLogin(tester, _managerEmail, _managerPassword);
+    await waitForLabel(
+      tester,
+      (l) => l.dashboardModulePurchases,
+      reason: 'gerente vê o card Compras',
+    );
+    await waitForLabel(
+      tester,
+      (l) => l.dashboardModuleReports,
+      reason: 'gerente vê o card Relatórios',
+    );
+    // Após o dashboard renderizado com o papel do gerente resolvido,
+    // Lojas não pode existir (findsNothing é robusto ao idioma).
+    expect(
+      find.text(l10nOf(tester).dashboardModuleStores),
+      findsNothing,
+      reason: 'gerente NÃO vê o card Lojas',
+    );
 
-      // ── FUNCIONÁRIO: só a operação — nada de gerencial/gestão ──
-      await doSignOut(tester);
-      await doLogin(tester, _employeeEmail, _employeePassword);
-      await waitForLabel(
-        tester,
-        (l) => l.dashboardModuleCustomers,
-        reason: 'funcionário vê a operação (Clientes)',
-      );
-      final l10n = l10nOf(tester);
-      expect(find.text(l10n.dashboardModulePurchases), findsNothing,
-          reason: 'funcionário NÃO vê o card Compras');
-      expect(find.text(l10n.dashboardModuleReports), findsNothing,
-          reason: 'funcionário NÃO vê o card Relatórios');
-      expect(find.text(l10n.dashboardModuleStores), findsNothing,
-          reason: 'funcionário NÃO vê o card Lojas');
-    },
-  );
+    // ── FUNCIONÁRIO: só a operação — nada de gerencial/gestão ──
+    await doSignOut(tester);
+    await doLogin(tester, _employeeEmail, _employeePassword);
+    await waitForLabel(
+      tester,
+      (l) => l.dashboardModuleCustomers,
+      reason: 'funcionário vê a operação (Clientes)',
+    );
+    final l10n = l10nOf(tester);
+    expect(
+      find.text(l10n.dashboardModulePurchases),
+      findsNothing,
+      reason: 'funcionário NÃO vê o card Compras',
+    );
+    expect(
+      find.text(l10n.dashboardModuleReports),
+      findsNothing,
+      reason: 'funcionário NÃO vê o card Relatórios',
+    );
+    expect(
+      find.text(l10n.dashboardModuleStores),
+      findsNothing,
+      reason: 'funcionário NÃO vê o card Lojas',
+    );
+  });
 }

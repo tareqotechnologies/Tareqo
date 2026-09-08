@@ -17,32 +17,31 @@ void main() {
     String storeId = 'st1',
     String customerName = 'Cliente A',
     QuotationStatus status = QuotationStatus.draft,
-  }) =>
-      Quotation(
-        id: id,
-        storeId: storeId,
-        customerId: 'c1',
-        customerName: customerName,
-        customerPhone: '84 123 4567',
-        items: const [
-          QuotationItem(
-            productId: 'p1',
-            productName: 'Caneta',
-            quantity: 2000,
-            unitPriceCents: 200,
-          ),
-          QuotationItem(
-            productId: 'p2',
-            productName: 'Caderno',
-            quantity: 1000,
-            unitPriceCents: 990,
-          ),
-        ],
-        totalAmountCents: 1390,
-        status: status,
-        validUntil: DateTime(2026, 8, 10),
-        createdAt: DateTime(2026, 8, 3, 14, 30),
-      );
+  }) => Quotation(
+    id: id,
+    storeId: storeId,
+    customerId: 'c1',
+    customerName: customerName,
+    customerPhone: '84 123 4567',
+    items: const [
+      QuotationItem(
+        productId: 'p1',
+        productName: 'Caneta',
+        quantity: 2000,
+        unitPriceCents: 200,
+      ),
+      QuotationItem(
+        productId: 'p2',
+        productName: 'Caderno',
+        quantity: 1000,
+        unitPriceCents: 990,
+      ),
+    ],
+    totalAmountCents: 1390,
+    status: status,
+    validUntil: DateTime(2026, 8, 10),
+    createdAt: DateTime(2026, 8, 3, 14, 30),
+  );
 
   test('add persiste e reconstrói a cotação completa com items', () async {
     final dataSource = QuotationSqliteDataSourceImpl(db);
@@ -104,8 +103,7 @@ void main() {
     );
   });
 
-  test('update persiste a transição de estado preservando o número',
-      () async {
+  test('update persiste a transição de estado preservando o número', () async {
     final dataSource = QuotationSqliteDataSourceImpl(db);
 
     final saved = await dataSource.add(buildQuotation(id: 'qt1'));

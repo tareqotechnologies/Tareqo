@@ -15,7 +15,7 @@ enum InvoiceStatus {
   expired,
 
   /// Factura cancelada pelo super admin.
-  cancelled;
+  cancelled,
 }
 
 /// Factura de cobrança gerada para renovação mensal do plano do tenant.

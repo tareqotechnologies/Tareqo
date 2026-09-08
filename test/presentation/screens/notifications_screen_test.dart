@@ -77,17 +77,16 @@ InvoiceNotification _notif({
   String body = 'Factura gerada no valor de 50.00 MZN.',
   bool isRead = false,
   DateTime? createdAt,
-}) =>
-    InvoiceNotification(
-      id: id,
-      tenantId: tenantId,
-      invoiceId: invoiceId,
-      type: type,
-      title: title,
-      body: body,
-      isRead: isRead,
-      createdAt: createdAt ?? DateTime.now(),
-    );
+}) => InvoiceNotification(
+  id: id,
+  tenantId: tenantId,
+  invoiceId: invoiceId,
+  type: type,
+  title: title,
+  body: body,
+  isRead: isRead,
+  createdAt: createdAt ?? DateTime.now(),
+);
 
 Widget _buildApp({
   required List<InvoiceNotification> notifications,
@@ -138,30 +137,24 @@ Widget _buildApp({
 void main() {
   group('NotificationsScreen', () {
     testWidgets('mostra título "Notificações" no AppBar', (tester) async {
-      await tester.pumpWidget(
-        _buildApp(notifications: const []),
-      );
+      await tester.pumpWidget(_buildApp(notifications: const []));
       await tester.pumpAndSettle();
 
       expect(find.text('Notificações'), findsOneWidget);
     });
 
-    testWidgets('mostra chips de filtro "Todas" e "Não lidas"',
-        (tester) async {
-      await tester.pumpWidget(
-        _buildApp(notifications: const []),
-      );
+    testWidgets('mostra chips de filtro "Todas" e "Não lidas"', (tester) async {
+      await tester.pumpWidget(_buildApp(notifications: const []));
       await tester.pumpAndSettle();
 
       expect(find.text('Todas'), findsOneWidget);
       expect(find.text('Não lidas'), findsOneWidget);
     });
 
-    testWidgets('mostra estado vazio quando não há notificações',
-        (tester) async {
-      await tester.pumpWidget(
-        _buildApp(notifications: const []),
-      );
+    testWidgets('mostra estado vazio quando não há notificações', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildApp(notifications: const []));
       await tester.pumpAndSettle();
 
       expect(find.text('Sem notificações'), findsOneWidget);
@@ -187,9 +180,7 @@ void main() {
         ),
       ];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       expect(find.text('Nova factura gerada'), findsWidgets);
@@ -200,106 +191,90 @@ void main() {
       );
     });
 
-    testWidgets('mostra botão "Marcar todas como lidas" quando há não lidas',
-        (tester) async {
-      final notifications = [
-        _notif(id: 'n1', isRead: false),
-      ];
+    testWidgets('mostra botão "Marcar todas como lidas" quando há não lidas', (
+      tester,
+    ) async {
+      final notifications = [_notif(id: 'n1', isRead: false)];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       expect(find.text('Marcar todas como lidas'), findsOneWidget);
     });
 
-    testWidgets('esconde botão "Marcar todas como lidas" quando todas são lidas',
-        (tester) async {
-      final notifications = [
-        _notif(id: 'n1', isRead: true),
-      ];
+    testWidgets(
+      'esconde botão "Marcar todas como lidas" quando todas são lidas',
+      (tester) async {
+        final notifications = [_notif(id: 'n1', isRead: true)];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(_buildApp(notifications: notifications));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Marcar todas como lidas'), findsNothing);
-    });
+        expect(find.text('Marcar todas como lidas'), findsNothing);
+      },
+    );
 
-    testWidgets('mostra badge de contagem no chip "Não lidas"',
-        (tester) async {
+    testWidgets('mostra badge de contagem no chip "Não lidas"', (tester) async {
       final notifications = [
         _notif(id: 'n1', isRead: false),
         _notif(id: 'n2', isRead: false),
         _notif(id: 'n3', isRead: true),
       ];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // Badge com contagem de não lidas (2) — aparece no AppBar e na pílula.
       expect(find.text('2'), findsWidgets);
     });
 
-    testWidgets('mostra dot indicator para notificações não lidas',
-        (tester) async {
+    testWidgets('mostra dot indicator para notificações não lidas', (
+      tester,
+    ) async {
       final notifications = [
         _notif(id: 'n1', isRead: false, title: 'Não lida'),
       ];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // Card com dot indicator (Container 8x8)
       expect(find.text('Não lida'), findsOneWidget);
     });
 
-    testWidgets('exibe botão marcar como lida para notificações não lidas',
-        (tester) async {
-      final notifications = [
-        _notif(id: 'n1', isRead: false),
-      ];
+    testWidgets('exibe botão marcar como lida para notificações não lidas', (
+      tester,
+    ) async {
+      final notifications = [_notif(id: 'n1', isRead: false)];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // IconButton com ícone mark_email_read_outlined
       expect(find.byIcon(Icons.done_all_outlined), findsOneWidget);
     });
 
-    testWidgets('esconde botão marcar como lida para notificações já lidas',
-        (tester) async {
-      final notifications = [
-        _notif(id: 'n1', isRead: true),
-      ];
+    testWidgets('esconde botão marcar como lida para notificações já lidas', (
+      tester,
+    ) async {
+      final notifications = [_notif(id: 'n1', isRead: true)];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // Não há botão marcar como lida
       expect(find.byIcon(Icons.done_all_outlined), findsNothing);
     });
 
-    testWidgets('alterna para filtro "Não lidas" e mostra apenas não lidas',
-        (tester) async {
+    testWidgets('alterna para filtro "Não lidas" e mostra apenas não lidas', (
+      tester,
+    ) async {
       final notifications = [
         _notif(id: 'n1', isRead: false, title: 'Não lida'),
         _notif(id: 'n2', isRead: true, title: 'Já lida'),
       ];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // Ambas visíveis no filtro "Todas"
@@ -315,8 +290,9 @@ void main() {
       expect(find.text('Já lida'), findsNothing);
     });
 
-    testWidgets('mostra tipos de notificação corretos (gerada, para vencer)',
-        (tester) async {
+    testWidgets('mostra tipos de notificação corretos (gerada, para vencer)', (
+      tester,
+    ) async {
       final notifications = [
         _notif(
           id: 'n1',
@@ -330,17 +306,16 @@ void main() {
         ),
       ];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       expect(find.text('Factura gerada'), findsWidgets);
       expect(find.text('Factura para vencer'), findsWidgets);
     });
 
-    testWidgets('mostra tipos de notificação corretos (expirada, paga)',
-        (tester) async {
+    testWidgets('mostra tipos de notificação corretos (expirada, paga)', (
+      tester,
+    ) async {
       final notifications = [
         _notif(
           id: 'n1',
@@ -354,27 +329,21 @@ void main() {
         ),
       ];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       expect(find.text('Factura expirada'), findsWidgets);
       expect(find.text('Factura paga'), findsWidgets);
     });
 
-    testWidgets('marcar notificação como lida chama o use case correto',
-        (tester) async {
+    testWidgets('marcar notificação como lida chama o use case correto', (
+      tester,
+    ) async {
       final markAsRead = _FakeMarkNotificationAsReadUseCase();
-      final notifications = [
-        _notif(id: 'n1', isRead: false),
-      ];
+      final notifications = [_notif(id: 'n1', isRead: false)];
 
       await tester.pumpWidget(
-        _buildApp(
-          notifications: notifications,
-          markAsRead: markAsRead,
-        ),
+        _buildApp(notifications: notifications, markAsRead: markAsRead),
       );
       await tester.pumpAndSettle();
 
@@ -386,8 +355,9 @@ void main() {
       expect(markAsRead.lastId, 'n1');
     });
 
-    testWidgets('marcar todas como lidas chama o use case correto',
-        (tester) async {
+    testWidgets('marcar todas como lidas chama o use case correto', (
+      tester,
+    ) async {
       final markAllAsRead = _FakeMarkAllNotificationsAsReadUseCase();
       final notifications = [
         _notif(id: 'n1', isRead: false),
@@ -395,10 +365,7 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        _buildApp(
-          notifications: notifications,
-          markAllAsRead: markAllAsRead,
-        ),
+        _buildApp(notifications: notifications, markAllAsRead: markAllAsRead),
       );
       await tester.pumpAndSettle();
 
@@ -410,16 +377,15 @@ void main() {
       expect(markAllAsRead.lastTenantId, 'tn1');
     });
 
-    testWidgets('múltiplas notificações exibe a quantidade correta',
-        (tester) async {
+    testWidgets('múltiplas notificações exibe a quantidade correta', (
+      tester,
+    ) async {
       final notifications = List.generate(
         5,
         (i) => _notif(id: 'n$i', title: 'Notificação $i'),
       );
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       for (var i = 0; i < 5; i++) {
@@ -433,9 +399,7 @@ void main() {
         _notif(id: 'n2', isRead: false, title: 'Não lida'),
       ];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // Ambas exibidas
@@ -446,41 +410,32 @@ void main() {
       expect(find.byIcon(Icons.done_all_outlined), findsOneWidget);
     });
 
-    testWidgets('mostra empty state no filtro "Não lidas" quando todas são lidas',
-        (tester) async {
+    testWidgets(
+      'mostra empty state no filtro "Não lidas" quando todas são lidas',
+      (tester) async {
+        final notifications = [_notif(id: 'n1', isRead: true)];
+
+        await tester.pumpWidget(_buildApp(notifications: notifications));
+        await tester.pumpAndSettle();
+
+        // Alterna para "Não lidas"
+        await tester.tap(find.text('Não lidas'));
+        await tester.pumpAndSettle();
+
+        // Empty state para "Não lidas"
+        expect(find.text('Não lidas'), findsWidgets); // chip + empty state
+      },
+    );
+
+    testWidgets('ícone de notificação está presente para cada card', (
+      tester,
+    ) async {
       final notifications = [
-        _notif(id: 'n1', isRead: true),
+        _notif(id: 'n1', type: InvoiceNotificationType.invoiceGenerated),
+        _notif(id: 'n2', type: InvoiceNotificationType.invoicePaid),
       ];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
-      await tester.pumpAndSettle();
-
-      // Alterna para "Não lidas"
-      await tester.tap(find.text('Não lidas'));
-      await tester.pumpAndSettle();
-
-      // Empty state para "Não lidas"
-      expect(find.text('Não lidas'), findsWidgets); // chip + empty state
-    });
-
-    testWidgets('ícone de notificação está presente para cada card',
-        (tester) async {
-      final notifications = [
-        _notif(
-          id: 'n1',
-          type: InvoiceNotificationType.invoiceGenerated,
-        ),
-        _notif(
-          id: 'n2',
-          type: InvoiceNotificationType.invoicePaid,
-        ),
-      ];
-
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // Ícones de tipo de notificação
@@ -489,13 +444,9 @@ void main() {
     });
 
     testWidgets('mostra timestamp relativo do card', (tester) async {
-      final notifications = [
-        _notif(id: 'n1'),
-      ];
+      final notifications = [_notif(id: 'n1')];
 
-      await tester.pumpWidget(
-        _buildApp(notifications: notifications),
-      );
+      await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // Timestamp recém-criado renderiza como "Agora mesmo".

@@ -7,17 +7,16 @@ import 'invoice_notification_local_data_source.dart';
 /// Usada em testes e no modo local (sem Supabase). Inicia vazia por padrão.
 final class InvoiceNotificationLocalDataSourceImpl
     implements InvoiceNotificationLocalDataSource {
-  InvoiceNotificationLocalDataSourceImpl({List<InvoiceNotification> seed = const []})
-      : _notifications = [...seed];
+  InvoiceNotificationLocalDataSourceImpl({
+    List<InvoiceNotification> seed = const [],
+  }) : _notifications = [...seed];
 
   final List<InvoiceNotification> _notifications;
 
   @override
   Future<InvoiceNotification> create(InvoiceNotification notification) async {
     final created = notification.copyWith(
-      id: notification.id.isEmpty
-          ? AppIds.newId('inv_notif')
-          : notification.id,
+      id: notification.id.isEmpty ? AppIds.newId('inv_notif') : notification.id,
     );
     _notifications.add(created);
     return created;
@@ -26,9 +25,7 @@ final class InvoiceNotificationLocalDataSourceImpl
   @override
   Future<List<InvoiceNotification>> getByTenant(String tenantId) async =>
       List.unmodifiable(
-        _notifications
-            .where((n) => n.tenantId == tenantId)
-            .toList()
+        _notifications.where((n) => n.tenantId == tenantId).toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
       );
 

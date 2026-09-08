@@ -18,12 +18,9 @@ final class EmployeeManagementLocalDataSourceImpl
   Future<List<EmployeeAttendance>> getAttendance({
     required String storeId,
     required String workDate,
-  }) async =>
-      List.unmodifiable(
-        _attendance.where(
-          (a) => a.storeId == storeId && a.workDate == workDate,
-        ),
-      );
+  }) async => List.unmodifiable(
+    _attendance.where((a) => a.storeId == storeId && a.workDate == workDate),
+  );
 
   @override
   Future<EmployeeAttendance> clockIn({
@@ -83,9 +80,7 @@ final class EmployeeManagementLocalDataSourceImpl
   Future<List<EmployeeCommissionRate>> getCommissionRates({
     required String storeId,
   }) async =>
-      List.unmodifiable(
-        _rates.values.where((rate) => rate.storeId == storeId),
-      );
+      List.unmodifiable(_rates.values.where((rate) => rate.storeId == storeId));
 
   @override
   Future<void> setCommissionRate({
@@ -118,14 +113,12 @@ final class EmployeeManagementLocalDataSourceImpl
   Future<List<EmployeeTarget>> getTargets({
     required String storeId,
     String? month,
-  }) async =>
-      List.unmodifiable(
-        _targets.where(
-          (target) =>
-              target.storeId == storeId &&
-              (month == null || target.month == month),
-        ),
-      );
+  }) async => List.unmodifiable(
+    _targets.where(
+      (target) =>
+          target.storeId == storeId && (month == null || target.month == month),
+    ),
+  );
 
   @override
   Future<void> setTarget({

@@ -50,8 +50,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
 
-    final pendingTenants =
-        ref.watch(pendingTenantsProvider).value?.length ?? 0;
+    final pendingTenants = ref.watch(pendingTenantsProvider).value?.length ?? 0;
     final pendingUpgrades =
         ref.watch(pendingPlanRequestsProvider).value?.length ?? 0;
     final pendingInvoices =
@@ -64,8 +63,9 @@ class _AdminShellState extends ConsumerState<AdminShell> {
       pendingInvoices: pendingInvoices,
     );
 
-    final totalBadge =
-        items.where((i) => i.badge > 0).fold<int>(0, (s, i) => s + i.badge);
+    final totalBadge = items
+        .where((i) => i.badge > 0)
+        .fold<int>(0, (s, i) => s + i.badge);
 
     final body = FadeIndexedStack(index: _index, children: _sections);
 
@@ -401,7 +401,9 @@ class _NavSheetItem extends StatelessWidget {
                 height: 38,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: selected ? scheme.primary : scheme.surfaceContainerHighest,
+                  color: selected
+                      ? scheme.primary
+                      : scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -427,8 +429,10 @@ class _NavSheetItem extends StatelessWidget {
               // Badge
               if (item.badge > 0)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: scheme.error,
                     borderRadius: BorderRadius.circular(AppRadius.full),

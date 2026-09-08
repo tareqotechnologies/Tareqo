@@ -28,12 +28,8 @@ class _PaymentReconciliationScreenState
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.paymentsTitle),
-      ),
-      body: _IntegrationBlockedBanner(
-        message: l10n.paymentsIntegrationBlocked,
-      ),
+      appBar: AppBar(title: Text(l10n.paymentsTitle)),
+      body: _IntegrationBlockedBanner(message: l10n.paymentsIntegrationBlocked),
     );
   }
 }
@@ -59,11 +55,7 @@ class _IntegrationBlockedBanner extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              Icons.info_outline_rounded,
-              color: warning,
-              size: 20,
-            ),
+            Icon(Icons.info_outline_rounded, color: warning, size: 20),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(

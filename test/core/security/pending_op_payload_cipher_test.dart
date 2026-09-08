@@ -88,7 +88,7 @@ void main() {
     final bytes = base64Decode(encrypted);
     // Corrompe no MEIO do ciphertext (depois do nonce, antes do MAC).
     final nonceLen = 12; // AES-GCM nonce
-    final macLen = 16;   // AES-GCM MAC
+    final macLen = 16; // AES-GCM MAC
     final cipherEnd = bytes.length - macLen;
     final target = nonceLen + ((cipherEnd - nonceLen) ~/ 2);
     bytes[target] = (bytes[target] + 1) % 256;
@@ -96,10 +96,9 @@ void main() {
 
     expect(
       () => cipher.decrypt(tampered),
-      throwsA(anyOf(
-        isA<SecretBoxAuthenticationError>(),
-        isA<FormatException>(),
-      )),
+      throwsA(
+        anyOf(isA<SecretBoxAuthenticationError>(), isA<FormatException>()),
+      ),
     );
   });
 }

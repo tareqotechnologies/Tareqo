@@ -37,14 +37,14 @@ final cancelInvoiceUseCaseProvider = Provider<CancelInvoiceUseCase>(
 
 final checkTenantsForInvoicesUseCaseProvider =
     Provider<CheckTenantsForInvoicesUseCase>(
-  (ref) => ServiceLocator.instance<CheckTenantsForInvoicesUseCase>(),
-);
+      (ref) => ServiceLocator.instance<CheckTenantsForInvoicesUseCase>(),
+    );
 
 /// Estado: facturas pendentes no sistema.
 final pendingInvoicesProvider =
     AsyncNotifierProvider<PendingInvoicesNotifier, List<Invoice>>(
-  PendingInvoicesNotifier.new,
-);
+      PendingInvoicesNotifier.new,
+    );
 
 class PendingInvoicesNotifier extends AsyncNotifier<List<Invoice>> {
   @override
@@ -60,8 +60,8 @@ class PendingInvoicesNotifier extends AsyncNotifier<List<Invoice>> {
 /// Estado: todas as facturas no sistema.
 final allInvoicesProvider =
     AsyncNotifierProvider<AllInvoicesNotifier, List<Invoice>>(
-  AllInvoicesNotifier.new,
-);
+      AllInvoicesNotifier.new,
+    );
 
 class AllInvoicesNotifier extends AsyncNotifier<List<Invoice>> {
   @override
@@ -75,7 +75,9 @@ class AllInvoicesNotifier extends AsyncNotifier<List<Invoice>> {
 }
 
 /// Estado: facturas de um tenant específico.
-final tenantInvoicesProvider =
-    FutureProvider.family<List<Invoice>, String>((ref, tenantId) async {
+final tenantInvoicesProvider = FutureProvider.family<List<Invoice>, String>((
+  ref,
+  tenantId,
+) async {
   return ref.watch(getTenantInvoicesUseCaseProvider).call(tenantId);
 });

@@ -17,6 +17,7 @@ import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/money_live_preview.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../../core/observability/crash_reporting.dart';
@@ -108,11 +109,8 @@ class _AdminPlansScreenState extends ConsumerState<AdminPlansScreen> {
                   ),
                   sliver: SliverList.separated(
                     itemCount: plans.length,
-                    separatorBuilder: (_, _) => const Divider(
-                      height: 1,
-                      indent: 40,
-                      endIndent: 0,
-                    ),
+                    separatorBuilder: (_, _) =>
+                        const Divider(height: 1, indent: 40, endIndent: 0),
                     itemBuilder: (_, i) => _PlanTile(
                       plan: plans[i],
                       onTap: () => _showPlanDetail(plans[i]),
@@ -161,7 +159,11 @@ class _CompactStats extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _Pill(count: total, label: context.l10n.commonTotal, color: scheme.onSurface),
+          _Pill(
+            count: total,
+            label: context.l10n.commonTotal,
+            color: scheme.onSurface,
+          ),
           const SizedBox(width: AppSpacing.xs),
           _Pill(
             count: active,
@@ -181,11 +183,7 @@ class _CompactStats extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({
-    required this.count,
-    required this.label,
-    required this.color,
-  });
+  const _Pill({required this.count, required this.label, required this.color});
 
   final int count;
   final String label;
@@ -247,10 +245,7 @@ class _PlanTile extends ConsumerWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 0,
-          vertical: 10,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
         child: Row(
           children: [
             // ── Color accent bar ──
@@ -330,10 +325,7 @@ class _PlanTile extends ConsumerWidget {
             // ── Status badge ──
             if (!plan.isActive)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: scheme.errorContainer.withValues(alpha: 0.5),
                   borderRadius: AppRadius.smAll,
@@ -347,11 +339,7 @@ class _PlanTile extends ConsumerWidget {
                 ),
               ),
 
-            Icon(
-              Icons.chevron_right,
-              size: 18,
-              color: scheme.onSurfaceVariant,
-            ),
+            Icon(Icons.chevron_right, size: 18, color: scheme.onSurfaceVariant),
           ],
         ),
       ),
@@ -362,10 +350,7 @@ class _PlanTile extends ConsumerWidget {
 // ─── Bottom sheet de detalhes/troubleshooting ────────────────────────────────
 
 class _PlanDetailSheet extends ConsumerWidget {
-  const _PlanDetailSheet({
-    required this.plan,
-    required this.onEdit,
-  });
+  const _PlanDetailSheet({required this.plan, required this.onEdit});
 
   final Plan plan;
   final VoidCallback onEdit;
@@ -379,12 +364,15 @@ class _PlanDetailSheet extends ConsumerWidget {
     // Tenants neste plano.
     final tenants = ref.watch(allTenantsProvider).value ?? const <Tenant>[];
     final planTenants = tenants.where((t) => t.planId == plan.id).toList();
-    final activeTenants =
-        planTenants.where((t) => t.status == TenantStatus.approved).toList();
-    final pendingTenants =
-        planTenants.where((t) => t.status == TenantStatus.pending).toList();
-    final rejectedTenants =
-        planTenants.where((t) => t.status == TenantStatus.rejected).toList();
+    final activeTenants = planTenants
+        .where((t) => t.status == TenantStatus.approved)
+        .toList();
+    final pendingTenants = planTenants
+        .where((t) => t.status == TenantStatus.pending)
+        .toList();
+    final rejectedTenants = planTenants
+        .where((t) => t.status == TenantStatus.rejected)
+        .toList();
 
     final accent = plan.isActive ? scheme.primary : scheme.outline;
 
@@ -396,9 +384,7 @@ class _PlanDetailSheet extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: scheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: ListView(
             controller: scrollController,
@@ -442,9 +428,7 @@ class _PlanDetailSheet extends ConsumerWidget {
                         ),
                         GestureDetector(
                           onTap: () {
-                            Clipboard.setData(
-                              ClipboardData(text: plan.id),
-                            );
+                            Clipboard.setData(ClipboardData(text: plan.id));
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(l10n.commonCopied),
@@ -495,10 +479,10 @@ class _PlanDetailSheet extends ConsumerWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      plan.isActive ? l10n.statusApproved : l10n.adminPlanInactive,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: accent,
-                      ),
+                      plan.isActive
+                          ? l10n.statusApproved
+                          : l10n.adminPlanInactive,
+                      style: theme.textTheme.bodySmall?.copyWith(color: accent),
                     ),
                   ],
                 ),
@@ -509,7 +493,8 @@ class _PlanDetailSheet extends ConsumerWidget {
               _InfoRow(
                 icon: Icons.attach_money,
                 label: l10n.adminPlanPriceLabel,
-                value: '${Formatters.currency(plan.priceMonthlyCents)}${context.l10n.adminPlanPerMonthSuffix}',
+                value:
+                    '${Formatters.currency(plan.priceMonthlyCents)}${context.l10n.adminPlanPerMonthSuffix}',
               ),
               _InfoRow(
                 icon: Icons.store_outlined,
@@ -527,8 +512,9 @@ class _PlanDetailSheet extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: scheme.surfaceContainerHighest
-                        .withValues(alpha: 0.3),
+                    color: scheme.surfaceContainerHighest.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: AppRadius.smAll,
                   ),
                   child: Text(
@@ -562,8 +548,9 @@ class _PlanDetailSheet extends ConsumerWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHighest
-                          .withValues(alpha: 0.5),
+                      color: scheme.surfaceContainerHighest.withValues(
+                        alpha: 0.5,
+                      ),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
@@ -740,11 +727,7 @@ class _TenantMiniTile extends StatelessWidget {
               color: color.withValues(alpha: 0.12),
               borderRadius: AppRadius.xsAll,
             ),
-            child: Icon(
-              Icons.business_outlined,
-              size: 16,
-              color: color,
-            ),
+            child: Icon(Icons.business_outlined, size: 16, color: color),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -1013,6 +996,8 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
                 label: l10n.adminPlanPriceLabel,
                 prefixIcon: Icons.attach_money,
               ),
+              // A2: mostra ao vivo o preço que será registado.
+              MoneyLivePreview(controller: _priceController),
               const SizedBox(height: AppSpacing.md),
               Row(
                 children: [

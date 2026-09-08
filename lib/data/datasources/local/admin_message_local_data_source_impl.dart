@@ -19,9 +19,7 @@ final class AdminMessageLocalDataSourceImpl
 
   @override
   Future<List<AdminMessage>> getByTenant(String tenantId) async {
-    return _messages.values
-        .where((m) => m.tenantId == tenantId)
-        .toList()
+    return _messages.values.where((m) => m.tenantId == tenantId).toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
@@ -36,10 +34,7 @@ final class AdminMessageLocalDataSourceImpl
   Future<void> markAsRead(String messageId) async {
     final msg = _messages[messageId];
     if (msg != null) {
-      _messages[messageId] = msg.copyWith(
-        isRead: true,
-        readAt: DateTime.now(),
-      );
+      _messages[messageId] = msg.copyWith(isRead: true, readAt: DateTime.now());
     }
   }
 
@@ -48,10 +43,7 @@ final class AdminMessageLocalDataSourceImpl
     final now = DateTime.now();
     for (final entry in _messages.entries) {
       if (entry.value.tenantId == tenantId && !entry.value.isRead) {
-        _messages[entry.key] = entry.value.copyWith(
-          isRead: true,
-          readAt: now,
-        );
+        _messages[entry.key] = entry.value.copyWith(isRead: true, readAt: now);
       }
     }
   }

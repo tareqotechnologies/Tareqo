@@ -12,42 +12,44 @@ import 'auth_providers.dart';
 /// Ponte com o ServiceLocator (GetIt): expõe os casos de uso como providers,
 /// permitindo substituí-los facilmente em testes.
 final getCustomersUseCaseProvider = Provider<GetCustomersUseCase>(
- (ref) => ServiceLocator.instance<GetCustomersUseCase>(),
+  (ref) => ServiceLocator.instance<GetCustomersUseCase>(),
 );
 
 final addCustomerUseCaseProvider = Provider<AddCustomerUseCase>(
- (ref) => ServiceLocator.instance<AddCustomerUseCase>(),
+  (ref) => ServiceLocator.instance<AddCustomerUseCase>(),
 );
 
 final updateCustomerUseCaseProvider = Provider<UpdateCustomerUseCase>(
- (ref) => ServiceLocator.instance<UpdateCustomerUseCase>(),
+  (ref) => ServiceLocator.instance<UpdateCustomerUseCase>(),
 );
 
 final deleteCustomerUseCaseProvider = Provider<DeleteCustomerUseCase>(
- (ref) => ServiceLocator.instance<DeleteCustomerUseCase>(),
+  (ref) => ServiceLocator.instance<DeleteCustomerUseCase>(),
 );
 
 /// Estado da lista de clientes (ordenada por nome).
 final customersProvider =
- AsyncNotifierProvider<CustomersNotifier, List<Customer>>(
- CustomersNotifier.new,
-);
+    AsyncNotifierProvider<CustomersNotifier, List<Customer>>(
+      CustomersNotifier.new,
+    );
 
 class CustomersNotifier extends AsyncNotifier<List<Customer>> {
- @override
- Future<List<Customer>> build() async {
- final user = ref.watch(authStateProvider).value;
- final storeId = user == null ? null : ref.watch(activeStoreIdProvider(user.id));
- if (storeId == null) return const [];
- final customers = [
- ...await ref.read(getCustomersUseCaseProvider).call(storeId: storeId),
- ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
- return customers;
- }
+  @override
+  Future<List<Customer>> build() async {
+    final user = ref.watch(authStateProvider).value;
+    final storeId = user == null
+        ? null
+        : ref.watch(activeStoreIdProvider(user.id));
+    if (storeId == null) return const [];
+    final customers = [
+      ...await ref.read(getCustomersUseCaseProvider).call(storeId: storeId),
+    ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return customers;
+  }
 
- /// Recarrega a lista de clientes (ex.: após cadastrar um cliente).
- Future<void> refresh() async {
- ref.invalidateSelf();
- await future;
- }
+  /// Recarrega a lista de clientes (ex.: após cadastrar um cliente).
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
 }

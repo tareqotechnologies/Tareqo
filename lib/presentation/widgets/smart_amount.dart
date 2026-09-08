@@ -11,37 +11,37 @@ import '../../core/utils/formatters.dart';
 /// alta. Um único ponto de renderização de valores monetários: os KPIs,
 /// totais de carrinho e resumos usam o mesmo componente.
 class SmartAmount extends StatelessWidget {
- const SmartAmount({
- super.key,
- required this.cents,
- this.prefix = '',
- this.style,
- this.alignment = Alignment.centerLeft,
- });
+  const SmartAmount({
+    super.key,
+    required this.cents,
+    this.prefix = '',
+    this.style,
+    this.alignment = Alignment.centerLeft,
+  });
 
- /// Valor em CENTAVOS inteiros (W4 — soma exata, sem double).
- final int cents;
+  /// Valor em CENTAVOS inteiros (W4 — soma exata, sem double).
+  final int cents;
 
- /// Prefixo opcional ANTES do valor (ex.: `'+ '`/`'- '` para o sinal das
- /// movimentações do Financeiro) — o auto-size cobre o texto completo.
- final String prefix;
+  /// Prefixo opcional ANTES do valor (ex.: `'+ '`/`'- '` para o sinal das
+  /// movimentações do Financeiro) — o auto-size cobre o texto completo.
+  final String prefix;
 
- /// Estilo do valor (ex.: `headlineSmall`, `titleLarge`).
- final TextStyle? style;
+  /// Estilo do valor (ex.: `headlineSmall`, `titleLarge`).
+  final TextStyle? style;
 
- /// Alinhamento quando o texto encolhe além do espaço disponível.
- final Alignment alignment;
+  /// Alinhamento quando o texto encolhe além do espaço disponível.
+  final Alignment alignment;
 
- @override
- Widget build(BuildContext context) {
- return FittedBox(
- fit: BoxFit.scaleDown,
- alignment: alignment,
- child: Text(
- '$prefix${Formatters.currency(cents)}',
- maxLines: 1,
- style: style,
- ),
- );
- }
+  @override
+  Widget build(BuildContext context) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: alignment,
+      child: Text(
+        '$prefix${Formatters.currency(cents)}',
+        maxLines: 1,
+        style: style,
+      ),
+    );
+  }
 }

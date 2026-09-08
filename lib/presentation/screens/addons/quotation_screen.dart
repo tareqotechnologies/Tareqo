@@ -64,8 +64,9 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
 
     // Cotações PERSISTIDAS desta loja (estado real, não lista local).
     // Sem loja (ex.: onboarding incompleto) a tela mostra vazio honesto.
-    final quotationsAsync =
-        storeId == null ? null : ref.watch(quotationsProvider(storeId));
+    final quotationsAsync = storeId == null
+        ? null
+        : ref.watch(quotationsProvider(storeId));
     final quotations = quotationsAsync?.value ?? const <Quotation>[];
 
     return AppPage(
@@ -91,27 +92,26 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
               },
             )
           : quotations.isEmpty
-              ? EmptyState(
-                  icon: Icons.request_quote_outlined,
-                  title: l10n.quotationEmpty,
-                  subtitle: l10n.quotationEmptySubtitle,
-                )
-              : ListView.separated(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontal,
-                    AppSpacing.lg,
-                    horizontal,
-                    AppSpacing.lg,
-                  ),
-                  itemCount: quotations.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.xs),
-                  itemBuilder: (context, index) => _QuotationCard(
-                    quotation: quotations[index],
-                    templateConfig: _templateConfig,
-                    onStatusChanged: _updateStatus,
-                  ),
-                ),
+          ? EmptyState(
+              icon: Icons.request_quote_outlined,
+              title: l10n.quotationEmpty,
+              subtitle: l10n.quotationEmptySubtitle,
+            )
+          : ListView.separated(
+              padding: EdgeInsets.fromLTRB(
+                horizontal,
+                AppSpacing.lg,
+                horizontal,
+                AppSpacing.lg,
+              ),
+              itemCount: quotations.length,
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
+              itemBuilder: (context, index) => _QuotationCard(
+                quotation: quotations[index],
+                templateConfig: _templateConfig,
+                onStatusChanged: _updateStatus,
+              ),
+            ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-quotation',
         onPressed: _openNewQuotation,
@@ -126,9 +126,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => _NewQuotationSheet(
-        onSave: _saveQuotation,
-      ),
+      builder: (_) => _NewQuotationSheet(onSave: _saveQuotation),
     );
   }
 
@@ -169,18 +167,12 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
       if (!mounted) return;
       navigator.pop();
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.quotationCreated(saved.number),
-          ),
-        ),
+        SnackBar(content: Text(l10n.quotationCreated(saved.number))),
       );
       ref.invalidate(quotationsProvider(storeId));
     } catch (_) {
       if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.quotationSaveError)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.quotationSaveError)));
     }
   }
 
@@ -198,10 +190,12 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
       final updated = quotation.copyWith(
         status: status,
         sentAt: status == QuotationStatus.sent ? now : quotation.sentAt,
-        acceptedAt:
-            status == QuotationStatus.accepted ? now : quotation.acceptedAt,
-        rejectedAt:
-            status == QuotationStatus.rejected ? now : quotation.rejectedAt,
+        acceptedAt: status == QuotationStatus.accepted
+            ? now
+            : quotation.acceptedAt,
+        rejectedAt: status == QuotationStatus.rejected
+            ? now
+            : quotation.rejectedAt,
       );
       await ref.read(quotationRepositoryProvider).update(updated);
       final storeId = _activeStoreId();
@@ -225,8 +219,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) =>
-          _QuotationTemplateSettingsSheet(config: _templateConfig),
+      builder: (_) => _QuotationTemplateSettingsSheet(config: _templateConfig),
     );
   }
 }
@@ -321,17 +314,18 @@ class _QuotationCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+                      // Nome COMPLETO — quebra em linhas quando necessário
+                      // (nunca truncar o nome do cliente).
                       quotation.customerName,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.quotationNumberPrefix(quotation.number.toString()
-                              .padLeft(5, '0')) +
+                      l10n.quotationNumberPrefix(
+                            quotation.number.toString().padLeft(5, '0'),
+                          ) +
                           (quotation.customerPhone.isNotEmpty
                               ? '  •  ${quotation.customerPhone}'
                               : ''),
@@ -357,21 +351,22 @@ class _QuotationCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          // Acções
-          Row(
+          // Acções — Wrap (não Row): em ecrãs estreitos os botões fluem
+          // para a linha seguinte em vez de estourarem/cortarem o rótulo.
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             children: [
               AppButton.secondary(
                 label: l10n.customInvoiceWhatsApp,
                 icon: const Icon(Icons.share_outlined, size: 16),
                 onPressed: () => _shareWhatsApp(context),
               ),
-              const SizedBox(width: AppSpacing.xs),
               AppButton.secondary(
                 label: l10n.customInvoicePdf,
                 icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
                 onPressed: () => _exportPdf(context),
               ),
-              const SizedBox(width: AppSpacing.xs),
               if (quotation.status == QuotationStatus.draft)
                 AppButton.primary(
                   label: l10n.quotationSend,
@@ -383,18 +378,13 @@ class _QuotationCard extends StatelessWidget {
                 AppButton.primary(
                   label: l10n.quotationAccept,
                   icon: const Icon(Icons.check_circle_outline, size: 16),
-                  onPressed: () => onStatusChanged(
-                    quotation,
-                    QuotationStatus.accepted,
-                  ),
+                  onPressed: () =>
+                      onStatusChanged(quotation, QuotationStatus.accepted),
                 ),
-                const SizedBox(width: AppSpacing.xs),
                 AppButton.danger(
                   label: l10n.quotationReject,
-                  onPressed: () => onStatusChanged(
-                    quotation,
-                    QuotationStatus.rejected,
-                  ),
+                  onPressed: () =>
+                      onStatusChanged(quotation, QuotationStatus.rejected),
                 ),
               ],
             ],
@@ -408,20 +398,26 @@ class _QuotationCard extends StatelessWidget {
     final l10n = context.l10n;
     final buffer = StringBuffer();
     buffer.writeln(l10n.quotationWhatsAppHeader);
-    buffer.writeln('${l10n.customInvoiceNumberShort}: '
-        '${quotation.number.toString().padLeft(5, '0')}');
     buffer.writeln(
-        '${l10n.customInvoiceClientLabel}: ${quotation.customerName}');
+      '${l10n.customInvoiceNumberShort}: '
+      '${quotation.number.toString().padLeft(5, '0')}',
+    );
+    buffer.writeln(
+      '${l10n.customInvoiceClientLabel}: ${quotation.customerName}',
+    );
     if (quotation.customerPhone.isNotEmpty) {
       buffer.writeln(
-          '${l10n.customInvoicePhoneLabel}: ${quotation.customerPhone}');
+        '${l10n.customInvoicePhoneLabel}: ${quotation.customerPhone}',
+      );
     }
     final validityDays = quotation.validUntil
         .difference(DateTime.now())
         .inDays
         .clamp(0, 365);
-    buffer.writeln('${l10n.quotationValidity}: '
-        '${l10n.quotationDays(validityDays)}');
+    buffer.writeln(
+      '${l10n.quotationValidity}: '
+      '${l10n.quotationDays(validityDays)}',
+    );
     buffer.writeln();
     for (final item in quotation.items) {
       // Quantidade guardada em MILÉSIMOS (1000 = 1 unidade).
@@ -435,8 +431,10 @@ class _QuotationCard extends StatelessWidget {
       );
     }
     buffer.writeln();
-    buffer.writeln('${l10n.customInvoiceTotalLabel}: '
-        '${Formatters.currency(quotation.totalAmountCents)}');
+    buffer.writeln(
+      '${l10n.customInvoiceTotalLabel}: '
+      '${Formatters.currency(quotation.totalAmountCents)}',
+    );
 
     final uri = Uri.parse(
       'https://wa.me/?text=${Uri.encodeComponent(buffer.toString())}',
@@ -468,8 +466,7 @@ class _QuotationCard extends StatelessWidget {
         validityHeading: l10n.quotationValidity,
         notesHeading: l10n.pdfConditionsNotesHeading,
         generalConditionsHeading: l10n.pdfGeneralConditionsHeading,
-        validConditionTemplate:
-            l10n.pdfConditionValidBullet('{date}'),
+        validConditionTemplate: l10n.pdfConditionValidBullet('{date}'),
         pricesConditionText: l10n.pdfConditionPricesBullet,
         contactConditionText: l10n.pdfConditionContactBullet,
         footerTemplate: l10n.pdfFooter('{date}'),
@@ -490,12 +487,15 @@ class _QuotationCard extends StatelessWidget {
       businessName: config.businessName.isNotEmpty
           ? config.businessName
           : l10n.businessFallbackName,
-      businessAddress:
-          config.businessAddress.isNotEmpty ? config.businessAddress : null,
-      businessPhone:
-          config.businessPhone.isNotEmpty ? config.businessPhone : null,
-      businessTaxId:
-          config.businessTaxId.isNotEmpty ? config.businessTaxId : null,
+      businessAddress: config.businessAddress.isNotEmpty
+          ? config.businessAddress
+          : null,
+      businessPhone: config.businessPhone.isNotEmpty
+          ? config.businessPhone
+          : null,
+      businessTaxId: config.businessTaxId.isNotEmpty
+          ? config.businessTaxId
+          : null,
       logoBytes: config.logoBytes,
       primaryColor: _flutterColorToPdf(config.primaryColor),
     );
@@ -512,8 +512,7 @@ class _NewQuotationSheet extends ConsumerStatefulWidget {
   final ValueChanged<_QuotationDraft> onSave;
 
   @override
-  ConsumerState<_NewQuotationSheet> createState() =>
-      _NewQuotationSheetState();
+  ConsumerState<_NewQuotationSheet> createState() => _NewQuotationSheetState();
 }
 
 class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
@@ -551,11 +550,13 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
     if (price <= 0 || qty <= 0) return;
 
     setState(() {
-      _items.add(_QuotationItemData(
-        name: product.name,
-        qty: qty,
-        unitPriceCents: (price * 100).round(),
-      ));
+      _items.add(
+        _QuotationItemData(
+          name: product.name,
+          qty: qty,
+          unitPriceCents: (price * 100).round(),
+        ),
+      );
       _selectedProductId = null;
       _priceController.clear();
       _qtyController.text = '1';
@@ -598,34 +599,34 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             const SizedBox(height: 6),
             if (customers.isNotEmpty)
               DropdownButtonFormField<String>(
-                  initialValue: _selectedCustomerId,
-                  isExpanded: true,
-                  menuMaxHeight: 250,
-                  decoration: InputDecoration(
-                    labelText: l10n.customInvoiceClientSection,
-                    prefixIcon: const Icon(Icons.person_outline, size: 20),
-                  ),
-                  items: customers
-                      .map(
-                        (c) => DropdownMenuItem(
-                          value: c.id,
-                          child: Text(
-                            '${c.name}${c.phone.isNotEmpty ? ' (${c.phone})' : ''}',
-                            style: theme.textTheme.bodySmall,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                initialValue: _selectedCustomerId,
+                isExpanded: true,
+                menuMaxHeight: 250,
+                decoration: InputDecoration(
+                  labelText: l10n.customInvoiceClientSection,
+                  prefixIcon: const Icon(Icons.person_outline, size: 20),
+                ),
+                items: customers
+                    .map(
+                      (c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Text(
+                          '${c.name}${c.phone.isNotEmpty ? ' (${c.phone})' : ''}',
+                          style: theme.textTheme.bodySmall,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      )
-                      .toList(),
-                  onChanged: (id) {
-                    setState(() {
-                      _selectedCustomerId = id;
-                      final c = customers.firstWhere((x) => x.id == id);
-                      _clientController.text = c.name;
-                      _phoneController.text = c.phone;
-                    });
-                  },
-                )
+                      ),
+                    )
+                    .toList(),
+                onChanged: (id) {
+                  setState(() {
+                    _selectedCustomerId = id;
+                    final c = customers.firstWhere((x) => x.id == id);
+                    _clientController.text = c.name;
+                    _phoneController.text = c.phone;
+                  });
+                },
+              )
             else
               AppTextField(
                 controller: _clientController,
@@ -648,69 +649,66 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             const SizedBox(height: 6),
             if (activeProducts.isNotEmpty)
               DropdownButtonFormField<String>(
-                  initialValue: _selectedProductId,
-                  isExpanded: true,
-                  menuMaxHeight: 250,
-                  decoration: InputDecoration(
-                    labelText: l10n.customInvoiceProductSection,
-                    prefixIcon:
-                        const Icon(Icons.inventory_2_outlined, size: 20),
-                  ),
-                  items: activeProducts
-                      .map(
-                        (p) => DropdownMenuItem(
-                          value: p.id,
-                          // Linha ÚNICA: o item seleccionado é exibido no
-                          // campo de altura compacta — uma Column de duas
-                          // linhas estourava o InputDecorator em 7px
-                          // (RenderFlex overflow) ao seleccionar o produto.
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  p.name,
-                                  style: theme.textTheme.bodySmall
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Text(
-                                l10n.customInvoiceProductOption(
-                                  (p.stockQuantity ~/ 1000).toString(),
-                                  p.unitLabel,
-                                  Formatters.currency(p.salePriceCents),
-                                ),
+                initialValue: _selectedProductId,
+                isExpanded: true,
+                menuMaxHeight: 250,
+                decoration: InputDecoration(
+                  labelText: l10n.customInvoiceProductSection,
+                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                ),
+                items: activeProducts
+                    .map(
+                      (p) => DropdownMenuItem(
+                        value: p.id,
+                        // Linha ÚNICA: o item seleccionado é exibido no
+                        // campo de altura compacta — uma Column de duas
+                        // linhas estourava o InputDecorator em 7px
+                        // (RenderFlex overflow) ao seleccionar o produto.
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                p.name,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: scheme.onSurfaceVariant
-                                      .withValues(alpha: 0.6),
-                                  fontSize: 11,
+                                  fontWeight: FontWeight.w400,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(
+                              l10n.customInvoiceProductOption(
+                                (p.stockQuantity ~/ 1000).toString(),
+                                p.unitLabel,
+                                Formatters.currency(p.salePriceCents),
+                              ),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurfaceVariant.withValues(
+                                  alpha: 0.6,
+                                ),
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
                         ),
-                      )
-                      .toList(),
-                  onChanged: (id) {
-                    setState(() {
-                      _selectedProductId = id;
-                      final p =
-                          activeProducts.firstWhere((x) => x.id == id);
-                      _priceController.text =
-                          (p.salePriceCents / 100).toStringAsFixed(2);
-                    });
-                  },
-                )
+                      ),
+                    )
+                    .toList(),
+                onChanged: (id) {
+                  setState(() {
+                    _selectedProductId = id;
+                    final p = activeProducts.firstWhere((x) => x.id == id);
+                    _priceController.text = (p.salePriceCents / 100)
+                        .toStringAsFixed(2);
+                  });
+                },
+              )
             else
               InputDecorator(
                 decoration: InputDecoration(
                   hintText: l10n.customInvoiceProductPlaceholder,
-                  prefixIcon:
-                      const Icon(Icons.inventory_2_outlined, size: 20),
+                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -753,37 +751,39 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             if (_items.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
               ..._items.asMap().entries.map(
-                    (entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        children: [
-                          Icon(Icons.check_circle_outline,
-                              size: 16, color: scheme.primary),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '${entry.value.name} x${entry.value.qty}',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                          ),
-                          Text(
-                            Formatters.currency(
-                              entry.value.unitPriceCents * entry.value.qty,
-                            ),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          InkWell(
-                            onTap: () => _removeItem(entry.key),
-                            child: Icon(Icons.close,
-                                size: 16, color: scheme.error),
-                          ),
-                        ],
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle_outline,
+                        size: 16,
+                        color: scheme.primary,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${entry.value.name} x${entry.value.qty}',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                      Text(
+                        Formatters.currency(
+                          entry.value.unitPriceCents * entry.value.qty,
+                        ),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: () => _removeItem(entry.key),
+                        child: Icon(Icons.close, size: 16, color: scheme.error),
+                      ),
+                    ],
                   ),
+                ),
+              ),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 l10n.customInvoiceBillTotal(Formatters.currency(_totalCents)),
@@ -798,17 +798,19 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             AppButton.primary(
               expanded: true,
               label: l10n.quotationSave,
-              onPressed: _clientController.text.trim().isNotEmpty &&
-                      _items.isNotEmpty
+              onPressed:
+                  _clientController.text.trim().isNotEmpty && _items.isNotEmpty
                   ? () {
-                      widget.onSave(_QuotationDraft(
-                        clientName: _clientController.text.trim(),
-                        clientPhone: _phoneController.text.trim(),
-                        customerId: _selectedCustomerId,
-                        items: List.from(_items),
-                        totalCents: _totalCents,
-                        validityDays: 7,
-                      ));
+                      widget.onSave(
+                        _QuotationDraft(
+                          clientName: _clientController.text.trim(),
+                          clientPhone: _phoneController.text.trim(),
+                          customerId: _selectedCustomerId,
+                          items: List.from(_items),
+                          totalCents: _totalCents,
+                          validityDays: 7,
+                        ),
+                      );
                     }
                   : null,
             ),
@@ -958,8 +960,7 @@ class _QuotationTemplateSettingsSheetState
               child: Container(
                 height: 100,
                 decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest
-                      .withValues(alpha: 0.3),
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   borderRadius: AppRadius.lgAll,
                   border: Border.all(
                     color: scheme.outlineVariant,
@@ -1004,8 +1005,9 @@ class _QuotationTemplateSettingsSheetState
                           Icon(
                             Icons.add_a_photo_outlined,
                             size: 28,
-                            color: scheme.onSurfaceVariant
-                                .withValues(alpha: 0.5),
+                            color: scheme.onSurfaceVariant.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -1032,8 +1034,7 @@ class _QuotationTemplateSettingsSheetState
                 return Tooltip(
                   message: paletteColorName(entry.key, l10n),
                   child: GestureDetector(
-                    onTap: () =>
-                        setState(() => _selectedColor = entry.value),
+                    onTap: () => setState(() => _selectedColor = entry.value),
                     child: Container(
                       width: 48,
                       height: 48,
@@ -1041,18 +1042,11 @@ class _QuotationTemplateSettingsSheetState
                         color: entry.value,
                         shape: BoxShape.circle,
                         border: isSelected
-                            ? Border.all(
-                                color: scheme.onSurface,
-                                width: 3,
-                              )
+                            ? Border.all(color: scheme.onSurface, width: 3)
                             : null,
                       ),
                       child: isSelected
-                          ? Icon(
-                              Icons.check,
-                              size: 18,
-                              color: scheme.surface,
-                            )
+                          ? Icon(Icons.check, size: 18, color: scheme.surface)
                           : null,
                     ),
                   ),
@@ -1117,10 +1111,7 @@ class _QuotationTemplateSettingsSheetState
                     child: _logoBytes != null
                         ? ClipRRect(
                             borderRadius: AppRadius.smAll,
-                            child: Image.memory(
-                              _logoBytes!,
-                              fit: BoxFit.cover,
-                            ),
+                            child: Image.memory(_logoBytes!, fit: BoxFit.cover),
                           )
                         : Icon(
                             Icons.request_quote,
@@ -1206,18 +1197,27 @@ class _StatusChip extends StatelessWidget {
     final l10n = context.l10n;
 
     final (label, color) = switch (status) {
-      QuotationStatus.draft =>
-        (l10n.quotationStatusDraft, AppColors.statusWarning),
-      QuotationStatus.sent =>
-        (l10n.quotationStatusSent, AppColors.statusInfo),
-      QuotationStatus.accepted =>
-        (l10n.quotationStatusAccepted, AppColors.success),
-      QuotationStatus.rejected =>
-        (l10n.quotationStatusRejected, AppColors.statusError),
-      QuotationStatus.expired =>
-        (l10n.quotationStatusExpired, AppColors.statusError),
-      QuotationStatus.converted =>
-        (l10n.quotationStatusConverted, AppColors.success),
+      QuotationStatus.draft => (
+        l10n.quotationStatusDraft,
+        AppColors.statusWarning,
+      ),
+      QuotationStatus.sent => (l10n.quotationStatusSent, AppColors.statusInfo),
+      QuotationStatus.accepted => (
+        l10n.quotationStatusAccepted,
+        AppColors.success,
+      ),
+      QuotationStatus.rejected => (
+        l10n.quotationStatusRejected,
+        AppColors.statusError,
+      ),
+      QuotationStatus.expired => (
+        l10n.quotationStatusExpired,
+        AppColors.statusError,
+      ),
+      QuotationStatus.converted => (
+        l10n.quotationStatusConverted,
+        AppColors.success,
+      ),
     };
 
     return Container(
@@ -1247,18 +1247,14 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.2,
-          ),
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.2,
+      ),
     );
   }
 }
 
 /// Converte uma [Color] do Flutter para [PdfColor] do pdf package.
 PdfColor _flutterColorToPdf(Color color) {
-  return PdfColor(
-    color.r / 255,
-    color.g / 255,
-    color.b / 255,
-  );
+  return PdfColor(color.r / 255, color.g / 255, color.b / 255);
 }

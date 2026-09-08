@@ -31,18 +31,23 @@ abstract class Quotation with _$Quotation {
     required String customerName,
     @Default('') String customerPhone,
     @Default(<QuotationItem>[]) List<QuotationItem> items,
+
     /// Valor total em centavos.
     required int totalAmountCents,
     @Default(QuotationStatus.draft) QuotationStatus status,
+
     /// Desconto global em centavos (opcional).
     @Default(0) int discountCents,
+
     /// Notas/observações visíveis ao cliente.
     @Default('') String notes,
+
     /// Data de validade da cotação.
     required DateTime validUntil,
     DateTime? sentAt,
     DateTime? acceptedAt,
     DateTime? rejectedAt,
+
     /// ID da venda gerada quando a cotação é convertida.
     String? convertedSaleId,
     required DateTime createdAt,
@@ -58,8 +63,10 @@ abstract class QuotationItem with _$QuotationItem {
   const factory QuotationItem({
     required String productId,
     required String productName,
+
     /// Quantidade em milésimos (1000 = 1 unidade).
     required int quantity,
+
     /// Preço unitário proposto em centavos.
     required int unitPriceCents,
   }) = _QuotationItem;

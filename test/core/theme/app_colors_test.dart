@@ -71,21 +71,33 @@ void main() {
 
     test('lerp interpola cada campo entre as duas variantes', () {
       final result = AppStatusColors.dark.lerp(AppStatusColors.light, 0.5);
-      expect(result.income,
-          Color.lerp(AppColors.income, AppColors.incomeLight, 0.5));
-      expect(result.expense,
-          Color.lerp(AppColors.expense, AppColors.expenseLight, 0.5));
-      expect(result.warning,
-          Color.lerp(AppColors.warning, AppColors.warningLight, 0.5));
-      expect(result.accent,
-          Color.lerp(AppColors.accent, AppColors.accentLight, 0.5));
+      expect(
+        result.income,
+        Color.lerp(AppColors.income, AppColors.incomeLight, 0.5),
+      );
+      expect(
+        result.expense,
+        Color.lerp(AppColors.expense, AppColors.expenseLight, 0.5),
+      );
+      expect(
+        result.warning,
+        Color.lerp(AppColors.warning, AppColors.warningLight, 0.5),
+      );
+      expect(
+        result.accent,
+        Color.lerp(AppColors.accent, AppColors.accentLight, 0.5),
+      );
     });
 
     test('lerp nos extremos devolve a variante correspondente', () {
-      expect(AppStatusColors.dark.lerp(AppStatusColors.light, 0).income,
-          AppColors.income);
-      expect(AppStatusColors.dark.lerp(AppStatusColors.light, 1).income,
-          AppColors.incomeLight);
+      expect(
+        AppStatusColors.dark.lerp(AppStatusColors.light, 0).income,
+        AppColors.income,
+      );
+      expect(
+        AppStatusColors.dark.lerp(AppStatusColors.light, 1).income,
+        AppColors.incomeLight,
+      );
     });
   });
 

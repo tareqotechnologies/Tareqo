@@ -44,6 +44,10 @@ jobs:
  cache: true
  - run: flutter pub get
  - run: flutter analyze
+ # M1: o projeto deve permanecer no padrão dart format (falha o CI se
+ # qualquer arquivo sair do formato).
+ - name: Format check (dart format)
+ run: dart format --output=none --set-exit-if-changed .
  # Garantias l10n (test/core/l10n): nenhuma chave órfã
  # (arb_keys_referenced_test) e paridade pt/en/fr — adições,
  # remoções, renames, duplicatas e metadata @key
@@ -69,9 +73,9 @@ jobs:
  # Comparação em ponto flutuante com awk puro (sem depender de bc).
  pct=$(awk -F: '/^LF:/{lf+=$2} /^LH:/{lh+=$2} END {printf "%.1f", (lf>0 ? 100*lh/lf : 0)}' coverage/lcov.info)
  echo "Line coverage: ${pct}%"
- # Gate de cobertura (auditoria H3/6.5): baseline medido em
- # 48.1% (Aug 5, 2026). Subir o limite conforme novos testes.
- threshold=45.0
+ # Gate de cobertura (auditoria H3/6.5 + M2): baseline medido em 51.3%
+ # (Set 2026, após testes de ServiceLocator/PDFs). Subir conforme cresce.
+ threshold=50.0
  below=$(awk -v p="$pct" -v t="$threshold" 'BEGIN { print (p < t) ? 1 : 0 }')
  if [ "$below" = "1" ]; then
  echo "::error::Coverage ${pct}% is below the ${threshold}% threshold"

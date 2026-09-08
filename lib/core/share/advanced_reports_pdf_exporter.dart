@@ -202,10 +202,7 @@ class AdvancedReportsPdfExporter {
           // ─── KPI Cards ──────────────────────────────────
           pw.Text(
             indicatorsLabel,
-            style: pw.TextStyle(
-              fontSize: 12,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 8),
           ..._buildKpiRows(kpis),
@@ -215,10 +212,7 @@ class AdvancedReportsPdfExporter {
             pw.SizedBox(height: 20),
             pw.Text(
               section.title,
-              style: pw.TextStyle(
-                fontSize: 12,
-                fontWeight: pw.FontWeight.bold,
-              ),
+              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 8),
             if (section.rows.isEmpty)
@@ -253,10 +247,7 @@ class AdvancedReportsPdfExporter {
           pw.Center(
             child: pw.Text(
               footerLabel.replaceFirst('{date}', dateStr),
-              style: const pw.TextStyle(
-                fontSize: 8,
-                color: PdfColors.grey500,
-              ),
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
             ),
           ),
         ],
@@ -292,35 +283,32 @@ class AdvancedReportsPdfExporter {
   }
 
   pw.Widget _kpiCell(String label, String value) => pw.Expanded(
-        child: pw.Container(
-          padding: const pw.EdgeInsets.all(10),
-          decoration: pw.BoxDecoration(
-            color: PdfColors.indigo50,
-            borderRadius: pw.BorderRadius.circular(6),
+    child: pw.Container(
+      padding: const pw.EdgeInsets.all(10),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.indigo50,
+        borderRadius: pw.BorderRadius.circular(6),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            label,
+            style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
           ),
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text(
-                label,
-                style: const pw.TextStyle(
-                  fontSize: 8,
-                  color: PdfColors.grey600,
-                ),
-              ),
-              pw.SizedBox(height: 2),
-              pw.Text(
-                value,
-                style: pw.TextStyle(
-                  fontSize: 12,
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.indigo900,
-                ),
-              ),
-            ],
+          pw.SizedBox(height: 2),
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              fontSize: 12,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.indigo900,
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 
   Future<void> _share(Uint8List bytes, String fileName, String subject) async {
     if (kIsWeb) {

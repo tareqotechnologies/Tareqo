@@ -39,7 +39,9 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
     final tenant = user == null
         ? null
         : ref.watch(myTenantProvider(user.id)).value;
-    final bundledAddOns = tenant != null ? _getBundledAddOns(ref, tenant.planId) : <String>{};
+    final bundledAddOns = tenant != null
+        ? _getBundledAddOns(ref, tenant.planId)
+        : <String>{};
 
     final horizontal = AppSpacing.pagePaddingForWidth(
       MediaQuery.sizeOf(context).width,
@@ -116,15 +118,11 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
     switch (addOnId) {
       case 'ao_custom_invoice':
         Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const CustomInvoiceScreen(),
-          ),
+          MaterialPageRoute<void>(builder: (_) => const CustomInvoiceScreen()),
         );
       case 'ao_quotation':
         Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const QuotationScreen(),
-          ),
+          MaterialPageRoute<void>(builder: (_) => const QuotationScreen()),
         );
       case 'ao_advanced_reports':
         Navigator.of(context).push(
@@ -140,9 +138,7 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
         );
       case 'ao_multi_store':
         Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const StoreTransfersScreen(),
-          ),
+          MaterialPageRoute<void>(builder: (_) => const StoreTransfersScreen()),
         );
       case 'ao_mobile_money':
         Navigator.of(context).push(
@@ -225,25 +221,25 @@ class _AddOnCard extends StatelessWidget {
                     Text(
                       addonDisplayName(context.l10n, addon),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
+                    // Descrição COMPLETA — nunca truncar: o nome e a
+                    // descrição são o que explica o add-on ao dono da loja.
                     Text(
                       addonDescription(context.l10n, addon),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
-                        fontSize: 12,
-                        height: 1.3,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Row(
+                    const SizedBox(height: 6),
+                    // Badges + preço — Wrap: nunca corta o rótulo em ecrãs
+                    // estreitos (fluem para a linha seguinte).
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         if (isIncluded)
                           Container(
@@ -259,8 +255,7 @@ class _AddOnCard extends StatelessWidget {
                               context.l10n.addonsIncluded,
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: AppColors.success,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -278,18 +273,20 @@ class _AddOnCard extends StatelessWidget {
                               context.l10n.addonsActive,
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: scheme.primary,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
-                        if (isIncluded || isActive) const SizedBox(width: 6),
                         Text(
-                          isIncluded ? '' : _formatPrice(addon.priceMonthlyCents, context.l10n),
+                          isIncluded
+                              ? ''
+                              : _formatPrice(
+                                  addon.priceMonthlyCents,
+                                  context.l10n,
+                                ),
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
-                            fontWeight: FontWeight.w300,
-                            fontSize: 12,
+                            color: scheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
@@ -314,7 +311,6 @@ class _AddOnCard extends StatelessWidget {
     final value = cents / 100;
     return l10n.addonsPerMonth(value.toStringAsFixed(0));
   }
-
 
   IconData _iconForName(String name) {
     switch (name) {

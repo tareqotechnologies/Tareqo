@@ -19,151 +19,156 @@ import 'auth_providers.dart';
 enum CashFlowPeriod { today, week, month, all }
 
 extension CashFlowPeriodLabel on CashFlowPeriod {
- String label(AppLocalizations l10n) => switch (this) {
- CashFlowPeriod.today => l10n.periodToday,
- CashFlowPeriod.week => l10n.periodWeek,
- CashFlowPeriod.month => l10n.periodMonth,
- CashFlowPeriod.all => l10n.periodAll,
- };
+  String label(AppLocalizations l10n) => switch (this) {
+    CashFlowPeriod.today => l10n.periodToday,
+    CashFlowPeriod.week => l10n.periodWeek,
+    CashFlowPeriod.month => l10n.periodMonth,
+    CashFlowPeriod.all => l10n.periodAll,
+  };
 }
 
 /// Período selecionado na tela de Financeiro.
 final cashFlowPeriodProvider =
- NotifierProvider<CashFlowPeriodNotifier, CashFlowPeriod>(
- CashFlowPeriodNotifier.new,
-);
+    NotifierProvider<CashFlowPeriodNotifier, CashFlowPeriod>(
+      CashFlowPeriodNotifier.new,
+    );
 
 class CashFlowPeriodNotifier extends Notifier<CashFlowPeriod> {
- @override
- CashFlowPeriod build() => CashFlowPeriod.month;
+  @override
+  CashFlowPeriod build() => CashFlowPeriod.month;
 
- void select(CashFlowPeriod period) => state = period;
+  void select(CashFlowPeriod period) => state = period;
 }
 
 /// Ponte com o ServiceLocator (GetIt).
 final financeRepositoryProvider = Provider<IFinancialTransactionRepository>(
- (ref) => ServiceLocator.instance<IFinancialTransactionRepository>(),
+  (ref) => ServiceLocator.instance<IFinancialTransactionRepository>(),
 );
 
 final getCashFlowUseCaseProvider = Provider<GetCashFlowUseCase>(
- (ref) => ServiceLocator.instance<GetCashFlowUseCase>(),
+  (ref) => ServiceLocator.instance<GetCashFlowUseCase>(),
 );
 
 final addTransactionUseCaseProvider = Provider<AddFinancialTransactionUseCase>(
- (ref) => ServiceLocator.instance<AddFinancialTransactionUseCase>(),
+  (ref) => ServiceLocator.instance<AddFinancialTransactionUseCase>(),
 );
 
 /// Marca uma transação pendente como paga (botão "Receber").
 final markTransactionAsPaidUseCaseProvider =
- Provider<MarkTransactionAsPaidUseCase>(
- (ref) => ServiceLocator.instance<MarkTransactionAsPaidUseCase>(),
-);
+    Provider<MarkTransactionAsPaidUseCase>(
+      (ref) => ServiceLocator.instance<MarkTransactionAsPaidUseCase>(),
+    );
 
 /// Ponte com o ServiceLocator: use cases do fecho de caixa (Z-report).
 /// O repositório também ganha um bridge (padrão do financeRepositoryProvider)
 /// — o histórico o usa via `ref.watch`, permitindo override em testes.
 final cashClosingRepositoryProvider = Provider<ICashClosingRepository>(
- (ref) => ServiceLocator.instance<ICashClosingRepository>(),
+  (ref) => ServiceLocator.instance<ICashClosingRepository>(),
 );
 
-final getCashClosingSummaryUseCaseProvider = Provider<GetCashClosingSummaryUseCase>(
- (ref) => ServiceLocator.instance<GetCashClosingSummaryUseCase>(),
-);
+final getCashClosingSummaryUseCaseProvider =
+    Provider<GetCashClosingSummaryUseCase>(
+      (ref) => ServiceLocator.instance<GetCashClosingSummaryUseCase>(),
+    );
 
 final closeCashRegisterUseCaseProvider = Provider<CloseCashRegisterUseCase>(
- (ref) => ServiceLocator.instance<CloseCashRegisterUseCase>(),
+  (ref) => ServiceLocator.instance<CloseCashRegisterUseCase>(),
 );
 
 /// Fecho de caixa é operação GERENCIAL (dono/gerente) — mesma matriz da
 /// anulação de venda e das compras. O servidor (RPC close_cash_register)
 /// é a autoridade; este provider só orienta a navegação/UX.
 final canCloseCashRegisterProvider = Provider<bool>((ref) {
- final access = ref.watch(currentAccessLevelProvider);
- return access == UserAccessLevel.owner || access == UserAccessLevel.manager;
+  final access = ref.watch(currentAccessLevelProvider);
+  return access == UserAccessLevel.owner || access == UserAccessLevel.manager;
 });
 
 /// Fecho de caixa do DIA atual da loja ativa: resumo do dia (vendas por
 /// forma, total, esperado na gaveta) + fecho já registrado (se houver).
 /// `null` enquanto a loja não estiver resolvida.
 final cashClosingSummaryProvider =
- FutureProvider.autoDispose<CashClosingSummary?>((ref) async {
- final user = ref.watch(authStateProvider).value;
- if (user == null) return null;
- final storeId = ref.watch(activeStoreIdProvider(user.id));
- if (storeId == null) return null;
- return ref
- .read(getCashClosingSummaryUseCaseProvider)
- .call(storeId: storeId, day: DateTime.now());
-});
+    FutureProvider.autoDispose<CashClosingSummary?>((ref) async {
+      final user = ref.watch(authStateProvider).value;
+      if (user == null) return null;
+      final storeId = ref.watch(activeStoreIdProvider(user.id));
+      if (storeId == null) return null;
+      return ref
+          .read(getCashClosingSummaryUseCaseProvider)
+          .call(storeId: storeId, day: DateTime.now());
+    });
 
 /// Histórico de fechos da loja ativa (mais recentes primeiro).
 final cashClosingHistoryProvider =
- FutureProvider.autoDispose<List<CashClosing>?>((ref) async {
- final user = ref.watch(authStateProvider).value;
- if (user == null) return null;
- final storeId = ref.watch(activeStoreIdProvider(user.id));
- if (storeId == null) return null;
- return ref.read(cashClosingRepositoryProvider).getAll(storeId: storeId);
-});
+    FutureProvider.autoDispose<List<CashClosing>?>((ref) async {
+      final user = ref.watch(authStateProvider).value;
+      if (user == null) return null;
+      final storeId = ref.watch(activeStoreIdProvider(user.id));
+      if (storeId == null) return null;
+      return ref.read(cashClosingRepositoryProvider).getAll(storeId: storeId);
+    });
 
 /// Estado do fluxo de caixa (entradas, saídas e saldo) para o período
 /// selecionado — reconstrói automaticamente quando o período muda.
-final cashFlowProvider =
- AsyncNotifierProvider<CashFlowNotifier, CashFlow>(CashFlowNotifier.new);
+final cashFlowProvider = AsyncNotifierProvider<CashFlowNotifier, CashFlow>(
+  CashFlowNotifier.new,
+);
 
 class CashFlowNotifier extends AsyncNotifier<CashFlow> {
- @override
- Future<CashFlow> build() {
- final period = ref.watch(cashFlowPeriodProvider);
- final now = DateTime.now();
- final user = ref.watch(authStateProvider).value;
- final storeId = user == null ? null : ref.watch(activeStoreIdProvider(user.id));
+  @override
+  Future<CashFlow> build() {
+    final period = ref.watch(cashFlowPeriodProvider);
+    final now = DateTime.now();
+    final user = ref.watch(authStateProvider).value;
+    final storeId = user == null
+        ? null
+        : ref.watch(activeStoreIdProvider(user.id));
 
- final start = switch (period) {
- // Todos os períodos alinhados ao início do dia (semântica única).
- CashFlowPeriod.today => startOfDay(now),
- CashFlowPeriod.week =>
- startOfDay(now.subtract(const Duration(days: 7))),
- CashFlowPeriod.month => DateTime(now.year, now.month, 1),
- CashFlowPeriod.all => DateTime(2000),
- };
+    final start = switch (period) {
+      // Todos os períodos alinhados ao início do dia (semântica única).
+      CashFlowPeriod.today => startOfDay(now),
+      CashFlowPeriod.week => startOfDay(now.subtract(const Duration(days: 7))),
+      CashFlowPeriod.month => DateTime(now.year, now.month, 1),
+      CashFlowPeriod.all => DateTime(2000),
+    };
 
- if (storeId == null) {
- return Future.value(const CashFlow(incomeCents: 0, expenseCents: 0));
- }
+    if (storeId == null) {
+      return Future.value(const CashFlow(incomeCents: 0, expenseCents: 0));
+    }
 
- return ref
- .read(getCashFlowUseCaseProvider)
- .call(storeId: storeId, start: start, end: now);
- }
+    return ref
+        .read(getCashFlowUseCaseProvider)
+        .call(storeId: storeId, start: start, end: now);
+  }
 
- Future<void> refresh() async {
- ref.invalidateSelf();
- await future;
- }
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
 }
 
 /// Estado da lista de movimentações (mais recentes primeiro).
 final transactionsProvider =
- AsyncNotifierProvider<TransactionsNotifier, List<FinancialTransaction>>(
- TransactionsNotifier.new,
-);
+    AsyncNotifierProvider<TransactionsNotifier, List<FinancialTransaction>>(
+      TransactionsNotifier.new,
+    );
 
 class TransactionsNotifier extends AsyncNotifier<List<FinancialTransaction>> {
- @override
- Future<List<FinancialTransaction>> build() async {
- final user = ref.watch(authStateProvider).value;
- final storeId = user == null ? null : ref.watch(activeStoreIdProvider(user.id));
- if (storeId == null) return const [];
- // Copia antes de ordenar: o repositório retorna lista imutável.
- final transactions = [
- ...await ref.read(financeRepositoryProvider).getAll(storeId: storeId),
- ]..sort((a, b) => b.date.compareTo(a.date));
- return transactions;
- }
+  @override
+  Future<List<FinancialTransaction>> build() async {
+    final user = ref.watch(authStateProvider).value;
+    final storeId = user == null
+        ? null
+        : ref.watch(activeStoreIdProvider(user.id));
+    if (storeId == null) return const [];
+    // Copia antes de ordenar: o repositório retorna lista imutável.
+    final transactions = [
+      ...await ref.read(financeRepositoryProvider).getAll(storeId: storeId),
+    ]..sort((a, b) => b.date.compareTo(a.date));
+    return transactions;
+  }
 
- Future<void> refresh() async {
- ref.invalidateSelf();
- await future;
- }
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
 }

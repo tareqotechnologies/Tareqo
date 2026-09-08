@@ -406,6 +406,78 @@ abstract class AppLocalizations {
   /// **'A abrir a sua sessão…'**
   String get splashLoading;
 
+  /// No description provided for @appLockTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'TAREQO bloqueado'**
+  String get appLockTitle;
+
+  /// No description provided for @appLockMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque no sensor ou use o reconhecimento facial para desbloquear o TAREQO.'**
+  String get appLockMessage;
+
+  /// No description provided for @appLockUnlock.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desbloquear'**
+  String get appLockUnlock;
+
+  /// No description provided for @appLockError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível autenticar. Tente novamente ou termine a sessão.'**
+  String get appLockError;
+
+  /// No description provided for @biometricSignInTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Autenticação Biométrica'**
+  String get biometricSignInTitle;
+
+  /// No description provided for @biometricHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque no sensor'**
+  String get biometricHint;
+
+  /// No description provided for @biometricCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get biometricCancel;
+
+  /// No description provided for @biometricFallbackTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar senha'**
+  String get biometricFallbackTitle;
+
+  /// No description provided for @biometricGoToSettingsButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações'**
+  String get biometricGoToSettingsButton;
+
+  /// No description provided for @biometricGoToSettingsDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configure a autenticação biométrica'**
+  String get biometricGoToSettingsDescription;
+
+  /// No description provided for @biometricLockOut.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tente novamente mais tarde'**
+  String get biometricLockOut;
+
+  /// No description provided for @biometricReason.
+  ///
+  /// In pt, this message translates to:
+  /// **'Autenticação biométrica'**
+  String get biometricReason;
+
   /// No description provided for @loginSubtitleSignUp.
   ///
   /// In pt, this message translates to:
@@ -4048,6 +4120,12 @@ abstract class AppLocalizations {
   /// **'Tendências de Crescimento'**
   String get adminGrowthTrends;
 
+  /// No description provided for @adminGrowthTrendsLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tendências (8 semanas)'**
+  String get adminGrowthTrendsLabel;
+
   /// No description provided for @adminGrowthThisWeek.
   ///
   /// In pt, this message translates to:
@@ -5097,6 +5175,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível carregar os dados de funcionários.'**
   String get employeeMgmtLoadError;
+
+  /// No description provided for @employeeMgmtNoStoreTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem loja activa'**
+  String get employeeMgmtNoStoreTitle;
+
+  /// No description provided for @employeeMgmtNoStoreAttendance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conclua o onboarding para registar o ponto.'**
+  String get employeeMgmtNoStoreAttendance;
+
+  /// No description provided for @employeeMgmtNoStoreCommissions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conclua o onboarding para ver comissões.'**
+  String get employeeMgmtNoStoreCommissions;
+
+  /// No description provided for @employeeMgmtNoStoreTargets.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conclua o onboarding para definir metas.'**
+  String get employeeMgmtNoStoreTargets;
 
   /// No description provided for @employeeClockInError.
   ///

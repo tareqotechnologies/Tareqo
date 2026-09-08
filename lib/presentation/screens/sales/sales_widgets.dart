@@ -48,9 +48,7 @@ class SalesSummaryHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -124,13 +122,13 @@ class _CompactDelta extends StatelessWidget {
     final color = up
         ? (upColor ?? theme.colorScheme.primary)
         : percent < 0
-            ? (downColor ?? theme.expense)
-            : theme.colorScheme.onSurfaceVariant;
+        ? (downColor ?? theme.expense)
+        : theme.colorScheme.onSurfaceVariant;
     final icon = up
         ? Icons.trending_up
         : percent < 0
-            ? Icons.trending_down
-            : Icons.trending_flat;
+        ? Icons.trending_down
+        : Icons.trending_flat;
     final sign = up ? '+' : '';
 
     return Container(
@@ -158,4 +156,3 @@ class _CompactDelta extends StatelessWidget {
     );
   }
 }
-

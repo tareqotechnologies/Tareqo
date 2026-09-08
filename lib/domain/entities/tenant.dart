@@ -5,14 +5,14 @@ part 'tenant.g.dart';
 
 /// Situação da solicitação de acesso do dono ao ERP.
 enum TenantStatus {
- /// Aguardando aprovação manual do super admin (prazo de até 24h).
- pending,
+  /// Aguardando aprovação manual do super admin (prazo de até 24h).
+  pending,
 
- /// Aprovado — o dono pode criar lojas e funcionários.
- approved,
+  /// Aprovado — o dono pode criar lojas e funcionários.
+  approved,
 
- /// Rejeitado — [Tenant.rejectionReason] explica o motivo.
- rejected;
+  /// Rejeitado — [Tenant.rejectionReason] explica o motivo.
+  rejected,
 }
 
 /// Tenant (empresa) do ERP — a unidade organizacional por trás do acesso.
@@ -21,7 +21,8 @@ enum TenantStatus {
 /// admin aprova ou rejeita manualmente; aprovado, o dono passa a gerenciar
 /// lojas e funcionários dentro do tenant, limitados pelo [Plan] contratado.
 @freezed
-abstract class Tenant with _$Tenant {  const factory Tenant({
+abstract class Tenant with _$Tenant {
+  const factory Tenant({
     required String id,
     required String ownerUserId,
     required String businessName,
@@ -41,14 +42,14 @@ abstract class Tenant with _$Tenant {  const factory Tenant({
     /// verificação no app compara com a data actual para gerar a factura.
     DateTime? nextInvoiceAt,
 
- /// Moeda padrão dos valores (BRL, USD, EUR, MZN) — escolhida pelo dono
- /// no onboarding e alterável em Lojas → Ajustes. Novos tenants nascem
- /// com MZN (mercado-alvo Moçambique).
- @Default('MZN') String currencyCode,
+    /// Moeda padrão dos valores (BRL, USD, EUR, MZN) — escolhida pelo dono
+    /// no onboarding e alterável em Lojas → Ajustes. Novos tenants nascem
+    /// com MZN (mercado-alvo Moçambique).
+    @Default('MZN') String currencyCode,
 
- /// Idioma do aplicativo (`pt` ou `en`) — escolhido pelo dono.
- @Default('pt') String language,
- }) = _Tenant;
+    /// Idioma do aplicativo (`pt` ou `en`) — escolhido pelo dono.
+    @Default('pt') String language,
+  }) = _Tenant;
 
- factory Tenant.fromJson(Map<String, dynamic> json) => _$TenantFromJson(json);
+  factory Tenant.fromJson(Map<String, dynamic> json) => _$TenantFromJson(json);
 }

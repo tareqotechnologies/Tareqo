@@ -24,78 +24,78 @@ import '../helpers/test_app.dart';
 /// em inglês e formata em Metical (MZN) — a escolha vale da tela de espera
 /// em diante.
 void main() {
- // O [TareqoApp] roteia pelo [AuthGate], que resolve o MFA via GetIt.
- // Sem o bootstrap real, registra o SecureStorageService em memória.
- setUpAll(registerTestSecureStorage);
+  // O [TareqoApp] roteia pelo [AuthGate], que resolve o MFA via GetIt.
+  // Sem o bootstrap real, registra o SecureStorageService em memória.
+  setUpAll(registerTestSecureStorage);
 
- // [Formatters] é estado global estático — cada teste começa do padrão,
- // mesmo que um teste anterior do arquivo tenha falhado no meio.
- setUp(() {
- Formatters.applySettings(currencyCode: 'BRL', language: 'pt');
- });
+  // [Formatters] é estado global estático — cada teste começa do padrão,
+  // mesmo que um teste anterior do arquivo tenha falhado no meio.
+  setUp(() {
+    Formatters.applySettings(currencyCode: 'BRL', language: 'pt');
+  });
 
- testWidgets('app abre em inglês (locale en) com tenant en + MZN e '
- 'formata valores em Metical', (tester) async {
- final tenant = Tenant(
- id: 'tn1',
- ownerUserId: 'u1',
- businessName: 'Comercial Demo',
- planId: 'pl2',
- status: TenantStatus.pending,
- createdAt: DateTime.now(),
- language: 'en',
- currencyCode: 'MZN',
- );
+  testWidgets('app abre em inglês (locale en) com tenant en + MZN e '
+      'formata valores em Metical', (tester) async {
+    final tenant = Tenant(
+      id: 'tn1',
+      ownerUserId: 'u1',
+      businessName: 'Comercial Demo',
+      planId: 'pl2',
+      status: TenantStatus.pending,
+      createdAt: DateTime.now(),
+      language: 'en',
+      currencyCode: 'MZN',
+    );
 
- await tester.pumpWidget(
- ProviderScope(
- overrides: [
- authStateProvider.overrideWith(
- (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
- ),
- adminRepositoryProvider.overrideWithValue(
- const FakeAdminRepository(),
- ),
- getMyTenantUseCaseProvider.overrideWithValue(
- FakeGetMyTenantUseCase(tenant),
- ),
- ],
- child: const TareqoApp(),
- ),
- );
- await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authStateProvider.overrideWith(
+            (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+          ),
+          adminRepositoryProvider.overrideWithValue(
+            const FakeAdminRepository(),
+          ),
+          getMyTenantUseCaseProvider.overrideWithValue(
+            FakeGetMyTenantUseCase(tenant),
+          ),
+        ],
+        child: const TareqoApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
- // Locale do MaterialApp trocou para en (l10n do app em inglês).
- final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
- expect(app.locale, const Locale('en'));
+    // Locale do MaterialApp trocou para en (l10n do app em inglês).
+    final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(app.locale, const Locale('en'));
 
- // A tela exibida (tenant pending) já está em inglês.
- expect(find.text('Waiting for approval'), findsOneWidget);
+    // A tela exibida (tenant pending) já está em inglês.
+    expect(find.text('Waiting for approval'), findsOneWidget);
 
- // Formatters aplicou a moeda/idioma do tenant (formato en_US + MZN).
- expect(Formatters.currentLanguage, 'en');
- expect(Formatters.currentCurrencyCode, 'MZN');
- expect(Formatters.currency(123450), 'MZN 1,234.50');
- });
+    // Formatters aplicou a moeda/idioma do tenant (formato en_US + MZN).
+    expect(Formatters.currentLanguage, 'en');
+    expect(Formatters.currentCurrencyCode, 'MZN');
+    expect(Formatters.currency(123450), 'MZN 1,234.50');
+  });
 
- testWidgets('app sem sessão abre em pt e mantém MZN', (tester) async {
- await tester.pumpWidget(
- ProviderScope(
- overrides: [
- authStateProvider.overrideWith((ref) => Stream.value(null)),
- adminRepositoryProvider.overrideWithValue(
- const FakeAdminRepository(),
- ),
- ],
- child: const TareqoApp(),
- ),
- );
- await tester.pumpAndSettle();
+  testWidgets('app sem sessão abre em pt e mantém MZN', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authStateProvider.overrideWith((ref) => Stream.value(null)),
+          adminRepositoryProvider.overrideWithValue(
+            const FakeAdminRepository(),
+          ),
+        ],
+        child: const TareqoApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
- final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
- // Sem sessão → sem tenant → padrão pt + MZN (metical — mercado-alvo).
- expect(app.locale, const Locale('pt'));
- expect(Formatters.currentLanguage, 'pt');
- expect(Formatters.currentCurrencyCode, 'MZN');
- });
+    final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    // Sem sessão → sem tenant → padrão pt + MZN (metical — mercado-alvo).
+    expect(app.locale, const Locale('pt'));
+    expect(Formatters.currentLanguage, 'pt');
+    expect(Formatters.currentCurrencyCode, 'MZN');
+  });
 }

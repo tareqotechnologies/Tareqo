@@ -9,11 +9,11 @@ import '../entities/sale.dart';
 /// [ProcessSaleUseCase] usa o caminho composto com [IUnitOfWork] e este
 /// contrato fica sem implementação registrada.
 abstract interface class ISaleAtomicProcessor {
- /// Processa [sale] atomicamente no servidor.
- ///
- /// Lança exceções de domínio equivalentes às do caminho composto
- /// (ex.: estoque insuficiente) — o caso de uso traduz para a UI.
- Future<void> process(Sale sale);
+  /// Processa [sale] atomicamente no servidor.
+  ///
+  /// Lança exceções de domínio equivalentes às do caminho composto
+  /// (ex.: estoque insuficiente) — o caso de uso traduz para a UI.
+  Future<void> process(Sale sale);
 }
 
 /// Processador **atômico** de ANULAÇÃO de venda (estorno de estoque nos
@@ -26,10 +26,10 @@ abstract interface class ISaleAtomicProcessor {
 /// caminho composto com [IUnitOfWork] e este contrato fica sem
 /// implementação registrada.
 abstract interface class ISaleCancellationProcessor {
- /// Anula a venda [saleId] da loja [storeId] atomicamente no servidor.
- ///
- /// Lança exceções de domínio equivalentes às do caminho composto
- /// (ex.: venda não encontrada, acesso negado) — o caso de uso traduz
- /// para a UI.
- Future<void> cancel(String saleId, {required String storeId});
+  /// Anula a venda [saleId] da loja [storeId] atomicamente no servidor.
+  ///
+  /// Lança exceções de domínio equivalentes às do caminho composto
+  /// (ex.: venda não encontrada, acesso negado) — o caso de uso traduz
+  /// para a UI.
+  Future<void> cancel(String saleId, {required String storeId});
 }

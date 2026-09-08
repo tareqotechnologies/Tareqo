@@ -12,8 +12,8 @@ final customInvoiceRepositoryProvider = Provider<ICustomInvoiceRepository>(
 
 /// Facturas da loja [storeId] persistidas, da mais recente para a mais
 /// antiga. Re-buscar ao voltar à tela; invalidar após criar uma factura.
-final customInvoicesProvider =
-    FutureProvider.autoDispose.family<List<CustomInvoice>, String>(
-  (ref, storeId) =>
-      ref.watch(customInvoiceRepositoryProvider).getByStore(storeId),
-);
+final customInvoicesProvider = FutureProvider.autoDispose
+    .family<List<CustomInvoice>, String>(
+      (ref, storeId) =>
+          ref.watch(customInvoiceRepositoryProvider).getByStore(storeId),
+    );

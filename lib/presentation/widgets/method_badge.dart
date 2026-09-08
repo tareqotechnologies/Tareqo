@@ -9,27 +9,27 @@ import 'package:flutter/material.dart';
 /// A cor vem de [PaymentMethodAccent] (cores escolhidas para ≥ 3:1 sobre o
 /// card nos dois temas — ver auditoria em test/core/theme/theme_contrast_test.dart).
 class PaymentMethodBadge extends StatelessWidget {
- const PaymentMethodBadge({
- super.key,
- required this.accent,
- required this.icon,
- });
+  const PaymentMethodBadge({
+    super.key,
+    required this.accent,
+    required this.icon,
+  });
 
- final Color accent;
- final IconData icon;
+  final Color accent;
+  final IconData icon;
 
- @override
- Widget build(BuildContext context) {
- return Container(
- width: 42,
- height: 42,
- alignment: Alignment.center,
- decoration: BoxDecoration(
- shape: BoxShape.circle,
- color: accent.withValues(alpha: 0.14),
- border: Border.all(color: accent.withValues(alpha: 0.25)),
- ),
- child: Icon(icon, size: 20, color: accent),
- );
- }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 42,
+      height: 42,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: accent.withValues(alpha: 0.14),
+        border: Border.all(color: accent.withValues(alpha: 0.25)),
+      ),
+      child: Icon(icon, size: 20, color: accent),
+    );
+  }
 }

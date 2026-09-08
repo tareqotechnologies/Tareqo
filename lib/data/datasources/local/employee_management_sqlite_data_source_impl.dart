@@ -97,10 +97,10 @@ final class EmployeeManagementSqliteDataSourceImpl
         throw StateError('Sem entrada registada para $userId em $workDate.');
       }
       id = rows.first['id'] as String;
-      _db.execute(
-        'UPDATE employee_attendance SET clock_out = ? WHERE id = ?',
-        [clockOut.millisecondsSinceEpoch, id],
-      );
+      _db.execute('UPDATE employee_attendance SET clock_out = ? WHERE id = ?', [
+        clockOut.millisecondsSinceEpoch,
+        id,
+      ]);
     });
     final recordId = id;
     final updated = _db.select(
@@ -197,10 +197,10 @@ final class EmployeeManagementSqliteDataSourceImpl
 
   @override
   Future<void> removeTarget(String id, {required String storeId}) async {
-    _db.execute(
-      'DELETE FROM employee_targets WHERE id = ? AND store_id = ?',
-      [id, storeId],
-    );
+    _db.execute('DELETE FROM employee_targets WHERE id = ? AND store_id = ?', [
+      id,
+      storeId,
+    ]);
   }
 
   EmployeeAttendance _mapAttendance(Row row) => EmployeeAttendance(

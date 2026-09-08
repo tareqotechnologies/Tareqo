@@ -65,11 +65,11 @@ abstract final class AppColors {
   /// de cor no design system). Fonte única do mapeamento (antes duplicado
   /// em tenants/audit/dashboard).
   static Color decisionStatusColor(String? status) => switch (status) {
-        'approved' => success,
-        'rejected' => statusError,
-        'pending' => statusWarning,
-        _ => Colors.grey,
-      };
+    'approved' => success,
+    'rejected' => statusError,
+    'pending' => statusWarning,
+    _ => Colors.grey,
+  };
 
   /// Resolve um par (escuro, claro) conforme o brilho do tema.
   static Color of(Brightness brightness, Color dark, Color light) =>

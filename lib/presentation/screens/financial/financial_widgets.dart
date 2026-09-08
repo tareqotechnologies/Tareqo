@@ -12,9 +12,9 @@ import '../../widgets/app_button.dart';
 /// Home (dinheiro que entra sobe, que sai desce).
 extension TransactionDirectionIcon on TransactionType {
   IconData get icon => switch (this) {
-        TransactionType.income => Icons.north_east,
-        TransactionType.expense => Icons.south_west,
-      };
+    TransactionType.income => Icons.north_east,
+    TransactionType.expense => Icons.south_west,
+  };
 }
 
 /// Card de movimentação ultra-compacto — apenas 3 informações:
@@ -43,7 +43,8 @@ class TransactionCard extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: '${transaction.category}, $sign ${Formatters.currency(transaction.amountCents)}, ${Formatters.time(transaction.date)}',
+      label:
+          '${transaction.category}, $sign ${Formatters.currency(transaction.amountCents)}, ${Formatters.time(transaction.date)}',
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -116,16 +117,10 @@ class DateSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final totalColor =
-        totalCents >= 0 ? theme.income : theme.expense;
+    final totalColor = totalCents >= 0 ? theme.income : theme.expense;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        10,
-        AppSpacing.lg,
-        4,
-      ),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 10, AppSpacing.lg, 4),
       child: Row(
         children: [
           Expanded(
@@ -300,11 +295,7 @@ class TransactionDetailSheet extends StatelessWidget {
 
 /// Linha de detalhe — rótulo + valor, minimalista.
 class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.label,
-    required this.value,
-    this.valueColor,
-  });
+  const _DetailRow({required this.label, required this.value, this.valueColor});
 
   final String label;
   final String value;

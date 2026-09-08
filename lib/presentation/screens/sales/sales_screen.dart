@@ -167,9 +167,7 @@ class _SalesBody extends StatelessWidget {
           // ── Resumo do dia ──
           SliverPadding(
             padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 16),
-            sliver: SliverToBoxAdapter(
-              child: SalesSummaryHeader(sales: sales),
-            ),
+            sliver: SliverToBoxAdapter(child: SalesSummaryHeader(sales: sales)),
           ),
           // ── Filtros dropdown FIXOS ──
           // Wrap (não Row): em telas estreitas / escala de texto alta os
@@ -182,14 +180,8 @@ class _SalesBody extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 4,
                 children: [
-                  PeriodFilterBar(
-                    value: period,
-                    onChanged: onPeriodChanged,
-                  ),
-                  PaymentFilterBar(
-                    value: payment,
-                    onChanged: onPaymentChanged,
-                  ),
+                  PeriodFilterBar(value: period, onChanged: onPeriodChanged),
+                  PaymentFilterBar(value: payment, onChanged: onPaymentChanged),
                 ],
               ),
             ),
@@ -201,7 +193,12 @@ class _SalesBody extends StatelessWidget {
               child: isFiltering && filtered.isNotEmpty
                   ? Padding(
                       key: const ValueKey('sales-filtered-summary'),
-                      padding: EdgeInsets.fromLTRB(horizontal, 6, horizontal, 0),
+                      padding: EdgeInsets.fromLTRB(
+                        horizontal,
+                        6,
+                        horizontal,
+                        0,
+                      ),
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
@@ -219,8 +216,7 @@ class _SalesBody extends StatelessWidget {
                         ),
                       ),
                     )
-                  : const SizedBox.shrink(
-                      key: ValueKey('sales-filtered-none')),
+                  : const SizedBox.shrink(key: ValueKey('sales-filtered-none')),
             ),
           ),
           // ── Lista de vendas ──

@@ -13,17 +13,17 @@ import 'dart:typed_data';
 /// caminho absoluto do arquivo local (modo SQLite). Essa referência é
 /// gravada em [Product.imagePath] e lida pela UI para exibir a foto.
 abstract interface class IProductImageStore {
- /// Persiste a imagem [bytes] do produto [productId] da loja [storeId] e
- /// devolve a referência (URL/caminho). Substitui a imagem anterior do
- /// produto (mesmo caminho de objeto/arquivo).
- Future<String> saveImage({
- required String productId,
- required String storeId,
- required Uint8List bytes,
- });
+  /// Persiste a imagem [bytes] do produto [productId] da loja [storeId] e
+  /// devolve a referência (URL/caminho). Substitui a imagem anterior do
+  /// produto (mesmo caminho de objeto/arquivo).
+  Future<String> saveImage({
+    required String productId,
+    required String storeId,
+    required Uint8List bytes,
+  });
 
- /// Remove a imagem referenciada por [path] (URL ou caminho local).
- /// No-op quando [path] é vazio ou o arquivo/objeto não existe
- /// (best-effort — remover uma imagem já ausente não é erro).
- Future<void> deleteImage(String path);
+  /// Remove a imagem referenciada por [path] (URL ou caminho local).
+  /// No-op quando [path] é vazio ou o arquivo/objeto não existe
+  /// (best-effort — remover uma imagem já ausente não é erro).
+  Future<void> deleteImage(String path);
 }

@@ -3,10 +3,7 @@ import '../../core/security/secure_storage_service.dart';
 
 /// Use case for biometric authentication
 class BiometricAuthUseCase {
-  BiometricAuthUseCase(
-    this._biometricService,
-    this._secureStorage,
-  );
+  BiometricAuthUseCase(this._biometricService, this._secureStorage);
 
   final BiometricService _biometricService;
   final SecureStorageService _secureStorage;
@@ -31,8 +28,19 @@ class BiometricAuthUseCase {
 
   /// Authenticate with biometrics
   /// Returns true if authentication succeeds
+  ///
+  /// As mensagens do prompt são repassadas ao [BiometricService] já
+  /// localizadas pelos callers (auditoria M3) — o use case não conhece o
+  /// contexto de UI.
   Future<bool> authenticate({
     String localizedReason = 'Autenticação biométrica',
+    String signInTitle = 'Autenticação Biométrica',
+    String biometricHint = 'Toque no sensor',
+    String cancelButton = 'Cancelar',
+    String fallbackTitle = 'Usar senha',
+    String goToSettingsButton = 'Configurações',
+    String goToSettingsDescription = 'Configure a autenticação biométrica',
+    String lockOut = 'Tente novamente mais tarde',
   }) async {
     // Check if biometric is available on the device
     final available = await _biometricService.isAvailable;
@@ -43,6 +51,13 @@ class BiometricAuthUseCase {
     // Perform authentication
     return await _biometricService.authenticate(
       localizedReason: localizedReason,
+      signInTitle: signInTitle,
+      biometricHint: biometricHint,
+      cancelButton: cancelButton,
+      fallbackTitle: fallbackTitle,
+      goToSettingsButton: goToSettingsButton,
+      goToSettingsDescription: goToSettingsDescription,
+      lockOut: lockOut,
     );
   }
 

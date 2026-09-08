@@ -18,12 +18,12 @@ import '../../widgets/app_card.dart';
 /// via [GetCashFlowUseCase] — o tab financeiro usava zeros fixos antes.
 final advancedReportCashFlowProvider =
     FutureProvider.family<CashFlow, (String, String)>((ref, key) {
-  final (storeId, periodKey) = key;
-  final (start, end) = _periodRange(periodKey, DateTime.now());
-  return ref
-      .watch(getCashFlowUseCaseProvider)
-      .call(storeId: storeId, start: start, end: end);
-});
+      final (storeId, periodKey) = key;
+      final (start, end) = _periodRange(periodKey, DateTime.now());
+      return ref
+          .watch(getCashFlowUseCaseProvider)
+          .call(storeId: storeId, start: start, end: end);
+    });
 
 /// Ecra de relatórios avançados — dashboards, filtros e exportação.
 class AdvancedReportsScreen extends ConsumerStatefulWidget {
@@ -57,9 +57,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          l10n.reportsAdvancedTitle,
-        ),
+        title: Text(l10n.reportsAdvancedTitle),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
@@ -111,10 +109,13 @@ class _SalesReportTab extends ConsumerWidget {
       0,
       (sum, p) => sum + ((p.stockQuantity * p.salePriceCents) ~/ 1000),
     );
-    final lowStock =
-        products.where((p) => (p.stockQuantity ~/ 1000) <= 10).length;
-    final totalItems =
-        products.fold<int>(0, (sum, p) => sum + (p.stockQuantity ~/ 1000));
+    final lowStock = products
+        .where((p) => (p.stockQuantity ~/ 1000) <= 10)
+        .length;
+    final totalItems = products.fold<int>(
+      0,
+      (sum, p) => sum + (p.stockQuantity ~/ 1000),
+    );
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -245,10 +246,9 @@ class _SalesReportTab extends ConsumerWidget {
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
+                            // Nome COMPLETO — quebra quando necessário.
                             p.name,
                             style: theme.textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
@@ -256,9 +256,7 @@ class _SalesReportTab extends ConsumerWidget {
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
-                            fontFeatures: const [
-                              FontFeature.tabularFigures(),
-                            ],
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -273,8 +271,7 @@ class _SalesReportTab extends ConsumerWidget {
           expanded: true,
           label: l10n.reportsExportSales,
           icon: const Icon(Icons.download_outlined, size: 18),
-          onPressed: () =>
-              const AdvancedReportsPdfExporter().shareSalesReport(
+          onPressed: () => const AdvancedReportsPdfExporter().shareSalesReport(
             title: context.l10n.reportsTabSales,
             period: selectedPeriod,
             businessName: l10n.businessFallbackName,
@@ -286,8 +283,9 @@ class _SalesReportTab extends ConsumerWidget {
               l10n.reportsKpiProducts: '$totalProducts',
               l10n.reportsKpiLowStock: '$lowStock',
               l10n.reportsKpiTotalItems: '$totalItems',
-              l10n.reportsKpiStockValue:
-                  Formatters.currency(totalStockValueCents),
+              l10n.reportsKpiStockValue: Formatters.currency(
+                totalStockValueCents,
+              ),
             },
           ),
         ),
@@ -315,9 +313,7 @@ class _FinancialReportTab extends ConsumerWidget {
         : ref.watch(activeStoreIdProvider(user.id));
     final cashFlowAsync = storeId == null
         ? null
-        : ref.watch(
-            advancedReportCashFlowProvider((storeId, selectedPeriod)),
-          );
+        : ref.watch(advancedReportCashFlowProvider((storeId, selectedPeriod)));
     final cashFlow = cashFlowAsync?.value;
 
     return ListView(
@@ -341,9 +337,7 @@ class _FinancialReportTab extends ConsumerWidget {
                 ),
                 TextButton(
                   onPressed: () => ref.invalidate(
-                    advancedReportCashFlowProvider(
-                      (storeId, selectedPeriod),
-                    ),
+                    advancedReportCashFlowProvider((storeId, selectedPeriod)),
                   ),
                   child: Text(l10n.commonRetry),
                 ),
@@ -415,8 +409,7 @@ class _FinancialReportTab extends ConsumerWidget {
                     child: Icon(
                       Icons.show_chart_rounded,
                       size: 14,
-                      color:
-                          IconTone.lightForeground(ModuleColors.reports),
+                      color: IconTone.lightForeground(ModuleColors.reports),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
@@ -439,15 +432,13 @@ class _FinancialReportTab extends ConsumerWidget {
                       Icon(
                         Icons.show_chart,
                         size: 32,
-                        color: scheme.onSurfaceVariant
-                            .withValues(alpha: 0.25),
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.25),
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         l10n.reportsCashFlowChart,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
-                          fontSize: 11,
                         ),
                       ),
                     ],
@@ -470,22 +461,25 @@ class _FinancialReportTab extends ConsumerWidget {
           icon: const Icon(Icons.download_outlined, size: 18),
           onPressed: () =>
               const AdvancedReportsPdfExporter().shareFinancialReport(
-            title: context.l10n.reportsTabFinancial,
-            period: selectedPeriod,
-            businessName: l10n.businessFallbackName,
-            generatedOnLabel: context.l10n.pdfGeneratedOn('{date}'),
-            indicatorsLabel: context.l10n.pdfIndicators,
-            noDataLabel: context.l10n.reportsNoSalesData,
-            footerLabel: context.l10n.pdfFooter('{date}'),
-            kpis: {
-              l10n.reportsKpiRevenue:
-                  Formatters.currency(cashFlow?.incomeCents ?? 0),
-              l10n.reportsKpiExpenses:
-                  Formatters.currency(cashFlow?.expenseCents ?? 0),
-              l10n.reportsKpiNetProfit:
-                  Formatters.currency(cashFlow?.balanceCents ?? 0),
-            },
-          ),
+                title: context.l10n.reportsTabFinancial,
+                period: selectedPeriod,
+                businessName: l10n.businessFallbackName,
+                generatedOnLabel: context.l10n.pdfGeneratedOn('{date}'),
+                indicatorsLabel: context.l10n.pdfIndicators,
+                noDataLabel: context.l10n.reportsNoSalesData,
+                footerLabel: context.l10n.pdfFooter('{date}'),
+                kpis: {
+                  l10n.reportsKpiRevenue: Formatters.currency(
+                    cashFlow?.incomeCents ?? 0,
+                  ),
+                  l10n.reportsKpiExpenses: Formatters.currency(
+                    cashFlow?.expenseCents ?? 0,
+                  ),
+                  l10n.reportsKpiNetProfit: Formatters.currency(
+                    cashFlow?.balanceCents ?? 0,
+                  ),
+                },
+              ),
         ),
       ],
     );
@@ -506,8 +500,9 @@ class _StockReportTab extends ConsumerWidget {
     final l10n = context.l10n;
     final products = ref.watch(productsProvider).value ?? [];
     final totalProducts = products.length;
-    final lowStock =
-        products.where((p) => (p.stockQuantity ~/ 1000) <= 10).length;
+    final lowStock = products
+        .where((p) => (p.stockQuantity ~/ 1000) <= 10)
+        .length;
     // Valor de estoque em CENTAVOS — exacto (antes truncava quantidade e
     // preço para inteiros: 2,7 un × 15,99 saía 2 × 15 = MT 30,00 em vez
     // de ≈ MT 43,17).
@@ -515,8 +510,9 @@ class _StockReportTab extends ConsumerWidget {
       0,
       (sum, p) => sum + ((p.stockQuantity * p.salePriceCents) ~/ 1000),
     );
-    final outOfStock =
-        products.where((p) => (p.stockQuantity ~/ 1000) == 0).length;
+    final outOfStock = products
+        .where((p) => (p.stockQuantity ~/ 1000) == 0)
+        .length;
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -588,8 +584,7 @@ class _StockReportTab extends ConsumerWidget {
                     child: Icon(
                       Icons.warning_amber_rounded,
                       size: 14,
-                      color:
-                          IconTone.lightForeground(ModuleColors.credit),
+                      color: IconTone.lightForeground(ModuleColors.credit),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
@@ -609,17 +604,14 @@ class _StockReportTab extends ConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: ModuleColors.credit.withValues(alpha: 0.12),
-                        borderRadius:
-                            BorderRadius.circular(AppRadius.full),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
                       ),
                       child: Text(
                         '$lowStock',
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: ModuleColors.credit,
                           fontWeight: FontWeight.w500,
-                          fontFeatures: const [
-                            FontFeature.tabularFigures(),
-                          ],
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ),
@@ -631,31 +623,24 @@ class _StockReportTab extends ConsumerWidget {
                   l10n.reportsStockHealthy,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 11,
                   ),
                 )
               else
-                for (final p in products
-                    .where((p) => (p.stockQuantity ~/ 1000) <= 10)
-                    .take(5)) ...[
+                for (final p
+                    in products
+                        .where((p) => (p.stockQuantity ~/ 1000) <= 10)
+                        .take(5)) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 6),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.circle,
-                          size: 6,
-                          color: ModuleColors.credit,
-                        ),
+                        Icon(Icons.circle, size: 6, color: ModuleColors.credit),
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
+                            // Nome COMPLETO — quebra quando necessário.
                             p.name,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontSize: 12,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall,
                           ),
                         ),
                         Text(
@@ -663,9 +648,7 @@ class _StockReportTab extends ConsumerWidget {
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: ModuleColors.credit,
                             fontWeight: FontWeight.w500,
-                            fontFeatures: const [
-                              FontFeature.tabularFigures(),
-                            ],
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -680,8 +663,7 @@ class _StockReportTab extends ConsumerWidget {
           expanded: true,
           label: l10n.reportsExportStock,
           icon: const Icon(Icons.download_outlined, size: 18),
-          onPressed: () =>
-              const AdvancedReportsPdfExporter().shareStockReport(
+          onPressed: () => const AdvancedReportsPdfExporter().shareStockReport(
             title: context.l10n.reportsTabStock,
             period: selectedPeriod,
             businessName: l10n.businessFallbackName,
@@ -692,8 +674,9 @@ class _StockReportTab extends ConsumerWidget {
             kpis: {
               l10n.reportsKpiTotalProducts: '$totalProducts',
               l10n.reportsKpiLowStock: '$lowStock',
-              l10n.reportsKpiStockValue:
-                  Formatters.currency(totalStockValueCents),
+              l10n.reportsKpiStockValue: Formatters.currency(
+                totalStockValueCents,
+              ),
               l10n.reportsKpiStockOut: '$outOfStock',
             },
           ),
@@ -764,21 +747,22 @@ class _KpiTile extends StatelessWidget {
                     label,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
-                      fontSize: 11,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 1),
-                  Text(
-                    value,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: color,
-                      letterSpacing: -0.2,
+                  // Valor COMPLETO — FittedBox encolhe em vez de truncar
+                  // (mesmo padrão dos KPIs do dashboard).
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      value,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: color,
+                        letterSpacing: -0.2,
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -879,10 +863,9 @@ class _CashFlowBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxCents =
-        cashFlow.incomeCents > cashFlow.expenseCents
-            ? cashFlow.incomeCents
-            : cashFlow.expenseCents;
+    final maxCents = cashFlow.incomeCents > cashFlow.expenseCents
+        ? cashFlow.incomeCents
+        : cashFlow.expenseCents;
 
     Widget bar({
       required String label,
@@ -900,15 +883,13 @@ class _CashFlowBars extends StatelessWidget {
                   label,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 11,
                   ),
                 ),
               ),
               Text(
                 Formatters.currency(cents),
-                style: theme.textTheme.labelSmall?.copyWith(
+                style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w500,
-                  fontSize: 11,
                 ),
               ),
             ],

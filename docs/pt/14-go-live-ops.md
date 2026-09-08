@@ -40,6 +40,14 @@
  conteúdo de `supabase/upgrade.sql` (leva um banco EXISTENTE ao estado
  atual — substitui as antigas migrações 002..011; 100% idempotente, seguro
  reexecutar). Para projetos novos, só o `supabase/schema.sql` basta.
+
+> **📘 Set/2026:** o processo completo de configuração do Supabase de
+> produção (criação do projeto, aplicação dos scripts, super admin,
+> credenciais `env/prod.env`, build e validação) está consolidado no
+> **[capítulo 19 — Supabase de produção passo a passo](19-supabase-producao-passo-a-passo.md)**.
+> Os 7 arquivos de migração de add-ons/billing foram arquivados em
+> `supabase/archived_migrations/` — o conteúdo foi fundido no `schema.sql`
+> (PARTE 1.9) e no `upgrade.sql` (PARTE 31).
  → **Runbook completo (W4 centavos + H2 RPCs): [capítulo 15](15-migracao-w4-h2.md)**
  — backup, pré-flight, aplicação em transação única, verificação
  `sql_check_live.sh` 14/14 e rollback.

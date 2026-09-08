@@ -18,6 +18,7 @@ import 'package:tareqo/domain/usecases/update_product_use_case.dart';
 import 'package:tareqo/presentation/controllers/account_providers.dart';
 import 'package:tareqo/data/services/product_image_store_noop.dart';
 import 'package:tareqo/presentation/controllers/products_providers.dart';
+import 'package:tareqo/presentation/screens/products/product_form_sheets.dart';
 import 'package:tareqo/presentation/screens/products/product_list_screen.dart';
 
 import '../../helpers/fake_stock_lot_repository.dart';
@@ -51,12 +52,18 @@ class _InMemoryProductRepository implements IProductRepository {
 
   @override
   Future<void> update(Product product) async {
-    final idx = products.indexWhere((p) => p.id == product.id && p.storeId == product.storeId);
+    final idx = products.indexWhere(
+      (p) => p.id == product.id && p.storeId == product.storeId,
+    );
     if (idx >= 0) products[idx] = product;
   }
 
   @override
-  Future<void> updateStock(String id, int newQuantity, {required String storeId}) async {
+  Future<void> updateStock(
+    String id,
+    int newQuantity, {
+    required String storeId,
+  }) async {
     final idx = products.indexWhere((p) => p.id == id && p.storeId == storeId);
     if (idx >= 0) {
       products[idx] = products[idx].copyWith(stockQuantity: newQuantity);
@@ -67,12 +74,19 @@ class _InMemoryProductRepository implements IProductRepository {
   Future<List<Product>> getAll({required String storeId}) async =>
       products.where((p) => p.storeId == storeId).toList();
 
-  Future<List<Product>> searchByName(String query, {required String storeId}) async {
+  Future<List<Product>> searchByName(
+    String query, {
+    required String storeId,
+  }) async {
     final q = query.toLowerCase();
-    return products.where((p) =>
-      p.storeId == storeId &&
-      (p.name.toLowerCase().contains(q) || p.description.toLowerCase().contains(q))
-    ).toList();
+    return products
+        .where(
+          (p) =>
+              p.storeId == storeId &&
+              (p.name.toLowerCase().contains(q) ||
+                  p.description.toLowerCase().contains(q)),
+        )
+        .toList();
   }
 
   Future<void> delete(String id, {required String storeId}) async {
@@ -86,25 +100,27 @@ class _DirectUnitOfWork implements IUnitOfWork {
 
   @override
   Future<T> run<T>(Future<T> Function() action) => action();
-}/// Constrói o [UpdateProductUseCase] real sobre o repositório em memória.
+}
+
+/// Constrói o [UpdateProductUseCase] real sobre o repositório em memória.
 UpdateProductUseCase _updateUseCase(_InMemoryProductRepository repository) {
- return UpdateProductUseCase(
-  repository,
-  FifoStockUseCase(
-   FakeStockLotRepository(),
-   UpdateProductStockUseCase(repository),
-  ),
-  const _DirectUnitOfWork(),
- );
+  return UpdateProductUseCase(
+    repository,
+    FifoStockUseCase(
+      FakeStockLotRepository(),
+      UpdateProductStockUseCase(repository),
+    ),
+    const _DirectUnitOfWork(),
+  );
 }
 
 /// Constrói o [AddProductUseCase] real sobre o repositório em memória.
 AddProductUseCase _addUseCase(_InMemoryProductRepository repository) {
- return AddProductUseCase(
-  repository,
-  FakeStockLotRepository(),
-  const _DirectUnitOfWork(),
- );
+  return AddProductUseCase(
+    repository,
+    FakeStockLotRepository(),
+    const _DirectUnitOfWork(),
+  );
 }
 
 /// Fake que sempre falha, para exercitar o estado de erro.
@@ -163,7 +179,9 @@ Widget _buildAppEmployee(GetProductsUseCase useCase) {
 
 void main() {
   group('ProductListScreen', () {
-    testWidgets('exibe os produtos retornados pelo caso de uso', (tester) async {
+    testWidgets('exibe os produtos retornados pelo caso de uso', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildApp(
           _FakeGetProductsUseCase(const [
@@ -189,16 +207,19 @@ void main() {
     });
 
     testWidgets('exibe estado vazio quando não há produtos', (tester) async {
-      await tester.pumpWidget(
-        _buildApp(_FakeGetProductsUseCase(const [])),
-      );
+      await tester.pumpWidget(_buildApp(_FakeGetProductsUseCase(const [])));
       await tester.pumpAndSettle();
 
       expect(find.text('Nenhum produto cadastrado'), findsOneWidget);
-      expect(find.text('Toque em "Novo produto" para começar.'), findsOneWidget);
+      expect(
+        find.text('Toque em "Novo produto" para começar.'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('busca por nome filtra a lista (case-insensitive)', (tester) async {
+    testWidgets('busca por nome filtra a lista (case-insensitive)', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildApp(
           _FakeGetProductsUseCase(const [
@@ -299,7 +320,9 @@ void main() {
       expect(find.text('Caderno'), findsNothing);
     });
 
-    testWidgets('filtro de produtos usa rótulo próprio "Todos"', (tester) async {
+    testWidgets('filtro de produtos usa rótulo próprio "Todos"', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildApp(
           _FakeGetProductsUseCase(const [
@@ -326,7 +349,9 @@ void main() {
       expect(find.text('1 produto'), findsOneWidget);
     });
 
-    testWidgets('ativar venda por peso não quebra o dropdown de unidade', (tester) async {
+    testWidgets('ativar venda por peso não quebra o dropdown de unidade', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildApp(
           _FakeGetProductsUseCase(const []),
@@ -360,7 +385,9 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('cadastro de produto permite definir a validade', (tester) async {
+    testWidgets('cadastro de produto permite definir a validade', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildApp(
           _FakeGetProductsUseCase(const []),
@@ -373,9 +400,18 @@ void main() {
       await tester.pumpAndSettle();
 
       // Preenche campos obrigatórios (rótulos atuais do design system).
-      await tester.enterText(find.widgetWithText(TextFormField, 'Nome'), 'Arroz');
-      await tester.enterText(find.widgetWithText(TextFormField, 'Preço de compra'), '10,00');
-      await tester.enterText(find.widgetWithText(TextFormField, 'Preço de venda'), '15,00');
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Nome'),
+        'Arroz',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço de compra'),
+        '10,00',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço de venda'),
+        '15,00',
+      );
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Quantidade em estoque'),
         '50',
@@ -407,7 +443,9 @@ void main() {
       expect(find.text('Produto adicionado!'), findsOneWidget);
     });
 
-    testWidgets('tocar no produto abre a edição (dono/gerente)', (tester) async {
+    testWidgets('tocar no produto abre a edição (dono/gerente)', (
+      tester,
+    ) async {
       final repository = _InMemoryProductRepository()
         ..add(
           const Product(
@@ -441,7 +479,10 @@ void main() {
       expect(find.text('Salvar alterações'), findsOneWidget);
       // Pré-preenchido com os valores atuais.
       expect(find.widgetWithText(TextFormField, 'Caneta'), findsOneWidget);
-      expect(find.text('2.00'), findsOneWidget); // preço de venda pré-preenchido
+      expect(
+        find.text('2.00'),
+        findsOneWidget,
+      ); // preço de venda pré-preenchido
     });
 
     testWidgets('editar nome e preço salva as alterações', (tester) async {
@@ -478,7 +519,10 @@ void main() {
         find.widgetWithText(TextFormField, 'Caneta'),
         'Caneta Azul',
       );
-      await tester.enterText(find.widgetWithText(TextFormField, '2.00'), '2.50');
+      await tester.enterText(
+        find.widgetWithText(TextFormField, '2.00'),
+        '2.50',
+      );
 
       // O botão "Salvar alterações" fica no rodapé da sheet.
       await tester.ensureVisible(find.text('Salvar alterações'));
@@ -562,12 +606,13 @@ void main() {
     });
 
     testWidgets('exibe erro e permite tentar novamente', (tester) async {
-      await tester.pumpWidget(
-        _buildApp(_ThrowingGetProductsUseCase()),
-      );
+      await tester.pumpWidget(_buildApp(_ThrowingGetProductsUseCase()));
       await tester.pumpAndSettle();
 
-      expect(find.text('Não foi possível carregar os produtos.'), findsOneWidget);
+      expect(
+        find.text('Não foi possível carregar os produtos.'),
+        findsOneWidget,
+      );
       expect(find.text('Tentar novamente'), findsOneWidget);
 
       // Tentar novamente não explode (o erro persiste, mas a UI não quebra).
@@ -576,7 +621,9 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('não estoura com escala de texto 2.0 em tela estreita', (tester) async {
+    testWidgets('não estoura com escala de texto 2.0 em tela estreita', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(
@@ -593,14 +640,16 @@ void main() {
 
     testWidgets('produtos sobrevivem à rotação para paisagem', (tester) async {
       await tester.pumpWidget(
-        _buildApp(_FakeGetProductsUseCase(const [
-          Product(
-            id: '1',
-            name: 'Caneta',
-            purchasePriceCents: 100,
-            salePriceCents: 200,
-          ),
-        ])),
+        _buildApp(
+          _FakeGetProductsUseCase(const [
+            Product(
+              id: '1',
+              name: 'Caneta',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+            ),
+          ]),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -617,16 +666,20 @@ void main() {
       expect(find.text('Caneta'), findsOneWidget);
     });
 
-    testWidgets('funcionário comum NÃO vê o botão de novo produto (só vende)', (tester) async {
+    testWidgets('funcionário comum NÃO vê o botão de novo produto (só vende)', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        _buildAppEmployee(_FakeGetProductsUseCase(const [
-          Product(
-            id: '1',
-            name: 'Caneta',
-            purchasePriceCents: 100,
-            salePriceCents: 200,
-          ),
-        ])),
+        _buildAppEmployee(
+          _FakeGetProductsUseCase(const [
+            Product(
+              id: '1',
+              name: 'Caneta',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+            ),
+          ]),
+        ),
       );
       await tester.pumpAndSettle();
 

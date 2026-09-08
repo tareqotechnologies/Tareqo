@@ -11,8 +11,8 @@ import 'package:tareqo/core/database/app_database_io.dart';
 /// todas as plataformas (na VM Windows cai para a winsqlite3.dll do
 /// sistema via hook) — sem setup manual de loader.
 Database openTestDatabase() {
- final db = sqlite3.openInMemory();
- db.execute('PRAGMA foreign_keys = ON;');
- AppDatabase.initialize(db);
- return db;
+  final db = sqlite3.openInMemory();
+  db.execute('PRAGMA foreign_keys = ON;');
+  AppDatabase.initialize(db);
+  return db;
 }

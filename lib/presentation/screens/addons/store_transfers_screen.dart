@@ -32,11 +32,7 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
     final transfers = ref.watch(stockTransfersProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.transfersTitle,
-        ),
-      ),
+      appBar: AppBar(title: Text(l10n.transfersTitle)),
       body: transfers.isEmpty
           ? EmptyState(
               icon: Icons.swap_horiz_outlined,
@@ -46,11 +42,9 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
           : ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: transfers.length,
-              separatorBuilder: (_, _) =>
-                  const SizedBox(height: AppSpacing.xs),
-              itemBuilder: (context, index) => _TransferCard(
-                transfer: transfers[index],
-              ),
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
+              itemBuilder: (context, index) =>
+                  _TransferCard(transfer: transfers[index]),
             ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab-transfer',
@@ -86,14 +80,19 @@ class _TransferCard extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     final (statusColor, statusIcon) = switch (transfer.status) {
-      StockTransferStatus.pending =>
-        (ModuleColors.credit, Icons.schedule_outlined),
-      StockTransferStatus.inTransit =>
-        (ModuleColors.reports, Icons.local_shipping_outlined),
-      StockTransferStatus.received =>
-        (IconTone.green, Icons.check_circle_outline),
-      StockTransferStatus.cancelled =>
-        (IconTone.red, Icons.cancel_outlined),
+      StockTransferStatus.pending => (
+        ModuleColors.credit,
+        Icons.schedule_outlined,
+      ),
+      StockTransferStatus.inTransit => (
+        ModuleColors.reports,
+        Icons.local_shipping_outlined,
+      ),
+      StockTransferStatus.received => (
+        IconTone.green,
+        Icons.check_circle_outline,
+      ),
+      StockTransferStatus.cancelled => (IconTone.red, Icons.cancel_outlined),
     };
 
     final formattedQty = Quantity.format(
@@ -137,31 +136,25 @@ class _TransferCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+                      // Nomes COMPLETOS das lojas — quebra quando necessário
+                      // (nunca truncar o percurso da transferência).
                       '${transfer.fromStoreName}  →  ${transfer.toStoreName}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 1),
                     Text(
                       '${transfer.productName}  ·  $formattedQty  ·  ${Formatters.date(transfer.createdAt)}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontSize: 11,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
@@ -194,10 +187,7 @@ class _TransferCard extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _NewTransferItem {
-  _NewTransferItem({
-    required this.product,
-    required this.qtyMilli,
-  });
+  _NewTransferItem({required this.product, required this.qtyMilli});
 
   final Product product;
   final int qtyMilli;
@@ -250,9 +240,20 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
   Future<void> _executeTransfer() async {
     if (_fromStoreId == null || _toStoreId == null || _items.isEmpty) return;
 
-    final stores = ref.read(storesProvider(
-      ref.read(myTenantProvider(ref.read(authStateProvider).value!.id)).value!.id,
-    )).value ?? [];
+    final stores =
+        ref
+            .read(
+              storesProvider(
+                ref
+                    .read(
+                      myTenantProvider(ref.read(authStateProvider).value!.id),
+                    )
+                    .value!
+                    .id,
+              ),
+            )
+            .value ??
+        [];
 
     // Resolve os NOMES antes de executar: se uma loja selecionada sumir da
     // lista (ex.: refresh/stale), aborta sem crashar (o antigo firstWhere
@@ -261,10 +262,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
         .where((s) => s.id == _fromStoreId)
         .firstOrNull
         ?.name;
-    final toName = stores
-        .where((s) => s.id == _toStoreId)
-        .firstOrNull
-        ?.name;
+    final toName = stores.where((s) => s.id == _toStoreId).firstOrNull?.name;
     if (fromName == null || toName == null) return;
 
     setState(() => _executing = true);
@@ -291,11 +289,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.l10n.transfersSuccess(_items.length),
-            ),
-          ),
+          SnackBar(content: Text(context.l10n.transfersSuccess(_items.length))),
         );
       }
     } catch (e) {
@@ -332,9 +326,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
         : ref.watch(activeStoreIdProvider(user.id));
 
     // Filtrar loja de destino (não pode ser igual à origem).
-    final destStores = stores
-        .where((s) => s.id != _fromStoreId)
-        .toList();
+    final destStores = stores.where((s) => s.id != _fromStoreId).toList();
 
     // Definir origem padrão se ainda não selecionada.
     if (_fromStoreId == null &&
@@ -368,7 +360,6 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
-                  fontSize: 11,
                 ),
               ),
             ],
@@ -403,10 +394,12 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                 prefixIcon: const Icon(Icons.store_outlined),
               ),
               items: stores
-                  .map<DropdownMenuItem<String>>((s) => DropdownMenuItem(
-                        value: s.id,
-                        child: Text(s.name, style: theme.textTheme.bodySmall),
-                      ))
+                  .map<DropdownMenuItem<String>>(
+                    (s) => DropdownMenuItem(
+                      value: s.id,
+                      child: Text(s.name, style: theme.textTheme.bodySmall),
+                    ),
+                  )
                   .toList(),
               onChanged: (v) => setState(() {
                 _fromStoreId = v;
@@ -421,10 +414,12 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                 prefixIcon: const Icon(Icons.storefront_outlined),
               ),
               items: destStores
-                  .map<DropdownMenuItem<String>>((s) => DropdownMenuItem(
-                        value: s.id,
-                        child: Text(s.name, style: theme.textTheme.bodySmall),
-                      ))
+                  .map<DropdownMenuItem<String>>(
+                    (s) => DropdownMenuItem(
+                      value: s.id,
+                      child: Text(s.name, style: theme.textTheme.bodySmall),
+                    ),
+                  )
                   .toList(),
               onChanged: (v) => setState(() => _toStoreId = v),
             ),
@@ -453,17 +448,13 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                       ),
                     )
                     .toList(),
-                onChanged: (id) =>
-                    setState(() => _selectedProductId = id),
+                onChanged: (id) => setState(() => _selectedProductId = id),
               )
             else
               InputDecorator(
                 decoration: InputDecoration(
                   hintText: l10n.transfersProductPlaceholder,
-                  prefixIcon: const Icon(
-                    Icons.inventory_2_outlined,
-                    size: 20,
-                  ),
+                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -489,8 +480,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                   alignment: Alignment.bottomCenter,
                   child: AppButton.secondary(
                     label: l10n.transfersAddItem,
-                    onPressed:
-                        _selectedProductId != null ? _addItem : null,
+                    onPressed: _selectedProductId != null ? _addItem : null,
                   ),
                 ),
               ],
@@ -498,35 +488,39 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             if (_items.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
               ..._items.asMap().entries.map(
-                    (entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        children: [
-                          Icon(Icons.check_circle_outline,
-                              size: 16, color: scheme.primary),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '${entry.value.product.name}  ·  ${Quantity.format(entry.value.qtyMilli, unitLabel: entry.value.product.vendaPorFracao ? entry.value.product.unitLabel : null)}',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () => setState(
-                                () => _items.removeAt(entry.key)),
-                            child: Icon(Icons.close,
-                                size: 16, color: scheme.error),
-                          ),
-                        ],
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle_outline,
+                        size: 16,
+                        color: scheme.primary,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${entry.value.product.name}  ·  ${Quantity.format(entry.value.qtyMilli, unitLabel: entry.value.product.vendaPorFracao ? entry.value.product.unitLabel : null)}',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => setState(() => _items.removeAt(entry.key)),
+                        child: Icon(Icons.close, size: 16, color: scheme.error),
+                      ),
+                    ],
                   ),
+                ),
+              ),
             ],
             const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               expanded: true,
-              label: _executing ? l10n.transfersExecuting : l10n.transfersExecute,
-              onPressed: _executing ||
+              label: _executing
+                  ? l10n.transfersExecuting
+                  : l10n.transfersExecute,
+              onPressed:
+                  _executing ||
                       _fromStoreId == null ||
                       _toStoreId == null ||
                       _fromStoreId == _toStoreId ||
@@ -555,9 +549,9 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.2,
-          ),
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.2,
+      ),
     );
   }
 }

@@ -66,7 +66,20 @@ class _SecuritySettingsScreenState
       await ref.read(biometricAuthUseCaseProvider).disable();
       setState(() => _biometricEnabled = false);
     } else {
-      final auth = await ref.read(biometricAuthUseCaseProvider).authenticate();
+      // M3: prompt de biometria no idioma ativo do app.
+      final l10n = context.l10n;
+      final auth = await ref
+          .read(biometricAuthUseCaseProvider)
+          .authenticate(
+            localizedReason: l10n.biometricReason,
+            signInTitle: l10n.biometricSignInTitle,
+            biometricHint: l10n.biometricHint,
+            cancelButton: l10n.biometricCancel,
+            fallbackTitle: l10n.biometricFallbackTitle,
+            goToSettingsButton: l10n.biometricGoToSettingsButton,
+            goToSettingsDescription: l10n.biometricGoToSettingsDescription,
+            lockOut: l10n.biometricLockOut,
+          );
       if (auth) {
         await ref.read(biometricAuthUseCaseProvider).enable();
         if (mounted) setState(() => _biometricEnabled = true);

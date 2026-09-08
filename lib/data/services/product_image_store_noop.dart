@@ -7,16 +7,15 @@ import '../../domain/repositories/i_product_image_store.dart';
 /// vazia (`Product.imagePath = ''` → a UI mostra o ícone padrão).
 /// Registrada apenas quando o app roda sem SQLite e sem Supabase.
 final class ProductImageStoreNoop implements IProductImageStore {
- const ProductImageStoreNoop();
+  const ProductImageStoreNoop();
 
- @override
- Future<String> saveImage({
- required String productId,
- required String storeId,
- required Uint8List bytes,
- }) async =>
- '';
+  @override
+  Future<String> saveImage({
+    required String productId,
+    required String storeId,
+    required Uint8List bytes,
+  }) async => '';
 
- @override
- Future<void> deleteImage(String path) async {}
+  @override
+  Future<void> deleteImage(String path) async {}
 }

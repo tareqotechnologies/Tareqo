@@ -46,10 +46,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   }
 
   Future<void> _openAddSheet() async {
-    await showAppSheet<void>(
-      context,
-      builder: (_) => const AddCustomerSheet(),
-    );
+    await showAppSheet<void>(context, builder: (_) => const AddCustomerSheet());
     if (!mounted) return;
     ref.invalidate(customersProvider);
   }
@@ -77,9 +74,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     try {
       await ref.read(deleteCustomerUseCaseProvider).call(customer.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.customersDeleteSuccess)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.customersDeleteSuccess)));
       ref.invalidate(customersProvider);
     } catch (error, stackTrace) {
       CrashReporting.capture(
@@ -88,9 +85,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         hint: 'Erro ao remover cliente',
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.customersDeleteError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.customersDeleteError)));
     }
   }
 
@@ -177,13 +174,13 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                 final filtered = _query.isEmpty
                     ? customers
                     : customers
-                        .where(
-                          (customer) =>
-                              customer.name.toLowerCase().contains(query) ||
-                              customer.phone.contains(query) ||
-                              customer.email.toLowerCase().contains(query),
-                        )
-                        .toList();
+                          .where(
+                            (customer) =>
+                                customer.name.toLowerCase().contains(query) ||
+                                customer.phone.contains(query) ||
+                                customer.email.toLowerCase().contains(query),
+                          )
+                          .toList();
 
                 if (filtered.isEmpty) {
                   return EmptyState(
@@ -200,11 +197,15 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   // superfície elevada — mesmo padrão de Vendas/Produtos.
                   child: ListView.separated(
                     padding: EdgeInsets.fromLTRB(
-                    AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-                    4,
-                    AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-                    96,
-                  ),
+                      AppSpacing.pagePaddingForWidth(
+                        MediaQuery.sizeOf(context).width,
+                      ),
+                      4,
+                      AppSpacing.pagePaddingForWidth(
+                        MediaQuery.sizeOf(context).width,
+                      ),
+                      96,
+                    ),
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: filtered.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -362,8 +363,11 @@ class _CustomerTile extends StatelessWidget {
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit_outlined, size: 18,
-                              color: theme.colorScheme.onSurface),
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 18,
+                            color: theme.colorScheme.onSurface,
+                          ),
                           const SizedBox(width: 10),
                           Text(l10n.customersEditTitle),
                         ],
@@ -373,8 +377,11 @@ class _CustomerTile extends StatelessWidget {
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_outline, size: 18,
-                              color: theme.colorScheme.error),
+                          Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: theme.colorScheme.error,
+                          ),
                           const SizedBox(width: 10),
                           Text(l10n.commonDelete),
                         ],
@@ -614,11 +621,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
     } on InvalidCustomerException catch (error) {
       setState(() => _formError = error.message);
     } catch (error, stackTrace) {
-      CrashReporting.capture(
-        error,
-        stackTrace,
-        hint: 'Erro ao editar cliente',
-      );
+      CrashReporting.capture(error, stackTrace, hint: 'Erro ao editar cliente');
       setState(() {
         _formError = l10n.customersEditError;
       });

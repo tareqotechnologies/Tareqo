@@ -13,9 +13,7 @@ final class QuotationLocalDataSourceImpl implements QuotationLocalDataSource {
 
   @override
   Future<List<Quotation>> getAll({required String storeId}) async {
-    final list = _quotations.values
-        .where((q) => q.storeId == storeId)
-        .toList()
+    final list = _quotations.values.where((q) => q.storeId == storeId).toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return List.unmodifiable(list);
   }

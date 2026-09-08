@@ -9,17 +9,17 @@ import 'package:flutter/material.dart';
 /// da loja ativa NÃO mora mais aqui: foi migrada para **Lojas → Ajustes**
 /// (seção "Loja ativa") — o banner no topo foi removido do design.
 class StoreScopedContent extends StatelessWidget {
- const StoreScopedContent({super.key, required this.child});
+  const StoreScopedContent({super.key, required this.child});
 
- final Widget child;
+  final Widget child;
 
- @override
- Widget build(BuildContext context) {
- // SafeArea TOP no topo do shell (Android 15+/16 — edge-to-edge
- // obrigatório): sem o consumo do padding, os AppBars colidem com a
- // barra de status (texto por cima do relógio/notificações). O SafeArea
- // aqui também remove o padding do MediaQuery para os descendentes — os
- // AppBars das telas NÃO aplicam padding duplo.
- return SafeArea(bottom: false, child: child);
- }
+  @override
+  Widget build(BuildContext context) {
+    // SafeArea TOP no topo do shell (Android 15+/16 — edge-to-edge
+    // obrigatório): sem o consumo do padding, os AppBars colidem com a
+    // barra de status (texto por cima do relógio/notificações). O SafeArea
+    // aqui também remove o padding do MediaQuery para os descendentes — os
+    // AppBars das telas NÃO aplicam padding duplo.
+    return SafeArea(bottom: false, child: child);
+  }
 }

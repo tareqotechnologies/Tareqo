@@ -8,31 +8,33 @@ import '../datasources/remote/supabase_datasource_helpers.dart';
 ///
 /// Valores em CENTAVOS inteiros (W4): a RPC devolve BIGINT.
 final class SupabaseCashFlowRepository implements ICashFlowRepository {
- const SupabaseCashFlowRepository();
+  const SupabaseCashFlowRepository();
 
- @override
- Future<CashFlow> fetchCashFlow({
- required String storeId,
- required DateTime start,
- required DateTime end,
- }) async {
- requireCurrentUserId(); // Falha cedo (cliente) se não houver sessão.
- final rows = await supabaseClient.rpc(
- 'get_cash_flow',
- params: {
- 'p_store_id': storeId,
- 'p_start': start.toUtc().toIso8601String(),
- 'p_end': end.toUtc().toIso8601String(),
- },
- ) as List<dynamic>;
+  @override
+  Future<CashFlow> fetchCashFlow({
+    required String storeId,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    requireCurrentUserId(); // Falha cedo (cliente) se não houver sessão.
+    final rows =
+        await supabaseClient.rpc(
+              'get_cash_flow',
+              params: {
+                'p_store_id': storeId,
+                'p_start': start.toUtc().toIso8601String(),
+                'p_end': end.toUtc().toIso8601String(),
+              },
+            )
+            as List<dynamic>;
 
- if (rows.isEmpty) {
- return const CashFlow(incomeCents: 0, expenseCents: 0);
- }
- final row = rows.first as Map<String, dynamic>;
- return CashFlow(
- incomeCents: (row['income_cents'] as num).toInt(),
- expenseCents: (row['expense_cents'] as num).toInt(),
- );
- }
+    if (rows.isEmpty) {
+      return const CashFlow(incomeCents: 0, expenseCents: 0);
+    }
+    final row = rows.first as Map<String, dynamic>;
+    return CashFlow(
+      incomeCents: (row['income_cents'] as num).toInt(),
+      expenseCents: (row['expense_cents'] as num).toInt(),
+    );
+  }
 }

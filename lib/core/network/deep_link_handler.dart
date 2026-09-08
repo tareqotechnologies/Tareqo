@@ -20,19 +20,35 @@ import '../observability/crash_reporting.dart';
 /// - iOS: `Info.plist` (`CFBundleURLTypes` → `tareqo`);
 /// - Supabase: `site_url` = `tareqo://callback` (Authentication).
 abstract final class DeepLinkHandler {
-  /// Scheme do app registrado no AndroidManifest.xml / Info.plist.
+  /// Scheme do app registrado no AndroidManifest.xml / Info.plist
+  /// (legado — o fluxo novo é App Links/Universal Links, auditoria M4).
   static const String _scheme = 'tareqo';
 
   /// Host de callback do gotrue (OAuth PKCE / magic link).
   static const String _callbackHost = 'callback';
 
+  /// Domínio HTTPS do site (App Links / Universal Links): o gotrue
+  /// também aceita `https://tareqo.app/callback` quando o `site_url` do
+  /// Supabase é configurado para ele (ver website/.well-known e
+  /// docs/13-build-e-publicacao — passos de infra M4).
+  static const String _webHost = 'tareqo.app';
+
+  static const String _callbackPath = '/callback';
+
   /// Valida se [uri] é um deep link de autenticação legítimo.
   ///
-  /// Aceita apenas `tareqo://callback?code=...` ou
-  /// `tareqo://callback?error=...`. Qualquer outro scheme ou host
-  /// é rejeitado — protege contra hijack de scheme (auditoria 2026-08, V12).
+  /// Aceita `tareqo://callback?code=...` (scheme legado, com validação
+  /// de scheme+host contra hijack — auditoria V12) ou
+  /// `https://tareqo.app/callback?code=...` (App Links/Universal Links,
+  /// verificados pelo SO — auditoria M4). Qualquer outra origem é
+  /// rejeitada.
   static bool isAuthCallbackUri(Uri uri) {
-    return uri.scheme == _scheme && uri.host == _callbackHost;
+    if (uri.scheme == _scheme && uri.host == _callbackHost) {
+      return true;
+    }
+    return uri.scheme == 'https' &&
+        uri.host == _webHost &&
+        uri.path == _callbackPath;
   }
 
   static AppLinks? _appLinks;

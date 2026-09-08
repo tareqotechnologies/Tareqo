@@ -21,7 +21,7 @@ enum InvoiceNotificationType {
   addOnExpiringSoon,
 
   /// Add-on expirou.
-  addOnExpired;
+  addOnExpired,
 }
 
 /// Notificação in-app para o dono do tenant quando uma factura é gerada

@@ -26,7 +26,8 @@ void main() {
       expect(
         missing,
         isEmpty,
-        reason: 'Chaves presentes em app_pt.arb mas ausentes em '
+        reason:
+            'Chaves presentes em app_pt.arb mas ausentes em '
             'app_$locale.arb (acrescente-as ou ajuste o rename também em '
             'app_$locale.arb):\n${missing.join('\n')}',
       );
@@ -35,7 +36,8 @@ void main() {
       expect(
         extra,
         isEmpty,
-        reason: 'Chaves presentes em app_$locale.arb mas ausentes em '
+        reason:
+            'Chaves presentes em app_$locale.arb mas ausentes em '
             'app_pt.arb (remova-as ou ajuste o rename também em '
             'app_$locale.arb):\n${extra.join('\n')}',
       );
@@ -48,7 +50,8 @@ void main() {
       expect(
         duplicated,
         isEmpty,
-        reason: 'Chaves duplicadas em app_$locale.arb '
+        reason:
+            'Chaves duplicadas em app_$locale.arb '
             '(mantenha apenas a ocorrência canónica):\n'
             '${duplicated.join('\n')}',
       );
@@ -61,7 +64,8 @@ void main() {
       expect(
         orphans,
         isEmpty,
-        reason: 'Metadata @ sem chave correspondente em app_$locale.arb '
+        reason:
+            'Metadata @ sem chave correspondente em app_$locale.arb '
             '(remova-a ou recrie a chave):\n${orphans.join('\n')}',
       );
     }

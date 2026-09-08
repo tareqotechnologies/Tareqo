@@ -61,14 +61,8 @@ class _PulseBadgeState extends State<PulseBadge>
       duration: widget.pulseDuration,
     );
 
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.15,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseController,
-        curve: Curves.easeInOut,
-      ),
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
     if (widget.showPulse && widget.count > 0) {
@@ -124,10 +118,7 @@ class _PulseBadgeState extends State<PulseBadge>
               );
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 5,
-                vertical: 1,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
                 color: badgeColor,
                 borderRadius: BorderRadius.circular(AppRadius.full),
@@ -139,10 +130,7 @@ class _PulseBadgeState extends State<PulseBadge>
                   ),
                 ],
               ),
-              constraints: const BoxConstraints(
-                minWidth: 16,
-                minHeight: 16,
-              ),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(
                 displayText,
                 style: const TextStyle(

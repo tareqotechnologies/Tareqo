@@ -17,23 +17,25 @@ import 'package:tareqo/presentation/controllers/admin_providers.dart';
 import 'package:tareqo/presentation/screens/admin/admin_plan_requests_screen.dart';
 
 class _FakeGetPendingPlanRequestsUseCase
- implements GetPendingPlanRequestsUseCase {
- _FakeGetPendingPlanRequestsUseCase(this._requests);
+    implements GetPendingPlanRequestsUseCase {
+  _FakeGetPendingPlanRequestsUseCase(this._requests);
 
- final List<PlanRequest> _requests;
+  final List<PlanRequest> _requests;
 
- @override
- Future<List<PlanRequest>> call() async => _requests;
+  @override
+  Future<List<PlanRequest>> call() async => _requests;
 }
 
 class _FakeGetAllTenantsUseCase implements GetAllTenantsUseCase {
- _FakeGetAllTenantsUseCase(this._tenants);
+  _FakeGetAllTenantsUseCase(this._tenants);
 
- final List<Tenant> _tenants;
+  final List<Tenant> _tenants;
 
- @override
- Future<List<Tenant>> call() async => _tenants;
-}class _FakeGetPlansUseCase implements GetPlansUseCase {
+  @override
+  Future<List<Tenant>> call() async => _tenants;
+}
+
+class _FakeGetPlansUseCase implements GetPlansUseCase {
   _FakeGetPlansUseCase(this._plans);
 
   final List<Plan> _plans;
@@ -52,136 +54,137 @@ class _FakeGetAllPlansUseCase implements GetAllPlansUseCase {
 }
 
 class _FakeDecidePlanRequestUseCase implements DecidePlanRequestUseCase {
- int calls = 0;
- String? lastRequestId;
- bool? lastApprove;
+  int calls = 0;
+  String? lastRequestId;
+  bool? lastApprove;
 
- @override
- Future<void> call(String requestId, {required bool approve}) async {
- calls++;
- lastRequestId = requestId;
- lastApprove = approve;
- }
+  @override
+  Future<void> call(String requestId, {required bool approve}) async {
+    calls++;
+    lastRequestId = requestId;
+    lastApprove = approve;
+  }
 }
 
 Widget _buildApp({
- required List<PlanRequest> requests,
- List<Tenant> tenants = const [],
- List<Plan> plans = const [],
- DecidePlanRequestUseCase? decide,
+  required List<PlanRequest> requests,
+  List<Tenant> tenants = const [],
+  List<Plan> plans = const [],
+  DecidePlanRequestUseCase? decide,
 }) {
- return ProviderScope(
- overrides: [
- getPendingPlanRequestsUseCaseProvider.overrideWithValue(
- _FakeGetPendingPlanRequestsUseCase(requests),
- ),
- getAllTenantsUseCaseProvider.overrideWithValue(
- _FakeGetAllTenantsUseCase(tenants),
- ),    getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase(plans)),
-    getAllPlansUseCaseProvider.overrideWithValue(_FakeGetAllPlansUseCase(plans)),
- decidePlanRequestUseCaseProvider.overrideWithValue(
- decide ?? _FakeDecidePlanRequestUseCase(),
- ),
- ],
- child: testApp(home: const AdminPlanRequestsScreen()),
- );
+  return ProviderScope(
+    overrides: [
+      getPendingPlanRequestsUseCaseProvider.overrideWithValue(
+        _FakeGetPendingPlanRequestsUseCase(requests),
+      ),
+      getAllTenantsUseCaseProvider.overrideWithValue(
+        _FakeGetAllTenantsUseCase(tenants),
+      ),
+      getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase(plans)),
+      getAllPlansUseCaseProvider.overrideWithValue(
+        _FakeGetAllPlansUseCase(plans),
+      ),
+      decidePlanRequestUseCaseProvider.overrideWithValue(
+        decide ?? _FakeDecidePlanRequestUseCase(),
+      ),
+    ],
+    child: testApp(home: const AdminPlanRequestsScreen()),
+  );
 }
 
 void main() {
- final tenant = Tenant(
- id: 'tn1',
- ownerUserId: '1',
- businessName: 'Comercial Demo',
- planId: 'pl1',
- status: TenantStatus.approved,
- createdAt: DateTime(2026, 7, 1),
- );
- const plans = [
- Plan(id: 'pl1', name: 'Essencial', priceMonthlyCents: 2990),
- Plan(id: 'pl2', name: 'Comercial', priceMonthlyCents: 9900),
- ];
- final request = PlanRequest(
- id: 'r1',
- tenantId: 'tn1',
- currentPlanId: 'pl1',
- requestedPlanId: 'pl2',
- createdAt: DateTime(2026, 8, 2),
- );
+  final tenant = Tenant(
+    id: 'tn1',
+    ownerUserId: '1',
+    businessName: 'Comercial Demo',
+    planId: 'pl1',
+    status: TenantStatus.approved,
+    createdAt: DateTime(2026, 7, 1),
+  );
+  const plans = [
+    Plan(id: 'pl1', name: 'Essencial', priceMonthlyCents: 2990),
+    Plan(id: 'pl2', name: 'Comercial', priceMonthlyCents: 9900),
+  ];
+  final request = PlanRequest(
+    id: 'r1',
+    tenantId: 'tn1',
+    currentPlanId: 'pl1',
+    requestedPlanId: 'pl2',
+    createdAt: DateTime(2026, 8, 2),
+  );
 
- testWidgets('exibe os pedidos de upgrade com planos resolvidos',
- (tester) async {
- await tester.pumpWidget(
- _buildApp(
- requests: [request],
- tenants: [tenant],
- plans: plans,
- ),
- );
- await tester.pumpAndSettle();
+  testWidgets('exibe os pedidos de upgrade com planos resolvidos', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(requests: [request], tenants: [tenant], plans: plans),
+    );
+    await tester.pumpAndSettle();
 
- // Nome do tenant + badges "Atual/Solicitado" com os nomes dos planos.
- expect(find.text('Comercial Demo'), findsOneWidget);
- expect(find.text('Atual'), findsOneWidget);
- expect(find.text('Solicitado'), findsOneWidget);
- expect(find.text('Essencial'), findsOneWidget);
- expect(find.text('Comercial'), findsOneWidget);
- expect(find.text('Aprovar'), findsOneWidget);
- expect(find.text('Rejeitar'), findsOneWidget);
- });
+    // Nome do tenant + badges "Atual/Solicitado" com os nomes dos planos.
+    expect(find.text('Comercial Demo'), findsOneWidget);
+    expect(find.text('Atual'), findsOneWidget);
+    expect(find.text('Solicitado'), findsOneWidget);
+    expect(find.text('Essencial'), findsOneWidget);
+    expect(find.text('Comercial'), findsOneWidget);
+    expect(find.text('Aprovar'), findsOneWidget);
+    expect(find.text('Rejeitar'), findsOneWidget);
+  });
 
- testWidgets('mostra estado vazio quando não há upgrades pendentes',
- (tester) async {
- await tester.pumpWidget(_buildApp(requests: const []));
- await tester.pumpAndSettle();
+  testWidgets('mostra estado vazio quando não há upgrades pendentes', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildApp(requests: const []));
+    await tester.pumpAndSettle();
 
- expect(find.text('Nenhum upgrade pendente'), findsOneWidget);
- });
+    expect(find.text('Nenhum upgrade pendente'), findsOneWidget);
+  });
 
- testWidgets('aprovar o upgrade chama o DecidePlanRequestUseCase',
- (tester) async {
- final decide = _FakeDecidePlanRequestUseCase();
+  testWidgets('aprovar o upgrade chama o DecidePlanRequestUseCase', (
+    tester,
+  ) async {
+    final decide = _FakeDecidePlanRequestUseCase();
 
- await tester.pumpWidget(
- _buildApp(
- requests: [request],
- tenants: [tenant],
- plans: plans,
- decide: decide,
- ),
- );
- await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      _buildApp(
+        requests: [request],
+        tenants: [tenant],
+        plans: plans,
+        decide: decide,
+      ),
+    );
+    await tester.pumpAndSettle();
 
- await tester.tap(find.text('Aprovar'));
- await tester.pumpAndSettle();
+    await tester.tap(find.text('Aprovar'));
+    await tester.pumpAndSettle();
 
- expect(decide.calls, 1);
- expect(decide.lastRequestId, 'r1');
- expect(decide.lastApprove, isTrue);
- expect(      find.text('Upgrade aprovado — plano atualizado!'),
- findsOneWidget,
- );
- });
+    expect(decide.calls, 1);
+    expect(decide.lastRequestId, 'r1');
+    expect(decide.lastApprove, isTrue);
+    expect(find.text('Upgrade aprovado — plano atualizado!'), findsOneWidget);
+  });
 
- testWidgets('rejeitar o upgrade chama o DecidePlanRequestUseCase',
- (tester) async {
- final decide = _FakeDecidePlanRequestUseCase();
+  testWidgets('rejeitar o upgrade chama o DecidePlanRequestUseCase', (
+    tester,
+  ) async {
+    final decide = _FakeDecidePlanRequestUseCase();
 
- await tester.pumpWidget(
- _buildApp(
- requests: [request],
- tenants: [tenant],
- plans: plans,
- decide: decide,
- ),
- );
- await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      _buildApp(
+        requests: [request],
+        tenants: [tenant],
+        plans: plans,
+        decide: decide,
+      ),
+    );
+    await tester.pumpAndSettle();
 
- await tester.tap(find.text('Rejeitar'));
- await tester.pumpAndSettle();
+    await tester.tap(find.text('Rejeitar'));
+    await tester.pumpAndSettle();
 
- expect(decide.calls, 1);
- expect(decide.lastRequestId, 'r1');
- expect(decide.lastApprove, isFalse);
- expect(find.text('Upgrade rejeitado.'), findsOneWidget);
- });
+    expect(decide.calls, 1);
+    expect(decide.lastRequestId, 'r1');
+    expect(decide.lastApprove, isFalse);
+    expect(find.text('Upgrade rejeitado.'), findsOneWidget);
+  });
 }

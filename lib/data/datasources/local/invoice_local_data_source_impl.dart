@@ -7,7 +7,7 @@ import 'invoice_local_data_source.dart';
 /// Usada em testes e no modo local (sem Supabase). Inicia vazia por padrão.
 final class InvoiceLocalDataSourceImpl implements InvoiceLocalDataSource {
   InvoiceLocalDataSourceImpl({List<Invoice> seed = const []})
-      : _invoices = [...seed];
+    : _invoices = [...seed];
 
   final List<Invoice> _invoices;
 
@@ -23,26 +23,21 @@ final class InvoiceLocalDataSourceImpl implements InvoiceLocalDataSource {
   }
 
   @override
-  Future<List<Invoice>> getByTenant(String tenantId) async =>
-      List.unmodifiable(
-        _invoices
-            .where((i) => i.tenantId == tenantId)
-            .toList()
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
-      );
+  Future<List<Invoice>> getByTenant(String tenantId) async => List.unmodifiable(
+    _invoices.where((i) => i.tenantId == tenantId).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
+  );
 
   @override
   Future<List<Invoice>> getPending() async => List.unmodifiable(
-        _invoices
-            .where((i) => i.status == InvoiceStatus.pending)
-            .toList()
-          ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
-      );
+    _invoices.where((i) => i.status == InvoiceStatus.pending).toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
+  );
 
   @override
   Future<List<Invoice>> getAll() async => List.unmodifiable(
-        [..._invoices]..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
-      );
+    [..._invoices]..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
+  );
 
   @override
   Future<void> markAsPaid(String invoiceId) async {

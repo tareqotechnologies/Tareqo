@@ -26,13 +26,15 @@ final class SupabaseAddOnDataSourceImpl implements AddOnLocalDataSource {
     // Filtrar expirados.
     final now = DateTime.now();
     return Set.unmodifiable(
-      rows.where((row) {
-        final expiresAt = row['expires_at'] as String?;
-        if (expiresAt != null) {
-          return DateTime.parse(expiresAt).isAfter(now);
-        }
-        return true;
-      }).map((row) => row['add_on_id'] as String),
+      rows
+          .where((row) {
+            final expiresAt = row['expires_at'] as String?;
+            if (expiresAt != null) {
+              return DateTime.parse(expiresAt).isAfter(now);
+            }
+            return true;
+          })
+          .map((row) => row['add_on_id'] as String),
     );
   }
 
@@ -90,7 +92,8 @@ final class SupabaseAddOnDataSourceImpl implements AddOnLocalDataSource {
     if (row == null || row['is_active'] != true) return false;
 
     final expiresAt = row['expires_at'] as String?;
-    if (expiresAt != null && DateTime.now().isAfter(DateTime.parse(expiresAt))) {
+    if (expiresAt != null &&
+        DateTime.now().isAfter(DateTime.parse(expiresAt))) {
       return false;
     }
     return true;
@@ -135,13 +138,13 @@ final class SupabaseAddOnDataSourceImpl implements AddOnLocalDataSource {
   }
 
   TenantAddOn _map(Map<String, dynamic> row) => TenantAddOn(
-        id: row['id'] as String,
-        tenantId: row['tenant_id'] as String,
-        addOnId: row['add_on_id'] as String,
-        activatedAt: DateTime.parse(row['activated_at'] as String),
-        expiresAt: row['expires_at'] != null
-            ? DateTime.parse(row['expires_at'] as String)
-            : null,
-        isActive: (row['is_active'] as bool?) ?? true,
-      );
+    id: row['id'] as String,
+    tenantId: row['tenant_id'] as String,
+    addOnId: row['add_on_id'] as String,
+    activatedAt: DateTime.parse(row['activated_at'] as String),
+    expiresAt: row['expires_at'] != null
+        ? DateTime.parse(row['expires_at'] as String)
+        : null,
+    isActive: (row['is_active'] as bool?) ?? true,
+  );
 }

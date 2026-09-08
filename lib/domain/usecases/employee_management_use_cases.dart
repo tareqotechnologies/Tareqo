@@ -50,10 +50,7 @@ class CalculateCommissionUseCase {
   ///
   /// [rateBps] é em basis points: 500 = 5%, 1000 = 10%, etc.
   /// Retorna o valor da comissão em centavos.
-  int call({
-    required int saleAmountCents,
-    required int rateBps,
-  }) {
+  int call({required int saleAmountCents, required int rateBps}) {
     if (rateBps <= 0) return 0;
     return (saleAmountCents * rateBps) ~/ 10000;
   }

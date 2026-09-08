@@ -1,6 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// Riverpod 3.x: os providers legados (StateProvider) vivem em `legacy`.
-import 'package:flutter_riverpod/legacy.dart';
 
 import '../../core/config/supabase_config.dart';
 import '../../core/di/service_locator.dart';
@@ -23,45 +21,57 @@ import '../../domain/usecases/sign_up_use_case.dart';
 /// provider. Os use cases são **compostos** a partir dele (e não lidos do
 /// GetIt), para que um único override nos testes cubra toda a cadeia.
 final authRepositoryProvider = Provider<IAuthRepository>(
- (ref) => ServiceLocator.instance<IAuthRepository>(),
+  (ref) => ServiceLocator.instance<IAuthRepository>(),
 );
 
 final signInUseCaseProvider = Provider<SignInUseCase>(
- (ref) => SignInUseCase(ref.watch(authRepositoryProvider)),
+  (ref) => SignInUseCase(ref.watch(authRepositoryProvider)),
 );
 
 final signUpUseCaseProvider = Provider<SignUpUseCase>(
- (ref) => SignUpUseCase(ref.watch(authRepositoryProvider)),
+  (ref) => SignUpUseCase(ref.watch(authRepositoryProvider)),
 );
 
 final signOutUseCaseProvider = Provider<SignOutUseCase>(
- (ref) => SignOutUseCase(ref.watch(authRepositoryProvider)),
+  (ref) => SignOutUseCase(ref.watch(authRepositoryProvider)),
 );
 
 final resetPasswordUseCaseProvider = Provider<ResetPasswordUseCase>(
- (ref) => ResetPasswordUseCase(ref.watch(authRepositoryProvider)),
+  (ref) => ResetPasswordUseCase(ref.watch(authRepositoryProvider)),
 );
 
 final changePasswordUseCaseProvider = Provider<ChangePasswordUseCase>(
- (ref) => ChangePasswordUseCase(ref.watch(authRepositoryProvider)),
+  (ref) => ChangePasswordUseCase(ref.watch(authRepositoryProvider)),
 );
 
 final setNewPasswordUseCaseProvider = Provider<SetNewPasswordUseCase>(
- (ref) => SetNewPasswordUseCase(ref.watch(authRepositoryProvider)),
+  (ref) => SetNewPasswordUseCase(ref.watch(authRepositoryProvider)),
 );
 
 /// Eventos de autenticação em bruto — o [AuthGate] usa para detectar o
 /// fluxo de RECUPERAÇÃO de senha vindo do link do e-mail.
 final authEventsProvider = StreamProvider<AuthEvent>(
- (ref) => SupabaseConfig.isConfigured
- ? ref.watch(authRepositoryProvider).authEvents
- : Stream.value(AuthEvent.other),
+  (ref) => SupabaseConfig.isConfigured
+      ? ref.watch(authRepositoryProvider).authEvents
+      : Stream.value(AuthEvent.other),
 );
 
 /// Sinaliza que a sessão veio de um link de recuperação de senha: o
 /// [AuthGate] mostra a tela de definir nova senha antes de entrar. É
 /// limpo ao concluir a troca ou ao sair da conta.
-final passwordRecoveryPendingProvider = StateProvider<bool>((ref) => false);
+///
+/// B2: migrado de StateProvider (legacy) para Notifier (Riverpod 3).
+final passwordRecoveryPendingProvider =
+    NotifierProvider<PasswordRecoveryPendingNotifier, bool>(
+      PasswordRecoveryPendingNotifier.new,
+    );
+
+final class PasswordRecoveryPendingNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool value) => state = value;
+}
 
 /// Estado da sessão: `null` = deslogado; [AppUser] = logado.
 ///
@@ -77,10 +87,6 @@ final authStateProvider = StreamProvider<AppUser?>(
       ? ref.watch(authRepositoryProvider).authStateChanges
       : Stream.value(null),
 );
-
-/// Sinaliza que o utilizador está logado mas ainda NÃO verificou MFA.
-/// O [AuthGate] usa para mostrar a sheet de verificação em vez do AppShell.
-final mfaPendingProvider = StateProvider<bool>((ref) => false);
 
 /// Caso de uso MFA (Multi-Factor Authentication / TOTP).
 /// Requer SecureStorageService já registrado no ServiceLocator.

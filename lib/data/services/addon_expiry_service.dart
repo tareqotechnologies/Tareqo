@@ -21,10 +21,7 @@ const _warningDays = [1, 3, 7];
 /// Add-ons com `expires_at` no passado são desactivados automaticamente.
 /// Cria notificações in-app quando um add-on está para expirar ou já expirou.
 class AddOnExpiryService {
-  AddOnExpiryService(
-    this._dataSource, {
-    this._notificationRepository,
-  });
+  AddOnExpiryService(this._dataSource, {this._notificationRepository});
 
   final AddOnLocalDataSource _dataSource;
   final IInvoiceNotificationRepository? _notificationRepository;
@@ -112,8 +109,7 @@ class AddOnExpiryService {
 
         // Janela = menor limiar que cobre os dias restantes (1, 3 ou 7).
         final window = _warningDays.firstWhere((d) => daysLeft <= d);
-        final key =
-            '${tenantId}_${ta.addOnId}_warn_${window}_$expiryKey';
+        final key = '${tenantId}_${ta.addOnId}_warn_${window}_$expiryKey';
         if (!_notifiedKeys.add(key)) continue;
 
         await _createNotification(
@@ -160,7 +156,8 @@ void registerAddOnExpiryService() {
   if (!ServiceLocator.instance.isRegistered<AddOnExpiryService>()) {
     final dataSource = ServiceLocator.instance<AddOnLocalDataSource>();
     IInvoiceNotificationRepository? notifRepo;
-    if (ServiceLocator.instance.isRegistered<IInvoiceNotificationRepository>()) {
+    if (ServiceLocator.instance
+        .isRegistered<IInvoiceNotificationRepository>()) {
       notifRepo = ServiceLocator.instance<IInvoiceNotificationRepository>();
     }
     ServiceLocator.instance.registerLazySingleton<AddOnExpiryService>(

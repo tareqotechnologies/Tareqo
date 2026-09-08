@@ -31,7 +31,8 @@ void main() {
     expect(
       missing,
       isEmpty,
-      reason: 'Chaves l10n sem referência no código '
+      reason:
+          'Chaves l10n sem referência no código '
           '(remova-as dos 3 ARBs):\n'
           '${missing.join('\n')}',
     );

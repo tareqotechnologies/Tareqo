@@ -7,20 +7,20 @@ import 'package:tareqo/l10n/generated/app_localizations.dart';
 
 /// Backend em memória — simula o Keychain/Keystore sem plataforma.
 class _InMemoryBackend implements SecureStorageBackend {
- final Map<String, String> _store = {};
+  final Map<String, String> _store = {};
 
- @override
- Future<String?> read(String key) async => _store[key];
+  @override
+  Future<String?> read(String key) async => _store[key];
 
- @override
- Future<void> write(String key, String value) async {
-  _store[key] = value;
- }
+  @override
+  Future<void> write(String key, String value) async {
+    _store[key] = value;
+  }
 
- @override
- Future<void> delete(String key) async {
-  _store.remove(key);
- }
+  @override
+  Future<void> delete(String key) async {
+    _store.remove(key);
+  }
 }
 
 /// O [SecureStorageService] real é registrado no [ServiceLocator] apenas no
@@ -33,12 +33,12 @@ class _InMemoryBackend implements SecureStorageBackend {
 /// Testes que montam o app de ponta a ponta ([TareqoApp]) sem passar por
 /// [testApp] também devem chamá-la no `setUpAll`.
 void registerTestSecureStorage() {
- final getIt = GetIt.instance;
- if (!getIt.isRegistered<SecureStorageService>()) {
-  getIt.registerLazySingleton<SecureStorageService>(
-   () => SecureStorageService(backend: _InMemoryBackend()),
-  );
- }
+  final getIt = GetIt.instance;
+  if (!getIt.isRegistered<SecureStorageService>()) {
+    getIt.registerLazySingleton<SecureStorageService>(
+      () => SecureStorageService(backend: _InMemoryBackend()),
+    );
+  }
 }
 
 /// [MaterialApp] de teste com o delegate de localização do app e o locale
@@ -57,16 +57,20 @@ void registerTestSecureStorage() {
 /// testes que verificam o comportamento no modo claro (ex.: telas que
 /// seguem o brilho do tema).
 Widget testApp({
- required Widget home,
- Locale locale = const Locale('pt'),
- ThemeData? theme,
+  required Widget home,
+  Locale locale = const Locale('pt'),
+  ThemeData? theme,
+  // Inserido acima do Navigator (MaterialApp.builder) — mesmo papel do
+  // AppLockOverlay em produção; coberto por app_lock_overlay_test.dart.
+  Widget Function(BuildContext, Widget?)? builder,
 }) {
- registerTestSecureStorage();
- return MaterialApp(
- locale: locale,
- theme: theme ?? AppTheme.dark,
- localizationsDelegates: AppLocalizations.localizationsDelegates,
- supportedLocales: AppLocalizations.supportedLocales,
- home: home,
- );
+  registerTestSecureStorage();
+  return MaterialApp(
+    locale: locale,
+    theme: theme ?? AppTheme.dark,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: home,
+    builder: builder,
+  );
 }

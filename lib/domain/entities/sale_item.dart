@@ -12,15 +12,15 @@ part 'sale_item.g.dart';
 /// não é afetado.
 @freezed
 abstract class SaleItem with _$SaleItem {
- const factory SaleItem({
- required String productId,
- required String productName,
- // Quantidade em MILÉSIMOS de unidade (W11): 1000 = 1 unidade/kg.
- required int quantity,
- // Preço unitário cobrado em CENTAVOS inteiros (W4).
- required int unitPriceCents,
- }) = _SaleItem;
+  const factory SaleItem({
+    required String productId,
+    required String productName,
+    // Quantidade em MILÉSIMOS de unidade (W11): 1000 = 1 unidade/kg.
+    required int quantity,
+    // Preço unitário cobrado em CENTAVOS inteiros (W4).
+    required int unitPriceCents,
+  }) = _SaleItem;
 
- factory SaleItem.fromJson(Map<String, dynamic> json) =>
- _$SaleItemFromJson(json);
+  factory SaleItem.fromJson(Map<String, dynamic> json) =>
+      _$SaleItemFromJson(json);
 }

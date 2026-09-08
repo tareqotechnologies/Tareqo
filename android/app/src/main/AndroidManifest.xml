@@ -43,6 +43,20 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="tareqo" android:host="callback"/>
             </intent-filter>
+            <!-- M4: App Links (Android) — https://tareqo.app/callback como
+                 alternativa ao custom scheme (imune a scheme hijack). O
+                 autoVerify exige o assetlinks.json hospedado em
+                 https://tareqo.app/.well-known/assetlinks.json com o
+                 fingerprint do cert de assinatura (ver website/.well-known
+                 e docs/13-build-e-publicacao). Enquanto o site_url do
+                 Supabase apontar para tareqo://callback este filtro fica
+                 dormente (links https não são gerados). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="tareqo.app" android:pathPrefix="/callback"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

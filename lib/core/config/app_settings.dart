@@ -7,25 +7,25 @@ import 'package:flutter/widgets.dart';
 /// no onboarding e pode alterar em Lojas → Ajustes. Funcionários herdam a
 /// configuração do dono (a escolha é do negócio, não do usuário).
 class AppSettings {
- const AppSettings({required this.currencyCode, required this.language});
+  const AppSettings({required this.currencyCode, required this.language});
 
- /// Código ISO da moeda: `BRL`, `USD`, `EUR` ou `MZN`.
- final String currencyCode;
+  /// Código ISO da moeda: `BRL`, `USD`, `EUR` ou `MZN`.
+  final String currencyCode;
 
- /// Idioma do app: `pt`, `en` ou `fr`.
- final String language;
+  /// Idioma do app: `pt`, `en` ou `fr`.
+  final String language;
 
- /// Moedas suportadas (escolha do dono).
- static const List<String> supportedCurrencies = ['BRL', 'USD', 'EUR', 'MZN'];
+  /// Moedas suportadas (escolha do dono).
+  static const List<String> supportedCurrencies = ['BRL', 'USD', 'EUR', 'MZN'];
 
- /// Idiomas suportados (escolha do dono).
- static const List<String> supportedLanguages = ['pt', 'en', 'fr'];
+  /// Idiomas suportados (escolha do dono).
+  static const List<String> supportedLanguages = ['pt', 'en', 'fr'];
 
- /// Locale derivado do idioma escolhido.
- Locale get locale => Locale(language);
+  /// Locale derivado do idioma escolhido.
+  Locale get locale => Locale(language);
 
- static bool isValidCurrency(String code) =>
- supportedCurrencies.contains(code);
+  static bool isValidCurrency(String code) =>
+      supportedCurrencies.contains(code);
 
- static bool isValidLanguage(String lang) => supportedLanguages.contains(lang);
+  static bool isValidLanguage(String lang) => supportedLanguages.contains(lang);
 }

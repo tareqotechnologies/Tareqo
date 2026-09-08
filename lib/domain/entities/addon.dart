@@ -27,10 +27,13 @@ abstract class AddOn with _$AddOn {
     required String name,
     required String description,
     required AddOnCategory category,
+
     /// Preço mensal em CENTAVOS inteiros.
     required int priceMonthlyCents,
+
     /// Ícone do add-on.
     @Default('') String iconName,
+
     /// Se o add-on está disponível para compra (pode ser descontinuado).
     @Default(true) bool isAvailable,
   }) = _AddOn;

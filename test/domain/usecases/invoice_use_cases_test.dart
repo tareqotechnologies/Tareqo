@@ -38,26 +38,21 @@ class _FakeInvoiceRepository implements IInvoiceRepository {
   }
 
   @override
-  Future<List<Invoice>> getByTenant(String tenantId) async =>
-      List.unmodifiable(
-        _invoices
-            .where((i) => i.tenantId == tenantId)
-            .toList()
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
-      );
+  Future<List<Invoice>> getByTenant(String tenantId) async => List.unmodifiable(
+    _invoices.where((i) => i.tenantId == tenantId).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
+  );
 
   @override
   Future<List<Invoice>> getPending() async => List.unmodifiable(
-        _invoices
-            .where((i) => i.status == InvoiceStatus.pending)
-            .toList()
-          ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
-      );
+    _invoices.where((i) => i.status == InvoiceStatus.pending).toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
+  );
 
   @override
   Future<List<Invoice>> getAll() async => List.unmodifiable(
-        [..._invoices]..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
-      );
+    [..._invoices]..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
+  );
 
   @override
   Future<void> markAsPaid(String invoiceId) async {
@@ -153,8 +148,7 @@ class _FakeTenantRepository implements ITenantRepository {
     required String planId,
     required String currencyCode,
     required String language,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 
   @override
   Future<void> updateSettings(
@@ -183,8 +177,8 @@ class _FakeTenantRepository implements ITenantRepository {
 
   @override
   Future<List<Tenant>> getPending() async => List.unmodifiable(
-        _tenants.where((t) => t.status == TenantStatus.pending),
-      );
+    _tenants.where((t) => t.status == TenantStatus.pending),
+  );
 
   @override
   Future<List<Tenant>> getAll() async => List.unmodifiable(_tenants);
@@ -212,29 +206,23 @@ Tenant _approvedTenant({
   String planId = 'pl1',
   DateTime? planExpiresAt,
   DateTime? nextInvoiceAt,
-}) =>
-    Tenant(
-      id: id,
-      ownerUserId: 'u1',
-      businessName: 'Comercial X',
-      planId: planId,
-      status: TenantStatus.approved,
-      approvedAt: DateTime.now().subtract(const Duration(days: 14)),
-      createdAt: DateTime.now().subtract(const Duration(days: 14)),
-      planExpiresAt: planExpiresAt,
-      nextInvoiceAt: nextInvoiceAt,
-    );
+}) => Tenant(
+  id: id,
+  ownerUserId: 'u1',
+  businessName: 'Comercial X',
+  planId: planId,
+  status: TenantStatus.approved,
+  approvedAt: DateTime.now().subtract(const Duration(days: 14)),
+  createdAt: DateTime.now().subtract(const Duration(days: 14)),
+  planExpiresAt: planExpiresAt,
+  nextInvoiceAt: nextInvoiceAt,
+);
 
 Plan _basicPlan({
   String id = 'pl1',
   String name = 'Essencial',
   int priceMonthlyCents = 5000,
-}) =>
-    Plan(
-      id: id,
-      name: name,
-      priceMonthlyCents: priceMonthlyCents,
-    );
+}) => Plan(id: id, name: name, priceMonthlyCents: priceMonthlyCents);
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -242,31 +230,35 @@ Plan _basicPlan({
 
 void main() {
   group('GenerateInvoiceUseCase', () {
-    test('cria factura quando tenant e plano existem e não há duplicação',
-        () async {
-      final invoiceRepo = _FakeInvoiceRepository();
-      final tenantRepo = _FakeTenantRepository();
-      final planRepo = _FakePlanRepository();
+    test(
+      'cria factura quando tenant e plano existem e não há duplicação',
+      () async {
+        final invoiceRepo = _FakeInvoiceRepository();
+        final tenantRepo = _FakeTenantRepository();
+        final planRepo = _FakePlanRepository();
 
-      final now = DateTime.now();
-      final expiresAt = now.add(const Duration(days: 7));
-      tenantRepo.seedTenant(_approvedTenant(
-        planExpiresAt: expiresAt,
-      ));
-      planRepo.add(_basicPlan());
+        final now = DateTime.now();
+        final expiresAt = now.add(const Duration(days: 7));
+        tenantRepo.seedTenant(_approvedTenant(planExpiresAt: expiresAt));
+        planRepo.add(_basicPlan());
 
-      final useCase = GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      final invoice = await useCase('tn1');
+        final useCase = GenerateInvoiceUseCase(
+          invoiceRepo,
+          tenantRepo,
+          planRepo,
+        );
+        final invoice = await useCase('tn1');
 
-      expect(invoice, isNotNull);
-      expect(invoice!.tenantId, 'tn1');
-      expect(invoice.planId, 'pl1');
-      expect(invoice.amountCents, 5000);
-      expect(invoice.status, InvoiceStatus.pending);
-      expect(invoice.dueDate, expiresAt);
-      expect(invoice.period, isNotEmpty);
-      expect(invoiceRepo.createCalled, isTrue);
-    });
+        expect(invoice, isNotNull);
+        expect(invoice!.tenantId, 'tn1');
+        expect(invoice.planId, 'pl1');
+        expect(invoice.amountCents, 5000);
+        expect(invoice.status, InvoiceStatus.pending);
+        expect(invoice.dueDate, expiresAt);
+        expect(invoice.period, isNotEmpty);
+        expect(invoiceRepo.createCalled, isTrue);
+      },
+    );
 
     test('retorna null quando tenant não existe', () async {
       final invoiceRepo = _FakeInvoiceRepository();
@@ -295,25 +287,31 @@ void main() {
       expect(invoiceRepo.createCalled, isFalse);
     });
 
-    test('retorna null quando já existe factura pendente para o período',
-        () async {
-      final invoiceRepo = _FakeInvoiceRepository();
-      final tenantRepo = _FakeTenantRepository();
-      final planRepo = _FakePlanRepository();
+    test(
+      'retorna null quando já existe factura pendente para o período',
+      () async {
+        final invoiceRepo = _FakeInvoiceRepository();
+        final tenantRepo = _FakeTenantRepository();
+        final planRepo = _FakePlanRepository();
 
-      tenantRepo.seedTenant(_approvedTenant());
-      planRepo.add(_basicPlan());
+        tenantRepo.seedTenant(_approvedTenant());
+        planRepo.add(_basicPlan());
 
-      // Cria primeira factura
-      final useCase = GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      await useCase('tn1');
-      expect(invoiceRepo._invoices, hasLength(1));
+        // Cria primeira factura
+        final useCase = GenerateInvoiceUseCase(
+          invoiceRepo,
+          tenantRepo,
+          planRepo,
+        );
+        await useCase('tn1');
+        expect(invoiceRepo._invoices, hasLength(1));
 
-      // Tenta criar segunda factura (duplicação)
-      final invoice = await useCase('tn1');
-      expect(invoice, isNull);
-      expect(invoiceRepo._invoices, hasLength(1)); // Não duplicou
-    });
+        // Tenta criar segunda factura (duplicação)
+        final invoice = await useCase('tn1');
+        expect(invoice, isNull);
+        expect(invoiceRepo._invoices, hasLength(1)); // Não duplicou
+      },
+    );
 
     test('usa planExpiresAt como dueDate quando definido', () async {
       final invoiceRepo = _FakeInvoiceRepository();
@@ -498,16 +496,18 @@ void main() {
       final invoiceRepo = _FakeInvoiceRepository();
       final now = DateTime.now();
 
-      invoiceRepo._invoices.add(Invoice(
-        id: 'inv1',
-        tenantId: 'tn1',
-        planId: 'pl1',
-        amountCents: 5000,
-        status: InvoiceStatus.pending,
-        dueDate: now,
-        period: 'Agosto 2026',
-        createdAt: now,
-      ));
+      invoiceRepo._invoices.add(
+        Invoice(
+          id: 'inv1',
+          tenantId: 'tn1',
+          planId: 'pl1',
+          amountCents: 5000,
+          status: InvoiceStatus.pending,
+          dueDate: now,
+          period: 'Agosto 2026',
+          createdAt: now,
+        ),
+      );
 
       final useCase = MarkInvoiceAsPaidUseCase(invoiceRepo);
       await useCase('inv1');
@@ -522,10 +522,7 @@ void main() {
 
       final useCase = MarkInvoiceAsPaidUseCase(invoiceRepo);
 
-      expect(
-        () => useCase('inexistente'),
-        throwsStateError,
-      );
+      expect(() => useCase('inexistente'), throwsStateError);
     });
   });
 
@@ -534,16 +531,18 @@ void main() {
       final invoiceRepo = _FakeInvoiceRepository();
       final now = DateTime.now();
 
-      invoiceRepo._invoices.add(Invoice(
-        id: 'inv1',
-        tenantId: 'tn1',
-        planId: 'pl1',
-        amountCents: 5000,
-        status: InvoiceStatus.pending,
-        dueDate: now,
-        period: 'Agosto 2026',
-        createdAt: now,
-      ));
+      invoiceRepo._invoices.add(
+        Invoice(
+          id: 'inv1',
+          tenantId: 'tn1',
+          planId: 'pl1',
+          amountCents: 5000,
+          status: InvoiceStatus.pending,
+          dueDate: now,
+          period: 'Agosto 2026',
+          createdAt: now,
+        ),
+      );
 
       final useCase = CancelInvoiceUseCase(invoiceRepo);
       await useCase('inv1');
@@ -557,10 +556,7 @@ void main() {
 
       final useCase = CancelInvoiceUseCase(invoiceRepo);
 
-      expect(
-        () => useCase('inexistente'),
-        throwsStateError,
-      );
+      expect(() => useCase('inexistente'), throwsStateError);
     });
   });
 
@@ -574,16 +570,23 @@ void main() {
       final pastDate = now.subtract(const Duration(days: 1));
 
       // Tenant com nextInvoiceAt no passado (deve receber factura)
-      tenantRepo.seedTenant(_approvedTenant(
-        planExpiresAt: now.add(const Duration(days: 23)),
-        nextInvoiceAt: pastDate,
-      ));
+      tenantRepo.seedTenant(
+        _approvedTenant(
+          planExpiresAt: now.add(const Duration(days: 23)),
+          nextInvoiceAt: pastDate,
+        ),
+      );
       planRepo.add(_basicPlan());
 
-      final generateUseCase =
-          GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      final checkUseCase =
-          CheckTenantsForInvoicesUseCase(generateUseCase, tenantRepo);
+      final generateUseCase = GenerateInvoiceUseCase(
+        invoiceRepo,
+        tenantRepo,
+        planRepo,
+      );
+      final checkUseCase = CheckTenantsForInvoicesUseCase(
+        generateUseCase,
+        tenantRepo,
+      );
 
       final generated = await checkUseCase();
 
@@ -597,32 +600,41 @@ void main() {
       expect(tenant.nextInvoiceAt!.isAfter(now), isTrue);
     });
 
-    test('não gera factura quando nextInvoiceAt ainda não foi atingido',
-        () async {
-      final invoiceRepo = _FakeInvoiceRepository();
-      final tenantRepo = _FakeTenantRepository();
-      final planRepo = _FakePlanRepository();
+    test(
+      'não gera factura quando nextInvoiceAt ainda não foi atingido',
+      () async {
+        final invoiceRepo = _FakeInvoiceRepository();
+        final tenantRepo = _FakeTenantRepository();
+        final planRepo = _FakePlanRepository();
 
-      final now = DateTime.now();
-      final futureDate = now.add(const Duration(days: 5));
+        final now = DateTime.now();
+        final futureDate = now.add(const Duration(days: 5));
 
-      // Tenant com nextInvoiceAt no futuro (não deve receber factura)
-      tenantRepo.seedTenant(_approvedTenant(
-        planExpiresAt: now.add(const Duration(days: 12)),
-        nextInvoiceAt: futureDate,
-      ));
-      planRepo.add(_basicPlan());
+        // Tenant com nextInvoiceAt no futuro (não deve receber factura)
+        tenantRepo.seedTenant(
+          _approvedTenant(
+            planExpiresAt: now.add(const Duration(days: 12)),
+            nextInvoiceAt: futureDate,
+          ),
+        );
+        planRepo.add(_basicPlan());
 
-      final generateUseCase =
-          GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      final checkUseCase =
-          CheckTenantsForInvoicesUseCase(generateUseCase, tenantRepo);
+        final generateUseCase = GenerateInvoiceUseCase(
+          invoiceRepo,
+          tenantRepo,
+          planRepo,
+        );
+        final checkUseCase = CheckTenantsForInvoicesUseCase(
+          generateUseCase,
+          tenantRepo,
+        );
 
-      final generated = await checkUseCase();
+        final generated = await checkUseCase();
 
-      expect(generated, isEmpty);
-      expect(invoiceRepo._invoices, isEmpty);
-    });
+        expect(generated, isEmpty);
+        expect(invoiceRepo._invoices, isEmpty);
+      },
+    );
 
     test('ignora tenants não aprovados', () async {
       final invoiceRepo = _FakeInvoiceRepository();
@@ -632,21 +644,28 @@ void main() {
       final now = DateTime.now();
 
       // Tenant pendente (não deve receber factura)
-      tenantRepo.seedTenant(Tenant(
-        id: 'tn1',
-        ownerUserId: 'u1',
-        businessName: 'Comercial X',
-        planId: 'pl1',
-        status: TenantStatus.pending,
-        createdAt: now,
-        nextInvoiceAt: now.subtract(const Duration(days: 1)),
-      ));
+      tenantRepo.seedTenant(
+        Tenant(
+          id: 'tn1',
+          ownerUserId: 'u1',
+          businessName: 'Comercial X',
+          planId: 'pl1',
+          status: TenantStatus.pending,
+          createdAt: now,
+          nextInvoiceAt: now.subtract(const Duration(days: 1)),
+        ),
+      );
       planRepo.add(_basicPlan());
 
-      final generateUseCase =
-          GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      final checkUseCase =
-          CheckTenantsForInvoicesUseCase(generateUseCase, tenantRepo);
+      final generateUseCase = GenerateInvoiceUseCase(
+        invoiceRepo,
+        tenantRepo,
+        planRepo,
+      );
+      final checkUseCase = CheckTenantsForInvoicesUseCase(
+        generateUseCase,
+        tenantRepo,
+      );
 
       final generated = await checkUseCase();
 
@@ -663,10 +682,15 @@ void main() {
       tenantRepo.seedTenant(_approvedTenant());
       planRepo.add(_basicPlan());
 
-      final generateUseCase =
-          GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      final checkUseCase =
-          CheckTenantsForInvoicesUseCase(generateUseCase, tenantRepo);
+      final generateUseCase = GenerateInvoiceUseCase(
+        invoiceRepo,
+        tenantRepo,
+        planRepo,
+      );
+      final checkUseCase = CheckTenantsForInvoicesUseCase(
+        generateUseCase,
+        tenantRepo,
+      );
 
       final generated = await checkUseCase();
 
@@ -682,24 +706,35 @@ void main() {
       final pastDate = now.subtract(const Duration(days: 1));
 
       // Dois tenants elegíveis
-      tenantRepo.seedTenant(_approvedTenant(
-        id: 'tn1',
-        planExpiresAt: now.add(const Duration(days: 23)),
-        nextInvoiceAt: pastDate,
-      ));
-      tenantRepo.seedTenant(_approvedTenant(
-        id: 'tn2',
-        planId: 'pl2',
-        planExpiresAt: now.add(const Duration(days: 20)),
-        nextInvoiceAt: pastDate,
-      ));
+      tenantRepo.seedTenant(
+        _approvedTenant(
+          id: 'tn1',
+          planExpiresAt: now.add(const Duration(days: 23)),
+          nextInvoiceAt: pastDate,
+        ),
+      );
+      tenantRepo.seedTenant(
+        _approvedTenant(
+          id: 'tn2',
+          planId: 'pl2',
+          planExpiresAt: now.add(const Duration(days: 20)),
+          nextInvoiceAt: pastDate,
+        ),
+      );
       planRepo.add(_basicPlan());
-      planRepo.add(_basicPlan(id: 'pl2', name: 'Premium', priceMonthlyCents: 10000));
+      planRepo.add(
+        _basicPlan(id: 'pl2', name: 'Premium', priceMonthlyCents: 10000),
+      );
 
-      final generateUseCase =
-          GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      final checkUseCase =
-          CheckTenantsForInvoicesUseCase(generateUseCase, tenantRepo);
+      final generateUseCase = GenerateInvoiceUseCase(
+        invoiceRepo,
+        tenantRepo,
+        planRepo,
+      );
+      final checkUseCase = CheckTenantsForInvoicesUseCase(
+        generateUseCase,
+        tenantRepo,
+      );
 
       final generated = await checkUseCase();
 
@@ -715,16 +750,23 @@ void main() {
       final now = DateTime.now();
       final pastDate = now.subtract(const Duration(days: 1));
 
-      tenantRepo.seedTenant(_approvedTenant(
-        planExpiresAt: now.add(const Duration(days: 23)),
-        nextInvoiceAt: pastDate,
-      ));
+      tenantRepo.seedTenant(
+        _approvedTenant(
+          planExpiresAt: now.add(const Duration(days: 23)),
+          nextInvoiceAt: pastDate,
+        ),
+      );
       planRepo.add(_basicPlan());
 
-      final generateUseCase =
-          GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      final checkUseCase =
-          CheckTenantsForInvoicesUseCase(generateUseCase, tenantRepo);
+      final generateUseCase = GenerateInvoiceUseCase(
+        invoiceRepo,
+        tenantRepo,
+        planRepo,
+      );
+      final checkUseCase = CheckTenantsForInvoicesUseCase(
+        generateUseCase,
+        tenantRepo,
+      );
 
       await checkUseCase();
 
@@ -734,64 +776,79 @@ void main() {
       expect(tenant.nextInvoiceAt, isNotNull);
 
       // Próximo planExpiresAt deve ser ~30 dias no futuro
-      final daysUntilExpires =
-          tenant.planExpiresAt!.difference(now).inDays;
+      final daysUntilExpires = tenant.planExpiresAt!.difference(now).inDays;
       expect(daysUntilExpires, greaterThanOrEqualTo(29));
       expect(daysUntilExpires, lessThanOrEqualTo(31));
 
       // Próximo nextInvoiceAt deve ser 7 dias antes de planExpiresAt
-      final daysBetween =
-          tenant.planExpiresAt!.difference(tenant.nextInvoiceAt!).inDays;
+      final daysBetween = tenant.planExpiresAt!
+          .difference(tenant.nextInvoiceAt!)
+          .inDays;
       expect(daysBetween, kInvoiceAdvanceDays);
     });
 
-    test('retorna lista vazia quando nenhum tenant precisa de factura',
-        () async {
-      final invoiceRepo = _FakeInvoiceRepository();
-      final tenantRepo = _FakeTenantRepository();
-      final planRepo = _FakePlanRepository();
+    test(
+      'retorna lista vazia quando nenhum tenant precisa de factura',
+      () async {
+        final invoiceRepo = _FakeInvoiceRepository();
+        final tenantRepo = _FakeTenantRepository();
+        final planRepo = _FakePlanRepository();
 
-      final now = DateTime.now();
+        final now = DateTime.now();
 
-      // Tenant com nextInvoiceAt no futuro
-      tenantRepo.seedTenant(_approvedTenant(
-        nextInvoiceAt: now.add(const Duration(days: 5)),
-      ));
-      planRepo.add(_basicPlan());
+        // Tenant com nextInvoiceAt no futuro
+        tenantRepo.seedTenant(
+          _approvedTenant(nextInvoiceAt: now.add(const Duration(days: 5))),
+        );
+        planRepo.add(_basicPlan());
 
-      final generateUseCase =
-          GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      final checkUseCase =
-          CheckTenantsForInvoicesUseCase(generateUseCase, tenantRepo);
+        final generateUseCase = GenerateInvoiceUseCase(
+          invoiceRepo,
+          tenantRepo,
+          planRepo,
+        );
+        final checkUseCase = CheckTenantsForInvoicesUseCase(
+          generateUseCase,
+          tenantRepo,
+        );
 
-      final generated = await checkUseCase();
+        final generated = await checkUseCase();
 
-      expect(generated, isEmpty);
-      expect(invoiceRepo._invoices, isEmpty);
-    });
+        expect(generated, isEmpty);
+        expect(invoiceRepo._invoices, isEmpty);
+      },
+    );
   });
 
   group('Ciclo de facturacao (integração)', () {
-    test('trial de 14 dias: primeira factura gerada ao fim do trial',
-        () async {
+    test('trial de 14 dias: primeira factura gerada ao fim do trial', () async {
       final invoiceRepo = _FakeInvoiceRepository();
       final tenantRepo = _FakeTenantRepository();
       final planRepo = _FakePlanRepository();
 
       final now = DateTime.now();
-      final trialEnd = now.subtract(const Duration(days: 1)); // trial já terminou
+      final trialEnd = now.subtract(
+        const Duration(days: 1),
+      ); // trial já terminou
 
       // Tenant com trial de 14 dias que já expirou
-      tenantRepo.seedTenant(_approvedTenant(
-        planExpiresAt: now.add(const Duration(days: 13)),
-        nextInvoiceAt: trialEnd, // factura gerada ontem (trial terminou)
-      ));
+      tenantRepo.seedTenant(
+        _approvedTenant(
+          planExpiresAt: now.add(const Duration(days: 13)),
+          nextInvoiceAt: trialEnd, // factura gerada ontem (trial terminou)
+        ),
+      );
       planRepo.add(_basicPlan());
 
-      final generateUseCase =
-          GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      final checkUseCase =
-          CheckTenantsForInvoicesUseCase(generateUseCase, tenantRepo);
+      final generateUseCase = GenerateInvoiceUseCase(
+        invoiceRepo,
+        tenantRepo,
+        planRepo,
+      );
+      final checkUseCase = CheckTenantsForInvoicesUseCase(
+        generateUseCase,
+        tenantRepo,
+      );
 
       // Simula que o trial terminou
       final generated = await checkUseCase();
@@ -800,8 +857,7 @@ void main() {
       expect(generated.first.amountCents, 5000);
     });
 
-    test('ciclo mensal: após trial, facturas mensais são geradas',
-        () async {
+    test('ciclo mensal: após trial, facturas mensais são geradas', () async {
       final invoiceRepo = _FakeInvoiceRepository();
       final tenantRepo = _FakeTenantRepository();
       final planRepo = _FakePlanRepository();
@@ -809,16 +865,23 @@ void main() {
       final now = DateTime.now();
 
       // Tenant com trial já expirado (factura pendente)
-      tenantRepo.seedTenant(_approvedTenant(
-        planExpiresAt: now.add(const Duration(days: 23)),
-        nextInvoiceAt: now.subtract(const Duration(days: 1)),
-      ));
+      tenantRepo.seedTenant(
+        _approvedTenant(
+          planExpiresAt: now.add(const Duration(days: 23)),
+          nextInvoiceAt: now.subtract(const Duration(days: 1)),
+        ),
+      );
       planRepo.add(_basicPlan());
 
-      final generateUseCase =
-          GenerateInvoiceUseCase(invoiceRepo, tenantRepo, planRepo);
-      final checkUseCase =
-          CheckTenantsForInvoicesUseCase(generateUseCase, tenantRepo);
+      final generateUseCase = GenerateInvoiceUseCase(
+        invoiceRepo,
+        tenantRepo,
+        planRepo,
+      );
+      final checkUseCase = CheckTenantsForInvoicesUseCase(
+        generateUseCase,
+        tenantRepo,
+      );
 
       // Primeira factura (fim do trial)
       final first = await checkUseCase();

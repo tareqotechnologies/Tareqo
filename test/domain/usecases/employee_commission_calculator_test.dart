@@ -22,24 +22,23 @@ Sale sale(
   String storeId = 'st1',
   DateTime? dateTime,
   SaleStatus status = SaleStatus.active,
-}) =>
-    Sale(
-      id: id,
-      userId: userId,
-      storeId: storeId,
-      items: const [
-        SaleItem(
-          productId: 'p1',
-          productName: 'Caneta',
-          quantity: 1000,
-          unitPriceCents: 100,
-        ),
-      ],
-      totalAmountCents: totalAmountCents,
-      paymentMethod: PaymentMethod.cash,
-      dateTime: dateTime ?? DateTime(2026, 9, 10, 10),
-      status: status,
-    );
+}) => Sale(
+  id: id,
+  userId: userId,
+  storeId: storeId,
+  items: const [
+    SaleItem(
+      productId: 'p1',
+      productName: 'Caneta',
+      quantity: 1000,
+      unitPriceCents: 100,
+    ),
+  ],
+  totalAmountCents: totalAmountCents,
+  paymentMethod: PaymentMethod.cash,
+  dateTime: dateTime ?? DateTime(2026, 9, 10, 10),
+  status: status,
+);
 
 void main() {
   final roster = [

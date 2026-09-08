@@ -3,10 +3,7 @@ import '../../core/security/secure_storage_service.dart';
 
 /// Use case for Multi-Factor Authentication (MFA)
 class MFAAuthUseCase {
-  MFAAuthUseCase(
-    this._mfaService,
-    this._secureStorage,
-  );
+  MFAAuthUseCase(this._mfaService, this._secureStorage);
 
   final MFAService _mfaService;
   final SecureStorageService _secureStorage;

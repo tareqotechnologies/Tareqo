@@ -38,267 +38,279 @@ import '../../domain/repositories/i_unit_of_work.dart';
 /// SQLite implementam **os mesmos contratos** que os de memória — apenas
 /// o registro no ServiceLocator muda.
 abstract final class AppDatabase {
- static Database? _database;  /// Abre o banco persistente (`tareqo.db` em documentos) e prepara
- /// o schema. Retorna `true` quando o SQLite está ativo; `false`
- /// (sem efeitos colaterais) se a biblioteca nativa falhar — nesse caso
- /// o ServiceLocator usa os datasources em memória.
- ///
- /// W10: desde o sqlite3 3.x, o carregamento da biblioteca nativa é feito
- /// por BUILD HOOKS (native assets) — o pacote empacota o SQLite para
- /// todas as plataformas, sem `open.overrideFor`/`sqlite3_flutter_libs`.
- static Future<bool> openAppDatabase() async {
- if (kIsWeb) return false;
+  static Database? _database;
 
- Database? db;
- try {
- final directory = await getApplicationDocumentsDirectory();    db = sqlite3.open(p.join(directory.path, 'tareqo.db'));
- db.execute('PRAGMA foreign_keys = ON;');
- initialize(db);
- _database = db;
- return true;
- } catch (error, stackTrace) {
- db?.close();
- debugPrint(
- 'AppDatabase: SQLite indisponível ($error) — usando memória.\n'
- '$stackTrace',
- );
- return false;
- }
- }
+  /// Abre o banco persistente (`tareqo.db` em documentos) e prepara
+  /// o schema. Retorna `true` quando o SQLite está ativo; `false`
+  /// (sem efeitos colaterais) se a biblioteca nativa falhar — nesse caso
+  /// o ServiceLocator usa os datasources em memória.
+  ///
+  /// W10: desde o sqlite3 3.x, o carregamento da biblioteca nativa é feito
+  /// por BUILD HOOKS (native assets) — o pacote empacota o SQLite para
+  /// todas as plataformas, sem `open.overrideFor`/`sqlite3_flutter_libs`.
+  static Future<bool> openAppDatabase() async {
+    if (kIsWeb) return false;
 
- /// Registra os datasources SQLite no GetIt (chamado somente após
- /// [openAppDatabase] retornar `true`).
- ///
- /// Atenção: Manter as assinaturas de `openAppDatabase()` e
- /// `registerDatasources()` em sincronia com `app_database_stub.dart`.
- static void registerDatasources(GetIt instance) {
- final db = _database;
- assert(db != null, 'AppDatabase: chame openAppDatabase() antes.');
- if (db == null) return;
- instance
- ..registerLazySingleton<IUnitOfWork>(() => SqliteUnitOfWork(db))
- ..registerLazySingleton<ProductLocalDataSource>(
- () => ProductSqliteDataSourceImpl(db),
- )
- ..registerLazySingleton<SaleLocalDataSource>(
- () => SaleSqliteDataSourceImpl(db),
- )
- ..registerLazySingleton<FinancialTransactionLocalDataSource>(
- () => FinancialTransactionSqliteDataSourceImpl(db),
- )
- ..registerLazySingleton<DebtLocalDataSource>(
- () => DebtSqliteDataSourceImpl(db),
- )
- ..registerLazySingleton<CustomerLocalDataSource>(
- () => CustomerSqliteDataSourceImpl(db),
- )
- ..registerLazySingleton<PurchaseLocalDataSource>(
- () => PurchaseSqliteDataSourceImpl(db),
- )
- ..registerLazySingleton<StockLotLocalDataSource>(
- () => StockLotSqliteDataSourceImpl(db),
- )  ..registerLazySingleton<CashClosingLocalDataSource>(
-    () => CashClosingSqliteDataSourceImpl(db),
-  )
-  ..registerLazySingleton<CustomInvoiceLocalDataSource>(
-    () => CustomInvoiceSqliteDataSourceImpl(db),
-  )
-  ..registerLazySingleton<QuotationLocalDataSource>(
-    () => QuotationSqliteDataSourceImpl(db),
-  )
-  ..registerLazySingleton<EmployeeManagementLocalDataSource>(
-    () => EmployeeManagementSqliteDataSourceImpl(db),
-  );
- }
+    Database? db;
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      db = sqlite3.open(p.join(directory.path, 'tareqo.db'));
+      db.execute('PRAGMA foreign_keys = ON;');
+      initialize(db);
+      _database = db;
+      return true;
+    } catch (error, stackTrace) {
+      db?.close();
+      debugPrint(
+        'AppDatabase: SQLite indisponível ($error) — usando memória.\n'
+        '$stackTrace',
+      );
+      return false;
+    }
+  }
 
- /// Registra a fila offline (outbox) sobre o MESMO banco SQLite.
- ///
- /// Usada no modo SaaS (onde os datasources de negócio são REMOTOS, mas a
- /// fila precisa de persistência local) e no modo local (mesmo banco).
- /// Atenção: Não registra os datasources de negócio — só a fila.
- static void registerOfflineQueue(GetIt instance) {
- final db = _database;
- if (db == null) return;
- instance.registerLazySingleton<IPendingOpQueue>(
- () => PendingOpQueueSqliteImpl(db),
- );
- }
+  /// Registra os datasources SQLite no GetIt (chamado somente após
+  /// [openAppDatabase] retornar `true`).
+  ///
+  /// Atenção: Manter as assinaturas de `openAppDatabase()` e
+  /// `registerDatasources()` em sincronia com `app_database_stub.dart`.
+  static void registerDatasources(GetIt instance) {
+    final db = _database;
+    assert(db != null, 'AppDatabase: chame openAppDatabase() antes.');
+    if (db == null) return;
+    instance
+      ..registerLazySingleton<IUnitOfWork>(() => SqliteUnitOfWork(db))
+      ..registerLazySingleton<ProductLocalDataSource>(
+        () => ProductSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<SaleLocalDataSource>(
+        () => SaleSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<FinancialTransactionLocalDataSource>(
+        () => FinancialTransactionSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<DebtLocalDataSource>(
+        () => DebtSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<CustomerLocalDataSource>(
+        () => CustomerSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<PurchaseLocalDataSource>(
+        () => PurchaseSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<StockLotLocalDataSource>(
+        () => StockLotSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<CashClosingLocalDataSource>(
+        () => CashClosingSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<CustomInvoiceLocalDataSource>(
+        () => CustomInvoiceSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<QuotationLocalDataSource>(
+        () => QuotationSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<EmployeeManagementLocalDataSource>(
+        () => EmployeeManagementSqliteDataSourceImpl(db),
+      );
+  }
 
- /// Leva o banco à versão atual do schema (migrações versionadas via
- /// `PRAGMA user_version`). Nenhum dado é semeado: o banco nasce vazio e
- /// só registra dados REAIS criados pelo usuário.
- ///
- /// Bancos NOVOS e LEGADOS (criados antes do versionamento, `user_version`
- /// = 0) rodam a migração v1 — o schema completo atual, idempotente por
- /// construção (IF NOT EXISTS + guardas por presença de coluna). Depois
- /// disso o `user_version` fica em [currentSchemaVersion] e as migrações
- /// antigas NUNCA reexecutam (startup rápido e determinístico). Mudanças
- /// futuras de schema entram como NOVAS migrações (v2, v3...) — nunca
- /// editar a v1.
- static void initialize(Database db) => _migrate(db);  /// Versão atual do schema (`PRAGMA user_version`).
-  static const int currentSchemaVersion = 5;
+  /// Registra a fila offline (outbox) sobre o MESMO banco SQLite.
+  ///
+  /// Usada no modo SaaS (onde os datasources de negócio são REMOTOS, mas a
+  /// fila precisa de persistência local) e no modo local (mesmo banco).
+  /// Atenção: Não registra os datasources de negócio — só a fila.
+  static void registerOfflineQueue(GetIt instance) {
+    final db = _database;
+    if (db == null) return;
+    instance.registerLazySingleton<IPendingOpQueue>(
+      () => PendingOpQueueSqliteImpl(db),
+    );
+  }
 
- /// Migrações versionadas, em ordem crescente de versão.
- ///
- /// A v1 é o schema COMPLETO atual (tabelas + migrações leves acumuladas
- /// + W4 centavos) — idempotente para bancos legados. Migrações novas:
- /// adicionar `_Migration(version: 2, description: ..., up: _migracaoV2)`
- /// e a função — o [initialize] roda apenas as pendentes.
- static final List<_Migration> _migrations = [
- _Migration(
- version: 1,
- description: 'schema completo + W4 (centavos) + numerações/backfills',
- up: _schemaV1,
- ),
- _Migration(
- version: 2,
- description: 'fila offline (outbox) — tabela pending_ops',
- up: _schemaV2,
- ), _Migration(
-   version: 3,
-   description: 'facturas personalizadas (add-on) — tabela custom_invoices',
-   up: _schemaV3,
- ),
- _Migration(
-   version: 4,
-   description: 'cotações (add-on) — tabela quotations',
-   up: _schemaV4,
- ),
- _Migration(
-   version: 5,
-   description: 'gestão de funcionários (add-on) — ponto, comissões, metas',
-   up: _schemaV5,
- ),
- ];
+  /// Leva o banco à versão atual do schema (migrações versionadas via
+  /// `PRAGMA user_version`). Nenhum dado é semeado: o banco nasce vazio e
+  /// só registra dados REAIS criados pelo usuário.
+  ///
+  /// Bancos NOVOS e LEGADOS (criados antes do versionamento, `user_version`
+  /// = 0) rodam a migração v1 — o schema completo atual, idempotente por
+  /// construção (IF NOT EXISTS + guardas por presença de coluna). Depois
+  /// disso o `user_version` fica em [currentSchemaVersion] e as migrações
+  /// antigas NUNCA reexecutam (startup rápido e determinístico). Mudanças
+  /// futuras de schema entram como NOVAS migrações (v2, v3...) — nunca
+  /// editar a v1.
+  static void initialize(Database db) => _migrate(db);
 
- /// Lê a versão atual do banco (0 em bancos novos/legados sem versionar).
- static int _userVersion(Database db) =>
- db.select('PRAGMA user_version').first['user_version'] as int;
+  /// Versão atual do schema (`PRAGMA user_version`).
+  static const int currentSchemaVersion = 6;
 
- /// Roda as migrações pendentes (versão > atual), cada uma na própria
- /// transação com o `user_version` carimbado DENTRO dela — se a migração
- /// falhar, o rollback desfaz o schema E a versão; o próximo startup
- /// retenta do ponto exato.
- static void _migrate(Database db) {
- final version = _userVersion(db);
- if (version >= currentSchemaVersion) return;
- for (final migration in _migrations) {
- if (migration.version <= version) continue;
- runInTransaction(db, () {
- migration.up(db);
- db.execute('PRAGMA user_version = ${migration.version}');
- });
- }
- }
+  /// Migrações versionadas, em ordem crescente de versão.
+  ///
+  /// A v1 é o schema COMPLETO atual (tabelas + migrações leves acumuladas
+  /// + W4 centavos) — idempotente para bancos legados. Migrações novas:
+  /// adicionar `_Migration(version: 2, description: ..., up: _migracaoV2)`
+  /// e a função — o [initialize] roda apenas as pendentes.
+  static final List<_Migration> _migrations = [
+    _Migration(
+      version: 1,
+      description: 'schema completo + W4 (centavos) + numerações/backfills',
+      up: _schemaV1,
+    ),
+    _Migration(
+      version: 2,
+      description: 'fila offline (outbox) — tabela pending_ops',
+      up: _schemaV2,
+    ),
+    _Migration(
+      version: 3,
+      description: 'facturas personalizadas (add-on) — tabela custom_invoices',
+      up: _schemaV3,
+    ),
+    _Migration(
+      version: 4,
+      description: 'cotações (add-on) — tabela quotations',
+      up: _schemaV4,
+    ),
+    _Migration(
+      version: 5,
+      description: 'gestão de funcionários (add-on) — ponto, comissões, metas',
+      up: _schemaV5,
+    ),
+    _Migration(
+      version: 6,
+      description: 'fila offline (A3) — backoff exponencial + dead-letter',
+      up: _schemaV6,
+    ),
+  ];
 
- /// Parte da migração v1 — W4 (centavos inteiros): bancos criados antes
- /// da migração guardavam dinheiro como REAL (reais com fração); a partir
- /// daqui o domínio e o schema usam **centavos inteiros**. Detecta o
- /// schema antigo pela afinidade REAL das colunas de dinheiro (PRAGMA
- /// table_info — o novo schema declara INTEGER) e multiplica os valores
- /// por 100, arredondando. Idempotente: bancos novos (INTEGER) não são
- /// tocados; bancos já migrados não voltam a ser multiplicados.
- ///
- /// SQLite é dinamicamente tipado: depois da multiplicação, a coluna
- /// REAL guarda inteiros (lidos como int pelo driver) — não é preciso
- /// rebuild da tabela; bancos NOVOS já nascem com INTEGER.
- static void _migrateMoneyToCents(Database db) {
- // Colunas de dinheiro por tabela (schema antigo = REAL).
- const moneyColumns = <String, List<String>>{
- 'products': ['purchase_price', 'sale_price'],
- 'sales': ['total_amount'],
- 'sale_items': ['unit_price'],
- 'financial_transactions': ['amount'],
- 'debts': ['amount'],
- 'purchases': ['total_amount'],
- 'purchase_items': ['unit_price'],
- };
+  /// Lê a versão atual do banco (0 em bancos novos/legados sem versionar).
+  static int _userVersion(Database db) =>
+      db.select('PRAGMA user_version').first['user_version'] as int;
 
- for (final entry in moneyColumns.entries) {
- final table = entry.key;
- final columns = db.select('PRAGMA table_info($table)');
- for (final column in columns) {
- final name = column['name'] as String;
- final type = column['type'] as String;
- if (type == 'REAL' && entry.value.contains(name)) {
- db.execute(
- 'UPDATE $table SET $name = CAST(ROUND($name * 100) AS INTEGER) '
- 'WHERE $name IS NOT NULL',
- );
- }
- }
- }
- }
+  /// Roda as migrações pendentes (versão > atual), cada uma na própria
+  /// transação com o `user_version` carimbado DENTRO dela — se a migração
+  /// falhar, o rollback desfaz o schema E a versão; o próximo startup
+  /// retenta do ponto exato.
+  static void _migrate(Database db) {
+    final version = _userVersion(db);
+    if (version >= currentSchemaVersion) return;
+    for (final migration in _migrations) {
+      if (migration.version <= version) continue;
+      runInTransaction(db, () {
+        migration.up(db);
+        db.execute('PRAGMA user_version = ${migration.version}');
+      });
+    }
+  }
 
- /// Profundidade de transação ativa na conexão compartilhada. SQLite não
- /// permite transações aninhadas: quando > 0, um novo begin apenas se
- /// junta à transação externa (sem BEGIN/COMMIT/ROLLBACK próprios).
- ///
- /// Atenção: **Invariante global:** o contador é estático e assume UMA conexão
- /// (Database singleton) e UM [IUnitOfWork] no processo — como o app
- /// registra. Não abra múltiplas conexões transacionais concorrentes.
- static int _transactionDepth = 0;
+  /// Parte da migração v1 — W4 (centavos inteiros): bancos criados antes
+  /// da migração guardavam dinheiro como REAL (reais com fração); a partir
+  /// daqui o domínio e o schema usam **centavos inteiros**. Detecta o
+  /// schema antigo pela afinidade REAL das colunas de dinheiro (PRAGMA
+  /// table_info — o novo schema declara INTEGER) e multiplica os valores
+  /// por 100, arredondando. Idempotente: bancos novos (INTEGER) não são
+  /// tocados; bancos já migrados não voltam a ser multiplicados.
+  ///
+  /// SQLite é dinamicamente tipado: depois da multiplicação, a coluna
+  /// REAL guarda inteiros (lidos como int pelo driver) — não é preciso
+  /// rebuild da tabela; bancos NOVOS já nascem com INTEGER.
+  static void _migrateMoneyToCents(Database db) {
+    // Colunas de dinheiro por tabela (schema antigo = REAL).
+    const moneyColumns = <String, List<String>>{
+      'products': ['purchase_price', 'sale_price'],
+      'sales': ['total_amount'],
+      'sale_items': ['unit_price'],
+      'financial_transactions': ['amount'],
+      'debts': ['amount'],
+      'purchases': ['total_amount'],
+      'purchase_items': ['unit_price'],
+    };
 
- /// Inicia uma transação (re-entrante): só o chamador externo emite o
- /// `BEGIN IMMEDIATE` (que adquire a trava de escrita na hora, fechando
- /// janelas TOCTOU); chamadas aninhadas apenas incrementam a profundidade.
- ///
- /// A profundidade é incrementada **depois** do BEGIN com sucesso: se o
- /// SQL falhar, o contador permanece 0 (sem vazamento que corromperia
- /// transações futuras).
- static void beginTransaction(Database db) {
- if (_transactionDepth > 0) {
- _transactionDepth++;
- return;
- }
- db.execute('BEGIN IMMEDIATE;');
- _transactionDepth = 1;
- }
+    for (final entry in moneyColumns.entries) {
+      final table = entry.key;
+      final columns = db.select('PRAGMA table_info($table)');
+      for (final column in columns) {
+        final name = column['name'] as String;
+        final type = column['type'] as String;
+        if (type == 'REAL' && entry.value.contains(name)) {
+          db.execute(
+            'UPDATE $table SET $name = CAST(ROUND($name * 100) AS INTEGER) '
+            'WHERE $name IS NOT NULL',
+          );
+        }
+      }
+    }
+  }
 
- /// Confirma a transação — apenas o chamador externo emite o `COMMIT`.
- static void commitTransaction(Database db) {
- assert(_transactionDepth > 0, 'commitTransaction sem transação ativa.');
- if (--_transactionDepth == 0) db.execute('COMMIT;');
- }
+  /// Profundidade de transação ativa na conexão compartilhada. SQLite não
+  /// permite transações aninhadas: quando > 0, um novo begin apenas se
+  /// junta à transação externa (sem BEGIN/COMMIT/ROLLBACK próprios).
+  ///
+  /// Atenção: **Invariante global:** o contador é estático e assume UMA conexão
+  /// (Database singleton) e UM [IUnitOfWork] no processo — como o app
+  /// registra. Não abra múltiplas conexões transacionais concorrentes.
+  static int _transactionDepth = 0;
 
- /// Desfaz a transação — apenas o chamador externo emite o `ROLLBACK`.
- /// Chamadas aninhadas só reentram a profundidade e o erro propaga para o
- /// chamador externo, que faz o rollback de verdade.
- static void rollbackTransaction(Database db) {
- assert(_transactionDepth > 0, 'rollbackTransaction sem transação ativa.');
- if (--_transactionDepth == 0) db.execute('ROLLBACK;');
- }
+  /// Inicia uma transação (re-entrante): só o chamador externo emite o
+  /// `BEGIN IMMEDIATE` (que adquire a trava de escrita na hora, fechando
+  /// janelas TOCTOU); chamadas aninhadas apenas incrementam a profundidade.
+  ///
+  /// A profundidade é incrementada **depois** do BEGIN com sucesso: se o
+  /// SQL falhar, o contador permanece 0 (sem vazamento que corromperia
+  /// transações futuras).
+  static void beginTransaction(Database db) {
+    if (_transactionDepth > 0) {
+      _transactionDepth++;
+      return;
+    }
+    db.execute('BEGIN IMMEDIATE;');
+    _transactionDepth = 1;
+  }
 
- /// Executa [action] dentro de uma transação (commit no sucesso,
- /// rollback automático em qualquer erro). O `package:sqlite3` não expõe
- /// um wrapper `transaction()` — usamos SQL explícito com try/catch.
- ///
- /// **Re-entrante:** se já houver uma transação ativa na conexão (ex.: um
- /// [IUnitOfWork] envolvendo a chamada), junta-se a ela em vez de abrir
- /// uma transação aninhada (que o SQLite rejeitaria).
- static void runInTransaction(Database db, void Function() action) {
- beginTransaction(db);
- try {
- action();
- commitTransaction(db);
- } catch (_) {
- rollbackTransaction(db);
- rethrow;
- }
- }
+  /// Confirma a transação — apenas o chamador externo emite o `COMMIT`.
+  static void commitTransaction(Database db) {
+    assert(_transactionDepth > 0, 'commitTransaction sem transação ativa.');
+    if (--_transactionDepth == 0) db.execute('COMMIT;');
+  }
 
- /// Migração v1 — schema COMPLETO atual. Os `CHECK` são a salvaguarda
- /// final do banco contra valores inválidos (estoque/valores nunca
- /// negativos) — as regras de negócio continuam no domínio.
- ///
- /// Desde a migração W4, colunas de dinheiro são **INTEGER (centavos)**.
- ///
- /// Idempotente por construção (IF NOT EXISTS + guardas por presença de
- /// coluna): roda igual em bancos NOVOS (cria tudo) e LEGADOS (apenas o
- /// que falta + backfills). Nunca editar depois do versionamento — a v1
- /// já foi aplicada nos bancos existentes; mudanças novas vão em v2+.
- static void _schemaV1(Database db) {
- db.execute('''
+  /// Desfaz a transação — apenas o chamador externo emite o `ROLLBACK`.
+  /// Chamadas aninhadas só reentram a profundidade e o erro propaga para o
+  /// chamador externo, que faz o rollback de verdade.
+  static void rollbackTransaction(Database db) {
+    assert(_transactionDepth > 0, 'rollbackTransaction sem transação ativa.');
+    if (--_transactionDepth == 0) db.execute('ROLLBACK;');
+  }
+
+  /// Executa [action] dentro de uma transação (commit no sucesso,
+  /// rollback automático em qualquer erro). O `package:sqlite3` não expõe
+  /// um wrapper `transaction()` — usamos SQL explícito com try/catch.
+  ///
+  /// **Re-entrante:** se já houver uma transação ativa na conexão (ex.: um
+  /// [IUnitOfWork] envolvendo a chamada), junta-se a ela em vez de abrir
+  /// uma transação aninhada (que o SQLite rejeitaria).
+  static void runInTransaction(Database db, void Function() action) {
+    beginTransaction(db);
+    try {
+      action();
+      commitTransaction(db);
+    } catch (_) {
+      rollbackTransaction(db);
+      rethrow;
+    }
+  }
+
+  /// Migração v1 — schema COMPLETO atual. Os `CHECK` são a salvaguarda
+  /// final do banco contra valores inválidos (estoque/valores nunca
+  /// negativos) — as regras de negócio continuam no domínio.
+  ///
+  /// Desde a migração W4, colunas de dinheiro são **INTEGER (centavos)**.
+  ///
+  /// Idempotente por construção (IF NOT EXISTS + guardas por presença de
+  /// coluna): roda igual em bancos NOVOS (cria tudo) e LEGADOS (apenas o
+  /// que falta + backfills). Nunca editar depois do versionamento — a v1
+  /// já foi aplicada nos bancos existentes; mudanças novas vão em v2+.
+  static void _schemaV1(Database db) {
+    db.execute('''
  CREATE TABLE IF NOT EXISTS products (
  id TEXT PRIMARY KEY,
  store_id TEXT NOT NULL DEFAULT 'st1',
@@ -323,7 +335,7 @@ abstract final class AppDatabase {
  image_path TEXT
  );
  ''');
- db.execute('''
+    db.execute('''
  CREATE TABLE IF NOT EXISTS sales (
  id TEXT PRIMARY KEY,
  store_id TEXT NOT NULL DEFAULT 'st1',
@@ -341,7 +353,7 @@ abstract final class AppDatabase {
  cancelled_at INTEGER
  );
  ''');
- db.execute('''
+    db.execute('''
  CREATE TABLE IF NOT EXISTS sale_items (
  id INTEGER PRIMARY KEY AUTOINCREMENT,
  sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
@@ -353,10 +365,10 @@ abstract final class AppDatabase {
  CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id
  ON sale_items(sale_id);
  ''');
- // Consumo de LOTES por venda — registrado na MESMA transação da venda
- // (caminho composto local). Permite à anulação devolver o estoque aos
- // lotes EXATOS consumidos (preservando validade e custo de cada lote).
- db.execute('''
+    // Consumo de LOTES por venda — registrado na MESMA transação da venda
+    // (caminho composto local). Permite à anulação devolver o estoque aos
+    // lotes EXATOS consumidos (preservando validade e custo de cada lote).
+    db.execute('''
  CREATE TABLE IF NOT EXISTS sale_lot_consumption (
  id INTEGER PRIMARY KEY AUTOINCREMENT,
  sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
@@ -367,7 +379,7 @@ abstract final class AppDatabase {
  CREATE INDEX IF NOT EXISTS idx_sale_lot_consumption_sale
  ON sale_lot_consumption(sale_id);
  ''');
- db.execute('''
+    db.execute('''
  CREATE TABLE IF NOT EXISTS financial_transactions (
  id TEXT PRIMARY KEY,
  store_id TEXT NOT NULL DEFAULT 'st1',
@@ -380,7 +392,7 @@ abstract final class AppDatabase {
  debt_id TEXT
  );
  ''');
- db.execute('''
+    db.execute('''
  CREATE TABLE IF NOT EXISTS debts (
  id TEXT PRIMARY KEY,
  store_id TEXT NOT NULL DEFAULT 'st1',
@@ -398,7 +410,7 @@ abstract final class AppDatabase {
  customer_id TEXT
  );
  ''');
- db.execute('''
+    db.execute('''
  CREATE TABLE IF NOT EXISTS customers (
  id TEXT PRIMARY KEY,
  store_id TEXT NOT NULL DEFAULT 'st1',
@@ -407,7 +419,7 @@ abstract final class AppDatabase {
  email TEXT NOT NULL DEFAULT ''
  );
  ''');
- db.execute('''
+    db.execute('''
  CREATE TABLE IF NOT EXISTS purchases (
  id TEXT PRIMARY KEY,
  store_id TEXT NOT NULL DEFAULT 'st1',
@@ -425,7 +437,7 @@ abstract final class AppDatabase {
  date_time INTEGER NOT NULL
  );
  ''');
- db.execute('''
+    db.execute('''
  CREATE TABLE IF NOT EXISTS purchase_items (
  id INTEGER PRIMARY KEY AUTOINCREMENT,
  purchase_id TEXT NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
@@ -441,11 +453,11 @@ abstract final class AppDatabase {
  CREATE INDEX IF NOT EXISTS idx_purchase_items_purchase_id
  ON purchase_items(purchase_id);
  ''');
- // W11 — Lotes FIFO: cada entrada de mercadoria cria um lote; a baixa
- // no PDV consome em ordem de validade (mais próximo primeiro) e, sem
- // validade, por data de entrada. `current_quantity` = quantidade ATUAL
- // (milésimos); `cost_price` = custo de aquisição (centavos).
- db.execute('''
+    // W11 — Lotes FIFO: cada entrada de mercadoria cria um lote; a baixa
+    // no PDV consome em ordem de validade (mais próximo primeiro) e, sem
+    // validade, por data de entrada. `current_quantity` = quantidade ATUAL
+    // (milésimos); `cost_price` = custo de aquisição (centavos).
+    db.execute('''
  CREATE TABLE IF NOT EXISTS stock_lots (
  id TEXT PRIMARY KEY,
  store_id TEXT NOT NULL DEFAULT 'st1',
@@ -461,12 +473,12 @@ abstract final class AppDatabase {
  CREATE INDEX IF NOT EXISTS idx_stock_lots_expiry
  ON stock_lots(expiry_date) WHERE current_quantity > 0;
  ''');
- // Fecho de caixa diário (Z-report) — um fecho por loja por dia.
- // `closing_date` = início do dia local em ms (época); `expected_cash` =
- // o que deveria estar na gaveta (Σ vendas ativas em DINHEIRO do dia);
- // `counted_cash` = dinheiro físico contado na conferência;
- // `sales_by_method` = abertura por forma de pagamento (JSON).
- db.execute('''
+    // Fecho de caixa diário (Z-report) — um fecho por loja por dia.
+    // `closing_date` = início do dia local em ms (época); `expected_cash` =
+    // o que deveria estar na gaveta (Σ vendas ativas em DINHEIRO do dia);
+    // `counted_cash` = dinheiro físico contado na conferência;
+    // `sales_by_method` = abertura por forma de pagamento (JSON).
+    db.execute('''
  CREATE TABLE IF NOT EXISTS cash_closings (
  id TEXT PRIMARY KEY,
  store_id TEXT NOT NULL DEFAULT 'st1',
@@ -483,17 +495,19 @@ abstract final class AppDatabase {
  ON cash_closings(store_id);
  ''');
 
- // Migração leve: bancos criados antes do `sale_number` (numeração
- // sequencial por loja) recebem a coluna com DEFAULT 0 e são re-numerados
- // em ordem de data (a venda mais antiga da loja = 1). Idempotente para
- // bancos novos, que já criam a coluna no CREATE TABLE acima.
- final salesColumns = db.select('PRAGMA table_info(sales)');
- final hasSaleNumber = salesColumns.any((row) => row['name'] == 'sale_number');
- if (!hasSaleNumber) {
- db.execute(
- 'ALTER TABLE sales ADD COLUMN sale_number INTEGER NOT NULL DEFAULT 0',
- );
- db.execute('''
+    // Migração leve: bancos criados antes do `sale_number` (numeração
+    // sequencial por loja) recebem a coluna com DEFAULT 0 e são re-numerados
+    // em ordem de data (a venda mais antiga da loja = 1). Idempotente para
+    // bancos novos, que já criam a coluna no CREATE TABLE acima.
+    final salesColumns = db.select('PRAGMA table_info(sales)');
+    final hasSaleNumber = salesColumns.any(
+      (row) => row['name'] == 'sale_number',
+    );
+    if (!hasSaleNumber) {
+      db.execute(
+        'ALTER TABLE sales ADD COLUMN sale_number INTEGER NOT NULL DEFAULT 0',
+      );
+      db.execute('''
  WITH numbered AS (
  SELECT id, ROW_NUMBER() OVER (
  PARTITION BY store_id ORDER BY date_time, id
@@ -503,124 +517,124 @@ abstract final class AppDatabase {
  UPDATE sales
  SET sale_number = (SELECT rn FROM numbered WHERE numbered.id = sales.id)
  ''');
- }
- // Garantia de unicidade por loja (defesa em profundidade — o datasource
- // já atribui MAX+1 dentro da transação).
- db.execute(
- 'CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_store_number '
- 'ON sales(store_id, sale_number)',
- );
+    }
+    // Garantia de unicidade por loja (defesa em profundidade — o datasource
+    // já atribui MAX+1 dentro da transação).
+    db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_store_number '
+      'ON sales(store_id, sale_number)',
+    );
 
- // Migração leve (anulação de vendas): bancos criados antes do status
- // recebem `status` DEFAULT 'active' (todas as vendas existentes são
- // ativas — nunca foram anuladas) e `cancelled_at` NULL. Idempotente
- // para bancos novos, que já criam as colunas no CREATE TABLE acima.
- final salesStatusColumns = db.select('PRAGMA table_info(sales)');
- final hasStatus =
- salesStatusColumns.any((row) => row['name'] == 'status');
- if (!hasStatus) {
- db.execute(
- "ALTER TABLE sales ADD COLUMN status TEXT NOT NULL DEFAULT 'active'",
- );
- db.execute('ALTER TABLE sales ADD COLUMN cancelled_at INTEGER');
- }
+    // Migração leve (anulação de vendas): bancos criados antes do status
+    // recebem `status` DEFAULT 'active' (todas as vendas existentes são
+    // ativas — nunca foram anuladas) e `cancelled_at` NULL. Idempotente
+    // para bancos novos, que já criam as colunas no CREATE TABLE acima.
+    final salesStatusColumns = db.select('PRAGMA table_info(sales)');
+    final hasStatus = salesStatusColumns.any((row) => row['name'] == 'status');
+    if (!hasStatus) {
+      db.execute(
+        "ALTER TABLE sales ADD COLUMN status TEXT NOT NULL DEFAULT 'active'",
+      );
+      db.execute('ALTER TABLE sales ADD COLUMN cancelled_at INTEGER');
+    }
 
- // Migração leve: bancos criados antes da coluna `is_paid` (baixa de
- // fiado) recebem a coluna com DEFAULT 0 (tudo pendente). Idempotente
- // para bancos novos, que já criam a coluna no CREATE TABLE acima.
- final debtColumns = db.select('PRAGMA table_info(debts)');
- final hasIsPaid = debtColumns.any((row) => row['name'] == 'is_paid');
- if (!hasIsPaid) {
- db.execute(
- 'ALTER TABLE debts ADD COLUMN is_paid INTEGER NOT NULL DEFAULT 0',
- );
- }
+    // Migração leve: bancos criados antes da coluna `is_paid` (baixa de
+    // fiado) recebem a coluna com DEFAULT 0 (tudo pendente). Idempotente
+    // para bancos novos, que já criam a coluna no CREATE TABLE acima.
+    final debtColumns = db.select('PRAGMA table_info(debts)');
+    final hasIsPaid = debtColumns.any((row) => row['name'] == 'is_paid');
+    if (!hasIsPaid) {
+      db.execute(
+        'ALTER TABLE debts ADD COLUMN is_paid INTEGER NOT NULL DEFAULT 0',
+      );
+    }
 
- // Migração leve: bancos criados antes do vínculo `debt_id` (origem da
- // pendência de fiado) recebem a coluna NULL — dívidas antigas seguem
- // quitando via nova entrada no caixa (sem duplicata). Idempotente para
- // bancos novos.
- final transactionColumns =
- db.select('PRAGMA table_info(financial_transactions)');
- final hasDebtId =
- transactionColumns.any((row) => row['name'] == 'debt_id');
- if (!hasDebtId) {
- db.execute(
- 'ALTER TABLE financial_transactions ADD COLUMN debt_id TEXT',
- );
- }
+    // Migração leve: bancos criados antes do vínculo `debt_id` (origem da
+    // pendência de fiado) recebem a coluna NULL — dívidas antigas seguem
+    // quitando via nova entrada no caixa (sem duplicata). Idempotente para
+    // bancos novos.
+    final transactionColumns = db.select(
+      'PRAGMA table_info(financial_transactions)',
+    );
+    final hasDebtId = transactionColumns.any((row) => row['name'] == 'debt_id');
+    if (!hasDebtId) {
+      db.execute('ALTER TABLE financial_transactions ADD COLUMN debt_id TEXT');
+    }
 
- // Migração leve: bancos criados antes do `paid_at` (data da baixa do
- // fiado — histórico de quitações) recebem a coluna NULL; dívidas já
- // quitadas ficam sem data de baixa até uma nova quitação. Idempotente.
- final debtPaidAtColumns = db.select('PRAGMA table_info(debts)');
- final hasPaidAt = debtPaidAtColumns.any((row) => row['name'] == 'paid_at');
- if (!hasPaidAt) {
- db.execute('ALTER TABLE debts ADD COLUMN paid_at INTEGER');
- }
+    // Migração leve: bancos criados antes do `paid_at` (data da baixa do
+    // fiado — histórico de quitações) recebem a coluna NULL; dívidas já
+    // quitadas ficam sem data de baixa até uma nova quitação. Idempotente.
+    final debtPaidAtColumns = db.select('PRAGMA table_info(debts)');
+    final hasPaidAt = debtPaidAtColumns.any((row) => row['name'] == 'paid_at');
+    if (!hasPaidAt) {
+      db.execute('ALTER TABLE debts ADD COLUMN paid_at INTEGER');
+    }
 
- // Migração leve: bancos criados antes do vínculo `customer_id`
- // (módulo de clientes) recebem a coluna NULL — dívidas antigas seguem
- // exibindo apenas o personName (snapshot). Idempotente.
- final debtCustomerColumns = db.select('PRAGMA table_info(debts)');
- final hasCustomerId =
- debtCustomerColumns.any((row) => row['name'] == 'customer_id');
- if (!hasCustomerId) {
- db.execute('ALTER TABLE debts ADD COLUMN customer_id TEXT');
- }
+    // Migração leve: bancos criados antes do vínculo `customer_id`
+    // (módulo de clientes) recebem a coluna NULL — dívidas antigas seguem
+    // exibindo apenas o personName (snapshot). Idempotente.
+    final debtCustomerColumns = db.select('PRAGMA table_info(debts)');
+    final hasCustomerId = debtCustomerColumns.any(
+      (row) => row['name'] == 'customer_id',
+    );
+    if (!hasCustomerId) {
+      db.execute('ALTER TABLE debts ADD COLUMN customer_id TEXT');
+    }
 
- // Migração leve (Fase 2 do multi-tenancy): bancos criados antes do
- // escopo por loja recebem `store_id` com DEFAULT 'st1' — registros
- // antigos continuam visíveis na loja padrão. Idempotente para bancos
- // novos (já criam a coluna no CREATE TABLE).
- final migrationTargets = <String, String>{
- 'products': 'idx_products_store',
- 'sales': 'idx_sales_store',
- 'financial_transactions': 'idx_financial_transactions_store',
- 'debts': 'idx_debts_store',
- 'customers': 'idx_customers_store',
- 'purchases': 'idx_purchases_store',
- };
- for (final entry in migrationTargets.entries) {
- final columns = db.select('PRAGMA table_info(${entry.key})');
- final hasStoreId = columns.any((row) => row['name'] == 'store_id');
- if (!hasStoreId) {
- db.execute(
- "ALTER TABLE ${entry.key} ADD COLUMN store_id TEXT NOT NULL "
- "DEFAULT 'st1'",
- );
- }
- db.execute('CREATE INDEX IF NOT EXISTS ${entry.value} '
- 'ON ${entry.key}(store_id)');
- }
+    // Migração leve (Fase 2 do multi-tenancy): bancos criados antes do
+    // escopo por loja recebem `store_id` com DEFAULT 'st1' — registros
+    // antigos continuam visíveis na loja padrão. Idempotente para bancos
+    // novos (já criam a coluna no CREATE TABLE).
+    final migrationTargets = <String, String>{
+      'products': 'idx_products_store',
+      'sales': 'idx_sales_store',
+      'financial_transactions': 'idx_financial_transactions_store',
+      'debts': 'idx_debts_store',
+      'customers': 'idx_customers_store',
+      'purchases': 'idx_purchases_store',
+    };
+    for (final entry in migrationTargets.entries) {
+      final columns = db.select('PRAGMA table_info(${entry.key})');
+      final hasStoreId = columns.any((row) => row['name'] == 'store_id');
+      if (!hasStoreId) {
+        db.execute(
+          "ALTER TABLE ${entry.key} ADD COLUMN store_id TEXT NOT NULL "
+          "DEFAULT 'st1'",
+        );
+      }
+      db.execute(
+        'CREATE INDEX IF NOT EXISTS ${entry.value} '
+        'ON ${entry.key}(store_id)',
+      );
+    }
 
- // Migração W11 (FIFO + validade + milésimos): bancos criados antes
- // do módulo recebem as colunas novas e têm TODAS as quantidades
- // convertidas de unidades inteiras para MILÉSIMOS (×1000) — produtos,
- // itens de venda e itens de compra. Depois, cada produto com estoque
- // ganha um lote inicial (sem validade, custo = preço de compra) para
- // a invariante `stock = Σ lotes` valer desde o primeiro dia. Idempotente:
- // bancos novos já criam as colunas no CREATE TABLE (o guard abaixo não
- // dispara) e a reconversão ×1000 nunca reexecuta (ligada à presença da
- // coluna `code` — adicionada apenas nesta migração).
- final productColumns = db.select('PRAGMA table_info(products)');
- final hasW11Columns = productColumns.any((row) => row['name'] == 'code');
- if (!hasW11Columns) {
- db.execute("ALTER TABLE products ADD COLUMN code TEXT");
- db.execute(
- 'ALTER TABLE products ADD COLUMN venda_por_fracao '
- 'INTEGER NOT NULL DEFAULT 0',
- );
- db.execute(
- "ALTER TABLE products ADD COLUMN unit_label TEXT NOT NULL "
- "DEFAULT 'un'",
- );
- // Conversão para MILÉSIMOS (W11) — roda apenas nesta migração.
- db.execute('UPDATE products SET stock_quantity = stock_quantity * 1000');
- db.execute('UPDATE sale_items SET quantity = quantity * 1000');
- db.execute('UPDATE purchase_items SET quantity = quantity * 1000');
- // Lote inicial de cada produto com estoque (FIFO sem validade).
- db.execute('''
+    // Migração W11 (FIFO + validade + milésimos): bancos criados antes
+    // do módulo recebem as colunas novas e têm TODAS as quantidades
+    // convertidas de unidades inteiras para MILÉSIMOS (×1000) — produtos,
+    // itens de venda e itens de compra. Depois, cada produto com estoque
+    // ganha um lote inicial (sem validade, custo = preço de compra) para
+    // a invariante `stock = Σ lotes` valer desde o primeiro dia. Idempotente:
+    // bancos novos já criam as colunas no CREATE TABLE (o guard abaixo não
+    // dispara) e a reconversão ×1000 nunca reexecuta (ligada à presença da
+    // coluna `code` — adicionada apenas nesta migração).
+    final productColumns = db.select('PRAGMA table_info(products)');
+    final hasW11Columns = productColumns.any((row) => row['name'] == 'code');
+    if (!hasW11Columns) {
+      db.execute("ALTER TABLE products ADD COLUMN code TEXT");
+      db.execute(
+        'ALTER TABLE products ADD COLUMN venda_por_fracao '
+        'INTEGER NOT NULL DEFAULT 0',
+      );
+      db.execute(
+        "ALTER TABLE products ADD COLUMN unit_label TEXT NOT NULL "
+        "DEFAULT 'un'",
+      );
+      // Conversão para MILÉSIMOS (W11) — roda apenas nesta migração.
+      db.execute('UPDATE products SET stock_quantity = stock_quantity * 1000');
+      db.execute('UPDATE sale_items SET quantity = quantity * 1000');
+      db.execute('UPDATE purchase_items SET quantity = quantity * 1000');
+      // Lote inicial de cada produto com estoque (FIFO sem validade).
+      db.execute('''
  INSERT INTO stock_lots
  (id, store_id, product_id, entry_date, expiry_date,
  initial_quantity, current_quantity, cost_price)
@@ -630,58 +644,61 @@ abstract final class AppDatabase {
  FROM products
  WHERE stock_quantity > 0
  ''');
- }
+    }
 
- // Migração leve (produto inativo): bancos criados antes do campo
- // `is_active` recebem a coluna com DEFAULT 1 — todos os produtos
- // existentes permanecem ATIVOS (nunca foram desativados). Idempotente
- // para bancos novos, que já criam a coluna no CREATE TABLE acima.
- final productActiveColumns = db.select('PRAGMA table_info(products)');
- final hasIsActive = productActiveColumns.any(
- (row) => row['name'] == 'is_active',
- );
- if (!hasIsActive) {
- db.execute(
- 'ALTER TABLE products ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1',
- );
- }
+    // Migração leve (produto inativo): bancos criados antes do campo
+    // `is_active` recebem a coluna com DEFAULT 1 — todos os produtos
+    // existentes permanecem ATIVOS (nunca foram desativados). Idempotente
+    // para bancos novos, que já criam a coluna no CREATE TABLE acima.
+    final productActiveColumns = db.select('PRAGMA table_info(products)');
+    final hasIsActive = productActiveColumns.any(
+      (row) => row['name'] == 'is_active',
+    );
+    if (!hasIsActive) {
+      db.execute(
+        'ALTER TABLE products ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1',
+      );
+    }
 
- // Migração leve (FOTO do produto): bancos criados antes do `image_path`
- // recebem a coluna NULL — produtos existentes ficam sem foto (a UI
- // mostra o ícone padrão). Idempotente para bancos novos, que já criam
- // a coluna no CREATE TABLE acima.
- final productImageColumns = db.select('PRAGMA table_info(products)');
- final hasImagePath = productImageColumns.any(
- (row) => row['name'] == 'image_path',
- );
- if (!hasImagePath) {
- db.execute('ALTER TABLE products ADD COLUMN image_path TEXT');
- }
+    // Migração leve (FOTO do produto): bancos criados antes do `image_path`
+    // recebem a coluna NULL — produtos existentes ficam sem foto (a UI
+    // mostra o ícone padrão). Idempotente para bancos novos, que já criam
+    // a coluna no CREATE TABLE acima.
+    final productImageColumns = db.select('PRAGMA table_info(products)');
+    final hasImagePath = productImageColumns.any(
+      (row) => row['name'] == 'image_path',
+    );
+    if (!hasImagePath) {
+      db.execute('ALTER TABLE products ADD COLUMN image_path TEXT');
+    }
 
- // Migração leve W11: bancos criados antes do `expiry_date` (validade
- // opcional por item de compra) recebem a coluna NULL. Idempotente.
- final purchaseItemColumns = db.select('PRAGMA table_info(purchase_items)');
- final hasExpiry = purchaseItemColumns.any((row) => row['name'] == 'expiry_date');
- if (!hasExpiry) {
- db.execute('ALTER TABLE purchase_items ADD COLUMN expiry_date INTEGER');
- }
+    // Migração leve W11: bancos criados antes do `expiry_date` (validade
+    // opcional por item de compra) recebem a coluna NULL. Idempotente.
+    final purchaseItemColumns = db.select('PRAGMA table_info(purchase_items)');
+    final hasExpiry = purchaseItemColumns.any(
+      (row) => row['name'] == 'expiry_date',
+    );
+    if (!hasExpiry) {
+      db.execute('ALTER TABLE purchase_items ADD COLUMN expiry_date INTEGER');
+    }
 
- // Migração leve (NUMERAÇÃO SEQUENCIAL): roda DEPOIS da migração de
- // store_id acima (os backfills referenciam store_id; em bancos legados
- // a coluna acaba de ser adicionada). Bancos criados antes de
- // `purchase_number`/`debt_number` recebem a coluna com DEFAULT 0 e são
- // re-numerados (compra mais antiga da loja = 1; dívida mais antiga = 1).
- // Idempotente para bancos novos, que já criam as colunas no CREATE
- // TABLE acima.
- final purchasesColumns = db.select('PRAGMA table_info(purchases)');
- final hasPurchaseNumber =
- purchasesColumns.any((row) => row['name'] == 'purchase_number');
- if (!hasPurchaseNumber) {
- db.execute(
- 'ALTER TABLE purchases ADD COLUMN purchase_number '
- 'INTEGER NOT NULL DEFAULT 0',
- );
- db.execute('''
+    // Migração leve (NUMERAÇÃO SEQUENCIAL): roda DEPOIS da migração de
+    // store_id acima (os backfills referenciam store_id; em bancos legados
+    // a coluna acaba de ser adicionada). Bancos criados antes de
+    // `purchase_number`/`debt_number` recebem a coluna com DEFAULT 0 e são
+    // re-numerados (compra mais antiga da loja = 1; dívida mais antiga = 1).
+    // Idempotente para bancos novos, que já criam as colunas no CREATE
+    // TABLE acima.
+    final purchasesColumns = db.select('PRAGMA table_info(purchases)');
+    final hasPurchaseNumber = purchasesColumns.any(
+      (row) => row['name'] == 'purchase_number',
+    );
+    if (!hasPurchaseNumber) {
+      db.execute(
+        'ALTER TABLE purchases ADD COLUMN purchase_number '
+        'INTEGER NOT NULL DEFAULT 0',
+      );
+      db.execute('''
  WITH numbered AS (
  SELECT id, ROW_NUMBER() OVER (
  PARTITION BY store_id ORDER BY date_time, id
@@ -692,22 +709,23 @@ abstract final class AppDatabase {
  SET purchase_number =
  (SELECT rn FROM numbered WHERE numbered.id = purchases.id)
  ''');
- }
- // Garantia de unicidade por loja (defesa em profundidade — o datasource
- // já atribui MAX+1 dentro da transação).
- db.execute(
- 'CREATE UNIQUE INDEX IF NOT EXISTS uq_purchases_store_number '
- 'ON purchases(store_id, purchase_number)',
- );
+    }
+    // Garantia de unicidade por loja (defesa em profundidade — o datasource
+    // já atribui MAX+1 dentro da transação).
+    db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS uq_purchases_store_number '
+      'ON purchases(store_id, purchase_number)',
+    );
 
- final debtNumberColumns = db.select('PRAGMA table_info(debts)');
- final hasDebtNumber =
- debtNumberColumns.any((row) => row['name'] == 'debt_number');
- if (!hasDebtNumber) {
- db.execute(
- 'ALTER TABLE debts ADD COLUMN debt_number INTEGER NOT NULL DEFAULT 0',
- );
- db.execute('''
+    final debtNumberColumns = db.select('PRAGMA table_info(debts)');
+    final hasDebtNumber = debtNumberColumns.any(
+      (row) => row['name'] == 'debt_number',
+    );
+    if (!hasDebtNumber) {
+      db.execute(
+        'ALTER TABLE debts ADD COLUMN debt_number INTEGER NOT NULL DEFAULT 0',
+      );
+      db.execute('''
  WITH numbered AS (
  SELECT id, ROW_NUMBER() OVER (
  PARTITION BY store_id ORDER BY due_date, id
@@ -717,52 +735,53 @@ abstract final class AppDatabase {
  UPDATE debts
  SET debt_number = (SELECT rn FROM numbered WHERE numbered.id = debts.id)
  ''');
- }
- // Garantia de unicidade por loja (defesa em profundidade — o datasource
- // já atribui MAX+1 dentro da transação).
- db.execute(
- 'CREATE UNIQUE INDEX IF NOT EXISTS uq_debts_store_number '
- 'ON debts(store_id, debt_number)',
- );
+    }
+    // Garantia de unicidade por loja (defesa em profundidade — o datasource
+    // já atribui MAX+1 dentro da transação).
+    db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS uq_debts_store_number '
+      'ON debts(store_id, debt_number)',
+    );
 
- // Migração leve (forma de pagamento das compras): bancos criados antes
- // da coluna `payment_method` recebem a coluna com DEFAULT 'cash' — as
- // compras antigas não registravam o método e são interpretadas como
- // pagamento à vista (mesmo enum de vendas, gravado pelo NOME).
- // Idempotente para bancos novos, que já criam a coluna no CREATE TABLE.
- final purchasePaymentColumns = db.select('PRAGMA table_info(purchases)');
- final hasPurchasePayment =
- purchasePaymentColumns.any((row) => row['name'] == 'payment_method');
- if (!hasPurchasePayment) {
- db.execute(
- "ALTER TABLE purchases ADD COLUMN payment_method TEXT NOT NULL "
- "DEFAULT 'cash'",
- );
- }
+    // Migração leve (forma de pagamento das compras): bancos criados antes
+    // da coluna `payment_method` recebem a coluna com DEFAULT 'cash' — as
+    // compras antigas não registravam o método e são interpretadas como
+    // pagamento à vista (mesmo enum de vendas, gravado pelo NOME).
+    // Idempotente para bancos novos, que já criam a coluna no CREATE TABLE.
+    final purchasePaymentColumns = db.select('PRAGMA table_info(purchases)');
+    final hasPurchasePayment = purchasePaymentColumns.any(
+      (row) => row['name'] == 'payment_method',
+    );
+    if (!hasPurchasePayment) {
+      db.execute(
+        "ALTER TABLE purchases ADD COLUMN payment_method TEXT NOT NULL "
+        "DEFAULT 'cash'",
+      );
+    }
 
- // Migração leve (formas de pagamento): o produto trocou o Pix (BR)
- // pelas carteiras de dinheiro móvel de Moçambique (M-Pesa e E-Mola).
- // O enum PaymentMethod é persistido pelo NOME (values.byName), então
- // vendas antigas com 'pix' quebrariam a leitura — reescreve para
- // 'mPesa' (escolha do produto: operadora dominante). Idempotente:
- // reexecutar com dados é um no-op (não há mais 'pix').
- db.execute(
- "UPDATE sales SET payment_method = 'mPesa' "
- "WHERE payment_method = 'pix'",
- );
+    // Migração leve (formas de pagamento): o produto trocou o Pix (BR)
+    // pelas carteiras de dinheiro móvel de Moçambique (M-Pesa e E-Mola).
+    // O enum PaymentMethod é persistido pelo NOME (values.byName), então
+    // vendas antigas com 'pix' quebrariam a leitura — reescreve para
+    // 'mPesa' (escolha do produto: operadora dominante). Idempotente:
+    // reexecutar com dados é um no-op (não há mais 'pix').
+    db.execute(
+      "UPDATE sales SET payment_method = 'mPesa' "
+      "WHERE payment_method = 'pix'",
+    );
 
- // W4 (centavos) DEPOIS do schema: colunas legadas REAL são convertidas
- // por afinidade (bancos novos já nascem INTEGER — no-op).
- _migrateMoneyToCents(db);
- }
+    // W4 (centavos) DEPOIS do schema: colunas legadas REAL são convertidas
+    // por afinidade (bancos novos já nascem INTEGER — no-op).
+    _migrateMoneyToCents(db);
+  }
 
- /// Migração v2 — fila offline (outbox): operações do caminho de dinheiro
- /// gravadas LOCALMENTE quando o modo SaaS está sem conexão, reenviadas
- /// pelo `OfflineSyncService` assim que a rede volta. `id` AUTOINCREMENT
- /// É a ordem FIFO de replay; `payload` é o JSON do comando original
- /// (entidade + parâmetros), reexecutado de forma idempotente nas RPCs.
- static void _schemaV2(Database db) {
- db.execute('''
+  /// Migração v2 — fila offline (outbox): operações do caminho de dinheiro
+  /// gravadas LOCALMENTE quando o modo SaaS está sem conexão, reenviadas
+  /// pelo `OfflineSyncService` assim que a rede volta. `id` AUTOINCREMENT
+  /// É a ordem FIFO de replay; `payload` é o JSON do comando original
+  /// (entidade + parâmetros), reexecutado de forma idempotente nas RPCs.
+  static void _schemaV2(Database db) {
+    db.execute('''
  CREATE TABLE IF NOT EXISTS pending_ops (
  id INTEGER PRIMARY KEY AUTOINCREMENT,
  op_type TEXT NOT NULL,
@@ -772,17 +791,17 @@ abstract final class AppDatabase {
  last_error TEXT
  );
  ''');
- }
+  }
 
- /// v3 — Facturas personalizadas (add-on `ao_custom_invoice`).
- ///
- /// Documento por loja com número sequencial dentro da loja
- /// (`UNIQUE(store_id, invoice_number)` garante que MAX+1 nunca duplica).
- /// O corpo completo é guardado como JSON (items snapshot, descontos,
- /// notas, método de pagamento) — a factura é um documento, não um
- /// agregado com RPCs de dinheiro.
- static void _schemaV3(Database db) {
-  db.execute('''
+  /// v3 — Facturas personalizadas (add-on `ao_custom_invoice`).
+  ///
+  /// Documento por loja com número sequencial dentro da loja
+  /// (`UNIQUE(store_id, invoice_number)` garante que MAX+1 nunca duplica).
+  /// O corpo completo é guardado como JSON (items snapshot, descontos,
+  /// notas, método de pagamento) — a factura é um documento, não um
+  /// agregado com RPCs de dinheiro.
+  static void _schemaV3(Database db) {
+    db.execute('''
   CREATE TABLE IF NOT EXISTS custom_invoices (
    id TEXT PRIMARY KEY,
    store_id TEXT NOT NULL,
@@ -792,21 +811,21 @@ abstract final class AppDatabase {
    UNIQUE (store_id, invoice_number)
   );
   ''');
-  db.execute('''
+    db.execute('''
   CREATE INDEX IF NOT EXISTS idx_custom_invoices_store
   ON custom_invoices (store_id, created_at DESC);
   ''');
- }
+  }
 
- /// v4 — Cotações/orçamentos (add-on `ao_quotation`).
- ///
- /// Documento por loja com número sequencial dentro da loja
- /// (`UNIQUE(store_id, quotation_number)` garante que MAX+1 nunca
- /// duplica). O corpo completo é guardado como JSON (items snapshot,
- /// estado, desconto, validade) — a cotação é um documento, não um
- /// agregado com RPCs de dinheiro.
- static void _schemaV4(Database db) {
-  db.execute('''
+  /// v4 — Cotações/orçamentos (add-on `ao_quotation`).
+  ///
+  /// Documento por loja com número sequencial dentro da loja
+  /// (`UNIQUE(store_id, quotation_number)` garante que MAX+1 nunca
+  /// duplica). O corpo completo é guardado como JSON (items snapshot,
+  /// estado, desconto, validade) — a cotação é um documento, não um
+  /// agregado com RPCs de dinheiro.
+  static void _schemaV4(Database db) {
+    db.execute('''
   CREATE TABLE IF NOT EXISTS quotations (
    id TEXT PRIMARY KEY,
    store_id TEXT NOT NULL,
@@ -816,41 +835,69 @@ abstract final class AppDatabase {
    UNIQUE (store_id, quotation_number)
   );
   ''');
-  db.execute('''
+    db.execute('''
   CREATE INDEX IF NOT EXISTS idx_quotations_store
   ON quotations (store_id, created_at DESC);
   ''');
- }
-
- /// v5 — Gestão de funcionários (add-on `ao_employee_mgmt`).
- ///
- /// Três tabelas por loja:
- ///  - `employee_attendance` — ponto: UMA linha por funcionário por dia
- ///    (`UNIQUE(store_id, user_id, work_date)`); a entrada insere, a
- ///    saída atualiza a mesma linha (clock_out NULL = presente).
- ///  - `employee_commission_rates` — taxa de comissão por funcionário em
- ///    pontos base (`UNIQUE(store_id, user_id)`; 500 = 5%).
- ///  - `employee_targets` — meta mensal de vendas por funcionário
- ///    (`UNIQUE(store_id, user_id, month)`; month = `YYYY-MM`).
- ///
- /// As COMISSÕES nunca são armazenadas: são CALCULADAS das vendas reais
- /// (`sales.user_id` = caixa) × taxa. A coluna `sales.user_id` é
- /// adicionada aqui para bancos legados e novos (a v1 não a tem — o
- /// guard de presença cobre ambos).
- static void _schemaV5(Database db) {
-  // Caixa da venda (atribuição de comissões/metas): bancos novos e
-  // legados recebem a coluna via ALTER (a v1 não a tem). NULL = venda
-  // legada sem atribuição (não conta para comissões — nunca inventa
-  // números).
-  final saleColumns = db.select('PRAGMA table_info(sales)');
-  final hasUserId = saleColumns.any((row) => row['name'] == 'user_id');
-  if (!hasUserId) {
-   db.execute('ALTER TABLE sales ADD COLUMN user_id TEXT');
   }
-  db.execute('CREATE INDEX IF NOT EXISTS idx_sales_user_store '
-   'ON sales(user_id, store_id)');
 
-  db.execute('''
+  /// v6 — Fila offline com backoff + dead-letter (auditoria A3).
+  ///
+  /// Antes, uma operação que falhava por NEGÓCIO era reenviada a cada
+  /// dreno (45s) para sempre — `attempt_count` existia mas ninguém usava.
+  /// Agora o [PendingOpQueueSqliteImpl.markFailed] agenda `next_retry_at`
+  /// com backoff exponencial e marca `dead` quando a operação esgota
+  /// `pendingOpMaxAttempts` (dead-letter: sai da contagem e do replay,
+  /// permanece no banco para auditoria). Idempotente para bancos novos e
+  /// legados (guardas por presença de coluna — mesmo padrão da v5).
+  static void _schemaV6(Database db) {
+    final columns = db.select('PRAGMA table_info(pending_ops)');
+    final names = columns.map((row) => row['name']).toSet();
+    if (!names.contains('next_retry_at')) {
+      db.execute('ALTER TABLE pending_ops ADD COLUMN next_retry_at INTEGER');
+    }
+    if (!names.contains('dead')) {
+      db.execute(
+        'ALTER TABLE pending_ops ADD COLUMN dead INTEGER NOT NULL DEFAULT 0',
+      );
+    }
+    db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_pending_ops_due '
+      'ON pending_ops(dead, next_retry_at)',
+    );
+  }
+
+  /// v5 — Gestão de funcionários (add-on `ao_employee_mgmt`).
+  ///
+  /// Três tabelas por loja:
+  ///  - `employee_attendance` — ponto: UMA linha por funcionário por dia
+  ///    (`UNIQUE(store_id, user_id, work_date)`); a entrada insere, a
+  ///    saída atualiza a mesma linha (clock_out NULL = presente).
+  ///  - `employee_commission_rates` — taxa de comissão por funcionário em
+  ///    pontos base (`UNIQUE(store_id, user_id)`; 500 = 5%).
+  ///  - `employee_targets` — meta mensal de vendas por funcionário
+  ///    (`UNIQUE(store_id, user_id, month)`; month = `YYYY-MM`).
+  ///
+  /// As COMISSÕES nunca são armazenadas: são CALCULADAS das vendas reais
+  /// (`sales.user_id` = caixa) × taxa. A coluna `sales.user_id` é
+  /// adicionada aqui para bancos legados e novos (a v1 não a tem — o
+  /// guard de presença cobre ambos).
+  static void _schemaV5(Database db) {
+    // Caixa da venda (atribuição de comissões/metas): bancos novos e
+    // legados recebem a coluna via ALTER (a v1 não a tem). NULL = venda
+    // legada sem atribuição (não conta para comissões — nunca inventa
+    // números).
+    final saleColumns = db.select('PRAGMA table_info(sales)');
+    final hasUserId = saleColumns.any((row) => row['name'] == 'user_id');
+    if (!hasUserId) {
+      db.execute('ALTER TABLE sales ADD COLUMN user_id TEXT');
+    }
+    db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_sales_user_store '
+      'ON sales(user_id, store_id)',
+    );
+
+    db.execute('''
   CREATE TABLE IF NOT EXISTS employee_attendance (
    id TEXT PRIMARY KEY,
    store_id TEXT NOT NULL,
@@ -863,12 +910,12 @@ abstract final class AppDatabase {
    UNIQUE (store_id, user_id, work_date)
   );
   ''');
-  db.execute('''
+    db.execute('''
   CREATE INDEX IF NOT EXISTS idx_employee_attendance_store
   ON employee_attendance (store_id, work_date DESC);
   ''');
 
-  db.execute('''
+    db.execute('''
   CREATE TABLE IF NOT EXISTS employee_commission_rates (
    id TEXT PRIMARY KEY,
    store_id TEXT NOT NULL,
@@ -879,7 +926,7 @@ abstract final class AppDatabase {
   );
   ''');
 
-  db.execute('''
+    db.execute('''
   CREATE TABLE IF NOT EXISTS employee_targets (
    id TEXT PRIMARY KEY,
    store_id TEXT NOT NULL,
@@ -890,30 +937,29 @@ abstract final class AppDatabase {
    UNIQUE (store_id, user_id, month)
   );
   ''');
-  db.execute('''
+    db.execute('''
   CREATE INDEX IF NOT EXISTS idx_employee_targets_store
   ON employee_targets (store_id, month);
   ''');
- }
-
+  }
 }
 
 /// Uma migração de schema: versão (`PRAGMA user_version`) + função que
 /// aplica a mudança. Cada migração roda na própria transação; a versão é
 /// carimbada dentro dela (rollback desfaz schema E versão juntos).
 class _Migration {
- const _Migration({
- required this.version,
- required this.description,
- required this.up,
- });
+  const _Migration({
+    required this.version,
+    required this.description,
+    required this.up,
+  });
 
- /// Número da versão — deve ser estritamente crescente na lista.
- final int version;
+  /// Número da versão — deve ser estritamente crescente na lista.
+  final int version;
 
- /// Descrição curta da mudança (auditoria do histórico de migrações).
- final String description;
+  /// Descrição curta da mudança (auditoria do histórico de migrações).
+  final String description;
 
- /// Aplica a migração (SQL idempotente para bancos legados).
- final void Function(Database db) up;
+  /// Aplica a migração (SQL idempotente para bancos legados).
+  final void Function(Database db) up;
 }

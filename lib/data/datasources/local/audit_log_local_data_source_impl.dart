@@ -9,6 +9,5 @@ final class AuditLogLocalDataSourceImpl implements AuditLogLocalDataSource {
   const AuditLogLocalDataSourceImpl();
 
   @override
-  Future<List<AuditEntry>> getAuditLog({int limit = 100}) async =>
-      const [];
+  Future<List<AuditEntry>> getAuditLog({int limit = 100}) async => const [];
 }

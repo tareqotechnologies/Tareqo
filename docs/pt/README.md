@@ -29,6 +29,8 @@ Este diretório reúne todos os documentos do app: do que ele faz até como cada
 | 15 | [Migração W4 + H2 no live](15-migracao-w4-h2.md) | Runbook passo a passo para aplicar `supabase/upgrade.sql` no projeto de produção + verificação pós-migração |
 | 16 | [Migração W11 no live](16-migracao-w11.md) | Runbook da Parte 22 (FIFO por lotes + validade + vendas por peso): milésimos, backfill de lotes, verificação pós-migração e janela de publicação |
 | 17 | [Migração do fecho de caixa no live](17-migracao-fecho-caixa.md) | Runbook da Parte 25 (Z-report): tabela `cash_closings` + RPC `close_cash_register` (cálculo server-side + guarda gerencial), verificação pós-migração (checks 32–34) e publicação |
+| 18 | [Migração de add-ons no live](18-migracao-addons-persistencia.md) | Runbook histórico das migrações de persistência dos add-ons (agora consolidadas no `schema.sql`/`upgrade.sql`) |
+| 19 | **[Supabase de produção — passo a passo](19-supabase-producao-passo-a-passo.md)** | **Guia definitivo da configuração do Supabase de produção: 2 scripts SQL consolidados, promoção de super admin, credenciais do app, build de produção, checklist de validação e solução de problemas** |
 
 ---
 
@@ -43,7 +45,7 @@ Este diretório reúne todos os documentos do app: do que ele faz até como cada
 
 > **Glossário trilíngue:** [português](GLOSSARIO.md) · [english](../en/GLOSSARY.md) · [français](../fr/GLOSSAIRE.md)
 
-> **Em francês (nouvelle langue):** [Guide de l'utilisateur](GUIA_DO_USUARIO.md) → [`docs/fr/GUIDE_DE_L_UTILISATEUR.md`](../fr/GUIDE_DE_L_UTILISATEUR.md) · [Dépannage](TROUBLESHOOTING.md) → [`docs/fr/DEPANNAGE.md`](../fr/DEPANNAGE.md) — empacotados no app (leitura offline) e em PDF em `docs/pdf/fr/`. Todos os **capítulos técnicos** (01–19) também estão em francês em [`docs/fr/`](../fr/README.md).
+> **Em francês (nouvelle langue):** [Guide de l'utilisateur](GUIA_DO_USUARIO.md) → [`docs/fr/GUIDE_DE_L_UTILISATEUR.md`](../fr/GUIDE_DE_L_UTILISATEUR.md) · [Dépannage](TROUBLESHOOTING.md) → [`docs/fr/DEPANNAGE.md`](../fr/DEPANNAGE.md) — empacotados no app (leitura offline) e em PDF em `docs/pdf/fr/`. Todos os **capítulos técnicos** (01–18) também estão em francês em [`docs/fr/`](../fr/README.md) — o **capítulo 19** (guia de produção) está em português.
 
 ---
 

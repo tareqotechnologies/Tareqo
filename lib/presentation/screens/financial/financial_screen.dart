@@ -98,12 +98,9 @@ class FinancialScreen extends ConsumerWidget {
                                 vertical: 8,
                               ),
                               shape: const StadiumBorder(),
-                              side: BorderSide(
-                                color: scheme.outlineVariant,
-                              ),
+                              side: BorderSide(color: scheme.outlineVariant),
                               backgroundColor: Colors.transparent,
-                              selectedBackgroundColor:
-                                  scheme.primaryContainer,
+                              selectedBackgroundColor: scheme.primaryContainer,
                               selectedForegroundColor:
                                   scheme.onPrimaryContainer,
                               foregroundColor: scheme.onSurfaceVariant,
@@ -149,15 +146,15 @@ class FinancialScreen extends ConsumerWidget {
                           onRetry: () => ref.invalidate(cashFlowProvider),
                         )
                       : cashFlowAsync.isLoading
-                          ? const _CashStackSkeleton()
-                          : _CashStack(
-                              incomeCents: cashFlow?.incomeCents ?? 0,
-                              expenseCents: cashFlow?.expenseCents ?? 0,
-                              incomeLabel: l10n.financialIncome,
-                              expenseLabel: l10n.financialExpense,
-                              balanceLabel: l10n.financialPeriodBalance,
-                              currency: Formatters.currencySymbol,
-                            ),
+                      ? const _CashStackSkeleton()
+                      : _CashStack(
+                          incomeCents: cashFlow?.incomeCents ?? 0,
+                          expenseCents: cashFlow?.expenseCents ?? 0,
+                          incomeLabel: l10n.financialIncome,
+                          expenseLabel: l10n.financialExpense,
+                          balanceLabel: l10n.financialPeriodBalance,
+                          currency: Formatters.currencySymbol,
+                        ),
                 ),
               ),
 
@@ -178,9 +175,8 @@ class FinancialScreen extends ConsumerWidget {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(0, 12, 0, 96),
                 sliver: transactionsAsync.when(
-                  loading: () => const SliverToBoxAdapter(
-                    child: _TransactionsSkeleton(),
-                  ),
+                  loading: () =>
+                      const SliverToBoxAdapter(child: _TransactionsSkeleton()),
                   error: (error, _) => SliverToBoxAdapter(
                     child: ErrorView(
                       message: l10n.financialLoadError,
@@ -196,8 +192,7 @@ class FinancialScreen extends ConsumerWidget {
                           title: l10n.financialEmptyTitle,
                           subtitle: l10n.financialEmptySubtitle,
                           actionLabel: l10n.financialRegister,
-                          onAction: () =>
-                              _openAddTransaction(context, ref),
+                          onAction: () => _openAddTransaction(context, ref),
                         ),
                       );
                     }
@@ -205,42 +200,39 @@ class FinancialScreen extends ConsumerWidget {
                     final groups = _groupByDate(transactions);
 
                     return SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final group = groups[index];
-                          return _DateGroup(
-                            date: group.date,
-                            label: group.label,
-                            totalCents: group.totalCents,
-                            transactions: group.transactions,
-                            onTap: (tx) =>
-                                _openTransactionDetail(context, ref, tx),
-                            onReceive: (tx) => _settlePending(
-                              context,
-                              ref,
-                              tx,
-                              title: l10n.financialReceivePendingTitle,
-                              body: l10n.financialReceivePendingBody,
-                              confirmLabel: l10n.financialReceive,
-                              success: l10n.financialReceived,
-                              failure: l10n.financialReceiveError,
-                              hint: 'Erro ao receber pendência',
-                            ),
-                            onPay: (tx) => _settlePending(
-                              context,
-                              ref,
-                              tx,
-                              title: l10n.financialPayPendingTitle,
-                              body: l10n.financialPayPendingBody,
-                              confirmLabel: l10n.financialPay,
-                              success: l10n.financialPaid,
-                              failure: l10n.financialPayError,
-                              hint: 'Erro ao pagar saída pendente',
-                            ),
-                          );
-                        },
-                        childCount: groups.length,
-                      ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final group = groups[index];
+                        return _DateGroup(
+                          date: group.date,
+                          label: group.label,
+                          totalCents: group.totalCents,
+                          transactions: group.transactions,
+                          onTap: (tx) =>
+                              _openTransactionDetail(context, ref, tx),
+                          onReceive: (tx) => _settlePending(
+                            context,
+                            ref,
+                            tx,
+                            title: l10n.financialReceivePendingTitle,
+                            body: l10n.financialReceivePendingBody,
+                            confirmLabel: l10n.financialReceive,
+                            success: l10n.financialReceived,
+                            failure: l10n.financialReceiveError,
+                            hint: 'Erro ao receber pendência',
+                          ),
+                          onPay: (tx) => _settlePending(
+                            context,
+                            ref,
+                            tx,
+                            title: l10n.financialPayPendingTitle,
+                            body: l10n.financialPayPendingBody,
+                            confirmLabel: l10n.financialPay,
+                            success: l10n.financialPaid,
+                            failure: l10n.financialPayError,
+                            hint: 'Erro ao pagar saída pendente',
+                          ),
+                        );
+                      }, childCount: groups.length),
                     );
                   },
                 ),
@@ -289,8 +281,7 @@ class FinancialScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _openAddTransaction(
-      BuildContext context, WidgetRef ref) async {
+  Future<void> _openAddTransaction(BuildContext context, WidgetRef ref) async {
     await showAppSheet<void>(
       context,
       builder: (_) => const AddTransactionSheet(),
@@ -301,19 +292,18 @@ class FinancialScreen extends ConsumerWidget {
     ref.invalidate(dashboardKpisProvider);
   }
 
-  Future<void> _openCashClosing(
-      BuildContext context, WidgetRef ref) async {
-    await showAppSheet<void>(
-      context,
-      builder: (_) => const CashClosingSheet(),
-    );
+  Future<void> _openCashClosing(BuildContext context, WidgetRef ref) async {
+    await showAppSheet<void>(context, builder: (_) => const CashClosingSheet());
     if (!context.mounted) return;
     ref.invalidate(cashFlowProvider);
     ref.invalidate(dashboardKpisProvider);
   }
 
   void _openTransactionDetail(
-      BuildContext context, WidgetRef ref, FinancialTransaction tx) {
+    BuildContext context,
+    WidgetRef ref,
+    FinancialTransaction tx,
+  ) {
     final l10n = context.l10n;
     final pending = tx.status == TransactionStatus.pending;
     showAppSheet<void>(
@@ -322,29 +312,29 @@ class FinancialScreen extends ConsumerWidget {
         transaction: tx,
         onReceive: pending && tx.type == TransactionType.income
             ? () => _settlePending(
-                  context,
-                  ref,
-                  tx,
-                  title: l10n.financialReceivePendingTitle,
-                  body: l10n.financialReceivePendingBody,
-                  confirmLabel: l10n.financialReceive,
-                  success: l10n.financialReceived,
-                  failure: l10n.financialReceiveError,
-                  hint: 'Erro ao receber pendência',
-                )
+                context,
+                ref,
+                tx,
+                title: l10n.financialReceivePendingTitle,
+                body: l10n.financialReceivePendingBody,
+                confirmLabel: l10n.financialReceive,
+                success: l10n.financialReceived,
+                failure: l10n.financialReceiveError,
+                hint: 'Erro ao receber pendência',
+              )
             : null,
         onPay: pending && tx.type == TransactionType.expense
             ? () => _settlePending(
-                  context,
-                  ref,
-                  tx,
-                  title: l10n.financialPayPendingTitle,
-                  body: l10n.financialPayPendingBody,
-                  confirmLabel: l10n.financialPay,
-                  success: l10n.financialPaid,
-                  failure: l10n.financialPayError,
-                  hint: 'Erro ao pagar saída pendente',
-                )
+                context,
+                ref,
+                tx,
+                title: l10n.financialPayPendingTitle,
+                body: l10n.financialPayPendingBody,
+                confirmLabel: l10n.financialPay,
+                success: l10n.financialPaid,
+                failure: l10n.financialPayError,
+                hint: 'Erro ao pagar saída pendente',
+              )
             : null,
       ),
     );
@@ -421,9 +411,7 @@ class _CashStack extends StatelessWidget {
                             color: balanceColor,
                             fontWeight: FontWeight.w500,
                             letterSpacing: -0.6,
-                            fontFeatures: const [
-                              FontFeature.tabularFigures(),
-                            ],
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -461,8 +449,7 @@ class _CashStack extends StatelessWidget {
                       icon: Icons.north_east,
                       color: theme.income,
                       label: incomeLabel,
-                      value:
-                          Formatters.signedAmount(incomeCents),
+                      value: Formatters.signedAmount(incomeCents),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -471,8 +458,7 @@ class _CashStack extends StatelessWidget {
                       icon: Icons.south_west,
                       color: theme.expense,
                       label: expenseLabel,
-                      value:
-                          Formatters.signedAmount(-expenseCents),
+                      value: Formatters.signedAmount(-expenseCents),
                     ),
                   ),
                 ],
@@ -518,9 +504,9 @@ class _CashStack extends StatelessWidget {
                   final text = Formatters.currency(balance);
                   final baseSize =
                       theme.textTheme.displaySmall?.fontSize ?? 34.0;
-                  final scale = (constraints.maxWidth /
-                          (text.length * baseSize * 0.52))
-                      .clamp(0.55, 1.0);
+                  final scale =
+                      (constraints.maxWidth / (text.length * baseSize * 0.52))
+                          .clamp(0.55, 1.0);
                   return Text(
                     text,
                     maxLines: 1,
@@ -530,9 +516,7 @@ class _CashStack extends StatelessWidget {
                       color: balanceColor,
                       fontWeight: FontWeight.w500,
                       letterSpacing: -0.8,
-                      fontFeatures: const [
-                        FontFeature.tabularFigures(),
-                      ],
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   );
                 },
@@ -607,10 +591,7 @@ class _CashLine extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 3,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(999),
@@ -694,14 +675,14 @@ class _DateGroup extends StatelessWidget {
                     onTap: () => onTap(transactions[i]),
                     onReceive:
                         transactions[i].status == TransactionStatus.pending &&
-                                transactions[i].type == TransactionType.income
-                            ? () => onReceive(transactions[i])
-                            : null,
+                            transactions[i].type == TransactionType.income
+                        ? () => onReceive(transactions[i])
+                        : null,
                     onPay:
                         transactions[i].status == TransactionStatus.pending &&
-                                transactions[i].type == TransactionType.expense
-                            ? () => onPay(transactions[i])
-                            : null,
+                            transactions[i].type == TransactionType.expense
+                        ? () => onPay(transactions[i])
+                        : null,
                   ),
                 ],
               ],
@@ -823,8 +804,7 @@ List<_DateGroupData> _groupByDate(List<FinancialTransaction> transactions) {
     }
   }
 
-  final groups = map.values.toList()
-    ..sort((a, b) => b.date.compareTo(a.date));
+  final groups = map.values.toList()..sort((a, b) => b.date.compareTo(a.date));
   return groups;
 }
 
@@ -853,10 +833,10 @@ String _dateRangeLabel(CashFlowPeriod period, AppLocalizations l10n) {
     CashFlowPeriod.today => fmt(today),
     CashFlowPeriod.week =>
       '${fmt(today.subtract(Duration(days: today.weekday - 1)))}–'
-      '${fmt(today.add(Duration(days: 7 - today.weekday)))}',
+          '${fmt(today.add(Duration(days: 7 - today.weekday)))}',
     CashFlowPeriod.month =>
       '${fmt(DateTime(now.year, now.month, 1))}–'
-      '${fmt(DateTime(now.year, now.month + 1, 0))}',
+          '${fmt(DateTime(now.year, now.month + 1, 0))}',
     CashFlowPeriod.all => l10n.periodAll,
   };
 }

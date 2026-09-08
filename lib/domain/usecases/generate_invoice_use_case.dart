@@ -45,8 +45,10 @@ class GenerateInvoiceUseCase {
     final period = _formatPeriod(now);
 
     // Verifica se já existe factura pendente para este período.
-    final alreadyExists =
-        await _invoiceRepository.hasPendingForPeriod(tenantId, period);
+    final alreadyExists = await _invoiceRepository.hasPendingForPeriod(
+      tenantId,
+      period,
+    );
     if (alreadyExists) return null;
 
     // Data de vencimento = data de expiração do plano (ou 30 dias a partir

@@ -6,5 +6,4 @@
 /// SQLite indisponível e o ServiceLocator usa os datasources em memória.
 library;
 
-export 'app_database_stub.dart'
- if (dart.library.io) 'app_database_io.dart';
+export 'app_database_stub.dart' if (dart.library.io) 'app_database_io.dart';

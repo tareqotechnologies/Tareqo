@@ -7,134 +7,132 @@ import 'package:tareqo/domain/entities/debt.dart';
 import '../../../helpers/test_sqlite.dart';
 
 Debt _buildDebt(String id, String personName) => Debt(
- id: id,
- personName: personName,
- amountCents: 2500,
- dueDate: DateTime(2026, 8, 15),
- isCustomerDebt: true,
+  id: id,
+  personName: personName,
+  amountCents: 2500,
+  dueDate: DateTime(2026, 8, 15),
+  isCustomerDebt: true,
 );
 
 void main() {
- late Database db;
+  late Database db;
 
- setUp(() => db = openTestDatabase());
- tearDown(() => db.close());
+  setUp(() => db = openTestDatabase());
+  tearDown(() => db.close());
 
- test('add persiste e getAll reconstrói a dívida (incl. booleanos)', () async {
- final dataSource = DebtSqliteDataSourceImpl(db);
+  test('add persiste e getAll reconstrói a dívida (incl. booleanos)', () async {
+    final dataSource = DebtSqliteDataSourceImpl(db);
 
- await dataSource.add(
- Debt(
- id: 'd1',
- personName: 'João',
- amountCents: 2500,
- dueDate: DateTime(2026, 8, 15),
- isCustomerDebt: true,
- isPaid: true,
- ),
- );
- await dataSource.add(
- Debt(
- id: 'd2',
- personName: 'Distribuidora',
- amountCents: 12000,
- dueDate: DateTime(2026, 8, 20),
- isCustomerDebt: false,
- ),
- );
+    await dataSource.add(
+      Debt(
+        id: 'd1',
+        personName: 'João',
+        amountCents: 2500,
+        dueDate: DateTime(2026, 8, 15),
+        isCustomerDebt: true,
+        isPaid: true,
+      ),
+    );
+    await dataSource.add(
+      Debt(
+        id: 'd2',
+        personName: 'Distribuidora',
+        amountCents: 12000,
+        dueDate: DateTime(2026, 8, 20),
+        isCustomerDebt: false,
+      ),
+    );
 
- final debts = await dataSource.getAll(storeId: 'st1');
+    final debts = await dataSource.getAll(storeId: 'st1');
 
- expect(debts, hasLength(2));
- expect(debts.first.isCustomerDebt, isTrue);
- expect(debts.first.isPaid, isTrue);
- expect(debts.last.isCustomerDebt, isFalse);
- expect(debts.last.isPaid, isFalse);
- expect(debts.first.dueDate, DateTime(2026, 8, 15));
- // Número SEQUENCIAL atribuído pelo banco (ordem de inserção).
- expect(debts.map((d) => d.number).toList(), [1, 2]);
- });
+    expect(debts, hasLength(2));
+    expect(debts.first.isCustomerDebt, isTrue);
+    expect(debts.first.isPaid, isTrue);
+    expect(debts.last.isCustomerDebt, isFalse);
+    expect(debts.last.isPaid, isFalse);
+    expect(debts.first.dueDate, DateTime(2026, 8, 15));
+    // Número SEQUENCIAL atribuído pelo banco (ordem de inserção).
+    expect(debts.map((d) => d.number).toList(), [1, 2]);
+  });
 
- test('add atribui número SEQUENCIAL por loja (MAX+1) e ignora o do objeto',
- () async {
- final dataSource = DebtSqliteDataSourceImpl(db);
+  test(
+    'add atribui número SEQUENCIAL por loja (MAX+1) e ignora o do objeto',
+    () async {
+      final dataSource = DebtSqliteDataSourceImpl(db);
 
- await dataSource.add(_buildDebt('d1', 'João'));
- // Mesmo que o objeto traga number: 999, o banco atribui o próximo.
- await dataSource.add(_buildDebt('d2', 'Maria').copyWith(number: 999));
- await dataSource.add(_buildDebt('d3', 'Ana'));
+      await dataSource.add(_buildDebt('d1', 'João'));
+      // Mesmo que o objeto traga number: 999, o banco atribui o próximo.
+      await dataSource.add(_buildDebt('d2', 'Maria').copyWith(number: 999));
+      await dataSource.add(_buildDebt('d3', 'Ana'));
 
- final debts = await dataSource.getAll(storeId: 'st1');
- expect(debts, hasLength(3));
- expect(debts.map((d) => d.number).toSet(), {1, 2, 3});
- });
+      final debts = await dataSource.getAll(storeId: 'st1');
+      expect(debts, hasLength(3));
+      expect(debts.map((d) => d.number).toSet(), {1, 2, 3});
+    },
+  );
 
- test('numeração é independente por loja (cada loja começa em 1)', () async {
- final dataSource = DebtSqliteDataSourceImpl(db);
+  test('numeração é independente por loja (cada loja começa em 1)', () async {
+    final dataSource = DebtSqliteDataSourceImpl(db);
 
- await dataSource.add(_buildDebt('d1', 'João'));
- await dataSource.add(_buildDebt('d2', 'Maria').copyWith(storeId: 'st2'));
+    await dataSource.add(_buildDebt('d1', 'João'));
+    await dataSource.add(_buildDebt('d2', 'Maria').copyWith(storeId: 'st2'));
 
- expect((await dataSource.getAll(storeId: 'st1')).first.number, 1);
- expect((await dataSource.getAll(storeId: 'st2')).first.number, 1);
- });
+    expect((await dataSource.getAll(storeId: 'st1')).first.number, 1);
+    expect((await dataSource.getAll(storeId: 'st2')).first.number, 1);
+  });
 
- test('markAsPaid marca a dívida como paga e carimba a data da baixa',
- () async {
- final dataSource = DebtSqliteDataSourceImpl(db);
+  test(
+    'markAsPaid marca a dívida como paga e carimba a data da baixa',
+    () async {
+      final dataSource = DebtSqliteDataSourceImpl(db);
 
- await dataSource.add(
- Debt(
- id: 'd1',
- personName: 'João',
- amountCents: 2500,
- dueDate: DateTime(2026, 8, 15),
- isCustomerDebt: true,
- ),
- );
- expect(
- (await dataSource.getAll(storeId: 'st1')).first.isPaid,
- isFalse,
- );
- expect(
- (await dataSource.getAll(storeId: 'st1')).first.paidAt,
- isNull,
- );
+      await dataSource.add(
+        Debt(
+          id: 'd1',
+          personName: 'João',
+          amountCents: 2500,
+          dueDate: DateTime(2026, 8, 15),
+          isCustomerDebt: true,
+        ),
+      );
+      expect((await dataSource.getAll(storeId: 'st1')).first.isPaid, isFalse);
+      expect((await dataSource.getAll(storeId: 'st1')).first.paidAt, isNull);
 
- await dataSource.markAsPaid('d1', storeId: 'st1');
+      await dataSource.markAsPaid('d1', storeId: 'st1');
 
- final settled = (await dataSource.getAll(storeId: 'st1')).first;
- expect(settled.isPaid, isTrue);
- // Data da baixa carimbada (histórico de quitações).
- expect(settled.paidAt, isNotNull);
- });
+      final settled = (await dataSource.getAll(storeId: 'st1')).first;
+      expect(settled.isPaid, isTrue);
+      // Data da baixa carimbada (histórico de quitações).
+      expect(settled.paidAt, isNotNull);
+    },
+  );
 
- test('add persiste e reconstrói a data da baixa (paidAt)', () async {
- final dataSource = DebtSqliteDataSourceImpl(db);
+  test('add persiste e reconstrói a data da baixa (paidAt)', () async {
+    final dataSource = DebtSqliteDataSourceImpl(db);
 
- await dataSource.add(
- Debt(
- id: 'd1',
- personName: 'Ana',
- amountCents: 4000,
- dueDate: DateTime(2026, 7, 15),
- isCustomerDebt: true,
- isPaid: true,
- paidAt: DateTime(2026, 8, 3, 10, 30),
- ),
- );
+    await dataSource.add(
+      Debt(
+        id: 'd1',
+        personName: 'Ana',
+        amountCents: 4000,
+        dueDate: DateTime(2026, 7, 15),
+        isCustomerDebt: true,
+        isPaid: true,
+        paidAt: DateTime(2026, 8, 3, 10, 30),
+      ),
+    );
 
- final settled = (await dataSource.getAll(storeId: 'st1')).first;
- expect(settled.isPaid, isTrue);
- expect(settled.paidAt, DateTime(2026, 8, 3, 10, 30));
- });
+    final settled = (await dataSource.getAll(storeId: 'st1')).first;
+    expect(settled.isPaid, isTrue);
+    expect(settled.paidAt, DateTime(2026, 8, 3, 10, 30));
+  });
 
- test('markAsPaid lança StateError para dívida inexistente', () async {
- final dataSource = DebtSqliteDataSourceImpl(db);
+  test('markAsPaid lança StateError para dívida inexistente', () async {
+    final dataSource = DebtSqliteDataSourceImpl(db);
 
- await expectLater(
- dataSource.markAsPaid('nope', storeId: 'st1'),
- throwsStateError,
- );
- });
+    await expectLater(
+      dataSource.markAsPaid('nope', storeId: 'st1'),
+      throwsStateError,
+    );
+  });
 }

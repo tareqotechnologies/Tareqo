@@ -47,21 +47,29 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
       final repository = ref.read(authRepositoryProvider);
       final email = _emailController.text.trim();
 
-      developer.log('Enviando resetPassword para: $email',
-          name: 'ForgotPassword');
+      // M7: NUNCA logar o e-mail do usuário (PII) — apenas o fluxo, sem
+      // identificar a conta.
+      developer.log(
+        'resetPassword: enviando link (fluxo iniciado)',
+        name: 'ForgotPassword',
+      );
 
       await repository.resetPassword(email: email);
 
-      developer.log('resetPassword bem-sucedido para: $email',
-          name: 'ForgotPassword');
+      developer.log(
+        'resetPassword: link enviado com sucesso',
+        name: 'ForgotPassword',
+      );
 
       if (!mounted) return;
       Navigator.of(context).pop();
       messenger.showSnackBar(SnackBar(content: Text(l10n.forgotPasswordSent)));
     } on AuthApiException catch (error) {
       if (!mounted) return;
-      developer.log('AuthApiException: ${error.statusCode} - ${error.message}',
-          name: 'ForgotPassword');
+      developer.log(
+        'AuthApiException: ${error.statusCode} - ${error.message}',
+        name: 'ForgotPassword',
+      );
       CrashReporting.capture(
         error,
         StackTrace.current,
@@ -86,9 +94,10 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
       }
     } catch (error, stackTrace) {
       if (!mounted) return;
-      // Log COMPLETO no console (visível no DevTools/terminal).
+      // Log COMPLETO no console (visível no DevTools/terminal) — M7: sem
+      // e-mail (a exceção do SDK não carrega PII da conta).
       developer.log(
-        'ERRO resetPassword: ${error.runtimeType} - $error',
+        'ERRO resetPassword: ${error.runtimeType}',
         name: 'ForgotPassword',
         error: error,
         stackTrace: stackTrace,
@@ -98,9 +107,7 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
         stackTrace,
         hint: 'Erro ao enviar link de redefinição de senha',
       );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.forgotPasswordError)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.forgotPasswordError)));
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

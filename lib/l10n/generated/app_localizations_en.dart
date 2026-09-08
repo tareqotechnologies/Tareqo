@@ -175,6 +175,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashLoading => 'Opening your session…';
 
   @override
+  String get appLockTitle => 'TAREQO is locked';
+
+  @override
+  String get appLockMessage =>
+      'Touch the sensor or use facial recognition to unlock TAREQO.';
+
+  @override
+  String get appLockUnlock => 'Unlock';
+
+  @override
+  String get appLockError => 'Couldn\'t authenticate. Try again or sign out.';
+
+  @override
+  String get biometricSignInTitle => 'Biometric Authentication';
+
+  @override
+  String get biometricHint => 'Touch the sensor';
+
+  @override
+  String get biometricCancel => 'Cancel';
+
+  @override
+  String get biometricFallbackTitle => 'Use password';
+
+  @override
+  String get biometricGoToSettingsButton => 'Settings';
+
+  @override
+  String get biometricGoToSettingsDescription =>
+      'Set up biometric authentication';
+
+  @override
+  String get biometricLockOut => 'Try again later';
+
+  @override
+  String get biometricReason => 'Biometric authentication';
+
+  @override
   String get loginSubtitleSignUp => 'Create your account to get started';
 
   @override
@@ -2305,6 +2343,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminGrowthTrends => 'Growth Trends';
 
   @override
+  String get adminGrowthTrendsLabel => 'Trends (8 weeks)';
+
+  @override
   String get adminGrowthThisWeek => 'This week';
 
   @override
@@ -2882,6 +2923,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get employeeMgmtLoadError => 'Unable to load employee data.';
+
+  @override
+  String get employeeMgmtNoStoreTitle => 'No active store';
+
+  @override
+  String get employeeMgmtNoStoreAttendance =>
+      'Complete onboarding to clock in.';
+
+  @override
+  String get employeeMgmtNoStoreCommissions =>
+      'Complete onboarding to view commissions.';
+
+  @override
+  String get employeeMgmtNoStoreTargets =>
+      'Complete onboarding to set targets.';
 
   @override
   String get employeeClockInError => 'Unable to record clock in.';

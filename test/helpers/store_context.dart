@@ -12,45 +12,45 @@ import 'package:tareqo/presentation/controllers/auth_providers.dart';
 
 /// Fake do [GetMyTenantUseCase] que retorna um tenant aprovado.
 class FakeGetMyTenantUseCase implements GetMyTenantUseCase {
- FakeGetMyTenantUseCase(this._tenant);
+  FakeGetMyTenantUseCase(this._tenant);
 
- final Tenant _tenant;
+  final Tenant _tenant;
 
- @override
- Future<Tenant?> call(String userId) async => _tenant;
+  @override
+  Future<Tenant?> call(String userId) async => _tenant;
 }
 
 /// Fake do [GetStoresUseCase] que retorna as lojas fornecidas.
 class FakeGetStoresUseCase implements GetStoresUseCase {
- FakeGetStoresUseCase(this._stores);
+  FakeGetStoresUseCase(this._stores);
 
- final List<Store> _stores;
+  final List<Store> _stores;
 
- @override
- Future<List<Store>> call(String tenantId) async => List.unmodifiable(_stores);
+  @override
+  Future<List<Store>> call(String tenantId) async => List.unmodifiable(_stores);
 }
 
 /// Fake do [IAdminRepository] — por padrão ninguém é super admin; passe
 /// `isAdmin: true` para simular o papel concedido (testes do AuthGate).
 class FakeAdminRepository implements IAdminRepository {
- const FakeAdminRepository({this.isAdmin = false});
+  const FakeAdminRepository({this.isAdmin = false});
 
- final bool isAdmin;
+  final bool isAdmin;
 
- @override
- Future<bool> isSuperAdmin() async => isAdmin;
+  @override
+  Future<bool> isSuperAdmin() async => isAdmin;
 }
 
 /// Tenant aprovado de exemplo (mesmo id do seed demo).
 Tenant approvedTenant({String ownerUserId = '1'}) => Tenant(
- id: 'tn1',
- ownerUserId: ownerUserId,
- businessName: 'Comercial Demo',
- planId: 'pl2',
- status: TenantStatus.approved,
- approvedAt: DateTime.now(),
- createdAt: DateTime.now(),
- );
+  id: 'tn1',
+  ownerUserId: ownerUserId,
+  businessName: 'Comercial Demo',
+  planId: 'pl2',
+  status: TenantStatus.approved,
+  approvedAt: DateTime.now(),
+  createdAt: DateTime.now(),
+);
 
 /// Contexto padrão de loja para testes de widget.
 ///
@@ -61,21 +61,22 @@ Tenant approvedTenant({String ownerUserId = '1'}) => Tenant(
 /// - tenant aprovado ([getMyTenantUseCaseProvider]);
 /// - lojas do tenant ([getStoresUseCaseProvider]).
 List<dynamic> storeContextOverrides({
- String userId = '1',
- List<Store> stores = const [
- Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
- ],
+  String userId = '1',
+  List<Store> stores = const [
+    Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro'),
+  ],
 }) {
- return [
- authStateProvider.overrideWith(
- (ref) => Stream.value(AppUser(id: userId, email: 'dono@loja.com')),
- ),
- getMyTenantUseCaseProvider
- .overrideWithValue(FakeGetMyTenantUseCase(approvedTenant(ownerUserId: userId))),
- getStoresUseCaseProvider.overrideWithValue(FakeGetStoresUseCase(stores)),
- // Papel de super admin: sem o ServiceLocator inicializado nos testes, o
- // AuthGate cairia no estado de erro do provider — override explícito
- // (ninguém é super admin) mantém o roteamento determinístico.
- adminRepositoryProvider.overrideWithValue(const FakeAdminRepository()),
- ];
+  return [
+    authStateProvider.overrideWith(
+      (ref) => Stream.value(AppUser(id: userId, email: 'dono@loja.com')),
+    ),
+    getMyTenantUseCaseProvider.overrideWithValue(
+      FakeGetMyTenantUseCase(approvedTenant(ownerUserId: userId)),
+    ),
+    getStoresUseCaseProvider.overrideWithValue(FakeGetStoresUseCase(stores)),
+    // Papel de super admin: sem o ServiceLocator inicializado nos testes, o
+    // AuthGate cairia no estado de erro do provider — override explícito
+    // (ninguém é super admin) mantém o roteamento determinístico.
+    adminRepositoryProvider.overrideWithValue(const FakeAdminRepository()),
+  ];
 }

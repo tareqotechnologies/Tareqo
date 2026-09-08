@@ -94,23 +94,25 @@ void main() {
   });
 
   group('EmployeeManagementSqliteDataSourceImpl — taxas', () {
-    test('setCommissionRate insere e atualiza (UPSERT por funcionário)',
-        () async {
-      await dataSource.setCommissionRate(
-        storeId: 'st1',
-        userId: 'u1',
-        rateBps: 500,
-      );
-      await dataSource.setCommissionRate(
-        storeId: 'st1',
-        userId: 'u1',
-        rateBps: 700,
-      );
+    test(
+      'setCommissionRate insere e atualiza (UPSERT por funcionário)',
+      () async {
+        await dataSource.setCommissionRate(
+          storeId: 'st1',
+          userId: 'u1',
+          rateBps: 500,
+        );
+        await dataSource.setCommissionRate(
+          storeId: 'st1',
+          userId: 'u1',
+          rateBps: 700,
+        );
 
-      final rates = await dataSource.getCommissionRates(storeId: 'st1');
-      expect(rates, hasLength(1));
-      expect(rates.single.rateBps, 700);
-    });
+        final rates = await dataSource.getCommissionRates(storeId: 'st1');
+        expect(rates, hasLength(1));
+        expect(rates.single.rateBps, 700);
+      },
+    );
 
     test('taxa inválida lança StateError', () async {
       await expectLater(
@@ -125,8 +127,7 @@ void main() {
   });
 
   group('EmployeeManagementSqliteDataSourceImpl — metas', () {
-    test('setTarget insere e atualiza (UPSERT por funcionário/mês)',
-        () async {
+    test('setTarget insere e atualiza (UPSERT por funcionário/mês)', () async {
       await dataSource.setTarget(
         storeId: 'st1',
         userId: 'u1',
@@ -172,29 +173,31 @@ void main() {
   });
 
   group('sales.user_id (v5) — atribuição de comissões', () {
-    test('venda legada sem user_id persiste e lê como vazio (sem forjar)',
-        () async {
-      final saleSource = SaleSqliteDataSourceImpl(db);
-      await saleSource.add(
-        Sale(
-          id: 's1',
-          items: const [
-            SaleItem(
-              productId: 'p1',
-              productName: 'Caneta',
-              quantity: 1000,
-              unitPriceCents: 200,
-            ),
-          ],
-          totalAmountCents: 200,
-          paymentMethod: PaymentMethod.cash,
-          dateTime: DateTime(2026, 9, 5, 10),
-        ),
-      );
+    test(
+      'venda legada sem user_id persiste e lê como vazio (sem forjar)',
+      () async {
+        final saleSource = SaleSqliteDataSourceImpl(db);
+        await saleSource.add(
+          Sale(
+            id: 's1',
+            items: const [
+              SaleItem(
+                productId: 'p1',
+                productName: 'Caneta',
+                quantity: 1000,
+                unitPriceCents: 200,
+              ),
+            ],
+            totalAmountCents: 200,
+            paymentMethod: PaymentMethod.cash,
+            dateTime: DateTime(2026, 9, 5, 10),
+          ),
+        );
 
-      final sales = await saleSource.getAll(storeId: 'st1');
-      expect(sales.single.userId, '');
-    });
+        final sales = await saleSource.getAll(storeId: 'st1');
+        expect(sales.single.userId, '');
+      },
+    );
 
     test('venda com caixa persiste e lê a atribuição', () async {
       final saleSource = SaleSqliteDataSourceImpl(db);

@@ -9,35 +9,34 @@ import 'customer_local_data_source.dart';
 /// persistência acontece apenas no ServiceLocator. Usa SQL parametrizado
 /// (prepared statements).
 final class CustomerSqliteDataSourceImpl implements CustomerLocalDataSource {
- const CustomerSqliteDataSourceImpl(this._db);
+  const CustomerSqliteDataSourceImpl(this._db);
 
- final Database _db;
+  final Database _db;
 
- static const _columns = 'id, store_id, name, phone, email';
+  static const _columns = 'id, store_id, name, phone, email';
 
- @override
- Future<List<Customer>> getAll({required String storeId}) async {
- final rows = _db.select(
- 'SELECT $_columns FROM customers WHERE store_id = ? '
- 'ORDER BY name COLLATE NOCASE',
- [storeId],
- );
- return [for (final row in rows) _map(row)];
- }
+  @override
+  Future<List<Customer>> getAll({required String storeId}) async {
+    final rows = _db.select(
+      'SELECT $_columns FROM customers WHERE store_id = ? '
+      'ORDER BY name COLLATE NOCASE',
+      [storeId],
+    );
+    return [for (final row in rows) _map(row)];
+  }
 
- @override
- Future<void> add(Customer customer) async {
- _db.execute(
- 'INSERT INTO customers ($_columns) VALUES (?, ?, ?, ?, ?)',
- [
- customer.id,
- customer.storeId,
- customer.name,
- customer.phone,
- customer.email,
- ],
- );
- }  @override
+  @override
+  Future<void> add(Customer customer) async {
+    _db.execute('INSERT INTO customers ($_columns) VALUES (?, ?, ?, ?, ?)', [
+      customer.id,
+      customer.storeId,
+      customer.name,
+      customer.phone,
+      customer.email,
+    ]);
+  }
+
+  @override
   Future<void> update(Customer customer) async {
     _db.execute(
       'UPDATE customers SET name = ?, phone = ?, email = ? WHERE id = ?',

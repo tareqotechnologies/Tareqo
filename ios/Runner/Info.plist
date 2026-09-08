@@ -81,5 +81,9 @@
 	<!-- Captura de foto de produto (image_picker) — câmera e galeria. -->
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Escolher a foto do produto a partir da galeria.</string>
+	<!-- Autenticação biométrica (local_auth): obrigatório para o Face ID —
+	     sem esta chave o LAContext falha e o prompt de rosto nunca aparece. -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>Desbloquear o TAREQO com o seu rosto.</string>
 </dict>
 </plist>

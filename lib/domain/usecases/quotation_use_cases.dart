@@ -101,9 +101,7 @@ class ConvertQuotationToSaleUseCase {
   /// de venda. O caller deve usar o `ProcessSaleUseCase` para finalizar.
   List<SaleItemInput> prepareSaleItems(Quotation quotation) {
     if (quotation.status != QuotationStatus.accepted) {
-      throw StateError(
-        'Só é possível converter cotações com status "Aceite".',
-      );
+      throw StateError('Só é possível converter cotações com status "Aceite".');
     }
     if (quotation.items.isEmpty) {
       throw StateError('A cotação aceite deve ter itens para converter.');

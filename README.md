@@ -49,6 +49,9 @@ flutter run --flavor dev --dart-define-from-file=env/dev.env
 # Modo SaaS (Supabase): a anon key vem do env/dev.env (projeto de dev).
 # Produção (release, assinada): usa env/prod.env (NUNCA versionado —
 # veja env/prod.env.example) + key.properties (veja docs/13-build-e-publicacao).
+# A1: todo release exige credenciais EXPLÍCITAS + o marcador
+# SUPABASE_CREDENTIALS_EXPLICIT=true (já presentes em env/prod.env.example)
+# — a guarda de release rejeita defaults embutidos em qualquer flavor.
 flutter build appbundle --flavor prod --release \
  --dart-define-from-file=env/prod.env
 ```

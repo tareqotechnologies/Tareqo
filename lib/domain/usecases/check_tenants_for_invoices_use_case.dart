@@ -58,8 +58,9 @@ class CheckTenantsForInvoicesUseCase {
 
         // Avança o ciclo: próximo plano expira em 30 dias, factura em 7.
         final newExpiresAt = now.add(const Duration(days: kBillingCycleDays));
-        final newNextInvoice =
-            newExpiresAt.subtract(const Duration(days: kInvoiceAdvanceDays));
+        final newNextInvoice = newExpiresAt.subtract(
+          const Duration(days: kInvoiceAdvanceDays),
+        );
 
         await _tenantRepository.updateBilling(
           tenant.id,

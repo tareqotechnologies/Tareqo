@@ -46,10 +46,7 @@ void main() {
 
   Color? confirmButtonColor(WidgetTester tester, String label) {
     final button = tester.widget<FilledButton>(
-      find.ancestor(
-        of: find.text(label),
-        matching: find.byType(FilledButton),
-      ),
+      find.ancestor(of: find.text(label), matching: find.byType(FilledButton)),
     );
     // AppButton.primary não define style (default do tema = primary);
     // AppButton.danger define o erro explicitamente no style.
@@ -57,8 +54,9 @@ void main() {
   }
 
   group('showConfirmDialog', () {
-    testWidgets('renderiza título, mensagem e acções (Cancelar + confirmar)',
-        (tester) async {
+    testWidgets('renderiza título, mensagem e acções (Cancelar + confirmar)', (
+      tester,
+    ) async {
       await openDialog(
         tester,
         title: 'Quitar dívida?',
@@ -113,16 +111,16 @@ void main() {
       expect(find.text('Sair'), findsOneWidget);
     });
 
-    testWidgets('não-destrutivo usa a variante primary (não error)',
-        (tester) async {
+    testWidgets('não-destrutivo usa a variante primary (não error)', (
+      tester,
+    ) async {
       await openDialog(
         tester,
         title: 'Confirmar',
         message: 'Detalhe',
         confirmLabel: 'Salvar',
       );
-      final scheme =
-          Theme.of(tester.element(find.text('Salvar'))).colorScheme;
+      final scheme = Theme.of(tester.element(find.text('Salvar'))).colorScheme;
 
       final bg = confirmButtonColor(tester, 'Salvar');
       expect(bg, isNot(scheme.error));
@@ -130,27 +128,31 @@ void main() {
       expect(bg, isNull);
     });
 
-    testWidgets('destrutivo usa a variante danger (error) e confirma com true',
-        (tester) async {
-      await openDialog(
-        tester,
-        title: 'Apagar cliente?',
-        message: 'Essa acção não pode ser desfeita.',
-        confirmLabel: 'Apagar',
-        destructive: true,
-      );
-      final scheme =
-          Theme.of(tester.element(find.text('Apagar'))).colorScheme;
+    testWidgets(
+      'destrutivo usa a variante danger (error) e confirma com true',
+      (tester) async {
+        await openDialog(
+          tester,
+          title: 'Apagar cliente?',
+          message: 'Essa acção não pode ser desfeita.',
+          confirmLabel: 'Apagar',
+          destructive: true,
+        );
+        final scheme = Theme.of(
+          tester.element(find.text('Apagar')),
+        ).colorScheme;
 
-      expect(confirmButtonColor(tester, 'Apagar'), scheme.error);
+        expect(confirmButtonColor(tester, 'Apagar'), scheme.error);
 
-      await tester.tap(find.text('Apagar'));
-      await tester.pumpAndSettle();
-      expect(await result, isTrue);
-    });
+        await tester.tap(find.text('Apagar'));
+        await tester.pumpAndSettle();
+        expect(await result, isTrue);
+      },
+    );
 
-    testWidgets('confirmar (não-destrutivo) retorna true e fecha o dialog',
-        (tester) async {
+    testWidgets('confirmar (não-destrutivo) retorna true e fecha o dialog', (
+      tester,
+    ) async {
       await openDialog(
         tester,
         title: 'Quitar dívida?',
@@ -180,7 +182,9 @@ void main() {
       expect(find.byType(AlertDialog), findsNothing);
     });
 
-    testWidgets('dismiss pela barreira (tap fora) retorna null', (tester) async {
+    testWidgets('dismiss pela barreira (tap fora) retorna null', (
+      tester,
+    ) async {
       await openDialog(
         tester,
         title: 'Fora?',

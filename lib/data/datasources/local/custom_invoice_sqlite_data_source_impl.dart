@@ -38,9 +38,9 @@ final class CustomInvoiceSqliteDataSourceImpl
       // Mesma semântica dos demais datasources: id duplicado é um erro
       // de domínio (StateError) — espelha a PK do banco sem vazar a
       // exceção crua do SQLite para a UI.
-      final exists = _db
-          .select('SELECT 1 FROM custom_invoices WHERE id = ?', [invoice.id])
-          .isNotEmpty;
+      final exists = _db.select('SELECT 1 FROM custom_invoices WHERE id = ?', [
+        invoice.id,
+      ]).isNotEmpty;
       if (exists) {
         throw StateError('Factura ${invoice.id} já existe.');
       }
@@ -48,13 +48,13 @@ final class CustomInvoiceSqliteDataSourceImpl
       // (mesmo padrão das vendas) — o número enviado no objeto é ignorado:
       // o banco é a autoridade. O UNIQUE(store_id, invoice_number) é a
       // rede de segurança contra corridas.
-      final nextNumber = _db
-          .select(
-            'SELECT COALESCE(MAX(invoice_number), 0) + 1 AS next '
-            'FROM custom_invoices WHERE store_id = ?',
-            [invoice.storeId],
-          )
-          .first['next'] as int;
+      final nextNumber =
+          _db.select(
+                'SELECT COALESCE(MAX(invoice_number), 0) + 1 AS next '
+                'FROM custom_invoices WHERE store_id = ?',
+                [invoice.storeId],
+              ).first['next']
+              as int;
 
       persisted = invoice.copyWith(number: nextNumber);
       _db.execute(
@@ -74,11 +74,8 @@ final class CustomInvoiceSqliteDataSourceImpl
   }
 
   CustomInvoice _map(Row row) {
-    final json =
-        jsonDecode(row['payload'] as String) as Map<String, dynamic>;
+    final json = jsonDecode(row['payload'] as String) as Map<String, dynamic>;
     final invoice = CustomInvoice.fromJson(json);
-    return invoice.copyWith(
-      number: (row['invoice_number'] as num).toInt(),
-    );
+    return invoice.copyWith(number: (row['invoice_number'] as num).toInt());
   }
 }

@@ -14,10 +14,12 @@
 # livre `APP_FLAVOR=prod` — fallback lido por AppFlavorConfig em
 # plataformas sem injeção de FLUTTER_APP_FLAVOR (ver lib/core/config/
 # app_flavor.dart). Isso satisfaz a guarda de release do main.dart.
-# - Sem `--dart-define-from-file`: o deployment usa um ÚNICO projeto Supabase
-# (dotklbpqmlnhcdifiukd) partilhado dev/prod, e os defaults embutidos em
-# `SupabaseConfig` já apontam para ele; o fail-fast S2 aceita release
-# `prod` com essas credenciais (ver lib/core/network/supabase_bootstrap.dart).
+# - Credenciais Supabase vêm dos secrets (A1): todo release EXIGE
+# SUPABASE_URL/SUPABASE_ANON_KEY explícitos + o marcador
+# SUPABASE_CREDENTIALS_EXPLICIT=true — a guarda de release rejeita
+# defaults embutidos (ver lib/core/network/supabase_bootstrap.dart).
+# Enquanto o projeto prod separado não existir, os secrets apontam para o
+# projeto único atual (dotklbpqmlnhcdifiukd).
 name: iOS IPA (release artifact)
 
 on:
@@ -58,7 +60,10 @@ jobs:
  rm -rf Pods .symlinks
 
  - name: Build IPA (no codesign)
- run: flutter build ipa --release --no-codesign --dart-define=APP_FLAVOR=prod --obfuscate --split-debug-info=build/symbols
+ env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL_PROD }}
+  SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_PROD }}
+ run: flutter build ipa --release --no-codesign --dart-define=APP_FLAVOR=prod --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" --dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true --obfuscate --split-debug-info=build/symbols
 
  # `flutter build ipa --no-codesign` arquiva mas NÃO exporta o .ipa (sem
  # assinatura não há export). Se o flutter não gerar o .ipa, empacota-se

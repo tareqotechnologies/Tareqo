@@ -9,8 +9,7 @@ final class InvoiceRepositoryImpl implements IInvoiceRepository {
   final InvoiceLocalDataSource _localDataSource;
 
   @override
-  Future<Invoice> create(Invoice invoice) =>
-      _localDataSource.create(invoice);
+  Future<Invoice> create(Invoice invoice) => _localDataSource.create(invoice);
 
   @override
   Future<List<Invoice>> getByTenant(String tenantId) =>

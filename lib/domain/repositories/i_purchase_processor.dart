@@ -9,9 +9,9 @@ import '../entities/purchase.dart';
 /// [ProcessPurchaseUseCase] usa o caminho composto com [IUnitOfWork] e
 /// este contrato fica sem implementação registrada.
 abstract interface class IPurchaseAtomicProcessor {
- /// Processa [purchase] atomicamente no servidor.
- ///
- /// Lança exceções de domínio equivalentes às do caminho composto
- /// (ex.: produto inexistente) — o caso de uso traduz para a UI.
- Future<void> process(Purchase purchase);
+  /// Processa [purchase] atomicamente no servidor.
+  ///
+  /// Lança exceções de domínio equivalentes às do caminho composto
+  /// (ex.: produto inexistente) — o caso de uso traduz para a UI.
+  Future<void> process(Purchase purchase);
 }

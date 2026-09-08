@@ -50,18 +50,13 @@ class _SalesCardState extends State<SalesCard> {
             : scheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          side: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.6),
-          ),
+          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
         ),
         child: InkWell(
           onTap: _onTap ?? () => _openDetails(context),
           borderRadius: BorderRadius.circular(AppRadius.md),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
                 // ── Left: payment icon (dark solid bg + light fg) ──
@@ -142,9 +137,7 @@ class _SalesCardState extends State<SalesCard> {
                             label: isCancelled
                                 ? l10n.salesStatusCancelled
                                 : l10n.salesStatusPaid,
-                            color: isCancelled
-                                ? theme.expense
-                                : theme.income,
+                            color: isCancelled ? theme.expense : theme.income,
                             icon: isCancelled
                                 ? Icons.block
                                 : Icons.check_circle_outline,

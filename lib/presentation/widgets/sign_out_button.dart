@@ -6,14 +6,14 @@ import '../controllers/auth_providers.dart';
 
 /// Botão de sair da conta (ícone de logout).
 class SignOutButton extends ConsumerWidget {
- const SignOutButton({super.key});
+  const SignOutButton({super.key});
 
- @override
- Widget build(BuildContext context, WidgetRef ref) {
- return IconButton(
- tooltip: context.l10n.commonSignOut,
- icon: const Icon(Icons.logout),
- onPressed: () => ref.read(signOutUseCaseProvider).call(),
- );
- }
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return IconButton(
+      tooltip: context.l10n.commonSignOut,
+      icon: const Icon(Icons.logout),
+      onPressed: () => ref.read(signOutUseCaseProvider).call(),
+    );
+  }
 }

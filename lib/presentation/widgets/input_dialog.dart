@@ -51,10 +51,7 @@ Future<String?> showInputDialog(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(cancelLabel ?? l10n.commonCancel),
         ),
-        AppButton.primary(
-          label: confirmLabel,
-          onPressed: submit,
-        ),
+        AppButton.primary(label: confirmLabel, onPressed: submit),
       ],
     ),
   );

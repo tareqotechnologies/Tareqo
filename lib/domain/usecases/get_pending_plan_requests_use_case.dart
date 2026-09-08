@@ -3,9 +3,9 @@ import '../repositories/i_plan_request_repository.dart';
 
 /// Caso de uso: listar pedidos de upgrade aguardando decisão (super admin).
 class GetPendingPlanRequestsUseCase {
- const GetPendingPlanRequestsUseCase(this._repository);
+  const GetPendingPlanRequestsUseCase(this._repository);
 
- final IPlanRequestRepository _repository;
+  final IPlanRequestRepository _repository;
 
- Future<List<PlanRequest>> call() => _repository.getPending();
+  Future<List<PlanRequest>> call() => _repository.getPending();
 }

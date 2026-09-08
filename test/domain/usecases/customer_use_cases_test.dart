@@ -7,79 +7,72 @@ import 'package:tareqo/domain/usecases/get_customers_use_case.dart';
 
 /// Fake em memória do [ICustomerRepository].
 class _FakeCustomerRepository implements ICustomerRepository {
- final List<Customer> _customers = [];
- bool addCalled = false;
- bool updateCalled = false;
- bool deleteCalled = false;
+  final List<Customer> _customers = [];
+  bool addCalled = false;
+  bool updateCalled = false;
+  bool deleteCalled = false;
 
- @override
- Future<List<Customer>> getAll({required String storeId}) async =>
- List.unmodifiable(_customers);
+  @override
+  Future<List<Customer>> getAll({required String storeId}) async =>
+      List.unmodifiable(_customers);
 
- @override
- Future<void> add(Customer customer) async {
- addCalled = true;
- _customers.add(customer);
- }
+  @override
+  Future<void> add(Customer customer) async {
+    addCalled = true;
+    _customers.add(customer);
+  }
 
- @override
- Future<void> update(Customer customer) async {
- updateCalled = true;
- final index = _customers.indexWhere((c) => c.id == customer.id);
- if (index != -1) _customers[index] = customer;
- }
+  @override
+  Future<void> update(Customer customer) async {
+    updateCalled = true;
+    final index = _customers.indexWhere((c) => c.id == customer.id);
+    if (index != -1) _customers[index] = customer;
+  }
 
- @override
- Future<void> delete(String id) async {
- deleteCalled = true;
- _customers.removeWhere((c) => c.id == id);
- }
+  @override
+  Future<void> delete(String id) async {
+    deleteCalled = true;
+    _customers.removeWhere((c) => c.id == id);
+  }
 }
 
 void main() {
- group('AddCustomerUseCase', () {
- test('cadastra o cliente quando o nome não é vazio', () async {
- final repository = _FakeCustomerRepository();
- final useCase = AddCustomerUseCase(repository);
+  group('AddCustomerUseCase', () {
+    test('cadastra o cliente quando o nome não é vazio', () async {
+      final repository = _FakeCustomerRepository();
+      final useCase = AddCustomerUseCase(repository);
 
- await useCase(
- const Customer(id: 'c1', name: 'Maria', phone: '(11) 99999-0000'),
- );
+      await useCase(
+        const Customer(id: 'c1', name: 'Maria', phone: '(11) 99999-0000'),
+      );
 
- expect(repository.addCalled, isTrue);
- expect(
- repository.getAll(storeId: 'st1'),
- completion(hasLength(1)),
- );
- expect(
- (await repository.getAll(storeId: 'st1')).first.email,
- isEmpty,
- );
- });
+      expect(repository.addCalled, isTrue);
+      expect(repository.getAll(storeId: 'st1'), completion(hasLength(1)));
+      expect((await repository.getAll(storeId: 'st1')).first.email, isEmpty);
+    });
 
- test('lança InvalidCustomerException quando o nome é vazio', () async {
- final repository = _FakeCustomerRepository();
- final useCase = AddCustomerUseCase(repository);
+    test('lança InvalidCustomerException quando o nome é vazio', () async {
+      final repository = _FakeCustomerRepository();
+      final useCase = AddCustomerUseCase(repository);
 
- await expectLater(
- useCase(const Customer(id: 'c1', name: ' ')),
- throwsA(isA<InvalidCustomerException>()),
- );
+      await expectLater(
+        useCase(const Customer(id: 'c1', name: ' ')),
+        throwsA(isA<InvalidCustomerException>()),
+      );
 
- expect(repository.addCalled, isFalse);
- });
- });
+      expect(repository.addCalled, isFalse);
+    });
+  });
 
- group('GetCustomersUseCase', () {
- test('retorna a lista de clientes do repositório', () async {
- final repository = _FakeCustomerRepository();
- await repository.add(const Customer(id: 'c1', name: 'João'));
+  group('GetCustomersUseCase', () {
+    test('retorna a lista de clientes do repositório', () async {
+      final repository = _FakeCustomerRepository();
+      await repository.add(const Customer(id: 'c1', name: 'João'));
 
- final result =
- await GetCustomersUseCase(repository)(storeId: 'st1');
+      final result = await GetCustomersUseCase(repository)(storeId: 'st1');
 
- expect(result, hasLength(1));
- expect(result.first.name, 'João');
- });
- });
+      expect(result, hasLength(1));
+      expect(result.first.name, 'João');
+    });
+  });
 }

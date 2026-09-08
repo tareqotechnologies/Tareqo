@@ -104,18 +104,18 @@ final class InvoiceSupabaseDataSourceImpl implements InvoiceLocalDataSource {
   }
 
   Invoice _map(Map<String, dynamic> row) => Invoice(
-        id: row['id'] as String,
-        number: row['number'] as int? ?? 0,
-        tenantId: row['tenant_id'] as String,
-        planId: row['plan_id'] as String,
-        amountCents: row['amount_cents'] as int,
-        status: InvoiceStatus.values.byName(row['status'] as String),
-        dueDate: DateTime.parse(row['due_date'] as String).toLocal(),
-        period: (row['period'] as String?) ?? '',
-        paidAt: row['paid_at'] == null
-            ? null
-            : DateTime.parse(row['paid_at'] as String).toLocal(),
-        notes: row['notes'] as String?,
-        createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
-      );
+    id: row['id'] as String,
+    number: row['number'] as int? ?? 0,
+    tenantId: row['tenant_id'] as String,
+    planId: row['plan_id'] as String,
+    amountCents: row['amount_cents'] as int,
+    status: InvoiceStatus.values.byName(row['status'] as String),
+    dueDate: DateTime.parse(row['due_date'] as String).toLocal(),
+    period: (row['period'] as String?) ?? '',
+    paidAt: row['paid_at'] == null
+        ? null
+        : DateTime.parse(row['paid_at'] as String).toLocal(),
+    notes: row['notes'] as String?,
+    createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
+  );
 }

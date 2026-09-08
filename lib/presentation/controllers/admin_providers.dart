@@ -16,7 +16,7 @@ import '../../domain/usecases/get_pending_tenants_use_case.dart';
 /// Ponte com o ServiceLocator (GetIt): repositório do papel de super admin
 /// (substituível em testes).
 final adminRepositoryProvider = Provider<IAdminRepository>(
- (ref) => ServiceLocator.instance<IAdminRepository>(),
+  (ref) => ServiceLocator.instance<IAdminRepository>(),
 );
 
 /// O usuário logado é super admin? Papel **baseado em banco** — a tabela
@@ -25,29 +25,32 @@ final adminRepositoryProvider = Provider<IAdminRepository>(
 /// resolvido no servidor com a sessão do próprio usuário). Mudanças de
 /// papel refletem no próximo login/invalidação — o RLS do servidor é a
 /// autoridade, o cliente decide apenas a navegação.
-final isSuperAdminProvider =
- FutureProvider.family<bool, String>((ref, userId) async {
- return ref.watch(adminRepositoryProvider).isSuperAdmin();
+final isSuperAdminProvider = FutureProvider.family<bool, String>((
+  ref,
+  userId,
+) async {
+  return ref.watch(adminRepositoryProvider).isSuperAdmin();
 });
 
 /// Ponte com o ServiceLocator (GetIt): casos de uso do painel do super
 /// admin como providers (substituíveis em testes).
 final getPendingTenantsUseCaseProvider = Provider<GetPendingTenantsUseCase>(
- (ref) => ServiceLocator.instance<GetPendingTenantsUseCase>(),
+  (ref) => ServiceLocator.instance<GetPendingTenantsUseCase>(),
 );
 
 final getAllTenantsUseCaseProvider = Provider<GetAllTenantsUseCase>(
- (ref) => ServiceLocator.instance<GetAllTenantsUseCase>(),
+  (ref) => ServiceLocator.instance<GetAllTenantsUseCase>(),
 );
 
 final getAllPlansUseCaseProvider = Provider<GetAllPlansUseCase>(
- (ref) => ServiceLocator.instance<GetAllPlansUseCase>(),
+  (ref) => ServiceLocator.instance<GetAllPlansUseCase>(),
 );
 
 final getPendingPlanRequestsUseCaseProvider =
- Provider<GetPendingPlanRequestsUseCase>(
- (ref) => ServiceLocator.instance<GetPendingPlanRequestsUseCase>(),
-);final decidePlanRequestUseCaseProvider = Provider<DecidePlanRequestUseCase>(
+    Provider<GetPendingPlanRequestsUseCase>(
+      (ref) => ServiceLocator.instance<GetPendingPlanRequestsUseCase>(),
+    );
+final decidePlanRequestUseCaseProvider = Provider<DecidePlanRequestUseCase>(
   (ref) => ServiceLocator.instance<DecidePlanRequestUseCase>(),
 );
 
@@ -57,59 +60,60 @@ final getAuditLogUseCaseProvider = Provider<GetAuditLogUseCase>(
 
 /// Estado: solicitações de tenant aguardando aprovação.
 final pendingTenantsProvider =
- AsyncNotifierProvider<PendingTenantsNotifier, List<Tenant>>(
- PendingTenantsNotifier.new,
-);
+    AsyncNotifierProvider<PendingTenantsNotifier, List<Tenant>>(
+      PendingTenantsNotifier.new,
+    );
 
 class PendingTenantsNotifier extends AsyncNotifier<List<Tenant>> {
- @override
- Future<List<Tenant>> build() =>
- ref.watch(getPendingTenantsUseCaseProvider).call();
+  @override
+  Future<List<Tenant>> build() =>
+      ref.watch(getPendingTenantsUseCaseProvider).call();
 
- Future<void> refresh() async {
- ref.invalidateSelf();
- await future;
- }
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
 }
 
 /// Estado: todos os tenants (painel do super admin).
 final allTenantsProvider =
- AsyncNotifierProvider<AllTenantsNotifier, List<Tenant>>(
- AllTenantsNotifier.new,
-);
+    AsyncNotifierProvider<AllTenantsNotifier, List<Tenant>>(
+      AllTenantsNotifier.new,
+    );
 
 class AllTenantsNotifier extends AsyncNotifier<List<Tenant>> {
- @override
- Future<List<Tenant>> build() =>
- ref.watch(getAllTenantsUseCaseProvider).call();
+  @override
+  Future<List<Tenant>> build() =>
+      ref.watch(getAllTenantsUseCaseProvider).call();
 
- Future<void> refresh() async {
- ref.invalidateSelf();
- await future;
- }
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
 }
 
 /// Estado: todos os planos, incluindo inativos (gestão de planos).
 final allPlansProvider = AsyncNotifierProvider<AllPlansNotifier, List<Plan>>(
- AllPlansNotifier.new,
+  AllPlansNotifier.new,
 );
 
 class AllPlansNotifier extends AsyncNotifier<List<Plan>> {
- @override
- Future<List<Plan>> build() =>
- ref.watch(getAllPlansUseCaseProvider).call();
+  @override
+  Future<List<Plan>> build() => ref.watch(getAllPlansUseCaseProvider).call();
 
- Future<void> refresh() async {
- ref.invalidateSelf();
- await future;
- }
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
 }
 
 /// Estado: pedidos de upgrade aguardando decisão.
 final pendingPlanRequestsProvider =
- AsyncNotifierProvider<PendingPlanRequestsNotifier, List<PlanRequest>>(
- PendingPlanRequestsNotifier.new,
-);class PendingPlanRequestsNotifier extends AsyncNotifier<List<PlanRequest>> {
+    AsyncNotifierProvider<PendingPlanRequestsNotifier, List<PlanRequest>>(
+      PendingPlanRequestsNotifier.new,
+    );
+
+class PendingPlanRequestsNotifier extends AsyncNotifier<List<PlanRequest>> {
   @override
   Future<List<PlanRequest>> build() =>
       ref.watch(getPendingPlanRequestsUseCaseProvider).call();
@@ -123,8 +127,8 @@ final pendingPlanRequestsProvider =
 /// Estado: registo de auditoria (ações admin).
 final auditLogProvider =
     AsyncNotifierProvider<AuditLogNotifier, List<AuditEntry>>(
-  AuditLogNotifier.new,
-);
+      AuditLogNotifier.new,
+    );
 
 class AuditLogNotifier extends AsyncNotifier<List<AuditEntry>> {
   @override

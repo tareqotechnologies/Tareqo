@@ -9,23 +9,22 @@ CustomInvoice buildInvoice({
   String storeId = 'st1',
   int number = 0,
   DateTime? createdAt,
-}) =>
-    CustomInvoice(
-      id: id,
-      storeId: storeId,
-      number: number,
-      clientName: 'Cliente $id',
-      items: const [
-        CustomInvoiceItem(
-          productName: 'Caneta',
-          quantity: 1,
-          unitPriceCents: 200,
-          subtotalCents: 200,
-        ),
-      ],
-      totalAmountCents: 200,
-      createdAt: createdAt ?? DateTime(2026, 8, 3, 10),
-    );
+}) => CustomInvoice(
+  id: id,
+  storeId: storeId,
+  number: number,
+  clientName: 'Cliente $id',
+  items: const [
+    CustomInvoiceItem(
+      productName: 'Caneta',
+      quantity: 1,
+      unitPriceCents: 200,
+      subtotalCents: 200,
+    ),
+  ],
+  totalAmountCents: 200,
+  createdAt: createdAt ?? DateTime(2026, 8, 3, 10),
+);
 
 void main() {
   group('CustomInvoiceLocalDataSourceImpl', () {
@@ -44,23 +43,23 @@ void main() {
       expect(otherStore.number, 1);
     });
 
-    test('getAll devolve só facturas da loja, mais recentes primeiro',
-        () async {
-      final dataSource = CustomInvoiceLocalDataSourceImpl();
+    test(
+      'getAll devolve só facturas da loja, mais recentes primeiro',
+      () async {
+        final dataSource = CustomInvoiceLocalDataSourceImpl();
 
-      await dataSource.add(
-        buildInvoice(id: 'ci1', createdAt: DateTime(2026, 8, 1)),
-      );
-      await dataSource.add(
-        buildInvoice(id: 'ci2', createdAt: DateTime(2026, 8, 5)),
-      );
-      await dataSource.add(
-        buildInvoice(id: 'ci9', storeId: 'st2'),
-      );
+        await dataSource.add(
+          buildInvoice(id: 'ci1', createdAt: DateTime(2026, 8, 1)),
+        );
+        await dataSource.add(
+          buildInvoice(id: 'ci2', createdAt: DateTime(2026, 8, 5)),
+        );
+        await dataSource.add(buildInvoice(id: 'ci9', storeId: 'st2'));
 
-      final invoices = await dataSource.getAll(storeId: 'st1');
-      expect(invoices.map((i) => i.id), ['ci2', 'ci1']);
-    });
+        final invoices = await dataSource.getAll(storeId: 'st1');
+        expect(invoices.map((i) => i.id), ['ci2', 'ci1']);
+      },
+    );
 
     test('add com id duplicado lança StateError', () async {
       final dataSource = CustomInvoiceLocalDataSourceImpl();
@@ -74,8 +73,7 @@ void main() {
   });
 
   group('CustomInvoiceRepositoryImpl', () {
-    test('delega para o datasource (número atribuído na gravação)',
-        () async {
+    test('delega para o datasource (número atribuído na gravação)', () async {
       final repository = CustomInvoiceRepositoryImpl(
         CustomInvoiceLocalDataSourceImpl(),
       );

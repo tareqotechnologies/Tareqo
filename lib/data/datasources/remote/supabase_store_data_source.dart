@@ -9,19 +9,23 @@ import 'supabase_datasource_helpers.dart';
 /// explicitamente; o trigger `set_tenant_id_from_owner` do schema reforça
 /// no servidor.
 final class StoreSupabaseDataSourceImpl implements StoreLocalDataSource {
- const StoreSupabaseDataSourceImpl();  static const _table = 'stores';
-  static const _columns = 'id, tenant_id, name, address, phone, email, nuit, city';
+  const StoreSupabaseDataSourceImpl();
+  static const _table = 'stores';
+  static const _columns =
+      'id, tenant_id, name, address, phone, email, nuit, city';
 
- @override
- Future<List<Store>> getByTenant(String tenantId) async {
- final rows = await supabaseClient
- .from(_table)
- .select(_columns)
- .eq('tenant_id', tenantId)
- .order('created_at', ascending: true)
- .limit(SupabaseQueryLimits.pageSize);
- return List.unmodifiable([for (final row in rows) _map(row)]);
- }  @override
+  @override
+  Future<List<Store>> getByTenant(String tenantId) async {
+    final rows = await supabaseClient
+        .from(_table)
+        .select(_columns)
+        .eq('tenant_id', tenantId)
+        .order('created_at', ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
+    return List.unmodifiable([for (final row in rows) _map(row)]);
+  }
+
+  @override
   Future<void> add(Store store) async {
     await supabaseClient.from(_table).insert({
       'id': store.id,
@@ -37,15 +41,20 @@ final class StoreSupabaseDataSourceImpl implements StoreLocalDataSource {
 
   @override
   Future<void> update(Store store) async {
-    await supabaseClient.from(_table).update({
-      'name': store.name,
-      'address': store.address,
-      'phone': store.phone,
-      'email': store.email,
-      'nuit': store.nuit,
-      'city': store.city,
-    }).eq('id', store.id);
-  }  Store _map(Map<String, dynamic> row) => Store(
+    await supabaseClient
+        .from(_table)
+        .update({
+          'name': store.name,
+          'address': store.address,
+          'phone': store.phone,
+          'email': store.email,
+          'nuit': store.nuit,
+          'city': store.city,
+        })
+        .eq('id', store.id);
+  }
+
+  Store _map(Map<String, dynamic> row) => Store(
     id: row['id'] as String,
     tenantId: row['tenant_id'] as String,
     name: row['name'] as String,

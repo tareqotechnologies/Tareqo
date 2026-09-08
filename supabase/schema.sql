@@ -3,12 +3,19 @@
 -- ============================================================================
 -- Como usar:
 --   1. Abra o SQL Editor do seu projeto:
---      https://supabase.com/dashboard/project/dotklbpqmlnhcdifiukd/sql/new
+--      https://supabase.com/dashboard/project/<SEU_REF>/sql/new
 --   2. Cole TODO o script e execute (o comando "Run").
---   3. A Parte 1 (estrutura) é idempotente e pode ser executada a qualquer
---      momento. A Parte 2 (catálogo de planos) também é idempotente — o
---      ERP NÃO semeia dados de demonstração: cada tenant começa vazio e
---      registra apenas dados reais.
+--   3. Idempotente: pode ser executado a qualquer momento. O ERP NÃO semeia
+--      dados de demonstração: cada tenant começa vazio e registra apenas
+--      dados reais (a única exceção é o catálogo de planos — PARTE 2).
+--
+-- ⚙️ CONSOLIDAÇÃO (Set/2026): este é o ÚNICO script de instalação nova —
+--    PARTE 1 (estrutura + RLS + RPCs), PARTE 1.9 (add-ons: facturas
+--    personalizadas, cotações, gestão de funcionários; billing: invoices +
+--    notificações; mensagens admin) e PARTE 2 (catálogo de planos).
+--    As 7 migrações originais foram arquivadas em `supabase/archived_migrations/`.
+--    Bases EXISTENTES: usar `upgrade.sql` (PARTE 31 = mesmo conteúdo da 1.9).
+--    Guia completo: docs/pt/19-supabase-producao-passo-a-passo.md.
 --
 -- O design segue o modelo multi-tenant documentado: cada tabela tem a coluna
 -- `user_id` (vínculo com auth.users) e o RLS isola os dados por
@@ -700,9 +707,6 @@ CREATE POLICY customers_delete ON public.customers
   FOR DELETE USING (auth.uid() = user_id);
 
 -- purchases
-DROP POLICY IF EXISTS purchases_select ON public.purchases;
-CREATE POLICY purchases_select ON public.purchases
-  FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
 -- purchases — módulo de nível GERENCIAL (matriz de acesso Aug 6): dono e
 -- gerente leem/gravam; FUNCIONÁRIO comum não acede. A autoridade é o
 -- servidor: o RLS nega mesmo se o app esconder só na UI. (O app usa a RPC
@@ -2955,6 +2959,788 @@ CREATE POLICY product_images_auth_delete ON storage.objects
     bucket_id = 'product-images'
     AND public.is_my_store((storage.foldername(name))[1])
   );
+
+-- ============================================================================
+-- PARTE 1.9 — ADD-ONS, FATURAÇÃO (billing) E MENSAGENS ADMIN [consolidada]
+-- ============================================================================
+-- Objetos das migrações 20260902–20260905 e 020/021/023, FUNDIDOS no schema
+-- base para que uma instalação NOVA fique completa com UM ÚNICO script
+-- (auditoria Set/2026 — consolidação de 13 SQL em 2). Fontes arquivadas em
+-- `supabase/archived_migrations/`; bases EXISTENTES recebem os mesmos
+-- objetos pela PARTE 31 do `upgrade.sql`.
+--
+-- Conteúdo:
+--   1.9.1  tenant_addons          — add-ons contratados por tenant (020/20260902);
+--   1.9.2  custom_invoices        — facturas personalizadas (20260905);
+--   1.9.3  quotations             — cotações/orçamentos (20260905);
+--   1.9.4  employee_mgmt          — ponto, comissões, metas (20260905);
+--   1.9.5  invoices + billing     — cobrança mensal e notificações (021);
+--   1.9.6  admin_messages         — mensagens do super admin (023).
+--
+-- Idempotente: CREATE TABLE IF NOT EXISTS, ADD COLUMN IF NOT EXISTS,
+-- DROP POLICY IF EXISTS + CREATE POLICY, DROP TRIGGER IF EXISTS + CREATE
+-- TRIGGER, CREATE OR REPLACE FUNCTION, Realtime com guarda
+-- pg_publication_tables. Requer as funções/objetos das seções 1.x
+-- (set_tenant_user_id, set_record_store_id, is_my_store, is_tenant_owner,
+-- is_super_admin, store_employees.is_active) — definidas ACIMA.
+-- ============================================================================
+
+-- ---------------------------------------------------------------
+-- 1.9.1 tenant_addons — add-ons contratados por tenant
+-- ---------------------------------------------------------------
+-- Cada linha é um add-on ativo (factura personalizada, cotação etc.)
+-- contratado além do plano base. Um tenant tem NO MÁXIMO UMA ativação por
+-- add-on (UNIQUE). RLS: dono gerencia os seus; super admin gerencia todos
+-- (sem essa política, o painel admin não consegue ativar add-ons).
+CREATE TABLE IF NOT EXISTS public.tenant_addons (
+  id            TEXT DEFAULT ('ao_' || substr(md5(random()::text), 1, 12)) PRIMARY KEY,
+  tenant_id     TEXT NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
+  add_on_id     TEXT NOT NULL,  -- ID do catálogo (ex.: ao_custom_invoice)
+  activated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at    TIMESTAMPTZ,    -- NULL = sem expiração (assinatura mensal recorrente)
+  is_active     BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_tenant_addon UNIQUE (tenant_id, add_on_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_tenant_addons_tenant_id
+  ON public.tenant_addons (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_tenant_addons_active
+  ON public.tenant_addons (tenant_id, is_active);
+
+ALTER TABLE public.tenant_addons ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS tenant_addons_select_own ON public.tenant_addons;
+CREATE POLICY tenant_addons_select_own
+  ON public.tenant_addons
+  FOR SELECT
+  USING (
+    tenant_id IN (
+      SELECT id FROM public.tenants
+      WHERE owner_user_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS tenant_addons_insert_own ON public.tenant_addons;
+CREATE POLICY tenant_addons_insert_own
+  ON public.tenant_addons
+  FOR INSERT
+  WITH CHECK (
+    tenant_id IN (
+      SELECT id FROM public.tenants
+      WHERE owner_user_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS tenant_addons_update_own ON public.tenant_addons;
+CREATE POLICY tenant_addons_update_own
+  ON public.tenant_addons
+  FOR UPDATE
+  USING (
+    tenant_id IN (
+      SELECT id FROM public.tenants
+      WHERE owner_user_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS tenant_addons_delete_own ON public.tenant_addons;
+CREATE POLICY tenant_addons_delete_own
+  ON public.tenant_addons
+  FOR DELETE
+  USING (
+    tenant_id IN (
+      SELECT id FROM public.tenants
+      WHERE owner_user_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS tenant_addons_super_admin_all ON public.tenant_addons;
+CREATE POLICY tenant_addons_super_admin_all
+  ON public.tenant_addons
+  FOR ALL
+  USING (
+    auth.uid() IN (SELECT user_id FROM public.super_admins)
+  )
+  WITH CHECK (
+    auth.uid() IN (SELECT user_id FROM public.super_admins)
+  );
+
+-- ---------------------------------------------------------------
+-- 1.9.2 custom_invoices — facturas personalizadas (add-on ao_custom_invoice)
+-- ---------------------------------------------------------------
+-- Documento por loja com número sequencial DENTRO da loja (MAX+1 sob
+-- advisory lock). O corpo completo (items snapshot, descontos, notas,
+-- pagamento) é JSONB: a factura é um documento, não um agregado com RPCs
+-- de dinheiro. RLS: dono + funcionários da loja via is_my_store; DELETE
+-- só de registros PRÓPRIOS (o app não apaga — zero impacto).
+CREATE TABLE IF NOT EXISTS public.custom_invoices (
+  id             TEXT PRIMARY KEY,
+  user_id        UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  store_id       TEXT NOT NULL,
+  invoice_number BIGINT NOT NULL DEFAULT 0,
+  payload        JSONB NOT NULL,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_custom_invoices_store_number UNIQUE (store_id, invoice_number)
+);
+
+CREATE INDEX IF NOT EXISTS idx_custom_invoices_store
+  ON public.custom_invoices (store_id, created_at DESC);
+
+-- user_id = usuário logado (reforço anti-forja — função da seção 1.x).
+DROP TRIGGER IF EXISTS trg_custom_invoices_user_id
+  ON public.custom_invoices;
+CREATE TRIGGER trg_custom_invoices_user_id
+  BEFORE INSERT ON public.custom_invoices
+  FOR EACH ROW EXECUTE FUNCTION public.set_tenant_user_id();
+
+-- store_id = loja do usuário (anti-forja — função da seção 1.x).
+DROP TRIGGER IF EXISTS trg_custom_invoices_store_id
+  ON public.custom_invoices;
+CREATE TRIGGER trg_custom_invoices_store_id
+  BEFORE INSERT ON public.custom_invoices
+  FOR EACH ROW EXECUTE FUNCTION public.set_record_store_id();
+
+-- Número sequencial por loja com advisory lock (duas escritas concorrentes
+-- nunca recebem o mesmo número). Número 0 = atribuir; já preenchido
+-- (restauração) é preservado.
+CREATE OR REPLACE FUNCTION public.get_next_custom_invoice_number(
+  p_store_id TEXT
+)
+RETURNS BIGINT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_next BIGINT;
+BEGIN
+  PERFORM pg_advisory_xact_lock(
+    hashtext('custom_invoice_number'),
+    hashtext(p_store_id)
+  );
+
+  SELECT COALESCE(MAX(invoice_number), 0) + 1
+  INTO v_next
+  FROM public.custom_invoices
+  WHERE store_id = p_store_id;
+
+  RETURN v_next;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.set_custom_invoice_number()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.invoice_number = 0 THEN
+    NEW.invoice_number := public.get_next_custom_invoice_number(NEW.store_id);
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_custom_invoices_number
+  ON public.custom_invoices;
+CREATE TRIGGER trg_custom_invoices_number
+  BEFORE INSERT ON public.custom_invoices
+  FOR EACH ROW EXECUTE FUNCTION public.set_custom_invoice_number();
+
+ALTER TABLE public.custom_invoices ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS custom_invoices_select ON public.custom_invoices;
+CREATE POLICY custom_invoices_select ON public.custom_invoices
+  FOR SELECT USING (
+    auth.uid() = user_id OR public.is_my_store(store_id)
+  );
+
+DROP POLICY IF EXISTS custom_invoices_insert ON public.custom_invoices;
+CREATE POLICY custom_invoices_insert ON public.custom_invoices
+  FOR INSERT WITH CHECK (
+    auth.uid() = user_id OR public.is_my_store(store_id)
+  );
+
+DROP POLICY IF EXISTS custom_invoices_delete ON public.custom_invoices;
+CREATE POLICY custom_invoices_delete ON public.custom_invoices
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------
+-- 1.9.3 quotations — cotações/orçamentos (add-on ao_quotation)
+-- ---------------------------------------------------------------
+-- Mesmo padrão das facturas personalizadas: documento JSONB por loja com
+-- número sequencial sob advisory lock. UPDATE é necessário para as
+-- transições de estado (rascunho → enviada → aceite/rejeitada); DELETE só
+-- de registros PRÓPRIOS.
+CREATE TABLE IF NOT EXISTS public.quotations (
+  id                TEXT PRIMARY KEY,
+  user_id           UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  store_id          TEXT NOT NULL,
+  quotation_number  BIGINT NOT NULL DEFAULT 0,
+  payload           JSONB NOT NULL,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_quotations_store_number UNIQUE (store_id, quotation_number)
+);
+
+CREATE INDEX IF NOT EXISTS idx_quotations_store
+  ON public.quotations (store_id, created_at DESC);
+
+DROP TRIGGER IF EXISTS trg_quotations_user_id ON public.quotations;
+CREATE TRIGGER trg_quotations_user_id
+  BEFORE INSERT ON public.quotations
+  FOR EACH ROW EXECUTE FUNCTION public.set_tenant_user_id();
+
+DROP TRIGGER IF EXISTS trg_quotations_store_id ON public.quotations;
+CREATE TRIGGER trg_quotations_store_id
+  BEFORE INSERT ON public.quotations
+  FOR EACH ROW EXECUTE FUNCTION public.set_record_store_id();
+
+CREATE OR REPLACE FUNCTION public.get_next_quotation_number(
+  p_store_id TEXT
+)
+RETURNS BIGINT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_next BIGINT;
+BEGIN
+  PERFORM pg_advisory_xact_lock(
+    hashtext('quotation_number'),
+    hashtext(p_store_id)
+  );
+
+  SELECT COALESCE(MAX(quotation_number), 0) + 1
+  INTO v_next
+  FROM public.quotations
+  WHERE store_id = p_store_id;
+
+  RETURN v_next;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.set_quotation_number()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.quotation_number = 0 THEN
+    NEW.quotation_number := public.get_next_quotation_number(NEW.store_id);
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_quotations_number ON public.quotations;
+CREATE TRIGGER trg_quotations_number
+  BEFORE INSERT ON public.quotations
+  FOR EACH ROW EXECUTE FUNCTION public.set_quotation_number();
+
+ALTER TABLE public.quotations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS quotations_select ON public.quotations;
+CREATE POLICY quotations_select ON public.quotations
+  FOR SELECT USING (
+    auth.uid() = user_id OR public.is_my_store(store_id)
+  );
+
+DROP POLICY IF EXISTS quotations_insert ON public.quotations;
+CREATE POLICY quotations_insert ON public.quotations
+  FOR INSERT WITH CHECK (
+    auth.uid() = user_id OR public.is_my_store(store_id)
+  );
+
+DROP POLICY IF EXISTS quotations_update ON public.quotations;
+CREATE POLICY quotations_update ON public.quotations
+  FOR UPDATE USING (
+    auth.uid() = user_id OR public.is_my_store(store_id)
+  );
+
+DROP POLICY IF EXISTS quotations_delete ON public.quotations;
+CREATE POLICY quotations_delete ON public.quotations
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------
+-- 1.9.4 employee_mgmt — ponto, comissões e metas (add-on ao_employee_mgmt)
+-- ---------------------------------------------------------------
+-- Três tabelas por loja + UMA RPC de agregação:
+--   employee_attendance       — ponto: UMA linha por funcionário por dia
+--                               (entrada insere, saída atualiza a MESMA
+--                               linha; clock_out NULL = presente);
+--   employee_commission_rates — taxa de comissão em PONTOS BASE
+--                               (500 = 5%) — inteiro, sem floats;
+--   employee_targets          — meta mensal de vendas (month = 'YYYY-MM').
+-- COMISSÕES NUNCA SÃO ARMAZENADAS: a RPC calcula das VENDAS REAIS
+-- (sales.user_id = caixa, status 'active') × taxa cadastrada.
+
+-- Guarda: o usuário é funcionário ATIVO da loja?
+CREATE OR REPLACE FUNCTION public.is_store_employee_active(
+  p_store_id TEXT,
+  p_user_id UUID
+)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.store_employees e
+    WHERE e.store_id = p_store_id
+      AND e.user_id = p_user_id
+      AND e.is_active = TRUE
+  );
+$$;
+
+CREATE TABLE IF NOT EXISTS public.employee_attendance (
+  id          TEXT PRIMARY KEY,
+  -- SUJEITO: o funcionário (NÃO o actor — o dono registra pelo
+  -- funcionário; por isso o trigger set_tenant_user_id NÃO é usado aqui).
+  user_id     UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  store_id    TEXT NOT NULL,
+  -- Dia de trabalho 'YYYY-MM-DD' — chave de unicidade por funcionário.
+  work_date   TEXT NOT NULL,
+  clock_in    TIMESTAMPTZ NOT NULL,
+  clock_out   TIMESTAMPTZ,
+  -- ACTOR: quem executou a acção (auth.uid() pelo trigger abaixo).
+  recorded_by UUID,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_employee_attendance_day
+    UNIQUE (store_id, user_id, work_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_employee_attendance_store
+  ON public.employee_attendance (store_id, work_date DESC);
+
+-- recorded_by = usuário logado (ACTOR). NÃO usa set_tenant_user_id (que
+-- forçaria user_id = auth.uid() e apagaria o SUJEITO).
+CREATE OR REPLACE FUNCTION public.set_employee_attendance_actor()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.uid() IS NOT NULL THEN
+    NEW.recorded_by := auth.uid();
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_employee_attendance_recorded_by
+  ON public.employee_attendance;
+CREATE TRIGGER trg_employee_attendance_recorded_by
+  BEFORE INSERT ON public.employee_attendance
+  FOR EACH ROW EXECUTE FUNCTION public.set_employee_attendance_actor();
+
+DROP TRIGGER IF EXISTS trg_employee_attendance_store_id
+  ON public.employee_attendance;
+CREATE TRIGGER trg_employee_attendance_store_id
+  BEFORE INSERT ON public.employee_attendance
+  FOR EACH ROW EXECUTE FUNCTION public.set_record_store_id();
+
+CREATE TABLE IF NOT EXISTS public.employee_commission_rates (
+  id         TEXT PRIMARY KEY,
+  store_id   TEXT NOT NULL,
+  user_id    UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  rate_bps   INTEGER NOT NULL CHECK (rate_bps >= 0 AND rate_bps <= 10000),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_employee_commission_rate UNIQUE (store_id, user_id)
+);
+
+DROP TRIGGER IF EXISTS trg_employee_rates_store_id
+  ON public.employee_commission_rates;
+CREATE TRIGGER trg_employee_rates_store_id
+  BEFORE INSERT ON public.employee_commission_rates
+  FOR EACH ROW EXECUTE FUNCTION public.set_record_store_id();
+
+CREATE TABLE IF NOT EXISTS public.employee_targets (
+  id           TEXT PRIMARY KEY,
+  store_id     TEXT NOT NULL,
+  user_id      UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  month        TEXT NOT NULL,
+  target_cents BIGINT NOT NULL CHECK (target_cents >= 0),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_employee_target UNIQUE (store_id, user_id, month)
+);
+
+CREATE INDEX IF NOT EXISTS idx_employee_targets_store
+  ON public.employee_targets (store_id, month);
+
+DROP TRIGGER IF EXISTS trg_employee_targets_store_id
+  ON public.employee_targets;
+CREATE TRIGGER trg_employee_targets_store_id
+  BEFORE INSERT ON public.employee_targets
+  FOR EACH ROW EXECUTE FUNCTION public.set_record_store_id();
+
+ALTER TABLE public.employee_attendance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.employee_commission_rates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.employee_targets ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS employee_attendance_select ON public.employee_attendance;
+CREATE POLICY employee_attendance_select ON public.employee_attendance
+  FOR SELECT USING (public.is_my_store(store_id));
+
+DROP POLICY IF EXISTS employee_attendance_insert ON public.employee_attendance;
+CREATE POLICY employee_attendance_insert ON public.employee_attendance
+  FOR INSERT WITH CHECK (
+    public.is_my_store(store_id)
+    AND public.is_store_employee_active(store_id, user_id)
+  );
+
+DROP POLICY IF EXISTS employee_attendance_update ON public.employee_attendance;
+CREATE POLICY employee_attendance_update ON public.employee_attendance
+  FOR UPDATE USING (public.is_my_store(store_id));
+
+DROP POLICY IF EXISTS employee_attendance_delete ON public.employee_attendance;
+CREATE POLICY employee_attendance_delete ON public.employee_attendance
+  FOR DELETE USING (public.is_my_store(store_id));
+
+DROP POLICY IF EXISTS employee_rates_select ON public.employee_commission_rates;
+CREATE POLICY employee_rates_select ON public.employee_commission_rates
+  FOR SELECT USING (public.is_my_store(store_id));
+
+DROP POLICY IF EXISTS employee_rates_insert ON public.employee_commission_rates;
+CREATE POLICY employee_rates_insert ON public.employee_commission_rates
+  FOR INSERT WITH CHECK (
+    public.is_my_store(store_id)
+    AND public.is_store_employee_active(store_id, user_id)
+  );
+
+DROP POLICY IF EXISTS employee_rates_update ON public.employee_commission_rates;
+CREATE POLICY employee_rates_update ON public.employee_commission_rates
+  FOR UPDATE USING (public.is_my_store(store_id));
+
+DROP POLICY IF EXISTS employee_rates_delete ON public.employee_commission_rates;
+CREATE POLICY employee_rates_delete ON public.employee_commission_rates
+  FOR DELETE USING (public.is_my_store(store_id));
+
+DROP POLICY IF EXISTS employee_targets_select ON public.employee_targets;
+CREATE POLICY employee_targets_select ON public.employee_targets
+  FOR SELECT USING (public.is_my_store(store_id));
+
+DROP POLICY IF EXISTS employee_targets_insert ON public.employee_targets;
+CREATE POLICY employee_targets_insert ON public.employee_targets
+  FOR INSERT WITH CHECK (
+    public.is_my_store(store_id)
+    AND public.is_store_employee_active(store_id, user_id)
+  );
+
+DROP POLICY IF EXISTS employee_targets_update ON public.employee_targets;
+CREATE POLICY employee_targets_update ON public.employee_targets
+  FOR UPDATE USING (public.is_my_store(store_id));
+
+DROP POLICY IF EXISTS employee_targets_delete ON public.employee_targets;
+CREATE POLICY employee_targets_delete ON public.employee_targets
+  FOR DELETE USING (public.is_my_store(store_id));
+
+-- RPC: resumo de comissões CALCULADO das vendas reais — por funcionário
+-- ATIVO da loja (0 bps = sem taxa → comissão 0). SECURITY DEFINER com
+-- guarda is_my_store (mesmo padrão get_cash_flow/get_sales_report).
+CREATE OR REPLACE FUNCTION public.get_employee_commission_summary(
+  p_store_id TEXT,
+  p_month TEXT
+)
+RETURNS TABLE (
+  user_id          UUID,
+  full_name        TEXT,
+  sales_cents      BIGINT,
+  rate_bps         INTEGER,
+  commission_cents BIGINT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_start TIMESTAMPTZ;
+  v_end   TIMESTAMPTZ;
+BEGIN
+  IF NOT public.is_my_store(p_store_id) THEN
+    RAISE EXCEPTION 'Loja não acessível';
+  END IF;
+  IF p_month !~ '^\d{4}-\d{2}$' THEN
+    RAISE EXCEPTION 'Mês inválido (esperado YYYY-MM): %', p_month;
+  END IF;
+
+  v_start := to_timestamp(p_month || '-01', 'YYYY-MM-DD');
+  v_end := v_start + interval '1 month';
+
+  RETURN QUERY
+  SELECT
+    e.user_id,
+    e.full_name,
+    COALESCE(SUM(s.total_amount) FILTER (
+      WHERE s.status = 'active'
+    ), 0) AS sales_cents,
+    COALESCE(r.rate_bps, 0) AS rate_bps,
+    COALESCE(SUM(s.total_amount) FILTER (
+      WHERE s.status = 'active'
+    ), 0) * COALESCE(r.rate_bps, 0) / 10000 AS commission_cents
+  FROM public.store_employees e
+  LEFT JOIN public.sales s
+    ON s.store_id = e.store_id
+   AND s.user_id = e.user_id
+   AND s.date_time >= v_start
+   AND s.date_time < v_end
+  LEFT JOIN public.employee_commission_rates r
+    ON r.store_id = e.store_id
+   AND r.user_id = e.user_id
+  WHERE e.store_id = p_store_id
+    AND e.is_active = TRUE
+  GROUP BY e.user_id, e.full_name, r.rate_bps
+  ORDER BY commission_cents DESC;
+END;
+$$;
+
+-- ---------------------------------------------------------------
+-- 1.9.5 invoices + billing — cobrança mensal e notificações (021)
+-- ---------------------------------------------------------------
+-- Ciclo de facturação: `plan_expires_at` = expiração do plano atual
+-- (renovação mensal a partir de approved_at; trial = 14 dias);
+-- `next_invoice_at` = data em que a próxima factura deve ser gerada
+-- (7 dias antes da expiração).
+ALTER TABLE public.tenants
+  ADD COLUMN IF NOT EXISTS plan_expires_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS next_invoice_at TIMESTAMPTZ;
+
+COMMENT ON COLUMN public.tenants.plan_expires_at
+  IS 'Data de expiração do plano actual (renovação mensal a partir de approved_at). Trial: 14 dias.';
+COMMENT ON COLUMN public.tenants.next_invoice_at
+  IS 'Data em que a próxima factura de renovação deve ser gerada (7 dias antes de plan_expires_at).';
+
+-- Facturas de cobrança mensal (valor em CENTAVOS — mesma unidade do
+-- plans.price_monthly). Super admin gerencia; o dono LÊ as suas.
+CREATE TABLE IF NOT EXISTS public.invoices (
+  id            TEXT PRIMARY KEY,
+  number        BIGINT NOT NULL DEFAULT 0,
+  tenant_id     TEXT NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+  plan_id       TEXT NOT NULL REFERENCES public.plans (id),
+  amount_cents  BIGINT NOT NULL CHECK (amount_cents >= 0),
+  status        TEXT NOT NULL DEFAULT 'pending' CHECK (status IN
+    ('pending', 'paid', 'expired', 'cancelled')),
+  due_date      TIMESTAMPTZ NOT NULL,
+  period        TEXT NOT NULL DEFAULT '',
+  paid_at       TIMESTAMPTZ,
+  notes         TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE public.invoices
+  IS 'Facturas de cobrança geradas para renovação mensal do plano dos tenants.';
+COMMENT ON COLUMN public.invoices.number
+  IS 'Número sequencial da factura (INV-00001, INV-00002...)';
+COMMENT ON COLUMN public.invoices.period
+  IS 'Período que a factura cobre (ex.: "Janeiro 2026")';
+COMMENT ON COLUMN public.invoices.amount_cents
+  IS 'Valor em CENTAVOS inteiros (mesma unidade do Plan.price_monthly)';
+
+ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS invoices_super_admin_all ON public.invoices;
+CREATE POLICY invoices_super_admin_all ON public.invoices
+  FOR ALL USING (public.is_super_admin());
+
+DROP POLICY IF EXISTS invoices_tenant_owner_select ON public.invoices;
+CREATE POLICY invoices_tenant_owner_select ON public.invoices
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.tenants t
+      WHERE t.id = invoices.tenant_id
+        AND t.owner_user_id = auth.uid()
+    )
+  );
+
+CREATE INDEX IF NOT EXISTS idx_invoices_tenant
+  ON public.invoices (tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_invoices_status
+  ON public.invoices (status) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS idx_invoices_tenant_period
+  ON public.invoices (tenant_id, period, status);
+
+-- Número sequencial por tenant (advisory lock — sem duplicata).
+CREATE OR REPLACE FUNCTION public.get_next_invoice_number(p_tenant_id TEXT)
+RETURNS BIGINT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_next BIGINT;
+BEGIN
+  PERFORM pg_advisory_xact_lock(
+    hashtext('invoice_number'),
+    hashtext(p_tenant_id)
+  );
+
+  SELECT COALESCE(MAX(number), 0) + 1
+  INTO v_next
+  FROM public.invoices
+  WHERE tenant_id = p_tenant_id;
+
+  RETURN v_next;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.set_invoice_number()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.number = 0 THEN
+    NEW.number := public.get_next_invoice_number(NEW.tenant_id);
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_invoices_number ON public.invoices;
+CREATE TRIGGER trg_invoices_number
+  BEFORE INSERT ON public.invoices
+  FOR EACH ROW EXECUTE FUNCTION public.set_invoice_number();
+
+-- Notificações in-app para o dono (factura gerada/paga/a expirar),
+-- publicadas no Realtime para notificação instantânea.
+CREATE TABLE IF NOT EXISTS public.invoice_notifications (
+  id            TEXT PRIMARY KEY,
+  tenant_id     TEXT NOT NULL REFERENCES public.tenants (id) ON DELETE CASCADE,
+  invoice_id    TEXT REFERENCES public.invoices (id) ON DELETE SET NULL,
+  type          TEXT NOT NULL CHECK (type IN
+    ('invoiceGenerated', 'invoiceDueSoon', 'invoiceExpired', 'invoicePaid')),
+  title         TEXT NOT NULL,
+  body          TEXT NOT NULL,
+  is_read       BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  read_at       TIMESTAMPTZ
+);
+
+COMMENT ON TABLE public.invoice_notifications
+  IS 'Notificações in-app para o dono do tenant sobre facturas.';
+COMMENT ON COLUMN public.invoice_notifications.type
+  IS 'Tipo: invoiceGenerated, invoiceDueSoon, invoiceExpired, invoicePaid';
+
+ALTER TABLE public.invoice_notifications ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS invoice_notifications_super_admin_all
+  ON public.invoice_notifications;
+CREATE POLICY invoice_notifications_super_admin_all
+  ON public.invoice_notifications
+  FOR ALL USING (public.is_super_admin());
+
+DROP POLICY IF EXISTS invoice_notifications_tenant_owner_all
+  ON public.invoice_notifications;
+CREATE POLICY invoice_notifications_tenant_owner_all
+  ON public.invoice_notifications
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.tenants t
+      WHERE t.id = invoice_notifications.tenant_id
+        AND t.owner_user_id = auth.uid()
+    )
+  );
+
+CREATE INDEX IF NOT EXISTS idx_invoice_notifications_tenant
+  ON public.invoice_notifications (tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_invoice_notifications_unread
+  ON public.invoice_notifications (tenant_id)
+  WHERE is_read = FALSE;
+
+-- Realtime com guarda (PostgreSQL puro não tem a publicação — no-op).
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'invoices'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.invoices;
+  END IF;
+END
+$$;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'invoice_notifications'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.invoice_notifications;
+  END IF;
+END
+$$;
+
+-- ---------------------------------------------------------------
+-- 1.9.6 admin_messages — mensagens do super admin para tenants (023)
+-- ---------------------------------------------------------------
+-- Cotações, avisos de validade do plano e mensagens gerais. Super admin
+-- gerencia; o dono lê as suas e marca como lidas. Realtime para
+-- notificação instantânea (com guarda).
+CREATE TABLE IF NOT EXISTS public.admin_messages (
+  id         TEXT PRIMARY KEY,
+  tenant_id  TEXT NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
+  type       TEXT NOT NULL CHECK (type IN ('billingQuote', 'planExpiryChange', 'planExpiringSoon', 'general')),
+  title      TEXT NOT NULL,
+  body       TEXT NOT NULL,
+  is_read    BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  read_at    TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_messages_tenant
+  ON public.admin_messages (tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_messages_unread
+  ON public.admin_messages (tenant_id, is_read)
+  WHERE is_read = FALSE;
+
+ALTER TABLE public.admin_messages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS admin_messages_super_admin_all ON public.admin_messages;
+CREATE POLICY admin_messages_super_admin_all
+  ON public.admin_messages
+  FOR ALL
+  USING (public.is_super_admin());
+
+DROP POLICY IF EXISTS admin_messages_owner_read ON public.admin_messages;
+CREATE POLICY admin_messages_owner_read
+  ON public.admin_messages
+  FOR SELECT
+  USING (public.is_tenant_owner(tenant_id));
+
+DROP POLICY IF EXISTS admin_messages_owner_update ON public.admin_messages;
+CREATE POLICY admin_messages_owner_update
+  ON public.admin_messages
+  FOR UPDATE
+  USING (public.is_tenant_owner(tenant_id))
+  WITH CHECK (public.is_tenant_owner(tenant_id));
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'admin_messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.admin_messages;
+  END IF;
+END
+$$;
 
 -- ============================================================================
 -- PARTE 2 — CATÁLOGO DE PLANOS DE ASSINATURA (dados reais, não demo)

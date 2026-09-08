@@ -1,0 +1,42 @@
+# Dependabot (auditoria M8) — varredura automática de vulnerabilidades e
+# PRs de atualização de dependências:
+# - ecosystem `pub`: dependências Dart/Flutter (pubspec.yaml/pubspec.lock);
+# - ecosystem `github-actions`: ações dos workflows (ci/release/ios/ipa).
+# Ativação: o Dependabot passa a abrir PRs após este arquivo ser mergeado
+# (GitHub detecta automaticamente; ver Settings → Code security).
+version: 2
+updates:
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Africa/Maputo"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Versionamento semântico do projeto: majors de dependências entram
+    # como PRs separados (revisão + suíte completa antes do merge).
+    ignore:
+      - dependency-name: "freezed"
+        versions: [">=4.0.0"]
+      - dependency-name: "sentry_flutter"
+        versions: [">=10.0.0"]
+      - dependency-name: "local_auth"
+        versions: [">=3.0.0"]
+      - dependency-name: "flutter_secure_storage"
+        versions: [">=11.0.0"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Africa/Maputo"
+    open-pull-requests-limit: 5
+    labels:
+      - "ci"

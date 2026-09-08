@@ -10,16 +10,16 @@ part 'customer.g.dart';
 /// [Debt.personName] para preservar o histórico mesmo se o cadastro mudar.
 @freezed
 abstract class Customer with _$Customer {
- const factory Customer({
- required String id,
- // Loja que cadastrou o cliente (Fase 2 do multi-tenancy) — o fiado
- // referencia clientes da mesma loja.
- @Default('st1') String storeId,
- required String name,
- @Default('') String phone,
- @Default('') String email,
- }) = _Customer;
+  const factory Customer({
+    required String id,
+    // Loja que cadastrou o cliente (Fase 2 do multi-tenancy) — o fiado
+    // referencia clientes da mesma loja.
+    @Default('st1') String storeId,
+    required String name,
+    @Default('') String phone,
+    @Default('') String email,
+  }) = _Customer;
 
- factory Customer.fromJson(Map<String, dynamic> json) =>
- _$CustomerFromJson(json);
+  factory Customer.fromJson(Map<String, dynamic> json) =>
+      _$CustomerFromJson(json);
 }

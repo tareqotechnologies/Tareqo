@@ -14,53 +14,59 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 /// as telas chamam [CrashReporting.capture] — no debug imprime no console,
 /// em release envia ao Sentry (auditoria M2: log estruturado em um lugar só).
 abstract final class CrashReporting {
- static const String _dsn = String.fromEnvironment(
- 'SENTRY_DSN',
- defaultValue: '',
- );
+  static const String _dsn = String.fromEnvironment(
+    'SENTRY_DSN',
+    defaultValue: '',
+  );
 
- static bool get isEnabled => _dsn.isNotEmpty;
+  static bool get isEnabled => _dsn.isNotEmpty;
 
- /// Inicializa o Sentry (se DSN configurado) e os handlers globais de
- /// erros não capturados (Flutter + Dart).
- static Future<void> initialize() async {
- if (!isEnabled) return;
+  /// Inicializa o Sentry (se DSN configurado) e os handlers globais de
+  /// erros não capturados (Flutter + Dart).
+  static Future<void> initialize() async {
+    if (!isEnabled) return;
 
- await SentryFlutter.init(
- (options) {
- options.dsn = _dsn;
- // Erros não capturados de widgets/flutter.
- options.environment = kReleaseMode ? 'production' : 'development';
- // Não enviar eventos esperados de negócio (ex.: StateError de
- // entidade inválida já tratado pela UI) — reduz ruído no Sentry.
- options.beforeSend = (event, _) {
- final throwable = event.throwable;
- if (throwable is StateError) return null;
- return event;
- };
- },
- appRunner: () {
- FlutterError.onError = (details) {
- FlutterError.presentError(details);
- Sentry.captureException(
- details.exception,
- stackTrace: details.stack,
- );
- };
- },
- );
- }
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = _dsn;
+        // Erros não capturados de widgets/flutter.
+        options.environment = kReleaseMode ? 'production' : 'development';
+        // Não enviar eventos esperados de negócio (ex.: StateError de
+        // entidade inválida já tratado pela UI) — reduz ruído no Sentry.
+        options.beforeSend = (event, _) {
+          final throwable = event.throwable;
+          if (throwable is StateError) return null;
+          return event;
+        };
+      },
+      appRunner: () {
+        FlutterError.onError = (details) {
+          FlutterError.presentError(details);
+          Sentry.captureException(details.exception, stackTrace: details.stack);
+        };
+      },
+    );
+  }
 
- /// Registra um erro de aplicação (catch de telas/providers) no canal
- /// ativo: console em debug, Sentry em release.
- static void capture(Object error, StackTrace stackTrace, {String? hint}) {
- if (isEnabled) {
- Sentry.captureException(error, stackTrace: stackTrace);
- }
- // `debugPrint` mantém a legibilidade do desenvolvimento; no release o
- // Sentry já tem o evento (evita imprimir dados sensíveis no console).
- if (kDebugMode) {
- debugPrint('[erro]${hint == null ? '' : ' $hint'} $error\n$stackTrace');
- }
- }
+  /// Registra um erro de aplicação (catch de telas/providers) no canal
+  /// ativo: console em debug, Sentry em release.
+  static void capture(Object error, StackTrace stackTrace, {String? hint}) {
+    if (isEnabled) {
+      // B3: o `hint` agora acompanha o evento no Sentry como TAG (antes era
+      // ignorado — só aparecia no console em debug), dando contexto de
+      // negócio para filtrar/agrupar no dashboard.
+      Sentry.captureException(
+        error,
+        stackTrace: stackTrace,
+        withScope: (scope) {
+          if (hint != null) scope.setTag('hint', hint);
+        },
+      );
+    }
+    // `debugPrint` mantém a legibilidade do desenvolvimento; no release o
+    // Sentry já tem o evento (evita imprimir dados sensíveis no console).
+    if (kDebugMode) {
+      debugPrint('[erro]${hint == null ? '' : ' $hint'} $error\n$stackTrace');
+    }
+  }
 }

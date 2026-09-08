@@ -23,8 +23,8 @@ final addOnDataSourceProvider = Provider<AddOnLocalDataSource>((ref) {
 /// Auto-dispose: quando o tenant muda (login/logout), o estado é limpo.
 final activeAddOnIdsProvider =
     AsyncNotifierProvider<ActiveAddOnsNotifier, Set<String>>(
-  ActiveAddOnsNotifier.new,
-);
+      ActiveAddOnsNotifier.new,
+    );
 
 class ActiveAddOnsNotifier extends AsyncNotifier<Set<String>> {
   @override
@@ -94,8 +94,9 @@ final isAddOnActiveProvider = Provider.family<bool, String>((ref, addOnId) {
 
 /// IDs dos add-ons activos de um tenant específico (usado no painel admin
 /// para mostrar a contagem de add-ons activos no card do tenant).
-final tenantActiveAddOnIdsProvider =
-    FutureProvider.family<Set<String>, String>((ref, tenantId) async {
-  final ds = ref.watch(addOnDataSourceProvider);
-  return ds.getActiveAddOnIds(tenantId);
-});
+final tenantActiveAddOnIdsProvider = FutureProvider.family<Set<String>, String>(
+  (ref, tenantId) async {
+    final ds = ref.watch(addOnDataSourceProvider);
+    return ds.getActiveAddOnIds(tenantId);
+  },
+);

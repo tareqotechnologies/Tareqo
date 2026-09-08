@@ -178,6 +178,45 @@ class AppLocalizationsFr extends AppLocalizations {
   String get splashLoading => 'Ouverture de votre session…';
 
   @override
+  String get appLockTitle => 'TAREQO verrouillé';
+
+  @override
+  String get appLockMessage =>
+      'Touchez le capteur ou utilisez la reconnaissance faciale pour déverrouiller TAREQO.';
+
+  @override
+  String get appLockUnlock => 'Déverrouiller';
+
+  @override
+  String get appLockError =>
+      'Impossible de vous authentifier. Réessayez ou déconnectez-vous.';
+
+  @override
+  String get biometricSignInTitle => 'Authentification biométrique';
+
+  @override
+  String get biometricHint => 'Touchez le capteur';
+
+  @override
+  String get biometricCancel => 'Annuler';
+
+  @override
+  String get biometricFallbackTitle => 'Utiliser le mot de passe';
+
+  @override
+  String get biometricGoToSettingsButton => 'Réglages';
+
+  @override
+  String get biometricGoToSettingsDescription =>
+      'Configurez l\'authentification biométrique';
+
+  @override
+  String get biometricLockOut => 'Réessayez plus tard';
+
+  @override
+  String get biometricReason => 'Authentification biométrique';
+
+  @override
   String get loginSubtitleSignUp => 'Créez votre compte pour commencer';
 
   @override
@@ -2348,6 +2387,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adminGrowthTrends => 'Tendances de Croissance';
 
   @override
+  String get adminGrowthTrendsLabel => 'Tendances (8 semaines)';
+
+  @override
   String get adminGrowthThisWeek => 'Cette semaine';
 
   @override
@@ -2932,6 +2974,21 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get employeeMgmtLoadError =>
       'Impossible de charger les données des employés.';
+
+  @override
+  String get employeeMgmtNoStoreTitle => 'Aucun magasin actif';
+
+  @override
+  String get employeeMgmtNoStoreAttendance =>
+      'Terminez l\'onboarding pour pointer.';
+
+  @override
+  String get employeeMgmtNoStoreCommissions =>
+      'Terminez l\'onboarding pour voir les commissions.';
+
+  @override
+  String get employeeMgmtNoStoreTargets =>
+      'Terminez l\'onboarding pour définir des objectifs.';
 
   @override
   String get employeeClockInError => 'Impossible d\'enregistrer l\'entrée.';

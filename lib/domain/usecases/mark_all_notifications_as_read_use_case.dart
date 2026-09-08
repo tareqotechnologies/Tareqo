@@ -6,6 +6,5 @@ class MarkAllNotificationsAsReadUseCase {
 
   final IInvoiceNotificationRepository _repository;
 
-  Future<void> call(String tenantId) =>
-      _repository.markAllAsRead(tenantId);
+  Future<void> call(String tenantId) => _repository.markAllAsRead(tenantId);
 }

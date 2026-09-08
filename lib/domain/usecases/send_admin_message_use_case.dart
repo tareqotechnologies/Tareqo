@@ -7,10 +7,7 @@ import '../repositories/i_tenant_repository.dart';
 /// Usado para cotações, notificações de alteração de validade, avisos
 /// gerais, etc.
 class SendAdminMessageUseCase {
-  const SendAdminMessageUseCase(
-    this._repository,
-    this._tenantRepository,
-  );
+  const SendAdminMessageUseCase(this._repository, this._tenantRepository);
 
   final IAdminMessageRepository _repository;
   final ITenantRepository _tenantRepository;
@@ -27,7 +24,8 @@ class SendAdminMessageUseCase {
       throw StateError('Tenant $tenantId não encontrado.');
     }
 
-    final id = 'am_${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}'
+    final id =
+        'am_${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}'
         '_${DateTime.now().microsecond.toRadixString(16).padLeft(4, '0')}';
 
     final message = AdminMessage(

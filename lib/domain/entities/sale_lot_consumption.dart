@@ -10,32 +10,32 @@
 /// no SQLite/Supabase ou em memória no modo web) e consumido pelo
 /// [CancelSaleUseCase] na anulação.
 final class LotConsumption {
- const LotConsumption({
- required this.lotId,
- required this.productId,
- required this.quantity,
- });
+  const LotConsumption({
+    required this.lotId,
+    required this.productId,
+    required this.quantity,
+  });
 
- /// Lote de origem que foi abatido.
- final String lotId;
+  /// Lote de origem que foi abatido.
+  final String lotId;
 
- /// Produto dono do lote (necessário para devolver o total do produto).
- final String productId;
+  /// Produto dono do lote (necessário para devolver o total do produto).
+  final String productId;
 
- /// Quantidade abatida, em MILÉSIMOS de unidade (W11).
- final int quantity;
+  /// Quantidade abatida, em MILÉSIMOS de unidade (W11).
+  final int quantity;
 
- @override
- bool operator ==(Object other) =>
- other is LotConsumption &&
- other.lotId == lotId &&
- other.productId == productId &&
- other.quantity == quantity;
+  @override
+  bool operator ==(Object other) =>
+      other is LotConsumption &&
+      other.lotId == lotId &&
+      other.productId == productId &&
+      other.quantity == quantity;
 
- @override
- int get hashCode => Object.hash(lotId, productId, quantity);
+  @override
+  int get hashCode => Object.hash(lotId, productId, quantity);
 
- @override
- String toString() =>
- 'LotConsumption(lotId: $lotId, productId: $productId, quantity: $quantity)';
+  @override
+  String toString() =>
+      'LotConsumption(lotId: $lotId, productId: $productId, quantity: $quantity)';
 }

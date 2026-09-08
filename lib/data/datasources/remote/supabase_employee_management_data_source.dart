@@ -211,11 +211,11 @@ final class EmployeeManagementSupabaseDataSourceImpl
       );
 
   EmployeeTarget _mapTarget(Map<String, dynamic> row) => EmployeeTarget(
-        id: row['id'] as String,
-        storeId: row['store_id'] as String,
-        userId: row['user_id'] as String,
-        month: row['month'] as String,
-        targetCents: (row['target_cents'] as num).toInt(),
-        createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
-      );
+    id: row['id'] as String,
+    storeId: row['store_id'] as String,
+    userId: row['user_id'] as String,
+    month: row['month'] as String,
+    targetCents: (row['target_cents'] as num).toInt(),
+    createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
+  );
 }

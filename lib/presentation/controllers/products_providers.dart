@@ -13,15 +13,15 @@ import 'auth_providers.dart';
 /// uso como provider, permitindo substituí-lo facilmente em testes
 /// (`overrideWithValue`).
 final getProductsUseCaseProvider = Provider<GetProductsUseCase>(
- (ref) => ServiceLocator.instance<GetProductsUseCase>(),
+  (ref) => ServiceLocator.instance<GetProductsUseCase>(),
 );
 
 final addProductUseCaseProvider = Provider<AddProductUseCase>(
- (ref) => ServiceLocator.instance<AddProductUseCase>(),
+  (ref) => ServiceLocator.instance<AddProductUseCase>(),
 );
 
 final updateProductUseCaseProvider = Provider<UpdateProductUseCase>(
- (ref) => ServiceLocator.instance<UpdateProductUseCase>(),
+  (ref) => ServiceLocator.instance<UpdateProductUseCase>(),
 );
 
 /// Ponte para o armazenamento de FOTOS de produto (Supabase Storage no
@@ -29,7 +29,7 @@ final updateProductUseCaseProvider = Provider<UpdateProductUseCase>(
 /// Novo/Editar produto usam este provider para subir a foto antes de
 /// persistir o produto — substituível em testes via `overrideWithValue`.
 final productImageStoreProvider = Provider<IProductImageStore>(
- (ref) => ServiceLocator.instance<IProductImageStore>(),
+  (ref) => ServiceLocator.instance<IProductImageStore>(),
 );
 
 /// Estado da lista de produtos.
@@ -37,9 +37,8 @@ final productImageStoreProvider = Provider<IProductImageStore>(
 /// Um [AsyncValue]: `loading` (buscando), `error` (falha) ou `data`
 /// (produtos carregados). A tela consome via `ref.watch` e reage
 /// declarativamente a cada mudança.
-final productsProvider =
- AsyncNotifierProvider<ProductsNotifier, List<Product>>(
- ProductsNotifier.new,
+final productsProvider = AsyncNotifierProvider<ProductsNotifier, List<Product>>(
+  ProductsNotifier.new,
 );
 
 /// Notifier que orquestra o carregamento da lista de produtos.
@@ -47,18 +46,20 @@ final productsProvider =
 /// Conhece apenas o [GetProductsUseCase] (abstração de domínio) — nenhuma
 /// dependência com datasources ou implementações concretas.
 class ProductsNotifier extends AsyncNotifier<List<Product>> {
- @override
- Future<List<Product>> build() {
- final user = ref.watch(authStateProvider).value;
- final storeId = user == null ? null : ref.watch(activeStoreIdProvider(user.id));
- // Sem usuário ou loja ativa, lista vazia (o AuthGate roteia o login).
- if (storeId == null) return Future.value(const []);
- return ref.read(getProductsUseCaseProvider).call(storeId: storeId);
- }
+  @override
+  Future<List<Product>> build() {
+    final user = ref.watch(authStateProvider).value;
+    final storeId = user == null
+        ? null
+        : ref.watch(activeStoreIdProvider(user.id));
+    // Sem usuário ou loja ativa, lista vazia (o AuthGate roteia o login).
+    if (storeId == null) return Future.value(const []);
+    return ref.read(getProductsUseCaseProvider).call(storeId: storeId);
+  }
 
- /// Recarrega a lista de produtos (ex.: pull-to-refresh).
- Future<void> refresh() async {
- ref.invalidateSelf();
- await future;
- }
+  /// Recarrega a lista de produtos (ex.: pull-to-refresh).
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
 }

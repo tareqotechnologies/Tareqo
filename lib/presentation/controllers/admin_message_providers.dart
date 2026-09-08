@@ -19,30 +19,29 @@ final sendAdminMessageUseCaseProvider = Provider<SendAdminMessageUseCase>(
 
 final getTenantAdminMessagesUseCaseProvider =
     Provider<GetTenantAdminMessagesUseCase>(
-  (ref) => ServiceLocator.instance<GetTenantAdminMessagesUseCase>(),
-);
+      (ref) => ServiceLocator.instance<GetTenantAdminMessagesUseCase>(),
+    );
 
 final markAdminMessageAsReadUseCaseProvider =
     Provider<MarkAdminMessageAsReadUseCase>(
-  (ref) => ServiceLocator.instance<MarkAdminMessageAsReadUseCase>(),
-);
+      (ref) => ServiceLocator.instance<MarkAdminMessageAsReadUseCase>(),
+    );
 
 final markAllAdminMessagesAsReadUseCaseProvider =
     Provider<MarkAllAdminMessagesAsReadUseCase>(
-  (ref) => ServiceLocator.instance<MarkAllAdminMessagesAsReadUseCase>(),
-);
+      (ref) => ServiceLocator.instance<MarkAllAdminMessagesAsReadUseCase>(),
+    );
 
 // ---------------------------------------------------------------------------
 // Estado: mensagens admin do tenant logado
 // ---------------------------------------------------------------------------
 
-final tenantAdminMessagesProvider = AsyncNotifierProvider<
-    TenantAdminMessagesNotifier, List<AdminMessage>>(
-  TenantAdminMessagesNotifier.new,
-);
+final tenantAdminMessagesProvider =
+    AsyncNotifierProvider<TenantAdminMessagesNotifier, List<AdminMessage>>(
+      TenantAdminMessagesNotifier.new,
+    );
 
-class TenantAdminMessagesNotifier
-    extends AsyncNotifier<List<AdminMessage>> {
+class TenantAdminMessagesNotifier extends AsyncNotifier<List<AdminMessage>> {
   @override
   Future<List<AdminMessage>> build() async {
     final user = ref.watch(authStateProvider).value;
@@ -52,9 +51,7 @@ class TenantAdminMessagesNotifier
     final tenant = tenantAsync.value;
     if (tenant == null) return const [];
 
-    return ref
-        .watch(getTenantAdminMessagesUseCaseProvider)
-        .call(tenant.id);
+    return ref.watch(getTenantAdminMessagesUseCaseProvider).call(tenant.id);
   }
 
   Future<void> refresh() async {
@@ -75,7 +72,6 @@ final unreadAdminMessagesCountProvider = FutureProvider<int>((ref) async {
   final tenant = tenantAsync.value;
   if (tenant == null) return 0;
 
-  final messages =
-      ref.watch(tenantAdminMessagesProvider).value ?? const [];
+  final messages = ref.watch(tenantAdminMessagesProvider).value ?? const [];
   return messages.where((m) => !m.isRead).length;
 });

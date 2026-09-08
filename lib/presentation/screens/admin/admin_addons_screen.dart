@@ -233,8 +233,9 @@ class _TenantPicker extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: bulkMode
                           ? scheme.primary.withValues(alpha: 0.12)
-                          : scheme.surfaceContainerHighest
-                              .withValues(alpha: 0.5),
+                          : scheme.surfaceContainerHighest.withValues(
+                              alpha: 0.5,
+                            ),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Icon(
@@ -242,7 +243,9 @@ class _TenantPicker extends ConsumerWidget {
                           ? Icons.checklist_rounded
                           : Icons.checklist_outlined,
                       size: 20,
-                      color: bulkMode ? scheme.primary : scheme.onSurfaceVariant,
+                      color: bulkMode
+                          ? scheme.primary
+                          : scheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -255,15 +258,13 @@ class _TenantPicker extends ConsumerWidget {
           if (bulkMode)
             _BulkSelectionBar(
               selectedCount: selectedIds.length,
-              totalCount: allAsync.value
+              totalCount:
+                  allAsync.value
                       ?.where((t) => t.status == TenantStatus.approved)
                       .length ??
                   0,
-              onSelectAll: () => onSelectAll(
-                _filterTenants(
-                  allAsync.value ?? const [],
-                ),
-              ),
+              onSelectAll: () =>
+                  onSelectAll(_filterTenants(allAsync.value ?? const [])),
               onActivate: onBulkActivate,
               onCancel: onExitBulkMode,
             ),
@@ -280,11 +281,7 @@ class _TenantPicker extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 16,
-                      color: scheme.primary,
-                    ),
+                    Icon(Icons.info_outline, size: 16, color: scheme.primary),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
@@ -304,7 +301,8 @@ class _TenantPicker extends ConsumerWidget {
           Expanded(
             child: allAsync.when(
               loading: () => const ListSkeleton(items: 4),
-              error: (e, _) => Center(child: Text(context.l10n.adminAddonsLoadError('$e'))),
+              error: (e, _) =>
+                  Center(child: Text(context.l10n.adminAddonsLoadError('$e'))),
               data: (tenants) {
                 final filtered = _filterTenants(tenants);
                 if (filtered.isEmpty) {
@@ -344,9 +342,7 @@ class _TenantPicker extends ConsumerWidget {
   }
 
   List<Tenant> _filterTenants(List<Tenant> tenants) {
-    var list = tenants
-        .where((t) => t.status == TenantStatus.approved)
-        .toList();
+    var list = tenants.where((t) => t.status == TenantStatus.approved).toList();
     if (searchQuery.isNotEmpty) {
       final q = searchQuery.toLowerCase();
       list = list
@@ -417,7 +413,11 @@ class _BulkSelectionBar extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           TextButton(
             onPressed: onSelectAll,
-            child: Text(allSelected ? context.l10n.adminBulkDeselectAll : context.l10n.adminBulkSelectAll),
+            child: Text(
+              allSelected
+                  ? context.l10n.adminBulkDeselectAll
+                  : context.l10n.adminBulkSelectAll,
+            ),
           ),
           const Spacer(),
           if (selectedCount > 0)
@@ -456,10 +456,8 @@ class _TenantTile extends ConsumerWidget {
     final scheme = theme.colorScheme;
 
     final plans = ref.watch(allPlansProvider).value ?? [];
-    final planName = plans
-            .where((p) => p.id == tenant.planId)
-            .firstOrNull
-            ?.name ??
+    final planName =
+        plans.where((p) => p.id == tenant.planId).firstOrNull?.name ??
         tenant.planId;
 
     return GestureDetector(
@@ -468,9 +466,7 @@ class _TenantTile extends ConsumerWidget {
         elevated: true,
         borderRadius: const BorderRadius.all(Radius.circular(14)),
         padding: const EdgeInsets.all(12),
-        borderColor: isSelected
-            ? scheme.primary.withValues(alpha: 0.5)
-            : null,
+        borderColor: isSelected ? scheme.primary.withValues(alpha: 0.5) : null,
         onTap: onTap,
         child: Row(
           children: [
@@ -539,10 +535,7 @@ class _TenantTile extends ConsumerWidget {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _BulkAddOnSheet extends StatelessWidget {
-  const _BulkAddOnSheet({
-    required this.tenantCount,
-    required this.onApply,
-  });
+  const _BulkAddOnSheet({required this.tenantCount, required this.onApply});
 
   final int tenantCount;
   final Future<void> Function(String addOnId, bool activate) onApply;
@@ -554,9 +547,7 @@ class _BulkAddOnSheet extends StatelessWidget {
     // Só add-ons com funcionalidade REAL podem ser activados (os
     // BLOCKED — ex.: dependência externa/schema inexistente — ficam
     // fora do catálogo operável: nunca vender/activar o que não existe).
-    final addOns = AddOnCatalog.addOns()
-        .where((a) => a.isAvailable)
-        .toList();
+    final addOns = AddOnCatalog.addOns().where((a) => a.isAvailable).toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -668,11 +659,7 @@ class _BulkAddOnOption extends StatelessWidget {
               color: scheme.primary.withValues(alpha: 0.12),
               borderRadius: AppRadius.smAll,
             ),
-            child: Icon(
-              iconData,
-              size: 18,
-              color: scheme.primary,
-            ),
+            child: Icon(iconData, size: 18, color: scheme.primary),
           ),
           const SizedBox(width: AppSpacing.sm),
 
@@ -772,10 +759,7 @@ class _BulkAddOnOption extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _TenantAddOnManager extends ConsumerStatefulWidget {
-  const _TenantAddOnManager({
-    required this.tenant,
-    required this.onBack,
-  });
+  const _TenantAddOnManager({required this.tenant, required this.onBack});
 
   final Tenant tenant;
   final VoidCallback onBack;
@@ -845,9 +829,7 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     // Só add-ons com funcionalidade REAL (os BLOCKED não são activáveis).
-    final addOns = AddOnCatalog.addOns()
-        .where((a) => a.isAvailable)
-        .toList();
+    final addOns = AddOnCatalog.addOns().where((a) => a.isAvailable).toList();
 
     return Scaffold(
       backgroundColor: scheme.surface,
@@ -905,32 +887,26 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
           ),
 
           // Stats
-          _CompactStats(
-            total: addOns.length,
-            active: _activeAddOnIds.length,
-          ),
+          _CompactStats(total: addOns.length, active: _activeAddOnIds.length),
 
           // Add-on list
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
-                    : ListView.separated(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.lg,
-                          vertical: AppSpacing.sm,
-                        ),
-                        itemCount: addOns.length,
-                        separatorBuilder: (_, _) => const Divider(
-                          height: 1,
-                          indent: 40,
-                          endIndent: 0,
-                        ),
-                        itemBuilder: (_, i) => _AddOnToggleTile(
-                          addon: addOns[i],
-                          isActive: _activeAddOnIds.contains(addOns[i].id),
-                          onToggle: () => _toggleAddOn(addOns[i].id),
-                        ),
-                      ),
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.sm,
+                    ),
+                    itemCount: addOns.length,
+                    separatorBuilder: (_, _) =>
+                        const Divider(height: 1, indent: 40, endIndent: 0),
+                    itemBuilder: (_, i) => _AddOnToggleTile(
+                      addon: addOns[i],
+                      isActive: _activeAddOnIds.contains(addOns[i].id),
+                      onToggle: () => _toggleAddOn(addOns[i].id),
+                    ),
+                  ),
           ),
         ],
       ),
@@ -960,7 +936,11 @@ class _CompactStats extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _Pill(count: total,            label: context.l10n.commonTotal, color: scheme.onSurface),
+          _Pill(
+            count: total,
+            label: context.l10n.commonTotal,
+            color: scheme.onSurface,
+          ),
           const SizedBox(width: AppSpacing.xs),
           _Pill(
             count: active,
@@ -980,11 +960,7 @@ class _CompactStats extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({
-    required this.count,
-    required this.label,
-    required this.color,
-  });
+  const _Pill({required this.count, required this.label, required this.color});
 
   final int count;
   final String label;
@@ -1058,8 +1034,9 @@ class _AddOnToggleTile extends StatelessWidget {
             height: 36,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: (isActive ? scheme.primary : scheme.outline)
-                  .withValues(alpha: 0.12),
+              color: (isActive ? scheme.primary : scheme.outline).withValues(
+                alpha: 0.12,
+              ),
               borderRadius: AppRadius.smAll,
             ),
             child: Icon(
@@ -1114,10 +1091,7 @@ class _AddOnToggleTile extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
 
           // Toggle
-          Switch(
-            value: isActive,
-            onChanged: (_) => onToggle(),
-          ),
+          Switch(value: isActive, onChanged: (_) => onToggle()),
         ],
       ),
     );

@@ -18,8 +18,7 @@ final class QuotationSqliteDataSourceImpl implements QuotationLocalDataSource {
 
   final Database _db;
 
-  static const _columns =
-      'id, store_id, quotation_number, payload, created_at';
+  static const _columns = 'id, store_id, quotation_number, payload, created_at';
 
   @override
   Future<List<Quotation>> getAll({required String storeId}) async {
@@ -38,9 +37,9 @@ final class QuotationSqliteDataSourceImpl implements QuotationLocalDataSource {
       // Mesma semântica dos demais datasources: id duplicado é um erro
       // de domínio (StateError) — espelha a PK do banco sem vazar a
       // exceção crua do SQLite para a UI.
-      final exists = _db
-          .select('SELECT 1 FROM quotations WHERE id = ?', [quotation.id])
-          .isNotEmpty;
+      final exists = _db.select('SELECT 1 FROM quotations WHERE id = ?', [
+        quotation.id,
+      ]).isNotEmpty;
       if (exists) {
         throw StateError('Cotação ${quotation.id} já existe.');
       }
@@ -48,13 +47,13 @@ final class QuotationSqliteDataSourceImpl implements QuotationLocalDataSource {
       // (mesmo padrão das vendas/facturas) — o número enviado no objeto é
       // ignorado: o banco é a autoridade. O UNIQUE(store_id,
       // quotation_number) é a rede de segurança contra corridas.
-      final nextNumber = _db
-          .select(
-            'SELECT COALESCE(MAX(quotation_number), 0) + 1 AS next '
-            'FROM quotations WHERE store_id = ?',
-            [quotation.storeId],
-          )
-          .first['next'] as int;
+      final nextNumber =
+          _db.select(
+                'SELECT COALESCE(MAX(quotation_number), 0) + 1 AS next '
+                'FROM quotations WHERE store_id = ?',
+                [quotation.storeId],
+              ).first['next']
+              as int;
 
       persisted = quotation.copyWith(number: nextNumber);
       _db.execute(
@@ -75,10 +74,9 @@ final class QuotationSqliteDataSourceImpl implements QuotationLocalDataSource {
 
   @override
   Future<Quotation> update(Quotation quotation) async {
-    final rows = _db.select(
-      'SELECT $_columns FROM quotations WHERE id = ?',
-      [quotation.id],
-    );
+    final rows = _db.select('SELECT $_columns FROM quotations WHERE id = ?', [
+      quotation.id,
+    ]);
     if (rows.isEmpty) {
       throw StateError('Cotação ${quotation.id} não existe.');
     }
@@ -86,10 +84,10 @@ final class QuotationSqliteDataSourceImpl implements QuotationLocalDataSource {
       number: (rows.first['quotation_number'] as num).toInt(),
     );
     AppDatabase.runInTransaction(_db, () {
-      _db.execute(
-        'UPDATE quotations SET payload = ? WHERE id = ?',
-        [jsonEncode(persisted.toJson()), persisted.id],
-      );
+      _db.execute('UPDATE quotations SET payload = ? WHERE id = ?', [
+        jsonEncode(persisted.toJson()),
+        persisted.id,
+      ]);
     });
     return persisted;
   }
@@ -97,8 +95,6 @@ final class QuotationSqliteDataSourceImpl implements QuotationLocalDataSource {
   Quotation _map(Row row) {
     final json = jsonDecode(row['payload'] as String) as Map<String, dynamic>;
     final quotation = Quotation.fromJson(json);
-    return quotation.copyWith(
-      number: (row['quotation_number'] as num).toInt(),
-    );
+    return quotation.copyWith(number: (row['quotation_number'] as num).toInt());
   }
 }

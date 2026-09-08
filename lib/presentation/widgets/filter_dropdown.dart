@@ -12,25 +12,26 @@ import '../../core/theme/app_tokens.dart';
 /// O chip destaca (primaryContainer) quando um filtro NÃO-default está
 /// ativo — o estado de filtragem aparece num relance sem gritar.
 class FilterDropdown<T> extends StatelessWidget {
- const FilterDropdown({
- super.key,
- required this.icon,
- required this.options,
- required this.selected,
- required this.labelOf,
- required this.onChanged,
- });
+  const FilterDropdown({
+    super.key,
+    required this.icon,
+    required this.options,
+    required this.selected,
+    required this.labelOf,
+    required this.onChanged,
+  });
 
- /// Ícone fixo do chip (calendário para período, pagamentos para forma).
- final IconData icon;
+  /// Ícone fixo do chip (calendário para período, pagamentos para forma).
+  final IconData icon;
 
- final List<T> options;
+  final List<T> options;
 
- /// Opção ativa (a primeira da lista é o default — chip neutro).
- final T selected;
+  /// Opção ativa (a primeira da lista é o default — chip neutro).
+  final T selected;
 
- final String Function(T option) labelOf;
- final ValueChanged<T> onChanged;  @override
+  final String Function(T option) labelOf;
+  final ValueChanged<T> onChanged;
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -78,45 +79,45 @@ class FilterDropdown<T> extends StatelessWidget {
           ),
       ],
       child: Container(
- padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
- decoration: BoxDecoration(
- color: active ? scheme.primaryContainer : Colors.transparent,
- borderRadius: BorderRadius.circular(AppRadius.full),
- border: Border.all(
- color: active ? Colors.transparent : scheme.outlineVariant,
- ),
- ),
- child: Row(
- mainAxisSize: MainAxisSize.min,
- children: [
- Icon(
- icon,
- size: 16,
- color: active
- ? scheme.onPrimaryContainer
- : scheme.onSurfaceVariant,
- ),
- const SizedBox(width: 6),
- Text(
- labelOf(selected),
- style: theme.textTheme.labelLarge?.copyWith(
- color: active
- ? scheme.onPrimaryContainer
- : scheme.onSurfaceVariant,
- fontWeight: FontWeight.w500,
- ),
- ),
- const SizedBox(width: 2),
- Icon(
- Icons.keyboard_arrow_down_rounded,
- size: 18,
- color: active
- ? scheme.onPrimaryContainer
- : scheme.onSurfaceVariant,
- ),
- ],
- ),
- ),
- );
- }
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: active ? scheme.primaryContainer : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.full),
+          border: Border.all(
+            color: active ? Colors.transparent : scheme.outlineVariant,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: active
+                  ? scheme.onPrimaryContainer
+                  : scheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              labelOf(selected),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: active
+                    ? scheme.onPrimaryContainer
+                    : scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 2),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 18,
+              color: active
+                  ? scheme.onPrimaryContainer
+                  : scheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

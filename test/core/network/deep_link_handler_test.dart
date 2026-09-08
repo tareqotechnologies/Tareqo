@@ -30,9 +30,7 @@ void main() {
         isFalse,
       );
       expect(
-        DeepLinkHandler.isAuthCallbackUri(
-          Uri.parse('tareqo://evil?code=abc'),
-        ),
+        DeepLinkHandler.isAuthCallbackUri(Uri.parse('tareqo://evil?code=abc')),
         isFalse,
       );
     });

@@ -43,16 +43,15 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
     try {
       final secret = await ref.read(mfaAuthUseCaseProvider).generateSecret();
       final user = ref.read(authStateProvider).value;
-      final qrData = await ref.read(mfaAuthUseCaseProvider).generateQRCodeData(
-        issuer: 'TAREQO',
-        account: user?.email ?? 'user',
-      );
+      final qrData = await ref
+          .read(mfaAuthUseCaseProvider)
+          .generateQRCodeData(issuer: 'TAREQO', account: user?.email ?? 'user');
 
       setState(() {
         _secret = secret;
         _qrCodeData = qrData;
       });
-      
+
       _startTimer();
     } catch (e) {
       if (mounted) {
@@ -69,7 +68,7 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
         timer.cancel();
         return;
       }
-      
+
       final remaining = ref.read(mfaAuthUseCaseProvider).getTimeRemaining();
       setState(() {
         _timeRemaining = remaining;
@@ -80,9 +79,9 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
   Future<void> _verifySetup() async {
     final code = _codeController.text.trim();
     if (code.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.mfaCodeLengthError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.mfaCodeLengthError)));
       return;
     }
 
@@ -90,24 +89,24 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
 
     try {
       final isValid = await ref.read(mfaAuthUseCaseProvider).verifyCode(code);
-      
+
       if (isValid) {
         // Confirmar ativação — só agora gravamos mfa_enabled.
         await ref.read(mfaAuthUseCaseProvider).confirmEnable();
         setState(() => _isVerifying = false);
-        
+
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.mfaSetupSuccess)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(context.l10n.mfaSetupSuccess)));
           Navigator.of(context).pop(true);
         }
       } else {
         setState(() => _isVerifying = false);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.mfaInvalidCode)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(context.l10n.mfaInvalidCode)));
         }
       }
     } catch (e) {
@@ -238,9 +237,7 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
                   label: l10n.mfaVerifyAndEnable,
                 ),
               ] else
-                const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                const Center(child: CircularProgressIndicator()),
             ],
           ),
         ),

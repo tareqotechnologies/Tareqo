@@ -37,17 +37,38 @@ class MFAService {
       final now = DateTime.now().millisecondsSinceEpoch;
 
       // Check current window
-      final current = OTP.generateTOTPCodeString(secret, now, length: _digits, interval: _period, algorithm: Algorithm.SHA1, isGoogle: true);
+      final current = OTP.generateTOTPCodeString(
+        secret,
+        now,
+        length: _digits,
+        interval: _period,
+        algorithm: Algorithm.SHA1,
+        isGoogle: true,
+      );
       if (OTP.constantTimeVerification(current, code)) return true;
 
       // Check previous window (clock skew tolerance)
       final previousTime = now - (_period * 1000);
-      final previous = OTP.generateTOTPCodeString(secret, previousTime, length: _digits, interval: _period, algorithm: Algorithm.SHA1, isGoogle: true);
+      final previous = OTP.generateTOTPCodeString(
+        secret,
+        previousTime,
+        length: _digits,
+        interval: _period,
+        algorithm: Algorithm.SHA1,
+        isGoogle: true,
+      );
       if (OTP.constantTimeVerification(previous, code)) return true;
 
       // Check next window
       final nextTime = now + (_period * 1000);
-      final next = OTP.generateTOTPCodeString(secret, nextTime, length: _digits, interval: _period, algorithm: Algorithm.SHA1, isGoogle: true);
+      final next = OTP.generateTOTPCodeString(
+        secret,
+        nextTime,
+        length: _digits,
+        interval: _period,
+        algorithm: Algorithm.SHA1,
+        isGoogle: true,
+      );
       if (OTP.constantTimeVerification(next, code)) return true;
 
       return false;

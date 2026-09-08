@@ -83,16 +83,21 @@ info "All required environment variables present."
 info "Running flutter pub get..."
 flutter pub get
 
-info "Building iOS (no codesign)..."
+info "Building iOS (no codesign, obfuscated)..."
 DART_DEFINES=(
   "--dart-define=SUPABASE_URL=$SUPABASE_URL"
   "--dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
+  # A1: marcador de credenciais EXPLÍCITAS (guarda de release rejeita
+  # defaults embutidos).
+  "--dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true"
 )
 if [[ -n "${SENTRY_DSN:-}" ]]; then
   DART_DEFINES+=("--dart-define=SENTRY_DSN=$SENTRY_DSN")
 fi
 
-flutter build ios --release "${DART_DEFINES[@]}" --no-codesign
+# B6: release local SEMPRE ofuscado + symbols (mesmo padrão do CI/fastlane).
+flutter build ios --release "${DART_DEFINES[@]}" --no-codesign \
+  --obfuscate --split-debug-info=build/symbols
 
 if [[ "$UPLOAD" == "true" ]]; then
   info "Building signed IPA..."

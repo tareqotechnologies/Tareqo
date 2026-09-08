@@ -67,6 +67,11 @@ platform :android do
     dart_defines = [
       "--dart-define=SUPABASE_URL=#{required["SUPABASE_URL"]}",
       "--dart-define=SUPABASE_ANON_KEY=#{required["SUPABASE_ANON_KEY"]}",
+      # A1: marca as credenciais como EXPLÍCITAS — a guarda de release
+      # (SupabaseBootstrap) rejeita release com defaults embutidos por
+      # valor/marcador, mesmo que os valores coincidam com os defaults
+      # (deploy atual: projeto único dev/prod).
+      "--dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true",
     ]
     unless ENV["SENTRY_DSN"].to_s.empty?
       dart_defines << "--dart-define=SENTRY_DSN=#{ENV["SENTRY_DSN"]}"
@@ -134,6 +139,8 @@ platform :ios do
     dart_defines = [
       "--dart-define=SUPABASE_URL=#{required["SUPABASE_URL"]}",
       "--dart-define=SUPABASE_ANON_KEY=#{required["SUPABASE_ANON_KEY"]}",
+      # A1: marca as credenciais como EXPLÍCITAS (ver guarda de release).
+      "--dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true",
     ]
     unless ENV["SENTRY_DSN"].to_s.empty?
       dart_defines << "--dart-define=SENTRY_DSN=#{ENV["SENTRY_DSN"]}"

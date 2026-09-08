@@ -22,8 +22,7 @@ class _FakeInvoiceNotificationRepository
   bool markAllAsReadCalled = false;
 
   @override
-  Future<InvoiceNotification> create(
-      InvoiceNotification notification) async {
+  Future<InvoiceNotification> create(InvoiceNotification notification) async {
     createCalled = true;
     final created = notification.copyWith(
       id: notification.id.isEmpty
@@ -37,15 +36,12 @@ class _FakeInvoiceNotificationRepository
   @override
   Future<List<InvoiceNotification>> getByTenant(String tenantId) async =>
       List.unmodifiable(
-        _notifications
-            .where((n) => n.tenantId == tenantId)
-            .toList()
+        _notifications.where((n) => n.tenantId == tenantId).toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
       );
 
   @override
-  Future<List<InvoiceNotification>> getUnreadByTenant(
-      String tenantId) async =>
+  Future<List<InvoiceNotification>> getUnreadByTenant(String tenantId) async =>
       List.unmodifiable(
         _notifications
             .where((n) => n.tenantId == tenantId && !n.isRead)
@@ -55,15 +51,12 @@ class _FakeInvoiceNotificationRepository
 
   @override
   Future<int> getUnreadCount(String tenantId) async =>
-      _notifications
-          .where((n) => n.tenantId == tenantId && !n.isRead)
-          .length;
+      _notifications.where((n) => n.tenantId == tenantId && !n.isRead).length;
 
   @override
   Future<void> markAsRead(String notificationId) async {
     markAsReadCalled = true;
-    final index =
-        _notifications.indexWhere((n) => n.id == notificationId);
+    final index = _notifications.indexWhere((n) => n.id == notificationId);
     if (index >= 0) {
       _notifications[index] = _notifications[index].copyWith(
         isRead: true,
@@ -129,12 +122,7 @@ Plan _basicPlan({
   String id = 'pl1',
   String name = 'Essencial',
   int priceMonthlyCents = 5000,
-}) =>
-    Plan(
-      id: id,
-      name: name,
-      priceMonthlyCents: priceMonthlyCents,
-    );
+}) => Plan(id: id, name: name, priceMonthlyCents: priceMonthlyCents);
 
 Invoice _basicInvoice({
   String id = 'inv1',
@@ -166,17 +154,16 @@ InvoiceNotification _notif({
   String body = 'Factura gerada',
   bool isRead = false,
   DateTime? createdAt,
-}) =>
-    InvoiceNotification(
-      id: id,
-      tenantId: tenantId,
-      invoiceId: invoiceId,
-      type: type,
-      title: title,
-      body: body,
-      isRead: isRead,
-      createdAt: createdAt ?? DateTime.now(),
-    );
+}) => InvoiceNotification(
+  id: id,
+  tenantId: tenantId,
+  invoiceId: invoiceId,
+  type: type,
+  title: title,
+  body: body,
+  isRead: isRead,
+  createdAt: createdAt ?? DateTime.now(),
+);
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -189,8 +176,7 @@ void main() {
       final planRepo = _FakePlanRepository();
       planRepo.addPlan(_basicPlan());
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice();
 
       final notification = await useCase.call(invoice);
@@ -198,8 +184,7 @@ void main() {
       expect(notification, isNotNull);
       expect(notification!.tenantId, 'tn1');
       expect(notification.invoiceId, 'inv1');
-      expect(notification.type,
-          InvoiceNotificationType.invoiceGenerated);
+      expect(notification.type, InvoiceNotificationType.invoiceGenerated);
       expect(notification.title, isNotEmpty);
       expect(notification.body, contains('50.00'));
       expect(notification.body, contains('MZN'));
@@ -212,8 +197,7 @@ void main() {
       final planRepo = _FakePlanRepository();
       // Não adiciona nenhum plano
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice();
 
       final notification = await useCase.call(invoice);
@@ -227,8 +211,7 @@ void main() {
       final planRepo = _FakePlanRepository();
       planRepo.addPlan(_basicPlan());
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice(
         dueDate: DateTime.now().add(const Duration(days: 7)),
       );
@@ -236,8 +219,7 @@ void main() {
       final notification = await useCase.notifyDueSoon(invoice);
 
       expect(notification, isNotNull);
-      expect(notification!.type,
-          InvoiceNotificationType.invoiceDueSoon);
+      expect(notification!.type, InvoiceNotificationType.invoiceDueSoon);
       expect(notification.title, contains('vencer'));
       expect(notification.body, contains('dia(s)'));
     });
@@ -246,8 +228,7 @@ void main() {
       final notifRepo = _FakeInvoiceNotificationRepository();
       final planRepo = _FakePlanRepository();
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice();
 
       final notification = await useCase.notifyDueSoon(invoice);
@@ -260,8 +241,7 @@ void main() {
       final planRepo = _FakePlanRepository();
       planRepo.addPlan(_basicPlan());
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice(
         dueDate: DateTime.now().subtract(const Duration(days: 1)),
       );
@@ -269,8 +249,7 @@ void main() {
       final notification = await useCase.notifyExpired(invoice);
 
       expect(notification, isNotNull);
-      expect(notification!.type,
-          InvoiceNotificationType.invoiceExpired);
+      expect(notification!.type, InvoiceNotificationType.invoiceExpired);
       expect(notification.title, contains('expirada'));
     });
 
@@ -278,8 +257,7 @@ void main() {
       final notifRepo = _FakeInvoiceNotificationRepository();
       final planRepo = _FakePlanRepository();
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice();
 
       final notification = await useCase.notifyExpired(invoice);
@@ -292,17 +270,13 @@ void main() {
       final planRepo = _FakePlanRepository();
       planRepo.addPlan(_basicPlan());
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
-      final invoice = _basicInvoice(
-        status: InvoiceStatus.paid,
-      );
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final invoice = _basicInvoice(status: InvoiceStatus.paid);
 
       final notification = await useCase.notifyPaid(invoice);
 
       expect(notification, isNotNull);
-      expect(notification!.type,
-          InvoiceNotificationType.invoicePaid);
+      expect(notification!.type, InvoiceNotificationType.invoicePaid);
       expect(notification.title, contains('paga'));
     });
 
@@ -310,8 +284,7 @@ void main() {
       final notifRepo = _FakeInvoiceNotificationRepository();
       final planRepo = _FakePlanRepository();
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice();
 
       final notification = await useCase.notifyPaid(invoice);
@@ -324,8 +297,7 @@ void main() {
       final planRepo = _FakePlanRepository();
       planRepo.addPlan(_basicPlan());
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice(amountCents: 10000);
 
       final notification = await useCase.call(invoice);
@@ -339,8 +311,7 @@ void main() {
       final planRepo = _FakePlanRepository();
       planRepo.addPlan(_basicPlan());
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice();
 
       final notification = await useCase.call(invoice);
@@ -354,8 +325,7 @@ void main() {
       final planRepo = _FakePlanRepository();
       planRepo.addPlan(_basicPlan());
 
-      final useCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final useCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final dueDate = DateTime(2026, 9, 15);
       final invoice = _basicInvoice(dueDate: dueDate);
 
@@ -388,8 +358,7 @@ void main() {
       expect(result.every((n) => n.tenantId == 'tn1'), isTrue);
     });
 
-    test('retorna lista vazia quando tenant não tem notificações',
-        () async {
+    test('retorna lista vazia quando tenant não tem notificações', () async {
       final notifRepo = _FakeInvoiceNotificationRepository();
 
       final useCase = GetTenantNotificationsUseCase(notifRepo);
@@ -430,11 +399,9 @@ void main() {
     test('marca notificação como lida', () async {
       final notifRepo = _FakeInvoiceNotificationRepository();
 
-      notifRepo._notifications.add(_notif(
-        id: 'n1',
-        tenantId: 'tn1',
-        isRead: false,
-      ));
+      notifRepo._notifications.add(
+        _notif(id: 'n1', tenantId: 'tn1', isRead: false),
+      );
 
       final useCase = MarkNotificationAsReadUseCase(notifRepo);
       await useCase('n1');
@@ -461,8 +428,7 @@ void main() {
   });
 
   group('MarkAllNotificationsAsReadUseCase', () {
-    test('marca todas as notificações de um tenant como lidas',
-        () async {
+    test('marca todas as notificações de um tenant como lidas', () async {
       final notifRepo = _FakeInvoiceNotificationRepository();
 
       notifRepo._notifications.addAll([
@@ -489,12 +455,7 @@ void main() {
 
       final readAt = DateTime(2026, 8, 28);
       notifRepo._notifications.addAll([
-        _notif(
-          id: 'n1',
-          tenantId: 'tn1',
-          isRead: true,
-          createdAt: readAt,
-        ),
+        _notif(id: 'n1', tenantId: 'tn1', isRead: true, createdAt: readAt),
       ]);
 
       final useCase = MarkAllNotificationsAsReadUseCase(notifRepo);
@@ -515,8 +476,7 @@ void main() {
       expect(notifRepo._notifications, isEmpty);
     });
 
-    test('marca todas as notificações (pendentes e já lidas)',
-        () async {
+    test('marca todas as notificações (pendentes e já lidas)', () async {
       final notifRepo = _FakeInvoiceNotificationRepository();
 
       notifRepo._notifications.addAll([
@@ -527,26 +487,24 @@ void main() {
       final useCase = MarkAllNotificationsAsReadUseCase(notifRepo);
       await useCase('tn1');
 
-      final allRead = notifRepo._notifications
-          .every((n) => n.isRead);
+      final allRead = notifRepo._notifications.every((n) => n.isRead);
       expect(allRead, isTrue);
 
-      final allHaveReadAt = notifRepo._notifications
-          .every((n) => n.readAt != null);
+      final allHaveReadAt = notifRepo._notifications.every(
+        (n) => n.readAt != null,
+      );
       expect(allHaveReadAt, isTrue);
     });
   });
 
   group('Integração — fluxo completo de notificação', () {
-    test('factura gerada → notificação criada → marca como lida',
-        () async {
+    test('factura gerada → notificação criada → marca como lida', () async {
       final notifRepo = _FakeInvoiceNotificationRepository();
       final planRepo = _FakePlanRepository();
       planRepo.addPlan(_basicPlan());
 
       // 1. Gera notificação de factura
-      final notifyUseCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final notifyUseCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice();
       final notification = await notifyUseCase.call(invoice);
 
@@ -560,8 +518,7 @@ void main() {
       expect(notifications, hasLength(1));
 
       // 3. Marca como lida
-      final markUseCase =
-          MarkNotificationAsReadUseCase(notifRepo);
+      final markUseCase = MarkNotificationAsReadUseCase(notifRepo);
       await markUseCase(notification!.id);
 
       expect(notifRepo._notifications.first.isRead, isTrue);
@@ -574,8 +531,7 @@ void main() {
       planRepo.addPlan(_basicPlan());
 
       // Gera múltiplas notificações
-      final notifyUseCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final notifyUseCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice();
       await notifyUseCase.call(invoice);
       await notifyUseCase.notifyDueSoon(invoice);
@@ -584,12 +540,10 @@ void main() {
       expect(notifRepo._notifications, hasLength(3));
 
       // Marca todas como lidas
-      final markAllUseCase =
-          MarkAllNotificationsAsReadUseCase(notifRepo);
+      final markAllUseCase = MarkAllNotificationsAsReadUseCase(notifRepo);
       await markAllUseCase('tn1');
 
-      final allRead = notifRepo._notifications
-          .every((n) => n.isRead);
+      final allRead = notifRepo._notifications.every((n) => n.isRead);
       expect(allRead, isTrue);
     });
 
@@ -599,8 +553,7 @@ void main() {
       planRepo.addPlan(_basicPlan());
 
       // Gera 3 notificações
-      final notifyUseCase =
-          NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
+      final notifyUseCase = NotifyInvoiceGeneratedUseCase(notifRepo, planRepo);
       final invoice = _basicInvoice();
       final n1 = await notifyUseCase.call(invoice);
       await notifyUseCase.notifyDueSoon(invoice);
@@ -611,16 +564,14 @@ void main() {
       expect(unreadCount, 3);
 
       // Marca uma como lida
-      final markUseCase =
-          MarkNotificationAsReadUseCase(notifRepo);
+      final markUseCase = MarkNotificationAsReadUseCase(notifRepo);
       await markUseCase(n1!.id);
 
       unreadCount = await notifRepo.getUnreadCount('tn1');
       expect(unreadCount, 2);
 
       // Marca todas como lidas
-      final markAllUseCase =
-          MarkAllNotificationsAsReadUseCase(notifRepo);
+      final markAllUseCase = MarkAllNotificationsAsReadUseCase(notifRepo);
       await markAllUseCase('tn1');
 
       unreadCount = await notifRepo.getUnreadCount('tn1');

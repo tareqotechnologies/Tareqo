@@ -128,9 +128,7 @@ class GenerateInvoicePreviewUseCase {
       buffer.writeln(
         '  ${item.productName}  ${_formatQty(item.quantity)} x ${_formatMoney(item.unitPriceCents)}',
       );
-      buffer.writeln(
-        '    Subtotal: ${_formatMoney(item.subtotalCents)}',
-      );
+      buffer.writeln('    Subtotal: ${_formatMoney(item.subtotalCents)}');
     }
 
     buffer.writeln('───────────────────────────────');

@@ -13,8 +13,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// linhas. Listagens administrativas (tenants/plan requests pendentes) são
 /// naturalmente pequenas e usam o mesmo teto por segurança.
 abstract final class SupabaseQueryLimits {
- /// Teto de linhas por requisição de listagem (página da paginação keyset).
- static const int pageSize = 1000;
+  /// Teto de linhas por requisição de listagem (página da paginação keyset).
+  static const int pageSize = 1000;
 }
 
 /// Busca TODAS as linhas de uma listagem usando **paginação keyset** (H2):
@@ -27,24 +27,24 @@ abstract final class SupabaseQueryLimits {
 /// [cursorColumn] — a ordenação de exibição final é feita pelos providers
 /// (ou por um sort explícito no datasource, quando o contrato exige).
 Future<List<Map<String, dynamic>>> fetchAllKeyset(
- PostgrestFilterBuilder<List<Map<String, dynamic>>> query, {
- String cursorColumn = 'id',
+  PostgrestFilterBuilder<List<Map<String, dynamic>>> query, {
+  String cursorColumn = 'id',
 }) async {
- final all = <Map<String, dynamic>>[];
- String? cursor;
- while (true) {
- var page = query;
- if (cursor != null) {
- page = page.gt(cursorColumn, cursor);
- }
- final rows = await page
- .order(cursorColumn, ascending: true)
- .limit(SupabaseQueryLimits.pageSize);
- all.addAll(rows);
- if (rows.length < SupabaseQueryLimits.pageSize) break;
- cursor = rows.last[cursorColumn] as String;
- }
- return all;
+  final all = <Map<String, dynamic>>[];
+  String? cursor;
+  while (true) {
+    var page = query;
+    if (cursor != null) {
+      page = page.gt(cursorColumn, cursor);
+    }
+    final rows = await page
+        .order(cursorColumn, ascending: true)
+        .limit(SupabaseQueryLimits.pageSize);
+    all.addAll(rows);
+    if (rows.length < SupabaseQueryLimits.pageSize) break;
+    cursor = rows.last[cursorColumn] as String;
+  }
+  return all;
 }
 
 /// Cliente Supabase — requer `SupabaseBootstrap.initialize()` no `main()`
@@ -59,10 +59,10 @@ SupabaseClient get supabaseClient => Supabase.instance.client;
 /// na leitura. Usado pela prévia do Z-report (`get_cash_closing_summary`) e
 /// pelo fecho (`close_cash_register`), que persistem o mesmo formato.
 Map<String, int> mapSalesByMethodCents(dynamic raw) {
- final decoded = raw is String
- ? jsonDecode(raw) as Map<String, dynamic>
- : Map<String, dynamic>.from(raw as Map);
- return decoded.map((key, value) => MapEntry(key, (value as num).toInt()));
+  final decoded = raw is String
+      ? jsonDecode(raw) as Map<String, dynamic>
+      : Map<String, dynamic>.from(raw as Map);
+  return decoded.map((key, value) => MapEntry(key, (value as num).toInt()));
 }
 
 /// UUID do usuário autenticado (o *tenant* do modelo multi-tenant).
@@ -74,11 +74,11 @@ Map<String, int> mapSalesByMethodCents(dynamic raw) {
 /// Lança [StateError] se não houver sessão ativa (as telas de dados só são
 /// acessíveis após o login, via [AuthGate], então isso é um caso extremo).
 String requireCurrentUserId() {
- final userId = Supabase.instance.client.auth.currentUser?.id;
- if (userId == null) {
- throw StateError(
- 'Usuário não autenticado: os dados do Supabase exigem uma sessão ativa.',
- );
- }
- return userId;
+  final userId = Supabase.instance.client.auth.currentUser?.id;
+  if (userId == null) {
+    throw StateError(
+      'Usuário não autenticado: os dados do Supabase exigem uma sessão ativa.',
+    );
+  }
+  return userId;
 }

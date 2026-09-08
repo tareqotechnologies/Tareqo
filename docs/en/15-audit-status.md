@@ -44,7 +44,7 @@ This caught and fixed a **genuine W4 bug**: `SUM(bigint)` returns `numeric`, whi
 | **W4 — money in integer cents end-to-end** | ✓ Done — `*Cents` in domain, SQLite `INTEGER` + idempotent ×100 migration, Supabase `BIGINT` (+ W4 column migration, Part 7 of `upgrade.sql`), RPCs compare/sum in cents directly (no `ROUND(x*100)`), plan catalog in cents, `Money.parse` / `Formatters.currency(cents)` |
 | **H2 — server-side aggregation + keyset pagination** | ✓ Done — `get_cash_flow` + `get_sales_report` RPCs (SECURITY DEFINER, `is_my_store`-scoped, BIGINT, day bucketing in device timezone; Parts 8.6–8.7 of `upgrade.sql`); `fetchAllKeyset` (stable `id` cursor, `pageSize` batches) replacing `.limit(1000)` on all 6 Supabase `getAll` |
 | **W10 — sqlite3 3.x** | ✓ Done — `sqlite3` ^3.5.1 via build hooks/native assets; `sqlite3_flutter_libs` (EOL) removed; `dispose()` → `close()` |
-| **SQL consolidation** | ✓ Done — 13 → 4 SQL files (`schema.sql` fresh install, `upgrade.sql` existing DBs, `promote_super_admin.sql` ops helper, `sqlcheck_stub.sql` smoke-test stub); `supabase/migrations/` deleted |
+| **SQL consolidation** | ✓ Done — 13 → 4 SQL files (`schema.sql` fresh install, `upgrade.sql` existing DBs, `promote_super_admin.sql` ops helper, `sqlcheck_stub.sql` smoke-test stub); **Sep 2026:** the 7 add-on/billing migration files were archived in `supabase/archived_migrations/` with their objects merged into `schema.sql` (Part 1.9) and `upgrade.sql` (Part 31) — a fresh install now needs ONE script |
 | **Validation** | ✓ `sql_check.sh` **12/12** on real Postgres 16 (incl. idempotency + W4 migration with real data) · `sql_check_live.sh` **14/14** · CI runs the full suite in `ci.yml` + `release.yml` |
 
 ---

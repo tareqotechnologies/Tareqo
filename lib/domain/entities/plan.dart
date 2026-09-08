@@ -11,20 +11,20 @@ part 'plan.g.dart';
 /// `AddEmployeeUseCase`) e também podem ser reforçados no banco (Fase 2).
 @freezed
 abstract class Plan with _$Plan {
- const factory Plan({
- required String id,
- required String name,
- @Default('') String description,
- // Preço mensal em CENTAVOS inteiros (W4 — migração de dinheiro para
- // centavos; o banco persiste BIGINT/INTEGER).
- @Default(0) int priceMonthlyCents,
- @Default(1) int maxStores,
- @Default(1) int maxEmployees,
- @Default(true) bool isActive,
- // IDs dos add-ons incluídos neste plano (ex.: ['ao_advanced_reports']).
- // Tenants neste plano recebem estes add-ons automaticamente.
- @Default(<String>[]) List<String> bundledAddOns,
- }) = _Plan;
+  const factory Plan({
+    required String id,
+    required String name,
+    @Default('') String description,
+    // Preço mensal em CENTAVOS inteiros (W4 — migração de dinheiro para
+    // centavos; o banco persiste BIGINT/INTEGER).
+    @Default(0) int priceMonthlyCents,
+    @Default(1) int maxStores,
+    @Default(1) int maxEmployees,
+    @Default(true) bool isActive,
+    // IDs dos add-ons incluídos neste plano (ex.: ['ao_advanced_reports']).
+    // Tenants neste plano recebem estes add-ons automaticamente.
+    @Default(<String>[]) List<String> bundledAddOns,
+  }) = _Plan;
 
- factory Plan.fromJson(Map<String, dynamic> json) => _$PlanFromJson(json);
+  factory Plan.fromJson(Map<String, dynamic> json) => _$PlanFromJson(json);
 }

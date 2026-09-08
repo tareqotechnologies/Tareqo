@@ -1,0 +1,36 @@
+# Varredura de vulnerabilidades das dependências (auditoria M8).
+#
+# O `dart pub audit` não existe no SDK atual (Dart 3.12) — esta varredura
+# usa o OSV-Scanner oficial do Google (reusable workflow) contra o banco
+# OSV (oss-vulnerabilities) no pubspec.lock. Roda semanalmente + a cada
+# push na main + manualmente (workflow_dispatch), e falha o job se alguma
+# vulnerabilidade for encontrada (fail-on-vuln: true).
+#
+# Complemento: `dart pub outdated` (verificação de versões) segue manual/
+# CI conforme docs/13-build-e-publicacao.
+name: Security scan (OSV)
+
+on:
+  schedule:
+    # Segunda-feira 07:00 UTC (09:00 Maputo).
+    - cron: "0 7 * * 1"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  # Requerido para fazer upload do SARIF para o CodeQL.
+  actions: read
+  # Requerido para escrever eventos de segurança no tab Security.
+  security-events: write
+  contents: read
+
+jobs:
+  osv-scan:
+    name: OSV-Scanner (pubspec.lock)
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2"
+    with:
+      scan-args: |-
+        --lockfile=pubspec.lock
+      fail-on-vuln: true
+      upload-sarif: true

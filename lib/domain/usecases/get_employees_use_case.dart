@@ -3,10 +3,10 @@ import '../repositories/i_employee_repository.dart';
 
 /// Caso de uso: listar os funcionários de um tenant.
 class GetEmployeesUseCase {
- const GetEmployeesUseCase(this._repository);
+  const GetEmployeesUseCase(this._repository);
 
- final IEmployeeRepository _repository;
+  final IEmployeeRepository _repository;
 
- Future<List<StoreEmployee>> call(String tenantId) =>
- _repository.getByTenant(tenantId);
+  Future<List<StoreEmployee>> call(String tenantId) =>
+      _repository.getByTenant(tenantId);
 }

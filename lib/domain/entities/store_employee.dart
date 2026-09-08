@@ -5,11 +5,11 @@ part 'store_employee.g.dart';
 
 /// Cargo do funcionário dentro de uma loja.
 enum EmployeeRole {
- /// Gerente — gerencia loja/funcionários (além do dono do tenant).
- manager,
+  /// Gerente — gerencia loja/funcionários (além do dono do tenant).
+  manager,
 
- /// Funcionário comum — opera vendas/estoque da loja.
- employee;
+  /// Funcionário comum — opera vendas/estoque da loja.
+  employee,
 }
 
 /// Funcionário de uma loja: vínculo entre uma conta de usuário e uma loja
@@ -24,18 +24,19 @@ enum EmployeeRole {
 /// (`is_my_store`/`is_manager_of_store` passam a exigir vínculo ativo).
 @freezed
 abstract class StoreEmployee with _$StoreEmployee {
- const factory StoreEmployee({
- required String id,
- required String tenantId,
- required String storeId,
- required String userId,
- required String fullName,
- required String email,
- @Default(EmployeeRole.employee) EmployeeRole role,
- /// Vínculo ATIVO? `false` = funcionário desativado (conta suspensa).
- @Default(true) bool isActive,
- }) = _StoreEmployee;
+  const factory StoreEmployee({
+    required String id,
+    required String tenantId,
+    required String storeId,
+    required String userId,
+    required String fullName,
+    required String email,
+    @Default(EmployeeRole.employee) EmployeeRole role,
 
- factory StoreEmployee.fromJson(Map<String, dynamic> json) =>
- _$StoreEmployeeFromJson(json);
+    /// Vínculo ATIVO? `false` = funcionário desativado (conta suspensa).
+    @Default(true) bool isActive,
+  }) = _StoreEmployee;
+
+  factory StoreEmployee.fromJson(Map<String, dynamic> json) =>
+      _$StoreEmployeeFromJson(json);
 }

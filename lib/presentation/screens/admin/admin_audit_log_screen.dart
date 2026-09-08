@@ -656,7 +656,6 @@ class _StatusDot extends StatelessWidget {
       ],
     );
   }
-
 }
 
 // ─── Detail Sheet ────────────────────────────────────────────────────────────

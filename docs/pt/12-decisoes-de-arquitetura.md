@@ -104,6 +104,15 @@ Detalhes da implementação:
 - **Web**: o sqlite3 nativo não roda no navegador (o `dart:ffi` não existe lá), então `AppDatabase` usa **import condicional** e o app cai automaticamente para os datasources em memória (mesmos contratos — a UI continua igual).
 - **Testes**: na VM Windows o próprio `package:sqlite3` já cai para a `winsqlite3.dll` do sistema, então os testes rodam sem setup manual.
 
+## Por que o SQLite roda síncrono na main isolate (e por que NÃO migrar para isolates agora)?
+
+**Decisão (auditoria Set/2026, item M6):** manter as consultas SQLite **síncronas na main isolate**. Migrar para `IsolateDatabase`/`SynchronousDatabase` foi avaliado e **descartado nesta fase** — não é um problema atual, é uma otimização prematura com risco alto:
+
+1. **Contratos 100% síncronos.** Todas as interfaces locais (`*LocalDataSource`) e o `IUnitOfWork` são síncronos por design; os datasources em memória (fallback web) e SQLite implementam **os mesmos contratos**. Mover para isolates exigiria tornar assíncronas todas as interfaces, implementações, use cases e repositórios que as consomem — uma mudança transversal no caminho de dinheiro (vendas, fiado, compras, fecho de caixa), recém-estabilizado, sem mudança de comportamento visível.
+2. **Transações re-entrantes amarradas à conexão única.** `beginTransaction`/`commitTransaction`/`rollbackTransaction` usam um contador estático de profundidade com a invariante documentada de **uma** conexão e **um** `IUnitOfWork` por processo. Em isolates, essa semântica precisaria ser reprojetada do zero (mensagens/portas) — novo risco de corrupção de transação.
+3. **Volume de dados não justifica.** Um POS de loja individual (a unidade do produto) tem milhares, não milhões, de linhas; consultas locais em SQLite são microssegundos a poucos milissegundos. O ponto de maior custo (migrações v1–v6) roda **uma única vez** no startup, já versionado por `PRAGMA user_version`.
+4. **O que fazer quando valer a pena.** Gatilhos para reabrir o tema: (a) telemetria (Sentry) mostrando frames jankados por SQL; (b) relatórios pesados agregando histórico longo; (c) multi-store com grande volume por dispositivo. Nesses casos, migrar camada a camada (datasource por datasource) seguindo o mesmo processo documentado de troca de persistência.
+
 ## Por que Riverpod para o gerenciamento de estado?
 
 A camada de apresentação usa **Riverpod** (`Notifier`/`FutureProvider`/`StreamProvider`) para gerenciar o estado:

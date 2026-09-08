@@ -104,6 +104,15 @@ Implementation details:
 - **Web**: the native sqlite3 does not run in the browser (`dart:ffi` does not exist there), so `AppDatabase` uses a **conditional import** and the app falls back to the in-memory datasources (same contracts — the UI stays identical).
 - **Tests**: on the Windows VM, `package:sqlite3` itself falls back to the system `winsqlite3.dll`, so tests run without manual setup.
 
+## Why does SQLite run synchronously on the main isolate (and why NOT move to isolates now)?
+
+**Decision (Sep 2026 audit, item M6):** keep SQLite queries **synchronous on the main isolate**. Moving to `IsolateDatabase`/`SynchronousDatabase` was evaluated and **rejected at this stage** — it is not a current problem, it is premature optimization with high risk:
+
+1. **100% synchronous contracts.** All local interfaces (`*LocalDataSource`) and the `IUnitOfWork` are synchronous by design; the in-memory datasources (web fallback) and SQLite implement **the same contracts**. Moving to isolates would require making every interface, implementation, use case and repository that consumes them asynchronous — a cross-cutting change through the money path (sales, debts, purchases, cash closing), recently stabilized, with no visible behavior change.
+2. **Re-entrant transactions tied to a single connection.** `beginTransaction`/`commitTransaction`/`rollbackTransaction` use a static depth counter with the documented invariant of **one** connection and **one** `IUnitOfWork` per process. Under isolates this semantics would need to be redesigned from scratch (messages/ports) — a new transaction-corruption risk.
+3. **Data volume does not justify it.** A single-store POS (the product unit) has thousands, not millions, of rows; local SQLite queries take microseconds to a few milliseconds. The most expensive point (migrations v1–v6) runs **once** at startup, already versioned by `PRAGMA user_version`.
+4. **When to revisit.** Triggers to reopen the topic: (a) telemetry (Sentry) showing SQL-janked frames; (b) heavy reports aggregating long histories; (c) multi-store with large per-device volume. In those cases, migrate layer by layer (datasource by datasource) following the same documented persistence-swap process.
+
 ## Why Riverpod for state management?
 
 The presentation layer uses **Riverpod** (`Notifier`/`FutureProvider`/`StreamProvider`) to manage state:
@@ -264,7 +273,7 @@ Receivables are **tied-up capital**: the merchandise has left (and was paid to t
 3. **Automatic JWT renewal.** GoTrue renews the access token with the refresh token before it expires.
 4. **Reactivity.** Login/logout emit events on the same stream; navigation and any session-dependent state react automatically.
 
-Credentials are supplied via **flavors + `--dart-define-from-file`** (`env/dev.env` committed, `env/prod.env` gitignored); a **release** build with the embedded dev defaults throws at startup (fail-fast S2).
+Credentials are supplied via **flavors + `--dart-define-from-file`** (`env/dev.env` committed, `env/prod.env` gitignored); a **release** build with the embedded dev defaults throws at startup (fail-fast S2 + A1 — any release requires explicit credentials plus the `SUPABASE_CREDENTIALS_EXPLICIT=true` marker).
 
 ### Tenant currency and language (presentation)
 

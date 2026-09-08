@@ -120,11 +120,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         pendingUpgradesAsync.isLoading;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.adminDashboardTitle,
-        ),
-      ),
+      appBar: AppBar(title: Text(l10n.adminDashboardTitle)),
       body: hasError && !isLoading
           ? ErrorView(
               message: l10n.adminDashboardLoadError,
@@ -602,7 +598,7 @@ class _GrowthSummary extends StatelessWidget {
           // Charts
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Tendências (8 semanas)',
+            l10n.adminGrowthTrendsLabel,
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -1341,7 +1337,6 @@ class _ActivityRow extends StatelessWidget {
       ),
     );
   }
-
 }
 
 // ═════════════════════════════════════════════════════════════════════════════

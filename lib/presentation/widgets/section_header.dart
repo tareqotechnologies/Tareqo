@@ -4,18 +4,19 @@ import '../../core/theme/app_tokens.dart';
 
 /// Cabeçalho de seção V4 — título + ação opcional à direita.
 class SectionHeader extends StatelessWidget {
- const SectionHeader({
- super.key,
- required this.title,
- this.subtitle,
- this.actionLabel,
- this.onAction,
- });
+  const SectionHeader({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.actionLabel,
+    this.onAction,
+  });
 
- final String title;
- final String? subtitle;
- final String? actionLabel;
- final VoidCallback? onAction;  @override
+  final String title;
+  final String? subtitle;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -58,12 +59,9 @@ class SectionHeader extends StatelessWidget {
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: Text(
-              actionLabel!,
-              style: theme.textTheme.labelMedium,
-            ),
+            child: Text(actionLabel!, style: theme.textTheme.labelMedium),
           ),
       ],
     );
- }
+  }
 }

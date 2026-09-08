@@ -81,9 +81,10 @@ void main() {
         targetCents: 200000,
       );
       expect(
-        (await dataSource.getTargets(storeId: 'st1', month: '2026-09'))
-            .single
-            .targetCents,
+        (await dataSource.getTargets(
+          storeId: 'st1',
+          month: '2026-09',
+        )).single.targetCents,
         200000,
       );
     });
@@ -115,10 +116,7 @@ void main() {
         targetCents: 150000,
       );
 
-      expect(
-        await repository.getCommissionRates(storeId: 'st1'),
-        hasLength(1),
-      );
+      expect(await repository.getCommissionRates(storeId: 'st1'), hasLength(1));
       expect(
         await repository.getTargets(storeId: 'st1', month: '2026-09'),
         hasLength(1),

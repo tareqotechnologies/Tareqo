@@ -10,8 +10,8 @@ import 'products_providers.dart';
 /// entrada no destino).
 final stockTransfersProvider =
     NotifierProvider<StockTransfersNotifier, List<StockTransfer>>(
-  StockTransfersNotifier.new,
-);
+      StockTransfersNotifier.new,
+    );
 
 class StockTransfersNotifier extends Notifier<List<StockTransfer>> {
   @override
@@ -36,7 +36,8 @@ class StockTransfersNotifier extends Notifier<List<StockTransfer>> {
     final originProducts = await getProducts.call(storeId: fromStoreId);
     final originProduct = originProducts.firstWhere(
       (p) => p.id == productId,
-      orElse: () => throw ArgumentError('Produto não encontrado na loja de origem'),
+      orElse: () =>
+          throw ArgumentError('Produto não encontrado na loja de origem'),
     );
 
     final currentStockMilli = originProduct.stockQuantity;

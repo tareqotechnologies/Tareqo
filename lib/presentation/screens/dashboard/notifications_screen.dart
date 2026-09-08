@@ -131,7 +131,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     )
                   : ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 24),
+                      padding: EdgeInsets.fromLTRB(
+                        horizontal,
+                        8,
+                        horizontal,
+                        24,
+                      ),
                       itemCount: _buildItemList(
                         filteredAdminMessages,
                         filteredNotifications,
@@ -833,15 +838,15 @@ abstract final class _AdminMessageTypeLabel {
     AdminMessageType.general => AppColors.statusIndigo,
   };
 
-  static String label(AdminMessageType type, AppLocalizations l10n) =>
-      switch (type) {
-        AdminMessageType.billingQuote => l10n.notificationAdminLabelQuote,
-        AdminMessageType.planExpiryChange =>
-          l10n.notificationAdminLabelValidity,
-        AdminMessageType.planExpiringSoon =>
-          l10n.notificationAdminLabelExpiring,
-        AdminMessageType.general => l10n.notificationAdminLabelGeneral,
-      };
+  static String label(
+    AdminMessageType type,
+    AppLocalizations l10n,
+  ) => switch (type) {
+    AdminMessageType.billingQuote => l10n.notificationAdminLabelQuote,
+    AdminMessageType.planExpiryChange => l10n.notificationAdminLabelValidity,
+    AdminMessageType.planExpiringSoon => l10n.notificationAdminLabelExpiring,
+    AdminMessageType.general => l10n.notificationAdminLabelGeneral,
+  };
 }
 
 abstract final class _InvoiceTypeLabel {

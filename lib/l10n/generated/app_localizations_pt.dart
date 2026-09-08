@@ -179,6 +179,45 @@ class AppLocalizationsPt extends AppLocalizations {
   String get splashLoading => 'A abrir a sua sessão…';
 
   @override
+  String get appLockTitle => 'TAREQO bloqueado';
+
+  @override
+  String get appLockMessage =>
+      'Toque no sensor ou use o reconhecimento facial para desbloquear o TAREQO.';
+
+  @override
+  String get appLockUnlock => 'Desbloquear';
+
+  @override
+  String get appLockError =>
+      'Não foi possível autenticar. Tente novamente ou termine a sessão.';
+
+  @override
+  String get biometricSignInTitle => 'Autenticação Biométrica';
+
+  @override
+  String get biometricHint => 'Toque no sensor';
+
+  @override
+  String get biometricCancel => 'Cancelar';
+
+  @override
+  String get biometricFallbackTitle => 'Usar senha';
+
+  @override
+  String get biometricGoToSettingsButton => 'Configurações';
+
+  @override
+  String get biometricGoToSettingsDescription =>
+      'Configure a autenticação biométrica';
+
+  @override
+  String get biometricLockOut => 'Tente novamente mais tarde';
+
+  @override
+  String get biometricReason => 'Autenticação biométrica';
+
+  @override
   String get loginSubtitleSignUp => 'Crie sua conta para começar';
 
   @override
@@ -2344,6 +2383,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get adminGrowthTrends => 'Tendências de Crescimento';
 
   @override
+  String get adminGrowthTrendsLabel => 'Tendências (8 semanas)';
+
+  @override
   String get adminGrowthThisWeek => 'Esta semana';
 
   @override
@@ -2925,6 +2967,21 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get employeeMgmtLoadError =>
       'Não foi possível carregar os dados de funcionários.';
+
+  @override
+  String get employeeMgmtNoStoreTitle => 'Sem loja activa';
+
+  @override
+  String get employeeMgmtNoStoreAttendance =>
+      'Conclua o onboarding para registar o ponto.';
+
+  @override
+  String get employeeMgmtNoStoreCommissions =>
+      'Conclua o onboarding para ver comissões.';
+
+  @override
+  String get employeeMgmtNoStoreTargets =>
+      'Conclua o onboarding para definir metas.';
 
   @override
   String get employeeClockInError => 'Não foi possível registar a entrada.';

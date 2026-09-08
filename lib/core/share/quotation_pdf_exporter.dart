@@ -118,8 +118,9 @@ class QuotationPdfExporter {
       theme: pw.ThemeData.withFont(base: pw.Font.ttf(data)),
     );
 
-    final daysRemaining =
-        quotation.validUntil.difference(DateTime.now()).inDays;
+    final daysRemaining = quotation.validUntil
+        .difference(DateTime.now())
+        .inDays;
     final statusLabel = labels.statusText(quotation.status);
     final validityDaysLabel = labels.daysLeftText(daysRemaining);
 
@@ -155,8 +156,7 @@ class QuotationPdfExporter {
                       pw.Container(
                         width: 48,
                         height: 48,
-                        child:
-                            pw.Image(logoImage, fit: pw.BoxFit.contain),
+                        child: pw.Image(logoImage, fit: pw.BoxFit.contain),
                       ),
                       pw.SizedBox(width: 12),
                     ],
@@ -181,8 +181,7 @@ class QuotationPdfExporter {
                                 color: PdfColors.grey700,
                               ),
                             ),
-                          if (businessPhone != null &&
-                              businessPhone.isNotEmpty)
+                          if (businessPhone != null && businessPhone.isNotEmpty)
                             pw.Text(
                               businessPhone,
                               style: const pw.TextStyle(
@@ -190,13 +189,9 @@ class QuotationPdfExporter {
                                 color: PdfColors.grey700,
                               ),
                             ),
-                          if (businessTaxId != null &&
-                              businessTaxId.isNotEmpty)
+                          if (businessTaxId != null && businessTaxId.isNotEmpty)
                             pw.Text(
-                              _fill(
-                                labels.taxIdLabelTemplate,
-                                businessTaxId,
-                              ),
+                              _fill(labels.taxIdLabelTemplate, businessTaxId),
                               style: const pw.TextStyle(
                                 fontSize: 9,
                                 color: PdfColors.grey700,
@@ -232,8 +227,10 @@ class QuotationPdfExporter {
                   ),
                   pw.SizedBox(height: 8),
                   pw.Text(
-                    labels.numberLabelTemplate
-                        .replaceFirst('{number}', quotationNumber),
+                    labels.numberLabelTemplate.replaceFirst(
+                      '{number}',
+                      quotationNumber,
+                    ),
                     style: pw.TextStyle(
                       fontSize: 12,
                       fontWeight: pw.FontWeight.bold,
@@ -383,9 +380,7 @@ class QuotationPdfExporter {
               fontWeight: pw.FontWeight.bold,
               color: PdfColors.white,
             ),
-            headerDecoration: pw.BoxDecoration(
-              color: primaryColor,
-            ),
+            headerDecoration: pw.BoxDecoration(color: primaryColor),
             cellStyle: const pw.TextStyle(fontSize: 9),
             cellPadding: const pw.EdgeInsets.all(6),
             cellAlignments: {
@@ -438,10 +433,7 @@ class QuotationPdfExporter {
             pw.SizedBox(height: 4),
             pw.Text(
               quotation.notes,
-              style: const pw.TextStyle(
-                fontSize: 9,
-                color: PdfColors.grey700,
-              ),
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
             ),
           ],
 
@@ -497,10 +489,7 @@ class QuotationPdfExporter {
           pw.Center(
             child: pw.Text(
               labels.footerTemplate.replaceFirst('{date}', dateLine),
-              style: const pw.TextStyle(
-                fontSize: 8,
-                color: PdfColors.grey500,
-              ),
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
             ),
           ),
         ],
@@ -533,7 +522,8 @@ class QuotationPdfExporter {
     );
     final number = quotation.number.toString().padLeft(5, '0');
     final fileName = '${labels.fileNameBase}_$number.pdf';
-    final subject = '${labels.subjectWord} '
+    final subject =
+        '${labels.subjectWord} '
         '${labels.numberLabelTemplate.replaceFirst('{number}', number)}';
     await _share(bytes, fileName, subject);
   }
@@ -543,11 +533,7 @@ class QuotationPdfExporter {
       await SharePlus.instance.share(
         ShareParams(
           files: [
-            XFile.fromData(
-              bytes,
-              mimeType: 'application/pdf',
-              name: fileName,
-            ),
+            XFile.fromData(bytes, mimeType: 'application/pdf', name: fileName),
           ],
           subject: subject,
         ),
@@ -577,8 +563,12 @@ class QuotationPdfExporter {
     return (millesimos / 1000).toStringAsFixed(1);
   }
 
-  pw.Widget _totalRow(String label, String value, PdfColor color,
-      {bool isBold = false}) {
+  pw.Widget _totalRow(
+    String label,
+    String value,
+    PdfColor color, {
+    bool isBold = false,
+  }) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 3),
       child: pw.Row(
@@ -588,8 +578,7 @@ class QuotationPdfExporter {
             label,
             style: pw.TextStyle(
               fontSize: isBold ? 12 : 9,
-              fontWeight:
-                  isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
               color: color,
             ),
           ),
@@ -597,8 +586,7 @@ class QuotationPdfExporter {
             value,
             style: pw.TextStyle(
               fontSize: isBold ? 14 : 10,
-              fontWeight:
-                  isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
               color: color,
             ),
           ),

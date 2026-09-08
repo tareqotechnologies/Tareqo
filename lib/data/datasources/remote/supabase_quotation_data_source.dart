@@ -11,12 +11,12 @@ import 'supabase_datasource_helpers.dart';
 /// servidor (advisory lock por loja) — o valor enviado (0) é substituído e
 /// a linha devolvida traz o número real. Transições de estado (enviada /
 /// aceite / rejeitada) gravam o payload atualizado via UPDATE.
-final class QuotationSupabaseDataSourceImpl implements QuotationLocalDataSource {
+final class QuotationSupabaseDataSourceImpl
+    implements QuotationLocalDataSource {
   const QuotationSupabaseDataSourceImpl();
 
   static const _table = 'quotations';
-  static const _columns =
-      'id, store_id, quotation_number, payload, created_at';
+  static const _columns = 'id, store_id, quotation_number, payload, created_at';
 
   @override
   Future<List<Quotation>> getAll({required String storeId}) async {

@@ -33,7 +33,9 @@ dependencies:
   # postgrest: exceções do cliente do Supabase — usada em PRODUÇÃO agora
   # (tradução dos erros da RPC set_employee_active no datasource remoto de
   # funcionários; antes só nos testes do SupabaseEmployeeProcessor).
-  postgrest: 2.8.0
+  # ^2.9.1 (M9): 2.8.0 exato travava o supabase_flutter em 2.16.0 (o 2.17.x
+  # exige postgrest 2.9+) — as exceções (PostgrestException) são estáveis em 2.x.
+  postgrest: ^2.9.1
   # W6: cliente HTTP central com timeout + retry de leituras idempotentes
   # (injetado no Supabase.initialize — ver core/network).
   http: ^1.6.0

@@ -17,13 +17,17 @@ abstract class EmployeeAttendance with _$EmployeeAttendance {
   const factory EmployeeAttendance({
     required String id,
     required String storeId,
+
     /// Funcionário (SUJEITO) — UUID do auth.users.
     required String userId,
+
     /// Dia de trabalho no formato `YYYY-MM-DD` (chave de unicidade).
     required String workDate,
     required DateTime clockIn,
+
     /// null enquanto o funcionário está presente (sem saída registada).
     DateTime? clockOut,
+
     /// Quem executou a acção (dono/gerente) — auth.uid() no servidor.
     @Default('') String recordedBy,
     required DateTime createdAt,
@@ -45,6 +49,7 @@ abstract class EmployeeCommissionRate with _$EmployeeCommissionRate {
     required String id,
     required String storeId,
     required String userId,
+
     /// Pontos base (500 = 5%). Validado ≥ 0 e ≤ 10000 (100%).
     required int rateBps,
     required DateTime createdAt,
@@ -66,8 +71,10 @@ abstract class EmployeeTarget with _$EmployeeTarget {
     required String id,
     required String storeId,
     required String userId,
+
     /// Mês da meta no formato `YYYY-MM`.
     required String month,
+
     /// Meta de vendas em centavos.
     required int targetCents,
     required DateTime createdAt,
@@ -86,21 +93,24 @@ abstract class EmployeeTarget with _$EmployeeTarget {
 /// DEFINER + is_my_store); localmente é calculado pelo provider a partir
 /// das vendas reais.
 @freezed
-abstract class EmployeeCommissionSummaryEntry with _$EmployeeCommissionSummaryEntry {
+abstract class EmployeeCommissionSummaryEntry
+    with _$EmployeeCommissionSummaryEntry {
   const factory EmployeeCommissionSummaryEntry({
     required String userId,
+
     /// Nome do funcionário (join com store_employees).
     required String fullName,
+
     /// Vendas ATIVAS do funcionário na loja no mês (centavos).
     required int salesCents,
+
     /// Taxa cadastrada em pontos base (0 = sem taxa → comissão 0).
     @Default(0) int rateBps,
+
     /// Comissão calculada = salesCents × rateBps / 10000 (centavos).
     required int commissionCents,
   }) = _EmployeeCommissionSummaryEntry;
 
-  factory EmployeeCommissionSummaryEntry.fromJson(
-    Map<String, dynamic> json,
-  ) =>
+  factory EmployeeCommissionSummaryEntry.fromJson(Map<String, dynamic> json) =>
       _$EmployeeCommissionSummaryEntryFromJson(json);
 }

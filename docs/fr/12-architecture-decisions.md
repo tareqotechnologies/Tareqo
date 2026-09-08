@@ -104,6 +104,15 @@ Détails d'implémentation :
 - **Web :** le sqlite3 natif ne s'exécute pas dans le navigateur (`dart:ffi` n'existe pas), donc `AppDatabase` utilise un **import conditionnel** et l'app retombe sur les datasources en mémoire (mêmes contrats — l'UI reste identique).
 - **Tests :** sur la VM Windows, `package:sqlite3` retombe lui-même sur la `winsqlite3.dll` système, donc les tests s'exécutent sans configuration manuelle.
 
+## Pourquoi SQLite s'exécute-t-il de façon synchrone sur l'isolate principal (et pourquoi NE PAS migrer vers des isolates maintenant) ?
+
+**Décision (audit sept. 2026, point M6) :** conserver les requêtes SQLite **synchrones sur l'isolate principal**. La migration vers `IsolateDatabase`/`SynchronousDatabase` a été évaluée et **écartée à ce stade** — ce n'est pas un problème actuel, c'est une optimisation prématurée à risque élevé :
+
+1. **Contrats 100 % synchrones.** Toutes les interfaces locales (`*LocalDataSource`) et l'`IUnitOfWork` sont synchrones par conception ; les datasources en mémoire (repli web) et SQLite implémentent **les mêmes contrats**. Migrer vers des isolates exigerait de rendre asynchrones toutes les interfaces, implémentations, cas d'usage et repositories qui les consomment — un changement transversal dans le chemin de l'argent (ventes, crédits, achats, clôture de caisse), récemment stabilisé, sans changement de comportement visible.
+2. **Transactions réentrantes liées à une connexion unique.** `beginTransaction`/`commitTransaction`/`rollbackTransaction` utilisent un compteur statique de profondeur avec l'invariant documenté d'**une** connexion et d'**un** `IUnitOfWork` par processus. Sous isolates, cette sémantique devrait être redessinée de zéro (messages/ports) — un nouveau risque de corruption de transaction.
+3. **Le volume de données ne le justifie pas.** Un POS à boutique unique (l'unité du produit) compte des milliers, pas des millions, de lignes ; les requêtes SQLite locales prennent des microsecondes à quelques millisecondes. Le point le plus coûteux (migrations v1–v6) s'exécute **une seule fois** au démarrage, déjà versionné par `PRAGMA user_version`.
+4. **Quand y revenir.** Déclencheurs pour rouvrir le sujet : (a) télémétrie (Sentry) montrant des frames saccadées par SQL ; (b) rapports lourds agrégeant un long historique ; (c) multi-boutique avec un gros volume par appareil. Dans ces cas, migrer couche par couche (datasource par datasource) en suivant le même processus documenté de remplacement de persistance.
+
 ## Pourquoi Riverpod pour la gestion d'état ?
 
 La couche de présentation utilise **Riverpod** (`Notifier`/`FutureProvider`/`StreamProvider`) pour gérer l'état :
@@ -264,7 +273,7 @@ Les à recevoir sont du **capital immobilisé** : la marchandise est partie (et 
 3. **Renouvellement automatique du JWT.** GoTrue renouvelle le jeton d'accès avec le jeton de rafraîchissement avant son expiration.
 4. **Réactivité.** Connexion/déconnexion émettent des événements sur le même flux ; la navigation et tout état dépendant de la session réagissent automatiquement.
 
-Les identifiants sont fournis via **flavors + `--dart-define-from-file`** (`env/dev.env` commité, `env/prod.env` gitignoré) ; un build **release** avec les défauts dev embarqués lève une erreur au démarrage (fail-fast S2).
+Les identifiants sont fournis via **flavors + `--dart-define-from-file`** (`env/dev.env` commité, `env/prod.env` gitignoré) ; un build **release** avec les défauts dev embarqués lève une erreur au démarrage (fail-fast S2 + A1 — tout release exige des identifiants explicites plus le marqueur `SUPABASE_CREDENTIALS_EXPLICIT=true`).
 
 ### Devise et langue du tenant (présentation)
 

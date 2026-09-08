@@ -177,11 +177,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       if (_isSignUpMode) {
-        await ref.read(signUpUseCaseProvider).call(
-          email: email,
-          password: password,
-          fullName: _nameController.text.trim(),
-        );
+        await ref
+            .read(signUpUseCaseProvider)
+            .call(
+              email: email,
+              password: password,
+              fullName: _nameController.text.trim(),
+            );
         messenger.showSnackBar(
           SnackBar(content: Text(l10n.loginSignUpSuccess)),
         );
@@ -238,18 +240,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         systemNavigationBarColor: palette.background,
-        systemNavigationBarIconBrightness:
-            isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
       ),
       child: Scaffold(
         backgroundColor: palette.background,
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 28,
-                vertical: 24,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 380),
                 child: Column(
@@ -399,8 +399,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: palette.greenDark,
                           foregroundColor: Colors.white,
-                          disabledBackgroundColor:
-                              palette.greenDark.withValues(alpha: 0.5),
+                          disabledBackgroundColor: palette.greenDark.withValues(
+                            alpha: 0.5,
+                          ),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -450,9 +451,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onTap: _isSubmitting
                             ? null
                             : () => setState(() {
-                                  _isSignUpMode = !_isSignUpMode;
-                                  _confirmController.clear();
-                                }),
+                                _isSignUpMode = !_isSignUpMode;
+                                _confirmController.clear();
+                              }),
                         child: RichText(
                           text: TextSpan(
                             text: _isSignUpMode
@@ -494,8 +495,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: Icon(
                             Icons.lock_outline_rounded,
                             size: 14,
-                            color: palette.textSecondary
-                                .withValues(alpha: 0.6),
+                            color: palette.textSecondary.withValues(alpha: 0.6),
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -505,8 +505,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 12,
-                              color: palette.textSecondary
-                                  .withValues(alpha: 0.6),
+                              color: palette.textSecondary.withValues(
+                                alpha: 0.6,
+                              ),
                               fontWeight: FontWeight.w400,
                             ),
                           ),

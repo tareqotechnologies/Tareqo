@@ -6,6 +6,5 @@ class MarkAdminMessageAsReadUseCase {
 
   final IAdminMessageRepository _repository;
 
-  Future<void> call(String messageId) =>
-      _repository.markAsRead(messageId);
+  Future<void> call(String messageId) => _repository.markAsRead(messageId);
 }

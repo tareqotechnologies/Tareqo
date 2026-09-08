@@ -65,9 +65,7 @@ class ConfirmTransferReceiveUseCase {
   /// debitado ao enviar; agora o destino é creditado.
   StoreTransfer call(StoreTransfer transfer) {
     if (transfer.status != TransferStatus.inTransit) {
-      throw StateError(
-        'Só é possível receber transferências em trânsito.',
-      );
+      throw StateError('Só é possível receber transferências em trânsito.');
     }
     return transfer.copyWith(
       status: TransferStatus.received,
@@ -82,9 +80,7 @@ class DispatchTransferUseCase {
 
   StoreTransfer call(StoreTransfer transfer) {
     if (transfer.status != TransferStatus.pending) {
-      throw StateError(
-        'Só é possível despachar transferências pendentes.',
-      );
+      throw StateError('Só é possível despachar transferências pendentes.');
     }
     return transfer.copyWith(
       status: TransferStatus.inTransit,

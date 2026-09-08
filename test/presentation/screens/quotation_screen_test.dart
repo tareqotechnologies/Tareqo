@@ -21,14 +21,14 @@ import '../../helpers/test_sqlite.dart';
 class _FakeGetProductsUseCase implements GetProductsUseCase {
   @override
   Future<List<Product>> call({required String storeId}) async => const [
-        Product(
-          id: 'p1',
-          name: 'Caneta',
-          purchasePriceCents: 100,
-          salePriceCents: 200,
-          stockQuantity: 1000,
-        ),
-      ];
+    Product(
+      id: 'p1',
+      name: 'Caneta',
+      purchasePriceCents: 100,
+      salePriceCents: 200,
+      stockQuantity: 1000,
+    ),
+  ];
 }
 
 class _EmptyCustomersUseCase implements GetCustomersUseCase {
@@ -139,8 +139,9 @@ void main() {
     expect(find.text('Rejeitar'), findsOneWidget);
   });
 
-  testWidgets('botão salvar só habilita com cliente e item válidos',
-      (tester) async {
+  testWidgets('botão salvar só habilita com cliente e item válidos', (
+    tester,
+  ) async {
     await _pumpQuotation(tester, db);
 
     await tester.tap(find.byType(FloatingActionButton));
@@ -153,5 +154,20 @@ void main() {
       ),
     );
     expect(saveButton.onPressed, isNull);
+  });
+
+  testWidgets('nome de cliente longo nunca trunca nem estoura o card', (
+    tester,
+  ) async {
+    await _pumpQuotation(tester, db);
+
+    // Nome suficientemente longo para expor truncatura/overflow — o card
+    // deve quebrar o texto em linhas e renderizar SEM excessões de layout.
+    const longName =
+        'Cliente Comercial de Teste de Moçambique Limitada — Filial da Avenida';
+    await _createQuotation(tester, clientName: longName);
+
+    expect(tester.takeException(), isNull);
+    expect(find.text(longName), findsOneWidget);
   });
 }

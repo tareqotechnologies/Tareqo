@@ -11,9 +11,9 @@
 /// implementação vazia (stream que nunca emite): não há servidor para
 /// ouvir — o polling do `AuthGate` continua cobrindo esse caso.
 abstract interface class IEmployeeRealtimeSignalSource {
- /// Sinal emitido quando o vínculo do usuário muda no servidor.
- ///
- /// O valor do sinal é irrelevante (evento = re-verificar). Deve
- /// terminar quando o canal fecha; nunca deve lançar.
- Stream<void> get signals;
+  /// Sinal emitido quando o vínculo do usuário muda no servidor.
+  ///
+  /// O valor do sinal é irrelevante (evento = re-verificar). Deve
+  /// terminar quando o canal fecha; nunca deve lançar.
+  Stream<void> get signals;
 }

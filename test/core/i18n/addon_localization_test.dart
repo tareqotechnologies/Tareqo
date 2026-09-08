@@ -19,28 +19,46 @@ void main() {
 
   group('addonDisplayName', () {
     test('add-ons conhecidos resolvem para o nome localizado (pt)', () {
-      expect(addonDisplayName(pt, addonOf('ao_custom_invoice')),
-          pt.addonCustomInvoiceName);
-      expect(addonDisplayName(pt, addonOf('ao_quotation')),
-          pt.addonQuotationName);
-      expect(addonDisplayName(pt, addonOf('ao_advanced_reports')),
-          pt.addonReportsName);
-      expect(addonDisplayName(pt, addonOf('ao_employee_mgmt')),
-          pt.addonEmployeesName);
-      expect(addonDisplayName(pt, addonOf('ao_multi_store')),
-          pt.addonMultiStoreName);
-      expect(addonDisplayName(pt, addonOf('ao_mobile_money')),
-          pt.addonMobileMoneyName);
+      expect(
+        addonDisplayName(pt, addonOf('ao_custom_invoice')),
+        pt.addonCustomInvoiceName,
+      );
+      expect(
+        addonDisplayName(pt, addonOf('ao_quotation')),
+        pt.addonQuotationName,
+      );
+      expect(
+        addonDisplayName(pt, addonOf('ao_advanced_reports')),
+        pt.addonReportsName,
+      );
+      expect(
+        addonDisplayName(pt, addonOf('ao_employee_mgmt')),
+        pt.addonEmployeesName,
+      );
+      expect(
+        addonDisplayName(pt, addonOf('ao_multi_store')),
+        pt.addonMultiStoreName,
+      );
+      expect(
+        addonDisplayName(pt, addonOf('ao_mobile_money')),
+        pt.addonMobileMoneyName,
+      );
     });
 
     test('troca de idioma conforme o locale (en)', () {
-      expect(addonDisplayName(en, addonOf('ao_custom_invoice')),
-          en.addonCustomInvoiceName);
-      expect(addonDisplayName(en, addonOf('ao_multi_store')),
-          en.addonMultiStoreName);
+      expect(
+        addonDisplayName(en, addonOf('ao_custom_invoice')),
+        en.addonCustomInvoiceName,
+      );
+      expect(
+        addonDisplayName(en, addonOf('ao_multi_store')),
+        en.addonMultiStoreName,
+      );
       // O nome em en não é o mesmo texto do catálogo (pt).
-      expect(addonDisplayName(en, addonOf('ao_quotation')),
-          isNot(addonOf('ao_quotation').name));
+      expect(
+        addonDisplayName(en, addonOf('ao_quotation')),
+        isNot(addonOf('ao_quotation').name),
+      );
     });
 
     test('add-on desconhecido cai no nome do catálogo', () {
@@ -58,18 +76,30 @@ void main() {
 
   group('addonDescription', () {
     test('add-ons conhecidos resolvem para a descrição localizada', () {
-      expect(addonDescription(pt, addonOf('ao_custom_invoice')),
-          pt.addonCustomInvoiceDesc);
-      expect(addonDescription(pt, addonOf('ao_quotation')),
-          pt.addonQuotationDesc);
-      expect(addonDescription(pt, addonOf('ao_employee_mgmt')),
-          pt.addonEmployeesDesc);
-      expect(addonDescription(pt, addonOf('ao_multi_store')),
-          pt.addonMultiStoreDesc);
-      expect(addonDescription(en, addonOf('ao_advanced_reports')),
-          en.addonReportsDesc);
-      expect(addonDescription(en, addonOf('ao_mobile_money')),
-          en.addonMobileMoneyDesc);
+      expect(
+        addonDescription(pt, addonOf('ao_custom_invoice')),
+        pt.addonCustomInvoiceDesc,
+      );
+      expect(
+        addonDescription(pt, addonOf('ao_quotation')),
+        pt.addonQuotationDesc,
+      );
+      expect(
+        addonDescription(pt, addonOf('ao_employee_mgmt')),
+        pt.addonEmployeesDesc,
+      );
+      expect(
+        addonDescription(pt, addonOf('ao_multi_store')),
+        pt.addonMultiStoreDesc,
+      );
+      expect(
+        addonDescription(en, addonOf('ao_advanced_reports')),
+        en.addonReportsDesc,
+      );
+      expect(
+        addonDescription(en, addonOf('ao_mobile_money')),
+        en.addonMobileMoneyDesc,
+      );
     });
 
     test('add-on desconhecido cai na descrição do catálogo', () {
@@ -86,25 +116,41 @@ void main() {
 
   group('addonCategoryLabel', () {
     test('cada categoria mapeia para o rótulo localizado (pt)', () {
-      expect(addonCategoryLabel(pt, AddOnCategory.invoice),
-          pt.addonCategoryInvoicing);
-      expect(addonCategoryLabel(pt, AddOnCategory.quotation),
-          pt.addonCategoryQuotation);
-      expect(addonCategoryLabel(pt, AddOnCategory.reports),
-          pt.addonCategoryReports);
-      expect(addonCategoryLabel(pt, AddOnCategory.employees),
-          pt.addonCategoryEmployees);
-      expect(addonCategoryLabel(pt, AddOnCategory.multiStore),
-          pt.addonCategoryMultiStore);
-      expect(addonCategoryLabel(pt, AddOnCategory.payments),
-          pt.addonCategoryPayments);
+      expect(
+        addonCategoryLabel(pt, AddOnCategory.invoice),
+        pt.addonCategoryInvoicing,
+      );
+      expect(
+        addonCategoryLabel(pt, AddOnCategory.quotation),
+        pt.addonCategoryQuotation,
+      );
+      expect(
+        addonCategoryLabel(pt, AddOnCategory.reports),
+        pt.addonCategoryReports,
+      );
+      expect(
+        addonCategoryLabel(pt, AddOnCategory.employees),
+        pt.addonCategoryEmployees,
+      );
+      expect(
+        addonCategoryLabel(pt, AddOnCategory.multiStore),
+        pt.addonCategoryMultiStore,
+      );
+      expect(
+        addonCategoryLabel(pt, AddOnCategory.payments),
+        pt.addonCategoryPayments,
+      );
     });
 
     test('rótulo troca de idioma conforme o locale (en)', () {
-      expect(addonCategoryLabel(en, AddOnCategory.invoice),
-          en.addonCategoryInvoicing);
-      expect(addonCategoryLabel(en, AddOnCategory.payments),
-          en.addonCategoryPayments);
+      expect(
+        addonCategoryLabel(en, AddOnCategory.invoice),
+        en.addonCategoryInvoicing,
+      );
+      expect(
+        addonCategoryLabel(en, AddOnCategory.payments),
+        en.addonCategoryPayments,
+      );
     });
   });
 }

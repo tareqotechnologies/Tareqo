@@ -169,8 +169,7 @@ class InvoicePdfExporter {
                                 color: PdfColors.grey700,
                               ),
                             ),
-                          if (businessPhone != null &&
-                              businessPhone.isNotEmpty)
+                          if (businessPhone != null && businessPhone.isNotEmpty)
                             pw.Text(
                               businessPhone,
                               style: const pw.TextStyle(
@@ -178,13 +177,9 @@ class InvoicePdfExporter {
                                 color: PdfColors.grey700,
                               ),
                             ),
-                          if (businessTaxId != null &&
-                              businessTaxId.isNotEmpty)
+                          if (businessTaxId != null && businessTaxId.isNotEmpty)
                             pw.Text(
-                              _fill(
-                                labels.taxIdLabelTemplate,
-                                businessTaxId,
-                              ),
+                              _fill(labels.taxIdLabelTemplate, businessTaxId),
                               style: const pw.TextStyle(
                                 fontSize: 9,
                                 color: PdfColors.grey700,
@@ -220,8 +215,10 @@ class InvoicePdfExporter {
                   ),
                   pw.SizedBox(height: 8),
                   pw.Text(
-                    labels.numberLabelTemplate
-                        .replaceFirst('{number}', invoiceNumber),
+                    labels.numberLabelTemplate.replaceFirst(
+                      '{number}',
+                      invoiceNumber,
+                    ),
                     style: pw.TextStyle(
                       fontSize: 12,
                       fontWeight: pw.FontWeight.bold,
@@ -255,42 +252,27 @@ class InvoicePdfExporter {
           pw.SizedBox(height: 4),
           pw.Text(
             invoice.clientName,
-            style: pw.TextStyle(
-              fontSize: 12,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
           if (invoice.clientPhone.isNotEmpty)
             pw.Text(
               _fill(labels.phoneLabelTemplate, invoice.clientPhone),
-              style: const pw.TextStyle(
-                fontSize: 9,
-                color: PdfColors.grey700,
-              ),
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
             ),
           if (invoice.clientEmail.isNotEmpty)
             pw.Text(
               _fill(labels.emailLabelTemplate, invoice.clientEmail),
-              style: const pw.TextStyle(
-                fontSize: 9,
-                color: PdfColors.grey700,
-              ),
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
             ),
           if (invoice.clientAddress.isNotEmpty)
             pw.Text(
               invoice.clientAddress,
-              style: const pw.TextStyle(
-                fontSize: 9,
-                color: PdfColors.grey700,
-              ),
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
             ),
           if (invoice.clientTaxId.isNotEmpty)
             pw.Text(
               _fill(labels.taxIdLabelTemplate, invoice.clientTaxId),
-              style: const pw.TextStyle(
-                fontSize: 9,
-                color: PdfColors.grey700,
-              ),
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
             ),
 
           pw.SizedBox(height: 20),
@@ -323,9 +305,7 @@ class InvoicePdfExporter {
               fontWeight: pw.FontWeight.bold,
               color: PdfColors.white,
             ),
-            headerDecoration: pw.BoxDecoration(
-              color: primaryColor,
-            ),
+            headerDecoration: pw.BoxDecoration(color: primaryColor),
             cellStyle: const pw.TextStyle(fontSize: 9),
             cellPadding: const pw.EdgeInsets.all(6),
             cellAlignments: {
@@ -421,10 +401,7 @@ class InvoicePdfExporter {
             pw.SizedBox(height: 4),
             pw.Text(
               invoice.notes,
-              style: const pw.TextStyle(
-                fontSize: 9,
-                color: PdfColors.grey700,
-              ),
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
             ),
           ],
 
@@ -435,10 +412,7 @@ class InvoicePdfExporter {
           pw.Center(
             child: pw.Text(
               labels.footerTemplate.replaceFirst('{date}', dateLine),
-              style: const pw.TextStyle(
-                fontSize: 8,
-                color: PdfColors.grey500,
-              ),
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
             ),
           ),
         ],
@@ -471,7 +445,8 @@ class InvoicePdfExporter {
     );
     final number = invoice.number.toString().padLeft(5, '0');
     final fileName = '${labels.fileNameBase}_$number.pdf';
-    final subject = '${labels.subjectWord} '
+    final subject =
+        '${labels.subjectWord} '
         '${labels.numberLabelTemplate.replaceFirst('{number}', number)}';
     await _share(bytes, fileName, subject);
   }
@@ -481,11 +456,7 @@ class InvoicePdfExporter {
       await SharePlus.instance.share(
         ShareParams(
           files: [
-            XFile.fromData(
-              bytes,
-              mimeType: 'application/pdf',
-              name: fileName,
-            ),
+            XFile.fromData(bytes, mimeType: 'application/pdf', name: fileName),
           ],
           subject: subject,
         ),
@@ -515,8 +486,12 @@ class InvoicePdfExporter {
     return '${(millesimos / 1000).toStringAsFixed(1)} $unit';
   }
 
-  pw.Widget _totalRow(String label, String value, PdfColor color,
-      {bool isBold = false}) {
+  pw.Widget _totalRow(
+    String label,
+    String value,
+    PdfColor color, {
+    bool isBold = false,
+  }) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 3),
       child: pw.Row(
@@ -526,8 +501,7 @@ class InvoicePdfExporter {
             label,
             style: pw.TextStyle(
               fontSize: isBold ? 12 : 9,
-              fontWeight:
-                  isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
               color: color,
             ),
           ),
@@ -535,8 +509,7 @@ class InvoicePdfExporter {
             value,
             style: pw.TextStyle(
               fontSize: isBold ? 14 : 10,
-              fontWeight:
-                  isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
               color: color,
             ),
           ),
@@ -553,5 +526,4 @@ class InvoicePdfExporter {
       (color.blue * 0.7).clamp(0, 1),
     );
   }
-
 }

@@ -39,24 +39,24 @@ class AuditEntry {
   final DateTime createdAt;
 
   factory AuditEntry.fromJson(Map<String, dynamic> json) => AuditEntry(
-        id: (json['id'] as num).toInt(),
-        actorUserId: json['actor_user_id'] as String?,
-        action: json['action'] as String,
-        entityType: json['entity_type'] as String,
-        entityId: json['entity_id'] as String?,
-        detail: json['detail'] as Map<String, dynamic>?,
-        createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
-      );
+    id: (json['id'] as num).toInt(),
+    actorUserId: json['actor_user_id'] as String?,
+    action: json['action'] as String,
+    entityType: json['entity_type'] as String,
+    entityId: json['entity_id'] as String?,
+    detail: json['detail'] as Map<String, dynamic>?,
+    createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'actor_user_id': actorUserId,
-        'action': action,
-        'entity_type': entityType,
-        'entity_id': entityId,
-        'detail': detail,
-        'created_at': createdAt.toUtc().toIso8601String(),
-      };
+    'id': id,
+    'actor_user_id': actorUserId,
+    'action': action,
+    'entity_type': entityType,
+    'entity_id': entityId,
+    'detail': detail,
+    'created_at': createdAt.toUtc().toIso8601String(),
+  };
 
   /// Rótulo legível da ação para exibição na UI.
   String get actionLabel {

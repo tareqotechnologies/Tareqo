@@ -8,7 +8,7 @@ import 'addon_local_data_source.dart';
 /// implementação remota é registada pelo ServiceLocator.
 final class AddOnLocalDataSourceImpl implements AddOnLocalDataSource {
   AddOnLocalDataSourceImpl({List<TenantAddOn> seed = const []})
-      : _records = [...seed];
+    : _records = [...seed];
 
   final List<TenantAddOn> _records;
 
@@ -16,8 +16,7 @@ final class AddOnLocalDataSourceImpl implements AddOnLocalDataSource {
   Future<Set<String>> getActiveAddOnIds(String tenantId) async {
     return Set.unmodifiable(
       _records
-          .where((r) =>
-              r.tenantId == tenantId && r.isActive && !_isExpired(r))
+          .where((r) => r.tenantId == tenantId && r.isActive && !_isExpired(r))
           .map((r) => r.addOnId),
     );
   }

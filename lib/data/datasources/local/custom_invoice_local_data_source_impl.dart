@@ -14,10 +14,9 @@ final class CustomInvoiceLocalDataSourceImpl
 
   @override
   Future<List<CustomInvoice>> getAll({required String storeId}) async {
-    final list = _invoices.values
-        .where((invoice) => invoice.storeId == storeId)
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final list =
+        _invoices.values.where((invoice) => invoice.storeId == storeId).toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return List.unmodifiable(list);
   }
 
@@ -30,8 +29,7 @@ final class CustomInvoiceLocalDataSourceImpl
     // mesma semântica do SQLite/Supabase (o número enviado é ignorado).
     var nextNumber = 0;
     for (final existing in _invoices.values) {
-      if (existing.storeId == invoice.storeId &&
-          existing.number > nextNumber) {
+      if (existing.storeId == invoice.storeId && existing.number > nextNumber) {
         nextNumber = existing.number;
       }
     }

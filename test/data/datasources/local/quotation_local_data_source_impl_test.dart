@@ -10,26 +10,25 @@ Quotation buildQuotation({
   int number = 0,
   QuotationStatus status = QuotationStatus.draft,
   DateTime? createdAt,
-}) =>
-    Quotation(
-      id: id,
-      storeId: storeId,
-      number: number,
-      customerId: 'c1',
-      customerName: 'Cliente $id',
-      items: const [
-        QuotationItem(
-          productId: 'p1',
-          productName: 'Caneta',
-          quantity: 1000,
-          unitPriceCents: 200,
-        ),
-      ],
-      totalAmountCents: 200,
-      status: status,
-      validUntil: DateTime(2026, 8, 10),
-      createdAt: createdAt ?? DateTime(2026, 8, 3, 10),
-    );
+}) => Quotation(
+  id: id,
+  storeId: storeId,
+  number: number,
+  customerId: 'c1',
+  customerName: 'Cliente $id',
+  items: const [
+    QuotationItem(
+      productId: 'p1',
+      productName: 'Caneta',
+      quantity: 1000,
+      unitPriceCents: 200,
+    ),
+  ],
+  totalAmountCents: 200,
+  status: status,
+  validUntil: DateTime(2026, 8, 10),
+  createdAt: createdAt ?? DateTime(2026, 8, 3, 10),
+);
 
 void main() {
   group('QuotationLocalDataSourceImpl', () {
@@ -48,21 +47,23 @@ void main() {
       expect(otherStore.number, 1);
     });
 
-    test('getAll devolve só cotações da loja, mais recentes primeiro',
-        () async {
-      final dataSource = QuotationLocalDataSourceImpl();
+    test(
+      'getAll devolve só cotações da loja, mais recentes primeiro',
+      () async {
+        final dataSource = QuotationLocalDataSourceImpl();
 
-      await dataSource.add(
-        buildQuotation(id: 'qt1', createdAt: DateTime(2026, 8, 1)),
-      );
-      await dataSource.add(
-        buildQuotation(id: 'qt2', createdAt: DateTime(2026, 8, 5)),
-      );
-      await dataSource.add(buildQuotation(id: 'qt9', storeId: 'st2'));
+        await dataSource.add(
+          buildQuotation(id: 'qt1', createdAt: DateTime(2026, 8, 1)),
+        );
+        await dataSource.add(
+          buildQuotation(id: 'qt2', createdAt: DateTime(2026, 8, 5)),
+        );
+        await dataSource.add(buildQuotation(id: 'qt9', storeId: 'st2'));
 
-      final quotations = await dataSource.getAll(storeId: 'st1');
-      expect(quotations.map((q) => q.id), ['qt2', 'qt1']);
-    });
+        final quotations = await dataSource.getAll(storeId: 'st1');
+        expect(quotations.map((q) => q.id), ['qt2', 'qt1']);
+      },
+    );
 
     test('add com id duplicado lança StateError', () async {
       final dataSource = QuotationLocalDataSourceImpl();
@@ -74,8 +75,7 @@ void main() {
       );
     });
 
-    test('update grava a transição de estado preservando o número',
-        () async {
+    test('update grava a transição de estado preservando o número', () async {
       final dataSource = QuotationLocalDataSourceImpl();
       final saved = await dataSource.add(buildQuotation(id: 'qt1'));
 
@@ -102,8 +102,7 @@ void main() {
   });
 
   group('QuotationRepositoryImpl', () {
-    test('delega para o datasource (número atribuído na gravação)',
-        () async {
+    test('delega para o datasource (número atribuído na gravação)', () async {
       final repository = QuotationRepositoryImpl(
         QuotationLocalDataSourceImpl(),
       );

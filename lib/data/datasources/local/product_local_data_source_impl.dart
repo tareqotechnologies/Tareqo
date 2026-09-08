@@ -11,79 +11,83 @@ import 'product_local_data_source.dart';
 /// `ProductSqliteDataSourceImpl` que implemente [ProductLocalDataSource]
 /// (mesmas assinaturas) e trocá-la no ServiceLocator.
 final class ProductLocalDataSourceImpl implements ProductLocalDataSource {
- /// Lista simulando as linhas da tabela de produtos.
- ///
- /// Inicia vazia por padrão (testes dependem disso) — sem dados de
- /// demonstração; o ServiceLocator injeta apenas dados reais.
- ProductLocalDataSourceImpl({List<Product> seed = const []})
- : _products = [...seed];
+  /// Lista simulando as linhas da tabela de produtos.
+  ///
+  /// Inicia vazia por padrão (testes dependem disso) — sem dados de
+  /// demonstração; o ServiceLocator injeta apenas dados reais.
+  ProductLocalDataSourceImpl({List<Product> seed = const []})
+    : _products = [...seed];
 
- final List<Product> _products;
+  final List<Product> _products;
 
- @override
- Future<List<Product>> getAll({required String storeId}) async {
- // Filtra pela loja ativa e mantém a mesma ordenação do SQLite (por
- // nome, case-insensitive) para listagem idêntica em web e nativo.
- final filtered = _products.where((p) => p.storeId == storeId);
- final sorted = [...filtered]
- ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
- return List.unmodifiable(sorted);
- }
+  @override
+  Future<List<Product>> getAll({required String storeId}) async {
+    // Filtra pela loja ativa e mantém a mesma ordenação do SQLite (por
+    // nome, case-insensitive) para listagem idêntica em web e nativo.
+    final filtered = _products.where((p) => p.storeId == storeId);
+    final sorted = [...filtered]
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return List.unmodifiable(sorted);
+  }
 
- @override
- Future<Product?> getById(String id, {required String storeId}) async {
- for (final product in _products) {
- // Escopo por loja: um id de outra loja não é visível aqui.
- if (product.id == id && product.storeId == storeId) return product;
- }
- return null;
- }
+  @override
+  Future<Product?> getById(String id, {required String storeId}) async {
+    for (final product in _products) {
+      // Escopo por loja: um id de outra loja não é visível aqui.
+      if (product.id == id && product.storeId == storeId) return product;
+    }
+    return null;
+  }
 
- @override
- Future<void> add(Product product) async {
- _products.add(product);
- }
+  @override
+  Future<void> add(Product product) async {
+    _products.add(product);
+  }
 
- @override
- Future<void> update(Product product) async {
- // Escopo por loja: só o produto da loja informada é mutável.
- final index = _products.indexWhere(
- (p) => p.id == product.id && p.storeId == product.storeId,
- );
- if (index == -1) {
- throw StateError('Produto ${product.id} não encontrado para atualização.');
- }
- // Atualiza apenas os campos EDITÁVEIS do catálogo — preserva o
- // estoque atual (a mutação de quantidade passa pelo FifoStockUseCase,
- // que mantém a invariante `stock = Σ lotes`).
- final current = _products[index];
- _products[index] = current.copyWith(
- name: product.name,
- description: product.description,
- imagePath: product.imagePath,
- purchasePriceCents: product.purchasePriceCents,
- salePriceCents: product.salePriceCents,
- code: product.code,
- vendaPorFracao: product.vendaPorFracao,
- unitLabel: product.unitLabel,
- isActive: product.isActive,
- );
- }
+  @override
+  Future<void> update(Product product) async {
+    // Escopo por loja: só o produto da loja informada é mutável.
+    final index = _products.indexWhere(
+      (p) => p.id == product.id && p.storeId == product.storeId,
+    );
+    if (index == -1) {
+      throw StateError(
+        'Produto ${product.id} não encontrado para atualização.',
+      );
+    }
+    // Atualiza apenas os campos EDITÁVEIS do catálogo — preserva o
+    // estoque atual (a mutação de quantidade passa pelo FifoStockUseCase,
+    // que mantém a invariante `stock = Σ lotes`).
+    final current = _products[index];
+    _products[index] = current.copyWith(
+      name: product.name,
+      description: product.description,
+      imagePath: product.imagePath,
+      purchasePriceCents: product.purchasePriceCents,
+      salePriceCents: product.salePriceCents,
+      code: product.code,
+      vendaPorFracao: product.vendaPorFracao,
+      unitLabel: product.unitLabel,
+      isActive: product.isActive,
+    );
+  }
 
- @override
- Future<void> updateStock(
- String id,
- int newQuantity, {
- required String storeId,
- }) async {
- // Escopo por loja: só o produto da loja informada é mutável.
- final index = _products.indexWhere(
- (product) => product.id == id && product.storeId == storeId,
- );
- if (index == -1) {
- throw StateError('Produto $id não encontrado para atualização de estoque.');
- }
- // Product é imutável: substitui por uma nova instância com o estoque novo.
- _products[index] = _products[index].copyWith(stockQuantity: newQuantity);
- }
+  @override
+  Future<void> updateStock(
+    String id,
+    int newQuantity, {
+    required String storeId,
+  }) async {
+    // Escopo por loja: só o produto da loja informada é mutável.
+    final index = _products.indexWhere(
+      (product) => product.id == id && product.storeId == storeId,
+    );
+    if (index == -1) {
+      throw StateError(
+        'Produto $id não encontrado para atualização de estoque.',
+      );
+    }
+    // Product é imutável: substitui por uma nova instância com o estoque novo.
+    _products[index] = _products[index].copyWith(stockQuantity: newQuantity);
+  }
 }

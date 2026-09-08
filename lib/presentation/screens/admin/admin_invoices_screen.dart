@@ -62,9 +62,7 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
       actions: [
         TextButton(
           onPressed: () => setState(() => _showPendingOnly = !_showPendingOnly),
-          child: Text(
-            _showPendingOnly ? l10n.adminAll : l10n.adminPendingOnly,
-          ),
+          child: Text(_showPendingOnly ? l10n.adminAll : l10n.adminPendingOnly),
         ),
       ],
       body: Column(
@@ -115,10 +113,22 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
           ),
           Expanded(
             child: _showPendingOnly
-                ? _buildList(context, pendingAsync, filtered, tenants, plans,
-                    l10n.adminInvoicesEmptyPending)
-                : _buildList(context, allAsync, filtered, tenants, plans,
-                    l10n.adminInvoicesEmpty),
+                ? _buildList(
+                    context,
+                    pendingAsync,
+                    filtered,
+                    tenants,
+                    plans,
+                    l10n.adminInvoicesEmptyPending,
+                  )
+                : _buildList(
+                    context,
+                    allAsync,
+                    filtered,
+                    tenants,
+                    plans,
+                    l10n.adminInvoicesEmpty,
+                  ),
           ),
         ],
       ),
@@ -134,8 +144,7 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
     final query = _searchQuery.toLowerCase();
     return invoices.where((inv) {
       final tenant = tenants.where((t) => t.id == inv.tenantId).firstOrNull;
-      if (tenant != null &&
-          tenant.businessName.toLowerCase().contains(query)) {
+      if (tenant != null && tenant.businessName.toLowerCase().contains(query)) {
         return true;
       }
       if (inv.period.toLowerCase().contains(query)) return true;
@@ -171,8 +180,9 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
             title: _searchQuery.isNotEmpty
                 ? context.l10n.commonNoResults
                 : emptyMessage,
-            subtitle:
-                _searchQuery.isNotEmpty ? context.l10n.commonNoResultsHint : null,
+            subtitle: _searchQuery.isNotEmpty
+                ? context.l10n.commonNoResultsHint
+                : null,
           );
         }
         return RefreshIndicator(
@@ -190,8 +200,9 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
               final tenant = tenants
                   .where((t) => t.id == invoice.tenantId)
                   .firstOrNull;
-              final plan =
-                  plans.where((p) => p.id == invoice.planId).firstOrNull;
+              final plan = plans
+                  .where((p) => p.id == invoice.planId)
+                  .firstOrNull;
               return _InvoiceCard(
                 invoice: invoice,
                 tenantName: tenant?.businessName ?? invoice.tenantId,
@@ -345,10 +356,7 @@ class _InvoiceCard extends StatelessWidget {
                   ],
                 ),
               ),
-              StatusChip(
-                label: statusLabel,
-                color: statusColor,
-              ),
+              StatusChip(label: statusLabel, color: statusColor),
             ],
           ),
           const SizedBox(height: 10),
@@ -362,7 +370,8 @@ class _InvoiceCard extends StatelessWidget {
               ),
               _InfoPill(
                 icon: Icons.calendar_today_outlined,
-                label: '${l10n.adminInvoiceDue} ${dateFormat.format(invoice.dueDate)}',
+                label:
+                    '${l10n.adminInvoiceDue} ${dateFormat.format(invoice.dueDate)}',
               ),
               if (invoice.paidAt != null)
                 _InfoPill(
@@ -409,11 +418,7 @@ class _InvoiceCard extends StatelessWidget {
 
 /// Pill de informação (ícone + texto).
 class _InfoPill extends StatelessWidget {
-  const _InfoPill({
-    required this.icon,
-    required this.label,
-    this.color,
-  });
+  const _InfoPill({required this.icon, required this.label, this.color});
 
   final IconData icon;
   final String label;
@@ -438,9 +443,9 @@ class _InfoPill extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: effectiveColor,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: effectiveColor),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),

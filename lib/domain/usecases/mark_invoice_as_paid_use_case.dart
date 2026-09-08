@@ -9,6 +9,5 @@ class MarkInvoiceAsPaidUseCase {
 
   final IInvoiceRepository _repository;
 
-  Future<void> call(String invoiceId) =>
-      _repository.markAsPaid(invoiceId);
+  Future<void> call(String invoiceId) => _repository.markAsPaid(invoiceId);
 }

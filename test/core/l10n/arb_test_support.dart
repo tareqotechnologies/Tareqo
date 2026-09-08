@@ -6,22 +6,22 @@ import 'dart:io';
 /// "chave de nível superior") para que os testes nunca discordem entre si.
 
 /// Conteúdo bruto de `lib/l10n/app_<locale>.arb`.
-String readArb(String locale) => File('lib/l10n/app_$locale.arb').readAsStringSync();
+String readArb(String locale) =>
+    File('lib/l10n/app_$locale.arb').readAsStringSync();
 
 /// Chaves de nível superior de um ARB, na ordem de aparição — incluindo a
 /// metadata `@key` e `@@locale`, que também vivem no nível superior.
 List<String> readArbTopLevelKeys(String locale) {
   final arb = readArb(locale);
-  return RegExp(r'^  "([^"]+)":', multiLine: true)
-      .allMatches(arb)
-      .map((m) => m.group(1)!)
-      .toList();
+  return RegExp(
+    r'^  "([^"]+)":',
+    multiLine: true,
+  ).allMatches(arb).map((m) => m.group(1)!).toList();
 }
 
 /// Apenas as chaves de tradução reais (sem `@` inicial).
-Set<String> readArbKeys(String locale) => readArbTopLevelKeys(locale)
-    .where((key) => !key.startsWith('@'))
-    .toSet();
+Set<String> readArbKeys(String locale) =>
+    readArbTopLevelKeys(locale).where((key) => !key.startsWith('@')).toSet();
 
 /// Chaves de tradução repetidas dentro do próprio ARB (ex.: blocos
 /// históricos duplicados). JSON tolera duplicatas silenciosamente
@@ -32,10 +32,7 @@ List<String> duplicatedArbKeys(String locale) {
     if (key.startsWith('@')) continue;
     seen.update(key, (count) => count + 1, ifAbsent: () => 1);
   }
-  return seen.entries
-      .where((e) => e.value > 1)
-      .map((e) => e.key)
-      .toList()
+  return seen.entries.where((e) => e.value > 1).map((e) => e.key).toList()
     ..sort();
 }
 

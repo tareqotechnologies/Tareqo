@@ -22,7 +22,8 @@ import '../../controllers/sales_providers.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/confirm_dialog.dart';
-import '../../widgets/payment_filter.dart' show PaymentMethodAccent, PaymentMethodIcon;
+import '../../widgets/payment_filter.dart'
+    show PaymentMethodAccent, PaymentMethodIcon;
 import '../../widgets/product_image.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/smart_amount.dart';
@@ -87,15 +88,14 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     if (confirmed != true || !mounted) return;
 
     final user = ref.read(authStateProvider).value;
-    final storeId =
-        user == null ? null : ref.read(activeStoreIdProvider(user.id));
+    final storeId = user == null
+        ? null
+        : ref.read(activeStoreIdProvider(user.id));
     if (storeId == null) return;
 
     setState(() => _cancelling = true);
     try {
-      await ref
-          .read(cancelSaleUseCaseProvider)
-          .call(sale.id, storeId: storeId);
+      await ref.read(cancelSaleUseCaseProvider).call(sale.id, storeId: storeId);
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.saleCancelledSuccess)),
@@ -238,11 +238,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.lock_clock_outlined,
-                size: 14,
-                color: scheme.outline,
-              ),
+              Icon(Icons.lock_clock_outlined, size: 14, color: scheme.outline),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
@@ -298,7 +294,8 @@ class _ItemRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final subtotal = Quantity.lineTotal(item.quantity, item.unitPriceCents);
-    final imagePath = ref
+    final imagePath =
+        ref
             .watch(productsProvider)
             .value
             ?.where((p) => p.id == item.productId)

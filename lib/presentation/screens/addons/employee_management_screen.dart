@@ -115,7 +115,9 @@ class _EmployeeManagementScreenState
 
 /// Resolve o rótulo localizado de um papel de funcionário.
 String _roleLabel(EmployeeRole role, AppLocalizations l10n) {
-  return role == EmployeeRole.manager ? l10n.roleManager : l10n.employeeRoleSales;
+  return role == EmployeeRole.manager
+      ? l10n.roleManager
+      : l10n.employeeRoleSales;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -160,10 +162,10 @@ class _AttendanceTab extends ConsumerWidget {
     };
 
     if (storeId == null) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.storefront_outlined,
-        title: 'Sem loja activa',
-        subtitle: 'Conclua o onboarding para registar o ponto.',
+        title: l10n.employeeMgmtNoStoreTitle,
+        subtitle: l10n.employeeMgmtNoStoreAttendance,
       );
     }
     if (attendanceAsync?.hasError ?? false) {
@@ -269,7 +271,6 @@ class _AttendanceTab extends ConsumerWidget {
                           _roleLabel(employee.role, context.l10n),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
-                            fontSize: 11,
                           ),
                         ),
                       ],
@@ -312,10 +313,7 @@ class _AttendanceTab extends ConsumerWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(AppRadius.full),
@@ -360,7 +358,6 @@ class _AttendanceTab extends ConsumerWidget {
                             record.userId,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w500,
-                          fontSize: 12,
                         ),
                       ),
                     ),
@@ -385,10 +382,7 @@ class _AttendanceTab extends ConsumerWidget {
       '${dateTime.hour.toString().padLeft(2, '0')}:'
       '${dateTime.minute.toString().padLeft(2, '0')}';
 
-  String? _employeeName(
-    List<StoreEmployee> employees,
-    String userId,
-  ) =>
+  String? _employeeName(List<StoreEmployee> employees, String userId) =>
       employees.where((e) => e.userId == userId).firstOrNull?.fullName;
 
   Future<void> _clockIn(
@@ -400,7 +394,9 @@ class _AttendanceTab extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
     try {
-      await ref.read(employeeManagementRepositoryProvider).clockIn(
+      await ref
+          .read(employeeManagementRepositoryProvider)
+          .clockIn(
             storeId: employee.storeId,
             userId: employee.userId,
             workDate: workDate,
@@ -408,7 +404,9 @@ class _AttendanceTab extends ConsumerWidget {
           );
       ref.invalidate(attendanceProvider(workDate));
     } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(l10n.employeeClockInError)));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.employeeClockInError)),
+      );
     }
   }
 
@@ -421,7 +419,9 @@ class _AttendanceTab extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
     try {
-      await ref.read(employeeManagementRepositoryProvider).clockOut(
+      await ref
+          .read(employeeManagementRepositoryProvider)
+          .clockOut(
             storeId: employee.storeId,
             userId: employee.userId,
             workDate: workDate,
@@ -474,10 +474,10 @@ class _CommissionsTab extends ConsumerWidget {
         : ref.watch(commissionSummaryProvider(month));
 
     if (storeId == null) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.storefront_outlined,
-        title: 'Sem loja activa',
-        subtitle: 'Conclua o onboarding para ver comissões.',
+        title: l10n.employeeMgmtNoStoreTitle,
+        subtitle: l10n.employeeMgmtNoStoreCommissions,
       );
     }
     if (summaryAsync?.hasError ?? false) {
@@ -494,7 +494,8 @@ class _CommissionsTab extends ConsumerWidget {
       );
     }
 
-    final entries = summaryAsync?.value ?? const <EmployeeCommissionSummaryEntry>[];
+    final entries =
+        summaryAsync?.value ?? const <EmployeeCommissionSummaryEntry>[];
     final totalSales = entries.fold<int>(0, (sum, e) => sum + e.salesCents);
     final totalCommission = entries.fold<int>(
       0,
@@ -519,7 +520,6 @@ class _CommissionsTab extends ConsumerWidget {
                       l10n.employeeSalesMonth,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontSize: 11,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -547,7 +547,6 @@ class _CommissionsTab extends ConsumerWidget {
                       l10n.employeeCommissionTitle,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontSize: 11,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -613,18 +612,13 @@ class _CommissionsTab extends ConsumerWidget {
                           _commissionSubtitle(entries, employee, l10n),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
-                            fontSize: 11,
                           ),
                         ),
                       ],
                     ),
                   ),
                   TextButton(
-                    onPressed: () => _openRateSheet(
-                      context,
-                      ref,
-                      employee,
-                    ),
+                    onPressed: () => _openRateSheet(context, ref, employee),
                     child: Text(l10n.employeeCommissionSetRate),
                   ),
                 ],
@@ -641,9 +635,7 @@ class _CommissionsTab extends ConsumerWidget {
     StoreEmployee employee,
     AppLocalizations l10n,
   ) {
-    final entry = entries
-        .where((e) => e.userId == employee.userId)
-        .firstOrNull;
+    final entry = entries.where((e) => e.userId == employee.userId).firstOrNull;
     if (entry == null) {
       return l10n.employeeCommissionNoRate;
     }
@@ -689,9 +681,9 @@ class _CommissionsTab extends ConsumerWidget {
           children: [
             Text(
               l10n.employeeCommissionSetRate,
-              style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: Theme.of(
+                sheetContext,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 4),
             Text(
@@ -704,7 +696,9 @@ class _CommissionsTab extends ConsumerWidget {
             AppTextField(
               controller: controller,
               label: l10n.employeeCommissionRateLabel,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             const SizedBox(height: 16),
             AppButton.primary(
@@ -723,24 +717,20 @@ class _CommissionsTab extends ConsumerWidget {
                         rateBps: value * 100,
                       );
                   ref.invalidate(commissionRatesProvider);
-                  ref.invalidate(commissionSummaryProvider(
-                    employeeMonthOf(DateTime.now()),
-                  ));
+                  ref.invalidate(
+                    commissionSummaryProvider(employeeMonthOf(DateTime.now())),
+                  );
                   if (!sheetContext.mounted) return;
                   Navigator.of(sheetContext).pop();
                   if (sheetContext.mounted) {
                     ScaffoldMessenger.of(sheetContext).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.employeeCommissionRateSaved),
-                      ),
+                      SnackBar(content: Text(l10n.employeeCommissionRateSaved)),
                     );
                   }
                 } catch (_) {
                   if (sheetContext.mounted) {
                     ScaffoldMessenger.of(sheetContext).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.employeeCommissionRateError),
-                      ),
+                      SnackBar(content: Text(l10n.employeeCommissionRateError)),
                     );
                   }
                 }
@@ -782,21 +772,20 @@ class _TargetsTab extends ConsumerWidget {
         .toList();
 
     final month = employeeMonthOf(DateTime.now());
-    final targetsAsync =
-        storeId == null ? null : ref.watch(targetsProvider);
+    final targetsAsync = storeId == null ? null : ref.watch(targetsProvider);
     final summaryAsync = storeId == null
         ? null
         : ref.watch(commissionSummaryProvider(month));
     final targets = targetsAsync?.value ?? const <EmployeeTarget>[];
-    final monthTargets =
-        targets.where((t) => t.month == month).toList();
-    final entries = summaryAsync?.value ?? const <EmployeeCommissionSummaryEntry>[];
+    final monthTargets = targets.where((t) => t.month == month).toList();
+    final entries =
+        summaryAsync?.value ?? const <EmployeeCommissionSummaryEntry>[];
 
     if (storeId == null) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.storefront_outlined,
-        title: 'Sem loja activa',
-        subtitle: 'Conclua o onboarding para definir metas.',
+        title: l10n.employeeMgmtNoStoreTitle,
+        subtitle: l10n.employeeMgmtNoStoreTargets,
       );
     }
     if (targetsAsync?.hasError ?? false) {
@@ -868,10 +857,7 @@ class _TargetsTab extends ConsumerWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(AppRadius.full),
@@ -892,10 +878,10 @@ class _TargetsTab extends ConsumerWidget {
               target: target,
               employeeName:
                   storeEmployees
-                          .where((e) => e.userId == target.userId)
-                          .firstOrNull
-                          ?.fullName ??
-                      target.userId,
+                      .where((e) => e.userId == target.userId)
+                      .firstOrNull
+                      ?.fullName ??
+                  target.userId,
               progress: _progress(target, entries),
               onRemove: () => _removeTarget(context, ref, target),
             ),
@@ -989,9 +975,9 @@ class _TargetsTab extends ConsumerWidget {
           children: [
             Text(
               l10n.employeeTargetNewTitle,
-              style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: Theme.of(
+                sheetContext,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -1113,7 +1099,6 @@ class _TargetCard extends StatelessWidget {
             l10n.employeeTargetMeta(Formatters.currency(target.targetCents)),
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
-              fontSize: 12,
             ),
           ),
           const SizedBox(height: 8),
@@ -1169,9 +1154,8 @@ class _MiniStat extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
+            // Rótulo COMPLETO — quebra quando necessário (nada de truncar).
             label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               height: 1.1,

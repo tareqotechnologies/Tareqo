@@ -1,5 +1,14 @@
 # 18 — Migrações de persistência dos add-ons no Supabase de produção (runbook)
 
+> **⚠️ CONSOLIDADO (Set/2026):** os objetos destas migrações foram **fundidos** no
+> `schema.sql` (PARTE 1.9 — instalação nova) e no `upgrade.sql` (PARTE 31 — bases
+> existentes), com correções de idempotência (políticas com
+> `DROP POLICY IF EXISTS`, Realtime com guarda `pg_publication_tables`).
+> Os arquivos originais foram **arquivados** em `supabase/archived_migrations/`
+> (somente leitura, histórico). **Não aplique os arquivos arquivados em bases
+> novas** — use os scripts consolidados; o runbook abaixo permanece como
+> referência do que cada objeto faz e de como foi verificado no live.
+
 > **Objetivo:** aplicar as migrações que tornam os add-ons **realmente persistentes**
 > no projeto de produção (`dotklbpqmlnhcdifiukd`), seguindo as mesmas convenções
 > das migrações anteriores (Partes de `upgrade.sql`): `CREATE TABLE IF NOT EXISTS`,
@@ -9,11 +18,17 @@
 
 Três migrações independentes, uma por add-on:
 
-| Migração | Add-on | Tabelas / RPC | Estado live |
+| Migração (arquivada em `supabase/archived_migrations/`) | Add-on | Tabelas / RPC | Estado live |
 | -------- | ------ | ------------- | ----------- |
 | `20260905_custom_invoice_persistence.sql` | Factura Personalizada | `custom_invoices` + trigger de numeração | ✅ **Aplicada + verificada** (REST/RLS) |
 | `20260905_quotation_persistence.sql` | Cotação / Orçamento | `quotations` + trigger de numeração | ✅ **Aplicada + verificada** (REST/RLS) |
 | `20260905_employee_mgmt_persistence.sql` | Gestão de Funcionários | `employee_attendance`, `employee_commission_rates`, `employee_targets` + RPC `get_employee_commission_summary` | ⏳ **Pendente de aplicação** |
+
+> **Estado atual (Set/2026):** com a consolidação, instalar o schema do zero
+> (`schema.sql`) já cria TODOS estes objetos (PARTE 1.9). Na base live existente,
+> aplicar a **PARTE 31 do `upgrade.sql`** cobre os três add-ons + billing +
+> mensagens admin de uma vez (idempotente — pode reexecutar). A ordem entre os
+> módulos não importa (são independentes).
 
 > A ordem de aplicação entre as três não importa (são independentes e idempotentes).
 > No SQLite o mesmo schema chega via **migração v3 (facturas), v4 (cotações) e v5

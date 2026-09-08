@@ -32,7 +32,6 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
 
     // Receita se cada tenant pagasse apenas o add-on mais caro.
 
-
     return Scaffold(
       backgroundColor: scheme.surface,
       body: CustomScrollView(
@@ -72,9 +71,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: AppSpacing.xs),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xs)),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -107,9 +104,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
           ),
 
           // ── Receita por Add-on ──
-          const SliverToBoxAdapter(
-            child: SizedBox(height: AppSpacing.lg),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -121,18 +116,13 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: AppSpacing.sm),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             sliver: SliverList.separated(
               itemCount: addOns.length,
-              separatorBuilder: (_, _) => const Divider(
-                height: 1,
-                indent: 40,
-                endIndent: 0,
-              ),
+              separatorBuilder: (_, _) =>
+                  const Divider(height: 1, indent: 40, endIndent: 0),
               itemBuilder: (_, i) => _AddOnRevenueTile(
                 addon: addOns[i],
                 tenantCount: tenants.length,
@@ -141,9 +131,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
           ),
 
           // ── Distribuição por Categoria ──
-          const SliverToBoxAdapter(
-            child: SizedBox(height: AppSpacing.lg),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -155,17 +143,16 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: AppSpacing.sm),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             sliver: SliverList.builder(
               itemCount: AddOnCategory.values.length,
               itemBuilder: (_, i) {
                 final category = AddOnCategory.values[i];
-                final categoryAddOns =
-                    addOns.where((a) => a.category == category).toList();
+                final categoryAddOns = addOns
+                    .where((a) => a.category == category)
+                    .toList();
                 final categoryRevenue = categoryAddOns.fold<int>(
                   0,
                   (sum, a) => sum + a.priceMonthlyCents,
@@ -180,9 +167,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
           ),
 
           // ── Bottom padding ──
-          const SliverToBoxAdapter(
-            child: SizedBox(height: AppSpacing.xxl),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
         ],
       ),
     );
@@ -261,10 +246,7 @@ class _KpiCard extends StatelessWidget {
 // ─── Add-on Revenue Tile ──────────────────────────────────────────────────
 
 class _AddOnRevenueTile extends StatelessWidget {
-  const _AddOnRevenueTile({
-    required this.addon,
-    required this.tenantCount,
-  });
+  const _AddOnRevenueTile({required this.addon, required this.tenantCount});
 
   final AddOn addon;
   final int tenantCount;

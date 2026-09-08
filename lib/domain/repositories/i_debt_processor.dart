@@ -10,12 +10,12 @@ import '../entities/debt.dart';
 /// preserva a semântica deliberada: a dívida sobrevive a uma falha da
 /// pendência na origem).
 abstract interface class IDebtAtomicProcessor {
- /// Registra [debt] e sua pendência financeira atomicamente no servidor.
- Future<void> register(Debt debt);
+  /// Registra [debt] e sua pendência financeira atomicamente no servidor.
+  Future<void> register(Debt debt);
 
- /// Quita a dívida [debtId] da loja [storeId] **atomicamente**: baixa da
- /// dívida + resolução da pendência vinculada (ou entrada direta no caixa
- /// para fiado antigo sem pendência) em uma única transação do banco
- /// (RPC `settle_debt`). Idempotente no servidor.
- Future<void> settle(String debtId, {required String storeId});
+  /// Quita a dívida [debtId] da loja [storeId] **atomicamente**: baixa da
+  /// dívida + resolução da pendência vinculada (ou entrada direta no caixa
+  /// para fiado antigo sem pendência) em uma única transação do banco
+  /// (RPC `settle_debt`). Idempotente no servidor.
+  Future<void> settle(String debtId, {required String storeId});
 }

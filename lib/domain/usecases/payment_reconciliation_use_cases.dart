@@ -52,9 +52,6 @@ class MarkPaymentFailedUseCase {
   const MarkPaymentFailedUseCase();
 
   PaymentReconciliation call(PaymentReconciliation payment, String reason) {
-    return payment.copyWith(
-      status: MobileMoneyStatus.failed,
-      notes: reason,
-    );
+    return payment.copyWith(status: MobileMoneyStatus.failed, notes: reason);
   }
 }
