@@ -393,6 +393,28 @@ abstract final class AppTheme {
             : AppColors.brandMuted,
       ),
 
+      // Menus de seleção (PopupMenu/Dropdown) — minimalistas e reais:
+      // overlay chapado (surfaceContainerLow, sem tinta M3), raio fino do
+      // sistema (12), sombra discreta, itens de 44px e texto 13/w400 —
+      // a mesma voz do corpo, sem a escala exagerada do padrão M3.
+      popupMenuTheme: PopupMenuThemeData(
+        color: scheme.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: scheme.shadow.withValues(alpha: 0.14),
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+        position: PopupMenuPosition.under,
+        textStyle: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0,
+          color: scheme.onSurface,
+        ),
+      ),
+      dropdownMenuTheme: const DropdownMenuThemeData(
+        textStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+      ),
+
       listTileTheme: ListTileThemeData(
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,

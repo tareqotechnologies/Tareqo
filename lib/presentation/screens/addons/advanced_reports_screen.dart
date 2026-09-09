@@ -13,6 +13,7 @@ import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_menu_option.dart';
 
 /// Fluxo de caixa REAL do período seleccionado (entradas/saídas pagas),
 /// via [GetCashFlowUseCase] — o tab financeiro usava zeros fixos antes.
@@ -54,10 +55,16 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.reportsAdvancedTitle),
+        // Título 3 (20/w600) — o AppBar de 56px com o chip de período à
+        // direita truncava o título 2 (22) em 'Relatórios Avançad…'.
+        title: Text(
+          l10n.reportsAdvancedTitle,
+          style: theme.textTheme.titleMedium,
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
@@ -783,7 +790,6 @@ class _PeriodChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
     final periods = <String, String>{
       'Hoje': l10n.periodToday,
@@ -792,39 +798,19 @@ class _PeriodChip extends StatelessWidget {
       'Este Ano': l10n.reportsPeriodYear,
     };
 
-    return PopupMenuButton<String>(
+    // Mesma pílula minimalista do dashboard ("Hoje ▾"): texto + chevron
+    // fino, menu via AppMenuOption (44px, bodySmall, chapado).
+    return AppMenuOption<String>(
+      label: periods[selected] ?? selected,
+      options: [
+        for (final entry in periods.entries)
+          AppMenuOptionItem(
+            value: entry.key,
+            label: entry.value,
+            checked: entry.key == selected,
+          ),
+      ],
       onSelected: onChanged,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              periods[selected] ?? selected,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.2,
-              ),
-            ),
-            const SizedBox(width: 2),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 16,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ],
-        ),
-      ),
-      itemBuilder: (ctx) => periods.entries
-          .map(
-            (entry) => CheckedPopupMenuItem(
-              value: entry.key,
-              checked: entry.key == selected,
-              child: Text(entry.value),
-            ),
-          )
-          .toList(),
     );
   }
 }

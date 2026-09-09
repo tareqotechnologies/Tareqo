@@ -9,6 +9,7 @@ import '../../../domain/entities/tenant.dart';
 import '../../controllers/admin_message_providers.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_picker_field.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Templates profissionais para cada tipo de mensagem admin→tenant.
@@ -190,32 +191,16 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
               // ── Selecionar tenant ──
               _SectionLabel(label: l10n.adminMessagesTenantLabel),
               const SizedBox(height: 8),
-              DropdownButtonFormField<Tenant>(
-                initialValue: _selectedTenant,
+              AppPickerField<Tenant>(
+                value: _selectedTenant,
                 isExpanded: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  hintText: context.l10n.adminMessagesTenantHint,
-                  hintStyle: TextStyle(
-                    color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
-                    fontSize: 12,
-                  ),
-                ),
+                hint: context.l10n.adminMessagesTenantHint,
                 items: [
                   for (final tenant in approvedTenants)
                     DropdownMenuItem(
                       value: tenant,
                       child: Text(
                         tenant.businessName,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontSize: 12,
-                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

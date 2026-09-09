@@ -55,7 +55,7 @@ class FilterDropdown<T> extends StatelessWidget {
         for (final option in options)
           PopupMenuItem(
             value: option,
-            height: 40,
+            height: 44,
             child: Row(
               children: [
                 Icon(
@@ -68,10 +68,14 @@ class FilterDropdown<T> extends StatelessWidget {
                       : scheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  labelOf(option),
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
+                Flexible(
+                  child: Text(
+                    labelOf(option),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurface,
+                    ),
                   ),
                 ),
               ],

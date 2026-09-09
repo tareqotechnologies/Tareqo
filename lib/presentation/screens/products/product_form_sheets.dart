@@ -16,6 +16,7 @@ import '../../../domain/usecases/add_product_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/products_providers.dart';
+import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
@@ -694,12 +695,10 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                 }),
               ),
               if (_vendaPorFracao) ...[
-                DropdownButtonFormField<String>(
-                  initialValue: _unitLabel,
-                  decoration: InputDecoration(
-                    labelText: l10n.productsUnitLabel,
-                    prefixIcon: const Icon(Icons.scale_outlined),
-                  ),
+                AppPickerField<String>(
+                  value: _unitLabel,
+                  label: l10n.productsUnitLabel,
+                  prefixIcon: Icons.scale_outlined,
                   items: [
                     for (final unit in const ['kg', 'g', 'l', 'ml'])
                       DropdownMenuItem(value: unit, child: Text(unit)),
@@ -1145,12 +1144,10 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 }),
               ),
               if (_vendaPorFracao) ...[
-                DropdownButtonFormField<String>(
-                  initialValue: _unitLabel,
-                  decoration: InputDecoration(
-                    labelText: l10n.productsUnitLabel,
-                    prefixIcon: const Icon(Icons.scale_outlined),
-                  ),
+                AppPickerField<String>(
+                  value: _unitLabel,
+                  label: l10n.productsUnitLabel,
+                  prefixIcon: Icons.scale_outlined,
                   items: [
                     for (final unit in const ['kg', 'g', 'l', 'ml'])
                       DropdownMenuItem(value: unit, child: Text(unit)),

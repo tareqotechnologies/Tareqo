@@ -13,6 +13,7 @@ import '../../controllers/products_providers.dart';
 import '../../controllers/stock_transfers_provider.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 
@@ -387,40 +388,28 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            DropdownButtonFormField<String>(
-              initialValue: _fromStoreId,
-              decoration: InputDecoration(
-                labelText: l10n.transfersOriginStore,
-                prefixIcon: const Icon(Icons.store_outlined),
-              ),
-              items: stores
-                  .map<DropdownMenuItem<String>>(
-                    (s) => DropdownMenuItem(
-                      value: s.id,
-                      child: Text(s.name, style: theme.textTheme.bodySmall),
-                    ),
-                  )
-                  .toList(),
+            AppPickerField<String>(
+              value: _fromStoreId,
+              label: l10n.transfersOriginStore,
+              prefixIcon: Icons.store_outlined,
+              items: [
+                for (final s in stores)
+                  DropdownMenuItem(value: s.id, child: Text(s.name)),
+              ],
               onChanged: (v) => setState(() {
                 _fromStoreId = v;
                 if (_toStoreId == v) _toStoreId = null;
               }),
             ),
             const SizedBox(height: AppSpacing.sm),
-            DropdownButtonFormField<String>(
-              initialValue: _toStoreId,
-              decoration: InputDecoration(
-                labelText: l10n.transfersDestStore,
-                prefixIcon: const Icon(Icons.storefront_outlined),
-              ),
-              items: destStores
-                  .map<DropdownMenuItem<String>>(
-                    (s) => DropdownMenuItem(
-                      value: s.id,
-                      child: Text(s.name, style: theme.textTheme.bodySmall),
-                    ),
-                  )
-                  .toList(),
+            AppPickerField<String>(
+              value: _toStoreId,
+              label: l10n.transfersDestStore,
+              prefixIcon: Icons.storefront_outlined,
+              items: [
+                for (final s in destStores)
+                  DropdownMenuItem(value: s.id, child: Text(s.name)),
+              ],
               onChanged: (v) => setState(() => _toStoreId = v),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -429,25 +418,22 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             _SectionLabel(text: l10n.transfersProduct),
             const SizedBox(height: 6),
             if (activeProducts.isNotEmpty)
-              DropdownButtonFormField<String>(
-                initialValue: _selectedProductId,
+              AppPickerField<String>(
+                value: _selectedProductId,
                 isExpanded: true,
-                decoration: InputDecoration(
-                  labelText: l10n.transfersProduct,
-                  prefixIcon: const Icon(Icons.inventory_2_outlined),
-                ),
-                items: activeProducts
-                    .map<DropdownMenuItem<String>>(
-                      (p) => DropdownMenuItem(
-                        value: p.id,
-                        child: Text(
-                          '${p.name}  ·  ${Quantity.format(p.stockQuantity, unitLabel: p.vendaPorFracao ? p.unitLabel : null)}',
-                          style: theme.textTheme.bodySmall,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                label: l10n.transfersProduct,
+                prefixIcon: Icons.inventory_2_outlined,
+                items: [
+                  for (final p in activeProducts)
+                    DropdownMenuItem(
+                      value: p.id,
+                      child: Text(
+                        '${p.name}  ·  ${Quantity.format(p.stockQuantity, unitLabel: p.vendaPorFracao ? p.unitLabel : null)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    )
-                    .toList(),
+                    ),
+                ],
                 onChanged: (id) => setState(() => _selectedProductId = id),
               )
             else

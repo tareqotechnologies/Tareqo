@@ -22,6 +22,7 @@ import '../../controllers/customers_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/quotation_providers.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/color_palette.dart';
@@ -598,26 +599,22 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             _SectionLabel(text: l10n.customInvoiceClientSection),
             const SizedBox(height: 6),
             if (customers.isNotEmpty)
-              DropdownButtonFormField<String>(
-                initialValue: _selectedCustomerId,
+              AppPickerField<String>(
+                value: _selectedCustomerId,
                 isExpanded: true,
-                menuMaxHeight: 250,
-                decoration: InputDecoration(
-                  labelText: l10n.customInvoiceClientSection,
-                  prefixIcon: const Icon(Icons.person_outline, size: 20),
-                ),
-                items: customers
-                    .map(
-                      (c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(
-                          '${c.name}${c.phone.isNotEmpty ? ' (${c.phone})' : ''}',
-                          style: theme.textTheme.bodySmall,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                label: l10n.customInvoiceClientSection,
+                prefixIcon: Icons.person_outline,
+                items: [
+                  for (final c in customers)
+                    DropdownMenuItem(
+                      value: c.id,
+                      child: Text(
+                        '${c.name}${c.phone.isNotEmpty ? ' (${c.phone})' : ''}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    )
-                    .toList(),
+                    ),
+                ],
                 onChanged: (id) {
                   setState(() {
                     _selectedCustomerId = id;
@@ -648,53 +645,47 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             _SectionLabel(text: l10n.customInvoiceProductSection),
             const SizedBox(height: 6),
             if (activeProducts.isNotEmpty)
-              DropdownButtonFormField<String>(
-                initialValue: _selectedProductId,
+              AppPickerField<String>(
+                value: _selectedProductId,
                 isExpanded: true,
-                menuMaxHeight: 250,
-                decoration: InputDecoration(
-                  labelText: l10n.customInvoiceProductSection,
-                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
-                ),
-                items: activeProducts
-                    .map(
-                      (p) => DropdownMenuItem(
-                        value: p.id,
-                        // Linha ÚNICA: o item seleccionado é exibido no
-                        // campo de altura compacta — uma Column de duas
-                        // linhas estourava o InputDecorator em 7px
-                        // (RenderFlex overflow) ao seleccionar o produto.
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                p.name,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                label: l10n.customInvoiceProductSection,
+                prefixIcon: Icons.inventory_2_outlined,
+                items: [
+                  for (final p in activeProducts)
+                    DropdownMenuItem(
+                      value: p.id,
+                      // Linha ÚNICA: o item seleccionado é exibido no
+                      // campo de altura compacta — uma Column de duas
+                      // linhas estourava o InputDecorator em 7px
+                      // (RenderFlex overflow) ao seleccionar o produto.
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              p.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(width: AppSpacing.xs),
-                            Text(
-                              l10n.customInvoiceProductOption(
-                                (p.stockQuantity ~/ 1000).toString(),
-                                p.unitLabel,
-                                Formatters.currency(p.salePriceCents),
-                              ),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: scheme.onSurfaceVariant.withValues(
-                                  alpha: 0.6,
-                                ),
-                                fontSize: 11,
-                              ),
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            l10n.customInvoiceProductOption(
+                              (p.stockQuantity ~/ 1000).toString(),
+                              p.unitLabel,
+                              Formatters.currency(p.salePriceCents),
                             ),
-                          ],
-                        ),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant.withValues(
+                                alpha: 0.6,
+                              ),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
                       ),
-                    )
-                    .toList(),
+                    ),
+                ],
                 onChanged: (id) {
                   setState(() {
                     _selectedProductId = id;

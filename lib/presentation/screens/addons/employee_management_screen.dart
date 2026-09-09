@@ -15,6 +15,7 @@ import '../../controllers/employee_management_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
@@ -980,14 +981,9 @@ class _TargetsTab extends ConsumerWidget {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              initialValue: selectedUserId,
-              decoration: InputDecoration(
-                labelText: l10n.employeeTargetEmployee,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+            AppPickerField<String>(
+              value: selectedUserId,
+              label: l10n.employeeTargetEmployee,
               items: [
                 for (final employee in available)
                   DropdownMenuItem(

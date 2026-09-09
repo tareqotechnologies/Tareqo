@@ -361,6 +361,7 @@ class _CustomerTile extends StatelessWidget {
                   itemBuilder: (ctx) => [
                     PopupMenuItem(
                       value: 'edit',
+                      height: 44,
                       child: Row(
                         children: [
                           Icon(
@@ -369,12 +370,18 @@ class _CustomerTile extends StatelessWidget {
                             color: theme.colorScheme.onSurface,
                           ),
                           const SizedBox(width: 10),
-                          Text(l10n.customersEditTitle),
+                          Text(
+                            l10n.customersEditTitle,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     PopupMenuItem(
                       value: 'delete',
+                      height: 44,
                       child: Row(
                         children: [
                           Icon(
@@ -383,7 +390,12 @@ class _CustomerTile extends StatelessWidget {
                             color: theme.colorScheme.error,
                           ),
                           const SizedBox(width: 10),
-                          Text(l10n.commonDelete),
+                          Text(
+                            l10n.commonDelete,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.error,
+                            ),
+                          ),
                         ],
                       ),
                     ),

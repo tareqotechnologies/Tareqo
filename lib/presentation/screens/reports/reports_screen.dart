@@ -79,11 +79,23 @@ class ReportsScreen extends ConsumerWidget {
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: _ExportFormat.csv,
-                child: Text(l10n.reportsExportCsv),
+                height: 44,
+                child: Text(
+                  l10n.reportsExportCsv,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
               ),
               PopupMenuItem(
                 value: _ExportFormat.pdf,
-                child: Text(l10n.reportsExportPdf),
+                height: 44,
+                child: Text(
+                  l10n.reportsExportPdf,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
               ),
             ],
           ),
