@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/store_context.dart';
 import '../../helpers/test_app.dart';
 
+import 'package:tareqo/core/security/biometric_service.dart';
+import 'package:tareqo/core/security/secure_storage_service.dart';
 import 'package:tareqo/core/share/receipt_sharer.dart';
 import 'package:tareqo/domain/entities/app_user.dart';
 import 'package:tareqo/domain/entities/sale.dart';
@@ -14,11 +16,13 @@ import 'package:tareqo/domain/entities/sale_item.dart';
 import 'package:tareqo/domain/entities/store.dart';
 import 'package:tareqo/domain/entities/store_employee.dart';
 import 'package:tareqo/domain/repositories/i_sale_processor.dart';
+import 'package:tareqo/domain/usecases/biometric_auth_use_case.dart';
 import 'package:tareqo/domain/usecases/cancel_sale_use_case.dart';
 import 'package:tareqo/presentation/controllers/account_providers.dart';
 import 'package:tareqo/presentation/controllers/admin_providers.dart';
 import 'package:tareqo/presentation/controllers/auth_providers.dart';
 import 'package:tareqo/presentation/controllers/sales_providers.dart';
+import 'package:get_it/get_it.dart';
 import 'package:tareqo/presentation/screens/sales/sale_detail_screen.dart';
 
 /// Fake do [ReceiptSharer] — grava as chamadas (share_plus/url_launcher
@@ -56,6 +60,55 @@ class _FakeCancelSaleUseCase implements CancelSaleUseCase {
     calls++;
     lastSaleId = saleId;
   }
+}
+
+/// Biometria fake para a 2ª barreira da anulação (M4) — mesmo padrão do
+/// app_lock_overlay_test: nunca toca no plugin nativo.
+///
+/// [available] simula aparelho SEM leitor (o fluxo segue só com o diálogo
+/// textual); [result] programa o resultado do prompt quando disponível.
+class _FakeBiometricService extends BiometricService {
+  _FakeBiometricService({this.available = false, this.result = true});
+
+  final bool available;
+  final bool result;
+  int attempts = 0;
+
+  @override
+  Future<bool> get isAvailable async => available;
+
+  @override
+  Future<bool> authenticate({
+    String localizedReason = '',
+    String signInTitle = '',
+    String biometricHint = '',
+    String cancelButton = '',
+    String fallbackTitle = '',
+    String goToSettingsButton = '',
+    String goToSettingsDescription = '',
+    String lockOut = '',
+    bool useErrorDialogs = true,
+    bool stickyAuth = true,
+    bool biometricOnly = false,
+  }) async {
+    attempts++;
+    return result;
+  }
+}
+
+/// Monta o use case biométrico fake com storage seguro em memória.
+/// O service devolvido expõe `attempts` para o teste afirmar o prompt.
+({BiometricAuthUseCase useCase, _FakeBiometricService service})
+_fakeBiometricUseCase({bool available = false, bool result = true}) {
+  registerTestSecureStorage();
+  final service = _FakeBiometricService(available: available, result: result);
+  return (
+    useCase: BiometricAuthUseCase(
+      service,
+      GetIt.instance<SecureStorageService>(),
+    ),
+    service: service,
+  );
 }
 
 /// Rola até o botão 'Partilhar recibo' — o design system 2026 deixou a
@@ -126,6 +179,8 @@ void main() {
     tester,
   ) async {
     final fakeCancel = _FakeCancelSaleUseCase();
+    // M4: biometria INDISPONÍVEL no aparelho simulado — a 2ª barreira é
+    // pulada (degradação consciente) e o fluxo textual segue sozinho.
 
     // Rota empurrada dentro de um ProviderScope com o use case fake (o
     // ServiceLocator não é inicializado nos testes de widget).
@@ -134,6 +189,9 @@ void main() {
         overrides: [
           ...storeContextOverrides(),
           cancelSaleUseCaseProvider.overrideWithValue(fakeCancel),
+          biometricAuthUseCaseProvider.overrideWithValue(
+            _fakeBiometricUseCase(available: false).useCase,
+          ),
         ],
         child: testApp(
           home: Builder(
@@ -191,6 +249,63 @@ void main() {
     expect(find.text('Venda anulada.'), findsOneWidget);
     expect(find.text('abrir'), findsOneWidget);
   });
+
+  testWidgets(
+    'biometria disponível: prompt confirma identidade antes de anular',
+    (tester) async {
+      final fakeCancel = _FakeCancelSaleUseCase();
+      final biometric = _fakeBiometricUseCase(available: true, result: true);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...storeContextOverrides(),
+            cancelSaleUseCaseProvider.overrideWithValue(fakeCancel),
+            biometricAuthUseCaseProvider.overrideWithValue(biometric.useCase),
+          ],
+          child: testApp(
+            home: Builder(
+              builder: (context) => Consumer(
+                builder: (context, ref, _) {
+                  ref.watch(activeStoreIdProvider('1'));
+                  return Scaffold(
+                    body: Center(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => SaleDetailScreen(sale: _sale()),
+                          ),
+                        ),
+                        child: const Text('abrir'),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('abrir'));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Anular venda'),
+        120,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Anular venda'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sim, anular'));
+      await tester.pumpAndSettle();
+
+      // 2ª barreira: o prompt biométrico FOI exibido antes da anulação e a
+      // operação só aconteceu após o sucesso da identidade.
+      expect(biometric.service.attempts, greaterThanOrEqualTo(1));
+      expect(fakeCancel.calls, 1);
+      expect(fakeCancel.lastSaleId, 's1');
+    },
+  );
 
   testWidgets('funcionário comum NÃO vê a ação Anular venda', (tester) async {
     // Tenant de OUTRO dono + vínculo 'employee' do usuário logado →
