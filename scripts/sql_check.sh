@@ -206,7 +206,11 @@ SQL
 
 # Direto no PostgREST (RLS): o dono NÃO consegue mexer no status — a
 # política tenants_update continua restrita ao super admin.
-owner_status="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; UPDATE public.tenants SET status = 'approved' WHERE id = 'tn_smoke' RETURNING id;" | tail -n 1)"
+# Probes "de negação": o RLS rejeita a escrita e o psql sai 1 — sob
+# `set -euo pipefail` isso mataria o script ANTES da própria asserção.
+# Padrão: stderr silenciado + `|| true` no pipeline; quem valida é o
+# `[ -z ... ]` abaixo (nenhuma linha pode voltar).
+owner_status="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; UPDATE public.tenants SET status = 'approved' WHERE id = 'tn_smoke' RETURNING id;" 2>/dev/null | tail -n 1 || true)"
 [ -z "$owner_status" ] || {
   echo "FALHA: dono não deveria alterar o status via UPDATE direto (obtido: '$owner_status')"
   exit 1
@@ -249,7 +253,7 @@ plan_admin_update="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${A
 }
 
 # DONO comum NÃO cria (RLS nega o INSERT — a política exige super admin).
-plan_owner_insert="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; INSERT INTO public.plans (id, name) VALUES ('pl_rls_deny', 'Negado') RETURNING id;" | tail -n 1)"
+plan_owner_insert="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; INSERT INTO public.plans (id, name) VALUES ('pl_rls_deny', 'Negado') RETURNING id;" 2>/dev/null | tail -n 1 || true)"
 [ -z "$plan_owner_insert" ] || {
   echo "FALHA: dono comum não deveria criar plano (obtido: '$plan_owner_insert')"
   exit 1
