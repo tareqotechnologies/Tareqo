@@ -28,7 +28,7 @@ permissions:
 jobs:
   osv-scan:
     name: OSV-Scanner (pubspec.lock)
-    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2"
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.5.1"
     with:
       scan-args: |-
         --lockfile=pubspec.lock
