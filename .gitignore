@@ -71,3 +71,9 @@ fastlane/play-service-account.json
 
 # Base64 do keystore de upload (conveniência para adicionar o secret KEYSTORE_BASE64)
 android/app/upload-keystore.jks.b64
+
+# B3 (auditoria): artefatos locais fora do repositorio
+*.log
+compras_v.png
+screenshot_session_check.png
+*.iml
