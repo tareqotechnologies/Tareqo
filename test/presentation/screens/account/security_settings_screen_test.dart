@@ -88,10 +88,9 @@ void main() {
   }
 
   Switch tileSwitch(WidgetTester tester, String title) {
-    final tile = find.ancestor(
-      of: find.text(title).last,
-      matching: find.byType(Row),
-    ).first;
+    final tile = find
+        .ancestor(of: find.text(title).last, matching: find.byType(Row))
+        .first;
     return tester.widget<Switch>(
       find.descendant(of: tile, matching: find.byType(Switch)),
     );
@@ -109,10 +108,12 @@ void main() {
     expect(find.text('Não disponível neste dispositivo'), findsOneWidget);
     expect(
       find.descendant(
-        of: find.ancestor(
-          of: find.text('Não disponível neste dispositivo'),
-          matching: find.byType(Container),
-        ).first,
+        of: find
+            .ancestor(
+              of: find.text('Não disponível neste dispositivo'),
+              matching: find.byType(Container),
+            )
+            .first,
         matching: find.byType(Switch),
       ),
       findsNothing,

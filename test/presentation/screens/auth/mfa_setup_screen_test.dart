@@ -37,9 +37,7 @@ void main() {
   Future<void> openSetup(WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          mfaAuthUseCaseProvider.overrideWithValue(mfaUseCase),
-        ],
+        overrides: [mfaAuthUseCaseProvider.overrideWithValue(mfaUseCase)],
         child: testApp(home: const MFASetupScreen()),
       ),
     );
@@ -53,11 +51,17 @@ void main() {
   ) async {
     await openSetup(tester);
 
-    expect(find.text('Configurar Autenticação em Dois Fatores'), findsOneWidget);
+    expect(
+      find.text('Configurar Autenticação em Dois Fatores'),
+      findsOneWidget,
+    );
     expect(find.text('Escaneie o QR Code'), findsOneWidget);
     // O segredo gerado aparece para entrada manual (base32, ≥16 chars).
     expect(find.text('Ou digite este código manualmente:'), findsOneWidget);
-    expect(find.text('Digite o código do aplicativo para confirmar:'), findsOneWidget);
+    expect(
+      find.text('Digite o código do aplicativo para confirmar:'),
+      findsOneWidget,
+    );
     expect(find.text('Código de 6 dígitos'), findsOneWidget);
     expect(find.text('Verificar e Activar'), findsOneWidget);
     // O QR Code foi renderizado de fato.
@@ -89,7 +93,10 @@ void main() {
 
     expect(find.text('Digite o código de 6 dígitos'), findsOneWidget);
     // Continua na tela (não houve pop) e MFA segue desativado.
-    expect(find.text('Configurar Autenticação em Dois Fatores'), findsOneWidget);
+    expect(
+      find.text('Configurar Autenticação em Dois Fatores'),
+      findsOneWidget,
+    );
     expect(await mfaUseCase.isEnabled(), isFalse);
   });
 
@@ -105,7 +112,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Código inválido. Tente novamente.'), findsOneWidget);
-    expect(find.text('Configurar Autenticação em Dois Fatores'), findsOneWidget);
+    expect(
+      find.text('Configurar Autenticação em Dois Fatores'),
+      findsOneWidget,
+    );
     expect(await mfaUseCase.isEnabled(), isFalse);
   });
 
@@ -125,9 +135,7 @@ void main() {
                 child: TextButton(
                   onPressed: () async {
                     setupResult = await Navigator.of(context).push<bool>(
-                      MaterialPageRoute(
-                        builder: (_) => const MFASetupScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const MFASetupScreen()),
                     );
                   },
                   child: const Text('abrir'),
@@ -169,15 +177,15 @@ void main() {
     await openSetup(tester);
 
     expect(find.textContaining('Código expira em'), findsOneWidget);
-    final before = tester.widget<Text>(
-      find.textContaining('Código expira em').first,
-    ).data!;
+    final before = tester
+        .widget<Text>(find.textContaining('Código expira em').first)
+        .data!;
 
     await tester.pump(const Duration(seconds: 2));
 
-    final after = tester.widget<Text>(
-      find.textContaining('Código expira em').first,
-    ).data!;
+    final after = tester
+        .widget<Text>(find.textContaining('Código expira em').first)
+        .data!;
     expect(after, isNot(before), reason: 'o contador deve re-renderizar');
   });
 }
