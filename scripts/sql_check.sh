@@ -1751,9 +1751,11 @@ cc_updated="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UI
 }
 
 # 19.5 Guarda GERENCIAL: funcionário comum NÃO fecha o caixa (RPC rejeita).
-# O erro do psql vai para STDERR — captura com 2>&1; o `|| true` evita
-# que o status de erro esperado mate o script sob set -euo pipefail.
-emp_closed="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT public.close_cash_register('st_smoke', date_trunc('day', now()), $exp_ref);" 2>&1 | tail -n 1 || true)"
+# Captura a saída INTEIRA (stderr incluído, sem tail): o psql imprime
+# ERROR: <mensagem> + CONTEXT: ... — a última linha é o CONTEXT, não a
+# mensagem. O `|| true` evita que o status de erro esperado mate o
+# script sob set -euo pipefail; quem valida é o case abaixo.
+emp_closed="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT public.close_cash_register('st_smoke', date_trunc('day', now()), $exp_ref);" 2>&1 || true)"
 case "$emp_closed" in
   *"Apenas o dono ou um gerente"*) : ;;  # erro esperado (guarda gerencial)
   *)
