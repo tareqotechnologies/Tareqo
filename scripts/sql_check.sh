@@ -1703,7 +1703,9 @@ tot_ref="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\
 }
 
 # 19.3 Dono fecha o caixa de HOJE com contagem física = esperado (confere).
-psql_app -v ON_ERROR_STOP=1 <<'SQL'
+# (delimitador SEM aspas: o shell expande ${exp_ref} no corpo — com
+# <<'SQL' o psql recebia o literal e falhava com syntax error no "$".)
+psql_app -v ON_ERROR_STOP=1 <<SQL
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.close_cash_register('st_smoke', date_trunc('day', now()), ${exp_ref});
 SQL
@@ -1733,7 +1735,7 @@ cc_by_method="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_
 # 19.4 UPSERT: refazer o fecho do mesmo dia com contagem corrigida
 # (esperado + 100) atualiza o registro (1 linha, sem duplicar).
 cc_corrected="$((exp_ref + 100))"
-psql_app -v ON_ERROR_STOP=1 <<'SQL'
+psql_app -v ON_ERROR_STOP=1 <<SQL
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 SELECT public.close_cash_register('st_smoke', date_trunc('day', now()), ${cc_corrected});
 SQL
@@ -1749,7 +1751,9 @@ cc_updated="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UI
 }
 
 # 19.5 Guarda GERENCIAL: funcionário comum NÃO fecha o caixa (RPC rejeita).
-emp_closed="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT public.close_cash_register('st_smoke', date_trunc('day', now()), $exp_ref);" | tail -n 1)"
+# O erro do psql vai para STDERR — captura com 2>&1; o `|| true` evita
+# que o status de erro esperado mate o script sob set -euo pipefail.
+emp_closed="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT public.close_cash_register('st_smoke', date_trunc('day', now()), $exp_ref);" 2>&1 | tail -n 1 || true)"
 case "$emp_closed" in
   *"Apenas o dono ou um gerente"*) : ;;  # erro esperado (guarda gerencial)
   *)
