@@ -1503,31 +1503,31 @@ is_active_col="$(psql -q -tAc "SELECT count(*) FROM information_schema.columns W
   exit 1
 }
 
-# 18.2 Produto dedicado (smoke3) com lote inicial — ajuste para CIMA cria
+# 18.2 Produto dedicado (smoke5) com lote inicial — ajuste para CIMA cria
 # lote novo e o total do produto acompanha (invariante stock = Σ lotes).
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 INSERT INTO public.products (id, name, store_id, purchase_price, sale_price, stock_quantity)
-VALUES ('smoke3', 'Produto ajustável', 'st_smoke', 100, 200, 2000)
+VALUES ('smoke5', 'Produto ajustável', 'st_smoke', 100, 200, 2000)
 ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.stock_lots
   (id, store_id, product_id, entry_date, expiry_date, initial_quantity,
    current_quantity, cost_price)
-VALUES ('lot_smoke3', 'st_smoke', 'smoke3', now(), NULL, 2000, 2000, 100)
+VALUES ('lot_smoke5', 'st_smoke', 'smoke5', now(), NULL, 2000, 2000, 100)
 ON CONFLICT (id) DO NOTHING;
 SQL
 
 # Aumento: 2000 → 5000 (milésimos). Cria lote novo; stock = Σ lotes.
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
-SELECT public.adjust_product_stock('smoke3', 'st_smoke', 5000);
+SELECT public.adjust_product_stock('smoke5', 'st_smoke', 5000);
 SQL
-adj_up="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke3';" | tail -n 1)"
+adj_up="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke5';" | tail -n 1)"
 [ "$adj_up" = "5000" ] || {
   echo "FALHA: ajuste para cima não definiu o estoque (2000→5000, obtido: '$adj_up')"
   exit 1
 }
-adj_up_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT COALESCE(SUM(current_quantity), 0) FROM public.stock_lots WHERE product_id = 'smoke3' AND store_id = 'st_smoke';" | tail -n 1)"
+adj_up_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT COALESCE(SUM(current_quantity), 0) FROM public.stock_lots WHERE product_id = 'smoke5' AND store_id = 'st_smoke';" | tail -n 1)"
 [ "$adj_up_lots" = "5000" ] || {
   echo "FALHA: ajuste para cima não criou lote (stock = Σ lotes, obtido: '$adj_up_lots')"
   exit 1
@@ -1536,14 +1536,14 @@ adj_up_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_U
 # Redução: 5000 → 3000 (consome lotes em ordem FIFO; total acompanha).
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
-SELECT public.adjust_product_stock('smoke3', 'st_smoke', 3000);
+SELECT public.adjust_product_stock('smoke5', 'st_smoke', 3000);
 SQL
-adj_down="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke3';" | tail -n 1)"
+adj_down="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke5';" | tail -n 1)"
 [ "$adj_down" = "3000" ] || {
   echo "FALHA: ajuste para baixo não definiu o estoque (5000→3000, obtido: '$adj_down')"
   exit 1
 }
-adj_down_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT COALESCE(SUM(current_quantity), 0) FROM public.stock_lots WHERE product_id = 'smoke3' AND store_id = 'st_smoke';" | tail -n 1)"
+adj_down_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT COALESCE(SUM(current_quantity), 0) FROM public.stock_lots WHERE product_id = 'smoke5' AND store_id = 'st_smoke';" | tail -n 1)"
 [ "$adj_down_lots" = "3000" ] || {
   echo "FALHA: redução não consumiu os lotes (stock = Σ lotes, obtido: '$adj_down_lots')"
   exit 1
@@ -1552,9 +1552,9 @@ adj_down_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER
 # Idempotência: ajustar para o MESMO valor é no-op (nada muda).
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
-SELECT public.adjust_product_stock('smoke3', 'st_smoke', 3000);
+SELECT public.adjust_product_stock('smoke5', 'st_smoke', 3000);
 SQL
-adj_idem_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.stock_lots WHERE product_id = 'smoke3' AND store_id = 'st_smoke';" | tail -n 1)"
+adj_idem_lots="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.stock_lots WHERE product_id = 'smoke5' AND store_id = 'st_smoke';" | tail -n 1)"
 [ "$adj_idem_lots" = "2" ] || {
   echo "FALHA: ajuste repetido deveria ser no-op (sem lote novo, obtido: '$adj_idem_lots')"
   exit 1
@@ -1566,7 +1566,7 @@ SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 DO $$
 BEGIN
   BEGIN
-    PERFORM public.adjust_product_stock('smoke3', 'st_smoke', -100);
+    PERFORM public.adjust_product_stock('smoke5', 'st_smoke', -100);
     RAISE EXCEPTION 'SENTINELA: estoque negativo deveria ter sido rejeitado';
   EXCEPTION WHEN raise_exception THEN
     IF SQLERRM = 'SENTINELA: estoque negativo deveria ter sido rejeitado' THEN
@@ -1582,7 +1582,7 @@ SET request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222"}';
 DO $$
 BEGIN
   BEGIN
-    PERFORM public.adjust_product_stock('smoke3', 'st_smoke', 9000);
+    PERFORM public.adjust_product_stock('smoke5', 'st_smoke', 9000);
     RAISE EXCEPTION 'SENTINELA: funcionário deveria ter sido bloqueado no ajuste de estoque';
   EXCEPTION WHEN raise_exception THEN
     IF SQLERRM = 'SENTINELA: funcionário deveria ter sido bloqueado no ajuste de estoque' THEN
@@ -1591,7 +1591,7 @@ BEGIN
   END;
 END $$;
 SQL
-adj_emp="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke3';" | tail -n 1)"
+adj_emp="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT stock_quantity FROM public.products WHERE id = 'smoke5';" | tail -n 1)"
 [ "$adj_emp" = "3000" ] || {
   echo "FALHA: bloqueio do funcionário não deveria mudar o estoque (obtido: '$adj_emp')"
   exit 1
@@ -1600,7 +1600,7 @@ adj_emp="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\
 # 18.3 Produto DESATIVADO não é vendido nem reposto (lock_products_or_raise).
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
-UPDATE public.products SET is_active = FALSE WHERE id = 'smoke3' AND store_id = 'st_smoke';
+UPDATE public.products SET is_active = FALSE WHERE id = 'smoke5' AND store_id = 'st_smoke';
 SQL
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
@@ -1610,7 +1610,7 @@ BEGIN
     PERFORM public.process_sale(
       ('{"id":"s_inactive","store_id":"st_smoke","total_amount":200,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
       -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
-      '[{"product_id":"smoke3","product_name":"Produto desativado","quantity":1000,"unit_price":200}]'::jsonb
+      '[{"product_id":"smoke5","product_name":"Produto desativado","quantity":1000,"unit_price":200}]'::jsonb
     );
     RAISE EXCEPTION 'SENTINELA: venda de produto desativado deveria ter sido rejeitada';
   EXCEPTION WHEN raise_exception THEN
@@ -1635,7 +1635,7 @@ BEGIN
     PERFORM public.process_purchase(
       ('{"id":"p_inactive","store_id":"st_smoke","supplier_name":"Fornecedor","total_amount":200,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
       -- W11: quantidade em MILÉSIMOS (1000 = 1 unidade).
-      '[{"product_id":"smoke3","product_name":"Produto desativado","quantity":1000,"unit_price":200}]'::jsonb
+      '[{"product_id":"smoke5","product_name":"Produto desativado","quantity":1000,"unit_price":200}]'::jsonb
     );
     RAISE EXCEPTION 'SENTINELA: compra de produto desativado deveria ter sido rejeitada';
   EXCEPTION WHEN raise_exception THEN
@@ -1654,9 +1654,9 @@ purch_inactive="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNE
 # Reativação devolve a venda (e o ajuste continua funcionando).
 psql_app -v ON_ERROR_STOP=1 <<'SQL'
 SET request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111"}';
-UPDATE public.products SET is_active = TRUE WHERE id = 'smoke3' AND store_id = 'st_smoke';
+UPDATE public.products SET is_active = TRUE WHERE id = 'smoke5' AND store_id = 'st_smoke';
 SQL
-react_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT is_active FROM public.products WHERE id = 'smoke3';" | tail -n 1)"
+react_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT is_active FROM public.products WHERE id = 'smoke5';" | tail -n 1)"
 [ "$react_ok" = "t" ] || {
   echo "FALHA: reativação deveria restaurar is_active (obtido: '$react_ok')"
   exit 1
