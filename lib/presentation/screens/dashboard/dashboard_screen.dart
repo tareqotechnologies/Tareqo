@@ -25,6 +25,7 @@ import '../../controllers/purchases_providers.dart';
 import '../../controllers/sales_providers.dart';
 import '../../controllers/stock_transfers_provider.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_menu_option.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/inline_error_card.dart';
 import '../../widgets/store_switcher.dart';
@@ -429,45 +430,22 @@ class _PeriodPill extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
     final period = ref.watch(dashboardPeriodProvider);
 
-    return PopupMenuButton<CashFlowPeriod>(
+    return AppMenuOption<CashFlowPeriod>(
       key: const ValueKey('dashboardPeriodPill'),
-      onSelected: (selected) =>
-          ref.read(dashboardPeriodProvider.notifier).select(selected),
-      itemBuilder: (context) => [
+      label: period.label(l10n),
+      options: [
         for (final option in CashFlowPeriod.values)
-          CheckedPopupMenuItem(
+          AppMenuOptionItem(
             value: option,
+            label: option.label(l10n),
             checked: option == period,
-            child: Text(option.label(l10n)),
           ),
       ],
-      // Ripple mínimo só no próprio conteúdo (sem fundo próprio).
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              period.label(l10n),
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.2,
-              ),
-            ),
-            const SizedBox(width: 2),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 16,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ],
-        ),
-      ),
+      onSelected: (selected) =>
+          ref.read(dashboardPeriodProvider.notifier).select(selected),
     );
   }
 }
