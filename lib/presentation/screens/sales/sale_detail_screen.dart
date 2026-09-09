@@ -87,6 +87,37 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     );
     if (confirmed != true || !mounted) return;
 
+    // M4 (auditoria): segunda barreira de identidade para a anulação —
+    // operação financeira reversa (estorno de estoque + caixa). O guarda
+    // `is_manager_of_store` existe no SERVIDOR, mas a UX local precisa
+    // espelhá-lo: sem esta barreira, qualquer pessoa com o app desbloqueado
+    // anula vendas. A biometria é exigida SE o aparelho suporta; sem
+    // suporte (aparelho antigo), o diálogo textual permanece a única
+    // barreira (degradação consciente, não bloqueio do negócio).
+    final biometric = ref.read(biometricAuthUseCaseProvider);
+    if (await biometric.isAvailable()) {
+      // Reusa o `l10n` capturado no TOPO do método (antes do primeiro gap
+      // assíncrono) — nunca `context` depois de await (lint
+      // use_build_context_synchronously).
+      final ok = await biometric.authenticate(
+        localizedReason: l10n.saleDetailCancelBiometricReason,
+        signInTitle: l10n.biometricSignInTitle,
+        biometricHint: l10n.biometricHint,
+        cancelButton: l10n.biometricCancel,
+        fallbackTitle: l10n.biometricFallbackTitle,
+        goToSettingsButton: l10n.biometricGoToSettingsButton,
+        goToSettingsDescription: l10n.biometricGoToSettingsDescription,
+        lockOut: l10n.biometricLockOut,
+      );
+      if (!mounted) return;
+      if (!ok) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.saleDetailCancelBiometricFailed)),
+        );
+        return;
+      }
+    }
+
     final user = ref.read(authStateProvider).value;
     final storeId = user == null
         ? null

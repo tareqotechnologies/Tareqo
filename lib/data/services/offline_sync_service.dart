@@ -139,14 +139,82 @@ class OfflineSyncService {
   }
 
   /// Dreno automático periódico (startup do modo SaaS): tenta reenviar as
-  /// pendentes a cada [interval] enquanto o app estiver aberto.
-  void startAutoDrain({Duration interval = const Duration(seconds: 45)}) {
-    _timer ??= Timer.periodic(interval, (_) => drain());
+  /// pendentes enquanto o app estiver aberto, com BACKOFF ADAPTATIVO
+  /// (M5 — auditoria de performance):
+  ///
+  /// - Fila vazia → o dreno seguinte demora [idleInterval] (5 min): não há
+  ///   razão para sondar a rede a cada 45s com a fila limpa (bateria/dados
+  ///   móveis).
+  /// - Com fila e SUCESSO → volta ao [interval] base (45s) — sincronizar
+  ///   rápido é o comportamento desejado.
+  /// - Com fila e FALHA DE REDE → dobra o tempo até [maxInterval] (8 min):
+  ///   sondar uma rede caída a cada 45s só gasta bateria sem informação
+  ///   nova (backoff exponencial por falha consecutiva, resetado no
+  ///   sucesso).
+  ///
+  /// Não usa `connectivity_plus`: uma “rede disponível” não garante que o
+  /// servidor responde — o único sinal verdadeiro é a tentativa em si, e o
+  /// backoff below já evita martelá-la. (Sem nova dependência nativa.)
+  void startAutoDrain({
+    Duration interval = const Duration(seconds: 45),
+    Duration idleInterval = const Duration(minutes: 5),
+    Duration maxInterval = const Duration(minutes: 8),
+  }) {
+    stopAutoDrain();
+    _baseInterval = interval;
+    _idleInterval = idleInterval;
+    _maxInterval = maxInterval;
+    _scheduleNextDrain(delay: interval);
+  }
+
+  Duration _baseInterval = const Duration(seconds: 45);
+  Duration _idleInterval = const Duration(minutes: 5);
+  Duration _maxInterval = const Duration(minutes: 8);
+  int _consecutiveFailures = 0;
+
+  /// Agenda o próximo dreno pelo estado atual (backoff adaptativo).
+  void _scheduleNextDrain({required Duration delay}) {
+    _timer = Timer(delay, () async {
+      final pending = await count();
+      if (pending == 0) {
+        _consecutiveFailures = 0;
+        _scheduleNextDrain(delay: _idleInterval);
+        return;
+      }
+      try {
+        await drain();
+        _consecutiveFailures = 0;
+        // Restou pendência (ex.: backoff de negócio)? Mantém o ritmo base;
+        // tudo sincronizado → idle.
+        _scheduleNextDrain(
+          delay: (await count()) > 0 ? _baseInterval : _idleInterval,
+        );
+      } on Object catch (error) {
+        if (isNetworkError(error)) {
+          _consecutiveFailures++;
+          final backoff = Duration(
+            milliseconds:
+                (_baseInterval.inMilliseconds *
+                        (1 << _consecutiveFailures.clamp(0, 8)))
+                    .clamp(
+                      _baseInterval.inMilliseconds,
+                      _maxInterval.inMilliseconds,
+                    ),
+          );
+          _scheduleNextDrain(delay: backoff);
+          return;
+        }
+        // Falha de negócio inesperada fora do drain (já tratada lá):
+        // mantém o ritmo base e continua.
+        _scheduleNextDrain(delay: _baseInterval);
+      }
+    });
   }
 
   void stopAutoDrain() {
     _timer?.cancel();
     _timer = null;
+    _consecutiveFailures = 0;
   }
 
   Future<void> _emitCount() async {

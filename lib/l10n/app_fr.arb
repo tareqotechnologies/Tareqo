@@ -58,6 +58,15 @@
   "commonSignOut": "Se déconnecter",
   "appSheetClose": "Fermer",
   "storeSwitcherTooltip": "Changer de magasin",
+  "storeSwitcherA11yLabel": "Magasin : {store}",
+  "@storeSwitcherA11yLabel": {
+    "description": "Libellé d'accessibilité de la pilule de magasin unique dans la barre d'app (lecteur d'écran)",
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
   "storeSelectorSectionTitle": "Magasin actif",
   "tenantPendingTitle": "En attente d'approbation",
   "tenantPendingSubtitle": "Demande pour \"{business}\" envoyée. Attendez 24h.",
@@ -891,6 +900,8 @@
     }
   },
   "saleDetailCancelConfirm": "Oui, annuler",
+  "saleDetailCancelBiometricReason": "Confirmez votre identité pour annuler la vente.",
+  "saleDetailCancelBiometricFailed": "Identité non confirmée. La vente n'a pas été annulée.",
   "saleDetailCancelledAt": "Annulée le",
   "saleCancelledSuccess": "Vente annulée.",
   "saleNotFoundError": "Cette vente n'existe plus.",

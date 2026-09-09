@@ -5,6 +5,7 @@ import '../../core/i18n/l10n_ext.dart';
 import '../../core/theme/app_tokens.dart';
 import '../controllers/account_providers.dart';
 import '../controllers/auth_providers.dart';
+import 'app_menu_option.dart';
 
 /// Seletor rápido de loja ativa — pílula compacta com menu popup.
 class StoreSwitcher extends ConsumerWidget {
@@ -44,6 +45,9 @@ class StoreSwitcher extends ConsumerWidget {
 
     // Seletor curto — MESMO tamanho e tipografia do seletor de período da
     // Home (labelLarge + chevron, sem caixa, sem ícone): só o nome da loja.
+    // M3 (auditoria de a11y): o chevron decorativo é excluído da árvore de
+    // semântica e a pílula expõe UM nó claro "Loja: X" — o leitor de tela
+    // anuncia contexto em vez de um texto solto sem papel.
     final pill = Container(
       key: StoreSwitcher.pillKey,
       constraints: const BoxConstraints(maxWidth: 160),
@@ -78,7 +82,15 @@ class StoreSwitcher extends ConsumerWidget {
       ),
     );
 
-    if (!multiStore) return aligned(pill);
+    if (!multiStore) {
+      return aligned(
+        Semantics(
+          label: l10n.storeSwitcherA11yLabel(activeName),
+          excludeSemantics: true,
+          child: pill,
+        ),
+      );
+    }
 
     // Theme local: anula o hover/splash do InkWell INTERNO do
     // PopupMenuButton (que desenhava o realce ao pairar o mouse sobre a
@@ -90,34 +102,30 @@ class StoreSwitcher extends ConsumerWidget {
         highlightColor: Colors.transparent,
         splashColor: Colors.transparent,
       ),
-      child: PopupMenuButton<String>(
-        tooltip: l10n.storeSwitcherTooltip,
-        onSelected: (storeId) =>
-            ref.read(activeStoreIdProvider(user.id).notifier).select(storeId),
-        itemBuilder: (context) => [
-          for (final store in stores)
-            PopupMenuItem<String>(
-              value: store.id,
-              child: Row(
-                children: [
-                  Icon(
-                    store.id == activeStoreId
-                        ? Icons.check_circle_rounded
-                        : Icons.storefront_outlined,
-                    size: 18,
-                    color: store.id == activeStoreId
-                        ? theme.colorScheme.primary
-                        : null,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Flexible(
-                    child: Text(store.name, overflow: TextOverflow.ellipsis),
-                  ),
-                ],
+      // Menu padronizado via AppMenuOption (itens 44px, bodySmall,
+      // check leve na loja ativa, overlay chapado do popupMenuTheme).
+      // A pílula multi-loja carrega a MESMA [pillKey] do branch de loja
+      // única: testes e ferramentas encontram o widget nos dois casos
+      // (regressão store_selector_test). O ConstrainedBox preserva o
+      // maxWidth de 160 (ellipsis em nomes longos) que a pílula antiga
+      // tinha — o AppMenuOption não impõe limite próprio.
+      child: ConstrainedBox(
+        key: StoreSwitcher.pillKey,
+        constraints: const BoxConstraints(maxWidth: 160),
+        child: AppMenuOption<String>(
+          label: activeName,
+          tooltip: l10n.storeSwitcherTooltip,
+          options: [
+            for (final store in stores)
+              AppMenuOptionItem(
+                value: store.id,
+                label: store.name,
+                checked: store.id == activeStoreId,
               ),
-            ),
-        ],
-        child: pill,
+          ],
+          onSelected: (storeId) =>
+              ref.read(activeStoreIdProvider(user.id).notifier).select(storeId),
+        ),
       ),
     );
     return aligned(noHover);

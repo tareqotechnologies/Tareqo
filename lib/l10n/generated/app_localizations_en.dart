@@ -134,6 +134,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeSwitcherTooltip => 'Switch store';
 
   @override
+  String storeSwitcherA11yLabel(String store) {
+    return 'Store: $store';
+  }
+
+  @override
   String get storeSelectorSectionTitle => 'Active store';
 
   @override
@@ -1791,6 +1796,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saleDetailCancelConfirm => 'Yes, cancel';
+
+  @override
+  String get saleDetailCancelBiometricReason =>
+      'Confirm your identity to cancel the sale.';
+
+  @override
+  String get saleDetailCancelBiometricFailed =>
+      'Identity not confirmed. The sale was not cancelled.';
 
   @override
   String get saleDetailCancelledAt => 'Cancelled at';

@@ -58,6 +58,15 @@
   "commonSignOut": "Sign out",
   "appSheetClose": "Close",
   "storeSwitcherTooltip": "Switch store",
+  "storeSwitcherA11yLabel": "Store: {store}",
+  "@storeSwitcherA11yLabel": {
+    "description": "Accessibility label for the single-store pill in the app bar (screen reader)",
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
   "storeSelectorSectionTitle": "Active store",
   "tenantPendingTitle": "Waiting for approval",
   "tenantPendingSubtitle": "Request for \"{business}\" sent. Wait up to 24h.",
@@ -891,6 +900,8 @@
     }
   },
   "saleDetailCancelConfirm": "Yes, cancel",
+  "saleDetailCancelBiometricReason": "Confirm your identity to cancel the sale.",
+  "saleDetailCancelBiometricFailed": "Identity not confirmed. The sale was not cancelled.",
   "saleDetailCancelledAt": "Cancelled at",
   "saleCancelledSuccess": "Sale cancelled.",
   "saleNotFoundError": "This sale no longer exists.",

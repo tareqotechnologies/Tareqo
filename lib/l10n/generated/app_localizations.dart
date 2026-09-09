@@ -334,6 +334,12 @@ abstract class AppLocalizations {
   /// **'Trocar de loja'**
   String get storeSwitcherTooltip;
 
+  /// Rótulo de acessibilidade da pílula de loja única no app bar (leitor de tela)
+  ///
+  /// In pt, this message translates to:
+  /// **'Loja: {store}'**
+  String storeSwitcherA11yLabel(String store);
+
   /// No description provided for @storeSelectorSectionTitle.
   ///
   /// In pt, this message translates to:
@@ -3201,6 +3207,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Sim, anular'**
   String get saleDetailCancelConfirm;
+
+  /// No description provided for @saleDetailCancelBiometricReason.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirme a sua identidade para anular a venda.'**
+  String get saleDetailCancelBiometricReason;
+
+  /// No description provided for @saleDetailCancelBiometricFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Identidade não confirmada. A venda não foi anulada.'**
+  String get saleDetailCancelBiometricFailed;
 
   /// No description provided for @saleDetailCancelledAt.
   ///

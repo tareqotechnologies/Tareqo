@@ -111,7 +111,9 @@ O papel de super admin vive na tabela `super_admins` (nunca em e-mail hardcoded)
 
    ```env
    SUPABASE_URL=https://bcyolmheltzlddfwgqcq.supabase.co
-   SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjeW9sbWhlbHR6bGRkZndncWNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NjA1ODYsImV4cCI6MjEwNDQzNjU4Nn0.DfiV3YjTjdBziiitnVTFC8uomJJRLQJj3rhlnsMNbRw
+   # Use a publishable (anon) key REAL do dashboard do SEU projeto
+   # (Settings → API) — nunca cole chaves em documentos versionados.
+   SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.<resto-do-JWT-do-seu-projeto>
    SUPABASE_CREDENTIALS_EXPLICIT=true
    SENTRY_DSN=https://106274b6c1b7a252ae4f52d4c02996fb@o4512052158791680.ingest.de.sentry.io/4512052160888912
    ```

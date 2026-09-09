@@ -58,6 +58,15 @@
   "commonSignOut": "Terminar sess\u00e3o",
   "appSheetClose": "Fechar",
   "storeSwitcherTooltip": "Trocar de loja",
+  "storeSwitcherA11yLabel": "Loja: {store}",
+  "@storeSwitcherA11yLabel": {
+    "description": "Rótulo de acessibilidade da pílula de loja única no app bar (leitor de tela)",
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
   "storeSelectorSectionTitle": "Loja activa",
   "tenantPendingTitle": "Aguardando aprovação",
   "tenantPendingSubtitle": "Solicitação de \"{business}\" enviada. Aguarde até 24h.",
@@ -891,6 +900,8 @@
     }
   },
   "saleDetailCancelConfirm": "Sim, anular",
+  "saleDetailCancelBiometricReason": "Confirme a sua identidade para anular a venda.",
+  "saleDetailCancelBiometricFailed": "Identidade não confirmada. A venda não foi anulada.",
   "saleDetailCancelledAt": "Anulada em",
   "saleCancelledSuccess": "Venda anulada.",
   "saleNotFoundError": "Esta venda não existe mais.",

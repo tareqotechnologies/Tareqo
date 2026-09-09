@@ -10,6 +10,10 @@
 # por design (guarda de produção — main.dart). A assinatura
 # real do AAB de PRODUÇÃO acontece no workflow release.yml
 # (tag v*, Fastlane, secrets do keystore);
+# cert-pin-health — A2: extrai a data de expiração do certificado pinado
+# (WE1) e falha quando faltam < 180 dias — janela para rotacionar
+# o pin e publicar update ANTES de todos os clientes perderem a
+# conexão (o pinning é fail-closed);
 # sql-check — smoke test do supabase/schema.sql + upgrade.sql + RLS
 # contra um Postgres 16 real (scripts/sql_check.sh — 16
 # passos: RLS por loja, RPCs atômicas do dinheiro,
@@ -21,125 +25,153 @@
 name: CI
 
 on:
- push:
- branches: [master, main]
- pull_request:
+  push:
+    branches: [master, main]
+  pull_request:
 
 concurrency:
- group: ci-${{ github.ref }}
- cancel-in-progress: true
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
- contents: read
+  contents: read
 
 jobs:
- analyze:
- name: Analyze
- runs-on: ubuntu-latest
- steps:
- - uses: actions/checkout@v4
- - uses: subosito/flutter-action@v2
- with:
- channel: stable
- cache: true
- - run: flutter pub get
- - run: flutter analyze
- # M1: o projeto deve permanecer no padrão dart format (falha o CI se
- # qualquer arquivo sair do formato).
- - name: Format check (dart format)
- run: dart format --output=none --set-exit-if-changed .
- # Garantias l10n (test/core/l10n): nenhuma chave órfã
- # (arb_keys_referenced_test) e paridade pt/en/fr — adições,
- # remoções, renames, duplicatas e metadata @key
- # (arb_locale_parity_test). Também correm no job 'test', mas aqui
- # falham imediatamente após a análise, sem esperar a suite inteira.
- - name: L10n key tests (dead keys + parity)
-   run: flutter test test/core/l10n
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      # M1: o projeto deve permanecer no padrão dart format (falha o CI se
+      # qualquer arquivo sair do formato).
+      - name: Format check (dart format)
+        run: dart format --output=none --set-exit-if-changed .
+      # Garantias l10n (test/core/l10n): nenhuma chave órfã
+      # (arb_keys_referenced_test) e paridade pt/en/fr — adições,
+      # remoções, renames, duplicatas e metadata @key
+      # (arb_locale_parity_test). Também correm no job 'test', mas aqui
+      # falham imediatamente após a análise, sem esperar a suite inteira.
+      - name: L10n key tests (dead keys + parity)
+        run: flutter test test/core/l10n
 
- test:
- name: Test
- runs-on: ubuntu-latest
- steps:
- - uses: actions/checkout@v4
- - uses: subosito/flutter-action@v2
- with:
- channel: stable
- cache: true
- - run: flutter pub get
- - run: flutter test --coverage
- - name: Coverage summary
- run: |
- if [ -f coverage/lcov.info ]; then
- # Comparação em ponto flutuante com awk puro (sem depender de bc).
- pct=$(awk -F: '/^LF:/{lf+=$2} /^LH:/{lh+=$2} END {printf "%.1f", (lf>0 ? 100*lh/lf : 0)}' coverage/lcov.info)
- echo "Line coverage: ${pct}%"
- # Gate de cobertura (auditoria H3/6.5 + M2): baseline medido em 51.3%
- # (Set 2026, após testes de ServiceLocator/PDFs). Subir conforme cresce.
- threshold=50.0
- below=$(awk -v p="$pct" -v t="$threshold" 'BEGIN { print (p < t) ? 1 : 0 }')
- if [ "$below" = "1" ]; then
- echo "::error::Coverage ${pct}% is below the ${threshold}% threshold"
- exit 1
- fi
- fi
- - name: Upload coverage artifact
- uses: actions/upload-artifact@v4
- with:
- name: coverage-lcov
- path: coverage/lcov.info
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter test --coverage
+      - name: Coverage summary
+        run: |
+          if [ -f coverage/lcov.info ]; then
+          # Comparação em ponto flutuante com awk puro (sem depender de bc).
+          pct=$(awk -F: '/^LF:/{lf+=$2} /^LH:/{lh+=$2} END {printf "%.1f", (lf>0 ? 100*lh/lf : 0)}' coverage/lcov.info)
+          echo "Line coverage: ${pct}%"
+          # Gate de cobertura (auditoria H3/6.5 + M2): baseline medido em 51.3%
+          # (Set 2026, após testes de ServiceLocator/PDFs). Subir conforme cresce.
+          threshold=50.0
+          below=$(awk -v p="$pct" -v t="$threshold" 'BEGIN { print (p < t) ? 1 : 0 }')
+          if [ "$below" = "1" ]; then
+          echo "::error::Coverage ${pct}% is below the ${threshold}% threshold"
+          exit 1
+          fi
+          fi
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: coverage/lcov.info
 
- build:
- name: Build (Android release APK, flavor dev)
- runs-on: ubuntu-latest
- needs: [analyze, test]
- steps:
- - uses: actions/checkout@v4
- - uses: actions/setup-java@v4
- with:
- distribution: temurin
- java-version: '17'
- - uses: subosito/flutter-action@v2
- with:
- channel: stable
- cache: true
- - run: flutter pub get
- # Build do flavor DEV com os dart-defines de desenvolvimento
- # (env/dev.env, commitado). Sem key.properties no CI → assinatura
- # debug (fallback) — valida que o build de release compila e que os
- # flavors + dart-define-from-file funcionam. O AAB de PRODUÇÃO
- # (assinado) é construído apenas no workflow release.yml (tag v*,
- # Fastlane, secrets do keystore).
- - run: flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
- - uses: actions/upload-artifact@v4
- with:
- name: release-apk
- path: build/app/outputs/flutter-apk/app-dev-release.apk
+  build:
+    name: Build (Android release APK, flavor dev)
+    runs-on: ubuntu-latest
+    needs: [analyze, test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      # Build do flavor DEV com os dart-defines de desenvolvimento
+      # (env/dev.env, commitado). Sem key.properties no CI → assinatura
+      # debug (fallback) — valida que o build de release compila e que os
+      # flavors + dart-define-from-file funcionam. O AAB de PRODUÇÃO
+      # (assinado) é construído apenas no workflow release.yml (tag v*,
+      # Fastlane, secrets do keystore).
+      - run: flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-dev-release.apk
 
- sql-check:
- name: SQL / RLS check (16 passos — W4/H2/upgrade/42710)
- runs-on: ubuntu-latest
- timeout-minutes: 30
- services:
- postgres:
- image: postgres:16
- env:
- POSTGRES_PASSWORD: postgres
- POSTGRES_DB: tareqo
- ports:
- - 5432:5432
- options: >-
- --health-cmd "pg_isready -U postgres"
- --health-interval 10s
- --health-timeout 5s
- --health-retries 5
- steps:
- - uses: actions/checkout@v4
- # 16 passos: schema.sql + upgrade.sql 2x (idempotência) + RLS por loja
- # + RPCs atômicas + get_dashboard_kpis/get_cash_flow/get_sales_report
- # + migração W4 NUMERIC→centavos (25.50→2550, sem dupla aplicação)
- # + numeração sequencial + regressão 42710 (Realtime no cenário
- # Supabase) + catálogo de planos pl1/pl2/pl3.
- - name: Run SQL/RLS smoke test (W4/H2/upgrade)
- env:
- PGPASSWORD: postgres
- run: bash scripts/sql_check.sh localhost postgres tareqo
+  cert-pin-health:
+    name: Cert pin health (expiração do pin WE1 — A2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # A2 (auditoria): o cert pinning (lib/core/network/cert_pinning_io.dart)
+      # ancora a cadeia no intermediário WE1 (expira 2029). Se a CA rotacionar
+      # sem atualização do app, TODOS os clientes em produção param de
+      # conectar (fail-closed). Este job extrai a data de expiração do PEM
+      # pinado e falha quando faltam < 180 dias — janela para trocar o pin e
+      # publicar update com folga. Requer openssl (presente no runner).
+      - name: Check pinned certificate expiry (fail < 180 days)
+        run: |
+          PEM=$(sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' lib/core/network/cert_pinning_io.dart | head -n 30)
+          EXPIRY_STR=$(printf '%s\n' "$PEM" | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+          if [ -z "$EXPIRY_STR" ]; then
+            echo "::error::Não foi possível ler a data de expiração do certificado pinado (WE1) — o PEM mudou? Atualize o script de extração."
+            exit 1
+          fi
+          EXPIRY_EPOCH=$(date -d "$EXPIRY_STR" +%s)
+          NOW_EPOCH=$(date +%s)
+          DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+          echo "Pin WE1 expira em ${DAYS_LEFT} dias."
+          if [ "$DAYS_LEFT" -lt 180 ]; then
+            echo "::error::Certificado pinado (WE1) expira em ${DAYS_LEFT} dias (< 180). Rotacione o pin em lib/core/network/cert_pinning_io.dart e publique update antes da expiração."
+            exit 1
+          fi
+
+  sql-check:
+    name: SQL / RLS check (16 passos — W4/H2/upgrade/42710)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tareqo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      # 16 passos: schema.sql + upgrade.sql 2x (idempotência) + RLS por loja
+      # + RPCs atômicas + get_dashboard_kpis/get_cash_flow/get_sales_report
+      # + migração W4 NUMERIC→centavos (25.50→2550, sem dupla aplicação)
+      # + numeração sequencial + regressão 42710 (Realtime no cenário
+      # Supabase) + catálogo de planos pl1/pl2/pl3.
+      - name: Run SQL/RLS smoke test (W4/H2/upgrade)
+        env:
+          PGPASSWORD: postgres
+        run: bash scripts/sql_check.sh localhost postgres tareqo

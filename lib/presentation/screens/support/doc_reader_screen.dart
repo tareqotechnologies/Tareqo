@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
@@ -35,7 +35,7 @@ enum SupportDocument {
 }
 
 /// Leitor de um documento de suporte (markdown embutido) — renderizado com
-/// `flutter_markdown` no estilo do design system (cores do tema, sem HTML).
+/// `flutter_markdown_plus` no estilo do design system (cores do tema, sem HTML).
 class DocReaderScreen extends StatefulWidget {
   const DocReaderScreen({super.key, required this.document});
 

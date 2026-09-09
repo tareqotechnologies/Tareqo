@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:get_it/get_it.dart';
 
 import '../../core/config/supabase_config.dart';
 import '../../core/database/app_database.dart';
+import '../../core/observability/crash_reporting.dart';
 import '../../core/security/secure_storage_service.dart';
 import '../../data/datasources/auth/supabase_auth_remote_data_source.dart';
 import '../../data/datasources/local/cash_closing_local_data_source.dart';
@@ -309,6 +311,33 @@ final class ServiceLocator {
         () => const ProductImageStoreLocal(),
       );
     } else {
+      // M6 (auditoria): memória é aceitável na WEB (dart:ffi indisponível
+      // é a plataforma inteira, não uma falha) e em TESTES. Em RELEASE
+      // NATIVO, porém, cair para memória sem avisar significa que o usuário
+      // trabalha num banco vazio e PERDE TUDO ao fechar o app — falha de
+      // biblioteca não pode ser silenciosa. O app inteiro falha no boot
+      // (CrashReporting captura + mensagem clara) em vez de fingir que
+      // funciona: perder vendas sem saber é pior do que não abrir.
+      //
+      // O guard fica aqui (bootstrap) e não no AppDatabase para manter a
+      // decisão de POLÍTICA (o que fazer sem persistência) fora da
+      // infraestrutura (como abrir o banco).
+      if (kReleaseMode && !kIsWeb) {
+        CrashReporting.capture(
+          StateError(
+            'AppDatabase: SQLite indisponível em release nativo — '
+            'sem persistência, o modo local não pode operar sem risco de '
+            'perda de dados.',
+          ),
+          StackTrace.current,
+          hint: 'bootstrap-sqlite-indisponivel',
+        );
+        throw StateError(
+          'Armazenamento local indisponível neste dispositivo. '
+          'O TAREQO não pode operar sem persistência de dados em modo '
+          'local — reinstale o aplicativo ou contacte o suporte.',
+        );
+      }
       _registerInMemoryDatasources();
       instance.registerLazySingleton<IProductImageStore>(
         () => const ProductImageStoreNoop(),
