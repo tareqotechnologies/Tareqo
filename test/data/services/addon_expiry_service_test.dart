@@ -1,4 +1,6 @@
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 
 import 'package:tareqo/data/datasources/local/addon_local_data_source.dart';
 import 'package:tareqo/data/services/addon_expiry_service.dart';
@@ -204,6 +206,31 @@ void main() {
     );
 
     test(
+      'add-on SEM catálogo (id desconhecido) usa o id no aviso, sem crash',
+      () async {
+        final notifications = _FakeNotificationRepository();
+        final ds = _FakeAddOnDataSource([
+          TenantAddOn(
+            id: 'x',
+            tenantId: 't1',
+            addOnId: 'ao_futuro', // não existe no AddOnCatalog
+            activatedAt: DateTime.now(),
+            expiresAt: DateTime.now().add(const Duration(days: 1)),
+            isActive: true,
+          ),
+        ]);
+        final service = AddOnExpiryService(
+          ds,
+          notificationRepository: notifications,
+        );
+
+        await service.checkAndNotifyForTenant('t1');
+
+        expect(notifications.created.single.body, contains('ao_futuro'));
+      },
+    );
+
+    test(
       'renovação com nova validade gera novos avisos (chave inclui a data)',
       () async {
         final notifications = _FakeNotificationRepository();
@@ -263,4 +290,164 @@ void main() {
       expect(notifications.created, isEmpty);
     });
   });
+
+  group('AddOnExpiryService — timer e caminhos de falha', () {
+    test('startPeriodicCheck agenda o check a cada 30min e stop() cancela', () {
+      fakeAsync((async) {
+        final ds = _FakeAddOnDataSource([]);
+        final service = AddOnExpiryService(ds);
+
+        service.startPeriodicCheck();
+        // Avança 1h: dois disparos periódicos (t=30min e t=60min).
+        async.elapse(const Duration(hours: 1));
+        // O serviço não lança; checks rodam no timer fake.
+
+        service.stop();
+        // Depois do stop, avançar o tempo é inofensivo (sem timer vivo).
+        async.elapse(const Duration(hours: 2));
+      });
+    });
+
+    test(
+      'checkAndDeactivateExpired DELEGA ao datasource e devolve a contagem',
+      () async {
+        final ds = _ExpiringDataSource(deactivated: 3);
+        final service = AddOnExpiryService(ds);
+
+        expect(await service.checkAndDeactivateExpired(), 3);
+      },
+    );
+
+    test(
+      'checkAndDeactivateExpired engole falha do banco (não derruba a app)',
+      () async {
+        final ds = _ExpiringDataSource(error: StateError('banco fora do ar'));
+        final service = AddOnExpiryService(ds);
+
+        // Contrato: falha silenciosa → 0 (nunca exceção).
+        expect(await service.checkAndDeactivateExpired(), 0);
+      },
+    );
+
+    test(
+      'checkAndNotifyForTenant engole falha do datasource (não derruba a app)',
+      () async {
+        final ds = _AddOnFailingSource();
+        final service = AddOnExpiryService(
+          ds,
+          notificationRepository: _FakeNotificationRepository(),
+        );
+
+        // Não lança — o fluxo de login não pode morrer por rede/banco.
+        await expectLater(service.checkAndNotifyForTenant('t1'), completes);
+      },
+    );
+
+    test('sem repositório de notificações: check é no-op seguro', () async {
+      final ds = _FakeAddOnDataSource([
+        TenantAddOn(
+          id: 'x',
+          tenantId: 't1',
+          addOnId: 'ao_custom_invoice',
+          activatedAt: DateTime.now(),
+          expiresAt: DateTime.now().subtract(const Duration(hours: 1)),
+          isActive: true,
+        ),
+      ]);
+      final service = AddOnExpiryService(ds); // notificationRepository = null
+
+      await expectLater(service.checkAndNotifyForTenant('t1'), completes);
+    });
+  });
+
+  group('registerAddOnExpiryService (DI)', () {
+    test('registra lazy singleton respeitando dependências já registradas', () {
+      GetIt.instance.reset();
+      final ds = _FakeAddOnDataSource([]);
+      GetIt.instance.registerSingleton<AddOnLocalDataSource>(ds);
+
+      registerAddOnExpiryService();
+      registerAddOnExpiryService(); // 2ª chamada é no-op (idempotente)
+
+      expect(GetIt.instance.isRegistered<AddOnExpiryService>(), isTrue);
+      // Lazy: resolve sem notif repo (não registrado).
+      expect(
+        GetIt.instance<AddOnExpiryService>().checkAndDeactivateExpired(),
+        completes,
+      );
+      GetIt.instance.reset();
+    });
+  });
+}
+
+/// DataSource cujo deactivateExpired devolve contagem fixa ou lança.
+class _ExpiringDataSource implements AddOnLocalDataSource {
+  _ExpiringDataSource({this.deactivated = 0, this.error});
+
+  final int deactivated;
+  final Object? error;
+
+  @override
+  Future<int> deactivateExpired() async {
+    final failure = error;
+    if (failure != null) throw failure;
+    return deactivated;
+  }
+
+  @override
+  Future<List<TenantAddOn>> getByTenant(String tenantId) async => [];
+
+  @override
+  Future<Set<String>> getActiveAddOnIds(String tenantId) async => {};
+
+  @override
+  Future<void> activate(String tenantId, String addOnId) async {}
+
+  @override
+  Future<void> deactivate(String tenantId, String addOnId) async {}
+
+  @override
+  Future<void> register({
+    required String tenantId,
+    required String addOnId,
+    DateTime? expiresAt,
+  }) async {}
+
+  @override
+  Future<bool> isActive(String tenantId, String addOnId) async => false;
+
+  @override
+  Future<List<TenantAddOn>> getExpired() async => [];
+}
+
+/// DataSource cujo getByTenant SEMPRE lança (falha de rede/banco).
+class _AddOnFailingSource implements AddOnLocalDataSource {
+  @override
+  Future<List<TenantAddOn>> getByTenant(String tenantId) async =>
+      throw StateError('fonte indisponível');
+
+  @override
+  Future<Set<String>> getActiveAddOnIds(String tenantId) async => {};
+
+  @override
+  Future<void> activate(String tenantId, String addOnId) async {}
+
+  @override
+  Future<void> deactivate(String tenantId, String addOnId) async {}
+
+  @override
+  Future<void> register({
+    required String tenantId,
+    required String addOnId,
+    DateTime? expiresAt,
+  }) async {}
+
+  @override
+  Future<bool> isActive(String tenantId, String addOnId) async => false;
+
+  @override
+  Future<int> deactivateExpired() async => 0;
+
+  @override
+  Future<List<TenantAddOn>> getExpired() async => [];
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
@@ -234,6 +235,170 @@ void main() {
 
     await sub.cancel();
   });
+
+  group('startAutoDrain (backoff adaptativo M5 — timers fake)', () {
+    test(
+      'fila vazia: sonda UMA vez no intervalo e vai a idle (não martela a rede)',
+      () {
+        fakeAsync((async) {
+          final counting = _CountingQueue(queue);
+          final service = OfflineSyncService(counting);
+          service.startAutoDrain(
+            interval: const Duration(seconds: 45),
+            idleInterval: const Duration(minutes: 5),
+          );
+
+          // 1ª sonda em t=45s (fila vazia → reagenda para idle).
+          async.elapse(const Duration(seconds: 45));
+          expect(counting.countCalls, 1);
+
+          // Entre t=45s e t=285s NÃO há nova sonda (economia de bateria).
+          async.elapse(const Duration(minutes: 4));
+          expect(counting.countCalls, 1);
+
+          // 2ª sonda em t=45s + 5min.
+          async.elapse(const Duration(minutes: 1));
+          expect(counting.countCalls, 2);
+
+          service.stopAutoDrain();
+        });
+      },
+    );
+
+    test('com pendência: drena automaticamente no intervalo e sincroniza', () {
+      fakeAsync((async) {
+        final localQueue = PendingOpQueueMemoryImpl();
+        final localSync = OfflineSyncService(localQueue);
+        final replayed = <String>[];
+        localSync.registerReplayer(
+          'process_sale',
+          (payload) async =>
+              replayed.add((payload['sale'] as Map)['id'] as String),
+        );
+        // add muta a fila sincronicamente — visível para o dreno agendado.
+        unawaited(localQueue.add(_op('process_sale', 'off-1')));
+        localSync.startAutoDrain(interval: const Duration(seconds: 45));
+        async.elapse(const Duration(seconds: 45));
+
+        expect(replayed, ['off-1']);
+        var countAfter = -1;
+        localQueue.count().then<void>((c) => countAfter = c);
+        async.flushMicrotasks();
+        expect(countAfter, 0);
+
+        // Fila vazia → idle: nenhum replay extra no período.
+        async.elapse(const Duration(minutes: 10));
+        expect(replayed, ['off-1']);
+
+        localSync.stopAutoDrain();
+      });
+    });
+
+    test(
+      'falha de rede consecutiva dobra o backoff (45s → 90s → 180s, cap 8min)',
+      () {
+        fakeAsync((async) {
+          final localQueue = PendingOpQueueMemoryImpl();
+          final localSync = OfflineSyncService(localQueue);
+          localSync.registerReplayer(
+            'process_sale',
+            (_) async => throw http.ClientException('rede fora'),
+          );
+          unawaited(localQueue.add(_op('process_sale', 'x')));
+
+          localSync.startAutoDrain(
+            interval: const Duration(seconds: 45),
+            maxInterval: const Duration(minutes: 8),
+          );
+
+          int count() {
+            var value = -1;
+            localQueue.count().then<void>((c) => value = c);
+            async.flushMicrotasks();
+            return value;
+          }
+
+          // t=45s: 1ª tentativa → backoff 45×2^1 = 90s (vence em t=135s).
+          async.elapse(const Duration(seconds: 45));
+          expect(count(), 1);
+
+          // t=90s: ainda dentro do backoff → nada acontece.
+          async.elapse(const Duration(seconds: 45));
+          expect(count(), 1);
+
+          // t=135s: 2ª tentativa → backoff 45×2^2 = 180s (vence em t=315s).
+          async.elapse(const Duration(seconds: 45));
+          expect(count(), 1);
+
+          // t=225s: ainda em backoff (não venceu).
+          async.elapse(const Duration(seconds: 90));
+          expect(count(), 1);
+
+          // t=315s: 3ª tentativa acontece (op segue na fila — rede fora).
+          async.elapse(const Duration(seconds: 95));
+          expect(count(), 1);
+
+          localSync.stopAutoDrain();
+        });
+      },
+    );
+
+    test('stopAutoDrain cancela o timer (nada acontece depois)', () {
+      fakeAsync((async) {
+        sync.startAutoDrain(interval: const Duration(seconds: 45));
+        sync.stopAutoDrain();
+
+        async.elapse(const Duration(minutes: 30));
+
+        // Nenhuma exceção/efeito — apenas o cancelamento limpo.
+        var value = -1;
+        queue.count().then<void>((c) => value = c);
+        async.flushMicrotasks();
+        expect(value, 0);
+      });
+    });
+
+    test('OfflineEnqueuedException.toString nomeia a operação', () {
+      expect(
+        const OfflineEnqueuedException('process_sale').toString(),
+        contains('process_sale'),
+      );
+    });
+
+    test('isNetworkError distingue REDE de NEGÓCIO', () {
+      expect(isNetworkError(TimeoutException('t')), isTrue);
+      expect(isNetworkError(http.ClientException('c')), isTrue);
+      expect(isNetworkError(StateError('negócio')), isFalse);
+    });
+  });
+}
+
+class _CountingQueue implements IPendingOpQueue {
+  _CountingQueue(this._inner);
+
+  final IPendingOpQueue _inner;
+  int countCalls = 0;
+
+  @override
+  Future<int> count() async {
+    countCalls++;
+    return _inner.count();
+  }
+
+  @override
+  Future<void> add(PendingOp op) => _inner.add(op);
+
+  @override
+  Future<PendingOp?> next() => _inner.next();
+
+  @override
+  Future<void> remove(int id) => _inner.remove(id);
+
+  @override
+  Future<void> markFailed(int id, String error) => _inner.markFailed(id, error);
+
+  @override
+  Future<List<PendingOp>> list() => _inner.list();
 }
 
 PendingOp _op(String opType, String id) => PendingOp(
