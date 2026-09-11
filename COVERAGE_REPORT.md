@@ -300,3 +300,69 @@ exato/contendo).
 | Camada remote+auth | 9,3% | 84,4% |
 | Painel admin (7 telas + widgets) | parcial | **todas ≥ 88,9%** |
 | `flutter analyze` | limpo | **limpo** |
+
+---
+
+# Rodada 6 — app_page (quick win) + fluxo comercial (batch A)
+
+## 30. Resumo da rodada
+
+| Métrica | Antes | Depois | Δ |
+|---|---:|---:|---|
+| **Cobertura total** | 69,58% (18.257/26.237) | **71,67% (18.805/26.237)** | **+2,09 p.p.** |
+| `widgets/app_page.dart` | 28% | **96,8% (121/125)** | +68,8 |
+| `custom_invoice_preview.dart` | 0% | **96,9% (125/129)** | +96,9 |
+| `custom_invoice_screen.dart` | 51% | **80,3% (432/538)** | +29,3 |
+| `quotation_screen.dart` | 50% | **76,7% (451/588)** | +26,7 |
+| Testes | 1.238 | **1.271 (+33)** | todos passando |
+
+Instrumented lines idênticas (26.237) — **zero código de produção alterado**.
+Restantes não cobertas nas 4 telas: ramos de PDF/WhatsApp (launchUrl e
+`QuotationPdfExporter` — plugins de plataforma, fora do escopo de widget tests)
+e estilos secundários do sheet de modelo.
+
+## 31. Testes criados (3 arquivos, 33 testes)
+
+| Arquivo | Cobre |
+|---|---|
+| `app_page_test.dart` (13) | Scaffold compartilhado: AppBar só com título, header 2 linhas (72) com subtítulo, badge 0 escondido/positivo renderizado, FAB/actions/leading repassados, SafeArea on/off, `horizontalPadding` responsivo; **AppIconBadge** (tamanho, painter tracejado), **AppListTile** (clicável vs estático, leading/trailing), **AppPill** (onTap exige Material ancestral em teste; ícone/seta condicionais) |
+| `quotation_screen_test.dart` (8) | Estado vazio; card com nº padLeft(5) + telefone + "1 item • Validade: 5 dias • 30,00"; chips por estado (Rascunho→Enviar; Enviada→Aceitar/Rejeitar); erro de carga + retry persistente; **transição Enviar persistida** (`update` com `sentAt`); erro de transição; **criação via sheet** (dropdown cliente → preenche nome/telefone; produto → preço; qty ×1000 em milésimos; `customerId` propagado); sem clientes → campo livre + salvar desabilitado; template settings salva config |
+| `custom_invoice_screen_test.dart` (8) | Estado vazio; card com nº/telefone/itens/total; **total líquido com desconto+IVA** (3000−500+300=28,00); erro de carga + retry; **criação com desconto/IVA em centavos** (regressão do bug `?? 0 * 100`); erro ao salvar mantém sheet aberta; template settings com **CustomInvoicePreview embutido** (FACTURA/CLIENTE/TOTAL 550,00 + fallback "Nome da Empresa") e 3 estilos |
+| `custom_invoice_preview_test.dart` (3) | Preview completo (empresa/endereço/NIF/telefone, cliente fixo, itens de amostra, "TOTAL: 550,00 MT", data DINÂMICA — não 03/09/2026); fallback do nome vazio; campos opcionais vazios omitidos (contagem da linha "Tel:") |
+
+## 32. Descobertas da rodada (todas comportamento real do app, sem alterar produção)
+
+1. **Total de cotação em milésimos**: a sheet multiplica a quantidade por 1000
+(2 un → 2000) e o `CreateQuotationUseCase` soma `quantity × unitPriceCents`
+SEM dividir — o total gravado para 2 × 15,00 é **3.000.000 centavos**, não 3.000.
+O card da lista exibe os totais das cotações persistidas com esse mesmo valor —
+indício de inconsistência de unidades entre W4 (centavos) e W11 (milésimos)
+que merece revisão de produto (documentado, não alterado).
+2. **Sheet sem rebuild por tecla**: o total/botão salvar da sheet só re-avaliam
+no próximo `setState` — em produção o teclado dispara via `viewInsets`; no teste,
+um re-tap fornece o rebuild. Artefacto de teste, não bug.
+3. **Desconto/IVA só existem com item**: os campos estão dentro do bloco
+`if (_items.isNotEmpty)` da sheet — ordem de interacção importa no teste.
+4. **"Nome da Empresa" duplicado no sheet de modelo**: aparece no preview interno
+do sheet E no `CustomInvoicePreview` isolado — 2 instâncias legítimas.
+5. **AppPill clicável exige Material ancestral**: em produção vem do Scaffold;
+teste fornece explicitamente (mesma lição do InkWell padrão).
+
+## 33. Comandos executados (reais)
+
+| Comando | Resultado |
+|---|---|
+| `flutter analyze` | **No issues found!** |
+| `flutter test --coverage` | **+1271: All tests passed!** |
+| Cobertura (lcov) | **71,67%** (18.805/26.237) |
+
+## 34. Estado consolidado da sessão
+
+| Métrica | Início | Agora |
+|---|---:|---:|
+| Cobertura total | 52,63% | **71,67% (+19,04 p.p.)** |
+| Testes | 876 | **1.271 (+395)** |
+| Camada remote+auth | 9,3% | 84,4% |
+| Painel admin (7 telas + widgets) | parcial | **todas ≥ 88,9%** |
+| Fluxo comercial (cotação + facturas) | ~50% | **77–97%** |
+| `flutter analyze` | limpo | **limpo** |
