@@ -176,6 +176,66 @@ para testes:
 ## 18. Próximos alvos naturais
 
 - `admin_invoices_screen` (20,1%) — maior tela admin ainda descoberta
-- `admin_messages_screen` (45,2%)
+- Fluxos de formulário das telas restantes (product_form_sheets, quotation_screen)
+- `l10n/generated` e RPCs server-side permanecem fora do escopo (código gerado / contrato do Postgres coberto pelo `sql_check.sh` no CI)
+
+---
+
+# Rodada 4 — admin_messages_screen 100% + round-1 commitada
+
+## 19. Resumo da rodada
+
+| Métrica | Antes | Depois | Δ |
+|---|---:|---:|---|
+| **Cobertura total** | 68,30% (17.921/26.237) | **68,87% (18.069/26.237)** | **+0,57 p.p.** |
+| `admin_messages_screen.dart` | 45,2% (117/259) | **100,0% (259/259)** | **+54,8 p.p.** |
+| Testes | 1.218 | **1.226 (+8)** | todos passando |
+
+Instrumented lines idênticas (26.237) — **zero código de produção alterado**.
+
+## 20. Testes criados (`admin_messages_screen_test.dart`, 8 testes)
+
+| Cenário | Cobre |
+|---|---|
+| **Validação do form vazio** | 3 erros simultâneos (tenant/título/corpo), zero envios; template sem tenant é no-op (guarda de `_applyTemplate`) |
+| **Dropdown só aprovados** | Pendente e rejeitado excluídos da lista de destinatários |
+| **Cotação end-to-end** | Template preenche título+corpo, indicador "Template aplicado", preview, envio com `type: billingQuote` + título exato, snackbar "Mensagem enviada!", **form resetado** (chip/preview somem) |
+| **Tipo antes do tenant** | Ordem inversa de interacção: tipo seleccionado é aplicado automaticamente ao escolher o tenant (branch `_selectedType != general && value != null`) |
+| **Plano a expirar** | Dias restantes interpolados (10 dias, +2h de folga contra truncamento de `inDays`) |
+| **Alterar validade sem expiração** | Fallback de data + motivo "Ajuste administrativo" no corpo |
+| **Mensagem Livre** | Template vazio NÃO sobrescreve campos já preenchidos pela cotação |
+| **Erro de envio** | Snackbar de erro, campos **preservados** (sem reset), sem snackbar de sucesso |
+
+## 21. Descobertas da rodada
+
+- **`allPlansProvider` é `ref.read`-only na tela** (`_planName`): em produção o shell admin
+mantém o provider quente, mas num teste isolado o nome do plano cai no fallback para o ID
+bruto ("pl2"). Solução no teste: aquecer o provider via
+`container.read(allPlansProvider.future)` antes de seleccionar o tenant — sem alterar produção.
+- Debug via teste temporário (deletado em seguida) revelou que o primeiro tap no
+`DropdownButtonFormField` abre o menu normalmente; a falha era só a asserção do texto do chip.
+- `DateFormat('MMMM yyyy', 'pt')` funciona em teste sem `initializeDateFormatting`
+explícito (o delegate de l10n do app carrega os símbolos pt).
+
+## 22. Comandos executados (reais)
+
+| Comando | Resultado |
+|---|---|
+| `flutter analyze` | **No issues found!** |
+| `flutter test --coverage` | **+1226: All tests passed!** |
+| Cobertura (lcov) | **68,87%** (18.069/26.237) |
+
+## 23. Estado consolidado da sessão
+
+| Métrica | Início | Agora |
+|---|---:|---:|
+| Cobertura total | 52,63% | **68,87% (+16,24 p.p.)** |
+| Testes | 876 | **1.226 (+350)** |
+| Camada remote+auth | 9,3% | 84,4% |
+| `flutter analyze` | limpo | **limpo** |
+
+## 24. Próximos alvos naturais
+
+- `admin_invoices_screen` (20,1%) — última tela admin grande sem cobertura
 - Fluxos de formulário das telas restantes (product_form_sheets, quotation_screen)
 - `l10n/generated` e RPCs server-side permanecem fora do escopo (código gerado / contrato do Postgres coberto pelo `sql_check.sh` no CI)
