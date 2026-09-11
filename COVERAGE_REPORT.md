@@ -494,3 +494,74 @@ Arquivos a 0% (ou ~0%) restantes fora de `l10n/generated` e DI:
 |---|---|
 | Testes | **1.309 (+15)** — todos passando |
 | Cobertura | **73,45%** (19.270/26.237) — sessão: +20,82 p.p. |
+
+## 42. Rodada 7 — batches B + D: painel admin completo e lojas
+
+### Batch B — os últimos 2 ecrãs do painel admin
+
+| Arquivo | Antes | Depois |
+|---|---:|---:|
+| `admin_dashboard_screen.dart` | 61,4% | **98,2%** (601/612) |
+| `admin_plans_screen.dart` | 50% | **93,7%** (432/461) |
+
+**16 testes** (7 dashboard + 9 planos):
+
+- **Dashboard** — stats strip (3 tenants/1 activo/1 pendente/2 planos/2
+  upgrades); banner "3 ações necessárias" navega p/ tab 1; growth
+  summary com sublabels distintos por KPI (2 aprovações na semana →
+  "+2" vs "+1" de tenants); distribuição 33% + barras por plano; feed
+  com `Tenant decision`/`Plan change` + TextButton de auditoria; audit
+  vazio → "Nenhuma ação registrada." + 2× "Dados insuficientes" + 3×
+  "Sem alteração"; ErrorView com retry; esqueleto no loading
+  (Completer pendurado).
+- **Planos** — lista com pills e badge Inactivo; sheet de detalhes
+  (stats por status, mini tiles, ID copiável com snackbar, preço
+  "R$ 29,90"); botão Salvar do detalhe abre o editor pré-preenchido
+  ("29.9" = divisão simples por 100); criar via FAB (validação de nome
+  vazia → nada persistido; Money.parse aceita "59,90" → 5990); editar
+  via long press (update no repositório, "Plano Essencial atualizado!");
+  EmptyState; erro + retry que recupera.
+
+Descobertas: **(1)** `ProviderScope(retry: (_, _) => null)` desativa o
+retry automático do Riverpod 3 — sem isso, o timer de backoff (< 10ms)
+recoloca o provider em loading ANTES do frame de erro renderizar e o
+ErrorView fica invisível ao `pumpAndSettle`; **(2)** `find.text` não
+casa com spans de `Text.rich` (nome+preço do tile) — `find.textContaining`
+resolve via `toPlainText`; **(3)** `Clipboard.getData` fica pendente no
+ambiente de teste (sem handler nativo) — o snackbar prova o gesto.
+
+### Batch D — sheets de lojas (stores_widgets)
+
+| Arquivo | Antes | Depois |
+|---|---:|---:|
+| `stores_widgets.dart` | 53,8% | **85,6%** (545/637) |
+| `stores_screen.dart` | — | **85,0%** (226/266) |
+
+**5 testes** (arquivo novo `stores/stores_sheets_test.dart`) — os use
+cases REAIS sobre repositórios em memória:
+
+- **Nova loja** — validação de nome vazia (InvalidStoreException, nada
+  persistido); criação completa (NUIT, cidade) via AddStoreUseCase real;
+  **limite do plano estourado** (plano de 2 lojas com 2 existentes →
+  "permite até 2 lojas", sheet permanece aberta).
+- **Novo funcionário** — chips de loja/cargo; conta criada via
+  EmployeeAccountService + vínculo com `userId: 'new-user-id'` e cargo
+  Gerente (AddEmployeeUseCase real); **e-mail duplicado** → a mensagem
+  amigável de `EmployeeAccountCreationException` aparece no _formError.
+- **Upgrade** — sem seleção → "Escolha o plano de destino." sem envio;
+  seleção do pl3 e envio → pedido criado com currentPlanId/requested
+  PlanId corretos (RequestPlanUpgradeUseCase real).
+
+### Estado
+
+| Métrica | Valor |
+|---|---|
+| Testes | **1.326 (+17)** — todos passando |
+| Cobertura | **76,05%** (19.952/26.237) — sessão: +23,42 p.p. |
+| Painel admin | **7/7 ecrãs ≥ 93,7%** |
+
+Nota: os 3 sheets de operação (`new_sale_sheet` 77,8%,
+`add_purchase_sheet` 65,0%, `add_debt_sheet` 59,7%) já tinham suítes
+próprias (`new_sale_sheet_test.dart`, `add_purchase_sheet_test.dart`,
+`add_debt_sheet_test.dart` + barcode) — os misses restantes são ramos de
+erro/exceção específicos, de menor valor por linha.
