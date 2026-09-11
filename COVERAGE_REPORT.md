@@ -366,3 +366,72 @@ teste fornece explicitamente (mesma lição do InkWell padrão).
 | Painel admin (7 telas + widgets) | parcial | **todas ≥ 88,9%** |
 | Fluxo comercial (cotação + facturas) | ~50% | **77–97%** |
 | `flutter analyze` | limpo | **limpo** |
+
+---
+
+# Rodada 7 — FIX do total de cotação + batch C (notificações/clientes/dashboard)
+
+## 35. FIX DE PRODUÇÃO: total de cotação 1000× maior (§32.1)
+
+**Primeira alteração de código de produção da sessão** — e pequena de propósito:
+
+| | |
+|---|---|
+| **Sintoma** | Cotação de 2 un × 15,00 gravava `totalAmountCents: 3.000.000` (em vez de 3.000) |
+| **Causa** | A sheet multiplica a quantidade por 1000 (millesimos — W11: 1000 = 1 un) mas `CreateQuotationUseCase` somava `quantity × unitPriceCents` SEM dividir por 1000 |
+| **Evidência da convenção** | `QuotationItem.quantity` documentado em milésimos; WhatsApp share faz `quantity / 1000`; PDF exporter faz `~/ 1000` e `_formatQty(millesimos)` |
+| **Correção** | `subtotal = quantity * unitPriceCents ~/ 1000` em `quotation_use_cases.dart` (1 linha + comentário) |
+| **Regressão** | `quotation_use_cases_test.dart` reescrito com qty em milésimos (2000+1000 → 7500¢) + novo teste de fração (1500 mil = 1,5 kg × 10,00 → 1500¢); widget test do sheet atualizado (3000) |
+
+Nota: os dados persistidos ANTES do fix ficaram com o total inflado — migração
+dos valores fica fora do escopo (não há relatório conhecido afetado).
+
+## 36. Resumo da rodada (batch C + fix)
+
+| Métrica | Antes | Depois | Δ |
+|---|---:|---:|---|
+| **Cobertura total** | 71,67% (18.805/26.237) | **72,82% (19.105/26.237)** | **+1,15 p.p.** |
+| `notifications_screen.dart` | 59% | **87,8% (339/386)** | +28,8 |
+| `customers_screen.dart` | 50% | **92,1% (302/328)** | +42,1 |
+| `dashboard_screen.dart` | 72,7% | **75,1% (410/546)** | +2,4 |
+| `quotation_use_cases.dart` | 45% | **96,3% (52/54)** | +51,3 |
+| Testes | 1.271 | **1.294 (+23)** | todos passando |
+
+## 37. Testes criados (3 arquivos, 23 testes)
+
+| Arquivo | Cobre |
+|---|---|
+| `notifications_screen_test.dart` (6) | Estado vazio; lista mista admin+factura com badge = não lidas; filtro Todas/Não lidas; **tile tocado abre detalhe E marca como lida** (`lastMarkedId`); botão done_all marca sem abrir o detalhe; "Marcar todas como lidas" chama AMBOS os repositórios |
+| `customers_screen_test.dart` (9) | Estado vazio com CTA (sem FAB); lista com header "2 clientes" + FAB; **chip "Fiado"** ancorado à dívida pendente por `customerId`; busca normalizada (ANA→ana) por nome/telefone + sem resultado; cadastro via sheet (storeId da loja ativa, snackbar); validação de email inválido; edição via menu ⋮ pré-preenchida; remoção com diálogo de confirmação (mensagem interpolada); erro de remoção com snackbar |
+| `dashboard_screen_extended_test.dart` (7) | **Alertas de validade** de lotes ("Venceu há"/"Vence em" — lote vencido + a vencer, nome do produto como título); atividade vazia sem eventos; feed com venda/fiado pago/despesa ("Venda S-00001", "Pagamento fiado", "Despesa · Energia"); venda CANCELADA fora das métricas/feed; **banner de erro dos KPIs** com retry (RPC server-side via `getDashboardKpisUseCaseProvider`); caixa negativo "-80,00 BRL" no card `metric-cash`; a receber vindo dos KPIs do servidor (750,00) com contagem local de fiados |
+
+## 38. Descobertas da rodada
+
+- O badge do header e a pílula "Não lidas" mostram a MESMA contagem —
+2 instâncias do número (asserção `findsNWidgets(2)`, não 1).
+- O título do tile de notificação repete o título do sheet quando o corpo
+do tile é igual ao do sheet — asserções por contagem de instâncias.
+- `Formatters.amountWithCode` sempre sufixa o código ("80,00 BRL") —
+o negativo do hero mantém o sinal à esquerda ("-80,00 BRL").
+- Os campos da sheet de cliente começam em `TextField.at(1)` — o `.at(0)`
+é o SearchField da tela por baixo (sheets não escondem a árvore de baixo).
+
+## 39. Comandos executados (reais)
+
+| Comando | Resultado |
+|---|---|
+| `flutter analyze` | **No issues found!** |
+| `flutter test --coverage` | **+1294: All tests passed!** |
+| Cobertura (lcov) | **72,82%** (19.105/26.237) |
+
+## 40. Estado consolidado da sessão
+
+| Métrica | Início | Agora |
+|---|---:|---:|
+| Cobertura total | 52,63% | **72,82% (+20,19 p.p.)** |
+| Testes | 876 | **1.294 (+418)** |
+| Camada remote+auth | 9,3% | 84,4% |
+| Painel admin (7 telas + widgets) | parcial | **todas ≥ 88,9%** |
+| Fluxo comercial (cotação + facturas) | ~50% | **77–97%** |
+| Bugs de produção encontrados/corrigidos | — | **1** (total de cotação 1000×) |
+| `flutter analyze` | limpo | **limpo** |
