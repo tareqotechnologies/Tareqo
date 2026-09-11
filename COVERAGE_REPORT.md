@@ -435,3 +435,62 @@ o negativo do hero mantém o sinal à esquerda ("-80,00 BRL").
 | Fluxo comercial (cotação + facturas) | ~50% | **77–97%** |
 | Bugs de produção encontrados/corrigidos | — | **1** (total de cotação 1000×) |
 | `flutter analyze` | limpo | **limpo** |
+
+## 41. Rodada 6 — varredura dos arquivos a 0% (share/print + MFA sheet)
+
+Arquivos a 0% (ou ~0%) restantes fora de `l10n/generated` e DI:
+
+| Arquivo | Antes | Depois |
+|---|---:|---:|
+| `core/share/advanced_reports_pdf_exporter.dart` | 0,9% | **85,5%** (94/110) |
+| `core/share/receipt_sharer.dart` | 6,2% | **75,0%** (12/16) |
+| `presentation/screens/auth/mfa_verification_sheet.dart` | 1,9% | **92,6%** (50/54) |
+| `presentation/widgets/local_image_file_io.dart` | 0% | **100%** (4/4) |
+
+15 testes em 4 arquivos:
+
+- **advanced_reports_pdf_exporter** (2) — os 3 relatórios (vendas/
+  financeiro/estoque) partilham de verdade: PDF gravado em temp real
+  (via `PathProviderPlatform` fake) e lido de volta `%PDF`; subject =
+  título; slug de filename remove acentos (`ÁéÍ` → `aei`) e espaços.
+- **receipt_sharer** (4) — PNG gravado em temp e partilhado com os
+  bytes EXATOS recebidos e nome `recibo_venda_<saleId>.png`; `wa.me`
+  com texto URL-encoded (round-trip `Uri.decodeComponent`); retorno
+  `false` quando o lado nativo não abre; **`PlatformException`
+  PROPAGA** — classe fina por contrato (`launchUrl` doc: "returns false
+  OR throws"); quem chama trata.
+- **mfa_verification_sheet** (6) — render completo; código curto →
+  erro de tamanho sem chamar o use case; TOTP inválido → snackbar;
+  TOTP REAL (mesmo segredo + janela de 30s, como no setup test) →
+  fluxo completo; Cancelar; exceção do use case → snackbar `Erro ao
+  verificar código`, sheet aberta para retry.
+- **local_image_file_io** (3) — cobertura de UNIDADE: `Image.file`+
+  `BoxFit.cover`+`FileImage(path)`; `cacheWidth` vira `ResizeImage(96)`;
+  fallback entregue ao `errorBuilder` (contexto real capturado).
+
+### Descobertas da rodada
+
+- **`Image.file` não decodifica em testWidgets (FakeAsync)** — nem com
+  `tester.runAsync` o pump completa (decode real nunca retorna dentro
+  da zona falsa). Solução: testes de unidade que constroem o widget e
+  verificam a configuração sem montar a árvore.
+- **`share_plus` 13.x channel map** — arquivos com path viram chaves
+  `paths`/`mimeTypes` (não `files`); arquivos sem path são materializados
+  em UUID dirs dentro do temp do plugin.
+- **`launchUrl`**: "Returns true … otherwise returns false **or** throws
+  a PlatformException depending on the failure" — o `ReceiptSharer`
+  repassa os dois comportamentos.
+- **`MFAVerificationSheet`** é apresentado por `showAppSheet<bool>` a
+  partir do `AuthGate` (pop `true` → verificado, senão sign-out) — o
+  teste empurra via rota-base com Scaffold (Material ancestor exigido
+  pelo TextField).
+- **pubspec**: `path_provider_platform_interface` adicionado como
+  dev_dependency (idempotente, já transitivo) para o lint
+  `depend_on_referenced_packages`.
+
+### Estado
+
+| Métrica | Valor |
+|---|---|
+| Testes | **1.309 (+15)** — todos passando |
+| Cobertura | **73,45%** (19.270/26.237) — sessão: +20,82 p.p. |

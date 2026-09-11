@@ -96,6 +96,10 @@ dev_dependencies:
   # para satisfazer o lint depend_on_referenced_packages.
   fake_async: ^1.3.1
 
+  # Mock do getTemporaryPath nos testes dos exporters/share (mesma lógica:
+  # já transitivo via path_provider).
+  path_provider_platform_interface: ^2.1.3
+
   # Testes de integração E2E no browser (Chrome) contra o Supabase real:
   # flutter test integration_test -d chrome --dart-define-from-file=env/dev.env
   # (as credenciais reais são passadas via --dart-define=TEST_*_EMAIL/PASSWORD).
