@@ -46,7 +46,12 @@ class CreateQuotationUseCase {
     final quotationItems = <QuotationItem>[];
 
     for (final item in items) {
-      final subtotal = item.quantity * item.unitPriceCents;
+      // Quantidade em MILÉSIMOS (W11 — 1000 = 1 unidade), mesma convenção
+      // da entidade [QuotationItem.quantity], do compartilhamento por
+      // WhatsApp (quantity / 1000) e do exporter de PDF (~/ 1000).
+      // Sem esta divisão o total saía 1000× maior (2 un × 15,00 gravava
+      // 3.000.000 centavos em vez de 3.000).
+      final subtotal = item.quantity * item.unitPriceCents ~/ 1000;
       totalCents += subtotal;
       quotationItems.add(
         QuotationItem(

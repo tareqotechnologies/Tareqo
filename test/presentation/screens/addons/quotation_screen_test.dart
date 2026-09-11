@@ -317,10 +317,9 @@ void main() {
     expect(repository.addCalls, 1);
     // Quantidade em MILÉSIMOS: 2 × 1000.
     expect(repository.lastAdded?.items.first.quantity, 2000);
-    // Total em centavos: qty(2000 milésimos) × 1500¢ × 2 itens digitados
-    // → o use case soma quantity×unitPriceCents SEM dividir por 1000
-    // (a sheet multiplica qty por 1000 antes de chamar).
-    expect(repository.lastAdded?.totalAmountCents, 3000000);
+    // Total em centavos reais: qty(2000 milésimos = 2 un) × 1500¢ = 3000
+    // (regressão do bug de unidades — antes gravava 3.000.000).
+    expect(repository.lastAdded?.totalAmountCents, 3000);
     expect(repository.lastAdded?.customerId, 'c1');
     expect(find.textContaining('criada!'), findsOneWidget);
   });

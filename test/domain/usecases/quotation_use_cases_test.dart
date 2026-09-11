@@ -10,7 +10,8 @@ void main() {
   group('CreateQuotationUseCase', () {
     const useCase = CreateQuotationUseCase();
 
-    test('calcula o total em centavos e aplica a validade padrão (7 dias)', () {
+    test('calcula o total em centavos (qty em MILÉSIMOS) e validade padrão', () {
+      // Quantidade em milésimos (W11): 2000 = 2 unidades, 1000 = 1 kg.
       final quote = useCase.call(
         storeId: 's1',
         customer: _customer,
@@ -18,18 +19,20 @@ void main() {
           QuotationItemInput(
             productId: 'p1',
             productName: 'Caneta',
-            quantity: 2,
+            quantity: 2000,
             unitPriceCents: 1500,
           ),
           QuotationItemInput(
             productId: 'p2',
             productName: 'Caderno',
-            quantity: 1,
+            quantity: 1000,
             unitPriceCents: 4500,
           ),
         ],
       );
 
+      // 2 × 15,00 + 1 × 45,00 = 75,00 → 7500 centavos (NÃO 7.500.000 —
+      // regressão do bug de unidades onde o total saía 1000× maior).
       expect(quote.totalAmountCents, 7500);
       expect(quote.discountCents, 0);
       expect(quote.customerName, 'Cliente A');
@@ -38,6 +41,26 @@ void main() {
       final expected = DateTime.now().add(const Duration(days: 7));
       final delta = quote.validUntil.difference(expected).inSeconds.abs();
       expect(delta, lessThanOrEqualTo(1));
+    });
+
+    test('fração de milésimos (peso/granel) calcula subtotal proporcional', () {
+      // 1,5 kg × 10,00 = 15,00 → 1500 centavos.
+      final quote = useCase.call(
+        storeId: 's1',
+        customer: _customer,
+        items: const [
+          QuotationItemInput(
+            productId: 'p1',
+            productName: 'Arroz a granel',
+            quantity: 1500,
+            unitPriceCents: 1000,
+          ),
+        ],
+      );
+
+      expect(quote.totalAmountCents, 1500);
+      // A entidade preserva a quantidade em milésimos original.
+      expect(quote.items.single.quantity, 1500);
     });
 
     test('desconto aplicado em centavos e nunca gera total negativo', () {
@@ -52,7 +75,7 @@ void main() {
             unitPriceCents: 1000,
           ),
         ],
-        discountCents: 1500, // desconto maior que o subtotal
+        discountCents: 1500, // desconto maior que o subtotal (1 un = 1000 mil)
       );
 
       expect(quote.totalAmountCents, 0);
