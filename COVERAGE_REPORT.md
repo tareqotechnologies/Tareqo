@@ -565,3 +565,27 @@ Nota: os 3 sheets de operação (`new_sale_sheet` 77,8%,
 próprias (`new_sale_sheet_test.dart`, `add_purchase_sheet_test.dart`,
 `add_debt_sheet_test.dart` + barcode) — os misses restantes são ramos de
 erro/exceção específicos, de menor valor por linha.
+
+## 43. Rodada 8 — sweep único dos `fromJson` remanescentes nas entidades
+
+Um único arquivo novo (`test/domain/entities/domain_entities_json_sweep_test.dart`,
+16 testes) fecha as lacunas de serialização em **14 entidades** que ainda
+tinham o corpo do `fromJson` (delegação freezed `_$XFromJson`) sem
+exercício: `addon` (AddOn + TenantAddOn), `admin_message`, `app_user`,
+`cash_closing`, `customer`, `invoice` (paga e pendente),
+`invoice_notification`, `plan`, `plan_request`, `product` (granel),
+`stock_lot`, `store`, `store_employee` e `tenant`.
+
+Mesma convenção do `domain_entities_misc_test.dart`: round-trip
+`toJson()` → `fromJson()` escolhendo, por entidade, os campos que
+distinguem o caso — defaults (`iconName`, `storeId: 'st1'`,
+`currencyCode: 'MZN'`), enums (`InvoiceStatus.paid`,
+`PlanRequestStatus.approved`, `TenantStatus.rejected`,
+`EmployeeRole.manager`), datas nulas (`paidAt`/`readAt`/`expiryDate`/`decidedAt`)
+e o mapa do Z-report (`salesByMethodCents`).
+
+| Métrica | Valor |
+|---|---|
+| Testes | **1.342 (+16)** — todos passando |
+| Cobertura | **77,23%** (20.263/26.237) — sessão: +24,60 p.p. |
+| Entidades de domínio | `fromJson` 100% coberto nas 14 antes incompletas |
