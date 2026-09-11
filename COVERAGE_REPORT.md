@@ -236,6 +236,67 @@ explícito (o delegate de l10n do app carrega os símbolos pt).
 
 ## 24. Próximos alvos naturais
 
-- `admin_invoices_screen` (20,1%) — última tela admin grande sem cobertura
 - Fluxos de formulário das telas restantes (product_form_sheets, quotation_screen)
 - `l10n/generated` e RPCs server-side permanecem fora do escopo (código gerado / contrato do Postgres coberto pelo `sql_check.sh` no CI)
+
+---
+
+# Rodada 5 — admin_invoices_screen 99,5% (painel admin completo)
+
+## 25. Resumo da rodada
+
+| Métrica | Antes | Depois | Δ |
+|---|---:|---:|---|
+| **Cobertura total** | 68,87% (18.069/26.237) | **69,58% (18.257/26.237)** | **+0,71 p.p.** |
+| `admin_invoices_screen.dart` | 20,1% (41/204) | **99,5% (203/204)** | **+79,4 p.p.** |
+| Testes | 1.226 | **1.238 (+12)** | todos passando |
+
+Instrumented lines idênticas (26.237) — **zero código de produção alterado**.
+Com esta rodada, **todas as telas do painel admin passam de 88%** — a única linha
+descoberta da facturas é um ramo residual de texto longínquo.
+
+## 26. Testes criados (`admin_invoices_screen_test.dart`, 12 testes)
+
+| Cenário | Cobre |
+|---|---|
+| **Lista pendente resolvida** | Nomes via `allTenantsProvider` (não IDs brutos), "Setembro 2026 · Comercial", centavos→unidades (99.00 / 29.90), pill de vencimento, 2× chips "Pendente", ações só em pendentes |
+| **Toggle Todos** | 4 estados: chip Pendente/Paga/Expirada/Cancelada, pill "Pago em:" só na paga, ações só na pendente |
+| **Marcar como paga** | Use case chamado com ID certo, snackbar de sucesso, **ambos os providers recarregados** (contadores 1→2) |
+| **Erro ao marcar paga** | Snackbar de erro, sem sucesso |
+| **Cancelar com confirmação** | Dialog "Cancelar a factura de Setembro 2026?" (período interpolado), "Sim, cancelar" → use case + snackbar "Factura cancelada." |
+| **Dialog dispensado** | TextButton "Cancelar" do dialog ≠ ação do card → zero chamadas ao use case |
+| **Erro ao cancelar** | Snackbar de erro após confirmação |
+| **Busca multifacetada** | Por nome ("vida"), período ("setembro"), plano ("essencial"), sem resultado → "Nenhum resultado", limpar restaura (✕ size 16) |
+| **Estados vazios** | "Nenhuma factura pendente." vs "Nenhuma factura gerada ainda." por tab |
+| **Erro de carga + retry** | ErrorView "Não foi possível carregar as facturas.", retry recupera (limites inferiores — retry automático do Riverpod 3, §15) |
+| **Pull-to-refresh** | `fling` recarrega **ambos** os providers (contadores 1→2) |
+| **Fallbacks** | Tenant/plano desconhecidos → ID bruto no card ("tn-fantasma", "Setembro 2026 · pl-fantasma") |
+
+## 27. Nota técnica: fonte Ahem vs botões de largura fixa
+
+O card usa `SizedBox(width: 160)` nos botões e o `AppButton` constrói um `Row`
+sem clamp. Com a fonte de teste **Ahem** (glifos quadrados de exatamente 1em —
+cada caractere é ~2× a largura média da Inter de produção), "Marcar como paga"
+(16 chars) estoura ~104px. `MediaQuery.withClampedTextScaling` resolve, mas o
+cabeçalho do botão (ícone 16px + paddings ≈ 65px) não escala com o texto —
+foi preciso **maxScaleFactor: 0.35** neste arquivo (vs 0.8 nos outros) para
+absorver a parte não-texto. Sem efeito nas asserções (todas por texto
+exato/contendo).
+
+## 28. Comandos executados (reais)
+
+| Comando | Resultado |
+|---|---|
+| `flutter analyze` | **No issues found!** |
+| `flutter test --coverage` | **+1238: All tests passed!** |
+| Cobertura (lcov) | **69,58%** (18.257/26.237) |
+
+## 29. Estado consolidado da sessão
+
+| Métrica | Início | Agora |
+|---|---:|---:|
+| Cobertura total | 52,63% | **69,58% (+16,95 p.p.)** |
+| Testes | 876 | **1.238 (+362)** |
+| Camada remote+auth | 9,3% | 84,4% |
+| Painel admin (7 telas + widgets) | parcial | **todas ≥ 88,9%** |
+| `flutter analyze` | limpo | **limpo** |
