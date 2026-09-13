@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/supabase_config.dart';
 import '../security/secure_supabase_local_storage.dart';
-import 'timeout_retry_http_client.dart';
+import 'pinned_retry_http_client.dart';
 
 /// Inicialização do cliente Supabase (chamada no `main()` antes do runApp).
 abstract final class SupabaseBootstrap {
@@ -49,7 +49,10 @@ abstract final class SupabaseBootstrap {
       publishableKey: SupabaseConfig.anonKey,
       // W6: timeout global + retry de leituras idempotentes (GET/HEAD) em
       // timeout/5xx/429 — cobre todas as chamadas REST de forma central.
-      httpClient: TimeoutRetryHttpClient(),
+      // P2: o cliente interno é o PINADO (âncora única no WE1, trust store
+      // do SO ignorado — MITM com CA user-installed é rejeitado). Na web
+      // entra o stub (sem pin, limitação documentada).
+      httpClient: buildPinnedRetryHttpClient(),
       // Auditoria S1 (Aug 6): a sessão do Supabase é persistida no
       // Keychain/Keystore via [SecureSupabaseLocalStorage] em plataformas
       // nativas — o default do SDK usa `shared_preferences` (texto claro).

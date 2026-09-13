@@ -1,5 +1,6 @@
 import 'package:sqlite3/sqlite3.dart';
 
+import '../../../core/security/pending_op_payload_cipher.dart';
 import 'pending_op_queue.dart';
 
 /// Fila offline sobre SQLite (persistente — sobrevive a fechar o app).
@@ -9,14 +10,60 @@ import 'pending_op_queue.dart';
 /// v6 (backoff + dead-letter, auditoria A3). O id AUTOINCREMENT é a ordem
 /// FIFO de replay; a fila é acessada por UMA conexão (a mesma do banco do
 /// app) e cada operação é uma instrução autocommit — sem transação longa.
+///
+/// **Payload CIFRADO em repouso (P3 — auditoria forense):** o outbox
+/// guarda o comando ORIGINAL do caminho de dinheiro (venda com itens e
+/// valores, fiado com nome do cliente). Antes o JSON gravava em TEXTO
+/// CLARO — o `PendingOpPayloadCipher` existia mas nunca era usado, e o
+/// SECURITY.md alegava "payloads cifrados" sem que a cifra rodisse. Agora
+/// TODO payload passa pelo `PendingOpPayloadCipher` (AES-256-GCM, chave
+/// mestra no Keystore/Keychain via `SecureStorageService`) no `add`, e é
+/// decifrado ao ler (`next`/`list`). Linhas legadas em texto claro
+/// (gravadas por versões anteriores) são migradas na primeira leitura:
+/// decifradas com fallback para JSON puro e regravadas cifradas.
 final class PendingOpQueueSqliteImpl implements IPendingOpQueue {
-  PendingOpQueueSqliteImpl(this._db);
+  PendingOpQueueSqliteImpl(this._db, {PendingOpPayloadCipher? cipher})
+    : _payloadCipher = cipher;
 
   final Database _db;
+
+  /// Cifra do payload (opcional para testes que não precisam da
+  /// plataforma). Sem cifra (web/testes), o JSON é gravado como antes —
+  /// a fila em memória não persiste e a web não tem Keystore (mesma
+  /// limitação documentada do armazenamento de sessão).
+  final PendingOpPayloadCipher? _payloadCipher;
 
   static const _columns =
       'id, op_type, payload, created_at, attempt_count, last_error, '
       'next_retry_at, dead';
+
+  /// Grava o payload CIFRADO (base64 de nonce||ciphertext||mac).
+  Future<String> _encodePayload(Map<String, dynamic> payload) async {
+    final cipher = _payloadCipher;
+    if (cipher == null) return PendingOp.payloadToJson(payload);
+    return cipher.encrypt(PendingOp.payloadToJson(payload));
+  }
+
+  /// Lê e decifra o payload. Linhas legadas em TEXTO CLARO (versões
+  /// anteriores da app) são reconhecidas porque a decifração falha
+  /// (base64 inválido ou MAC não bate) — nesses casos o JSON puro é
+  /// aceito e a linha é REGRAVADA cifrada (migração transparente).
+  Future<Map<String, dynamic>> _decodePayload(int id, String stored) async {
+    final cipher = _payloadCipher;
+    if (cipher == null) return PendingOp.payloadFromJsonString(stored);
+    try {
+      return PendingOp.payloadFromJsonString(await cipher.decrypt(stored));
+    } on Object {
+      // Legado em texto claro: migra para cifrado na mesma conexão.
+      final plain = PendingOp.payloadFromJsonString(stored);
+      final encrypted = await _encodePayload(plain);
+      _db.execute(
+        'UPDATE pending_ops SET payload = ? WHERE id = ?',
+        [encrypted, id],
+      );
+      return plain;
+    }
+  }
 
   @override
   Future<void> add(PendingOp op) async {
@@ -25,7 +72,15 @@ final class PendingOpQueueSqliteImpl implements IPendingOpQueue {
       '(op_type, payload, created_at, attempt_count, last_error, '
       'next_retry_at, dead) '
       'VALUES (?, ?, ?, ?, ?, ?, ?)',
-      op.toRow(),
+      [
+        op.opType,
+        await _encodePayload(op.payload),
+        op.createdAt.millisecondsSinceEpoch,
+        op.attemptCount,
+        op.lastError,
+        op.nextRetryAt?.millisecondsSinceEpoch,
+        op.dead ? 1 : 0,
+      ],
     );
   }
 
@@ -35,7 +90,7 @@ final class PendingOpQueueSqliteImpl implements IPendingOpQueue {
       'SELECT $_columns FROM pending_ops WHERE dead = 0 ORDER BY id LIMIT 1',
     );
     if (rows.isEmpty) return null;
-    return PendingOp.fromRow(rows.first);
+    return _fromRow(rows.first);
   }
 
   @override
@@ -87,6 +142,25 @@ final class PendingOpQueueSqliteImpl implements IPendingOpQueue {
     for (final row in _db.select(
       'SELECT $_columns FROM pending_ops ORDER BY id',
     ))
-      PendingOp.fromRow(row),
+      await _fromRow(row),
   ];
+
+  Future<PendingOp> _fromRow(Map<String, dynamic> row) async {
+    final payload = await _decodePayload(
+      row['id'] as int,
+      row['payload'] as String,
+    );
+    return PendingOp(
+      id: row['id'] as int,
+      opType: row['op_type'] as String,
+      payload: payload,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(row['created_at'] as int),
+      attemptCount: row['attempt_count'] as int,
+      lastError: row['last_error'] as String?,
+      nextRetryAt: row['next_retry_at'] == null
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(row['next_retry_at'] as int),
+      dead: (row['dead'] as int) == 1,
+    );
+  }
 }

@@ -66,11 +66,16 @@ final class TenantLocalDataSourceImpl implements TenantLocalDataSource {
     String id, {
     required String currencyCode,
     required String language,
+    bool? mfaEnforced,
   }) async {
     await _update(
       id,
-      (tenant) =>
-          tenant.copyWith(currencyCode: currencyCode, language: language),
+      (tenant) => tenant.copyWith(
+        currencyCode: currencyCode,
+        language: language,
+        // null = não altera a exigência de MFA (P1).
+        mfaEnforced: mfaEnforced ?? tenant.mfaEnforced,
+      ),
     );
   }
 

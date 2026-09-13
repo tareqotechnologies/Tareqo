@@ -163,22 +163,25 @@ StockLot _lot({
   costPriceCents: 800,
 );
 
-Sale _sale({required int totalCents, DateTime? at, SaleStatus status = SaleStatus.active}) =>
-    Sale(
-      id: 's-$totalCents-$at',
-      items: const [
-        SaleItem(
-          productId: 'p1',
-          productName: 'Paracetamol',
-          quantity: 1,
-          unitPriceCents: 100,
-        ),
-      ],
-      totalAmountCents: totalCents,
-      paymentMethod: PaymentMethod.mPesa,
-      dateTime: at ?? DateTime.now(),
-      status: status,
-    );
+Sale _sale({
+  required int totalCents,
+  DateTime? at,
+  SaleStatus status = SaleStatus.active,
+}) => Sale(
+  id: 's-$totalCents-$at',
+  items: const [
+    SaleItem(
+      productId: 'p1',
+      productName: 'Paracetamol',
+      quantity: 1,
+      unitPriceCents: 100,
+    ),
+  ],
+  totalAmountCents: totalCents,
+  paymentMethod: PaymentMethod.mPesa,
+  dateTime: at ?? DateTime.now(),
+  status: status,
+);
 
 Debt _settledDebt() => Debt(
   id: 'd1',
@@ -254,10 +257,8 @@ Widget _buildApp({
     ],
     child: testApp(
       home: const DashboardScreen(),
-      builder: (context, child) => MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 0.6,
-        child: child!,
-      ),
+      builder: (context, child) =>
+          MediaQuery.withClampedTextScaling(maxScaleFactor: 0.6, child: child!),
     ),
   );
 }
@@ -317,10 +318,7 @@ void main() {
   ) async {
     await _pumpDashboard(
       tester,
-      _buildApp(
-        products: [_product(stock: 50000)],
-        lots: const [],
-      ),
+      _buildApp(products: [_product(stock: 50000)], lots: const []),
     );
 
     expect(find.text('Nenhuma atividade registrada ainda.'), findsOneWidget);
@@ -351,9 +349,7 @@ void main() {
   ) async {
     await _pumpDashboard(
       tester,
-      _buildApp(
-        sales: [_sale(totalCents: 5000, status: SaleStatus.cancelled)],
-      ),
+      _buildApp(sales: [_sale(totalCents: 5000, status: SaleStatus.cancelled)]),
     );
 
     // Sem eventos: só o cancelado existiria. Zero em unidades no hero
@@ -363,10 +359,7 @@ void main() {
   });
 
   testWidgets('banner de erro dos KPIs aparece com retry', (tester) async {
-    await _pumpDashboard(
-      tester,
-      _buildApp(failKpis: true),
-    );
+    await _pumpDashboard(tester, _buildApp(failKpis: true));
 
     expect(
       find.text('Não foi possível carregar os indicadores.'),

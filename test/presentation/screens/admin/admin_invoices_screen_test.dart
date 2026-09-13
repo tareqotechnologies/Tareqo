@@ -452,18 +452,13 @@ void main() {
     _useWideViewport(tester);
     // Riverpod 3 reexecuta providers a falhar com backoff — usar limites
     // inferiores nas contagens (ver COVERAGE_REPORT.md §15).
-    final pendingUseCase =
-        _FakeGetPendingInvoicesUseCase([_invoice()])..throwOnCall = true;
+    final pendingUseCase = _FakeGetPendingInvoicesUseCase([_invoice()])
+      ..throwOnCall = true;
 
-    await tester.pumpWidget(
-      _buildApp(pendingUseCase: pendingUseCase),
-    );
+    await tester.pumpWidget(_buildApp(pendingUseCase: pendingUseCase));
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Não foi possível carregar as facturas.'),
-      findsOneWidget,
-    );
+    expect(find.text('Não foi possível carregar as facturas.'), findsOneWidget);
     final callsAfterInitial = pendingUseCase.calls;
     expect(callsAfterInitial, greaterThanOrEqualTo(1));
 
@@ -507,14 +502,9 @@ void main() {
     tester,
   ) async {
     _useWideViewport(tester);
-    final invoice = _invoice(
-      tenantId: 'tn-fantasma',
-      planId: 'pl-fantasma',
-    );
+    final invoice = _invoice(tenantId: 'tn-fantasma', planId: 'pl-fantasma');
 
-    await tester.pumpWidget(
-      _buildApp(pending: [invoice], all: [invoice]),
-    );
+    await tester.pumpWidget(_buildApp(pending: [invoice], all: [invoice]));
     await tester.pumpAndSettle();
 
     // Sem tenant/plano correspondentes: mostra o ID bruto.

@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import '../../core/security/pending_op_payload_cipher.dart';
 import '../../data/datasources/local/pending_op_queue.dart';
 import '../../data/datasources/local/pending_op_queue_sqlite_impl.dart';
 import '../../data/datasources/local/cash_closing_local_data_source.dart';
@@ -120,11 +121,17 @@ abstract final class AppDatabase {
   /// Usada no modo SaaS (onde os datasources de negócio são REMOTOS, mas a
   /// fila precisa de persistência local) e no modo local (mesmo banco).
   /// Atenção: Não registra os datasources de negócio — só a fila.
-  static void registerOfflineQueue(GetIt instance) {
+  ///
+  /// [cipher] (P3): cifra o payload em repouso (AES-256-GCM, chave no
+  /// Keystore/Keychain). Obrigatório no app real; os testes podem omitir.
+  static void registerOfflineQueue(
+    GetIt instance, {
+    PendingOpPayloadCipher? cipher,
+  }) {
     final db = _database;
     if (db == null) return;
     instance.registerLazySingleton<IPendingOpQueue>(
-      () => PendingOpQueueSqliteImpl(db),
+      () => PendingOpQueueSqliteImpl(db, cipher: cipher),
     );
   }
 
@@ -216,6 +223,10 @@ abstract final class AppDatabase {
   /// rebuild da tabela; bancos NOVOS já nascem com INTEGER.
   static void _migrateMoneyToCents(Database db) {
     // Colunas de dinheiro por tabela (schema antigo = REAL).
+    // `stock_lots.cost_price` está aqui como defesa em profundidade: a
+    // tabela nasceu DEPOIS do W4 e a coluna é INTEGER (o guard por tipo
+    // não dispara) — o lote legado é semeado JÁ EM CENTAVOS no INSERT
+    // abaixo (CAST(ROUND(x*100))).
     const moneyColumns = <String, List<String>>{
       'products': ['purchase_price', 'sale_price'],
       'sales': ['total_amount'],
@@ -224,6 +235,7 @@ abstract final class AppDatabase {
       'debts': ['amount'],
       'purchases': ['total_amount'],
       'purchase_items': ['unit_price'],
+      'stock_lots': ['cost_price'],
     };
 
     for (final entry in moneyColumns.entries) {
@@ -495,35 +507,11 @@ abstract final class AppDatabase {
  ON cash_closings(store_id);
  ''');
 
-    // Migração leve: bancos criados antes do `sale_number` (numeração
-    // sequencial por loja) recebem a coluna com DEFAULT 0 e são re-numerados
-    // em ordem de data (a venda mais antiga da loja = 1). Idempotente para
-    // bancos novos, que já criam a coluna no CREATE TABLE acima.
-    final salesColumns = db.select('PRAGMA table_info(sales)');
-    final hasSaleNumber = salesColumns.any(
-      (row) => row['name'] == 'sale_number',
-    );
-    if (!hasSaleNumber) {
-      db.execute(
-        'ALTER TABLE sales ADD COLUMN sale_number INTEGER NOT NULL DEFAULT 0',
-      );
-      db.execute('''
- WITH numbered AS (
- SELECT id, ROW_NUMBER() OVER (
- PARTITION BY store_id ORDER BY date_time, id
- ) AS rn
- FROM sales
- )
- UPDATE sales
- SET sale_number = (SELECT rn FROM numbered WHERE numbered.id = sales.id)
- ''');
-    }
-    // Garantia de unicidade por loja (defesa em profundidade — o datasource
-    // já atribui MAX+1 dentro da transação).
-    db.execute(
-      'CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_store_number '
-      'ON sales(store_id, sale_number)',
-    );
+    // NOTA: a numeração sequencial de VENDAS (sale_number + índice único)
+    // roda MAIS ABAIXO, junto das numerações de compras e dívidas — DEPOIS
+    // da migração de store_id. Antes ficava aqui e o backfill referenciava
+    // store_id que ainda não existia em bancos legados com vendas
+    // (SqliteException 'no such column: store_id' no bootstrap).
 
     // Migração leve (anulação de vendas): bancos criados antes do status
     // recebem `status` DEFAULT 'active' (todas as vendas existentes são
@@ -634,13 +622,18 @@ abstract final class AppDatabase {
       db.execute('UPDATE sale_items SET quantity = quantity * 1000');
       db.execute('UPDATE purchase_items SET quantity = quantity * 1000');
       // Lote inicial de cada produto com estoque (FIFO sem validade).
+      // `cost_price` é semeado JÁ EM CENTAVOS (W4): o `purchase_price`
+      // legado está em reais (REAL) e o W4 por tipo não alcança esta
+      // coluna INTEGER — sem o CAST, o custo do lote ficaria 100× abaixo
+      // do preço do produto migrado (valoração FIFO errada).
       db.execute('''
  INSERT INTO stock_lots
  (id, store_id, product_id, entry_date, expiry_date,
  initial_quantity, current_quantity, cost_price)
  SELECT 'lot-mig-' || id, store_id, id,
  CAST(strftime('%s','now') AS INTEGER) * 1000,
- NULL, stock_quantity, stock_quantity, purchase_price
+ NULL, stock_quantity, stock_quantity,
+ CAST(ROUND(purchase_price * 100) AS INTEGER)
  FROM products
  WHERE stock_quantity > 0
  ''');
@@ -685,10 +678,36 @@ abstract final class AppDatabase {
     // Migração leve (NUMERAÇÃO SEQUENCIAL): roda DEPOIS da migração de
     // store_id acima (os backfills referenciam store_id; em bancos legados
     // a coluna acaba de ser adicionada). Bancos criados antes de
-    // `purchase_number`/`debt_number` recebem a coluna com DEFAULT 0 e são
-    // re-numerados (compra mais antiga da loja = 1; dívida mais antiga = 1).
-    // Idempotente para bancos novos, que já criam as colunas no CREATE
-    // TABLE acima.
+    // `sale_number`/`purchase_number`/`debt_number` recebem a coluna com
+    // DEFAULT 0 e são re-numerados (venda/compra/dívida mais antiga da
+    // loja = 1). Idempotente para bancos novos, que já criam as colunas
+    // no CREATE TABLE acima.
+    final salesColumns = db.select('PRAGMA table_info(sales)');
+    final hasSaleNumber = salesColumns.any(
+      (row) => row['name'] == 'sale_number',
+    );
+    if (!hasSaleNumber) {
+      db.execute(
+        'ALTER TABLE sales ADD COLUMN sale_number INTEGER NOT NULL DEFAULT 0',
+      );
+      db.execute('''
+ WITH numbered AS (
+ SELECT id, ROW_NUMBER() OVER (
+ PARTITION BY store_id ORDER BY date_time, id
+ ) AS rn
+ FROM sales
+ )
+ UPDATE sales
+ SET sale_number = (SELECT rn FROM numbered WHERE numbered.id = sales.id)
+ ''');
+    }
+    // Garantia de unicidade por loja (defesa em profundidade — o datasource
+    // já atribui MAX+1 dentro da transação).
+    db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_store_number '
+      'ON sales(store_id, sale_number)',
+    );
+
     final purchasesColumns = db.select('PRAGMA table_info(purchases)');
     final hasPurchaseNumber = purchasesColumns.any(
       (row) => row['name'] == 'purchase_number',

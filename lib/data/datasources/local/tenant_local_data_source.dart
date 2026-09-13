@@ -19,12 +19,13 @@ abstract interface class TenantLocalDataSource {
     required String language,
   });
 
-  /// Atualiza as preferências de apresentação do tenant (moeda/idioma),
-  /// escolhidas pelo dono em Lojas → Ajustes.
+  /// Atualiza as preferências de apresentação do tenant (moeda/idioma) e a
+  /// exigência de MFA no servidor, escolhidas pelo dono em Lojas → Ajustes.
   Future<void> updateSettings(
     String id, {
     required String currencyCode,
     required String language,
+    bool? mfaEnforced,
   });
 
   /// Aprova o tenant.

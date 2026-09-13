@@ -22,11 +22,14 @@ abstract interface class ITenantRepository {
     required String language,
   });
 
-  /// Atualiza as preferências de apresentação do tenant (moeda/idioma).
+  /// Atualiza as preferências de apresentação do tenant (moeda/idioma) e a
+  /// exigência de MFA no servidor (P1). `mfaEnforced == null` não altera a
+  /// flag — apenas moeda/idioma.
   Future<void> updateSettings(
     String id, {
     required String currencyCode,
     required String language,
+    bool? mfaEnforced,
   });
 
   /// Aprova o tenant (status `approved` + data da aprovação).

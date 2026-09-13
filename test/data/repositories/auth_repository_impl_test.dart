@@ -62,12 +62,19 @@ class _FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   @override
   Stream<AppUser?> get authStateChanges => _controller.stream;
 
+  final _eventController = StreamController<AuthEvent>.broadcast();
+
   @override
-  Stream<AuthEvent> get authEvents => const Stream.empty();
+  Stream<AuthEvent> get authEvents => _eventController.stream;
+
+  void emitEvent(AuthEvent event) => _eventController.add(event);
 
   void emit(AppUser? user) => _controller.add(user);
 
-  Future<void> close() => _controller.close();
+  Future<void> close() async {
+    await _controller.close();
+    await _eventController.close();
+  }
 }
 
 void main() {
@@ -142,6 +149,20 @@ void main() {
     expect(events, hasLength(2));
     expect(events.first?.email, 'dono@loja.com');
     expect(events.last, isNull);
+
+    await subscription.cancel();
+  });
+
+  test('authEvents repassa o fluxo de eventos em bruto', () async {
+    final events = <AuthEvent>[];
+    final subscription = repository.authEvents.listen(events.add);
+
+    dataSource.emitEvent(AuthEvent.passwordRecovery);
+    dataSource.emitEvent(AuthEvent.other);
+
+    await Future<void>.delayed(Duration.zero);
+
+    expect(events, [AuthEvent.passwordRecovery, AuthEvent.other]);
 
     await subscription.cancel();
   });

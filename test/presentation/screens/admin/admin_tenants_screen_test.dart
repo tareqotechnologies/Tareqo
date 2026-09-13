@@ -214,9 +214,7 @@ Widget _buildApp({
       getAllPlansUseCaseProvider.overrideWithValue(
         _FakeGetAllPlansUseCase(plans),
       ),
-      getStoresUseCaseProvider.overrideWithValue(
-        _FakeGetStoresUseCase(stores),
-      ),
+      getStoresUseCaseProvider.overrideWithValue(_FakeGetStoresUseCase(stores)),
       getEmployeesUseCaseProvider.overrideWithValue(
         _FakeGetEmployeesUseCase(employees),
       ),
@@ -230,10 +228,8 @@ Widget _buildApp({
       // A fonte de teste (Ahem) é mais larga que a Inter de produção — o
       // sheet de detalhes (limitado a 640px pelo framework) estoura Rows
       // de texto longo. Clamp de escala compensa sem afetar as asserções.
-      builder: (context, child) => MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 0.8,
-        child: child!,
-      ),
+      builder: (context, child) =>
+          MediaQuery.withClampedTextScaling(maxScaleFactor: 0.8, child: child!),
     ),
   );
 }
@@ -492,10 +488,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.copy).first);
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Copiado para a área de transferência'),
-      findsOneWidget,
-    );
+    expect(find.text('Copiado para a área de transferência'), findsOneWidget);
   });
 
   testWidgets('detalhe do tenant pendente: chips, infos e seções vazias', (
@@ -525,10 +518,7 @@ void main() {
     // Copiar o owner ID via tap na linha.
     await tester.tap(find.text('owner123'));
     await tester.pumpAndSettle();
-    expect(
-      find.text('Copiado para a área de transferência'),
-      findsOneWidget,
-    );
+    expect(find.text('Copiado para a área de transferência'), findsOneWidget);
 
     // Seções vazias (sem lojas/funcionários/atividade).
     await _scrollSheetUntilVisible(tester, find.text('Funcionários'));
@@ -566,7 +556,10 @@ void main() {
     await tester.tap(find.text('Mercado Central'));
     await tester.pumpAndSettle();
 
-    await _scrollSheetUntilVisible(tester, find.text('Documentação incompleta'));
+    await _scrollSheetUntilVisible(
+      tester,
+      find.text('Documentação incompleta'),
+    );
     expect(find.text('Motivo da rejeição'), findsOneWidget);
     expect(find.text('Documentação incompleta'), findsOneWidget);
     expect(find.text('Rejeitado'), findsWidgets);
@@ -605,7 +598,12 @@ void main() {
         all: [approved],
         plans: plans,
         stores: const [
-          Store(id: 'st1', tenantId: 'tn1', name: 'Loja Centro', city: 'Maputo'),
+          Store(
+            id: 'st1',
+            tenantId: 'tn1',
+            name: 'Loja Centro',
+            city: 'Maputo',
+          ),
         ],
         employees: const [
           StoreEmployee(
@@ -676,48 +674,49 @@ void main() {
     expect(find.text('Plan change'), findsNothing);
   });
 
-  testWidgets('rejeição em lote pede o motivo e rejeita todos os selecionados', (
-    tester,
-  ) async {
-    _useWideViewport(tester);
-    final reject = _FakeRejectTenantUseCase();
-    final pending = [
-      _pendingTenant(name: 'Comercial Demo'),
-      _pendingTenant(id: 'tn2', name: 'Mercado Central'),
-    ];
+  testWidgets(
+    'rejeição em lote pede o motivo e rejeita todos os selecionados',
+    (tester) async {
+      _useWideViewport(tester);
+      final reject = _FakeRejectTenantUseCase();
+      final pending = [
+        _pendingTenant(name: 'Comercial Demo'),
+        _pendingTenant(id: 'tn2', name: 'Mercado Central'),
+      ];
 
-    await tester.pumpWidget(
-      _buildApp(pending: pending, all: pending, reject: reject),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        _buildApp(pending: pending, all: pending, reject: reject),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.longPress(find.text('Comercial Demo'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(Checkbox).last);
-    await tester.pumpAndSettle();
+      await tester.longPress(find.text('Comercial Demo'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Checkbox).last);
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Rejeitar (2)'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Rejeitar (2)'));
+      await tester.pumpAndSettle();
 
-    // Diálogo de motivo em lote com o título com contagem.
-    expect(find.text('Rejeitar 2 tenants'), findsOneWidget);
-    expect(find.text('Motivo da rejeição'), findsOneWidget);
-    await tester.enterText(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(TextField),
-      ),
-      'Documentos falsificados',
-    );
-    await tester.tap(find.widgetWithText(FilledButton, 'Rejeitar'));
-    await tester.pumpAndSettle();
+      // Diálogo de motivo em lote com o título com contagem.
+      expect(find.text('Rejeitar 2 tenants'), findsOneWidget);
+      expect(find.text('Motivo da rejeição'), findsOneWidget);
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        'Documentos falsificados',
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Rejeitar'));
+      await tester.pumpAndSettle();
 
-    expect(reject.calls, 2);
-    expect(reject.lastReason, 'Documentos falsificados');
-    expect(find.text('2 tenants rejeitados'), findsOneWidget);
-    // Modo de seleção encerrado.
-    expect(find.text('2 / 2'), findsNothing);
-  });
+      expect(reject.calls, 2);
+      expect(reject.lastReason, 'Documentos falsificados');
+      expect(find.text('2 tenants rejeitados'), findsOneWidget);
+      // Modo de seleção encerrado.
+      expect(find.text('2 / 2'), findsNothing);
+    },
+  );
 
   testWidgets('erro parcial na aprovação em lote mostra snackbar de erro', (
     tester,
@@ -761,8 +760,8 @@ void main() {
     // Riverpod 3 reexecuta o provider automaticamente (retry com backoff)
     // enquanto a carga falha — o número exato de chamadas depende do
     // schedule interno, então as asserções usam limites inferiores.
-    final pendingUseCase =
-        _FakeGetPendingTenantsUseCase([_pendingTenant()])..throwOnCall = true;
+    final pendingUseCase = _FakeGetPendingTenantsUseCase([_pendingTenant()])
+      ..throwOnCall = true;
 
     await tester.pumpWidget(
       _buildApp(
@@ -802,7 +801,11 @@ void main() {
     final pendingUseCase = _FakeGetPendingTenantsUseCase([_pendingTenant()]);
 
     await tester.pumpWidget(
-      _buildApp(pending: [_pendingTenant()], all: [_pendingTenant()], pendingUseCase: pendingUseCase),
+      _buildApp(
+        pending: [_pendingTenant()],
+        all: [_pendingTenant()],
+        pendingUseCase: pendingUseCase,
+      ),
     );
     await tester.pumpAndSettle();
     expect(pendingUseCase.calls, 1);

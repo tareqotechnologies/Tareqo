@@ -151,10 +151,8 @@ Widget _buildApp({
     ],
     child: testApp(
       home: const NotificationsScreen(),
-      builder: (context, child) => MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 0.7,
-        child: child!,
-      ),
+      builder: (context, child) =>
+          MediaQuery.withClampedTextScaling(maxScaleFactor: 0.7, child: child!),
     ),
   );
 }
@@ -219,7 +217,11 @@ void main() {
       _buildApp(
         notificationRepo: _FakeNotificationRepository([
           _notification(id: 'n1'),
-          _notification(id: 'n2', isRead: true, createdAt: DateTime(2026, 9, 1)),
+          _notification(
+            id: 'n2',
+            isRead: true,
+            createdAt: DateTime(2026, 9, 1),
+          ),
         ]),
         messageRepo: _FakeAdminMessageRepository([_message(isRead: true)]),
       ),
@@ -314,5 +316,133 @@ void main() {
 
     expect(notificationRepo.markAllCalls, 1);
     expect(messageRepo.markAllCalls, 1);
+  });
+
+  testWidgets('cada tipo renderiza o ícone e o rótulo correctos', (
+    tester,
+  ) async {
+    _useWideViewport(tester);
+    final notificationRepo = _FakeNotificationRepository([
+      _notification(id: 'n1', type: InvoiceNotificationType.invoiceGenerated),
+      _notification(id: 'n2', type: InvoiceNotificationType.invoiceDueSoon),
+      _notification(id: 'n3', type: InvoiceNotificationType.invoiceExpired),
+      _notification(id: 'n4', type: InvoiceNotificationType.invoicePaid),
+      _notification(id: 'n5', type: InvoiceNotificationType.addOnExpiringSoon),
+      _notification(id: 'n6', type: InvoiceNotificationType.addOnExpired),
+    ]);
+    final messageRepo = _FakeAdminMessageRepository([
+      _message(id: 'm1', type: AdminMessageType.billingQuote),
+      _message(id: 'm2', type: AdminMessageType.planExpiryChange),
+      _message(id: 'm3', type: AdminMessageType.planExpiringSoon),
+      _message(id: 'm4', type: AdminMessageType.general),
+    ]);
+    await tester.pumpWidget(
+      _buildApp(notificationRepo: notificationRepo, messageRepo: messageRepo),
+    );
+    await tester.pumpAndSettle();
+
+    // Ícones por tipo — cada braço do switch dos helpers.
+    expect(find.byIcon(Icons.receipt_long_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.event_repeat_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.timer_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.mail_outline), findsOneWidget);
+    expect(find.byIcon(Icons.add_circle_outline), findsOneWidget);
+    expect(find.byIcon(Icons.schedule_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.cancel_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+    expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.extension_off_outlined), findsOneWidget);
+
+    // Rótulos localizados (pt) por tipo.
+    expect(find.text('Cotação'), findsOneWidget);
+    expect(find.text('Validade'), findsOneWidget);
+    expect(find.text('Expira'), findsOneWidget);
+    expect(find.text('Geral'), findsOneWidget);
+    expect(find.text('Factura'), findsOneWidget);
+    expect(find.text('Vence'), findsOneWidget);
+    expect(find.text('Expirada'), findsOneWidget);
+    expect(find.text('Paga'), findsOneWidget);
+    expect(find.text('A expirar'), findsOneWidget);
+    expect(find.text('Expirado'), findsOneWidget);
+  });
+
+  testWidgets('detalhe da mensagem do admin marca como lida e exibe o sheet', (
+    tester,
+  ) async {
+    _useWideViewport(tester);
+    final messageRepo = _FakeAdminMessageRepository([
+      _message(id: 'm1', type: AdminMessageType.planExpiringSoon),
+    ]);
+    await tester.pumpWidget(
+      _buildApp(
+        notificationRepo: _FakeNotificationRepository([]),
+        messageRepo: messageRepo,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // when — abre o detalhe da mensagem do admin.
+    await tester.tap(find.text('Cotação de Plano — Comercial'));
+    await tester.pumpAndSettle();
+
+    // then — sheet com o corpo completo (tile + sheet → 2 instâncias) e
+    // marcação de leitura no repositório.
+    expect(
+      find.text('Segue a cotação para renovação do seu plano.'),
+      findsNWidgets(2),
+    );
+    expect(messageRepo.markOneCalls, 1);
+  });
+
+  testWidgets('data relativa: ontem e dias atrás nos tiles', (tester) async {
+    _useWideViewport(tester);
+    final now = DateTime.now();
+    await tester.pumpWidget(
+      _buildApp(
+        notificationRepo: _FakeNotificationRepository([
+          _notification(
+            id: 'n1',
+            createdAt: now.subtract(const Duration(days: 1)),
+          ),
+          _notification(
+            id: 'n2',
+            createdAt: now.subtract(const Duration(days: 3)),
+          ),
+          _notification(
+            id: 'n3',
+            createdAt: now.subtract(const Duration(days: 1, hours: 1)),
+          ),
+        ]),
+        messageRepo: _FakeAdminMessageRepository([]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // then — rótulos pt de tempo relativo: "Ontem" e "3 dias atrás".
+    expect(find.text('Ontem'), findsWidgets);
+    expect(find.textContaining('dias atrás'), findsOneWidget);
+  });
+
+  testWidgets('data relativa: minutos e agora mesmo', (tester) async {
+    _useWideViewport(tester);
+    final now = DateTime.now();
+    await tester.pumpWidget(
+      _buildApp(
+        notificationRepo: _FakeNotificationRepository([
+          _notification(id: 'n1', createdAt: now),
+          _notification(
+            id: 'n2',
+            createdAt: now.subtract(const Duration(minutes: 5)),
+          ),
+        ]),
+        messageRepo: _FakeAdminMessageRepository([]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // then — "Agora mesmo" e "há 5 min" (formato do header, ARB pt:
+    // dashboardActivityMinutesAgo = "há {count} min").
+    expect(find.text('Agora mesmo'), findsWidgets);
+    expect(find.textContaining('5 min'), findsOneWidget);
   });
 }

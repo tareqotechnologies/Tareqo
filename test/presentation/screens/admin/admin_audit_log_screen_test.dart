@@ -32,16 +32,15 @@ AuditEntry _entry({
   Map<String, dynamic>? detail,
   required DateTime createdAt,
   String? actorUserId,
-}) =>
-    AuditEntry(
-      id: id,
-      actorUserId: actorUserId,
-      action: action,
-      entityType: entityType,
-      entityId: entityId,
-      detail: detail,
-      createdAt: createdAt,
-    );
+}) => AuditEntry(
+  id: id,
+  actorUserId: actorUserId,
+  action: action,
+  entityType: entityType,
+  entityId: entityId,
+  detail: detail,
+  createdAt: createdAt,
+);
 
 /// Viewport alto e largo — o CustomScrollView empilha stats + busca +
 /// filtros + grupos de data; e os tiles usam Text.rich (fonte Ahem é larga).
@@ -58,9 +57,7 @@ Finder _tileText(String text) => find.textContaining(text, findRichText: true);
 
 Widget _buildApp(_FakeGetAuditLogUseCase useCase) {
   return ProviderScope(
-    overrides: [
-      getAuditLogUseCaseProvider.overrideWithValue(useCase),
-    ],
+    overrides: [getAuditLogUseCaseProvider.overrideWithValue(useCase)],
     child: testApp(home: const AdminAuditLogScreen()),
   );
 }
@@ -309,10 +306,7 @@ void main() {
     tester,
   ) async {
     _useWideTallViewport(tester);
-    final useCase = _FakeGetAuditLogUseCase(
-      const [],
-      throwOnCall: true,
-    );
+    final useCase = _FakeGetAuditLogUseCase(const [], throwOnCall: true);
 
     await tester.pumpWidget(_buildApp(useCase));
     await tester.pumpAndSettle();

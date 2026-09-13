@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:http/http.dart' as http;
 
 /// Cliente HTTP com timeout global e retry para leituras idempotentes.
@@ -27,6 +28,13 @@ final class TimeoutRetryHttpClient extends http.BaseClient {
 
   /// Repetições adicionais (para além da tentativa inicial) em leituras.
   final int maxRetries;
+
+  /// Cliente interno (pinado no bootstrap do app). Exposto APENAS para
+  /// testes de regressão (P2): o teste prova que o `inner` injetado é o
+  /// `IOClient` pinado, e não o cliente padrão — remover o pin do
+  /// bootstrap quebra o teste.
+  @visibleForTesting
+  http.Client get debugInnerClient => _inner;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {

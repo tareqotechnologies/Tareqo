@@ -56,11 +56,13 @@ class _FakeTenantRepository implements ITenantRepository {
     String id, {
     required String currencyCode,
     required String language,
+    bool? mfaEnforced,
   }) async {
     final index = _tenants.indexWhere((tenant) => tenant.id == id);
     _tenants[index] = _tenants[index].copyWith(
       currencyCode: currencyCode,
       language: language,
+      mfaEnforced: mfaEnforced ?? _tenants[index].mfaEnforced,
     );
   }
 

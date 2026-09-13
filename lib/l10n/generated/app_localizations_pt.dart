@@ -3655,6 +3655,21 @@ class AppLocalizationsPt extends AppLocalizations {
   String get securityTwoFactorTitle => 'Autenticação em Dois Fatores';
 
   @override
+  String get settingsMfaEnforceError =>
+      'Não foi possível alterar a exigência de MFA. Verifique a conexão e tente de novo.';
+
+  @override
+  String get settingsMfaEnforceSubOff =>
+      'Desligado — vendas e caixa funcionam só com senha';
+
+  @override
+  String get settingsMfaEnforceSubOn =>
+      'Exigido — escritas de dinheiro pedem código do autenticador';
+
+  @override
+  String get settingsMfaEnforceTitle => 'Exigir MFA para operações de dinheiro';
+
+  @override
   String get transfersRowDate => 'Data';
 
   @override

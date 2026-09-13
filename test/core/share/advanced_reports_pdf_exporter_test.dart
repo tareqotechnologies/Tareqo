@@ -61,71 +61,74 @@ void main() {
   const footerLabel = 'Tareqo — {date}';
 
   group('AdvancedReportsPdfExporter — share (caminho real de arquivo)', () {
-    test('shareSalesReport grava o PDF temporário e partilha com slug',
-        () async {
-      final calls = captureShare();
-      const title = 'Relatório de Vendas';
-      await const AdvancedReportsPdfExporter().shareSalesReport(
-        title: title,
-        period: 'Este mês',
-        kpis: kpis(),
-        businessName: businessName,
-        generatedOnLabel: generatedOnLabel,
-        indicatorsLabel: indicatorsLabel,
-        noDataLabel: noDataLabel,
-        footerLabel: footerLabel,
-      );
+    test(
+      'shareSalesReport grava o PDF temporário e partilha com slug',
+      () async {
+        final calls = captureShare();
+        const title = 'Relatório de Vendas';
+        await const AdvancedReportsPdfExporter().shareSalesReport(
+          title: title,
+          period: 'Este mês',
+          kpis: kpis(),
+          businessName: businessName,
+          generatedOnLabel: generatedOnLabel,
+          indicatorsLabel: indicatorsLabel,
+          noDataLabel: noDataLabel,
+          footerLabel: footerLabel,
+        );
 
-      expect(calls, hasLength(1));
-      expect(calls.single['subject'], title);
-      final paths = (calls.single['paths'] as List).cast<String>();
-      // O título vira nome de arquivo seguro (sem espaços/maiúsculas).
-      expect(paths.single, endsWith('relatorio_de_vendas.pdf'));
-      expect((calls.single['mimeTypes'] as List).single, 'application/pdf');
+        expect(calls, hasLength(1));
+        expect(calls.single['subject'], title);
+        final paths = (calls.single['paths'] as List).cast<String>();
+        // O título vira nome de arquivo seguro (sem espaços/maiúsculas).
+        expect(paths.single, endsWith('relatorio_de_vendas.pdf'));
+        expect((calls.single['mimeTypes'] as List).single, 'application/pdf');
 
-      // O arquivo partilhado é um PDF válido — lido do disco a partir do
-      // caminho que o exporter gravou via getTemporaryDirectory.
-      final bytes = File(paths.single).readAsBytesSync();
-      expect(String.fromCharCodes(bytes.take(4)), '%PDF');
-    });
+        // O arquivo partilhado é um PDF válido — lido do disco a partir do
+        // caminho que o exporter gravou via getTemporaryDirectory.
+        final bytes = File(paths.single).readAsBytesSync();
+        expect(String.fromCharCodes(bytes.take(4)), '%PDF');
+      },
+    );
 
     test(
-        'shareFinancialReport e shareStockReport partilham PDFs válidos com slug sem acentos',
-        () async {
-      final exporter = const AdvancedReportsPdfExporter();
+      'shareFinancialReport e shareStockReport partilham PDFs válidos com slug sem acentos',
+      () async {
+        final exporter = const AdvancedReportsPdfExporter();
 
-      final finCalls = captureShare();
-      await exporter.shareFinancialReport(
-        title: 'Relatório Financeiro ÁéÍ',
-        period: 'Hoje',
-        kpis: kpis(),
-        businessName: businessName,
-        generatedOnLabel: generatedOnLabel,
-        indicatorsLabel: indicatorsLabel,
-        noDataLabel: noDataLabel,
-        footerLabel: footerLabel,
-      );
-      final finPaths = (finCalls.single['paths'] as List).cast<String>();
-      // Slug remove acentos e espaços.
-      expect(finPaths.single, endsWith('relatorio_financeiro_aei.pdf'));
-      final finBytes = File(finPaths.single).readAsBytesSync();
-      expect(String.fromCharCodes(finBytes.take(4)), '%PDF');
+        final finCalls = captureShare();
+        await exporter.shareFinancialReport(
+          title: 'Relatório Financeiro ÁéÍ',
+          period: 'Hoje',
+          kpis: kpis(),
+          businessName: businessName,
+          generatedOnLabel: generatedOnLabel,
+          indicatorsLabel: indicatorsLabel,
+          noDataLabel: noDataLabel,
+          footerLabel: footerLabel,
+        );
+        final finPaths = (finCalls.single['paths'] as List).cast<String>();
+        // Slug remove acentos e espaços.
+        expect(finPaths.single, endsWith('relatorio_financeiro_aei.pdf'));
+        final finBytes = File(finPaths.single).readAsBytesSync();
+        expect(String.fromCharCodes(finBytes.take(4)), '%PDF');
 
-      final stockCalls = captureShare();
-      await exporter.shareStockReport(
-        title: 'Relatório de Estoque',
-        period: 'Semana',
-        kpis: kpis(),
-        businessName: businessName,
-        generatedOnLabel: generatedOnLabel,
-        indicatorsLabel: indicatorsLabel,
-        noDataLabel: noDataLabel,
-        footerLabel: footerLabel,
-      );
-      final stockPaths = (stockCalls.single['paths'] as List).cast<String>();
-      expect(stockPaths.single, endsWith('relatorio_de_estoque.pdf'));
-      final stockBytes = File(stockPaths.single).readAsBytesSync();
-      expect(String.fromCharCodes(stockBytes.take(4)), '%PDF');
-    });
+        final stockCalls = captureShare();
+        await exporter.shareStockReport(
+          title: 'Relatório de Estoque',
+          period: 'Semana',
+          kpis: kpis(),
+          businessName: businessName,
+          generatedOnLabel: generatedOnLabel,
+          indicatorsLabel: indicatorsLabel,
+          noDataLabel: noDataLabel,
+          footerLabel: footerLabel,
+        );
+        final stockPaths = (stockCalls.single['paths'] as List).cast<String>();
+        expect(stockPaths.single, endsWith('relatorio_de_estoque.pdf'));
+        final stockBytes = File(stockPaths.single).readAsBytesSync();
+        expect(String.fromCharCodes(stockBytes.take(4)), '%PDF');
+      },
+    );
   });
 }

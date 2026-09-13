@@ -12,16 +12,17 @@ import 'package:tareqo/presentation/controllers/auth_providers.dart';
 import 'package:tareqo/presentation/screens/auth/mfa_verification_sheet.dart';
 
 /// Fake que SEMPRE lança — cobre o caminho de exceção do `_verifyCode`
-/// (snackbar de erro, sheet permanece aberta). Lança SINCRONAMENTE: o
-/// `try/catch` da tela trata igual erro síncrono e assíncrono, e assim o
-/// FakeAsync do teste nunca vê um erro não tratado.
-/// `noSuchMethod` satisfaz a interface inteira sem reimplementar 8 métodos.
+/// (falha de TRANSPORTE no verifyAndElevate: snackbar de erro, sheet
+/// permanece aberta). Lança SINCRONAMENTE: o `try/catch` da tela trata
+/// igual erro síncrono e assíncrono, e assim o FakeAsync do teste nunca
+/// vê um erro não tratado. `noSuchMethod` satisfaz a interface inteira
+/// sem reimplementar os métodos.
 class _ThrowingMFAUseCase implements MFAAuthUseCase {
   int calls = 0;
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
-    if (invocation.memberName == #verifyCode) {
+    if (invocation.memberName == #verifyAndElevate) {
       calls++;
       throw Exception('boom');
     }
@@ -46,16 +47,17 @@ void main() {
     await storage.delete(SecureStorageKeys.mfaEnabled);
     await storage.delete(SecureStorageKeys.mfaSecret);
     await storage.delete(SecureStorageKeys.biometricEnabled);
-    mfaUseCase = MFAAuthUseCase(MFAService(), storage);
+    mfaUseCase = MFAAuthUseCase(
+      MFAService(),
+      storage,
+      LocalOnlyMfaServerPort(MFAService()),
+    );
   });
 
   /// Apresenta o sheet por `push<bool>` de uma rota-base (em produção é
   /// `showAppSheet<bool>` a partir do [AuthGate]) — o pop tem para onde
   /// voltar.
-  Future<void> openSheet(
-    WidgetTester tester, {
-    MFAAuthUseCase? useCase,
-  }) async {
+  Future<void> openSheet(WidgetTester tester, {MFAAuthUseCase? useCase}) async {
     // SEMPRE exatamente um override — Riverpod 3 lança se o mesmo provider
     // for sobrescrito duas vezes no mesmo container.
     await tester.pumpWidget(
@@ -105,8 +107,9 @@ void main() {
     expect(find.text('Cancelar'), findsOneWidget);
   });
 
-  testWidgets('código curto mostra erro de tamanho e NÃO verifica',
-      (tester) async {
+  testWidgets('código curto mostra erro de tamanho e NÃO verifica', (
+    tester,
+  ) async {
     await openSheet(tester);
 
     await tester.enterText(find.byType(TextFormField), '123');
@@ -118,9 +121,10 @@ void main() {
     expect(find.text('Código MFA'), findsOneWidget);
   });
 
-  testWidgets('código TOTP inválido mostra snackbar e permanece aberto',
-      (tester) async {
-    await mfaUseCase.generateSecret(); // segredo real, código errado
+  testWidgets('código TOTP inválido mostra snackbar e permanece aberto', (
+    tester,
+  ) async {
+    await mfaUseCase.beginSetup(); // segredo real, código errado
     await openSheet(tester);
 
     await tester.enterText(find.byType(TextFormField), '000000');
@@ -132,7 +136,7 @@ void main() {
   });
 
   testWidgets('código TOTP REAL confirma e faz pop(true)', (tester) async {
-    await mfaUseCase.generateSecret();
+    await mfaUseCase.beginSetup();
     await openSheet(tester);
 
     // Mesmo segredo + mesma janela de 30s → código válido.
@@ -158,26 +162,25 @@ void main() {
     expect(find.text('Código MFA'), findsNothing);
   });
 
-  testWidgets('exceção do use case mostra snackbar com o erro e reseta o spinner',
-      (tester) async {
-    final throwing = _ThrowingMFAUseCase();
-    await openSheet(tester, useCase: throwing);
+  testWidgets(
+    'exceção do use case mostra snackbar com o erro e reseta o spinner',
+    (tester) async {
+      final throwing = _ThrowingMFAUseCase();
+      await openSheet(tester, useCase: throwing);
 
-    await tester.enterText(find.byType(TextFormField), '123456');
-    await tester.tap(find.text('Verificar'), warnIfMissed: true);
-    await tester.pump(const Duration(milliseconds: 100));
+      await tester.enterText(find.byType(TextFormField), '123456');
+      await tester.tap(find.text('Verificar'), warnIfMissed: true);
+      await tester.pump(const Duration(milliseconds: 100));
 
-    // O tap chegou ao botão: o use case foi invocado (e lançou).
-    expect(throwing.calls, 1);
+      // O tap chegou ao botão: o use case foi invocado (e lançou).
+      expect(throwing.calls, 1);
 
-    await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 200));
 
-    expect(
-      find.textContaining('Erro ao verificar código'),
-      findsOneWidget,
-    );
-    expect(find.byType(CircularProgressIndicator), findsNothing);
-    // Permanece aberto para nova tentativa.
-    expect(find.text('Código MFA'), findsOneWidget);
-  });
+      expect(find.textContaining('Erro ao verificar código'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      // Permanece aberto para nova tentativa.
+      expect(find.text('Código MFA'), findsOneWidget);
+    },
+  );
 }

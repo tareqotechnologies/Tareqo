@@ -37,6 +37,23 @@ class _FakeGetStoresUseCase implements GetStoresUseCase {
   ];
 }
 
+/// Loja com todos os contatos preenchidos — para o sheet de detalhes.
+class _FakeGetStoresUseCaseFullContact implements GetStoresUseCase {
+  @override
+  Future<List<Store>> call(String tenantId) async => const [
+    Store(
+      id: 'st9',
+      tenantId: 'tn1',
+      name: 'Loja Completa',
+      phone: '+258 84 111 1111',
+      email: 'loja@completa.co.mz',
+      nuit: '123456789',
+      city: 'Maputo',
+      address: 'Av. 24 de Julho, 100',
+    ),
+  ];
+}
+
 class _FakeGetEmployeesUseCase implements GetEmployeesUseCase {
   final List<StoreEmployee> employees;
   _FakeGetEmployeesUseCase({List<StoreEmployee>? employees})
@@ -343,5 +360,53 @@ void main() {
       find.text('Desactivar'),
       findsNothing,
     ); // não há como desativar de novo
+  });
+
+  testWidgets('tocar no card da loja abre o sheet de detalhes com os dados', (
+    tester,
+  ) async {
+    // given — loja com TODOS os campos de contato preenchidos: o sheet
+    // precisa mostrar cada _DetailRow (telefone/email/NUIT/cidade/endereço).
+    final useCase = _FakeGetStoresUseCaseFullContact();
+    late Widget app;
+    app = ProviderScope(
+      overrides: [
+        authStateProvider.overrideWith(
+          (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+        ),
+        getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
+        getStoresUseCaseProvider.overrideWithValue(useCase),
+        getEmployeesUseCaseProvider.overrideWithValue(employeesUseCase),
+        setEmployeeActiveUseCaseProvider.overrideWithValue(setActiveUseCase),
+        getMyPlanRequestsUseCaseProvider.overrideWithValue(
+          _FakeGetMyPlanRequestsUseCase(),
+        ),
+      ],
+      child: testApp(home: StoresScreen(tenant: tenant)),
+    );
+
+    await tester.pumpWidget(app);
+    await tester.pumpAndSettle();
+
+    // when — toca no card da loja (nome visível na aba Lojas).
+    await tester.tap(find.text('Loja Completa'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // then — o sheet de detalhes exibe avatar com inicial, nome e todas
+    // as linhas de contato.
+    expect(find.text('Loja Completa'), findsWidgets);
+    expect(find.text('Telefone'), findsOneWidget);
+    expect(find.text('+258 84 111 1111'), findsOneWidget);
+    expect(find.text('E-mail'), findsOneWidget);
+    expect(find.text('loja@completa.co.mz'), findsOneWidget);
+    expect(find.text('NUIT'), findsOneWidget);
+    expect(find.text('123456789'), findsOneWidget);
+    expect(find.text('Cidade'), findsOneWidget);
+    expect(find.text('Maputo'), findsOneWidget);
+    expect(find.text('Endereço'), findsOneWidget);
+    // O endereço também aparece no card por trás do sheet.
+    expect(find.text('Av. 24 de Julho, 100'), findsWidgets);
   });
 }

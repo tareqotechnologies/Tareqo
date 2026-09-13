@@ -11,7 +11,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('retorna Image.file com BoxFit.cover', () {
-    final widget = localImageFile('/dados/foto.png', const Icon(Icons.broken_image));
+    final widget = localImageFile(
+      '/dados/foto.png',
+      const Icon(Icons.broken_image),
+    );
 
     expect(widget, isA<Image>());
     final image = widget as Image;

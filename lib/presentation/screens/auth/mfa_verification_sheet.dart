@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../domain/repositories/i_mfa_server_port.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
@@ -38,9 +39,14 @@ class _MFAVerificationSheetState extends ConsumerState<MFAVerificationSheet> {
     setState(() => _isVerifying = true);
 
     try {
-      final isValid = await ref.read(mfaAuthUseCaseProvider).verifyCode(code);
+      // P1: a verificação é feita NO SERVIDOR (GoTrue) — o código correto
+      // renova a sessão com claim aal2, o que as guardas de RLS consultam.
+      // A flag local antiga (`verifyCode` TOTP offline) NÃO eleva a sessão.
+      final result = await ref
+          .read(mfaAuthUseCaseProvider)
+          .verifyAndElevate(code);
 
-      if (isValid) {
+      if (result == MfaElevationResult.success) {
         setState(() => _isVerifying = false);
         if (mounted) {
           Navigator.of(context).pop(true);

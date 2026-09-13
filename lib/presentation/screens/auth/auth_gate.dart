@@ -127,7 +127,7 @@ class _MFAGateState extends ConsumerState<_MFAGate> {
   void initState() {
     super.initState();
     _checkMFA();
-    // Timeout de 5 segundos — se MFA check não resolver, assumir desabilitado.
+    // Timeout de 3 segundos — se MFA check não resolver, assumir desabilitado.
     _timeoutTimer = Timer(const Duration(seconds: 3), () {
       if (mounted && !_mfaChecked) {
         setState(() {
@@ -231,7 +231,7 @@ class _AdminTenantGateState extends ConsumerState<_AdminTenantGate> {
   @override
   void initState() {
     super.initState();
-    // Timeout de 5 segundos para este gate também.
+    // Timeout de 3 segundos para este gate também.
     _timeoutTimer = Timer(const Duration(seconds: 3), () {
       if (mounted && !_timedOut) setState(() => _timedOut = true);
     });
@@ -282,7 +282,7 @@ class _TenantGateState extends ConsumerState<_TenantGate> {
   @override
   void initState() {
     super.initState();
-    // Timeout de 5 segundos — mostrar tela de erro em vez de ficar preso.
+    // Timeout de 3 segundos — mostrar tela de erro em vez de ficar preso.
     _timeoutTimer = Timer(const Duration(seconds: 3), () {
       if (mounted && !_timedOut) setState(() => _timedOut = true);
     });

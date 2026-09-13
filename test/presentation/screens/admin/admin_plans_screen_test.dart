@@ -99,19 +99,18 @@ Tenant _tenant({
   required String id,
   required String planId,
   required TenantStatus status,
-}) =>
-    Tenant(
-      id: id,
-      ownerUserId: 'owner12345',
-      businessName: 'Tenant $id',
-      planId: planId,
-      status: status,
-      createdAt: DateTime(2026, 8, 1),
-    );
+}) => Tenant(
+  id: id,
+  ownerUserId: 'owner12345',
+  businessName: 'Tenant $id',
+  planId: planId,
+  status: status,
+  createdAt: DateTime(2026, 8, 1),
+);
 
 class _Harness {
   _Harness({List<Plan> plans = _plans})
-      : repository = _FakePlanRepository(List.of(plans)) {
+    : repository = _FakePlanRepository(List.of(plans)) {
     getAllPlans = _FakeGetAllPlansUseCase(plans);
   }
 
@@ -130,9 +129,7 @@ class _Harness {
         getAllTenantsUseCaseProvider.overrideWithValue(
           _FakeAllTenantsUseCase(allTenants),
         ),
-        addPlanUseCaseProvider.overrideWithValue(
-          AddPlanUseCase(repository),
-        ),
+        addPlanUseCaseProvider.overrideWithValue(AddPlanUseCase(repository)),
         updatePlanUseCaseProvider.overrideWithValue(
           UpdatePlanUseCase(repository),
         ),
@@ -155,42 +152,42 @@ void _useWideViewport(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('lista planos com preço, limites, contagem de tenants e badge de inactivo', (tester) async {
-    _useWideViewport(tester);
-    final h = _Harness();
-    await tester.pumpWidget(h.build());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'lista planos com preço, limites, contagem de tenants e badge de inactivo',
+    (tester) async {
+      _useWideViewport(tester);
+      final h = _Harness();
+      await tester.pumpWidget(h.build());
+      await tester.pumpAndSettle();
 
-    // ignore: avoid_print
-    print('DEBUG texts=${tester.allWidgets
-        .whereType<Text>()
-        .map((t) => t.data)
-        .where((d) => d != null)
-        .toSet()
-        .take(20)
-        .toList()}');
+      // ignore: avoid_print
+      print(
+        'DEBUG texts=${tester.allWidgets.whereType<Text>().map((t) => t.data).where((d) => d != null).toSet().take(20).toList()}',
+      );
 
-    // Stats compacto: 2 planos, 1 activo, 1 inactivo (contagem e rótulo
-    // são Texts SEPARADOS na _Pill).
-    expect(find.text('2'), findsWidgets);
-    expect(find.text('Total'), findsOneWidget);
-    expect(find.text('Activos'), findsOneWidget);
-    expect(find.text('Inactivos'), findsOneWidget);
+      // Stats compacto: 2 planos, 1 activo, 1 inactivo (contagem e rótulo
+      // são Texts SEPARADOS na _Pill).
+      expect(find.text('2'), findsWidgets);
+      expect(find.text('Total'), findsOneWidget);
+      expect(find.text('Activos'), findsOneWidget);
+      expect(find.text('Inactivos'), findsOneWidget);
 
-    // Tile: nome + preço num Text.rich (findRichText: true para casar).
-    expect(find.textContaining('Essencial'), findsOneWidget);
-    expect(find.textContaining('Comercial'), findsOneWidget);
-    // Badge "Inactivo" só no tile do pl2 (o stats usa "Inactivos", plural).
-    expect(find.text('Inactivo'), findsOneWidget);
-    // Limites: "1 máx. lojas · 3 máx. funcionários" e "5 · 20".
-    expect(find.textContaining('máx. lojas'), findsWidgets);
-    // Contagem de tenants por plano (pl1: 2, pl2: 1).
-    expect(find.text('2 tenants'), findsOneWidget);
-    expect(find.text('1 tenant'), findsOneWidget);
-  });
+      // Tile: nome + preço num Text.rich (findRichText: true para casar).
+      expect(find.textContaining('Essencial'), findsOneWidget);
+      expect(find.textContaining('Comercial'), findsOneWidget);
+      // Badge "Inactivo" só no tile do pl2 (o stats usa "Inactivos", plural).
+      expect(find.text('Inactivo'), findsOneWidget);
+      // Limites: "1 máx. lojas · 3 máx. funcionários" e "5 · 20".
+      expect(find.textContaining('máx. lojas'), findsWidgets);
+      // Contagem de tenants por plano (pl1: 2, pl2: 1).
+      expect(find.text('2 tenants'), findsOneWidget);
+      expect(find.text('1 tenant'), findsOneWidget);
+    },
+  );
 
-  testWidgets('toque no tile abre o sheet de detalhes com stats por status',
-      (tester) async {
+  testWidgets('toque no tile abre o sheet de detalhes com stats por status', (
+    tester,
+  ) async {
     _useWideViewport(tester);
     final h = _Harness();
     await tester.pumpWidget(h.build());
@@ -216,8 +213,9 @@ void main() {
     expect(find.text('owner123'), findsNWidgets(2));
   });
 
-  testWidgets('plano inactivo mostra status Inactivo e descrição no sheet',
-      (tester) async {
+  testWidgets('plano inactivo mostra status Inactivo e descrição no sheet', (
+    tester,
+  ) async {
     _useWideViewport(tester);
     final h = _Harness();
     await tester.pumpWidget(h.build());
@@ -251,27 +249,32 @@ void main() {
     // acima já prova que o gesto chegou ao `Clipboard.setData`.
   });
 
-  testWidgets('botão Salvar do sheet de detalhes abre o editor pré-preenchido', (tester) async {
-    _useWideViewport(tester);
-    final h = _Harness();
-    await tester.pumpWidget(h.build());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'botão Salvar do sheet de detalhes abre o editor pré-preenchido',
+    (tester) async {
+      _useWideViewport(tester);
+      final h = _Harness();
+      await tester.pumpWidget(h.build());
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.textContaining('Essencial'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('Essencial'));
+      await tester.pumpAndSettle();
 
-    // O botão "Salvar" do DETALHE abre o editor (rota: pop + editor).
-    await tester.tap(find.text('Salvar'));
-    await tester.pumpAndSettle();
+      // O botão "Salvar" do DETALHE abre o editor (rota: pop + editor).
+      await tester.tap(find.text('Salvar'));
+      await tester.pumpAndSettle();
 
-    // Editor em modo edição: título "Editar plano" + campos pré-preenchidos.
-    expect(find.text('Editar plano'), findsOneWidget);
-    expect(find.text('Nome do plano'), findsOneWidget);
-    expect(find.text('29.9'), findsOneWidget); // 2990/100 sem vírgula
-    expect(find.text('Criar plano'), findsNothing);
-  });
+      // Editor em modo edição: título "Editar plano" + campos pré-preenchidos.
+      expect(find.text('Editar plano'), findsOneWidget);
+      expect(find.text('Nome do plano'), findsOneWidget);
+      expect(find.text('29.9'), findsOneWidget); // 2990/100 sem vírgula
+      expect(find.text('Criar plano'), findsNothing);
+    },
+  );
 
-  testWidgets('criar plano via FAB: validação, preenchimento e persistência', (tester) async {
+  testWidgets('criar plano via FAB: validação, preenchimento e persistência', (
+    tester,
+  ) async {
     _useWideViewport(tester);
     final h = _Harness();
     await tester.pumpWidget(h.build());
@@ -323,7 +326,9 @@ void main() {
     expect(added.maxEmployees, 10);
   });
 
-  testWidgets('editar plano: campos pré-preenchidos e update no repositório', (tester) async {
+  testWidgets('editar plano: campos pré-preenchidos e update no repositório', (
+    tester,
+  ) async {
     _useWideViewport(tester);
     final h = _Harness();
     await tester.pumpWidget(h.build());
@@ -352,7 +357,9 @@ void main() {
     );
   });
 
-  testWidgets('lista vazia mostra EmptyState (sem FAB de criar no empty)', (tester) async {
+  testWidgets('lista vazia mostra EmptyState (sem FAB de criar no empty)', (
+    tester,
+  ) async {
     _useWideViewport(tester);
     final h = _Harness(plans: const []);
     await tester.pumpWidget(h.build());
@@ -365,7 +372,9 @@ void main() {
     );
   });
 
-  testWidgets('erro de carga mostra ErrorView com retry que recupera', (tester) async {
+  testWidgets('erro de carga mostra ErrorView com retry que recupera', (
+    tester,
+  ) async {
     _useWideViewport(tester);
     final h = _Harness()..getAllPlans.throwOnCall = true;
     await tester.pumpWidget(
@@ -376,7 +385,9 @@ void main() {
           getAllTenantsUseCaseProvider.overrideWithValue(
             _FakeAllTenantsUseCase(const []),
           ),
-          addPlanUseCaseProvider.overrideWithValue(AddPlanUseCase(h.repository)),
+          addPlanUseCaseProvider.overrideWithValue(
+            AddPlanUseCase(h.repository),
+          ),
           updatePlanUseCaseProvider.overrideWithValue(
             UpdatePlanUseCase(h.repository),
           ),

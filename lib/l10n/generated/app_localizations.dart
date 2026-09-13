@@ -6370,6 +6370,30 @@ abstract class AppLocalizations {
   /// **'Autenticação em Dois Fatores'**
   String get securityTwoFactorTitle;
 
+  /// No description provided for @settingsMfaEnforceError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível alterar a exigência de MFA. Verifique a conexão e tente de novo.'**
+  String get settingsMfaEnforceError;
+
+  /// No description provided for @settingsMfaEnforceSubOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligado — vendas e caixa funcionam só com senha'**
+  String get settingsMfaEnforceSubOff;
+
+  /// No description provided for @settingsMfaEnforceSubOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exigido — escritas de dinheiro pedem código do autenticador'**
+  String get settingsMfaEnforceSubOn;
+
+  /// No description provided for @settingsMfaEnforceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exigir MFA para operações de dinheiro'**
+  String get settingsMfaEnforceTitle;
+
   /// No description provided for @transfersRowDate.
   ///
   /// In pt, this message translates to:

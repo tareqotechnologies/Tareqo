@@ -72,6 +72,19 @@ AS $$
   );
 $$;
 
+-- Stub da tabela de fatores MFA do GoTrue (P1 — MFA server-side): espelha
+-- auth.mfa_factors do Supabase — o suficiente para os helpers
+-- mfa_verified_factor_count/mfa_enforced_for_user/mfa_ok do schema.
+CREATE TABLE IF NOT EXISTS auth.mfa_factors (
+  id          uuid PRIMARY KEY,
+  user_id     uuid NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  friendly_name text,
+  factor_type text NOT NULL DEFAULT 'totp',
+  status      text NOT NULL DEFAULT 'unverified',
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+
 -- Usuários demo usados nos testes de RLS
 INSERT INTO auth.users (id, email) VALUES
   ('11111111-1111-1111-1111-111111111111', 'dono@loja.com')

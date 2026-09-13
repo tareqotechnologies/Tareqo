@@ -313,10 +313,15 @@ void main() {
           contains('/rest/v1/rpc/update_tenant_settings'),
         );
         final body = jsonBodyOf(rpcReq) as Map<String, dynamic>;
+        // p_mfa_enforced vai SEMPRE (default false): PostgREST resolve RPC
+        // por assinatura exata — omitir o argumento falha (PGRST203) em
+        // bancos com overload 3/4-args (CREATE OR REPLACE com assinatura
+        // nova). false NÃO altera o estado (não é ativação).
         expect(body, {
           'p_tenant_id': 'tn1',
           'p_currency_code': 'ZAR',
           'p_language': 'en',
+          'p_mfa_enforced': false,
         });
       },
     );

@@ -1,5 +1,7 @@
 import 'package:get_it/get_it.dart';
 
+import '../../core/security/pending_op_payload_cipher.dart';
+
 /// Versão **web** do bootstrap SQLite: `dart:ffi` não existe no
 /// navegador, então o SQLite nunca está disponível — o ServiceLocator
 /// usa os datasources em memória (mesmos contratos, mesma UI).
@@ -13,7 +15,10 @@ abstract final class AppDatabase {
     // Nunca chamado na web: openAppDatabase sempre retorna false.
   }
 
-  static void registerOfflineQueue(GetIt instance) {
+  static void registerOfflineQueue(
+    GetIt instance, {
+    PendingOpPayloadCipher? cipher,
+  }) {
     // Nunca chamado na web: openAppDatabase sempre retorna false.
   }
 }

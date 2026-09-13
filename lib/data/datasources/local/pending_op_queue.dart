@@ -52,6 +52,17 @@ class PendingOp {
 
   String get payloadJson => jsonEncode(payload);
 
+  /// Codifica o payload para persistência (string JSON).
+  ///
+  /// Helper estático usado também pela fila SQLite (P3), que grava a
+  /// versão CIFRADA deste JSON — ver `PendingOpQueueSqliteImpl`.
+  static String payloadToJson(Map<String, dynamic> payload) =>
+      jsonEncode(payload);
+
+  /// Decodifica o JSON persistido de volta ao mapa do payload.
+  static Map<String, dynamic> payloadFromJsonString(String json) =>
+      jsonDecode(json) as Map<String, dynamic>;
+
   /// Linha do banco (INSERT).
   List<Object?> toRow() => [
     opType,

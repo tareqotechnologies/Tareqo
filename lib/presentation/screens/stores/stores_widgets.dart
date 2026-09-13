@@ -817,9 +817,41 @@ class _SettingsTab extends ConsumerStatefulWidget {
 class _SettingsTabState extends ConsumerState<_SettingsTab> {
   late String _language = widget.tenant.language;
   late String _currencyCode = widget.tenant.currencyCode;
+  late bool _mfaEnforced = widget.tenant.mfaEnforced;
 
   bool _isSaving = false;
   String? _formError;
+
+  /// P1 (auditoria): o dono ativa a exigência de MFA NO SERVIDOR — a RPC
+  /// `update_tenant_settings` valida dono + fator TOTP verificado antes de
+  /// ligar `tenants.mfa_enforced`.
+  Future<void> _toggleMfaEnforced(bool value) async {
+    setState(() => _mfaEnforced = value);
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    try {
+      await ref
+          .read(updateTenantSettingsUseCaseProvider)
+          .call(
+            tenantId: widget.tenant.id,
+            currencyCode: _currencyCode,
+            language: _language,
+            mfaEnforced: value,
+          );
+      final user = ref.read(authStateProvider).value;
+      if (user != null) ref.invalidate(myTenantProvider(user.id));
+    } catch (error, stackTrace) {
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao alterar exigência de MFA do tenant',
+      );
+      if (mounted) setState(() => _mfaEnforced = !value);
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.settingsMfaEnforceError)),
+      );
+    }
+  }
 
   Future<void> _save() async {
     setState(() {
@@ -837,6 +869,10 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
             tenantId: widget.tenant.id,
             currencyCode: _currencyCode,
             language: _language,
+            // P1: a RPC grava mfa_enforced SEMPRE que p_mfa_enforced vem
+            // preenchido — enviar o estado ATUAL do formulário evita que
+            // um ajuste de moeda/idioma desligue a exigência por engano.
+            mfaEnforced: _mfaEnforced,
           );
       if (!mounted) return;
       // Recarrega o tenant: o tenantSettingsProvider (locale + moeda)
@@ -975,6 +1011,22 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
                 )
               : const Icon(Icons.save_outlined),
           label: l10n.settingsSave,
+        ),
+        // P1 (MFA server-side): exigência de aal2 nas escritas de dinheiro
+        // do tenant — persistida no SERVIDOR via update_tenant_settings.
+        // Fica ABAIXO do botão Salvar porque salva sozinha (sem passar
+        // pelo botão) e assim não altera o posicionamento dos campos
+        // manuais (idioma/moeda) acima.
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _mfaEnforced,
+          onChanged: (v) => unawaited(_toggleMfaEnforced(v)),
+          title: Text(l10n.settingsMfaEnforceTitle),
+          subtitle: Text(
+            _mfaEnforced
+                ? l10n.settingsMfaEnforceSubOn
+                : l10n.settingsMfaEnforceSubOff,
+          ),
         ),
         // SEGURANÇA — troca de senha da conta (qualquer utilizador
         // logado; não é uma definição do tenant).

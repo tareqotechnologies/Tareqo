@@ -66,7 +66,9 @@ class _FakeSendAdminMessageUseCase implements SendAdminMessageUseCase {
   }
 }
 
-const _defaultPlans = [Plan(id: 'pl2', name: 'Comercial', priceMonthlyCents: 9900)];
+const _defaultPlans = [
+  Plan(id: 'pl2', name: 'Comercial', priceMonthlyCents: 9900),
+];
 
 Tenant _approvedTenant({
   String id = 'tn1',
@@ -103,10 +105,8 @@ Widget _buildApp({
       home: const AdminMessagesScreen(),
       // A fonte de teste (Ahem) é mais larga que a Inter de produção —
       // clamp compensa sem afetar as asserções de texto.
-      builder: (context, child) => MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 0.8,
-        child: child!,
-      ),
+      builder: (context, child) =>
+          MediaQuery.withClampedTextScaling(maxScaleFactor: 0.8, child: child!),
     ),
   );
 }
@@ -151,7 +151,10 @@ void main() {
     // Template sem tenant seleccionado é no-op (branch de guarda).
     await tester.tap(find.text('Cotação'));
     await tester.pumpAndSettle();
-    expect(find.text('Template aplicado — edite conforme necessário'), findsNothing);
+    expect(
+      find.text('Template aplicado — edite conforme necessário'),
+      findsNothing,
+    );
 
     await tester.tap(find.text('Enviar'));
     await tester.pumpAndSettle();
@@ -207,9 +210,7 @@ void main() {
     final send = _FakeSendAdminMessageUseCase();
     final tenant = _approvedTenant(expiresAt: DateTime(2026, 10, 15));
 
-    await tester.pumpWidget(
-      _buildApp(all: [tenant], send: send),
-    );
+    await tester.pumpWidget(_buildApp(all: [tenant], send: send));
     await tester.pumpAndSettle();
     await _warmPlans(tester);
 
@@ -256,7 +257,10 @@ void main() {
     // Tipo primeiro (ainda sem tenant — no-op).
     await tester.tap(find.text('Alterar Validade'));
     await tester.pumpAndSettle();
-    expect(find.text('Template aplicado — edite conforme necessário'), findsNothing);
+    expect(
+      find.text('Template aplicado — edite conforme necessário'),
+      findsNothing,
+    );
 
     // Tenant depois → o template do tipo já seleccionado é aplicado.
     await _warmPlans(tester);
@@ -346,7 +350,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(send.calls, 1);
-    expect(find.text('Não foi possível enviar a mensagem. Tente novamente.'), findsOneWidget);
+    expect(
+      find.text('Não foi possível enviar a mensagem. Tente novamente.'),
+      findsOneWidget,
+    );
     // Campos preservados (sem reset) — o admin não perde o texto.
     expect(find.text('Assunto teste'), findsOneWidget);
     expect(find.text('Mensagem enviada!'), findsNothing);

@@ -310,7 +310,14 @@ CREATE TABLE IF NOT EXISTS public.tenants (
   currency_code    TEXT NOT NULL DEFAULT 'MZN'
                     CHECK (currency_code IN ('BRL', 'USD', 'EUR', 'MZN')),
   language         TEXT NOT NULL DEFAULT 'pt'
-                    CHECK (language IN ('pt', 'en', 'fr'))
+                    CHECK (language IN ('pt', 'en', 'fr')),
+
+  -- P1 (MFA server-side): quando TRUE, TODA escrita do caminho de dinheiro
+  -- (venda/compra/fiado/quitação/anulação/fecho) do tenant EXIGE sessão
+  -- aal2 — o 2º fator TOTP verificado no GoTrue. Default FALSE: ativação
+  -- explícita pelo dono (Lojas → Ajustes), nunca trancando bases
+  -- existentes. Leitura não é bloqueada.
+  mfa_enforced     BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- Migração idempotente para bancos já criados (CREATE TABLE IF NOT EXISTS
@@ -319,6 +326,8 @@ ALTER TABLE IF EXISTS public.tenants
   ADD COLUMN IF NOT EXISTS currency_code TEXT NOT NULL DEFAULT 'MZN';
 ALTER TABLE IF EXISTS public.tenants
   ADD COLUMN IF NOT EXISTS language TEXT NOT NULL DEFAULT 'pt';
+ALTER TABLE IF EXISTS public.tenants
+  ADD COLUMN IF NOT EXISTS mfa_enforced BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Lojas de um tenant — cada loja terá seus funcionários e, na Fase 2,
 -- seu próprio estoque e vendas (escopo por store_id).
@@ -474,6 +483,100 @@ AS $$
 $$;
 
 -- ---------------------------------------------------------------
+-- 1.2c Helpers de MFA no SERVIDOR (P1 — auditoria forense)
+--
+-- O MFA/TOTP do app era APENAS client-side: a flag e o segredo viviam no
+-- armazenamento seguro do DISPOSITIVO e a verificação era local — um
+-- portador da senha autenticava pela API direta com sessão válida e o RLS
+-- aceitava (as políticas só consultam auth.uid()). Estes helpers movem a
+-- decisão para o SERVIDOR:
+--   * o fato verificado vive em auth.mfa_factors (GoTrue — matrícula via
+--     enroll/challenge/verify, igual ao tool/enroll_owner_mfa.dart);
+--   * a sessão carrega o claim `aal` ('aal1' senha / 'aal2' senha+fator);
+--   * o dono ativa a EXIGÊNCIA por tenant (tenants.mfa_enforced) —
+--     default FALSE, para que bases existentes e contas sem autenticador
+--     não sejam trancadas por uma migração.
+-- SECURITY DEFINER + search_path fixo: consulta auth.mfa_factors (schema
+-- auth, sem políticas) dentro de políticas RLS sem recursão.
+-- ---------------------------------------------------------------
+
+-- Nº de fatores TOTP VERIFICADOS do usuário logado no GoTrue.
+CREATE OR REPLACE FUNCTION public.mfa_verified_factor_count(p_user uuid)
+RETURNS integer
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COUNT(*)::int
+  FROM auth.mfa_factors
+  WHERE user_id = p_user
+    AND status = 'verified'
+    AND factor_type = 'totp';
+$$;
+
+-- O usuário logado concluiu o 2º fator NESTA sessão?
+-- O claim `aal` do JWT só sobe para 'aal2' após o challenge+verify
+-- (AuthChangeEvent.mfaChallengeVerified renova o token com aal2).
+CREATE OR REPLACE FUNCTION public.mfa_satisfied(p_user uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(auth.jwt() ->> 'aal', 'aal1') = 'aal2';
+$$;
+
+-- A exigência de MFA está ATIVA para o usuário [p_user]?
+-- Dono: mfa_enforced do tenant dele. Funcionário: a exigência do tenant
+-- da loja do vínculo ATIVO. Sem vínculo/tenant: FALSE (nunca trancar).
+CREATE OR REPLACE FUNCTION public.mfa_enforced_for_user(p_user uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.tenants t
+    WHERE t.mfa_enforced
+      AND (
+        t.owner_user_id = p_user
+        OR EXISTS (
+          SELECT 1
+          FROM public.stores s
+          JOIN public.store_employees e ON e.store_id = s.id
+          WHERE s.tenant_id = t.id
+            AND e.user_id = p_user
+            AND e.is_active
+        )
+      )
+  );
+$$;
+
+-- Guarda ÚNICA usada por políticas e RPCs do dinheiro:
+-- TRUE quando o usuário NÃO está sujeito à exigência (MFA desligado no
+-- tenant OU já concluiu o 2º fator nesta sessão). Policy/RPC usa
+-- `mfa_ok()` — leitura NUNCA é bloqueada; escrita do dinheiro SIM.
+--
+-- Nota de fail-safe: se a leitura de auth.mfa_factors falhar dentro de
+-- mfa_verified_factor_count (p.ex. projeto sem GoTrue — testes locais),
+-- a EXISTS do enforcement ainda precisa do tenants.mfa_enforced para
+-- bloquear; bases antigas nascem com FALSE (sem tranca).
+CREATE OR REPLACE FUNCTION public.mfa_ok(p_user uuid DEFAULT auth.uid())
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT NOT public.mfa_enforced_for_user(p_user)
+      OR public.mfa_satisfied(p_user);
+$$;
+
+-- ---------------------------------------------------------------
 -- 1.3 Políticas de isolamento por tenant E LOJA (auditoria C2)
 --
 -- Regra de acesso às tabelas de negócio: o registro é visível/gravável
@@ -534,11 +637,15 @@ CREATE POLICY sales_select ON public.sales
   FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS sales_insert ON public.sales;
 CREATE POLICY sales_insert ON public.sales
-  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+  FOR INSERT WITH CHECK (
+    (auth.uid() = user_id OR public.is_my_store(store_id))
+    AND public.mfa_ok()
+  );
 DROP POLICY IF EXISTS sales_update ON public.sales;
 CREATE POLICY sales_update ON public.sales
   FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
-  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+  WITH CHECK ((auth.uid() = user_id OR public.is_my_store(store_id))
+              AND public.mfa_ok());
 DROP POLICY IF EXISTS sales_delete ON public.sales;
 -- DELETE só de registros PRÓPRIOS: o app não exclui nada (zero
 -- impacto) e impede um cliente direto de destruir registros de
@@ -561,11 +668,12 @@ CREATE POLICY sale_items_select ON public.sale_items
 DROP POLICY IF EXISTS sale_items_insert ON public.sale_items;
 CREATE POLICY sale_items_insert ON public.sale_items
   FOR INSERT WITH CHECK (
-    auth.uid() = user_id
-    OR EXISTS (
-      SELECT 1 FROM public.sales s
-      WHERE s.id = sale_items.sale_id AND public.is_my_store(s.store_id)
-    )
+    (auth.uid() = user_id
+     OR EXISTS (
+       SELECT 1 FROM public.sales s
+       WHERE s.id = sale_items.sale_id AND public.is_my_store(s.store_id)
+     ))
+    AND public.mfa_ok()
   );
 DROP POLICY IF EXISTS sale_items_update ON public.sale_items;
 CREATE POLICY sale_items_update ON public.sale_items
@@ -604,12 +712,13 @@ CREATE POLICY sale_lot_consumption_select ON public.sale_lot_consumption
 DROP POLICY IF EXISTS sale_lot_consumption_insert ON public.sale_lot_consumption;
 CREATE POLICY sale_lot_consumption_insert ON public.sale_lot_consumption
   FOR INSERT WITH CHECK (
-    auth.uid() = user_id
-    OR EXISTS (
-      SELECT 1 FROM public.sales s
-      WHERE s.id = sale_lot_consumption.sale_id
-        AND public.is_my_store(s.store_id)
-    )
+    (auth.uid() = user_id
+     OR EXISTS (
+       SELECT 1 FROM public.sales s
+       WHERE s.id = sale_lot_consumption.sale_id
+         AND public.is_my_store(s.store_id)
+     ))
+    AND public.mfa_ok()
   );
 DROP POLICY IF EXISTS sale_lot_consumption_update ON public.sale_lot_consumption;
 CREATE POLICY sale_lot_consumption_update ON public.sale_lot_consumption
@@ -639,11 +748,15 @@ CREATE POLICY financial_transactions_select ON public.financial_transactions
   FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS financial_transactions_insert ON public.financial_transactions;
 CREATE POLICY financial_transactions_insert ON public.financial_transactions
-  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+  FOR INSERT WITH CHECK (
+    (auth.uid() = user_id OR public.is_my_store(store_id))
+    AND public.mfa_ok()
+  );
 DROP POLICY IF EXISTS financial_transactions_update ON public.financial_transactions;
 CREATE POLICY financial_transactions_update ON public.financial_transactions
   FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
-  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+  WITH CHECK ((auth.uid() = user_id OR public.is_my_store(store_id))
+              AND public.mfa_ok());
 DROP POLICY IF EXISTS financial_transactions_delete ON public.financial_transactions;
 -- DELETE só de registros PRÓPRIOS: o app não exclui nada (zero
 -- impacto) e impede um cliente direto de destruir registros de
@@ -676,11 +789,15 @@ CREATE POLICY debts_select ON public.debts
   FOR SELECT USING (auth.uid() = user_id OR public.is_my_store(store_id));
 DROP POLICY IF EXISTS debts_insert ON public.debts;
 CREATE POLICY debts_insert ON public.debts
-  FOR INSERT WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+  FOR INSERT WITH CHECK (
+    (auth.uid() = user_id OR public.is_my_store(store_id))
+    AND public.mfa_ok()
+  );
 DROP POLICY IF EXISTS debts_update ON public.debts;
 CREATE POLICY debts_update ON public.debts
   FOR UPDATE USING (auth.uid() = user_id OR public.is_my_store(store_id))
-  WITH CHECK (auth.uid() = user_id OR public.is_my_store(store_id));
+  WITH CHECK ((auth.uid() = user_id OR public.is_my_store(store_id))
+              AND public.mfa_ok());
 DROP POLICY IF EXISTS debts_delete ON public.debts;
 -- DELETE só de registros PRÓPRIOS: o app não exclui nada (zero
 -- impacto) e impede um cliente direto de destruir registros de
@@ -717,11 +834,12 @@ CREATE POLICY purchases_select ON public.purchases
   FOR SELECT USING (public.is_manager_of_store(store_id));
 DROP POLICY IF EXISTS purchases_insert ON public.purchases;
 CREATE POLICY purchases_insert ON public.purchases
-  FOR INSERT WITH CHECK (public.is_manager_of_store(store_id));
+  FOR INSERT WITH CHECK (public.is_manager_of_store(store_id)
+                         AND public.mfa_ok());
 DROP POLICY IF EXISTS purchases_update ON public.purchases;
 CREATE POLICY purchases_update ON public.purchases
   FOR UPDATE USING (public.is_manager_of_store(store_id))
-  WITH CHECK (public.is_manager_of_store(store_id));
+  WITH CHECK (public.is_manager_of_store(store_id) AND public.mfa_ok());
 DROP POLICY IF EXISTS purchases_delete ON public.purchases;
 -- DELETE gerencial (intencional): compras são nível manager+ — um gerente
 -- pode remover QUALQUER compra da loja (incluindo do dono), consistente com
@@ -1446,7 +1564,8 @@ CREATE POLICY plan_requests_delete ON public.plan_requests
 CREATE OR REPLACE FUNCTION public.update_tenant_settings(
   p_tenant_id TEXT,
   p_currency_code TEXT,
-  p_language TEXT
+  p_language TEXT,
+  p_mfa_enforced BOOLEAN DEFAULT NULL
 )
 RETURNS void
 LANGUAGE plpgsql
@@ -1458,9 +1577,38 @@ DECLARE
                           THEN p_currency_code ELSE 'MZN' END;
   v_lang text := CASE WHEN p_language IN ('pt','en','fr')
                       THEN p_language ELSE 'pt' END;
+  v_mfa_current boolean;
 BEGIN
   IF NOT public.is_tenant_owner(p_tenant_id) THEN
     RAISE EXCEPTION 'Apenas o dono do tenant pode alterar moeda e idioma.';
+  END IF;
+
+  SELECT mfa_enforced INTO v_mfa_current
+    FROM public.tenants WHERE id = p_tenant_id;
+
+  -- P1 (MFA server-side): só TRANSIÇÕES de estado alteram mfa_enforced —
+  -- receber o MESMO valor é no-op (o ajuste de moeda/idioma da app envia
+  -- sempre o estado atual do formulário e NUNCA deve tocar a exigência).
+  --   * ativação (false→true): exige fator TOTP verificado no GoTrue — o
+  --     ativador não pode trancar a si mesmo;
+  --   * desativação (true→false): exige sessão aal2 — um invasor apenas
+  --     com a senha (aal1) NÃO consegue desligar a proteção por RPC.
+  IF p_mfa_enforced IS TRUE AND NOT COALESCE(v_mfa_current, FALSE) THEN
+    IF public.mfa_verified_factor_count(auth.uid()) = 0 THEN
+      RAISE EXCEPTION
+        'Ative e verifique um fator TOTP antes de exigir MFA no tenant.';
+    END IF;
+    UPDATE public.tenants
+       SET mfa_enforced = TRUE
+     WHERE id = p_tenant_id;
+  ELSIF p_mfa_enforced IS FALSE AND COALESCE(v_mfa_current, FALSE) THEN
+    IF NOT public.mfa_satisfied(auth.uid()) THEN
+      RAISE EXCEPTION
+        'Desativar a exigência de MFA requer sessão com 2º fator (aal2).';
+    END IF;
+    UPDATE public.tenants
+       SET mfa_enforced = FALSE
+     WHERE id = p_tenant_id;
   END IF;
 
   UPDATE public.tenants
@@ -1854,6 +2002,10 @@ BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para ajustar o estoque.';
   END IF;
+  -- P1 (MFA server-side): ajuste muta estoque e cria/consume lotes.
+  IF NOT public.mfa_ok(v_uid) THEN
+    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para ajustar o estoque.';
+  END IF;
   IF NOT public.is_manager_of_store(p_store_id) THEN
     RAISE EXCEPTION 'Apenas o dono ou um gerente podem ajustar o estoque na loja %.',
       p_store_id;
@@ -1943,6 +2095,12 @@ DECLARE
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a venda.';
+  END IF;
+  -- P1 (MFA server-side): escrita do dinheiro exige aal2 quando o tenant
+  -- do dono/funcionário ativou a exigência (venda é operação de caixa —
+  -- funcionário comum incluído; leitura nunca é bloqueada).
+  IF NOT public.mfa_ok(v_uid) THEN
+    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para vender.';
   END IF;
   -- Guarda de acesso: a loja precisa pertencer ao usuário (dono do tenant
   -- ou funcionário vinculado). Substitui o RLS dentro do SECURITY DEFINER.
@@ -2095,6 +2253,11 @@ BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para anular a venda.';
   END IF;
+  -- P1 (MFA server-side): anulação mexe em caixa e estoque — escrita de
+  -- dinheiro (dono/gerente com aal2 quando o tenant exigir).
+  IF NOT public.mfa_ok(v_uid) THEN
+    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para anular vendas.';
+  END IF;
   -- Guarda GERENCIAL (matriz de acesso): anular venda é operação de
   -- gestão — dono ou gerente. O funcionário comum NÃO anula, mesmo por
   -- fora do app (o servidor é a autoridade).
@@ -2206,6 +2369,10 @@ DECLARE
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para fechar o caixa.';
+  END IF;
+  -- P1 (MFA server-side): fecho grava a conferência do caixa do dia.
+  IF NOT public.mfa_ok(v_uid) THEN
+    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para fechar o caixa.';
   END IF;
   IF NOT public.is_manager_of_store(p_store_id) THEN
     RAISE EXCEPTION 'Apenas o dono ou um gerente podem fechar o caixa da loja %.', p_store_id;
@@ -2382,6 +2549,10 @@ BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar o fiado.';
   END IF;
+  -- P1 (MFA server-side): fiado cria dívida + pendência no caixa.
+  IF NOT public.mfa_ok(v_uid) THEN
+    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para registrar fiado.';
+  END IF;
   IF NOT public.is_my_store(v_store) THEN
     RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', v_store;
   END IF;
@@ -2460,6 +2631,10 @@ DECLARE
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para quitar o fiado.';
+  END IF;
+  -- P1 (MFA server-side): quitação cria entrada no caixa.
+  IF NOT public.mfa_ok(v_uid) THEN
+    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para quitar o fiado.';
   END IF;
   IF NOT public.is_my_store(p_store) THEN
     RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', p_store;
@@ -2550,6 +2725,10 @@ DECLARE
 BEGIN
   IF v_uid IS NULL THEN
     RAISE EXCEPTION 'Sessão necessária para registrar a compra.';
+  END IF;
+  -- P1 (MFA server-side): compra muta estoque e caixa (nível gerencial).
+  IF NOT public.mfa_ok(v_uid) THEN
+    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para registrar compras.';
   END IF;
   -- Guarda de nível gerencial (matriz de acesso Aug 6): compras exigem
   -- DONO ou GERENTE da loja — o funcionário comum opera vendas/estoque,

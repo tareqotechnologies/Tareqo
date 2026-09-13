@@ -23,9 +23,8 @@ class _FakeCustomInvoiceRepository implements ICustomInvoiceRepository {
   _FakeCustomInvoiceRepository(this.invoices);
 
   @override
-  Future<List<CustomInvoice>> getByStore(String storeId) async => List.of(
-    invoices,
-  )..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  Future<List<CustomInvoice>> getByStore(String storeId) async =>
+      List.of(invoices)..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
   @override
   Future<CustomInvoice> add(CustomInvoice invoice) async {
@@ -108,10 +107,8 @@ Widget _buildApp({
     child: testApp(
       home: const CustomInvoiceScreen(),
       // Fonte de teste Ahem é mais larga que a Inter — clamp compensa.
-      builder: (context, child) => MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 0.6,
-        child: child!,
-      ),
+      builder: (context, child) =>
+          MediaQuery.withClampedTextScaling(maxScaleFactor: 0.6, child: child!),
     ),
   );
 }
@@ -174,19 +171,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Não foi possível carregar as facturas.'),
-      findsOneWidget,
-    );
+    expect(find.text('Não foi possível carregar as facturas.'), findsOneWidget);
     expect(find.text('Tentar novamente'), findsOneWidget);
 
     // Retry com o repositório ainda a falhar — erro persiste (sem crash).
     await tester.tap(find.text('Tentar novamente'));
     await tester.pumpAndSettle();
-    expect(
-      find.text('Não foi possível carregar as facturas.'),
-      findsOneWidget,
-    );
+    expect(find.text('Não foi possível carregar as facturas.'), findsOneWidget);
   });
 
   testWidgets('criar factura: produto, qty, desconto, IVA e salvar', (
@@ -253,8 +244,7 @@ void main() {
     tester,
   ) async {
     _useWideViewport(tester);
-    final repository = _FakeCustomInvoiceRepository([])
-      ..throwOnAdd = true;
+    final repository = _FakeCustomInvoiceRepository([])..throwOnAdd = true;
     await tester.pumpWidget(
       _buildApp(repository: repository, products: [_product()]),
     );

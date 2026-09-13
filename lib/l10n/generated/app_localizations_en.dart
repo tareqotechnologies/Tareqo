@@ -3606,6 +3606,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get securityTwoFactorTitle => 'Two-Factor Authentication';
 
   @override
+  String get settingsMfaEnforceError =>
+      'Could not change the MFA requirement. Check your connection and try again.';
+
+  @override
+  String get settingsMfaEnforceSubOff =>
+      'Off — sales and cash work with password only';
+
+  @override
+  String get settingsMfaEnforceSubOn =>
+      'Enforced — money writes require your authenticator code';
+
+  @override
+  String get settingsMfaEnforceTitle => 'Require MFA for money operations';
+
+  @override
   String get transfersRowDate => 'Date';
 
   @override

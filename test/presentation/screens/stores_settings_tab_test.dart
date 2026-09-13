@@ -64,17 +64,20 @@ class _CapturingUpdateTenantSettings implements UpdateTenantSettingsUseCase {
   String? tenantId;
   String? currencyCode;
   String? language;
+  bool? mfaEnforced;
 
   @override
   Future<void> call({
     required String tenantId,
     required String currencyCode,
     required String language,
+    bool? mfaEnforced,
   }) async {
     if (throwOnSave) throw StateError('falha simulada');
     this.tenantId = tenantId;
     this.currencyCode = currencyCode;
     this.language = language;
+    this.mfaEnforced = mfaEnforced;
   }
 }
 

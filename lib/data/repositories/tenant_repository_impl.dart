@@ -35,10 +35,12 @@ final class TenantRepositoryImpl implements ITenantRepository {
     String id, {
     required String currencyCode,
     required String language,
+    bool? mfaEnforced,
   }) => _localDataSource.updateSettings(
     id,
     currencyCode: currencyCode,
     language: language,
+    mfaEnforced: mfaEnforced,
   );
 
   @override

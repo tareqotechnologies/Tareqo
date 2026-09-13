@@ -1,3 +1,4 @@
+import '../../core/utils/ids.dart';
 import '../entities/admin_message.dart';
 import '../repositories/i_admin_message_repository.dart';
 import '../repositories/i_tenant_repository.dart';
@@ -24,9 +25,12 @@ class SendAdminMessageUseCase {
       throw StateError('Tenant $tenantId não encontrado.');
     }
 
-    final id =
-        'am_${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}'
-        '_${DateTime.now().microsecond.toRadixString(16).padLeft(4, '0')}';
+    // AppIds.newId combina carimbo de tempo + 24 bits de entropia
+    // criptográfica: o gerador anterior usava apenas o relógio e colidia
+    // quando duas mensagens eram criadas no mesmo tick (Windows ~15,6ms),
+    // corrompendo a chave primária (insert falha no banco / mensagem
+    // sobrescrita no cache local).
+    final id = AppIds.newId('am');
 
     final message = AdminMessage(
       id: id,

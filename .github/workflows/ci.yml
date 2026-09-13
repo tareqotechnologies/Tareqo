@@ -26,7 +26,7 @@ name: CI
 
 on:
   push:
-    branches: [master, main]
+    # Sem filtro de branch: roda em TODOS os pushes (pedido 2026-09).
   pull_request:
 
 concurrency:
@@ -78,8 +78,10 @@ jobs:
           pct=$(awk -F: '/^LF:/{lf+=$2} /^LH:/{lh+=$2} END {printf "%.1f", (lf>0 ? 100*lh/lf : 0)}' coverage/lcov.info)
           echo "Line coverage: ${pct}%"
           # Gate de cobertura (auditoria H3/6.5 + M2): baseline medido em 51.3%
-          # (Set 2026, após testes de ServiceLocator/PDFs). Subir conforme cresce.
-          threshold=50.0
+          # (Set 2026, após testes de ServiceLocator/PDFs); atualizado para 90.0
+          # em Set 2026 (cobertura real medida: 90.65% — 1606 testes). As regras
+          # de negócio (domain/usecases) estão em ~94%.
+          threshold=90.0
           below=$(awk -v p="$pct" -v t="$threshold" 'BEGIN { print (p < t) ? 1 : 0 }')
           if [ "$below" = "1" ]; then
           echo "::error::Coverage ${pct}% is below the ${threshold}% threshold"

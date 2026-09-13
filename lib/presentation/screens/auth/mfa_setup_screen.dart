@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../domain/usecases/mfa_auth_use_case.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
@@ -20,7 +21,13 @@ class MFASetupScreen extends ConsumerStatefulWidget {
 
 class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
   final _codeController = TextEditingController();
+  // Capturado NO initState (eager): `ref` não pode ser usado após o
+  // unmount — o dispose ainda precisa acionar o cancelamento da matrícula
+  // pendente. Lazy (`late final`) inicializaria no primeiro acesso, que
+  // pode ser o próprio dispose → crash do Riverpod.
+  late final MFAAuthUseCase _mfaUseCase;
   bool _isVerifying = false;
+  bool _enrolled = false;
   String? _secret;
   String? _qrCodeData;
   Timer? _timer;
@@ -29,26 +36,34 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
   @override
   void initState() {
     super.initState();
+    _mfaUseCase = ref.read(mfaAuthUseCaseProvider);
     _initializeMFA();
   }
 
   @override
   void dispose() {
-    _codeController.dispose();
     _timer?.cancel();
+    _codeController.dispose();
+    // Matrícula abortada (usuário fechou a tela sem concluir): remove o
+    // fator NÃO verificado do servidor — P1 (auditoria forense).
+    if (!_enrolled) {
+      unawaited(_mfaUseCase.cancelSetup());
+    }
     super.dispose();
   }
 
   Future<void> _initializeMFA() async {
     try {
-      final secret = await ref.read(mfaAuthUseCaseProvider).generateSecret();
+      // P1: o secret é gerado pelo SERVIDOR (GoTrue), não pelo app.
+      final pending = await ref.read(mfaAuthUseCaseProvider).beginSetup();
       final user = ref.read(authStateProvider).value;
       final qrData = await ref
           .read(mfaAuthUseCaseProvider)
           .generateQRCodeData(issuer: 'TAREQO', account: user?.email ?? 'user');
 
+      if (!mounted) return;
       setState(() {
-        _secret = secret;
+        _secret = pending.secret;
         _qrCodeData = qrData;
       });
 
@@ -88,11 +103,12 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
     setState(() => _isVerifying = true);
 
     try {
-      final isValid = await ref.read(mfaAuthUseCaseProvider).verifyCode(code);
+      // P1: a verificação acontece NO SERVIDOR (challenge + verify do
+      // GoTrue); só após o servidor confirmar é que a flag local liga.
+      final isValid = await _mfaUseCase.completeSetup(code: code);
 
       if (isValid) {
-        // Confirmar ativação — só agora gravamos mfa_enabled.
-        await ref.read(mfaAuthUseCaseProvider).confirmEnable();
+        _enrolled = true;
         setState(() => _isVerifying = false);
 
         if (mounted) {

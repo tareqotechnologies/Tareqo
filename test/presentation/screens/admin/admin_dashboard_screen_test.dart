@@ -84,43 +84,42 @@ Tenant _tenant({
   required TenantStatus status,
   required String planId,
   int daysAgo = 40,
-}) =>
-    Tenant(
-      id: id,
-      ownerUserId: 'owner12345',
-      businessName: 'Tenant $id',
-      planId: planId,
-      status: status,
-      createdAt: DateTime.now().subtract(Duration(days: daysAgo, hours: 1)),
-    );
+}) => Tenant(
+  id: id,
+  ownerUserId: 'owner12345',
+  businessName: 'Tenant $id',
+  planId: planId,
+  status: status,
+  createdAt: DateTime.now().subtract(Duration(days: daysAgo, hours: 1)),
+);
 
 AuditEntry _approvalAudit() => AuditEntry(
-      id: 7,
-      actorUserId: 'admin9',
-      action: 'tenant_decision',
-      entityType: 'tenants',
-      entityId: 'tn1',
-      detail: const {'status': 'approved'},
-      createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-    );
+  id: 7,
+  actorUserId: 'admin9',
+  action: 'tenant_decision',
+  entityType: 'tenants',
+  entityId: 'tn1',
+  detail: const {'status': 'approved'},
+  createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+);
 
 AuditEntry _approvalAudit2() => AuditEntry(
-      id: 8,
-      actorUserId: 'admin9',
-      action: 'tenant_decision',
-      entityType: 'tenants',
-      entityId: 'tn2',
-      detail: const {'status': 'approved'},
-      createdAt: DateTime.now().subtract(const Duration(hours: 3)),
-    );
+  id: 8,
+  actorUserId: 'admin9',
+  action: 'tenant_decision',
+  entityType: 'tenants',
+  entityId: 'tn2',
+  detail: const {'status': 'approved'},
+  createdAt: DateTime.now().subtract(const Duration(hours: 3)),
+);
 
 PlanRequest _upgradeRequest(String id) => PlanRequest(
-      id: id,
-      tenantId: 'tn1',
-      currentPlanId: 'pl1',
-      requestedPlanId: 'pl2',
-      createdAt: DateTime(2026, 8, 1),
-    );
+  id: id,
+  tenantId: 'tn1',
+  currentPlanId: 'pl1',
+  requestedPlanId: 'pl2',
+  createdAt: DateTime(2026, 8, 1),
+);
 
 Widget _buildApp({
   List<Tenant> tenants = const [],
@@ -155,10 +154,8 @@ Widget _buildApp({
       home: AdminDashboardScreen(onNavigateToTab: onNavigateToTab),
       // Fonte de teste (Ahem) mais larga que a Inter — clamp sem afetar
       // as asserções de texto.
-      builder: (context, child) => MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 0.8,
-        child: child!,
-      ),
+      builder: (context, child) =>
+          MediaQuery.withClampedTextScaling(maxScaleFactor: 0.8, child: child!),
     ),
   );
 }
@@ -180,14 +177,16 @@ void main() {
       await tester.pumpWidget(
         _buildApp(
           tenants: [
-            _tenant(id: 'tn1', status: TenantStatus.approved, planId: 'pl1', daysAgo: 0),
+            _tenant(
+              id: 'tn1',
+              status: TenantStatus.approved,
+              planId: 'pl1',
+              daysAgo: 0,
+            ),
             _tenant(id: 'tn2', status: TenantStatus.pending, planId: 'pl1'),
             _tenant(id: 'tn3', status: TenantStatus.rejected, planId: 'pl2'),
           ],
-          pendingRequests: [
-            _upgradeRequest('pr1'),
-            _upgradeRequest('pr2'),
-          ],
+          pendingRequests: [_upgradeRequest('pr1'), _upgradeRequest('pr2')],
           onNavigateToTab: tabs.add,
         ),
       );
@@ -210,21 +209,24 @@ void main() {
     },
   );
 
-  testWidgets('growth summary: comparativas semana/mês e tendência +1',
-      (tester) async {
+  testWidgets('growth summary: comparativas semana/mês e tendência +1', (
+    tester,
+  ) async {
     _useWideViewport(tester);
     await tester.pumpWidget(
       _buildApp(
         tenants: [
-          _tenant(id: 'tn1', status: TenantStatus.approved, planId: 'pl1', daysAgo: 0),
+          _tenant(
+            id: 'tn1',
+            status: TenantStatus.approved,
+            planId: 'pl1',
+            daysAgo: 0,
+          ),
           _tenant(id: 'tn2', status: TenantStatus.pending, planId: 'pl1'),
         ],
         // 2 aprovações nesta semana → sublabel da KPI de aprovações
         // DIFERE da de tenants (ambas seriam 1/0).
-        auditLog: [
-          _approvalAudit(),
-          _approvalAudit2(),
-        ],
+        auditLog: [_approvalAudit(), _approvalAudit2()],
       ),
     );
     await tester.pumpAndSettle();
@@ -241,17 +243,25 @@ void main() {
     expect(find.text('+1'), findsOneWidget);
     expect(find.text('+2'), findsOneWidget);
     // Tendências 8 semanas com dados → sem mensagem de vazio.
-    expect(find.text('Dados insuficientes para mostrar tendências'),
-        findsNothing);
+    expect(
+      find.text('Dados insuficientes para mostrar tendências'),
+      findsNothing,
+    );
   });
 
-  testWidgets('distribuição: taxa de aprovação e barras por plano',
-      (tester) async {
+  testWidgets('distribuição: taxa de aprovação e barras por plano', (
+    tester,
+  ) async {
     _useWideViewport(tester);
     await tester.pumpWidget(
       _buildApp(
         tenants: [
-          _tenant(id: 'tn1', status: TenantStatus.approved, planId: 'pl1', daysAgo: 0),
+          _tenant(
+            id: 'tn1',
+            status: TenantStatus.approved,
+            planId: 'pl1',
+            daysAgo: 0,
+          ),
           _tenant(id: 'tn2', status: TenantStatus.pending, planId: 'pl1'),
           _tenant(id: 'tn3', status: TenantStatus.rejected, planId: 'pl2'),
         ],
@@ -268,14 +278,20 @@ void main() {
     expect(find.text('Comercial'), findsOneWidget);
   });
 
-  testWidgets('feed de actividade + acções rápidas navegam para as tabs',
-      (tester) async {
+  testWidgets('feed de actividade + acções rápidas navegam para as tabs', (
+    tester,
+  ) async {
     _useWideViewport(tester);
     final tabs = <int>[];
     await tester.pumpWidget(
       _buildApp(
         tenants: [
-          _tenant(id: 'tn1', status: TenantStatus.approved, planId: 'pl1', daysAgo: 0),
+          _tenant(
+            id: 'tn1',
+            status: TenantStatus.approved,
+            planId: 'pl1',
+            daysAgo: 0,
+          ),
         ],
         auditLog: [
           _approvalAudit(),
@@ -298,8 +314,10 @@ void main() {
     expect(find.text('Plan change'), findsOneWidget);
     // Com audit não-vazio, o TextButton "Ver Registo de Auditoria" existe
     // (além do quick action com o mesmo rótulo).
-    expect(find.widgetWithText(TextButton, 'Ver Registo de Auditoria'),
-        findsOneWidget);
+    expect(
+      find.widgetWithText(TextButton, 'Ver Registo de Auditoria'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Gerir Planos'));
     await tester.pump();
@@ -320,11 +338,15 @@ void main() {
       expect(find.textContaining('Nenhuma ação'), findsOneWidget);
       // Sem audit, o TextButton de auditoria NÃO existe (quick action com
       // o mesmo rótulo continua).
-      expect(find.widgetWithText(TextButton, 'Ver Registo de Auditoria'),
-          findsNothing);
+      expect(
+        find.widgetWithText(TextButton, 'Ver Registo de Auditoria'),
+        findsNothing,
+      );
       // Gráficos sem dados (×2: registos + actividade).
-      expect(find.text('Dados insuficientes para mostrar tendências'),
-          findsNWidgets(2));
+      expect(
+        find.text('Dados insuficientes para mostrar tendências'),
+        findsNWidgets(2),
+      );
       // diff 0 → "Sem alteração" (novos tenants + aprovações + mês).
       expect(find.text('Sem alteração'), findsNWidgets(3));
       // Banner de pendências só com pendências.
@@ -342,8 +364,10 @@ void main() {
     // com o retry automático do Riverpod 3 (timer < 10ms esconde o frame).
     await tester.pumpAndSettle();
 
-    expect(find.text('Não foi possível carregar a visão geral.'),
-        findsOneWidget);
+    expect(
+      find.text('Não foi possível carregar a visão geral.'),
+      findsOneWidget,
+    );
     final callsAfterInitial = allUseCase.calls;
     expect(callsAfterInitial, greaterThanOrEqualTo(1));
 
@@ -362,8 +386,9 @@ void main() {
     expect(allUseCase.calls, greaterThan(1));
   });
 
-  testWidgets('loading: esqueleto no lugar dos stats até os dados chegarem',
-      (tester) async {
+  testWidgets('loading: esqueleto no lugar dos stats até os dados chegarem', (
+    tester,
+  ) async {
     _useWideViewport(tester);
     final gate = Completer<List<Tenant>>();
     // Sobrescreve o comportamento: pendura o primeiro build.
@@ -378,8 +403,9 @@ void main() {
             _GateableAllTenants(gate),
           ),
           getAllPlansUseCaseProvider.overrideWithValue(plansUseCase),
-          getPendingPlanRequestsUseCaseProvider
-              .overrideWithValue(pendingUseCase),
+          getPendingPlanRequestsUseCaseProvider.overrideWithValue(
+            pendingUseCase,
+          ),
           getAuditLogUseCaseProvider.overrideWithValue(
             _FakeGetAuditLogUseCase(const []),
           ),

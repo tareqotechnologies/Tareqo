@@ -29,9 +29,8 @@ class _FakeQuotationRepository implements IQuotationRepository {
   _FakeQuotationRepository(this.quotations);
 
   @override
-  Future<List<Quotation>> getByStore(String storeId) async => List.of(
-    quotations,
-  )..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  Future<List<Quotation>> getByStore(String storeId) async =>
+      List.of(quotations)..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
   @override
   Future<Quotation> add(Quotation quotation) async {
@@ -140,10 +139,8 @@ Widget _buildApp({
     child: testApp(
       home: const QuotationScreen(),
       // Fonte de teste Ahem é mais larga que a Inter — clamp compensa.
-      builder: (context, child) => MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 0.6,
-        child: child!,
-      ),
+      builder: (context, child) =>
+          MediaQuery.withClampedTextScaling(maxScaleFactor: 0.6, child: child!),
     ),
   );
 }

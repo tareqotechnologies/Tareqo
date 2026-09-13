@@ -39,7 +39,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 :root{--ink:#10211a;--muted:#627168;--paper:#f8faf8;--surface:#fff;--line:#dfe8e2;--green:#18a766;--green-dark:#087543;--mint:#dff8eb;--blue:#4a82e8;--shadow:0 24px 70px rgba(16,33,26,.11);--radius:22px;--container:min(1160px,calc(100% - 40px));}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:88px}body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6}body:before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.2;background-image:linear-gradient(rgba(16,33,26,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(16,33,26,.025) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,#000,transparent 80%);z-index:-1}.container{width:var(--container);margin-inline:auto}.skip-link{position:fixed;left:16px;top:-60px;z-index:1000;padding:10px 14px;background:var(--ink);color:#fff;border-radius:10px}.skip-link:focus{top:16px}.nav{position:sticky;top:0;z-index:50;background:rgba(248,250,248,.84);border-bottom:1px solid rgba(223,232,226,.8);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}.nav-inner{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:700;letter-spacing:.08em}.brand-icon{border-radius:10px;box-shadow:0 4px 14px rgba(24,167,102,.2)}.brand-name{font-family:'Space Grotesk',sans-serif}.nav-links{display:flex;align-items:center;gap:22px}.nav-links>a:not(.btn),.footer a{color:var(--muted);font-size:.9rem;text-decoration:none;transition:color .2s}.nav-links>a:not(.btn):hover,.footer a:hover{color:var(--green-dark)}.lang-switch{display:flex;padding:3px;background:#eef4ef;border-radius:10px}.lang-btn{border:0;background:transparent;color:var(--muted);padding:6px 8px;border-radius:7px;font:600 .72rem inherit;cursor:pointer}.lang-btn.is-active{background:#fff;color:var(--green-dark);box-shadow:0 2px 8px rgba(16,33,26,.1)}.nav-burger{display:none;border:0;background:transparent;color:var(--ink);padding:8px;cursor:pointer}.ic{width:1.15em;height:1.15em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.16em}.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:11px 18px;border:1px solid transparent;border-radius:12px;font:700 .9rem inherit;text-decoration:none;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s}.btn:hover{transform:translateY(-2px)}.btn-primary{background:var(--green);color:#fff;box-shadow:0 8px 22px rgba(24,167,102,.22)}.btn-primary:hover{background:var(--green-dark);box-shadow:0 12px 28px rgba(24,167,102,.28)}.btn-ghost{background:#fff;color:var(--ink);border-color:var(--line)}.btn-ghost:hover{border-color:#aacbb8;box-shadow:0 8px 20px rgba(16,33,26,.08)}.btn-sm{min-height:38px;padding:8px 13px;font-size:.8rem}.btn-lg{min-height:50px;padding:13px 21px}.btn-block{width:100%}.hero{position:relative;overflow:hidden;padding:112px 0 90px;background:radial-gradient(circle at 85% 8%,#ddf9e9,transparent 32%),linear-gradient(180deg,#fff 0%,var(--paper) 100%)}.hero-inner{display:grid;grid-template-columns:1.03fr .97fr;align-items:center;gap:70px}.badge,.kicker{display:inline-flex;align-items:center;gap:7px;color:var(--green-dark);font-size:.76rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.badge{padding:8px 11px;background:var(--mint);border:1px solid #c4efd8;border-radius:99px;letter-spacing:.04em;text-transform:none}.hero-title,h1,h2,h3{font-family:'Space Grotesk',sans-serif;line-height:1.08;letter-spacing:-.045em}.hero-title{max-width:680px;margin:22px 0 20px;font-size:clamp(3.2rem,6vw,5.4rem)}.hero-title .grad,.grad{color:var(--green)}.hero-sub{max-width:600px;margin:0;color:var(--muted);font-size:1.13rem}.hero-ctas{display:flex;flex-wrap:wrap;gap:11px;margin:30px 0 14px}.hero-note{color:#829088;font-size:.82rem}.stats{display:flex;flex-wrap:wrap;gap:22px;margin:37px 0 0;padding:22px 0 0;border-top:1px solid var(--line);list-style:none}.stat{display:grid;gap:1px}.stat-v{font:700 1.35rem 'Space Grotesk';color:var(--ink)}.stat-l{color:var(--muted);font-size:.76rem}.hero-visual{position:relative;min-height:580px;display:grid;place-items:center}.phone{position:relative;width:min(305px,75vw);padding:11px;border:8px solid #17251e;border-radius:44px;background:#17251e;box-shadow:0 35px 70px rgba(16,33,26,.25),inset 0 0 0 1px rgba(255,255,255,.2);transform:rotate(3deg);z-index:2}.phone-notch{position:absolute;z-index:3;top:10px;left:50%;width:90px;height:22px;transform:translateX(-50%);border-radius:0 0 15px 15px;background:#17251e}.phone-screen{overflow:hidden;min-height:555px;padding:35px 15px 13px;border-radius:31px;background:#f1f7f2;color:#163026}.app-head,.app-card-head,.prod{display:flex;align-items:center;justify-content:space-between}.app-greet,.kpi-l,.prod small{display:block;color:#7d9083;font-size:.57rem}.app-store,.prod strong{font-size:.72rem}.app-avatar{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#d1f1dd;color:var(--green-dark);font-weight:700;font-size:.7rem}.app-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:20px 0 12px}.kpi{padding:9px 7px;border:1px solid #e2ece4;border-radius:10px;background:#fff}.kpi-green{background:#e4f9ed;border-color:#c8efd9}.kpi-v{display:block;margin-top:4px;font-size:.66rem}.app-card{margin-top:10px;padding:12px;border:1px solid #e2ece4;border-radius:14px;background:#fff}.app-card-head{color:#4e6659;font-size:.63rem;font-weight:700}.app-link{color:var(--green-dark)}.bars{height:105px;display:flex;align-items:end;justify-content:space-around;gap:7px;padding:15px 5px 0}.bars span{width:11%;height:var(--h);border-radius:5px 5px 2px 2px;background:#bdebd0}.bars .is-hi{background:var(--green)}.prod{justify-content:flex-start;gap:8px;margin-top:11px}.prod-dot{width:7px;height:7px;border-radius:50%;background:#f4b75d}.app-nav{display:flex;justify-content:space-around;margin-top:18px;padding-top:13px;border-top:1px solid #dce8de;color:#91a195}.app-nav .is-hi{color:var(--green)}.phone-glow{position:absolute;width:350px;height:350px;border-radius:50%;background:#c9f4d9;filter:blur(40px);opacity:.7}.section{padding:105px 0}.section-alt{background:#eef6f0}.section-head{max-width:700px;margin:0 auto 46px;text-align:center}.section-head h2{margin:13px 0 12px;font-size:clamp(2rem,4vw,3.25rem)}.section-head p{margin:0;color:var(--muted)}.cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card{padding:25px;border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,.8);box-shadow:0 8px 30px rgba(16,33,26,.035);transition:transform .25s,box-shadow .25s,border-color .25s}.card:hover{transform:translateY(-5px);border-color:#b9d9c4;box-shadow:var(--shadow)}.card h3{margin:19px 0 8px;font-size:1.05rem;letter-spacing:-.025em}.card p{margin:0;color:var(--muted);font-size:.9rem}.card-ic,.step-ic{display:grid;place-items:center;width:45px;height:45px;border-radius:14px;font-size:1.25rem}.tone-green{background:#ddf8e8;color:#15935a}.tone-blue{background:#e2edff;color:#3f78d7}.tone-teal{background:#dcf7f2;color:#138b7c}.tone-violet{background:#eee5ff;color:#8052cc}.tone-amber{background:#fff1d9;color:#b77816}.tone-slate{background:#e9eef0;color:#5e7075}.pill-soon,.pill-hi{display:inline-block;margin-top:16px;padding:5px 9px;border-radius:99px;background:#edf1ee;color:var(--muted);font-size:.7rem;font-weight:700}.strip{padding:22px 0;border-block:1px solid var(--line);background:#fff}.strip-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:15px}.strip-item{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--muted);font-size:.75rem;text-align:center}.strip-item .ic{color:var(--green);font-size:1.1rem}.steps{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:24px}.step{text-align:center}.step .step-ic{margin:0 auto 15px}.step-n{display:inline-grid;place-items:center;width:27px;height:27px;margin-bottom:18px;border:1px solid #b9d9c4;border-radius:50%;color:var(--green-dark);font-size:.75rem;font-weight:700}.step h3{margin:0 0 8px;font-size:1.12rem}.step p{margin:0;color:var(--muted);font-size:.9rem}.step-arrow{color:#9cbbb0;font-size:1.5rem}.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}.plan{position:relative;display:flex;flex-direction:column;padding:30px;border:1px solid var(--line);border-radius:var(--radius);background:#fff}.plan-hi{border:2px solid var(--green);box-shadow:var(--shadow);transform:translateY(-8px)}.pill-hi{position:absolute;top:18px;right:18px;padding:5px 9px;border-radius:99px;background:var(--mint);color:var(--green-dark);font-size:.7rem;font-weight:700}.plan h3{margin:0;font-size:1.4rem}.plan-d{margin:6px 0 22px;color:var(--muted);font-size:.88rem}.plan-price{display:flex;align-items:baseline;gap:5px;padding-bottom:22px;border-bottom:1px solid var(--line)}.plan-price strong{font:700 2.4rem 'Space Grotesk'}.plan-price span{color:var(--muted);font-size:.8rem}.plan-feats{display:grid;gap:12px;margin:22px 0 28px;padding:0;list-style:none}.plan-feats li{display:flex;gap:8px;color:var(--muted);font-size:.87rem}.plan-feats .ic{flex:none;color:var(--green);font-weight:700}.plan .btn{margin-top:auto}.faq-list{max-width:800px;margin:auto}.faq{border-bottom:1px solid var(--line)}.faq summary{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 0;cursor:pointer;font-weight:700;list-style:none}.faq summary::-webkit-details-marker{display:none}.faq summary .ic{transition:transform .2s}.faq[open] summary .ic{transform:rotate(180deg)}.faq p{max-width:700px;margin:0 0 22px;color:var(--muted)}.contact-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.contact-form{display:grid;gap:17px}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.contact-form label{display:grid;gap:7px;color:var(--ink);font-size:.83rem;font-weight:700}.contact-form input,.contact-form textarea{width:100%;border:1px solid var(--line);border-radius:11px;background:#fbfdfb;color:var(--ink);padding:12px 13px;font:inherit;font-size:.9rem;outline:none;transition:border .2s,box-shadow .2s;resize:vertical}.contact-form input:focus,.contact-form textarea:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(24,167,102,.12)}.form-note{margin:0;color:var(--muted);font-size:.75rem}.contact-side{display:grid;align-content:start;gap:14px}.cta-card{display:flex;align-items:center;gap:16px;color:inherit;text-decoration:none}.cta-card h3{margin:0 0 4px;font-size:1rem}.cta-card p{margin:0}.final-cta{padding:110px 0;background:var(--ink);color:#fff;text-align:center}.final-inner{max-width:780px}.final-cta h2{margin:0 0 15px;font-size:clamp(2.3rem,5vw,4rem)}.final-cta p{color:#b8c9bf}.final-ctas{display:flex;justify-content:center;flex-wrap:wrap;gap:11px;margin-top:27px}.final-cta .btn-ghost{background:transparent;border-color:#5a7063;color:#fff}.footer{padding:62px 0 20px;background:#0b1711;color:#c4d2c9}.footer-grid{display:grid;grid-template-columns:1.8fr repeat(3,1fr);gap:50px}.footer-brand p{max-width:270px;color:#7f9788;font-size:.85rem}.footer-col{display:grid;align-content:start;gap:10px}.footer-col h4{margin:0 0 7px;color:#fff;font-size:.8rem}.footer .brand{color:#fff}.footer-base{display:flex;justify-content:space-between;gap:20px;margin-top:48px;padding-top:20px;border-top:1px solid #263b2e;color:#72887a;font-size:.75rem}.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}.reveal.is-visible{opacity:1;transform:none}.is-hidden{display:none!important}@media(max-width:1000px){.nav-links{gap:12px}.cards-grid{grid-template-columns:repeat(2,1fr)}.strip-grid{grid-template-columns:repeat(3,1fr)}.hero-inner{gap:35px}}@media(max-width:760px){:root{--container:min(100% - 28px,600px)}.nav-inner{height:67px}.nav-burger{display:block}.nav-links{display:none;position:absolute;top:67px;left:14px;right:14px;padding:14px;align-items:stretch;flex-direction:column;gap:4px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.97);box-shadow:var(--shadow)}.nav-links.is-open{display:flex}.nav-links>a:not(.btn){padding:10px}.lang-switch{justify-content:center}.hero{padding:72px 0 60px}.hero-inner{grid-template-columns:1fr;text-align:center}.hero-sub{margin-inline:auto}.hero-ctas,.final-ctas{justify-content:center}.stats{justify-content:center;text-align:left}.hero-visual{min-height:510px;order:-1}.phone{transform:rotate(2deg) scale(.9)}.section{padding:75px 0}.strip-grid{grid-template-columns:repeat(2,1fr);gap:18px 8px}.steps{grid-template-columns:1fr;gap:26px}.step-arrow{display:none}.pricing,.contact-grid{grid-template-columns:1fr}.plan-hi{transform:none}.form-row{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr;gap:30px}.footer-brand{grid-column:1/-1}.footer-base{flex-direction:column;gap:5px}}@media(max-width:460px){.hero-title{font-size:2.9rem}.hero-ctas .btn,.final-ctas .btn{width:100%}.cards-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr}.footer-brand{grid-column:auto}}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:88px}body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6}body:before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.2;background-image:linear-gradient(rgba(16,33,26,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(16,33,26,.025) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,#000,transparent 80%);z-index:-1}.container{width:var(--container);margin-inline:auto}.skip-link{position:fixed;left:16px;top:-60px;z-index:1000;padding:10px 14px;background:var(--ink);color:#fff;border-radius:10px}.skip-link:focus{top:16px}.nav{position:sticky;top:0;z-index:50;background:rgba(248,250,248,.84);border-bottom:1px solid rgba(223,232,226,.8);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}.nav-inner{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:700;letter-spacing:.08em}.brand-icon{border-radius:10px;box-shadow:0 4px 14px rgba(24,167,102,.2)}.brand-name{font-family:'Space Grotesk',sans-serif}.nav-links{display:flex;align-items:center;gap:22px}.nav-links>a:not(.btn),.footer a{color:var(--muted);font-size:.9rem;text-decoration:none;transition:color .2s}.nav-links>a:not(.btn):hover,.footer a:hover{color:var(--green-dark)}.lang-switch{display:flex;padding:3px;background:#eef4ef;border-radius:10px}.lang-btn{border:0;background:transparent;color:var(--muted);padding:6px 8px;border-radius:7px;font:600 .72rem inherit;cursor:pointer}.lang-btn.is-active{background:#fff;color:var(--green-dark);box-shadow:0 2px 8px rgba(16,33,26,.1)}.nav-burger{display:none;border:0;background:transparent;color:var(--ink);padding:8px;cursor:pointer}.ic{width:1.15em;height:1.15em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.16em}.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:11px 18px;border:1px solid transparent;border-radius:12px;font:700 .9rem inherit;text-decoration:none;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s}.btn:hover{transform:translateY(-2px)}.btn-primary{background:var(--green);color:#fff;box-shadow:0 8px 22px rgba(24,167,102,.22)}.btn-primary:hover{background:var(--green-dark);box-shadow:0 12px 28px rgba(24,167,102,.28)}.btn-ghost{background:#fff;color:var(--ink);border-color:var(--line)}.btn-ghost:hover{border-color:#aacbb8;box-shadow:0 8px 20px rgba(16,33,26,.08)}.btn-sm{min-height:38px;padding:8px 13px;font-size:.8rem}.btn-lg{min-height:50px;padding:13px 21px}.btn-block{width:100%}.hero{position:relative;overflow:hidden;padding:112px 0 90px;background:radial-gradient(circle at 85% 8%,#ddf9e9,transparent 32%),linear-gradient(180deg,#fff 0%,var(--paper) 100%)}.hero-inner{display:grid;grid-template-columns:1.03fr .97fr;align-items:center;gap:70px}.badge,.kicker{display:inline-flex;align-items:center;gap:7px;color:var(--green-dark);font-size:.76rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.badge{padding:8px 11px;background:var(--mint);border:1px solid #c4efd8;border-radius:99px;letter-spacing:.04em;text-transform:none}.hero-title,h1,h2,h3{font-family:'Space Grotesk',sans-serif;line-height:1.08;letter-spacing:-.045em}.hero-title{max-width:680px;margin:22px 0 20px;font-size:clamp(3.2rem,6vw,5.4rem)}.hero-title .grad,.grad{color:var(--green)}.hero-sub{max-width:600px;margin:0;color:var(--muted);font-size:1.13rem}.hero-ctas{display:flex;flex-wrap:wrap;gap:11px;margin:30px 0 14px}.hero-note{color:#829088;font-size:.82rem}.stats{display:flex;flex-wrap:wrap;gap:22px;margin:37px 0 0;padding:22px 0 0;border-top:1px solid var(--line);list-style:none}.stat{display:grid;gap:1px}.stat-v{font:700 1.35rem 'Space Grotesk';color:var(--ink)}.stat-l{color:var(--muted);font-size:.76rem}.hero-visual{position:relative;min-height:580px;display:grid;place-items:center}.phone{position:relative;width:min(305px,75vw);padding:11px;border:8px solid #17251e;border-radius:44px;background:#17251e;box-shadow:0 35px 70px rgba(16,33,26,.25),inset 0 0 0 1px rgba(255,255,255,.2);transform:rotate(3deg);z-index:2}.phone-notch{position:absolute;z-index:3;top:10px;left:50%;width:90px;height:22px;transform:translateX(-50%);border-radius:0 0 15px 15px;background:#17251e}.phone-screen{overflow:hidden;min-height:555px;padding:35px 15px 13px;border-radius:31px;background:#f1f7f2;color:#163026}.app-head,.app-card-head,.prod{display:flex;align-items:center;justify-content:space-between}.app-greet,.kpi-l,.prod small{display:block;color:#7d9083;font-size:.57rem}.app-store,.prod strong{font-size:.72rem}.app-avatar{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#d1f1dd;color:var(--green-dark);font-weight:700;font-size:.7rem}.app-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:20px 0 12px}.kpi{padding:9px 7px;border:1px solid #e2ece4;border-radius:10px;background:#fff}.kpi-green{background:#e4f9ed;border-color:#c8efd9}.kpi-v{display:block;margin-top:4px;font-size:.66rem}.app-card{margin-top:10px;padding:12px;border:1px solid #e2ece4;border-radius:14px;background:#fff}.app-card-head{color:#4e6659;font-size:.63rem;font-weight:700}.app-link{color:var(--green-dark)}.bars{height:105px;display:flex;align-items:end;justify-content:space-around;gap:7px;padding:15px 5px 0}.bars span{width:11%;height:var(--h);border-radius:5px 5px 2px 2px;background:#bdebd0}.bars .is-hi{background:var(--green)}.prod{justify-content:flex-start;gap:8px;margin-top:11px}.prod-dot{width:7px;height:7px;border-radius:50%;background:#f4b75d}.app-nav{display:flex;justify-content:space-around;margin-top:18px;padding-top:13px;border-top:1px solid #dce8de;color:#91a195}.app-nav .is-hi{color:var(--green)}.phone-glow{position:absolute;width:350px;height:350px;border-radius:50%;background:#c9f4d9;filter:blur(40px);opacity:.7}.section{padding:105px 0}.section-alt{background:#eef6f0}.section-head{max-width:700px;margin:0 auto 46px;text-align:center}.section-head h2{margin:13px 0 12px;font-size:clamp(2rem,4vw,3.25rem)}.section-head p{margin:0;color:var(--muted)}.cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card{padding:25px;border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,.8);box-shadow:0 8px 30px rgba(16,33,26,.035);transition:transform .25s,box-shadow .25s,border-color .25s}.card:hover{transform:translateY(-5px);border-color:#b9d9c4;box-shadow:var(--shadow)}.card h3{margin:19px 0 8px;font-size:1.05rem;letter-spacing:-.025em}.card p{margin:0;color:var(--muted);font-size:.9rem}.card-ic,.step-ic{display:grid;place-items:center;width:45px;height:45px;border-radius:14px;font-size:1.25rem}.tone-green{background:#ddf8e8;color:#15935a}.tone-blue{background:#e2edff;color:#3f78d7}.tone-teal{background:#dcf7f2;color:#138b7c}.tone-violet{background:#eee5ff;color:#8052cc}.tone-amber{background:#fff1d9;color:#b77816}.tone-slate{background:#e9eef0;color:#5e7075}.pill-soon,.pill-hi{display:inline-block;margin-top:16px;padding:5px 9px;border-radius:99px;background:#edf1ee;color:var(--muted);font-size:.7rem;font-weight:700}.strip{padding:22px 0;border-block:1px solid var(--line);background:#fff}.strip-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:15px}.strip-item{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--muted);font-size:.75rem;text-align:center}.strip-item .ic{color:var(--green);font-size:1.1rem}.steps{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:24px}.step{text-align:center}.step .step-ic{margin:0 auto 15px}.step-n{display:inline-grid;place-items:center;width:27px;height:27px;margin-bottom:18px;border:1px solid #b9d9c4;border-radius:50%;color:var(--green-dark);font-size:.75rem;font-weight:700}.step h3{margin:0 0 8px;font-size:1.12rem}.step p{margin:0;color:var(--muted);font-size:.9rem}.step-arrow{color:#9cbbb0;font-size:1.5rem}.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}.plan{position:relative;display:flex;flex-direction:column;padding:30px;border:1px solid var(--line);border-radius:var(--radius);background:#fff}.plan-hi{border:2px solid var(--green);box-shadow:var(--shadow);transform:translateY(-8px)}.pill-hi{position:absolute;top:18px;right:18px;padding:5px 9px;border-radius:99px;background:var(--mint);color:var(--green-dark);font-size:.7rem;font-weight:700}.plan h3{margin:0;font-size:1.4rem}.plan-d{margin:6px 0 22px;color:var(--muted);font-size:.88rem}.plan-price{display:flex;align-items:baseline;gap:5px;padding-bottom:22px;border-bottom:1px solid var(--line)}.plan-price strong{font:700 2.4rem 'Space Grotesk'}.plan-price span{color:var(--muted);font-size:.8rem}.plan-feats{display:grid;gap:12px;margin:22px 0 28px;padding:0;list-style:none}.plan-feats li{display:flex;gap:8px;color:var(--muted);font-size:.87rem}.plan-feats .ic{flex:none;color:var(--green);font-weight:700}.plan .btn{margin-top:auto}.plan-price-consult strong{font-size:1.55rem;letter-spacing:-.02em}.plan-price-note{margin:-14px 0 0;color:var(--muted);font-size:.78rem;line-height:1.5}.plan-note{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.78rem;line-height:1.55}.compare{margin-top:48px}.compare-title{margin:0 0 18px;text-align:center;font-size:1.35rem}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:0 8px 30px rgba(16,33,26,.035)}.compare-table{width:100%;border-collapse:collapse;min-width:640px}.compare-table th,.compare-table td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);color:var(--muted);font-size:.88rem}.compare-table thead th{background:#f4faf6;color:var(--ink);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}.compare-table thead th:not(:first-child),.compare-table tbody td:not(:first-child){text-align:center}.compare-table tbody td:not(:first-child){font-weight:700;color:var(--ink);white-space:nowrap}.compare-table tbody tr:last-child td{border-bottom:0}.compare-table tbody tr:hover{background:var(--mint)}.pr-note{margin:28px 0 0;text-align:center;color:var(--muted);font-size:.8rem}.faq-list{max-width:800px;margin:auto}.faq{border-bottom:1px solid var(--line)}.faq summary{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 0;cursor:pointer;font-weight:700;list-style:none}.faq summary::-webkit-details-marker{display:none}.faq summary .ic{transition:transform .2s}.faq[open] summary .ic{transform:rotate(180deg)}.faq p{max-width:700px;margin:0 0 22px;color:var(--muted)}.contact-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.contact-form{display:grid;gap:17px}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.contact-form label{display:grid;gap:7px;color:var(--ink);font-size:.83rem;font-weight:700}.contact-form input,.contact-form textarea{width:100%;border:1px solid var(--line);border-radius:11px;background:#fbfdfb;color:var(--ink);padding:12px 13px;font:inherit;font-size:.9rem;outline:none;transition:border .2s,box-shadow .2s;resize:vertical}.contact-form input:focus,.contact-form textarea:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(24,167,102,.12)}.form-note{margin:0;color:var(--muted);font-size:.75rem}.contact-side{display:grid;align-content:start;gap:14px}.cta-card{display:flex;align-items:center;gap:16px;color:inherit;text-decoration:none}.cta-card h3{margin:0 0 4px;font-size:1rem}.cta-card p{margin:0}.final-cta{padding:110px 0;background:var(--ink);color:#fff;text-align:center}.final-inner{max-width:780px}.final-cta h2{margin:0 0 15px;font-size:clamp(2.3rem,5vw,4rem)}.final-cta p{color:#b8c9bf}.final-ctas{display:flex;justify-content:center;flex-wrap:wrap;gap:11px;margin-top:27px}.final-cta .btn-ghost{background:transparent;border-color:#5a7063;color:#fff}.footer{padding:62px 0 20px;background:#0b1711;color:#c4d2c9}.footer-grid{display:grid;grid-template-columns:1.8fr repeat(3,1fr);gap:50px}.footer-brand p{max-width:270px;color:#7f9788;font-size:.85rem}.footer-col{display:grid;align-content:start;gap:10px}.footer-col h4{margin:0 0 7px;color:#fff;font-size:.8rem}.footer .brand{color:#fff}.footer-base{display:flex;justify-content:space-between;gap:20px;margin-top:48px;padding-top:20px;border-top:1px solid #263b2e;color:#72887a;font-size:.75rem}.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}.reveal.is-visible{opacity:1;transform:none}.is-hidden{display:none!important}@media(max-width:1000px){.nav-links{gap:12px}.cards-grid{grid-template-columns:repeat(2,1fr)}.strip-grid{grid-template-columns:repeat(3,1fr)}.hero-inner{gap:35px}}@media(max-width:760px){:root{--container:min(100% - 28px,600px)}.nav-inner{height:67px}.nav-burger{display:block}.nav-links{display:none;position:absolute;top:67px;left:14px;right:14px;padding:14px;align-items:stretch;flex-direction:column;gap:4px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.97);box-shadow:var(--shadow)}.nav-links.is-open{display:flex}.nav-links>a:not(.btn){padding:10px}.lang-switch{justify-content:center}.hero{padding:72px 0 60px}.hero-inner{grid-template-columns:1fr;text-align:center}.hero-sub{margin-inline:auto}.hero-ctas,.final-ctas{justify-content:center}.stats{justify-content:center;text-align:left}.hero-visual{min-height:510px;order:-1}.phone{transform:rotate(2deg) scale(.9)}.section{padding:75px 0}.strip-grid{grid-template-columns:repeat(2,1fr);gap:18px 8px}.steps{grid-template-columns:1fr;gap:26px}.step-arrow{display:none}.pricing,.contact-grid{grid-template-columns:1fr}.plan-hi{transform:none}.form-row{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr;gap:30px}.footer-brand{grid-column:1/-1}.footer-base{flex-direction:column;gap:5px}}@media(max-width:460px){.hero-title{font-size:2.9rem}.hero-ctas .btn,.final-ctas .btn{width:100%}.cards-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr}.footer-brand{grid-column:auto}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}.reveal{opacity:1;transform:none}}
 </style>
 
@@ -435,53 +435,210 @@
     <div class="section-head reveal">
       <span class="kicker" data-i18n="pr.kicker">Planos</span>
       <h2 data-i18n="pr.title">Comece grátis, cresça quando quiser</h2>
-      <p data-i18n="pr.subtitle">Planos por tenant — active add-ons conforme a dimensão do seu negócio.</p>
+      <p data-i18n="pr.subtitle">Do caderno ao controlo profissional — cada plano desbloqueia mais gestão para o seu negócio.</p>
     </div>
 
-    <!-- NOTA: valores exemplificativos — edite conforme a sua estratégia de preços -->
     <div class="pricing">
       <article class="plan reveal">
         <h3 data-i18n="pr.p1.t">Grátis</h3>
-        <p class="plan-d" data-i18n="pr.p1.d">Para começar hoje</p>
+        <p class="plan-d" data-i18n="pr.p1.d">Para pequenos negócios que estão a começar a organizar a sua operação.</p>
         <div class="plan-price"><strong>0 MT</strong><span data-i18n="pr.month">/mês</span></div>
         <ul class="plan-feats">
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f1">1 loja · 1 utilizador</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f2">Vendas, compras e caixa</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f3">Crédito fiado e clientes</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f4">100% offline, sincroniza na nuvem</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f1">Dashboard com visão geral das vendas</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f2">Registo de produtos e categorias</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f3">Controlo básico de estoque</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f4">Registo de vendas</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f5">Gestão de clientes</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f6">Controlo de caixa</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f7">Crédito fiado</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f8">Histórico de transações</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f9">Funcionamento offline</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f10">Sincronização automática quando a internet estiver disponível</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f11">Idiomas: português, inglês e francês</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p1.f12">Moedas: MZN, BRL, USD e EUR</span></li>
         </ul>
-        <a href="#contacto" class="btn btn-ghost btn-block" data-i18n="pr.cta1">Começar grátis</a>
+        <a href="#contacto" class="btn btn-ghost btn-block" data-i18n="pr.cta1">Começar gratuitamente</a>
+        <p class="plan-note" data-i18n="pr.p1.note">Ideal para substituir cadernos, folhas de cálculo e processos manuais por uma solução simples e organizada.</p>
       </article>
 
       <article class="plan plan-hi reveal">
-        <span class="pill-hi" data-i18n="pr.popular">Mais popular</span>
+        <span class="pill-hi" data-i18n="pr.popular">Mais escolhido</span>
         <h3 data-i18n="pr.p2.t">Profissional</h3>
-        <p class="plan-d" data-i18n="pr.p2.d">Para lojas em crescimento</p>
-        <div class="plan-price"><strong>499 MT</strong><span data-i18n="pr.month">/mês</span></div>
+        <p class="plan-d" data-i18n="pr.p2.d">Para negócios que estão a crescer e precisam de mais controlo sobre a operação.</p>
+        <div class="plan-price"><strong>999 MT</strong><span data-i18n="pr.month">/mês</span></div>
+        <p class="plan-price-note" data-i18n="pr.p2.priceNote">Tudo o que precisa para gerir vendas, estoque, equipa, caixa e clientes com mais eficiência.</p>
         <ul class="plan-feats">
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f1">Tudo do plano Grátis</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f2">Add-ons: facturas, cotações, funcionários e transferências</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f3">Até 3 lojas · equipa</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f4">Relatórios avançados em PDF</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f5">Suporte por WhatsApp</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f1">Relatórios avançados para decisões mais rápidas</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f2">Faturas e orçamentos profissionais</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f3">Gestão de equipa e permissões</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f4">Controlo de várias lojas</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f5">Transferência de estoque entre unidades</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f6">Gestão financeira detalhada</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f7">Sincronização segura na nuvem</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p2.f8">Suporte prioritário por WhatsApp</span></li>
         </ul>
-        <a href="#contacto" class="btn btn-primary btn-block" data-i18n="pr.cta2">Assinar Profissional</a>
+        <a href="#contacto" class="btn btn-primary btn-block" data-i18n="pr.cta2">Começar com o Profissional</a>
+        <p class="plan-note" data-i18n="pr.p2.note">O plano completo para transformar a gestão diária do seu negócio.</p>
       </article>
 
       <article class="plan reveal">
         <h3 data-i18n="pr.p3.t">Empresarial</h3>
-        <p class="plan-d" data-i18n="pr.p3.d">Para redes e múltiplas lojas</p>
-        <div class="plan-price"><strong>1 499 MT</strong><span data-i18n="pr.month">/mês</span></div>
+        <p class="plan-d" data-i18n="pr.p3.d">Para redes, distribuidores e empresas que precisam de controlo avançado, personalização e suporte dedicado.</p>
+        <div class="plan-price plan-price-consult"><strong data-i18n="pr.p3.price">Sob consulta</strong></div>
+        <p class="plan-price-note" data-i18n="pr.p3.priceNote">Valor definido de acordo com o número de lojas, utilizadores, volume de transações, integrações, suporte e personalização.</p>
         <ul class="plan-feats">
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f1">Tudo do Profissional</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f2">Lojas e funcionários ilimitados</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f3">M-Pesa / E-Mola (em breve)</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f4">Onboarding dedicado</span></li>
-          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f5">Suporte prioritário</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f1">Tudo do Plano Profissional, além de:</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f2">Múltiplas lojas e unidades com utilizadores personalizados</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f3">Permissões avançadas e fluxos de aprovação</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f4">Relatórios consolidados e comparação entre lojas</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f5">Indicadores personalizados e integrações sob contrato</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f6">M-Pesa e E-Mola, quando disponível</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f7">Onboarding, migração de dados e treinamento da equipa</span></li>
+          <li><svg class="ic"><use href="#i-check"/></svg><span data-i18n="pr.p3.f8">Suporte prioritário dedicado e maior capacidade</span></li>
         </ul>
-        <a href="#contacto" class="btn btn-ghost btn-block" data-i18n="pr.cta3">Falar connosco</a>
+        <a href="#contacto" class="btn btn-ghost btn-block" data-i18n="pr.cta3">Falar com um especialista</a>
+        <p class="plan-note" data-i18n="pr.p3.note">Uma solução de gestão preparada para acompanhar a expansão da sua empresa.</p>
       </article>
     </div>
+
+    <div class="compare reveal">
+      <h3 class="compare-title" data-i18n="pr.cmp.title">Comparação resumida</h3>
+      <div class="table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th data-i18n="pr.cmp.feat">Funcionalidade</th>
+              <th data-i18n="pr.p1.t">Grátis</th>
+              <th data-i18n="pr.p2.t">Profissional</th>
+              <th data-i18n="pr.p3.t">Empresarial</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-i18n="pr.cmp.r1">Dashboard de vendas e caixa</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r2">Gestão de produtos</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r3">Controlo de estoque</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r4">Registo de vendas</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r5">Crédito fiado</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r6">Funcionamento offline</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r7">Sincronização na nuvem</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r8">Relatórios avançados</td>
+              <td data-i18n="pr.cmp.no">Não</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r9">Faturas personalizadas</td>
+              <td data-i18n="pr.cmp.no">Não</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r10">Exportação em PDF</td>
+              <td data-i18n="pr.cmp.no">Não</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r11">Cotações e orçamentos</td>
+              <td data-i18n="pr.cmp.no">Não</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r12">Gestão de funcionários</td>
+              <td data-i18n="pr.cmp.basic">Básica</td>
+              <td data-i18n="pr.cmp.advanced">Avançada</td>
+              <td data-i18n="pr.cmp.custom">Personalizada</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r13">Permissões por função</td>
+              <td data-i18n="pr.cmp.no">Não</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.advPerm">Avançada</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r14">Gestão de várias lojas</td>
+              <td data-i18n="pr.cmp.no">Não</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r15">Transferência entre lojas</td>
+              <td data-i18n="pr.cmp.no">Não</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r16">Comissões e metas</td>
+              <td data-i18n="pr.cmp.no">Não</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+              <td data-i18n="pr.cmp.yes">Sim</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r17">M-Pesa e E-Mola</td>
+              <td data-i18n="pr.cmp.no">Não</td>
+              <td data-i18n="pr.cmp.whenAvail">Conforme disponibilidade</td>
+              <td data-i18n="pr.cmp.byContract">Conforme contrato</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r18">Suporte</td>
+              <td data-i18n="pr.cmp.std">Padrão</td>
+              <td data-i18n="pr.cmp.waPriority">Prioritário por WhatsApp</td>
+              <td data-i18n="pr.cmp.dedicated">Dedicado</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r19">Onboarding</td>
+              <td data-i18n="pr.cmp.guided">Guiado</td>
+              <td data-i18n="pr.cmp.assisted">Assistido</td>
+              <td data-i18n="pr.cmp.personalized">Personalizado</td>
+            </tr>
+            <tr>
+              <td data-i18n="pr.cmp.r20">Migração de dados</td>
+              <td data-i18n="pr.cmp.no">Não</td>
+              <td data-i18n="pr.cmp.optional">Opcional</td>
+              <td data-i18n="pr.cmp.inContract">Incluída conforme contrato</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <p class="pr-note reveal" data-i18n="pr.disclaimer">Preços em Meticais, IVA incluído. Cancele quando quiser.</p>
   </div>
 </section>

@@ -59,24 +59,27 @@ void main() {
   });
 
   group('AdminMessage', () {
-    test('fromJson round-trip de mensagem não lida (isRead/readAt defaults)', () {
-      final message = AdminMessage(
-        id: 'am1',
-        tenantId: 'tn1',
-        type: AdminMessageType.billingQuote,
-        title: 'Cotação de Plano',
-        body: 'Pro por 2.500 MZN/mês',
-        createdAt: DateTime(2026, 9, 10, 9),
-      );
+    test(
+      'fromJson round-trip de mensagem não lida (isRead/readAt defaults)',
+      () {
+        final message = AdminMessage(
+          id: 'am1',
+          tenantId: 'tn1',
+          type: AdminMessageType.billingQuote,
+          title: 'Cotação de Plano',
+          body: 'Pro por 2.500 MZN/mês',
+          createdAt: DateTime(2026, 9, 10, 9),
+        );
 
-      final restored = AdminMessage.fromJson(message.toJson());
+        final restored = AdminMessage.fromJson(message.toJson());
 
-      expect(restored.type, AdminMessageType.billingQuote);
-      expect(restored.title, 'Cotação de Plano');
-      expect(restored.isRead, isFalse);
-      expect(restored.readAt, isNull);
-      expect(restored.createdAt, message.createdAt);
-    });
+        expect(restored.type, AdminMessageType.billingQuote);
+        expect(restored.title, 'Cotação de Plano');
+        expect(restored.isRead, isFalse);
+        expect(restored.readAt, isNull);
+        expect(restored.createdAt, message.createdAt);
+      },
+    );
   });
 
   group('AppUser', () {
@@ -99,10 +102,7 @@ void main() {
         totalSalesCents: 150000,
         expectedCashCents: 90000,
         countedCashCents: 89500,
-        salesByMethodCents: const {
-          'Dinheiro': 90000,
-          'M-Pesa': 60000,
-        },
+        salesByMethodCents: const {'Dinheiro': 90000, 'M-Pesa': 60000},
         closedAt: DateTime(2026, 9, 10, 20, 30),
       );
 
@@ -110,10 +110,7 @@ void main() {
 
       expect(restored.storeId, 'st1');
       expect(restored.totalSalesCents, 150000);
-      expect(restored.salesByMethodCents, {
-        'Dinheiro': 90000,
-        'M-Pesa': 60000,
-      });
+      expect(restored.salesByMethodCents, {'Dinheiro': 90000, 'M-Pesa': 60000});
       expect(restored.differenceCents, -500);
     });
   });

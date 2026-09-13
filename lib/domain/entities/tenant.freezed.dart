@@ -25,7 +25,11 @@ mixin _$Tenant {
 /// no onboarding e alterável em Lojas → Ajustes. Novos tenants nascem
 /// com MZN (mercado-alvo Moçambique).
  String get currencyCode;/// Idioma do aplicativo (`pt` ou `en`) — escolhido pelo dono.
- String get language;
+ String get language;/// P1 (MFA server-side): quando `true`, as escritas de dinheiro do
+/// tenant (vendas, cancelamentos, dívidas, caixa, estoque) exigem
+/// sessão com `aal = aal2` no SERVIDOR (guardas `mfa_ok()` no RLS e
+/// nas RPCs financeiras). A matrícula do fator é feita no GoTrue.
+ bool get mfaEnforced;
 /// Create a copy of Tenant
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -38,16 +42,16 @@ $TenantCopyWith<Tenant> get copyWith => _$TenantCopyWithImpl<Tenant>(this as Ten
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.planExpiresAt, planExpiresAt) || other.planExpiresAt == planExpiresAt)&&(identical(other.nextInvoiceAt, nextInvoiceAt) || other.nextInvoiceAt == nextInvoiceAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.planExpiresAt, planExpiresAt) || other.planExpiresAt == planExpiresAt)&&(identical(other.nextInvoiceAt, nextInvoiceAt) || other.nextInvoiceAt == nextInvoiceAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language)&&(identical(other.mfaEnforced, mfaEnforced) || other.mfaEnforced == mfaEnforced));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,ownerUserId,businessName,planId,status,rejectionReason,approvedAt,createdAt,planExpiresAt,nextInvoiceAt,currencyCode,language);
+int get hashCode => Object.hash(runtimeType,id,ownerUserId,businessName,planId,status,rejectionReason,approvedAt,createdAt,planExpiresAt,nextInvoiceAt,currencyCode,language,mfaEnforced);
 
 @override
 String toString() {
-  return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, planExpiresAt: $planExpiresAt, nextInvoiceAt: $nextInvoiceAt, currencyCode: $currencyCode, language: $language)';
+  return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, planExpiresAt: $planExpiresAt, nextInvoiceAt: $nextInvoiceAt, currencyCode: $currencyCode, language: $language, mfaEnforced: $mfaEnforced)';
 }
 
 
@@ -58,7 +62,7 @@ abstract mixin class $TenantCopyWith<$Res>  {
   factory $TenantCopyWith(Tenant value, $Res Function(Tenant) _then) = _$TenantCopyWithImpl;
 @useResult
 $Res call({
- String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, DateTime? planExpiresAt, DateTime? nextInvoiceAt, String currencyCode, String language
+ String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, DateTime? planExpiresAt, DateTime? nextInvoiceAt, String currencyCode, String language, bool mfaEnforced
 });
 
 
@@ -75,7 +79,7 @@ class _$TenantCopyWithImpl<$Res>
 
 /// Create a copy of Tenant
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? ownerUserId = null,Object? businessName = null,Object? planId = null,Object? status = null,Object? rejectionReason = freezed,Object? approvedAt = freezed,Object? createdAt = null,Object? planExpiresAt = freezed,Object? nextInvoiceAt = freezed,Object? currencyCode = null,Object? language = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? ownerUserId = null,Object? businessName = null,Object? planId = null,Object? status = null,Object? rejectionReason = freezed,Object? approvedAt = freezed,Object? createdAt = null,Object? planExpiresAt = freezed,Object? nextInvoiceAt = freezed,Object? currencyCode = null,Object? language = null,Object? mfaEnforced = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,ownerUserId: null == ownerUserId ? _self.ownerUserId : ownerUserId // ignore: cast_nullable_to_non_nullable
@@ -89,7 +93,8 @@ as DateTime,planExpiresAt: freezed == planExpiresAt ? _self.planExpiresAt : plan
 as DateTime?,nextInvoiceAt: freezed == nextInvoiceAt ? _self.nextInvoiceAt : nextInvoiceAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
-as String,
+as String,mfaEnforced: null == mfaEnforced ? _self.mfaEnforced : mfaEnforced // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -174,10 +179,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  DateTime? planExpiresAt,  DateTime? nextInvoiceAt,  String currencyCode,  String language)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  DateTime? planExpiresAt,  DateTime? nextInvoiceAt,  String currencyCode,  String language,  bool mfaEnforced)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Tenant() when $default != null:
-return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.planExpiresAt,_that.nextInvoiceAt,_that.currencyCode,_that.language);case _:
+return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.planExpiresAt,_that.nextInvoiceAt,_that.currencyCode,_that.language,_that.mfaEnforced);case _:
   return orElse();
 
 }
@@ -195,10 +200,10 @@ return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  DateTime? planExpiresAt,  DateTime? nextInvoiceAt,  String currencyCode,  String language)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  DateTime? planExpiresAt,  DateTime? nextInvoiceAt,  String currencyCode,  String language,  bool mfaEnforced)  $default,) {final _that = this;
 switch (_that) {
 case _Tenant():
-return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.planExpiresAt,_that.nextInvoiceAt,_that.currencyCode,_that.language);case _:
+return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.planExpiresAt,_that.nextInvoiceAt,_that.currencyCode,_that.language,_that.mfaEnforced);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -215,10 +220,10 @@ return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  DateTime? planExpiresAt,  DateTime? nextInvoiceAt,  String currencyCode,  String language)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ownerUserId,  String businessName,  String planId,  TenantStatus status,  String? rejectionReason,  DateTime? approvedAt,  DateTime createdAt,  DateTime? planExpiresAt,  DateTime? nextInvoiceAt,  String currencyCode,  String language,  bool mfaEnforced)?  $default,) {final _that = this;
 switch (_that) {
 case _Tenant() when $default != null:
-return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.planExpiresAt,_that.nextInvoiceAt,_that.currencyCode,_that.language);case _:
+return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that.status,_that.rejectionReason,_that.approvedAt,_that.createdAt,_that.planExpiresAt,_that.nextInvoiceAt,_that.currencyCode,_that.language,_that.mfaEnforced);case _:
   return null;
 
 }
@@ -230,7 +235,7 @@ return $default(_that.id,_that.ownerUserId,_that.businessName,_that.planId,_that
 @JsonSerializable()
 
 class _Tenant implements Tenant {
-  const _Tenant({required this.id, required this.ownerUserId, required this.businessName, required this.planId, required this.status, this.rejectionReason, this.approvedAt, required this.createdAt, this.planExpiresAt, this.nextInvoiceAt, this.currencyCode = 'MZN', this.language = 'pt'});
+  const _Tenant({required this.id, required this.ownerUserId, required this.businessName, required this.planId, required this.status, this.rejectionReason, this.approvedAt, required this.createdAt, this.planExpiresAt, this.nextInvoiceAt, this.currencyCode = 'MZN', this.language = 'pt', this.mfaEnforced = false});
   factory _Tenant.fromJson(Map<String, dynamic> json) => _$TenantFromJson(json);
 
 @override final  String id;
@@ -255,6 +260,11 @@ class _Tenant implements Tenant {
 @override@JsonKey() final  String currencyCode;
 /// Idioma do aplicativo (`pt` ou `en`) — escolhido pelo dono.
 @override@JsonKey() final  String language;
+/// P1 (MFA server-side): quando `true`, as escritas de dinheiro do
+/// tenant (vendas, cancelamentos, dívidas, caixa, estoque) exigem
+/// sessão com `aal = aal2` no SERVIDOR (guardas `mfa_ok()` no RLS e
+/// nas RPCs financeiras). A matrícula do fator é feita no GoTrue.
+@override@JsonKey() final  bool mfaEnforced;
 
 /// Create a copy of Tenant
 /// with the given fields replaced by the non-null parameter values.
@@ -269,16 +279,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.planExpiresAt, planExpiresAt) || other.planExpiresAt == planExpiresAt)&&(identical(other.nextInvoiceAt, nextInvoiceAt) || other.nextInvoiceAt == nextInvoiceAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tenant&&(identical(other.id, id) || other.id == id)&&(identical(other.ownerUserId, ownerUserId) || other.ownerUserId == ownerUserId)&&(identical(other.businessName, businessName) || other.businessName == businessName)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.status, status) || other.status == status)&&(identical(other.rejectionReason, rejectionReason) || other.rejectionReason == rejectionReason)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.planExpiresAt, planExpiresAt) || other.planExpiresAt == planExpiresAt)&&(identical(other.nextInvoiceAt, nextInvoiceAt) || other.nextInvoiceAt == nextInvoiceAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.language, language) || other.language == language)&&(identical(other.mfaEnforced, mfaEnforced) || other.mfaEnforced == mfaEnforced));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,ownerUserId,businessName,planId,status,rejectionReason,approvedAt,createdAt,planExpiresAt,nextInvoiceAt,currencyCode,language);
+int get hashCode => Object.hash(runtimeType,id,ownerUserId,businessName,planId,status,rejectionReason,approvedAt,createdAt,planExpiresAt,nextInvoiceAt,currencyCode,language,mfaEnforced);
 
 @override
 String toString() {
-  return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, planExpiresAt: $planExpiresAt, nextInvoiceAt: $nextInvoiceAt, currencyCode: $currencyCode, language: $language)';
+  return 'Tenant(id: $id, ownerUserId: $ownerUserId, businessName: $businessName, planId: $planId, status: $status, rejectionReason: $rejectionReason, approvedAt: $approvedAt, createdAt: $createdAt, planExpiresAt: $planExpiresAt, nextInvoiceAt: $nextInvoiceAt, currencyCode: $currencyCode, language: $language, mfaEnforced: $mfaEnforced)';
 }
 
 
@@ -289,7 +299,7 @@ abstract mixin class _$TenantCopyWith<$Res> implements $TenantCopyWith<$Res> {
   factory _$TenantCopyWith(_Tenant value, $Res Function(_Tenant) _then) = __$TenantCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, DateTime? planExpiresAt, DateTime? nextInvoiceAt, String currencyCode, String language
+ String id, String ownerUserId, String businessName, String planId, TenantStatus status, String? rejectionReason, DateTime? approvedAt, DateTime createdAt, DateTime? planExpiresAt, DateTime? nextInvoiceAt, String currencyCode, String language, bool mfaEnforced
 });
 
 
@@ -306,7 +316,7 @@ class __$TenantCopyWithImpl<$Res>
 
 /// Create a copy of Tenant
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? ownerUserId = null,Object? businessName = null,Object? planId = null,Object? status = null,Object? rejectionReason = freezed,Object? approvedAt = freezed,Object? createdAt = null,Object? planExpiresAt = freezed,Object? nextInvoiceAt = freezed,Object? currencyCode = null,Object? language = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? ownerUserId = null,Object? businessName = null,Object? planId = null,Object? status = null,Object? rejectionReason = freezed,Object? approvedAt = freezed,Object? createdAt = null,Object? planExpiresAt = freezed,Object? nextInvoiceAt = freezed,Object? currencyCode = null,Object? language = null,Object? mfaEnforced = null,}) {
   return _then(_Tenant(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,ownerUserId: null == ownerUserId ? _self.ownerUserId : ownerUserId // ignore: cast_nullable_to_non_nullable
@@ -320,7 +330,8 @@ as DateTime,planExpiresAt: freezed == planExpiresAt ? _self.planExpiresAt : plan
 as DateTime?,nextInvoiceAt: freezed == nextInvoiceAt ? _self.nextInvoiceAt : nextInvoiceAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
-as String,
+as String,mfaEnforced: null == mfaEnforced ? _self.mfaEnforced : mfaEnforced // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

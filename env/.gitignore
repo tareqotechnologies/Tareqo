@@ -4,3 +4,6 @@
 # Supabase — URL + anon key; a segurança vem do RLS). Os restantes
 # (prod.env, db.env) continuam ignorados.
 !dev.env
+# O modelo de produção é placeholder puro (SEU-PROJETO-PROD) e é referenciado
+# pelo .gitignore raiz — versionado como documentação.
+!prod.env.example

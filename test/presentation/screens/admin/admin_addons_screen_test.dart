@@ -39,10 +39,8 @@ class _FakeGetAllPlansUseCase implements GetAllPlansUseCase {
 /// Backend de add-ons em memória com registro de chamadas — cobre os
 /// fluxos de activação individual (manager) e em lote (sheet).
 class _SpyAddOnDataSource implements AddOnLocalDataSource {
-  _SpyAddOnDataSource({
-    Set<String>? active,
-    this.throwOnActivateFor = const {},
-  }) : _active = {...?active};
+  _SpyAddOnDataSource({Set<String>? active, this.throwOnActivateFor = const {}})
+    : _active = {...?active};
 
   final Set<String> _active;
   final Set<String> throwOnActivateFor;
@@ -219,10 +217,7 @@ void main() {
     await tester.pumpWidget(
       _buildApp(
         tenants: const [],
-        tenantsUseCase: _FakeGetAllTenantsUseCase(
-          const [],
-          throwOnCall: true,
-        ),
+        tenantsUseCase: _FakeGetAllTenantsUseCase(const [], throwOnCall: true),
       ),
     );
     await tester.pumpAndSettle();
@@ -270,10 +265,7 @@ void main() {
     expect(addOns.calls.last.$1, 'deactivate');
     expect(addOns.calls.last.$2, 'tn1');
     expect(addOns.calls.last.$3, 'ao_custom_invoice');
-    expect(
-      tester.widget<Switch>(find.byType(Switch).first).value,
-      isFalse,
-    );
+    expect(tester.widget<Switch>(find.byType(Switch).first).value, isFalse);
     expect(find.text('5'), findsNWidgets(2));
 
     // Ligar o último add-on → activate.
@@ -362,10 +354,10 @@ void main() {
     await tester.tap(find.text('Activar').first);
     await tester.pumpAndSettle();
 
-    expect(
-      addOns.calls.where((c) => c.$1 == 'activate').map((c) => c.$2),
-      ['tn1', 'tn2'],
-    );
+    expect(addOns.calls.where((c) => c.$1 == 'activate').map((c) => c.$2), [
+      'tn1',
+      'tn2',
+    ]);
     expect(addOns.calls.first.$3, 'ao_custom_invoice');
     expect(
       find.text('Factura Personalizada activado em 2 tenants'),

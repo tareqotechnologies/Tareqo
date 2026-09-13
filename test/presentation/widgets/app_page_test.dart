@@ -53,12 +53,16 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        testApp(home: const AppPage(title: 'A', badge: 0, body: Text('x'))),
+        testApp(
+          home: const AppPage(title: 'A', badge: 0, body: Text('x')),
+        ),
       );
       expect(find.text('0'), findsNothing);
 
       await tester.pumpWidget(
-        testApp(home: const AppPage(title: 'A', badge: 5, body: Text('x'))),
+        testApp(
+          home: const AppPage(title: 'A', badge: 5, body: Text('x')),
+        ),
       );
       expect(find.text('5'), findsOneWidget);
     });
@@ -71,9 +75,7 @@ void main() {
           home: AppPage(
             title: 'T',
             body: const Text('x'),
-            actions: [
-              TextButton(onPressed: () {}, child: const Text('Ação')),
-            ],
+            actions: [TextButton(onPressed: () {}, child: const Text('Ação'))],
             leading: const Icon(Icons.arrow_back),
             floatingActionButton: FloatingActionButton(
               onPressed: () {},
@@ -90,16 +92,12 @@ void main() {
 
     testWidgets('useSafeArea false dispensa o SafeArea', (tester) async {
       await tester.pumpWidget(
-        testApp(
-          home: const AppPage(useSafeArea: false, body: Text('x')),
-        ),
+        testApp(home: const AppPage(useSafeArea: false, body: Text('x'))),
       );
 
       expect(find.byType(SafeArea), findsNothing);
 
-      await tester.pumpWidget(
-        testApp(home: const AppPage(body: Text('x'))),
-      );
+      await tester.pumpWidget(testApp(home: const AppPage(body: Text('x'))));
       expect(find.byType(SafeArea), findsOneWidget);
     });
 
@@ -133,7 +131,12 @@ void main() {
       final icon = tester.widget<Icon>(find.byIcon(Icons.store));
       expect(icon.size, 22);
       final container = tester.widget<Container>(
-        find.ancestor(of: find.byIcon(Icons.store), matching: find.byType(Container)).first,
+        find
+            .ancestor(
+              of: find.byIcon(Icons.store),
+              matching: find.byType(Container),
+            )
+            .first,
       );
       expect(container.constraints?.maxWidth, 48);
     });
@@ -146,7 +149,10 @@ void main() {
       // O painter privado existe além do CustomPaint do Material.
       final hasDashedPainter = tester
           .widgetList<CustomPaint>(find.byType(CustomPaint))
-          .any((cp) => cp.painter?.runtimeType.toString() == '_DashedBorderPainter');
+          .any(
+            (cp) =>
+                cp.painter?.runtimeType.toString() == '_DashedBorderPainter',
+          );
       expect(hasDashedPainter, isTrue);
     });
   });

@@ -3666,6 +3666,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get securityTwoFactorTitle => 'Authentification à deux facteurs';
 
   @override
+  String get settingsMfaEnforceError =>
+      'Impossible de modifier l\'exigence MFA. Vérifiez la connexion et réessayez.';
+
+  @override
+  String get settingsMfaEnforceSubOff =>
+      'Désactivé — ventes et caisse fonctionnent avec mot de passe seul';
+
+  @override
+  String get settingsMfaEnforceSubOn =>
+      'Exigé — les écritures d\'argent demandent le code de l\'application d\'authentification';
+
+  @override
+  String get settingsMfaEnforceTitle =>
+      'Exiger le MFA pour les opérations d\'argent';
+
+  @override
   String get transfersRowDate => 'Date';
 
   @override

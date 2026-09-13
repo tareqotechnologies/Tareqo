@@ -39,6 +39,7 @@ class _FakeTenantRepository implements ITenantRepository {
     String id, {
     required String currencyCode,
     required String language,
+    bool? mfaEnforced,
   }) async {}
 
   @override

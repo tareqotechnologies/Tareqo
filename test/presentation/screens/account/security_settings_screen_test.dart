@@ -60,7 +60,10 @@ void main() {
   setUp(() async {
     registerTestSecureStorage();
     storage = GetIt.instance<SecureStorageService>();
-    mfaUseCase = MFAAuthUseCase(MFAService(), storage);
+    // P1: o use case agora orquestra o servidor; nos testes usamos o
+    // fallback local (mesma semântica do app sem Supabase configurado).
+    mfaUseCase = MFAAuthUseCase(MFAService(), storage,
+        LocalOnlyMfaServerPort(MFAService()));
     bioService = _FakeBiometricService();
     bioService
       ..available = false

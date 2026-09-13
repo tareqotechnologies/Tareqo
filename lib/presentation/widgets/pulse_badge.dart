@@ -99,7 +99,7 @@ class _PulseBadgeState extends State<PulseBadge>
     final scheme = Theme.of(context).colorScheme;
     final badgeColor = widget.color ?? scheme.tertiary;
     final displayText = widget.count > widget.maxCount
-        ? '$widget.maxCount+'
+        ? '${widget.maxCount}+'
         : '${widget.count}';
 
     return Stack(

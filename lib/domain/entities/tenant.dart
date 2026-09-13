@@ -49,6 +49,12 @@ abstract class Tenant with _$Tenant {
 
     /// Idioma do aplicativo (`pt` ou `en`) — escolhido pelo dono.
     @Default('pt') String language,
+
+    /// P1 (MFA server-side): quando `true`, as escritas de dinheiro do
+    /// tenant (vendas, cancelamentos, dívidas, caixa, estoque) exigem
+    /// sessão com `aal = aal2` no SERVIDOR (guardas `mfa_ok()` no RLS e
+    /// nas RPCs financeiras). A matrícula do fator é feita no GoTrue.
+    @Default(false) bool mfaEnforced,
   }) = _Tenant;
 
   factory Tenant.fromJson(Map<String, dynamic> json) => _$TenantFromJson(json);

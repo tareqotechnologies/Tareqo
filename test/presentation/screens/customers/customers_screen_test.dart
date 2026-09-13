@@ -77,10 +77,7 @@ Customer _customer({
   String email = '',
 }) => Customer(id: id, name: name, phone: phone, email: email);
 
-Debt _debt({
-  required String customerId,
-  int amountCents = 2500,
-}) => Debt(
+Debt _debt({required String customerId, int amountCents = 2500}) => Debt(
   id: 'd-$customerId',
   personName: 'Cliente',
   amountCents: amountCents,
@@ -114,10 +111,8 @@ Widget _buildApp({
     ],
     child: testApp(
       home: const CustomersScreen(),
-      builder: (context, child) => MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 0.7,
-        child: child!,
-      ),
+      builder: (context, child) =>
+          MediaQuery.withClampedTextScaling(maxScaleFactor: 0.7, child: child!),
     ),
   );
 }
@@ -131,9 +126,7 @@ void _useWideViewport(WidgetTester tester) {
 void main() {
   testWidgets('estado vazio com CTA "Novo cliente" e sem FAB', (tester) async {
     _useWideViewport(tester);
-    await tester.pumpWidget(
-      _buildApp(repository: _FakeCustomerRepository([])),
-    );
+    await tester.pumpWidget(_buildApp(repository: _FakeCustomerRepository([])));
     await tester.pumpAndSettle();
 
     expect(find.text('Nenhum cliente cadastrado'), findsOneWidget);

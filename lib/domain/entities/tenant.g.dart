@@ -25,6 +25,7 @@ _Tenant _$TenantFromJson(Map<String, dynamic> json) => _Tenant(
       : DateTime.parse(json['nextInvoiceAt'] as String),
   currencyCode: json['currencyCode'] as String? ?? 'MZN',
   language: json['language'] as String? ?? 'pt',
+  mfaEnforced: json['mfaEnforced'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$TenantToJson(_Tenant instance) => <String, dynamic>{
@@ -40,6 +41,7 @@ Map<String, dynamic> _$TenantToJson(_Tenant instance) => <String, dynamic>{
   'nextInvoiceAt': instance.nextInvoiceAt?.toIso8601String(),
   'currencyCode': instance.currencyCode,
   'language': instance.language,
+  'mfaEnforced': instance.mfaEnforced,
 };
 
 const _$TenantStatusEnumMap = {

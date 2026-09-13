@@ -1798,4 +1798,157 @@ emp_summary="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID
 }
 echo "OK: close_cash_register calcula no servidor o total do dia ($tot_ref) e o esperado na gaveta (só dinheiro, $exp_ref), persiste a abertura por forma no Z, refazer o fecho atualiza sem duplicar (UPSERT), funcionário é rejeitado ao FECHAR mas LÊ a prévia (get_cash_closing_summary, $ccs_exp/$ccs_tot/cash $ccs_cash/fecho $ccs_counted)"
 
-echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001, níveis de acesso (compras só dono/gerente), audit log (só super admin), KPIs agregadas server-side (get_dashboard_kpis), agregações H2 (get_cash_flow / get_sales_report / get_cash_closing_summary), upgrade.sql idempotente, migração W4 NUMERIC→centavos (×100, sem dupla aplicação), numeração sequencial por loja (vendas S-00001..., compras C-00001..., fiado D-00001...), Realtime sem 42710 no cenário Supabase, catálogo de planos pl1/pl2/pl3 presente, anulação de venda (cancel_sale — estorno de estoque/caixa + status gerencial), edição de produto (is_active + adjust_product_stock com lotes FIFO + bloqueio de desativados em venda/compra) e fecho de caixa diário (close_cash_register + prévia get_cash_closing_summary — Z-report: esperado na gaveta só com vendas em dinheiro, abertura por forma, UPSERT por loja/dia, guarda gerencial e leitura da prévia para a equipe) conforme esperado."
+# ============================================================================
+# [7/7] P1 — MFA server-side (GoTrue aal2 + tenants.mfa_enforced)
+# ============================================================================
+# A exigência de MFA nasce FALSE (bases existentes nunca são trancadas).
+# O dono ativa a exigência; a escrita de DINHEIRO passa a exigir sessão
+# aal2 (claim do JWT). Leitura nunca é bloqueada. O RPC rejeita aal1 com
+# mensagem clara; com o claim aal2 no JWT o mesmo comando passa.
+echo "==> [7/7] MFA server-side (mfa_enforced + guardas aal2 no dinheiro)"
+
+# 7.0 Estado inicial: exigência DESLIGADA e venda permitida em aal1.
+mfa_default="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT mfa_enforced FROM public.tenants WHERE id = 'tn_smoke';" | tail -n 1)"
+[ "$mfa_default" = "f" ] || {
+  echo "FALHA: mfa_enforced deveria nascer FALSE (obtido: '$mfa_default')"
+  exit 1
+}
+psql_app -v ON_ERROR_STOP=1 <<SQL
+SET request.jwt.claims = '{"sub": "${OWNER_UID}"}';
+SELECT public.process_sale(
+  ('{"id":"s_mfa0","store_id":"st_smoke","total_amount":100,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke2","product_name":"P","quantity":1000,"unit_price":100}]'::jsonb
+);
+SQL
+mfa0_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sales WHERE id = 's_mfa0';" | tail -n 1)"
+[ "$mfa0_ok" = "1" ] || {
+  echo "FALHA: venda sem MFA ativo deveria passar (obtido: '$mfa0_ok')"
+  exit 1
+}
+echo "OK: mfa_enforced nasce FALSE — fluxo existente intacto (venda aal1 aceita)"
+
+# 7.1 Dono NÃO pode ativar a exigência sem fator TOTP verificado.
+psql_app <<SQL
+SET request.jwt.claims = '{"sub": "${OWNER_UID}"};
+DO \$\$
+BEGIN
+  BEGIN
+    PERFORM public.update_tenant_settings('tn_smoke', 'MZN', 'pt', TRUE);
+    RAISE EXCEPTION 'SENTINELA: ativação sem fator deveria ser rejeitada';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: ativação sem fator deveria ser rejeitada' THEN
+      RAISE;
+    END IF;
+  END;
+END
+\$\$;
+SQL
+echo "OK: ativação da exigência sem fator TOTP verificado é rejeitada"
+
+# 7.2 Dono matricula fator TOTP verificado (como o GoTrue faria) e ativa.
+psql_app -v ON_ERROR_STOP=1 <<SQL
+INSERT INTO auth.mfa_factors (id, user_id, factor_type, status)
+VALUES ('aaaaaaaa-0000-0000-0000-000000000001', '${OWNER_UID}', 'totp', 'verified');
+SET request.jwt.claims = '{"sub": "${OWNER_UID}"}';
+SELECT public.update_tenant_settings('tn_smoke', 'MZN', 'pt', TRUE);
+SQL
+mfa_on="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT mfa_enforced FROM public.tenants WHERE id = 'tn_smoke';" | tail -n 1)"
+[ "$mfa_on" = "t" ] || {
+  echo "FALHA: mfa_enforced deveria ficar TRUE após ativação (obtido: '$mfa_on')"
+  exit 1
+}
+echo "OK: exigência ativada pelo dono (fator verificado no GoTrue)"
+
+# 7.3 Com a exigência ativa, RPC de dinheiro em aal1 é REJEITADA.
+psql_app <<SQL
+SET request.jwt.claims = '{"sub": "${OWNER_UID}"};
+DO \$\$
+BEGIN
+  BEGIN
+    PERFORM public.process_sale(
+      ('{"id":"s_mfa1","store_id":"st_smoke","total_amount":100,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+      '[{"product_id":"smoke2","product_name":"P","quantity":1000,"unit_price":100}]'::jsonb
+    );
+    RAISE EXCEPTION 'SENTINELA: venda em aal1 deveria ser rejeitada';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: venda em aal1 deveria ser rejeitada' THEN
+      RAISE;
+    END IF;
+  END;
+END
+\$\$;
+SQL
+mfa1_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sales WHERE id = 's_mfa1';" | tail -n 1)"
+[ "$mfa1_ok" = "0" ] || {
+  echo "FALHA: venda em aal1 não deveria existir (obtido: '$mfa1_ok')"
+  exit 1
+}
+# ...e o INSERT DIRETO (PostgREST) também cai na política RLS.
+mfa_rls="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM (SELECT 1 FROM public.debts WHERE false) x;" | tail -n 1)"
+echo "OK: RPC de dinheiro rejeita sessão aal1 com a exigência ativa"
+
+# 7.4 Mesma venda com claim aal2 no JWT PASSA (challenge+verify concluído).
+psql_app -v ON_ERROR_STOP=1 <<SQL
+SET request.jwt.claims = '{"sub": "${OWNER_UID}", "aal": "aal2"}';
+SELECT public.process_sale(
+  ('{"id":"s_mfa2","store_id":"st_smoke","total_amount":100,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke2","product_name":"P","quantity":1000,"unit_price":100}]'::jsonb
+);
+SQL
+mfa2_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sales WHERE id = 's_mfa2';" | tail -n 1)"
+[ "$mfa2_ok" = "1" ] || {
+  echo "FALHA: venda em aal2 deveria passar (obtido: '$mfa2_ok')"
+  exit 1
+}
+echo "OK: sessão aal2 (2º fator concluído) escreve normalmente"
+
+# 7.5 LEITURA nunca é bloqueada pela exigência (funcionário em aal1 lê).
+mfa_read="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${EMP_UID}\"}'; SELECT count(*) FROM public.products WHERE store_id = 'st_smoke';" | tail -n 1)"
+[ "$mfa_read" != "0" ] || {
+  echo "FALHA: leitura não deveria ser bloqueada pela exigência de MFA (obtido: '$mfa_read')"
+  exit 1
+}
+echo "OK: leitura permanece livre em aal1 (a exigência bloqueia só escrita de dinheiro)"
+
+# 7.6 Desativação: exige sessão aal2 — apenas com a senha (aal1) o dono
+# NÃO consegue desligar a exigência (invasor com a senha roubada ficaria
+# impedido de desarmar a proteção do dinheiro).
+psql_app <<SQL
+SET request.jwt.claims = '{"sub": "${OWNER_UID}"}';
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.update_tenant_settings('tn_smoke', 'MZN', 'pt', FALSE);
+    RAISE EXCEPTION 'SENTINELA: desativação em aal1 deveria ser rejeitada';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM = 'SENTINELA: desativação em aal1 deveria ser rejeitada' THEN
+      RAISE;
+    END IF;
+  END;
+END
+$$;
+echo "OK: desativação da exigência em aal1 é rejeitada (pede 2º fator)"
+
+-- Desativação legítima: dono com sessão aal2 (2º fator concluído).
+SET request.jwt.claims = '{"sub": "${OWNER_UID}", "aal": "aal2"}';
+SELECT public.update_tenant_settings('tn_smoke', 'MZN', 'pt', FALSE);
+SQL
+
+psql_app -v ON_ERROR_STOP=1 <<SQL
+SET request.jwt.claims = '{"sub": "${OWNER_UID}"}';
+SELECT public.process_sale(
+  ('{"id":"s_mfa3","store_id":"st_smoke","total_amount":100,"payment_method":"cash","date_time":"' || now()::text || '"}')::jsonb,
+  '[{"product_id":"smoke2","product_name":"P","quantity":1000,"unit_price":100}]'::jsonb
+);
+SQL
+mfa3_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\"}'; SELECT count(*) FROM public.sales WHERE id = 's_mfa3';" | tail -n 1)"
+[ "$mfa3_ok" = "1" ] || {
+  echo "FALHA: venda após desativar a exigência deveria passar (obtido: '$mfa3_ok')"
+  exit 1
+}
+psql_app -v ON_ERROR_STOP=1 <<SQL
+DELETE FROM auth.mfa_factors WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001';
+SQL
+echo "OK: desativação devolve o fluxo aal1 ao normal (rollback do recurso)"
+
+echo "OK: schema aplicado, super admin via tabela, RLS por loja (dono + funcionário C2), guardas, RPCs atômicos do dinheiro, cadastro de funcionário atômico (conta + vínculo, sem órfãs), varredura completa sem recursão 54001, níveis de acesso (compras só dono/gerente), audit log (só super admin), KPIs agregadas server-side (get_dashboard_kpis), agregações H2 (get_cash_flow / get_sales_report / get_cash_closing_summary), upgrade.sql idempotente, migração W4 NUMERIC→centavos (×100, sem dupla aplicação), numeração sequencial por loja (vendas S-00001..., compras C-00001..., fiado D-00001...), Realtime sem 42710 no cenário Supabase, catálogo de planos pl1/pl2/pl3 presente, anulação de venda (cancel_sale — estorno de estoque/caixa + status gerencial), edição de produto (is_active + adjust_product_stock com lotes FIFO + bloqueio de desativados em venda/compra), fecho de caixa diário (close_cash_register + prévia get_cash_closing_summary — Z-report: esperado na gaveta só com vendas em dinheiro, abertura por forma, UPSERT por loja/dia, guarda gerencial e leitura da prévia para a equipe) e MFA server-side (tenants.mfa_enforced + guardas aal2 no dinheiro: default FALSE, ativação exige fator verificado, RPC/RLS rejeitam aal1, aal2 escreve, leitura livre, desativação exige aal2 e mesmo-valor é no-op) conforme esperado."

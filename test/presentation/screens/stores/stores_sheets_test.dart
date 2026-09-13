@@ -152,16 +152,16 @@ class _FakeEmployeeAccountService implements EmployeeAccountService {
 class _FakeGetPlansUseCase implements GetPlansUseCase {
   @override
   Future<List<Plan>> call() async => const [
-        Plan(id: 'pl1', name: 'Essencial', maxStores: 1, maxEmployees: 1),
-        Plan(id: 'pl2', name: 'Profissional', maxStores: 3, maxEmployees: 10),
-        Plan(
-          id: 'pl3',
-          name: 'Avançado',
-          priceMonthlyCents: 19900,
-          maxStores: 10,
-          maxEmployees: 40,
-        ),
-      ];
+    Plan(id: 'pl1', name: 'Essencial', maxStores: 1, maxEmployees: 1),
+    Plan(id: 'pl2', name: 'Profissional', maxStores: 3, maxEmployees: 10),
+    Plan(
+      id: 'pl3',
+      name: 'Avançado',
+      priceMonthlyCents: 19900,
+      maxStores: 10,
+      maxEmployees: 40,
+    ),
+  ];
 }
 
 class _FakeGetStoresUseCase implements GetStoresUseCase {
@@ -228,35 +228,35 @@ void main() {
   });
 
   Widget build() => ProviderScope(
-        overrides: [
-          authStateProvider.overrideWith(
-            (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
-          ),
-          getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
-          getStoresUseCaseProvider.overrideWithValue(
-            _FakeGetStoresUseCase(storeRepo.stores),
-          ),
-          getMyPlanRequestsUseCaseProvider.overrideWithValue(
-            _FakeGetMyPlanRequestsUseCase(),
-          ),
-          addStoreUseCaseProvider.overrideWithValue(
-            AddStoreUseCase(storeRepo, tenantRepo, planRepo),
-          ),
-          addEmployeeUseCaseProvider.overrideWithValue(
-            AddEmployeeUseCase(
-              employeeRepo,
-              tenantRepo,
-              planRepo,
-              storeRepo,
-              accountService: accountService,
-            ),
-          ),
-          requestPlanUpgradeUseCaseProvider.overrideWithValue(
-            RequestPlanUpgradeUseCase(planRequestRepo, tenantRepo),
-          ),
-        ],
-        child: testApp(home: StoresScreen(tenant: tenant)),
-      );
+    overrides: [
+      authStateProvider.overrideWith(
+        (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+      ),
+      getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
+      getStoresUseCaseProvider.overrideWithValue(
+        _FakeGetStoresUseCase(storeRepo.stores),
+      ),
+      getMyPlanRequestsUseCaseProvider.overrideWithValue(
+        _FakeGetMyPlanRequestsUseCase(),
+      ),
+      addStoreUseCaseProvider.overrideWithValue(
+        AddStoreUseCase(storeRepo, tenantRepo, planRepo),
+      ),
+      addEmployeeUseCaseProvider.overrideWithValue(
+        AddEmployeeUseCase(
+          employeeRepo,
+          tenantRepo,
+          planRepo,
+          storeRepo,
+          accountService: accountService,
+        ),
+      ),
+      requestPlanUpgradeUseCaseProvider.overrideWithValue(
+        RequestPlanUpgradeUseCase(planRequestRepo, tenantRepo),
+      ),
+    ],
+    child: testApp(home: StoresScreen(tenant: tenant)),
+  );
 
   Future<void> openStoreSheet(WidgetTester tester) async {
     await tester.pumpWidget(build());
@@ -265,8 +265,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('Nova loja: validação de nome vazio e criação com sucesso',
-      (tester) async {
+  testWidgets('Nova loja: validação de nome vazio e criação com sucesso', (
+    tester,
+  ) async {
     await openStoreSheet(tester);
 
     // Salvar sem nome → erro do use case (InvalidStoreException).
@@ -295,36 +296,35 @@ void main() {
     expect(added.city, 'Maputo');
   });
 
-  testWidgets('Nova loja: limite do plano estourado mostra mensagem do use case',
-      (tester) async {
-    // Plano com 1 loja (as 2 da fixture já estouram o limite de 3? não —
-    // usamos um plano de 2 lojas: 2 existentes ≥ 2 → bloqueia a 3ª).
-    planRepo.plans.clear();
-    planRepo.plans.add(
-      const Plan(
-        id: 'pl2',
-        name: 'Profissional',
-        priceMonthlyCents: 9900,
-        maxStores: 2,
-        maxEmployees: 10,
-      ),
-    );
-    await openStoreSheet(tester);
+  testWidgets(
+    'Nova loja: limite do plano estourado mostra mensagem do use case',
+    (tester) async {
+      // Plano com 1 loja (as 2 da fixture já estouram o limite de 3? não —
+      // usamos um plano de 2 lojas: 2 existentes ≥ 2 → bloqueia a 3ª).
+      planRepo.plans.clear();
+      planRepo.plans.add(
+        const Plan(
+          id: 'pl2',
+          name: 'Profissional',
+          priceMonthlyCents: 9900,
+          maxStores: 2,
+          maxEmployees: 10,
+        ),
+      );
+      await openStoreSheet(tester);
 
-    await tester.enterText(find.byType(TextFormField).at(0), 'Terceira');
-    await tester.ensureVisible(find.text('Criar loja'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Criar loja'));
-    await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).at(0), 'Terceira');
+      await tester.ensureVisible(find.text('Criar loja'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Criar loja'));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.textContaining('permite até 2 lojas'),
-      findsOneWidget,
-    );
-    expect(storeRepo.addCalls, 0);
-    // A sheet PERMANECE aberta (erro inline, sem pop).
-    expect(find.text('Criar loja'), findsOneWidget);
-  });
+      expect(find.textContaining('permite até 2 lojas'), findsOneWidget);
+      expect(storeRepo.addCalls, 0);
+      // A sheet PERMANECE aberta (erro inline, sem pop).
+      expect(find.text('Criar loja'), findsOneWidget);
+    },
+  );
 
   Future<void> openEmployeeSheet(WidgetTester tester) async {
     await tester.pumpWidget(build());
@@ -336,8 +336,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('Novo funcionário: chips de loja/cargo, conta criada e vínculo',
-      (tester) async {
+  testWidgets('Novo funcionário: chips de loja/cargo, conta criada e vínculo', (
+    tester,
+  ) async {
     await openEmployeeSheet(tester);
 
     // Preenche dados pessoais.
@@ -357,8 +358,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Conta criada + vínculo persistido com cargo e loja corretos.
-    expect(find.text('Funcionário cadastrado! Conta de acesso criada.'),
-        findsOneWidget);
+    expect(
+      find.text('Funcionário cadastrado! Conta de acesso criada.'),
+      findsOneWidget,
+    );
     expect(accountService.calls, 1);
     expect(employeeRepo.addCalls, 1);
     final e = employeeRepo.employees.single;
@@ -368,8 +371,9 @@ void main() {
     expect(e.storeId, 'st1');
   });
 
-  testWidgets('Novo funcionário: e-mail duplicado mostra a mensagem da conta',
-      (tester) async {
+  testWidgets('Novo funcionário: e-mail duplicado mostra a mensagem da conta', (
+    tester,
+  ) async {
     accountService.throwOnCreate = const EmployeeAccountCreationException(
       'E-mail já registrado.',
     );
@@ -392,38 +396,40 @@ void main() {
     expect(find.text('Cadastrar funcionário'), findsOneWidget);
   });
 
-  testWidgets('Upgrade: seleção de plano, envio do pedido e duplicado bloqueado',
-      (tester) async {
-    await tester.pumpWidget(build());
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(Tab).at(2)); // Upgrades
-    await tester.pumpAndSettle();
-    // Card do plano → botão Upgrade abre o _UpgradeSheet.
-    await tester.tap(find.text('Upgrade'));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'Upgrade: seleção de plano, envio do pedido e duplicado bloqueado',
+    (tester) async {
+      await tester.pumpWidget(build());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Tab).at(2)); // Upgrades
+      await tester.pumpAndSettle();
+      // Card do plano → botão Upgrade abre o _UpgradeSheet.
+      await tester.tap(find.text('Upgrade'));
+      await tester.pumpAndSettle();
 
-    // Título + subtítulo; candidato único (pl3) com preço.
-    expect(find.text('Upgrade de plano'), findsOneWidget);
-    expect(
-      find.text('Escolha o novo plano. Aguarda aprovação do super admin.'),
-      findsOneWidget,
-    );
+      // Título + subtítulo; candidato único (pl3) com preço.
+      expect(find.text('Upgrade de plano'), findsOneWidget);
+      expect(
+        find.text('Escolha o novo plano. Aguarda aprovação do super admin.'),
+        findsOneWidget,
+      );
 
-    // Sem seleção → erro inline, nada enviado.
-    await tester.tap(find.text('Solicitar upgrade'));
-    await tester.pumpAndSettle();
-    expect(find.text('Escolha o plano de destino.'), findsOneWidget);
-    expect(planRequestRepo.createCalls, 0);
+      // Sem seleção → erro inline, nada enviado.
+      await tester.tap(find.text('Solicitar upgrade'));
+      await tester.pumpAndSettle();
+      expect(find.text('Escolha o plano de destino.'), findsOneWidget);
+      expect(planRequestRepo.createCalls, 0);
 
-    // Seleciona e envia.
-    await tester.tap(find.textContaining('Avançado'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Solicitar upgrade'));
-    await tester.pumpAndSettle();
+      // Seleciona e envia.
+      await tester.tap(find.textContaining('Avançado'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Solicitar upgrade'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Pedido de upgrade enviado!'), findsOneWidget);
-    expect(planRequestRepo.createCalls, 1);
-    expect(planRequestRepo.lastCreated?.requestedPlanId, 'pl3');
-    expect(planRequestRepo.lastCreated?.currentPlanId, 'pl2');
-  });
+      expect(find.text('Pedido de upgrade enviado!'), findsOneWidget);
+      expect(planRequestRepo.createCalls, 1);
+      expect(planRequestRepo.lastCreated?.requestedPlanId, 'pl3');
+      expect(planRequestRepo.lastCreated?.currentPlanId, 'pl2');
+    },
+  );
 }

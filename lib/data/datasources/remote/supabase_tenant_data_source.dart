@@ -20,7 +20,7 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
   static const _columns =
       'id, owner_user_id, business_name, plan_id, status, '
       'rejection_reason, approved_at, created_at, currency_code, language, '
-      'plan_expires_at, next_invoice_at';
+      'plan_expires_at, next_invoice_at, mfa_enforced';
 
   @override
   Future<Tenant?> getMyTenant(String userId) async {
@@ -100,18 +100,30 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
     String id, {
     required String currencyCode,
     required String language,
+    bool? mfaEnforced,
   }) async {
     // A política RLS `tenants_update` só permite o SUPER ADMIN alterar o
     // tenant (status/plano são decisões administrativas) — um UPDATE direto
     // do dono retornava 0 linhas e os ajustes nunca salvavam. O dono troca
-    // moeda/idioma pela RPC SECURITY DEFINER `update_tenant_settings`, que
-    // valida is_tenant_owner e atualiza APENAS as colunas de apresentação.
+    // moeda/idioma/exigência de MFA pela RPC SECURITY DEFINER
+    // `update_tenant_settings`, que valida is_tenant_owner, exige fator
+    // TOTP verificado para ATIVAR a exigência e atualiza APENAS as colunas
+    // permitidas.
+    //
+    // `mfaEnforced ?? false`: SEMPRE enviamos p_mfa_enforced. RPCs do
+    // PostgREST resolvem por assinatura EXATA — omitir o parâmetro falha
+    // (PGRST203) em bancos com as duas assinaturas (3 e 4 args) criadas
+    // por CREATE OR REPLACE com assinatura alterada. ATENÇÃO: a RPC grava
+    // mfa_enforced sempre que o parâmetro chega preenchido — o CHAMADOR
+    // (UpdateTenantSettingsUseCase via tela Ajustes) envia o estado atual
+    // do formulário; `false` aqui persiste "não exigido" de propósito.
     await supabaseClient.rpc(
       'update_tenant_settings',
       params: {
         'p_tenant_id': id,
         'p_currency_code': currencyCode,
         'p_language': language,
+        'p_mfa_enforced': mfaEnforced ?? false,
       },
     );
   }
@@ -214,6 +226,8 @@ final class TenantSupabaseDataSourceImpl implements TenantLocalDataSource {
     // Defaults para bancos ainda sem a migração das colunas.
     currencyCode: (row['currency_code'] as String?) ?? 'MZN',
     language: (row['language'] as String?) ?? 'pt',
+    // P1: exigência de MFA (null em bancos ainda sem a migração).
+    mfaEnforced: (row['mfa_enforced'] as bool?) ?? false,
     // Campos de facturacao (podem ser null em tenants antigos).
     planExpiresAt: row['plan_expires_at'] == null
         ? null

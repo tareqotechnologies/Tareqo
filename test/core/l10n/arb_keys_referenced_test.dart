@@ -24,7 +24,7 @@ void main() {
     final keys = readArbKeys('pt');
     expect(keys, isNotEmpty, reason: 'Nenhuma chave encontrada nos ARBs');
 
-    final code = _dartSources().join('\n');
+    final code = _dartSources().map(stripDartComments).join('\n');
     final missing = keys.where((key) => !_isReferenced(code, key)).toList()
       ..sort();
 
@@ -70,9 +70,80 @@ List<String> _dartSources() {
 }
 
 /// Procura o identificador da chave fora de comentários `//` e `/* */`.
-bool _isReferenced(String code, String key) {
-  final withoutComments = code
-      .replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '')
-      .replaceAll(RegExp(r'//[^\n]*'), '');
-  return RegExp('\\b${RegExp.escape(key)}\\b').hasMatch(withoutComments);
+///
+/// A remoção de comentários é feita por ARQUIVO (via [stripDartComments]) —
+/// nunca sobre as fontes concatenadas. Concatenar antes de remover faz um
+/// `/*` dentro de um comentário de linha (ex.: `/// ... env/*.env`) engolir
+/// tudo até um `*/` num arquivo posterior, escondendo referências reais e
+/// falhando o teste de chaves órfãs com falso positivo.
+bool _isReferenced(String code, String key) =>
+    RegExp('\\b${RegExp.escape(key)}\\b').hasMatch(code);
+
+/// Remove comentários `//…` (incluindo `///`) e blocos `/*…*/` de um único
+/// fonte Dart, preservando strings e deixando um `\n` no lugar de cada linha
+/// de comentário (as âncoras `^`/`$` e os números de linha permanecem
+/// coerentes). Um `/*` ou `//` dentro de string/interpolação NÃO abre
+/// comentário — e um `/*` dentro de comentário de linha é consumido com ele.
+String stripDartComments(String source) {
+  final out = StringBuffer();
+  var i = 0;
+  String? stringDelimiter; // ' ou "
+  while (i < source.length) {
+    final ch = source[i];
+    final next = i + 1 < source.length ? source[i + 1] : '';
+
+    // Dentro de string: consome até o delimitador fechante (ou escape).
+    if (stringDelimiter != null) {
+      if (ch == '\\') {
+        out.write(ch);
+        if (next != '') {
+          out.write(next);
+          i += 2;
+          continue;
+        }
+      } else {
+        if (ch == stringDelimiter) stringDelimiter = null;
+        out.write(ch);
+      }
+      i++;
+      continue;
+    }
+
+    // Abertura de string (prefixos r/R não mudam o delimitador de fecho;
+    // triples ''' e """ fecham com 3 — tratadas como ' e " porque um
+    // delimitador solto não abre comentário antes de fechar a string).
+    if (ch == '"' || ch == "'") {
+      stringDelimiter = ch;
+      out.write(ch);
+      i++;
+      continue;
+    }
+
+    // Comentário de linha: consome até o fim da linha (deixa o \n).
+    if (ch == '/' && next == '/') {
+      while (i < source.length && source[i] != '\n') {
+        i++;
+      }
+      continue;
+    }
+
+    // Comentário de bloco: consome até `*/` (ou o fim do arquivo).
+    if (ch == '/' && next == '*') {
+      i += 2;
+      while (i < source.length &&
+          !(source[i] == '*' &&
+              i + 1 < source.length &&
+              source[i + 1] == '/')) {
+        // Preserva quebras de linha para manter a contagem de linhas.
+        if (source[i] == '\n') out.write('\n');
+        i++;
+      }
+      i = i + 2 < source.length + 1 ? i + 2 : source.length;
+      continue;
+    }
+
+    out.write(ch);
+    i++;
+  }
+  return out.toString();
 }

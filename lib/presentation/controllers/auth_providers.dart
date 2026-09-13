@@ -11,6 +11,8 @@ import '../../domain/usecases/reset_password_use_case.dart';
 import '../../domain/usecases/set_new_password_use_case.dart';
 import '../../core/security/biometric_service.dart';
 import '../../core/security/mfa_service.dart';
+import '../../data/datasources/auth/supabase_mfa_server_port.dart';
+import '../../domain/repositories/i_mfa_server_port.dart';
 import '../../domain/usecases/biometric_auth_use_case.dart';
 import '../../domain/usecases/mfa_auth_use_case.dart';
 import '../../domain/usecases/sign_in_use_case.dart';
@@ -88,12 +90,25 @@ final authStateProvider = StreamProvider<AppUser?>(
       : Stream.value(null),
 );
 
+/// Porta MFA do servidor: GoTrue real quando o Supabase está configurado;
+/// fallback local (sem GoTrue) em dev/testes.
+final mfaServerPortProvider = Provider<IMfaServerPort>(
+  (ref) => SupabaseConfig.isConfigured
+      ? const SupabaseMfaServerPort()
+      : LocalOnlyMfaServerPort(MFAService()),
+);
+
 /// Caso de uso MFA (Multi-Factor Authentication / TOTP).
 /// Requer SecureStorageService já registrado no ServiceLocator.
+///
+/// P1: agora ORQUESTRA o servidor (GoTrue) — a matrícula cria o fator no
+/// servidor e a verificação no login sobe a sessão para aal2, o que as
+/// guardas `mfa_ok()` do RLS consultam quando o tenant exige MFA.
 final mfaAuthUseCaseProvider = Provider<MFAAuthUseCase>(
   (ref) => MFAAuthUseCase(
     MFAService(),
     ServiceLocator.instance<SecureStorageService>(),
+    ref.watch(mfaServerPortProvider),
   ),
 );
 

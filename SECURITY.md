@@ -47,10 +47,33 @@ segurança (o repositório pode ser público). Em vez disso:
 - Autenticação/autorização e RLS no Supabase (`supabase/schema.sql` —
   políticas, `SECURITY DEFINER`, guardas `is_super_admin`,
   `is_manager_of_store`, `is_store_employee_active`);
+- **MFA server-side (P1, Set/2026):** a matrícula TOTP cria o fator no
+  **GoTrue** (`IMfaServerPort` / `SupabaseMfaServerPort`) — não só no app;
+  a verificação no login renova a sessão com claim `aal = aal2`, que as
+  guardas `mfa_ok()`/`mfa_satisfied()` do RLS e das RPCs financeiras
+  (`process_sale`, `cancel_sale`, `register_debt`, `settle_debt`,
+  `process_purchase`, `adjust_product_stock`, `close_cash_register`)
+  consultam quando `tenants.mfa_enforced`. A escrita de dinheiro falha
+  **fail-closed** sem o 2º fator (aal1 rejeitado); leitura permanece
+  livre. **Desativar** a exigência exige sessão aal2 (invasor só com a
+  senha não desarma) e chamada com o mesmo valor é no-op (o ajuste de
+  moeda/idioma nunca toca a flag). Enquanto o tenant não ativa a
+  exigência, o comportamento é o anterior (fail-open por design, sem
+  travar quem não optou);
 - Armazenamento de sessão/tokens (Keychain/Keystore), MFA/TOTP e biometria;
-- Fila offline (outbox) com payloads cifrados e RPCs atômicas do caminho
-  de dinheiro (venda, compra, fiado, quitação, anulação);
-- Certificado TLS pinning (intermediário WE1 — `cert_pinning_io.dart`);
+- Fila offline (outbox) com **payloads cifrados em repouso** (P3,
+  Set/2026): todo payload do caminho de dinheiro é cifrado com
+  `PendingOpPayloadCipher` (AES-256-GCM, chave mestra no Keystore/Keychain
+  via `SecureStorageService`) antes de tocar o SQLite e decifrado na
+  leitura; linhas legadas em texto claro são migradas na primeira leitura
+  (`pending_op_queue_sqlite_impl.dart`); e RPCs atômicas do caminho de
+  dinheiro (venda, compra, fiado, quitação, anulação);
+- **Certificado TLS pinning** (intermediário WE1 — `cert_pinning_io.dart`),
+  **conectado ao cliente HTTP real** do Supabase via
+  `pinned_retry_http_client.dart` (P2, Set/2026 — antes o módulo existia
+  sem ser injetado no bootstrap); regressão
+  `test/core/network/pinned_retry_http_client_test.dart` + E2E contra o
+  projeto real (`test/core/network/cert_pinning_live_host_test.dart`);
 - Deep links de autenticação (`tareqo://callback` — PKCE).
 
 A anon key do Supabase em `env/dev.env`/`SupabaseConfig` é **pública por
@@ -64,4 +87,9 @@ estar no repositório.
   (`env/prod.env` é gitignored);
 - Release automatizado com guardas de flavor/assinatura (fail-fast);
 - Varredura de vulnerabilidades de dependências via OSV-Scanner
-  (`.github/workflows/security_scan.yml`) e Dependabot.
+  (`.github/workflows/security_scan.yml`) e Dependabot;
+- Validação de RLS/RPCs contra Postgres real no CI (`scripts/sql_check.sh`
+  — inclui a seção MFA: default FALSE, ativação exige fator TOTP
+  verificado, RPC/RLS rejeitam aal1, aal2 escreve, leitura livre,
+  desativação exige aal2, mesmo-valor é no-op) e contra o projeto live
+  (`scripts/sql_check_live.sh`).

@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import '../../core/config/supabase_config.dart';
 import '../../core/database/app_database.dart';
 import '../../core/observability/crash_reporting.dart';
+import '../../core/security/pending_op_payload_cipher.dart';
 import '../../core/security/secure_storage_service.dart';
 import '../../data/datasources/auth/supabase_auth_remote_data_source.dart';
 import '../../data/datasources/local/cash_closing_local_data_source.dart';
@@ -273,7 +274,14 @@ final class ServiceLocator {
     // memória (não persiste entre sessões — limitação documentada).
     final sqliteAvailable = await AppDatabase.openAppDatabase();
     if (sqliteAvailable) {
-      AppDatabase.registerOfflineQueue(instance);
+      // P3: a fila grava o payload do caminho de dinheiro CIFRADO
+      // (AES-256-GCM, chave no Keystore/Keychain). A cifra é criada APENAS
+      // quando há SQLite (native) — na web a fila é em memória (não
+      // persiste) e o flutter_secure_storage não está disponível.
+      AppDatabase.registerOfflineQueue(
+        instance,
+        cipher: PendingOpPayloadCipher(instance<SecureStorageService>()),
+      );
     } else {
       instance.registerLazySingleton<IPendingOpQueue>(
         PendingOpQueueMemoryImpl.new,

@@ -26,7 +26,12 @@ void main() {
   setUp(() async {
     registerTestSecureStorage();
     storage = GetIt.instance<SecureStorageService>();
-    mfaUseCase = MFAAuthUseCase(MFAService(), storage);
+    // P1: o use case orquestra o servidor — nos testes, o fallback local.
+    mfaUseCase = MFAAuthUseCase(
+      MFAService(),
+      storage,
+      LocalOnlyMfaServerPort(MFAService()),
+    );
     // O backend em memória é um singleton GetIt partilhado por TODOS os
     // testes do arquivo — limpa o estado que um teste anterior deixou.
     await storage.delete(SecureStorageKeys.mfaEnabled);
@@ -173,19 +178,74 @@ void main() {
     expect(await mfaUseCase.isEnabled(), isTrue);
   });
 
-  testWidgets('contador "expira em" avança com o timer de 1s', (tester) async {
-    await openSetup(tester);
+  testWidgets(
+    'contador "expira em" avança com o timer de 1s (determinístico)',
+    (tester) async {
+      // O contador da tela lê `MFAAuthUseCase.getTimeRemaining()`, que é
+      // baseado em DateTime.now() REAL — o pump(2s) do framework só avança o
+      // relógio FAKE, então o teste original dependia de um segundo real
+      // passar durante a execução (flaky sob carga). Aqui o use case é
+      // espiado: o timer PERIÓDICO de 1s continua sendo o comportamento em
+      // teste, mas a fonte de tempo é controlada pelo teste.
+      // A tela nasce com 30 (valor padrão do initState) e o primeiro tick
+      // do Timer.periodic de 1s traz o valor do use case.
+      var remaining = 28;
+      final controlled = _ControlledTimeMfaUseCase(
+        MFAService(),
+        storage,
+        LocalOnlyMfaServerPort(MFAService()),
+        () => remaining,
+      );
 
-    expect(find.textContaining('Código expira em'), findsOneWidget);
-    final before = tester
-        .widget<Text>(find.textContaining('Código expira em').first)
-        .data!;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [mfaAuthUseCaseProvider.overrideWithValue(controlled)],
+          child: testApp(home: const MFASetupScreen()),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
 
-    await tester.pump(const Duration(seconds: 2));
+      expect(find.textContaining('Código expira em'), findsOneWidget);
+      final before = tester
+          .widget<Text>(find.textContaining('Código expira em').first)
+          .data!;
+      expect(before, contains('30'));
 
-    final after = tester
-        .widget<Text>(find.textContaining('Código expira em').first)
-        .data!;
-    expect(after, isNot(before), reason: 'o contador deve re-renderizar');
-  });
+      // Ticks do relógio fake: 1s traz o 28 controlado; 2s traz o 26.
+      remaining = 28;
+      await tester.pump(const Duration(seconds: 1));
+      expect(
+        tester
+            .widget<Text>(find.textContaining('Código expira em').first)
+            .data!,
+        contains('28'),
+        reason: 'o primeiro tick deve puxar o valor do use case',
+      );
+
+      remaining = 26;
+      await tester.pump(const Duration(seconds: 1));
+
+      final after = tester
+          .widget<Text>(find.textContaining('Código expira em').first)
+          .data!;
+      expect(after, contains('26'), reason: 'o contador deve re-renderizar');
+    },
+  );
+}
+
+/// Subclasse que controla apenas `getTimeRemaining` (fonte de tempo do
+/// contador); todo o resto delega ao use case real sobre o storage em
+/// memória — o fluxo TOTP de verdade continua exercitado nos demais testes.
+class _ControlledTimeMfaUseCase extends MFAAuthUseCase {
+  _ControlledTimeMfaUseCase(
+    super.mfaService,
+    super.secureStorage,
+    super.serverPort,
+    this._remaining,
+  );
+
+  final int Function() _remaining;
+
+  @override
+  int getTimeRemaining() => _remaining();
 }
