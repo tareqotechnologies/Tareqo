@@ -3,6 +3,20 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.1.3+23] — 2026-09-14
+
+### Novo
+- **MFA exigida no servidor (aal2)**: guardas `mfa_ok` nas 7 RPCs financeiras (`process_sale`, `register_debt`, `settle_debt`, `process_purchase`, `close_cash_register`, `cancel_sale`, `adjust_product_stock`) e nas policies INSERT/UPDATE das 6 tabelas de dinheiro — o servidor recusa escritas de sessões sem 2º fator, mesmo que um cliente modificado tente contornar o app. Migração `supabase/upgrade.sql` (runbook `docs/pt/20-migracao-mfa-aal2.md`), aplicada ao live.
+- **Cobertura de testes 77% → 91,7%** (+308 testes, 1.648 no total): varrimento de entidades/DTOs, repositórios (auth, MFA, outbox pendente), localização (1.064 membros × 3 locales com paridade ARB↔classe), telas críticas (menu, documentos, notificações, cotas, lojas), porta MFA GoTrue (17 testes de contrato), exportadores PDF (fatura/cotação) e resolução completa do service locator (85 fábricas lazy).
+
+### Corrigido
+- **Migração v1 — crash no bootstrap de bancos pré-Fase-2 com vendas**: o backfill de `sale_number` corria antes da coluna `store_id` existir; numerações (vendas/compras/dívidas) movidas para depois da migração de `store_id` (contrato já documentado no código).
+- **Migração W4 — lote FIFO com custo 100× off**: bancos que migrassem criavam `stock_lots` depois do mapa de conversão de dinheiro; lotes agora nascem já em centavos (custo de estoque correto na valoração FIFO).
+- **Teste MFA dependente de tempo real** eliminado (contador com use case injetado) — suite determinística.
+
+### Alterado
+- `dart format` em arquivos pendentes (gate do CI); `sql_check_live.sh` estendido com os checks 36–39 (aal2, overloads, policies).
+
 ## [2.1.1+21] — 2026-09-05
 
 ### Corrigido
