@@ -57,10 +57,10 @@ final class PendingOpQueueSqliteImpl implements IPendingOpQueue {
       // Legado em texto claro: migra para cifrado na mesma conexão.
       final plain = PendingOp.payloadFromJsonString(stored);
       final encrypted = await _encodePayload(plain);
-      _db.execute(
-        'UPDATE pending_ops SET payload = ? WHERE id = ?',
-        [encrypted, id],
-      );
+      _db.execute('UPDATE pending_ops SET payload = ? WHERE id = ?', [
+        encrypted,
+        id,
+      ]);
       return plain;
     }
   }

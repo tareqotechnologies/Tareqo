@@ -62,11 +62,7 @@ final class SupabaseMfaServerPort implements IMfaServerPort {
     }
     // Challenge imediato: o par fica pendente até o verify do usuário.
     final challenge = await _auth.mfa.challenge(factorId: enroll.id);
-    return (
-      factorId: enroll.id,
-      challengeId: challenge.id,
-      secret: secret,
-    );
+    return (factorId: enroll.id, challengeId: challenge.id, secret: secret);
   }
 
   @override

@@ -5,7 +5,11 @@
 /// factor/challenge fica PENDENTE até `completeTotpEnrollment` verificar
 /// o código do autenticador do usuário. `discardEnrollment` limpa fatores
 /// abortados (mesma política do `tool/enroll_owner_mfa.dart`).
-typedef MfaPendingEnrollment = ({String factorId, String challengeId, String secret});
+typedef MfaPendingEnrollment = ({
+  String factorId,
+  String challengeId,
+  String secret,
+});
 
 /// Resultado da verificação do 2º fator no SERVIDOR (GoTrue).
 ///
