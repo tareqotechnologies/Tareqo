@@ -31,6 +31,7 @@ Este diretório reúne todos os documentos do app: do que ele faz até como cada
 | 17 | [Migração do fecho de caixa no live](17-migracao-fecho-caixa.md) | Runbook da Parte 25 (Z-report): tabela `cash_closings` + RPC `close_cash_register` (cálculo server-side + guarda gerencial), verificação pós-migração (checks 32–34) e publicação |
 | 18 | [Migração de add-ons no live](18-migracao-addons-persistencia.md) | Runbook histórico das migrações de persistência dos add-ons (agora consolidadas no `schema.sql`/`upgrade.sql`) |
 | 19 | **[Supabase de produção — passo a passo](19-supabase-producao-passo-a-passo.md)** | **Guia definitivo da configuração do Supabase de produção: 2 scripts SQL consolidados, promoção de super admin, credenciais do app, build de produção, checklist de validação e solução de problemas** |
+| 20 | [Migração do MFA server-side (aal2) no live](20-migracao-mfa-aal2.md) | Runbook do P1: coluna `tenants.mfa_enforced`, helpers aal2, guardas `mfa_ok` nas RPCs/políticas do dinheiro, correção do overload PGRST203 de `update_tenant_settings`, verificação (checks 36–39) e ativação por tenant |
 
 ---
 

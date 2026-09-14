@@ -27,6 +27,12 @@
 #        store_id+closing_date), RPC close_cash_register SECURITY DEFINER
 #        com guarda is_manager_of_store (Parte 25.5) e triggers/índice
 #        (Partes 25.3/25.4) — checks 32-34
+#   MFA server-side (P1, Sep 2026) → coluna tenants.mfa_enforced + 4
+#        helpers aal2 (check 36), guardas mfa_ok nas 7 RPCs do dinheiro
+#        (check 37), policies INSERT/UPDATE das 6 tabelas de dinheiro com
+#        mfa_ok (check 38) e assinatura ÚNICA 4-arg de
+#        update_tenant_settings — overload legado 3-arg removido
+#        (check 39, causa raiz do PGRST203) — checks 36-39
 #   Migração → quantidade de super_admins registrados (informativo)
 #
 # Uso:
@@ -117,7 +123,9 @@ BEGIN
     'public.register_debt(jsonb)',
     'public.settle_debt(text,text)',
     'public.create_employee_account(text,text,text,text,text,text)',
-    'public.update_tenant_settings(text,text,text)'
+    'public.update_tenant_settings(text,text,text,boolean)',
+    'public.cancel_sale(text,text)',
+    'public.adjust_product_stock(text,text,bigint)'
   ]) AS sig
   LOOP
     IF to_regprocedure(r.sig) IS NULL THEN
@@ -127,7 +135,7 @@ BEGIN
       RAISE EXCEPTION 'FAIL: % nao e SECURITY DEFINER', r.sig;
     END IF;
   END LOOP;
-  RAISE NOTICE 'PASS: process_sale / process_purchase / register_debt / settle_debt / create_employee_account / update_tenant_settings OK';
+  RAISE NOTICE 'PASS: process_sale / process_purchase / register_debt / settle_debt / create_employee_account / update_tenant_settings(4-arg) / cancel_sale / adjust_product_stock OK';
 END $$;
 
 \echo '== 5. index idx_financial_transactions_debt (C4) =='
@@ -722,6 +730,104 @@ BEGIN
     RAISE EXCEPTION 'FAIL: get_cash_closing_summary sem agregacao server-side sobre sales';
   END IF;
   RAISE NOTICE 'PASS: get_cash_closing_summary SECURITY DEFINER + guarda is_my_store + agregacao server-side';
+END $$;
+
+\echo '== 36. MFA server-side: coluna tenants.mfa_enforced + helpers aal2 (P1) =='
+DO $$
+DECLARE
+  r record;
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'tenants'
+      AND column_name = 'mfa_enforced' AND data_type = 'boolean'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: coluna tenants.mfa_enforced ausente (upgrade.sql P1)';
+  END IF;
+  FOR r IN SELECT unnest(ARRAY[
+    'public.mfa_verified_factor_count(uuid)',
+    'public.mfa_satisfied(uuid)',
+    'public.mfa_enforced_for_user(uuid)',
+    'public.mfa_ok(uuid)'
+  ]) AS sig
+  LOOP
+    IF to_regprocedure(r.sig) IS NULL THEN
+      RAISE EXCEPTION 'FAIL: helper MFA % ausente', r.sig;
+    END IF;
+    IF NOT (SELECT prosecdef FROM pg_proc WHERE oid = to_regprocedure(r.sig)) THEN
+      RAISE EXCEPTION 'FAIL: helper MFA % nao e SECURITY DEFINER', r.sig;
+    END IF;
+  END LOOP;
+  RAISE NOTICE 'PASS: tenants.mfa_enforced + helpers mfa_verified_factor_count/mfa_satisfied/mfa_enforced_for_user/mfa_ok OK';
+END $$;
+
+\echo '== 37. MFA: guardas aal2 (mfa_ok) nas 7 RPCs do dinheiro (P1) =='
+DO $$
+DECLARE
+  r record;
+  v_def text;
+BEGIN
+  FOR r IN SELECT unnest(ARRAY[
+    'public.process_sale(jsonb,jsonb)',
+    'public.cancel_sale(text,text)',
+    'public.register_debt(jsonb)',
+    'public.settle_debt(text,text)',
+    'public.process_purchase(jsonb,jsonb)',
+    'public.adjust_product_stock(text,text,bigint)',
+    'public.close_cash_register(text,timestamptz,bigint)'
+  ]) AS sig
+  LOOP
+    IF to_regprocedure(r.sig) IS NULL THEN
+      RAISE EXCEPTION 'FAIL: RPC % ausente para guarda MFA', r.sig;
+    END IF;
+    SELECT pg_get_functiondef(to_regprocedure(r.sig)) INTO v_def;
+    IF position('mfa_ok' IN v_def) = 0 THEN
+      RAISE EXCEPTION 'FAIL: % sem guarda mfa_ok (upgrade.sql P1 nao aplicado?)', r.sig;
+    END IF;
+  END LOOP;
+  RAISE NOTICE 'PASS: guardas mfa_ok presentes nas 7 RPCs do dinheiro';
+END $$;
+
+\echo '== 38. MFA: policies INSERT/UPDATE das tabelas de dinheiro com mfa_ok (P1) =='
+DO $$
+DECLARE
+  r record;
+  v_count int := 0;
+BEGIN
+  FOR r IN
+    SELECT tablename, policyname FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename IN ('sales','sale_items','sale_lot_consumption','financial_transactions','debts','purchases')
+      AND policyname IN (
+        'sales_insert','sales_update',
+        'sale_items_insert','sale_items_update',
+        'sale_lot_consumption_insert',
+        'financial_transactions_insert','financial_transactions_update',
+        'debts_insert','debts_update',
+        'purchases_insert','purchases_update'
+      )
+  LOOP
+    IF position('mfa_ok' IN COALESCE(r.qual, '') || COALESCE(r.with_check, '')) = 0 THEN
+      RAISE EXCEPTION 'FAIL: policy %.% sem guarda mfa_ok', r.tablename, r.policyname;
+    END IF;
+    v_count := v_count + 1;
+  END LOOP;
+  IF v_count < 11 THEN
+    RAISE EXCEPTION 'FAIL: apenas % policies de dinheiro com mfa_ok (esperado >= 11)', v_count;
+  END IF;
+  RAISE NOTICE 'PASS: % policies INSERT/UPDATE do dinheiro exigem mfa_ok', v_count;
+END $$;
+
+\echo '== 39. MFA: overload legado update_tenant_settings(3-arg) removido (PGRST203) =='
+DO $$
+BEGIN
+  IF to_regprocedure('public.update_tenant_settings(text,text,text)') IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL: overload legado update_tenant_settings(text,text,text) ainda existe (rodar o DROP do upgrade.sql P1)';
+  END IF;
+  IF to_regprocedure('public.update_tenant_settings(text,text,text,boolean)') IS NULL THEN
+    RAISE EXCEPTION 'FAIL: update_tenant_settings(text,text,text,boolean) ausente';
+  END IF;
+  RAISE NOTICE 'PASS: update_tenant_settings com assinatura unica 4-arg (sem PGRST203)';
 END $$;
 SQL
 
