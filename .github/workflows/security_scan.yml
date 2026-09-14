@@ -33,4 +33,10 @@ jobs:
       scan-args: |-
         --lockfile=pubspec.lock
       fail-on-vuln: true
-      upload-sarif: true
+      # upload-sarif desligado: o repo NÃO tem Code scanning habilitado
+      # (Settings → Code security) e o upload falha o job com
+      # JOB_STATUS_CONFIGURATION_ERROR mesmo sem vulnerabilidades — o
+      # resultado real (falha só com CVE/GHSA) continua garantido por
+      # fail-on-vuln. Para restaurar a visibilidade no tab Security:
+      # habilite Code scanning no repo e volte a `upload-sarif: true`.
+      upload-sarif: false

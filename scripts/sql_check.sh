@@ -1829,7 +1829,7 @@ echo "OK: mfa_enforced nasce FALSE — fluxo existente intacto (venda aal1 aceit
 
 # 7.1 Dono NÃO pode ativar a exigência sem fator TOTP verificado.
 psql_app <<SQL
-SET request.jwt.claims = '{"sub": "${OWNER_UID}"};
+SET request.jwt.claims = '{"sub": "${OWNER_UID}"}';
 DO \$\$
 BEGIN
   BEGIN
@@ -1846,9 +1846,13 @@ SQL
 echo "OK: ativação da exigência sem fator TOTP verificado é rejeitada"
 
 # 7.2 Dono matricula fator TOTP verificado (como o GoTrue faria) e ativa.
-psql_app -v ON_ERROR_STOP=1 <<SQL
+# O INSERT em auth.mfa_factors roda como SUPERUSER: no Supabase real quem
+# escreve fatores é o GoTrue (privilégio elevado) — nunca a sessão do app.
+psql -v ON_ERROR_STOP=1 <<SQL
 INSERT INTO auth.mfa_factors (id, user_id, factor_type, status)
 VALUES ('aaaaaaaa-0000-0000-0000-000000000001', '${OWNER_UID}', 'totp', 'verified');
+SQL
+psql_app -v ON_ERROR_STOP=1 <<SQL
 SET request.jwt.claims = '{"sub": "${OWNER_UID}"}';
 SELECT public.update_tenant_settings('tn_smoke', 'MZN', 'pt', TRUE);
 SQL
@@ -1946,7 +1950,8 @@ mfa3_ok="$(psql_app -q -tAc "SET request.jwt.claims = '{\"sub\": \"${OWNER_UID}\
   echo "FALHA: venda após desativar a exigência deveria passar (obtido: '$mfa3_ok')"
   exit 1
 }
-psql_app -v ON_ERROR_STOP=1 <<SQL
+# Limpeza do fator também como SUPERUSER (mesmo motivo do INSERT 7.2).
+psql -v ON_ERROR_STOP=1 <<SQL
 DELETE FROM auth.mfa_factors WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001';
 SQL
 echo "OK: desativação devolve o fluxo aal1 ao normal (rollback do recurso)"
