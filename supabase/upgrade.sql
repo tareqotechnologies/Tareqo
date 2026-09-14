@@ -46,6 +46,15 @@ ALTER TABLE public.tenants
 ALTER TABLE public.tenants
   ADD COLUMN IF NOT EXISTS mfa_enforced BOOLEAN NOT NULL DEFAULT FALSE;
 
+-- ⚠️ ORDEM CRÍTICA (regressão 42703 no sql_check [1c]): as helpers de MFA
+-- (Parte 1.1, abaixo) e as helpers RLS (Parte 3) são LANGUAGE sql — o
+-- PostgreSQL valida as colunas no momento do CREATE. Ambas referenciam
+-- `store_employees.is_active`; em bases legadas a coluna precisa existir
+-- ANTES delas. A Parte 3 (3.0) repete o ADD COLUMN — idempotente — por
+-- legibilidade local.
+ALTER TABLE public.store_employees
+  ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
+
 -- ============================================================================
 -- PARTE 1.1 — Helpers de MFA no SERVIDOR (P1 — auditoria forense)
 -- ============================================================================
