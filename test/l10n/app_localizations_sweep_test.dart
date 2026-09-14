@@ -19,11 +19,132 @@ import 'package:tareqo/l10n/generated/app_localizations.dart';
 import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_fr.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
+
 /// Total de membros do catálogo: 1068 (951 getters + 117 métodos).
 const int kTotalMembers = 1068;
 const int kTotalGetters = 951;
 const int kTotalMethods = 117;
-const Set<String> kMethodNames = <String>{  'onboardingPlanDetails',  'onboardingSuccess',  'storeSwitcherA11yLabel',  'tenantPendingSubtitle',  'tenantRejectedSubtitle',  'syncPendingCount',  'syncDone',  'dashboardGreeting',  'dashboardActivityEvents',  'dashboardActivityMinutesAgo',  'dashboardFiadoCount',  'dashboardStockEntry',  'dashboardStockEntryDetail',  'dashboardExpenseRow',  'dashboardLowStockDetail',  'dashboardSaleItems',  'employeeDeactivateConfirm',  'employeeReactivateConfirm',  'upgradesRequestedOn',  'planDetails',  'addStoreSuccess',  'productsHeaderCount',  'productsFilteredCount',  'customersHeaderCount',  'customersCreditLabel',  'customersAdded',  'customersEditSuccess',  'customersDeleteConfirmMessage',  'purchasesHeaderCount',  'purchasesStockAdded',  'purchasesRegistered',  'purchasesProductNotFound',  'purchasesStockLabel',  'reportsRevenueLabel',  'financialReceivePendingBody',  'financialPayPendingBody',  'cashClosingSurplus',  'cashClosingShortage',  'debtsSettleBody',  'debtsSettled',  'debtsDueIn',  'debtsDueAgo',  'debtsSettledOn',  'debtsRegisteredFor',  'salesCartSection',  'salesHeaderTransactions',  'salesPdvCount',  'salesFilteredSummary',  'salesRegistered',  'salesInsufficientStock',  'salesStockFor',  'salesProductNotFound',  'saleDetailId',  'saleDetailCancelConfirmBody',  'adminAwaitingCount',  'adminAccessApproved',  'adminRequestRejected',  'adminRejectTitle',  'adminPlanLabel',  'adminPlanCreated',  'adminPlanUpdated',  'salesStockLimit',  'dashboardExpiredIn',  'dashboardExpiresIn',  'adminTenantDetailStoresCount',  'adminTenantDetailEmployeesCount',  'adminTenantDetailActivityCount',  'adminTenantDetailEmployeeRole',  'adminBulkApprove',  'adminBulkReject',  'adminBulkRejectTitle',  'adminBulkApproveSuccess',  'adminBulkRejectSuccess',  'adminPendingActionRequired',  'adminGrowthUp',  'adminGrowthDown',  'adminInvoiceCancelConfirm',  'notificationSinceDaysAgo',  'notificationDaysShort',  'customInvoiceCreated',  'customInvoiceItemsCount',  'customInvoiceProductOption',  'customInvoiceBillTotal',  'customInvoiceNumberPrefix',  'quotationCreated',  'quotationItemsCount',  'quotationDays',  'quotationNumberPrefix',  'employeeCommissionRate',  'employeeTargetMeta',  'employeeTargetProgress',  'addonsPerMonth',  'transfersSuccess',  'transfersError',  'pdfGeneratedOn',  'pdfFooter',  'pdfPhoneLine',  'pdfEmailLine',  'pdfNifLine',  'pdfPaymentLine',  'pdfReferenceLine',  'pdfValidityDaysLeft',  'pdfConditionValidBullet',  'adminAddonsLoadError',  'adminAddonsUpdateError',  'dashboardSaleEntry',  'mfaExpiresIn',  'mfaInitError',  'mfaVerifyError',  'adminAddonsBulkActivated',  'adminAddonsBulkDeactivated',  'adminAddonsBulkSheetCount',  'adminAddOnsCount',  'adminTenantCount',  'adminTenantCycleActiveLeft',  'adminTenantCycleExpiresIn',  'adminTenantCycleTrialLeft',};/// Carrega os valores de string do ARB (chaves sem `@`).
+const Set<String> kMethodNames = <String>{
+  'onboardingPlanDetails',
+  'onboardingSuccess',
+  'storeSwitcherA11yLabel',
+  'tenantPendingSubtitle',
+  'tenantRejectedSubtitle',
+  'syncPendingCount',
+  'syncDone',
+  'dashboardGreeting',
+  'dashboardActivityEvents',
+  'dashboardActivityMinutesAgo',
+  'dashboardFiadoCount',
+  'dashboardStockEntry',
+  'dashboardStockEntryDetail',
+  'dashboardExpenseRow',
+  'dashboardLowStockDetail',
+  'dashboardSaleItems',
+  'employeeDeactivateConfirm',
+  'employeeReactivateConfirm',
+  'upgradesRequestedOn',
+  'planDetails',
+  'addStoreSuccess',
+  'productsHeaderCount',
+  'productsFilteredCount',
+  'customersHeaderCount',
+  'customersCreditLabel',
+  'customersAdded',
+  'customersEditSuccess',
+  'customersDeleteConfirmMessage',
+  'purchasesHeaderCount',
+  'purchasesStockAdded',
+  'purchasesRegistered',
+  'purchasesProductNotFound',
+  'purchasesStockLabel',
+  'reportsRevenueLabel',
+  'financialReceivePendingBody',
+  'financialPayPendingBody',
+  'cashClosingSurplus',
+  'cashClosingShortage',
+  'debtsSettleBody',
+  'debtsSettled',
+  'debtsDueIn',
+  'debtsDueAgo',
+  'debtsSettledOn',
+  'debtsRegisteredFor',
+  'salesCartSection',
+  'salesHeaderTransactions',
+  'salesPdvCount',
+  'salesFilteredSummary',
+  'salesRegistered',
+  'salesInsufficientStock',
+  'salesStockFor',
+  'salesProductNotFound',
+  'saleDetailId',
+  'saleDetailCancelConfirmBody',
+  'adminAwaitingCount',
+  'adminAccessApproved',
+  'adminRequestRejected',
+  'adminRejectTitle',
+  'adminPlanLabel',
+  'adminPlanCreated',
+  'adminPlanUpdated',
+  'salesStockLimit',
+  'dashboardExpiredIn',
+  'dashboardExpiresIn',
+  'adminTenantDetailStoresCount',
+  'adminTenantDetailEmployeesCount',
+  'adminTenantDetailActivityCount',
+  'adminTenantDetailEmployeeRole',
+  'adminBulkApprove',
+  'adminBulkReject',
+  'adminBulkRejectTitle',
+  'adminBulkApproveSuccess',
+  'adminBulkRejectSuccess',
+  'adminPendingActionRequired',
+  'adminGrowthUp',
+  'adminGrowthDown',
+  'adminInvoiceCancelConfirm',
+  'notificationSinceDaysAgo',
+  'notificationDaysShort',
+  'customInvoiceCreated',
+  'customInvoiceItemsCount',
+  'customInvoiceProductOption',
+  'customInvoiceBillTotal',
+  'customInvoiceNumberPrefix',
+  'quotationCreated',
+  'quotationItemsCount',
+  'quotationDays',
+  'quotationNumberPrefix',
+  'employeeCommissionRate',
+  'employeeTargetMeta',
+  'employeeTargetProgress',
+  'addonsPerMonth',
+  'transfersSuccess',
+  'transfersError',
+  'pdfGeneratedOn',
+  'pdfFooter',
+  'pdfPhoneLine',
+  'pdfEmailLine',
+  'pdfNifLine',
+  'pdfPaymentLine',
+  'pdfReferenceLine',
+  'pdfValidityDaysLeft',
+  'pdfConditionValidBullet',
+  'adminAddonsLoadError',
+  'adminAddonsUpdateError',
+  'dashboardSaleEntry',
+  'mfaExpiresIn',
+  'mfaInitError',
+  'mfaVerifyError',
+  'adminAddonsBulkActivated',
+  'adminAddonsBulkDeactivated',
+  'adminAddonsBulkSheetCount',
+  'adminAddOnsCount',
+  'adminTenantCount',
+  'adminTenantCycleActiveLeft',
+  'adminTenantCycleExpiresIn',
+  'adminTenantCycleTrialLeft',
+};
+
+/// Carrega os valores de string do ARB (chaves sem `@`).
 Map<String, String> _loadArb(String locale) {
   final file = File('lib/l10n/app_$locale.arb');
   final data = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
@@ -32,14 +153,27 @@ Map<String, String> _loadArb(String locale) {
       if (!e.key.startsWith('@') && e.value is String) e.key: e.value as String,
   };
 }
+
 void main() {
   group('núcleo — lookup, delegates e classe base', () {
     test('lookupAppLocalizations resolve pt/en/fr e rejeita não suportado', () {
-      expect(lookupAppLocalizations(const Locale('pt')), isA<AppLocalizationsPt>());
-      expect(lookupAppLocalizations(const Locale('en')), isA<AppLocalizationsEn>());
-      expect(lookupAppLocalizations(const Locale('fr')), isA<AppLocalizationsFr>());
+      expect(
+        lookupAppLocalizations(const Locale('pt')),
+        isA<AppLocalizationsPt>(),
+      );
+      expect(
+        lookupAppLocalizations(const Locale('en')),
+        isA<AppLocalizationsEn>(),
+      );
+      expect(
+        lookupAppLocalizations(const Locale('fr')),
+        isA<AppLocalizationsFr>(),
+      );
       // Subtag ignorada: resolve pelo languageCode.
-      expect(lookupAppLocalizations(const Locale('pt', 'BR')), isA<AppLocalizationsPt>());
+      expect(
+        lookupAppLocalizations(const Locale('pt', 'BR')),
+        isA<AppLocalizationsPt>(),
+      );
       expect(
         () => lookupAppLocalizations(const Locale('es')),
         throwsFlutterError,
@@ -769,17 +903,22 @@ void main() {
         'customInvoiceTemplateSaved': l.customInvoiceTemplateSaved,
         'customInvoiceTemplateLogoSection': l.customInvoiceTemplateLogoSection,
         'customInvoiceTemplateLogoHint': l.customInvoiceTemplateLogoHint,
-        'customInvoiceTemplateColorSection': l.customInvoiceTemplateColorSection,
-        'customInvoiceTemplateCompanySection': l.customInvoiceTemplateCompanySection,
+        'customInvoiceTemplateColorSection':
+            l.customInvoiceTemplateColorSection,
+        'customInvoiceTemplateCompanySection':
+            l.customInvoiceTemplateCompanySection,
         'customInvoiceTemplateCompanyName': l.customInvoiceTemplateCompanyName,
         'customInvoiceTemplateAddress': l.customInvoiceTemplateAddress,
         'customInvoiceTemplateTaxId': l.customInvoiceTemplateTaxId,
         'customInvoiceTemplateStyle': l.customInvoiceTemplateStyle,
-        'customInvoiceTemplateStyleClassic': l.customInvoiceTemplateStyleClassic,
+        'customInvoiceTemplateStyleClassic':
+            l.customInvoiceTemplateStyleClassic,
         'customInvoiceTemplateStyleModern': l.customInvoiceTemplateStyleModern,
-        'customInvoiceTemplateStyleCompact': l.customInvoiceTemplateStyleCompact,
+        'customInvoiceTemplateStyleCompact':
+            l.customInvoiceTemplateStyleCompact,
         'customInvoiceTemplateSave': l.customInvoiceTemplateSave,
-        'customInvoicePreviewCompanyFallback': l.customInvoicePreviewCompanyFallback,
+        'customInvoicePreviewCompanyFallback':
+            l.customInvoicePreviewCompanyFallback,
         'quotationTitle': l.quotationTitle,
         'quotationEmpty': l.quotationEmpty,
         'quotationEmptySubtitle': l.quotationEmptySubtitle,
@@ -1035,23 +1174,362 @@ void main() {
       // no ARB (chave adicionada sem regenerar falha aqui). As chaves
       // dos métodos parametrizados ficam no ARB mas não no mapa de
       // getters — são subtraídas via kMethodNames.
-      expect(getters.keys.toSet(), equals(arb.keys.toSet().difference(kMethodNames)));
+      expect(
+        getters.keys.toSet(),
+        equals(arb.keys.toSet().difference(kMethodNames)),
+      );
       getters.forEach((key, actual) {
         expect(actual, arb[key], reason: '$key divergiu do ARB pt');
       });
     });
-    test('métodos: ramos de plural (=0, =1, other) e interpolação executam', () {
-      final l = AppLocalizationsPt();
-      final methods = <String, List<String Function(AppLocalizations)>>{
-        'onboardingPlanDetails': [          (l) => l.onboardingPlanDetails(0, 2),          (l) => l.onboardingPlanDetails(1, 2),          (l) => l.onboardingPlanDetails(2, 2),        ],        'onboardingSuccess': [          (l) => l.onboardingSuccess('X'),        ],        'storeSwitcherA11yLabel': [          (l) => l.storeSwitcherA11yLabel('X'),        ],        'tenantPendingSubtitle': [          (l) => l.tenantPendingSubtitle('X'),        ],        'tenantRejectedSubtitle': [          (l) => l.tenantRejectedSubtitle('X'),        ],        'syncPendingCount': [          (l) => l.syncPendingCount(0),          (l) => l.syncPendingCount(1),          (l) => l.syncPendingCount(2),        ],        'syncDone': [          (l) => l.syncDone(0),          (l) => l.syncDone(1),          (l) => l.syncDone(2),        ],        'dashboardGreeting': [          (l) => l.dashboardGreeting('X'),        ],        'dashboardActivityEvents': [          (l) => l.dashboardActivityEvents(0),          (l) => l.dashboardActivityEvents(1),          (l) => l.dashboardActivityEvents(2),        ],        'dashboardActivityMinutesAgo': [          (l) => l.dashboardActivityMinutesAgo('X'),        ],        'dashboardFiadoCount': [          (l) => l.dashboardFiadoCount(0),          (l) => l.dashboardFiadoCount(1),          (l) => l.dashboardFiadoCount(2),        ],        'dashboardStockEntry': [          (l) => l.dashboardStockEntry('X'),        ],        'dashboardStockEntryDetail': [          (l) => l.dashboardStockEntryDetail('X', 'X'),        ],        'dashboardExpenseRow': [          (l) => l.dashboardExpenseRow('X'),        ],        'dashboardLowStockDetail': [          (l) => l.dashboardLowStockDetail('X', 'X'),        ],        'dashboardSaleItems': [          (l) => l.dashboardSaleItems(0),          (l) => l.dashboardSaleItems(1),          (l) => l.dashboardSaleItems(2),        ],        'employeeDeactivateConfirm': [          (l) => l.employeeDeactivateConfirm('X'),        ],        'employeeReactivateConfirm': [          (l) => l.employeeReactivateConfirm('X'),        ],        'upgradesRequestedOn': [          (l) => l.upgradesRequestedOn('X'),        ],        'planDetails': [          (l) => l.planDetails(0, 2),          (l) => l.planDetails(1, 2),          (l) => l.planDetails(2, 2),        ],        'addStoreSuccess': [          (l) => l.addStoreSuccess('X'),        ],        'productsHeaderCount': [          (l) => l.productsHeaderCount(0),          (l) => l.productsHeaderCount(1),          (l) => l.productsHeaderCount(2),        ],        'productsFilteredCount': [          (l) => l.productsFilteredCount(0),          (l) => l.productsFilteredCount(1),          (l) => l.productsFilteredCount(2),        ],        'customersHeaderCount': [          (l) => l.customersHeaderCount(0),          (l) => l.customersHeaderCount(1),          (l) => l.customersHeaderCount(2),        ],        'customersCreditLabel': [          (l) => l.customersCreditLabel('X'),        ],        'customersAdded': [          (l) => l.customersAdded('X'),        ],        'customersEditSuccess': [          (l) => l.customersEditSuccess('X'),        ],        'customersDeleteConfirmMessage': [          (l) => l.customersDeleteConfirmMessage('X'),        ],        'purchasesHeaderCount': [          (l) => l.purchasesHeaderCount(0),          (l) => l.purchasesHeaderCount(1),          (l) => l.purchasesHeaderCount(2),        ],        'purchasesStockAdded': [          (l) => l.purchasesStockAdded(0, 'X'),          (l) => l.purchasesStockAdded(1, 'X'),          (l) => l.purchasesStockAdded(2, 'X'),        ],        'purchasesRegistered': [          (l) => l.purchasesRegistered('X'),        ],        'purchasesProductNotFound': [          (l) => l.purchasesProductNotFound('X'),        ],        'purchasesStockLabel': [          (l) => l.purchasesStockLabel(0, 'X'),          (l) => l.purchasesStockLabel(1, 'X'),          (l) => l.purchasesStockLabel(2, 'X'),        ],        'reportsRevenueLabel': [          (l) => l.reportsRevenueLabel('X'),        ],        'financialReceivePendingBody': [          (l) => l.financialReceivePendingBody('X'),        ],        'financialPayPendingBody': [          (l) => l.financialPayPendingBody('X'),        ],        'cashClosingSurplus': [          (l) => l.cashClosingSurplus('X'),        ],        'cashClosingShortage': [          (l) => l.cashClosingShortage('X'),        ],        'debtsSettleBody': [          (l) => l.debtsSettleBody('X', 'X'),        ],        'debtsSettled': [          (l) => l.debtsSettled('X', 'X'),        ],        'debtsDueIn': [          (l) => l.debtsDueIn(0),          (l) => l.debtsDueIn(1),          (l) => l.debtsDueIn(2),        ],        'debtsDueAgo': [          (l) => l.debtsDueAgo(0),          (l) => l.debtsDueAgo(1),          (l) => l.debtsDueAgo(2),        ],        'debtsSettledOn': [          (l) => l.debtsSettledOn('X'),        ],        'debtsRegisteredFor': [          (l) => l.debtsRegisteredFor('X'),        ],        'salesCartSection': [          (l) => l.salesCartSection(0),          (l) => l.salesCartSection(1),          (l) => l.salesCartSection(2),        ],        'salesHeaderTransactions': [          (l) => l.salesHeaderTransactions(0),          (l) => l.salesHeaderTransactions(1),          (l) => l.salesHeaderTransactions(2),        ],        'salesPdvCount': [          (l) => l.salesPdvCount(0),          (l) => l.salesPdvCount(1),          (l) => l.salesPdvCount(2),        ],        'salesFilteredSummary': [          (l) => l.salesFilteredSummary(0, 'X'),          (l) => l.salesFilteredSummary(1, 'X'),          (l) => l.salesFilteredSummary(2, 'X'),        ],        'salesRegistered': [          (l) => l.salesRegistered('X'),        ],        'salesInsufficientStock': [          (l) => l.salesInsufficientStock('X', 2),        ],        'salesStockFor': [          (l) => l.salesStockFor('X'),        ],        'salesProductNotFound': [          (l) => l.salesProductNotFound('X'),        ],        'saleDetailId': [          (l) => l.saleDetailId('X'),        ],        'saleDetailCancelConfirmBody': [          (l) => l.saleDetailCancelConfirmBody('X'),        ],        'adminAwaitingCount': [          (l) => l.adminAwaitingCount(0),          (l) => l.adminAwaitingCount(1),          (l) => l.adminAwaitingCount(2),        ],        'adminAccessApproved': [          (l) => l.adminAccessApproved('X'),        ],        'adminRequestRejected': [          (l) => l.adminRequestRejected('X'),        ],        'adminRejectTitle': [          (l) => l.adminRejectTitle('X'),        ],        'adminPlanLabel': [          (l) => l.adminPlanLabel('X'),        ],        'adminPlanCreated': [          (l) => l.adminPlanCreated('X'),        ],        'adminPlanUpdated': [          (l) => l.adminPlanUpdated('X'),        ],        'salesStockLimit': [          (l) => l.salesStockLimit('X'),        ],        'dashboardExpiredIn': [          (l) => l.dashboardExpiredIn(0),          (l) => l.dashboardExpiredIn(1),          (l) => l.dashboardExpiredIn(2),        ],        'dashboardExpiresIn': [          (l) => l.dashboardExpiresIn(0),          (l) => l.dashboardExpiresIn(1),          (l) => l.dashboardExpiresIn(2),        ],        'adminTenantDetailStoresCount': [          (l) => l.adminTenantDetailStoresCount(0),          (l) => l.adminTenantDetailStoresCount(1),          (l) => l.adminTenantDetailStoresCount(2),        ],        'adminTenantDetailEmployeesCount': [          (l) => l.adminTenantDetailEmployeesCount(0),          (l) => l.adminTenantDetailEmployeesCount(1),          (l) => l.adminTenantDetailEmployeesCount(2),        ],        'adminTenantDetailActivityCount': [          (l) => l.adminTenantDetailActivityCount(0),          (l) => l.adminTenantDetailActivityCount(1),          (l) => l.adminTenantDetailActivityCount(2),        ],        'adminTenantDetailEmployeeRole': [          (l) => l.adminTenantDetailEmployeeRole('X'),        ],        'adminBulkApprove': [          (l) => l.adminBulkApprove('X'),        ],        'adminBulkReject': [          (l) => l.adminBulkReject('X'),        ],        'adminBulkRejectTitle': [          (l) => l.adminBulkRejectTitle(0),          (l) => l.adminBulkRejectTitle(1),          (l) => l.adminBulkRejectTitle(2),        ],        'adminBulkApproveSuccess': [          (l) => l.adminBulkApproveSuccess(0),          (l) => l.adminBulkApproveSuccess(1),          (l) => l.adminBulkApproveSuccess(2),        ],        'adminBulkRejectSuccess': [          (l) => l.adminBulkRejectSuccess(0),          (l) => l.adminBulkRejectSuccess(1),          (l) => l.adminBulkRejectSuccess(2),        ],        'adminPendingActionRequired': [          (l) => l.adminPendingActionRequired(0),          (l) => l.adminPendingActionRequired(1),          (l) => l.adminPendingActionRequired(2),        ],        'adminGrowthUp': [          (l) => l.adminGrowthUp('X'),        ],        'adminGrowthDown': [          (l) => l.adminGrowthDown('X'),        ],        'adminInvoiceCancelConfirm': [          (l) => l.adminInvoiceCancelConfirm('X'),        ],        'notificationSinceDaysAgo': [          (l) => l.notificationSinceDaysAgo(0),          (l) => l.notificationSinceDaysAgo(1),          (l) => l.notificationSinceDaysAgo(2),        ],        'notificationDaysShort': [          (l) => l.notificationDaysShort(0),          (l) => l.notificationDaysShort(1),          (l) => l.notificationDaysShort(2),        ],        'customInvoiceCreated': [          (l) => l.customInvoiceCreated(0),          (l) => l.customInvoiceCreated(1),          (l) => l.customInvoiceCreated(2),        ],        'customInvoiceItemsCount': [          (l) => l.customInvoiceItemsCount(0),          (l) => l.customInvoiceItemsCount(1),          (l) => l.customInvoiceItemsCount(2),        ],        'customInvoiceProductOption': [          (l) => l.customInvoiceProductOption('X', 'X', 'X'),        ],        'customInvoiceBillTotal': [          (l) => l.customInvoiceBillTotal('X'),        ],        'customInvoiceNumberPrefix': [          (l) => l.customInvoiceNumberPrefix('X'),        ],        'quotationCreated': [          (l) => l.quotationCreated(0),          (l) => l.quotationCreated(1),          (l) => l.quotationCreated(2),        ],        'quotationItemsCount': [          (l) => l.quotationItemsCount(0),          (l) => l.quotationItemsCount(1),          (l) => l.quotationItemsCount(2),        ],        'quotationDays': [          (l) => l.quotationDays(0),          (l) => l.quotationDays(1),          (l) => l.quotationDays(2),        ],        'quotationNumberPrefix': [          (l) => l.quotationNumberPrefix('X'),        ],        'employeeCommissionRate': [          (l) => l.employeeCommissionRate(0, 'X'),          (l) => l.employeeCommissionRate(1, 'X'),          (l) => l.employeeCommissionRate(2, 'X'),        ],        'employeeTargetMeta': [          (l) => l.employeeTargetMeta('X'),        ],        'employeeTargetProgress': [          (l) => l.employeeTargetProgress(0),          (l) => l.employeeTargetProgress(1),          (l) => l.employeeTargetProgress(2),        ],        'addonsPerMonth': [          (l) => l.addonsPerMonth('X'),        ],        'transfersSuccess': [          (l) => l.transfersSuccess(0),          (l) => l.transfersSuccess(1),          (l) => l.transfersSuccess(2),        ],        'transfersError': [          (l) => l.transfersError('X'),        ],        'pdfGeneratedOn': [          (l) => l.pdfGeneratedOn('X'),        ],        'pdfFooter': [          (l) => l.pdfFooter('X'),        ],        'pdfPhoneLine': [          (l) => l.pdfPhoneLine('X'),        ],        'pdfEmailLine': [          (l) => l.pdfEmailLine('X'),        ],        'pdfNifLine': [          (l) => l.pdfNifLine('X'),        ],        'pdfPaymentLine': [          (l) => l.pdfPaymentLine('X'),        ],        'pdfReferenceLine': [          (l) => l.pdfReferenceLine('X'),        ],        'pdfValidityDaysLeft': [          (l) => l.pdfValidityDaysLeft(0),          (l) => l.pdfValidityDaysLeft(1),          (l) => l.pdfValidityDaysLeft(2),        ],        'pdfConditionValidBullet': [          (l) => l.pdfConditionValidBullet('X'),        ],        'adminAddonsLoadError': [          (l) => l.adminAddonsLoadError('X'),        ],        'adminAddonsUpdateError': [          (l) => l.adminAddonsUpdateError('X'),        ],        'dashboardSaleEntry': [          (l) => l.dashboardSaleEntry('X'),        ],        'mfaExpiresIn': [          (l) => l.mfaExpiresIn(0),          (l) => l.mfaExpiresIn(1),          (l) => l.mfaExpiresIn(2),        ],        'mfaInitError': [          (l) => l.mfaInitError('X'),        ],        'mfaVerifyError': [          (l) => l.mfaVerifyError('X'),        ],        'adminAddonsBulkActivated': [          (l) => l.adminAddonsBulkActivated('X', 2),        ],        'adminAddonsBulkDeactivated': [          (l) => l.adminAddonsBulkDeactivated('X', 2),        ],        'adminAddonsBulkSheetCount': [          (l) => l.adminAddonsBulkSheetCount(0),          (l) => l.adminAddonsBulkSheetCount(1),          (l) => l.adminAddonsBulkSheetCount(2),        ],        'adminAddOnsCount': [          (l) => l.adminAddOnsCount(0),          (l) => l.adminAddOnsCount(1),          (l) => l.adminAddOnsCount(2),        ],        'adminTenantCount': [          (l) => l.adminTenantCount(0),          (l) => l.adminTenantCount(1),          (l) => l.adminTenantCount(2),        ],        'adminTenantCycleActiveLeft': [          (l) => l.adminTenantCycleActiveLeft(0),          (l) => l.adminTenantCycleActiveLeft(1),          (l) => l.adminTenantCycleActiveLeft(2),        ],        'adminTenantCycleExpiresIn': [          (l) => l.adminTenantCycleExpiresIn(0),          (l) => l.adminTenantCycleExpiresIn(1),          (l) => l.adminTenantCycleExpiresIn(2),        ],        'adminTenantCycleTrialLeft': [          (l) => l.adminTenantCycleTrialLeft(0),          (l) => l.adminTenantCycleTrialLeft(1),          (l) => l.adminTenantCycleTrialLeft(2),        ],      };
-      expect(methods, hasLength(kTotalMethods));
-      methods.forEach((name, fns) {
-        for (final fn in fns) {
-          final result = fn(l);
-          expect(result, isNotEmpty, reason: '$name devolveu string vazia');
-        }
-      });
-    });
+    test(
+      'métodos: ramos de plural (=0, =1, other) e interpolação executam',
+      () {
+        final l = AppLocalizationsPt();
+        final methods = <String, List<String Function(AppLocalizations)>>{
+          'onboardingPlanDetails': [
+            (l) => l.onboardingPlanDetails(0, 2),
+            (l) => l.onboardingPlanDetails(1, 2),
+            (l) => l.onboardingPlanDetails(2, 2),
+          ],
+          'onboardingSuccess': [(l) => l.onboardingSuccess('X')],
+          'storeSwitcherA11yLabel': [(l) => l.storeSwitcherA11yLabel('X')],
+          'tenantPendingSubtitle': [(l) => l.tenantPendingSubtitle('X')],
+          'tenantRejectedSubtitle': [(l) => l.tenantRejectedSubtitle('X')],
+          'syncPendingCount': [
+            (l) => l.syncPendingCount(0),
+            (l) => l.syncPendingCount(1),
+            (l) => l.syncPendingCount(2),
+          ],
+          'syncDone': [
+            (l) => l.syncDone(0),
+            (l) => l.syncDone(1),
+            (l) => l.syncDone(2),
+          ],
+          'dashboardGreeting': [(l) => l.dashboardGreeting('X')],
+          'dashboardActivityEvents': [
+            (l) => l.dashboardActivityEvents(0),
+            (l) => l.dashboardActivityEvents(1),
+            (l) => l.dashboardActivityEvents(2),
+          ],
+          'dashboardActivityMinutesAgo': [
+            (l) => l.dashboardActivityMinutesAgo('X'),
+          ],
+          'dashboardFiadoCount': [
+            (l) => l.dashboardFiadoCount(0),
+            (l) => l.dashboardFiadoCount(1),
+            (l) => l.dashboardFiadoCount(2),
+          ],
+          'dashboardStockEntry': [(l) => l.dashboardStockEntry('X')],
+          'dashboardStockEntryDetail': [
+            (l) => l.dashboardStockEntryDetail('X', 'X'),
+          ],
+          'dashboardExpenseRow': [(l) => l.dashboardExpenseRow('X')],
+          'dashboardLowStockDetail': [
+            (l) => l.dashboardLowStockDetail('X', 'X'),
+          ],
+          'dashboardSaleItems': [
+            (l) => l.dashboardSaleItems(0),
+            (l) => l.dashboardSaleItems(1),
+            (l) => l.dashboardSaleItems(2),
+          ],
+          'employeeDeactivateConfirm': [
+            (l) => l.employeeDeactivateConfirm('X'),
+          ],
+          'employeeReactivateConfirm': [
+            (l) => l.employeeReactivateConfirm('X'),
+          ],
+          'upgradesRequestedOn': [(l) => l.upgradesRequestedOn('X')],
+          'planDetails': [
+            (l) => l.planDetails(0, 2),
+            (l) => l.planDetails(1, 2),
+            (l) => l.planDetails(2, 2),
+          ],
+          'addStoreSuccess': [(l) => l.addStoreSuccess('X')],
+          'productsHeaderCount': [
+            (l) => l.productsHeaderCount(0),
+            (l) => l.productsHeaderCount(1),
+            (l) => l.productsHeaderCount(2),
+          ],
+          'productsFilteredCount': [
+            (l) => l.productsFilteredCount(0),
+            (l) => l.productsFilteredCount(1),
+            (l) => l.productsFilteredCount(2),
+          ],
+          'customersHeaderCount': [
+            (l) => l.customersHeaderCount(0),
+            (l) => l.customersHeaderCount(1),
+            (l) => l.customersHeaderCount(2),
+          ],
+          'customersCreditLabel': [(l) => l.customersCreditLabel('X')],
+          'customersAdded': [(l) => l.customersAdded('X')],
+          'customersEditSuccess': [(l) => l.customersEditSuccess('X')],
+          'customersDeleteConfirmMessage': [
+            (l) => l.customersDeleteConfirmMessage('X'),
+          ],
+          'purchasesHeaderCount': [
+            (l) => l.purchasesHeaderCount(0),
+            (l) => l.purchasesHeaderCount(1),
+            (l) => l.purchasesHeaderCount(2),
+          ],
+          'purchasesStockAdded': [
+            (l) => l.purchasesStockAdded(0, 'X'),
+            (l) => l.purchasesStockAdded(1, 'X'),
+            (l) => l.purchasesStockAdded(2, 'X'),
+          ],
+          'purchasesRegistered': [(l) => l.purchasesRegistered('X')],
+          'purchasesProductNotFound': [(l) => l.purchasesProductNotFound('X')],
+          'purchasesStockLabel': [
+            (l) => l.purchasesStockLabel(0, 'X'),
+            (l) => l.purchasesStockLabel(1, 'X'),
+            (l) => l.purchasesStockLabel(2, 'X'),
+          ],
+          'reportsRevenueLabel': [(l) => l.reportsRevenueLabel('X')],
+          'financialReceivePendingBody': [
+            (l) => l.financialReceivePendingBody('X'),
+          ],
+          'financialPayPendingBody': [(l) => l.financialPayPendingBody('X')],
+          'cashClosingSurplus': [(l) => l.cashClosingSurplus('X')],
+          'cashClosingShortage': [(l) => l.cashClosingShortage('X')],
+          'debtsSettleBody': [(l) => l.debtsSettleBody('X', 'X')],
+          'debtsSettled': [(l) => l.debtsSettled('X', 'X')],
+          'debtsDueIn': [
+            (l) => l.debtsDueIn(0),
+            (l) => l.debtsDueIn(1),
+            (l) => l.debtsDueIn(2),
+          ],
+          'debtsDueAgo': [
+            (l) => l.debtsDueAgo(0),
+            (l) => l.debtsDueAgo(1),
+            (l) => l.debtsDueAgo(2),
+          ],
+          'debtsSettledOn': [(l) => l.debtsSettledOn('X')],
+          'debtsRegisteredFor': [(l) => l.debtsRegisteredFor('X')],
+          'salesCartSection': [
+            (l) => l.salesCartSection(0),
+            (l) => l.salesCartSection(1),
+            (l) => l.salesCartSection(2),
+          ],
+          'salesHeaderTransactions': [
+            (l) => l.salesHeaderTransactions(0),
+            (l) => l.salesHeaderTransactions(1),
+            (l) => l.salesHeaderTransactions(2),
+          ],
+          'salesPdvCount': [
+            (l) => l.salesPdvCount(0),
+            (l) => l.salesPdvCount(1),
+            (l) => l.salesPdvCount(2),
+          ],
+          'salesFilteredSummary': [
+            (l) => l.salesFilteredSummary(0, 'X'),
+            (l) => l.salesFilteredSummary(1, 'X'),
+            (l) => l.salesFilteredSummary(2, 'X'),
+          ],
+          'salesRegistered': [(l) => l.salesRegistered('X')],
+          'salesInsufficientStock': [(l) => l.salesInsufficientStock('X', 2)],
+          'salesStockFor': [(l) => l.salesStockFor('X')],
+          'salesProductNotFound': [(l) => l.salesProductNotFound('X')],
+          'saleDetailId': [(l) => l.saleDetailId('X')],
+          'saleDetailCancelConfirmBody': [
+            (l) => l.saleDetailCancelConfirmBody('X'),
+          ],
+          'adminAwaitingCount': [
+            (l) => l.adminAwaitingCount(0),
+            (l) => l.adminAwaitingCount(1),
+            (l) => l.adminAwaitingCount(2),
+          ],
+          'adminAccessApproved': [(l) => l.adminAccessApproved('X')],
+          'adminRequestRejected': [(l) => l.adminRequestRejected('X')],
+          'adminRejectTitle': [(l) => l.adminRejectTitle('X')],
+          'adminPlanLabel': [(l) => l.adminPlanLabel('X')],
+          'adminPlanCreated': [(l) => l.adminPlanCreated('X')],
+          'adminPlanUpdated': [(l) => l.adminPlanUpdated('X')],
+          'salesStockLimit': [(l) => l.salesStockLimit('X')],
+          'dashboardExpiredIn': [
+            (l) => l.dashboardExpiredIn(0),
+            (l) => l.dashboardExpiredIn(1),
+            (l) => l.dashboardExpiredIn(2),
+          ],
+          'dashboardExpiresIn': [
+            (l) => l.dashboardExpiresIn(0),
+            (l) => l.dashboardExpiresIn(1),
+            (l) => l.dashboardExpiresIn(2),
+          ],
+          'adminTenantDetailStoresCount': [
+            (l) => l.adminTenantDetailStoresCount(0),
+            (l) => l.adminTenantDetailStoresCount(1),
+            (l) => l.adminTenantDetailStoresCount(2),
+          ],
+          'adminTenantDetailEmployeesCount': [
+            (l) => l.adminTenantDetailEmployeesCount(0),
+            (l) => l.adminTenantDetailEmployeesCount(1),
+            (l) => l.adminTenantDetailEmployeesCount(2),
+          ],
+          'adminTenantDetailActivityCount': [
+            (l) => l.adminTenantDetailActivityCount(0),
+            (l) => l.adminTenantDetailActivityCount(1),
+            (l) => l.adminTenantDetailActivityCount(2),
+          ],
+          'adminTenantDetailEmployeeRole': [
+            (l) => l.adminTenantDetailEmployeeRole('X'),
+          ],
+          'adminBulkApprove': [(l) => l.adminBulkApprove('X')],
+          'adminBulkReject': [(l) => l.adminBulkReject('X')],
+          'adminBulkRejectTitle': [
+            (l) => l.adminBulkRejectTitle(0),
+            (l) => l.adminBulkRejectTitle(1),
+            (l) => l.adminBulkRejectTitle(2),
+          ],
+          'adminBulkApproveSuccess': [
+            (l) => l.adminBulkApproveSuccess(0),
+            (l) => l.adminBulkApproveSuccess(1),
+            (l) => l.adminBulkApproveSuccess(2),
+          ],
+          'adminBulkRejectSuccess': [
+            (l) => l.adminBulkRejectSuccess(0),
+            (l) => l.adminBulkRejectSuccess(1),
+            (l) => l.adminBulkRejectSuccess(2),
+          ],
+          'adminPendingActionRequired': [
+            (l) => l.adminPendingActionRequired(0),
+            (l) => l.adminPendingActionRequired(1),
+            (l) => l.adminPendingActionRequired(2),
+          ],
+          'adminGrowthUp': [(l) => l.adminGrowthUp('X')],
+          'adminGrowthDown': [(l) => l.adminGrowthDown('X')],
+          'adminInvoiceCancelConfirm': [
+            (l) => l.adminInvoiceCancelConfirm('X'),
+          ],
+          'notificationSinceDaysAgo': [
+            (l) => l.notificationSinceDaysAgo(0),
+            (l) => l.notificationSinceDaysAgo(1),
+            (l) => l.notificationSinceDaysAgo(2),
+          ],
+          'notificationDaysShort': [
+            (l) => l.notificationDaysShort(0),
+            (l) => l.notificationDaysShort(1),
+            (l) => l.notificationDaysShort(2),
+          ],
+          'customInvoiceCreated': [
+            (l) => l.customInvoiceCreated(0),
+            (l) => l.customInvoiceCreated(1),
+            (l) => l.customInvoiceCreated(2),
+          ],
+          'customInvoiceItemsCount': [
+            (l) => l.customInvoiceItemsCount(0),
+            (l) => l.customInvoiceItemsCount(1),
+            (l) => l.customInvoiceItemsCount(2),
+          ],
+          'customInvoiceProductOption': [
+            (l) => l.customInvoiceProductOption('X', 'X', 'X'),
+          ],
+          'customInvoiceBillTotal': [(l) => l.customInvoiceBillTotal('X')],
+          'customInvoiceNumberPrefix': [
+            (l) => l.customInvoiceNumberPrefix('X'),
+          ],
+          'quotationCreated': [
+            (l) => l.quotationCreated(0),
+            (l) => l.quotationCreated(1),
+            (l) => l.quotationCreated(2),
+          ],
+          'quotationItemsCount': [
+            (l) => l.quotationItemsCount(0),
+            (l) => l.quotationItemsCount(1),
+            (l) => l.quotationItemsCount(2),
+          ],
+          'quotationDays': [
+            (l) => l.quotationDays(0),
+            (l) => l.quotationDays(1),
+            (l) => l.quotationDays(2),
+          ],
+          'quotationNumberPrefix': [(l) => l.quotationNumberPrefix('X')],
+          'employeeCommissionRate': [
+            (l) => l.employeeCommissionRate(0, 'X'),
+            (l) => l.employeeCommissionRate(1, 'X'),
+            (l) => l.employeeCommissionRate(2, 'X'),
+          ],
+          'employeeTargetMeta': [(l) => l.employeeTargetMeta('X')],
+          'employeeTargetProgress': [
+            (l) => l.employeeTargetProgress(0),
+            (l) => l.employeeTargetProgress(1),
+            (l) => l.employeeTargetProgress(2),
+          ],
+          'addonsPerMonth': [(l) => l.addonsPerMonth('X')],
+          'transfersSuccess': [
+            (l) => l.transfersSuccess(0),
+            (l) => l.transfersSuccess(1),
+            (l) => l.transfersSuccess(2),
+          ],
+          'transfersError': [(l) => l.transfersError('X')],
+          'pdfGeneratedOn': [(l) => l.pdfGeneratedOn('X')],
+          'pdfFooter': [(l) => l.pdfFooter('X')],
+          'pdfPhoneLine': [(l) => l.pdfPhoneLine('X')],
+          'pdfEmailLine': [(l) => l.pdfEmailLine('X')],
+          'pdfNifLine': [(l) => l.pdfNifLine('X')],
+          'pdfPaymentLine': [(l) => l.pdfPaymentLine('X')],
+          'pdfReferenceLine': [(l) => l.pdfReferenceLine('X')],
+          'pdfValidityDaysLeft': [
+            (l) => l.pdfValidityDaysLeft(0),
+            (l) => l.pdfValidityDaysLeft(1),
+            (l) => l.pdfValidityDaysLeft(2),
+          ],
+          'pdfConditionValidBullet': [(l) => l.pdfConditionValidBullet('X')],
+          'adminAddonsLoadError': [(l) => l.adminAddonsLoadError('X')],
+          'adminAddonsUpdateError': [(l) => l.adminAddonsUpdateError('X')],
+          'dashboardSaleEntry': [(l) => l.dashboardSaleEntry('X')],
+          'mfaExpiresIn': [
+            (l) => l.mfaExpiresIn(0),
+            (l) => l.mfaExpiresIn(1),
+            (l) => l.mfaExpiresIn(2),
+          ],
+          'mfaInitError': [(l) => l.mfaInitError('X')],
+          'mfaVerifyError': [(l) => l.mfaVerifyError('X')],
+          'adminAddonsBulkActivated': [
+            (l) => l.adminAddonsBulkActivated('X', 2),
+          ],
+          'adminAddonsBulkDeactivated': [
+            (l) => l.adminAddonsBulkDeactivated('X', 2),
+          ],
+          'adminAddonsBulkSheetCount': [
+            (l) => l.adminAddonsBulkSheetCount(0),
+            (l) => l.adminAddonsBulkSheetCount(1),
+            (l) => l.adminAddonsBulkSheetCount(2),
+          ],
+          'adminAddOnsCount': [
+            (l) => l.adminAddOnsCount(0),
+            (l) => l.adminAddOnsCount(1),
+            (l) => l.adminAddOnsCount(2),
+          ],
+          'adminTenantCount': [
+            (l) => l.adminTenantCount(0),
+            (l) => l.adminTenantCount(1),
+            (l) => l.adminTenantCount(2),
+          ],
+          'adminTenantCycleActiveLeft': [
+            (l) => l.adminTenantCycleActiveLeft(0),
+            (l) => l.adminTenantCycleActiveLeft(1),
+            (l) => l.adminTenantCycleActiveLeft(2),
+          ],
+          'adminTenantCycleExpiresIn': [
+            (l) => l.adminTenantCycleExpiresIn(0),
+            (l) => l.adminTenantCycleExpiresIn(1),
+            (l) => l.adminTenantCycleExpiresIn(2),
+          ],
+          'adminTenantCycleTrialLeft': [
+            (l) => l.adminTenantCycleTrialLeft(0),
+            (l) => l.adminTenantCycleTrialLeft(1),
+            (l) => l.adminTenantCycleTrialLeft(2),
+          ],
+        };
+        expect(methods, hasLength(kTotalMethods));
+        methods.forEach((name, fns) {
+          for (final fn in fns) {
+            final result = fn(l);
+            expect(result, isNotEmpty, reason: '$name devolveu string vazia');
+          }
+        });
+      },
+    );
   });
   group('AppLocalizationsEn — varredura dos $kTotalMembers membros', () {
     test('getters: valor EXATAMENTE igual ao ARB e paridade de chaves', () {
@@ -1749,17 +2227,22 @@ void main() {
         'customInvoiceTemplateSaved': l.customInvoiceTemplateSaved,
         'customInvoiceTemplateLogoSection': l.customInvoiceTemplateLogoSection,
         'customInvoiceTemplateLogoHint': l.customInvoiceTemplateLogoHint,
-        'customInvoiceTemplateColorSection': l.customInvoiceTemplateColorSection,
-        'customInvoiceTemplateCompanySection': l.customInvoiceTemplateCompanySection,
+        'customInvoiceTemplateColorSection':
+            l.customInvoiceTemplateColorSection,
+        'customInvoiceTemplateCompanySection':
+            l.customInvoiceTemplateCompanySection,
         'customInvoiceTemplateCompanyName': l.customInvoiceTemplateCompanyName,
         'customInvoiceTemplateAddress': l.customInvoiceTemplateAddress,
         'customInvoiceTemplateTaxId': l.customInvoiceTemplateTaxId,
         'customInvoiceTemplateStyle': l.customInvoiceTemplateStyle,
-        'customInvoiceTemplateStyleClassic': l.customInvoiceTemplateStyleClassic,
+        'customInvoiceTemplateStyleClassic':
+            l.customInvoiceTemplateStyleClassic,
         'customInvoiceTemplateStyleModern': l.customInvoiceTemplateStyleModern,
-        'customInvoiceTemplateStyleCompact': l.customInvoiceTemplateStyleCompact,
+        'customInvoiceTemplateStyleCompact':
+            l.customInvoiceTemplateStyleCompact,
         'customInvoiceTemplateSave': l.customInvoiceTemplateSave,
-        'customInvoicePreviewCompanyFallback': l.customInvoicePreviewCompanyFallback,
+        'customInvoicePreviewCompanyFallback':
+            l.customInvoicePreviewCompanyFallback,
         'quotationTitle': l.quotationTitle,
         'quotationEmpty': l.quotationEmpty,
         'quotationEmptySubtitle': l.quotationEmptySubtitle,
@@ -2015,23 +2498,362 @@ void main() {
       // no ARB (chave adicionada sem regenerar falha aqui). As chaves
       // dos métodos parametrizados ficam no ARB mas não no mapa de
       // getters — são subtraídas via kMethodNames.
-      expect(getters.keys.toSet(), equals(arb.keys.toSet().difference(kMethodNames)));
+      expect(
+        getters.keys.toSet(),
+        equals(arb.keys.toSet().difference(kMethodNames)),
+      );
       getters.forEach((key, actual) {
         expect(actual, arb[key], reason: '$key divergiu do ARB en');
       });
     });
-    test('métodos: ramos de plural (=0, =1, other) e interpolação executam', () {
-      final l = AppLocalizationsEn();
-      final methods = <String, List<String Function(AppLocalizations)>>{
-        'onboardingPlanDetails': [          (l) => l.onboardingPlanDetails(0, 2),          (l) => l.onboardingPlanDetails(1, 2),          (l) => l.onboardingPlanDetails(2, 2),        ],        'onboardingSuccess': [          (l) => l.onboardingSuccess('X'),        ],        'storeSwitcherA11yLabel': [          (l) => l.storeSwitcherA11yLabel('X'),        ],        'tenantPendingSubtitle': [          (l) => l.tenantPendingSubtitle('X'),        ],        'tenantRejectedSubtitle': [          (l) => l.tenantRejectedSubtitle('X'),        ],        'syncPendingCount': [          (l) => l.syncPendingCount(0),          (l) => l.syncPendingCount(1),          (l) => l.syncPendingCount(2),        ],        'syncDone': [          (l) => l.syncDone(0),          (l) => l.syncDone(1),          (l) => l.syncDone(2),        ],        'dashboardGreeting': [          (l) => l.dashboardGreeting('X'),        ],        'dashboardActivityEvents': [          (l) => l.dashboardActivityEvents(0),          (l) => l.dashboardActivityEvents(1),          (l) => l.dashboardActivityEvents(2),        ],        'dashboardActivityMinutesAgo': [          (l) => l.dashboardActivityMinutesAgo('X'),        ],        'dashboardFiadoCount': [          (l) => l.dashboardFiadoCount(0),          (l) => l.dashboardFiadoCount(1),          (l) => l.dashboardFiadoCount(2),        ],        'dashboardStockEntry': [          (l) => l.dashboardStockEntry('X'),        ],        'dashboardStockEntryDetail': [          (l) => l.dashboardStockEntryDetail('X', 'X'),        ],        'dashboardExpenseRow': [          (l) => l.dashboardExpenseRow('X'),        ],        'dashboardLowStockDetail': [          (l) => l.dashboardLowStockDetail('X', 'X'),        ],        'dashboardSaleItems': [          (l) => l.dashboardSaleItems(0),          (l) => l.dashboardSaleItems(1),          (l) => l.dashboardSaleItems(2),        ],        'employeeDeactivateConfirm': [          (l) => l.employeeDeactivateConfirm('X'),        ],        'employeeReactivateConfirm': [          (l) => l.employeeReactivateConfirm('X'),        ],        'upgradesRequestedOn': [          (l) => l.upgradesRequestedOn('X'),        ],        'planDetails': [          (l) => l.planDetails(0, 2),          (l) => l.planDetails(1, 2),          (l) => l.planDetails(2, 2),        ],        'addStoreSuccess': [          (l) => l.addStoreSuccess('X'),        ],        'productsHeaderCount': [          (l) => l.productsHeaderCount(0),          (l) => l.productsHeaderCount(1),          (l) => l.productsHeaderCount(2),        ],        'productsFilteredCount': [          (l) => l.productsFilteredCount(0),          (l) => l.productsFilteredCount(1),          (l) => l.productsFilteredCount(2),        ],        'customersHeaderCount': [          (l) => l.customersHeaderCount(0),          (l) => l.customersHeaderCount(1),          (l) => l.customersHeaderCount(2),        ],        'customersCreditLabel': [          (l) => l.customersCreditLabel('X'),        ],        'customersAdded': [          (l) => l.customersAdded('X'),        ],        'customersEditSuccess': [          (l) => l.customersEditSuccess('X'),        ],        'customersDeleteConfirmMessage': [          (l) => l.customersDeleteConfirmMessage('X'),        ],        'purchasesHeaderCount': [          (l) => l.purchasesHeaderCount(0),          (l) => l.purchasesHeaderCount(1),          (l) => l.purchasesHeaderCount(2),        ],        'purchasesStockAdded': [          (l) => l.purchasesStockAdded(0, 'X'),          (l) => l.purchasesStockAdded(1, 'X'),          (l) => l.purchasesStockAdded(2, 'X'),        ],        'purchasesRegistered': [          (l) => l.purchasesRegistered('X'),        ],        'purchasesProductNotFound': [          (l) => l.purchasesProductNotFound('X'),        ],        'purchasesStockLabel': [          (l) => l.purchasesStockLabel(0, 'X'),          (l) => l.purchasesStockLabel(1, 'X'),          (l) => l.purchasesStockLabel(2, 'X'),        ],        'reportsRevenueLabel': [          (l) => l.reportsRevenueLabel('X'),        ],        'financialReceivePendingBody': [          (l) => l.financialReceivePendingBody('X'),        ],        'financialPayPendingBody': [          (l) => l.financialPayPendingBody('X'),        ],        'cashClosingSurplus': [          (l) => l.cashClosingSurplus('X'),        ],        'cashClosingShortage': [          (l) => l.cashClosingShortage('X'),        ],        'debtsSettleBody': [          (l) => l.debtsSettleBody('X', 'X'),        ],        'debtsSettled': [          (l) => l.debtsSettled('X', 'X'),        ],        'debtsDueIn': [          (l) => l.debtsDueIn(0),          (l) => l.debtsDueIn(1),          (l) => l.debtsDueIn(2),        ],        'debtsDueAgo': [          (l) => l.debtsDueAgo(0),          (l) => l.debtsDueAgo(1),          (l) => l.debtsDueAgo(2),        ],        'debtsSettledOn': [          (l) => l.debtsSettledOn('X'),        ],        'debtsRegisteredFor': [          (l) => l.debtsRegisteredFor('X'),        ],        'salesCartSection': [          (l) => l.salesCartSection(0),          (l) => l.salesCartSection(1),          (l) => l.salesCartSection(2),        ],        'salesHeaderTransactions': [          (l) => l.salesHeaderTransactions(0),          (l) => l.salesHeaderTransactions(1),          (l) => l.salesHeaderTransactions(2),        ],        'salesPdvCount': [          (l) => l.salesPdvCount(0),          (l) => l.salesPdvCount(1),          (l) => l.salesPdvCount(2),        ],        'salesFilteredSummary': [          (l) => l.salesFilteredSummary(0, 'X'),          (l) => l.salesFilteredSummary(1, 'X'),          (l) => l.salesFilteredSummary(2, 'X'),        ],        'salesRegistered': [          (l) => l.salesRegistered('X'),        ],        'salesInsufficientStock': [          (l) => l.salesInsufficientStock('X', 2),        ],        'salesStockFor': [          (l) => l.salesStockFor('X'),        ],        'salesProductNotFound': [          (l) => l.salesProductNotFound('X'),        ],        'saleDetailId': [          (l) => l.saleDetailId('X'),        ],        'saleDetailCancelConfirmBody': [          (l) => l.saleDetailCancelConfirmBody('X'),        ],        'adminAwaitingCount': [          (l) => l.adminAwaitingCount(0),          (l) => l.adminAwaitingCount(1),          (l) => l.adminAwaitingCount(2),        ],        'adminAccessApproved': [          (l) => l.adminAccessApproved('X'),        ],        'adminRequestRejected': [          (l) => l.adminRequestRejected('X'),        ],        'adminRejectTitle': [          (l) => l.adminRejectTitle('X'),        ],        'adminPlanLabel': [          (l) => l.adminPlanLabel('X'),        ],        'adminPlanCreated': [          (l) => l.adminPlanCreated('X'),        ],        'adminPlanUpdated': [          (l) => l.adminPlanUpdated('X'),        ],        'salesStockLimit': [          (l) => l.salesStockLimit('X'),        ],        'dashboardExpiredIn': [          (l) => l.dashboardExpiredIn(0),          (l) => l.dashboardExpiredIn(1),          (l) => l.dashboardExpiredIn(2),        ],        'dashboardExpiresIn': [          (l) => l.dashboardExpiresIn(0),          (l) => l.dashboardExpiresIn(1),          (l) => l.dashboardExpiresIn(2),        ],        'adminTenantDetailStoresCount': [          (l) => l.adminTenantDetailStoresCount(0),          (l) => l.adminTenantDetailStoresCount(1),          (l) => l.adminTenantDetailStoresCount(2),        ],        'adminTenantDetailEmployeesCount': [          (l) => l.adminTenantDetailEmployeesCount(0),          (l) => l.adminTenantDetailEmployeesCount(1),          (l) => l.adminTenantDetailEmployeesCount(2),        ],        'adminTenantDetailActivityCount': [          (l) => l.adminTenantDetailActivityCount(0),          (l) => l.adminTenantDetailActivityCount(1),          (l) => l.adminTenantDetailActivityCount(2),        ],        'adminTenantDetailEmployeeRole': [          (l) => l.adminTenantDetailEmployeeRole('X'),        ],        'adminBulkApprove': [          (l) => l.adminBulkApprove('X'),        ],        'adminBulkReject': [          (l) => l.adminBulkReject('X'),        ],        'adminBulkRejectTitle': [          (l) => l.adminBulkRejectTitle(0),          (l) => l.adminBulkRejectTitle(1),          (l) => l.adminBulkRejectTitle(2),        ],        'adminBulkApproveSuccess': [          (l) => l.adminBulkApproveSuccess(0),          (l) => l.adminBulkApproveSuccess(1),          (l) => l.adminBulkApproveSuccess(2),        ],        'adminBulkRejectSuccess': [          (l) => l.adminBulkRejectSuccess(0),          (l) => l.adminBulkRejectSuccess(1),          (l) => l.adminBulkRejectSuccess(2),        ],        'adminPendingActionRequired': [          (l) => l.adminPendingActionRequired(0),          (l) => l.adminPendingActionRequired(1),          (l) => l.adminPendingActionRequired(2),        ],        'adminGrowthUp': [          (l) => l.adminGrowthUp('X'),        ],        'adminGrowthDown': [          (l) => l.adminGrowthDown('X'),        ],        'adminInvoiceCancelConfirm': [          (l) => l.adminInvoiceCancelConfirm('X'),        ],        'notificationSinceDaysAgo': [          (l) => l.notificationSinceDaysAgo(0),          (l) => l.notificationSinceDaysAgo(1),          (l) => l.notificationSinceDaysAgo(2),        ],        'notificationDaysShort': [          (l) => l.notificationDaysShort(0),          (l) => l.notificationDaysShort(1),          (l) => l.notificationDaysShort(2),        ],        'customInvoiceCreated': [          (l) => l.customInvoiceCreated(0),          (l) => l.customInvoiceCreated(1),          (l) => l.customInvoiceCreated(2),        ],        'customInvoiceItemsCount': [          (l) => l.customInvoiceItemsCount(0),          (l) => l.customInvoiceItemsCount(1),          (l) => l.customInvoiceItemsCount(2),        ],        'customInvoiceProductOption': [          (l) => l.customInvoiceProductOption('X', 'X', 'X'),        ],        'customInvoiceBillTotal': [          (l) => l.customInvoiceBillTotal('X'),        ],        'customInvoiceNumberPrefix': [          (l) => l.customInvoiceNumberPrefix('X'),        ],        'quotationCreated': [          (l) => l.quotationCreated(0),          (l) => l.quotationCreated(1),          (l) => l.quotationCreated(2),        ],        'quotationItemsCount': [          (l) => l.quotationItemsCount(0),          (l) => l.quotationItemsCount(1),          (l) => l.quotationItemsCount(2),        ],        'quotationDays': [          (l) => l.quotationDays(0),          (l) => l.quotationDays(1),          (l) => l.quotationDays(2),        ],        'quotationNumberPrefix': [          (l) => l.quotationNumberPrefix('X'),        ],        'employeeCommissionRate': [          (l) => l.employeeCommissionRate(0, 'X'),          (l) => l.employeeCommissionRate(1, 'X'),          (l) => l.employeeCommissionRate(2, 'X'),        ],        'employeeTargetMeta': [          (l) => l.employeeTargetMeta('X'),        ],        'employeeTargetProgress': [          (l) => l.employeeTargetProgress(0),          (l) => l.employeeTargetProgress(1),          (l) => l.employeeTargetProgress(2),        ],        'addonsPerMonth': [          (l) => l.addonsPerMonth('X'),        ],        'transfersSuccess': [          (l) => l.transfersSuccess(0),          (l) => l.transfersSuccess(1),          (l) => l.transfersSuccess(2),        ],        'transfersError': [          (l) => l.transfersError('X'),        ],        'pdfGeneratedOn': [          (l) => l.pdfGeneratedOn('X'),        ],        'pdfFooter': [          (l) => l.pdfFooter('X'),        ],        'pdfPhoneLine': [          (l) => l.pdfPhoneLine('X'),        ],        'pdfEmailLine': [          (l) => l.pdfEmailLine('X'),        ],        'pdfNifLine': [          (l) => l.pdfNifLine('X'),        ],        'pdfPaymentLine': [          (l) => l.pdfPaymentLine('X'),        ],        'pdfReferenceLine': [          (l) => l.pdfReferenceLine('X'),        ],        'pdfValidityDaysLeft': [          (l) => l.pdfValidityDaysLeft(0),          (l) => l.pdfValidityDaysLeft(1),          (l) => l.pdfValidityDaysLeft(2),        ],        'pdfConditionValidBullet': [          (l) => l.pdfConditionValidBullet('X'),        ],        'adminAddonsLoadError': [          (l) => l.adminAddonsLoadError('X'),        ],        'adminAddonsUpdateError': [          (l) => l.adminAddonsUpdateError('X'),        ],        'dashboardSaleEntry': [          (l) => l.dashboardSaleEntry('X'),        ],        'mfaExpiresIn': [          (l) => l.mfaExpiresIn(0),          (l) => l.mfaExpiresIn(1),          (l) => l.mfaExpiresIn(2),        ],        'mfaInitError': [          (l) => l.mfaInitError('X'),        ],        'mfaVerifyError': [          (l) => l.mfaVerifyError('X'),        ],        'adminAddonsBulkActivated': [          (l) => l.adminAddonsBulkActivated('X', 2),        ],        'adminAddonsBulkDeactivated': [          (l) => l.adminAddonsBulkDeactivated('X', 2),        ],        'adminAddonsBulkSheetCount': [          (l) => l.adminAddonsBulkSheetCount(0),          (l) => l.adminAddonsBulkSheetCount(1),          (l) => l.adminAddonsBulkSheetCount(2),        ],        'adminAddOnsCount': [          (l) => l.adminAddOnsCount(0),          (l) => l.adminAddOnsCount(1),          (l) => l.adminAddOnsCount(2),        ],        'adminTenantCount': [          (l) => l.adminTenantCount(0),          (l) => l.adminTenantCount(1),          (l) => l.adminTenantCount(2),        ],        'adminTenantCycleActiveLeft': [          (l) => l.adminTenantCycleActiveLeft(0),          (l) => l.adminTenantCycleActiveLeft(1),          (l) => l.adminTenantCycleActiveLeft(2),        ],        'adminTenantCycleExpiresIn': [          (l) => l.adminTenantCycleExpiresIn(0),          (l) => l.adminTenantCycleExpiresIn(1),          (l) => l.adminTenantCycleExpiresIn(2),        ],        'adminTenantCycleTrialLeft': [          (l) => l.adminTenantCycleTrialLeft(0),          (l) => l.adminTenantCycleTrialLeft(1),          (l) => l.adminTenantCycleTrialLeft(2),        ],      };
-      expect(methods, hasLength(kTotalMethods));
-      methods.forEach((name, fns) {
-        for (final fn in fns) {
-          final result = fn(l);
-          expect(result, isNotEmpty, reason: '$name devolveu string vazia');
-        }
-      });
-    });
+    test(
+      'métodos: ramos de plural (=0, =1, other) e interpolação executam',
+      () {
+        final l = AppLocalizationsEn();
+        final methods = <String, List<String Function(AppLocalizations)>>{
+          'onboardingPlanDetails': [
+            (l) => l.onboardingPlanDetails(0, 2),
+            (l) => l.onboardingPlanDetails(1, 2),
+            (l) => l.onboardingPlanDetails(2, 2),
+          ],
+          'onboardingSuccess': [(l) => l.onboardingSuccess('X')],
+          'storeSwitcherA11yLabel': [(l) => l.storeSwitcherA11yLabel('X')],
+          'tenantPendingSubtitle': [(l) => l.tenantPendingSubtitle('X')],
+          'tenantRejectedSubtitle': [(l) => l.tenantRejectedSubtitle('X')],
+          'syncPendingCount': [
+            (l) => l.syncPendingCount(0),
+            (l) => l.syncPendingCount(1),
+            (l) => l.syncPendingCount(2),
+          ],
+          'syncDone': [
+            (l) => l.syncDone(0),
+            (l) => l.syncDone(1),
+            (l) => l.syncDone(2),
+          ],
+          'dashboardGreeting': [(l) => l.dashboardGreeting('X')],
+          'dashboardActivityEvents': [
+            (l) => l.dashboardActivityEvents(0),
+            (l) => l.dashboardActivityEvents(1),
+            (l) => l.dashboardActivityEvents(2),
+          ],
+          'dashboardActivityMinutesAgo': [
+            (l) => l.dashboardActivityMinutesAgo('X'),
+          ],
+          'dashboardFiadoCount': [
+            (l) => l.dashboardFiadoCount(0),
+            (l) => l.dashboardFiadoCount(1),
+            (l) => l.dashboardFiadoCount(2),
+          ],
+          'dashboardStockEntry': [(l) => l.dashboardStockEntry('X')],
+          'dashboardStockEntryDetail': [
+            (l) => l.dashboardStockEntryDetail('X', 'X'),
+          ],
+          'dashboardExpenseRow': [(l) => l.dashboardExpenseRow('X')],
+          'dashboardLowStockDetail': [
+            (l) => l.dashboardLowStockDetail('X', 'X'),
+          ],
+          'dashboardSaleItems': [
+            (l) => l.dashboardSaleItems(0),
+            (l) => l.dashboardSaleItems(1),
+            (l) => l.dashboardSaleItems(2),
+          ],
+          'employeeDeactivateConfirm': [
+            (l) => l.employeeDeactivateConfirm('X'),
+          ],
+          'employeeReactivateConfirm': [
+            (l) => l.employeeReactivateConfirm('X'),
+          ],
+          'upgradesRequestedOn': [(l) => l.upgradesRequestedOn('X')],
+          'planDetails': [
+            (l) => l.planDetails(0, 2),
+            (l) => l.planDetails(1, 2),
+            (l) => l.planDetails(2, 2),
+          ],
+          'addStoreSuccess': [(l) => l.addStoreSuccess('X')],
+          'productsHeaderCount': [
+            (l) => l.productsHeaderCount(0),
+            (l) => l.productsHeaderCount(1),
+            (l) => l.productsHeaderCount(2),
+          ],
+          'productsFilteredCount': [
+            (l) => l.productsFilteredCount(0),
+            (l) => l.productsFilteredCount(1),
+            (l) => l.productsFilteredCount(2),
+          ],
+          'customersHeaderCount': [
+            (l) => l.customersHeaderCount(0),
+            (l) => l.customersHeaderCount(1),
+            (l) => l.customersHeaderCount(2),
+          ],
+          'customersCreditLabel': [(l) => l.customersCreditLabel('X')],
+          'customersAdded': [(l) => l.customersAdded('X')],
+          'customersEditSuccess': [(l) => l.customersEditSuccess('X')],
+          'customersDeleteConfirmMessage': [
+            (l) => l.customersDeleteConfirmMessage('X'),
+          ],
+          'purchasesHeaderCount': [
+            (l) => l.purchasesHeaderCount(0),
+            (l) => l.purchasesHeaderCount(1),
+            (l) => l.purchasesHeaderCount(2),
+          ],
+          'purchasesStockAdded': [
+            (l) => l.purchasesStockAdded(0, 'X'),
+            (l) => l.purchasesStockAdded(1, 'X'),
+            (l) => l.purchasesStockAdded(2, 'X'),
+          ],
+          'purchasesRegistered': [(l) => l.purchasesRegistered('X')],
+          'purchasesProductNotFound': [(l) => l.purchasesProductNotFound('X')],
+          'purchasesStockLabel': [
+            (l) => l.purchasesStockLabel(0, 'X'),
+            (l) => l.purchasesStockLabel(1, 'X'),
+            (l) => l.purchasesStockLabel(2, 'X'),
+          ],
+          'reportsRevenueLabel': [(l) => l.reportsRevenueLabel('X')],
+          'financialReceivePendingBody': [
+            (l) => l.financialReceivePendingBody('X'),
+          ],
+          'financialPayPendingBody': [(l) => l.financialPayPendingBody('X')],
+          'cashClosingSurplus': [(l) => l.cashClosingSurplus('X')],
+          'cashClosingShortage': [(l) => l.cashClosingShortage('X')],
+          'debtsSettleBody': [(l) => l.debtsSettleBody('X', 'X')],
+          'debtsSettled': [(l) => l.debtsSettled('X', 'X')],
+          'debtsDueIn': [
+            (l) => l.debtsDueIn(0),
+            (l) => l.debtsDueIn(1),
+            (l) => l.debtsDueIn(2),
+          ],
+          'debtsDueAgo': [
+            (l) => l.debtsDueAgo(0),
+            (l) => l.debtsDueAgo(1),
+            (l) => l.debtsDueAgo(2),
+          ],
+          'debtsSettledOn': [(l) => l.debtsSettledOn('X')],
+          'debtsRegisteredFor': [(l) => l.debtsRegisteredFor('X')],
+          'salesCartSection': [
+            (l) => l.salesCartSection(0),
+            (l) => l.salesCartSection(1),
+            (l) => l.salesCartSection(2),
+          ],
+          'salesHeaderTransactions': [
+            (l) => l.salesHeaderTransactions(0),
+            (l) => l.salesHeaderTransactions(1),
+            (l) => l.salesHeaderTransactions(2),
+          ],
+          'salesPdvCount': [
+            (l) => l.salesPdvCount(0),
+            (l) => l.salesPdvCount(1),
+            (l) => l.salesPdvCount(2),
+          ],
+          'salesFilteredSummary': [
+            (l) => l.salesFilteredSummary(0, 'X'),
+            (l) => l.salesFilteredSummary(1, 'X'),
+            (l) => l.salesFilteredSummary(2, 'X'),
+          ],
+          'salesRegistered': [(l) => l.salesRegistered('X')],
+          'salesInsufficientStock': [(l) => l.salesInsufficientStock('X', 2)],
+          'salesStockFor': [(l) => l.salesStockFor('X')],
+          'salesProductNotFound': [(l) => l.salesProductNotFound('X')],
+          'saleDetailId': [(l) => l.saleDetailId('X')],
+          'saleDetailCancelConfirmBody': [
+            (l) => l.saleDetailCancelConfirmBody('X'),
+          ],
+          'adminAwaitingCount': [
+            (l) => l.adminAwaitingCount(0),
+            (l) => l.adminAwaitingCount(1),
+            (l) => l.adminAwaitingCount(2),
+          ],
+          'adminAccessApproved': [(l) => l.adminAccessApproved('X')],
+          'adminRequestRejected': [(l) => l.adminRequestRejected('X')],
+          'adminRejectTitle': [(l) => l.adminRejectTitle('X')],
+          'adminPlanLabel': [(l) => l.adminPlanLabel('X')],
+          'adminPlanCreated': [(l) => l.adminPlanCreated('X')],
+          'adminPlanUpdated': [(l) => l.adminPlanUpdated('X')],
+          'salesStockLimit': [(l) => l.salesStockLimit('X')],
+          'dashboardExpiredIn': [
+            (l) => l.dashboardExpiredIn(0),
+            (l) => l.dashboardExpiredIn(1),
+            (l) => l.dashboardExpiredIn(2),
+          ],
+          'dashboardExpiresIn': [
+            (l) => l.dashboardExpiresIn(0),
+            (l) => l.dashboardExpiresIn(1),
+            (l) => l.dashboardExpiresIn(2),
+          ],
+          'adminTenantDetailStoresCount': [
+            (l) => l.adminTenantDetailStoresCount(0),
+            (l) => l.adminTenantDetailStoresCount(1),
+            (l) => l.adminTenantDetailStoresCount(2),
+          ],
+          'adminTenantDetailEmployeesCount': [
+            (l) => l.adminTenantDetailEmployeesCount(0),
+            (l) => l.adminTenantDetailEmployeesCount(1),
+            (l) => l.adminTenantDetailEmployeesCount(2),
+          ],
+          'adminTenantDetailActivityCount': [
+            (l) => l.adminTenantDetailActivityCount(0),
+            (l) => l.adminTenantDetailActivityCount(1),
+            (l) => l.adminTenantDetailActivityCount(2),
+          ],
+          'adminTenantDetailEmployeeRole': [
+            (l) => l.adminTenantDetailEmployeeRole('X'),
+          ],
+          'adminBulkApprove': [(l) => l.adminBulkApprove('X')],
+          'adminBulkReject': [(l) => l.adminBulkReject('X')],
+          'adminBulkRejectTitle': [
+            (l) => l.adminBulkRejectTitle(0),
+            (l) => l.adminBulkRejectTitle(1),
+            (l) => l.adminBulkRejectTitle(2),
+          ],
+          'adminBulkApproveSuccess': [
+            (l) => l.adminBulkApproveSuccess(0),
+            (l) => l.adminBulkApproveSuccess(1),
+            (l) => l.adminBulkApproveSuccess(2),
+          ],
+          'adminBulkRejectSuccess': [
+            (l) => l.adminBulkRejectSuccess(0),
+            (l) => l.adminBulkRejectSuccess(1),
+            (l) => l.adminBulkRejectSuccess(2),
+          ],
+          'adminPendingActionRequired': [
+            (l) => l.adminPendingActionRequired(0),
+            (l) => l.adminPendingActionRequired(1),
+            (l) => l.adminPendingActionRequired(2),
+          ],
+          'adminGrowthUp': [(l) => l.adminGrowthUp('X')],
+          'adminGrowthDown': [(l) => l.adminGrowthDown('X')],
+          'adminInvoiceCancelConfirm': [
+            (l) => l.adminInvoiceCancelConfirm('X'),
+          ],
+          'notificationSinceDaysAgo': [
+            (l) => l.notificationSinceDaysAgo(0),
+            (l) => l.notificationSinceDaysAgo(1),
+            (l) => l.notificationSinceDaysAgo(2),
+          ],
+          'notificationDaysShort': [
+            (l) => l.notificationDaysShort(0),
+            (l) => l.notificationDaysShort(1),
+            (l) => l.notificationDaysShort(2),
+          ],
+          'customInvoiceCreated': [
+            (l) => l.customInvoiceCreated(0),
+            (l) => l.customInvoiceCreated(1),
+            (l) => l.customInvoiceCreated(2),
+          ],
+          'customInvoiceItemsCount': [
+            (l) => l.customInvoiceItemsCount(0),
+            (l) => l.customInvoiceItemsCount(1),
+            (l) => l.customInvoiceItemsCount(2),
+          ],
+          'customInvoiceProductOption': [
+            (l) => l.customInvoiceProductOption('X', 'X', 'X'),
+          ],
+          'customInvoiceBillTotal': [(l) => l.customInvoiceBillTotal('X')],
+          'customInvoiceNumberPrefix': [
+            (l) => l.customInvoiceNumberPrefix('X'),
+          ],
+          'quotationCreated': [
+            (l) => l.quotationCreated(0),
+            (l) => l.quotationCreated(1),
+            (l) => l.quotationCreated(2),
+          ],
+          'quotationItemsCount': [
+            (l) => l.quotationItemsCount(0),
+            (l) => l.quotationItemsCount(1),
+            (l) => l.quotationItemsCount(2),
+          ],
+          'quotationDays': [
+            (l) => l.quotationDays(0),
+            (l) => l.quotationDays(1),
+            (l) => l.quotationDays(2),
+          ],
+          'quotationNumberPrefix': [(l) => l.quotationNumberPrefix('X')],
+          'employeeCommissionRate': [
+            (l) => l.employeeCommissionRate(0, 'X'),
+            (l) => l.employeeCommissionRate(1, 'X'),
+            (l) => l.employeeCommissionRate(2, 'X'),
+          ],
+          'employeeTargetMeta': [(l) => l.employeeTargetMeta('X')],
+          'employeeTargetProgress': [
+            (l) => l.employeeTargetProgress(0),
+            (l) => l.employeeTargetProgress(1),
+            (l) => l.employeeTargetProgress(2),
+          ],
+          'addonsPerMonth': [(l) => l.addonsPerMonth('X')],
+          'transfersSuccess': [
+            (l) => l.transfersSuccess(0),
+            (l) => l.transfersSuccess(1),
+            (l) => l.transfersSuccess(2),
+          ],
+          'transfersError': [(l) => l.transfersError('X')],
+          'pdfGeneratedOn': [(l) => l.pdfGeneratedOn('X')],
+          'pdfFooter': [(l) => l.pdfFooter('X')],
+          'pdfPhoneLine': [(l) => l.pdfPhoneLine('X')],
+          'pdfEmailLine': [(l) => l.pdfEmailLine('X')],
+          'pdfNifLine': [(l) => l.pdfNifLine('X')],
+          'pdfPaymentLine': [(l) => l.pdfPaymentLine('X')],
+          'pdfReferenceLine': [(l) => l.pdfReferenceLine('X')],
+          'pdfValidityDaysLeft': [
+            (l) => l.pdfValidityDaysLeft(0),
+            (l) => l.pdfValidityDaysLeft(1),
+            (l) => l.pdfValidityDaysLeft(2),
+          ],
+          'pdfConditionValidBullet': [(l) => l.pdfConditionValidBullet('X')],
+          'adminAddonsLoadError': [(l) => l.adminAddonsLoadError('X')],
+          'adminAddonsUpdateError': [(l) => l.adminAddonsUpdateError('X')],
+          'dashboardSaleEntry': [(l) => l.dashboardSaleEntry('X')],
+          'mfaExpiresIn': [
+            (l) => l.mfaExpiresIn(0),
+            (l) => l.mfaExpiresIn(1),
+            (l) => l.mfaExpiresIn(2),
+          ],
+          'mfaInitError': [(l) => l.mfaInitError('X')],
+          'mfaVerifyError': [(l) => l.mfaVerifyError('X')],
+          'adminAddonsBulkActivated': [
+            (l) => l.adminAddonsBulkActivated('X', 2),
+          ],
+          'adminAddonsBulkDeactivated': [
+            (l) => l.adminAddonsBulkDeactivated('X', 2),
+          ],
+          'adminAddonsBulkSheetCount': [
+            (l) => l.adminAddonsBulkSheetCount(0),
+            (l) => l.adminAddonsBulkSheetCount(1),
+            (l) => l.adminAddonsBulkSheetCount(2),
+          ],
+          'adminAddOnsCount': [
+            (l) => l.adminAddOnsCount(0),
+            (l) => l.adminAddOnsCount(1),
+            (l) => l.adminAddOnsCount(2),
+          ],
+          'adminTenantCount': [
+            (l) => l.adminTenantCount(0),
+            (l) => l.adminTenantCount(1),
+            (l) => l.adminTenantCount(2),
+          ],
+          'adminTenantCycleActiveLeft': [
+            (l) => l.adminTenantCycleActiveLeft(0),
+            (l) => l.adminTenantCycleActiveLeft(1),
+            (l) => l.adminTenantCycleActiveLeft(2),
+          ],
+          'adminTenantCycleExpiresIn': [
+            (l) => l.adminTenantCycleExpiresIn(0),
+            (l) => l.adminTenantCycleExpiresIn(1),
+            (l) => l.adminTenantCycleExpiresIn(2),
+          ],
+          'adminTenantCycleTrialLeft': [
+            (l) => l.adminTenantCycleTrialLeft(0),
+            (l) => l.adminTenantCycleTrialLeft(1),
+            (l) => l.adminTenantCycleTrialLeft(2),
+          ],
+        };
+        expect(methods, hasLength(kTotalMethods));
+        methods.forEach((name, fns) {
+          for (final fn in fns) {
+            final result = fn(l);
+            expect(result, isNotEmpty, reason: '$name devolveu string vazia');
+          }
+        });
+      },
+    );
   });
   group('AppLocalizationsFr — varredura dos $kTotalMembers membros', () {
     test('getters: valor EXATAMENTE igual ao ARB e paridade de chaves', () {
@@ -2729,17 +3551,22 @@ void main() {
         'customInvoiceTemplateSaved': l.customInvoiceTemplateSaved,
         'customInvoiceTemplateLogoSection': l.customInvoiceTemplateLogoSection,
         'customInvoiceTemplateLogoHint': l.customInvoiceTemplateLogoHint,
-        'customInvoiceTemplateColorSection': l.customInvoiceTemplateColorSection,
-        'customInvoiceTemplateCompanySection': l.customInvoiceTemplateCompanySection,
+        'customInvoiceTemplateColorSection':
+            l.customInvoiceTemplateColorSection,
+        'customInvoiceTemplateCompanySection':
+            l.customInvoiceTemplateCompanySection,
         'customInvoiceTemplateCompanyName': l.customInvoiceTemplateCompanyName,
         'customInvoiceTemplateAddress': l.customInvoiceTemplateAddress,
         'customInvoiceTemplateTaxId': l.customInvoiceTemplateTaxId,
         'customInvoiceTemplateStyle': l.customInvoiceTemplateStyle,
-        'customInvoiceTemplateStyleClassic': l.customInvoiceTemplateStyleClassic,
+        'customInvoiceTemplateStyleClassic':
+            l.customInvoiceTemplateStyleClassic,
         'customInvoiceTemplateStyleModern': l.customInvoiceTemplateStyleModern,
-        'customInvoiceTemplateStyleCompact': l.customInvoiceTemplateStyleCompact,
+        'customInvoiceTemplateStyleCompact':
+            l.customInvoiceTemplateStyleCompact,
         'customInvoiceTemplateSave': l.customInvoiceTemplateSave,
-        'customInvoicePreviewCompanyFallback': l.customInvoicePreviewCompanyFallback,
+        'customInvoicePreviewCompanyFallback':
+            l.customInvoicePreviewCompanyFallback,
         'quotationTitle': l.quotationTitle,
         'quotationEmpty': l.quotationEmpty,
         'quotationEmptySubtitle': l.quotationEmptySubtitle,
@@ -2995,21 +3822,361 @@ void main() {
       // no ARB (chave adicionada sem regenerar falha aqui). As chaves
       // dos métodos parametrizados ficam no ARB mas não no mapa de
       // getters — são subtraídas via kMethodNames.
-      expect(getters.keys.toSet(), equals(arb.keys.toSet().difference(kMethodNames)));
+      expect(
+        getters.keys.toSet(),
+        equals(arb.keys.toSet().difference(kMethodNames)),
+      );
       getters.forEach((key, actual) {
         expect(actual, arb[key], reason: '$key divergiu do ARB fr');
       });
     });
-    test('métodos: ramos de plural (=0, =1, other) e interpolação executam', () {
-      final l = AppLocalizationsFr();
-      final methods = <String, List<String Function(AppLocalizations)>>{
-        'onboardingPlanDetails': [          (l) => l.onboardingPlanDetails(0, 2),          (l) => l.onboardingPlanDetails(1, 2),          (l) => l.onboardingPlanDetails(2, 2),        ],        'onboardingSuccess': [          (l) => l.onboardingSuccess('X'),        ],        'storeSwitcherA11yLabel': [          (l) => l.storeSwitcherA11yLabel('X'),        ],        'tenantPendingSubtitle': [          (l) => l.tenantPendingSubtitle('X'),        ],        'tenantRejectedSubtitle': [          (l) => l.tenantRejectedSubtitle('X'),        ],        'syncPendingCount': [          (l) => l.syncPendingCount(0),          (l) => l.syncPendingCount(1),          (l) => l.syncPendingCount(2),        ],        'syncDone': [          (l) => l.syncDone(0),          (l) => l.syncDone(1),          (l) => l.syncDone(2),        ],        'dashboardGreeting': [          (l) => l.dashboardGreeting('X'),        ],        'dashboardActivityEvents': [          (l) => l.dashboardActivityEvents(0),          (l) => l.dashboardActivityEvents(1),          (l) => l.dashboardActivityEvents(2),        ],        'dashboardActivityMinutesAgo': [          (l) => l.dashboardActivityMinutesAgo('X'),        ],        'dashboardFiadoCount': [          (l) => l.dashboardFiadoCount(0),          (l) => l.dashboardFiadoCount(1),          (l) => l.dashboardFiadoCount(2),        ],        'dashboardStockEntry': [          (l) => l.dashboardStockEntry('X'),        ],        'dashboardStockEntryDetail': [          (l) => l.dashboardStockEntryDetail('X', 'X'),        ],        'dashboardExpenseRow': [          (l) => l.dashboardExpenseRow('X'),        ],        'dashboardLowStockDetail': [          (l) => l.dashboardLowStockDetail('X', 'X'),        ],        'dashboardSaleItems': [          (l) => l.dashboardSaleItems(0),          (l) => l.dashboardSaleItems(1),          (l) => l.dashboardSaleItems(2),        ],        'employeeDeactivateConfirm': [          (l) => l.employeeDeactivateConfirm('X'),        ],        'employeeReactivateConfirm': [          (l) => l.employeeReactivateConfirm('X'),        ],        'upgradesRequestedOn': [          (l) => l.upgradesRequestedOn('X'),        ],        'planDetails': [          (l) => l.planDetails(0, 2),          (l) => l.planDetails(1, 2),          (l) => l.planDetails(2, 2),        ],        'addStoreSuccess': [          (l) => l.addStoreSuccess('X'),        ],        'productsHeaderCount': [          (l) => l.productsHeaderCount(0),          (l) => l.productsHeaderCount(1),          (l) => l.productsHeaderCount(2),        ],        'productsFilteredCount': [          (l) => l.productsFilteredCount(0),          (l) => l.productsFilteredCount(1),          (l) => l.productsFilteredCount(2),        ],        'customersHeaderCount': [          (l) => l.customersHeaderCount(0),          (l) => l.customersHeaderCount(1),          (l) => l.customersHeaderCount(2),        ],        'customersCreditLabel': [          (l) => l.customersCreditLabel('X'),        ],        'customersAdded': [          (l) => l.customersAdded('X'),        ],        'customersEditSuccess': [          (l) => l.customersEditSuccess('X'),        ],        'customersDeleteConfirmMessage': [          (l) => l.customersDeleteConfirmMessage('X'),        ],        'purchasesHeaderCount': [          (l) => l.purchasesHeaderCount(0),          (l) => l.purchasesHeaderCount(1),          (l) => l.purchasesHeaderCount(2),        ],        'purchasesStockAdded': [          (l) => l.purchasesStockAdded(0, 'X'),          (l) => l.purchasesStockAdded(1, 'X'),          (l) => l.purchasesStockAdded(2, 'X'),        ],        'purchasesRegistered': [          (l) => l.purchasesRegistered('X'),        ],        'purchasesProductNotFound': [          (l) => l.purchasesProductNotFound('X'),        ],        'purchasesStockLabel': [          (l) => l.purchasesStockLabel(0, 'X'),          (l) => l.purchasesStockLabel(1, 'X'),          (l) => l.purchasesStockLabel(2, 'X'),        ],        'reportsRevenueLabel': [          (l) => l.reportsRevenueLabel('X'),        ],        'financialReceivePendingBody': [          (l) => l.financialReceivePendingBody('X'),        ],        'financialPayPendingBody': [          (l) => l.financialPayPendingBody('X'),        ],        'cashClosingSurplus': [          (l) => l.cashClosingSurplus('X'),        ],        'cashClosingShortage': [          (l) => l.cashClosingShortage('X'),        ],        'debtsSettleBody': [          (l) => l.debtsSettleBody('X', 'X'),        ],        'debtsSettled': [          (l) => l.debtsSettled('X', 'X'),        ],        'debtsDueIn': [          (l) => l.debtsDueIn(0),          (l) => l.debtsDueIn(1),          (l) => l.debtsDueIn(2),        ],        'debtsDueAgo': [          (l) => l.debtsDueAgo(0),          (l) => l.debtsDueAgo(1),          (l) => l.debtsDueAgo(2),        ],        'debtsSettledOn': [          (l) => l.debtsSettledOn('X'),        ],        'debtsRegisteredFor': [          (l) => l.debtsRegisteredFor('X'),        ],        'salesCartSection': [          (l) => l.salesCartSection(0),          (l) => l.salesCartSection(1),          (l) => l.salesCartSection(2),        ],        'salesHeaderTransactions': [          (l) => l.salesHeaderTransactions(0),          (l) => l.salesHeaderTransactions(1),          (l) => l.salesHeaderTransactions(2),        ],        'salesPdvCount': [          (l) => l.salesPdvCount(0),          (l) => l.salesPdvCount(1),          (l) => l.salesPdvCount(2),        ],        'salesFilteredSummary': [          (l) => l.salesFilteredSummary(0, 'X'),          (l) => l.salesFilteredSummary(1, 'X'),          (l) => l.salesFilteredSummary(2, 'X'),        ],        'salesRegistered': [          (l) => l.salesRegistered('X'),        ],        'salesInsufficientStock': [          (l) => l.salesInsufficientStock('X', 2),        ],        'salesStockFor': [          (l) => l.salesStockFor('X'),        ],        'salesProductNotFound': [          (l) => l.salesProductNotFound('X'),        ],        'saleDetailId': [          (l) => l.saleDetailId('X'),        ],        'saleDetailCancelConfirmBody': [          (l) => l.saleDetailCancelConfirmBody('X'),        ],        'adminAwaitingCount': [          (l) => l.adminAwaitingCount(0),          (l) => l.adminAwaitingCount(1),          (l) => l.adminAwaitingCount(2),        ],        'adminAccessApproved': [          (l) => l.adminAccessApproved('X'),        ],        'adminRequestRejected': [          (l) => l.adminRequestRejected('X'),        ],        'adminRejectTitle': [          (l) => l.adminRejectTitle('X'),        ],        'adminPlanLabel': [          (l) => l.adminPlanLabel('X'),        ],        'adminPlanCreated': [          (l) => l.adminPlanCreated('X'),        ],        'adminPlanUpdated': [          (l) => l.adminPlanUpdated('X'),        ],        'salesStockLimit': [          (l) => l.salesStockLimit('X'),        ],        'dashboardExpiredIn': [          (l) => l.dashboardExpiredIn(0),          (l) => l.dashboardExpiredIn(1),          (l) => l.dashboardExpiredIn(2),        ],        'dashboardExpiresIn': [          (l) => l.dashboardExpiresIn(0),          (l) => l.dashboardExpiresIn(1),          (l) => l.dashboardExpiresIn(2),        ],        'adminTenantDetailStoresCount': [          (l) => l.adminTenantDetailStoresCount(0),          (l) => l.adminTenantDetailStoresCount(1),          (l) => l.adminTenantDetailStoresCount(2),        ],        'adminTenantDetailEmployeesCount': [          (l) => l.adminTenantDetailEmployeesCount(0),          (l) => l.adminTenantDetailEmployeesCount(1),          (l) => l.adminTenantDetailEmployeesCount(2),        ],        'adminTenantDetailActivityCount': [          (l) => l.adminTenantDetailActivityCount(0),          (l) => l.adminTenantDetailActivityCount(1),          (l) => l.adminTenantDetailActivityCount(2),        ],        'adminTenantDetailEmployeeRole': [          (l) => l.adminTenantDetailEmployeeRole('X'),        ],        'adminBulkApprove': [          (l) => l.adminBulkApprove('X'),        ],        'adminBulkReject': [          (l) => l.adminBulkReject('X'),        ],        'adminBulkRejectTitle': [          (l) => l.adminBulkRejectTitle(0),          (l) => l.adminBulkRejectTitle(1),          (l) => l.adminBulkRejectTitle(2),        ],        'adminBulkApproveSuccess': [          (l) => l.adminBulkApproveSuccess(0),          (l) => l.adminBulkApproveSuccess(1),          (l) => l.adminBulkApproveSuccess(2),        ],        'adminBulkRejectSuccess': [          (l) => l.adminBulkRejectSuccess(0),          (l) => l.adminBulkRejectSuccess(1),          (l) => l.adminBulkRejectSuccess(2),        ],        'adminPendingActionRequired': [          (l) => l.adminPendingActionRequired(0),          (l) => l.adminPendingActionRequired(1),          (l) => l.adminPendingActionRequired(2),        ],        'adminGrowthUp': [          (l) => l.adminGrowthUp('X'),        ],        'adminGrowthDown': [          (l) => l.adminGrowthDown('X'),        ],        'adminInvoiceCancelConfirm': [          (l) => l.adminInvoiceCancelConfirm('X'),        ],        'notificationSinceDaysAgo': [          (l) => l.notificationSinceDaysAgo(0),          (l) => l.notificationSinceDaysAgo(1),          (l) => l.notificationSinceDaysAgo(2),        ],        'notificationDaysShort': [          (l) => l.notificationDaysShort(0),          (l) => l.notificationDaysShort(1),          (l) => l.notificationDaysShort(2),        ],        'customInvoiceCreated': [          (l) => l.customInvoiceCreated(0),          (l) => l.customInvoiceCreated(1),          (l) => l.customInvoiceCreated(2),        ],        'customInvoiceItemsCount': [          (l) => l.customInvoiceItemsCount(0),          (l) => l.customInvoiceItemsCount(1),          (l) => l.customInvoiceItemsCount(2),        ],        'customInvoiceProductOption': [          (l) => l.customInvoiceProductOption('X', 'X', 'X'),        ],        'customInvoiceBillTotal': [          (l) => l.customInvoiceBillTotal('X'),        ],        'customInvoiceNumberPrefix': [          (l) => l.customInvoiceNumberPrefix('X'),        ],        'quotationCreated': [          (l) => l.quotationCreated(0),          (l) => l.quotationCreated(1),          (l) => l.quotationCreated(2),        ],        'quotationItemsCount': [          (l) => l.quotationItemsCount(0),          (l) => l.quotationItemsCount(1),          (l) => l.quotationItemsCount(2),        ],        'quotationDays': [          (l) => l.quotationDays(0),          (l) => l.quotationDays(1),          (l) => l.quotationDays(2),        ],        'quotationNumberPrefix': [          (l) => l.quotationNumberPrefix('X'),        ],        'employeeCommissionRate': [          (l) => l.employeeCommissionRate(0, 'X'),          (l) => l.employeeCommissionRate(1, 'X'),          (l) => l.employeeCommissionRate(2, 'X'),        ],        'employeeTargetMeta': [          (l) => l.employeeTargetMeta('X'),        ],        'employeeTargetProgress': [          (l) => l.employeeTargetProgress(0),          (l) => l.employeeTargetProgress(1),          (l) => l.employeeTargetProgress(2),        ],        'addonsPerMonth': [          (l) => l.addonsPerMonth('X'),        ],        'transfersSuccess': [          (l) => l.transfersSuccess(0),          (l) => l.transfersSuccess(1),          (l) => l.transfersSuccess(2),        ],        'transfersError': [          (l) => l.transfersError('X'),        ],        'pdfGeneratedOn': [          (l) => l.pdfGeneratedOn('X'),        ],        'pdfFooter': [          (l) => l.pdfFooter('X'),        ],        'pdfPhoneLine': [          (l) => l.pdfPhoneLine('X'),        ],        'pdfEmailLine': [          (l) => l.pdfEmailLine('X'),        ],        'pdfNifLine': [          (l) => l.pdfNifLine('X'),        ],        'pdfPaymentLine': [          (l) => l.pdfPaymentLine('X'),        ],        'pdfReferenceLine': [          (l) => l.pdfReferenceLine('X'),        ],        'pdfValidityDaysLeft': [          (l) => l.pdfValidityDaysLeft(0),          (l) => l.pdfValidityDaysLeft(1),          (l) => l.pdfValidityDaysLeft(2),        ],        'pdfConditionValidBullet': [          (l) => l.pdfConditionValidBullet('X'),        ],        'adminAddonsLoadError': [          (l) => l.adminAddonsLoadError('X'),        ],        'adminAddonsUpdateError': [          (l) => l.adminAddonsUpdateError('X'),        ],        'dashboardSaleEntry': [          (l) => l.dashboardSaleEntry('X'),        ],        'mfaExpiresIn': [          (l) => l.mfaExpiresIn(0),          (l) => l.mfaExpiresIn(1),          (l) => l.mfaExpiresIn(2),        ],        'mfaInitError': [          (l) => l.mfaInitError('X'),        ],        'mfaVerifyError': [          (l) => l.mfaVerifyError('X'),        ],        'adminAddonsBulkActivated': [          (l) => l.adminAddonsBulkActivated('X', 2),        ],        'adminAddonsBulkDeactivated': [          (l) => l.adminAddonsBulkDeactivated('X', 2),        ],        'adminAddonsBulkSheetCount': [          (l) => l.adminAddonsBulkSheetCount(0),          (l) => l.adminAddonsBulkSheetCount(1),          (l) => l.adminAddonsBulkSheetCount(2),        ],        'adminAddOnsCount': [          (l) => l.adminAddOnsCount(0),          (l) => l.adminAddOnsCount(1),          (l) => l.adminAddOnsCount(2),        ],        'adminTenantCount': [          (l) => l.adminTenantCount(0),          (l) => l.adminTenantCount(1),          (l) => l.adminTenantCount(2),        ],        'adminTenantCycleActiveLeft': [          (l) => l.adminTenantCycleActiveLeft(0),          (l) => l.adminTenantCycleActiveLeft(1),          (l) => l.adminTenantCycleActiveLeft(2),        ],        'adminTenantCycleExpiresIn': [          (l) => l.adminTenantCycleExpiresIn(0),          (l) => l.adminTenantCycleExpiresIn(1),          (l) => l.adminTenantCycleExpiresIn(2),        ],        'adminTenantCycleTrialLeft': [          (l) => l.adminTenantCycleTrialLeft(0),          (l) => l.adminTenantCycleTrialLeft(1),          (l) => l.adminTenantCycleTrialLeft(2),        ],      };
-      expect(methods, hasLength(kTotalMethods));
-      methods.forEach((name, fns) {
-        for (final fn in fns) {
-          final result = fn(l);
-          expect(result, isNotEmpty, reason: '$name devolveu string vazia');
-        }
-      });
-    });
-  });}
+    test(
+      'métodos: ramos de plural (=0, =1, other) e interpolação executam',
+      () {
+        final l = AppLocalizationsFr();
+        final methods = <String, List<String Function(AppLocalizations)>>{
+          'onboardingPlanDetails': [
+            (l) => l.onboardingPlanDetails(0, 2),
+            (l) => l.onboardingPlanDetails(1, 2),
+            (l) => l.onboardingPlanDetails(2, 2),
+          ],
+          'onboardingSuccess': [(l) => l.onboardingSuccess('X')],
+          'storeSwitcherA11yLabel': [(l) => l.storeSwitcherA11yLabel('X')],
+          'tenantPendingSubtitle': [(l) => l.tenantPendingSubtitle('X')],
+          'tenantRejectedSubtitle': [(l) => l.tenantRejectedSubtitle('X')],
+          'syncPendingCount': [
+            (l) => l.syncPendingCount(0),
+            (l) => l.syncPendingCount(1),
+            (l) => l.syncPendingCount(2),
+          ],
+          'syncDone': [
+            (l) => l.syncDone(0),
+            (l) => l.syncDone(1),
+            (l) => l.syncDone(2),
+          ],
+          'dashboardGreeting': [(l) => l.dashboardGreeting('X')],
+          'dashboardActivityEvents': [
+            (l) => l.dashboardActivityEvents(0),
+            (l) => l.dashboardActivityEvents(1),
+            (l) => l.dashboardActivityEvents(2),
+          ],
+          'dashboardActivityMinutesAgo': [
+            (l) => l.dashboardActivityMinutesAgo('X'),
+          ],
+          'dashboardFiadoCount': [
+            (l) => l.dashboardFiadoCount(0),
+            (l) => l.dashboardFiadoCount(1),
+            (l) => l.dashboardFiadoCount(2),
+          ],
+          'dashboardStockEntry': [(l) => l.dashboardStockEntry('X')],
+          'dashboardStockEntryDetail': [
+            (l) => l.dashboardStockEntryDetail('X', 'X'),
+          ],
+          'dashboardExpenseRow': [(l) => l.dashboardExpenseRow('X')],
+          'dashboardLowStockDetail': [
+            (l) => l.dashboardLowStockDetail('X', 'X'),
+          ],
+          'dashboardSaleItems': [
+            (l) => l.dashboardSaleItems(0),
+            (l) => l.dashboardSaleItems(1),
+            (l) => l.dashboardSaleItems(2),
+          ],
+          'employeeDeactivateConfirm': [
+            (l) => l.employeeDeactivateConfirm('X'),
+          ],
+          'employeeReactivateConfirm': [
+            (l) => l.employeeReactivateConfirm('X'),
+          ],
+          'upgradesRequestedOn': [(l) => l.upgradesRequestedOn('X')],
+          'planDetails': [
+            (l) => l.planDetails(0, 2),
+            (l) => l.planDetails(1, 2),
+            (l) => l.planDetails(2, 2),
+          ],
+          'addStoreSuccess': [(l) => l.addStoreSuccess('X')],
+          'productsHeaderCount': [
+            (l) => l.productsHeaderCount(0),
+            (l) => l.productsHeaderCount(1),
+            (l) => l.productsHeaderCount(2),
+          ],
+          'productsFilteredCount': [
+            (l) => l.productsFilteredCount(0),
+            (l) => l.productsFilteredCount(1),
+            (l) => l.productsFilteredCount(2),
+          ],
+          'customersHeaderCount': [
+            (l) => l.customersHeaderCount(0),
+            (l) => l.customersHeaderCount(1),
+            (l) => l.customersHeaderCount(2),
+          ],
+          'customersCreditLabel': [(l) => l.customersCreditLabel('X')],
+          'customersAdded': [(l) => l.customersAdded('X')],
+          'customersEditSuccess': [(l) => l.customersEditSuccess('X')],
+          'customersDeleteConfirmMessage': [
+            (l) => l.customersDeleteConfirmMessage('X'),
+          ],
+          'purchasesHeaderCount': [
+            (l) => l.purchasesHeaderCount(0),
+            (l) => l.purchasesHeaderCount(1),
+            (l) => l.purchasesHeaderCount(2),
+          ],
+          'purchasesStockAdded': [
+            (l) => l.purchasesStockAdded(0, 'X'),
+            (l) => l.purchasesStockAdded(1, 'X'),
+            (l) => l.purchasesStockAdded(2, 'X'),
+          ],
+          'purchasesRegistered': [(l) => l.purchasesRegistered('X')],
+          'purchasesProductNotFound': [(l) => l.purchasesProductNotFound('X')],
+          'purchasesStockLabel': [
+            (l) => l.purchasesStockLabel(0, 'X'),
+            (l) => l.purchasesStockLabel(1, 'X'),
+            (l) => l.purchasesStockLabel(2, 'X'),
+          ],
+          'reportsRevenueLabel': [(l) => l.reportsRevenueLabel('X')],
+          'financialReceivePendingBody': [
+            (l) => l.financialReceivePendingBody('X'),
+          ],
+          'financialPayPendingBody': [(l) => l.financialPayPendingBody('X')],
+          'cashClosingSurplus': [(l) => l.cashClosingSurplus('X')],
+          'cashClosingShortage': [(l) => l.cashClosingShortage('X')],
+          'debtsSettleBody': [(l) => l.debtsSettleBody('X', 'X')],
+          'debtsSettled': [(l) => l.debtsSettled('X', 'X')],
+          'debtsDueIn': [
+            (l) => l.debtsDueIn(0),
+            (l) => l.debtsDueIn(1),
+            (l) => l.debtsDueIn(2),
+          ],
+          'debtsDueAgo': [
+            (l) => l.debtsDueAgo(0),
+            (l) => l.debtsDueAgo(1),
+            (l) => l.debtsDueAgo(2),
+          ],
+          'debtsSettledOn': [(l) => l.debtsSettledOn('X')],
+          'debtsRegisteredFor': [(l) => l.debtsRegisteredFor('X')],
+          'salesCartSection': [
+            (l) => l.salesCartSection(0),
+            (l) => l.salesCartSection(1),
+            (l) => l.salesCartSection(2),
+          ],
+          'salesHeaderTransactions': [
+            (l) => l.salesHeaderTransactions(0),
+            (l) => l.salesHeaderTransactions(1),
+            (l) => l.salesHeaderTransactions(2),
+          ],
+          'salesPdvCount': [
+            (l) => l.salesPdvCount(0),
+            (l) => l.salesPdvCount(1),
+            (l) => l.salesPdvCount(2),
+          ],
+          'salesFilteredSummary': [
+            (l) => l.salesFilteredSummary(0, 'X'),
+            (l) => l.salesFilteredSummary(1, 'X'),
+            (l) => l.salesFilteredSummary(2, 'X'),
+          ],
+          'salesRegistered': [(l) => l.salesRegistered('X')],
+          'salesInsufficientStock': [(l) => l.salesInsufficientStock('X', 2)],
+          'salesStockFor': [(l) => l.salesStockFor('X')],
+          'salesProductNotFound': [(l) => l.salesProductNotFound('X')],
+          'saleDetailId': [(l) => l.saleDetailId('X')],
+          'saleDetailCancelConfirmBody': [
+            (l) => l.saleDetailCancelConfirmBody('X'),
+          ],
+          'adminAwaitingCount': [
+            (l) => l.adminAwaitingCount(0),
+            (l) => l.adminAwaitingCount(1),
+            (l) => l.adminAwaitingCount(2),
+          ],
+          'adminAccessApproved': [(l) => l.adminAccessApproved('X')],
+          'adminRequestRejected': [(l) => l.adminRequestRejected('X')],
+          'adminRejectTitle': [(l) => l.adminRejectTitle('X')],
+          'adminPlanLabel': [(l) => l.adminPlanLabel('X')],
+          'adminPlanCreated': [(l) => l.adminPlanCreated('X')],
+          'adminPlanUpdated': [(l) => l.adminPlanUpdated('X')],
+          'salesStockLimit': [(l) => l.salesStockLimit('X')],
+          'dashboardExpiredIn': [
+            (l) => l.dashboardExpiredIn(0),
+            (l) => l.dashboardExpiredIn(1),
+            (l) => l.dashboardExpiredIn(2),
+          ],
+          'dashboardExpiresIn': [
+            (l) => l.dashboardExpiresIn(0),
+            (l) => l.dashboardExpiresIn(1),
+            (l) => l.dashboardExpiresIn(2),
+          ],
+          'adminTenantDetailStoresCount': [
+            (l) => l.adminTenantDetailStoresCount(0),
+            (l) => l.adminTenantDetailStoresCount(1),
+            (l) => l.adminTenantDetailStoresCount(2),
+          ],
+          'adminTenantDetailEmployeesCount': [
+            (l) => l.adminTenantDetailEmployeesCount(0),
+            (l) => l.adminTenantDetailEmployeesCount(1),
+            (l) => l.adminTenantDetailEmployeesCount(2),
+          ],
+          'adminTenantDetailActivityCount': [
+            (l) => l.adminTenantDetailActivityCount(0),
+            (l) => l.adminTenantDetailActivityCount(1),
+            (l) => l.adminTenantDetailActivityCount(2),
+          ],
+          'adminTenantDetailEmployeeRole': [
+            (l) => l.adminTenantDetailEmployeeRole('X'),
+          ],
+          'adminBulkApprove': [(l) => l.adminBulkApprove('X')],
+          'adminBulkReject': [(l) => l.adminBulkReject('X')],
+          'adminBulkRejectTitle': [
+            (l) => l.adminBulkRejectTitle(0),
+            (l) => l.adminBulkRejectTitle(1),
+            (l) => l.adminBulkRejectTitle(2),
+          ],
+          'adminBulkApproveSuccess': [
+            (l) => l.adminBulkApproveSuccess(0),
+            (l) => l.adminBulkApproveSuccess(1),
+            (l) => l.adminBulkApproveSuccess(2),
+          ],
+          'adminBulkRejectSuccess': [
+            (l) => l.adminBulkRejectSuccess(0),
+            (l) => l.adminBulkRejectSuccess(1),
+            (l) => l.adminBulkRejectSuccess(2),
+          ],
+          'adminPendingActionRequired': [
+            (l) => l.adminPendingActionRequired(0),
+            (l) => l.adminPendingActionRequired(1),
+            (l) => l.adminPendingActionRequired(2),
+          ],
+          'adminGrowthUp': [(l) => l.adminGrowthUp('X')],
+          'adminGrowthDown': [(l) => l.adminGrowthDown('X')],
+          'adminInvoiceCancelConfirm': [
+            (l) => l.adminInvoiceCancelConfirm('X'),
+          ],
+          'notificationSinceDaysAgo': [
+            (l) => l.notificationSinceDaysAgo(0),
+            (l) => l.notificationSinceDaysAgo(1),
+            (l) => l.notificationSinceDaysAgo(2),
+          ],
+          'notificationDaysShort': [
+            (l) => l.notificationDaysShort(0),
+            (l) => l.notificationDaysShort(1),
+            (l) => l.notificationDaysShort(2),
+          ],
+          'customInvoiceCreated': [
+            (l) => l.customInvoiceCreated(0),
+            (l) => l.customInvoiceCreated(1),
+            (l) => l.customInvoiceCreated(2),
+          ],
+          'customInvoiceItemsCount': [
+            (l) => l.customInvoiceItemsCount(0),
+            (l) => l.customInvoiceItemsCount(1),
+            (l) => l.customInvoiceItemsCount(2),
+          ],
+          'customInvoiceProductOption': [
+            (l) => l.customInvoiceProductOption('X', 'X', 'X'),
+          ],
+          'customInvoiceBillTotal': [(l) => l.customInvoiceBillTotal('X')],
+          'customInvoiceNumberPrefix': [
+            (l) => l.customInvoiceNumberPrefix('X'),
+          ],
+          'quotationCreated': [
+            (l) => l.quotationCreated(0),
+            (l) => l.quotationCreated(1),
+            (l) => l.quotationCreated(2),
+          ],
+          'quotationItemsCount': [
+            (l) => l.quotationItemsCount(0),
+            (l) => l.quotationItemsCount(1),
+            (l) => l.quotationItemsCount(2),
+          ],
+          'quotationDays': [
+            (l) => l.quotationDays(0),
+            (l) => l.quotationDays(1),
+            (l) => l.quotationDays(2),
+          ],
+          'quotationNumberPrefix': [(l) => l.quotationNumberPrefix('X')],
+          'employeeCommissionRate': [
+            (l) => l.employeeCommissionRate(0, 'X'),
+            (l) => l.employeeCommissionRate(1, 'X'),
+            (l) => l.employeeCommissionRate(2, 'X'),
+          ],
+          'employeeTargetMeta': [(l) => l.employeeTargetMeta('X')],
+          'employeeTargetProgress': [
+            (l) => l.employeeTargetProgress(0),
+            (l) => l.employeeTargetProgress(1),
+            (l) => l.employeeTargetProgress(2),
+          ],
+          'addonsPerMonth': [(l) => l.addonsPerMonth('X')],
+          'transfersSuccess': [
+            (l) => l.transfersSuccess(0),
+            (l) => l.transfersSuccess(1),
+            (l) => l.transfersSuccess(2),
+          ],
+          'transfersError': [(l) => l.transfersError('X')],
+          'pdfGeneratedOn': [(l) => l.pdfGeneratedOn('X')],
+          'pdfFooter': [(l) => l.pdfFooter('X')],
+          'pdfPhoneLine': [(l) => l.pdfPhoneLine('X')],
+          'pdfEmailLine': [(l) => l.pdfEmailLine('X')],
+          'pdfNifLine': [(l) => l.pdfNifLine('X')],
+          'pdfPaymentLine': [(l) => l.pdfPaymentLine('X')],
+          'pdfReferenceLine': [(l) => l.pdfReferenceLine('X')],
+          'pdfValidityDaysLeft': [
+            (l) => l.pdfValidityDaysLeft(0),
+            (l) => l.pdfValidityDaysLeft(1),
+            (l) => l.pdfValidityDaysLeft(2),
+          ],
+          'pdfConditionValidBullet': [(l) => l.pdfConditionValidBullet('X')],
+          'adminAddonsLoadError': [(l) => l.adminAddonsLoadError('X')],
+          'adminAddonsUpdateError': [(l) => l.adminAddonsUpdateError('X')],
+          'dashboardSaleEntry': [(l) => l.dashboardSaleEntry('X')],
+          'mfaExpiresIn': [
+            (l) => l.mfaExpiresIn(0),
+            (l) => l.mfaExpiresIn(1),
+            (l) => l.mfaExpiresIn(2),
+          ],
+          'mfaInitError': [(l) => l.mfaInitError('X')],
+          'mfaVerifyError': [(l) => l.mfaVerifyError('X')],
+          'adminAddonsBulkActivated': [
+            (l) => l.adminAddonsBulkActivated('X', 2),
+          ],
+          'adminAddonsBulkDeactivated': [
+            (l) => l.adminAddonsBulkDeactivated('X', 2),
+          ],
+          'adminAddonsBulkSheetCount': [
+            (l) => l.adminAddonsBulkSheetCount(0),
+            (l) => l.adminAddonsBulkSheetCount(1),
+            (l) => l.adminAddonsBulkSheetCount(2),
+          ],
+          'adminAddOnsCount': [
+            (l) => l.adminAddOnsCount(0),
+            (l) => l.adminAddOnsCount(1),
+            (l) => l.adminAddOnsCount(2),
+          ],
+          'adminTenantCount': [
+            (l) => l.adminTenantCount(0),
+            (l) => l.adminTenantCount(1),
+            (l) => l.adminTenantCount(2),
+          ],
+          'adminTenantCycleActiveLeft': [
+            (l) => l.adminTenantCycleActiveLeft(0),
+            (l) => l.adminTenantCycleActiveLeft(1),
+            (l) => l.adminTenantCycleActiveLeft(2),
+          ],
+          'adminTenantCycleExpiresIn': [
+            (l) => l.adminTenantCycleExpiresIn(0),
+            (l) => l.adminTenantCycleExpiresIn(1),
+            (l) => l.adminTenantCycleExpiresIn(2),
+          ],
+          'adminTenantCycleTrialLeft': [
+            (l) => l.adminTenantCycleTrialLeft(0),
+            (l) => l.adminTenantCycleTrialLeft(1),
+            (l) => l.adminTenantCycleTrialLeft(2),
+          ],
+        };
+        expect(methods, hasLength(kTotalMethods));
+        methods.forEach((name, fns) {
+          for (final fn in fns) {
+            final result = fn(l);
+            expect(result, isNotEmpty, reason: '$name devolveu string vazia');
+          }
+        });
+      },
+    );
+  });
+}

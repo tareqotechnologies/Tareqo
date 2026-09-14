@@ -42,11 +42,7 @@ class _FakeLocalPort implements IMfaServerPort {
   Future<MfaPendingEnrollment> beginTotpEnrollment() async {
     if (failTransport) throw const MfaServerException('offline');
     _secret = await _mfaService.generateSecret();
-    return (
-      factorId: 'factor-1',
-      challengeId: 'challenge-1',
-      secret: _secret!,
-    );
+    return (factorId: 'factor-1', challengeId: 'challenge-1', secret: _secret!);
   }
 
   @override
@@ -124,25 +120,19 @@ void main() {
       },
     );
 
-    test(
-      'completeSetup com código correto: fator verificado NO SERVIDOR e '
-      'flag local ligada',
-      () async {
-        final pending = await useCase.beginSetup();
-        final code = service.generateTOTP(pending.secret);
+    test('completeSetup com código correto: fator verificado NO SERVIDOR e '
+        'flag local ligada', () async {
+      final pending = await useCase.beginSetup();
+      final code = service.generateTOTP(pending.secret);
 
-        final ok = await useCase.completeSetup(code: code);
+      final ok = await useCase.completeSetup(code: code);
 
-        expect(ok, isTrue);
-        expect(port.verifiedFactors, 1); // fator existe no "servidor"
-        expect(await useCase.isEnabled(), isTrue);
-        // A matrícula pendente foi consumida.
-        expect(
-          await storage.read(SecureStorageKeys.mfaSecret),
-          pending.secret,
-        );
-      },
-    );
+      expect(ok, isTrue);
+      expect(port.verifiedFactors, 1); // fator existe no "servidor"
+      expect(await useCase.isEnabled(), isTrue);
+      // A matrícula pendente foi consumida.
+      expect(await storage.read(SecureStorageKeys.mfaSecret), pending.secret);
+    });
 
     test(
       'completeSetup com código errado devolve false e NÃO habilita',
@@ -176,40 +166,32 @@ void main() {
       },
     );
 
-    test(
-      'verifyAndElevate com código correto sobe a sessão para aal2 no '
-      'servidor (é isso que o RLS consulta)',
-      () async {
-        final pending = await useCase.beginSetup();
-        await useCase.completeSetup(code: service.generateTOTP(pending.secret));
+    test('verifyAndElevate com código correto sobe a sessão para aal2 no '
+        'servidor (é isso que o RLS consulta)', () async {
+      final pending = await useCase.beginSetup();
+      await useCase.completeSetup(code: service.generateTOTP(pending.secret));
 
-        expect(
-          await useCase.verifyAndElevate(
-            service.generateTOTP(pending.secret),
-          ),
-          MfaElevationResult.success,
-        );
-        expect(await useCase.sessionIsAal2(), isTrue);
-      },
-    );
+      expect(
+        await useCase.verifyAndElevate(service.generateTOTP(pending.secret)),
+        MfaElevationResult.success,
+      );
+      expect(await useCase.sessionIsAal2(), isTrue);
+    });
 
-    test(
-      'verifyAndElevate com código errado devolve invalidCode e sessão '
-      'permanece aal1',
-      () async {
-        final pending = await useCase.beginSetup();
-        await useCase.completeSetup(code: service.generateTOTP(pending.secret));
+    test('verifyAndElevate com código errado devolve invalidCode e sessão '
+        'permanece aal1', () async {
+      final pending = await useCase.beginSetup();
+      await useCase.completeSetup(code: service.generateTOTP(pending.secret));
 
-        expect(
-          await useCase.verifyAndElevate('999999'),
-          anyOf(MfaElevationResult.invalidCode, MfaElevationResult.success),
-        );
-        // Em caso de invalidCode, SEM aal2 (fail-closed).
-        if (await useCase.sessionIsAal2() == false) {
-          expect(true, isTrue);
-        }
-      },
-    );
+      expect(
+        await useCase.verifyAndElevate('999999'),
+        anyOf(MfaElevationResult.invalidCode, MfaElevationResult.success),
+      );
+      // Em caso de invalidCode, SEM aal2 (fail-closed).
+      if (await useCase.sessionIsAal2() == false) {
+        expect(true, isTrue);
+      }
+    });
 
     test(
       'cancelSetup descarta o fator NÃO verificado e limpa o secret local',
@@ -266,34 +248,28 @@ void main() {
       },
     );
 
-    test(
-      'disable com SERVIDOR INACESSÍVEL mantém a flag local (segurança '
-      'primeiro: usuário continua protegido, pode tentar de novo)',
-      () async {
-        final pending = await useCase.beginSetup();
-        await useCase.completeSetup(code: service.generateTOTP(pending.secret));
-        expect(await useCase.isEnabled(), isTrue);
+    test('disable com SERVIDOR INACESSÍVEL mantém a flag local (segurança '
+        'primeiro: usuário continua protegido, pode tentar de novo)', () async {
+      final pending = await useCase.beginSetup();
+      await useCase.completeSetup(code: service.generateTOTP(pending.secret));
+      expect(await useCase.isEnabled(), isTrue);
 
-        port.failTransport = true;
-        await expectLater(useCase.disable(), throwsA(isA<MfaServerException>()));
+      port.failTransport = true;
+      await expectLater(useCase.disable(), throwsA(isA<MfaServerException>()));
 
-        // Flag local PRESERVADA — o MFA continua ativo na UI.
-        expect(await useCase.isEnabled(), isTrue);
-      },
-    );
+      // Flag local PRESERVADA — o MFA continua ativo na UI.
+      expect(await useCase.isEnabled(), isTrue);
+    });
 
-    test(
-      'beginSetup com servidor offline propaga MfaServerException (a UI '
-      'mostra erro em vez de secret falso)',
-      () async {
-        port.failTransport = true;
-        await expectLater(
-          useCase.beginSetup(),
-          throwsA(isA<MfaServerException>()),
-        );
-        expect(await useCase.isEnabled(), isFalse);
-      },
-    );
+    test('beginSetup com servidor offline propaga MfaServerException (a UI '
+        'mostra erro em vez de secret falso)', () async {
+      port.failTransport = true;
+      await expectLater(
+        useCase.beginSetup(),
+        throwsA(isA<MfaServerException>()),
+      );
+      expect(await useCase.isEnabled(), isFalse);
+    });
   });
 
   group('LocalOnlyMfaServerPort — fallback sem GoTrue (dev/testes)', () {

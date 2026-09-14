@@ -162,91 +162,109 @@ void main() {
     });
 
     String rawPayloadOf(int id) =>
-        db.select('SELECT payload FROM pending_ops WHERE id = $id').first['payload']
+        db
+                .select('SELECT payload FROM pending_ops WHERE id = $id')
+                .first['payload']
             as String;
 
-    test('add grava o payload cifrado — NÃO contém o JSON em texto claro', () async {
-      await encryptedQueue.add(
-        PendingOp(
-          opType: 'process_sale',
-          payload: {
-            'sale': {
-              'id': 's1',
-              'totalAmountCents': 99900,
-              'items': [
-                {'productName': 'Açúcar', 'unitPriceCents': 999},
-              ],
+    test(
+      'add grava o payload cifrado — NÃO contém o JSON em texto claro',
+      () async {
+        await encryptedQueue.add(
+          PendingOp(
+            opType: 'process_sale',
+            payload: {
+              'sale': {
+                'id': 's1',
+                'totalAmountCents': 99900,
+                'items': [
+                  {'productName': 'Açúcar', 'unitPriceCents': 999},
+                ],
+              },
             },
-          },
-          createdAt: DateTime.now(),
-        ),
-      );
+            createdAt: DateTime.now(),
+          ),
+        );
 
-      final raw = rawPayloadOf(1);
-      // O valor financeiro e o nome do cliente NÃO podem estar legíveis.
-      expect(raw.contains('99900'), isFalse);
-      expect(raw.contains('Açúcar'), isFalse);
-      expect(raw.contains('totalAmountCents'), isFalse);
-      // Formato do cipher: base64(nonce || ciphertext || mac).
-      expect(() => base64Decode(raw), returnsNormally);
-    });
+        final raw = rawPayloadOf(1);
+        // O valor financeiro e o nome do cliente NÃO podem estar legíveis.
+        expect(raw.contains('99900'), isFalse);
+        expect(raw.contains('Açúcar'), isFalse);
+        expect(raw.contains('totalAmountCents'), isFalse);
+        // Formato do cipher: base64(nonce || ciphertext || mac).
+        expect(() => base64Decode(raw), returnsNormally);
+      },
+    );
 
-    test('round-trip: next/list decifram exatamente o payload gravado', () async {
-      final original = PendingOp(
-        opType: 'settle_debt',
-        payload: {'debtId': 'd9', 'storeId': 'st1'},
-        createdAt: DateTime(2026, 9, 13, 8),
-      );
-      await encryptedQueue.add(original);
+    test(
+      'round-trip: next/list decifram exatamente o payload gravado',
+      () async {
+        final original = PendingOp(
+          opType: 'settle_debt',
+          payload: {'debtId': 'd9', 'storeId': 'st1'},
+          createdAt: DateTime(2026, 9, 13, 8),
+        );
+        await encryptedQueue.add(original);
 
-      final read = await encryptedQueue.next();
-      expect(read!.opType, 'settle_debt');
-      expect(read.payload, original.payload);
+        final read = await encryptedQueue.next();
+        expect(read!.opType, 'settle_debt');
+        expect(read.payload, original.payload);
 
-      final listed = await encryptedQueue.list();
-      expect(listed.single.payload, original.payload);
-    });
+        final listed = await encryptedQueue.list();
+        expect(listed.single.payload, original.payload);
+      },
+    );
 
-    test('linha legada em TEXTO CLARO é migrada para cifrado na leitura', () async {
-      // Simula uma op gravada por versão anterior (payload em claro).
-      db.execute(
-        'INSERT INTO pending_ops '
-        '(op_type, payload, created_at, attempt_count, last_error, '
-        'next_retry_at, dead) VALUES (?, ?, ?, 0, NULL, NULL, 0)',
-        [
-          'register_debt',
-          jsonEncode({
-            'debt': {'id': 'd2', 'personName': 'Maria', 'amountCents': 1000},
-          }),
-          DateTime.now().millisecondsSinceEpoch,
-        ],
-      );
+    test(
+      'linha legada em TEXTO CLARO é migrada para cifrado na leitura',
+      () async {
+        // Simula uma op gravada por versão anterior (payload em claro).
+        db.execute(
+          'INSERT INTO pending_ops '
+          '(op_type, payload, created_at, attempt_count, last_error, '
+          'next_retry_at, dead) VALUES (?, ?, ?, 0, NULL, NULL, 0)',
+          [
+            'register_debt',
+            jsonEncode({
+              'debt': {'id': 'd2', 'personName': 'Maria', 'amountCents': 1000},
+            }),
+            DateTime.now().millisecondsSinceEpoch,
+          ],
+        );
 
-      // A leitura decifra/aceita o legado E regrava a linha cifrada.
-      final op = await encryptedQueue.next();
-      expect(
-        (op!.payload['debt'] as Map<String, dynamic>)['personName'],
-        'Maria',
-      );
-      final raw = rawPayloadOf(op.id!);
-      expect(raw.contains('Maria'), isFalse);
-      expect(raw.contains('amountCents'), isFalse);
-    });
+        // A leitura decifra/aceita o legado E regrava a linha cifrada.
+        final op = await encryptedQueue.next();
+        expect(
+          (op!.payload['debt'] as Map<String, dynamic>)['personName'],
+          'Maria',
+        );
+        final raw = rawPayloadOf(op.id!);
+        expect(raw.contains('Maria'), isFalse);
+        expect(raw.contains('amountCents'), isFalse);
+      },
+    );
 
-    test('payload adulterado (MAC inválido) não decifra como dado falso', () async {
-      await encryptedQueue.add(
-        PendingOp(
-          opType: 'process_sale',
-          payload: {'sale': {'id': 's3'}},
-          createdAt: DateTime.now(),
-        ),
-      );
-      // Adultera o ciphertext no banco (independente da chave).
-      db.execute("UPDATE pending_ops SET payload = 'AAAA' || payload WHERE id = 1");
+    test(
+      'payload adulterado (MAC inválido) não decifra como dado falso',
+      () async {
+        await encryptedQueue.add(
+          PendingOp(
+            opType: 'process_sale',
+            payload: {
+              'sale': {'id': 's3'},
+            },
+            createdAt: DateTime.now(),
+          ),
+        );
+        // Adultera o ciphertext no banco (independente da chave).
+        db.execute(
+          "UPDATE pending_ops SET payload = 'AAAA' || payload WHERE id = 1",
+        );
 
-      // A leitura trata como legado — e o "legado" corrompido falha o
-      // jsonDecode (lança). Nunca devolve um payload inventado.
-      await expectLater(encryptedQueue.next(), throwsA(anything));
-    });
+        // A leitura trata como legado — e o "legado" corrompido falha o
+        // jsonDecode (lança). Nunca devolve um payload inventado.
+        await expectLater(encryptedQueue.next(), throwsA(anything));
+      },
+    );
   });
 }

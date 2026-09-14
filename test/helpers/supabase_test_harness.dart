@@ -68,6 +68,11 @@ class StubSupabaseHttp extends http.BaseClient {
 
   StubSupabaseHttp({this.handler});
 
+  /// Sobrescreve o corpo da resposta de `POST {auth}/token` — usado pelos
+  /// testes de MFA, que precisam de fatores (`user.factors`) e do claim
+  /// `aal` customizados na sessão stubbed.
+  Map<String, dynamic> Function()? tokenPayloadOverride;
+
   /// Requisições recebidas, em ordem (método + caminho + corpo).
   final List<http.BaseRequest> requests = [];
   int? failNext;
@@ -99,6 +104,10 @@ class StubSupabaseHttp extends http.BaseClient {
 
     // Auth (GoTrue): endpoint de token → sessão com usuário fixo `u1`.
     if (_pathOf(request).endsWith('/token')) {
+      final override = tokenPayloadOverride;
+      if (override != null) {
+        return _stream(jsonEncode(override()), request);
+      }
       return _stream(
         jsonEncode({
           'access_token': 'test-token',
