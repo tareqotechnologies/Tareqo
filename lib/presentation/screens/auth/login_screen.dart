@@ -218,9 +218,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } on AuthRetryableFetchException {
       // DNS/rede fora (errno 7 "No address associated with hostname" etc.):
       // mensagem ACIONÁVEL em vez do genérico "verifique e-mail e senha".
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.loginNoConnection)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.loginNoConnection)));
     } catch (error, stackTrace) {
       CrashReporting.capture(error, stackTrace, hint: 'Erro de autenticação');
       messenger.showSnackBar(

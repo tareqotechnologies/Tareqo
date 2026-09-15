@@ -118,30 +118,27 @@ void main() {
       },
     );
 
-    test(
-      'signUp embute tareqo://callback no e-mail de confirmação',
-      () async {
-        stub.handler = (path, request) {
-          expect(path, contains('/signup'));
-          expect(request.method, 'POST');
-          // O redirect viaja como QUERY PARAM (gotrue fetch.dart), não no
-          // corpo — igual ao /recover.
-          expect(request.url.queryParameters['redirect_to'], 'tareqo://callback');
-          final body = jsonBodyOf(request) as Map<String, dynamic>;
-          expect(body['email'], 'dono@test.local');
-          expect(body['data'], {'full_name': 'Dono Demo'});
-          // Confirmação de e-mail ativa: resposta SEM sessão.
-          return FakeResponse({'user': userPayload()});
-        };
+    test('signUp embute tareqo://callback no e-mail de confirmação', () async {
+      stub.handler = (path, request) {
+        expect(path, contains('/signup'));
+        expect(request.method, 'POST');
+        // O redirect viaja como QUERY PARAM (gotrue fetch.dart), não no
+        // corpo — igual ao /recover.
+        expect(request.url.queryParameters['redirect_to'], 'tareqo://callback');
+        final body = jsonBodyOf(request) as Map<String, dynamic>;
+        expect(body['email'], 'dono@test.local');
+        expect(body['data'], {'full_name': 'Dono Demo'});
+        // Confirmação de e-mail ativa: resposta SEM sessão.
+        return FakeResponse({'user': userPayload()});
+      };
 
-        final user = await ds.signUp(
-          email: 'dono@test.local',
-          password: 'senha-forte-123',
-          fullName: 'Dono Demo',
-        );
-        expect(user.email, 'dono@test.local');
-      },
-    );
+      final user = await ds.signUp(
+        email: 'dono@test.local',
+        password: 'senha-forte-123',
+        fullName: 'Dono Demo',
+      );
+      expect(user.email, 'dono@test.local');
+    });
 
     test('resetPassword aponta o redirect para tareqo://callback', () async {
       stub.handler = (path, request) {

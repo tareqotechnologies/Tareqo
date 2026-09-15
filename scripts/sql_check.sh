@@ -1865,7 +1865,7 @@ echo "OK: exigência ativada pelo dono (fator verificado no GoTrue)"
 
 # 7.3 Com a exigência ativa, RPC de dinheiro em aal1 é REJEITADA.
 psql_app <<SQL
-SET request.jwt.claims = '{"sub": "${OWNER_UID}"};
+SET request.jwt.claims = '{"sub": "${OWNER_UID}"}';
 DO \$\$
 BEGIN
   BEGIN
@@ -1919,7 +1919,7 @@ echo "OK: leitura permanece livre em aal1 (a exigência bloqueia só escrita de 
 # impedido de desarmar a proteção do dinheiro).
 psql_app <<SQL
 SET request.jwt.claims = '{"sub": "${OWNER_UID}"}';
-DO $$
+DO \$\$
 BEGIN
   BEGIN
     PERFORM public.update_tenant_settings('tn_smoke', 'MZN', 'pt', FALSE);
@@ -1930,10 +1930,12 @@ BEGIN
     END IF;
   END;
 END
-$$;
+\$\$;
+SQL
 echo "OK: desativação da exigência em aal1 é rejeitada (pede 2º fator)"
 
--- Desativação legítima: dono com sessão aal2 (2º fator concluído).
+# Desativação legítima: dono com sessão aal2 (2º fator concluído).
+psql_app -v ON_ERROR_STOP=1 <<SQL
 SET request.jwt.claims = '{"sub": "${OWNER_UID}", "aal": "aal2"}';
 SELECT public.update_tenant_settings('tn_smoke', 'MZN', 'pt', FALSE);
 SQL
