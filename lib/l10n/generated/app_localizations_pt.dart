@@ -272,6 +272,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível criar a conta. Tente novamente.';
 
   @override
+  String get loginNoConnection =>
+      'Sem conexão com a internet. Verifique o Wi-Fi/dados móveis e tente novamente.';
+
+  @override
   String get loginSignInError =>
       'Não foi possível entrar. Verifique e-mail e senha.';
 

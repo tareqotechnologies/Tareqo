@@ -266,6 +266,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginSignUpError => 'Could not create the account. Try again.';
 
   @override
+  String get loginNoConnection =>
+      'No internet connection. Check your Wi-Fi/mobile data and try again.';
+
+  @override
   String get loginSignInError =>
       'Could not sign in. Check your email and password.';
 

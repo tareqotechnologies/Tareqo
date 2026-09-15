@@ -3,6 +3,17 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.1.4+24] — 2026-09-14
+
+### Alterado
+- **Guia do Usuário actualizado (pt/en/fr)**: reescrito para a versão atual do app — navegação real de 4 abas (Início/Vendas/**Carteira**/**Menu** + FAB de ações), 2FA (ativação em Menu → Segurança, exigência por loja em Lojas → Ajustes), seção **Segurança** (2FA, trocar senha, biometria), seção **Add-ons** (Factura Personalizada, Cotações, Relatórios Avançados, Gestão de Funcionários, Transferências entre Lojas), **fila offline** (venda salva offline e reenvio automático) e FAQ ampliado (código 2FA, add-ons, comissões). Rótulos verificados contra o l10n real. PDFs regenerados (docs/pdf/{pt,en,fr}/).
+
+### Corrigido
+- **Login/cadastro offline mostrava erro enganoso**: sem internet, o `AuthRetryableFetchException` (DNS fora — errno 7) caía no genérico "Verifique e-mail e senha" e era reportado ao Sentry como crash. Agora tem tratamento próprio: mensagem acionável **"Sem conexão com a internet..."** (`loginNoConnection`, pt/en/fr) e o evento offline deixa de poluir o dashboard de crashes.
+
+### Configuração
+- **Auditoria da cadeia DEV/PROD**: `env/dev.env` → projeto `dotklbpqmlnhcdifiukd` e `env/prod.env` → `bcyolmheltzlddfwgqcq` confirmados (JWTs válidos até 2036, ref correcta em cada chave); health checks GoTrue 200 nos dois projetos; signup de produção aceita o `redirect_to` do app (400 validation com probe inválido = allow list OK). Pipeline verificado: CI usa dev.env, fastlane/build_android.sh usam prod.env com `SUPABASE_CREDENTIALS_EXPLICIT=true`. Comentário desatualizado no `SupabaseBootstrap` ("projeto único") corrigido.
+
 ## [2.1.3+23] — 2026-09-14
 
 ### Novo

@@ -9,7 +9,10 @@ import '../../../helpers/supabase_test_harness.dart';
 /// - `changePassword` EXIGE sessão (guarda) e REAUTENTICA com a senha atual
 ///   antes de gravar a nova (exigência do GoTrue);
 /// - `setNewPassword` grava direto (fluxo de recovery — sem re-auth);
-/// - `resetPassword` aponta o redirect para o deep link `tareqo://callback`.
+/// - `resetPassword` aponta o redirect para o deep link `tareqo://callback`;
+/// - `signUp` também embute o deep link no e-mail de confirmação
+///   (`emailRedirectTo`) — sem isso o gotrue usa o `site_url` do projeto
+///   (default: localhost:3000) e a confirmação nunca completa no app.
 void main() {
   late StubSupabaseHttp stub;
 
@@ -112,6 +115,31 @@ void main() {
           stub.requests.where((r) => r.url.path.endsWith('/token')),
           isEmpty,
         );
+      },
+    );
+
+    test(
+      'signUp embute tareqo://callback no e-mail de confirmação',
+      () async {
+        stub.handler = (path, request) {
+          expect(path, contains('/signup'));
+          expect(request.method, 'POST');
+          // O redirect viaja como QUERY PARAM (gotrue fetch.dart), não no
+          // corpo — igual ao /recover.
+          expect(request.url.queryParameters['redirect_to'], 'tareqo://callback');
+          final body = jsonBodyOf(request) as Map<String, dynamic>;
+          expect(body['email'], 'dono@test.local');
+          expect(body['data'], {'full_name': 'Dono Demo'});
+          // Confirmação de e-mail ativa: resposta SEM sessão.
+          return FakeResponse({'user': userPayload()});
+        };
+
+        final user = await ds.signUp(
+          email: 'dono@test.local',
+          password: 'senha-forte-123',
+          fullName: 'Dono Demo',
+        );
+        expect(user.email, 'dono@test.local');
       },
     );
 

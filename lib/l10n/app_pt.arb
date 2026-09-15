@@ -120,6 +120,7 @@
   "loginSignIn": "Entrar",
   "loginSignUpSuccess": "Conta criada! Confirme seu e-mail para entrar.",
   "loginSignUpError": "Não foi possível criar a conta. Tente novamente.",
+  "loginNoConnection": "Sem conexão com a internet. Verifique o Wi-Fi/dados móveis e tente novamente.",
   "loginSignInError": "Não foi possível entrar. Verifique e-mail e senha.",
   "forgotPasswordTitle": "Redefinir senha",
   "forgotPasswordHint": "Informe seu e-mail. Enviaremos um link para redefinir.",

@@ -120,6 +120,7 @@
   "loginSignIn": "Se connecter",
   "loginSignUpSuccess": "Compte créé ! Confirmez votre e-mail pour vous connecter.",
   "loginSignUpError": "Impossible de créer le compte. Réessayez.",
+  "loginNoConnection": "Pas de connexion Internet. Vérifiez le Wi-Fi/données mobiles et réessayez.",
   "loginSignInError": "Impossible de se connecter. Vérifiez l'e-mail et le mot de passe.",
   "forgotPasswordTitle": "Réinitialiser le mot de passe",
   "forgotPasswordHint": "Indiquez votre e-mail. Nous enverrons un lien.",

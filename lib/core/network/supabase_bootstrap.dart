@@ -27,13 +27,12 @@ abstract final class SupabaseBootstrap {
     // release + credenciais embutidas = erro de configuração.
     //
     // Antes (deploy Aug 2026) o projeto Supabase era ÚNICO e compartilhado
-    // entre dev e prod, então um release prod com os defaults era aceite de
-    // propósito. Desde a auditoria A1 todo release EXIGE as credenciais
-    // EXPLÍCITAS (--dart-define-from-file=env/prod.env ou --dart-define),
-    // mesmo que hoje o env/prod.env ainda aponte para o projeto único — o
-    // passo de infra pendente é criar o projeto de PRODUÇÃO separado e
-    // atualizar env/prod.env (ver docs/13-build-e-publicacao e o checklist
-    // de produção).
+    // entre dev e prod. Desde Set/2026 existem DOIS projetos separados:
+    // dev = dotklbpqmlnhcdifiukd (env/dev.env, commitado) e
+    // prod = bcyolmheltzlddfwgqcq (env/prod.env, gitignored) — e a auditoria
+    // A1 exige credenciais EXPLÍCITAS em todo release
+    // (--dart-define-from-file=env/prod.env ou --dart-define), nunca os
+    // defaults embutidos (que apontam para o projeto de DEV).
     if (kReleaseMode && SupabaseConfig.usesEmbeddedDefaults) {
       throw StateError(
         'Build de release com as credenciais EMBUTIDAS (defaults de '

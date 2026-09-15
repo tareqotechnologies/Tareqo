@@ -16,7 +16,7 @@ import 'pending_op_queue.dart';
 /// valores, fiado com nome do cliente). Antes o JSON gravava em TEXTO
 /// CLARO — o `PendingOpPayloadCipher` existia mas nunca era usado, e o
 /// SECURITY.md alegava "payloads cifrados" sem que a cifra rodisse. Agora
-/// TODO payload passa pelo `PendingOpPayloadCipher` (AES-256-GCM, chave
+/// todo payload passa pelo `PendingOpPayloadCipher` (AES-256-GCM, chave
 /// mestra no Keystore/Keychain via `SecureStorageService`) no `add`, e é
 /// decifrado ao ler (`next`/`list`). Linhas legadas em texto claro
 /// (gravadas por versões anteriores) são migradas na primeira leitura:

@@ -22,7 +22,7 @@ import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 
 /// Total de membros do catálogo: 1068 (951 getters + 117 métodos).
 const int kTotalMembers = 1068;
-const int kTotalGetters = 951;
+const int kTotalGetters = 952;
 const int kTotalMethods = 117;
 const Set<String> kMethodNames = <String>{
   'onboardingPlanDetails',
@@ -285,6 +285,7 @@ void main() {
         'loginSignIn': l.loginSignIn,
         'loginSignUpSuccess': l.loginSignUpSuccess,
         'loginSignUpError': l.loginSignUpError,
+        'loginNoConnection': l.loginNoConnection,
         'loginSignInError': l.loginSignInError,
         'forgotPasswordTitle': l.forgotPasswordTitle,
         'forgotPasswordHint': l.forgotPasswordHint,
@@ -1609,6 +1610,7 @@ void main() {
         'loginSignIn': l.loginSignIn,
         'loginSignUpSuccess': l.loginSignUpSuccess,
         'loginSignUpError': l.loginSignUpError,
+        'loginNoConnection': l.loginNoConnection,
         'loginSignInError': l.loginSignInError,
         'forgotPasswordTitle': l.forgotPasswordTitle,
         'forgotPasswordHint': l.forgotPasswordHint,
@@ -2933,6 +2935,7 @@ void main() {
         'loginSignIn': l.loginSignIn,
         'loginSignUpSuccess': l.loginSignUpSuccess,
         'loginSignUpError': l.loginSignUpError,
+        'loginNoConnection': l.loginNoConnection,
         'loginSignInError': l.loginSignInError,
         'forgotPasswordTitle': l.forgotPasswordTitle,
         'forgotPasswordHint': l.forgotPasswordHint,

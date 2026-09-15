@@ -120,6 +120,7 @@
   "loginSignIn": "Sign in",
   "loginSignUpSuccess": "Account created! Confirm your email to sign in.",
   "loginSignUpError": "Could not create the account. Try again.",
+  "loginNoConnection": "No internet connection. Check your Wi-Fi/mobile data and try again.",
   "loginSignInError": "Could not sign in. Check your email and password.",
   "forgotPasswordTitle": "Reset password",
   "forgotPasswordHint": "Enter your email. We'll send a reset link.",

@@ -23,6 +23,11 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       email: email,
       password: password,
       data: fullName == null ? null : {'full_name': fullName},
+      // O link de confirmação do e-mail reabre o app (deep link do mesmo
+      // scheme do recovery — ver DeepLinkHandler). Sem isso, o gotrue
+      // SEMPRE usa o site_url do projeto (default: localhost:3000) e a
+      // confirmação nunca completa no app.
+      emailRedirectTo: 'tareqo://callback',
     );
     // Se a confirmação por e-mail estiver ativa, o `user` pode ser null
     // (a conta é criada, mas a sessão só vem após confirmar).

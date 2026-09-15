@@ -574,6 +574,12 @@ abstract class AppLocalizations {
   /// **'Não foi possível criar a conta. Tente novamente.'**
   String get loginSignUpError;
 
+  /// No description provided for @loginNoConnection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem conexão com a internet. Verifique o Wi-Fi/dados móveis e tente novamente.'**
+  String get loginNoConnection;
+
   /// No description provided for @loginSignInError.
   ///
   /// In pt, this message translates to:
