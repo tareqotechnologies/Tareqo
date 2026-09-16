@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/observability/crash_reporting.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
@@ -58,22 +59,38 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
         SnackBar(content: Text(l10n.changePasswordSuccess)),
       );
     } on AuthApiException catch (error) {
-      // Senha atual errada: o provedor rejeita o signIn de reautenticação
-      // com 400 'Invalid login credentials'. Combina statusCode E mensagem
-      // para não depender só do texto. Outros erros caem no genérico.
+      // Erros de NEGÓCIO do GoTrue (fetch.dart mapeia `error_code`):
+      //   * invalid_credentials — a reautenticação com a senha ATUAL foi
+      //     rejeitada (senha errada) — vem do POST /token;
+      //   * current_password_invalid / current_password_required — o PUT
+      //     /user rejeitou o `current_password` (senha errada);
+      //   * same_password — nova igual à atual;
+      //   * 401/insufficient_aal — conta com MFA: a troca exige aal2
+      //     (reautenticar por senha não eleva o AAL) — genérico + Sentry.
+      final code = error.code;
       final wrongCurrent =
-          error.statusCode == '400' &&
-          error.message.toLowerCase().contains('invalid login credentials');
+          code == 'invalid_credentials' ||
+          code == 'current_password_invalid' ||
+          code == 'current_password_required' ||
+          (code == null &&
+              error.message.toLowerCase().contains(
+                'invalid login credentials',
+              ));
+      final String message;
+      if (wrongCurrent) {
+        message = l10n.changePasswordWrongCurrent;
+      } else if (code == 'same_password') {
+        message = l10n.passwordSameAsCurrent;
+      } else {
+        CrashReporting.capture(
+          error,
+          StackTrace.current,
+          hint: 'change-password: ${error.statusCode} ${error.code}',
+        );
+        message = l10n.changePasswordError;
+      }
       if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            wrongCurrent
-                ? l10n.changePasswordWrongCurrent
-                : l10n.changePasswordError,
-          ),
-        ),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(message)));
     } on AuthWeakPasswordException {
       // Política de senha do provedor (GoTrue).
       if (!mounted) return;

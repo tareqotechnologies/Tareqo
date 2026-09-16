@@ -3,6 +3,15 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.1.5+25] — 2026-09-15
+
+### Novo
+- **Sentry Logs (logs estruturados)**: `sentry_flutter` 9.26 → 9.30 com `options.enableLogs = true` — o `CrashReporting.log()` envia entradas (trace→fatal) com atributos ao Logs Explorer do Sentry; fluxos de redefinição de senha reportam eventos de negócio (same_password, sessão expirada, rate limit) como logs em vez de erros, e erros não mapeados continuam indo ao Issues. Sem DSN é no-op.
+
+### Corrigido
+- **"Não foi possível atualizar a senha" no fluxo de redefinição (link do e-mail)**: o ecrã "Definir nova senha" engolia a causa real num `catch` genérico. Agora os códigos do GoTrue têm mensagens acionáveis (pt/en/fr): `same_password` → "A nova senha deve ser diferente da atual"; sessão de recovery expirada/revogada (401/session_missing) → "Peça um novo link"; rate limit → "Aguarde e tente de novo"; sem rede → mensagem de conexão; conta com MFA → pede o código 2FA (sheet) e sobe a sessão para aal2 antes de gravar. Erros não mapeados passam a ser reportados ao Sentry com o código.
+- **"Trocar senha" falhava SEMPRE com "Não foi possível alterar a senha"**: com o "Secure password change" do GoTrue ativo (GOTRUE_SECURITY_UPDATE_PASSWORD_REQUIRE_CURRENT_PASSWORD=true), o `PUT /user` exige `current_password` no corpo — confirmado contra o GoTrue real (400 `current_password_required`). O campo agora viaja no PUT (além da reautenticação prévia, que apenas renova a sessão); `current_password_invalid`/`invalid_credentials` mostram "Senha atual incorreta" e `same_password` mostra mensagem específica.
+
 ## [2.1.4+24] — 2026-09-14
 
 ### Alterado

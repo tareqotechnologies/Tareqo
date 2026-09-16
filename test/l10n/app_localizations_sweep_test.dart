@@ -20,9 +20,9 @@ import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_fr.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 
-/// Total de membros do catálogo: 1068 (951 getters + 117 métodos).
-const int kTotalMembers = 1068;
-const int kTotalGetters = 952;
+/// Total de membros do catálogo: 1073 (956 getters + 117 métodos).
+const int kTotalMembers = 1073;
+const int kTotalGetters = 956;
 const int kTotalMethods = 117;
 const Set<String> kMethodNames = <String>{
   'onboardingPlanDetails',
@@ -297,6 +297,9 @@ void main() {
         'setNewPasswordSubmit': l.setNewPasswordSubmit,
         'setNewPasswordSuccess': l.setNewPasswordSuccess,
         'setNewPasswordError': l.setNewPasswordError,
+        'setNewPasswordSamePassword': l.setNewPasswordSamePassword,
+        'setNewPasswordSessionExpired': l.setNewPasswordSessionExpired,
+        'setNewPasswordRateLimited': l.setNewPasswordRateLimited,
         'setNewPasswordSignOut': l.setNewPasswordSignOut,
         'changePasswordTitle': l.changePasswordTitle,
         'changePasswordCurrentLabel': l.changePasswordCurrentLabel,
@@ -306,6 +309,7 @@ void main() {
         'changePasswordWrongCurrent': l.changePasswordWrongCurrent,
         'changePasswordSubmit': l.changePasswordSubmit,
         'changePasswordError': l.changePasswordError,
+        'passwordSameAsCurrent': l.passwordSameAsCurrent,
         'securitySectionTitle': l.securitySectionTitle,
         'securityChangePassword': l.securityChangePassword,
         'securityChangePasswordHint': l.securityChangePasswordHint,
@@ -1622,6 +1626,9 @@ void main() {
         'setNewPasswordSubmit': l.setNewPasswordSubmit,
         'setNewPasswordSuccess': l.setNewPasswordSuccess,
         'setNewPasswordError': l.setNewPasswordError,
+        'setNewPasswordSamePassword': l.setNewPasswordSamePassword,
+        'setNewPasswordSessionExpired': l.setNewPasswordSessionExpired,
+        'setNewPasswordRateLimited': l.setNewPasswordRateLimited,
         'setNewPasswordSignOut': l.setNewPasswordSignOut,
         'changePasswordTitle': l.changePasswordTitle,
         'changePasswordCurrentLabel': l.changePasswordCurrentLabel,
@@ -1631,6 +1638,7 @@ void main() {
         'changePasswordWrongCurrent': l.changePasswordWrongCurrent,
         'changePasswordSubmit': l.changePasswordSubmit,
         'changePasswordError': l.changePasswordError,
+        'passwordSameAsCurrent': l.passwordSameAsCurrent,
         'securitySectionTitle': l.securitySectionTitle,
         'securityChangePassword': l.securityChangePassword,
         'securityChangePasswordHint': l.securityChangePasswordHint,
@@ -2947,6 +2955,9 @@ void main() {
         'setNewPasswordSubmit': l.setNewPasswordSubmit,
         'setNewPasswordSuccess': l.setNewPasswordSuccess,
         'setNewPasswordError': l.setNewPasswordError,
+        'setNewPasswordSamePassword': l.setNewPasswordSamePassword,
+        'setNewPasswordSessionExpired': l.setNewPasswordSessionExpired,
+        'setNewPasswordRateLimited': l.setNewPasswordRateLimited,
         'setNewPasswordSignOut': l.setNewPasswordSignOut,
         'changePasswordTitle': l.changePasswordTitle,
         'changePasswordCurrentLabel': l.changePasswordCurrentLabel,
@@ -2956,6 +2967,7 @@ void main() {
         'changePasswordWrongCurrent': l.changePasswordWrongCurrent,
         'changePasswordSubmit': l.changePasswordSubmit,
         'changePasswordError': l.changePasswordError,
+        'passwordSameAsCurrent': l.passwordSameAsCurrent,
         'securitySectionTitle': l.securitySectionTitle,
         'securityChangePassword': l.securityChangePassword,
         'securityChangePasswordHint': l.securityChangePasswordHint,

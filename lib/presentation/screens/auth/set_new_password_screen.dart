@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart' show SentryLevel;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/observability/crash_reporting.dart';
 import '../../../core/utils/password_policy.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
+import 'mfa_verification_sheet.dart';
 
 /// Tela de DEFINIR NOVA SENHA — mostrada pelo [AuthGate] quando a sessão
 /// veio de um link de RECUPERAÇÃO de senha (o e-mail já foi confirmado e o
@@ -45,6 +50,7 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
     setState(() => _isSubmitting = true);
 
     var updated = false;
+    var awaitingMfa = false;
     try {
       await ref
           .read(setNewPasswordUseCaseProvider)
@@ -53,11 +59,75 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.setNewPasswordSuccess)),
       );
+    } on AuthApiException catch (error) {
+      // Erros de NEGÓCIO do GoTrue têm código próprio (fetch.dart mapeia
+      // `error_code` da resposta) — cada um vira uma mensagem acionável em
+      // vez do genérico "Could not update the password".
+      final code = error.code;
+      if (code == 'same_password') {
+        // 422: a nova senha é IGUAL à atual — o usuário provavelmente
+        // reabriu um link antigo ou digitou a senha de sempre.
+        CrashReporting.log(
+          'Recovery: nova senha rejeitada (same_password)',
+          SentryLevel.info,
+          hint: 'set-new-password:same_password',
+        );
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.setNewPasswordSamePassword)),
+        );
+      } else if (code == 'insufficient_aal' ||
+          code == 'reauthentication_needed') {
+        // Conta com MFA: a sessão de recovery é aal1 e o servidor exige
+        // aal2 para gravar a senha. Pede o código TOTP (a verificação sobe
+        // a sessão para aal2) e tenta de novo na sequência.
+        awaitingMfa = true;
+        if (mounted) await _elevateAndRetry(messenger, l10n);
+      } else if (error.statusCode == '401' || code == 'session_missing') {
+        // Sessão de recovery expirada/revogada (link antigo, token já
+        // usado, refresh falhou) — a recuperação tem de recomeçar.
+        CrashReporting.log(
+          'Recovery: sessão de recuperação expirada/ausente',
+          SentryLevel.warning,
+          hint: 'set-new-password:session_expired',
+        );
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.setNewPasswordSessionExpired)),
+        );
+      } else if (error.statusCode == '429' ||
+          code == 'over_request_rate_limit') {
+        CrashReporting.log(
+          'Recovery: rate limit no update de senha',
+          SentryLevel.warning,
+          hint: 'set-new-password:rate_limited',
+        );
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.setNewPasswordRateLimited)),
+        );
+      } else {
+        // Erro não mapeado — reporta com o código para diagnóstico e
+        // mostra o genérico (não engolir mais a causa real).
+        CrashReporting.capture(
+          error,
+          StackTrace.current,
+          hint: 'set-new-password: ${error.statusCode} ${error.code}',
+        );
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.setNewPasswordError)),
+        );
+      }
+    } on AuthRetryableFetchException {
+      // Sem rede — mensagem acionável (mesma do login offline).
+      messenger.showSnackBar(SnackBar(content: Text(l10n.loginNoConnection)));
     } on AuthWeakPasswordException {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.loginWeakPasswordError)),
       );
-    } catch (error) {
+    } catch (error, stackTrace) {
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'set-new-password: erro inesperado',
+      );
       messenger.showSnackBar(SnackBar(content: Text(l10n.setNewPasswordError)));
     } finally {
       // Limpa o sinal de recovery APENAS no sucesso — e mesmo que a tela
@@ -65,11 +135,53 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
       // fica preso indevidamente: sem um NOVO link de recuperação, o
       // AuthGate não volta a mostrar esta tela.
       if (mounted) {
-        if (updated) {
+        if (updated && !awaitingMfa) {
           ref.read(passwordRecoveryPendingProvider.notifier).set(false);
         }
+        if (!awaitingMfa) {
+          setState(() => _isSubmitting = false);
+        }
+      }
+    }
+  }
+
+  /// Eleva a sessão para aal2 (sheet de MFA) e tenta gravar a senha de
+  /// novo. Falha mantém a tela ativa com mensagem (o usuário pode tentar
+  /// novamente); cancelamento volta ao formulário sem alterar nada.
+  Future<void> _elevateAndRetry(
+    ScaffoldMessengerState messenger,
+    AppLocalizations l10n,
+  ) async {
+    final elevated = await showAppSheet<bool>(
+      context,
+      isDismissible: false,
+      builder: (_) => const MFAVerificationSheet(),
+    );
+    if (elevated != true || !mounted) {
+      if (mounted) setState(() => _isSubmitting = false);
+      return;
+    }
+    try {
+      await ref
+          .read(setNewPasswordUseCaseProvider)
+          .call(newPassword: _newController.text);
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.setNewPasswordSuccess)),
+      );
+      ref.read(passwordRecoveryPendingProvider.notifier).set(false);
+      if (mounted) {
+        // O evento userUpdated + flag limpo movem o AuthGate para a área
+        // de gestão; esta tela sai da árvore.
         setState(() => _isSubmitting = false);
       }
+    } on AuthException catch (error, stackTrace) {
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'set-new-password: falhou após elevação aal2',
+      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.setNewPasswordError)));
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 

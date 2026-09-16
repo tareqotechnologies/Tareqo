@@ -306,6 +306,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setNewPasswordError => 'Could not update the password. Try again.';
 
   @override
+  String get setNewPasswordSamePassword =>
+      'The new password must be different from the current one.';
+
+  @override
+  String get setNewPasswordSessionExpired =>
+      'The recovery link expired or was already used. Request a new link.';
+
+  @override
+  String get setNewPasswordRateLimited =>
+      'Too many attempts. Wait a moment and try again.';
+
+  @override
   String get setNewPasswordSignOut => 'Sign out';
 
   @override
@@ -332,6 +344,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get changePasswordError => 'Could not change the password. Try again.';
+
+  @override
+  String get passwordSameAsCurrent =>
+      'The new password must be different from the current one.';
 
   @override
   String get securitySectionTitle => 'Security';

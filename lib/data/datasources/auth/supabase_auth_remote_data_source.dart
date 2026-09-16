@@ -72,7 +72,15 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     // O GoTrue exige sessão RECENTE para `updateUser`: reautentica com a
     // senha atual (valida a senha E renova a sessão) antes de gravar a nova.
     await _auth.signInWithPassword(email: email, password: currentPassword);
-    await _auth.updateUser(UserAttributes(password: newPassword));
+    // "Secure password change" do GoTrue (GOTRUE_SECURITY_UPDATE_PASSWORD_
+    // REQUIRE_CURRENT_PASSWORD=true neste projeto): o PUT /user EXIGE
+    // `current_password` — sem ele a gravação falha SEMPRE com 400
+    // current_password_required ("Could not change the password"). O
+    // signIn acima apenas renova a sessão; a senha atual viaja junto no
+    // corpo para o servidor validar a troca.
+    await _auth.updateUser(
+      UserAttributes(password: newPassword, currentPassword: currentPassword),
+    );
   }
 
   @override

@@ -30,6 +30,22 @@
 
 
 -- ============================================================================
+-- CONTROLO TRANSACIONAL E CONCORRÊNCIA DA MIGRAÇÃO
+-- ============================================================================
+-- Executar o upgrade como uma unidade atômica evita um estado parcialmente
+-- migrado. O advisory lock impede dois upgrades simultâneos no mesmo projeto.
+BEGIN;
+SET LOCAL lock_timeout = '30s';
+SET LOCAL statement_timeout = '30min';
+DO $$
+BEGIN
+  PERFORM pg_advisory_xact_lock(
+    hashtextextended('dumbhanengue:supabase:upgrade', 0)
+  );
+END
+$$;
+
+-- ============================================================================
 -- PARTE 1 — Preferências do tenant (moeda e idioma)  [migração 002]
 -- ============================================================================
 ALTER TABLE public.tenants
@@ -70,7 +86,7 @@ RETURNS integer
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
   SELECT COUNT(*)::int
   FROM auth.mfa_factors
@@ -84,7 +100,7 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
   SELECT COALESCE(auth.jwt() ->> 'aal', 'aal1') = 'aal2';
 $$;
@@ -94,7 +110,7 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
   SELECT EXISTS (
     SELECT 1
@@ -119,7 +135,7 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
   SELECT NOT public.mfa_enforced_for_user(p_user)
       OR public.mfa_satisfied(p_user);
@@ -188,7 +204,7 @@ CREATE OR REPLACE FUNCTION public.set_decided_by()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 BEGIN
   -- Só carimba quando a decisão acontece (pending → approved/rejected) e
@@ -258,7 +274,7 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.super_admins WHERE user_id = auth.uid()
@@ -280,7 +296,7 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.tenants t
@@ -293,7 +309,7 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.stores s
@@ -318,7 +334,7 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.stores s
@@ -428,7 +444,7 @@ CREATE OR REPLACE FUNCTION public.log_audit_entry()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, extensions
+SET search_path = pg_catalog, public, extensions
 AS $$
 BEGIN
   INSERT INTO public.audit_log
@@ -456,7 +472,7 @@ CREATE OR REPLACE FUNCTION public.get_audit_log(p_limit integer DEFAULT 100)
 RETURNS SETOF public.audit_log
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, extensions
+SET search_path = pg_catalog, public, extensions
 AS $$
 BEGIN
   IF NOT public.is_super_admin() THEN
@@ -494,7 +510,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 -- `extensions` no search_path: em projetos Supabase geridos as funções do
 -- pgcrypto (crypt/gen_salt) vivem no schema `extensions`, não no `public`.
-SET search_path = public, extensions
+SET search_path = pg_catalog, public, extensions
 AS $$
 DECLARE
   v_owner uuid := auth.uid();
@@ -679,7 +695,7 @@ CREATE OR REPLACE FUNCTION public.process_sale(p_sale jsonb, p_items jsonb)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_uid uuid := auth.uid();
@@ -779,7 +795,7 @@ CREATE OR REPLACE FUNCTION public.register_debt(p_debt jsonb)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_uid uuid := auth.uid();
@@ -865,7 +881,7 @@ CREATE OR REPLACE FUNCTION public.settle_debt(p_debt_id text, p_store text)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_uid uuid := auth.uid();
@@ -951,7 +967,7 @@ CREATE OR REPLACE FUNCTION public.process_purchase(p_purchase jsonb, p_items jso
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_uid uuid := auth.uid();
@@ -1066,7 +1082,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, extensions
+SET search_path = pg_catalog, public, extensions
 AS $$
 BEGIN
   IF NOT public.is_my_store(p_store_id) THEN
@@ -1108,7 +1124,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, extensions
+SET search_path = pg_catalog, public, extensions
 AS $$
 BEGIN
   IF NOT public.is_my_store(p_store_id) THEN
@@ -1142,7 +1158,7 @@ CREATE OR REPLACE FUNCTION public.get_sales_report(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, extensions
+SET search_path = pg_catalog, public, extensions
 AS $$
 DECLARE
   v_revenue BIGINT;
@@ -1237,7 +1253,7 @@ CREATE OR REPLACE FUNCTION public.update_tenant_settings(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_currency text := CASE WHEN p_currency_code IN ('BRL','USD','EUR','MZN')
@@ -1533,7 +1549,7 @@ CREATE OR REPLACE FUNCTION public.set_employee_active(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_tenant_id TEXT;
@@ -1740,7 +1756,7 @@ CREATE OR REPLACE FUNCTION public.process_sale(p_sale jsonb, p_items jsonb)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_uid uuid := auth.uid();
@@ -1882,7 +1898,7 @@ CREATE OR REPLACE FUNCTION public.process_purchase(p_purchase jsonb, p_items jso
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_uid uuid := auth.uid();
@@ -2012,7 +2028,7 @@ CREATE OR REPLACE FUNCTION public.get_sales_report(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, extensions
+SET search_path = pg_catalog, public, extensions
 AS $$
 DECLARE
   v_revenue BIGINT;
@@ -2181,7 +2197,7 @@ CREATE OR REPLACE FUNCTION public.cancel_sale(p_sale_id text, p_store_id text)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_uid uuid := auth.uid();
@@ -2296,7 +2312,7 @@ CREATE OR REPLACE FUNCTION public.lock_products_or_raise(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_item jsonb;
@@ -2346,7 +2362,7 @@ CREATE OR REPLACE FUNCTION public.adjust_product_stock(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_uid uuid := auth.uid();
@@ -2508,7 +2524,7 @@ CREATE OR REPLACE FUNCTION public.close_cash_register(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, extensions
+SET search_path = pg_catalog, public, extensions
 AS $$
 DECLARE
   v_uid uuid := auth.uid();
@@ -2616,7 +2632,7 @@ CREATE OR REPLACE FUNCTION public.get_cash_closing_summary(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, extensions
+SET search_path = pg_catalog, public, extensions
 AS $$
 DECLARE
   v_day_start timestamptz;
@@ -2904,7 +2920,7 @@ CREATE OR REPLACE FUNCTION public.get_next_custom_invoice_number(
 RETURNS BIGINT
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_next BIGINT;
@@ -2927,7 +2943,7 @@ CREATE OR REPLACE FUNCTION public.set_custom_invoice_number()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 BEGIN
   IF NEW.invoice_number = 0 THEN
@@ -2997,7 +3013,7 @@ CREATE OR REPLACE FUNCTION public.get_next_quotation_number(
 RETURNS BIGINT
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_next BIGINT;
@@ -3020,7 +3036,7 @@ CREATE OR REPLACE FUNCTION public.set_quotation_number()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 BEGIN
   IF NEW.quotation_number = 0 THEN
@@ -3081,7 +3097,7 @@ RETURNS BOOLEAN
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.store_employees e
@@ -3117,7 +3133,7 @@ CREATE OR REPLACE FUNCTION public.set_employee_attendance_actor()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 BEGIN
   IF auth.uid() IS NOT NULL THEN
@@ -3250,7 +3266,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_start TIMESTAMPTZ;
@@ -3363,7 +3379,7 @@ CREATE OR REPLACE FUNCTION public.get_next_invoice_number(p_tenant_id TEXT)
 RETURNS BIGINT
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_next BIGINT;
@@ -3386,7 +3402,7 @@ CREATE OR REPLACE FUNCTION public.set_invoice_number()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 BEGIN
   IF NEW.number = 0 THEN
@@ -3536,3 +3552,177 @@ BEGIN
   END IF;
 END
 $$;
+
+-- ============================================================================
+-- PARTE 32 — ENDURECIMENTO FINAL DO UPGRADE (aditivo e idempotente)
+-- ============================================================================
+-- Não altera a lógica de negócio nem os dados. Fecha vetores de alteração de
+-- escopo, garante RLS nas tabelas adicionadas por módulos e corrige privilégios
+-- padrão para que funções SECURITY DEFINER não fiquem públicas por acidente.
+
+-- 32.1 Escopo é imutável depois do INSERT. Os triggers anti-forja originais
+-- protegem INSERT; estes protegem UPDATE (defesa contra mover dados entre
+-- tenants/lojas por chamada direta ao PostgREST).
+CREATE OR REPLACE FUNCTION public.prevent_scope_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $$
+BEGIN
+  IF TG_ARGV[0] = 'user_id' AND NEW.user_id IS DISTINCT FROM OLD.user_id THEN
+    RAISE EXCEPTION 'user_id não pode ser alterado após a criação do registro.';
+  END IF;
+  IF TG_ARGV[0] = 'store_id' AND NEW.store_id IS DISTINCT FROM OLD.store_id THEN
+    RAISE EXCEPTION 'store_id não pode ser alterado após a criação do registro.';
+  END IF;
+  IF TG_ARGV[0] = 'tenant_id' AND NEW.tenant_id IS DISTINCT FROM OLD.tenant_id THEN
+    RAISE EXCEPTION 'tenant_id não pode ser alterado após a criação do registro.';
+  END IF;
+  IF TG_ARGV[0] = 'owner_user_id' AND NEW.owner_user_id IS DISTINCT FROM OLD.owner_user_id THEN
+    RAISE EXCEPTION 'owner_user_id não pode ser alterado após a criação do registro.';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DO $$
+DECLARE
+  v_table text;
+BEGIN
+  FOREACH v_table IN ARRAY ARRAY[
+    'products','sales','financial_transactions','cash_closings','debts',
+    'customers','purchases','stock_lots'
+  ] LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS trg_%I_user_scope_guard ON public.%I', v_table, v_table);
+    EXECUTE format(
+      'CREATE TRIGGER trg_%I_user_scope_guard BEFORE UPDATE OF user_id ON public.%I '
+      'FOR EACH ROW EXECUTE FUNCTION public.prevent_scope_change(%L)',
+      v_table, v_table, 'user_id'
+    );
+    EXECUTE format('DROP TRIGGER IF EXISTS trg_%I_store_scope_guard ON public.%I', v_table, v_table);
+    EXECUTE format(
+      'CREATE TRIGGER trg_%I_store_scope_guard BEFORE UPDATE OF store_id ON public.%I '
+      'FOR EACH ROW EXECUTE FUNCTION public.prevent_scope_change(%L)',
+      v_table, v_table, 'store_id'
+    );
+  END LOOP;
+
+  FOREACH v_table IN ARRAY ARRAY['sale_items','sale_lot_consumption','purchase_items'] LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS trg_%I_user_scope_guard ON public.%I', v_table, v_table);
+    EXECUTE format(
+      'CREATE TRIGGER trg_%I_user_scope_guard BEFORE UPDATE OF user_id ON public.%I '
+      'FOR EACH ROW EXECUTE FUNCTION public.prevent_scope_change(%L)',
+      v_table, v_table, 'user_id'
+    );
+  END LOOP;
+END
+$$;
+
+-- Relações administrativas também não podem ser reatribuídas por UPDATE.
+DO $$
+BEGIN
+  IF to_regclass('public.tenants') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS trg_tenants_owner_scope_guard ON public.tenants;
+    CREATE TRIGGER trg_tenants_owner_scope_guard
+      BEFORE UPDATE OF owner_user_id ON public.tenants
+      FOR EACH ROW EXECUTE FUNCTION public.prevent_scope_change('owner_user_id');
+  END IF;
+  IF to_regclass('public.stores') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS trg_stores_tenant_scope_guard ON public.stores;
+    CREATE TRIGGER trg_stores_tenant_scope_guard
+      BEFORE UPDATE OF tenant_id ON public.stores
+      FOR EACH ROW EXECUTE FUNCTION public.prevent_scope_change('tenant_id');
+  END IF;
+  IF to_regclass('public.store_employees') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS trg_store_employees_tenant_scope_guard ON public.store_employees;
+    CREATE TRIGGER trg_store_employees_tenant_scope_guard
+      BEFORE UPDATE OF tenant_id ON public.store_employees
+      FOR EACH ROW EXECUTE FUNCTION public.prevent_scope_change('tenant_id');
+    DROP TRIGGER IF EXISTS trg_store_employees_store_scope_guard ON public.store_employees;
+    CREATE TRIGGER trg_store_employees_store_scope_guard
+      BEFORE UPDATE OF store_id ON public.store_employees
+      FOR EACH ROW EXECUTE FUNCTION public.prevent_scope_change('store_id');
+    DROP TRIGGER IF EXISTS trg_store_employees_user_scope_guard ON public.store_employees;
+    CREATE TRIGGER trg_store_employees_user_scope_guard
+      BEFORE UPDATE OF user_id ON public.store_employees
+      FOR EACH ROW EXECUTE FUNCTION public.prevent_scope_change('user_id');
+  END IF;
+  IF to_regclass('public.plan_requests') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS trg_plan_requests_tenant_scope_guard ON public.plan_requests;
+    CREATE TRIGGER trg_plan_requests_tenant_scope_guard
+      BEFORE UPDATE OF tenant_id ON public.plan_requests
+      FOR EACH ROW EXECUTE FUNCTION public.prevent_scope_change('tenant_id');
+  END IF;
+END
+$$;
+
+-- 32.2 RLS explícito em todos os objetos de módulos opcionais. Isto é seguro
+-- em bases antigas e garante deny-by-default quando uma tabela foi criada
+-- num módulo anterior sem o ALTER TABLE de proteção.
+DO $$
+DECLARE
+  v_table text;
+BEGIN
+  FOREACH v_table IN ARRAY ARRAY[
+    'tenant_addons','custom_invoices','quotations','employee_attendance',
+    'employee_commission_rates','employee_targets','invoices',
+    'invoice_notifications','admin_messages','audit_log'
+  ] LOOP
+    IF to_regclass('public.' || v_table) IS NOT NULL THEN
+      EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', v_table);
+    END IF;
+  END LOOP;
+END
+$$;
+
+-- 32.3 Índices que suportam RLS, FIFO e relatórios sem mudar resultados.
+CREATE INDEX IF NOT EXISTS idx_products_store_active_upgrade
+  ON public.products (store_id, is_active, id);
+CREATE INDEX IF NOT EXISTS idx_sales_store_status_datetime_upgrade
+  ON public.sales (store_id, status, date_time DESC);
+CREATE INDEX IF NOT EXISTS idx_financial_store_status_date_upgrade
+  ON public.financial_transactions (store_id, status, date DESC);
+CREATE INDEX IF NOT EXISTS idx_stock_lots_fifo_upgrade
+  ON public.stock_lots (store_id, product_id, expiry_date ASC, entry_date ASC, id)
+  WHERE current_quantity > 0;
+CREATE INDEX IF NOT EXISTS idx_employees_active_store_user_upgrade
+  ON public.store_employees (store_id, user_id) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_debts_unpaid_store_upgrade
+  ON public.debts (store_id, is_paid) WHERE is_paid = FALSE;
+
+-- 32.4 Privilégios: anon não pode executar RPCs; authenticated mantém o
+-- acesso necessário ao app. As verificações internas das RPCs continuam sendo
+-- a autoridade, pois SECURITY DEFINER ignora RLS durante a execução.
+REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    EXECUTE 'REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA public FROM anon';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+    EXECUTE 'GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    EXECUTE 'GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO service_role';
+  END IF;
+END
+$$;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+    EXECUTE 'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO authenticated';
+  END IF;
+END
+$$;
+
+-- 32.5 Atualiza estatísticas somente depois de toda a migração.
+ANALYZE public.products;
+ANALYZE public.sales;
+ANALYZE public.financial_transactions;
+ANALYZE public.store_employees;
+
+COMMIT;
+

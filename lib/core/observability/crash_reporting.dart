@@ -31,6 +31,12 @@ abstract final class CrashReporting {
         options.dsn = _dsn;
         // Erros não capturados de widgets/flutter.
         options.environment = kReleaseMode ? 'production' : 'development';
+        // Logs estruturados (Sentry Logs, SDK >= 9.0): `Sentry.logger.*`
+        // envia entradas de log ao projeto — visíveis em Logs Explorer.
+        // A captura por INTEGRAÇÃO (console/dart:loggin) fica OFF para não
+        // duplicar eventos; o que enviamos explicitamente via [log] é
+        // sempre capturado.
+        options.enableLogs = true;
         // Não enviar eventos esperados de negócio (ex.: StateError de
         // entidade inválida já tratado pela UI) — reduz ruído no Sentry.
         options.beforeSend = (event, _) {
@@ -46,6 +52,39 @@ abstract final class CrashReporting {
         };
       },
     );
+  }
+
+  /// Log estruturado no Sentry (novo API de Logs do SDK 9.x). No-op sem
+  /// DSN — o app nunca depende do Sentry para funcionar. Níveis:
+  /// trace/debug/info/warn/error/fatal via [SentryLevel].
+  static void log(
+    String message,
+    SentryLevel level, {
+    String? hint,
+    Map<String, String>? attributes,
+  }) {
+    if (!isEnabled) return;
+    final attrs = {
+      if (hint != null) 'hint': SentryAttribute.string(hint),
+      ...?attributes?.map((k, v) => MapEntry(k, SentryAttribute.string(v))),
+    };
+    switch (level) {
+      case SentryLevel.fatal:
+        Sentry.logger.fatal(message, attributes: attrs);
+      case SentryLevel.error:
+        Sentry.logger.error(message, attributes: attrs);
+      case SentryLevel.warning:
+        Sentry.logger.warn(message, attributes: attrs);
+      case SentryLevel.info:
+        Sentry.logger.info(message, attributes: attrs);
+      case SentryLevel.debug:
+        Sentry.logger.debug(message, attributes: attrs);
+      default:
+        Sentry.logger.trace(message, attributes: attrs);
+    }
+    if (kDebugMode) {
+      debugPrint('[log ${level.name}]${hint == null ? '' : ' $hint'} $message');
+    }
   }
 
   /// Registra um erro de aplicação (catch de telas/providers) no canal

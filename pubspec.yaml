@@ -2,7 +2,7 @@ name: tareqo
 description: "TAREQO — sistema de gestão empresarial (estoque, vendas, clientes, compras e relatórios) construído em Flutter com Clean Architecture."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 2.1.4+24
+version: 2.1.5+25
 
 environment:
   sdk: ^3.12.2
@@ -68,7 +68,7 @@ dependencies:
   # A migração upstream (getsentry/sentry-dart#3738, DART-382) está prevista
   # para o v10 estável (~fim de ago/meio de set 2026, bloqueada no jni).
   # Quando o v10 sair: subir para ^10.0.0 — o aviso desaparece sozinho.
-  sentry_flutter: ^9.26.0
+  sentry_flutter: ^9.30.0
   mobile_scanner: ^7.4.0
   share_plus: ^13.3.0
   url_launcher: ^6.3.2

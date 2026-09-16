@@ -314,6 +314,18 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível atualizar a senha. Tente novamente.';
 
   @override
+  String get setNewPasswordSamePassword =>
+      'A nova senha deve ser diferente da atual.';
+
+  @override
+  String get setNewPasswordSessionExpired =>
+      'O link de recuperação expirou ou já foi usado. Peça um novo link.';
+
+  @override
+  String get setNewPasswordRateLimited =>
+      'Muitas tentativas. Aguarde um momento e tente de novo.';
+
+  @override
   String get setNewPasswordSignOut => 'Sair da conta';
 
   @override
@@ -341,6 +353,10 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get changePasswordError =>
       'Não foi possível alterar a senha. Tente novamente.';
+
+  @override
+  String get passwordSameAsCurrent =>
+      'A nova senha deve ser diferente da atual.';
 
   @override
   String get securitySectionTitle => 'Segurança';

@@ -646,6 +646,24 @@ abstract class AppLocalizations {
   /// **'Não foi possível atualizar a senha. Tente novamente.'**
   String get setNewPasswordError;
 
+  /// No description provided for @setNewPasswordSamePassword.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nova senha deve ser diferente da atual.'**
+  String get setNewPasswordSamePassword;
+
+  /// No description provided for @setNewPasswordSessionExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'O link de recuperação expirou ou já foi usado. Peça um novo link.'**
+  String get setNewPasswordSessionExpired;
+
+  /// No description provided for @setNewPasswordRateLimited.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas tentativas. Aguarde um momento e tente de novo.'**
+  String get setNewPasswordRateLimited;
+
   /// No description provided for @setNewPasswordSignOut.
   ///
   /// In pt, this message translates to:
@@ -699,6 +717,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível alterar a senha. Tente novamente.'**
   String get changePasswordError;
+
+  /// No description provided for @passwordSameAsCurrent.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nova senha deve ser diferente da atual.'**
+  String get passwordSameAsCurrent;
 
   /// No description provided for @securitySectionTitle.
   ///

@@ -6,9 +6,11 @@ import 'package:tareqo/data/datasources/auth/supabase_auth_remote_data_source.da
 import '../../../helpers/supabase_test_harness.dart';
 
 /// Fluxos de SENHA do datasource de autenticação (contrato REST):
-/// - `changePassword` EXIGE sessão (guarda) e REAUTENTICA com a senha atual
-///   antes de gravar a nova (exigência do GoTrue);
-/// - `setNewPassword` grava direto (fluxo de recovery — sem re-auth);
+/// - `changePassword` EXIGE sessão (guarda), REAUTENTICA com a senha atual
+///   e envia `current_password` no PUT /user — exigência do "Secure
+///   password change" do GoTrue (sem o campo: 400 current_password_required);
+/// - `setNewPassword` grava direto (fluxo de recovery — sem re-auth, sem
+///   current_password: o GoTrue isenta sessões AMR=recovery dessa checagem);
 /// - `resetPassword` aponta o redirect para o deep link `tareqo://callback`;
 /// - `signUp` também embute o deep link no e-mail de confirmação
 ///   (`emailRedirectTo`) — sem isso o gotrue usa o `site_url` do projeto
@@ -61,16 +63,18 @@ void main() {
     );
 
     test(
-      'changePassword reautentica com a senha atual e grava a nova',
+      'changePassword reautentica, envia current_password no PUT e grava a nova',
       () async {
         await signInStubUser();
 
         stub.handler = (path, request) {
           if (path.contains('/user')) {
-            // PUT {auth}/user — gravação da nova senha.
+            // PUT {auth}/user — gravação da nova senha. O GoTrue com
+            // "Secure password change" exige current_password no corpo.
             expect(request.method, 'PUT');
             final body = jsonBodyOf(request) as Map<String, dynamic>;
             expect(body['password'], 'nova-forte-456');
+            expect(body['current_password'], 'senha-atual-123');
             return FakeResponse(userPayload());
           }
           // Reauth vai pelo /token (stub de sessão) — senha não vaza em log.
@@ -165,6 +169,30 @@ void main() {
         throwsA(isA<AuthException>()),
       );
     });
+
+    test(
+      'same_password (422) propaga AuthApiException com code mapeável',
+      () async {
+        await signInStubUser();
+
+        stub.handler = (path, request) => FakeResponse({
+          'code': 422,
+          'error_code': 'same_password',
+          'msg': 'New password should be different from the old password.',
+        }, status: 422);
+
+        await expectLater(
+          ds.setNewPassword(newPassword: 'igual'),
+          throwsA(
+            isA<AuthApiException>().having(
+              (e) => e.code,
+              'code',
+              'same_password',
+            ),
+          ),
+        );
+      },
+    );
 
     test(
       'falha de rede no resetPassword propaga AuthRetryableFetchException',

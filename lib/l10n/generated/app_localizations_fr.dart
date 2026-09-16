@@ -312,6 +312,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get setNewPasswordError => 'Impossible de mettre à jour. Réessayez.';
 
   @override
+  String get setNewPasswordSamePassword =>
+      'Le nouveau mot de passe doit être différent de l\'actuel.';
+
+  @override
+  String get setNewPasswordSessionExpired =>
+      'Le lien de réinitialisation a expiré ou a déjà été utilisé. Demandez un nouveau lien.';
+
+  @override
+  String get setNewPasswordRateLimited =>
+      'Trop de tentatives. Attendez un instant et réessayez.';
+
+  @override
   String get setNewPasswordSignOut => 'Se déconnecter';
 
   @override
@@ -339,6 +351,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get changePasswordError =>
       'Impossible de changer le mot de passe. Réessayez.';
+
+  @override
+  String get passwordSameAsCurrent =>
+      'Le nouveau mot de passe doit être différent de l\'actuel.';
 
   @override
   String get securitySectionTitle => 'Sécurité';
