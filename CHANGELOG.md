@@ -3,6 +3,16 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.1.6+26] — 2026-09-16
+
+### Corrigido
+- **Add-on Factura Personalizada — PDF ignorava o template**: a configuração (logotipo, cor, estilo, dados da empresa) vivia só no estado da tela e era PERDIDA ao reabrir o app — o PDF saía sempre com o design padrão. Agora o template é PERSISTIDO (`SharedPreferencesAsync` via `invoiceTemplateProvider`, partilhado por Factura e Cotação) e os 3 estilos escolhidos (Clássico/Moderno/Compacto) são aplicados de verdade no PDF. O nome do negócio segue a cascata: template → **nome real da loja activa** (endereço, telefone, NUIT incluídos quando o template não define) → fallback localizado — nunca mais "My Business" com loja configurada. Relatórios Avançados também exportam com o nome real da loja. A Cotação recebeu os mesmos 3 estilos.
+- **Add-on Gestão de Funcionários no Supabase**: (1) a aba Comissões falhava com "não foi possível carregar funcionários" — a RPC `get_employee_commission_summary` quebrava com 42804 (`SUM(bigint)` devolve numeric, `RETURNS TABLE` declara bigint); fix incremental `supabase/fix_employee_mgmt_rpc_2026_09_16.sql` aplicado no projeto dev. (2) Marcar entrada/saída do ponto não gravava — o INSERT remoto não gerava o `id` (TEXT PRIMARY KEY sem default → 23502); agora o datasource remoto gera `AppIds.newId('att')` (mesmo padrão do caminho local/SQLite).
+- **Hardening Supabase (linter 0025/0029)**: correção do fix que revogava EXECUTE dos helpers usados DENTRO das policies RLS (`is_my_store`, `mfa_ok` etc. — quebraria o app com 42501); storage `product-images` com bucket + policies (fotos de produto sem "no storage permission"); policy do painel admin via `is_super_admin()` (42501 corrigido); gap P1 fechado (`sale_items_update`/`sale_lot_consumption_update` com guarda `mfa_ok`). Checks 38–42 no `sql_check_live.sh` + smoke E2E (`scripts/smoke_rls_rest.py`, 18/18) — 34/34 PASS no dev.
+
+### Testes
+- Unit do template persistente (round-trip, JSON malformado, persistência entre sessões, backend ausente); 3 estilos validados nos exporters; contrato do `clockIn` exige `id`; bateria completa 1.659/1.659 verde.
+
 ## [2.1.5+25] — 2026-09-15
 
 ### Novo
