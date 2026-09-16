@@ -192,6 +192,10 @@ SELECT sa.user_id, u.email FROM public.super_admins sa JOIN auth.users u ON u.id
 
 `scripts/sql_check_live.sh` roda as mesmas assertivas do CI contra o projeto real
 (leia o cabeçalho do script: preencha host/senha do projeto de produção).
+O check 40 valida o storage de fotos de produto (bucket `product-images`
+público + 4 policies) — se falhar, rode `supabase/fix_product_images_storage.sql`
+no SQL Editor e revalide. Sem isso o app salva o produto, mas a foto não sobe
+(aviso "(sem permissão de armazenamento)").
 
 ---
 
@@ -201,10 +205,26 @@ SELECT sa.user_id, u.email FROM public.super_admins sa JOIN auth.users u ON u.id
 |---|---|---|
 | Authentication → Providers | Apenas **Email** (confirmação conforme o app usa) | Menor superfície de ataque |
 | Authentication → URL Configuration | URL do app/deep link de reset de senha | Fluxo "esqueci a senha" |
+| Authentication → Policies | **Leaked password protection: ON** (linter auth_leaked_password_protection) | Rejeita senhas comprometidas (HaveIBeenPwned) no cadastro/reset. Configuração **exclusiva do Dashboard** (não é SQL): Authentication → Policies → toggle ON |
 | Auth → Rate limits | Defaults já razoáveis; não aumentar | Anti-força-bruta |
 | Database → Backups | Verificar política do plano (PITR se disponível) | **Dados financeiros** — restauração é inegociável |
 | Settings → API | Nunca expor a `service_role` key no app | Ela ignora o RLS |
 | Logs → API | Acompanhar 4xx/5xx na primeira semana | Detectar RLS mal configurado / bugs |
+
+### 9.1 Warnings do linter aceitos de propósito (0029)
+
+Depois de rodar `fix_hardening_linter_2026_09.sql`, o Security Advisor ainda
+aponta WARNs 0029 para **17 funções** — todos aceitos, com justificativa:
+
+| Grupo | Funções | Por que fica exposto |
+|---|---|---|
+| RPCs do app (dinheiro/relatórios) | `process_sale`, `process_purchase`, `register_debt`, `cancel_sale`, `settle_debt`, `adjust_product_stock`, `close_cash_register`, `get_cash_closing_summary`, `get_dashboard_kpis`, `get_cash_flow`, `get_sales_report`, `get_employee_commission_summary`, `create_employee_account`, `set_employee_active`, `update_tenant_settings`, `get_audit_log` | São a API real do app via `/rest/v1/rpc`; cada uma valida tenant/loja/papel internamente (`is_my_store`, `is_manager_of_store`, `is_super_admin`, `mfa_ok`) — o servidor é a autoridade |
+| Helpers citados em policies RLS | `is_my_store`, `is_tenant_owner`, `is_manager_of_store`, `is_store_employee_active`, `mfa_ok`, `is_super_admin` | A policy é avaliada com os privilégios do papel que consulta a tabela: **revogar o EXECUTE quebra o app** (42501 "permission denied for function"). São guards booleanas sobre ids explícitos — não exfiltram dados |
+
+⚠️ Nunca "limpe" esses WARNs revogando o EXECUTE dos helpers de RLS: o linter
+para de apontá-los, mas toda leitura/escrita das tabelas protegidas passa a
+falhar. O check 42 do `scripts/sql_check_live.sh` valida exatamente isso
+(funções internas RESTRICTAS **sem** EXECUTE; helpers de policy **com** EXECUTE).
 
 ---
 
@@ -249,6 +269,7 @@ SELECT sa.user_id, u.email FROM public.super_admins sa JOIN auth.users u ON u.id
 | 5 | Preencher `env/prod.env` (+ marcador) | 2 min |
 | 6 | Build prod com defines | 5 min |
 | 7 | Checklist funcional (seção 8.2) | 10 min |
+| 8 | Storage de fotos (`fix_product_images_storage.sql`) + `sql_check_live.sh` | 5 min |
 
 **Total: ~20–25 min** para um Supabase de produção completo, seguro (RLS +
 SECURITY DEFINER em tudo) e com o mesmo comportamento validado nos 862 testes

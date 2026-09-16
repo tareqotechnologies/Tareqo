@@ -2163,19 +2163,21 @@ CREATE POLICY sale_lot_consumption_insert ON public.sale_lot_consumption
 DROP POLICY IF EXISTS sale_lot_consumption_update ON public.sale_lot_consumption;
 CREATE POLICY sale_lot_consumption_update ON public.sale_lot_consumption
   FOR UPDATE USING (
-    auth.uid() = user_id
-    OR EXISTS (
-      SELECT 1 FROM public.sales s
-      WHERE s.id = sale_lot_consumption.sale_id
-        AND public.is_my_store(s.store_id)
-    )
+    (auth.uid() = user_id
+     OR EXISTS (
+       SELECT 1 FROM public.sales s
+       WHERE s.id = sale_lot_consumption.sale_id
+         AND public.is_my_store(s.store_id)
+     ))
+    AND public.mfa_ok()
   ) WITH CHECK (
-    auth.uid() = user_id
-    OR EXISTS (
-      SELECT 1 FROM public.sales s
-      WHERE s.id = sale_lot_consumption.sale_id
-        AND public.is_my_store(s.store_id)
-    )
+    (auth.uid() = user_id
+     OR EXISTS (
+       SELECT 1 FROM public.sales s
+       WHERE s.id = sale_lot_consumption.sale_id
+         AND public.is_my_store(s.store_id)
+     ))
+    AND public.mfa_ok()
   );
 DROP POLICY IF EXISTS sale_lot_consumption_delete ON public.sale_lot_consumption;
 -- DELETE só de registros PRÓPRIOS (o app não exclui nada).
@@ -2728,8 +2730,17 @@ ON CONFLICT (id) DO NOTHING;
 
 -- 27.3 Políticas de acesso ao storage (DROP + CREATE — reexecutável).
 DROP POLICY IF EXISTS product_images_public_read ON storage.objects;
+-- ⚠️ Leitura SEM listing (linter 0025 public_bucket_allows_listing): a
+-- comparação self-referente `name = foldername[1] || '/' || foldername[2]`
+-- só aceita o objeto cujo nome exato foi pedido — GET por URL pública
+-- continua, LIST fica vazio. O app nunca lista o bucket (Image.network no
+-- path exato de products.image_path). Espelha o schema.sql (FOTOS).
 CREATE POLICY product_images_public_read ON storage.objects
-  FOR SELECT USING (bucket_id = 'product-images');
+  FOR SELECT USING (
+    bucket_id = 'product-images'
+    AND name = ((storage.foldername(name))[1] || '/' ||
+                (storage.foldername(name))[2])
+  );
 
 DROP POLICY IF EXISTS product_images_auth_insert ON storage.objects;
 CREATE POLICY product_images_auth_insert ON storage.objects
@@ -2866,14 +2877,21 @@ CREATE POLICY tenant_addons_delete_own
   );
 
 DROP POLICY IF EXISTS tenant_addons_super_admin_all ON public.tenant_addons;
+-- ⚠️ NÃO consultar public.super_admins DIRETAMENTE dentro da policy:
+-- a tabela tem REVOKE ALL de anon/authenticated (defesa anti-auto-promoção)
+-- e o Postgres nega com 42501 'permission denied for table super_admins'
+-- ANTES de avaliar o RLS (bug de produção Set/2026 — painel admin não
+-- conseguia ativar add-on). A função SECURITY DEFINER is_super_admin()
+-- lê a tabela como dono do schema — mesmo padrão das demais políticas
+-- (plans/plan_requests/tenants) e RPCs administrativas.
 CREATE POLICY tenant_addons_super_admin_all
   ON public.tenant_addons
   FOR ALL
   USING (
-    auth.uid() IN (SELECT user_id FROM public.super_admins)
+    public.is_super_admin()
   )
   WITH CHECK (
-    auth.uid() IN (SELECT user_id FROM public.super_admins)
+    public.is_super_admin()
   );
 
 -- ---------------------------------------------------------------
@@ -3554,6 +3572,32 @@ END
 $$;
 
 -- ============================================================================
+-- PARTE 31.5 — P1 complementar: guarda mfa_ok na UPDATE de itens de venda
+-- ============================================================================
+-- O P1 original adicionou mfa_ok às policies INSERT das 6 tabelas de dinheiro
+-- e às UPDATEs de sales/debts/financial_transactions/purchases — mas deixou
+-- de fora a UPDATE de sale_items e sale_lot_consumption (o corpo dos itens
+-- nunca muda pela UI; escrever por fora exigiria sessão SEM aal2). Iguala as
+-- UPDATEs de sales/stock_lots: guarda no USING e no WITH CHECK. Idempotente.
+DROP POLICY IF EXISTS sale_items_update ON public.sale_items;
+CREATE POLICY sale_items_update ON public.sale_items
+  FOR UPDATE USING (
+    (auth.uid() = user_id
+     OR EXISTS (
+       SELECT 1 FROM public.sales s
+       WHERE s.id = sale_items.sale_id AND public.is_my_store(s.store_id)
+     ))
+    AND public.mfa_ok()
+  ) WITH CHECK (
+    (auth.uid() = user_id
+     OR EXISTS (
+       SELECT 1 FROM public.sales s
+       WHERE s.id = sale_items.sale_id AND public.is_my_store(s.store_id)
+     ))
+    AND public.mfa_ok()
+  );
+
+-- ============================================================================
 -- PARTE 32 — ENDURECIMENTO FINAL DO UPGRADE (aditivo e idempotente)
 -- ============================================================================
 -- Não altera a lógica de negócio nem os dados. Fecha vetores de alteração de
@@ -3717,6 +3761,75 @@ BEGIN
   END IF;
 END
 $$;
+
+-- 32.6 Funções INTERNAS fora do PostgREST (linter 0029 — Sep 2026):
+-- triggers e helpers que o app NUNCA chama via /rest/v1/rpc perdem o EXECUTE
+-- de anon/authenticated (32.4 concede TUDO a authenticated; aqui recortamos
+-- a superfície que não é API). A chamada INTERNA (trigger ou corpo de outra
+-- função) NÃO depende do grant de EXECUTE do chamador — somente chamadas
+-- diretas pelo PostgREST. Idempotente: revogar é no-op. Deve permanecer
+-- DEPOIS do GRANT geral 32.4 e espelha a seção 3.7 do schema.sql.
+--
+-- ⚠️ NÃO revogar aqui os helpers citados DENTRO de expressões de policy RLS
+-- (is_my_store, is_tenant_owner, is_manager_of_store,
+-- is_store_employee_active, mfa_ok) nem is_super_admin(): a policy é
+-- avaliada com os privilégios do papel que CONSULTA a tabela — SECURITY
+-- DEFINER muda os privilégios dentro do corpo da função, não o direito de
+-- chamá-la. Sem o EXECUTE, toda leitura/escrita das tabelas protegidas por
+-- esses helpers falha com 42501 "permission denied for function". O WARN
+-- 0029 remanescente desses helpers é aceito (guards booleanas, sem dados).
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_record_store_id() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_tenant_user_id() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_store_tenant() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_tenant_owner() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_employee_tenant() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_employee_attendance_actor() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_invoice_number() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_custom_invoice_number() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_quotation_number() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_decided_by() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_plan_request_tenant() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.log_audit_entry() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.prevent_scope_change() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.enforce_store_limit() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.enforce_employee_limit() FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.lock_products_or_raise(jsonb, text, boolean) FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_invoice_number(text) FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_custom_invoice_number(text) FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_quotation_number(text) FROM anon, authenticated';
+    -- Helpers MFA internos: chamados dentro de mfa_ok()/update_tenant_settings
+    -- (contexto SECURITY DEFINER) — não são API e não aparecem em policies.
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_enforced_for_user(uuid) FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_verified_factor_count(uuid) FROM anon, authenticated';
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_satisfied(uuid) FROM anon, authenticated';
+  END IF;
+  -- Corretivo idempotente p/ bases onde o fix de Sep/2026 revogou os helpers
+  -- de policy (o linter 0029 deixa de apontá-los, mas o app quebra com 42501
+  -- "permission denied for function" em toda leitura/escrita).
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+    IF to_regprocedure('public.is_my_store(text)') IS NOT NULL THEN
+      EXECUTE 'GRANT EXECUTE ON FUNCTION public.is_my_store(text) TO authenticated';
+    END IF;
+    IF to_regprocedure('public.is_tenant_owner(text)') IS NOT NULL THEN
+      EXECUTE 'GRANT EXECUTE ON FUNCTION public.is_tenant_owner(text) TO authenticated';
+    END IF;
+    IF to_regprocedure('public.is_manager_of_store(text)') IS NOT NULL THEN
+      EXECUTE 'GRANT EXECUTE ON FUNCTION public.is_manager_of_store(text) TO authenticated';
+    END IF;
+    IF to_regprocedure('public.is_store_employee_active(text, uuid)') IS NOT NULL THEN
+      EXECUTE 'GRANT EXECUTE ON FUNCTION public.is_store_employee_active(text, uuid) TO authenticated';
+    END IF;
+    IF to_regprocedure('public.mfa_ok(uuid)') IS NOT NULL THEN
+      EXECUTE 'GRANT EXECUTE ON FUNCTION public.mfa_ok(uuid) TO authenticated';
+    END IF;
+  END IF;
+END
+$$;
+-- Nota: get_audit_log é chamada PELO APP (painel admin) e fica exposta —
+-- a guarda is_super_admin() dentro dela é a autoridade.
 
 -- 32.5 Atualiza estatísticas somente depois de toda a migração.
 ANALYZE public.products;

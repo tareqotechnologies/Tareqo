@@ -33,6 +33,18 @@
 #        mfa_ok (check 38) e assinatura ÚNICA 4-arg de
 #        update_tenant_settings — overload legado 3-arg removido
 #        (check 39, causa raiz do PGRST203) — checks 36-39
+#   Storage → bucket público product-images + 4 policies (read/insert/
+#        update/delete) das fotos de produto (check 40 — sem isso o app
+#        salva o produto com o aviso "(no storage permission)")
+#   Add-ons → tenant_addons_super_admin_all via is_super_admin() e NENHUMA
+#        policy citando super_admins no corpo (check 41 — subquery direta
+#        falha com 42501 "permission denied for table super_admins" no
+#        painel admin)
+#   Hardening → policy do bucket product-images sem listing (linter 0025),
+#        funções internas (triggers/helpers) sem EXECUTE de authenticated
+#        (linter 0029) e helpers de policy (is_my_store, mfa_ok, is_super_admin
+#        etc.) COM EXECUTE — sem isso o app quebra com 42501 — check 42
+#        (fix_hardening_linter_2026_09.sql)
 #   Migração → quantidade de super_admins registrados (informativo)
 #
 # Uso:
@@ -795,7 +807,9 @@ DECLARE
   v_count int := 0;
 BEGIN
   FOR r IN
-    SELECT tablename, policyname FROM pg_policies
+    SELECT tablename, policyname, COALESCE(qual, '') AS qual,
+           COALESCE(with_check, '') AS with_check
+    FROM pg_policies
     WHERE schemaname = 'public'
       AND tablename IN ('sales','sale_items','sale_lot_consumption','financial_transactions','debts','purchases')
       AND policyname IN (
@@ -807,7 +821,7 @@ BEGIN
         'purchases_insert','purchases_update'
       )
   LOOP
-    IF position('mfa_ok' IN COALESCE(r.qual, '') || COALESCE(r.with_check, '')) = 0 THEN
+    IF position('mfa_ok' IN r.qual || r.with_check) = 0 THEN
       RAISE EXCEPTION 'FAIL: policy %.% sem guarda mfa_ok', r.tablename, r.policyname;
     END IF;
     v_count := v_count + 1;
@@ -828,6 +842,148 @@ BEGIN
     RAISE EXCEPTION 'FAIL: update_tenant_settings(text,text,text,boolean) ausente';
   END IF;
   RAISE NOTICE 'PASS: update_tenant_settings com assinatura unica 4-arg (sem PGRST203)';
+END $$;
+
+\echo '== 40. Storage: bucket publico product-images + 4 policies (fotos de produto) =='
+DO $$
+DECLARE
+  v_policies int := 0;
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'product-images' AND public) THEN
+    RAISE EXCEPTION 'FAIL: bucket product-images ausente ou nao publico (fotos de produto — rodar supabase/fix_product_images_storage.sql)';
+  END IF;
+  SELECT count(*) INTO v_policies FROM pg_policies
+  WHERE schemaname = 'storage' AND tablename = 'objects'
+    AND policyname IN (
+      'product_images_public_read',
+      'product_images_auth_insert',
+      'product_images_auth_update',
+      'product_images_auth_delete'
+    );
+  IF v_policies < 4 THEN
+    RAISE EXCEPTION 'FAIL: apenas % policies product_images em storage.objects (esperado 4 — rodar supabase/fix_product_images_storage.sql)', v_policies;
+  END IF;
+  RAISE NOTICE 'PASS: bucket product-images publico + % policies de fotos de produto', v_policies;
+END $$;
+
+\echo '== 41. Add-ons: tenant_addons_super_admin_all via is_super_admin() (nao subquery em super_admins) =='
+DO $$
+DECLARE
+  v_expr text;
+  v_bad int := 0;
+  r record;
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'tenant_addons'
+      AND policyname = 'tenant_addons_super_admin_all'
+      AND (
+        position('super_admins' IN COALESCE(qual, '')) > 0
+        OR position('super_admins' IN COALESCE(with_check, '')) > 0
+      )
+  ) THEN
+    RAISE EXCEPTION 'FAIL: tenant_addons_super_admin_all consulta super_admins diretamente (42501 no painel admin — rodar supabase/fix_super_admin_addons_policy.sql)';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'tenant_addons'
+      AND policyname = 'tenant_addons_super_admin_all'
+      AND position('is_super_admin' IN COALESCE(qual, '')) > 0
+      AND position('is_super_admin' IN COALESCE(with_check, '')) > 0
+  ) THEN
+    RAISE EXCEPTION 'FAIL: tenant_addons_super_admin_all ausente ou sem is_super_admin() (rodar supabase/fix_super_admin_addons_policy.sql)';
+  END IF;
+  FOR r IN
+    SELECT tablename, policyname FROM pg_policies
+    WHERE schemaname = 'public'
+      AND policyname <> 'tenant_addons_super_admin_all'
+      AND (
+        position('super_admins' IN COALESCE(qual, '')) > 0
+        OR position('super_admins' IN COALESCE(with_check, '')) > 0
+      )
+  LOOP
+    v_bad := v_bad + 1;
+    RAISE WARNING 'Policy %.% cita super_admins no corpo — recriar com is_super_admin()', r.tablename, r.policyname;
+  END LOOP;
+  IF v_bad > 0 THEN
+    RAISE EXCEPTION 'FAIL: % policies citam super_admins diretamente (rodar supabase/fix_super_admin_addons_policy.sql)', v_bad;
+  END IF;
+  RAISE NOTICE 'PASS: add-ons governados por is_super_admin() (sem subquery em super_admins)';
+END $$;
+
+\echo '== 42. Hardening: storage sem listing + funções internas restritas + helpers de policy executáveis (linter 0025/0029) =='
+DO $$
+DECLARE
+  v_bad int := 0;
+  r record;
+BEGIN
+  -- (a) policy de leitura do bucket NÃO pode aceitar listing (só objeto
+  --     nomeado exatamente — comparação self-referente no corpo).
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'storage' AND tablename = 'objects'
+      AND policyname = 'product_images_public_read'
+      AND position('foldername' IN COALESCE(qual, '')) > 0
+  ) THEN
+    RAISE EXCEPTION 'FAIL: product_images_public_read permite listing (rodar supabase/fix_hardening_linter_2026_09.sql)';
+  END IF;
+  -- (b) funções internas não podem ser executáveis por authenticated
+  --     (nenhuma delas é citada em policies RLS — só triggers/corpo de RPC).
+  FOR r IN
+    SELECT p.proname
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname IN (
+        'set_record_store_id','set_tenant_user_id','set_store_tenant',
+        'set_tenant_owner','set_employee_tenant','set_invoice_number',
+        'set_custom_invoice_number','set_quotation_number','set_decided_by',
+        'set_plan_request_tenant','log_audit_entry','prevent_scope_change',
+        'enforce_store_limit','enforce_employee_limit',
+        'lock_products_or_raise','get_next_invoice_number',
+        'get_next_custom_invoice_number','get_next_quotation_number',
+        'mfa_enforced_for_user','mfa_verified_factor_count','mfa_satisfied'
+      )
+      AND has_function_privilege('authenticated', p.oid, 'EXECUTE')
+  LOOP
+    v_bad := v_bad + 1;
+    RAISE WARNING 'Função interna %.() executável por authenticated', r.proname;
+  END LOOP;
+  IF v_bad > 0 THEN
+    RAISE EXCEPTION 'FAIL: % funções internas expostas via RPC (rodar supabase/fix_hardening_linter_2026_09.sql)', v_bad;
+  END IF;
+  -- (c) helpers citados DENTRO de policies RLS PRECISAM continuar
+  --     executáveis por authenticated: a policy roda com os privilégios do
+  --     papel que consulta a tabela; sem o grant, toda leitura/escrita falha
+  --     com 42501 "permission denied for function". (O linter 0029 aponta
+  --     WARN para eles — aceito de propósito: guards booleanas, sem dados.)
+  v_bad := 0;
+  FOR r IN
+    SELECT p.proname
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname IN (
+        'is_my_store','is_tenant_owner','is_manager_of_store',
+        'is_store_employee_active','mfa_ok','is_super_admin'
+      )
+      AND NOT has_function_privilege('authenticated', p.oid, 'EXECUTE')
+  LOOP
+    v_bad := v_bad + 1;
+    RAISE WARNING 'Helper de policy %.() SEM EXECUTE de authenticated (app quebraria com 42501)', r.proname;
+  END LOOP;
+  IF v_bad > 0 THEN
+    RAISE EXCEPTION 'FAIL: % helpers de policy sem EXECUTE (rodar supabase/fix_hardening_linter_2026_09.sql — seção corretiva 2.5)', v_bad;
+  END IF;
+  -- (d) rls_auto_enable: se existir (event trigger ensure_rls depende dela
+  --     para ligar RLS em tabela nova), não pode ser executável por
+  --     authenticated — RESTINGE, não remova (o DROP quebra o event trigger).
+  IF to_regprocedure('public.rls_auto_enable()') IS NOT NULL
+     AND has_function_privilege('authenticated',
+          to_regprocedure('public.rls_auto_enable()'), 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: public.rls_auto_enable() executável por authenticated (rodar supabase/fix_hardening_linter_2026_09.sql — seção 2.6)';
+  END IF;
+  RAISE NOTICE 'PASS: storage sem listing + funções internas restritas + helpers de policy executáveis';
 END $$;
 SQL
 
