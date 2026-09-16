@@ -17,6 +17,7 @@ import '../../../domain/usecases/custom_invoice_use_cases.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/custom_invoice_providers.dart';
+import '../../controllers/invoice_template_providers.dart';
 import '../../controllers/customers_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_page.dart';
@@ -39,9 +40,10 @@ class CustomInvoiceScreen extends ConsumerStatefulWidget {
 }
 
 class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
-  /// Template salvo ao longo da sessão (configuração do PDF / ícones).
-  /// Template salvo ao longo da sessão (configuração do PDF / ícones).
-  final _templateConfig = InvoiceTemplateConfig();
+  /// Template PERSISTENTE do PDF (prefs via [invoiceTemplateProvider]) —
+  /// antes vivia só no State da tela e era perdido ao reabrir o app,
+  /// fazendo o PDF sair sempre com o design padrão.
+  InvoiceTemplateConfig get _templateConfig => ref.watch(invoiceTemplateProvider);
 
   /// Loja activa (as facturas são documento POR loja — número sequencial
   /// dentro da loja). Resolvida como nas demais telas de dados.
@@ -56,6 +58,19 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
     final stores =
         ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
     return stores.isEmpty ? null : stores.first.id;
+  }
+
+  /// Loja activa (entidade) — nome/contatos reais para o PDF.
+  Store? _activeStore() {
+    final user = ref.watch(authStateProvider).value;
+    if (user == null) return null;
+    final tenant = ref.watch(myTenantProvider(user.id)).value;
+    if (tenant == null) return null;
+    final stores =
+        ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
+    if (stores.isEmpty) return null;
+    final storeId = ref.watch(activeStoreIdProvider(user.id));
+    return stores.where((s) => s.id == storeId).firstOrNull ?? stores.first;
   }
 
   @override
@@ -113,6 +128,7 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
               itemBuilder: (context, index) => _InvoiceCard(
                 invoice: invoices[index],
                 templateConfig: _templateConfig,
+                store: _activeStore(),
               ),
             ),
       floatingActionButton: FloatingActionButton(
@@ -183,7 +199,7 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => _TemplateSettingsSheet(config: _templateConfig),
+      builder: (_) => const _TemplateSettingsSheet(),
     );
   }
 }
@@ -225,11 +241,22 @@ class _InvoiceItemData {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _InvoiceCard extends StatelessWidget {
-  const _InvoiceCard({required this.invoice, this.templateConfig});
+  const _InvoiceCard({
+    required this.invoice,
+    this.templateConfig,
+    this.store,
+  });
 
   /// Factura PERSISTIDA (número sequencial real da loja vem da entidade).
   final CustomInvoice invoice;
   final InvoiceTemplateConfig? templateConfig;
+
+  /// Loja activa — nome/contatos reais entram no PDF quando o template
+  /// não define dados da empresa.
+  final Store? store;
+
+  /// Nome real da loja (fallback do nome no PDF).
+  String? get storeName => store?.name;
 
   @override
   Widget build(BuildContext context) {
@@ -368,6 +395,7 @@ class _InvoiceCard extends StatelessWidget {
     final l10n = context.l10n;
     await InvoicePdfExporter().sharePdf(
       invoiceEntity,
+      templateStyle: config.templateStyle,
       labels: InvoicePdfLabels(
         docWord: l10n.pdfInvoiceDocWord,
         numberLabelTemplate: l10n.customInvoiceNumberPrefix('{number}'),
@@ -389,17 +417,28 @@ class _InvoiceCard extends StatelessWidget {
         fileNameBase: l10n.pdfInvoiceFileBase,
         subjectWord: l10n.pdfInvoiceSubjectWord,
       ),
+      // Nome do negócio: template preenchido → nome da LOJA real
+      // (dono vê a própria loja; funcionário pode não ter acesso a stores,
+      // aí cai no fallback do template) → fallback localizado.
       businessName: config.businessName.isNotEmpty
           ? config.businessName
+          : (storeName?.isNotEmpty ?? false)
+          ? storeName!
           : l10n.businessFallbackName,
       businessAddress: config.businessAddress.isNotEmpty
           ? config.businessAddress
+          : (store?.address.isNotEmpty ?? false)
+          ? store!.address
           : null,
       businessPhone: config.businessPhone.isNotEmpty
           ? config.businessPhone
+          : (store?.phone.isNotEmpty ?? false)
+          ? store!.phone
           : null,
       businessTaxId: config.businessTaxId.isNotEmpty
           ? config.businessTaxId
+          : (store?.nuit.isNotEmpty ?? false)
+          ? store!.nuit
           : null,
       logoBytes: config.logoBytes,
       primaryColor: _flutterColorToPdf(config.primaryColor),
@@ -760,37 +799,16 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
 // Template Settings Sheet
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// Configurações do modelo de factura — logotipo, cores e dados da empresa.
-class InvoiceTemplateConfig {
-  InvoiceTemplateConfig({
-    this.logoBytes,
-    this.businessName = '',
-    this.businessAddress = '',
-    this.businessPhone = '',
-    this.businessTaxId = '',
-    this.primaryColor = const Color(0xFF2563EB),
-    this.templateStyle = 'Classic',
-  });
-
-  Uint8List? logoBytes;
-  String businessName;
-  String businessAddress;
-  String businessPhone;
-  String businessTaxId;
-  Color primaryColor;
-  String templateStyle;
-}
-
-class _TemplateSettingsSheet extends StatefulWidget {
-  const _TemplateSettingsSheet({required this.config});
-
-  final InvoiceTemplateConfig config;
+class _TemplateSettingsSheet extends ConsumerStatefulWidget {
+  const _TemplateSettingsSheet();
 
   @override
-  State<_TemplateSettingsSheet> createState() => _TemplateSettingsSheetState();
+  ConsumerState<_TemplateSettingsSheet> createState() =>
+      _TemplateSettingsSheetState();
 }
 
-class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
+class _TemplateSettingsSheetState
+    extends ConsumerState<_TemplateSettingsSheet> {
   late final TextEditingController _nameController;
   late final TextEditingController _addressController;
   late final TextEditingController _phoneController;
@@ -804,7 +822,9 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
   @override
   void initState() {
     super.initState();
-    final c = widget.config;
+    // Config PERSISTIDA (provider) — o sheet edita uma cópia local e só
+    // grava no provider no Salvar.
+    final c = ref.read(invoiceTemplateProvider);
     _nameController = TextEditingController(text: c.businessName);
     _addressController = TextEditingController(text: c.businessAddress);
     _phoneController = TextEditingController(text: c.businessPhone);
@@ -860,14 +880,20 @@ class _TemplateSettingsSheetState extends State<_TemplateSettingsSheet> {
   void _removeLogo() => setState(() => _logoBytes = null);
 
   void _save() {
-    widget.config
-      ..businessName = _nameController.text.trim()
-      ..businessAddress = _addressController.text.trim()
-      ..businessPhone = _phoneController.text.trim()
-      ..businessTaxId = _taxIdController.text.trim()
-      ..templateStyle = _selectedTemplate
-      ..primaryColor = _selectedColor
-      ..logoBytes = _logoBytes;
+    // Grava no provider PERSISTENTE (prefs) — sobrevive ao fechar do app.
+    ref
+        .read(invoiceTemplateProvider.notifier)
+        .save(
+          InvoiceTemplateConfig(
+            logoBytes: _logoBytes,
+            businessName: _nameController.text.trim(),
+            businessAddress: _addressController.text.trim(),
+            businessPhone: _phoneController.text.trim(),
+            businessTaxId: _taxIdController.text.trim(),
+            primaryColor: _selectedColor,
+            templateStyle: _selectedTemplate,
+          ),
+        );
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(context.l10n.customInvoiceTemplateSaved)),

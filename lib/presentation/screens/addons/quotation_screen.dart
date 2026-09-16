@@ -19,6 +19,7 @@ import '../../../domain/usecases/quotation_use_cases.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/customers_providers.dart';
+import '../../controllers/invoice_template_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/quotation_providers.dart';
 import '../../widgets/app_page.dart';
@@ -38,7 +39,9 @@ class QuotationScreen extends ConsumerStatefulWidget {
 }
 
 class _QuotationScreenState extends ConsumerState<QuotationScreen> {
-  final _templateConfig = _QuotationTemplateConfig();
+  /// Template PERSISTENTE (prefs via [invoiceTemplateProvider]) — antes
+  /// vivia só no State da tela e era perdido ao reabrir o app.
+  InvoiceTemplateConfig get _templateConfig => ref.watch(invoiceTemplateProvider);
 
   /// Loja activa (as cotações são documento POR loja — número sequencial
   /// dentro da loja). Resolvida como nas demais telas de dados.
@@ -53,6 +56,19 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
     final stores =
         ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
     return stores.isEmpty ? null : stores.first.id;
+  }
+
+  /// Loja activa (entidade) — nome/contatos reais para o PDF.
+  Store? _activeStore() {
+    final user = ref.watch(authStateProvider).value;
+    if (user == null) return null;
+    final tenant = ref.watch(myTenantProvider(user.id)).value;
+    if (tenant == null) return null;
+    final stores =
+        ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
+    if (stores.isEmpty) return null;
+    final storeId = ref.watch(activeStoreIdProvider(user.id));
+    return stores.where((s) => s.id == storeId).firstOrNull ?? stores.first;
   }
 
   @override
@@ -110,6 +126,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
               itemBuilder: (context, index) => _QuotationCard(
                 quotation: quotations[index],
                 templateConfig: _templateConfig,
+                store: _activeStore(),
                 onStatusChanged: _updateStatus,
               ),
             ),
@@ -220,7 +237,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => _QuotationTemplateSettingsSheet(config: _templateConfig),
+      builder: (_) => const _QuotationTemplateSettingsSheet(),
     );
   }
 }
@@ -266,12 +283,17 @@ class _QuotationCard extends StatelessWidget {
   const _QuotationCard({
     required this.quotation,
     this.templateConfig,
+    this.store,
     required this.onStatusChanged,
   });
 
   /// Cotação PERSISTIDA (número sequencial real da loja vem da entidade).
   final Quotation quotation;
-  final _QuotationTemplateConfig? templateConfig;
+  final InvoiceTemplateConfig? templateConfig;
+
+  /// Loja activa — nome/contatos reais entram no PDF quando o template
+  /// não define dados da empresa.
+  final Store? store;
   final void Function(Quotation quotation, QuotationStatus status)
   onStatusChanged;
 
@@ -448,10 +470,11 @@ class _QuotationCard extends StatelessWidget {
     // validade reais) — sem reconstruir uma entidade sintética.
     final quotationEntity = quotation;
 
-    final config = templateConfig ?? _QuotationTemplateConfig();
+    final config = templateConfig ?? InvoiceTemplateConfig();
     final l10n = context.l10n;
     await QuotationPdfExporter().sharePdf(
       quotationEntity,
+      templateStyle: config.templateStyle,
       labels: QuotationPdfLabels(
         docWord: l10n.pdfQuotationDocWord,
         numberLabelTemplate: l10n.quotationNumberPrefix('{number}'),
@@ -485,17 +508,27 @@ class _QuotationCard extends StatelessWidget {
             ? l10n.pdfValidityDaysLeft(days)
             : l10n.quotationStatusExpired,
       ),
+      // Nome do negócio: template preenchido → nome da LOJA real →
+      // fallback localizado (nunca 'My Business' com loja conhecida).
       businessName: config.businessName.isNotEmpty
           ? config.businessName
+          : (store?.name.isNotEmpty ?? false)
+          ? store!.name
           : l10n.businessFallbackName,
       businessAddress: config.businessAddress.isNotEmpty
           ? config.businessAddress
+          : (store?.address.isNotEmpty ?? false)
+          ? store!.address
           : null,
       businessPhone: config.businessPhone.isNotEmpty
           ? config.businessPhone
+          : (store?.phone.isNotEmpty ?? false)
+          ? store!.phone
           : null,
       businessTaxId: config.businessTaxId.isNotEmpty
           ? config.businessTaxId
+          : (store?.nuit.isNotEmpty ?? false)
+          ? store!.nuit
           : null,
       logoBytes: config.logoBytes,
       primaryColor: _flutterColorToPdf(config.primaryColor),
@@ -813,30 +846,19 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Template Config + Settings Sheet
+// Settings Sheet (usa o template PERSISTENTE de invoice_template_providers)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-class _QuotationTemplateConfig {
-  Uint8List? logoBytes;
-  String businessName = '';
-  String businessAddress = '';
-  String businessPhone = '';
-  String businessTaxId = '';
-  Color primaryColor = const Color(0xFFD97706);
-}
-
-class _QuotationTemplateSettingsSheet extends StatefulWidget {
-  const _QuotationTemplateSettingsSheet({required this.config});
-
-  final _QuotationTemplateConfig config;
+class _QuotationTemplateSettingsSheet extends ConsumerStatefulWidget {
+  const _QuotationTemplateSettingsSheet();
 
   @override
-  State<_QuotationTemplateSettingsSheet> createState() =>
+  ConsumerState<_QuotationTemplateSettingsSheet> createState() =>
       _QuotationTemplateSettingsSheetState();
 }
 
 class _QuotationTemplateSettingsSheetState
-    extends State<_QuotationTemplateSettingsSheet> {
+    extends ConsumerState<_QuotationTemplateSettingsSheet> {
   late final TextEditingController _nameController;
   late final TextEditingController _addressController;
   late final TextEditingController _phoneController;
@@ -849,7 +871,8 @@ class _QuotationTemplateSettingsSheetState
   @override
   void initState() {
     super.initState();
-    final c = widget.config;
+    // Config PERSISTIDA (provider) — o sheet edita e grava no Salvar.
+    final c = ref.read(invoiceTemplateProvider);
     _nameController = TextEditingController(text: c.businessName);
     _addressController = TextEditingController(text: c.businessAddress);
     _phoneController = TextEditingController(text: c.businessPhone);
@@ -904,13 +927,20 @@ class _QuotationTemplateSettingsSheetState
   void _removeLogo() => setState(() => _logoBytes = null);
 
   void _save() {
-    widget.config
-      ..businessName = _nameController.text.trim()
-      ..businessAddress = _addressController.text.trim()
-      ..businessPhone = _phoneController.text.trim()
-      ..businessTaxId = _taxIdController.text.trim()
-      ..primaryColor = _selectedColor
-      ..logoBytes = _logoBytes;
+    // Grava no provider PERSISTENTE (prefs) — sobrevive ao fechar do app.
+    ref
+        .read(invoiceTemplateProvider.notifier)
+        .save(
+          InvoiceTemplateConfig(
+            logoBytes: _logoBytes,
+            businessName: _nameController.text.trim(),
+            businessAddress: _addressController.text.trim(),
+            businessPhone: _phoneController.text.trim(),
+            businessTaxId: _taxIdController.text.trim(),
+            primaryColor: _selectedColor,
+            templateStyle: ref.read(invoiceTemplateProvider).templateStyle,
+          ),
+        );
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(context.l10n.customInvoiceTemplateSaved)),

@@ -96,6 +96,8 @@ class InvoicePdfExporter {
   /// [logoBytes] — bytes da imagem do logotipo (PNG/JPEG).
   /// [primaryColor] — cor principal do template (usada no cabeçalho,
   /// tabela e totais).
+  /// [templateStyle] — estilo escolhido no template: 'Classic' (padrão),
+  /// 'Modern' (faixa lateral + totais em caixa) ou 'Compact' (denso).
   Future<Uint8List> buildPdf(
     CustomInvoice invoice, {
     required InvoicePdfLabels labels,
@@ -105,6 +107,7 @@ class InvoicePdfExporter {
     String? businessTaxId,
     Uint8List? logoBytes,
     PdfColor primaryColor = PdfColors.indigo700,
+    String templateStyle = 'Classic',
   }) async {
     final data = await rootBundle.load('assets/fonts/Inter-Variable.ttf');
     final doc = pw.Document(
@@ -123,122 +126,69 @@ class InvoicePdfExporter {
     final invoiceNumber = invoice.number.toString().padLeft(5, '0');
     final dateLine = _formatDate(invoice.createdAt);
 
+    final isModern = templateStyle == 'Modern';
+    final isCompact = templateStyle == 'Compact';
+    // Densidade vertical por estilo (Compact aperta, Modern respira).
+    final gapSection = isCompact ? 12.0 : (isModern ? 28.0 : 20.0);
+    final gapTable = isCompact ? 8.0 : 16.0;
+    final tablePadding = isCompact ? 4.0 : 6.0;
+
     doc.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(32),
+        margin: pw.EdgeInsets.fromLTRB(
+          isModern ? 0 : 32,
+          32,
+          isModern ? 0 : 32,
+          32,
+        ),
         build: (context) => [
           // ─── Cabeçalho ───────────────────────────────────────
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              // Lado esquerdo: logotipo + dados da empresa
-              pw.Expanded(
-                child: pw.Row(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    // Logotipo (se fornecido)
-                    if (logoImage != null) ...[
-                      pw.Container(
-                        width: 48,
-                        height: 48,
-                        child: pw.Image(logoImage, fit: pw.BoxFit.contain),
-                      ),
-                      pw.SizedBox(width: 12),
-                    ],
-                    // Dados da empresa
-                    pw.Expanded(
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          pw.Text(
-                            businessName,
-                            style: pw.TextStyle(
-                              fontSize: 20,
-                              fontWeight: pw.FontWeight.bold,
-                              color: primaryDark,
-                            ),
-                          ),
-                          if (businessAddress != null &&
-                              businessAddress.isNotEmpty)
-                            pw.Text(
-                              businessAddress,
-                              style: const pw.TextStyle(
-                                fontSize: 9,
-                                color: PdfColors.grey700,
-                              ),
-                            ),
-                          if (businessPhone != null && businessPhone.isNotEmpty)
-                            pw.Text(
-                              businessPhone,
-                              style: const pw.TextStyle(
-                                fontSize: 9,
-                                color: PdfColors.grey700,
-                              ),
-                            ),
-                          if (businessTaxId != null && businessTaxId.isNotEmpty)
-                            pw.Text(
-                              _fill(labels.taxIdLabelTemplate, businessTaxId),
-                              style: const pw.TextStyle(
-                                fontSize: 9,
-                                color: PdfColors.grey700,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
+          // Modern: faixa lateral colorida + fundo suave da cor do
+          // template — o PDF segue o ESTILO escolhido no template.
+          if (isModern)
+            // Borda lateral + fundo suave (identidade Modern). Container
+            // puro: Row+stretch teria altura infinita no MultiPage.
+            pw.Container(
+              padding: const pw.EdgeInsets.fromLTRB(24, 32, 32, 24),
+              decoration: pw.BoxDecoration(
+                color: PdfColor.fromInt(
+                  0x0D000000 | (primaryColor.toInt() & 0x00FFFFFF),
+                ),
+                border: pw.Border(
+                  left: pw.BorderSide(color: primaryColor, width: 10),
                 ),
               ),
-              // Lado direito: selo do documento + nº + data
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.end,
-                children: [
-                  pw.Container(
-                    padding: const pw.EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: pw.BoxDecoration(
-                      color: primaryColor,
-                      borderRadius: pw.BorderRadius.circular(6),
-                    ),
-                    child: pw.Text(
-                      labels.docWord,
-                      style: pw.TextStyle(
-                        fontSize: 14,
-                        fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.white,
-                      ),
-                    ),
-                  ),
-                  pw.SizedBox(height: 8),
-                  pw.Text(
-                    labels.numberLabelTemplate.replaceFirst(
-                      '{number}',
-                      invoiceNumber,
-                    ),
-                    style: pw.TextStyle(
-                      fontSize: 12,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  pw.Text(
-                    dateLine,
-                    style: const pw.TextStyle(
-                      fontSize: 9,
-                      color: PdfColors.grey700,
-                    ),
-                  ),
-                ],
+              child: _header(
+                logoImage: logoImage,
+                businessName: businessName,
+                businessAddress: businessAddress,
+                businessPhone: businessPhone,
+                businessTaxId: businessTaxId,
+                labels: labels,
+                invoiceNumber: invoiceNumber,
+                dateLine: dateLine,
+                primaryColor: primaryColor,
+                primaryDark: primaryDark,
               ),
-            ],
-          ),
+            )
+          else
+            _header(
+              logoImage: logoImage,
+              businessName: businessName,
+              businessAddress: businessAddress,
+              businessPhone: businessPhone,
+              businessTaxId: businessTaxId,
+              labels: labels,
+              invoiceNumber: invoiceNumber,
+              dateLine: dateLine,
+              primaryColor: primaryColor,
+              primaryDark: primaryDark,
+            ),
 
-          pw.SizedBox(height: 24),
+          pw.SizedBox(height: gapSection),
           pw.Divider(color: PdfColors.grey300),
-          pw.SizedBox(height: 16),
+          pw.SizedBox(height: isCompact ? 8 : 16),
 
           // ─── Dados do Cliente ────────────────────────────────
           pw.Text(
@@ -275,7 +225,7 @@ class InvoicePdfExporter {
               style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
             ),
 
-          pw.SizedBox(height: 20),
+          pw.SizedBox(height: gapSection),
 
           // ─── Tabela de Itens ─────────────────────────────────
           pw.TableHelper.fromTextArray(
@@ -307,7 +257,7 @@ class InvoicePdfExporter {
             ),
             headerDecoration: pw.BoxDecoration(color: primaryColor),
             cellStyle: const pw.TextStyle(fontSize: 9),
-            cellPadding: const pw.EdgeInsets.all(6),
+            cellPadding: pw.EdgeInsets.all(tablePadding),
             cellAlignments: {
               1: pw.Alignment.center,
               2: pw.Alignment.centerRight,
@@ -315,7 +265,7 @@ class InvoicePdfExporter {
             },
           ),
 
-          pw.SizedBox(height: 16),
+          pw.SizedBox(height: gapTable),
 
           // ─── Totais ──────────────────────────────────────────
           pw.Row(
@@ -352,7 +302,7 @@ class InvoicePdfExporter {
 
           // ─── Pagamento ───────────────────────────────────────
           if (invoice.paymentMethod.isNotEmpty) ...[
-            pw.SizedBox(height: 16),
+            pw.SizedBox(height: gapTable),
             pw.Container(
               padding: const pw.EdgeInsets.all(10),
               decoration: pw.BoxDecoration(
@@ -389,7 +339,7 @@ class InvoicePdfExporter {
 
           // ─── Notas ───────────────────────────────────────────
           if (invoice.notes.isNotEmpty) ...[
-            pw.SizedBox(height: 16),
+            pw.SizedBox(height: gapTable),
             pw.Text(
               labels.notesHeading,
               style: pw.TextStyle(
@@ -432,6 +382,7 @@ class InvoicePdfExporter {
     String? businessTaxId,
     Uint8List? logoBytes,
     PdfColor primaryColor = PdfColors.indigo700,
+    String templateStyle = 'Classic',
   }) async {
     final bytes = await buildPdf(
       invoice,
@@ -442,6 +393,7 @@ class InvoicePdfExporter {
       businessTaxId: businessTaxId,
       logoBytes: logoBytes,
       primaryColor: primaryColor,
+      templateStyle: templateStyle,
     );
     final number = invoice.number.toString().padLeft(5, '0');
     final fileName = '${labels.fileNameBase}_$number.pdf';
@@ -471,6 +423,123 @@ class InvoicePdfExporter {
         files: [XFile(file.path, mimeType: 'application/pdf')],
         subject: subject,
       ),
+    );
+  }
+
+  /// Cabeçalho do PDF (logotipo + dados da empresa + selo do documento).
+  /// Extraído para permitir variantes por ESTILO do template (Modern
+  /// embrulha o cabeçalho numa faixa colorida; Classic/Compact usam
+  /// o layout padrão).
+  pw.Widget _header({
+    required pw.ImageProvider? logoImage,
+    required String businessName,
+    String? businessAddress,
+    String? businessPhone,
+    String? businessTaxId,
+    required InvoicePdfLabels labels,
+    required String invoiceNumber,
+    required String dateLine,
+    required PdfColor primaryColor,
+    required PdfColor primaryDark,
+  }) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        // Lado esquerdo: logotipo + dados da empresa
+        pw.Expanded(
+          child: pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Logotipo (se fornecido)
+              if (logoImage != null) ...[
+                pw.Container(
+                  width: 48,
+                  height: 48,
+                  child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+                ),
+                pw.SizedBox(width: 12),
+              ],
+              // Dados da empresa
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      businessName,
+                      style: pw.TextStyle(
+                        fontSize: 20,
+                        fontWeight: pw.FontWeight.bold,
+                        color: primaryDark,
+                      ),
+                    ),
+                    if (businessAddress != null && businessAddress.isNotEmpty)
+                      pw.Text(
+                        businessAddress,
+                        style: const pw.TextStyle(
+                          fontSize: 9,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
+                    if (businessPhone != null && businessPhone.isNotEmpty)
+                      pw.Text(
+                        businessPhone,
+                        style: const pw.TextStyle(
+                          fontSize: 9,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
+                    if (businessTaxId != null && businessTaxId.isNotEmpty)
+                      pw.Text(
+                        _fill(labels.taxIdLabelTemplate, businessTaxId),
+                        style: const pw.TextStyle(
+                          fontSize: 9,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Lado direito: selo do documento + nº + data
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: pw.BoxDecoration(
+                color: primaryColor,
+                borderRadius: pw.BorderRadius.circular(6),
+              ),
+              child: pw.Text(
+                labels.docWord,
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.white,
+                ),
+              ),
+            ),
+            pw.SizedBox(height: 8),
+            pw.Text(
+              labels.numberLabelTemplate.replaceFirst('{number}', invoiceNumber),
+              style: pw.TextStyle(
+                fontSize: 12,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.Text(
+              dateLine,
+              style: const pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.grey700,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

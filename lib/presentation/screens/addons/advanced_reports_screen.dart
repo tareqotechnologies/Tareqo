@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../domain/entities/store.dart';
 import '../../../core/share/advanced_reports_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
@@ -93,6 +94,21 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
       ),
     );
   }
+}
+
+/// Nome do negócio para PDFs de relatórios: LOJA REAL primeiro, fallback
+/// localizado só quando não há loja/tenant (nunca "My Business" fixo).
+String? _activeStoreName(WidgetRef ref) {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return null;
+  final tenant = ref.watch(myTenantProvider(user.id)).value;
+  if (tenant == null) return null;
+  final stores =
+      ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
+  if (stores.isEmpty) return null;
+  final storeId = ref.watch(activeStoreIdProvider(user.id));
+  return stores.where((s) => s.id == storeId).firstOrNull?.name ??
+      stores.first.name;
 }
 
 // ─── Vendas ─────────────────────────────────────────────────────────────
@@ -281,7 +297,8 @@ class _SalesReportTab extends ConsumerWidget {
           onPressed: () => const AdvancedReportsPdfExporter().shareSalesReport(
             title: context.l10n.reportsTabSales,
             period: selectedPeriod,
-            businessName: l10n.businessFallbackName,
+            businessName:
+                _activeStoreName(ref) ?? l10n.businessFallbackName,
             generatedOnLabel: context.l10n.pdfGeneratedOn('{date}'),
             indicatorsLabel: context.l10n.pdfIndicators,
             noDataLabel: context.l10n.reportsNoSalesData,
@@ -470,7 +487,8 @@ class _FinancialReportTab extends ConsumerWidget {
               const AdvancedReportsPdfExporter().shareFinancialReport(
                 title: context.l10n.reportsTabFinancial,
                 period: selectedPeriod,
-                businessName: l10n.businessFallbackName,
+                businessName:
+                    _activeStoreName(ref) ?? l10n.businessFallbackName,
                 generatedOnLabel: context.l10n.pdfGeneratedOn('{date}'),
                 indicatorsLabel: context.l10n.pdfIndicators,
                 noDataLabel: context.l10n.reportsNoSalesData,
@@ -673,7 +691,8 @@ class _StockReportTab extends ConsumerWidget {
           onPressed: () => const AdvancedReportsPdfExporter().shareStockReport(
             title: context.l10n.reportsTabStock,
             period: selectedPeriod,
-            businessName: l10n.businessFallbackName,
+            businessName:
+                _activeStoreName(ref) ?? l10n.businessFallbackName,
             generatedOnLabel: context.l10n.pdfGeneratedOn('{date}'),
             indicatorsLabel: context.l10n.pdfIndicators,
             noDataLabel: context.l10n.reportsNoSalesData,

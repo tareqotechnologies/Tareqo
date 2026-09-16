@@ -168,6 +168,50 @@ void main() {
       expect(String.fromCharCodes(bytes.take(4)), '%PDF');
       expect(bytes.length, greaterThan(1500));
     });
+
+    test(
+      'os 3 estilos do template (Classic/Modern/Compact) geram PDF válidos',
+      () async {
+        // O PDF deve seguir o ESTILO escolhido no template (antes só a
+        // Factura tinha variantes; a cotação saía sempre Classic).
+        final classic = await exporter.buildPdf(
+          _quotation(),
+          labels: _labels(),
+          businessName: 'Loja',
+          templateStyle: 'Classic',
+        );
+        final modern = await exporter.buildPdf(
+          _quotation(),
+          labels: _labels(),
+          businessName: 'Loja',
+          templateStyle: 'Modern',
+        );
+        final compact = await exporter.buildPdf(
+          _quotation(),
+          labels: _labels(),
+          businessName: 'Loja',
+          templateStyle: 'Compact',
+        );
+
+        for (final bytes in [classic, modern, compact]) {
+          expect(String.fromCharCodes(bytes.take(4)), '%PDF');
+          expect(
+            String.fromCharCodes(bytes).trimRight().endsWith('%%EOF'),
+            isTrue,
+          );
+          expect(bytes.length, greaterThan(1000));
+        }
+
+        // Estilo desconhecido cai no Classic sem quebrar.
+        final unknown = await exporter.buildPdf(
+          _quotation(),
+          labels: _labels(),
+          businessName: 'Loja',
+          templateStyle: 'Inexistente',
+        );
+        expect(String.fromCharCodes(unknown.take(4)), '%PDF');
+      },
+    );
   });
 
   group('QuotationPdfExporter.sharePdf', () {

@@ -87,6 +87,11 @@ dependencies:
   cryptography: ^2.7.2
   flutter_markdown_plus: ^1.0.12
 
+  # Template PERSISTENTE de Factura/Cotação (invoice_template_providers) —
+  # já transitiva via supabase_flutter; declarada aqui por uso direto
+  # (lint depend_on_referenced_packages). Fixada à mesma faixa do lock.
+  shared_preferences: ^2.5.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -99,6 +104,10 @@ dev_dependencies:
   # Mock do getTemporaryPath nos testes dos exporters/share (mesma lógica:
   # já transitivo via path_provider).
   path_provider_platform_interface: ^2.1.3
+
+  # Backend in-memory do SharedPreferencesAsync nos testes do template
+  # persistente de Factura/Cotação (transitiva via shared_preferences).
+  shared_preferences_platform_interface: ^2.4.2
 
   # Testes do BiometricService trocam LocalAuthPlatform.instance (padrão do
   # próprio plugin local_auth) — já transitivo via local_auth, declarado
