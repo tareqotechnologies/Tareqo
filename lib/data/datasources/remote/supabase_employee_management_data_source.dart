@@ -1,3 +1,4 @@
+import '../../../core/utils/ids.dart';
 import '../../../domain/entities/employee_management.dart';
 import '../local/employee_management_local_data_source.dart';
 import 'supabase_datasource_helpers.dart';
@@ -48,9 +49,13 @@ final class EmployeeManagementSupabaseDataSourceImpl
     required DateTime clockIn,
     String? recordedBy,
   }) async {
+    // id GERADO PELO APP: `employee_attendance.id` é TEXT PRIMARY KEY sem
+    // default — o INSERT sem id falha com 23502 (null value in "id") e o
+    // botão de entrada mostrava apenas o erro genérico de rede.
     final rows = await supabaseClient
         .from(_attendance)
         .insert({
+          'id': AppIds.newId('att'),
           'store_id': storeId,
           'user_id': userId,
           'work_date': workDate,

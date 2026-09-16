@@ -3478,6 +3478,9 @@ CREATE POLICY quotations_delete ON public.quotations
 --   employee_attendance       — ponto: UMA linha por funcionário por dia
 --                               (entrada insere, saída atualiza a MESMA
 --                               linha; clock_out NULL = presente);
+--                               id gerado PELO APP (AppIds.newId('att')) —
+--                               TEXT PRIMARY KEY sem default: INSERT sem
+--                               id falha com 23502 (null value in "id");
 --   employee_commission_rates — taxa de comissão em PONTOS BASE
 --                               (500 = 5%) — inteiro, sem floats;
 --   employee_targets          — meta mensal de vendas (month = 'YYYY-MM').
@@ -3682,13 +3685,17 @@ BEGIN
   SELECT
     e.user_id,
     e.full_name,
+    -- CAST OBRIGATÓRIO: SUM(bigint) devolve NUMERIC no Postgres e o
+    -- RETURNS TABLE declara BIGINT — sem o cast a RPC falha com 42804
+    -- "Returned type numeric does not match expected type bigint"
+    -- (aba Comissões: "não foi possível carregar funcionários").
     COALESCE(SUM(s.total_amount) FILTER (
       WHERE s.status = 'active'
-    ), 0) AS sales_cents,
+    ), 0)::BIGINT AS sales_cents,
     COALESCE(r.rate_bps, 0) AS rate_bps,
-    COALESCE(SUM(s.total_amount) FILTER (
+    (COALESCE(SUM(s.total_amount) FILTER (
       WHERE s.status = 'active'
-    ), 0) * COALESCE(r.rate_bps, 0) / 10000 AS commission_cents
+    ), 0)::BIGINT) * COALESCE(r.rate_bps, 0) / 10000 AS commission_cents
   FROM public.store_employees e
   LEFT JOIN public.sales s
     ON s.store_id = e.store_id

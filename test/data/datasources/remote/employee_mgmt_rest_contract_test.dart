@@ -68,6 +68,10 @@ void main() {
 
         final body = jsonBodyOf(stub.requests.single) as Map<String, dynamic>;
         expect(body['clock_in'], '2026-09-01T08:00:00.000Z');
+        // id GERADO PELO APP: employee_attendance.id é TEXT PRIMARY KEY
+        // sem default — INSERT sem id falhava com 23502 (null value in
+        // "id") e o botão de entrada mostrava erro genérico de rede.
+        expect(body['id'], startsWith('att'));
       },
     );
 
