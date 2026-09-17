@@ -112,7 +112,19 @@ class AppShell extends ConsumerWidget {
     ); // Contagem de notificações não lidas para o badge.
     final unreadCount = ref.watch(unreadNotificationsCountProvider).value ?? 0;
 
-    return Scaffold(
+    // Hierarquia de voltar: em qualquer seção ≠ Home, o botão voltar do
+    // sistema devolve ao Dashboard em vez de fechar o app (o Menu abre
+    // Produtos/Crédito/Clientes no IndexedStack — sem rota para pop). Na
+    // Home o comportamento nativo é preservado (voltar fecha o app).
+    final atHome = index == AppSection.dashboard.index;
+
+    return PopScope<Object?>(
+      canPop: atHome,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        ref.read(shellIndexProvider.notifier).goTo(AppSection.dashboard);
+      },
+      child: Scaffold(
       appBar: AppBar(
         toolbarHeight: 48,
         title: Text(
@@ -202,6 +214,7 @@ class AppShell extends ConsumerWidget {
               tooltip: l10n.fabMenuTitle,
               child: const Icon(Icons.add_rounded, size: 28),
             ),
+      ),
     );
   }
 }

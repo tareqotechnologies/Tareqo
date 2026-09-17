@@ -139,6 +139,13 @@ class _FakeGetMyPlanRequestsUseCase implements GetMyPlanRequestsUseCase {
 }
 
 void main() {
+  // Simula o botão voltar do sistema (rota do navigator — o PopScope do
+  // shell intercepta via onPopInvokedWithResult).
+  Future<void> simulateSystemBack(WidgetTester tester) async {
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('AppShell V3 exibe os 4 destinos e navega entre eles', (
     tester,
   ) async {
@@ -473,5 +480,62 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(find.text('Nenhuma venda registrada'), findsOneWidget);
+  });
+
+  /// Hierarquia de voltar (Fase 2): em seção ≠ Home, o botão voltar do
+  /// sistema devolve ao Dashboard em vez de fechar o app. Na Home o
+  /// comportamento nativo é preservado (PopScope.canPop = true).
+  testWidgets('botão voltar volta ao Dashboard em vez de fechar o app', (
+    tester,
+  ) async {
+    usePortraitViewport(tester);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ...storeContextOverrides(),
+          getProductsUseCaseProvider.overrideWithValue(
+            _FakeGetProductsUseCase(),
+          ),
+          salesRepositoryProvider.overrideWithValue(_FakeSalesRepository()),
+          getCashFlowUseCaseProvider.overrideWithValue(
+            _FakeGetCashFlowUseCase(),
+          ),
+          getPendingDebtsUseCaseProvider.overrideWithValue(
+            _FakeGetPendingDebtsUseCase(),
+          ),
+          getSettledDebtsUseCaseProvider.overrideWithValue(
+            _FakeGetSettledDebtsUseCase(),
+          ),
+          financeRepositoryProvider.overrideWithValue(_FakeFinanceRepository()),
+          getCustomersUseCaseProvider.overrideWithValue(
+            _FakeGetCustomersUseCase(),
+          ),
+        ],
+        child: testApp(home: AppShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    NavigationBar bar() =>
+        tester.widget<NavigationBar>(find.byType(NavigationBar));
+
+    // Home inicial.
+    expect(bar().selectedIndex, 0);
+
+    // Navega para Vendas e simula o botão voltar do sistema.
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Vendas'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(bar().selectedIndex, 1);
+
+    await simulateSystemBack(tester);
+
+    // O pop foi interceptado (rota não fechou) e devolveu à Home.
+    expect(bar().selectedIndex, 0);
   });
 }
