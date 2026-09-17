@@ -16,8 +16,11 @@ const landscapeViewportSize = Size(800, 600);
 ///
 /// Sempre a primeira chamada de um teste de rotação: monta a tela em
 /// retrato, verifica o layout estreito e só então gira.
-void usePortraitViewport(WidgetTester tester) {
-  tester.view.physicalSize = portraitViewportSize;
+///
+/// [size] permite capturar um viewport específico (ex.: goldens de tela
+/// cheia com proporção de telefone real 412×915 ou dashboard 800×2000).
+void usePortraitViewport(WidgetTester tester, {Size? size}) {
+  tester.view.physicalSize = size ?? portraitViewportSize;
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 }

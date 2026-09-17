@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/period_utils.dart';
 import '../../../core/utils/quantity.dart';
@@ -75,7 +76,7 @@ class DashboardScreen extends ConsumerWidget {
     final cashFlow = cashFlowAsync.value;
 
     // ----- Métricas (3 cards compactos — app de referência) --------------
-    final now = DateTime.now();
+    final now = AppClock.now();
     final (start, previousStart) = switch (period) {
       CashFlowPeriod.today => (
         startOfDay(now),
@@ -827,7 +828,7 @@ class _ActivityItem {
       product.name,
       '${Quantity.format(product.stockQuantity)} un',
     ),
-    dateTime: DateTime.now(),
+    dateTime: AppClock.now(),
     icon: Icons.warning_amber_rounded,
     iconBackground: IconTone.amberDark,
     iconColor: IconTone.amber,
@@ -848,8 +849,8 @@ class _ActivityItem {
       details: expired
           ? l10n.dashboardExpiredIn(-alert.daysRemaining)
           : l10n.dashboardExpiresIn(alert.daysRemaining),
-      dateTime: DateTime.now(),
-      icon: expired ? Icons.dangerous_outlined : Icons.hourglass_top_rounded,
+    dateTime: AppClock.now(),
+    icon: expired ? Icons.dangerous_outlined : Icons.hourglass_top_rounded,
       iconBackground: color.withValues(alpha: 0.18),
       iconColor: color,
       badge: Quantity.format(
@@ -1057,7 +1058,7 @@ class _DetailRow extends StatelessWidget {
 
 /// Rótulo de tempo do feed: < 1h → "há X min"; senão → hora absoluta.
 String _timeLabel(DateTime date, AppLocalizations l10n) {
-  final diff = DateTime.now().difference(date);
+  final diff = AppClock.now().difference(date);
   if (diff.inMinutes < 60) {
     return l10n.dashboardActivityMinutesAgo(diff.inMinutes);
   }

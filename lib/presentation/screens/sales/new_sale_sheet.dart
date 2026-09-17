@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/quantity.dart';
@@ -370,7 +371,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     // Resumo de hoje no cabeçalho (canvas V3): "Hoje · N vendas · total".
     // Mesmo critério do resumo da lista: vendas anuladas não contam.
     final salesAsync = ref.watch(salesListProvider);
-    final now = DateTime.now();
+    final now = AppClock.now();
     final today = DateTime(now.year, now.month, now.day);
     var todayCents = 0;
     var todayCount = 0;

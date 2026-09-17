@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
+import '../../core/utils/app_clock.dart';
 import '../../core/utils/period_utils.dart';
 import '../../data/services/offline_sync_service.dart';
 import '../../domain/entities/sale.dart';
@@ -115,7 +116,7 @@ class DashboardKpisNotifier extends AsyncNotifier<DashboardKpis> {
     // Período do caixa (mesma semântica do financeiro): o período afeta
     // apenas entradas/saídas — vendas, fiado e estoque são totais da loja.
     final period = ref.watch(cashFlowPeriodProvider);
-    final now = DateTime.now();
+    final now = AppClock.now();
     final start = switch (period) {
       CashFlowPeriod.today => startOfDay(now),
       CashFlowPeriod.week => startOfDay(now.subtract(const Duration(days: 7))),
