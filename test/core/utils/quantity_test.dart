@@ -6,10 +6,24 @@ void main() {
   group('Quantity (W11 — milésimos de unidade)', () {
     test('parse aceita separador vírgula (pt) e ponto (en)', () {
       expect(Quantity.parse('1,75'), 1750);
-      expect(Quantity.parse('1.75'), 1750);
+      expect(Quantity.parse('1.75', language: 'en'), 1750);
       expect(Quantity.parse('1'), 1000);
       expect(Quantity.parse('0,5'), 500);
       expect(Quantity.parse(' 2,5 '), 2500);
+    });
+
+    test('parse segue a MESMA convenção de locale do format (round-trip)', () {
+      // pt: '.' é MILHAR e ',' é decimal — espelho exato do NumberFormat.
+      // Antes da correção, "1.250" era lido como 1,25 (corrompia estoque).
+      expect(Quantity.parse('1.250'), 1250 * 1000);
+      expect(Quantity.parse('1,25'), 1250);
+      // en: ',' é milhar e '.' é decimal.
+      expect(Quantity.parse('1,250', language: 'en'), 1250 * 1000);
+      // Round-trips reais do PDV/estoque (pt) — mesmo recorte do dialog
+      // (o dialog faz split(' ').first para descartar o rótulo):
+      expect(Quantity.parse(Quantity.format(1250000).split(' ').first), 1250000);
+      expect(Quantity.parse(Quantity.format(1250, unitLabel: 'kg').split(' ').first), 1250);
+      expect(Quantity.parse(Quantity.format(25000).split(' ').first), 25000);
     });
 
     test('parse devolve 0 para entradas vazias ou inválidas', () {

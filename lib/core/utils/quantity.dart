@@ -29,15 +29,23 @@ abstract final class Quantity {
 
   /// Interpreta [input] digitado na UI como milésimos inteiros.
   ///
-  /// Aceita separador decimal vírgula (pt) ou ponto (en): "1,75" → 1750,
-  /// "1.75" → 1750, "1750" → 1750000 (entrada direta em milésimos só para
-  /// uso interno). Retorna 0 para entradas vazias/inválidas (a validação
-  /// de "maior que zero" fica nos validators/use cases).
-  static int parse(String input) {
-    final normalized = input.trim().replaceAll(' ', '').replaceAll(',', '.');
+  /// Convenção de locale (MESMA de [format]): pt usa vírgula decimal e
+  /// ponto como separador de milhar ("1,75" → 1,75; "1.250" → 1250);
+  /// en/fr usam ponto decimal ("1.75" → 1,75; "1250" → 1250). Sem isso,
+  /// redigitar o valor que o próprio formato exibiu corrompia a quantidade
+  /// ("1.250" lido como 1,25). Aceita fração só até 3 casas (granularidade
+  /// do domínio); retorna 0 para entradas vazias/inválidas.
+  static int parse(String input, {String language = 'pt'}) {
+    final normalized = input.trim().replaceAll(' ', '');
     if (normalized.isEmpty) return 0;
-    final value = double.tryParse(normalized);
-    if (value == null) return 0;
+
+    // pt: '.' é milhar e ',' é decimal — remove milhares e promove ','.
+    final decimalSource = language == 'pt'
+        ? normalized.replaceAll('.', '').replaceAll(',', '.')
+        : normalized.replaceAll(',', '');
+
+    final value = double.tryParse(decimalSource);
+    if (value == null || value.isNaN || value.isInfinite) return 0;
     return (value * milliFactor).round();
   }
 

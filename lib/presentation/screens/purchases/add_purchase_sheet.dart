@@ -143,7 +143,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
       confirmLabel: l10n.commonConfirm,
     );
     if (result == null) return;
-    final milli = Quantity.parse(result);
+    final milli = Quantity.parse(result, language: Formatters.currentLanguage);
     if (milli > 0) _setQuantity(product, milli);
   }
 

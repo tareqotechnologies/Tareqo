@@ -53,6 +53,7 @@ class NewSaleSheet extends ConsumerStatefulWidget {
 
 class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
   final _barcodeController = TextEditingController();
   String _query = '';
   String? _barcodeError;
@@ -71,6 +72,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocus.dispose();
     _barcodeController.dispose();
     super.dispose();
   }
@@ -97,6 +99,8 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   void _add(Product product) {
     final current = _cart[product.id] ?? 0;
     if (current < product.stockQuantity) {
+      // Seleção relevante (Fase 3): toque de stepper confirma sem diálogo.
+      Haptics.selection();
       setState(() {
         // 1 unidade inteira (1000 milésimos).
         _cart[product.id] = current + Quantity.milliFactor;
@@ -107,6 +111,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   void _addFraction(Product product) {
     final current = _cart[product.id] ?? 0;
     if (current < product.stockQuantity) {
+      Haptics.selection();
       setState(() {
         // Passo de 0,1 unidade (100 milésimos) para produtos por peso.
         _cart[product.id] = current + 100;
@@ -117,6 +122,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   void _remove(Product product) {
     final current = _cart[product.id] ?? 0;
     if (current <= 0) return;
+    Haptics.selection();
     setState(() {
       if (current <= (product.vendaPorFracao ? 100 : Quantity.milliFactor)) {
         _cart.remove(product.id);
@@ -133,21 +139,39 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       if (milli <= 0) {
         _cart.remove(product.id);
       } else {
-        _cart[product.id] = math.min(milli, product.stockQuantity);
+        // Produto por UNIDADE: fração não é vendável — arredonda para
+        // baixo até unidades inteiras (digitar 1,5 numa caneta vende 1;
+        // 0,4 remove o item). Produtos por peso aceitam a fração digitada.
+        var value = milli;
+        if (!product.vendaPorFracao) {
+          value = (value ~/ Quantity.milliFactor) * Quantity.milliFactor;
+        }
+        if (value <= 0) {
+          _cart.remove(product.id);
+        } else {
+          _cart[product.id] = math.min(value, product.stockQuantity);
+        }
       }
     });
   }
 
-  /// Abre o diálogo de quantidade decimal (produtos por peso — ex.: 1,75).
-  Future<void> _editFraction(Product product) async {
+  /// Abre o diálogo de quantidade digitada — atalho de balcão para TODOS
+  /// os produtos (antes só os por peso tinham edição): vender 25 canetas
+  /// são 2 toques (tap + Enter) em vez de 25 no "+". Produtos por peso
+  /// usam teclado decimal; por unidade, teclado inteiro (fração é
+  /// arredondada para baixo em [_setQuantity]).
+  Future<void> _editQuantity(Product product) async {
     final l10n = context.l10n;
+    final isWeight = product.vendaPorFracao;
     final result = await showInputDialog(
       context,
       title: product.name,
       label: l10n.salesQuantityLabel,
       hintText: l10n.salesQuantityHint,
       suffixText: product.unitLabel,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      keyboardType: TextInputType.numberWithOptions(
+        decimal: isWeight,
+      ),
       initialValue: Quantity.format(
         _cart[product.id] ?? 0,
         unitLabel: product.unitLabel,
@@ -156,8 +180,11 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       confirmLabel: l10n.commonConfirm,
     );
     if (result == null) return;
-    final milli = Quantity.parse(result);
+    final milli = Quantity.parse(result, language: Formatters.currentLanguage);
     if (milli > 0) _setQuantity(product, milli);
+    // Foco de volta na busca: digitação de PLU em sequência fica fluida
+    // (atalho de balcão — Enter → adiciona → Enter → adiciona).
+    if (mounted) _searchFocus.requestFocus();
   }
 
   /// Intercepta leituras de código de barras (scanner USB tipo teclado ou
@@ -249,6 +276,38 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       _barcodeController.clear();
       _barcodeError = null;
     });
+  }
+
+  /// Atalho de balcão: Enter no campo de BUSCA dá quick-add.
+  ///
+  /// Operador digita o PLU/código do produto e aperta Enter — sem tocar no
+  /// catálogo. Reaproveita TODO o pipeline de leitura de código ([_handleBarcode]):
+  /// balança `20PPPPPWWWWW`, PLU com zeros à esquerda, caps de estoque e
+  /// mensagens de erro — nada de regra duplicada. Texto que NÃO resolve
+  /// produto é ignorado silenciosamente: quem digitou estava buscando por
+  /// nome (o filtro em tempo real continua respondendo) e o Enter vira no-op
+  /// em vez de lançar "produto não encontrado" para uma busca legítima.
+  Future<void> _handleSearchSubmit(String raw) async {
+    final digits = raw.trim();
+    if (digits.isEmpty) return;
+    // Candidate a código: só dígitos (PLU/EAN). Nome com letras nunca
+    // dispara o pipeline de barcode.
+    if (digits.contains(RegExp(r'\D'))) return;
+
+    final active = (ref.read(productsProvider).value ?? const <Product>[])
+        .where((product) => product.isActive);
+    // Resolve ANTES de delegar: se o texto não casa com nenhum produto
+    // (nem por id, nem por código), é busca por nome — sai sem tocar nada.
+    final digitsKey = ScaleBarcode.lookupKey(digits);
+    final resolves = active.any(
+      (p) =>
+          p.id == digits ||
+          p.code == digits ||
+          ScaleBarcode.lookupKey(p.code) == digitsKey,
+    );
+    if (!resolves) return;
+
+    await _handleBarcode(digits);
   }
 
   Future<void> _openScanner() async {
@@ -417,8 +476,13 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
       child: SearchField(
         controller: _searchController,
+        focusNode: _searchFocus,
         hintText: l10n.salesSearchProducts,
         onChanged: (value) => setState(() => _query = value.trim()),
+        // Enter no campo de busca: PLU/código → quick-add (atalho de
+        // balcão); busca por nome → filtro em tempo real (já feito no
+        // onChanged), Enter vira no-op.
+        onSubmitted: _handleSearchSubmit,
       ),
     );
 
@@ -547,7 +611,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                               onAdd: () => _add(product),
                               onAddFraction: () => _addFraction(product),
                               onRemove: () => _remove(product),
-                              onEdit: () => _editFraction(product),
+                              onEdit: () => _editQuantity(product),
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -829,7 +893,10 @@ class _CartProductRow extends StatelessWidget {
                     onPressed: quantity == 0 ? null : onRemove,
                   ),
                   InkWell(
-                    onTap: isWeight ? onEdit : null,
+                    // Toque na quantidade: edição digitada para TODOS os
+                    // produtos (por peso: fração decimal; por unidade:
+                    // inteiro). Atalho de balcão — 25 canetas em 2 toques.
+                    onTap: onEdit,
                     borderRadius: BorderRadius.circular(8),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(

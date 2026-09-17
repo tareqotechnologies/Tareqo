@@ -389,7 +389,10 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
     final purchasePriceCents = _parsePrice(_purchasePriceController.text);
     final salePriceCents = _parsePrice(_salePriceController.text);
     // W11: estoque digitado em UNIDADES (ou kg) → MILÉSIMOS.
-    final stockMilli = Quantity.parse(_stockController.text.trim());
+    final stockMilli = Quantity.parse(
+      _stockController.text.trim(),
+      language: Formatters.currentLanguage,
+    );
 
     // O produto pertence à loja ativa (cada loja tem seu próprio estoque).
     final user = ref.read(authStateProvider).value;
@@ -656,7 +659,10 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                 validator: (value) {
                   // W11: aceita decimais (ex.: 1,75) — convertido para
                   // milésimos no submit; rejeita texto/números negativos.
-                  final quantity = Quantity.parse(value?.trim() ?? '');
+                  final quantity = Quantity.parse(
+                    value?.trim() ?? '',
+                    language: Formatters.currentLanguage,
+                  );
                   if (quantity < 0 ||
                       (value != null &&
                           value.trim().isNotEmpty &&
@@ -913,7 +919,10 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
 
       // 2) Ajuste MANUAL do estoque (apenas se o valor mudou): define a
       // quantidade exata criando/consumindo lotes FIFO na mesma transação.
-      final stockMilli = Quantity.parse(_stockController.text.trim());
+      final stockMilli = Quantity.parse(
+      _stockController.text.trim(),
+      language: Formatters.currentLanguage,
+    );
       if (stockMilli != _product.stockQuantity) {
         await useCase.adjustStock(
           _product.id,

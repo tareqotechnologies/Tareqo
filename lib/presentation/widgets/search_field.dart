@@ -11,12 +11,19 @@ class SearchField extends StatelessWidget {
   const SearchField({
     super.key,
     this.controller,
+    this.focusNode,
     this.onChanged,
+    this.onSubmitted,
     this.hintText,
   });
 
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final ValueChanged<String>? onChanged;
+
+  /// Enter/ ação do teclado (ex.: PDV usa o Enter para dar quick-add por
+  /// PLU/código digitado). `null` = sem ação no submit.
+  final ValueChanged<String>? onSubmitted;
 
   /// Dica do campo; se nulo, usa a tradução padrão ("Buscar..."/"Search...").
   final String? hintText;
@@ -25,7 +32,9 @@ class SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppTextField(
       controller: controller,
+      focusNode: focusNode,
       onChanged: onChanged,
+      onSubmitted: onSubmitted,
       hintText: hintText ?? context.l10n.commonSearch,
       prefixIcon: Icons.search,
       textInputAction: TextInputAction.search,

@@ -12,6 +12,7 @@ class AppTextField extends StatelessWidget {
     super.key,
     this.label,
     this.controller,
+    this.focusNode,
     this.onChanged,
     this.onSubmitted,
     this.keyboardType,
@@ -42,6 +43,9 @@ class AppTextField extends StatelessWidget {
   final String? label;
 
   final TextEditingController? controller;
+
+  /// Foco externo (ex.: PDV devolve o foco à busca após dialogs).
+  final FocusNode? focusNode;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final TextInputType? keyboardType;
@@ -95,6 +99,7 @@ class AppTextField extends StatelessWidget {
     final radius = borderRadius;
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
       onChanged: onChanged,
       onFieldSubmitted: onSubmitted,
       style: style,
