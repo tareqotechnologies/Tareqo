@@ -51,6 +51,26 @@ abstract final class AppColors {
   static const Color backgroundDark = Color(0xFF09090B);
   static const Color borderDark = Color(0xFF27272A);
 
+  // ── Papéis do modo CLARO (fonte única dos hex do AppTheme.light) ──
+  // Espelham os mesmos hex usados inline no `_base(Brightness.light)` —
+  // quem precisa de um papel do tema FORA do ThemeData (splash, paletas
+  // const de telas) importa daqui em vez de repetir o hex.
+
+  /// Fundo de scaffold claro (mesmo papel do `scaffoldBackgroundColor`).
+  static const Color scaffoldLight = Color(0xFFFAFAFA);
+
+  /// Texto principal sobre superfícies claras (mesmo papel do `onSurface`).
+  static const Color onSurfaceLight = Color(0xFF18181B);
+
+  /// Texto secundário no escuro (mesmo papel do `onSurfaceVariant` dark).
+  static const Color onSurfaceVariantDark = Color(0xFFA1A1AA);
+
+  /// Texto secundário no claro (mesmo papel do `onSurfaceVariant` light).
+  static const Color onSurfaceVariantLight = Color(0xFF6E6E77);
+
+  /// Bordas/linhas no claro (mesmo papel do `outlineVariant` light).
+  static const Color borderLight = Color(0xFFE4E4E7);
+
   // ── Status semânticos (centralizados; cores de ícone/decorativas) ──
   static const Color statusError = Color(0xFFDC2626);
   static const Color statusWarning = Color(0xFFF59E0B);

@@ -486,14 +486,14 @@ class _SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? AppColors.backgroundDark : const Color(0xFFFAFAFA);
-    final textPrimary = isDark
-        ? const Color(0xFFFFFFFF)
-        : const Color(0xFF18181B);
+    final bg = isDark
+        ? AppColors.backgroundDark
+        : AppColors.scaffoldLight;
+    final textPrimary = isDark ? Colors.white : AppColors.onSurfaceLight;
     final textSecondary = isDark
-        ? const Color(0xFFA1A1AA)
-        : const Color(0xFF6E6E77);
-    final green = isDark ? AppColors.brand : const Color(0xFF15803D);
+        ? AppColors.onSurfaceVariantDark
+        : AppColors.onSurfaceVariantLight;
+    final green = isDark ? AppColors.brand : AppColors.brandMuted;
 
     return Scaffold(
       backgroundColor: bg,

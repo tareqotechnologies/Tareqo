@@ -536,7 +536,7 @@ class _BalanceHero extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFF34D399).withValues(alpha: 0.10),
+                    AppColors.income.withValues(alpha: 0.10),
                     Colors.transparent,
                   ],
                 ),

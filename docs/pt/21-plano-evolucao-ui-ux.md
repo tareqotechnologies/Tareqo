@@ -236,7 +236,7 @@ F1 (1d) ──► F2 (2d) ──► F3 (2d) ──► F4 (3-4d) ──► F5 (1d
 | `HapticFeedback` em arquivos | 0 | ≥ 12 arquivos-chave |
 | `Semantics(` em arquivos | 5 | ≥ 25 |
 | Peso inline (`copyWith(fontWeight:`) | ~200 | < 100 |
-| Hex inline em `lib/presentation` | 46 ocorrências em 44 arquivos (medido na F0) | 0 fora de tokens |
+| Hex inline em `lib/presentation` | 46 ocorrências (medido na F0) → 29 **legítimas documentadas** (paleta de template escolhida pelo usuário, identidade visual de provedores de pagamento/WhatsApp, papel de recibo impresso, gradientes hero de uso único, default de template) — os 17 duplicados de papéis do tema viraram `AppColors.*` | 0 não-documentados |
 | Headers de sheet distintos | 2 | 1 |
 | Transição de rota | padrão | plataforma-nativa (zoom/cupertino) |
 | Guideline de a11y (tap targets/contrast) | não medido | 100% nas 12 telas-chave |

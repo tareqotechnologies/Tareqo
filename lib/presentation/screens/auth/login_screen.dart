@@ -68,22 +68,24 @@ class _LoginPalette {
     surface: AppColors.surfaceDark,
     border: AppColors.borderDark,
     borderFocus: AppColors.brand,
-    textPrimary: Color(0xFFFFFFFF),
-    textSecondary: Color(0xFFA1A1AA),
+    // Branco puro e verde vivo #22C55E são exclusivos da identidade
+    // premium do login (não são papéis do tema).
+    textPrimary: Colors.white,
+    textSecondary: AppColors.onSurfaceVariantDark,
     green: Color(0xFF22C55E),
     greenDark: AppColors.brand,
   );
 
-  /// Modo claro — espelha os neutros do `AppTheme.light`.
+  /// Modo claro — espelha os neutros do `AppTheme.light` via tokens.
   static const _LoginPalette light = _LoginPalette(
-    background: Color(0xFFFAFAFA),
-    surface: Color(0xFFFFFFFF),
-    border: Color(0xFFE4E4E7),
-    borderFocus: Color(0xFF15803D),
-    textPrimary: Color(0xFF18181B),
-    textSecondary: Color(0xFF6E6E77),
-    green: Color(0xFF15803D),
-    greenDark: Color(0xFF15803D),
+    background: AppColors.scaffoldLight,
+    surface: Colors.white,
+    border: AppColors.borderLight,
+    borderFocus: AppColors.brandMuted,
+    textPrimary: AppColors.onSurfaceLight,
+    textSecondary: AppColors.onSurfaceVariantLight,
+    green: AppColors.brandMuted,
+    greenDark: AppColors.brandMuted,
   );
 }
 
