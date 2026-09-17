@@ -22,7 +22,7 @@ import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 
 /// Total de membros do catálogo: 1073 (956 getters + 117 métodos).
 const int kTotalMembers = 1073;
-const int kTotalGetters = 956;
+const int kTotalGetters = 959;
 const int kTotalMethods = 117;
 const Set<String> kMethodNames = <String>{
   'onboardingPlanDetails',
@@ -137,6 +137,7 @@ const Set<String> kMethodNames = <String>{
   'adminAddonsBulkActivated',
   'adminAddonsBulkDeactivated',
   'adminAddonsBulkSheetCount',
+  'adminAddonsPriceUpdated',
   'adminAddOnsCount',
   'adminTenantCount',
   'adminTenantCycleActiveLeft',
@@ -702,6 +703,7 @@ void main() {
         'adminNavUpgrades': l.adminNavUpgrades,
         'adminTenantsTitle': l.adminTenantsTitle,
         'adminPendingOnly': l.adminPendingOnly,
+        'adminAddonsPriceSaveError': l.adminAddonsPriceSaveError,
         'adminAll': l.adminAll,
         'adminTenantsEmpty': l.adminTenantsEmpty,
         'adminRequestsLoadError': l.adminRequestsLoadError,
@@ -900,6 +902,7 @@ void main() {
         'customInvoiceTaxIdOptional': l.customInvoiceTaxIdOptional,
         'customInvoiceProductSection': l.customInvoiceProductSection,
         'customInvoiceProductPlaceholder': l.customInvoiceProductPlaceholder,
+        'customInvoicePreviewCompanyFallback': l.customInvoicePreviewCompanyFallback,
         'customInvoicePrice': l.customInvoicePrice,
         'customInvoiceQty': l.customInvoiceQty,
         'customInvoiceAddItem': l.customInvoiceAddItem,
@@ -907,17 +910,21 @@ void main() {
         'customInvoiceTax': l.customInvoiceTax,
         'customInvoiceTemplateSaved': l.customInvoiceTemplateSaved,
         'customInvoiceTemplateLogoSection': l.customInvoiceTemplateLogoSection,
+        'customInvoiceTemplateCompanySection': l.customInvoiceTemplateCompanySection,
         'customInvoiceTemplateLogoHint': l.customInvoiceTemplateLogoHint,
         'customInvoiceTemplateColorSection':
             l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanySection':
             l.customInvoiceTemplateCompanySection,
+        'customInvoiceTemplateColorSection': l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanyName': l.customInvoiceTemplateCompanyName,
         'customInvoiceTemplateAddress': l.customInvoiceTemplateAddress,
         'customInvoiceTemplateTaxId': l.customInvoiceTemplateTaxId,
         'customInvoiceTemplateStyle': l.customInvoiceTemplateStyle,
         'customInvoiceTemplateStyleClassic':
             l.customInvoiceTemplateStyleClassic,
+        'customInvoiceTemplateStyleClassic': l.customInvoiceTemplateStyleClassic,
+        'customInvoiceTemplateStyleCompact': l.customInvoiceTemplateStyleCompact,
         'customInvoiceTemplateStyleModern': l.customInvoiceTemplateStyleModern,
         'customInvoiceTemplateStyleCompact':
             l.customInvoiceTemplateStyleCompact,
@@ -1166,6 +1173,8 @@ void main() {
         'transfersRowOrigin': l.transfersRowOrigin,
         'transfersRowStatus': l.transfersRowStatus,
         'adminAddonsBulkSheetTitle': l.adminAddonsBulkSheetTitle,
+        'adminAddonsEditPriceTitle': l.adminAddonsEditPriceTitle,
+        'adminAddonsEditPriceTooltip': l.adminAddonsEditPriceTooltip,
         'adminAddonsListHint': l.adminAddonsListHint,
         'adminRevenueByAddOn': l.adminRevenueByAddOn,
         'adminRevenueByCategory': l.adminRevenueByCategory,
@@ -2031,6 +2040,7 @@ void main() {
         'adminNavUpgrades': l.adminNavUpgrades,
         'adminTenantsTitle': l.adminTenantsTitle,
         'adminPendingOnly': l.adminPendingOnly,
+        'adminAddonsPriceSaveError': l.adminAddonsPriceSaveError,
         'adminAll': l.adminAll,
         'adminTenantsEmpty': l.adminTenantsEmpty,
         'adminRequestsLoadError': l.adminRequestsLoadError,
@@ -2229,6 +2239,7 @@ void main() {
         'customInvoiceTaxIdOptional': l.customInvoiceTaxIdOptional,
         'customInvoiceProductSection': l.customInvoiceProductSection,
         'customInvoiceProductPlaceholder': l.customInvoiceProductPlaceholder,
+        'customInvoicePreviewCompanyFallback': l.customInvoicePreviewCompanyFallback,
         'customInvoicePrice': l.customInvoicePrice,
         'customInvoiceQty': l.customInvoiceQty,
         'customInvoiceAddItem': l.customInvoiceAddItem,
@@ -2236,17 +2247,21 @@ void main() {
         'customInvoiceTax': l.customInvoiceTax,
         'customInvoiceTemplateSaved': l.customInvoiceTemplateSaved,
         'customInvoiceTemplateLogoSection': l.customInvoiceTemplateLogoSection,
+        'customInvoiceTemplateCompanySection': l.customInvoiceTemplateCompanySection,
         'customInvoiceTemplateLogoHint': l.customInvoiceTemplateLogoHint,
         'customInvoiceTemplateColorSection':
             l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanySection':
             l.customInvoiceTemplateCompanySection,
+        'customInvoiceTemplateColorSection': l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanyName': l.customInvoiceTemplateCompanyName,
         'customInvoiceTemplateAddress': l.customInvoiceTemplateAddress,
         'customInvoiceTemplateTaxId': l.customInvoiceTemplateTaxId,
         'customInvoiceTemplateStyle': l.customInvoiceTemplateStyle,
         'customInvoiceTemplateStyleClassic':
             l.customInvoiceTemplateStyleClassic,
+        'customInvoiceTemplateStyleClassic': l.customInvoiceTemplateStyleClassic,
+        'customInvoiceTemplateStyleCompact': l.customInvoiceTemplateStyleCompact,
         'customInvoiceTemplateStyleModern': l.customInvoiceTemplateStyleModern,
         'customInvoiceTemplateStyleCompact':
             l.customInvoiceTemplateStyleCompact,
@@ -2495,6 +2510,8 @@ void main() {
         'transfersRowOrigin': l.transfersRowOrigin,
         'transfersRowStatus': l.transfersRowStatus,
         'adminAddonsBulkSheetTitle': l.adminAddonsBulkSheetTitle,
+        'adminAddonsEditPriceTitle': l.adminAddonsEditPriceTitle,
+        'adminAddonsEditPriceTooltip': l.adminAddonsEditPriceTooltip,
         'adminAddonsListHint': l.adminAddonsListHint,
         'adminRevenueByAddOn': l.adminRevenueByAddOn,
         'adminRevenueByCategory': l.adminRevenueByCategory,
@@ -3360,6 +3377,7 @@ void main() {
         'adminNavUpgrades': l.adminNavUpgrades,
         'adminTenantsTitle': l.adminTenantsTitle,
         'adminPendingOnly': l.adminPendingOnly,
+        'adminAddonsPriceSaveError': l.adminAddonsPriceSaveError,
         'adminAll': l.adminAll,
         'adminTenantsEmpty': l.adminTenantsEmpty,
         'adminRequestsLoadError': l.adminRequestsLoadError,
@@ -3558,6 +3576,7 @@ void main() {
         'customInvoiceTaxIdOptional': l.customInvoiceTaxIdOptional,
         'customInvoiceProductSection': l.customInvoiceProductSection,
         'customInvoiceProductPlaceholder': l.customInvoiceProductPlaceholder,
+        'customInvoicePreviewCompanyFallback': l.customInvoicePreviewCompanyFallback,
         'customInvoicePrice': l.customInvoicePrice,
         'customInvoiceQty': l.customInvoiceQty,
         'customInvoiceAddItem': l.customInvoiceAddItem,
@@ -3565,17 +3584,21 @@ void main() {
         'customInvoiceTax': l.customInvoiceTax,
         'customInvoiceTemplateSaved': l.customInvoiceTemplateSaved,
         'customInvoiceTemplateLogoSection': l.customInvoiceTemplateLogoSection,
+        'customInvoiceTemplateCompanySection': l.customInvoiceTemplateCompanySection,
         'customInvoiceTemplateLogoHint': l.customInvoiceTemplateLogoHint,
         'customInvoiceTemplateColorSection':
             l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanySection':
             l.customInvoiceTemplateCompanySection,
+        'customInvoiceTemplateColorSection': l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanyName': l.customInvoiceTemplateCompanyName,
         'customInvoiceTemplateAddress': l.customInvoiceTemplateAddress,
         'customInvoiceTemplateTaxId': l.customInvoiceTemplateTaxId,
         'customInvoiceTemplateStyle': l.customInvoiceTemplateStyle,
         'customInvoiceTemplateStyleClassic':
             l.customInvoiceTemplateStyleClassic,
+        'customInvoiceTemplateStyleClassic': l.customInvoiceTemplateStyleClassic,
+        'customInvoiceTemplateStyleCompact': l.customInvoiceTemplateStyleCompact,
         'customInvoiceTemplateStyleModern': l.customInvoiceTemplateStyleModern,
         'customInvoiceTemplateStyleCompact':
             l.customInvoiceTemplateStyleCompact,
@@ -3824,6 +3847,8 @@ void main() {
         'transfersRowOrigin': l.transfersRowOrigin,
         'transfersRowStatus': l.transfersRowStatus,
         'adminAddonsBulkSheetTitle': l.adminAddonsBulkSheetTitle,
+        'adminAddonsEditPriceTitle': l.adminAddonsEditPriceTitle,
+        'adminAddonsEditPriceTooltip': l.adminAddonsEditPriceTooltip,
         'adminAddonsListHint': l.adminAddonsListHint,
         'adminRevenueByAddOn': l.adminRevenueByAddOn,
         'adminRevenueByCategory': l.adminRevenueByCategory,
