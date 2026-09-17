@@ -902,7 +902,6 @@ void main() {
         'customInvoiceTaxIdOptional': l.customInvoiceTaxIdOptional,
         'customInvoiceProductSection': l.customInvoiceProductSection,
         'customInvoiceProductPlaceholder': l.customInvoiceProductPlaceholder,
-        'customInvoicePreviewCompanyFallback': l.customInvoicePreviewCompanyFallback,
         'customInvoicePrice': l.customInvoicePrice,
         'customInvoiceQty': l.customInvoiceQty,
         'customInvoiceAddItem': l.customInvoiceAddItem,
@@ -910,21 +909,17 @@ void main() {
         'customInvoiceTax': l.customInvoiceTax,
         'customInvoiceTemplateSaved': l.customInvoiceTemplateSaved,
         'customInvoiceTemplateLogoSection': l.customInvoiceTemplateLogoSection,
-        'customInvoiceTemplateCompanySection': l.customInvoiceTemplateCompanySection,
         'customInvoiceTemplateLogoHint': l.customInvoiceTemplateLogoHint,
         'customInvoiceTemplateColorSection':
             l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanySection':
             l.customInvoiceTemplateCompanySection,
-        'customInvoiceTemplateColorSection': l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanyName': l.customInvoiceTemplateCompanyName,
         'customInvoiceTemplateAddress': l.customInvoiceTemplateAddress,
         'customInvoiceTemplateTaxId': l.customInvoiceTemplateTaxId,
         'customInvoiceTemplateStyle': l.customInvoiceTemplateStyle,
         'customInvoiceTemplateStyleClassic':
             l.customInvoiceTemplateStyleClassic,
-        'customInvoiceTemplateStyleClassic': l.customInvoiceTemplateStyleClassic,
-        'customInvoiceTemplateStyleCompact': l.customInvoiceTemplateStyleCompact,
         'customInvoiceTemplateStyleModern': l.customInvoiceTemplateStyleModern,
         'customInvoiceTemplateStyleCompact':
             l.customInvoiceTemplateStyleCompact,
@@ -2239,7 +2234,6 @@ void main() {
         'customInvoiceTaxIdOptional': l.customInvoiceTaxIdOptional,
         'customInvoiceProductSection': l.customInvoiceProductSection,
         'customInvoiceProductPlaceholder': l.customInvoiceProductPlaceholder,
-        'customInvoicePreviewCompanyFallback': l.customInvoicePreviewCompanyFallback,
         'customInvoicePrice': l.customInvoicePrice,
         'customInvoiceQty': l.customInvoiceQty,
         'customInvoiceAddItem': l.customInvoiceAddItem,
@@ -2247,21 +2241,17 @@ void main() {
         'customInvoiceTax': l.customInvoiceTax,
         'customInvoiceTemplateSaved': l.customInvoiceTemplateSaved,
         'customInvoiceTemplateLogoSection': l.customInvoiceTemplateLogoSection,
-        'customInvoiceTemplateCompanySection': l.customInvoiceTemplateCompanySection,
         'customInvoiceTemplateLogoHint': l.customInvoiceTemplateLogoHint,
         'customInvoiceTemplateColorSection':
             l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanySection':
             l.customInvoiceTemplateCompanySection,
-        'customInvoiceTemplateColorSection': l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanyName': l.customInvoiceTemplateCompanyName,
         'customInvoiceTemplateAddress': l.customInvoiceTemplateAddress,
         'customInvoiceTemplateTaxId': l.customInvoiceTemplateTaxId,
         'customInvoiceTemplateStyle': l.customInvoiceTemplateStyle,
         'customInvoiceTemplateStyleClassic':
             l.customInvoiceTemplateStyleClassic,
-        'customInvoiceTemplateStyleClassic': l.customInvoiceTemplateStyleClassic,
-        'customInvoiceTemplateStyleCompact': l.customInvoiceTemplateStyleCompact,
         'customInvoiceTemplateStyleModern': l.customInvoiceTemplateStyleModern,
         'customInvoiceTemplateStyleCompact':
             l.customInvoiceTemplateStyleCompact,
@@ -3576,7 +3566,6 @@ void main() {
         'customInvoiceTaxIdOptional': l.customInvoiceTaxIdOptional,
         'customInvoiceProductSection': l.customInvoiceProductSection,
         'customInvoiceProductPlaceholder': l.customInvoiceProductPlaceholder,
-        'customInvoicePreviewCompanyFallback': l.customInvoicePreviewCompanyFallback,
         'customInvoicePrice': l.customInvoicePrice,
         'customInvoiceQty': l.customInvoiceQty,
         'customInvoiceAddItem': l.customInvoiceAddItem,
@@ -3584,21 +3573,17 @@ void main() {
         'customInvoiceTax': l.customInvoiceTax,
         'customInvoiceTemplateSaved': l.customInvoiceTemplateSaved,
         'customInvoiceTemplateLogoSection': l.customInvoiceTemplateLogoSection,
-        'customInvoiceTemplateCompanySection': l.customInvoiceTemplateCompanySection,
         'customInvoiceTemplateLogoHint': l.customInvoiceTemplateLogoHint,
         'customInvoiceTemplateColorSection':
             l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanySection':
             l.customInvoiceTemplateCompanySection,
-        'customInvoiceTemplateColorSection': l.customInvoiceTemplateColorSection,
         'customInvoiceTemplateCompanyName': l.customInvoiceTemplateCompanyName,
         'customInvoiceTemplateAddress': l.customInvoiceTemplateAddress,
         'customInvoiceTemplateTaxId': l.customInvoiceTemplateTaxId,
         'customInvoiceTemplateStyle': l.customInvoiceTemplateStyle,
         'customInvoiceTemplateStyleClassic':
             l.customInvoiceTemplateStyleClassic,
-        'customInvoiceTemplateStyleClassic': l.customInvoiceTemplateStyleClassic,
-        'customInvoiceTemplateStyleCompact': l.customInvoiceTemplateStyleCompact,
         'customInvoiceTemplateStyleModern': l.customInvoiceTemplateStyleModern,
         'customInvoiceTemplateStyleCompact':
             l.customInvoiceTemplateStyleCompact,
