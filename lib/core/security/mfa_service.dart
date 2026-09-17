@@ -1,5 +1,7 @@
 import 'package:otp/otp.dart';
 
+import '../utils/app_clock.dart';
+
 /// Service for Multi-Factor Authentication (MFA) using TOTP
 class MFAService {
   MFAService();
@@ -78,9 +80,14 @@ class MFAService {
   }
 
   /// Get time remaining until next TOTP code changes
+  ///
+  /// Inclusive no múltiplo exato do período (`now % 30 == 0` → 30, e não
+  /// 0): o código atual ainda é válido pela janela inteira. Relógio via
+  /// [AppClock] para testes determinísticos.
   int getTimeRemaining() {
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    return _period - (now % _period);
+    final now = AppClock.now().millisecondsSinceEpoch ~/ 1000;
+    final intoPeriod = now % _period;
+    return intoPeriod == 0 ? _period : _period - intoPeriod;
   }
 
   /// Generate QR code data for authenticator apps
