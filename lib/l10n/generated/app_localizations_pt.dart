@@ -3293,9 +3293,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportsKpiLowStock => 'Estoque Baixo';
 
   @override
-  String get reportsKpiTotalItems => 'Total Itens';
-
-  @override
   String get reportsKpiStockValue => 'Valor Estoque';
 
   @override
@@ -3308,16 +3305,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportsKpiNetProfit => 'Lucro Líquido';
 
   @override
-  String get reportsStockByQty => 'Produtos por Estoque';
-
-  @override
   String get reportsCashFlow => 'Fluxo de Caixa';
 
   @override
   String get reportsCashFlowChart => 'Gráfico de fluxo de caixa';
-
-  @override
-  String get reportsNoProducts => 'Sem produtos cadastrados';
 
   @override
   String get reportsStockHealthy => 'Todos os produtos com estoque adequado';

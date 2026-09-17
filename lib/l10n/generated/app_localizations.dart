@@ -5740,12 +5740,6 @@ abstract class AppLocalizations {
   /// **'Estoque Baixo'**
   String get reportsKpiLowStock;
 
-  /// No description provided for @reportsKpiTotalItems.
-  ///
-  /// In pt, this message translates to:
-  /// **'Total Itens'**
-  String get reportsKpiTotalItems;
-
   /// No description provided for @reportsKpiStockValue.
   ///
   /// In pt, this message translates to:
@@ -5770,12 +5764,6 @@ abstract class AppLocalizations {
   /// **'Lucro Líquido'**
   String get reportsKpiNetProfit;
 
-  /// No description provided for @reportsStockByQty.
-  ///
-  /// In pt, this message translates to:
-  /// **'Produtos por Estoque'**
-  String get reportsStockByQty;
-
   /// No description provided for @reportsCashFlow.
   ///
   /// In pt, this message translates to:
@@ -5787,12 +5775,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Gráfico de fluxo de caixa'**
   String get reportsCashFlowChart;
-
-  /// No description provided for @reportsNoProducts.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sem produtos cadastrados'**
-  String get reportsNoProducts;
 
   /// No description provided for @reportsStockHealthy.
   ///

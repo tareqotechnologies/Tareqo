@@ -3302,9 +3302,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportsKpiLowStock => 'Stock faible';
 
   @override
-  String get reportsKpiTotalItems => 'Articles au total';
-
-  @override
   String get reportsKpiStockValue => 'Valeur du stock';
 
   @override
@@ -3317,16 +3314,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportsKpiNetProfit => 'Bénéfice net';
 
   @override
-  String get reportsStockByQty => 'Produits par stock';
-
-  @override
   String get reportsCashFlow => 'Flux de trésorerie';
 
   @override
   String get reportsCashFlowChart => 'Graphique du flux de trésorerie';
-
-  @override
-  String get reportsNoProducts => 'Aucun produit enregistré';
 
   @override
   String get reportsStockHealthy => 'Tous les produits ont un stock adéquat';

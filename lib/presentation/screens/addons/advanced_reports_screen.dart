@@ -6,12 +6,15 @@ import '../../../domain/entities/store.dart';
 import '../../../core/share/advanced_reports_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/quantity.dart';
 import '../../../domain/usecases/get_cash_flow_use_case.dart';
+import '../../../domain/usecases/get_sales_report_use_case.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
+import '../../controllers/reports_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_menu_option.dart';
@@ -24,6 +27,17 @@ final advancedReportCashFlowProvider =
       final (start, end) = _periodRange(periodKey, DateTime.now());
       return ref
           .watch(getCashFlowUseCaseProvider)
+          .call(storeId: storeId, start: start, end: end);
+    });
+
+/// Relatório de VENDAS do período (faturamento, lucro bruto, top 5) — via
+/// [GetSalesReportUseCase] (RPC `get_sales_report` no modo Supabase).
+final advancedSalesReportProvider =
+    FutureProvider.family<SalesReport, (String, String)>((ref, key) {
+      final (storeId, periodKey) = key;
+      final (start, end) = _periodRange(periodKey, DateTime.now());
+      return ref
+          .watch(getSalesReportUseCaseProvider)
           .call(storeId: storeId, start: start, end: end);
     });
 
@@ -127,73 +141,91 @@ class _SalesReportTab extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
-    final products = ref.watch(productsProvider).value ?? [];
-    final totalProducts = products.length;
-    // Valor de estoque em CENTAVOS — exacto (antes truncava quantidade e
-    // preço para inteiros: 2,7 un × 15,99 saía 2 × 15 = MT 30,00 em vez
-    // de ≈ MT 43,17).
-    final totalStockValueCents = products.fold<int>(
-      0,
-      (sum, p) => sum + ((p.stockQuantity * p.salePriceCents) ~/ 1000),
-    );
-    final lowStock = products
-        .where((p) => (p.stockQuantity ~/ 1000) <= 10)
-        .length;
-    final totalItems = products.fold<int>(
-      0,
-      (sum, p) => sum + (p.stockQuantity ~/ 1000),
-    );
+
+    final user = ref.watch(authStateProvider).value;
+    final storeId = user == null
+        ? null
+        : ref.watch(activeStoreIdProvider(user.id));
+    final reportAsync = storeId == null
+        ? null
+        : ref.watch(advancedSalesReportProvider((storeId, selectedPeriod)));
+    final report = reportAsync?.value;
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        // KPIs
+        // Erro real (rede/banco) com retry — nunca silencia falha (mesmo
+        // padrão do tab Financeiro).
+        if (storeId != null && (reportAsync?.hasError ?? false))
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Row(
+              children: [
+                Icon(Icons.error_outline, size: 16, color: scheme.error),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    l10n.reportsLoadError,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.error,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => ref.invalidate(
+                    advancedSalesReportProvider((storeId, selectedPeriod)),
+                  ),
+                  child: Text(l10n.commonRetry),
+                ),
+              ],
+            ),
+          ),
+        // Loading real enquanto o servidor agrega as vendas.
+        if (reportAsync?.isLoading ?? false)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          ),
+        // KPIs de VENDAS do período (reais — RPC get_sales_report, em
+        // centavos). A aba mostrava KPIs de ESTOQUE (duplicados com o tab
+        // Estoque) — o operador abria "Vendas" e via inventário.
         Row(
           children: [
             Expanded(
               child: _KpiTile(
-                label: l10n.reportsKpiProducts,
-                value: '$totalProducts',
-                icon: Icons.inventory_2_outlined,
-                color: ModuleColors.products,
+                label: l10n.reportsRevenue,
+                value: report != null
+                    ? Formatters.currency(report.totalRevenueCents)
+                    : '—',
+                icon: Icons.arrow_downward_rounded,
+                color: IconTone.green,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _KpiTile(
-                label: l10n.reportsKpiLowStock,
-                value: '$lowStock',
-                icon: Icons.warning_amber_rounded,
-                color: ModuleColors.credit,
+                label: l10n.reportsProfit,
+                value: report != null
+                    ? Formatters.currency(report.totalProfitCents)
+                    : '—',
+                icon: Icons.savings_outlined,
+                color: ModuleColors.products,
               ),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.xs),
-        Row(
-          children: [
-            Expanded(
-              child: _KpiTile(
-                label: l10n.reportsKpiTotalItems,
-                value: Formatters.compact(totalItems),
-                icon: Icons.shopping_cart_outlined,
-                color: ModuleColors.purchases,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Expanded(
-              child: _KpiTile(
-                label: l10n.reportsKpiStockValue,
-                value: Formatters.currency(totalStockValueCents),
-                icon: Icons.attach_money,
-                color: ModuleColors.reports,
-              ),
-            ),
-          ],
+        _KpiTile(
+          label: l10n.reportsMargin,
+          value: report != null ? '${report.margin.toStringAsFixed(1)}%' : '—',
+          icon: Icons.percent_rounded,
+          color: ModuleColors.reports,
+          fullWidth: true,
         ),
         const SizedBox(height: AppSpacing.lg),
 
-        // Top produtos
+        // Mais vendidos do período (top 5 por quantidade) — mesmo padrão
+        // visual da tela de Relatórios (_BestSellerRow simplificado).
         AppCard(
           elevated: true,
           borderRadius: const BorderRadius.all(Radius.circular(18)),
@@ -220,71 +252,102 @@ class _SalesReportTab extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
-                      l10n.reportsStockByQty,
+                      l10n.reportsBestSellers,
                       style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                    ),
-                    child: Text(
-                      '${products.length}',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+                  if (report != null && report.bestSellers.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Text(
+                        '${report.bestSellers.length}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.sm),
-              if (products.isEmpty)
+              if (report == null)
+                const SizedBox.shrink()
+              else if (report.bestSellers.isEmpty)
                 Text(
-                  l10n.reportsNoProducts,
+                  l10n.reportsNoSalesData,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 )
               else
-                for (final p in products.take(5)) ...[
+                for (final (index, best) in report.bestSellers.indexed) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 6),
                     child: Row(
                       children: [
                         Container(
-                          width: 6,
-                          height: 6,
+                          width: 22,
+                          height: 22,
+                          alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: p.stockQuantity ~/ 1000 <= 10
-                                ? ModuleColors.credit
-                                : ModuleColors.products,
+                            color: scheme.primaryContainer,
                             shape: BoxShape.circle,
                           ),
+                          child: Text(
+                            '${index + 1}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w500,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: AppSpacing.xs),
+                        const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: Text(
                             // Nome COMPLETO — quebra quando necessário.
-                            p.name,
+                            best.productName,
                             style: theme.textTheme.bodySmall,
                           ),
                         ),
-                        Text(
-                          '${p.stockQuantity ~/ 1000} ${p.unitLabel}',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              Formatters.currency(best.revenueCents),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                fontWeight: FontWeight.w500,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                            // W11: quantidade em milésimos → unidades.
+                            Text(
+                              Quantity.format(
+                                best.quantity,
+                                language: Formatters.currentLanguage,
+                              ),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -308,12 +371,13 @@ class _SalesReportTab extends ConsumerWidget {
             noDataLabel: context.l10n.reportsNoSalesData,
             footerLabel: context.l10n.pdfFooter('{date}'),
             kpis: {
-              l10n.reportsKpiProducts: '$totalProducts',
-              l10n.reportsKpiLowStock: '$lowStock',
-              l10n.reportsKpiTotalItems: '$totalItems',
-              l10n.reportsKpiStockValue: Formatters.currency(
-                totalStockValueCents,
-              ),
+              l10n.reportsRevenue:
+                  Formatters.currency(report?.totalRevenueCents ?? 0),
+              l10n.reportsProfit:
+                  Formatters.currency(report?.totalProfitCents ?? 0),
+              l10n.reportsMargin: report != null
+                  ? '${report.margin.toStringAsFixed(1)}%'
+                  : '0,0%',
             },
           ),
         ),

@@ -3248,9 +3248,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsKpiLowStock => 'Low Stock';
 
   @override
-  String get reportsKpiTotalItems => 'Total Items';
-
-  @override
   String get reportsKpiStockValue => 'Stock Value';
 
   @override
@@ -3263,16 +3260,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsKpiNetProfit => 'Net Profit';
 
   @override
-  String get reportsStockByQty => 'Products by Stock';
-
-  @override
   String get reportsCashFlow => 'Cash Flow';
 
   @override
   String get reportsCashFlowChart => 'Cash flow chart';
-
-  @override
-  String get reportsNoProducts => 'No products registered';
 
   @override
   String get reportsStockHealthy => 'All products have adequate stock';

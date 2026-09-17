@@ -7,10 +7,13 @@ import '../../helpers/store_context.dart';
 
 import 'package:tareqo/domain/entities/product.dart';
 import 'package:tareqo/domain/repositories/i_cash_flow_repository.dart';
+import 'package:tareqo/domain/repositories/i_sales_report_repository.dart';
 import 'package:tareqo/domain/usecases/get_cash_flow_use_case.dart';
 import 'package:tareqo/domain/usecases/get_products_use_case.dart';
+import 'package:tareqo/domain/usecases/get_sales_report_use_case.dart';
 import 'package:tareqo/presentation/controllers/finance_providers.dart';
 import 'package:tareqo/presentation/controllers/products_providers.dart';
+import 'package:tareqo/presentation/controllers/reports_providers.dart';
 import 'package:tareqo/presentation/screens/addons/advanced_reports_screen.dart';
 
 class _FakeGetProducts implements GetProductsUseCase {
@@ -44,6 +47,28 @@ class _FakeGetCashFlow implements GetCashFlowUseCase {
   }
 }
 
+/// Fake do relatório de vendas — grava a janela pedida (contrato do
+/// período) e devolve o [SalesReport] fixo.
+class _FakeGetSalesReport implements GetSalesReportUseCase {
+  _FakeGetSalesReport(this._report);
+
+  final SalesReport _report;
+  final windows = <({DateTime start, DateTime end})>[];
+
+  @override
+  Future<SalesReport> call({
+    required String storeId,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    windows.add((start: start, end: end));
+    return _report;
+  }
+
+  @override
+  ISalesReportRepository? get serverRepository => null;
+}
+
 Product _product(
   String name, {
   int stockMilli = 5000,
@@ -60,6 +85,7 @@ Product _product(
 Widget _buildApp({
   List<Product> products = const [],
   GetCashFlowUseCase? cashFlow,
+  GetSalesReportUseCase? salesReport,
 }) {
   return ProviderScope(
     overrides: [
@@ -67,6 +93,8 @@ Widget _buildApp({
       getProductsUseCaseProvider.overrideWithValue(_FakeGetProducts(products)),
       if (cashFlow != null)
         getCashFlowUseCaseProvider.overrideWithValue(cashFlow),
+      if (salesReport != null)
+        getSalesReportUseCaseProvider.overrideWithValue(salesReport),
     ],
     child: testApp(home: const AdvancedReportsScreen()),
   );
@@ -74,44 +102,84 @@ Widget _buildApp({
 
 void main() {
   testWidgets(
-    'aba Vendas: KPIs de estoque calculados dos produtos reais (centavos exactos)',
+    'aba Vendas: KPIs de VENDAS reais (faturamento, lucro, margem) + top produtos',
     (tester) async {
-      await tester.pumpWidget(
-        _buildApp(
-          products: [
-            _product(
-              'Arroz',
-              stockMilli: 50000,
-              salePriceCents: 1000,
-            ), // 50 un × 10
-            _product(
-              'Óleo',
-              stockMilli: 2700,
-              salePriceCents: 1599,
-            ), // 2,7 × 15,99
+      final fake = _FakeGetSalesReport(
+        const SalesReport(
+          totalRevenueCents: 150000, // R$ 1.500,00
+          totalProfitCents: 60000, // R$ 600,00
+          bestSellers: [
+            BestSeller(
+              productId: 'p1',
+              productName: 'Arroz 25kg',
+              quantity: 25000, // 25 un (milésimos)
+              revenueCents: 100000,
+            ),
+            BestSeller(
+              productId: 'p2',
+              productName: 'Óleo 1L',
+              quantity: 1750, // 1,75 un (fração W11)
+              revenueCents: 2799,
+            ),
           ],
+          perDay: [],
         ),
       );
+      await tester.pumpWidget(_buildApp(salesReport: fake));
       await tester.pumpAndSettle();
 
-      // 2 produtos; 1 com estoque baixo (Óleo 2 un ≤ 10; Arroz 50 não).
-      // Valor: (50000×1000 + 2700×1599) ~/ 1000 = 50000 + 4317 = 54317 cents.
-      expect(find.text('2'), findsAtLeast(2)); // KPI + badge do top-card
-      expect(find.text('1'), findsOneWidget); // estoque baixo
-      expect(find.text('R\$ 543,17'), findsOneWidget); // valor exacto
-      expect(find.text('Arroz'), findsOneWidget);
-      expect(find.text('Óleo'), findsOneWidget);
+      // KPIs de vendas do período (antes: KPIs de estoque duplicados).
+      expect(find.text('R\$ 1.500,00'), findsOneWidget);
+      expect(find.text('R\$ 600,00'), findsOneWidget);
+      expect(find.textContaining('40.0%'), findsOneWidget); // margem
+      // toStringAsFixed não é locale-aware (mesmo padrão da tela de
+      // Relatórios: ponto decimal em todos os idiomas).
+      // Top produtos: nome + receita + quantidade em unidades (W11).
+      expect(find.text('Arroz 25kg'), findsOneWidget);
+      expect(find.text('R\$ 1.000,00'), findsOneWidget);
+      expect(find.text('25'), findsOneWidget);
+      expect(find.text('Óleo 1L'), findsOneWidget);
+      expect(find.textContaining('1,75'), findsOneWidget);
+      // A janela pedida começa no início do mês (período padrão "Este Mês").
+      final now = DateTime.now();
+      expect(fake.windows.single.start, DateTime(now.year, now.month));
     },
   );
 
-  testWidgets('aba Vendas sem produtos mostra mensagem de vazio', (
+  testWidgets('aba Vendas sem vendas no período mostra mensagem de vazio', (
     tester,
   ) async {
-    await tester.pumpWidget(_buildApp());
+    await tester.pumpWidget(
+      _buildApp(
+        salesReport: _FakeGetSalesReport(
+          const SalesReport(
+            totalRevenueCents: 0,
+            totalProfitCents: 0,
+            bestSellers: [],
+            perDay: [],
+          ),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
-    expect(find.text('Sem produtos cadastrados'), findsOneWidget);
+    expect(find.text('Sem dados para este período'), findsOneWidget);
   });
+
+  testWidgets(
+    'aba Vendas: erro do relatório mostra retry (nunca silencia falha)',
+    (tester) async {
+      final fake = _AlwaysThrowSalesReport();
+      await tester.pumpWidget(_buildApp(salesReport: fake));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Não foi possível carregar o relatório.'),
+        findsOneWidget,
+      );
+      expect(find.text('Tentar novamente'), findsOneWidget);
+    },
+  );
 
   testWidgets(
     'aba Financeiro: KPIs do fluxo de caixa real (entradas/saídas/líquido)',
@@ -244,4 +312,18 @@ class _AlwaysThrowCashFlow implements GetCashFlowUseCase {
 
   @override
   ICashFlowRepository? get serverRepository => null;
+}
+
+class _AlwaysThrowSalesReport implements GetSalesReportUseCase {
+  @override
+  Future<SalesReport> call({
+    required String storeId,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    throw Exception('banco indisponível');
+  }
+
+  @override
+  ISalesReportRepository? get serverRepository => null;
 }

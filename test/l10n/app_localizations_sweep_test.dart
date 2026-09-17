@@ -22,7 +22,7 @@ import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 
 /// Total de membros do catálogo: 1073 (956 getters + 117 métodos).
 const int kTotalMembers = 1073;
-const int kTotalGetters = 961;
+const int kTotalGetters = 958;
 const int kTotalMethods = 117;
 const Set<String> kMethodNames = <String>{
   'onboardingPlanDetails',
@@ -1066,15 +1066,12 @@ void main() {
         'reportsTabStock': l.reportsTabStock,
         'reportsKpiProducts': l.reportsKpiProducts,
         'reportsKpiLowStock': l.reportsKpiLowStock,
-        'reportsKpiTotalItems': l.reportsKpiTotalItems,
         'reportsKpiStockValue': l.reportsKpiStockValue,
         'reportsKpiRevenue': l.reportsKpiRevenue,
         'reportsKpiExpenses': l.reportsKpiExpenses,
         'reportsKpiNetProfit': l.reportsKpiNetProfit,
-        'reportsStockByQty': l.reportsStockByQty,
         'reportsCashFlow': l.reportsCashFlow,
         'reportsCashFlowChart': l.reportsCashFlowChart,
-        'reportsNoProducts': l.reportsNoProducts,
         'reportsStockHealthy': l.reportsStockHealthy,
         'reportsExportSales': l.reportsExportSales,
         'reportsExportFinancial': l.reportsExportFinancial,
@@ -2400,15 +2397,12 @@ void main() {
         'reportsTabStock': l.reportsTabStock,
         'reportsKpiProducts': l.reportsKpiProducts,
         'reportsKpiLowStock': l.reportsKpiLowStock,
-        'reportsKpiTotalItems': l.reportsKpiTotalItems,
         'reportsKpiStockValue': l.reportsKpiStockValue,
         'reportsKpiRevenue': l.reportsKpiRevenue,
         'reportsKpiExpenses': l.reportsKpiExpenses,
         'reportsKpiNetProfit': l.reportsKpiNetProfit,
-        'reportsStockByQty': l.reportsStockByQty,
         'reportsCashFlow': l.reportsCashFlow,
         'reportsCashFlowChart': l.reportsCashFlowChart,
-        'reportsNoProducts': l.reportsNoProducts,
         'reportsStockHealthy': l.reportsStockHealthy,
         'reportsExportSales': l.reportsExportSales,
         'reportsExportFinancial': l.reportsExportFinancial,
@@ -3734,15 +3728,12 @@ void main() {
         'reportsTabStock': l.reportsTabStock,
         'reportsKpiProducts': l.reportsKpiProducts,
         'reportsKpiLowStock': l.reportsKpiLowStock,
-        'reportsKpiTotalItems': l.reportsKpiTotalItems,
         'reportsKpiStockValue': l.reportsKpiStockValue,
         'reportsKpiRevenue': l.reportsKpiRevenue,
         'reportsKpiExpenses': l.reportsKpiExpenses,
         'reportsKpiNetProfit': l.reportsKpiNetProfit,
-        'reportsStockByQty': l.reportsStockByQty,
         'reportsCashFlow': l.reportsCashFlow,
         'reportsCashFlowChart': l.reportsCashFlowChart,
-        'reportsNoProducts': l.reportsNoProducts,
         'reportsStockHealthy': l.reportsStockHealthy,
         'reportsExportSales': l.reportsExportSales,
         'reportsExportFinancial': l.reportsExportFinancial,
