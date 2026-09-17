@@ -79,9 +79,10 @@ CustomInvoice _invoice({
   clientName: 'João Silva',
   clientPhone: '841234567',
   items: [
+    // Convenção W11: quantidade em MILÉSIMOS (2 un = 2000).
     const CustomInvoiceItem(
       productName: 'Paracetamol',
-      quantity: 2,
+      quantity: 2000,
       unitPriceCents: 1500,
       subtotalCents: 3000,
     ),

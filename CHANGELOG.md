@@ -5,6 +5,10 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) �
 
 ## [2.2.0+27] — 2026-09-17
 
+### Corrigido (pós-release)
+- **Factura Personalizada gravava a quantidade ERRADA** (PDF mostrava "0.0 un"): a tela salvava o inteiro cru do campo (qty 2 → quantity 2), mas o app usa a convenção W11 (quantidade em MILÉSIMOS — 1000 = 1 unidade, venda a granel) que o exporter do PDF e o preview textual seguem (÷ 1000). Fix: criação grava `qty × 1000` (mesmo padrão da Cotação) e o use case calcula subtotal `qty × preço ÷ 1000` (antes saía 1000× maior). WhatsApp do card exibe unidades reais. Migração para facturas antigas gravadas cruas: `supabase/fix_custom_invoice_qty_millesimos_2026_09_17.sql` (idempotente, com SELECTs de auditoria antes/depois).
+- **Título "Relatórios Avançados" truncado** no AppBar ("Relatórios Avanca…") — o chip de período à direita disputava espaço com o titleMedium (20); reduzido para bodyLarge 17/w500 com folga.
+
 ### Novo
 - **Super admin edita o preço dos add-ons**: o catálogo era 100% hardcoded no app — agora o painel (Add-ons → tenant) tem botão de editar preço por add-on (sheet "Editar preço mensal", mesmo padrão do editor de planos: preview ao vivo, validação e confirmação). Nova tabela `add_ons` no Supabase (schema.sql + upgrade.sql, idempotente, RLS: logados leem / só super admin escreve via `is_super_admin()`) guardando SOMENTE os overrides (preço em centavos + disponibilidade por id do catálogo); repositório novo mescla seed estático + overrides com fallback garantido no seed (banco falhou = catálogo nunca vazio). O marketplace do tenant reflete o preço editado.
 

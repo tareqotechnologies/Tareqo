@@ -47,7 +47,11 @@ class CreateCustomInvoiceUseCase {
     int totalCents = 0;
 
     for (final item in items) {
-      final subtotal = item.quantity * item.unitPriceCents;
+      // Quantidade em MILÉSIMOS (W11 — 1000 = 1 unidade), mesma convenção
+      // do use case da cotação, do preview WhatsApp (quantity / 1000) e do
+      // exporter de PDF (~/ 1000). Sem a divisão o subtotal saía 1000×
+      // maior (2 un × 15,00 gravava 30.000,00 em vez de 30,00).
+      final subtotal = item.quantity * item.unitPriceCents ~/ 1000;
       totalCents += subtotal;
       invoiceItems.add(
         CustomInvoiceItem(

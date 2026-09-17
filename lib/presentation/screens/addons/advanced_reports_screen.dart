@@ -60,11 +60,15 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
 
     return Scaffold(
       appBar: AppBar(
-        // Título 3 (20/w600) — o AppBar de 56px com o chip de período à
-        // direita truncava o título 2 (22) em 'Relatórios Avançad…'.
+        // Título em bodyLarge (17/w400) — o AppBar de 56px com o chip de
+        // período à direita truncava até o título 3 (20) em
+        // 'Relatórios Avançad…' em telas estreitas; 17px cabe com folga
+        // e mantém a hierarquia (o chip de período é o elemento primário).
         title: Text(
           l10n.reportsAdvancedTitle,
-          style: theme.textTheme.titleMedium,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
         ),
         actions: [
           Padding(

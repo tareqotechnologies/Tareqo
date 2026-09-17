@@ -173,7 +173,12 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
           for (final item in data.items)
             CustomInvoiceItemInput(
               productName: item.name,
-              quantity: item.qty,
+              // Convenção W11 do app: quantidade em MILÉSIMOS
+              // (1000 = 1 unidade) — o exporter do PDF e o preview
+              // textual dividem por 1000. Sem o ×1000, o PDF mostrava
+              // "0.0 un" (qty crua 2 ÷ 1000) e a quantidade ficava
+              // errada na factura impressa.
+              quantity: item.qty * 1000,
               unitPriceCents: item.unitPriceCents,
             ),
         ],
@@ -361,6 +366,14 @@ class _InvoiceCard extends StatelessWidget {
     );
   }
 
+  /// Milésimos → texto de unidades ("2" ou "1.5" para frações).
+  String _qtyToUnits(int millesimos) {
+    final units = millesimos / 1000;
+    return units == units.roundToDouble()
+        ? units.toStringAsFixed(0)
+        : units.toStringAsFixed(2);
+  }
+
   Future<void> _shareWhatsApp(BuildContext context) async {
     final l10n = context.l10n;
     final buffer = StringBuffer();
@@ -375,7 +388,10 @@ class _InvoiceCard extends StatelessWidget {
     buffer.writeln();
     for (final item in invoice.items) {
       buffer.writeln(
-        '• ${item.productName} x${item.quantity} — ${Formatters.currency(item.unitPriceCents * item.quantity)}',
+        // Quantidade guardada em MILÉSIMOS (1000 = 1 unidade) — exibir
+        // em unidades reais (mesmo padrão do card da cotação).
+        '• ${item.productName} x${_qtyToUnits(item.quantity)} — '
+        '${Formatters.currency((item.unitPriceCents * item.quantity / 1000).round())}',
       );
     }
     buffer.writeln();

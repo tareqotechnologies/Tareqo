@@ -125,19 +125,20 @@ void main() {
 
   group('CreateCustomInvoiceUseCase — cálculo', () {
     test('deve calcular subtotais e total com múltiplos itens', () {
-      // Quantidade em MILÉSIMOS: subtotal = quantidade × preço unitário.
+      // Quantidade em MILÉSIMOS (W11): subtotal = qty × preço ÷ 1000
+      // (2 un × 5,00 = 10,00 — e não 10.000,00).
       final invoice = create(
         storeId: 'st1',
         clientName: 'Ana',
         items: [
-          item('Arroz', 2000, 500), // 2.000 × 5,00 = 10.000,00
-          item('Sal', 1000, 150), // 1.000 × 1,50 = 1.500,00
+          item('Arroz', 2000, 500), // 2.000 × 5,00 ÷ 1000 = 10,00
+          item('Sal', 1000, 150), // 1.000 × 1,50 ÷ 1000 = 1,50
         ],
       );
 
-      expect(invoice.items.first.subtotalCents, 1000000);
-      expect(invoice.items.last.subtotalCents, 150000);
-      expect(invoice.totalAmountCents, 1150000);
+      expect(invoice.items.first.subtotalCents, 1000);
+      expect(invoice.items.last.subtotalCents, 150);
+      expect(invoice.totalAmountCents, 1150);
       // id vazio: atribuído pelo banco.
       expect(invoice.id, '');
     });
@@ -146,18 +147,18 @@ void main() {
       final withAdjustments = create(
         storeId: 'st1',
         clientName: 'Ana',
-        items: [item('A', 1000, 1000)], // 1.000 × 10,00 = 10.000,00
-        discountCents: 30000, // -300,00
-        taxCents: 10000, // +100,00
+        items: [item('A', 1000, 1000)], // 1.000 × 10,00 ÷ 1000 = 10,00
+        discountCents: 300, // -3,00
+        taxCents: 100, // +1,00
       );
-      expect(withAdjustments.totalAmountCents, 980000);
+      expect(withAdjustments.totalAmountCents, 800);
 
       // Desconto maior que o total → satura em 0 (sem total negativo).
       final saturated = create(
         storeId: 'st1',
         clientName: 'Ana',
         items: [item('A', 1000, 100)],
-        discountCents: 500000,
+        discountCents: 500,
       );
       expect(saturated.totalAmountCents, 0);
     });
@@ -183,13 +184,13 @@ void main() {
     });
 
     test('deve aceitar valores muito grandes sem estourar para double', () {
-      // 999.999 milésimos × 999.999,99 — em centavos inteiros.
+      // 999.999 milésimos × 999.999,99 ÷ 1000 — em centavos inteiros.
       final invoice = create(
         storeId: 'st1',
         clientName: 'Ana',
         items: [item('Container', 999999, 99999999)],
       );
-      expect(invoice.items.first.subtotalCents, 999999 * 99999999);
+      expect(invoice.items.first.subtotalCents, 999999 * 99999999 ~/ 1000);
     });
   });
 
