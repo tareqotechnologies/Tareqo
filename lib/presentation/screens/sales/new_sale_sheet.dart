@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/ui/haptics.dart';
 import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
@@ -315,6 +316,8 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       // O ProcessSaleUseCase registra a venda, baixa o estoque em FIFO por
       // lotes e lança a entrada no caixa — uma única porta para o fluxo.
       await ref.read(processSaleUseCaseProvider).call(sale);
+      // Confirmação tátil da conclusão (antes do pop: imediato, sem atraso).
+      Haptics.success();
 
       if (!mounted) return;
       navigator.pop();
@@ -338,6 +341,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       navigator.pop();
       messenger.showSnackBar(SnackBar(content: Text(l10n.syncOfflineSaved)));
     } on InsufficientStockException catch (error) {
+      Haptics.error();
       final product = _productById(error.productId);
       setState(() {
         final nameSuffix = product != null
@@ -346,10 +350,12 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
         _error = l10n.salesInsufficientStock(nameSuffix, error.available);
       });
     } on ProductNotFoundException catch (error) {
+      Haptics.error();
       setState(() {
         _error = l10n.salesProductNotFound(error.productId);
       });
     } catch (error, stackTrace) {
+      Haptics.error();
       CrashReporting.capture(
         error,
         stackTrace,

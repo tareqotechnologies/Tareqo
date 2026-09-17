@@ -3675,6 +3675,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get securityTwoFactorTitle => 'Autenticação em Dois Fatores';
 
   @override
+  String get settingsHapticsTitle => 'Feedback tátil';
+
+  @override
+  String get settingsHapticsSubtitle =>
+      'Vibração ao concluir vendas, pagamentos e confirmações';
+
+  @override
   String get settingsMfaEnforceError =>
       'Não foi possível alterar a exigência de MFA. Verifique a conexão e tente de novo.';
 

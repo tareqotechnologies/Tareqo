@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/config/app_flavor.dart';
 import 'core/di/service_locator.dart';
+import 'core/ui/haptics.dart';
 import 'core/network/supabase_bootstrap.dart';
 import 'core/observability/crash_reporting.dart';
 import 'data/services/addon_expiry_service.dart';
@@ -35,6 +36,11 @@ Future<void> main() async {
 
   // Inicializa o Service Locator (GetIt) com as dependências.
   await ServiceLocator.initialize();
+
+  // Preferência de feedback tátil (Lojas → Ajustes → Geral). Antes do
+  // runApp: qualquer haptic emitido na primeira interação já respeita a
+  // escolha do utilizador.
+  await Haptics.load();
 
   // Verificar add-ons expirados no arranque e iniciar verificação periódica.
   registerAddOnExpiryService();

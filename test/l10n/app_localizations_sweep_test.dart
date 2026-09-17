@@ -22,7 +22,7 @@ import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 
 /// Total de membros do catálogo: 1073 (956 getters + 117 métodos).
 const int kTotalMembers = 1073;
-const int kTotalGetters = 959;
+const int kTotalGetters = 961;
 const int kTotalMethods = 117;
 const Set<String> kMethodNames = <String>{
   'onboardingPlanDetails',
@@ -234,6 +234,8 @@ void main() {
         'settingsSave': l.settingsSave,
         'settingsSaved': l.settingsSaved,
         'settingsGenericError': l.settingsGenericError,
+        'settingsHapticsSubtitle': l.settingsHapticsSubtitle,
+        'settingsHapticsTitle': l.settingsHapticsTitle,
         'settingsSupportSection': l.settingsSupportSection,
         'settingsSupportEntry': l.settingsSupportEntry,
         'settingsSupportEntryHint': l.settingsSupportEntryHint,
@@ -1566,6 +1568,8 @@ void main() {
         'settingsSave': l.settingsSave,
         'settingsSaved': l.settingsSaved,
         'settingsGenericError': l.settingsGenericError,
+        'settingsHapticsSubtitle': l.settingsHapticsSubtitle,
+        'settingsHapticsTitle': l.settingsHapticsTitle,
         'settingsSupportSection': l.settingsSupportSection,
         'settingsSupportEntry': l.settingsSupportEntry,
         'settingsSupportEntryHint': l.settingsSupportEntryHint,
@@ -2898,6 +2902,8 @@ void main() {
         'settingsSave': l.settingsSave,
         'settingsSaved': l.settingsSaved,
         'settingsGenericError': l.settingsGenericError,
+        'settingsHapticsSubtitle': l.settingsHapticsSubtitle,
+        'settingsHapticsTitle': l.settingsHapticsTitle,
         'settingsSupportSection': l.settingsSupportSection,
         'settingsSupportEntry': l.settingsSupportEntry,
         'settingsSupportEntryHint': l.settingsSupportEntryHint,

@@ -818,6 +818,17 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
   late String _language = widget.tenant.language;
   late String _currencyCode = widget.tenant.currencyCode;
   late bool _mfaEnforced = widget.tenant.mfaEnforced;
+  // Haptics: estado inicial assume ligado (default); a leitura real é
+  // async — sincroniza no initState sem bloquear o primeiro frame.
+  bool _hapticsEnabled = Haptics.isEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    Haptics.load().then((_) {
+      if (mounted) setState(() => _hapticsEnabled = Haptics.isEnabled);
+    });
+  }
 
   bool _isSaving = false;
   String? _formError;
@@ -1027,6 +1038,20 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
                 ? l10n.settingsMfaEnforceSubOn
                 : l10n.settingsMfaEnforceSubOff,
           ),
+        ),
+        // GERAL — feedback tátil: preferência LOCAL do dispositivo (não é
+        // do tenant — cada operador escolhe no seu aparelho). Salva na
+        // hora, sem passar pelo botão Salvar (mesmo padrão do switch MFA
+        // acima).
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _hapticsEnabled,
+          onChanged: (v) async {
+            await Haptics.setEnabled(v);
+            if (mounted) setState(() => _hapticsEnabled = v);
+          },
+          title: Text(l10n.settingsHapticsTitle),
+          subtitle: Text(l10n.settingsHapticsSubtitle),
         ),
         // SEGURANÇA — troca de senha da conta (qualquer utilizador
         // logado; não é uma definição do tenant).

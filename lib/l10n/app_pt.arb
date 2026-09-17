@@ -1626,6 +1626,8 @@
   "securityTwoFactorDisabledSub": "Adicione uma camada extra de segurança",
   "securityTwoFactorEnabledSub": "Activada — Use um app autenticador",
   "securityTwoFactorTitle": "Autenticação em Dois Fatores",
+  "settingsHapticsTitle": "Feedback tátil",
+  "settingsHapticsSubtitle": "Vibração ao concluir vendas, pagamentos e confirmações",
   "settingsMfaEnforceError": "Não foi possível alterar a exigência de MFA. Verifique a conexão e tente de novo.",
   "settingsMfaEnforceSubOff": "Desligado — vendas e caixa funcionam só com senha",
   "settingsMfaEnforceSubOn": "Exigido — escritas de dinheiro pedem código do autenticador",

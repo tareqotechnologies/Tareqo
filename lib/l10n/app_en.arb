@@ -1629,6 +1629,8 @@
   "settingsMfaEnforceError": "Could not change the MFA requirement. Check your connection and try again.",
   "settingsMfaEnforceSubOff": "Off — sales and cash work with password only",
   "settingsMfaEnforceSubOn": "Enforced — money writes require your authenticator code",
+  "settingsHapticsTitle": "Haptic feedback",
+  "settingsHapticsSubtitle": "Vibration when completing sales, payments and confirmations",
   "settingsMfaEnforceTitle": "Require MFA for money operations",
   "transfersRowDate": "Date",
   "transfersRowDest": "Destination",

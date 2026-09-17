@@ -3626,6 +3626,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get securityTwoFactorTitle => 'Two-Factor Authentication';
 
   @override
+  String get settingsHapticsTitle => 'Haptic feedback';
+
+  @override
+  String get settingsHapticsSubtitle =>
+      'Vibration when completing sales, payments and confirmations';
+
+  @override
   String get settingsMfaEnforceError =>
       'Could not change the MFA requirement. Check your connection and try again.';
 

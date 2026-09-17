@@ -6400,6 +6400,18 @@ abstract class AppLocalizations {
   /// **'Autenticação em Dois Fatores'**
   String get securityTwoFactorTitle;
 
+  /// No description provided for @settingsHapticsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Feedback tátil'**
+  String get settingsHapticsTitle;
+
+  /// No description provided for @settingsHapticsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vibração ao concluir vendas, pagamentos e confirmações'**
+  String get settingsHapticsSubtitle;
+
   /// No description provided for @settingsMfaEnforceError.
   ///
   /// In pt, this message translates to:

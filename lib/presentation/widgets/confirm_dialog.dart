@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/i18n/l10n_ext.dart';
+import '../../core/ui/haptics.dart';
 import 'app_button.dart';
 
 import 'admin_thin_bridge.dart';
@@ -44,7 +45,12 @@ Future<bool?> showConfirmDialog(
           if (destructive)
             AppButton.danger(
               label: confirmLabel,
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () {
+                // Confirmação tátil do risco aceito — um único ponto
+                // centraliza o feedback de TODAS as destrutivas do app.
+                Haptics.warning();
+                Navigator.of(context).pop(true);
+              },
             )
           else
             AppButton.primary(
