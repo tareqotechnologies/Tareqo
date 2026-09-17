@@ -83,3 +83,4 @@ android/app/upload-keystore.jks.b64
 compras_v.png
 screenshot_session_check.png
 *.iml
+test/presentation/goldens/failures/
