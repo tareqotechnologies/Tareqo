@@ -4,6 +4,7 @@ import '../../core/di/service_locator.dart';
 import '../../data/datasources/local/addon_catalog.dart';
 import '../../data/datasources/local/addon_local_data_source.dart';
 import '../../domain/entities/addon.dart';
+import '../../domain/repositories/i_addon_repository.dart';
 import 'account_providers.dart';
 import 'auth_providers.dart';
 
@@ -11,6 +12,47 @@ import 'auth_providers.dart';
 final addOnCatalogProvider = Provider<List<AddOn>>((ref) {
   return AddOnCatalog.addOns();
 });
+
+/// Repositório do catálogo de add-ons (seed + overrides do banco) —
+/// substituível em testes.
+final addOnRepositoryProvider = Provider<IAddOnRepository>((ref) {
+  return ServiceLocator.instance<IAddOnRepository>();
+});
+
+/// Catálogo EFECTIVO de add-ons: seed estático mesclado com os overrides
+/// persistidos (`add_ons` — preço mensal editado pelo super admin).
+/// Fallback: se o banco falhar/estiver vazio, mantém o seed — nunca vazio.
+final allAddOnsProvider =
+    AsyncNotifierProvider<AllAddOnsNotifier, List<AddOn>>(
+      AllAddOnsNotifier.new,
+    );
+
+class AllAddOnsNotifier extends AsyncNotifier<List<AddOn>> {
+  @override
+  Future<List<AddOn>> build() =>
+      ref.watch(addOnRepositoryProvider).all();
+
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
+
+  /// Persiste o novo preço mensal (CENTAVOS) de um add-on e actualiza o
+  /// estado local imediatamente (a UI reflete sem recarregar o banco).
+  Future<void> updatePrice(String addOnId, int priceMonthlyCents) async {
+    await ref.read(addOnRepositoryProvider).updatePrice(
+          addOnId,
+          priceMonthlyCents,
+        );
+    final current = state.value ?? const <AddOn>[];
+    state = AsyncValue.data([
+      for (final addon in current)
+        addon.id == addOnId
+            ? addon.copyWith(priceMonthlyCents: priceMonthlyCents)
+            : addon,
+    ]);
+  }
+}
 
 /// DataSource de add-ons — injeta via ServiceLocator (Supabase ou local).
 final addOnDataSourceProvider = Provider<AddOnLocalDataSource>((ref) {

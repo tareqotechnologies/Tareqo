@@ -3,6 +3,21 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.2.0+27] — 2026-09-17
+
+### Novo
+- **Super admin edita o preço dos add-ons**: o catálogo era 100% hardcoded no app — agora o painel (Add-ons → tenant) tem botão de editar preço por add-on (sheet "Editar preço mensal", mesmo padrão do editor de planos: preview ao vivo, validação e confirmação). Nova tabela `add_ons` no Supabase (schema.sql + upgrade.sql, idempotente, RLS: logados leem / só super admin escreve via `is_super_admin()`) guardando SOMENTE os overrides (preço em centavos + disponibilidade por id do catálogo); repositório novo mescla seed estático + overrides com fallback garantido no seed (banco falhou = catálogo nunca vazio). O marketplace do tenant reflete o preço editado.
+
+### Corrigido
+- **PDF da Factura/Cotação saía sempre PRETO com qualquer tema escolhido**: `_flutterColorToPdf` dividia `color.r/g/b` por 255, mas no Flutter moderno esses canais já são 0.0–1.0 — amarelo/verde/vermelho viravam ~0.004 (preto). Conversão corrigida nas duas telas (paleta partilhada).
+- **Títulos das telas de add-ons truncados em PT** ("Factura Personaliza…", "Gestão de Funcionário…"): AppPage ganhou `titleStyle` e as telas usam `titleMedium` (20/w600) — mesmo precedente do Relatórios Avançados; ellipsis de segurança no título do AppBar.
+
+### Alterado (UI/UX — painel do super admin)
+- **Tipografia Thin em todo o painel**: novo wrapper `AdminThin` aplica escala leve (títulos w300, labels w400) às 9 telas via Theme local — hierarquia por tamanho/cor, não por peso; KPIs do dashboard em 24/w300; AppBar das telas internas 19/w300; inputs/dropdowns/chips herdam pesos leves. Bottom sheets e dialogs do painel também em Thin (`adminThinIfNeeded` nos builders das rotas modais — sheets de planos, add-ons, audit log, tenant detail e nav sheet; `showConfirmDialog`/`showInputDialog` com `thinStyle: true`). Badges de contagem pendente mantêm w600 (legibilidade sobre vermelho).
+
+### Testes
+- 6 testes novos: contrato REST do datasource `add_ons` (fetch/upsert) + repositório (mesclagem, fallback, delegação). Suíte admin/add-ons/widgets verde (132 testes); `flutter analyze` 0 issues.
+
 ## [2.1.6+26] — 2026-09-16
 
 ### Corrigido

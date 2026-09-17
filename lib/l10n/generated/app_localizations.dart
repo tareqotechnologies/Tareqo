@@ -6472,6 +6472,30 @@ abstract class AppLocalizations {
   /// **'Activar add-on em lote'**
   String get adminAddonsBulkSheetTitle;
 
+  /// No description provided for @adminAddonsEditPriceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar preço mensal'**
+  String get adminAddonsEditPriceTitle;
+
+  /// No description provided for @adminAddonsEditPriceTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar preço'**
+  String get adminAddonsEditPriceTooltip;
+
+  /// No description provided for @adminAddonsPriceUpdated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço de {addonName} actualizado para {price}/mês'**
+  String adminAddonsPriceUpdated(Object addonName, Object price);
+
+  /// No description provided for @adminAddonsPriceSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar o preço. Tente novamente.'**
+  String get adminAddonsPriceSaveError;
+
   /// No description provided for @adminAddonsListHint.
   ///
   /// In pt, this message translates to:

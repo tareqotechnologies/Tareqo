@@ -111,7 +111,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
               child: Text(
                 l10n.adminRevenueByAddOn,
                 style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
@@ -138,7 +138,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
               child: Text(
                 l10n.adminRevenueByCategory,
                 style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
@@ -224,7 +224,7 @@ class _KpiCard extends StatelessWidget {
             Text(
               value,
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w400,
                 color: color,
               ),
             ),
@@ -281,7 +281,7 @@ class _AddOnRevenueTile extends StatelessWidget {
                 Text(
                   addon.name,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -305,7 +305,7 @@ class _AddOnRevenueTile extends StatelessWidget {
               Text(
                 Formatters.currency(maxRevenue),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                   color: AppColors.success,
                 ),
               ),
@@ -368,7 +368,7 @@ class _CategoryTile extends StatelessWidget {
                 Text(
                   category.label,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
                 Text(
@@ -384,7 +384,7 @@ class _CategoryTile extends StatelessWidget {
           Text(
             Formatters.currency(revenue),
             style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w400,
               color: AppColors.success,
             ),
           ),

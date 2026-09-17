@@ -3974,6 +3974,41 @@ VALUES
   ('pl3', 'Empresa', 'Para expandir: 10 lojas e até 50 funcionários.', 200000, 10, 50, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
+-- ----------------------------------------------------------------------------
+-- 2.1 add_ons — OVERRIDES do catálogo de add-ons (preço editável)
+-- ----------------------------------------------------------------------------
+-- O app traz o catálogo compilar-time (AddOnCatalog: nome, descrição,
+-- categoria, ícone). Esta tabela guarda SOMENTE os campos editados pelo
+-- super admin — hoje o preço mensal em CENTAVOS (mesma unidade do
+-- plans.price_monthly). Sem linha aqui = preço padrão do catálogo. Assim
+-- o catálogo pode evoluir no app sem migração de dados, e o preço sem
+-- edição nunca diverge entre app/banco.
+CREATE TABLE IF NOT EXISTS public.add_ons (
+  id            TEXT PRIMARY KEY,  -- ID do catálogo (ex.: ao_custom_invoice)
+  price_monthly BIGINT NOT NULL DEFAULT 0
+                CHECK (price_monthly >= 0),
+  is_available  BOOLEAN NOT NULL DEFAULT TRUE,
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.add_ons ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS add_ons_select ON public.add_ons;
+CREATE POLICY add_ons_select ON public.add_ons
+  FOR SELECT USING (auth.uid() IS NOT NULL);
+DROP POLICY IF EXISTS add_ons_insert ON public.add_ons;
+CREATE POLICY add_ons_insert ON public.add_ons
+  FOR INSERT WITH CHECK (public.is_super_admin());
+DROP POLICY IF EXISTS add_ons_update ON public.add_ons;
+CREATE POLICY add_ons_update ON public.add_ons
+  FOR UPDATE USING (public.is_super_admin()) WITH CHECK (public.is_super_admin());
+DROP POLICY IF EXISTS add_ons_delete ON public.add_ons;
+CREATE POLICY add_ons_delete ON public.add_ons
+  FOR DELETE USING (public.is_super_admin());
+
+COMMENT ON COLUMN public.add_ons.price_monthly
+  IS 'Valor em CENTAVOS inteiros (mesma unidade do Plan.price_monthly)';
+
 
 -- ============================================================================
 -- PARTE 3 — ENDURECIMENTO DE PRODUÇÃO (sem alteração da lógica funcional)

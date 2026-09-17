@@ -203,6 +203,12 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                         tenant.businessName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        // Thin: item do dropdown leve (w300) — herda a
+                        // voz do painel admin.
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w300,
+                          color: scheme.onSurface,
+                        ),
                       ),
                     ),
                 ],
@@ -398,7 +404,8 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
 
 // ─── Widgets auxiliares ──────────────────────────────────────────────────────
 
-/// Label de secção minimalista.
+/// Label de secção minimalista — thin: uppercase leve com tracking,
+/// hierarquia sem peso pesado.
 class _SectionLabel extends StatelessWidget {
   const _SectionLabel({required this.label});
 
@@ -407,10 +414,10 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      label,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        fontWeight: FontWeight.w600,
-        fontSize: 12,
+      label.toUpperCase(),
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        fontWeight: FontWeight.w400,
+        letterSpacing: 0.8,
       ),
     );
   }
@@ -597,7 +604,7 @@ class _TemplateCard extends StatelessWidget {
                   Text(
                     title,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w300,
                       color: isSelected ? color : scheme.onSurface,
                     ),
                   ),
@@ -655,7 +662,7 @@ class _MessagePreview extends StatelessWidget {
                 'Preview',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w300,
                   color: scheme.onSurfaceVariant,
                 ),
               ),
@@ -665,7 +672,7 @@ class _MessagePreview extends StatelessWidget {
           Text(
             title,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w400,
               fontSize: 12,
             ),
           ),

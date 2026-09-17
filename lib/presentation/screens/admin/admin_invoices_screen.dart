@@ -272,6 +272,8 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
       title: l10n.adminInvoiceCancelTitle,
       message: l10n.adminInvoiceCancelConfirm(invoice.period),
       confirmLabel: l10n.adminInvoiceCancelConfirmButton,
+      // Thin: o dialog é rota modal — não herda o Theme do shell.
+      thinStyle: true,
     );
   }
 

@@ -8,6 +8,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/audit_entry.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/admin_providers.dart';
+import '../../widgets/admin_thin_bridge.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
@@ -538,7 +539,7 @@ class _AuditTile extends StatelessWidget {
                   Text.rich(
                     TextSpan(
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                       ),
                       children: [
                         TextSpan(text: entry.actionLabel),
@@ -622,7 +623,12 @@ class _AuditTile extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _AuditDetailSheet(entry: entry),
+      // Thin: rotas modais não herdam o Theme local do shell.
+      builder: (sheetContext) => adminThinIfNeeded(
+        sheetContext,
+        thinStyle: true,
+        child: _AuditDetailSheet(entry: entry),
+      ),
     );
   }
 }
@@ -705,7 +711,7 @@ class _AuditDetailSheet extends StatelessWidget {
             Text(
               entry.actionLabel,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
               ),
             ),
             const SizedBox(height: 2),

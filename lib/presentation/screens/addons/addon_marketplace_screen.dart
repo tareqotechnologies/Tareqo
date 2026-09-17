@@ -49,6 +49,7 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
 
     return AppPage(
       title: l10n.addonsTitle,
+      titleStyle: theme.textTheme.titleMedium,
       useSafeArea: false,
       body: ListView(
         padding: EdgeInsets.fromLTRB(

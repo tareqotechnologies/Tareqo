@@ -82,7 +82,7 @@ class _AdminTenantCard extends ConsumerWidget {
                     '$addOnCount',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: AppColors.statusPurple,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w400,
                       fontSize: 11,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
@@ -306,7 +306,7 @@ class _TenantDetailSheet extends ConsumerWidget {
                         Text(
                           tenant.businessName,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -1087,7 +1087,7 @@ class _BillingInfoCard extends StatelessWidget {
                 statusText,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: statusColor,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],

@@ -3738,6 +3738,21 @@ class AppLocalizationsPt extends AppLocalizations {
   String get adminAddonsBulkSheetTitle => 'Activar add-on em lote';
 
   @override
+  String get adminAddonsEditPriceTitle => 'Editar preço mensal';
+
+  @override
+  String get adminAddonsEditPriceTooltip => 'Editar preço';
+
+  @override
+  String adminAddonsPriceUpdated(Object addonName, Object price) {
+    return 'Preço de $addonName actualizado para $price/mês';
+  }
+
+  @override
+  String get adminAddonsPriceSaveError =>
+      'Não foi possível salvar o preço. Tente novamente.';
+
+  @override
   String get adminAddonsListHint =>
       'Toque num tenant para gerir os seus add-ons. Toque no ícone ✓ para seleção múltipla.';
 

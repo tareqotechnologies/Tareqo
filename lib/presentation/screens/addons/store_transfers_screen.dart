@@ -30,10 +30,15 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
     final transfers = ref.watch(stockTransfersProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.transfersTitle)),
+      // Título 3 (20/w600) — rótulo longo ('Transferências entre Lojas')
+      // truncava em titleLarge (22) no AppBar de 56px.
+      appBar: AppBar(
+        title: Text(l10n.transfersTitle, style: theme.textTheme.titleMedium),
+      ),
       body: transfers.isEmpty
           ? EmptyState(
               icon: Icons.swap_horiz_outlined,

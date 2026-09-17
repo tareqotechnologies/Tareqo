@@ -28,7 +28,12 @@ class _PaymentReconciliationScreenState
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.paymentsTitle)),
+      appBar: AppBar(
+        title: Text(
+          l10n.paymentsTitle,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ),
       body: _IntegrationBlockedBanner(message: l10n.paymentsIntegrationBlocked),
     );
   }

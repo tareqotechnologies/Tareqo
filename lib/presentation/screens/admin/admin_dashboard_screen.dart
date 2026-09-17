@@ -436,6 +436,11 @@ class _StatCell extends StatelessWidget {
           stat.value,
           style: theme.textTheme.titleMedium?.copyWith(
             color: stat.color,
+            // Thin: KPI leve (24/w300) — o número respira, a hierarquia
+            // vem do tamanho e da cor de estado.
+            fontSize: 24,
+            fontWeight: FontWeight.w300,
+            letterSpacing: -0.4,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
@@ -692,7 +697,7 @@ class _GrowthKpi extends StatelessWidget {
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontSize: 12,
                     color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),
@@ -781,7 +786,7 @@ class _TrendChart extends StatelessWidget {
                 title,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w300,
                   color: scheme.onSurfaceVariant,
                 ),
                 maxLines: 1,

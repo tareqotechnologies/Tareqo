@@ -21,6 +21,7 @@ import '../../widgets/money_live_preview.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../widgets/admin_thin_bridge.dart';
 
 /// Painel do super admin — gestão de planos (criar, editar, ativar/desativar).
 /// Os planos limitam a estrutura de cada tenant (nº de lojas e funcionários).
@@ -37,7 +38,13 @@ class _AdminPlansScreenState extends ConsumerState<AdminPlansScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _PlanEditorSheet(plan: plan),
+      // Thin: rotas modais não herdam o Theme local do shell — o builder
+      // aplica o tema thin explicitamente.
+      builder: (sheetContext) => adminThinIfNeeded(
+        sheetContext,
+        thinStyle: true,
+        child: _PlanEditorSheet(plan: plan),
+      ),
     );
     if (!mounted) return;
     ref.read(allPlansProvider.notifier).refresh();
@@ -48,12 +55,16 @@ class _AdminPlansScreenState extends ConsumerState<AdminPlansScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _PlanDetailSheet(
-        plan: plan,
-        onEdit: () {
-          Navigator.of(context).pop();
-          _openEditor(plan);
-        },
+      builder: (sheetContext) => adminThinIfNeeded(
+        sheetContext,
+        thinStyle: true,
+        child: _PlanDetailSheet(
+          plan: plan,
+          onEdit: () {
+            Navigator.of(context).pop();
+            _openEditor(plan);
+          },
+        ),
       ),
     );
   }
@@ -268,7 +279,7 @@ class _PlanTile extends ConsumerWidget {
                   Text.rich(
                     TextSpan(
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                       ),
                       children: [
                         TextSpan(text: plan.name),
@@ -423,7 +434,7 @@ class _PlanDetailSheet extends ConsumerWidget {
                         Text(
                           plan.name,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                         GestureDetector(
@@ -737,7 +748,7 @@ class _TenantMiniTile extends StatelessWidget {
                 Text(
                   tenant.businessName,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -962,7 +973,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
                           ? l10n.adminPlanNewTitle
                           : l10n.adminPlanEditTitle,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ),

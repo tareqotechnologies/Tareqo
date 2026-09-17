@@ -6,6 +6,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/admin_providers.dart';
 import '../../controllers/invoice_providers.dart';
+import '../../widgets/admin_thin_bridge.dart';
 import '../../widgets/fade_indexed_stack.dart';
 import '../../widgets/sign_out_button.dart';
 import 'admin_addons_screen.dart';
@@ -17,6 +18,7 @@ import 'admin_messages_screen.dart';
 import 'admin_plan_requests_screen.dart';
 import 'admin_plans_screen.dart';
 import 'admin_tenants_screen.dart';
+import 'admin_thin_theme.dart';
 
 /// Casca de navegação do **super admin** — estilo minimalista com FAB.
 ///
@@ -67,7 +69,11 @@ class _AdminShellState extends ConsumerState<AdminShell> {
         .where((i) => i.badge > 0)
         .fold<int>(0, (s, i) => s + i.badge);
 
-    final body = FadeIndexedStack(index: _index, children: _sections);
+    // Tipografia THIN em todo o painel — títulos leves (w300), rótulos
+    // w400; inputs/dropdowns/chips herdam via Theme local.
+    final body = AdminThin(
+      child: FadeIndexedStack(index: _index, children: _sections),
+    );
 
     final theme = Theme.of(context);
 
@@ -96,8 +102,8 @@ class _AdminShellState extends ConsumerState<AdminShell> {
             Text(
               l10n.adminTitle,
               style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
+                fontWeight: FontWeight.w400,
+                letterSpacing: 0.4,
               ),
             ),
           ],
@@ -190,13 +196,17 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _NavBottomSheet(
-        items: items,
-        selectedIndex: _index,
-        onSelect: (i) {
-          Navigator.of(context).pop();
-          setState(() => _index = i);
-        },
+      builder: (sheetContext) => adminThinIfNeeded(
+        sheetContext,
+        thinStyle: true,
+        child: _NavBottomSheet(
+          items: items,
+          selectedIndex: _index,
+          onSelect: (i) {
+            Navigator.of(context).pop();
+            setState(() => _index = i);
+          },
+        ),
       ),
     );
   }
@@ -242,7 +252,7 @@ class _AdminFab extends StatelessWidget {
                 currentLabel,
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: scheme.onPrimary,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                   fontSize: 12,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -267,7 +277,7 @@ class _AdminFab extends StatelessWidget {
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: Colors.white,
                     fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -336,7 +346,7 @@ class _NavBottomSheet extends StatelessWidget {
                 'Navegação',
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w300,
                   fontSize: 12,
                   letterSpacing: 0.3,
                 ),
@@ -419,7 +429,7 @@ class _NavSheetItem extends StatelessWidget {
                 child: Text(
                   item.label,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    fontWeight: selected ? FontWeight.w500 : FontWeight.w300,
                     color: color,
                     fontSize: 14,
                   ),
@@ -442,7 +452,7 @@ class _NavSheetItem extends StatelessWidget {
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: Colors.white,
                       fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -561,7 +571,7 @@ class _SidebarIcon extends StatelessWidget {
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

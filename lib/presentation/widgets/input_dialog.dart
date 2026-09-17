@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../../core/i18n/l10n_ext.dart';
+import 'admin_thin_bridge.dart';
 import 'app_button.dart';
 import 'app_text_field.dart';
 
 /// Dialog de INPUT unificado do design system — um campo de texto com
 /// cancelar (`TextButton`) + confirmar (`AppButton.primary`), seguindo o
 /// mesmo contrato do [showConfirmDialog] do barrel `dialogs.dart`.
+///
+/// [thinStyle] aplica a tipografia Thin do painel do super admin
+/// (títulos w300) — rotas modais não herdam o Theme local do shell,
+/// então o painel pede explicitamente.
 ///
 /// Retorna o texto preenchido (com trim quando [trimResult]) ao confirmar e
 /// `null` ao cancelar ou fechar — o mesmo contrato dos `showDialog<String>`
@@ -23,6 +28,7 @@ Future<String?> showInputDialog(
   required String confirmLabel,
   String? cancelLabel,
   bool trimResult = true,
+  bool thinStyle = false,
 }) {
   final l10n = context.l10n;
   final controller = TextEditingController(text: initialValue ?? '');
@@ -34,25 +40,30 @@ Future<String?> showInputDialog(
 
   return showDialog<String>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
-      content: AppTextField(
-        controller: controller,
-        maxLines: maxLines,
-        autofocus: true,
-        label: label,
-        hintText: hintText,
-        suffixText: suffixText,
-        keyboardType: keyboardType,
-        onSubmitted: (_) => submit(),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(cancelLabel ?? l10n.commonCancel),
+    builder: (context) => adminThinIfNeeded(
+      context,
+      thinStyle: thinStyle,
+      child: AlertDialog(
+        title: Text(title),
+        titleTextStyle: adminDialogTitleStyle(context, thinStyle: thinStyle),
+        content: AppTextField(
+          controller: controller,
+          maxLines: maxLines,
+          autofocus: true,
+          label: label,
+          hintText: hintText,
+          suffixText: suffixText,
+          keyboardType: keyboardType,
+          onSubmitted: (_) => submit(),
         ),
-        AppButton.primary(label: confirmLabel, onPressed: submit),
-      ],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(cancelLabel ?? l10n.commonCancel),
+          ),
+          AppButton.primary(label: confirmLabel, onPressed: submit),
+        ],
+      ),
     ),
   );
 }

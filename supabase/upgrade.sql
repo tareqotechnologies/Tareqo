@@ -1646,6 +1646,40 @@ CREATE POLICY plans_update ON public.plans
 DROP POLICY IF EXISTS plans_delete ON public.plans;
 CREATE POLICY plans_delete ON public.plans
   FOR DELETE USING (public.is_super_admin());
+
+-- ============================================================================
+-- 21c. add_ons — OVERRIDES do catálogo de add-ons (preço editável)
+-- ============================================================================
+-- O app traz o catálogo compilar-time (AddOnCatalog: nome, descrição,
+-- categoria, ícone). Esta tabela guarda SOMENTE os campos editados pelo
+-- super admin — hoje o preço mensal em CENTAVOS (mesma unidade do
+-- plans.price_monthly). Sem linha aqui = preço padrão do catálogo.
+-- RLS idêntico ao de `plans`: logados leem; só o super admin escreve.
+CREATE TABLE IF NOT EXISTS public.add_ons (
+  id            TEXT PRIMARY KEY,  -- ID do catálogo (ex.: ao_custom_invoice)
+  price_monthly BIGINT NOT NULL DEFAULT 0
+                CHECK (price_monthly >= 0),
+  is_available  BOOLEAN NOT NULL DEFAULT TRUE,
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.add_ons ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS add_ons_select ON public.add_ons;
+CREATE POLICY add_ons_select ON public.add_ons
+  FOR SELECT USING (auth.uid() IS NOT NULL);
+DROP POLICY IF EXISTS add_ons_insert ON public.add_ons;
+CREATE POLICY add_ons_insert ON public.add_ons
+  FOR INSERT WITH CHECK (public.is_super_admin());
+DROP POLICY IF EXISTS add_ons_update ON public.add_ons;
+CREATE POLICY add_ons_update ON public.add_ons
+  FOR UPDATE USING (public.is_super_admin()) WITH CHECK (public.is_super_admin());
+DROP POLICY IF EXISTS add_ons_delete ON public.add_ons;
+CREATE POLICY add_ons_delete ON public.add_ons
+  FOR DELETE USING (public.is_super_admin());
+
+COMMENT ON COLUMN public.add_ons.price_monthly
+  IS 'Valor em CENTAVOS inteiros (mesma unidade do Plan.price_monthly)';
 -- ============================================================================
 -- 22. W11 — FIFO, validade por lotes e vendas por peso (milésimos)
 -- ============================================================================

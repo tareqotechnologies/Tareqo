@@ -80,6 +80,9 @@ class _EmployeeManagementScreenState
 
     return AppPage(
       title: l10n.employeeMgmtTitle,
+      // Título 3 (20/w600) — rótulo longo ('Gestão de Funcionários')
+      // truncava em titleLarge (22) no AppBar de 56px.
+      titleStyle: theme.textTheme.titleMedium,
       useSafeArea: false,
       body: Column(
         children: [

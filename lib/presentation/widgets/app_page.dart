@@ -11,6 +11,7 @@ class AppPage extends StatelessWidget {
     this.title,
     this.subtitle,
     this.badge,
+    this.titleStyle,
     this.actions,
     this.leading,
     this.floatingActionButton,
@@ -23,6 +24,11 @@ class AppPage extends StatelessWidget {
 
   /// Título do AppBar (escala do tema — `titleLarge` 22/w600).
   final String? title;
+
+  /// Estilo do título do AppBar (default: `titleLarge`). Telas com
+  /// rótulos longos (ex.: add-ons 'Factura Personalizada') usam
+  /// `titleMedium` (20/w600) para não truncar em idiomas verbosos.
+  final TextStyle? titleStyle;
 
   /// Subtítulo discreto abaixo do título (ex.: contagem de itens) —
   /// renderizado quando presente com o cabeçalho de duas linhas (altura 72)
@@ -69,7 +75,12 @@ class AppPage extends StatelessWidget {
   /// Conteúdo do título: texto simples, texto + badge ou coluna com
   /// subtítulo — nunca combinado com [badge] (linha única apenas).
   Widget _titleContent(ThemeData theme, ColorScheme scheme) {
-    final Widget titleWidget = Text(title!);
+    final Widget titleWidget = Text(
+      title!,
+      style: titleStyle,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
     if (subtitle != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,

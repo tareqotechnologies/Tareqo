@@ -88,6 +88,9 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
 
     return AppPage(
       title: l10n.quotationTitle,
+      // Título 3 (20/w600) — rótulo longo ('Cotações / Orçamentos')
+      // truncava em titleLarge (22) no AppBar de 56px.
+      titleStyle: Theme.of(context).textTheme.titleMedium,
       useSafeArea: false,
       actions: [
         IconButton(
@@ -1276,6 +1279,10 @@ class _SectionLabel extends StatelessWidget {
 }
 
 /// Converte uma [Color] do Flutter para [PdfColor] do pdf package.
+///
+/// `color.r/g/b` JÁ são normalizados (0.0–1.0) no Flutter moderno —
+/// dividir por 255 os esmagava para ~0 e o PDF saía sempre PRETO,
+/// independentemente da cor do tema escolhida.
 PdfColor _flutterColorToPdf(Color color) {
-  return PdfColor(color.r / 255, color.g / 255, color.b / 255);
+  return PdfColor(color.r, color.g, color.b, color.a);
 }

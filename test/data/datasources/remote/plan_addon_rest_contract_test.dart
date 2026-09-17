@@ -6,8 +6,11 @@ import 'package:http/http.dart' as http;
 import 'package:tareqo/data/datasources/remote/supabase_plan_data_source.dart';
 import 'package:tareqo/data/datasources/remote/supabase_plan_request_data_source.dart';
 import 'package:tareqo/data/datasources/remote/supabase_admin_message_data_source.dart';
+import 'package:tareqo/data/datasources/remote/supabase_addon_catalog_data_source.dart';
 import 'package:tareqo/data/datasources/remote/supabase_addon_data_source.dart';
 import 'package:tareqo/data/datasources/remote/supabase_audit_log_data_source.dart';
+import 'package:tareqo/data/datasources/local/addon_catalog.dart';
+import 'package:tareqo/data/repositories/addon_repository_impl.dart';
 import 'package:tareqo/domain/entities/plan.dart';
 import 'package:tareqo/domain/entities/plan_request.dart';
 import 'package:tareqo/domain/entities/admin_message.dart';
@@ -536,4 +539,130 @@ void main() {
       expect(bodies.single['p_limit'], 1);
     });
   });
+
+  group('SupabaseAddOnCatalogDataSourceImpl', () {
+    const ds = SupabaseAddOnCatalogDataSourceImpl();
+
+    test('fetchOverrides mapeia id → preço/disponibilidade', () async {
+      stub.handler = (path, request) {
+        if (path.contains('add_ons')) {
+          return FakeResponse([
+            {'id': 'ao_custom_invoice', 'price_monthly': 25000, 'is_available': true},
+            {'id': 'ao_quotation', 'price_monthly': 10000, 'is_available': false},
+          ]);
+        }
+        return FakeResponse(<dynamic>[]);
+      };
+
+      final overrides = await ds.fetchOverrides();
+      expect(overrides['ao_custom_invoice']!.priceMonthlyCents, 25000);
+      expect(overrides['ao_custom_invoice']!.isAvailable, isTrue);
+      expect(overrides['ao_quotation']!.priceMonthlyCents, 10000);
+      expect(overrides['ao_quotation']!.isAvailable, isFalse);
+    });
+
+    test('upsertOverride grava id + preço em centavos', () async {
+      final bodies = <Map<String, dynamic>>[];
+      stub.handler = (path, request) {
+        if (path.contains('add_ons')) {
+          bodies.add(
+            jsonDecode((request as http.Request).body) as Map<String, dynamic>,
+          );
+          return FakeResponse(<dynamic>[]);
+        }
+        return FakeResponse(<dynamic>[]);
+      };
+
+      await ds.upsertOverride(
+        addOnId: 'ao_custom_invoice',
+        priceMonthlyCents: 45000,
+      );
+      expect(bodies.single, {
+        'id': 'ao_custom_invoice',
+        'price_monthly': 45000,
+        'is_available': true,
+      });
+    });
+  });
+
+  group('AddOnRepositoryImpl', () {
+    test('all() sem remote devolve o seed estático (modo local)', () async {
+      final repo = AddOnRepositoryImpl();
+      final catalog = await repo.all();
+      expect(catalog, isNotEmpty);
+      expect(catalog.length, AddOnCatalog.addOns().length);
+    });
+
+    test(
+      'all() mescla overrides do banco (preço editado) com o seed',
+      () async {
+        final repo = AddOnRepositoryImpl(
+          remote: _StubCatalogDataSource({
+            'ao_custom_invoice': (
+              priceMonthlyCents: 12345,
+              isAvailable: true,
+            ),
+          }),
+        );
+
+        final catalog = await repo.all();
+        final edited = catalog.firstWhere((a) => a.id == 'ao_custom_invoice');
+        expect(edited.priceMonthlyCents, 12345);
+        // Sem override: preço padrão do catálogo (30000).
+        final untouched = catalog.firstWhere((a) => a.id == 'ao_quotation');
+        expect(untouched.priceMonthlyCents, 25000);
+      },
+    );
+
+    test('all() com banco falhando cai no seed (nunca vazio)', () async {
+      final repo = AddOnRepositoryImpl(remote: _ThrowingCatalogDataSource());
+      final catalog = await repo.all();
+      expect(catalog.length, AddOnCatalog.addOns().length);
+    });
+
+    test('updatePrice delega ao remote (upsert do override)', () async {
+      final stubSource = _StubCatalogDataSource({});
+      final repo = AddOnRepositoryImpl(remote: stubSource);
+ 
+      await repo.updatePrice('ao_custom_invoice', 99000);
+      expect(stubSource.upserts.single, ('ao_custom_invoice', 99000));
+    });
+  });
+}
+
+/// DataSource de catálogo stubado — devolve os overrides fixados e grava
+/// os upserts para asserção (o repository nunca toca rede aqui).
+class _StubCatalogDataSource implements SupabaseAddOnCatalogDataSource {
+  _StubCatalogDataSource(this._overrides);
+ 
+  final Map<String, ({int priceMonthlyCents, bool isAvailable})> _overrides;
+  final List<(String, int)> upserts = [];
+
+  @override
+  Future<Map<String, ({int priceMonthlyCents, bool isAvailable})>>
+  fetchOverrides() async => _overrides;
+
+  @override
+  Future<void> upsertOverride({
+    required String addOnId,
+    required int priceMonthlyCents,
+  }) async {
+    upserts.add((addOnId, priceMonthlyCents));
+    _overrides[addOnId] = (
+      priceMonthlyCents: priceMonthlyCents,
+      isAvailable: true,
+    );
+  }
+}
+
+class _ThrowingCatalogDataSource implements SupabaseAddOnCatalogDataSource {
+  @override
+  Future<Map<String, ({int priceMonthlyCents, bool isAvailable})>>
+  fetchOverrides() async => throw Exception('banco indisponível');
+
+  @override
+  Future<void> upsertOverride({
+    required String addOnId,
+    required int priceMonthlyCents,
+  }) async => throw Exception('banco indisponível');
 }

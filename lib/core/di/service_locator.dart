@@ -17,6 +17,7 @@ import '../../data/datasources/local/debt_local_data_source.dart';
 import '../../data/datasources/local/debt_local_data_source_impl.dart';
 import '../../data/datasources/local/addon_local_data_source.dart';
 import '../../data/datasources/local/addon_local_data_source_impl.dart';
+import '../../data/datasources/remote/supabase_addon_catalog_data_source.dart';
 import '../../data/datasources/local/plan_catalog.dart';
 import '../../data/datasources/local/employee_local_data_source.dart';
 import '../../data/datasources/local/employee_local_data_source_impl.dart';
@@ -67,6 +68,7 @@ import '../../data/datasources/remote/supabase_tenant_data_source.dart';
 import '../../data/datasources/local/audit_log_local_data_source.dart';
 import '../../data/datasources/local/audit_log_local_data_source_impl.dart';
 import '../../data/datasources/remote/supabase_audit_log_data_source.dart';
+import '../../data/repositories/addon_repository_impl.dart';
 import '../../data/repositories/admin_repository_impl.dart';
 import '../../data/repositories/audit_log_repository_impl.dart';
 import '../../data/repositories/auth_repository_impl.dart';
@@ -104,6 +106,7 @@ import '../../data/services/supabase_stock_adjustment_processor.dart';
 import '../../domain/entities/debt.dart';
 import '../../domain/entities/purchase.dart';
 import '../../domain/entities/sale.dart';
+import '../../domain/repositories/i_addon_repository.dart';
 import '../../domain/repositories/i_admin_repository.dart';
 import '../../domain/repositories/i_audit_log_repository.dart';
 import '../../domain/repositories/i_employee_account_processor.dart';
@@ -508,6 +511,13 @@ final class ServiceLocator {
       // Add-ons: persistência por tenant (RLS filtra automaticamente).
       ..registerLazySingleton<AddOnLocalDataSource>(
         () => const SupabaseAddOnDataSourceImpl(),
+      )
+      // Catálogo de add-ons com overrides do banco (preço editado pelo
+      // super admin na tabela `add_ons`; fallback = seed do app).
+      ..registerLazySingleton<IAddOnRepository>(
+        () => AddOnRepositoryImpl(
+          remote: const SupabaseAddOnCatalogDataSourceImpl(),
+        ),
       )
       // Facturas personalizadas (add-on) — documento por loja, RLS por
       // is_my_store; número sequencial atribuído por trigger no servidor.

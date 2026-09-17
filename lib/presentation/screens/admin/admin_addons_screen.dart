@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/observability/crash_reporting.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/money.dart';
 import '../../../data/datasources/local/addon_catalog.dart';
 import '../../../domain/entities/addon.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/addon_providers.dart';
 import '../../controllers/admin_providers.dart';
+import '../../widgets/admin_thin_bridge.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/money_live_preview.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../widgets/search_field.dart';
 
@@ -108,12 +113,17 @@ class _AdminAddOnsScreenState extends ConsumerState<AdminAddOnsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _BulkAddOnSheet(
-        tenantCount: _selectedTenantIds.length,
-        onApply: (addOnId, activate) async {
-          Navigator.of(context).pop();
-          await _applyBulkAddOn(addOnId, activate);
-        },
+      // Thin: rotas modais não herdam o Theme local do shell.
+      builder: (sheetContext) => adminThinIfNeeded(
+        sheetContext,
+        thinStyle: true,
+        child: _BulkAddOnSheet(
+          tenantCount: _selectedTenantIds.length,
+          onApply: (addOnId, activate) async {
+            Navigator.of(context).pop();
+            await _applyBulkAddOn(addOnId, activate);
+          },
+        ),
       ),
     );
   }
@@ -502,7 +512,7 @@ class _TenantTile extends ConsumerWidget {
                   Text(
                     tenant.businessName,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w400,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -583,7 +593,7 @@ class _BulkAddOnSheet extends StatelessWidget {
                       Text(
                         context.l10n.adminAddonsBulkSheetTitle,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -671,7 +681,7 @@ class _BulkAddOnOption extends StatelessWidget {
                 Text(
                   addon.name,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -698,7 +708,7 @@ class _BulkAddOnOption extends StatelessWidget {
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                         fontSize: 11,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -751,6 +761,165 @@ class _BulkAddOnOption extends StatelessWidget {
       default:
         return Icons.extension_outlined;
     }
+  }
+}
+
+// ─── Sheet de edição de preço ───────────────────────────────────────────
+
+/// Sheet de edição do preço mensal de um add-on (super admin).
+/// Mesmo padrão visual do `_PlanEditorSheet` (gestão de planos).
+class _AddOnPriceSheet extends ConsumerStatefulWidget {
+  const _AddOnPriceSheet({required this.addon});
+  final AddOn addon;
+  @override
+  ConsumerState<_AddOnPriceSheet> createState() => _AddOnPriceSheetState();
+}
+
+class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
+  late final _priceController = TextEditingController(
+    text: (widget.addon.priceMonthlyCents / 100).toString(),
+  );
+  bool _isSubmitting = false;
+  String? _formError;
+  @override
+  void dispose() {
+    _priceController.dispose();
+    super.dispose();
+  }
+  Future<void> _submit() async {
+    final l10n = context.l10n;
+    final priceCents = Money.parse(_priceController.text.trim());
+    if (_priceController.text.trim().isEmpty || priceCents < 0) {
+      setState(() => _formError = l10n.adminPlanPriceError);
+      return;
+    }
+    setState(() {
+      _isSubmitting = true;
+      _formError = null;
+    });
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(allAddOnsProvider.notifier)
+          .updatePrice(widget.addon.id, priceCents);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.adminAddonsPriceUpdated(
+              widget.addon.name,
+              Formatters.currency(priceCents),
+            ),
+          ),
+        ),
+      );
+    } catch (error, stackTrace) {
+      CrashReporting.capture(
+        error,
+        stackTrace,
+        hint: 'Erro ao salvar preço do add-on',
+      );
+      if (!mounted) return;
+      setState(() => _formError = l10n.adminAddonsPriceSaveError);
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(top: 12, bottom: 20),
+                decoration: BoxDecoration(
+                  color: scheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            // Header
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.adminAddonsEditPriceTitle,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.addon.name,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: l10n.appSheetClose,
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AppTextField(
+              controller: _priceController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              label: l10n.adminPlanPriceLabel,
+              prefixIcon: Icons.attach_money,
+            ),
+            // A2: mostra ao vivo o preço que será registado.
+            MoneyLivePreview(controller: _priceController),
+            if (_formError != null) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                _formError!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.error,
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            AppButton.primary(
+              onPressed: _isSubmitting ? null : _submit,
+              icon: _isSubmitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : null,
+              label: l10n.commonSave,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -824,12 +993,33 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
     }
   }
 
+  /// Abre o sheet de edição do preço mensal do add-on (super admin).
+  Future<void> _editPrice(AddOn addon) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => adminThinIfNeeded(
+        sheetContext,
+        thinStyle: true,
+        child: _AddOnPriceSheet(addon: addon),
+      ),
+    );
+    if (!mounted) return;
+    // Recarrega a lista com o preço actualizado.
+    await ref.read(allAddOnsProvider.notifier).refresh();
+    await _loadActiveAddOns();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    // Só add-ons com funcionalidade REAL (os BLOCKED não são activáveis).
-    final addOns = AddOnCatalog.addOns().where((a) => a.isAvailable).toList();
+    // Catálogo EFECTIVO (overrides do banco — preço editado pelo admin);
+    // fallback no seed estático enquanto carrega/erro.
+    final catalog = ref.watch(allAddOnsProvider).value;
+    final addOns =
+        (catalog ?? AddOnCatalog.addOns()).where((a) => a.isAvailable).toList();
 
     return Scaffold(
       backgroundColor: scheme.surface,
@@ -866,7 +1056,7 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
                       Text(
                         widget.tenant.businessName,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w400,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -905,6 +1095,7 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
                       addon: addOns[i],
                       isActive: _activeAddOnIds.contains(addOns[i].id),
                       onToggle: () => _toggleAddOn(addOns[i].id),
+                      onEditPrice: () => _editPrice(addOns[i]),
                     ),
                   ),
           ),
@@ -1000,11 +1191,13 @@ class _AddOnToggleTile extends StatelessWidget {
     required this.addon,
     required this.isActive,
     required this.onToggle,
+    required this.onEditPrice,
   });
 
   final AddOn addon;
   final bool isActive;
   final VoidCallback onToggle;
+  final VoidCallback onEditPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -1055,7 +1248,7 @@ class _AddOnToggleTile extends StatelessWidget {
                 Text(
                   addon.name,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1079,7 +1272,7 @@ class _AddOnToggleTile extends StatelessWidget {
                       '${Formatters.currency(addon.priceMonthlyCents)}/mês',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -1089,6 +1282,16 @@ class _AddOnToggleTile extends StatelessWidget {
           ),
 
           const SizedBox(width: AppSpacing.sm),
+
+          // Editar preço (super admin) — toque no valor abre o sheet.
+          IconButton(
+            tooltip: context.l10n.adminAddonsEditPriceTooltip,
+            icon: const Icon(Icons.edit_outlined, size: 16),
+            color: scheme.onSurfaceVariant,
+            onPressed: onEditPrice,
+          ),
+
+          const SizedBox(width: AppSpacing.xs),
 
           // Toggle
           Switch(value: isActive, onChanged: (_) => onToggle()),

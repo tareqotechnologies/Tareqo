@@ -56,6 +56,8 @@ class AppPickerField<T> extends StatelessWidget {
       style: theme.textTheme.bodySmall?.copyWith(
         color: scheme.onSurface,
         letterSpacing: 0,
+        // Peso herdado do tema local (painel admin usa Thin/w300-400).
+        fontWeight: theme.textTheme.bodySmall?.fontWeight ?? FontWeight.w400,
       ),
       decoration: InputDecoration(
         labelText: label,

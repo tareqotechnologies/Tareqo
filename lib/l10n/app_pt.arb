@@ -1638,6 +1638,16 @@
   "adminAddonsBulkDeactivated": "{addonName} desactivado em {count, plural, =1{1 tenant} other{{count} tenants}}",
   "adminAddonsBulkSheetCount": "{count, plural, =1{1 tenant selecionado} other{{count} tenants selecionados}}",
   "adminAddonsBulkSheetTitle": "Activar add-on em lote",
+  "adminAddonsEditPriceTitle": "Editar preço mensal",
+  "adminAddonsEditPriceTooltip": "Editar preço",
+  "adminAddonsPriceUpdated": "Preço de {addonName} actualizado para {price}/mês",
+  "@adminAddonsPriceUpdated": {
+    "placeholders": {
+      "addonName": {},
+      "price": {}
+    }
+  },
+  "adminAddonsPriceSaveError": "Não foi possível salvar o preço. Tente novamente.",
   "adminAddonsListHint": "Toque num tenant para gerir os seus add-ons. Toque no ícone ✓ para seleção múltipla.",
   "adminAddOnsCount": "{count, plural, =1{1 add-on} other{{count} add-ons}}",
   "adminRevenueByAddOn": "Receita por Add-on",

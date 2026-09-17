@@ -18,6 +18,7 @@ import '../../controllers/addon_providers.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/admin_thin_bridge.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/empty_state.dart';
@@ -472,6 +473,8 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
       hintText: l10n.adminRejectReasonHint,
       maxLines: 3,
       confirmLabel: l10n.adminReject,
+      // Thin: o dialog é rota modal — não herda o Theme do shell.
+      thinStyle: true,
     );
   }
 
@@ -511,6 +514,7 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
       hintText: l10n.adminRejectReasonHint,
       maxLines: 3,
       confirmLabel: l10n.adminReject,
+      thinStyle: true,
     );
   }
 
@@ -520,9 +524,14 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _TenantDetailSheet(
-        tenant: tenant,
-        planName: _plansById(tenant.planId),
+      // Thin: rotas modais não herdam o Theme local do shell.
+      builder: (sheetContext) => adminThinIfNeeded(
+        sheetContext,
+        thinStyle: true,
+        child: _TenantDetailSheet(
+          tenant: tenant,
+          planName: _plansById(tenant.planId),
+        ),
       ),
     );
   }
