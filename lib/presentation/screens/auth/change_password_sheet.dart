@@ -117,7 +117,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AppSheetHeader(title: l10n.changePasswordTitle),
+            SheetHeader(title: l10n.changePasswordTitle),
             AppTextField(
               controller: _currentController,
               obscureText: _obscureCurrent,

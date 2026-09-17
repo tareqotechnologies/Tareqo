@@ -126,7 +126,7 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AppSheetHeader(title: l10n.forgotPasswordTitle),
+            SheetHeader(title: l10n.forgotPasswordTitle),
             Text(
               l10n.forgotPasswordHint,
               style: theme.textTheme.bodyMedium?.copyWith(

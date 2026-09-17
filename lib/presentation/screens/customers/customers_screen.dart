@@ -496,7 +496,7 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AppSheetHeader(title: l10n.customersAddNew),
+            SheetHeader(title: l10n.customersAddNew),
             // Seção: Dados do cliente — nome, telefone e email.
             SheetSection(
               icon: Icons.person_outline,
@@ -655,7 +655,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AppSheetHeader(title: l10n.customersEditTitle),
+            SheetHeader(title: l10n.customersEditTitle),
             SheetSection(
               icon: Icons.person_outline,
               title: l10n.customersEditTitle,

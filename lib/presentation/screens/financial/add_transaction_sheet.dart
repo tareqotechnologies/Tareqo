@@ -126,7 +126,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AppSheetHeader(title: l10n.financialAddTitle),
+              SheetHeader(title: l10n.financialAddTitle),
               // Seção: Tipo — pílulas estilo Apple.
               SheetSection(
                 icon: Icons.swap_vert,

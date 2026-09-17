@@ -254,7 +254,7 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AppSheetHeader(title: l10n.addStoreTitle),
+            SheetHeader(title: l10n.addStoreTitle),
             // Seção: Dados da loja — nome e endereço.
             SheetSection(
               icon: Icons.store_outlined,
@@ -448,7 +448,7 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AppSheetHeader(title: l10n.addEmployeeTitle),
+            SheetHeader(title: l10n.addEmployeeTitle),
             // Seção: Dados pessoais — nome, email e senha.
             SheetSection(
               icon: Icons.person_outline,
@@ -663,7 +663,7 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AppSheetHeader(title: l10n.upgradeTitle),
+          SheetHeader(title: l10n.upgradeTitle),
           Text(
             l10n.upgradeSubtitle,
             style: theme.textTheme.bodyMedium?.copyWith(

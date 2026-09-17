@@ -284,7 +284,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
       ),
       child: Column(
         children: [
-          AppSheetHeader(title: l10n.purchasesAddNew),
+          SheetHeader(title: l10n.purchasesAddNew),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
             child: AppTextField(

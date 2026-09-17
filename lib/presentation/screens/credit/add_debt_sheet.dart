@@ -167,7 +167,7 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AppSheetHeader(title: l10n.debtsAddDebt),
+            SheetHeader(title: l10n.debtsAddDebt),
             // Seção: Cliente — seletor opcional vinculado ao módulo de clientes.
             customersAsync.when(
               loading: () => const SizedBox.shrink(),

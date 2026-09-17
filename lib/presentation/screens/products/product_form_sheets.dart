@@ -498,7 +498,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AppSheetHeader(title: l10n.productsAddNew),
+              SheetHeader(title: l10n.productsAddNew),
               // FOTO — seção própria no topo (preview + câmera/galeria).
               const SizedBox(height: 16),
               _ProductPhotoPicker(
@@ -967,7 +967,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AppSheetHeader(title: l10n.productsEditTitle),
+              SheetHeader(title: l10n.productsEditTitle),
               // FOTO — seção própria no topo (preview + câmera/galeria).
               const SizedBox(height: 16),
               _ProductPhotoPicker(

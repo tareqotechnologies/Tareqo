@@ -126,21 +126,35 @@ class SheetSection extends StatelessWidget {
   }
 }
 
-/// Cabeçalho unificado das sheets V4 — título centrado, fechar à esquerda,
-/// acção principal à direita. O rótulo da acção é passado por quem usa
-/// (ex.: "Aplicar" num filtro) em vez de um default genérico de produto.
+/// Cabeçalho UNIFICADO das sheets — fechar à esquerda, título (e subtítulo
+/// opcional) centrado, acção principal à direita.
+///
+/// * Sheets com acção (formulários/filtros): passe [onSave] + [actionLabel]
+///   (ex.: "Guardar", "Aplicar") — o rótulo vem de quem usa, sem default
+///   genérico de produto.
+/// * Sheets de leitura/detalhe (sem acção): omita [onSave]/[actionLabel] —
+///   o espaço à direita é preenchido para manter o título centrado.
+///
+/// Este é o ÚNICO cabeçalho de sheet do design system (o antigo
+/// `AppSheetHeader`, com título à esquerda, foi absorvido aqui).
 class SheetHeader extends StatelessWidget {
   const SheetHeader({
     super.key,
     required this.title,
-    required this.onSave,
+    this.subtitle,
+    this.onSave,
     this.actionLabel,
     this.isSaving = false,
     this.onClose,
   });
 
   final String title;
-  final VoidCallback onSave;
+
+  /// Linha de apoio sob o título (ex.: contagem, contexto).
+  final String? subtitle;
+
+  /// Acção principal. `null` = sheet sem acção (só fechar).
+  final VoidCallback? onSave;
   final String? actionLabel;
   final bool isSaving;
   final VoidCallback? onClose;
@@ -150,6 +164,7 @@ class SheetHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
+    final hasAction = onSave != null && actionLabel != null;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(
@@ -172,25 +187,47 @@ class SheetHeader extends StatelessWidget {
             tooltip: l10n.appSheetClose,
           ),
           Expanded(
-            child: Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: theme.textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
             ),
           ),
-          AppButton.primary(
-            label: actionLabel ?? l10n.commonSave,
-            onPressed: isSaving ? null : onSave,
-            icon: isSaving
-                ? const SizedBox(
-                    height: 16,
-                    width: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : null,
-          ),
+          // Ação real ou espaçador da largura do IconButton: o título fica
+          // centrado nos dois casos (balanceamento do Row).
+          if (hasAction)
+            AppButton.primary(
+              label: actionLabel!,
+              onPressed: isSaving ? null : onSave,
+              icon: isSaving
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : null,
+            )
+          else
+            const SizedBox(width: 48),
         ],
       ),
     );
@@ -213,56 +250,3 @@ class _SheetHandle extends StatelessWidget {
   }
 }
 
-/// Cabeçalho padrão das sheets V4.
-class AppSheetHeader extends StatelessWidget {
-  const AppSheetHeader({super.key, required this.title, this.subtitle});
-
-  final String title;
-  final String? subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xl,
-        AppSpacing.xs,
-        AppSpacing.sm,
-        AppSpacing.xs,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(title, style: theme.textTheme.titleLarge),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ],
-              ],
-            ),
-          ),
-          IconButton(
-            tooltip: context.l10n.appSheetClose,
-            style: IconButton.styleFrom(
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              foregroundColor: theme.colorScheme.onSurfaceVariant,
-            ),
-            icon: const Icon(Icons.close, size: 18),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
-}

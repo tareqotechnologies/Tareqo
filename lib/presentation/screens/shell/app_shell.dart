@@ -240,7 +240,7 @@ class _ActionMenuSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AppSheetHeader(title: l10n.fabMenuTitle),
+          SheetHeader(title: l10n.fabMenuTitle),
           Text(l10n.fabMenuSubtitle, style: theme.textTheme.bodySmall),
           const SizedBox(height: AppSpacing.md),
           _ActionTile(

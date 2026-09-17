@@ -418,7 +418,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
 
     return Column(
       children: [
-        AppSheetHeader(
+        SheetHeader(
           title: l10n.salesTitle,
           subtitle:
               '${l10n.periodToday} · '

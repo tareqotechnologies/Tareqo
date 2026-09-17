@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_app.dart';
 
 import 'package:tareqo/core/theme/app_theme.dart';
+import 'package:tareqo/core/theme/app_tokens.dart';
 import 'package:tareqo/presentation/widgets/app_button.dart';
 import 'package:tareqo/presentation/widgets/app_card.dart';
 import 'package:tareqo/presentation/widgets/app_sheet.dart';
@@ -123,6 +124,27 @@ void main() {
                       title: 'Pagamento',
                       children: [Text('M-Pesa · e-Mola · Dinheiro · Crédito')],
                     ),
+                  ),
+                  const SizedBox(height: 24),
+                  const SectionHeader(title: 'Cabeçalho de sheet'),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(AppRadius.xl),
+                    ),
+                    child: SheetHeader(
+                      title: 'Novo produto',
+                      subtitle: 'Loja Centro · Catálogo',
+                      onSave: () {},
+                      actionLabel: 'Guardar',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(AppRadius.xl),
+                    ),
+                    child: const SheetHeader(title: 'Detalhes da venda'),
                   ),
                   const SizedBox(height: 24),
                   AppButton.primary(
