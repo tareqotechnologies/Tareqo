@@ -179,6 +179,32 @@ Widget _buildAppEmployee(GetProductsUseCase useCase) {
 
 void main() {
   group('ProductListScreen', () {
+    // A11y (Fase 6): busca, filtros e linhas de produto passam nos
+    // guidelines de toque (≥48dp) e contraste de texto.
+    testWidgets('a11y: estoque passa nos guidelines de toque e contraste', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          _FakeGetProductsUseCase(const [
+            Product(
+              id: '1',
+              name: 'Caneta',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+            ),
+          ]),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final handle = tester.ensureSemantics();
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
     testWidgets('exibe os produtos retornados pelo caso de uso', (
       tester,
     ) async {

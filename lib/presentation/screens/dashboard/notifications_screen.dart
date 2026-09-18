@@ -674,6 +674,9 @@ class _DetailBottomSheet extends StatelessWidget {
                   ),
                 ),
                 IconButton(
+                  // A11y: leitor de ecrã anuncia a ação (mesmo padrão
+                  // das outras sheets do app).
+                  tooltip: l10n.appSheetClose,
                   onPressed: () => Navigator.of(context).pop(),
                   icon: Icon(
                     Icons.close_rounded,

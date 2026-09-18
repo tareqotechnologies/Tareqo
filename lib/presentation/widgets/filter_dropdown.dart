@@ -83,6 +83,11 @@ class FilterDropdown<T> extends StatelessWidget {
           ),
       ],
       child: Container(
+        // Alvo de toque ≥ 48dp (WCAG/androidTapTargetGuideline): o chip é
+        // compacto por design, mas a área tocável não pode ser menor que
+        // o mínimo de acessibilidade.
+        constraints: const BoxConstraints(minHeight: AppSizes.touchTarget),
+        alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: active ? scheme.primaryContainer : Colors.transparent,

@@ -21,6 +21,7 @@ import 'package:tareqo/presentation/controllers/finance_providers.dart';
 import 'package:tareqo/presentation/screens/financial/financial_screen.dart';
 import 'package:tareqo/presentation/widgets/skeleton.dart';
 
+import '../../helpers/haptic_spy.dart';
 import '../../helpers/store_context.dart';
 
 class _FakeFinanceRepository implements IFinancialTransactionRepository {
@@ -193,6 +194,39 @@ Widget _buildApp(
 }
 
 void main() {
+  // A11y (Fase 6): saldo, pílula de período, linhas de movimentação e botão
+  // de fecho passam nos guidelines de toque (≥48dp) e contraste de texto.
+  testWidgets('a11y: caixa passa nos guidelines de toque e contraste', (
+    tester,
+  ) async {
+    final now = DateTime(2024, 1, 10, 10);
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeFinanceRepository([
+          FinancialTransaction(
+            id: 't1',
+            description: 'Venda PIX',
+            amountCents: 100000,
+            type: TransactionType.income,
+            category: 'Vendas',
+            date: now,
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final handle = tester.ensureSemantics();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
+  late HapticSpy spy;
+  setUp(() => spy = HapticSpy()..install());
+  tearDown(() => spy.uninstall());
+
   testWidgets('mostra skeleton enquanto as movimentações carregam', (
     tester,
   ) async {
@@ -764,6 +798,8 @@ void main() {
       // A contagem digitada (1100 centavos) chegou ao use case.
       expect(closeUseCase.countedCalls, [1100]);
       expect(find.text('Caixa fechado!'), findsWidgets);
+      // Confirmação tátil do fecho (operação gerencial).
+      expect(spy.mediumImpacts, 1);
       expect(tester.takeException(), isNull);
     });
 

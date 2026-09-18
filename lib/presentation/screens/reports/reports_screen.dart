@@ -125,10 +125,11 @@ class ReportsScreen extends ConsumerWidget {
                   child: SegmentedButton<ReportPeriod>(
                     showSelectedIcon: false,
                     style: SegmentedButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
+                      // Sem densidade compacta: o segmento é botão de baixa
+                      // frequência — alvo de toque ≥ 48dp (guideline a11y).
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
-                        vertical: 8,
+                        vertical: 14,
                       ),
                       shape: const StadiumBorder(),
                       side: BorderSide(color: theme.colorScheme.outlineVariant),

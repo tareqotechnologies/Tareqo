@@ -13,6 +13,8 @@ import 'package:tareqo/presentation/controllers/auth_providers.dart';
 import 'package:tareqo/presentation/screens/auth/change_password_sheet.dart';
 import 'package:tareqo/presentation/widgets/app_sheet.dart';
 
+import '../../helpers/haptic_spy.dart';
+
 class _FakeAuthRepository implements IAuthRepository {
   final _controller = StreamController<AppUser?>.broadcast();
 
@@ -81,6 +83,10 @@ Widget _buildApp(IAuthRepository repository) {
 }
 
 void main() {
+  late HapticSpy spy;
+  setUp(() => spy = HapticSpy()..install());
+  tearDown(() => spy.uninstall());
+
   testWidgets('troca a senha validando a atual e a nova (política forte)', (
     tester,
   ) async {
@@ -102,6 +108,8 @@ void main() {
     expect(repository.lastCurrent, 'SenhaAtual1!');
     expect(repository.lastNew, 'NovaSenha2@');
     expect(find.text('Senha alterada com sucesso!'), findsOneWidget);
+    // Confirmação tátil da troca (antes do pop).
+    expect(spy.mediumImpacts, 1);
   });
 
   testWidgets('senha nova fraca bloqueia o envio (4 classes exigidas)', (

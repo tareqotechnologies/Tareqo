@@ -452,5 +452,21 @@ void main() {
       // Timestamp recém-criado renderiza como "Agora mesmo".
       expect(find.text('Agora mesmo'), findsOneWidget);
     });
+
+    testWidgets('a11y: sheet de detalhe anuncia o botão fechar (tooltip)', (
+      tester,
+    ) async {
+      final notifications = [_notif(id: 'n1')];
+
+      await tester.pumpWidget(_buildApp(notifications: notifications));
+      await tester.pumpAndSettle();
+
+      // Abre o detalhe (toque no card) — o ✕ tem tooltip "Fechar" para o
+      // leitor de ecrã (mesmo padrão das outras sheets do app).
+      await tester.tap(find.text('Nova factura gerada'));
+      await tester.pumpAndSettle();
+
+      expect(find.byTooltip('Fechar'), findsOneWidget);
+    });
   });
 }

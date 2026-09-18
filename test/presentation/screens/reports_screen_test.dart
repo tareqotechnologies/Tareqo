@@ -145,6 +145,21 @@ Widget _buildApp(
 }
 
 void main() {
+  // A11y (Fase 6): KPIs, seletor de período, mais vendidos e menu de
+  // exportação passam nos guidelines de toque (≥48dp) e contraste de texto.
+  testWidgets('a11y: relatórios passa nos guidelines de toque e contraste', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildApp(_FakeGetSalesReportUseCase(_report())));
+    await tester.pumpAndSettle();
+
+    final handle = tester.ensureSemantics();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
   testWidgets('exibe KPIs, mais vendidos e vendas por dia', (tester) async {
     await tester.pumpWidget(_buildApp(_FakeGetSalesReportUseCase(_report())));
     await tester.pumpAndSettle();

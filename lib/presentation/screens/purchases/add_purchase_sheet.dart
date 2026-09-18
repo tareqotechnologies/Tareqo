@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/ui/haptics.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/quantity.dart';
@@ -87,12 +88,16 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
   Product? _productById(String id) => _productsById[id];
 
   void _add(Product product) {
+    // Seleção relevante (Fase 3): toque de stepper confirma sem diálogo —
+    // mesmo padrão do carrinho de Vendas.
+    Haptics.selection();
     setState(() {
       _cart[product.id] = (_cart[product.id] ?? 0) + Quantity.milliFactor;
     });
   }
 
   void _addFraction(Product product) {
+    Haptics.selection();
     setState(() {
       // Passo de 0,1 unidade (100 milésimos) para produtos por peso.
       _cart[product.id] = (_cart[product.id] ?? 0) + 100;
@@ -102,6 +107,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
   void _remove(Product product) {
     final current = _cart[product.id] ?? 0;
     if (current <= 0) return;
+    Haptics.selection();
     setState(() {
       if (current <= (product.vendaPorFracao ? 100 : Quantity.milliFactor)) {
         _cart.remove(product.id);
@@ -231,6 +237,8 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
       // ProcessPurchaseUseCase registra a compra, cria os lotes FIFO,
       // aumenta o estoque e lança a saída no caixa.
       await ref.read(processPurchaseUseCaseProvider).call(purchase);
+      // Confirmação tátil da conclusão (antes do pop: imediato, sem atraso).
+      Haptics.success();
 
       if (!mounted) return;
       navigator.pop();
@@ -249,10 +257,12 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
       navigator.pop();
       messenger.showSnackBar(SnackBar(content: Text(l10n.syncOfflineSaved)));
     } on ProductNotFoundException catch (error) {
+      Haptics.error();
       setState(() {
         _error = l10n.purchasesProductNotFound(error.productId);
       });
     } catch (error, stackTrace) {
+      Haptics.error();
       CrashReporting.capture(
         error,
         stackTrace,

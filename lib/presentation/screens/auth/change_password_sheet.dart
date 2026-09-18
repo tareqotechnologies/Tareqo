@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../core/ui/haptics.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
@@ -54,6 +55,9 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
             newPassword: _newController.text,
           );
       if (!mounted) return;
+      // Confirmação tátil da troca (antes do pop: imediato, sem atraso) —
+      // mesmo padrão das sheets de Vendas/Compras/Fiado.
+      Haptics.success();
       Navigator.of(context).pop();
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.changePasswordSuccess)),
@@ -90,14 +94,17 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
         message = l10n.changePasswordError;
       }
       if (!mounted) return;
+      Haptics.error();
       messenger.showSnackBar(SnackBar(content: Text(message)));
     } on AuthWeakPasswordException {
+      Haptics.error();
       // Política de senha do provedor (GoTrue).
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.loginWeakPasswordError)),
       );
     } catch (error) {
+      Haptics.error();
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.changePasswordError)));
     } finally {

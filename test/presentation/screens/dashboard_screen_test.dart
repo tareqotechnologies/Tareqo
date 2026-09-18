@@ -295,6 +295,28 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  // A11y (Fase 6): toda a tela passa nos guidelines de toque (≥48dp) e
+  // contraste de texto — cobre KPIs, pílula de período, chip de loja e feed.
+  testWidgets('a11y: dashboard passa nos guidelines de toque e contraste', (
+    tester,
+  ) async {
+    await pumpDashboard(
+      tester,
+      _buildApp(
+        products: const [],
+        sales: const [],
+        cashFlow: const CashFlow(incomeCents: 10000, expenseCents: 4000),
+        debts: const [],
+      ),
+    );
+
+    final handle = tester.ensureSemantics();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
   testWidgets('exibe saudação, data, pílula de período, loja e métricas', (
     tester,
   ) async {

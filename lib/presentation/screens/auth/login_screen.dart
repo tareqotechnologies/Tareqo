@@ -73,7 +73,10 @@ class _LoginPalette {
     textPrimary: Colors.white,
     textSecondary: AppColors.onSurfaceVariantDark,
     green: Color(0xFF22C55E),
-    greenDark: AppColors.brand,
+    // Botão Entrar com branco por cima: o verde vivo (#16A34A) dá 3.30:1 —
+    // abaixo do AA para texto (guideline textContrast falhava no escuro).
+    // O verde médio atinge 5.01:1 (mesmo verde do botão no modo claro).
+    greenDark: AppColors.brandMuted,
   );
 
   /// Modo claro — espelha os neutros do `AppTheme.light` via tokens.

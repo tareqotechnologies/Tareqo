@@ -96,6 +96,36 @@ Sale _pastSale({
 }
 
 void main() {
+  // A11y (Fase 6): resumo do dia e cards de venda passam nos guidelines de
+  // toque (≥48dp) e contraste de texto.
+  testWidgets('a11y: vendas passa nos guidelines de toque e contraste', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _FakeSalesRepository([
+          _pastSale(
+            items: const [
+              SaleItem(
+                productId: 'p1',
+                productName: 'Caneta',
+                quantity: 2,
+                unitPriceCents: 200,
+              ),
+            ],
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final handle = tester.ensureSemantics();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
   testWidgets('exibe as vendas registradas pelo repositório', (tester) async {
     await tester.pumpWidget(
       _buildApp(

@@ -832,6 +832,12 @@ class _CartProductRow extends StatelessWidget {
     final outOfStock = product.stockQuantity == 0;
     final soldOut = quantity >= product.stockQuantity;
     final isWeight = product.vendaPorFracao;
+    // Estado por TEXTO, não só pela cor (daltónicos e leitores de ecrã):
+    // mesma mensagem do alerta do dashboard/estoque (dashboardLowStock).
+    final lowStock =
+        !outOfStock &&
+        product.stockQuantity <
+            Quantity.lowStockThresholdUnits * Quantity.milliFactor;
 
     // Card premium (estilo Apple): cantos 18 + superfície elevada — o
     // esgotado recebe fundo esmaecido via `color` (estado especial).
@@ -869,7 +875,8 @@ class _CartProductRow extends StatelessWidget {
                       ? l10n.commonSoldOut
                       : '${Formatters.currency(product.salePriceCents)} · '
                             '${Quantity.format(product.stockQuantity, unitLabel: isWeight ? product.unitLabel : null, language: Formatters.currentLanguage)}'
-                            '${isWeight ? '' : ' ${l10n.commonUnits}'}',
+                            '${isWeight ? '' : ' ${l10n.commonUnits}'}'
+                            '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontSize: 12,
                     color: theme.colorScheme.onSurfaceVariant,

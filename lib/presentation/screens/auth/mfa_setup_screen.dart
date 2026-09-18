@@ -158,6 +158,8 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
           ),
         ),
         leading: IconButton(
+          // A11y: leitor de ecrã anuncia a ação (mesmo padrão das sheets).
+          tooltip: l10n.appSheetClose,
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
         ),

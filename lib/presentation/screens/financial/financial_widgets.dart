@@ -47,7 +47,13 @@ class TransactionCard extends StatelessWidget {
           '${transaction.category}, $sign ${Formatters.currency(transaction.amountCents)}, ${Formatters.time(transaction.date)}',
       child: InkWell(
         onTap: onTap,
-        child: Padding(
+        // Alvo de toque ≥ 48dp (WCAG/androidTapTargetGuideline): a linha é
+        // compacta por design, mas abrir o detalhe é o gesto principal da
+        // lista — o Container garante a altura mínima (o texto de 18dp de
+        // linha + padding 10 ficava a 46dp).
+        child: Container(
+          constraints: const BoxConstraints(minHeight: AppSizes.touchTarget),
+          alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: 10,

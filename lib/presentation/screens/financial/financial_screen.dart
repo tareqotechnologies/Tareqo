@@ -92,10 +92,11 @@ class FinancialScreen extends ConsumerWidget {
                           child: SegmentedButton<CashFlowPeriod>(
                             showSelectedIcon: false,
                             style: SegmentedButton.styleFrom(
-                              visualDensity: VisualDensity.compact,
+                              // Sem densidade compacta: o segmento é botão de
+                              // baixa frequência — alvo ≥ 48dp (guideline a11y).
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
-                                vertical: 8,
+                                vertical: 14,
                               ),
                               shape: const StadiumBorder(),
                               side: BorderSide(color: scheme.outlineVariant),

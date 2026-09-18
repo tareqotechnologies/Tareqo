@@ -757,26 +757,35 @@ class _ProductTileState extends State<_ProductTile> {
                 ),
                 const SizedBox(width: 12),
                 // ── Coluna direita: preço + estoque ──
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerRight,
-                      child: SmartAmount(
-                        cents: _product.salePriceCents,
+                // Flexible: o rótulo de estoque (que agora pode incluir
+                // "· Estoque baixo") encolhe com ellipsis em vez de estourar
+                // a linha em ecrãs estreitos.
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
                         alignment: Alignment.centerRight,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: inactive ? scheme.onSurfaceVariant : null,
-                          fontFeatures: const [FontFeature.tabularFigures()],
+                        child: SmartAmount(
+                          cents: _product.salePriceCents,
+                          alignment: Alignment.centerRight,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: inactive ? scheme.onSurfaceVariant : null,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 2),
                     Text(
                       '${Quantity.format(_product.stockQuantity, unitLabel: _product.vendaPorFracao ? _product.unitLabel : null, language: Formatters.currentLanguage)}'
-                      '${_product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}',
+                      '${_product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}'
+                      // Estado por TEXTO, não só pela cor (daltónicos e
+                      // leitores de ecrã): a mesma mensagem do alerta do
+                      // dashboard (dashboardLowStock).
+                      '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.labelSmall?.copyWith(
@@ -790,6 +799,7 @@ class _ProductTileState extends State<_ProductTile> {
                       ),
                     ),
                   ],
+                  ),
                 ),
               ],
             ),

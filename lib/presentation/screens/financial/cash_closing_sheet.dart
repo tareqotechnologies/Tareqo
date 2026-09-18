@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../core/ui/haptics.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/money.dart';
 import '../../../domain/entities/sale.dart';
@@ -76,6 +77,9 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
             countedCashCents: countedCents,
           );
       if (!mounted) return;
+      // Confirmação tátil do fecho (operação gerencial — imediato, sem
+      // atraso): mesmo padrão das sheets de Vendas/Compras/Fiado.
+      Haptics.success();
       setState(() {
         _isSubmitting = false;
         // Mostra o resultado persistido (o servidor é a autoridade no modo
@@ -89,6 +93,7 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
       messenger.showSnackBar(SnackBar(content: Text(_successMessage!)));
       _prefillCounted(closing.expectedCashCents);
     } on InvalidCashCountException catch (error) {
+      Haptics.error();
       if (mounted) {
         setState(() {
           _isSubmitting = false;
@@ -96,6 +101,7 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
         });
       }
     } catch (error, stackTrace) {
+      Haptics.error();
       CrashReporting.capture(error, stackTrace, hint: 'Erro ao fechar o caixa');
       if (mounted) {
         setState(() {

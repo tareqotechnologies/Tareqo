@@ -426,7 +426,11 @@ abstract final class AppTheme {
 
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
-          visualDensity: VisualDensity.compact,
+          // Alvo de toque ≥ 48dp (WCAG/androidTapTargetGuideline): sem a
+          // densidade compacta — o segmento é um botão de baixa frequência,
+          // não um stepper (onde o compacto já passou no guideline).
+          // minimumSize: 0 desvia para o default M3 (40dp) — fixado em 48.
+          minimumSize: const WidgetStatePropertyAll(Size(0, AppSizes.touchTarget)),
           padding: WidgetStateProperty.all(
             const EdgeInsets.symmetric(
               horizontal: AppSpacing.sm,

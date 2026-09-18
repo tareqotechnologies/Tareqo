@@ -73,6 +73,13 @@ void main() {
     expect(find.byType(QrImageView), findsOneWidget);
   });
 
+  testWidgets('a11y: o botão fechar do AppBar tem tooltip', (tester) async {
+    await openSetup(tester);
+
+    // Leitor de ecrã anuncia a ação (mesmo padrão das outras telas).
+    expect(find.byTooltip('Fechar'), findsOneWidget);
+  });
+
   testWidgets('grava o segredo no storage ANTES de marcar MFA como ativo', (
     tester,
   ) async {

@@ -56,6 +56,21 @@ const _customers = [
 ];
 
 void main() {
+  // A11y (Fase 6): busca e linhas de clientes passam nos guidelines de
+  // toque (≥48dp) e contraste de texto.
+  testWidgets('a11y: clientes passa nos guidelines de toque e contraste', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildApp(customers: _customers));
+    await tester.pumpAndSettle();
+
+    final handle = tester.ensureSemantics();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
   testWidgets('exibe a lista de clientes', (tester) async {
     await tester.pumpWidget(_buildApp(customers: _customers));
     await tester.pumpAndSettle();

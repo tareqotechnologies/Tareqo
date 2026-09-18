@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/ui/haptics.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/debt.dart';
 import '../../../domain/usecases/settle_debt_use_case.dart';
@@ -138,10 +139,11 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                 child: SegmentedButton<_DebtView>(
                   showSelectedIcon: false,
                   style: SegmentedButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
+                    // Sem densidade compacta: o segmento é botão de baixa
+                    // frequência — alvo de toque ≥ 48dp (guideline a11y).
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 8,
+                      vertical: 14,
                     ),
                     shape: const StadiumBorder(),
                     side: BorderSide(color: theme.colorScheme.outlineVariant),
@@ -330,6 +332,9 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     try {
       await ref.read(settleDebtUseCaseProvider).call(debt.id, storeId: storeId);
       if (!context.mounted) return;
+      // Confirmação tátil da baixa (dinheiro entrou no caixa) — mesmo
+      // padrão das sheets de Vendas/Compras/Fiado.
+      Haptics.success();
       messenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -347,6 +352,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
       ref.invalidate(cashFlowProvider);
       ref.invalidate(dashboardKpisProvider);
     } on DebtNotFoundException {
+      Haptics.error();
       if (!context.mounted) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.debtsNotFound)));
       ref.invalidate(pendingDebtsProvider);
@@ -356,6 +362,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
       if (!context.mounted) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.syncOfflineSaved)));
     } catch (error, stackTrace) {
+      Haptics.error();
       CrashReporting.capture(error, stackTrace, hint: 'Erro ao quitar fiado');
       if (!context.mounted) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.debtsSettleError)));

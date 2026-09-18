@@ -14,6 +14,7 @@ import 'package:tareqo/presentation/controllers/debts_providers.dart';
 import 'package:tareqo/presentation/screens/credit/debts_screen.dart';
 import 'package:tareqo/presentation/widgets/app_card.dart';
 
+import '../../helpers/haptic_spy.dart';
 import '../../helpers/store_context.dart';
 
 class _FakeGetPendingDebtsUseCase implements GetPendingDebtsUseCase {
@@ -95,6 +96,30 @@ List<Debt> _debts() => [
 ];
 
 void main() {
+  // A11y (Fase 6): pílulas de período, linhas de fiado e FAB passam nos
+  // guidelines de toque (≥48dp) e contraste de texto.
+  testWidgets('a11y: fiado passa nos guidelines de toque e contraste', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        useCase: _FakeGetPendingDebtsUseCase(_debts()),
+        settleUseCase: _FakeSettleDebtUseCase(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final handle = tester.ensureSemantics();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
+  late HapticSpy spy;
+  setUp(() => spy = HapticSpy()..install());
+  tearDown(() => spy.uninstall());
+
   testWidgets('mostra o total a receber e as dívidas pendentes', (
     tester,
   ) async {
@@ -186,6 +211,9 @@ void main() {
 
     expect(settle.called, ['d1']);
     expect(find.textContaining('no caixa'), findsOneWidget);
+
+    // Confirmação tátil da baixa (dinheiro entrou no caixa).
+    expect(spy.mediumImpacts, 1);
 
     // João foi quitado e sai da lista pendente; Maria permanece.
     expect(find.text('João'), findsNothing);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/ui/haptics.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/money.dart';
@@ -109,6 +110,9 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
       // O AddDebtUseCase registra a dívida E a pendência financeira
       // vinculada (debtId) — o livro reflete o fiado desde o início.
       await ref.read(addDebtUseCaseProvider).call(debt);
+      // Confirmação tátil da conclusão (antes do pop: imediato, sem atraso)
+      // — mesmo padrão das sheets de Vendas e Compras.
+      Haptics.success();
       if (!mounted) return;
       Navigator.of(context).pop();
       messenger.showSnackBar(
@@ -125,6 +129,7 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
       Navigator.of(context).pop();
       messenger.showSnackBar(SnackBar(content: Text(l10n.syncOfflineSaved)));
     } on InvalidDebtAmountException catch (error) {
+      Haptics.error();
       setState(() => _formError = error.message);
     } on PendingEntryRegistrationException catch (error, stackTrace) {
       // A dívida foi registrada; apenas a pendência falhou. Não sugerir
@@ -140,6 +145,7 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
       });
       ref.invalidate(pendingDebtsProvider);
     } catch (error, stackTrace) {
+      Haptics.error();
       CrashReporting.capture(
         error,
         stackTrace,
