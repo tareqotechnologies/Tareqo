@@ -49,6 +49,11 @@ class _FadeIndexedStackState extends State<FadeIndexedStack>
 
   @override
   Widget build(BuildContext context) {
+    // Movimento reduzido (acessibilidade, Fase 7): a troca de aba é direta,
+    // sem fade — mesmo conteúdo, mesmo estado preservado.
+    if (MediaQuery.disableAnimationsOf(context)) {
+      return IndexedStack(index: widget.index, children: widget.children);
+    }
     return FadeTransition(
       opacity: CurvedAnimation(parent: _controller, curve: Curves.easeOut),
       child: IndexedStack(index: widget.index, children: widget.children),

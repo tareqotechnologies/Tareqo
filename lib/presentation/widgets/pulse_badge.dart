@@ -96,6 +96,18 @@ class _PulseBadgeState extends State<PulseBadge>
   Widget build(BuildContext context) {
     if (widget.count <= 0) return widget.child;
 
+    // Movimento reduzido (acessibilidade, Fase 7): o pulso é uma animação
+    // INFINITA — no pior caso rodaria para sempre com a preferência de
+    // movimento reduzido ativa. O badge continua visível (a informação
+    // importa; o movimento não) e a escala fica estável em 1.0.
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _pulseController.stop();
+    } else if (widget.showPulse &&
+        _pulseController.isAnimating == false &&
+        _pulseController.isCompleted == false) {
+      _pulseController.repeat(reverse: true);
+    }
+
     final scheme = Theme.of(context).colorScheme;
     final badgeColor = widget.color ?? scheme.tertiary;
     final displayText = widget.count > widget.maxCount

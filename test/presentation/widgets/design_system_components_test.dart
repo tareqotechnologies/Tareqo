@@ -219,6 +219,43 @@ void main() {
   });
 
   group('FadeIndexedStack', () {
+    testWidgets(
+      'disableAnimations (movimento reduzido): troca direta, estado preservado',
+      (tester) async {
+        tester.platformDispatcher.accessibilityFeaturesTestValue =
+            const FakeAccessibilityFeatures(disableAnimations: true);
+        addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+        Widget build(int index) => testApp(
+          home: FadeIndexedStack(
+            index: index,
+            children: const [
+              _CounterTab(label: 'A'),
+              _CounterTab(label: 'B'),
+            ],
+          ),
+        );
+
+        await tester.pumpWidget(build(0));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('incrementar A'));
+        await tester.pump();
+        expect(find.text('A 1'), findsOneWidget);
+
+        // Troca de aba: SEM fade (conteúdo já visível no primeiro frame),
+        // o estado continua preservado — só o movimento é removido.
+        await tester.pumpWidget(build(1));
+        await tester.pump();
+        expect(find.text('B 0'), findsOneWidget);
+        expect(find.text('A 1'), findsNothing);
+        expect(tester.takeException(), isNull);
+
+        await tester.pumpWidget(build(0));
+        await tester.pump();
+        expect(find.text('A 1'), findsOneWidget);
+      },
+    );
+
     testWidgets('troca de aba anima o fade e preserva o estado dos filhos', (
       tester,
     ) async {
