@@ -86,17 +86,18 @@ flutter run --flavor dev --dart-define-from-file=env/dev.env
 
 #### Aviso conhecido no build (sentry_flutter + KGP) — rastreado upstream
 
-> **Atenção:** **Aug 8:** o Flutter 3.44+ com AGP 9+ emite um **aviso** ao configurar o Gradle de QUALQUER build Android (dev ou prod):
+> **Atenção:** **Sep 18:** o Flutter 3.47 com AGP 9+ e `android.builtInKotlin=true` ainda emite um **aviso** ao configurar o Gradle de QUALQUER build Android (dev ou prod):
 >
 > ```
 > WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): sentry_flutter
 > Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
 > ```
 >
-> - **É benigno hoje** — apenas um aviso informativo; o build passa normalmente (confirmado no `assembleDevRelease`). Só versões **futuras** do Flutter falharão nisso.
-> - **Causa:** o `android/build.gradle` do `sentry_flutter` aplica `kotlin-android` (KGP) incondicionalmente, e o tooling do Flutter sinaliza plugins assim quando o AGP ≥ 9 (este projeto usa 9.3.1). Não há **nenhuma** versão publicada que corrija (9.26.0, `10.0.0-alpha.3` e o `main` do sentry-dart ainda aplicam KGP) nem flag de supressão no Flutter 3.44.
-> - **Rastreio upstream:** **getsentry/sentry-dart#3738** (DART-382) — a migração do plugin para Kotlin built-in está prevista para o **v10 estável (~fim de ago/meio de set 2026)**, bloqueada no pacote `jni` (dart-lang/native#3415).
+> - **É benigno hoje** — apenas um aviso informativo; o build passa normalmente (confirmado no `assembleDevRelease` e no `assembleProdRelease`).
+> - **Causa:** a deteção do Flutter Gradle Plugin é **textual** (regex sobre o `android/build.gradle` do plugin) e ainda encontra a linha `apply plugin: 'kotlin-android'` do `sentry_flutter` — que com built-in Kotlin ativo **não é executada** (a aplicação é condicional a `builtInKotlin=false`; o mesmo padrão bimodal existe no `mobile_scanner 7.4.2`).
+> - **Rastreio upstream:** **getsentry/sentry-dart#3738** (DART-382) — a migração do plugin para Kotlin built-in está prevista para o **v10 estável**, bloqueada no pacote `jni` (dart-lang/native#3415).
 > - **Ação quando o v10 sair:** subir `sentry_flutter` para `^10.0.0` no `pubspec.yaml` — o aviso desaparece sozinho.
+> - **Histórico (Aug 8):** até 17 de set, o projeto rodava em modo legado (`android.builtInKotlin=false`, adicionado pelo migrator do 3.44). Nesse modo o `mobile_scanner` quebrava o build release (o FGP aplicava KGP ao subprojeto depois da avaliação do script e o `GeneratedPluginRegistrant` não achava a classe do plugin). A migração para built-in Kotlin (Sep 18) desbloqueou o build de release.
 
 ### Publicação via CI (Fastlane)
 

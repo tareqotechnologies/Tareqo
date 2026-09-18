@@ -58,16 +58,15 @@ dependencies:
   # 3.44+ (o 8.14.2 fixava languageVersion=1.6 e quebrava o build de
   # release — falha pré-existente do CI, auditoria M4/7.7).
   #
-  # ⚠️ AVISO CONHECIDO (build AGP 9+, Flutter 3.44): o android/build.gradle
-  # do sentry_flutter ainda aplica `apply plugin: 'kotlin-android'` (KGP), e o
-  # tooling do Flutter emite: "Your app uses the following plugins that apply
-  # Kotlin Gradle Plugin (KGP): sentry_flutter — Future versions of Flutter
-  # will fail to build". É BENIGNO hoje (apenas aviso, o build passa) e NÃO há
-  # como suprimir via gradle.properties. Nenhuma versão publicada corrige
-  # ainda: o 9.26.0, o 10.0.0-alpha.3 e até o main do sentry-dart aplicam KGP.
-  # A migração upstream (getsentry/sentry-dart#3738, DART-382) está prevista
-  # para o v10 estável (~fim de ago/meio de set 2026, bloqueada no jni).
-  # Quando o v10 sair: subir para ^10.0.0 — o aviso desaparece sozinho.
+  # ⚠️ AVISO CONHECIDO (build AGP 9+, Flutter 3.47 com builtInKotlin=true):
+  # o tooling do Flutter emite: "Your app uses the following plugins that apply
+  # Kotlin Gradle Plugin (KGP): sentry_flutter". A deteção é TEXTUAL (regex no
+  # build.gradle do plugin) e ainda encontra a linha `apply plugin:
+  # 'kotlin-android'` — que com built-in Kotlin ativo NÃO é executada (a
+  # aplicação é condicional a builtInKotlin=false). É BENIGNO (o build passa;
+  # confirmado no assembleProdRelease) e some quando o sentry publicar a
+  # migração upstream (getsentry/sentry-dart#3738, DART-382) — aí, subir para
+  # ^10.0.0.
   sentry_flutter: ^9.30.0
   mobile_scanner: ^7.4.0
   share_plus: ^13.3.0
