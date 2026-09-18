@@ -559,8 +559,9 @@ class _CartProductRow extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          visualDensity: VisualDensity.compact,
+                          // Alvo de toque ≥ 48dp (a11y — guideline).
                           icon: const Icon(Icons.remove, size: 18),
+                          tooltip: l10n.a11yDecreaseQuantity,
                           onPressed: quantity == 0 ? null : onRemove,
                         ),
                         InkWell(
@@ -583,8 +584,11 @@ class _CartProductRow extends StatelessWidget {
                           ),
                         ),
                         IconButton(
-                          visualDensity: VisualDensity.compact,
+                          // Alvo de toque ≥ 48dp (a11y — guideline).
                           icon: const Icon(Icons.add, size: 18),
+                          tooltip: isWeight
+                              ? l10n.a11yAddFraction
+                              : l10n.a11yIncreaseQuantity,
                           onPressed: isWeight ? onAddFraction : onAdd,
                         ),
                       ],

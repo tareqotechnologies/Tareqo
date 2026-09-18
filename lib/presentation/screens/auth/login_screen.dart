@@ -359,6 +359,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           size: 20,
                           color: palette.textSecondary,
                         ),
+                        // A11y: leitor de ecrã anuncia a ação (e o estado
+                        // futuro — o tooltip descreve o que o toque FAZ).
+                        tooltip: _obscurePassword
+                            ? l10n.loginShowPassword
+                            : l10n.loginHidePassword,
                         onPressed: () => setState(() {
                           _obscurePassword = !_obscurePassword;
                         }),
@@ -388,6 +393,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             size: 20,
                             color: palette.textSecondary,
                           ),
+                          tooltip: _obscureConfirm
+                              ? l10n.loginShowPassword
+                              : l10n.loginHidePassword,
                           onPressed: () => setState(() {
                             _obscureConfirm = !_obscureConfirm;
                           }),

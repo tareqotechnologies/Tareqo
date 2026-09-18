@@ -887,9 +887,12 @@ class _CartProductRow extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Sem visualDensity.compact: o alvo de toque efetivo tem
+                  // que ser ≥ 48dp (WCAG/androidTapTargetGuideline) — o
+                  // stepper é o controle mais usado do app.
                   IconButton(
-                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.remove, size: 18),
+                    tooltip: l10n.a11yDecreaseQuantity,
                     onPressed: quantity == 0 ? null : onRemove,
                   ),
                   InkWell(
@@ -915,8 +918,10 @@ class _CartProductRow extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.add, size: 18),
+                    tooltip: isWeight
+                        ? l10n.a11yAddFraction
+                        : l10n.a11yIncreaseQuantity,
                     onPressed: soldOut
                         ? null
                         : (isWeight ? onAddFraction : onAdd),

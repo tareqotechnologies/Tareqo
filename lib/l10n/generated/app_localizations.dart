@@ -6394,6 +6394,24 @@ abstract class AppLocalizations {
   /// **'Vibração ao concluir vendas, pagamentos e confirmações'**
   String get settingsHapticsSubtitle;
 
+  /// No description provided for @a11yIncreaseQuantity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aumentar quantidade'**
+  String get a11yIncreaseQuantity;
+
+  /// No description provided for @a11yDecreaseQuantity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diminuir quantidade'**
+  String get a11yDecreaseQuantity;
+
+  /// No description provided for @a11yAddFraction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar 0,1 (peso)'**
+  String get a11yAddFraction;
+
   /// No description provided for @settingsMfaEnforceError.
   ///
   /// In pt, this message translates to:

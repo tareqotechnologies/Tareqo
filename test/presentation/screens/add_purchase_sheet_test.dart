@@ -157,8 +157,11 @@ void main() {
     await tester.tap(find.byIcon(Icons.add).first);
     await tester.pumpAndSettle();
 
-    // Troca o padrão (M-Pesa) para Dinheiro (aba segmentada do seletor
-    // compartilhado — design system 2026).
+    // Troca o padrão (M-Pesa) para Dinheiro: o seletor fica RECOLHIDO no
+    // rodapé (resumo de 48dp) — tocar no resumo expande as abas e a
+    // seleção recolhe de volta (design system 2026).
+    await tester.tap(find.text('M-Pesa'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Dinheiro'));
     await tester.pumpAndSettle();
 

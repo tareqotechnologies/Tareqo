@@ -10,18 +10,33 @@ import 'payment_filter.dart' show PaymentMethodIcon;
 /// crédito) como abas segmentadas e métodos SECUNDÁRIOS (M-Pesa, E-Mola,
 /// Transferência) como lista com indicador de seleção (radio).
 ///
-/// Compartilhado pelo carrinho de Vendas e de Compras — mesma linguagem
-/// visual nos dois fluxos.
-class PaymentMethodPicker extends StatelessWidget {
+/// No rodapé das sheets o seletor fica RECOLHIDO por padrão: uma única
+/// linha de 48dp com o método atual — tocar expande o seletor completo e
+/// a seleção recolhe de volta. Sem isso, o seletor completo (~237px)
+/// espreme o catálogo em telas baixas (a lista de produtos ficava com
+/// menos de 30px na viewport de teste) e o toque no stepper caía no
+/// rodapé. Compartilhado pelo carrinho de Vendas e de Compras — mesma
+/// linguagem visual nos dois fluxos.
+class PaymentMethodPicker extends StatefulWidget {
   const PaymentMethodPicker({
     super.key,
     required this.value,
     required this.onChanged,
+    this.initiallyExpanded = false,
   });
 
   final PaymentMethod value;
   final ValueChanged<PaymentMethod> onChanged;
 
+  /// Expandido na abertura (usado em superfícies onde o seletor é o
+  /// conteúdo principal, não o rodapé).
+  final bool initiallyExpanded;
+
+  @override
+  State<PaymentMethodPicker> createState() => _PaymentMethodPickerState();
+}
+
+class _PaymentMethodPickerState extends State<PaymentMethodPicker> {
   /// Métodos primários: abas segmentadas (uma linha).
   static const List<PaymentMethod> _primary = [
     PaymentMethod.cash,
@@ -36,9 +51,26 @@ class PaymentMethodPicker extends StatelessWidget {
     PaymentMethod.transfer,
   ];
 
+  late bool _expanded = widget.initiallyExpanded;
+
+  void _select(PaymentMethod method) {
+    widget.onChanged(method);
+    // A seleção fecha o seletor: o rodapé volta ao resumo de 48dp e o
+    // catálogo recupera o espaço imediatamente.
+    setState(() => _expanded = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+
+    if (!_expanded) {
+      return _CollapsedSummary(
+        label: widget.value.labelFor(l10n),
+        icon: widget.value.icon,
+        onTap: () => setState(() => _expanded = true),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -54,8 +86,8 @@ class PaymentMethodPicker extends StatelessWidget {
                 child: _PrimaryTab(
                   label: method.labelFor(l10n),
                   icon: method.icon,
-                  selected: value == method,
-                  onTap: () => onChanged(method),
+                  selected: widget.value == method,
+                  onTap: () => _select(method),
                 ),
               ),
             ],
@@ -69,12 +101,65 @@ class PaymentMethodPicker extends StatelessWidget {
           _SecondaryTile(
             label: method.labelFor(l10n),
             icon: method.icon,
-            selected: value == method,
-            onTap: () => onChanged(method),
+            selected: widget.value == method,
+            onTap: () => _select(method),
           ),
           if (method != _secondary.last) const SizedBox(height: 4),
         ],
       ],
+    );
+  }
+}
+
+/// Estado recolhido: uma linha de 48dp com o método selecionado — alvo de
+/// toque acessível sem ocupar o rodapé inteiro.
+class _CollapsedSummary extends StatelessWidget {
+  const _CollapsedSummary({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: theme.colorScheme.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.expand_more,
+                size: 22,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -175,7 +260,9 @@ class _SecondaryTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          // Padding vertical 14: linha com ≥ 48dp de altura — alvo de toque
+          // acessível (WCAG/androidTapTargetGuideline). Era 6 (≈37px).
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(

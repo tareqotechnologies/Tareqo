@@ -3624,6 +3624,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Vibration when completing sales, payments and confirmations';
 
   @override
+  String get a11yIncreaseQuantity => 'Increase quantity';
+
+  @override
+  String get a11yDecreaseQuantity => 'Decrease quantity';
+
+  @override
+  String get a11yAddFraction => 'Add 0.1 (weight)';
+
+  @override
   String get settingsMfaEnforceError =>
       'Could not change the MFA requirement. Check your connection and try again.';
 

@@ -105,9 +105,12 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
-      // O produto entrou no carrinho (pill "1×" no topo). A venda ainda
-      // NÃO foi registrada — só o carrinho recebeu o item.
-      expect(find.textContaining('Caneta Azul'), findsWidgets);
+      // O produto entrou no carrinho — resumo do rodapé (estável mesmo com
+      // a SliverList lazy). A venda ainda NÃO foi registrada — só o
+      // carrinho recebeu o item. O total "R$ 2,00" aparece no rodapé E na
+      // pill/linha do catálogo (ambos visíveis desde o layout compacto).
+      expect(find.text('1 item'), findsOneWidget);
+      expect(find.text('R\$ 2,00'), findsWidgets);
       expect(processSale.calls, 0);
 
       // Confirmar registra a venda com o item do quick-add (1 unidade).
@@ -149,10 +152,20 @@ void main() {
       final processSale = _FakeProcessSaleUseCase();
       await _pumpPdv(tester, processSale: processSale);
 
-      // Adiciona 1 unidade via "+"; a pill do carrinho (display-only)
-      // empurra a linha do catálogo para baixo — a SliverList é lazy, então
-      // scrollUntilVisible constrói a linha ao rolar. Toca na quantidade
-      // exibida "1" (exata; "0,05 un." não colide).
+      // A SliverList é lazy: com as linhas de pagamento em 48dp (Fase 6),
+      // a linha do catálogo fica no cache extent (offstage) no viewport de
+      // teste. Rola até a linha entrar em cena — o NOME é único aqui (a
+      // pill só existe depois de adicionar; o código não é renderizado).
+      await tester.scrollUntilVisible(
+        find.text('Caneta Azul'),
+        150,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      // Adiciona 1 unidade via "+"; a pill do carrinho empurra a linha
+      // para baixo — rola de novo até o stepper exibir a quantidade "1"
+      // (exata; "0,05 un." não colide).
       await tester.tap(find.byIcon(Icons.add).first);
       await tester.pump();
       await tester.scrollUntilVisible(

@@ -22,7 +22,7 @@ import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 
 /// Total de membros do catálogo: 1073 (956 getters + 117 métodos).
 const int kTotalMembers = 1073;
-const int kTotalGetters = 958;
+const int kTotalGetters = 961;
 const int kTotalMethods = 117;
 const Set<String> kMethodNames = <String>{
   'onboardingPlanDetails',
@@ -233,6 +233,9 @@ void main() {
         'currencyMzn': l.currencyMzn,
         'settingsSave': l.settingsSave,
         'settingsSaved': l.settingsSaved,
+        'a11yAddFraction': l.a11yAddFraction,
+        'a11yDecreaseQuantity': l.a11yDecreaseQuantity,
+        'a11yIncreaseQuantity': l.a11yIncreaseQuantity,
         'settingsGenericError': l.settingsGenericError,
         'settingsHapticsSubtitle': l.settingsHapticsSubtitle,
         'settingsHapticsTitle': l.settingsHapticsTitle,
@@ -1564,6 +1567,9 @@ void main() {
         'currencyMzn': l.currencyMzn,
         'settingsSave': l.settingsSave,
         'settingsSaved': l.settingsSaved,
+        'a11yAddFraction': l.a11yAddFraction,
+        'a11yDecreaseQuantity': l.a11yDecreaseQuantity,
+        'a11yIncreaseQuantity': l.a11yIncreaseQuantity,
         'settingsGenericError': l.settingsGenericError,
         'settingsHapticsSubtitle': l.settingsHapticsSubtitle,
         'settingsHapticsTitle': l.settingsHapticsTitle,
@@ -2895,6 +2901,9 @@ void main() {
         'currencyMzn': l.currencyMzn,
         'settingsSave': l.settingsSave,
         'settingsSaved': l.settingsSaved,
+        'a11yAddFraction': l.a11yAddFraction,
+        'a11yDecreaseQuantity': l.a11yDecreaseQuantity,
+        'a11yIncreaseQuantity': l.a11yIncreaseQuantity,
         'settingsGenericError': l.settingsGenericError,
         'settingsHapticsSubtitle': l.settingsHapticsSubtitle,
         'settingsHapticsTitle': l.settingsHapticsTitle,
