@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../helpers/test_app.dart';
 
+import 'package:tareqo/core/utils/app_clock.dart';
+
 import 'package:tareqo/domain/entities/audit_entry.dart';
 import 'package:tareqo/domain/usecases/get_audit_log_use_case.dart';
 import 'package:tareqo/presentation/controllers/admin_providers.dart';
@@ -67,7 +69,14 @@ void main() {
     tester,
   ) async {
     _useWideTallViewport(tester);
-    final now = DateTime.now();
+    // Relógio FIXO (AppClock): a tela agrupa por Hoje/Ontem — com o
+    // relógio real, rodar entre 00:00 e 00:30 tornava a entrada "ontem"
+    // (now − 1d − 30min) um dia a mais e o grupo ONTEM desaparecia
+    // (flake observado à meia-noite). O 10:00 dá margem total.
+    final fixedNow = DateTime(2026, 9, 19, 10);
+    AppClock.inject(() => fixedNow);
+    addTearDown(AppClock.reset);
+    final now = fixedNow;
     final entries = [
       _entry(
         id: 1,

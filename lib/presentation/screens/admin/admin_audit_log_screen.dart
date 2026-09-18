@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/utils/app_clock.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/audit_entry.dart';
@@ -163,7 +164,10 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
     List<AuditEntry> entries,
     AppLocalizations l10n,
   ) {
-    final now = DateTime.now();
+    // AppClock (não DateTime.now): testes e goldens fixam o instante —
+    // agrupar por "Hoje/Ontem" com o relógio real é flaky perto da
+    // meia-noite (ex.: 00:16 vira "dois dias atrás" com now−1d−30min).
+    final now = AppClock.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final weekAgo = today.subtract(const Duration(days: 7));
@@ -606,7 +610,9 @@ class _AuditTile extends StatelessWidget {
   }
 
   String _relativeTime(DateTime dt) {
-    final diff = DateTime.now().difference(dt);
+    // AppClock: mesma fonte de tempo do agrupamento (determinismo em
+    // testes/goldens — ver _groupByDate).
+    final diff = AppClock.now().difference(dt);
     if (diff.inMinutes < 1) return 'agora';
     if (diff.inMinutes < 60) return '${diff.inMinutes}m';
     if (diff.inHours < 24) return '${diff.inHours}h';
