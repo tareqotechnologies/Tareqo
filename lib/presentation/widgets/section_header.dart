@@ -53,11 +53,10 @@ class SectionHeader extends StatelessWidget {
         if (actionLabel != null && onAction != null)
           TextButton(
             onPressed: onAction,
+            // Alvo de toque ≥ 48dp (a11y — guideline): sem shrinkWrap,
+            // minimumSize zero ou densidade compacta.
             style: TextButton.styleFrom(
-              visualDensity: VisualDensity.compact,
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(actionLabel!, style: theme.textTheme.labelMedium),
           ),

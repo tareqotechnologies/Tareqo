@@ -138,10 +138,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                     child: SegmentedButton<TransactionType>(
                       showSelectedIcon: false,
                       style: SegmentedButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 8,
+                          // Alvo de toque ≥ 48dp (a11y — guideline).
+                          vertical: 14,
                         ),
                         shape: const StadiumBorder(),
                         side: BorderSide(

@@ -224,6 +224,112 @@ void main() {
   // em paisagem fica mais baixo — a lista de produtos (Expanded) precisa
   // encolher e o rodapé (forma de pagamento + total + confirmar) segue
   // acessível. Overflows de RenderFlex falham o teste via takeException.
+  testWidgets('remover por stepper zera o item e o total', (tester) async {
+    final processPurchase = _FakeProcessPurchaseUseCase();
+    await tester.pumpWidget(
+      _buildApp(
+        products: const [
+          Product(
+            id: 'p1',
+            name: 'Caneta',
+            purchasePriceCents: 50,
+            salePriceCents: 200,
+            stockQuantity: 10,
+          ),
+        ],
+        processPurchase: processPurchase,
+      ),
+    );
+    await _openSheet(tester);
+
+    // Adiciona 2 unidades.
+    await tester.tap(find.byIcon(Icons.add).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.add).first);
+    await tester.pumpAndSettle();
+    expect(find.text('R\$ 1,00'), findsOneWidget);
+
+    // O botão − desabilita quando a quantidade volta a zero.
+    await tester.tap(find.byIcon(Icons.remove).first);
+    await tester.pumpAndSettle();
+    expect(find.text('R\$ 0,50'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.remove).first);
+    await tester.pumpAndSettle();
+    expect(find.text('R\$ 0,00'), findsOneWidget);
+
+    // O stepper não permite quantidade negativa (− desabilitado em zero).
+    final removeButton = tester.widget<IconButton>(
+      find.ancestor(
+        of: find.byIcon(Icons.remove).first,
+        matching: find.byType(IconButton),
+      ),
+    );
+    expect(removeButton.onPressed, isNull);
+    // Sem itens, o botão de confirmar volta a ficar desabilitado.
+    await tester.tap(find.widgetWithText(FilledButton, 'Confirmar compra'));
+    await tester.pumpAndSettle();
+    expect(processPurchase.calls, 0);
+  });
+
+  testWidgets('validade definida aparece na linha do item e vai para a compra', (
+    tester,
+  ) async {
+    final processPurchase = _FakeProcessPurchaseUseCase();
+
+    await tester.pumpWidget(
+      _buildApp(
+        products: const [
+          Product(
+            id: 'p1',
+            name: 'Arroz',
+            purchasePriceCents: 5000,
+            salePriceCents: 6500,
+            stockQuantity: 10,
+          ),
+        ],
+        processPurchase: processPurchase,
+      ),
+    );
+    await _openSheet(tester);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Fornecedor'),
+      'Distribuidora Central',
+    );
+    await tester.pumpAndSettle();
+
+    // Adiciona o Arroz.
+    await tester.tap(find.byIcon(Icons.add).first);
+    await tester.pumpAndSettle();
+
+    // Abre o seletor de datas e alterna para entrada por texto.
+    await tester.tap(find.byIcon(Icons.event_outlined).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.edit_outlined));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(Dialog),
+        matching: find.byType(TextField),
+      ),
+      '15/09/2027',
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.event_available_outlined), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Confirmar compra'));
+    await tester.pumpAndSettle();
+    expect(processPurchase.calls, 1);
+    expect(
+      processPurchase.lastPurchase?.items.first.expiryDate,
+      DateTime(2027, 9, 15),
+    );
+  });
+
   testWidgets('carrinho de compra sobrevive à rotação para paisagem', (
     tester,
   ) async {

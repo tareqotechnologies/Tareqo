@@ -534,7 +534,6 @@ class _CartProductRow extends StatelessWidget {
                       IconButton(
                         tooltip: l10n.productsExpiryClear,
                         icon: const Icon(Icons.close, size: 16),
-                        visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(
                           minWidth: 32,
@@ -555,7 +554,6 @@ class _CartProductRow extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.event_outlined, size: 18),
                     tooltip: l10n.purchasesExpiryAdd,
                     onPressed: onPickExpiry,

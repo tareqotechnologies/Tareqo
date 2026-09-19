@@ -1085,7 +1085,6 @@ class _TargetCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.close, size: 18),
                 color: scheme.onSurfaceVariant,
                 tooltip: l10n.commonDelete,

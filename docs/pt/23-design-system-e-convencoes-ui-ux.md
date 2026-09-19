@@ -92,6 +92,15 @@ comuns de validação. Teste de contrato: `test/helpers/haptic_spy.dart`
   `maxLines` antes de pensar em limitar escala.
 - Relógio de telas com "Hoje/Ontem": usar `AppClock` (não `DateTime.now`)
   — determinismo em testes.
+- Exceções documentadas ao mínimo de 48dp (o alvo real é o CARD inteiro,
+  que já supera o mínimo):
+  - Checkbox de seleção em bulk dentro de `AppCard` tocável
+    (`admin_addons_screen`, `admin_tenants_widgets`) — densidade compacta
+    para caber no card denso de gestão;
+  - Ícone de limpar validade no item de compra e no campo de validade de
+    Produtos — 32px com tooltip, padrão consolidado do `_ExpiryField`.
+  Fora dessas exceções, `visualDensity: compact` em alvos de toque é
+  violação — a guideline falha.
 
 ## 7. Guard rails do CI
 
@@ -100,7 +109,7 @@ Falham o push quando violados (`flutter analyze` + `dart format` +
 
 | Guard | Onde | Protege |
 | --- | --- | --- |
-| Guidelines de a11y | `test/presentation/screens/pdv_accessibility_test.dart` + teste `a11y:` em 9 telas-chave (login, dashboard, vendas, caixa, estoque, clientes, fiado, relatórios, PDV) | `androidTapTargetGuideline` ≥48dp, `iOSTapTargetGuideline`, `textContrastGuideline` |
+| Guidelines de a11y | `test/presentation/screens/pdv_accessibility_test.dart` + teste `a11y:` em 10 telas-chave (login, dashboard, vendas, caixa, estoque, clientes, fiado, relatórios, PDV, sheet de transação) | `androidTapTargetGuideline` ≥48dp, `iOSTapTargetGuideline`, `textContrastGuideline` |
 | Inventário de hex | `test/core/theme/hex_guard_test.dart` | Nenhum `Color(0x…)` novo fora da lista justificada (nem entrada obsoleta) |
 | Contraste dos temas | `test/core/theme/theme_contrast_test.dart` | Cores semânticas AA nos dois modos |
 | Haptics | `test/presentation/screens/haptics_wiring_test.dart` | Fluxos de DINHEIRO confirmam com sucesso/erro na camada `Haptics` |

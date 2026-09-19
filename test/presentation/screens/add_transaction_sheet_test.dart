@@ -170,7 +170,10 @@ void main() {
       '30',
     );
 
-    // Ativa o switch "Pendente (fiado)".
+    // Ativa o switch "Pendente (fiado)" (pode estar abaixo da dobra —
+    // a sheet é rolável, então garante visibilidade antes do toque).
+    await tester.ensureVisible(find.text('Pendente (fiado)'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Pendente (fiado)'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
@@ -178,4 +181,16 @@ void main() {
 
     expect(useCase.lastTransaction?.status, TransactionStatus.pending);
   });
+
+  testWidgets(
+    'a11y: alvos de toque ≥48dp e contraste AA na sheet de transação',
+    (tester) async {
+      await tester.pumpWidget(_buildApp(_FakeAddTransactionUseCase()));
+      await _openSheet(tester);
+
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    },
+  );
 }
