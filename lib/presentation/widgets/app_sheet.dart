@@ -190,14 +190,23 @@ class SheetHeader extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                // Textos longos ("Registrar movimentação") NÃO truncam:
+                // título SEM maxLines/ellipsis e auto-size — em telas
+                // estreitas ou com escala de texto alta o rótulo encolhe
+                // (fator mínimo 0.8, ~12.8pt de um titleMedium 16pt) para
+                // continuar 100% legível em uma linha.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                    textAlign: TextAlign.center,
+                    softWrap: false,
+                    maxLines: 1,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),

@@ -217,12 +217,21 @@ class AppShell extends ConsumerWidget {
             ),
       // Seções que já trazem o seu próprio FAB: ocultamos o FAB do shell
       // para evitar duplicação visual (Sales, Financial, Products, Customers).
+      // Na seção Crédito, o FAB pula o menu e abre DIRETO o "Registrar
+      // fiado" (AddDebtSheet) — é a única ação que faz sentido ali.
       floatingActionButton: _hasOwnFab(index)
           ? null
           : FloatingActionButton(
               heroTag: 'fab-shell',
-              onPressed: openActionMenu,
-              tooltip: l10n.fabMenuTitle,
+              onPressed: AppSection.values[index] == AppSection.credit
+                  ? () => showAppSheet<void>(
+                        context,
+                        builder: (_) => const AddDebtSheet(),
+                      )
+                  : openActionMenu,
+              tooltip: AppSection.values[index] == AppSection.credit
+                  ? l10n.debtsAddDebt
+                  : l10n.fabMenuTitle,
               child: const Icon(Icons.add_rounded, size: 28),
             ),
       ),

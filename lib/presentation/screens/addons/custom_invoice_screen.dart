@@ -272,91 +272,88 @@ class _InvoiceCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
+    // Card MINIMALISTA (mesmo padrão do fiado — _DebtCard): uma linha de
+    // conteúdo + acções como ÍCONES discretos à direita. Sem avatar, sem
+    // bloco de botões em largura total — o documento é a informação, não
+    // a moldura.
     return AppCard(
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cabeçalho: nome do cliente + total
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Ícone com fundo tingido (padrão IconTone)
-              Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: IconTone.darkBackground(ModuleColors.reports),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.receipt_long_outlined,
-                  size: 16,
-                  color: IconTone.lightForeground(ModuleColors.reports),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      // Nome COMPLETO — quebra em linhas quando necessário
-                      // (nunca truncar o nome do cliente).
-                      invoice.clientName,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.customInvoiceNumberPrefix(
+                    // Nome + nº sequencial INLINE (padrão Wrap do fiado) —
+                    // nome COMPLETO quebra em linhas quando necessário
+                    // (nunca truncar o nome do cliente).
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          invoice.clientName,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          l10n.customInvoiceNumberPrefix(
                             invoice.number.toString().padLeft(5, '0'),
-                          ) +
-                          (invoice.clientPhone.isNotEmpty
-                              ? '  •  ${invoice.clientPhone}'
-                              : ''),
-                      style: theme.textTheme.bodySmall?.copyWith(
+                          ),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    // Metadados em UMA linha discreta: itens · total.
+                    Text(
+                      '${l10n.customInvoiceItemsCount(invoice.items.length)}'
+                      '${invoice.clientPhone.isNotEmpty ? '  •  ${invoice.clientPhone}' : ''}',
+                      style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
+              // Valor à DIREITA em destaque (padrão dos cards do app).
               Text(
                 Formatters.currency(invoice.totalAmountCents),
-                style: theme.textTheme.titleMedium?.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
-                  letterSpacing: -0.3,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          // Detalhes: contagem de itens
-          Text(
-            l10n.customInvoiceItemsCount(invoice.items.length),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Acções — Wrap (não Row): em ecrãs estreitos os botões fluem
-          // para a linha seguinte em vez de estourarem/cortarem o rótulo.
-          Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
+          const SizedBox(height: 10),
+          // Acções como ÍCONES discretos no canto (padrão das linhas de
+          // itens da sheet): WhatsApp e PDF — rótulos ficam nos tooltips.
+          Row(
             children: [
-              AppButton.secondary(
-                label: l10n.customInvoiceWhatsApp,
-                icon: const Icon(Icons.share_outlined, size: 16),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.share_outlined, size: 18),
+                color: scheme.onSurfaceVariant,
+                tooltip: l10n.customInvoiceWhatsApp,
                 onPressed: () => _shareWhatsApp(context),
               ),
-              AppButton.secondary(
-                label: l10n.customInvoicePdf,
-                icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
+              const SizedBox(width: AppSpacing.xs),
+              IconButton(
+                icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                color: scheme.onSurfaceVariant,
+                tooltip: l10n.customInvoicePdf,
                 onPressed: () => _exportPdf(context),
               ),
             ],

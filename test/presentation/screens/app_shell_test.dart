@@ -35,6 +35,7 @@ import 'package:tareqo/presentation/controllers/dashboard_providers.dart';
 import 'package:tareqo/presentation/controllers/finance_providers.dart';
 import 'package:tareqo/presentation/controllers/products_providers.dart';
 import 'package:tareqo/presentation/controllers/sales_providers.dart';
+import 'package:tareqo/presentation/screens/credit/add_debt_sheet.dart';
 import 'package:tareqo/presentation/screens/shell/app_shell.dart';
 
 import '../../helpers/store_context.dart';
@@ -346,6 +347,60 @@ void main() {
     // Fecha pelo Cancelar.
     await tester.tap(find.text('Cancelar'));
     await tester.pumpAndSettle();
+    expect(find.text('Registrar despesa'), findsNothing);
+  });
+
+  // Regressão: na aba Crédito o FAB central NÃO abre o menu "Nova ação" —
+  // vai DIRETO ao "Registrar fiado" (AddDebtSheet), a única ação que faz
+  // sentido na seção.
+  testWidgets('na aba Crédito o FAB abre direto o Registrar fiado', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ...storeContextOverrides(),
+          getProductsUseCaseProvider.overrideWithValue(
+            _FakeGetProductsUseCase(),
+          ),
+          salesRepositoryProvider.overrideWithValue(_FakeSalesRepository()),
+          getCashFlowUseCaseProvider.overrideWithValue(
+            _FakeGetCashFlowUseCase(),
+          ),
+          getPendingDebtsUseCaseProvider.overrideWithValue(
+            _FakeGetPendingDebtsUseCase(),
+          ),
+          getSettledDebtsUseCaseProvider.overrideWithValue(
+            _FakeGetSettledDebtsUseCase(),
+          ),
+          financeRepositoryProvider.overrideWithValue(_FakeFinanceRepository()),
+          getCustomersUseCaseProvider.overrideWithValue(
+            _FakeGetCustomersUseCase(),
+          ),
+        ],
+        child: testApp(home: AppShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Vai para a seção Crédito programaticamente (mesmo caminho do Menu).
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(AppShell)),
+    );
+    container.read(shellIndexProvider.notifier).goTo(AppSection.credit);
+    await tester.pumpAndSettle();
+
+    // O FAB da aba Crédito tem o tooltip do "Registrar fiado" (o botão do
+    // estado vazio tem o mesmo rótulo, mas sem tooltip).
+    expect(find.byTooltip('Registrar fiado'), findsOneWidget);
+
+    // Toca no FAB: abre a sheet de fiado — NÃO o menu de ações.
+    await tester.tap(find.byTooltip('Registrar fiado'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AddDebtSheet), findsOneWidget);
+    // O menu global de ações não abriu (ações exclusivas dele).
+    expect(find.text('Nova venda'), findsNothing);
     expect(find.text('Registrar despesa'), findsNothing);
   });
 

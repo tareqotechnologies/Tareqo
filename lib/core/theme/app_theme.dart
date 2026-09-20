@@ -103,13 +103,59 @@ abstract final class AppTheme {
     final selectionContent = scheme.onPrimaryContainer;
 
     // Estados dos botões outline: a borda descansa em `outline` (≥3:1) e
-    // perde força quando desabilitado (padrão M3).
+    // perde força quando desabilitado (padrão M3). No foco, a borda assume
+    // o primary (1.5px) — indicador de foco visível que não depende apenas
+    // de cor (o véu de foco é sutil).
     final outlinedSide = WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) {
         return BorderSide(color: scheme.outlineVariant);
       }
+      if (states.contains(WidgetState.focused)) {
+        return BorderSide(color: scheme.primary, width: 1.5);
+      }
       return BorderSide(color: scheme.outline);
     });
+
+    // ── Estados de interação (hover/pressed/focus) — SOBRES e NEUTROS ────
+    // O padrão M3 deriva o véu de hover do `primary` (verde) — trocado aqui
+    // por feedback discreto e funcional, em ambos os temas:
+    // * Botões de SUPERFÍCIE (outline/texto/ícone/segmented/elevated): véu
+    //   cinza via `onSurface` com alfa baixo — cinza claro no tema claro,
+    //   clareamento sutil no escuro. Sem verde, brilho ou gradiente.
+    // * Botões PREENCHIDOS (primário/destrutivo): véu PRETO translúcido —
+    //   ESCURECE o preenchimento (o verde da marca fica mais escuro e
+    //   sóbrio no hover; o vermelho do destrutivo idem). Neutro (r=g=b),
+    //   nunca neon nem luminoso.
+    // Transição de 150ms (AppDurations.fast) — dentro da faixa 120–180ms.
+    WidgetStateProperty<Color?> surfaceOverlay() =>
+        WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) return null;
+          if (states.contains(WidgetState.pressed)) {
+            return scheme.onSurface.withValues(alpha: 0.10);
+          }
+          if (states.contains(WidgetState.focused)) {
+            return scheme.onSurface.withValues(alpha: 0.08);
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return scheme.onSurface.withValues(alpha: 0.06);
+          }
+          return null;
+        });
+
+    WidgetStateProperty<Color?> filledOverlay() =>
+        WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) return null;
+          if (states.contains(WidgetState.pressed)) {
+            return Colors.black.withValues(alpha: 0.14);
+          }
+          if (states.contains(WidgetState.focused)) {
+            return Colors.black.withValues(alpha: 0.10);
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return Colors.black.withValues(alpha: 0.08);
+          }
+          return null;
+        });
 
     return ThemeData(
       useMaterial3: true,
@@ -206,6 +252,31 @@ abstract final class AppTheme {
             fontWeight: FontWeight.w400,
             letterSpacing: 0,
           ),
+        ).copyWith(
+          animationDuration: AppDurations.fast,
+          // Normal: verde sóbrio da marca + texto branco (AA 5.0:1).
+          // Disabled: cinza neutro (SEM verde), sem sombra.
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              // Cinza neutro sutil sobre a superfície (SEM verde) —
+              // desabilitado lê-se como "inativo", não como ação.
+              return scheme.onSurface.withValues(alpha: 0.08);
+            }
+            return scheme.primary;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              // Texto desabilitado: neutro desatenue com contraste
+              // suficiente (~2.8:1 composto; isento de AA na WCAG, mas
+              // legível) — nunca verde.
+              return scheme.onSurface.withValues(alpha: 0.45);
+            }
+            return scheme.onPrimary;
+          }),
+          // Hover/pressed: escurece o preenchimento — verde mais escuro e
+          // sóbrio, sem verde vivo, brilho, gradiente ou elevação extra.
+          overlayColor: filledOverlay(),
+          elevation: const WidgetStatePropertyAll(0),
         ),
       ),
 
@@ -222,6 +293,10 @@ abstract final class AppTheme {
             fontWeight: FontWeight.w400,
             letterSpacing: 0,
           ),
+        ).copyWith(
+          animationDuration: AppDurations.fast,
+          // Hover/pressed: véu cinza neutro — nada de verde no feedback.
+          overlayColor: surfaceOverlay(),
         ),
       ),
 
@@ -237,7 +312,13 @@ abstract final class AppTheme {
             fontWeight: FontWeight.w400,
             letterSpacing: 0,
           ),
-        ).copyWith(side: outlinedSide),
+        ).copyWith(
+          side: outlinedSide,
+          animationDuration: AppDurations.fast,
+          // Hover/pressed: véu cinza claro discreto — borda/texto neutros,
+          // sem verde intenso, brilho ou gradiente.
+          overlayColor: surfaceOverlay(),
+        ),
       ),
 
       textButtonTheme: TextButtonThemeData(
@@ -249,6 +330,11 @@ abstract final class AppTheme {
             fontWeight: FontWeight.w400,
             letterSpacing: 0,
           ),
+        ).copyWith(
+          animationDuration: AppDurations.fast,
+          // Hover/pressed: véu cinza neutro (o rótulo verde da marca fica —
+          // ação de marca — mas o FUNDO de hover nunca é verde).
+          overlayColor: surfaceOverlay(),
         ),
       ),
 
@@ -256,6 +342,10 @@ abstract final class AppTheme {
         style: IconButton.styleFrom(
           minimumSize: const Size(AppSizes.touchTarget, AppSizes.touchTarget),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.smAll),
+        ).copyWith(
+          // Hover/pressed/focus: véu cinza neutro — o padrão M3 derivaria
+          // do primary (verde).
+          overlayColor: surfaceOverlay(),
         ),
       ),
 
@@ -336,6 +426,12 @@ abstract final class AppTheme {
         foregroundColor: isLight ? Colors.white : const Color(0xFF052E16),
         elevation: 2,
         highlightElevation: 4,
+        // Hover/focus: escurece o verde da marca com véu preto sutil (mesma
+        // linguagem dos botões preenchidos) — sem verde vivo, brilho ou
+        // lift exagerado (hover não altera a elevação).
+        hoverColor: Colors.black.withValues(alpha: 0.08),
+        focusColor: Colors.black.withValues(alpha: 0.10),
+        hoverElevation: 2,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
         sizeConstraints: const BoxConstraints.tightFor(width: 56, height: 56),
       ),
@@ -440,6 +536,9 @@ abstract final class AppTheme {
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(borderRadius: AppRadius.smAll),
           ),
+          // Hover/pressed: véu cinza neutro (sem o verde do padrão M3).
+          overlayColor: surfaceOverlay(),
+          animationDuration: AppDurations.fast,
         ),
       ),
 

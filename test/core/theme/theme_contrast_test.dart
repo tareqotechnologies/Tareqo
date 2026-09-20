@@ -263,4 +263,126 @@ void main() {
       AppColors.expense,
     );
   });
+
+  // Estados de interação dos botões (V6 — hover sem verde):
+  // * Filled/primário: hover ESCURECE o preenchimento (véu preto 8%) e o
+  //   texto branco continua ≥ 4.5:1; desabilitado usa cinza neutro (sem
+  //   verde) com contraste suficiente para comunicar o estado.
+  // * Outline/texto/ícone: véu de hover compõe cinza claro sobre a
+  //   superfície — o texto escuro continua ≥ 4.5:1 (feedback discreto,
+  //   sem verde, brilho ou gradiente).
+  // * FAB: hover escurece o verde da marca (véu preto) — ícone ≥ 3:1.
+  test('estados de hover/pressed/disabled dos botões têm contraste', () {
+    Color compose(Color bg, Color fg, double alpha) =>
+        Color.lerp(bg, fg, alpha)!;
+
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
+      final scheme = theme.colorScheme;
+      final name = theme.brightness.name;
+      final surface = theme.cardTheme.color ?? scheme.surface;
+
+      // ── Primário (Filled): hover/pressed escurecem o fundo ──
+      final filledStyle = theme.filledButtonTheme.style;
+      final filledBg = filledStyle?.backgroundColor?.resolve(
+        const <WidgetState>{},
+      );
+      final filledFg = filledStyle?.foregroundColor?.resolve(
+        const <WidgetState>{},
+      );
+      final filledDisabledBg = filledStyle?.backgroundColor?.resolve(
+        const <WidgetState>{WidgetState.disabled},
+      );
+      final filledDisabledFg = filledStyle?.foregroundColor?.resolve(
+        const <WidgetState>{WidgetState.disabled},
+      );
+      final hoverVeil = filledStyle?.overlayColor?.resolve(
+        const <WidgetState>{WidgetState.hovered},
+      );
+      if (filledBg != null &&
+          filledFg != null &&
+          hoverVeil != null &&
+          hoverVeil.a > 0) {
+        // Color.a já é 0.0–1.0 (sem divisão por 255).
+        final hoveredBg = compose(filledBg, hoverVeil, hoverVeil.a);
+        _expectContrast(
+          filledFg,
+          hoveredBg,
+          'primário hover ($name)',
+        );
+        // O hover NÃO deve ficar mais claro que o repouso (verde vivo é
+        // proibido — escurece ou mantém, nunca clareia o primário).
+        expect(
+          hoveredBg.computeLuminance(),
+          lessThanOrEqualTo(filledBg.computeLuminance() + 0.001),
+          reason: 'primário hover deve escurecer, não clarear ($name)',
+        );
+      }
+      if (filledDisabledBg != null && filledDisabledFg != null) {
+        // Cores translúcidas compõem sobre a SURFÁCIE (o que o usuário vê).
+        // Disabled é isento de AA na WCAG — barra 2.5:1 para comunicar o
+        // estado sem competir com ações ativas.
+        final disabledBg = compose(
+          surface,
+          filledDisabledBg,
+          filledDisabledBg.a,
+        );
+        final disabledFg = compose(
+          disabledBg,
+          filledDisabledFg,
+          filledDisabledFg.a,
+        );
+        _expectContrast(
+          disabledFg,
+          disabledBg,
+          'primário desabilitado ($name)',
+          minRatio: 2.5,
+        );
+      }
+
+      // ── Outline/texto/ícone: véu cinza sobre a superfície ──
+      for (final (label, style) in [
+        ('outline', theme.outlinedButtonTheme.style),
+        ('texto', theme.textButtonTheme.style),
+        ('ícone', theme.iconButtonTheme.style),
+      ]) {
+        final veil = style?.overlayColor?.resolve(
+          const <WidgetState>{WidgetState.hovered},
+        );
+        if (veil == null || veil.a == 0) continue;
+        final hoveredSurface = compose(surface, veil, veil.a);
+        _expectContrast(
+          scheme.onSurface,
+          hoveredSurface,
+          'texto sobre hover $label ($name)',
+        );
+        // O véu do hover NÃO pode ser verde (neutro r≈g≈b).
+        expect(
+          (veil.r - veil.g).abs() + (veil.g - veil.b).abs(),
+          lessThan(0.02),
+          reason: 'hover de $label deve ser neutro, não verde ($name)',
+        );
+      }
+
+      // ── FAB: hover escurece o verde, ícone ≥ 3:1 ──
+      final fabTheme = theme.floatingActionButtonTheme;
+      if (fabTheme.hoverColor != null && fabTheme.backgroundColor != null) {
+        final fabHoverBg = compose(
+          fabTheme.backgroundColor!,
+          fabTheme.hoverColor!,
+          fabTheme.hoverColor!.a,
+        );
+        expect(
+          fabHoverBg.computeLuminance(),
+          lessThanOrEqualTo(fabTheme.backgroundColor!.computeLuminance() + 0.001),
+          reason: 'FAB hover deve escurecer o verde, não clarear ($name)',
+        );
+        _expectContrast(
+          fabTheme.foregroundColor!,
+          fabHoverBg,
+          'ícone do FAB em hover ($name)',
+          minRatio: 3.0,
+        );
+      }
+    }
+  });
 }
