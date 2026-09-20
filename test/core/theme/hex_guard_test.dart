@@ -33,13 +33,12 @@ void main() {
       'widgets/sale_receipt_view.dart': 5,
       // Identidade das formas de pagamento: M-Pesa, E-Mola, cartão.
       'widgets/payment_filter.dart': 5,
-      // Identidade premium do login (set-new-password espelha o login).
-      'screens/auth/set_new_password_screen.dart': 4,
       // Recibo impresso partilhado (mesmo papel do view).
       'screens/sales/sale_receipt_share_sheet.dart': 2,
-      // Gradiente hero do card de boas-vindas (uso único) + foreground do
-      // badge âmbar (texto escuro sobre chip).
-      'screens/dashboard/dashboard_screen.dart': 4,
+      // Foreground do badge âmbar do feed (texto escuro sobre chip) — o
+      // card-hero perdeu o gradiente (Fase de des-artificialização) e
+      // passou a usar só tokens do tema.
+      'screens/dashboard/dashboard_screen.dart': 1,
       // Template persistente de Factura/Cotação.
       'controllers/invoice_template_providers.dart': 2,
       // Verde #22C55E exclusivo da identidade do login.

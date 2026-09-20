@@ -69,6 +69,23 @@ abstract final class AppCurves {
   static const Curve emphasized = Curves.easeInOutCubic;
 }
 
+/// Borda tracejada circular — o traço do cupom térmico reaproveitado como
+/// linguagem de "valor diferente do padrão" (ajuste manual no recibo, valor
+/// recebido ≠ total no fiado) e como contorno de ícones dashed.
+abstract final class DashedBorders {
+  /// Espessura do traço (discreta: decoração, não alerta).
+  static const double strokeWidth = 1.4;
+
+  /// Número de tracejos ao redor do círculo completo.
+  static const int dashCount = 12;
+
+  /// Fração do arco ocupada por cada tracejo (o resto é intervalo).
+  static const double dashFraction = 0.55;
+
+  /// Recuo da borda em relação ao raio do container.
+  static const double inset = 2;
+}
+
 /// Cores de módulo — conjunto fechado de 6 cores profissionais
 /// para os módulos do Menu e ícones de navegação.
 ///

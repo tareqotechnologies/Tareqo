@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+
+import '../../l10n/generated/app_localizations.dart';
 
 /// Abre a câmera de leitura de código de barras em um bottom sheet e
 /// devolve o primeiro código lido (ou `null` se o usuário cancelar).
@@ -45,57 +48,76 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SizedBox(
-        height: MediaQuery.sizeOf(context).height * 0.6,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned.fill(
-              child: MobileScanner(
-                controller: _controller,
-                onDetect: _onDetect,
-                errorBuilder: (context, error) => Container(
-                  color: Colors.black,
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    'Câmera indisponível: $error',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white70),
+    // O sheet é aberto via rota modal própria: traz os delegates de
+    // localização do app para que o texto guia e o erro da câmera saiam
+    // no idioma do tenant (pt/en/fr) mesmo fora do MaterialApp raiz.
+    return Localizations.override(
+      context: context,
+      delegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      child: Builder(
+        builder: (context) {
+          final l10n = AppLocalizations.of(context);
+          return SafeArea(
+            child: SizedBox(
+              height: MediaQuery.sizeOf(context).height * 0.6,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned.fill(
+                    child: MobileScanner(
+                      controller: _controller,
+                      onDetect: _onDetect,
+                      errorBuilder: (context, error) => Container(
+                        color: Colors.black,
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          l10n.salesBarcodeCameraUnavailable('$error'),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  // Moldura de mira.
+                  IgnorePointer(
+                    child: Container(
+                      width: 240,
+                      height: 240,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white, width: 3),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: IconButton.filled(
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black54,
+                      ),
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 16,
+                    child: Text(
+                      l10n.salesBarcodeCameraHint,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ),
+                ],
               ),
             ),
-            // Moldura de mira.
-            IgnorePointer(
-              child: Container(
-                width: 240,
-                height: 240,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white, width: 3),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 12,
-              right: 12,
-              child: IconButton.filled(
-                style: IconButton.styleFrom(backgroundColor: Colors.black54),
-                icon: const Icon(Icons.close, color: Colors.white),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-            const Positioned(
-              bottom: 16,
-              child: Text(
-                'Aponte a câmera para o código de barras',
-                style: TextStyle(color: Colors.white70),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

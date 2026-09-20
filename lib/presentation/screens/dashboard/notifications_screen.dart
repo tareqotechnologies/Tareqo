@@ -64,9 +64,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           TextButton(
             onPressed: _markAllAsRead,
             style: TextButton.styleFrom(
+              // A11y: alvo de toque padrão (48dp) — sem shrinkWrap.
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
               l10n.notificationMarkAllRead,
@@ -491,16 +490,17 @@ class _NotificationTile extends StatelessWidget {
                             ),
                             const Spacer(),
                             if (onMarkAsRead != null)
-                              GestureDetector(
-                                onTap: onMarkAsRead,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: Icon(
-                                    Icons.done_all_outlined,
-                                    size: 16,
-                                    color: scheme.onSurfaceVariant.withValues(
-                                      alpha: 0.4,
-                                    ),
+                              IconButton(
+                                // A11y: alvo de toque 48dp + rótulo para
+                                // leitores de ecrã (antes: gesto de 24dp
+                                // sem rótulo).
+                                tooltip: l10n.notificationMarkRead,
+                                onPressed: onMarkAsRead,
+                                icon: Icon(
+                                  Icons.done_all_outlined,
+                                  size: 16,
+                                  color: scheme.onSurfaceVariant.withValues(
+                                    alpha: 0.4,
                                   ),
                                 ),
                               ),
@@ -618,7 +618,7 @@ class _DetailBottomSheet extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: typeColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: AppRadius.mdAll,
                   ),
                   child: Icon(icon, size: 22, color: typeColor),
                 ),
@@ -684,9 +684,10 @@ class _DetailBottomSheet extends StatelessWidget {
                     color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
                   padding: EdgeInsets.zero,
+                  // A11y: alvo de toque ≥48dp.
                   constraints: const BoxConstraints(
-                    minWidth: 32,
-                    minHeight: 32,
+                    minWidth: 48,
+                    minHeight: 48,
                   ),
                 ),
               ],
@@ -756,9 +757,18 @@ class _Pill extends StatelessWidget {
     final scheme = theme.colorScheme;
     final activeColor = accent ? scheme.error : scheme.primary;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        // A11y: alvo de toque com 48dp de altura (androidTapTargetGuideline)
+        // sem alterar o visual da pílula — a área extra é transparente.
+        child: SizedBox(
+          height: AppSizes.touchTarget,
+          child: Center(
+            widthFactor: 1,
+            child: AnimatedContainer(
         duration: AppDurations.fast,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
@@ -816,6 +826,9 @@ class _Pill extends StatelessWidget {
               ),
             ],
           ],
+        ),
+        ),
+        ),
         ),
       ),
     );

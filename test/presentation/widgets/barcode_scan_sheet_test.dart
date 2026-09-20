@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:tareqo/l10n/generated/app_localizations.dart';
 import 'package:tareqo/presentation/widgets/barcode_scan_sheet.dart';
 
 /// O BarcodeScanSheet usa a CÂMERA real (MobileScannerController) — em
@@ -47,6 +49,16 @@ void main() {
   Future<void> pumpSheet(WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        // O texto guia do scanner é localizado (pt/en/fr) — o harness usa
+        // pt, igual ao restante da suíte de widget tests.
+        locale: const Locale('pt'),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) => Scaffold(
             body: Center(

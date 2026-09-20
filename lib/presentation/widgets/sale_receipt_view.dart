@@ -228,6 +228,9 @@ class _DashedDivider extends StatelessWidget {
   }
 }
 
+/// Traço LINEAR do cupom térmico — geometria de linha (dash 5 / gap 4),
+/// distinta da borda tracejada circular [DashedCirclePainter] usada em
+/// ícones: papel do recibo impresso, cores fixas de tinta.
 class _DashedLinePainter extends CustomPainter {
   const _DashedLinePainter({required this.color});
 

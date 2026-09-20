@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_tokens.dart';
 
-/// Badge animado com efeito de pulso para notificações.
+/// Badge de contagem de notificações.
 ///
-/// Exibe um círculo com contagem que pulsa suavemente quando há
-/// notificações novas. O pulso para automaticamente após некоторое
-/// tempo para não ser distraínte.
+/// Exibe um círculo com contagem sobre o widget filho (normalmente um
+/// ícone). O número já comunica a informação — o badge é ESTÁTICO por
+/// padrão: animação em loop num ecrã consultado dezenas de vezes por dia
+/// vira ruído (Fase 3: cada animação deve explicar uma mudança).
+///
+/// O pulso continua disponível como OPT-IN explícito via [showPulse]
+/// (ex.: um momento pontual de "há algo novo") e respeita
+/// `MediaQuery.disableAnimationsOf` (movimento reduzido).
 ///
 /// Uso:
 /// ```dart
@@ -21,7 +26,7 @@ class PulseBadge extends StatefulWidget {
     required this.count,
     required this.child,
     this.color,
-    this.showPulse = true,
+    this.showPulse = false,
     this.pulseDuration = const Duration(seconds: 2),
     this.maxCount = 99,
   });
@@ -35,7 +40,9 @@ class PulseBadge extends StatefulWidget {
   /// Cor de fundo do badge. Se nulo, usa [ColorScheme.tertiary].
   final Color? color;
 
-  /// Se deve animar o pulso.
+  /// Se deve animar o pulso — OPT-IN: o default é o badge estático,
+  /// porque o pulso em loop não acrescenta informação à contagem e
+  /// distrai no uso diário.
   final bool showPulse;
 
   /// Duração de cada ciclo de pulso.
@@ -134,13 +141,6 @@ class _PulseBadgeState extends State<PulseBadge>
               decoration: BoxDecoration(
                 color: badgeColor,
                 borderRadius: BorderRadius.circular(AppRadius.full),
-                boxShadow: [
-                  BoxShadow(
-                    color: badgeColor.withValues(alpha: 0.4),
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  ),
-                ],
               ),
               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(

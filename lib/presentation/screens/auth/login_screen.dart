@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_sheet.dart';
@@ -29,9 +30,6 @@ import 'forgot_password_sheet.dart';
 class _LoginPalette {
   const _LoginPalette({
     required this.background,
-    required this.surface,
-    required this.border,
-    required this.borderFocus,
     required this.textPrimary,
     required this.textSecondary,
     required this.green,
@@ -40,15 +38,6 @@ class _LoginPalette {
 
   /// Fundo da página (atrás dos campos).
   final Color background;
-
-  /// Preenchimento dos campos.
-  final Color surface;
-
-  /// Borda dos campos em repouso.
-  final Color border;
-
-  /// Borda dos campos com foco.
-  final Color borderFocus;
 
   /// Texto principal (título, rótulos, input).
   final Color textPrimary;
@@ -62,12 +51,9 @@ class _LoginPalette {
   /// Fundo do botão principal (CTA).
   final Color greenDark;
 
-  /// Modo escuro — dark premium (mesma paleta da v2.0.0).
+  /// Modo escuro — dark premium.
   static const _LoginPalette dark = _LoginPalette(
     background: AppColors.backgroundDark,
-    surface: AppColors.surfaceDark,
-    border: AppColors.borderDark,
-    borderFocus: AppColors.brand,
     // Branco puro e verde vivo #22C55E são exclusivos da identidade
     // premium do login (não são papéis do tema).
     textPrimary: Colors.white,
@@ -82,9 +68,6 @@ class _LoginPalette {
   /// Modo claro — espelha os neutros do `AppTheme.light` via tokens.
   static const _LoginPalette light = _LoginPalette(
     background: AppColors.scaffoldLight,
-    surface: Colors.white,
-    border: AppColors.borderLight,
-    borderFocus: AppColors.brandMuted,
     textPrimary: AppColors.onSurfaceLight,
     textSecondary: AppColors.onSurfaceVariantLight,
     green: AppColors.brandMuted,
@@ -112,31 +95,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
 
-  final _emailFocus = FocusNode();
-  final _passwordFocus = FocusNode();
-
-  bool _emailFocused = false;
-  bool _passwordFocused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _emailFocus.addListener(() {
-      setState(() => _emailFocused = _emailFocus.hasFocus);
-    });
-    _passwordFocus.addListener(() {
-      setState(() => _passwordFocused = _passwordFocus.hasFocus);
-    });
-  }
-
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
     _nameController.dispose();
-    _emailFocus.dispose();
-    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -268,7 +232,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // ── Logo ──
                     Center(
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
                         child: Image.asset(
                           'assets/branding/icon_official.png',
                           width: 100,
@@ -315,8 +279,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         icon: Icons.person_outline_rounded,
                         textInputAction: TextInputAction.next,
                         obscure: false,
-                        focusNode: null,
-                        focused: false,
                       ),
                       const SizedBox(height: 20),
                     ],
@@ -332,8 +294,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       obscure: false,
-                      focusNode: _emailFocus,
-                      focused: _emailFocused,
                     ),
                     const SizedBox(height: 20),
 
@@ -352,8 +312,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onSubmitted: (_) {
                         if (!_isSignUpMode) _submit();
                       },
-                      focusNode: _passwordFocus,
-                      focused: _passwordFocused,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
@@ -386,8 +344,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         obscure: _obscureConfirm,
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _submit(),
-                        focusNode: null,
-                        focused: false,
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscureConfirm
@@ -421,7 +377,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            // Design system V4: mesmo raio dos controles
+                            // (botões/campos) — o 14 ad-hoc divergia.
+                            borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
                           textStyle: const TextStyle(
                             fontSize: 16,
@@ -564,53 +522,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     TextInputType? keyboardType,
     TextInputAction? textInputAction,
     ValueChanged<String>? onSubmitted,
-    FocusNode? focusNode,
-    bool focused = false,
     Widget? suffixIcon,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: focused ? palette.borderFocus : palette.border,
-          width: focused ? 1.5 : 1,
-        ),
-      ),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        obscureText: obscure,
-        keyboardType: keyboardType,
-        textInputAction: textInputAction,
-        onSubmitted: onSubmitted,
-        style: TextStyle(
-          fontSize: 15,
-          color: palette.textPrimary,
-          fontWeight: FontWeight.w400,
-        ),
-        cursorColor: palette.green,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-            fontSize: 15,
-            color: palette.textSecondary.withValues(alpha: 0.5),
-            fontWeight: FontWeight.w400,
-          ),
-          prefixIcon: Icon(
-            icon,
-            size: 20,
-            color: focused
-                ? palette.green
-                : palette.textSecondary.withValues(alpha: 0.7),
-          ),
-          suffixIcon: suffixIcon,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-        ),
+    // Campos alinhados ao design system: usa o InputDecorationTheme do app
+    // (fill, borda em repouso, foco 1.5 com primary, raio md) — o mesmo
+    // tratamento de todos os formulários. O foco é gerido pelo Flutter; a
+    // identidade do login fica na paleta (fundo e acento), não numa
+    // decoração de campo divergente.
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      onSubmitted: onSubmitted,
+      style: TextStyle(fontSize: 15, color: palette.textPrimary),
+      cursorColor: palette.green,
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon, size: 20),
+        suffixIcon: suffixIcon,
       ),
     );
   }
