@@ -14,6 +14,7 @@ import 'package:tareqo/domain/usecases/process_sale_use_case.dart';
 import 'package:tareqo/presentation/controllers/products_providers.dart';
 import 'package:tareqo/presentation/controllers/sales_providers.dart';
 import 'package:tareqo/presentation/screens/sales/new_sale_sheet.dart';
+import 'package:tareqo/presentation/widgets/app_button.dart';
 import 'package:tareqo/presentation/widgets/app_card.dart';
 
 import '../../helpers/store_context.dart';
@@ -54,12 +55,37 @@ const _sal = Product(
   code: '77777', // PLU de produto NÃO por peso
 );
 
+// Produto ATIVO com id CONTENDO dígitos — prova o casamento por ID
+// (p.id == raw.trim()), caminho de leitura por id numérico/alfanumérico.
+const _servico = Product(
+  id: 'p555',
+  name: 'Entrega',
+  purchasePriceCents: 0,
+  salePriceCents: 1000,
+  stockQuantity: 2000, // 2 unidades
+  code: '55555',
+);
+
+// Produto DESATIVADO — some do PDV (a leitura do código dele é erro de
+// busca, mesmo com o código cadastrado).
+const _inativo = Product(
+  id: 'p-inativo',
+  name: 'Disco Vinil',
+  purchasePriceCents: 5000,
+  salePriceCents: 9000,
+  stockQuantity: 1000,
+  code: '88888',
+  isActive: false,
+);
+
 class _FakeGetProductsUseCase implements GetProductsUseCase {
   @override
   Future<List<Product>> call({required String storeId}) async => const [
     _arroz,
     _biscoito,
     _sal,
+    _servico,
+    _inativo,
   ];
 }
 
@@ -381,6 +407,153 @@ void main() {
       await tester.tap(find.text('Confirmar venda'));
       await tester.pumpAndSettle();
       expect(processSale.lastSale?.items.single.quantity, 10000);
+    },
+  );
+
+  testWidgets('código exato de produto por UNIDADE adiciona 1 e limpa o campo',
+      (tester) async {
+    await _pumpSheet(tester);
+
+    // '77777' casa com o código EXATO do Sal (p.code == digits) — +1
+    // unidade pelo caminho de código simples (sem normalização necessária).
+    await _scan(tester, '77777');
+
+    // Campo limpo após leitura bem-sucedida — verificado ANTES de rolar:
+    // ao rolar até o catálogo, o campo lazy sai da viewport e é destruído.
+    final field = tester.widget<TextField>(_barcodeField());
+    expect(field.controller?.text, isEmpty);
+
+    await tester.scrollUntilVisible(
+      find.widgetWithText(AppCard, 'Sal'),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.widgetWithText(AppCard, 'Sal'),
+        matching: find.text('1'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('leitura por ID do produto resolve quando o id contém dígitos',
+      (tester) async {
+    await _pumpSheet(tester);
+
+    // 'p555' = id do produto Entrega (p.id == raw.trim()) — o caminho de id
+    // atende códigos alfanuméricos; os dígitos restantes ('555') não casam
+    // com nenhum código, mas o id resolve antes.
+    await _scan(tester, 'p555');
+
+    await tester.scrollUntilVisible(
+      find.widgetWithText(AppCard, 'Entrega'),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.widgetWithText(AppCard, 'Entrega'),
+        matching: find.text('1'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('código de produto INATIVO é erro de busca (some do PDV)',
+      (tester) async {
+    await _pumpSheet(tester);
+
+    // '88888' está cadastrado no Disco Vinil, mas ele está inativo — o PDV
+    // filtra isActive e a leitura vira "produto não encontrado" (o servidor
+    // também nega na venda).
+    await _scan(tester, '88888');
+
+    expect(
+      find.text('Produto não encontrado para este código.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('entrada SEM dígitos é no-op silencioso (nem erro mostra)',
+      (tester) async {
+    final processSale = await _pumpSheet(tester);
+
+    // QR/texto sem nenhum dígito: digits.isEmpty → return ANTES de qualquer
+    // busca — não mostra "produto não encontrado" (não foi tentativa de
+    // código) e o carrinho segue vazio.
+    await _scan(tester, 'QR SEM NÚMEROS');
+
+    expect(
+      find.text('Produto não encontrado para este código.'),
+      findsNothing,
+    );
+    final confirmButton = tester.widget<AppButton>(
+      find.ancestor(
+        of: find.text('Confirmar venda'),
+        matching: find.byType(AppButton),
+      ),
+    );
+    expect(confirmButton.onPressed, isNull);
+    expect(processSale.calls, 0);
+  });
+
+  testWidgets(
+    'etiqueta de balança com valor 00000 → peso ≤ 0 mostra erro de balança',
+    (tester) async {
+      final processSale = await _pumpSheet(tester);
+
+      // '200012300000' = 20 + PLU '00123' (Arroz por peso) + valor '00000'
+      // → peso derivado = 0 → inválido (não entra nada no carrinho).
+      await _scan(tester, '200012300000');
+
+      expect(find.text('Código de balança inválido.'), findsOneWidget);
+
+      await tester.tap(find.text('Confirmar venda'));
+      await tester.pumpAndSettle();
+      expect(processSale.calls, 0);
+    },
+  );
+
+  testWidgets(
+    'limite de estoque também vale no caminho de +1 unidade (código simples)',
+    (tester) async {
+      final processSale = await _pumpSheet(tester);
+
+      // Sal tem 3 unidades: três leituras de '77777' enchem o estoque e a
+      // quarta dispara o limite — sem exceder o disponível.
+      await _scan(tester, '77777');
+      await _scan(tester, '77777');
+      await _scan(tester, '77777');
+
+      await tester.scrollUntilVisible(
+        find.widgetWithText(AppCard, 'Sal'),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.widgetWithText(AppCard, 'Sal'),
+          matching: find.text('3'),
+        ),
+        findsOneWidget,
+      );
+
+      await _scan(tester, '77777');
+      expect(
+        find.text('Limite de estoque atingido para Sal.'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Confirmar venda'));
+      await tester.pumpAndSettle();
+      expect(processSale.lastSale?.items.single.productId, 'p-sal');
+      expect(processSale.lastSale?.items.single.quantity, 3000);
     },
   );
 }

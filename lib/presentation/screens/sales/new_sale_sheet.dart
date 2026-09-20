@@ -282,7 +282,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   /// Atalho de balcão: Enter no campo de BUSCA dá quick-add.
   ///
   /// Operador digita o PLU/código do produto e aperta Enter — sem tocar no
-  /// catálogo. Reaproveita TODO o pipeline de leitura de código ([_handleBarcode]):
+  /// catálogo. Reaproveita o pipeline COMPLETO de leitura de código ([_handleBarcode]):
   /// balança `20PPPPPWWWWW`, PLU com zeros à esquerda, caps de estoque e
   /// mensagens de erro — nada de regra duplicada. Texto que NÃO resolve
   /// produto é ignorado silenciosamente: quem digitou estava buscando por
