@@ -3,6 +3,19 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.4.0+29] — 2026-09-20
+
+### Novo
+- **FAB da aba Crédito abre "Registrar fiado" direto**: o FAB central do shell pula o menu "Nova ação" na seção Crédito e abre a sheet de fiado (ação única da tela); tooltip contextual "Registrar fiado" (l10n existente, pt/en/fr). Demais abas mantêm o menu. Teste de regressão no shell.
+
+### Alterado (UI/UX)
+- **Card de Factura Personalizada minimalista**: sem avatar, nome + nº sequencial inline, metadados numa linha discreta (itens · telefone), valor à direita com tabular figures e ações WhatsApp/PDF como ícones com tooltip — mesmo padrão dos cards de fiado (canvas V3); padding 14 e cantos 16.
+- **SheetHeader sem truncar títulos**: título auto-size (FittedBox, 15pt, softWrap=false) — "Registrar movimentação" fica 100% legível em telas estreitas e com escala de texto alta (antes cortava em ellipsis com titleMedium 16); subtítulo preservado.
+- **Hover/pressed/focus/disabled dos botões sem verde**: o véu de hover derivado do `primary` (M3) foi substituído por feedback neutro e sóbrio no ThemeData (claro e escuro) — primário/FAB ESCURECEM o preenchimento (véu preto sutil); outline/texto/ícone/elevated/segmented usam véu cinza (`onSurface` 6–10%); foco com borda `primary` 1.5px nos outline (não depende só de cor); disabled em cinza neutro SEM verde e sem sombra. Transição 150ms; verde mantido apenas onde é semântico (FAB, primário em repouso, income/success, chips de navegação). Auditoria nova em `theme_contrast_test.dart` (hover escurece, véus neutros, contraste ≥ 4.5:1; FAB ≥ 3:1).
+
+### Testes
+- Suíte completa **1750/1750 verde** (`flutter analyze` 0 issues); teste do card de factura atualizado ao layout minimalista (ícones/tooltip, metadados inline); goldens do design system e do PDV regenerados nos dois temas.
+
 ## [2.3.0+28] — 2026-09-20
 
 ### Novo

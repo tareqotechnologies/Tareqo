@@ -142,12 +142,14 @@ void main() {
 
     expect(find.text('João Silva'), findsOneWidget);
     expect(find.textContaining('Nº 00001'), findsOneWidget);
+    // Metadados numa linha única: itens • telefone (card minimalista).
     expect(find.textContaining('841234567'), findsOneWidget);
-    expect(find.text('1 item'), findsOneWidget);
+    expect(find.textContaining('1 item'), findsOneWidget);
     expect(find.textContaining('30,00'), findsOneWidget);
-    // Ações do card (sem Enviar — factura não tem transição de estado).
-    expect(find.text('WhatsApp'), findsOneWidget);
-    expect(find.text('PDF'), findsOneWidget);
+    // Ações do card MINIMALISTA: ícones com tooltip (não botões com
+    // rótulo — sem Enviar; factura não tem transição de estado).
+    expect(find.byTooltip('WhatsApp'), findsOneWidget);
+    expect(find.byTooltip('PDF'), findsOneWidget);
   });
 
   testWidgets('card paga com desconto mostra total líquido', (tester) async {
