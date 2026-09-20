@@ -364,7 +364,7 @@ class _StatsStrip extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(16)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
@@ -551,7 +551,7 @@ class _GrowthSummary extends StatelessWidget {
     final approvalDiff = approvalsThisWeek - approvalsLastWeek;
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(16)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -592,7 +592,9 @@ class _GrowthSummary extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _GrowthKpi(
-            label: l10n.adminGrowthNewTenants,
+            // Título próprio — o mensal usava o mesmo rótulo do semanal
+            // e só o sublabel os diferenciava (ambiguidade no ecrã).
+            label: l10n.adminGrowthNewTenantsMonth,
             sublabel:
                 '${l10n.adminGrowthThisMonth}: $newThisMonth · ${l10n.adminGrowthLastMonth}: $lastMonth',
             diff: monthDiff,
@@ -686,18 +688,21 @@ class _GrowthKpi extends StatelessWidget {
             children: [
               Icon(trendIcon, size: 14, color: trendColor),
               const SizedBox(width: 4),
+              // Pílula de tendência NO PADRÃO do StatusChip: fundo tingido
+              // 12% + texto na cor de estado — branco sobre o verde/âmbar
+              // do tema não atinge AA (texto pequeno exige 4.5:1).
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
-                  color: trendColor,
+                  color: trendColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   trendLabel,
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontSize: 12,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w400,
+                    color: trendColor,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -754,9 +759,6 @@ class _TrendChart extends StatelessWidget {
         ? 1
         : buckets.reduce(math.max).clamp(1, 9999);
     final total = buckets.fold(0, (a, b) => a + b);
-    final avg = buckets.isEmpty
-        ? '0'
-        : (total / buckets.length).toStringAsFixed(1);
 
     // Week labels (last 4 chars of abbreviated month)
     final weekStarts = <String>[];
@@ -791,13 +793,6 @@ class _TrendChart extends StatelessWidget {
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Text(
-              'μ $avg/sem',
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 12,
-                color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -966,7 +961,7 @@ class _DistributionCard extends StatelessWidget {
 
     if (isLoading) {
       return AppCard(
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
+        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Container(
           width: double.infinity,
@@ -1018,7 +1013,7 @@ class _DistributionCard extends StatelessWidget {
     ];
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(16)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1227,7 +1222,7 @@ class _RecentActivityFeed extends StatelessWidget {
 
     if (isLoading) {
       return AppCard(
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
+        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
@@ -1251,7 +1246,7 @@ class _RecentActivityFeed extends StatelessWidget {
 
     if (recent.isEmpty) {
       return AppCard(
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
+        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [
@@ -1273,7 +1268,7 @@ class _RecentActivityFeed extends StatelessWidget {
     }
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(16)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       padding: EdgeInsets.zero,
       child: Column(
         children: [
@@ -1398,10 +1393,9 @@ class _QuickActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(16)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.md,
@@ -1425,20 +1419,25 @@ class _QuickActionCard extends StatelessWidget {
               ),
               if (action.badge > 0) ...[
                 const Spacer(),
+                // Contagem em pílula tingida com texto na própria cor do
+                // item — `onTertiary` sobre primary/statusPurple era um
+                // pareamento sem relação com a cor de fundo (contraste
+                // imprevisível nos dois temas).
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: action.color,
+                    color: action.color.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     '${action.badge}',
                     style: TextStyle(
                       fontSize: 12,
-                      color: scheme.onTertiary,
+                      color: action.color,
+                      fontWeight: FontWeight.w600,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_settings.dart';
+import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/theme/app_theme.dart';
@@ -28,6 +29,7 @@ import '../../widgets/app_page.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/detail_row.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
@@ -234,10 +236,10 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
             final store = stores[index];
             final scheme = Theme.of(context).colorScheme;
             return AppCard(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
               padding: EdgeInsets.zero,
               child: InkWell(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
                 onTap: () => _openStoreDetail(store),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -341,10 +343,10 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
             final employee = employees[index];
             final scheme = Theme.of(context).colorScheme;
             return AppCard(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
               padding: EdgeInsets.zero,
               child: InkWell(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
                 onTap: () => _openEmployeeDetail(employee, stores, isOwner),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -532,7 +534,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
               PlanRequestStatus.rejected => (scheme.error, l10n.statusRejected),
             };
             return AppCard(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
               padding: EdgeInsets.zero,
               child: ListTile(
                 leading: Icon(Icons.swap_horiz, size: 20, color: color),

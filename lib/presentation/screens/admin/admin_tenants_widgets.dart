@@ -25,7 +25,7 @@ class _AdminTenantCard extends ConsumerWidget {
 
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       padding: const EdgeInsets.all(14),
       borderColor: color.withValues(alpha: 0.3),
       onTap: onTap,
@@ -144,7 +144,7 @@ class _PendingTenantCard extends StatelessWidget {
       onLongPress: onLongPress,
       child: AppCard(
         elevated: true,
-        borderRadius: const BorderRadius.all(Radius.circular(18)),
+        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
         borderColor: scheme.tertiary.withValues(alpha: 0.4),
         padding: const EdgeInsets.all(14),
         onTap: onTap,
@@ -277,7 +277,7 @@ class _TenantDetailSheet extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: scheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
           ),
           child: ListView(
             controller: scrollController,

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_settings.dart';
+import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../domain/entities/app_user.dart';
@@ -83,7 +85,7 @@ class _TenantOnboardingScreenState
         SnackBar(content: Text(l10n.onboardingSuccess(tenant.businessName))),
       );
     } on InvalidTenantRequestException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } catch (error, stackTrace) {
       CrashReporting.capture(
         error,
@@ -119,19 +121,10 @@ class _TenantOnboardingScreenState
                   height: 68,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withValues(
-                          alpha: 0.35,
-                        ),
-                        blurRadius: 28,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
                     child: Image.asset(
                       'assets/branding/icon_official.png',
                       width: 68,
@@ -162,7 +155,7 @@ class _TenantOnboardingScreenState
                 // elevada — o formulário flutua sobre o fundo.
                 AppCard(
                   elevated: true,
-                  borderRadius: const BorderRadius.all(Radius.circular(20)),
+                  borderRadius: const BorderRadius.all(Radius.circular(AppRadius.xl)),
                   padding: const EdgeInsets.all(20),
                   child: Form(
                     key: _formKey,
@@ -376,7 +369,7 @@ class _PlanCard extends StatelessWidget {
       onTap: onTap,
       // Card premium (estilo Apple): cantos 18 + superfície elevada.
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       padding: const EdgeInsets.all(14),
       // Seleção: borda no acento + fundo em primaryContainer; em repouso
       // segue a borda sutil (0.5px) e o fundo da superfície do design system.

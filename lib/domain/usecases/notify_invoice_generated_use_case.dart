@@ -36,6 +36,12 @@ class NotifyInvoiceGeneratedUseCase {
       body:
           'Factura ${invoice.period} no valor de $amount $currency. '
           'Vencimento: ${_formatDate(invoice.dueDate)}.',
+      bodyParams: {
+        'period': invoice.period,
+        'amount': amount,
+        'currency': currency,
+        'dueDate': _formatDate(invoice.dueDate),
+      },
       createdAt: DateTime.now(),
     );
 
@@ -59,6 +65,12 @@ class NotifyInvoiceGeneratedUseCase {
       body:
           'A factura ${invoice.period} no valor de $amount MZN '
           'vence em $daysLeft dia(s). Regularize o pagamento.',
+      bodyParams: {
+        'period': invoice.period,
+        'amount': amount,
+        'currency': 'MZN',
+        'days': '$daysLeft',
+      },
       createdAt: DateTime.now(),
     );
 
@@ -81,6 +93,11 @@ class NotifyInvoiceGeneratedUseCase {
       body:
           'A factura ${invoice.period} no valor de $amount MZN '
           'expirou sem pagamento. O acesso pode ser suspenso.',
+      bodyParams: {
+        'period': invoice.period,
+        'amount': amount,
+        'currency': 'MZN',
+      },
       createdAt: DateTime.now(),
     );
 
@@ -103,6 +120,11 @@ class NotifyInvoiceGeneratedUseCase {
       body:
           'A factura ${invoice.period} no valor de $amount MZN '
           'foi registada como paga. Obrigado!',
+      bodyParams: {
+        'period': invoice.period,
+        'amount': amount,
+        'currency': 'MZN',
+      },
       createdAt: DateTime.now(),
     );
 

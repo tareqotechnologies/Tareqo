@@ -129,7 +129,11 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Valor inválido.'), findsOneWidget);
+    // A UI localiza pelo TIPO da exceção (o message é fallback/legado).
+    expect(
+      find.text('O valor da transação deve ser maior que zero.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('exibe erro genérico quando a infraestrutura falha', (

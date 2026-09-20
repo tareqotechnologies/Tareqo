@@ -376,6 +376,7 @@ void main() {
   ) async {
     accountService.throwOnCreate = const EmployeeAccountCreationException(
       'E-mail já registrado.',
+      code: 'emailInUse',
     );
     await openEmployeeSheet(tester);
 
@@ -390,8 +391,14 @@ void main() {
     await tester.tap(find.text('Cadastrar funcionário'));
     await tester.pumpAndSettle();
 
-    // A mensagem amigável da EXCEÇÃO de conta aparece no _formError.
-    expect(find.text('E-mail já registrado.'), findsOneWidget);
+    // A UI localiza pelo CODE da exceção de conta (o message é fallback).
+    expect(
+      find.text(
+        'Já existe uma conta com este e-mail. Use outro e-mail ou peça '
+        'ao funcionário para entrar com a conta dele.',
+      ),
+      findsOneWidget,
+    );
     // A sheet permanece aberta para correção.
     expect(find.text('Cadastrar funcionário'), findsOneWidget);
   });

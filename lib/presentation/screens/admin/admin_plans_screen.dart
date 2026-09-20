@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/utils/ids.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
@@ -395,7 +396,7 @@ class _PlanDetailSheet extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: scheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
           ),
           child: ListView(
             controller: scrollController,
@@ -923,7 +924,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
         ),
       );
     } on InvalidPlanException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } catch (error, stackTrace) {
       CrashReporting.capture(error, stackTrace, hint: 'Erro ao salvar plano');
       setState(() {
@@ -943,7 +944,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),

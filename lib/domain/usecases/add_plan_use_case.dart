@@ -2,10 +2,16 @@ import '../entities/plan.dart';
 import '../repositories/i_plan_repository.dart';
 
 /// Exceção de domínio: plano inválido.
+///
+/// [code] identifica a variante de validação (estável, para a UI localizar
+/// a mensagem); [message] permanece como fallback/legado (PT).
 final class InvalidPlanException implements Exception {
-  const InvalidPlanException(this.message);
+  const InvalidPlanException(this.message, {this.code = ''});
 
   final String message;
+
+  /// Variante: emptyName | minStores | minEmployees | negativePrice.
+  final String code;
 
   @override
   String toString() => 'InvalidPlanException: $message';
@@ -17,18 +23,28 @@ final class InvalidPlanException implements Exception {
 /// (editar) aplicam exatamente as mesmas regras antes de persistir.
 void validatePlan(Plan plan) {
   if (plan.name.trim().isEmpty) {
-    throw const InvalidPlanException('Informe o nome do plano.');
+    throw const InvalidPlanException(
+      'Informe o nome do plano.',
+      code: 'emptyName',
+    );
   }
   if (plan.maxStores < 1) {
-    throw const InvalidPlanException('O plano deve permitir ao menos 1 loja.');
+    throw const InvalidPlanException(
+      'O plano deve permitir ao menos 1 loja.',
+      code: 'minStores',
+    );
   }
   if (plan.maxEmployees < 1) {
     throw const InvalidPlanException(
       'O plano deve permitir ao menos 1 funcionário.',
+      code: 'minEmployees',
     );
   }
   if (plan.priceMonthlyCents < 0) {
-    throw const InvalidPlanException('O preço não pode ser negativo.');
+    throw const InvalidPlanException(
+      'O preço não pode ser negativo.',
+      code: 'negativePrice',
+    );
   }
 }
 

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 
@@ -20,6 +21,7 @@ class CustomInvoicePreview extends StatelessWidget {
     required this.businessTaxId,
     this.logoBytes,
     required this.primaryColor,
+    this.currencySymbol = 'MT',
   });
 
   final String businessName;
@@ -29,13 +31,20 @@ class CustomInvoicePreview extends StatelessWidget {
   final Uint8List? logoBytes;
   final Color primaryColor;
 
+  /// Símbolo monetário dos preços de amostra. O chamador passa o símbolo
+  /// ativo do tenant ([Formatters.currencySymbol]) — antes estava fixo em
+  /// 'MT' mesmo para negócios em outra moeda. O default preserva a
+  /// amostra do metical (moeda base do produto) quando não informado.
+  final String currencySymbol;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = context.l10n;
     final displayName = businessName.isNotEmpty
         ? businessName
-        : 'Nome da Empresa';
+        : l10n.customInvoicePreviewCompanyFallback;
 
     // Cor escura para texto (mesma lógica do PDF exporter).
     final primaryDark = HSLColor.fromColor(primaryColor)
@@ -121,7 +130,7 @@ class CustomInvoicePreview extends StatelessWidget {
                                   ),
                                 if (businessTaxId.isNotEmpty)
                                   Text(
-                                    'NIF: $businessTaxId',
+                                    l10n.pdfNifLine(businessTaxId),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: scheme.onSurfaceVariant,
                                       fontSize: 9,
@@ -145,7 +154,7 @@ class CustomInvoicePreview extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        'FACTURA',
+                        l10n.pdfInvoiceDocWord,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -162,7 +171,7 @@ class CustomInvoicePreview extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    'Nº 00001  •  ${Formatters.date(DateTime.now())}',
+                    '${l10n.customInvoiceNumberPrefix('00001')}  •  ${Formatters.date(DateTime.now())}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                       fontSize: 9,
@@ -178,7 +187,7 @@ class CustomInvoicePreview extends StatelessWidget {
                 const SizedBox(height: 8),
                 // ─── Cliente ──
                 Text(
-                  'CLIENTE',
+                  l10n.pdfClientHeading,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontSize: 8,
                     fontWeight: FontWeight.w700,
@@ -188,14 +197,14 @@ class CustomInvoicePreview extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'João Silva',
+                  l10n.customInvoicePreviewSampleClient,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w500,
                     fontSize: 11,
                   ),
                 ),
                 Text(
-                  'Tel: 84 123 4567',
+                  l10n.pdfPhoneLine('84 123 4567'),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                     fontSize: 9,
@@ -219,7 +228,7 @@ class CustomInvoicePreview extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          'Item',
+                          l10n.pdfItemHeader,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -230,7 +239,7 @@ class CustomInvoicePreview extends StatelessWidget {
                       SizedBox(
                         width: 36,
                         child: Text(
-                          'Qtd',
+                          l10n.customInvoiceQty,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.white,
@@ -242,7 +251,7 @@ class CustomInvoicePreview extends StatelessWidget {
                       SizedBox(
                         width: 52,
                         child: Text(
-                          'Preço',
+                          l10n.pdfUnitPriceHeader,
                           textAlign: TextAlign.right,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.white,
@@ -256,15 +265,17 @@ class CustomInvoicePreview extends StatelessWidget {
                 ),
                 // Rows
                 _PreviewRow(
-                  name: 'Produto A',
+                  name: l10n.customInvoicePreviewSampleItemA,
                   qty: '2',
                   price: '150,00',
+                  currencySymbol: currencySymbol,
                   primaryColor: primaryColor,
                 ),
                 _PreviewRow(
-                  name: 'Produto B',
+                  name: l10n.customInvoicePreviewSampleItemB,
                   qty: '1',
                   price: '250,00',
+                  currencySymbol: currencySymbol,
                   primaryColor: primaryColor,
                   last: true,
                 ),
@@ -282,7 +293,7 @@ class CustomInvoicePreview extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'TOTAL: 550,00 MT',
+                      l10n.customInvoicePreviewTotal('550,00 $currencySymbol'),
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: primaryDark,
@@ -300,7 +311,7 @@ class CustomInvoicePreview extends StatelessWidget {
                 const SizedBox(height: 6),
                 Center(
                   child: Text(
-                    'Gerado pelo TAREQO',
+                    l10n.customInvoicePreviewFooter,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                       fontSize: 8,
@@ -322,6 +333,7 @@ class _PreviewRow extends StatelessWidget {
     required this.name,
     required this.qty,
     required this.price,
+    required this.currencySymbol,
     required this.primaryColor,
     this.last = false,
   });
@@ -329,6 +341,7 @@ class _PreviewRow extends StatelessWidget {
   final String name;
   final String qty;
   final String price;
+  final String currencySymbol;
   final Color primaryColor;
   final bool last;
 
@@ -368,7 +381,7 @@ class _PreviewRow extends StatelessWidget {
           SizedBox(
             width: 52,
             child: Text(
-              '$price MT',
+              '$price $currencySymbol',
               textAlign: TextAlign.right,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 9,

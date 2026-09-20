@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
@@ -280,10 +281,10 @@ class _CustomerTile extends StatelessWidget {
 
     return Material(
       color: theme.colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: AppRadius.lgAll,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: AppRadius.lgAll,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
@@ -468,7 +469,7 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
         SnackBar(content: Text(l10n.customersAdded(customer.name))),
       );
     } on InvalidCustomerException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } catch (error, stackTrace) {
       CrashReporting.capture(
         error,
@@ -631,7 +632,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
         SnackBar(content: Text(l10n.customersEditSuccess(updated.name))),
       );
     } on InvalidCustomerException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } catch (error, stackTrace) {
       CrashReporting.capture(error, stackTrace, hint: 'Erro ao editar cliente');
       setState(() {

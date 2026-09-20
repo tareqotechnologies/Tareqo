@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/ui/dashed_circle_painter.dart';
 import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/period_utils.dart';
@@ -331,8 +332,6 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.sm + 2),
               const StoreSwitcher(hideWhenSingle: false),
               const SizedBox(height: AppSpacing.lg),
-              const _SyncPendingBanner(),
-              const SizedBox(height: AppSpacing.lg),
               // Card-hero de saldo (canvas estilo app de referência):
               // caixa em DESTAQUE + vendas/a receber como colunas
               // secundárias. Erro de KPIs: em vez de zeros falsos, um
@@ -451,9 +450,12 @@ class _PeriodPill extends ConsumerWidget {
   }
 }
 
-/// Card-hero de saldo (estilo app de referência) — caixa em destaque com
-/// tipografia grande e tabular, mais as métricas Vendas / A receber em
-/// colunas secundárias separadas por uma régua fina.
+/// Card-hero de saldo — o destaque da Home. Flat como o resto do design
+/// system: superfície elevada, borda 1px e o rótulo da métrica CAIXA em
+/// primaryContainer (mesma linguagem dos chips selecionados) — sem
+/// gradientes nem sombras coloridas, que destoavam do resto do app.
+/// Métricas Vendas / A receber em colunas secundárias separadas por uma
+/// régua fina.
 class _BalanceHero extends StatelessWidget {
   const _BalanceHero({
     required this.cashValue,
@@ -485,117 +487,53 @@ class _BalanceHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    final scheme = theme.colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          stops: [0.0, 0.55, 1.0],
-          colors: [Color(0xFF1E7A45), Color(0xFF0F4D2C), Color(0xFF0A3320)],
-        ),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.40),
-            blurRadius: 28,
-            offset: const Offset(0, 14),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
+    return AppCard(
+      elevated: true,
+      borderRadius: AppRadius.xlAll,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Brilhos internos (profundidade estilo iOS): um halo quente no
-          // canto superior direito e um reflexo frio no inferior esquerdo.
-          Positioned(
-            right: -70,
-            top: -90,
-            child: Container(
-              width: 240,
-              height: 240,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    Colors.white.withValues(alpha: 0.12),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: -60,
-            bottom: -100,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.income.withValues(alpha: 0.10),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Aresta superior de "vidro" — um filete claro que dá o efeito
-          // de luz incidindo no topo do card (Apple Materials).
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            child: IgnorePointer(
-              child: Container(
-                height: 1.2,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.0),
-                      Colors.white.withValues(alpha: 0.35),
-                      Colors.white.withValues(alpha: 0.0),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Coluna da métrica CAIXA — chave cobre rótulo + valor
-                // (os testes localizam label e número pelo mesmo key).
+            // Coluna da métrica CAIXA — chave cobre rótulo + valor
+            // (os testes localizam label e número pelo mesmo key).
                 Column(
                   key: const ValueKey('metric-cash'),
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.account_balance_wallet_rounded,
-                          size: 16,
-                          color: Colors.white.withValues(alpha: 0.8),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          l10n.dashboardMetricCash,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.8),
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.5,
+                    // Rótulo da métrica CAIXA em pílula de marca — o mesmo
+                    // papel visual dos chips selecionados do tema.
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.account_balance_wallet_rounded,
+                            size: 14,
+                            color: scheme.onPrimaryContainer,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.dashboardMetricCash,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: scheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     // Valor grande e tabular — o destaque visual da Home.
                     // Formato "1.000,00 MZN": valor + código da moeda.
                     FittedBox(
@@ -605,7 +543,7 @@ class _BalanceHero extends StatelessWidget {
                         cashLoading ? '—' : cashValue,
                         maxLines: 1,
                         style: theme.textTheme.displaySmall?.copyWith(
-                          color: cashNegative ? theme.expense : Colors.white,
+                          color: cashNegative ? theme.expense : scheme.onSurface,
                           fontWeight: FontWeight.w500,
                           letterSpacing: -1.2,
                           height: 1.1,
@@ -616,7 +554,7 @@ class _BalanceHero extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 // Régua fina separando o saldo das métricas secundárias.
-                Divider(height: 1, color: Colors.white.withValues(alpha: 0.14)),
+                const Divider(height: 1),
                 const SizedBox(height: AppSpacing.sm),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -632,11 +570,7 @@ class _BalanceHero extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
-                    Container(
-                      width: 1,
-                      height: 40,
-                      color: Colors.white.withValues(alpha: 0.14),
-                    ),
+                    Container(width: 1, height: 40, color: scheme.outlineVariant),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: _HeroMetric(
@@ -650,9 +584,6 @@ class _BalanceHero extends StatelessWidget {
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -681,6 +612,7 @@ class _HeroMetric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Column(
       key: valueKey,
@@ -692,7 +624,7 @@ class _HeroMetric extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: Colors.white.withValues(alpha: 0.6),
+            color: scheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
             letterSpacing: 0.2,
           ),
@@ -705,7 +637,7 @@ class _HeroMetric extends StatelessWidget {
             loading ? '—' : value,
             maxLines: 1,
             style: theme.textTheme.titleLarge?.copyWith(
-              color: Colors.white,
+              color: scheme.onSurface,
               fontWeight: FontWeight.w500,
               letterSpacing: -0.4,
             ),
@@ -718,7 +650,7 @@ class _HeroMetric extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: subtextColor ?? Colors.white.withValues(alpha: 0.6),
+              color: subtextColor ?? scheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1105,8 +1037,9 @@ class _ActivityFeed extends StatelessWidget {
   }
 }
 
-/// Linha do feed — ícone em container circular tingido (com borda tracejada
-/// opcional) + título/detalhe + âncora à direita (valor ou badge).
+/// Linha do feed — ícone em container circular tingido + título/detalhe +
+/// âncora à direita (valor ou badge). O valor recebido ≠ total no fiado usa
+/// a borda tracejada térmica como marca de valor fora do padrão.
 class _ActivityRow extends StatelessWidget {
   const _ActivityRow({required this.item});
 
@@ -1133,7 +1066,7 @@ class _ActivityRow extends StatelessWidget {
             ),
             child: CustomPaint(
               painter: item.dashedBorder
-                  ? _DashedCirclePainter(color: item.iconColor)
+                  ? DashedCirclePainter(color: item.iconColor)
                   : null,
               child: Icon(item.icon, size: 18, color: item.iconColor),
             ),
@@ -1216,108 +1149,6 @@ class _ActivityRow extends StatelessWidget {
       onTap: item.onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: row,
-    );
-  }
-}
-
-/// Desenha a borda TRACEJADA circular do ícone de pagamento de fiado.
-class _DashedCirclePainter extends CustomPainter {
-  const _DashedCirclePainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-    final center = size.center(Offset.zero);
-    final radius = size.width / 2 - 2;
-    const dashCount = 12;
-    const totalAngle = 2 * 3.141592653589793;
-    final dashAngle = totalAngle / dashCount;
-    for (var i = 0; i < dashCount; i++) {
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        i * dashAngle,
-        dashAngle * 0.55,
-        false,
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedCirclePainter oldDelegate) =>
-      oldDelegate.color != color;
-}
-
-/// Banner de sincronização pendente (outbox offline do modo SaaS).
-///
-/// Aparece no topo do dashboard quando há operações do caminho de dinheiro
-/// enfileiradas sem conexão ([pendingOpsCountProvider] > 0) e some sozinho
-/// quando a fila esvazia. "Sincronizar" dispara o dreno imediato da fila.
-class _SyncPendingBanner extends ConsumerWidget {
-  const _SyncPendingBanner();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    final count = ref.watch(pendingOpsCountProvider).value ?? 0;
-    if (count <= 0) return const SizedBox.shrink();
-
-    return AppCard(
-      color: theme.warning.withValues(alpha: 0.08),
-      borderColor: theme.warning.withValues(alpha: 0.30),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: 6,
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.cloud_off_outlined,
-            color: theme.warning.withValues(alpha: 0.9),
-            size: 20,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              l10n.syncPendingCount(count),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => _syncNow(context, ref),
-            style: TextButton.styleFrom(
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            ),
-            child: Text(l10n.syncNow),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _syncNow(BuildContext context, WidgetRef ref) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final l10n = context.l10n;
-    final sync = ref.read(offlineSyncServiceProvider);
-    if (sync == null) return;
-    final synced = await sync.drain();
-    if (!context.mounted) return;
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          synced > 0 ? l10n.syncDone(synced) : l10n.syncStillOffline,
-        ),
-      ),
     );
   }
 }

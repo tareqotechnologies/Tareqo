@@ -19,6 +19,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/app_segmented_button.dart';
 import '../../widgets/skeleton.dart';
 import '../../widgets/inline_error_card.dart';
 import '../../widgets/kpi_card.dart';
@@ -122,27 +123,7 @@ class ReportsScreen extends ConsumerWidget {
               Center(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: SegmentedButton<ReportPeriod>(
-                    showSelectedIcon: false,
-                    style: SegmentedButton.styleFrom(
-                      // Sem densidade compacta: o segmento é botão de baixa
-                      // frequência — alvo de toque ≥ 48dp (guideline a11y).
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
-                      ),
-                      shape: const StadiumBorder(),
-                      side: BorderSide(color: theme.colorScheme.outlineVariant),
-                      backgroundColor: Colors.transparent,
-                      selectedBackgroundColor:
-                          theme.colorScheme.primaryContainer,
-                      selectedForegroundColor:
-                          theme.colorScheme.onPrimaryContainer,
-                      foregroundColor: theme.colorScheme.onSurfaceVariant,
-                      textStyle: theme.textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                  child: AppSegmentedButton<ReportPeriod>(
                     segments: [
                       for (final value in ReportPeriod.values)
                         ButtonSegment(
@@ -176,7 +157,7 @@ class ReportsScreen extends ConsumerWidget {
                         amountCents: report?.totalRevenueCents ?? 0,
                         icon: Icons.point_of_sale_outlined,
                         loading: reportAsync.isLoading,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: AppRadius.lgAll,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -188,7 +169,7 @@ class ReportsScreen extends ConsumerWidget {
                         iconBackground: theme.income.withValues(alpha: 0.14),
                         iconColor: theme.income,
                         loading: reportAsync.isLoading,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: AppRadius.lgAll,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -200,7 +181,7 @@ class ReportsScreen extends ConsumerWidget {
                         iconBackground: theme.warning.withValues(alpha: 0.14),
                         iconColor: theme.warning,
                         loading: reportAsync.isLoading,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: AppRadius.lgAll,
                       ),
                     ),
                   ],
@@ -258,7 +239,7 @@ class ReportsScreen extends ConsumerWidget {
                   if (data.perDay.isEmpty) return const SizedBox.shrink();
                   return AppCard(
                     elevated: true,
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: AppRadius.lgAll,
                     padding: EdgeInsets.zero,
                     child: Column(
                       children: [
@@ -377,10 +358,10 @@ class _BestSellerRow extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    // AppCard premium (estilo Apple): cantos 18, superfície elevada.
+    // AppCard premium: raio lg do design system, superfície elevada.
     return AppCard(
       elevated: true,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: AppRadius.lgAll,
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
@@ -443,13 +424,26 @@ class _DailyRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    // Dia da semana ajuda a leitura comparativa da série (ex.: "05/09 · Sex")
+    // — reusa as chaves weekday* existentes; o modelo não tem contagem de
+    // vendas por dia, então a linha continua dia + valor.
+    final weekday = switch (day.weekday) {
+      DateTime.monday => l10n.weekdayMonday,
+      DateTime.tuesday => l10n.weekdayTuesday,
+      DateTime.wednesday => l10n.weekdayWednesday,
+      DateTime.thursday => l10n.weekdayThursday,
+      DateTime.friday => l10n.weekdayFriday,
+      DateTime.saturday => l10n.weekdaySaturday,
+      _ => l10n.weekdaySunday,
+    };
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Row(
         children: [
           Expanded(
             child: Text(
-              Formatters.day(day),
+              '${Formatters.day(day)} · $weekday',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

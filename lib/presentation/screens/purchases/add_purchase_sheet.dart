@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/ui/haptics.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/quantity.dart';
@@ -480,7 +481,7 @@ class _CartProductRow extends StatelessWidget {
     // do carrinho segue o padrão das listas principais.
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [

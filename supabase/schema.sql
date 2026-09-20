@@ -3830,6 +3830,7 @@ CREATE TABLE IF NOT EXISTS public.invoice_notifications (
     ('invoiceGenerated', 'invoiceDueSoon', 'invoiceExpired', 'invoicePaid')),
   title         TEXT NOT NULL,
   body          TEXT NOT NULL,
+  body_params   JSONB,
   is_read       BOOLEAN NOT NULL DEFAULT FALSE,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   read_at       TIMESTAMPTZ
@@ -3839,6 +3840,12 @@ COMMENT ON TABLE public.invoice_notifications
   IS 'Notificações in-app para o dono do tenant sobre facturas.';
 COMMENT ON COLUMN public.invoice_notifications.type
   IS 'Tipo: invoiceGenerated, invoiceDueSoon, invoiceExpired, invoicePaid';
+COMMENT ON COLUMN public.invoice_notifications.body_params
+  IS 'Parâmetros do corpo para localização na exibição (nulo = legado: mostra body).';
+
+-- Migração idempotente para bancos já criados.
+ALTER TABLE IF EXISTS public.invoice_notifications
+  ADD COLUMN IF NOT EXISTS body_params JSONB;
 
 ALTER TABLE public.invoice_notifications ENABLE ROW LEVEL SECURITY;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/observability/crash_reporting.dart';
@@ -97,7 +98,7 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
       if (mounted) {
         setState(() {
           _isSubmitting = false;
-          _formError = error.message;
+          _formError = domainErrorMessage(error, l10n);
         });
       }
     } catch (error, stackTrace) {

@@ -222,8 +222,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   void _showNotificationDetail(InvoiceNotification notification) {
     if (!notification.isRead) _markAsRead(notification);
     _showDetailSheet(
-      title: notification.title,
-      body: notification.body,
+      // Título localizado por tipo: o título/corpo persistidos foram criados
+      // sem contexto (dado armazenado, PT) — na exibição localizamos o que
+      // dá; o corpo permanece o armazenado como fallback.
+      title: _InvoiceTypeLabel.label(notification.type, context.l10n),
+      body: _InvoiceTypeLabel.body(notification, context.l10n),
       time: notification.createdAt,
       typeLabel: _InvoiceTypeLabel.label(notification.type, context.l10n),
       typeColor: _InvoiceTypeLabel.color(notification.type),
@@ -349,8 +352,9 @@ class _NotificationTile extends StatelessWidget {
       icon: icon,
       iconBg: color,
       iconFg: _deriveFg(color),
-      title: notification.title,
-      subtitle: notification.body,
+      // Título/corpo localizados por tipo (os persistidos são dados).
+      title: _InvoiceTypeLabel.label(notification.type, l10n),
+      subtitle: _InvoiceTypeLabel.body(notification, l10n),
       time: notification.createdAt,
       typeLabel: _InvoiceTypeLabel.iconLabel(notification.type, l10n),
       typeColor: color,
@@ -897,6 +901,48 @@ abstract final class _InvoiceTypeLabel {
       l10n.notificationAddonExpiringTitle,
     InvoiceNotificationType.addOnExpired => l10n.notificationAddonExpiredTitle,
   };
+
+  /// Corpo localizado a partir de [InvoiceNotification.bodyParams] — o
+  /// corpo persistido é dado (PT) e fica como fallback para notificações
+  /// legadas (params nulos).
+  static String body(InvoiceNotification notification, AppLocalizations l10n) {
+    final p = notification.bodyParams;
+    if (p == null) return notification.body;
+    final days = int.tryParse(p['days'] ?? '') ?? 0;
+    return switch (notification.type) {
+      InvoiceNotificationType.invoiceGenerated => l10n
+          .notificationBodyInvoiceGenerated(
+            p['period'] ?? '',
+            p['amount'] ?? '',
+            p['currency'] ?? '',
+            p['dueDate'] ?? '',
+          ),
+      InvoiceNotificationType.invoiceDueSoon => l10n
+          .notificationBodyInvoiceDueSoon(
+            p['period'] ?? '',
+            p['amount'] ?? '',
+            p['currency'] ?? '',
+            days,
+          ),
+      InvoiceNotificationType.invoiceExpired => l10n
+          .notificationBodyInvoiceExpired(
+            p['period'] ?? '',
+            p['amount'] ?? '',
+            p['currency'] ?? '',
+          ),
+      InvoiceNotificationType.invoicePaid => l10n.notificationBodyInvoicePaid(
+        p['period'] ?? '',
+        p['amount'] ?? '',
+        p['currency'] ?? '',
+      ),
+      InvoiceNotificationType.addOnExpiringSoon => l10n
+          .notificationBodyAddOnExpiringSoon(p['addonName'] ?? '', days, p['date'] ?? ''),
+      InvoiceNotificationType.addOnExpired => l10n.notificationBodyAddOnExpired(
+        p['addonName'] ?? '',
+        p['date'] ?? '',
+      ),
+    };
+  }
 
   static String iconLabel(
     InvoiceNotificationType type,

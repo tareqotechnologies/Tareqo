@@ -179,6 +179,14 @@
       }
     }
   },
+  "syncErrorsCount": "{count, plural, =1{1 en erreur} other{{count} en erreur}}",
+  "@syncErrorsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "syncNow": "Synchroniser",
   "syncOfflineSaved": "Pas de connexion. Enregistré — synchronisé automatiquement.",
   "syncDone": "{count, plural, =1{1 opération synchronisée} other{{count} opérations synchronisées}}",
@@ -461,6 +469,10 @@
   "productsPhotoTake": "Prendre une photo",
   "productsPhotoGallery": "Choisir depuis la galerie",
   "productsPhotoRemove": "Retirer la photo",
+  "productsPhotoTitle": "Photo du produit",
+  "productsPhotoAdd": "Ajouter une photo",
+  "productsPhotoChangeHint": "Touchez pour modifier",
+  "productsPhotoOptionalHint": "Facultatif — appareil photo ou galerie",
   "productsPurchasePriceError": "Indiquez le prix d'achat",
   "productsSalePriceError": "Indiquez le prix de vente",
   "productsStockError": "Quantité invalide",
@@ -1036,6 +1048,16 @@
   "salesBarcodeLabel": "Code-barres",
   "salesBarcodeHint": "Étiquettes de balance et PLU — caméra ou lecteur USB",
   "salesBarcodeScan": "Lire avec la caméra",
+  "salesBarcodeCameraHint": "Pointez la caméra vers le code-barres",
+  "salesBarcodeCameraUnavailable": "Caméra indisponible : {error}",
+  "@salesBarcodeCameraUnavailable": {
+    "description": "Erreur affichée lorsque la caméra ne peut pas être ouverte dans le lecteur de code-barres",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "salesBarcodeNotFound": "Produit introuvable pour ce code.",
   "salesBarcodeInvalid": "Code de balance invalide.",
   "salesStockLimit": "Limite de stock atteinte pour {product}.",
@@ -1195,6 +1217,7 @@
   "adminGrowthThisMonth": "Ce mois-ci",
   "adminGrowthLastMonth": "Mois dernier",
   "adminGrowthNewTenants": "Nouveaux tenants",
+  "adminGrowthNewTenantsMonth": "Nouveaux tenants ce mois",
   "adminGrowthApprovals": "Approbations",
   "adminGrowthUp": "+{count}",
   "@adminGrowthUp": {
@@ -1250,6 +1273,7 @@
   "notificationInvoiceExpired": "Facture expirée",
   "notificationInvoicePaid": "Facture payée",
   "notificationMarkAllRead": "Tout marquer comme lu",
+  "notificationMarkRead": "Marquer comme lu",
   "notificationNoNotifications": "Aucune notification",
   "notificationNoNotificationsHint": "Les notifications de factures apparaîtront ici.",
   "notificationTabAll": "Toutes",
@@ -1270,6 +1294,55 @@
   "notificationAdminLabelGeneral": "Général",
   "notificationAddonExpiringTitle": "Add-on bientôt expiré",
   "notificationAddonExpiredTitle": "Add-on expiré",
+  "notificationBodyInvoiceGenerated": "Facture {period} d'un montant de {amount} {currency}. Échéance : {dueDate}.",
+  "@notificationBodyInvoiceGenerated": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "amount": { "type": "String" },
+      "currency": { "type": "String" },
+      "dueDate": { "type": "String" }
+    }
+  },
+  "notificationBodyInvoiceDueSoon": "La facture {period} d'un montant de {amount} {currency} arrive à échéance dans {days, plural, =1{1 jour} other{{days} jours}}. Merci de régulariser le paiement.",
+  "@notificationBodyInvoiceDueSoon": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "amount": { "type": "String" },
+      "currency": { "type": "String" },
+      "days": { "type": "int" }
+    }
+  },
+  "notificationBodyInvoiceExpired": "La facture {period} d'un montant de {amount} {currency} a expiré sans paiement. L'accès peut être suspendu.",
+  "@notificationBodyInvoiceExpired": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "amount": { "type": "String" },
+      "currency": { "type": "String" }
+    }
+  },
+  "notificationBodyInvoicePaid": "La facture {period} d'un montant de {amount} {currency} a été marquée comme payée. Merci !",
+  "@notificationBodyInvoicePaid": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "amount": { "type": "String" },
+      "currency": { "type": "String" }
+    }
+  },
+  "notificationBodyAddOnExpired": "Le service « {addonName} » a expiré le {date}. Renouvelez l'abonnement pour continuer à l'utiliser.",
+  "@notificationBodyAddOnExpired": {
+    "placeholders": {
+      "addonName": { "type": "String" },
+      "date": { "type": "String" }
+    }
+  },
+  "notificationBodyAddOnExpiringSoon": "Le service « {addonName} » expire dans {days, plural, =1{1 jour} other{{days} jours}} ({date}). Renouvelez pour éviter l'interruption.",
+  "@notificationBodyAddOnExpiringSoon": {
+    "placeholders": {
+      "addonName": { "type": "String" },
+      "days": { "type": "int" },
+      "date": { "type": "String" }
+    }
+  },
   "notificationIconInvoice": "Facture",
   "notificationIconDue": "Échéance",
   "notificationIconExpired": "Expirée",
@@ -1339,6 +1412,16 @@
   "customInvoiceTemplateStyleCompact": "Compact",
   "customInvoiceTemplateSave": "Enregistrer le modèle",
   "customInvoicePreviewCompanyFallback": "Nom de l'entreprise",
+  "customInvoicePreviewSampleItemA": "Produit A",
+  "customInvoicePreviewSampleItemB": "Produit B",
+  "customInvoicePreviewSampleClient": "João Silva",
+  "customInvoicePreviewTotal": "TOTAL : {total}",
+  "@customInvoicePreviewTotal": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "customInvoicePreviewFooter": "Généré par TAREQO",
   "quotationTitle": "Devis",
   "quotationEmpty": "Aucun devis",
   "quotationEmptySubtitle": "Créez des devis et des estimations pour vos clients",
@@ -1660,5 +1743,41 @@
   "adminTenantCycleActiveLeft": "Actif : {days, plural, =1{1 jour restant} other{{days} jours restants}}",
   "adminTenantCycleExpired": "Expiré",
   "adminTenantCycleExpiresIn": "Expire dans {days, plural, =1{1 jour} other{{days} jours}}",
-  "adminTenantCycleTrialLeft": "Essai : {days, plural, =1{1 jour restant} other{{days} jours restants}}"
+  "adminTenantCycleTrialLeft": "Essai : {days, plural, =1{1 jour restant} other{{days} jours restants}}",
+  "validationCustomerNameRequired": "Renseignez le nom du client.",
+  "validationDebtAmountPositive": "Le montant du crédit doit être supérieur à zéro.",
+  "validationAmountPositive": "Le montant de la transaction doit être supérieur à zéro.",
+  "validationCashCountNonNegative": "Le comptage physique ne peut pas être négatif.",
+  "validationSalePriceBelowPurchase": "Le prix de vente ne peut pas être inférieur au prix d'achat.",
+  "validationStoreNameRequired": "Renseignez le nom du magasin.",
+  "validationTenantNotApproved": "Votre accès à l'ERP n'a pas encore été approuvé.",
+  "validationEmployeeNameEmailRequired": "Renseignez le nom et l'e-mail de l'employé.",
+  "validationEmployeeStoreRequired": "Choisissez un magasin de votre tenant.",
+  "validationPlanNameRequired": "Renseignez le nom du plan.",
+  "validationPlanMinStores": "Le plan doit autoriser au moins 1 magasin.",
+  "validationPlanMinEmployees": "Le plan doit autoriser au moins 1 employé.",
+  "validationPlanPriceNonNegative": "Le prix ne peut pas être négatif.",
+  "validationBusinessNameRequired": "Renseignez le nom de votre entreprise.",
+  "validationAccessPlanRequired": "Choisissez un plan.",
+  "validationAccessAlreadyRequested": "Vous avez déjà une demande d'accès en cours. Attendez l'approbation.",
+  "validationUpgradePlanDifferent": "Choisissez un plan différent de l'actuel.",
+  "validationUpgradePendingExists": "Une demande de mise à niveau est déjà en attente d'approbation.",
+  "validationAccountGeneric": "Impossible de créer le compte de l'employé. Réessayez.",
+  "validationAccountEmailInUse": "Un compte avec cet e-mail existe déjà. Utilisez un autre e-mail ou demandez à l'employé de se connecter avec son compte.",
+  "validationAccountOwnerOnly": "Seul le propriétaire du tenant peut enregistrer des employés.",
+  "validationAccountWeakPassword": "Le mot de passe doit comporter au moins 8 caractères.",
+  "planLimitStores": "Le plan {planName} autorise jusqu'à {limit, plural, =1{1 magasin} other{{limit} magasins}}. Demandez une mise à niveau du plan pour en créer plus.",
+  "@planLimitStores": {
+    "placeholders": {
+      "planName": { "type": "String" },
+      "limit": { "type": "int" }
+    }
+  },
+  "planLimitEmployees": "Le plan {planName} autorise jusqu'à {limit, plural, =1{1 employé} other{{limit} employés}}. Demandez une mise à niveau du plan pour embaucher plus.",
+  "@planLimitEmployees": {
+    "placeholders": {
+      "planName": { "type": "String" },
+      "limit": { "type": "int" }
+    }
+  }
 }

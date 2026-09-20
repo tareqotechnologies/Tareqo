@@ -6,10 +6,27 @@ import '../repositories/i_store_repository.dart';
 import '../repositories/i_tenant_repository.dart';
 
 /// Exceção de domínio: limite do plano atingido.
+///
+/// Carrega os dados estruturados (plano, limite, tipo) para a UI formatar
+/// a mensagem localizada; [message] permanece como fallback/legado (PT).
 final class PlanLimitExceededException implements Exception {
-  const PlanLimitExceededException(this.message);
+  const PlanLimitExceededException(
+    this.message, {
+    this.planName = '',
+    this.limit = 0,
+    this.forEmployees = false,
+  });
 
   final String message;
+
+  /// Nome do plano atingido (ex.: "Essencial").
+  final String planName;
+
+  /// Limite atingido (maxStores ou maxEmployees).
+  final int limit;
+
+  /// true ⇒ limite de FUNCIONÁRIOS; false ⇒ limite de LOJAS.
+  final bool forEmployees;
 
   @override
   String toString() => 'PlanLimitExceededException: $message';
@@ -69,6 +86,8 @@ class AddStoreUseCase {
         'O plano ${plan.name} permite até ${plan.maxStores} '
         '${plan.maxStores == 1 ? 'loja' : 'lojas'}. '
         'Solicite um upgrade de plano para criar mais.',
+        planName: plan.name,
+        limit: plan.maxStores,
       );
     }
 

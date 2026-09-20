@@ -44,31 +44,41 @@ final class SupabaseEmployeeProcessor implements IEmployeeAccountProcessor {
       if (userId == null || userId.isEmpty) {
         throw const EmployeeAccountCreationException(
           'Não foi possível criar a conta do funcionário.',
+          code: 'generic',
         );
       }
       return userId;
     } on PostgrestException catch (error) {
       // O RPC rejeita com mensagens claras (e-mail duplicado, não-dono,
-      // senha fraca, loja inválida) — traduzidas para texto amigável.
-      throw EmployeeAccountCreationException(_friendlyMessage(error.message));
+      // senha fraca, loja inválida) — traduzidas para (código, texto
+      // amigável); a UI localiza pelo código, o texto fica como fallback.
+      final (code, friendly) = _friendlyMessage(error.message);
+      throw EmployeeAccountCreationException(friendly, code: code);
     }
   }
 
-  /// Traduz as mensagens do RPC (exceções do Postgres) para texto amigável.
-  static String _friendlyMessage(String serverMessage) {
+  /// Traduz as mensagens do RPC (exceções do Postgres) para um par
+  /// (código estável, texto amigável PT como fallback).
+  static (String, String) _friendlyMessage(String serverMessage) {
     if (serverMessage.contains('Já existe uma conta')) {
-      return 'Já existe uma conta com este e-mail. Use outro e-mail ou peça '
-          'ao funcionário para entrar com a conta dele.';
+      return (
+        'emailInUse',
+        'Já existe uma conta com este e-mail. Use outro e-mail ou peça '
+            'ao funcionário para entrar com a conta dele.',
+      );
     }
     if (serverMessage.contains('Apenas o dono')) {
-      return 'Apenas o dono do tenant pode cadastrar funcionários.';
+      return ('ownerOnly', 'Apenas o dono do tenant pode cadastrar funcionários.');
     }
     if (serverMessage.contains('pelo menos 8 caracteres')) {
-      return 'A senha deve ter pelo menos 8 caracteres.';
+      return ('weakPassword', 'A senha deve ter pelo menos 8 caracteres.');
     }
     if (serverMessage.contains('Escolha uma loja')) {
-      return 'Escolha uma loja do seu tenant.';
+      return ('noStore', 'Escolha uma loja do seu tenant.');
     }
-    return 'Não foi possível criar a conta do funcionário. Tente novamente.';
+    return (
+      'generic',
+      'Não foi possível criar a conta do funcionário. Tente novamente.',
+    );
   }
 }

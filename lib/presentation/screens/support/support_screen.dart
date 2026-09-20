@@ -34,7 +34,7 @@ class SupportScreen extends StatelessWidget {
     // em círculo pleno tintado — mesmo idioma das listas principais.
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       onTap: () => _open(context, document),
       child: Row(
         children: [

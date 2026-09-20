@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/i18n/l10n_ext.dart';
 import '../../core/i18n/payment_method_l10n.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../domain/entities/sale.dart';
 import 'payment_filter.dart' show PaymentMethodIcon;
 
@@ -130,9 +131,9 @@ class _CollapsedSummary extends StatelessWidget {
 
     return Material(
       color: theme.colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: AppRadius.mdAll,
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: AppRadius.mdAll,
         onTap: onTap,
         child: Container(
           height: 48,
@@ -255,16 +256,16 @@ class _SecondaryTile extends StatelessWidget {
 
     return Material(
       color: theme.colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: AppRadius.mdAll,
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: AppRadius.mdAll,
         onTap: onTap,
         child: Container(
           // Padding vertical 14: linha com ≥ 48dp de altura — alvo de toque
           // acessível (WCAG/androidTapTargetGuideline). Era 6 (≈37px).
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: AppRadius.mdAll,
             border: Border.all(
               color: selected ? primary : Colors.transparent,
               width: 1.5,

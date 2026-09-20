@@ -448,6 +448,17 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String syncErrorsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count en erreur',
+      one: '1 en erreur',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get syncNow => 'Synchroniser';
 
   @override
@@ -1078,6 +1089,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productsPhotoRemove => 'Retirer la photo';
+
+  @override
+  String get productsPhotoTitle => 'Photo du produit';
+
+  @override
+  String get productsPhotoAdd => 'Ajouter une photo';
+
+  @override
+  String get productsPhotoChangeHint => 'Touchez pour modifier';
+
+  @override
+  String get productsPhotoOptionalHint =>
+      'Facultatif — appareil photo ou galerie';
 
   @override
   String get productsPurchasePriceError => 'Indiquez le prix d\'achat';
@@ -2123,6 +2147,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get salesBarcodeScan => 'Lire avec la caméra';
 
   @override
+  String get salesBarcodeCameraHint => 'Pointez la caméra vers le code-barres';
+
+  @override
+  String salesBarcodeCameraUnavailable(String error) {
+    return 'Caméra indisponible : $error';
+  }
+
+  @override
   String get salesBarcodeNotFound => 'Produit introuvable pour ce code.';
 
   @override
@@ -2438,6 +2470,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get adminGrowthNewTenants => 'Nouveaux tenants';
 
   @override
+  String get adminGrowthNewTenantsMonth => 'Nouveaux tenants ce mois';
+
+  @override
   String get adminGrowthApprovals => 'Approbations';
 
   @override
@@ -2549,6 +2584,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get notificationMarkAllRead => 'Tout marquer comme lu';
 
   @override
+  String get notificationMarkRead => 'Marquer comme lu';
+
+  @override
   String get notificationNoNotifications => 'Aucune notification';
 
   @override
@@ -2595,6 +2633,70 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get notificationAddonExpiredTitle => 'Add-on expiré';
+
+  @override
+  String notificationBodyInvoiceGenerated(
+    String period,
+    String amount,
+    String currency,
+    String dueDate,
+  ) {
+    return 'Facture $period d\'un montant de $amount $currency. Échéance : $dueDate.';
+  }
+
+  @override
+  String notificationBodyInvoiceDueSoon(
+    String period,
+    String amount,
+    String currency,
+    int days,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours',
+      one: '1 jour',
+    );
+    return 'La facture $period d\'un montant de $amount $currency arrive à échéance dans $_temp0. Merci de régulariser le paiement.';
+  }
+
+  @override
+  String notificationBodyInvoiceExpired(
+    String period,
+    String amount,
+    String currency,
+  ) {
+    return 'La facture $period d\'un montant de $amount $currency a expiré sans paiement. L\'accès peut être suspendu.';
+  }
+
+  @override
+  String notificationBodyInvoicePaid(
+    String period,
+    String amount,
+    String currency,
+  ) {
+    return 'La facture $period d\'un montant de $amount $currency a été marquée comme payée. Merci !';
+  }
+
+  @override
+  String notificationBodyAddOnExpired(String addonName, String date) {
+    return 'Le service « $addonName » a expiré le $date. Renouvelez l\'abonnement pour continuer à l\'utiliser.';
+  }
+
+  @override
+  String notificationBodyAddOnExpiringSoon(
+    String addonName,
+    int days,
+    String date,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours',
+      one: '1 jour',
+    );
+    return 'Le service « $addonName » expire dans $_temp0 ($date). Renouvelez pour éviter l\'interruption.';
+  }
 
   @override
   String get notificationIconInvoice => 'Facture';
@@ -2796,6 +2898,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get customInvoicePreviewCompanyFallback => 'Nom de l\'entreprise';
+
+  @override
+  String get customInvoicePreviewSampleItemA => 'Produit A';
+
+  @override
+  String get customInvoicePreviewSampleItemB => 'Produit B';
+
+  @override
+  String get customInvoicePreviewSampleClient => 'João Silva';
+
+  @override
+  String customInvoicePreviewTotal(String total) {
+    return 'TOTAL : $total';
+  }
+
+  @override
+  String get customInvoicePreviewFooter => 'Généré par TAREQO';
 
   @override
   String get quotationTitle => 'Devis';
@@ -3843,5 +3962,111 @@ class AppLocalizationsFr extends AppLocalizations {
       one: '1 jour restant',
     );
     return 'Essai : $_temp0';
+  }
+
+  @override
+  String get validationCustomerNameRequired => 'Renseignez le nom du client.';
+
+  @override
+  String get validationDebtAmountPositive =>
+      'Le montant du crédit doit être supérieur à zéro.';
+
+  @override
+  String get validationAmountPositive =>
+      'Le montant de la transaction doit être supérieur à zéro.';
+
+  @override
+  String get validationCashCountNonNegative =>
+      'Le comptage physique ne peut pas être négatif.';
+
+  @override
+  String get validationSalePriceBelowPurchase =>
+      'Le prix de vente ne peut pas être inférieur au prix d\'achat.';
+
+  @override
+  String get validationStoreNameRequired => 'Renseignez le nom du magasin.';
+
+  @override
+  String get validationTenantNotApproved =>
+      'Votre accès à l\'ERP n\'a pas encore été approuvé.';
+
+  @override
+  String get validationEmployeeNameEmailRequired =>
+      'Renseignez le nom et l\'e-mail de l\'employé.';
+
+  @override
+  String get validationEmployeeStoreRequired =>
+      'Choisissez un magasin de votre tenant.';
+
+  @override
+  String get validationPlanNameRequired => 'Renseignez le nom du plan.';
+
+  @override
+  String get validationPlanMinStores =>
+      'Le plan doit autoriser au moins 1 magasin.';
+
+  @override
+  String get validationPlanMinEmployees =>
+      'Le plan doit autoriser au moins 1 employé.';
+
+  @override
+  String get validationPlanPriceNonNegative =>
+      'Le prix ne peut pas être négatif.';
+
+  @override
+  String get validationBusinessNameRequired =>
+      'Renseignez le nom de votre entreprise.';
+
+  @override
+  String get validationAccessPlanRequired => 'Choisissez un plan.';
+
+  @override
+  String get validationAccessAlreadyRequested =>
+      'Vous avez déjà une demande d\'accès en cours. Attendez l\'approbation.';
+
+  @override
+  String get validationUpgradePlanDifferent =>
+      'Choisissez un plan différent de l\'actuel.';
+
+  @override
+  String get validationUpgradePendingExists =>
+      'Une demande de mise à niveau est déjà en attente d\'approbation.';
+
+  @override
+  String get validationAccountGeneric =>
+      'Impossible de créer le compte de l\'employé. Réessayez.';
+
+  @override
+  String get validationAccountEmailInUse =>
+      'Un compte avec cet e-mail existe déjà. Utilisez un autre e-mail ou demandez à l\'employé de se connecter avec son compte.';
+
+  @override
+  String get validationAccountOwnerOnly =>
+      'Seul le propriétaire du tenant peut enregistrer des employés.';
+
+  @override
+  String get validationAccountWeakPassword =>
+      'Le mot de passe doit comporter au moins 8 caractères.';
+
+  @override
+  String planLimitStores(String planName, int limit) {
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other: '$limit magasins',
+      one: '1 magasin',
+    );
+    return 'Le plan $planName autorise jusqu\'à $_temp0. Demandez une mise à niveau du plan pour en créer plus.';
+  }
+
+  @override
+  String planLimitEmployees(String planName, int limit) {
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other: '$limit employés',
+      one: '1 employé',
+    );
+    return 'Le plan $planName autorise jusqu\'à $_temp0. Demandez une mise à niveau du plan pour embaucher plus.';
   }
 }

@@ -31,7 +31,7 @@ class _PlanCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: scheme.primaryContainer.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,11 +226,11 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
         SnackBar(content: Text(l10n.addStoreSuccess(store.name))),
       );
     } on InvalidStoreException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } on PlanLimitExceededException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } on TenantNotApprovedException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } catch (error, stackTrace) {
       CrashReporting.capture(error, stackTrace, hint: 'Erro ao criar loja');
       setState(() {
@@ -411,15 +411,15 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
       Navigator.of(context).pop();
       messenger.showSnackBar(SnackBar(content: Text(l10n.addEmployeeSuccess)));
     } on InvalidEmployeeException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } on PlanLimitExceededException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } on TenantNotApprovedException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } on EmployeeAccountCreationException catch (error) {
       // Falha ao criar a conta no servidor (e-mail já em uso, senha
       // fraca...) — mensagem amigável vinda da RPC, sem Sentry.
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } catch (error, stackTrace) {
       CrashReporting.capture(
         error,
@@ -633,7 +633,7 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
       Navigator.of(context).pop();
       messenger.showSnackBar(SnackBar(content: Text(l10n.upgradeSuccess)));
     } on InvalidPlanRequestException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } catch (error, stackTrace) {
       CrashReporting.capture(
         error,
@@ -1212,17 +1212,23 @@ class _EmployeeDetailSheet extends StatelessWidget {
           const SizedBox(height: 16),
 
           // ── Detalhes ──
-          _DetailRow(
+          DetailRow(
+            labelWidth: 70,
+            padding: const EdgeInsets.symmetric(vertical: 5),
             label: l10n.employeeDetailEmail,
             value: employee.email,
             icon: Icons.email_outlined,
           ),
-          _DetailRow(
+          DetailRow(
+            labelWidth: 70,
+            padding: const EdgeInsets.symmetric(vertical: 5),
             label: l10n.employeeDetailStore,
             value: storeName,
             icon: Icons.store_outlined,
           ),
-          _DetailRow(
+          DetailRow(
+            labelWidth: 70,
+            padding: const EdgeInsets.symmetric(vertical: 5),
             label: l10n.employeeDetailRole,
             value: isManager ? l10n.roleManager : l10n.roleEmployee,
             icon: isManager
@@ -1230,7 +1236,9 @@ class _EmployeeDetailSheet extends StatelessWidget {
                 : Icons.person_outline,
             valueColor: isManager ? scheme.primary : null,
           ),
-          _DetailRow(
+          DetailRow(
+            labelWidth: 70,
+            padding: const EdgeInsets.symmetric(vertical: 5),
             label: l10n.employeeDetailStatus,
             value: employee.isActive
                 ? l10n.employeeDetailActive
@@ -1272,56 +1280,6 @@ class _EmployeeDetailSheet extends StatelessWidget {
   }
 }
 
-/// Linha de detalhe — ícone + rótulo + valor.
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.valueColor,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color? valueColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: scheme.onSurfaceVariant),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 70,
-            child: Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-                fontSize: 12,
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              value,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: valueColor ?? scheme.onSurface,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// Sheet de detalhes de uma loja — exibida ao tocar no card.
 class _StoreDetailSheet extends StatelessWidget {
@@ -1378,31 +1336,41 @@ class _StoreDetailSheet extends StatelessWidget {
 
           // ── Detalhes ──
           if (store.phone.isNotEmpty)
-            _DetailRow(
+            DetailRow(
+              labelWidth: 70,
+              padding: const EdgeInsets.symmetric(vertical: 5),
               label: l10n.storeDetailPhone,
               value: store.phone,
               icon: Icons.phone_outlined,
             ),
           if (store.email.isNotEmpty)
-            _DetailRow(
+            DetailRow(
+              labelWidth: 70,
+              padding: const EdgeInsets.symmetric(vertical: 5),
               label: l10n.storeDetailEmail,
               value: store.email,
               icon: Icons.email_outlined,
             ),
           if (store.nuit.isNotEmpty)
-            _DetailRow(
+            DetailRow(
+              labelWidth: 70,
+              padding: const EdgeInsets.symmetric(vertical: 5),
               label: l10n.storeDetailNuit,
               value: store.nuit,
               icon: Icons.receipt_long_outlined,
             ),
           if (store.city.isNotEmpty)
-            _DetailRow(
+            DetailRow(
+              labelWidth: 70,
+              padding: const EdgeInsets.symmetric(vertical: 5),
               label: l10n.storeDetailCity,
               value: store.city,
               icon: Icons.location_city_outlined,
             ),
           if (store.address.isNotEmpty)
-            _DetailRow(
+            DetailRow(
+              labelWidth: 70,
+              padding: const EdgeInsets.symmetric(vertical: 5),
               label: l10n.storeDetailAddress,
               value: store.address,
               icon: Icons.place_outlined,

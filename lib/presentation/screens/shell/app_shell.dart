@@ -9,6 +9,7 @@ import '../../../domain/entities/financial_transaction.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/fade_indexed_stack.dart';
 import '../../widgets/store_scoped_content.dart';
+import '../../widgets/sync_pending_banner.dart';
 import '../credit/add_debt_sheet.dart';
 import '../credit/debts_screen.dart';
 import '../customers/customers_screen.dart';
@@ -107,8 +108,18 @@ class AppShell extends ConsumerWidget {
       showAppSheet<void>(context, builder: (_) => const _ActionMenuSheet());
     }
 
-    final content = StoreScopedContent(
-      child: FadeIndexedStack(index: index, children: _sections),
+    // Pendências do outbox offline ACIMA das seções: estado global do
+    // caminho de dinheiro (vendas/movimentações/fiado enfileirados sem
+    // conexão), visível em todas as abas — não só no Dashboard.
+    final content = Column(
+      children: [
+        const SyncPendingBanner(),
+        Expanded(
+          child: StoreScopedContent(
+            child: FadeIndexedStack(index: index, children: _sections),
+          ),
+        ),
+      ],
     ); // Contagem de notificações não lidas para o badge.
     final unreadCount = ref.watch(unreadNotificationsCountProvider).value ?? 0;
 

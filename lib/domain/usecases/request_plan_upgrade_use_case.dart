@@ -4,10 +4,16 @@ import '../repositories/i_plan_request_repository.dart';
 import '../repositories/i_tenant_repository.dart';
 
 /// Exceção de domínio: pedido de upgrade inválido.
+///
+/// [code] identifica a variante de validação (estável, para a UI localizar
+/// a mensagem); [message] permanece como fallback/legado (PT).
 final class InvalidPlanRequestException implements Exception {
-  const InvalidPlanRequestException(this.message);
+  const InvalidPlanRequestException(this.message, {this.code = ''});
 
   final String message;
+
+  /// Variante: notApproved | samePlan | pendingRequest.
+  final String code;
 
   @override
   String toString() => 'InvalidPlanRequestException: $message';
@@ -37,11 +43,13 @@ class RequestPlanUpgradeUseCase {
     if (tenant == null || tenant.status != TenantStatus.approved) {
       throw const InvalidPlanRequestException(
         'Seu acesso ao ERP ainda não foi aprovado.',
+        code: 'notApproved',
       );
     }
     if (requestedPlanId == currentPlanId) {
       throw const InvalidPlanRequestException(
         'Escolha um plano diferente do atual.',
+        code: 'samePlan',
       );
     }
 
@@ -52,6 +60,7 @@ class RequestPlanUpgradeUseCase {
     if (hasPending) {
       throw const InvalidPlanRequestException(
         'Já existe um pedido de upgrade aguardando aprovação.',
+        code: 'pendingRequest',
       );
     }
 

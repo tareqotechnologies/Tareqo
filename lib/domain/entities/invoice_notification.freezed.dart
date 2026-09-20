@@ -20,7 +20,23 @@ mixin _$InvoiceNotification {
  String? get invoiceId;/// Tipo da notificação.
  InvoiceNotificationType get type;/// Título da notificação (ex.: "Nova factura gerada").
  String get title;/// Corpo da notificação (ex.: "Factura INV-00001 no valor de 5000 MZN").
- String get body;/// Se a notificação foi lida pelo dono.
+///
+/// Pré-formatado em PT no momento da criação (dado armazenado). Quando
+/// [bodyParams] está presente, a exibição reconstrói o corpo localizado
+/// a partir dos parâmetros; [body] permanece como fallback legado.
+ String get body;/// Parâmetros de interpolação do corpo, para localização na exibição.
+///
+/// Chaves por tipo (todas String; `days` chega como String numérica e
+/// é convertida na exibição):
+/// - invoiceGenerated: `period`, `amount`, `currency`, `dueDate`
+/// - invoiceDueSoon:   `period`, `amount`, `currency`, `days`
+/// - invoiceExpired:   `period`, `amount`, `currency`
+/// - invoicePaid:      `period`, `amount`, `currency`
+/// - addOnExpiringSoon: `addonName`, `days`, `date`
+/// - addOnExpired:      `addonName`, `date`
+///
+/// Null ⇒ notificação legada: a exibição mostra [body] como está.
+ Map<String, String>? get bodyParams;/// Se a notificação foi lida pelo dono.
  bool get isRead;/// Data de criação.
  DateTime get createdAt;/// Data em que foi lida (null enquanto não lida).
  DateTime? get readAt;
@@ -36,16 +52,16 @@ $InvoiceNotificationCopyWith<InvoiceNotification> get copyWith => _$InvoiceNotif
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is InvoiceNotification&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.invoiceId, invoiceId) || other.invoiceId == invoiceId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is InvoiceNotification&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.invoiceId, invoiceId) || other.invoiceId == invoiceId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&const DeepCollectionEquality().equals(other.bodyParams, bodyParams)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,tenantId,invoiceId,type,title,body,isRead,createdAt,readAt);
+int get hashCode => Object.hash(runtimeType,id,tenantId,invoiceId,type,title,body,const DeepCollectionEquality().hash(bodyParams),isRead,createdAt,readAt);
 
 @override
 String toString() {
-  return 'InvoiceNotification(id: $id, tenantId: $tenantId, invoiceId: $invoiceId, type: $type, title: $title, body: $body, isRead: $isRead, createdAt: $createdAt, readAt: $readAt)';
+  return 'InvoiceNotification(id: $id, tenantId: $tenantId, invoiceId: $invoiceId, type: $type, title: $title, body: $body, bodyParams: $bodyParams, isRead: $isRead, createdAt: $createdAt, readAt: $readAt)';
 }
 
 
@@ -56,7 +72,7 @@ abstract mixin class $InvoiceNotificationCopyWith<$Res>  {
   factory $InvoiceNotificationCopyWith(InvoiceNotification value, $Res Function(InvoiceNotification) _then) = _$InvoiceNotificationCopyWithImpl;
 @useResult
 $Res call({
- String id, String tenantId, String? invoiceId, InvoiceNotificationType type, String title, String body, bool isRead, DateTime createdAt, DateTime? readAt
+ String id, String tenantId, String? invoiceId, InvoiceNotificationType type, String title, String body, Map<String, String>? bodyParams, bool isRead, DateTime createdAt, DateTime? readAt
 });
 
 
@@ -73,7 +89,7 @@ class _$InvoiceNotificationCopyWithImpl<$Res>
 
 /// Create a copy of InvoiceNotification
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? tenantId = null,Object? invoiceId = freezed,Object? type = null,Object? title = null,Object? body = null,Object? isRead = null,Object? createdAt = null,Object? readAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? tenantId = null,Object? invoiceId = freezed,Object? type = null,Object? title = null,Object? body = null,Object? bodyParams = freezed,Object? isRead = null,Object? createdAt = null,Object? readAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,tenantId: null == tenantId ? _self.tenantId : tenantId // ignore: cast_nullable_to_non_nullable
@@ -81,7 +97,8 @@ as String,invoiceId: freezed == invoiceId ? _self.invoiceId : invoiceId // ignor
 as String?,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as InvoiceNotificationType,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
-as String,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
+as String,bodyParams: freezed == bodyParams ? _self.bodyParams : bodyParams // ignore: cast_nullable_to_non_nullable
+as Map<String, String>?,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,readAt: freezed == readAt ? _self.readAt : readAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
@@ -169,10 +186,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String tenantId,  String? invoiceId,  InvoiceNotificationType type,  String title,  String body,  bool isRead,  DateTime createdAt,  DateTime? readAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String tenantId,  String? invoiceId,  InvoiceNotificationType type,  String title,  String body,  Map<String, String>? bodyParams,  bool isRead,  DateTime createdAt,  DateTime? readAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _InvoiceNotification() when $default != null:
-return $default(_that.id,_that.tenantId,_that.invoiceId,_that.type,_that.title,_that.body,_that.isRead,_that.createdAt,_that.readAt);case _:
+return $default(_that.id,_that.tenantId,_that.invoiceId,_that.type,_that.title,_that.body,_that.bodyParams,_that.isRead,_that.createdAt,_that.readAt);case _:
   return orElse();
 
 }
@@ -190,10 +207,10 @@ return $default(_that.id,_that.tenantId,_that.invoiceId,_that.type,_that.title,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String tenantId,  String? invoiceId,  InvoiceNotificationType type,  String title,  String body,  bool isRead,  DateTime createdAt,  DateTime? readAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String tenantId,  String? invoiceId,  InvoiceNotificationType type,  String title,  String body,  Map<String, String>? bodyParams,  bool isRead,  DateTime createdAt,  DateTime? readAt)  $default,) {final _that = this;
 switch (_that) {
 case _InvoiceNotification():
-return $default(_that.id,_that.tenantId,_that.invoiceId,_that.type,_that.title,_that.body,_that.isRead,_that.createdAt,_that.readAt);case _:
+return $default(_that.id,_that.tenantId,_that.invoiceId,_that.type,_that.title,_that.body,_that.bodyParams,_that.isRead,_that.createdAt,_that.readAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +227,10 @@ return $default(_that.id,_that.tenantId,_that.invoiceId,_that.type,_that.title,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String tenantId,  String? invoiceId,  InvoiceNotificationType type,  String title,  String body,  bool isRead,  DateTime createdAt,  DateTime? readAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String tenantId,  String? invoiceId,  InvoiceNotificationType type,  String title,  String body,  Map<String, String>? bodyParams,  bool isRead,  DateTime createdAt,  DateTime? readAt)?  $default,) {final _that = this;
 switch (_that) {
 case _InvoiceNotification() when $default != null:
-return $default(_that.id,_that.tenantId,_that.invoiceId,_that.type,_that.title,_that.body,_that.isRead,_that.createdAt,_that.readAt);case _:
+return $default(_that.id,_that.tenantId,_that.invoiceId,_that.type,_that.title,_that.body,_that.bodyParams,_that.isRead,_that.createdAt,_that.readAt);case _:
   return null;
 
 }
@@ -225,7 +242,7 @@ return $default(_that.id,_that.tenantId,_that.invoiceId,_that.type,_that.title,_
 @JsonSerializable()
 
 class _InvoiceNotification implements InvoiceNotification {
-  const _InvoiceNotification({required this.id, required this.tenantId, this.invoiceId, required this.type, required this.title, required this.body, this.isRead = false, required this.createdAt, this.readAt});
+  const _InvoiceNotification({required this.id, required this.tenantId, this.invoiceId, required this.type, required this.title, required this.body, final  Map<String, String>? bodyParams, this.isRead = false, required this.createdAt, this.readAt}): _bodyParams = bodyParams;
   factory _InvoiceNotification.fromJson(Map<String, dynamic> json) => _$InvoiceNotificationFromJson(json);
 
 @override final  String id;
@@ -238,7 +255,44 @@ class _InvoiceNotification implements InvoiceNotification {
 /// Título da notificação (ex.: "Nova factura gerada").
 @override final  String title;
 /// Corpo da notificação (ex.: "Factura INV-00001 no valor de 5000 MZN").
+///
+/// Pré-formatado em PT no momento da criação (dado armazenado). Quando
+/// [bodyParams] está presente, a exibição reconstrói o corpo localizado
+/// a partir dos parâmetros; [body] permanece como fallback legado.
 @override final  String body;
+/// Parâmetros de interpolação do corpo, para localização na exibição.
+///
+/// Chaves por tipo (todas String; `days` chega como String numérica e
+/// é convertida na exibição):
+/// - invoiceGenerated: `period`, `amount`, `currency`, `dueDate`
+/// - invoiceDueSoon:   `period`, `amount`, `currency`, `days`
+/// - invoiceExpired:   `period`, `amount`, `currency`
+/// - invoicePaid:      `period`, `amount`, `currency`
+/// - addOnExpiringSoon: `addonName`, `days`, `date`
+/// - addOnExpired:      `addonName`, `date`
+///
+/// Null ⇒ notificação legada: a exibição mostra [body] como está.
+ final  Map<String, String>? _bodyParams;
+/// Parâmetros de interpolação do corpo, para localização na exibição.
+///
+/// Chaves por tipo (todas String; `days` chega como String numérica e
+/// é convertida na exibição):
+/// - invoiceGenerated: `period`, `amount`, `currency`, `dueDate`
+/// - invoiceDueSoon:   `period`, `amount`, `currency`, `days`
+/// - invoiceExpired:   `period`, `amount`, `currency`
+/// - invoicePaid:      `period`, `amount`, `currency`
+/// - addOnExpiringSoon: `addonName`, `days`, `date`
+/// - addOnExpired:      `addonName`, `date`
+///
+/// Null ⇒ notificação legada: a exibição mostra [body] como está.
+@override Map<String, String>? get bodyParams {
+  final value = _bodyParams;
+  if (value == null) return null;
+  if (_bodyParams is EqualUnmodifiableMapView) return _bodyParams;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 /// Se a notificação foi lida pelo dono.
 @override@JsonKey() final  bool isRead;
 /// Data de criação.
@@ -259,16 +313,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InvoiceNotification&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.invoiceId, invoiceId) || other.invoiceId == invoiceId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InvoiceNotification&&(identical(other.id, id) || other.id == id)&&(identical(other.tenantId, tenantId) || other.tenantId == tenantId)&&(identical(other.invoiceId, invoiceId) || other.invoiceId == invoiceId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&const DeepCollectionEquality().equals(other._bodyParams, _bodyParams)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.readAt, readAt) || other.readAt == readAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,tenantId,invoiceId,type,title,body,isRead,createdAt,readAt);
+int get hashCode => Object.hash(runtimeType,id,tenantId,invoiceId,type,title,body,const DeepCollectionEquality().hash(_bodyParams),isRead,createdAt,readAt);
 
 @override
 String toString() {
-  return 'InvoiceNotification(id: $id, tenantId: $tenantId, invoiceId: $invoiceId, type: $type, title: $title, body: $body, isRead: $isRead, createdAt: $createdAt, readAt: $readAt)';
+  return 'InvoiceNotification(id: $id, tenantId: $tenantId, invoiceId: $invoiceId, type: $type, title: $title, body: $body, bodyParams: $bodyParams, isRead: $isRead, createdAt: $createdAt, readAt: $readAt)';
 }
 
 
@@ -279,7 +333,7 @@ abstract mixin class _$InvoiceNotificationCopyWith<$Res> implements $InvoiceNoti
   factory _$InvoiceNotificationCopyWith(_InvoiceNotification value, $Res Function(_InvoiceNotification) _then) = __$InvoiceNotificationCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String tenantId, String? invoiceId, InvoiceNotificationType type, String title, String body, bool isRead, DateTime createdAt, DateTime? readAt
+ String id, String tenantId, String? invoiceId, InvoiceNotificationType type, String title, String body, Map<String, String>? bodyParams, bool isRead, DateTime createdAt, DateTime? readAt
 });
 
 
@@ -296,7 +350,7 @@ class __$InvoiceNotificationCopyWithImpl<$Res>
 
 /// Create a copy of InvoiceNotification
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? tenantId = null,Object? invoiceId = freezed,Object? type = null,Object? title = null,Object? body = null,Object? isRead = null,Object? createdAt = null,Object? readAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? tenantId = null,Object? invoiceId = freezed,Object? type = null,Object? title = null,Object? body = null,Object? bodyParams = freezed,Object? isRead = null,Object? createdAt = null,Object? readAt = freezed,}) {
   return _then(_InvoiceNotification(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,tenantId: null == tenantId ? _self.tenantId : tenantId // ignore: cast_nullable_to_non_nullable
@@ -304,7 +358,8 @@ as String,invoiceId: freezed == invoiceId ? _self.invoiceId : invoiceId // ignor
 as String?,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as InvoiceNotificationType,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
-as String,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
+as String,bodyParams: freezed == bodyParams ? _self._bodyParams : bodyParams // ignore: cast_nullable_to_non_nullable
+as Map<String, String>?,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,readAt: freezed == readAt ? _self.readAt : readAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,

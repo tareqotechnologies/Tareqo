@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
@@ -130,7 +132,7 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
       messenger.showSnackBar(SnackBar(content: Text(l10n.syncOfflineSaved)));
     } on InvalidDebtAmountException catch (error) {
       Haptics.error();
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } on PendingEntryRegistrationException catch (error, stackTrace) {
       // A dívida foi registrada; apenas a pendência falhou. Não sugerir
       // nova tentativa (duplicaria o fiado): orienta a conferir o
@@ -240,7 +242,7 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
                 MoneyLivePreview(controller: _amountController),
                 const SizedBox(height: 12),
                 InkWell(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: AppRadius.mdAll,
                   onTap: _pickDate,
                   child: InputDecorator(
                     decoration: InputDecoration(

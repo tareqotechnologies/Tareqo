@@ -75,6 +75,7 @@ InvoiceNotification _notif({
   InvoiceNotificationType type = InvoiceNotificationType.invoiceGenerated,
   String title = 'Nova factura gerada',
   String body = 'Factura gerada no valor de 50.00 MZN.',
+  Map<String, String>? bodyParams,
   bool isRead = false,
   DateTime? createdAt,
 }) => InvoiceNotification(
@@ -84,6 +85,7 @@ InvoiceNotification _notif({
   type: type,
   title: title,
   body: body,
+  bodyParams: bodyParams,
   isRead: isRead,
   createdAt: createdAt ?? DateTime.now(),
 );
@@ -92,6 +94,7 @@ Widget _buildApp({
   required List<InvoiceNotification> notifications,
   MarkNotificationAsReadUseCase? markAsRead,
   MarkAllNotificationsAsReadUseCase? markAllAsRead,
+  Locale locale = const Locale('pt'),
 }) {
   return ProviderScope(
     overrides: [
@@ -126,7 +129,7 @@ Widget _buildApp({
         markAllAsRead ?? _FakeMarkAllNotificationsAsReadUseCase(),
       ),
     ],
-    child: testApp(home: const NotificationsScreen()),
+    child: testApp(home: const NotificationsScreen(), locale: locale),
   );
 }
 
@@ -191,6 +194,112 @@ void main() {
       );
     });
 
+    group('corpo com bodyParams localizado na exibição', () {
+      // Fixture com os MESMOS params que os produtores emitem (use case de
+      // facturas + serviço de add-ons). O body persistido é PT (fallback
+      // legado); a exibição reconstrói o corpo a partir dos params.
+      final invoiceGenerated = _notif(
+        id: 'n1',
+        type: InvoiceNotificationType.invoiceGenerated,
+        body: 'Factura Agosto 2026 no valor de 50.00 MZN. Vencimento: 15/9/2026.',
+        bodyParams: const {
+          'period': 'Agosto 2026',
+          'amount': '50.00',
+          'currency': 'MZN',
+          'dueDate': '15/9/2026',
+        },
+      );
+      final invoiceDueSoon = _notif(
+        id: 'n2',
+        type: InvoiceNotificationType.invoiceDueSoon,
+        body:
+            'A factura Agosto 2026 no valor de 50.00 MZN vence em 3 dia(s). '
+            'Regularize o pagamento.',
+        bodyParams: const {
+          'period': 'Agosto 2026',
+          'amount': '50.00',
+          'currency': 'MZN',
+          'days': '3',
+        },
+      );
+
+      testWidgets('en — gerada + para vencer (plural other)', (tester) async {
+        await tester.pumpWidget(
+          _buildApp(
+            notifications: [invoiceGenerated, invoiceDueSoon],
+            locale: const Locale('en'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Invoice Agosto 2026 for 50.00 MZN. Due on 15/9/2026.'),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            'Invoice Agosto 2026 for 50.00 MZN is due in 3 days. '
+            'Please settle the payment.',
+          ),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('fr — gerada + para vencer (plural other)', (tester) async {
+        await tester.pumpWidget(
+          _buildApp(
+            notifications: [invoiceGenerated, invoiceDueSoon],
+            locale: const Locale('fr'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(
+            "Facture Agosto 2026 d'un montant de 50.00 MZN. "
+            'Échéance : 15/9/2026.',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            "La facture Agosto 2026 d'un montant de 50.00 MZN arrive à "
+            'échéance dans 3 jours. Merci de régulariser le paiement.',
+          ),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('en — ramo plural =1 do dueSoon', (tester) async {
+        await tester.pumpWidget(
+          _buildApp(
+            notifications: [
+              _notif(
+                id: 'n3',
+                type: InvoiceNotificationType.invoiceDueSoon,
+                bodyParams: const {
+                  'period': 'Agosto 2026',
+                  'amount': '50.00',
+                  'currency': 'MZN',
+                  'days': '1',
+                },
+              ),
+            ],
+            locale: const Locale('en'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(
+            'Invoice Agosto 2026 for 50.00 MZN is due in 1 day. '
+            'Please settle the payment.',
+          ),
+          findsOneWidget,
+        );
+      });
+    });
+
     testWidgets('mostra botão "Marcar todas como lidas" quando há não lidas', (
       tester,
     ) async {
@@ -231,15 +340,15 @@ void main() {
     testWidgets('mostra dot indicator para notificações não lidas', (
       tester,
     ) async {
-      final notifications = [
-        _notif(id: 'n1', isRead: false, title: 'Não lida'),
-      ];
+      // O título exibido é derivado do TIPO (o persistido é dado) — o
+      // locator usa o título localizado do tipo default (invoiceGenerated).
+      final notifications = [_notif(id: 'n1', isRead: false)];
 
       await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // Card com dot indicator (Container 8x8)
-      expect(find.text('Não lida'), findsOneWidget);
+      expect(find.text('Nova factura gerada'), findsOneWidget);
     });
 
     testWidgets('exibe botão marcar como lida para notificações não lidas', (
@@ -269,25 +378,35 @@ void main() {
     testWidgets('alterna para filtro "Não lidas" e mostra apenas não lidas', (
       tester,
     ) async {
+      // Títulos exibidos derivam do TIPO — tipos distintos para poder
+      // distinguir os dois cards por texto.
       final notifications = [
-        _notif(id: 'n1', isRead: false, title: 'Não lida'),
-        _notif(id: 'n2', isRead: true, title: 'Já lida'),
+        _notif(
+          id: 'n1',
+          isRead: false,
+          type: InvoiceNotificationType.invoiceGenerated,
+        ),
+        _notif(
+          id: 'n2',
+          isRead: true,
+          type: InvoiceNotificationType.invoicePaid,
+        ),
       ];
 
       await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // Ambas visíveis no filtro "Todas"
-      expect(find.text('Não lida'), findsOneWidget);
-      expect(find.text('Já lida'), findsOneWidget);
+      expect(find.text('Nova factura gerada'), findsOneWidget);
+      expect(find.text('Factura paga'), findsOneWidget);
 
       // Alterna para "Não lidas"
       await tester.tap(find.text('Não lidas'));
       await tester.pumpAndSettle();
 
       // Apenas a não lida visível
-      expect(find.text('Não lida'), findsOneWidget);
-      expect(find.text('Já lida'), findsNothing);
+      expect(find.text('Nova factura gerada'), findsOneWidget);
+      expect(find.text('Factura paga'), findsNothing);
     });
 
     testWidgets('mostra tipos de notificação corretos (gerada, para vencer)', (
@@ -297,7 +416,7 @@ void main() {
         _notif(
           id: 'n1',
           type: InvoiceNotificationType.invoiceGenerated,
-          title: 'Factura gerada',
+          title: 'Nova factura gerada',
         ),
         _notif(
           id: 'n2',
@@ -309,7 +428,7 @@ void main() {
       await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
-      expect(find.text('Factura gerada'), findsWidgets);
+      expect(find.text('Nova factura gerada'), findsWidgets);
       expect(find.text('Factura para vencer'), findsWidgets);
     });
 
@@ -380,31 +499,36 @@ void main() {
     testWidgets('múltiplas notificações exibe a quantidade correta', (
       tester,
     ) async {
-      final notifications = List.generate(
-        5,
-        (i) => _notif(id: 'n$i', title: 'Notificação $i'),
-      );
+      // Mesmo tipo → todas exibem o título localizado do tipo.
+      final notifications = List.generate(5, (i) => _notif(id: 'n$i'));
 
       await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
-      for (var i = 0; i < 5; i++) {
-        expect(find.text('Notificação $i'), findsOneWidget);
-      }
+      expect(find.text('Nova factura gerada'), findsNWidgets(5));
     });
 
     testWidgets('notificações lidas não têm borda destacada', (tester) async {
+      // Tipos distintos para distinguir os cards por título exibido.
       final notifications = [
-        _notif(id: 'n1', isRead: true, title: 'Lida'),
-        _notif(id: 'n2', isRead: false, title: 'Não lida'),
+        _notif(
+          id: 'n1',
+          isRead: true,
+          type: InvoiceNotificationType.invoicePaid,
+        ),
+        _notif(
+          id: 'n2',
+          isRead: false,
+          type: InvoiceNotificationType.invoiceGenerated,
+        ),
       ];
 
       await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
       // Ambas exibidas
-      expect(find.text('Lida'), findsOneWidget);
-      expect(find.text('Não lida'), findsOneWidget);
+      expect(find.text('Factura paga'), findsOneWidget);
+      expect(find.text('Nova factura gerada'), findsOneWidget);
 
       // Apenas a não lida tem botão de marcar como lida
       expect(find.byIcon(Icons.done_all_outlined), findsOneWidget);

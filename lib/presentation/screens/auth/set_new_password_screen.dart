@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/auth_providers.dart';
@@ -189,29 +190,13 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final isDark = scheme.brightness == Brightness.dark;
     final l10n = context.l10n;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [
-                    const Color(0xFF16211E),
-                    scheme.surface,
-                    const Color(0xFF131916),
-                  ]
-                : [
-                    const Color(0xFFE4F2EC),
-                    scheme.surface,
-                    const Color(0xFFF0F7F4),
-                  ],
-          ),
-        ),
-        child: Center(
+      // Fundo sólido do tema — a mesma decisão do login (superfície de
+      // token, sem gradiente decorativo).
+      backgroundColor: scheme.surface,
+      body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: ConstrainedBox(
@@ -226,14 +211,7 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
                       height: 72,
                       decoration: BoxDecoration(
                         color: scheme.primary,
-                        borderRadius: BorderRadius.circular(22),
-                        boxShadow: [
-                          BoxShadow(
-                            color: scheme.primary.withValues(alpha: 0.3),
-                            blurRadius: 24,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
                       ),
                       child: Icon(
                         Icons.lock_reset,
@@ -264,7 +242,7 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
                   // elevada — mesmo padrão do login e do onboarding.
                   AppCard(
                     elevated: true,
-                    borderRadius: const BorderRadius.all(Radius.circular(20)),
+                    borderRadius: const BorderRadius.all(Radius.circular(AppRadius.xl)),
                     padding: const EdgeInsets.all(20),
                     child: Form(
                       key: _formKey,
@@ -369,7 +347,6 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

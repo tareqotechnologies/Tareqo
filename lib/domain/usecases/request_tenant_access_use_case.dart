@@ -2,10 +2,16 @@ import '../entities/tenant.dart';
 import '../repositories/i_tenant_repository.dart';
 
 /// Exceção de domínio: solicitação de acesso inválida.
+///
+/// [code] identifica a variante de validação (estável, para a UI localizar
+/// a mensagem); [message] permanece como fallback/legado (PT).
 final class InvalidTenantRequestException implements Exception {
-  const InvalidTenantRequestException(this.message);
+  const InvalidTenantRequestException(this.message, {this.code = ''});
 
   final String message;
+
+  /// Variante: emptyBusinessName | noPlan | alreadyRegistered.
+  final String code;
 
   @override
   String toString() => 'InvalidTenantRequestException: $message';
@@ -31,10 +37,14 @@ class RequestTenantAccessUseCase {
     if (businessName.trim().isEmpty) {
       throw const InvalidTenantRequestException(
         'Informe o nome do seu negócio.',
+        code: 'emptyBusinessName',
       );
     }
     if (planId.isEmpty) {
-      throw const InvalidTenantRequestException('Escolha um plano.');
+      throw const InvalidTenantRequestException(
+        'Escolha um plano.',
+        code: 'noPlan',
+      );
     }
 
     // Anti-spam (auditoria S3): se o usuário JÁ pertence a um tenant
@@ -46,6 +56,7 @@ class RequestTenantAccessUseCase {
     if (existing != null) {
       throw const InvalidTenantRequestException(
         'Você já possui um cadastro de acesso. Aguarde a aprovação.',
+        code: 'alreadyRegistered',
       );
     }
 

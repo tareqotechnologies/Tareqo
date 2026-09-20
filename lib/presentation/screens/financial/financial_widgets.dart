@@ -6,6 +6,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/detail_row.dart';
 
 /// Ícone inteligente por direção do movimento: entrada (north_east) em
 /// verde e saída (south_west) em vermelho — mesma direção do feed da
@@ -245,23 +246,23 @@ class TransactionDetailSheet extends StatelessWidget {
           const SizedBox(height: 20),
 
           // ── Detalhes ──
-          _DetailRow(
+          DetailRow(
             label: l10n.financialDetailDescription,
             value: transaction.description,
           ),
-          _DetailRow(
+          DetailRow(
             label: l10n.financialDetailCategory,
             value: transaction.category,
           ),
-          _DetailRow(
+          DetailRow(
             label: l10n.financialDetailNumber,
             value: Formatters.entityNumber(transaction.id),
           ),
-          _DetailRow(
+          DetailRow(
             label: l10n.financialDetailDate,
             value: Formatters.dateTime(transaction.date),
           ),
-          _DetailRow(
+          DetailRow(
             label: l10n.financialDetailStatus,
             value: transaction.status.label,
             valueColor: pending ? theme.warning : theme.income,
@@ -299,48 +300,3 @@ class TransactionDetailSheet extends StatelessWidget {
   }
 }
 
-/// Linha de detalhe — rótulo + valor, minimalista.
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value, this.valueColor});
-
-  final String label;
-  final String value;
-  final Color? valueColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              value,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: valueColor ?? scheme.onSurface,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

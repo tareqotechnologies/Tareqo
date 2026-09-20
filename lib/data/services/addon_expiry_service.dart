@@ -94,6 +94,10 @@ class AddOnExpiryService {
               body:
                   'O serviço "$addOnName" expirou em $expiryKey. '
                   'Renove a assinatura para continuar a usar.',
+              bodyParams: {
+                'addonName': addOnName,
+                'date': expiryKey,
+              },
             );
           }
           continue;
@@ -119,6 +123,11 @@ class AddOnExpiryService {
           body:
               'O serviço "$addOnName" expira em $daysLeft dia(s) '
               '($expiryKey). Renove para evitar a interrupção.',
+          bodyParams: {
+            'addonName': addOnName,
+            'days': '$daysLeft',
+            'date': expiryKey,
+          },
         );
       }
     } catch (_) {
@@ -138,6 +147,7 @@ class AddOnExpiryService {
     required InvoiceNotificationType type,
     required String title,
     required String body,
+    Map<String, String>? bodyParams,
   }) async {
     final notification = InvoiceNotification(
       id: AppIds.newId('notif_addon'),
@@ -145,6 +155,7 @@ class AddOnExpiryService {
       type: type,
       title: title,
       body: body,
+      bodyParams: bodyParams,
       createdAt: DateTime.now(),
     );
     await _notificationRepository!.create(notification);

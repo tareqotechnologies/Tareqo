@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/money.dart';
@@ -10,6 +11,7 @@ import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_segmented_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/money_live_preview.dart';
@@ -93,7 +95,9 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       Navigator.of(context).pop();
       messenger.showSnackBar(SnackBar(content: Text(l10n.financialRegistered)));
     } on InvalidAmountException catch (error) {
-      if (mounted) setState(() => _formError = error.message);
+      if (mounted) {
+        setState(() => _formError = domainErrorMessage(error, l10n));
+      }
     } catch (error, stackTrace) {
       CrashReporting.capture(
         error,
@@ -135,28 +139,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                   Semantics(
                     container: true,
                     label: l10n.financialAddTitle,
-                    child: SegmentedButton<TransactionType>(
-                      showSelectedIcon: false,
-                      style: SegmentedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          // Alvo de toque ≥ 48dp (a11y — guideline).
-                          vertical: 14,
-                        ),
-                        shape: const StadiumBorder(),
-                        side: BorderSide(
-                          color: theme.colorScheme.outlineVariant,
-                        ),
-                        backgroundColor: Colors.transparent,
-                        selectedBackgroundColor:
-                            theme.colorScheme.primaryContainer,
-                        selectedForegroundColor:
-                            theme.colorScheme.onPrimaryContainer,
-                        foregroundColor: theme.colorScheme.onSurfaceVariant,
-                        textStyle: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                    child: AppSegmentedButton<TransactionType>(
                       segments: [
                         ButtonSegment(
                           value: TransactionType.income,

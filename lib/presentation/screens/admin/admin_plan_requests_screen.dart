@@ -143,7 +143,7 @@ class _RequestCard extends StatelessWidget {
     // Card premium com borda de destaque para upgrade pendente.
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       borderColor: theme.warning.withValues(alpha: 0.3),
       padding: const EdgeInsets.all(14),
       child: Column(

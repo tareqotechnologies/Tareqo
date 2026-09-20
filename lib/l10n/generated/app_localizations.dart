@@ -886,6 +886,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 operação aguardando sincronização} other{{count} operações aguardando sincronização}}'**
   String syncPendingCount(int count);
 
+  /// No description provided for @syncErrorsCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 com erro} other{{count} com erro}}'**
+  String syncErrorsCount(int count);
+
   /// No description provided for @syncNow.
   ///
   /// In pt, this message translates to:
@@ -1977,6 +1983,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Remover fotografia'**
   String get productsPhotoRemove;
+
+  /// No description provided for @productsPhotoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto do produto'**
+  String get productsPhotoTitle;
+
+  /// No description provided for @productsPhotoAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar foto'**
+  String get productsPhotoAdd;
+
+  /// No description provided for @productsPhotoChangeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para alterar'**
+  String get productsPhotoChangeHint;
+
+  /// No description provided for @productsPhotoOptionalHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opcional — câmera ou galeria'**
+  String get productsPhotoOptionalHint;
 
   /// No description provided for @productsPurchasePriceError.
   ///
@@ -3730,6 +3760,18 @@ abstract class AppLocalizations {
   /// **'Ler com a câmera'**
   String get salesBarcodeScan;
 
+  /// No description provided for @salesBarcodeCameraHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aponte a câmera para o código de barras'**
+  String get salesBarcodeCameraHint;
+
+  /// Erro exibido quando a câmera não pode ser aberta no leitor de código de barras
+  ///
+  /// In pt, this message translates to:
+  /// **'Câmera indisponível: {error}'**
+  String salesBarcodeCameraUnavailable(String error);
+
   /// No description provided for @salesBarcodeNotFound.
   ///
   /// In pt, this message translates to:
@@ -4204,6 +4246,12 @@ abstract class AppLocalizations {
   /// **'Novos tenants'**
   String get adminGrowthNewTenants;
 
+  /// No description provided for @adminGrowthNewTenantsMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novos tenants no mês'**
+  String get adminGrowthNewTenantsMonth;
+
   /// No description provided for @adminGrowthApprovals.
   ///
   /// In pt, this message translates to:
@@ -4408,6 +4456,12 @@ abstract class AppLocalizations {
   /// **'Marcar todas como lidas'**
   String get notificationMarkAllRead;
 
+  /// No description provided for @notificationMarkRead.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como lida'**
+  String get notificationMarkRead;
+
   /// No description provided for @notificationNoNotifications.
   ///
   /// In pt, this message translates to:
@@ -4497,6 +4551,64 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Add-on expirado'**
   String get notificationAddonExpiredTitle;
+
+  /// No description provided for @notificationBodyInvoiceGenerated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Factura {period} no valor de {amount} {currency}. Vencimento: {dueDate}.'**
+  String notificationBodyInvoiceGenerated(
+    String period,
+    String amount,
+    String currency,
+    String dueDate,
+  );
+
+  /// No description provided for @notificationBodyInvoiceDueSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'A factura {period} no valor de {amount} {currency} vence em {days, plural, =1{1 dia} other{{days} dias}}. Regularize o pagamento.'**
+  String notificationBodyInvoiceDueSoon(
+    String period,
+    String amount,
+    String currency,
+    int days,
+  );
+
+  /// No description provided for @notificationBodyInvoiceExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'A factura {period} no valor de {amount} {currency} expirou sem pagamento. O acesso pode ser suspenso.'**
+  String notificationBodyInvoiceExpired(
+    String period,
+    String amount,
+    String currency,
+  );
+
+  /// No description provided for @notificationBodyInvoicePaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'A factura {period} no valor de {amount} {currency} foi registada como paga. Obrigado!'**
+  String notificationBodyInvoicePaid(
+    String period,
+    String amount,
+    String currency,
+  );
+
+  /// No description provided for @notificationBodyAddOnExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'O serviço \"{addonName}\" expirou em {date}. Renove a assinatura para continuar a usar.'**
+  String notificationBodyAddOnExpired(String addonName, String date);
+
+  /// No description provided for @notificationBodyAddOnExpiringSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'O serviço \"{addonName}\" expira em {days, plural, =1{1 dia} other{{days} dias}} ({date}). Renove para evitar a interrupção.'**
+  String notificationBodyAddOnExpiringSoon(
+    String addonName,
+    int days,
+    String date,
+  );
 
   /// No description provided for @notificationIconInvoice.
   ///
@@ -4851,6 +4963,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nome da Empresa'**
   String get customInvoicePreviewCompanyFallback;
+
+  /// No description provided for @customInvoicePreviewSampleItemA.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto A'**
+  String get customInvoicePreviewSampleItemA;
+
+  /// No description provided for @customInvoicePreviewSampleItemB.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto B'**
+  String get customInvoicePreviewSampleItemB;
+
+  /// No description provided for @customInvoicePreviewSampleClient.
+  ///
+  /// In pt, this message translates to:
+  /// **'João Silva'**
+  String get customInvoicePreviewSampleClient;
+
+  /// No description provided for @customInvoicePreviewTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'TOTAL: {total}'**
+  String customInvoicePreviewTotal(String total);
+
+  /// No description provided for @customInvoicePreviewFooter.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerado pelo TAREQO'**
+  String get customInvoicePreviewFooter;
 
   /// No description provided for @quotationTitle.
   ///
@@ -6573,6 +6715,150 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Trial: {days, plural, =1{1 dia restante} other{{days} dias restantes}}'**
   String adminTenantCycleTrialLeft(num days);
+
+  /// No description provided for @validationCustomerNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o nome do cliente.'**
+  String get validationCustomerNameRequired;
+
+  /// No description provided for @validationDebtAmountPositive.
+  ///
+  /// In pt, this message translates to:
+  /// **'O valor da dívida deve ser maior que zero.'**
+  String get validationDebtAmountPositive;
+
+  /// No description provided for @validationAmountPositive.
+  ///
+  /// In pt, this message translates to:
+  /// **'O valor da transação deve ser maior que zero.'**
+  String get validationAmountPositive;
+
+  /// No description provided for @validationCashCountNonNegative.
+  ///
+  /// In pt, this message translates to:
+  /// **'A contagem física não pode ser negativa.'**
+  String get validationCashCountNonNegative;
+
+  /// No description provided for @validationSalePriceBelowPurchase.
+  ///
+  /// In pt, this message translates to:
+  /// **'O preço de venda não pode ser menor que o preço de compra.'**
+  String get validationSalePriceBelowPurchase;
+
+  /// No description provided for @validationStoreNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o nome da loja.'**
+  String get validationStoreNameRequired;
+
+  /// No description provided for @validationTenantNotApproved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu acesso ao ERP ainda não foi aprovado.'**
+  String get validationTenantNotApproved;
+
+  /// No description provided for @validationEmployeeNameEmailRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe nome e e-mail do funcionário.'**
+  String get validationEmployeeNameEmailRequired;
+
+  /// No description provided for @validationEmployeeStoreRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha uma loja do seu tenant.'**
+  String get validationEmployeeStoreRequired;
+
+  /// No description provided for @validationPlanNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o nome do plano.'**
+  String get validationPlanNameRequired;
+
+  /// No description provided for @validationPlanMinStores.
+  ///
+  /// In pt, this message translates to:
+  /// **'O plano deve permitir ao menos 1 loja.'**
+  String get validationPlanMinStores;
+
+  /// No description provided for @validationPlanMinEmployees.
+  ///
+  /// In pt, this message translates to:
+  /// **'O plano deve permitir ao menos 1 funcionário.'**
+  String get validationPlanMinEmployees;
+
+  /// No description provided for @validationPlanPriceNonNegative.
+  ///
+  /// In pt, this message translates to:
+  /// **'O preço não pode ser negativo.'**
+  String get validationPlanPriceNonNegative;
+
+  /// No description provided for @validationBusinessNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o nome do seu negócio.'**
+  String get validationBusinessNameRequired;
+
+  /// No description provided for @validationAccessPlanRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha um plano.'**
+  String get validationAccessPlanRequired;
+
+  /// No description provided for @validationAccessAlreadyRequested.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você já possui um cadastro de acesso. Aguarde a aprovação.'**
+  String get validationAccessAlreadyRequested;
+
+  /// No description provided for @validationUpgradePlanDifferent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha um plano diferente do atual.'**
+  String get validationUpgradePlanDifferent;
+
+  /// No description provided for @validationUpgradePendingExists.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já existe um pedido de upgrade aguardando aprovação.'**
+  String get validationUpgradePendingExists;
+
+  /// No description provided for @validationAccountGeneric.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível criar a conta do funcionário. Tente novamente.'**
+  String get validationAccountGeneric;
+
+  /// No description provided for @validationAccountEmailInUse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já existe uma conta com este e-mail. Use outro e-mail ou peça ao funcionário para entrar com a conta dele.'**
+  String get validationAccountEmailInUse;
+
+  /// No description provided for @validationAccountOwnerOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apenas o dono do tenant pode cadastrar funcionários.'**
+  String get validationAccountOwnerOnly;
+
+  /// No description provided for @validationAccountWeakPassword.
+  ///
+  /// In pt, this message translates to:
+  /// **'A senha deve ter pelo menos 8 caracteres.'**
+  String get validationAccountWeakPassword;
+
+  /// No description provided for @planLimitStores.
+  ///
+  /// In pt, this message translates to:
+  /// **'O plano {planName} permite até {limit, plural, =1{1 loja} other{{limit} lojas}}. Solicite um upgrade de plano para criar mais.'**
+  String planLimitStores(String planName, int limit);
+
+  /// No description provided for @planLimitEmployees.
+  ///
+  /// In pt, this message translates to:
+  /// **'O plano {planName} permite até {limit, plural, =1{1 funcionário} other{{limit} funcionários}}. Solicite um upgrade de plano para contratar mais.'**
+  String planLimitEmployees(String planName, int limit);
 }
 
 class _AppLocalizationsDelegate

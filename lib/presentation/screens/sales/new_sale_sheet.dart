@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
@@ -731,7 +732,7 @@ class _ScannerZone extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: AppRadius.lgAll,
         border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
@@ -843,7 +844,7 @@ class _CartProductRow extends StatelessWidget {
     // esgotado recebe fundo esmaecido via `color` (estado especial).
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       color: outOfStock
           ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4)
           : null,

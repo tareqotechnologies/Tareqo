@@ -14,6 +14,9 @@ _InvoiceNotification _$InvoiceNotificationFromJson(Map<String, dynamic> json) =>
       type: $enumDecode(_$InvoiceNotificationTypeEnumMap, json['type']),
       title: json['title'] as String,
       body: json['body'] as String,
+      bodyParams: (json['bodyParams'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ),
       isRead: json['isRead'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       readAt: json['readAt'] == null
@@ -30,6 +33,7 @@ Map<String, dynamic> _$InvoiceNotificationToJson(
   'type': _$InvoiceNotificationTypeEnumMap[instance.type]!,
   'title': instance.title,
   'body': instance.body,
+  'bodyParams': instance.bodyParams,
   'isRead': instance.isRead,
   'createdAt': instance.createdAt.toIso8601String(),
   'readAt': instance.readAt?.toIso8601String(),

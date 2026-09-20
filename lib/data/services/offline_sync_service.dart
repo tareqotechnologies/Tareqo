@@ -51,12 +51,19 @@ class OfflineSyncService {
   final Map<String, Future<void> Function(Map<String, dynamic> payload)>
   _replayers = {};
 
-  /// Stream de mudanças na contagem — alimenta o banner do dashboard.
+  /// Stream de mudanças na contagem — alimenta o banner de sincronização.
   final _countController = StreamController<int>.broadcast();
+
+  /// Stream de mudanças na contagem de operações com falha de NEGÓCIO —
+  /// junto com [countChanges], diferencia "aguardando" de "aguardando com
+  /// erro" no banner (uma op com erro permanece na fila e na contagem).
+  final _failedController = StreamController<int>.broadcast();
 
   Timer? _timer;
 
   Stream<int> get countChanges => _countController.stream;
+
+  Stream<int> get failedChanges => _failedController.stream;
 
   /// Contagem ATUAL de operações pendentes.
   Future<int> count() => _queue.count();
@@ -95,6 +102,13 @@ class OfflineSyncService {
     }
   }
 
+  /// Contagem ATUAL de operações pendentes que já falharam por NEGÓCIO no
+  /// replay (têm `lastError` e ainda são reenviáveis — dead-letter não
+  /// conta: saiu da fila de replay). A op volta a "sem erro" quando o
+  /// replay dela tem sucesso e ela sai da fila.
+  Future<int> failedCount() async =>
+      (await _queue.list()).where((op) => !op.dead && op.lastError != null).length;
+
   /// Reenvia as operações pendentes em FIFO.
   ///
   /// Iteração sobre um SNAPSHOT (`list()` — ordem de id): falha de
@@ -115,6 +129,7 @@ class OfflineSyncService {
   /// Retorna quantas operações foram sincronizadas.
   Future<int> drain() async {
     var synced = 0;
+    final failedBefore = await failedCount();
     final now = DateTime.now();
     for (final op in await _queue.list()) {
       if (op.dead) continue;
@@ -134,7 +149,15 @@ class OfflineSyncService {
         await _queue.markFailed(op.id!, error.toString());
       }
     }
-    if (synced > 0) await _emitCount();
+    // Emite quando a contagem muda (sucesso) OU quando o número de
+    // falhas muda (marcação de erro/saída da fila) — o banner precisa
+    // refletir "N com erro" no momento em que acontece, mesmo sem nada
+    // ter sincronizado.
+    final failedAfter = await failedCount();
+    if (synced > 0 || failedBefore != failedAfter) {
+      await _emitCount();
+      await _emitFailed();
+    }
     return synced;
   }
 
@@ -220,5 +243,10 @@ class OfflineSyncService {
   Future<void> _emitCount() async {
     if (_countController.isClosed) return;
     _countController.add(await _queue.count());
+  }
+
+  Future<void> _emitFailed() async {
+    if (_failedController.isClosed) return;
+    _failedController.add(await failedCount());
   }
 }

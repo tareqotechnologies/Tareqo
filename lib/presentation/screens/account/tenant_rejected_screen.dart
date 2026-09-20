@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
@@ -65,7 +66,7 @@ class TenantRejectedScreen extends ConsumerWidget {
                     // Card premium (estilo Apple): cantos 18 + superfície
                     // elevada com fundo tingido pelo estado de erro.
                     elevated: true,
-                    borderRadius: const BorderRadius.all(Radius.circular(18)),
+                    borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
                     color: scheme.errorContainer.withValues(alpha: 0.5),
                     padding: const EdgeInsets.all(14),
                     child: Row(

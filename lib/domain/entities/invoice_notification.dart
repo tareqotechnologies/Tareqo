@@ -48,7 +48,25 @@ abstract class InvoiceNotification with _$InvoiceNotification {
     required String title,
 
     /// Corpo da notificação (ex.: "Factura INV-00001 no valor de 5000 MZN").
+    ///
+    /// Pré-formatado em PT no momento da criação (dado armazenado). Quando
+    /// [bodyParams] está presente, a exibição reconstrói o corpo localizado
+    /// a partir dos parâmetros; [body] permanece como fallback legado.
     required String body,
+
+    /// Parâmetros de interpolação do corpo, para localização na exibição.
+    ///
+    /// Chaves por tipo (todas String; `days` chega como String numérica e
+    /// é convertida na exibição):
+    /// - invoiceGenerated: `period`, `amount`, `currency`, `dueDate`
+    /// - invoiceDueSoon:   `period`, `amount`, `currency`, `days`
+    /// - invoiceExpired:   `period`, `amount`, `currency`
+    /// - invoicePaid:      `period`, `amount`, `currency`
+    /// - addOnExpiringSoon: `addonName`, `days`, `date`
+    /// - addOnExpired:      `addonName`, `date`
+    ///
+    /// Null ⇒ notificação legada: a exibição mostra [body] como está.
+    Map<String, String>? bodyParams,
 
     /// Se a notificação foi lida pelo dono.
     @Default(false) bool isRead,

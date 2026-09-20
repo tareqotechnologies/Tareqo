@@ -30,7 +30,7 @@ Future<T?> showAppSheet<T>(
               color: scheme.surface,
               borderRadius: fullscreen
                   ? BorderRadius.zero
-                  : const BorderRadius.vertical(top: Radius.circular(28)),
+                  : const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
               border: fullscreen
                   ? null
                   : Border(top: BorderSide(color: scheme.outlineVariant)),

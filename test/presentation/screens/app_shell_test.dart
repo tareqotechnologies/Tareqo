@@ -25,9 +25,13 @@ import 'package:tareqo/domain/usecases/get_pending_debts_use_case.dart';
 import 'package:tareqo/domain/usecases/get_plans_use_case.dart';
 import 'package:tareqo/domain/usecases/get_products_use_case.dart';
 import 'package:tareqo/domain/usecases/get_settled_debts_use_case.dart';
+import 'package:tareqo/data/datasources/local/pending_op_queue.dart';
+import 'package:tareqo/data/datasources/local/pending_op_queue_memory_impl.dart';
+import 'package:tareqo/data/services/offline_sync_service.dart';
 import 'package:tareqo/presentation/controllers/account_providers.dart';
 import 'package:tareqo/presentation/controllers/customers_providers.dart';
 import 'package:tareqo/presentation/controllers/debts_providers.dart';
+import 'package:tareqo/presentation/controllers/dashboard_providers.dart';
 import 'package:tareqo/presentation/controllers/finance_providers.dart';
 import 'package:tareqo/presentation/controllers/products_providers.dart';
 import 'package:tareqo/presentation/controllers/sales_providers.dart';
@@ -102,6 +106,26 @@ class _FakeGetCustomersUseCase implements GetCustomersUseCase {
   Future<List<Customer>> call({required String storeId}) async => const [
     Customer(id: 'c1', name: 'João'),
   ];
+}
+
+class _FakeFinancialTransactionRepository
+    implements IFinancialTransactionRepository {
+  @override
+  Future<List<FinancialTransaction>> getByPeriod({
+    required String storeId,
+    required DateTime start,
+    required DateTime end,
+  }) async => const [];
+
+  @override
+  Future<List<FinancialTransaction>> getAll({required String storeId}) async =>
+      const [];
+
+  @override
+  Future<void> add(FinancialTransaction transaction) async {}
+
+  @override
+  Future<void> markAsPaid(String id, {required String storeId}) async {}
 }
 
 class _FakeFinanceRepository implements IFinancialTransactionRepository {
@@ -537,5 +561,101 @@ void main() {
 
     // O pop foi interceptado (rota não fechou) e devolveu à Home.
     expect(bar().selectedIndex, 0);
+  });
+
+  /// Outbox offline com 1 operação e o serviço sobreposto — base dos
+  /// cenários do banner global de sincronização (o banner vive no SHELL
+  /// desde o Lote 3: é estado do caminho de dinheiro, visível em todas
+  /// as abas, não só no Dashboard).
+  Future<PendingOpQueueMemoryImpl> pumpShellWithOutbox(
+    WidgetTester tester, {
+    required Future<void> Function(Map<String, dynamic>) replayer,
+  }) async {
+    final queue = PendingOpQueueMemoryImpl();
+    await queue.add(
+      PendingOp(
+        opType: 'process_sale',
+        payload: {
+          'sale': {'id': 's1'},
+        },
+        createdAt: DateTime(2026, 8, 16),
+      ),
+    );
+    final sync = OfflineSyncService(queue);
+    sync.registerReplayer('process_sale', replayer);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ...storeContextOverrides(),
+          getProductsUseCaseProvider.overrideWithValue(
+            _FakeGetProductsUseCase(),
+          ),
+          salesRepositoryProvider.overrideWithValue(_FakeSalesRepository()),
+          getCashFlowUseCaseProvider.overrideWithValue(
+            _FakeGetCashFlowUseCase(),
+          ),
+          getPendingDebtsUseCaseProvider.overrideWithValue(
+            _FakeGetPendingDebtsUseCase(),
+          ),
+          getSettledDebtsUseCaseProvider.overrideWithValue(
+            _FakeGetSettledDebtsUseCase(),
+          ),
+          financeRepositoryProvider.overrideWithValue(
+            _FakeFinancialTransactionRepository(),
+          ),
+          getCustomersUseCaseProvider.overrideWithValue(
+            _FakeGetCustomersUseCase(),
+          ),
+          offlineSyncServiceProvider.overrideWithValue(sync),
+        ],
+        child: testApp(home: AppShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return queue;
+  }
+
+
+  testWidgets('banner de sincronização pendente aparece em TODAS as abas', (
+    tester,
+  ) async {
+    await pumpShellWithOutbox(tester, replayer: (_) async {});
+
+    // Visível na Home.
+    expect(find.text('1 operação aguardando sincronização'), findsOneWidget);
+    expect(find.byIcon(Icons.cloud_off_outlined), findsOneWidget);
+
+    // Continua visível na aba de Vendas (antes do Lote 3 o banner era
+    // local do dashboard — o operador nas abas de dinheiro não o via).
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Vendas'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('1 operação aguardando sincronização'), findsOneWidget);
+  });
+
+  testWidgets('banner de sincronização drena a fila e mostra erro de negócio', (
+    tester,
+  ) async {
+    // Replayer que SEMPRE falha por negócio (erro real do dado — não é
+    // rede): a operação fica na fila com lastError e o banner passa a
+    // distinguir "1 com erro" — sincronizar de novo não resolve.
+    await pumpShellWithOutbox(
+      tester,
+      replayer: (_) async => throw Exception('estoque insuficiente'),
+    );
+
+    expect(find.text('1 operação aguardando sincronização'), findsOneWidget);
+
+    // "Sincronizar" tenta o replay: falha de negócio → banner mostra o
+    // estado de erro e a fila mantém a operação.
+    await tester.tap(find.text('Sincronizar'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('1 com erro'), findsOneWidget);
   });
 }

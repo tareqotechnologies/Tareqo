@@ -691,7 +691,10 @@ class _ProductTileState extends State<_ProductTile> {
         ? (_product.description.isEmpty ? null : _product.description)
         : _product.code;
 
-    return MouseRegion(
+    // Padrão de hover unificado (Lote 2): mesmo feedback do SalesCard.
+    return HoverableTile(
+      enabled: _onTap != null,
+      child: MouseRegion(
       cursor: _onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -806,7 +809,8 @@ class _ProductTileState extends State<_ProductTile> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }
 

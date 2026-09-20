@@ -16,6 +16,7 @@ import '../../controllers/finance_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/app_segmented_button.dart';
 import '../../widgets/skeleton.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_sheet.dart';
@@ -136,26 +137,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
             Center(
               child: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: SegmentedButton<_DebtView>(
-                  showSelectedIcon: false,
-                  style: SegmentedButton.styleFrom(
-                    // Sem densidade compacta: o segmento é botão de baixa
-                    // frequência — alvo de toque ≥ 48dp (guideline a11y).
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    shape: const StadiumBorder(),
-                    side: BorderSide(color: theme.colorScheme.outlineVariant),
-                    backgroundColor: Colors.transparent,
-                    selectedBackgroundColor: theme.colorScheme.primaryContainer,
-                    selectedForegroundColor:
-                        theme.colorScheme.onPrimaryContainer,
-                    foregroundColor: theme.colorScheme.onSurfaceVariant,
-                    textStyle: theme.textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                child: AppSegmentedButton<_DebtView>(
                   segments: [
                     ButtonSegment(
                       value: _DebtView.pending,
@@ -509,7 +491,7 @@ class _DebtCard extends StatelessWidget {
     // para vence hoje, neutra para em dia).
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       borderColor: chipColor.withValues(alpha: 0.35),
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -593,7 +575,7 @@ class _SettledDebtCard extends StatelessWidget {
     // tingida de verde (baixa) — mesmo padrão do card pendente.
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       borderColor: theme.income.withValues(alpha: 0.35),
       padding: const EdgeInsets.all(14),
       child: Row(

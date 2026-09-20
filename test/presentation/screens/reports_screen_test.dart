@@ -182,10 +182,11 @@ void main() {
     expect(find.text('R\$ 24,00 vendidos'), findsOneWidget);
     expect(find.text('R\$ 30,00 vendidos'), findsOneWidget);
 
-    // Vendas por dia (Hoje/Ontem + totais). "Hoje" também é o rótulo do
-    // período (SegmentedButton) — usa findsWidgets.
+    // Vendas por dia (Hoje/Ontem + dia da semana + totais). "Hoje" também
+    // é o rótulo do período (SegmentedButton) — usa findsWidgets; a linha
+    // diária agora é "Ontem · <dia>" (leitura comparativa da série).
     expect(find.text('Hoje'), findsWidgets);
-    expect(find.text('Ontem'), findsOneWidget);
+    expect(find.textContaining('Ontem · '), findsOneWidget);
     expect(find.text('R\$ 20,00'), findsOneWidget);
     expect(find.text('R\$ 34,00'), findsOneWidget);
   });

@@ -7,6 +7,7 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/utils/formatters.dart';
 import '../../domain/entities/sale.dart';
 import '../screens/sales/sale_detail_screen.dart';
+import 'app_page.dart' show HoverableTile;
 import 'payment_filter.dart' show PaymentMethodAccent, PaymentMethodIcon;
 import 'status_chip.dart';
 
@@ -40,7 +41,9 @@ class _SalesCardState extends State<SalesCard> {
     final itemsLabel = l10n.dashboardSaleItems(_sale.items.length);
     final isCancelled = _sale.status == SaleStatus.cancelled;
 
-    return MouseRegion(
+    // Padrão de hover unificado (Lote 2) — o tile de produto usa o mesmo.
+    return HoverableTile(
+      child: MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -152,7 +155,8 @@ class _SalesCardState extends State<SalesCard> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   void _openDetails(BuildContext context) {

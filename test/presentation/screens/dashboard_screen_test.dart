@@ -27,9 +27,6 @@ import 'package:tareqo/domain/usecases/get_pending_debts_use_case.dart';
 import 'package:tareqo/domain/usecases/get_products_use_case.dart';
 import 'package:tareqo/domain/usecases/get_purchases_use_case.dart';
 import 'package:tareqo/domain/usecases/get_settled_debts_use_case.dart';
-import 'package:tareqo/data/datasources/local/pending_op_queue.dart';
-import 'package:tareqo/data/datasources/local/pending_op_queue_memory_impl.dart';
-import 'package:tareqo/data/services/offline_sync_service.dart';
 import 'package:tareqo/presentation/controllers/account_providers.dart';
 import 'package:tareqo/presentation/controllers/admin_providers.dart';
 import 'package:tareqo/presentation/controllers/dashboard_providers.dart';
@@ -431,46 +428,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('banner de sincronização pendente aparece e sincroniza', (
-    tester,
-  ) async {
-    // Outbox offline com 1 operação pendente + replayer que sincroniza.
-    final queue = PendingOpQueueMemoryImpl();
-    await queue.add(
-      PendingOp(
-        opType: 'process_sale',
-        payload: {
-          'sale': {'id': 's1'},
-        },
-        createdAt: DateTime(2026, 8, 16),
-      ),
-    );
-    final sync = OfflineSyncService(queue);
-    sync.registerReplayer('process_sale', (_) async {});
-
-    await pumpDashboard(
-      tester,
-      _buildApp(
-        products: const [],
-        sales: const [],
-        cashFlow: const CashFlow(incomeCents: 0, expenseCents: 0),
-        debts: const [],
-        extraOverrides: [offlineSyncServiceProvider.overrideWithValue(sync)],
-      ),
-    );
-
-    // Banner visível com a contagem.
-    expect(find.text('1 operação aguardando sincronização'), findsOneWidget);
-    expect(find.byIcon(Icons.cloud_off_outlined), findsOneWidget);
-
-    // "Sincronizar" drena a fila: banner some e o snackbar confirma.
-    await tester.tap(find.text('Sincronizar'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('1 operação sincronizada'), findsOneWidget);
-    expect(await queue.count(), 0);
-    expect(find.textContaining('aguardando sincronização'), findsNothing);
-  });
+  // O banner de sincronização pendente vive no SHELL desde o Lote 3
+  // (estado global do caminho de dinheiro, visível em todas as abas) —
+  // o cenário migrado está em app_shell_test.dart.
 
   testWidgets('tocar em uma venda do feed abre os detalhes da venda', (
     tester,

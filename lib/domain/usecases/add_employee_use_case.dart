@@ -11,10 +11,16 @@ import 'add_store_use_case.dart'
     show PlanLimitExceededException, TenantNotApprovedException;
 
 /// Exceção de domínio: funcionário inválido (dados de entrada).
+///
+/// [code] identifica a variante de validação (estável, para a UI localizar
+/// a mensagem); [message] permanece como fallback/legado (PT).
 final class InvalidEmployeeException implements Exception {
-  const InvalidEmployeeException(this.message);
+  const InvalidEmployeeException(this.message, {this.code = ''});
 
   final String message;
+
+  /// Variante: emptyNameOrEmail | noStore.
+  final String code;
 
   @override
   String toString() => 'InvalidEmployeeException: $message';
@@ -57,6 +63,7 @@ class AddEmployeeUseCase {
     if (employee.fullName.trim().isEmpty || employee.email.trim().isEmpty) {
       throw const InvalidEmployeeException(
         'Informe nome e e-mail do funcionário.',
+        code: 'emptyNameOrEmail',
       );
     }
 
@@ -70,7 +77,10 @@ class AddEmployeeUseCase {
     // A loja precisa pertencer ao tenant do funcionário.
     final stores = await _storeRepository.getByTenant(tenant.id);
     if (!stores.any((store) => store.id == employee.storeId)) {
-      throw const InvalidEmployeeException('Escolha uma loja do seu tenant.');
+      throw const InvalidEmployeeException(
+        'Escolha uma loja do seu tenant.',
+        code: 'noStore',
+      );
     }
 
     final plan = await _planRepository.getById(tenant.planId);
@@ -80,6 +90,9 @@ class AddEmployeeUseCase {
         'O plano ${plan.name} permite até ${plan.maxEmployees} '
         '${plan.maxEmployees == 1 ? 'funcionário' : 'funcionários'}. '
         'Solicite um upgrade de plano para contratar mais.',
+        planName: plan.name,
+        limit: plan.maxEmployees,
+        forEmployees: true,
       );
     }
 

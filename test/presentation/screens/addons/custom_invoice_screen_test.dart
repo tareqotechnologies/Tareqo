@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../helpers/store_context.dart';
 import '../../../helpers/test_app.dart';
 
+import 'package:tareqo/core/utils/formatters.dart';
 import 'package:tareqo/domain/entities/custom_invoice.dart';
 import 'package:tareqo/domain/entities/product.dart';
 import 'package:tareqo/domain/repositories/i_custom_invoice_repository.dart';
@@ -277,6 +278,13 @@ void main() {
 
   testWidgets('template settings abre, muda cor e salva', (tester) async {
     _useWideViewport(tester);
+    // Moeda do mercado do produto (MZN): o preview reflete a moeda ativa
+    // via Formatters (o harness não passa pelo bootstrap do app). Reset
+    // no teardown para não vazar o estado estático entre testes.
+    Formatters.applySettings(currencyCode: 'MZN', language: 'pt');
+    addTearDown(
+      () => Formatters.applySettings(currencyCode: 'BRL', language: 'pt'),
+    );
     await tester.pumpWidget(
       _buildApp(repository: _FakeCustomInvoiceRepository([])),
     );
@@ -294,9 +302,11 @@ void main() {
     expect(find.text('Dados da Empresa'), findsOneWidget);
 
     // Preview embutido no sheet (widget isolado — CustomInvoicePreview).
+    // O símbolo agora vem da moeda ativa do tenant (Formatters) — o app
+    // exibe o CÓDIGO da moeda (MZN), não 'MT' fixo como antes.
     expect(find.text('FACTURA'), findsOneWidget);
     expect(find.text('CLIENTE'), findsOneWidget);
-    expect(find.text('TOTAL: 550,00 MT'), findsOneWidget);
+    expect(find.text('TOTAL: 550,00 MZN'), findsOneWidget);
     // Fallback do nome vazio — aparece no preview interno do sheet E no
     // widget isolado CustomInvoicePreview (2 instâncias).
     expect(find.text('Nome da Empresa'), findsWidgets);

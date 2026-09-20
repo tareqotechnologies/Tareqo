@@ -512,7 +512,7 @@ class _CommissionsTab extends ConsumerWidget {
         // ─── Resumo do mês ───
         AppCard(
           elevated: true,
-          borderRadius: const BorderRadius.all(Radius.circular(18)),
+          borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [

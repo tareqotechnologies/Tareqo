@@ -28,7 +28,12 @@ for m in re.finditer(r'^  String (?:get (\w+)|(\w+)\(([^)]*)\));', abstract, re.
         members.append((m.group(1), []))
     else:
         params = []
-        for p in m.group(3).split(','):
+        # Assinaturas multilinha do gen-l10n terminam com vírgula
+        # (String a,\n String b,\n) — descartar o segmento vazio final.
+        param_src = m.group(3).strip()
+        if param_src.endswith(','):
+            param_src = param_src[:-1]
+        for p in param_src.split(','):
             p = p.strip()
             if not p:
                 sys.exit(f'param vazio em {m.group(2)}')

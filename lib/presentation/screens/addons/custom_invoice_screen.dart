@@ -274,7 +274,7 @@ class _InvoiceCard extends StatelessWidget {
 
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1130,6 +1130,7 @@ class _TemplateSettingsSheetState
               businessTaxId: _taxIdController.text,
               logoBytes: _logoBytes,
               primaryColor: _selectedColor,
+              currencySymbol: Formatters.currencySymbol,
             ),
             const SizedBox(height: AppSpacing.lg),
 

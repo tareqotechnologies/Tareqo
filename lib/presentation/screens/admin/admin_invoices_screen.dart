@@ -314,7 +314,7 @@ class _InvoiceCard extends StatelessWidget {
 
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       borderColor: statusColor.withValues(alpha: 0.3),
       padding: const EdgeInsets.all(14),
       child: Column(

@@ -10,6 +10,7 @@ import '../../../domain/entities/audit_entry.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/admin_thin_bridge.dart';
+import '../../widgets/detail_row.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
@@ -627,7 +628,7 @@ class _AuditTile extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: theme.colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
       // Thin: rotas modais não herdam o Theme local do shell.
       builder: (sheetContext) => adminThinIfNeeded(
@@ -737,22 +738,35 @@ class _AuditDetailSheet extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
 
             // ── Fields ──
-            _DetailRow(label: context.l10n.commonId, value: '#${entry.id}'),
-            _DetailRow(
+            DetailRow(
+              labelWidth: 80,
+              padding: const EdgeInsets.only(bottom: 8),
+              label: context.l10n.commonId,
+              value: '#${entry.id}',
+            ),
+            DetailRow(
+              labelWidth: 80,
+              padding: const EdgeInsets.only(bottom: 8),
               label: l10n.adminAuditLogDate,
               value: DateFormat.yMMMd().add_Hm().format(entry.createdAt),
             ),
             if (entry.actorUserId != null)
-              _DetailRow(
+              DetailRow(
+                labelWidth: 80,
+                padding: const EdgeInsets.only(bottom: 8),
                 label: l10n.adminAuditLogActor,
                 value: entry.actorUserId!,
               ),
-            _DetailRow(
+            DetailRow(
+              labelWidth: 80,
+              padding: const EdgeInsets.only(bottom: 8),
               label: l10n.adminAuditLogEntity,
               value: entry.entityTypeLabel,
             ),
             if (entry.entityId != null)
-              _DetailRow(
+              DetailRow(
+                labelWidth: 80,
+                padding: const EdgeInsets.only(bottom: 8),
                 label: l10n.adminAuditLogAction,
                 value: entry.entityId!,
               ),
@@ -795,44 +809,6 @@ class _AuditDetailSheet extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: theme.textTheme.bodySmall,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

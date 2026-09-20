@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
@@ -52,7 +53,7 @@ class _ProductPhotoPicker extends StatelessWidget {
 
     final preview = bytes != null
         ? ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: AppRadius.lgAll,
             child: Image.memory(
               bytes!,
               width: 76,
@@ -66,7 +67,7 @@ class _ProductPhotoPicker extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: AppRadius.mdAll,
       ),
       child: Row(
         children: [
@@ -88,7 +89,7 @@ class _ProductPhotoPicker extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  hasImage ? 'Foto do produto' : 'Adicionar foto',
+                  hasImage ? l10n.productsPhotoTitle : l10n.productsPhotoAdd,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w500,
                     fontSize: 12,
@@ -97,8 +98,8 @@ class _ProductPhotoPicker extends StatelessWidget {
                 const SizedBox(height: 1),
                 Text(
                   hasImage
-                      ? 'Toque para alterar'
-                      : 'Opcional — câmera ou galeria',
+                      ? l10n.productsPhotoChangeHint
+                      : l10n.productsPhotoOptionalHint,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                     fontSize: 11,
@@ -464,7 +465,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
         ),
       );
     } on InvalidPriceException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } catch (error, stackTrace) {
       // Upload feito mas o produto não persistiu → remove a foto órfã
       // (best-effort — nunca deixa imagem sem produto no storage).
@@ -943,7 +944,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
         ),
       );
     } on InvalidPriceException catch (error) {
-      setState(() => _formError = error.message);
+      setState(() => _formError = domainErrorMessage(error, l10n));
     } catch (error, stackTrace) {
       // Upload feito mas o produto não persistiu → remove a foto órfã
       // (best-effort — nunca deixa imagem sem produto no storage).

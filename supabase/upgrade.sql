@@ -3875,5 +3875,23 @@ ANALYZE public.sales;
 ANALYZE public.financial_transactions;
 ANALYZE public.store_employees;
 
+-- ═══════════════════════════════════════════════════════════════════════
+-- PARTE 33 — NOTIFICAÇÕES: body_params PARA LOCALIZAÇÃO NA EXIBIÇÃO
+-- (Sep 2026)
+-- ═══════════════════════════════════════════════════════════════════════
+-- Coluna body_params (JSONB) em invoice_notifications: parâmetros de
+-- interpolação do corpo (período, valor, moeda, dias, add-on, datas) para
+-- a UI reconstruir a mensagem LOCALIZADA na exibição. O body persistido
+-- permanece em PT como fallback; NULL = notificação legada (mostra body).
+-- Espelha schema.sql (ALTER idempotente p/ bancos já criados). O app grava
+-- via PostgREST (mapeado no datasource remoto); RLS/policies inalteradas.
+ALTER TABLE IF EXISTS public.invoice_notifications
+  ADD COLUMN IF NOT EXISTS body_params JSONB;
+
+COMMENT ON COLUMN public.invoice_notifications.body_params
+  IS 'Parâmetros do corpo para localização na exibição (nulo = legado: mostra body).';
+
+ANALYZE public.invoice_notifications;
+
 COMMIT;
 

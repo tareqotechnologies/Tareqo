@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/ui/dashed_circle_painter.dart';
 
 /// Layout padrão de página — AppBar opcional, padding responsivo e
 /// suporte a FAB/RefreshIndicator via [body].
@@ -178,26 +179,12 @@ class _DashedBorderPainter extends CustomPainter {
   final Color color;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-    final center = size.center(Offset.zero);
-    final radius = size.width / 2 - 2;
-    const dashCount = 12;
-    const totalAngle = 2 * 3.141592653589793;
-    final dashAngle = totalAngle / dashCount;
-    for (var i = 0; i < dashCount; i++) {
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        i * dashAngle,
-        dashAngle * 0.55,
-        false,
-        paint,
-      );
-    }
-  }
+  void paint(Canvas canvas, Size size) => DashedCirclePainter.paintDashes(
+    canvas,
+    size,
+    color: color,
+    strokeWidth: DashedBorders.strokeWidth,
+  );
 
   @override
   bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) =>
@@ -349,6 +336,51 @@ class AppPill extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.full),
       child: child,
+    );
+  }
+}
+
+/// Feedback de hover único para tiles/listas — o mesmo em todo o app.
+///
+/// Em telas de toque não faz nada (hover não existe); em desktop/web
+/// escurece a superfície do tile quando o cursor passa por cima.
+/// [enabled] = false desativa (ex.: tile sem ação).
+class HoverableTile extends StatefulWidget {
+  const HoverableTile({super.key, required this.child, this.enabled = true});
+
+  final Widget child;
+  final bool enabled;
+
+  @override
+  State<HoverableTile> createState() => _HoverableTileState();
+}
+
+class _HoverableTileState extends State<HoverableTile> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.enabled) return widget.child;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Material(
+        type: MaterialType.transparency,
+        child: AnimatedContainer(
+          duration: AppDurations.fast,
+          decoration: BoxDecoration(
+            color: _hovered
+                ? Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.3)
+                : null,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+          ),
+          child: widget.child,
+        ),
+      ),
     );
   }
 }

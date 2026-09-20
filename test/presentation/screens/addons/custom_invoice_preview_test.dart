@@ -54,6 +54,36 @@ void main() {
     expect(find.text('03/09/2026'), findsNothing);
   });
 
+  testWidgets('símbolo monetário segue o parâmetro (default MT)', (
+    tester,
+  ) async {
+    // Default: amostra do metical (moeda base do produto).
+    await tester.pumpWidget(buildPreview());
+    await tester.pumpAndSettle();
+    expect(find.text('TOTAL: 550,00 MT'), findsOneWidget);
+
+    // Símbolo explícito: moeda ativa do tenant aparece nos preços.
+    await tester.pumpWidget(
+      testApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: CustomInvoicePreview(
+              businessName: 'Loja Teste',
+              businessAddress: '',
+              businessPhone: '',
+              businessTaxId: '',
+              primaryColor: const Color(0xFF2563EB),
+              currencySymbol: r'R$',
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(r'TOTAL: 550,00 R$'), findsOneWidget);
+    expect(find.text(r'150,00 R$'), findsOneWidget);
+  });
+
   testWidgets('nome vazio cai no fallback "Nome da Empresa"', (tester) async {
     await tester.pumpWidget(buildPreview(businessName: ''));
     await tester.pumpAndSettle();

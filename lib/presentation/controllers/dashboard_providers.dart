@@ -89,6 +89,20 @@ final pendingOpsCountProvider = StreamProvider<int>((ref) async* {
   yield* sync.countChanges;
 });
 
+/// Operações pendentes com falha de NEGÓCIO (têm `lastError`, seguem na
+/// fila e continuam reenviáveis) — alimenta o estado de erro do banner de
+/// sincronização. Espelha [pendingOpsCountProvider]: valor atual primeiro,
+/// depois o stream do serviço; 0 sem serviço (modo local/testes).
+final failedOpsCountProvider = StreamProvider<int>((ref) async* {
+  final sync = ref.watch(offlineSyncServiceProvider);
+  if (sync == null) {
+    yield 0;
+    return;
+  }
+  yield await sync.failedCount();
+  yield* sync.failedChanges;
+});
+
 /// KPIs do dashboard (escala W5):
 ///
 /// - **Modo Supabase:** agregação no SERVIDOR — a RPC `get_dashboard_kpis`

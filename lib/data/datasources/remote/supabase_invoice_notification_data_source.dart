@@ -12,7 +12,7 @@ final class InvoiceNotificationSupabaseDataSourceImpl
 
   static const _table = 'invoice_notifications';
   static const _columns =
-      'id, tenant_id, invoice_id, type, title, body, is_read, created_at, read_at';
+      'id, tenant_id, invoice_id, type, title, body, body_params, is_read, created_at, read_at';
 
   @override
   Future<InvoiceNotification> create(InvoiceNotification notification) async {
@@ -25,6 +25,7 @@ final class InvoiceNotificationSupabaseDataSourceImpl
           'type': notification.type.name,
           'title': notification.title,
           'body': notification.body,
+          'body_params': notification.bodyParams,
           'is_read': notification.isRead,
         })
         .select(_columns);
@@ -110,6 +111,9 @@ final class InvoiceNotificationSupabaseDataSourceImpl
     type: InvoiceNotificationType.values.byName(row['type'] as String),
     title: row['title'] as String,
     body: row['body'] as String,
+    bodyParams: (row['body_params'] as Map<String, dynamic>?)?.map(
+      (key, value) => MapEntry(key, value.toString()),
+    ),
     isRead: row['is_read'] as bool? ?? false,
     createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
     readAt: row['read_at'] == null

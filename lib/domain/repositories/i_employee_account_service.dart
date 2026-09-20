@@ -4,9 +4,13 @@
 /// usuário sem permissão) para exibição direta no formulário — em vez do
 /// erro genérico do `catch` da tela.
 final class EmployeeAccountCreationException implements Exception {
-  const EmployeeAccountCreationException(this.message);
+  const EmployeeAccountCreationException(this.message, {this.code = ''});
 
   final String message;
+
+  /// Variante estável para a UI localizar:
+  /// generic | emailInUse | ownerOnly | weakPassword | noStore.
+  final String code;
 
   @override
   String toString() => 'EmployeeAccountCreationException: $message';

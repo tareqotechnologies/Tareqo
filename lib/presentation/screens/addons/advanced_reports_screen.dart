@@ -228,7 +228,7 @@ class _SalesReportTab extends ConsumerWidget {
         // visual da tela de Relatórios (_BestSellerRow simplificado).
         AppCard(
           elevated: true,
-          borderRadius: const BorderRadius.all(Radius.circular(18)),
+          borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -483,7 +483,7 @@ class _FinancialReportTab extends ConsumerWidget {
         // Comparativo de fluxo de caixa do período (dados reais).
         AppCard(
           elevated: true,
-          borderRadius: const BorderRadius.all(Radius.circular(18)),
+          borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -659,7 +659,7 @@ class _StockReportTab extends ConsumerWidget {
         // Lista de estoque baixo
         AppCard(
           elevated: true,
-          borderRadius: const BorderRadius.all(Radius.circular(18)),
+          borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

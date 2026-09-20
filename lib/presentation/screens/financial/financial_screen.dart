@@ -11,6 +11,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/app_segmented_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_sheet.dart';
@@ -89,26 +90,7 @@ class FinancialScreen extends ConsumerWidget {
                       Center(
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: SegmentedButton<CashFlowPeriod>(
-                            showSelectedIcon: false,
-                            style: SegmentedButton.styleFrom(
-                              // Sem densidade compacta: o segmento é botão de
-                              // baixa frequência — alvo ≥ 48dp (guideline a11y).
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 14,
-                              ),
-                              shape: const StadiumBorder(),
-                              side: BorderSide(color: scheme.outlineVariant),
-                              backgroundColor: Colors.transparent,
-                              selectedBackgroundColor: scheme.primaryContainer,
-                              selectedForegroundColor:
-                                  scheme.onPrimaryContainer,
-                              foregroundColor: scheme.onSurfaceVariant,
-                              textStyle: theme.textTheme.labelLarge?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                          child: AppSegmentedButton<CashFlowPeriod>(
                             segments: [
                               for (final value in CashFlowPeriod.values)
                                 ButtonSegment(

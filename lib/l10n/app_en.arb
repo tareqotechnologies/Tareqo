@@ -179,6 +179,14 @@
       }
     }
   },
+  "syncErrorsCount": "{count, plural, =1{1 with error} other{{count} with errors}}",
+  "@syncErrorsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "syncNow": "Sync now",
   "syncOfflineSaved": "No connection. Saved — will sync automatically.",
   "syncDone": "{count, plural, =1{1 operation synced} other{{count} operations synced}}",
@@ -461,6 +469,10 @@
   "productsPhotoTake": "Take photo",
   "productsPhotoGallery": "Choose from gallery",
   "productsPhotoRemove": "Remove photo",
+  "productsPhotoTitle": "Product photo",
+  "productsPhotoAdd": "Add photo",
+  "productsPhotoChangeHint": "Tap to change",
+  "productsPhotoOptionalHint": "Optional — camera or gallery",
   "productsPurchasePriceError": "Enter purchase price",
   "productsSalePriceError": "Enter sale price",
   "productsStockError": "Invalid quantity",
@@ -1036,6 +1048,16 @@
   "salesBarcodeLabel": "Barcode",
   "salesBarcodeHint": "Scale labels and PLUs — camera or USB reader",
   "salesBarcodeScan": "Scan with camera",
+  "salesBarcodeCameraHint": "Point the camera at the barcode",
+  "salesBarcodeCameraUnavailable": "Camera unavailable: {error}",
+  "@salesBarcodeCameraUnavailable": {
+    "description": "Error shown when the camera cannot be opened in the barcode reader",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "salesBarcodeNotFound": "Product not found for this code.",
   "salesBarcodeInvalid": "Invalid scale code.",
   "salesStockLimit": "Stock limit reached for {product}.",
@@ -1195,6 +1217,7 @@
   "adminGrowthThisMonth": "This month",
   "adminGrowthLastMonth": "Last month",
   "adminGrowthNewTenants": "New tenants",
+  "adminGrowthNewTenantsMonth": "New tenants this month",
   "adminGrowthApprovals": "Approvals",
   "adminGrowthUp": "+{count}",
   "@adminGrowthUp": {
@@ -1250,6 +1273,7 @@
   "notificationInvoiceExpired": "Invoice expired",
   "notificationInvoicePaid": "Invoice paid",
   "notificationMarkAllRead": "Mark all as read",
+  "notificationMarkRead": "Mark as read",
   "notificationNoNotifications": "No notifications",
   "notificationNoNotificationsHint": "You'll see invoice notifications here.",
   "notificationTabAll": "All",
@@ -1270,6 +1294,55 @@
   "notificationAdminLabelGeneral": "General",
   "notificationAddonExpiringTitle": "Add-on expiring soon",
   "notificationAddonExpiredTitle": "Add-on expired",
+  "notificationBodyInvoiceGenerated": "Invoice {period} for {amount} {currency}. Due on {dueDate}.",
+  "@notificationBodyInvoiceGenerated": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "amount": { "type": "String" },
+      "currency": { "type": "String" },
+      "dueDate": { "type": "String" }
+    }
+  },
+  "notificationBodyInvoiceDueSoon": "Invoice {period} for {amount} {currency} is due in {days, plural, =1{1 day} other{{days} days}}. Please settle the payment.",
+  "@notificationBodyInvoiceDueSoon": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "amount": { "type": "String" },
+      "currency": { "type": "String" },
+      "days": { "type": "int" }
+    }
+  },
+  "notificationBodyInvoiceExpired": "Invoice {period} for {amount} {currency} expired without payment. Access may be suspended.",
+  "@notificationBodyInvoiceExpired": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "amount": { "type": "String" },
+      "currency": { "type": "String" }
+    }
+  },
+  "notificationBodyInvoicePaid": "Invoice {period} for {amount} {currency} was marked as paid. Thank you!",
+  "@notificationBodyInvoicePaid": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "amount": { "type": "String" },
+      "currency": { "type": "String" }
+    }
+  },
+  "notificationBodyAddOnExpired": "The \"{addonName}\" add-on expired on {date}. Renew the subscription to keep using it.",
+  "@notificationBodyAddOnExpired": {
+    "placeholders": {
+      "addonName": { "type": "String" },
+      "date": { "type": "String" }
+    }
+  },
+  "notificationBodyAddOnExpiringSoon": "The \"{addonName}\" add-on expires in {days, plural, =1{1 day} other{{days} days}} ({date}). Renew to avoid interruption.",
+  "@notificationBodyAddOnExpiringSoon": {
+    "placeholders": {
+      "addonName": { "type": "String" },
+      "days": { "type": "int" },
+      "date": { "type": "String" }
+    }
+  },
   "notificationIconInvoice": "Invoice",
   "notificationIconDue": "Due",
   "notificationIconExpired": "Expired",
@@ -1339,6 +1412,16 @@
   "customInvoiceTemplateStyleCompact": "Compact",
   "customInvoiceTemplateSave": "Save Template",
   "customInvoicePreviewCompanyFallback": "Company name",
+  "customInvoicePreviewSampleItemA": "Product A",
+  "customInvoicePreviewSampleItemB": "Product B",
+  "customInvoicePreviewSampleClient": "João Silva",
+  "customInvoicePreviewTotal": "TOTAL: {total}",
+  "@customInvoicePreviewTotal": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+  "customInvoicePreviewFooter": "Generated by TAREQO",
   "quotationTitle": "Quotations",
   "quotationEmpty": "No quotations",
   "quotationEmptySubtitle": "Create quotations and estimates for your clients",
@@ -1660,5 +1743,41 @@
   "adminTenantCycleActiveLeft": "Active: {days, plural, =1{1 day left} other{{days} days left}}",
   "adminTenantCycleExpired": "Expired",
   "adminTenantCycleExpiresIn": "Expires in {days, plural, =1{1 day} other{{days} days}}",
-  "adminTenantCycleTrialLeft": "Trial: {days, plural, =1{1 day left} other{{days} days left}}"
+  "adminTenantCycleTrialLeft": "Trial: {days, plural, =1{1 day left} other{{days} days left}}",
+  "validationCustomerNameRequired": "Enter the customer name.",
+  "validationDebtAmountPositive": "The credit amount must be greater than zero.",
+  "validationAmountPositive": "The transaction amount must be greater than zero.",
+  "validationCashCountNonNegative": "The physical cash count cannot be negative.",
+  "validationSalePriceBelowPurchase": "The sale price cannot be lower than the purchase price.",
+  "validationStoreNameRequired": "Enter the store name.",
+  "validationTenantNotApproved": "Your ERP access has not been approved yet.",
+  "validationEmployeeNameEmailRequired": "Enter the employee's name and e-mail.",
+  "validationEmployeeStoreRequired": "Choose a store from your tenant.",
+  "validationPlanNameRequired": "Enter the plan name.",
+  "validationPlanMinStores": "The plan must allow at least 1 store.",
+  "validationPlanMinEmployees": "The plan must allow at least 1 employee.",
+  "validationPlanPriceNonNegative": "The price cannot be negative.",
+  "validationBusinessNameRequired": "Enter your business name.",
+  "validationAccessPlanRequired": "Choose a plan.",
+  "validationAccessAlreadyRequested": "You already have an access request. Please wait for approval.",
+  "validationUpgradePlanDifferent": "Choose a plan different from the current one.",
+  "validationUpgradePendingExists": "There is already an upgrade request awaiting approval.",
+  "validationAccountGeneric": "Could not create the employee account. Please try again.",
+  "validationAccountEmailInUse": "An account with this e-mail already exists. Use another e-mail or ask the employee to sign in with their own account.",
+  "validationAccountOwnerOnly": "Only the tenant owner can register employees.",
+  "validationAccountWeakPassword": "The password must have at least 8 characters.",
+  "planLimitStores": "The {planName} plan allows up to {limit, plural, =1{1 store} other{{limit} stores}}. Request a plan upgrade to add more.",
+  "@planLimitStores": {
+    "placeholders": {
+      "planName": { "type": "String" },
+      "limit": { "type": "int" }
+    }
+  },
+  "planLimitEmployees": "The {planName} plan allows up to {limit, plural, =1{1 employee} other{{limit} employees}}. Request a plan upgrade to hire more.",
+  "@planLimitEmployees": {
+    "placeholders": {
+      "planName": { "type": "String" },
+      "limit": { "type": "int" }
+    }
+  }
 }
