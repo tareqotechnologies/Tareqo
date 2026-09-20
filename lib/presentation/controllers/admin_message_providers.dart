@@ -64,14 +64,11 @@ class TenantAdminMessagesNotifier extends AsyncNotifier<List<AdminMessage>> {
 // Estado: contagem de mensagens não lidas do admin
 // ---------------------------------------------------------------------------
 
+/// Contagem de mensagens não lidas — derivada da FONTE ÚNICA (a lista do
+/// notifier acima, que já devolve lista vazia sem sessão/tenant). Await
+/// explícito no future da lista: leitura de snapshot `.value` aqui devolveria
+/// 0 provisório enquanto a lista carrega (corrida que travava o teste).
 final unreadAdminMessagesCountProvider = FutureProvider<int>((ref) async {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return 0;
-
-  final tenantAsync = ref.watch(myTenantProvider(user.id));
-  final tenant = tenantAsync.value;
-  if (tenant == null) return 0;
-
-  final messages = ref.watch(tenantAdminMessagesProvider).value ?? const [];
+  final messages = await ref.watch(tenantAdminMessagesProvider.future);
   return messages.where((m) => !m.isRead).length;
 });
