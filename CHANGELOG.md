@@ -3,6 +3,23 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.3.0+28] — 2026-09-20
+
+### Novo
+- **Notificações localizadas na exibição**: `InvoiceNotification` ganha `bodyParams` (JSONB, coluna `body_params` — **PARTE 33** em `schema.sql` + `upgrade.sql`, idempotente e validada no `sql_check` com aplicação dupla) com os parâmetros de interpolação do corpo (período, valor, moeda, dias, add-on, datas); a UI reconstrói título e corpo LOCALIZADOS por tipo (`_InvoiceTypeLabel`) e o corpo persistido em PT permanece como fallback para notificações legadas (params nulos). Cobertura widget en/fr dos ramos de plural.
+- **Erros de validação do domínio localizados na UI**: novo mapper `lib/core/i18n/domain_error_l10n.dart` converte as exceções de domínio em mensagens localizadas por TIPO (variante única) ou por `code` estável (variantes múltiplas), com fallback à mensagem PT armazenada — as 16 telas que exibiam `error.message` cru (PT) passam a consumir o mapper. Exceções ganham `code` (`InvalidPlanException`, `InvalidEmployeeException`, `InvalidTenantRequestException`, `InvalidPlanRequestException`, `EmployeeAccountCreationException`) e a `PlanLimitExceededException` carrega dados estruturados (plano + limite + lojas/funcionários) para a interpolação com plural.
+- **Banner de sincronização com falhas de negócio**: o `SyncPendingBanner` (montado em todas as abas do shell) distingue "N operações aguardando" de "· N com erro" — `OfflineSyncService` expõe `failedCount()`/`failedChanges` (falhas de negócio reenviáveis; dead-letter não conta) e o `drain()` emite os dois streams quando qualquer contagem muda.
+
+### Alterado (UI/UX — i18n Lote 2)
+- **UI 100% localizado**: varredura completa das telas restantes (admin, add-ons, financeiro, crédito, produtos, vendas, shell, conta) — o `CustomInvoicePreview` migra para `context.l10n` (reaproveitando as chaves `pdf*` do exporter) e os catálogos de planos/add-ons permanecem como DADO (os nomes vêm do banco em produção; localizar só o catálogo local criaria divergência).
+- **Widgets compartilhados novos**: `AppSegmentedButton`, `DetailRow` e `SyncPendingBanner`.
+
+### Testes
+- Suíte completa **1742/1742 verde** (`flutter analyze` 0 issues); l10n regenerado — **1123 membros** (994 getters + 129 métodos, pt/en/fr) com o sweep gerado pelo `tool/gen_l10n_test.py` (que agora aceita assinaturas multilinha do gen-l10n); 7 testes unitários do mapper de erros; goldens do dashboard/PDV regenerados.
+
+### Infra (Supabase)
+- **`body_params JSONB` aplicado e validado no DEV** (ALTER + COMMENT + ANALYZE; smoke test de escrita/leitura com round-trip do JSONB; fixtures `test_notif_%` removidas). **PROD pendente**: aplicar a PARTE 33 no projeto `bcyolmheltzlddfwgqcq` ANTES do release do app que lê a coluna (o datasource remoto já inclui a coluna no SELECT — contra banco não migrado falha com 42703). Verificação read-only via PostgREST: `select=body_params` deve responder 42501 (RLS) em vez de 42703.
+
 ## [2.2.0+27] — 2026-09-17
 
 ### Corrigido (pós-release)
