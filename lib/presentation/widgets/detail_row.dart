@@ -62,7 +62,7 @@ class DetailRow extends StatelessWidget {
               overflow: maxLines == null ? null : TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: valueColor ?? scheme.onSurface,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),

@@ -274,9 +274,11 @@ class _AdminFab extends StatelessWidget {
                 ),
                 child: Text(
                   '$totalBadge',
-                  style: theme.textTheme.labelSmall?.copyWith(
+                  // labelMedium 12 + w600 EXPLÍCITO: badges são ênfase — o
+                  // tema thin do painel rebaixa os labels para w400, mas o
+                  // badge sobre vermelho precisa de peso de destaque.
+                  style: theme.textTheme.labelMedium?.copyWith(
                     color: Colors.white,
-                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -429,7 +431,7 @@ class _NavSheetItem extends StatelessWidget {
                 child: Text(
                   item.label,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: selected ? FontWeight.w500 : FontWeight.w300,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w300,
                     color: color,
                     fontSize: 14,
                   ),
@@ -449,9 +451,10 @@ class _NavSheetItem extends StatelessWidget {
                   ),
                   child: Text(
                     '${item.badge}',
-                    style: theme.textTheme.labelSmall?.copyWith(
+                    // labelMedium 12 + w600 explícito — mesmo padrão do
+                    // badge do FAB (o tema thin rebaixa labels para w400).
+                    style: theme.textTheme.labelMedium?.copyWith(
                       color: Colors.white,
-                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

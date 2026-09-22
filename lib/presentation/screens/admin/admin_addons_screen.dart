@@ -416,9 +416,7 @@ class _BulkSelectionBar extends StatelessWidget {
           const SizedBox(width: AppSpacing.xs),
           Text(
             '$selectedCount / $totalCount',
-            style: theme.textTheme.labelMedium?.copyWith(
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
+            style: theme.textTheme.labelMedium,
           ),
           const SizedBox(width: AppSpacing.sm),
           TextButton(
@@ -770,8 +768,10 @@ class _BulkAddOnOption extends StatelessWidget {
 /// Mesmo padrão visual do `_PlanEditorSheet` (gestão de planos).
 class _AddOnPriceSheet extends ConsumerStatefulWidget {
   const _AddOnPriceSheet({required this.addon});
-  final AddOn addon;
-  @override
+
+  final AddOn addon;
+
+  @override
   ConsumerState<_AddOnPriceSheet> createState() => _AddOnPriceSheetState();
 }
 
@@ -779,25 +779,31 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
   late final _priceController = TextEditingController(
     text: (widget.addon.priceMonthlyCents / 100).toString(),
   );
-  bool _isSubmitting = false;
+
+  bool _isSubmitting = false;
   String? _formError;
-  @override
+
+  @override
   void dispose() {
     _priceController.dispose();
     super.dispose();
   }
-  Future<void> _submit() async {
+
+  Future<void> _submit() async {
     final l10n = context.l10n;
     final priceCents = Money.parse(_priceController.text.trim());
-    if (_priceController.text.trim().isEmpty || priceCents < 0) {
+
+    if (_priceController.text.trim().isEmpty || priceCents < 0) {
       setState(() => _formError = l10n.adminPlanPriceError);
       return;
     }
-    setState(() {
+
+    setState(() {
       _isSubmitting = true;
       _formError = null;
     });
-    final messenger = ScaffoldMessenger.of(context);
+
+    final messenger = ScaffoldMessenger.of(context);
     try {
       await ref
           .read(allAddOnsProvider.notifier)
@@ -826,12 +832,14 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
       if (mounted) setState(() => _isSubmitting = false);
     }
   }
-  @override
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
-    return Container(
+
+    return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
@@ -1168,14 +1176,12 @@ class _Pill extends StatelessWidget {
           style: theme.textTheme.labelSmall?.copyWith(
             color: color,
             fontSize: 12,
-            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
         const SizedBox(width: 3),
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 12,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),

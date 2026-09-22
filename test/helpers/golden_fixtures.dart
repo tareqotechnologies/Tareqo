@@ -285,16 +285,22 @@ List<dynamic> dashboardGoldenOverrides() {
 }
 
 /// Dashboard pronto para golden — monta a tela real com os fakes.
-Widget dashboardGoldenApp({ThemeData? theme}) {
+/// [locale] permite exercitar traduções (ex.: teste de overflow em fr).
+Widget dashboardGoldenApp({ThemeData? theme, Locale? locale}) {
   return ProviderScope(
     overrides: [...dashboardGoldenOverrides()],
-    child: testApp(theme: theme, home: const DashboardScreen()),
+    child: testApp(
+      theme: theme,
+      locale: locale ?? const Locale('pt'),
+      home: const DashboardScreen(),
+    ),
   );
 }
 
 /// PDV (NewSaleSheet) pronto para golden — mesma tela real aberta pelo
 /// FAB/aba de Vendas (fullscreen via showAppSheet em produção).
-Widget newSaleGoldenApp({ThemeData? theme}) {
+/// [locale] permite exercitar traduções (ex.: teste de overflow em fr).
+Widget newSaleGoldenApp({ThemeData? theme, Locale? locale}) {
   return ProviderScope(
     overrides: [
       ...storeContextOverrides(),
@@ -302,7 +308,11 @@ Widget newSaleGoldenApp({ThemeData? theme}) {
       processSaleUseCaseProvider.overrideWithValue(FakeProcessSaleUseCase()),
       salesRepositoryProvider.overrideWithValue(FakeSalesRepository()),
     ],
-    child: testApp(theme: theme, home: Scaffold(body: NewSaleSheet())),
+    child: testApp(
+      theme: theme,
+      locale: locale ?? const Locale('pt'),
+      home: Scaffold(body: NewSaleSheet()),
+    ),
   );
 }
 

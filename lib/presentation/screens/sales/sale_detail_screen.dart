@@ -179,7 +179,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           Text(
             l10n.saleDetailId(Formatters.saleLabel(sale.number)),
             style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 6),
@@ -349,7 +349,7 @@ class _ItemRow extends ConsumerWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 1),

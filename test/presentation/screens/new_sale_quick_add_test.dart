@@ -28,7 +28,7 @@ class _CatalogUseCase implements GetProductsUseCase {
       name: 'Caneta Azul',
       purchasePriceCents: 100,
       salePriceCents: 200,
-      // 50 UNIDADES (50.000 milésimos) — estoque realista para a edição
+      // 50 UNIDADES (50.000 milésimos) — stock realista para a edição
       // de quantidade (25 unidades) não ser capada pelo mínimo.
       stockQuantity: 50000,
     ),
@@ -106,7 +106,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // O produto entrou no carrinho — resumo do rodapé (estável mesmo com
-      // a SliverList lazy). A venda ainda NÃO foi registrada — só o
+      // a SliverList lazy). A venda ainda NÃO foi registada — só o
       // carrinho recebeu o item. O total "R$ 2,00" aparece no rodapé E na
       // pill/linha do catálogo (ambos visíveis desde o layout compacto).
       expect(find.text('1 item'), findsOneWidget);

@@ -91,7 +91,7 @@ class _SalesCardState extends State<SalesCard> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -108,12 +108,9 @@ class _SalesCardState extends State<SalesCard> {
                               child: Text(
                                 Formatters.currency(_sale.totalAmountCents),
                                 maxLines: 1,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
+                                // Destaque de linha = titleSmall (14/w600,
+                                // tabular) — padrão P1 da auditoria.
+                                style: theme.textTheme.titleSmall,
                               ),
                             ),
                           ),

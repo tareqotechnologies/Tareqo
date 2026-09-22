@@ -204,7 +204,7 @@ class _ReceiptItemRow extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   Formatters.currency(subtotal),
-                  style: _bodyStyle.copyWith(fontWeight: FontWeight.w500),
+                  style: _bodyStyle.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ),

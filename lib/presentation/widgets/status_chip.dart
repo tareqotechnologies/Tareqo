@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'num_text.dart';
+
 /// Pílula de status — rótulo com fundo colorido translúcido.
 class StatusChip extends StatelessWidget {
   const StatusChip({
@@ -34,18 +36,17 @@ class StatusChip extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text(
+              // NumText: chips carregam quantidades/valores/datas — dígitos
+              // alinhados em colunas de chips (tabular embutido).
+              child: NumText(
                 label,
                 maxLines: 1,
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   color: scheme.brightness == Brightness.dark
                       ? color.withValues(alpha: 0.9)
                       : color,
-                  // Chips carregam quantidades/valores/datas — dígitos
-                  // alinhados em colunas de chips.
-                  fontFeatures: [FontFeature.tabularFigures()],
                 ),
               ),
             ),

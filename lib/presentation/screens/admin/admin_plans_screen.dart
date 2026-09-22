@@ -212,14 +212,12 @@ class _Pill extends StatelessWidget {
           style: theme.textTheme.labelSmall?.copyWith(
             color: color,
             fontSize: 12,
-            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
         const SizedBox(width: 3),
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 12,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
@@ -453,7 +451,6 @@ class _PlanDetailSheet extends ConsumerWidget {
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurfaceVariant,
                               fontFamily: 'monospace',
-                              fontSize: 12,
                             ),
                           ),
                         ),
@@ -551,7 +548,7 @@ class _PlanDetailSheet extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       l10n.adminTenantDetailEmployees,
-                      style: theme.textTheme.labelMedium?.copyWith(),
+                      style: theme.textTheme.labelMedium,
                     ),
                   ),
                   Container(
@@ -569,7 +566,6 @@ class _PlanDetailSheet extends ConsumerWidget {
                       context.l10n.adminTenantCount(planTenants.length),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ),
@@ -669,8 +665,6 @@ class _InfoRow extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 12,
-              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
         ],
@@ -704,7 +698,6 @@ class _TenantStatChip extends StatelessWidget {
         '$count $label',
         style: theme.textTheme.labelSmall?.copyWith(
           color: color,
-          fontFeatures: const [FontFeature.tabularFigures()],
         ),
       ),
     );
@@ -759,7 +752,6 @@ class _TenantMiniTile extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                     fontFamily: 'monospace',
-                    fontSize: 12,
                   ),
                 ),
               ],

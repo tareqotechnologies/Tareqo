@@ -580,7 +580,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                                     cents: _totalCents,
                                     alignment: Alignment.centerRight,
                                     style: theme.textTheme.labelMedium
-                                        ?.copyWith(fontWeight: FontWeight.w500),
+                                        ?.copyWith(fontWeight: FontWeight.w600),
                                   ),
                                 ),
                               ],
@@ -763,7 +763,7 @@ class _ScannerZone extends StatelessWidget {
                     Text(
                       l10n.salesBarcodeLabel,
                       style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -866,7 +866,7 @@ class _CartProductRow extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: outOfStock ? theme.colorScheme.outline : null,
                   ),
                 ),
@@ -986,7 +986,7 @@ class _CartPill extends StatelessWidget {
                   : '${Quantity.format(quantity, language: Formatters.currentLanguage)}×',
               style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -1000,7 +1000,7 @@ class _CartPill extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 1),
@@ -1020,9 +1020,9 @@ class _CartPill extends StatelessWidget {
             child: SmartAmount(
               cents: Quantity.lineTotal(quantity, product.salePriceCents),
               alignment: Alignment.centerRight,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              // Destaque de linha = titleSmall (14/w600, tabular) — padrão
+              // P1 da auditoria tipográfica.
+              style: theme.textTheme.titleSmall,
             ),
           ),
         ],

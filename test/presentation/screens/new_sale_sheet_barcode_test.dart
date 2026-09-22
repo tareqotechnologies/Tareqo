@@ -346,13 +346,13 @@ void main() {
   });
 
   testWidgets(
-    'leituras sucessivas de balança respeitam o estoque e disparam o limite',
+    'leituras sucessivas de balança respeitam o stock e disparam o limite',
     (tester) async {
       final processSale = await _pumpSheet(tester);
 
       // '200012399999' = 20 + PLU '00123' + valor '99999' → peso derivado
       // = 99999 × 1000 ~/ 20000 = 4999 milésimos (máx. por etiqueta).
-      // Três leituras acumulam 4999+4999+4999 → estoura o estoque (10000) e
+      // Três leituras acumulam 4999+4999+4999 → estoura o stock (10000) e
       // o carrinho é limitado ao disponível (capped).
       await _scan(tester, '200012399999');
       // A pill do carrinho ocupa o topo da lista — rola até a linha do
@@ -396,14 +396,14 @@ void main() {
       final field = tester.widget<TextField>(_barcodeField());
       expect(field.controller?.text, isEmpty);
 
-      // A quarta leitura não cabe no estoque → erro de limite.
+      // A quarta leitura não cabe no stock → erro de limite.
       await _scan(tester, '200012399999');
       expect(
-        find.text('Limite de estoque atingido para Arroz.'),
+        find.text('Limite de stock atingido para Arroz.'),
         findsOneWidget,
       );
 
-      // Nada além do estoque entra no carrinho.
+      // Nada além do stock entra no carrinho.
       await tester.tap(find.text('Confirmar venda'));
       await tester.pumpAndSettle();
       expect(processSale.lastSale?.items.single.quantity, 10000);
@@ -520,11 +520,11 @@ void main() {
   );
 
   testWidgets(
-    'limite de estoque também vale no caminho de +1 unidade (código simples)',
+    'limite de stock também vale no caminho de +1 unidade (código simples)',
     (tester) async {
       final processSale = await _pumpSheet(tester);
 
-      // Sal tem 3 unidades: três leituras de '77777' enchem o estoque e a
+      // Sal tem 3 unidades: três leituras de '77777' enchem o stock e a
       // quarta dispara o limite — sem exceder o disponível.
       await _scan(tester, '77777');
       await _scan(tester, '77777');
@@ -546,7 +546,7 @@ void main() {
 
       await _scan(tester, '77777');
       expect(
-        find.text('Limite de estoque atingido para Sal.'),
+        find.text('Limite de stock atingido para Sal.'),
         findsOneWidget,
       );
 

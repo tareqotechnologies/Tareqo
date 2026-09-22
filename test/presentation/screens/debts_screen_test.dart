@@ -160,8 +160,8 @@ void main() {
     // Empty state sóbrio ("tudo em dia" — check, sem ícone de festa).
     expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
     // CTA ÚNICO (canvas V3): sem FAB próprio na tela, o estado vazio traz
-    // sempre o botão "Registrar fiado".
-    expect(find.text('Registrar fiado'), findsOneWidget);
+    // sempre o botão "Registar fiado".
+    expect(find.text('Registar fiado'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
@@ -374,9 +374,9 @@ void main() {
     expect(find.text('Nenhum resultado'), findsOneWidget);
     expect(find.text('João'), findsNothing);
     expect(find.text('Maria Souza'), findsNothing);
-    // Busca vazia NÃO oferece o CTA de registrar fiado (a busca é sobre a
+    // Busca vazia NÃO oferece o CTA de registar fiado (a busca é sobre a
     // lista carregada, não sobre a loja) — e não há FAB próprio (canvas).
-    expect(find.text('Registrar fiado'), findsNothing);
+    expect(find.text('Registar fiado'), findsNothing);
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 

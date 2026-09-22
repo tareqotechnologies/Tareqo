@@ -296,7 +296,7 @@ class _CustomerTile extends StatelessWidget {
                   _initials(customer.name),
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -310,7 +310,7 @@ class _CustomerTile extends StatelessWidget {
                     Text(
                       customer.name,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     if (contacts.isNotEmpty) ...[

@@ -165,7 +165,7 @@ flutter:
     - assets/branding/play_store_icon.png
     # Guias de suporte embutidos (ecrã Ajuda — Lojas → Ajustes → Suporte):
     # os mesmos documentos de docs/, empacotados no app para leitura offline.
-    - docs/pt/GUIA_DO_USUARIO.md
+    - docs/pt/GUIA_DO_UTILIZADOR.md
     - docs/pt/TROUBLESHOOTING.md
     - docs/en/USER_GUIDE.md
     - docs/en/TROUBLESHOOTING.md
@@ -179,6 +179,20 @@ flutter:
     - family: Inter
       fonts:
         - asset: assets/fonts/Inter-Variable.ttf
+        # Instância estática w700 — usada apenas pelos exporters de PDF
+        # (dart_pdf não seleciona o eixo wght da variável e sem fonte bold
+        # registrada os títulos das facturas/relatórios saem sem peso).
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+    # Mono — família 'monospace' (nome do PAPEL, não da fonte): todos os
+    # `fontFamily: 'monospace'` do app (código MFA, IDs do painel admin,
+    # snippets do leitor de ajuda) caem aqui. Política de fallback:
+    # trocar a mono do app é editar SÓ este bloco — os 6 usos em código
+    # permanecem estáveis. Variável Roboto Mono v3.001 (OFL, 180 KB) —
+    # pesos w400/w600 resolvidos pelo eixo wght (mesmo mecanismo da Inter).
+    - family: monospace
+      fonts:
+        - asset: assets/fonts/RobotoMono-Variable.ttf
 
 # Ícones nativos (W7) — gerados por tool/generate_icons_test.dart a partir
 # da imagem-fonte assets/branding/icon_official.png (design OFICIAL do

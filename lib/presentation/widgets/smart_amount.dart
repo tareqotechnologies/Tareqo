@@ -34,13 +34,27 @@ class SmartAmount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Tabular SEMPRE (P1 da auditoria tipográfica): o estilo passado pode
+    // vir de um papel sem tabular no tema (usos legados) — o merge re-aplica
+    // o recurso por último; este widget é a autoridade de renderização de
+    // dinheiro, então garante o alinhamento dígito a dígito de qualquer
+    // forma.
+    TextStyle? effective = style;
+    if (effective != null) {
+      effective = effective.copyWith(
+        fontFeatures: [
+          ...?effective.fontFeatures,
+          const FontFeature.tabularFigures(),
+        ],
+      );
+    }
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: alignment,
       child: Text(
         '$prefix${Formatters.currency(cents)}',
         maxLines: 1,
-        style: style,
+        style: effective,
       ),
     );
   }

@@ -118,11 +118,11 @@ void main() {
         tester,
         title: 'Confirmar',
         message: 'Detalhe',
-        confirmLabel: 'Salvar',
+        confirmLabel: 'Guardar',
       );
-      final scheme = Theme.of(tester.element(find.text('Salvar'))).colorScheme;
+      final scheme = Theme.of(tester.element(find.text('Guardar'))).colorScheme;
 
-      final bg = confirmButtonColor(tester, 'Salvar');
+      final bg = confirmButtonColor(tester, 'Guardar');
       expect(bg, isNot(scheme.error));
       // Sem style explícito o FilledButton cai no default do tema (primary).
       expect(bg, isNull);

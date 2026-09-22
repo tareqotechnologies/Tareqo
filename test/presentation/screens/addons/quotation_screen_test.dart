@@ -44,7 +44,7 @@ class _FakeQuotationRepository implements IQuotationRepository {
   @override
   Future<Quotation> update(Quotation quotation) async {
     updateCalls++;
-    if (throwOnUpdate) throw Exception('falha ao actualizar');
+    if (throwOnUpdate) throw Exception('falha ao atualizar');
     lastUpdated = quotation;
     return quotation;
   }
@@ -61,7 +61,7 @@ class _FailingQuotationRepository implements IQuotationRepository {
 
   @override
   Future<Quotation> update(Quotation quotation) async =>
-      throw Exception('falha ao actualizar');
+      throw Exception('falha ao atualizar');
 }
 
 class _FakeGetProductsUseCase implements GetProductsUseCase {
@@ -246,7 +246,7 @@ void main() {
     expect(repository.updateCalls, 1);
     expect(repository.lastUpdated?.status, QuotationStatus.sent);
     expect(repository.lastUpdated?.sentAt, isNotNull);
-    expect(find.text('Estado da cotação actualizado'), findsOneWidget);
+    expect(find.text('Estado da cotação atualizado'), findsOneWidget);
   });
 
   testWidgets('erro na transição de estado mostra snackbar de erro', (
@@ -263,13 +263,13 @@ void main() {
 
     expect(repository.updateCalls, 1);
     expect(
-      find.text('Não foi possível actualizar a cotação. Tente novamente.'),
+      find.text('Não foi possível atualizar a cotação. Tente novamente.'),
       findsOneWidget,
     );
-    expect(find.text('Estado da cotação actualizado'), findsNothing);
+    expect(find.text('Estado da cotação atualizado'), findsNothing);
   });
 
-  testWidgets('criar cotação via sheet: cliente, produto e salvar', (
+  testWidgets('criar cotação via sheet: cliente, produto e guardar', (
     tester,
   ) async {
     _useWideViewport(tester);
@@ -308,7 +308,7 @@ void main() {
     expect(find.textContaining('30,00'), findsWidgets);
 
     // Salva.
-    await tester.tap(find.text('Salvar Cotação'));
+    await tester.tap(find.text('Guardar Cotação'));
     await tester.pumpAndSettle();
 
     expect(repository.addCalls, 1);
@@ -321,7 +321,7 @@ void main() {
     expect(find.textContaining('criada!'), findsOneWidget);
   });
 
-  testWidgets('sem clientes: campo de texto livre e salvar desabilitado', (
+  testWidgets('sem clientes: campo de texto livre e guardar desabilitado', (
     tester,
   ) async {
     _useWideViewport(tester);
@@ -338,10 +338,10 @@ void main() {
 
     // Sem clientes → AppTextField de nome livre (label do campo).
     expect(find.text('Nome do cliente'), findsOneWidget);
-    // Botão salvar desabilitado sem cliente e sem itens.
+    // Botão guardar desabilitado sem cliente e sem itens.
     final saveButton = tester.widget<FilledButton>(
       find.ancestor(
-        of: find.text('Salvar Cotação'),
+        of: find.text('Guardar Cotação'),
         matching: find.byType(FilledButton),
       ),
     );
@@ -365,7 +365,7 @@ void main() {
 
     // Preenche o nome da empresa e salva.
     await tester.enterText(find.byType(TextField).first, 'Farmácia Vida, Lda');
-    await tester.tap(find.text('Salvar Modelo'));
+    await tester.tap(find.text('Guardar Modelo'));
     await tester.pumpAndSettle();
 
     expect(find.text('Modelo guardado com sucesso'), findsOneWidget);

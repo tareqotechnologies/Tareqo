@@ -1,6 +1,6 @@
-# Guia do Usuário — TAREQO ERP
+# Guia do Utilizador — TAREQO ERP
 
-Um guia simples e completo para usar o seu sistema de gestão do dia a dia: estoque, vendas, clientes, dinheiro e relatórios — tudo em um só lugar.
+Um guia simples e completo para usar o seu sistema de gestão do dia a dia: stock, vendas, clientes, dinheiro e relatórios — tudo em um só lugar.
 
 > **Precisa resolver um problema?** Consulte o [Troubleshooting (resolução de problemas)](TROUBLESHOOTING.md).
 
@@ -32,17 +32,17 @@ A tela inicial mostra o resumo do seu negócio **na loja activa**, com uma **pí
 - **Vendas** do período (com comparação % com o período anterior)
 - **Caixa** do período
 - **A receber (fiado)** — com contador de clientes devedores
-- **Atividade de hoje**: vendas, entradas de estoque, pagamentos de fiado, despesas e alertas — toque num evento para ver os detalhes.
+- **Atividade de hoje**: vendas, entradas de stock, pagamentos de fiado, despesas e alertas — toque num evento para ver os detalhes.
 
 ### Alertas de validade
 
 - **Amarelo** = produto está **para vencer** (menos de 30 dias de validade).
-- **Vermelho** = produto **já venceu** e ainda tem estoque.
+- **Vermelho** = produto **já venceu** e ainda tem stock.
 - Toque no alerta para ver qual é o produto e o lote envolvido.
 
 ### Ações rápidas
 
-O botão **+** (canto da tela) abre o menu de ações: **Nova venda**, **Registrar despesa**, **Adicionar produto**, **Adicionar cliente** e **Registrar fiado**.
+O botão **+** (canto da tela) abre o menu de ações: **Nova venda**, **Registar despesa**, **Adicionar produto**, **Adicionar cliente** e **Registar fiado**.
 
 ### Navegação
 
@@ -52,7 +52,7 @@ A barra inferior tem 4 abas: **Início**, **Vendas**, **Carteira** e **Menu**. E
 
 ## 3. Lojas — qual loja estou a ver?
 
-O sistema pode ter **várias lojas** (ex.: Loja Central, Loja do Bairro). Cada loja tem o **seu próprio estoque, vendas e caixa**.
+O sistema pode ter **várias lojas** (ex.: Loja Central, Loja do Bairro). Cada loja tem o **seu próprio stock, vendas e caixa**.
 
 - **Troca rápida:** toque na **pílula com o nome da loja** no topo do Início (e nos AppBars de Produtos, Vendas, Carteira e Clientes) e escolha a loja — tudo passa a mostrar os dados dela na hora.
 - Também é possível trocar em **Menu → Lojas → aba Ajustes → seção "Loja activa"**.
@@ -68,7 +68,7 @@ O sistema pode ter **várias lojas** (ex.: Loja Central, Loja do Bairro). Cada l
 1. Abra **Menu → Produtos** → toque em **Novo produto**.
 2. Preencha o **nome** e, se quiser, a **descrição**.
 3. Informe o preço de **compra** e o preço de **venda**.
-4. **Quantidade em estoque**: informe quantas unidades você tem (ex.: `50`).
+4. **Quantidade em stock**: informe quantas unidades você tem (ex.: `50`).
 5. **Foto (opcional)**: toque na área de foto para **tirar uma foto** ou **escolher da galeria**. A foto aparece na lista de produtos e ajuda na hora do balcão.
 6. **Validade (opcional)**: toque em **Definir validade** e escolha a data de vencimento. O sistema avisa quando estiver perto de vencer.
 7. **Venda por peso?** Active **"Venda por peso (fração)"** para produtos vendidos por quilo/litro (ex.: arroz a granel, óleo) e escolha a unidade (kg, g, l, ml). O balcão passa a aceitar quantidades como `1,75 kg`.
@@ -78,13 +78,13 @@ O sistema pode ter **várias lojas** (ex.: Loja Central, Loja do Bairro). Cada l
 ### Editar / desactivar um produto
 
 - Toque num produto da lista → **Editar produto**.
-- Pode alterar nome, preços, estoque (**ajuste manual**), foto, validade e o status **Produto activo**.
-- **Desactivar** (`Produto activo` desligado): o produto some do balcão e das compras, mas **permanece no histórico** com o estoque guardado — dá para reactivar depois.
+- Pode alterar nome, preços, stock (**ajuste manual**), foto, validade e o status **Produto activo**.
+- **Desactivar** (`Produto activo` desligado): o produto some do balcão e das compras, mas **permanece no histórico** com o stock guardado — dá para reactivar depois.
 - Para remover a foto, toque em **Remover foto**.
 
 > **Atenção:** Se a foto não enviar (ex.: sem internet), o produto é salvo mesmo assim — você verá um aviso e pode adicionar a foto depois pela edição.
 
-> **Filtros:** no topo da lista de produtos, o ícone de filtro abre a busca por nome, status, tipo de estoque, disponibilidade e faixa de preço.
+> **Filtros:** no topo da lista de produtos, o ícone de filtro abre a busca por nome, status, tipo de stock, disponibilidade e faixa de preço.
 
 ---
 
@@ -96,7 +96,7 @@ O sistema pode ter **várias lojas** (ex.: Loja Central, Loja do Bairro). Cada l
 4. Escolha a **forma de pagamento**: Dinheiro, Cartão de débito, Cartão de crédito, M-Pesa, E-Mola ou Transferência.
 5. Toque em **Confirmar venda**.
 
-> ✓ O estoque é abatido automaticamente — **primeiro o lote mais antigo** (FIFO), para nada vencer parado.
+> ✓ O stock é abatido automaticamente — **primeiro o lote mais antigo** (FIFO), para nada vencer parado.
 
 ### Recibo e partilha
 
@@ -108,7 +108,7 @@ O sistema pode ter **várias lojas** (ex.: Loja Central, Loja do Bairro). Cada l
 Se uma venda foi feita por engano:
 
 1. Abra o **detalhe** da venda → **Anular venda** → confirme.
-2. O estoque **volta aos lotes exactos** que foram vendidos (validade e custo preservados) e o caixa é **estornado**.
+2. O stock **volta aos lotes exactos** que foram vendidos (validade e custo preservados) e o caixa é **estornado**.
 3. A venda **permanece no histórico** com a marca "Anulada" (para auditoria), mas **sai dos relatórios, indicadores e do resumo do dia**.
 
 > No modo SaaS com MFA exigida, confirmar a venda (e outras operações de dinheiro) pode pedir o **código do autenticador** — é o servidor a proteger o seu caixa.
@@ -121,14 +121,14 @@ Se uma venda foi feita por engano:
 2. Informe o **fornecedor**.
 3. Adicione os produtos comprados e as quantidades.
 4. **Validade (opcional)**: para produtos que vencem, escolha a data do lote.
-5. Confirme a compra. O estoque aumenta na hora e a despesa sai do caixa.
+5. Confirme a compra. O stock aumenta na hora e a despesa sai do caixa.
 
 ---
 
 ## 7. Clientes e Fiado (Crédito)
 
 - **Clientes**: cadastre seus clientes com nome, telefone e e-mail (**Menu → Clientes**).
-- **Registrar fiado**: quando um cliente leva mercadoria para pagar depois, registre o valor e o vencimento (menu **+** → **Registrar fiado**).
+- **Registar fiado**: quando um cliente leva mercadoria para pagar depois, registe o valor e o vencimento (menu **+** → **Registar fiado**).
 - Na aba **Carteira → Crédito** você vê:
   - **Pendentes** = quem ainda deve (total a receber).
   - **Quitadas** = histórico de quem já pagou.
@@ -140,7 +140,7 @@ Se uma venda foi feita por engano:
 
 A aba **Carteira** mostra as movimentações de dinheiro: **entradas**, **saídas** e o **saldo**.
 
-- **Registrar movimentação**: pelo **+** → **Registrar despesa** (ou pela própria aba, para entradas).
+- **Registar movimentação**: pelo **+** → **Registar despesa** (ou pela própria aba, para entradas).
 - **Pendente**: deixe marcado se o valor ainda não foi recebido/pago — ele só conta no caixa **realizado** quando for recebido/pago.
 - Nas pendências:
   - **Receber** (entradas pendentes): confirma que o dinheiro entrou → passa a contar no caixa.
@@ -180,7 +180,7 @@ Toque em **Exportar** → escolha **Exportar CSV** ou **Exportar PDF**. O relat�
 
 Abra **Menu → Lojas** — são 4 abas:
 
-- **Lojas**: cadastre as suas lojas. Cada loja tem estoque e caixa próprios.
+- **Lojas**: cadastre as suas lojas. Cada loja tem stock e caixa próprios.
 - **Funcionários**: crie contas para quem trabalha com você e escolha o cargo:
   - **Gerente**: opera tudo, excepto gestão de lojas/funcionários.
   - **Funcionário**: só vende (não cadastra produtos, não vê relatórios, não faz compras, fecho de caixa nem anulações).
@@ -206,9 +206,9 @@ O **Menu → Add-ons** mostra os extras activos no seu plano (geridos pelo admin
 
 - **Factura Personalizada**: crie facturas com o layout da sua marca (logotipo, cores), numeração automática por loja e envio por **WhatsApp**.
 - **Cotações / Orçamentos**: crie cotações com modelo personalizado e acompanhe o estado — **rascunho → enviada → aceite/rejeitada**. Exporta em PDF.
-- **Relatórios Avançados**: KPIs financeiros, produtos por estoque, fluxo de caixa e estoque baixo.
+- **Relatórios Avançados**: KPIs financeiros, produtos por stock, fluxo de caixa e stock baixo.
 - **Gestão de Funcionários**: registo de ponto (entrada/saída), **comissões calculadas sobre as vendas reais** de cada vendedor e metas mensais com progresso.
-- **Transferências entre Lojas**: mova estoque entre lojas do seu negócio — baixa na origem, entrada no destino, histórico rastreável.
+- **Transferências entre Lojas**: mova stock entre lojas do seu negócio — baixa na origem, entrada no destino, histórico rastreável.
 
 ---
 
@@ -249,19 +249,19 @@ Seu acesso precisa ser **aprovado** pelo administrador (até 24h). Confirme tamb
 Não por muito tempo: o acesso é **derrubado na hora** quando o dono o desactiva. Se a sessão antiga ainda estiver aberta, feche e abra o app de novo.
 
 **Vendi por engano. Como desfazer?**
-Abra a venda → **Anular venda** (só dono/gerente). O estoque volta aos lotes certos e o caixa é estornado. A venda fica no histórico marcada como **Anulada**.
+Abra a venda → **Anular venda** (só dono/gerente). O stock volta aos lotes certos e o caixa é estornado. A venda fica no histórico marcada como **Anulada**.
 
-**O meu estoque não bate com o que contei.**
-Confira se não houve vendas não anuladas, compras ou ajustes manuais de estoque na edição do produto. Para corrigir uma divergência pequena, use o **ajuste de estoque** na edição do produto (dono/gerente).
+**O meu stock não bate com o que contei.**
+Confira se não houve vendas não anuladas, compras ou ajustes manuais de stock na edição do produto. Para corrigir uma divergência pequena, use o **ajuste de stock** na edição do produto (dono/gerente).
 
 **A foto do produto não aparece.**
 A foto pode não ter enviado por falta de internet no momento do cadastro (o produto é salvo mesmo assim). Abra o produto → **Editar produto** → adicione a foto de novo. Se continuar, veja o [Troubleshooting](TROUBLESHOOTING.md).
 
 **O fecho de caixa mostra "Falta" de dinheiro.**
-O "esperado na gaveta" considera **apenas vendas em dinheiro** — cartão, M-Pesa, E-Mola e transferência não entram. Confira se algum pagamento em dinheiro não foi registrado ou se houve dinheiro retirado da gaveta.
+O "esperado na gaveta" considera **apenas vendas em dinheiro** — cartão, M-Pesa, E-Mola e transferência não entram. Confira se algum pagamento em dinheiro não foi registado ou se houve dinheiro retirado da gaveta.
 
 **Posso ter mais de uma loja?**
-Sim — o número de lojas depende do seu **plano** (veja em **Menu → Lojas → Upgrades**). Cada loja tem estoque, vendas e caixa separados.
+Sim — o número de lojas depende do seu **plano** (veja em **Menu → Lojas → Upgrades**). Cada loja tem stock, vendas e caixa separados.
 
 **As vendas anuladas contam nos relatórios?**
 Não. Vendas anuladas ficam no histórico (auditoria), mas **saem** do faturamento, dos indicadores e do resumo do dia.

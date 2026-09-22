@@ -392,9 +392,8 @@ class _CashStack extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.headlineMedium?.copyWith(
                             color: balanceColor,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                             letterSpacing: -0.6,
-                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -497,9 +496,8 @@ class _CashStack extends StatelessWidget {
                     style: theme.textTheme.displaySmall?.copyWith(
                       fontSize: baseSize * scale,
                       color: balanceColor,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: -0.8,
-                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   );
                 },
@@ -586,7 +584,6 @@ class _CashLine extends StatelessWidget {
               style: theme.textTheme.labelMedium?.copyWith(
                 color: color,
                 fontWeight: FontWeight.w600,
-                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),

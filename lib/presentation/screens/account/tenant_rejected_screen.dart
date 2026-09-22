@@ -47,7 +47,7 @@ class TenantRejectedScreen extends ConsumerWidget {
                   l10n.tenantRejectedTitle,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: -0.5,
                   ),
                 ),

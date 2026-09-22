@@ -229,7 +229,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsSave.
   ///
   /// In pt, this message translates to:
-  /// **'Salvar'**
+  /// **'Guardar'**
   String get settingsSave;
 
   /// No description provided for @settingsSaved.
@@ -241,7 +241,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsGenericError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível salvar. Tente novamente.'**
+  /// **'Não foi possível guardar. Tente novamente.'**
   String get settingsGenericError;
 
   /// No description provided for @settingsSupportSection.
@@ -259,7 +259,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsSupportEntryHint.
   ///
   /// In pt, this message translates to:
-  /// **'Guia do Usuário e Troubleshooting — offline'**
+  /// **'Guia do Utilizador e Solução de Problemas — offline'**
   String get settingsSupportEntryHint;
 
   /// No description provided for @supportTitle.
@@ -271,31 +271,31 @@ abstract class AppLocalizations {
   /// No description provided for @supportSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Guia do usuário e solução de problemas.'**
+  /// **'Guia do utilizador e solução de problemas.'**
   String get supportSubtitle;
 
   /// No description provided for @supportUserGuide.
   ///
   /// In pt, this message translates to:
-  /// **'Guia do Usuário'**
+  /// **'Guia do Utilizador'**
   String get supportUserGuide;
 
   /// No description provided for @supportUserGuideHint.
   ///
   /// In pt, this message translates to:
-  /// **'Login, lojas, produtos, vendas, fiado, financeiro e relatórios'**
+  /// **'Login, lojas, produtos, vendas, fiado e relatórios'**
   String get supportUserGuideHint;
 
   /// No description provided for @supportTroubleshooting.
   ///
   /// In pt, this message translates to:
-  /// **'Troubleshooting'**
+  /// **'Solução de problemas'**
   String get supportTroubleshooting;
 
   /// No description provided for @supportTroubleshootingHint.
   ///
   /// In pt, this message translates to:
-  /// **'Problemas comuns: login, vendas, estoque e conexão'**
+  /// **'Resolva problemas de login, vendas, stock e conexão'**
   String get supportTroubleshootingHint;
 
   /// No description provided for @supportReadingError.
@@ -303,6 +303,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível abrir o documento.'**
   String get supportReadingError;
+
+  /// No description provided for @supportSearchHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar na ajuda'**
+  String get supportSearchHint;
+
+  /// No description provided for @supportContactSupport.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fale com o suporte'**
+  String get supportContactSupport;
+
+  /// No description provided for @supportContactSupportHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nossa equipe pode ajudar você'**
+  String get supportContactSupportHint;
+
+  /// No description provided for @supportHelpCenter.
+  ///
+  /// In pt, this message translates to:
+  /// **'Central de ajuda'**
+  String get supportHelpCenter;
+
+  /// No description provided for @supportContactMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá! Preciso de ajuda com o TAREQO.'**
+  String get supportContactMessage;
+
+  /// No description provided for @supportOpenError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível abrir o suporte.'**
+  String get supportOpenError;
 
   /// No description provided for @commonSearch.
   ///
@@ -631,7 +667,7 @@ abstract class AppLocalizations {
   /// No description provided for @setNewPasswordSubmit.
   ///
   /// In pt, this message translates to:
-  /// **'Salvar nova senha'**
+  /// **'Guardar nova senha'**
   String get setNewPasswordSubmit;
 
   /// No description provided for @setNewPasswordSuccess.
@@ -823,13 +859,13 @@ abstract class AppLocalizations {
   /// No description provided for @fabMenuNewSaleHint.
   ///
   /// In pt, this message translates to:
-  /// **'Carrinho · baixa de estoque · caixa'**
+  /// **'Carrinho · baixa de stock · caixa'**
   String get fabMenuNewSaleHint;
 
   /// No description provided for @fabMenuExpense.
   ///
   /// In pt, this message translates to:
-  /// **'Registrar despesa'**
+  /// **'Registar despesa'**
   String get fabMenuExpense;
 
   /// No description provided for @fabMenuExpenseHint.
@@ -847,13 +883,13 @@ abstract class AppLocalizations {
   /// No description provided for @fabMenuAddProductHint.
   ///
   /// In pt, this message translates to:
-  /// **'Catálogo · preço · estoque inicial'**
+  /// **'Catálogo · preço · stock inicial'**
   String get fabMenuAddProductHint;
 
   /// No description provided for @fabMenuAddDebt.
   ///
   /// In pt, this message translates to:
-  /// **'Registrar fiado'**
+  /// **'Registar fiado'**
   String get fabMenuAddDebt;
 
   /// No description provided for @fabMenuAddDebtHint.
@@ -967,7 +1003,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardLowStock.
   ///
   /// In pt, this message translates to:
-  /// **'Estoque baixo'**
+  /// **'Stock baixo'**
   String get dashboardLowStock;
 
   /// No description provided for @dashboardKpisError.
@@ -1021,13 +1057,13 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardActivityEmpty.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhuma atividade registrada ainda.'**
+  /// **'Nenhuma atividade registada ainda.'**
   String get dashboardActivityEmpty;
 
   /// No description provided for @dashboardStockEntry.
   ///
   /// In pt, this message translates to:
-  /// **'Estoque · {product}'**
+  /// **'Stock · {product}'**
   String dashboardStockEntry(String product);
 
   /// No description provided for @dashboardStockEntryDetail.
@@ -1609,7 +1645,7 @@ abstract class AppLocalizations {
   /// No description provided for @commonSave.
   ///
   /// In pt, this message translates to:
-  /// **'Salvar'**
+  /// **'Guardar'**
   String get commonSave;
 
   /// No description provided for @commonSoldOut.
@@ -1759,7 +1795,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsStockQuantity.
   ///
   /// In pt, this message translates to:
-  /// **'Quantidade em estoque'**
+  /// **'Quantidade em stock'**
   String get productsStockQuantity;
 
   /// No description provided for @productsAddSubmit.
@@ -1777,7 +1813,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsEditSubmit.
   ///
   /// In pt, this message translates to:
-  /// **'Salvar alterações'**
+  /// **'Guardar alterações'**
   String get productsEditSubmit;
 
   /// No description provided for @productsEditSaved.
@@ -1819,7 +1855,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsFilterStockType.
   ///
   /// In pt, this message translates to:
-  /// **'Tipo de estoque'**
+  /// **'Tipo de stock'**
   String get productsFilterStockType;
 
   /// No description provided for @productsFilterStockTypeAll.
@@ -1849,13 +1885,13 @@ abstract class AppLocalizations {
   /// No description provided for @productsFilterAvailable.
   ///
   /// In pt, this message translates to:
-  /// **'Em estoque'**
+  /// **'Em stock'**
   String get productsFilterAvailable;
 
   /// No description provided for @productsFilterLowStock.
   ///
   /// In pt, this message translates to:
-  /// **'Estoque baixo'**
+  /// **'Stock baixo'**
   String get productsFilterLowStock;
 
   /// No description provided for @productsFilterOutOfStock.
@@ -1939,7 +1975,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsStockAdjustHint.
   ///
   /// In pt, this message translates to:
-  /// **'Ajuste manual: define o estoque exato (FIFO).'**
+  /// **'Ajuste manual: define o stock exato (FIFO).'**
   String get productsStockAdjustHint;
 
   /// No description provided for @productsSectionInfo.
@@ -1957,7 +1993,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsSectionStock.
   ///
   /// In pt, this message translates to:
-  /// **'Estoque'**
+  /// **'Stock'**
   String get productsSectionStock;
 
   /// No description provided for @productsSectionStatus.
@@ -2125,7 +2161,7 @@ abstract class AppLocalizations {
   /// No description provided for @customersEditSubmit.
   ///
   /// In pt, this message translates to:
-  /// **'Salvar alterações'**
+  /// **'Guardar alterações'**
   String get customersEditSubmit;
 
   /// No description provided for @customersDeleteConfirmTitle.
@@ -2137,7 +2173,7 @@ abstract class AppLocalizations {
   /// No description provided for @customersDeleteConfirmMessage.
   ///
   /// In pt, this message translates to:
-  /// **'{name} será removido permanentemente. Registros de fiado são preservados.'**
+  /// **'{name} será removido permanentemente. Registos de fiado são preservados.'**
   String customersDeleteConfirmMessage(Object name);
 
   /// No description provided for @customersDeleteSuccess.
@@ -2173,7 +2209,7 @@ abstract class AppLocalizations {
   /// No description provided for @purchasesEmptyTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhuma compra registrada'**
+  /// **'Nenhuma compra registada'**
   String get purchasesEmptyTitle;
 
   /// No description provided for @purchasesEmptySubtitle.
@@ -2194,10 +2230,52 @@ abstract class AppLocalizations {
   /// **'vs ontem'**
   String get purchasesHeaderVsYesterday;
 
+  /// No description provided for @purchaseDetailTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Detalhes da compra'**
+  String get purchaseDetailTitle;
+
+  /// No description provided for @purchaseDetailSupplier.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fornecedor'**
+  String get purchaseDetailSupplier;
+
+  /// No description provided for @purchaseDetailDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data e hora'**
+  String get purchaseDetailDate;
+
+  /// No description provided for @purchaseDetailPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento'**
+  String get purchaseDetailPayment;
+
+  /// No description provided for @purchaseDetailExpiry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Validade do lote'**
+  String get purchaseDetailExpiry;
+
+  /// No description provided for @purchaseDetailNoExpiry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem validade'**
+  String get purchaseDetailNoExpiry;
+
+  /// No description provided for @purchaseDetailStockNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Stock atualizado via lote FIFO.'**
+  String get purchaseDetailStockNote;
+
   /// Chip do card de compra: unidades adicionadas ao estoque
   ///
   /// In pt, this message translates to:
-  /// **'Estoque +{units} {unit}'**
+  /// **'Stock +{units} {unit}'**
   String purchasesStockAdded(int units, String unit);
 
   /// No description provided for @purchasesEmptyFilteredTitle.
@@ -2233,7 +2311,7 @@ abstract class AppLocalizations {
   /// No description provided for @purchasesRegistered.
   ///
   /// In pt, this message translates to:
-  /// **'Compra registrada: {amount}!'**
+  /// **'Compra registada: {amount}!'**
   String purchasesRegistered(String amount);
 
   /// No description provided for @purchasesProductNotFound.
@@ -2245,7 +2323,7 @@ abstract class AppLocalizations {
   /// No description provided for @purchasesRegisterError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível registrar a compra. Tente novamente.'**
+  /// **'Não foi possível registar a compra. Tente novamente.'**
   String get purchasesRegisterError;
 
   /// No description provided for @purchasesSupplierLabel.
@@ -2263,7 +2341,7 @@ abstract class AppLocalizations {
   /// No description provided for @purchasesNoProductsSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Cadastre produtos para registrar compras.'**
+  /// **'Cadastre produtos para registar compras.'**
   String get purchasesNoProductsSubtitle;
 
   /// No description provided for @purchasesConfirm.
@@ -2275,7 +2353,7 @@ abstract class AppLocalizations {
   /// No description provided for @purchasesStockLabel.
   ///
   /// In pt, this message translates to:
-  /// **'{quantity} {unit} em estoque'**
+  /// **'{quantity} {unit} em stock'**
   String purchasesStockLabel(int quantity, String unit);
 
   /// No description provided for @reportsTitle.
@@ -2287,7 +2365,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportsRevenue.
   ///
   /// In pt, this message translates to:
-  /// **'Faturamento'**
+  /// **'Receita'**
   String get reportsRevenue;
 
   /// No description provided for @reportsProfit.
@@ -2323,7 +2401,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportsEmptySubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Registre vendas para ver o relatório.'**
+  /// **'Registe vendas para ver o relatório.'**
   String get reportsEmptySubtitle;
 
   /// No description provided for @reportsSalesPerDay.
@@ -2449,7 +2527,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialRegister.
   ///
   /// In pt, this message translates to:
-  /// **'Registrar'**
+  /// **'Registar'**
   String get financialRegister;
 
   /// No description provided for @financialIncome.
@@ -2497,7 +2575,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialEmptySubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Registre entradas e saídas para acompanhar o caixa.'**
+  /// **'Registe entradas e saídas para acompanhar o caixa.'**
   String get financialEmptySubtitle;
 
   /// No description provided for @financialReceivePendingTitle.
@@ -2563,7 +2641,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialAddTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Registrar movimentação'**
+  /// **'Registar movimentação'**
   String get financialAddTitle;
 
   /// No description provided for @financialIncomingType.
@@ -2623,13 +2701,13 @@ abstract class AppLocalizations {
   /// No description provided for @financialRegistered.
   ///
   /// In pt, this message translates to:
-  /// **'Movimentação registrada!'**
+  /// **'Movimentação registada!'**
   String get financialRegistered;
 
   /// No description provided for @financialRegisterError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível registrar. Tente novamente.'**
+  /// **'Não foi possível registar. Tente novamente.'**
   String get financialRegisterError;
 
   /// No description provided for @financialDefaultCategoryIncome.
@@ -2785,7 +2863,7 @@ abstract class AppLocalizations {
   /// No description provided for @cashClosingEmpty.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhuma venda registrada neste dia.'**
+  /// **'Nenhuma venda registada neste dia.'**
   String get cashClosingEmpty;
 
   /// No description provided for @debtsTitle.
@@ -2803,7 +2881,7 @@ abstract class AppLocalizations {
   /// No description provided for @debtsAddDebt.
   ///
   /// In pt, this message translates to:
-  /// **'Registrar fiado'**
+  /// **'Registar fiado'**
   String get debtsAddDebt;
 
   /// No description provided for @debtsSearchHint.
@@ -2989,19 +3067,19 @@ abstract class AppLocalizations {
   /// No description provided for @debtsRegisteredFor.
   ///
   /// In pt, this message translates to:
-  /// **'Fiado registrado para {name}!'**
+  /// **'Fiado registado para {name}!'**
   String debtsRegisteredFor(String name);
 
   /// No description provided for @debtsPendingEntryError.
   ///
   /// In pt, this message translates to:
-  /// **'Fiado registrado, mas a pendência não pôde ser criada.'**
+  /// **'Fiado registado, mas a pendência não pôde ser criada.'**
   String get debtsPendingEntryError;
 
   /// No description provided for @debtsRegisterError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível registrar o fiado. Tente novamente.'**
+  /// **'Não foi possível registar o fiado. Tente novamente.'**
   String get debtsRegisterError;
 
   /// No description provided for @debtsCustomerLinkLabel.
@@ -3061,7 +3139,7 @@ abstract class AppLocalizations {
   /// No description provided for @salesEmptyTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhuma venda registrada'**
+  /// **'Nenhuma venda registada'**
   String get salesEmptyTitle;
 
   /// No description provided for @salesEmptySubtitle.
@@ -3151,13 +3229,13 @@ abstract class AppLocalizations {
   /// No description provided for @salesRegistered.
   ///
   /// In pt, this message translates to:
-  /// **'Venda registrada: {amount}!'**
+  /// **'Venda registada: {amount}!'**
   String salesRegistered(String amount);
 
   /// No description provided for @salesInsufficientStock.
   ///
   /// In pt, this message translates to:
-  /// **'Estoque insuficiente{product}. Disponível: {available}.'**
+  /// **'Stock insuficiente{product}. Disponível: {available}.'**
   String salesInsufficientStock(String product, int available);
 
   /// No description provided for @salesStockFor.
@@ -3169,13 +3247,13 @@ abstract class AppLocalizations {
   /// No description provided for @salesProductNotFound.
   ///
   /// In pt, this message translates to:
-  /// **'Produto {id} não encontrado no estoque.'**
+  /// **'Produto {id} não encontrado no stock.'**
   String salesProductNotFound(String id);
 
   /// No description provided for @salesRegisterError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível registrar a venda. Tente novamente.'**
+  /// **'Não foi possível registar a venda. Tente novamente.'**
   String get salesRegisterError;
 
   /// No description provided for @salesSearchProducts.
@@ -3193,7 +3271,7 @@ abstract class AppLocalizations {
   /// No description provided for @salesNoProductsSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Cadastre produtos para registrar vendas.'**
+  /// **'Cadastre produtos para registar vendas.'**
   String get salesNoProductsSubtitle;
 
   /// No description provided for @salesConfirm.
@@ -3259,7 +3337,7 @@ abstract class AppLocalizations {
   /// Confirmação de anulação de venda — avisa que estoque e caixa serão estornados
   ///
   /// In pt, this message translates to:
-  /// **'Estoque será devolvido e caixa estornado ({amount}).'**
+  /// **'Stock será devolvido e caixa estornado ({amount}).'**
   String saleDetailCancelConfirmBody(String amount);
 
   /// No description provided for @saleDetailCancelConfirm.
@@ -3415,7 +3493,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminTenantsEmpty.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhum tenant registrado ainda.'**
+  /// **'Nenhum tenant registado ainda.'**
   String get adminTenantsEmpty;
 
   /// No description provided for @adminRequestsLoadError.
@@ -3565,7 +3643,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminPlanSaveError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível salvar o plano. Tente novamente.'**
+  /// **'Não foi possível guardar o plano. Tente novamente.'**
   String get adminPlanSaveError;
 
   /// No description provided for @adminPlanNewTitle.
@@ -3787,7 +3865,7 @@ abstract class AppLocalizations {
   /// Erro ao adicionar mais do que o estoque disponível
   ///
   /// In pt, this message translates to:
-  /// **'Limite de estoque atingido para {product}.'**
+  /// **'Limite de stock atingido para {product}.'**
   String salesStockLimit(String product);
 
   /// No description provided for @salesQuantityLabel.
@@ -4835,7 +4913,7 @@ abstract class AppLocalizations {
   /// No description provided for @customInvoiceProductOption.
   ///
   /// In pt, this message translates to:
-  /// **'Estoque: {stock} {unit}  •  {price}'**
+  /// **'Stock: {stock} {unit}  •  {price}'**
   String customInvoiceProductOption(Object price, Object stock, Object unit);
 
   /// No description provided for @customInvoicePrice.
@@ -4955,7 +5033,7 @@ abstract class AppLocalizations {
   /// No description provided for @customInvoiceTemplateSave.
   ///
   /// In pt, this message translates to:
-  /// **'Salvar Modelo'**
+  /// **'Guardar Modelo'**
   String get customInvoiceTemplateSave;
 
   /// No description provided for @customInvoicePreviewCompanyFallback.
@@ -5039,13 +5117,13 @@ abstract class AppLocalizations {
   /// No description provided for @quotationStatusSaved.
   ///
   /// In pt, this message translates to:
-  /// **'Estado da cotação actualizado'**
+  /// **'Estado da cotação atualizado'**
   String get quotationStatusSaved;
 
   /// No description provided for @quotationStatusError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível actualizar a cotação. Tente novamente.'**
+  /// **'Não foi possível atualizar a cotação. Tente novamente.'**
   String get quotationStatusError;
 
   /// No description provided for @quotationTemplateTooltip.
@@ -5135,7 +5213,7 @@ abstract class AppLocalizations {
   /// No description provided for @quotationSave.
   ///
   /// In pt, this message translates to:
-  /// **'Salvar Cotação'**
+  /// **'Guardar Cotação'**
   String get quotationSave;
 
   /// No description provided for @quotationTemplatePhone.
@@ -5447,7 +5525,7 @@ abstract class AppLocalizations {
   /// No description provided for @employeeCommissionRateSaved.
   ///
   /// In pt, this message translates to:
-  /// **'Taxa de comissão actualizada.'**
+  /// **'Taxa de comissão atualizada.'**
   String get employeeCommissionRateSaved;
 
   /// No description provided for @employeeCommissionRateError.
@@ -5531,7 +5609,7 @@ abstract class AppLocalizations {
   /// No description provided for @employeeTargetSave.
   ///
   /// In pt, this message translates to:
-  /// **'Salvar Meta'**
+  /// **'Guardar Meta'**
   String get employeeTargetSave;
 
   /// No description provided for @employeeTargetProgress.
@@ -5675,7 +5753,7 @@ abstract class AppLocalizations {
   /// No description provided for @addonReportsDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Relatórios financeiros, de vendas e estoque com filtros avançados, comparativos período a período e exportação em PDF/Excel. Inclui gráficos interativos e dashboards personalizados.'**
+  /// **'Relatórios financeiros, de vendas e stock com filtros avançados, comparativos período a período e exportação em PDF/Excel. Inclui gráficos interativos e dashboards personalizados.'**
   String get addonReportsDesc;
 
   /// No description provided for @addonEmployeesName.
@@ -5699,7 +5777,7 @@ abstract class AppLocalizations {
   /// No description provided for @addonMultiStoreDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Transferência de estoque entre lojas, relatórios consolidados comparando lojas, gestão centralizada de preços e promoções e alertas de reposição automática.'**
+  /// **'Transferência de stock entre lojas, relatórios consolidados comparando lojas, gestão centralizada de preços e promoções e alertas de reposição automática.'**
   String get addonMultiStoreDesc;
 
   /// No description provided for @addonMobileMoneyName.
@@ -5729,7 +5807,7 @@ abstract class AppLocalizations {
   /// No description provided for @transfersEmptySubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Transfira estoque entre lojas do\nmesmo tenant de forma rastreável'**
+  /// **'Transfira stock entre lojas do\nmesmo tenant de forma rastreável'**
   String get transfersEmptySubtitle;
 
   /// No description provided for @transfersNewFab.
@@ -5795,7 +5873,7 @@ abstract class AppLocalizations {
   /// No description provided for @transfersNoStoresSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'É necessário ter 2+ lojas para\ntransferir estoque entre elas'**
+  /// **'É necessário ter 2+ lojas para\ntransferir stock entre elas'**
   String get transfersNoStoresSubtitle;
 
   /// No description provided for @transfersSuccess.
@@ -5867,7 +5945,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportsTabStock.
   ///
   /// In pt, this message translates to:
-  /// **'Estoque'**
+  /// **'Stock'**
   String get reportsTabStock;
 
   /// No description provided for @reportsKpiProducts.
@@ -5879,13 +5957,13 @@ abstract class AppLocalizations {
   /// No description provided for @reportsKpiLowStock.
   ///
   /// In pt, this message translates to:
-  /// **'Estoque Baixo'**
+  /// **'Stock Baixo'**
   String get reportsKpiLowStock;
 
   /// No description provided for @reportsKpiStockValue.
   ///
   /// In pt, this message translates to:
-  /// **'Valor Estoque'**
+  /// **'Valor Stock'**
   String get reportsKpiStockValue;
 
   /// No description provided for @reportsKpiRevenue.
@@ -5921,7 +5999,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportsStockHealthy.
   ///
   /// In pt, this message translates to:
-  /// **'Todos os produtos com estoque adequado'**
+  /// **'Todos os produtos com stock adequado'**
   String get reportsStockHealthy;
 
   /// No description provided for @reportsExportSales.
@@ -5939,7 +6017,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportsExportStock.
   ///
   /// In pt, this message translates to:
-  /// **'Exportar Estoque (PDF)'**
+  /// **'Exportar Stock (PDF)'**
   String get reportsExportStock;
 
   /// No description provided for @reportsNoSalesData.
@@ -5957,7 +6035,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportsKpiStockOut.
   ///
   /// In pt, this message translates to:
-  /// **'Sem Estoque'**
+  /// **'Sem Stock'**
   String get reportsKpiStockOut;
 
   /// No description provided for @reportsKpiTotalProducts.
@@ -6050,7 +6128,7 @@ abstract class AppLocalizations {
   /// **'Item'**
   String get pdfItemHeader;
 
-  /// No description provided for @pdfUnitPriceHeader.
+  /// Header da coluna de preço unitário — preview em tela usa 10px; PDF usa a sua própria escala
   ///
   /// In pt, this message translates to:
   /// **'Preço Unit.'**
@@ -6197,7 +6275,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminAddonsUpdateError.
   ///
   /// In pt, this message translates to:
-  /// **'Erro ao actualizar add-on: {error}'**
+  /// **'Erro ao atualizar add-on: {error}'**
   String adminAddonsUpdateError(Object error);
 
   /// No description provided for @adminBackToList.
@@ -6641,13 +6719,13 @@ abstract class AppLocalizations {
   /// No description provided for @adminAddonsPriceUpdated.
   ///
   /// In pt, this message translates to:
-  /// **'Preço de {addonName} actualizado para {price}/mês'**
+  /// **'Preço de {addonName} atualizado para {price}/mês'**
   String adminAddonsPriceUpdated(Object addonName, Object price);
 
   /// No description provided for @adminAddonsPriceSaveError.
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível salvar o preço. Tente novamente.'**
+  /// **'Não foi possível guardar o preço. Tente novamente.'**
   String get adminAddonsPriceSaveError;
 
   /// No description provided for @adminAddonsListHint.

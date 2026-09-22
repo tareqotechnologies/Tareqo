@@ -26,6 +26,7 @@ import '../../widgets/app_page.dart';
 import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/smart_amount.dart';
 import '../../widgets/color_palette.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
@@ -310,109 +311,128 @@ class _QuotationCard extends StatelessWidget {
         .inDays
         .clamp(0, 365);
 
+    // Card LEVE (mesmo padrão do card da Factura Personalizada — _InvoiceCard):
+    // sem avatar, nome + nº + estado INLINE, metadados numa linha discreta e
+    // valor à direita. O documento é a informação, não a moldura.
     return AppCard(
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cabeçalho: nome do cliente + estado
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: IconTone.darkBackground(ModuleColors.credit),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.request_quote_outlined,
-                  size: 16,
-                  color: IconTone.lightForeground(ModuleColors.credit),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      // Nome COMPLETO — quebra em linhas quando necessário
-                      // (nunca truncar o nome do cliente).
-                      quotation.customerName,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.quotationNumberPrefix(
+                    // Nome + nº sequencial + estado INLINE (padrão Wrap do
+                    // fiado) — nome COMPLETO quebra em linhas quando
+                    // necessário (nunca truncar o nome do cliente).
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          quotation.customerName,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          l10n.quotationNumberPrefix(
                             quotation.number.toString().padLeft(5, '0'),
-                          ) +
-                          (quotation.customerPhone.isNotEmpty
-                              ? '  •  ${quotation.customerPhone}'
-                              : ''),
-                      style: theme.textTheme.bodySmall?.copyWith(
+                          ),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                        _StatusChip(status: quotation.status),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    // Metadados em UMA linha discreta: itens · validade ·
+                    // telefone.
+                    Text(
+                      '${l10n.quotationItemsCount(quotation.items.length)}'
+                      '  •  ${l10n.quotationValidity}: '
+                      '${l10n.quotationDays(validityDays)}'
+                      '${quotation.customerPhone.isNotEmpty ? '  •  ${quotation.customerPhone}' : ''}',
+                      style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
-              _StatusChip(status: quotation.status),
+              const SizedBox(width: 8),
+              // Valor à DIREITA em destaque — SmartAmount ENCOLHE para
+              // caber (nunca trunca) e alinha dígito a dígito (tabular).
+              Flexible(
+                child: SmartAmount(
+                  cents: quotation.totalAmountCents,
+                  alignment: Alignment.centerRight,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          // Detalhes
-          Text(
-            '${l10n.quotationItemsCount(quotation.items.length)}'
-            '  •  ${l10n.quotationValidity}: '
-            '${l10n.quotationDays(validityDays)}'
-            '  •  ${Formatters.currency(quotation.totalAmountCents)}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Acções — Wrap (não Row): em ecrãs estreitos os botões fluem
-          // para a linha seguinte em vez de estourarem/cortarem o rótulo.
-          Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
+          const SizedBox(height: 10),
+          // Ações em UMA linha: fluxo de estado (rótulos — decisão de
+          // negócio, precisa ser legível) à esquerda; WhatsApp e PDF como
+          // ÍCONES discretos à direita (padrão da Factura Personalizada).
+          // Wrap nos dois grupos: em telas estreitas/escala alta os botões
+          // fluem para a linha seguinte em vez de estourar.
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              AppButton.secondary(
-                label: l10n.customInvoiceWhatsApp,
-                icon: const Icon(Icons.share_outlined, size: 16),
-                onPressed: () => _shareWhatsApp(context),
+              Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  if (quotation.status == QuotationStatus.draft)
+                    AppButton.primary(
+                      label: l10n.quotationSend,
+                      onPressed: () =>
+                          onStatusChanged(quotation, QuotationStatus.sent),
+                    ),
+                  if (quotation.status == QuotationStatus.sent) ...[
+                    AppButton.primary(
+                      label: l10n.quotationAccept,
+                      onPressed: () =>
+                          onStatusChanged(quotation, QuotationStatus.accepted),
+                    ),
+                    AppButton.danger(
+                      label: l10n.quotationReject,
+                      onPressed: () =>
+                          onStatusChanged(quotation, QuotationStatus.rejected),
+                    ),
+                  ],
+                ],
               ),
-              AppButton.secondary(
-                label: l10n.customInvoicePdf,
-                icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
-                onPressed: () => _exportPdf(context),
+              const Spacer(),
+              Wrap(
+                spacing: AppSpacing.xs,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.share_outlined, size: 18),
+                    color: scheme.onSurfaceVariant,
+                    tooltip: l10n.customInvoiceWhatsApp,
+                    onPressed: () => _shareWhatsApp(context),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                    color: scheme.onSurfaceVariant,
+                    tooltip: l10n.customInvoicePdf,
+                    onPressed: () => _exportPdf(context),
+                  ),
+                ],
               ),
-              if (quotation.status == QuotationStatus.draft)
-                AppButton.primary(
-                  label: l10n.quotationSend,
-                  icon: const Icon(Icons.send_outlined, size: 16),
-                  onPressed: () =>
-                      onStatusChanged(quotation, QuotationStatus.sent),
-                ),
-              if (quotation.status == QuotationStatus.sent) ...[
-                AppButton.primary(
-                  label: l10n.quotationAccept,
-                  icon: const Icon(Icons.check_circle_outline, size: 16),
-                  onPressed: () =>
-                      onStatusChanged(quotation, QuotationStatus.accepted),
-                ),
-                AppButton.danger(
-                  label: l10n.quotationReject,
-                  onPressed: () =>
-                      onStatusChanged(quotation, QuotationStatus.rejected),
-                ),
-              ],
             ],
           ),
         ],
@@ -626,7 +646,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
             Text(
               l10n.customInvoiceNew,
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -799,7 +819,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
                           entry.value.unitPriceCents * entry.value.qty,
                         ),
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -815,7 +835,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
               Text(
                 l10n.customInvoiceBillTotal(Formatters.currency(_totalCents)),
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   letterSpacing: -0.3,
                 ),
                 textAlign: TextAlign.end,
@@ -971,7 +991,7 @@ class _QuotationTemplateSettingsSheetState
             Text(
               l10n.quotationTemplateTitle,
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -1153,7 +1173,7 @@ class _QuotationTemplateSettingsSheetState
                               ? _nameController.text
                               : l10n.customInvoicePreviewCompanyFallback,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
@@ -1271,7 +1291,7 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         letterSpacing: 0.2,
       ),
     );

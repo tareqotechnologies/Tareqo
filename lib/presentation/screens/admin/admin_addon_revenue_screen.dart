@@ -289,7 +289,6 @@ class _AddOnRevenueTile extends StatelessWidget {
                   '${Formatters.currency(addon.priceMonthlyCents)}/tenant/mês',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 12,
                   ),
                 ),
               ],
@@ -375,7 +374,6 @@ class _CategoryTile extends StatelessWidget {
                   context.l10n.adminAddOnsCount(addOnCount),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 12,
                   ),
                 ),
               ],

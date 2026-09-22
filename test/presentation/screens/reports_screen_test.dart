@@ -165,7 +165,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // KPIs do relatório.
-    expect(find.text('Faturamento'), findsOneWidget);
+    expect(find.text('Receita'), findsOneWidget);
     expect(find.text('R\$ 54,00'), findsAtLeastNWidgets(1));
     expect(find.text('Lucro bruto'), findsOneWidget);
     expect(find.text('R\$ 18,00'), findsOneWidget);
@@ -233,7 +233,7 @@ void main() {
     expect(find.text('Não foi possível carregar o relatório.'), findsWidgets);
     expect(find.byType(InlineErrorCard), findsOneWidget);
     // Nenhum rótulo de KPI com zero falso.
-    expect(find.text('Faturamento'), findsNothing);
+    expect(find.text('Receita'), findsNothing);
     expect(find.text('Lucro bruto'), findsNothing);
     expect(find.text('Margem'), findsNothing);
     // O retry do aviso recarrega o provider (o fake continua a falhar).
@@ -257,7 +257,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Continua renderizando os dados (o fake devolve sempre o mesmo).
-    expect(find.text('Faturamento'), findsOneWidget);
+    expect(find.text('Receita'), findsOneWidget);
   });
 
   // Rotação (UI): em paisagem o seletor de período renderiza em escala
@@ -313,7 +313,7 @@ void main() {
     await tester.tap(find.text('Exportar CSV'));
     await tester.pumpAndSettle();
 
-    // Nenhuma chamada "bem-sucedida" registrada e o erro é exibido.
+    // Nenhuma chamada "bem-sucedida" registada e o erro é exibido.
     expect(exporter.csvCalls, 0);
     expect(
       find.text('Não foi possível exportar o relatório. Tente novamente.'),
@@ -340,7 +340,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Retrato: os três KPIs e o seletor de período visíveis.
-    expect(find.text('Faturamento'), findsOneWidget);
+    expect(find.text('Receita'), findsOneWidget);
     expect(find.text('Lucro bruto'), findsOneWidget);
     expect(find.text('Margem'), findsOneWidget);
     expect(find.byType(SegmentedButton<ReportPeriod>), findsOneWidget);
@@ -352,7 +352,7 @@ void main() {
 
     // Sem overflow; KPIs e seletor seguem presentes após o giro.
     expect(tester.takeException(), isNull);
-    expect(find.text('Faturamento'), findsOneWidget);
+    expect(find.text('Receita'), findsOneWidget);
     expect(find.text('Lucro bruto'), findsOneWidget);
     expect(find.text('R\$ 54,00'), findsOneWidget);
     expect(find.byType(SegmentedButton<ReportPeriod>), findsOneWidget);

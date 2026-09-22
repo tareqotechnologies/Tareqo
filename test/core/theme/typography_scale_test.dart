@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:tareqo/core/theme/app_theme.dart';
+import 'package:tareqo/presentation/screens/admin/admin_thin_theme.dart';
 
 /// Auditoria da ESCALA TIPOGRÁFICA (Apple HIG / SF Pro, adaptada ao ERP
 /// — ver docs/pt/05-apresentacao.md): trava os tamanhos
@@ -81,7 +82,7 @@ void main() {
       tracking: -0.15,
       height: 1.35,
       opsz: 0, // corpo (sem eixo Display)
-      tabular: false,
+      tabular: true,
     ),
     (
       name: 'bodyLarge — corpo destacado (17)',
@@ -121,7 +122,7 @@ void main() {
       tracking: 0,
       height: 1.25,
       opsz: 0,
-      tabular: false,
+      tabular: true,
     ),
     (
       name: 'labelMedium — labels (12)',
@@ -131,7 +132,7 @@ void main() {
       tracking: 0,
       height: 1.25,
       opsz: 0,
-      tabular: false,
+      tabular: true,
     ),
     (
       name: 'labelSmall — caption/badge (11)',
@@ -141,7 +142,7 @@ void main() {
       tracking: 0.2,
       height: 1.25,
       opsz: 0,
-      tabular: false,
+      tabular: true,
     ),
   ];
 
@@ -215,6 +216,98 @@ void main() {
       }
     });
   }
+
+  // Painel do super admin — tema thin DERIVADO (AdminThin.thinTextTheme).
+  // A escala é a MESMA do app; só os PESOS mudam (hierarquia por tamanho
+  // e cor, não por peso). Qualquer drift do segundo sistema quebra aqui.
+  group('admin thin — pesos derivados da escala base', () {
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
+      final brightness = theme.brightness.name;
+      final thin = AdminThin.thinTextTheme(theme.textTheme);
+
+      test('$brightness — títulos w300, ações w400, corpo preservado', () {
+        // Títulos — leve (a hierarquia vem do tamanho e da cor).
+        expect(thin.titleLarge?.fontSize, 22);
+        expect(thin.titleLarge?.fontWeight, FontWeight.w300);
+        expect(thin.titleMedium?.fontSize, 20);
+        expect(thin.titleMedium?.fontWeight, FontWeight.w300);
+        expect(thin.titleSmall?.fontSize, 14);
+        expect(thin.titleSmall?.fontWeight, FontWeight.w400);
+        // Ações/rótulos — sem o peso pesado do M3.
+        expect(thin.labelLarge?.fontSize, 14);
+        expect(thin.labelLarge?.fontWeight, FontWeight.w400);
+        expect(thin.labelMedium?.fontSize, 12);
+        expect(thin.labelMedium?.fontWeight, FontWeight.w400);
+        // Corpo/captions — peso estrutural preservado.
+        expect(thin.bodyMedium?.fontSize, 15);
+        expect(thin.bodyMedium?.fontWeight, FontWeight.w400);
+        expect(thin.bodySmall?.fontSize, 13);
+        expect(thin.bodySmall?.fontWeight, FontWeight.w400);
+        expect(thin.labelSmall?.fontSize, 11);
+        expect(thin.labelSmall?.fontWeight, FontWeight.w500);
+      });
+
+      test('$brightness — tamanhos e tabular sobrevivem à derivação', () {
+        // Nenhum tamanho muda no thin — só pesos; tabular figures do base
+        // (preços/KPIs alinhados) não podem se perder na cópia.
+        for (final pair in [
+          MapEntry(thin.titleLarge, theme.textTheme.titleLarge),
+          MapEntry(thin.titleSmall, theme.textTheme.titleSmall),
+          MapEntry(thin.bodySmall, theme.textTheme.bodySmall),
+          MapEntry(thin.labelSmall, theme.textTheme.labelSmall),
+        ]) {
+          expect(pair.key?.fontSize, pair.value?.fontSize);
+          final tnumThin = pair.key?.fontFeatures
+                  ?.any((f) => f.feature == 'tnum') ??
+              false;
+          final tnumBase = pair.value?.fontFeatures
+                  ?.any((f) => f.feature == 'tnum') ??
+              false;
+          expect(tnumThin, tnumBase,
+              reason: 'tabular do base deve sobreviver ao thin');
+        }
+      });
+
+      testWidgets(
+        '$brightness — superfícies thin: AppBar 19/w300, inputs/chips 13/w400, snackbar 14/w400',
+        (tester) async {
+          late ThemeData derived;
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: theme,
+              home: AdminThin(
+                child: Builder(
+                  builder: (context) {
+                    derived = Theme.of(context);
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ),
+          );
+
+          final appBar = derived.appBarTheme.titleTextStyle!;
+          expect(appBar.fontSize, 19);
+          expect(appBar.fontWeight, FontWeight.w300);
+          expect(appBar.letterSpacing, -0.2);
+          expect(derived.appBarTheme.toolbarHeight, 52);
+
+          expect(derived.inputDecorationTheme.labelStyle!.fontSize, 13);
+          expect(
+            derived.inputDecorationTheme.labelStyle!.fontWeight,
+            FontWeight.w400,
+          );
+          expect(derived.chipTheme.labelStyle!.fontSize, 13);
+          expect(derived.chipTheme.labelStyle!.fontWeight, FontWeight.w400);
+          expect(derived.snackBarTheme.contentTextStyle!.fontSize, 14);
+          expect(
+            derived.snackBarTheme.contentTextStyle!.fontWeight,
+            FontWeight.w400,
+          );
+        },
+      );
+    }
+  });
 
   // Superfícies com tipografia própria (fora do TextTheme).
   test('superfícies: AppBar 22, diálogo 22 e chips 13 seguem a escala', () {

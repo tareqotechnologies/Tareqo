@@ -36,7 +36,7 @@ class _StoreScopedGetProductsUseCase implements GetProductsUseCase {
       name: storeId == 'st1' ? 'Produto Loja Centro' : 'Produto Loja Shopping',
       purchasePriceCents: 100,
       salePriceCents: 200,
-      stockQuantity: 2, // estoque baixo → aparece no dashboard
+      stockQuantity: 2, // stock baixo → aparece no dashboard
     ),
   ];
 }
@@ -112,7 +112,7 @@ void main() {
   testWidgets('banner de loja removido do topo (AppShell) — dados da loja '
       'ativa seguem no dashboard', (tester) async {
     // Viewport alto: o dashboard usa ListView preguiçoso e o card de
-    // estoque baixo (que exibe o nome do produto) fica abaixo da dobra.
+    // stock baixo (que exibe o nome do produto) fica abaixo da dobra.
     tester.view.physicalSize = const Size(800, 2600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -142,7 +142,7 @@ void main() {
     expect(find.widgetWithText(ChoiceChip, 'Loja Shopping'), findsNothing);
 
     // O dashboard mostra os dados da loja ativa (primeira = Loja Centro):
-    // o produto com estoque baixo entra no feed "Atividade de hoje" com o
+    // o produto com stock baixo entra no feed "Atividade de hoje" com o
     // nome embutido no detalhe da linha.
     expect(find.textContaining('Produto Loja Centro'), findsOneWidget);
   });
@@ -177,7 +177,7 @@ void main() {
   testWidgets('seletor rápido no app bar troca a loja ativa e re-escopa os '
       'dados', (tester) async {
     // Viewport alto: o dashboard usa ListView preguiçoso e o card de
-    // estoque baixo (que exibe o nome do produto) fica abaixo da dobra.
+    // stock baixo (que exibe o nome do produto) fica abaixo da dobra.
     tester.view.physicalSize = const Size(800, 2600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);

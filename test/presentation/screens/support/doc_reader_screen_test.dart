@@ -14,7 +14,7 @@ void main() {
       // when / then — pt (fallback), en e fr para cada documento.
       expect(
         SupportDocument.userGuide.assetPath('pt'),
-        'docs/pt/GUIA_DO_USUARIO.md',
+        'docs/pt/GUIA_DO_UTILIZADOR.md',
       );
       expect(
         SupportDocument.userGuide.assetPath('en'),
@@ -44,7 +44,7 @@ void main() {
         // when / then — 'es', 'de' etc. nunca quebram a Ajuda.
         expect(
           SupportDocument.userGuide.assetPath('es'),
-          'docs/pt/GUIA_DO_USUARIO.md',
+          'docs/pt/GUIA_DO_UTILIZADOR.md',
         );
         expect(
           SupportDocument.troubleshooting.assetPath('zh'),
@@ -73,11 +73,11 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       // then — appBar com o título l10n e o H1 do markdown visível.
-      expect(find.text('Troubleshooting'), findsOneWidget);
-      expect(find.textContaining('Troubleshooting — TAREQO ERP'), findsWidgets);
+      expect(find.text('Solução de problemas'), findsOneWidget);
+      expect(find.textContaining('Solução de Problemas — TAREQO ERP'), findsWidgets);
     });
 
-    testWidgets('exibe o guia do usuário com o título correto', (tester) async {
+    testWidgets('exibe o guia do utilizador com o título correto', (tester) async {
       // given
       await tester.pumpWidget(
         testApp(
@@ -89,7 +89,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       // then
-      expect(find.text('Guia do Usuário'), findsOneWidget);
+      expect(find.text('Guia do Utilizador'), findsOneWidget);
       // O guia renderiza conteúdo markdown (scrollável, sem erro).
       expect(find.text('Não foi possível abrir o documento.'), findsNothing);
     });

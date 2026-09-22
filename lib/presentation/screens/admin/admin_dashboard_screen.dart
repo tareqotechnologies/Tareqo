@@ -441,14 +441,12 @@ class _StatCell extends StatelessWidget {
             fontSize: 24,
             fontWeight: FontWeight.w300,
             letterSpacing: -0.4,
-            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
         const SizedBox(height: 2),
         Text(
           stat.label,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 12,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           maxLines: 1,
@@ -702,7 +700,7 @@ class _GrowthKpi extends StatelessWidget {
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontSize: 12,
                     color: trendColor,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -720,7 +718,6 @@ class _GrowthKpi extends StatelessWidget {
           Text(
             sublabel,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 12,
               color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
             ),
             maxLines: 1,
@@ -787,7 +784,6 @@ class _TrendChart extends StatelessWidget {
               child: Text(
                 title,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 12,
                   fontWeight: FontWeight.w300,
                   color: scheme.onSurfaceVariant,
                 ),
@@ -809,7 +805,6 @@ class _TrendChart extends StatelessWidget {
             child: Text(
               l10n.adminGrowthNoData,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 12,
                 color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
               ),
             ),
@@ -852,7 +847,6 @@ class _TrendChart extends StatelessWidget {
                               ? weekStarts[i]
                               : '',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            fontSize: 12,
                             color: scheme.onSurfaceVariant.withValues(
                               alpha: 0.4,
                             ),
@@ -906,7 +900,6 @@ class _TrendBar extends StatelessWidget {
             child: Text(
               valueLabel,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 12,
                 fontWeight: isLast ? FontWeight.w700 : FontWeight.w400,
                 color: isLast
                     ? color
@@ -1068,8 +1061,6 @@ class _DistributionCard extends StatelessWidget {
                     '$approvalRate%',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: rateColor,
-                      fontSize: 12,
-                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ),
@@ -1089,7 +1080,6 @@ class _DistributionCard extends StatelessWidget {
             Text(
               l10n.adminDashboardPlanDistribution,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 12,
                 color: scheme.onSurfaceVariant,
               ),
             ),
@@ -1137,10 +1127,7 @@ class _LegendDot extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontSize: 12,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
+          style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
     );
@@ -1190,10 +1177,7 @@ class _PlanBarRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.xs),
         Text(
           '$count',
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 12,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
+          style: theme.textTheme.bodySmall,
         ),
       ],
     );
@@ -1330,7 +1314,6 @@ class _ActivityRow extends StatelessWidget {
             timeFormat.format(entry.createdAt),
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
-              fontSize: 12,
             ),
           ),
         ],
@@ -1438,7 +1421,6 @@ class _QuickActionCard extends StatelessWidget {
                       fontSize: 12,
                       color: action.color,
                       fontWeight: FontWeight.w600,
-                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ),

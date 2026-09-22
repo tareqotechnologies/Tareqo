@@ -301,7 +301,7 @@ class _InvoiceCard extends StatelessWidget {
                         Text(
                           invoice.clientName,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
@@ -331,8 +331,7 @@ class _InvoiceCard extends StatelessWidget {
               Text(
                 Formatters.currency(invoice.totalAmountCents),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -567,7 +566,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
             Text(
               l10n.customInvoiceNew,
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -741,7 +740,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
                           entry.value.unitPriceCents * entry.value.qty,
                         ),
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -777,7 +776,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
                   Formatters.currency(total > 0 ? total : 0),
                 ),
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   letterSpacing: -0.3,
                 ),
                 textAlign: TextAlign.end,
@@ -937,7 +936,7 @@ class _TemplateSettingsSheetState
             Text(
               l10n.customInvoiceTemplateTitle,
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -1177,7 +1176,7 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         letterSpacing: 0.2,
       ),
     );
@@ -1229,7 +1228,7 @@ class _TemplateStyleChip extends StatelessWidget {
                 name,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
                 ),
               ),
             ],

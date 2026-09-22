@@ -223,7 +223,7 @@ class _AttendanceTab extends ConsumerWidget {
         Text(
           l10n.employeeAttendanceSection,
           style: theme.textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -268,7 +268,7 @@ class _AttendanceTab extends ConsumerWidget {
                         Text(
                           employee.fullName,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
@@ -312,7 +312,7 @@ class _AttendanceTab extends ConsumerWidget {
               Text(
                 l10n.employeeRecordsSection,
                 style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const Spacer(),
@@ -361,7 +361,7 @@ class _AttendanceTab extends ConsumerWidget {
                         _employeeName(storeEmployees, record.userId) ??
                             record.userId,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -530,7 +530,7 @@ class _CommissionsTab extends ConsumerWidget {
                     Text(
                       Formatters.currency(totalSales),
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         letterSpacing: -0.3,
                       ),
                     ),
@@ -557,7 +557,7 @@ class _CommissionsTab extends ConsumerWidget {
                     Text(
                       Formatters.currency(totalCommission),
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         color: IconTone.green,
                         letterSpacing: -0.3,
                       ),
@@ -574,7 +574,7 @@ class _CommissionsTab extends ConsumerWidget {
         Text(
           l10n.employeeCommissionPerEmployee,
           style: theme.textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -609,7 +609,7 @@ class _CommissionsTab extends ConsumerWidget {
                         Text(
                           employee.fullName,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
@@ -687,7 +687,7 @@ class _CommissionsTab extends ConsumerWidget {
               l10n.employeeCommissionSetRate,
               style: Theme.of(
                 sheetContext,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
             Text(
@@ -856,7 +856,7 @@ class _TargetsTab extends ConsumerWidget {
               Text(
                 l10n.employeeTargetsMonth,
                 style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const Spacer(),
@@ -981,7 +981,7 @@ class _TargetsTab extends ConsumerWidget {
               l10n.employeeTargetNewTitle,
               style: Theme.of(
                 sheetContext,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
             AppPickerField<String>(
@@ -1080,7 +1080,7 @@ class _TargetCard extends StatelessWidget {
                 child: Text(
                   employeeName,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

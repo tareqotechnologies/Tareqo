@@ -195,12 +195,16 @@ class ReportExporter {
     required DateTime generatedAt,
   }) async {
     final data = await rootBundle.load('assets/fonts/Inter-Variable.ttf');
-    // Nota: o dart_pdf embute a fonte inteira e MEDE os glifos via TtfParser
-    // (métricas reais — sem estimativa). Como a Inter é variável (eixo wght)
-    // e só há UMA instância no app, os pesos `bold` caem na base (o pacote
-    // não seleciona o eixo wght) — hierarquia mantida por cor/tamanho.
+    // Bold REAL: TTF estático Inter-Bold (mesma versão upstream 4.001 da
+    // Inter variável do app) embutido como fonte `bold` do dart_pdf — o
+    // pacote não seleciona o eixo wght da variável, então sem isto os pesos
+    // bold caem na base (hierarquia do relatório perdia o peso).
+    final bold = await rootBundle.load('assets/fonts/Inter-Bold.ttf');
     final doc = pw.Document(
-      theme: pw.ThemeData.withFont(base: pw.Font.ttf(data)),
+      theme: pw.ThemeData.withFont(
+        base: pw.Font.ttf(data),
+        bold: pw.Font.ttf(bold),
+      ),
     );
     doc.addPage(
       pw.MultiPage(

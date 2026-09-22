@@ -113,7 +113,7 @@ class FilterDropdown<T> extends StatelessWidget {
                 color: active
                     ? scheme.onPrimaryContainer
                     : scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(width: 2),

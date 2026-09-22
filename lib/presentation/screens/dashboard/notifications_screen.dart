@@ -71,7 +71,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               l10n.notificationMarkAllRead,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: scheme.primary,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -658,7 +658,7 @@ class _DetailBottomSheet extends StatelessWidget {
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: typeColor,
                                 fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),

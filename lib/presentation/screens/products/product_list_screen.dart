@@ -405,7 +405,7 @@ class _CompactFilterChip extends StatelessWidget {
               style: theme.textTheme.labelSmall?.copyWith(
                 fontSize: 11,
                 color: isSelected ? color : scheme.onSurfaceVariant,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
               ),
             ),
           ],
@@ -743,7 +743,6 @@ class _ProductTileState extends State<_ProductTile> {
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
-                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -775,9 +774,8 @@ class _ProductTileState extends State<_ProductTile> {
                           cents: _product.salePriceCents,
                           alignment: Alignment.centerRight,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                             color: inactive ? scheme.onSurfaceVariant : null,
-                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ),
@@ -798,7 +796,6 @@ class _ProductTileState extends State<_ProductTile> {
                         fontWeight: lowStock
                             ? FontWeight.w500
                             : FontWeight.w300,
-                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ],

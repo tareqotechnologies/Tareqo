@@ -22,6 +22,7 @@ import '../../widgets/app_page.dart';
 import '../../widgets/skeleton.dart';
 import '../../widgets/store_scoped_content.dart';
 import 'add_purchase_sheet.dart';
+import 'purchase_detail_sheet.dart';
 import 'purchases_widgets.dart';
 
 /// Tela de compras — histórico de entradas de mercadoria de fornecedores.
@@ -266,7 +267,15 @@ class _PurchasesBody extends StatelessWidget {
                       // as vizinhas; ValueKey preserva identidade.
                       RepaintBoundary(
                         key: ValueKey('purchase-card-${purchase.id}'),
-                        child: PurchaseCard(purchase: purchase),
+                        child: PurchaseCard(
+                          purchase: purchase,
+                          // Detalhes da compra em sheet de leitura
+                          // (fornecedor, data, pagamento, itens, validade).
+                          onTap: () => showPurchaseDetailSheet(
+                            context,
+                            purchase: purchase,
+                          ),
+                        ),
                       ),
                   ],
                 ),

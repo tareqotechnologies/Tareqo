@@ -172,7 +172,7 @@ class _RequestCard extends StatelessWidget {
                   children: [
                     Text(
                       tenantName,
-                      style: theme.textTheme.bodySmall?.copyWith(),
+                      style: theme.textTheme.bodySmall,
                     ),
                     Text(
                       _timeAgo(),

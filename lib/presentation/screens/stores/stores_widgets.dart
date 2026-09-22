@@ -47,7 +47,7 @@ class _PlanCard extends StatelessWidget {
                 child: Text(
                   plan?.name ?? l10n.planCardTitle,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: scheme.onPrimaryContainer,
                   ),
                 ),
@@ -774,7 +774,7 @@ class _UpgradePlanTile extends StatelessWidget {
                   Text(
                     plan.name,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -790,7 +790,7 @@ class _UpgradePlanTile extends StatelessWidget {
             Text(
               Formatters.currency(plan.priceMonthlyCents),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 color: scheme.primary,
               ),
             ),
@@ -934,6 +934,78 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
         96,
       ),
       children: [
+        // SALVAR — botão verde de largura total no TOPO da aba (referência
+        // de produto): persiste idioma + moeda. O spinner substitui o
+        // ícone durante o envio (design system ultra-clean).
+        AppButton.primary(
+          onPressed: _isSaving ? null : _save,
+          icon: _isSaving
+              ? const SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.save_outlined),
+          label: l10n.settingsSave,
+        ),
+        if (_formError != null) ...[
+          const SizedBox(height: 10),
+          Text(
+            _formError!,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+        ],
+        // MFA + FEEDBACK TÁTIL — switches de efeito IMEDIATO (salvam
+        // sozinhos, sem passar pelo botão Salvar), logo abaixo dele como
+        // na referência.
+        // P1 (MFA server-side): exigência de aal2 nas escritas de dinheiro
+        // do tenant — persistida no SERVIDOR via update_tenant_settings.
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _mfaEnforced,
+          onChanged: (v) => unawaited(_toggleMfaEnforced(v)),
+          title: Text(
+            l10n.settingsMfaEnforceTitle,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          subtitle: Text(
+            _mfaEnforced
+                ? l10n.settingsMfaEnforceSubOn
+                : l10n.settingsMfaEnforceSubOff,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.35,
+            ),
+          ),
+        ),
+        // GERAL — feedback tátil: preferência LOCAL do dispositivo (não é
+        // do tenant — cada operador escolhe no seu aparelho).
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _hapticsEnabled,
+          onChanged: (v) async {
+            await Haptics.setEnabled(v);
+            if (mounted) setState(() => _hapticsEnabled = v);
+          },
+          title: Text(
+            l10n.settingsHapticsTitle,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          subtitle: Text(
+            l10n.settingsHapticsSubtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.35,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
         // LOJA ATIVA — só com 2+ lojas E usuário logado há o que escolher
         // (com uma única loja não existe seletor, o mesmo critério do
         // banner antigo). O guard `user != null` espelha a linha do
@@ -1000,97 +1072,19 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
               ),
           ],
         ),
-        if (_formError != null) ...[
-          const SizedBox(height: 14),
-          Text(
-            _formError!,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.error,
-            ),
-          ),
-        ],
         const SizedBox(height: 24),
-        // AppButton (design system ultra-clean): altura 48, cantos 12,
-        // cores sólidas — o spinner substitui o ícone durante o envio.
-        AppButton.primary(
-          onPressed: _isSaving ? null : _save,
-          icon: _isSaving
-              ? const SizedBox(
-                  height: 18,
-                  width: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.save_outlined),
-          label: l10n.settingsSave,
-        ),
-        // P1 (MFA server-side): exigência de aal2 nas escritas de dinheiro
-        // do tenant — persistida no SERVIDOR via update_tenant_settings.
-        // Fica ABAIXO do botão Salvar porque salva sozinha (sem passar
-        // pelo botão) e assim não altera o posicionamento dos campos
-        // manuais (idioma/moeda) acima.
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          value: _mfaEnforced,
-          onChanged: (v) => unawaited(_toggleMfaEnforced(v)),
-          title: Text(l10n.settingsMfaEnforceTitle),
-          subtitle: Text(
-            _mfaEnforced
-                ? l10n.settingsMfaEnforceSubOn
-                : l10n.settingsMfaEnforceSubOff,
-          ),
-        ),
-        // GERAL — feedback tátil: preferência LOCAL do dispositivo (não é
-        // do tenant — cada operador escolhe no seu aparelho). Salva na
-        // hora, sem passar pelo botão Salvar (mesmo padrão do switch MFA
-        // acima).
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          value: _hapticsEnabled,
-          onChanged: (v) async {
-            await Haptics.setEnabled(v);
-            if (mounted) setState(() => _hapticsEnabled = v);
-          },
-          title: Text(l10n.settingsHapticsTitle),
-          subtitle: Text(l10n.settingsHapticsSubtitle),
-        ),
         // SEGURANÇA — troca de senha da conta (qualquer utilizador
         // logado; não é uma definição do tenant).
         const SizedBox(height: 32),
         Text(l10n.securitySectionTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
-        AppCard(
+        _SettingsEntry(
+          icon: Icons.lock_reset_outlined,
+          title: l10n.securityChangePassword,
+          subtitle: l10n.securityChangePasswordHint,
           onTap: () => showAppSheet<void>(
             context,
             builder: (_) => const ChangePasswordSheet(),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.lock_reset_outlined, color: theme.colorScheme.primary),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.securityChangePassword,
-                      style: theme.textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.securityChangePasswordHint,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ],
           ),
         ),
         // SUPORTE — acesso à documentação embutida (Ajuda → Guia do
@@ -1099,44 +1093,84 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
         const SizedBox(height: 32),
         Text(l10n.settingsSupportSection, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
-        AppCard(
+        _SettingsEntry(
+          icon: Icons.support_agent_outlined,
+          title: l10n.settingsSupportEntry,
+          subtitle: l10n.settingsSupportEntryHint,
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(builder: (_) => const SupportScreen()),
           ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.support_agent_outlined,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.settingsSupportEntry,
-                      style: theme.textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.settingsSupportEntryHint,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
         ),
       ],
+    );
+  }
+}
+
+/// Entrada de lista da aba Ajustes (Segurança/Suporte) — ícone em círculo
+/// tintado à esquerda, título + subtítulo e chevron à direita. Mesmo
+/// idioma visual dos tiles do Menu e da referência de produto.
+class _SettingsEntry extends StatelessWidget {
+  const _SettingsEntry({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return AppCard(
+      onTap: onTap,
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 10,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: IconTone.darkBackground(scheme.primary),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: IconTone.lightForeground(scheme.primary),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: theme.textTheme.titleSmall),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xxs),
+          Icon(Icons.chevron_right, size: 18, color: scheme.onSurfaceVariant),
+        ],
+      ),
     );
   }
 }
@@ -1324,7 +1358,7 @@ class _StoreDetailSheet extends StatelessWidget {
                     Text(
                       store.name,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],

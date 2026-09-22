@@ -313,7 +313,7 @@ void main() {
     expect(find.textContaining('Vence em'), findsOneWidget);
   });
 
-  testWidgets('produto sem estoque baixo nem alerta não gera atividade', (
+  testWidgets('produto sem stock baixo nem alerta não gera atividade', (
     tester,
   ) async {
     await _pumpDashboard(
@@ -321,7 +321,7 @@ void main() {
       _buildApp(products: [_product(stock: 50000)], lots: const []),
     );
 
-    expect(find.text('Nenhuma atividade registrada ainda.'), findsOneWidget);
+    expect(find.text('Nenhuma atividade registada ainda.'), findsOneWidget);
   });
 
   testWidgets('feed mostra venda de hoje, fiado pago e despesa', (
@@ -354,7 +354,7 @@ void main() {
 
     // Sem eventos: só o cancelado existiria. Zero em unidades no hero
     // ("0,00 BRL") — mas o KPI server-side pode sobrepor; usamos o feed.
-    expect(find.text('Nenhuma atividade registrada ainda.'), findsOneWidget);
+    expect(find.text('Nenhuma atividade registada ainda.'), findsOneWidget);
     expect(find.textContaining('Venda S-'), findsNothing);
   });
 

@@ -244,8 +244,8 @@ Widget _buildApp({
   );
 }
 
-/// Menu tab com o usuário logado como FUNCIONÁRIO ou GERENTE (o tenant
-/// pertence a OUTRO usuário — `ownerUserId` ≠ `userId`). A matriz de acesso
+/// Menu tab com o utilizador logado como FUNCIONÁRIO ou GERENTE (o tenant
+/// pertence a OUTRO utilizador — `ownerUserId` ≠ `userId`). A matriz de acesso
 /// (Compras/Relatórios/Lojas) vive no hub Menu desde o canvas V3 — o
 /// dashboard não exibe mais módulos.
 Widget _buildMenuAsEmployee({required EmployeeRole role}) {
@@ -452,9 +452,9 @@ void main() {
     expect(find.text('Caneta'), findsOneWidget);
   });
 
-  // Canvas V3: as COMPRAS de hoje aparecem no feed como entradas de estoque
-  // ("Estoque · Caneta" / "Entrada de 1 un · há X min" / "+1").
-  testWidgets('compras de hoje entram no feed como entradas de estoque', (
+  // Canvas V3: as COMPRAS de hoje aparecem no feed como entradas de stock
+  // ("Stock · Caneta" / "Entrada de 1 un · há X min" / "+1").
+  testWidgets('compras de hoje entram no feed como entradas de stock', (
     tester,
   ) async {
     await pumpDashboard(
@@ -481,7 +481,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Estoque · Caneta'), findsNWidgets(2));
+    expect(find.text('Stock · Caneta'), findsNWidgets(2));
     expect(find.textContaining('Entrada de 1 un'), findsNWidgets(2));
     expect(find.text('+1'), findsNWidgets(2));
   });
@@ -541,7 +541,7 @@ void main() {
   });
 
   testWidgets(
-    'exibe alerta de estoque baixo apenas para produtos com stock < 5',
+    'exibe alerta de stock baixo apenas para produtos com stock < 5',
     (tester) async {
       await pumpDashboard(
         tester,
@@ -568,9 +568,9 @@ void main() {
         ),
       );
 
-      // Canvas V3: título "Estoque baixo" + detalhe "{produto} · {qty}
+      // Canvas V3: título "Stock baixo" + detalhe "{produto} · {qty}
       // restantes" + pílula "Alerta".
-      expect(find.text('Estoque baixo'), findsOneWidget);
+      expect(find.text('Stock baixo'), findsOneWidget);
       expect(find.textContaining('Caneta'), findsOneWidget);
       expect(find.text('Alerta'), findsOneWidget);
       // O caderno (stock 10) não entra no alerta.
@@ -589,8 +589,8 @@ void main() {
       ),
     );
 
-    expect(find.text('Nenhuma atividade registrada ainda.'), findsOneWidget);
-    expect(find.text('Estoque baixo'), findsNothing);
+    expect(find.text('Nenhuma atividade registada ainda.'), findsOneWidget);
+    expect(find.text('Stock baixo'), findsNothing);
   });
 
   // App de referência: a Home é só cabeçalho + 3 métricas compactas + o
@@ -685,7 +685,7 @@ void main() {
     expect(find.text('Vendas'), findsOneWidget);
     expect(find.text('Caixa'), findsOneWidget);
     expect(find.text('A receber'), findsOneWidget);
-    // O alerta de estoque baixo entrou no feed (produto com nome comprido
+    // O alerta de stock baixo entrou no feed (produto com nome comprido
     // dentro do detalhe "{nome} · ... restantes").
     await tester.dragUntilVisible(
       find.textContaining('Produto com nome extremamente comprido'),

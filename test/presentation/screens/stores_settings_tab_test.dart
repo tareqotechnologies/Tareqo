@@ -120,7 +120,7 @@ void main() {
         _FakeGetMyPlanRequestsUseCase(),
       ),
       updateTenantSettingsUseCaseProvider.overrideWithValue(settings),
-      // Sessão + tenant: o save invalida o myTenantProvider do usuário
+      // Sessão + tenant: o save invalida o myTenantProvider do utilizador
       // (é assim que o tenantSettingsProvider reage e troca o locale).
       authStateProvider.overrideWith(
         (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
@@ -141,13 +141,20 @@ void main() {
   testWidgets('aba Ajustes exibe idioma/moeda e reflete o estado do tenant', (
     tester,
   ) async {
+    // Viewport alto: com Guardar + switches MFA/tátil no topo (referência
+    // de produto), os chips de idioma/moeda ficam abaixo da dobra padrão
+    // (600px) e a ListView lazy não os monta.
+    tester.view.physicalSize = const Size(600, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(build(_CapturingUpdateTenantSettings()));
     await tester.pumpAndSettle();
     await openSettingsTab(tester);
 
     expect(find.text('Idioma'), findsOneWidget);
     expect(find.text('Moeda'), findsOneWidget);
-    expect(find.text('Salvar'), findsOneWidget);
+    expect(find.text('Guardar'), findsOneWidget);
 
     // Tenant atual é pt + BRL → selecionados por padrão.
     expect(_chipSelected(tester, 'Português'), isTrue);
@@ -156,8 +163,13 @@ void main() {
     expect(_chipSelected(tester, 'Metical (MZN)'), isFalse);
   });
 
-  testWidgets('salvar inglês + MZN propaga a escolha (use case captura en/MZN) '
+  testWidgets('guardar inglês + MZN propaga a escolha (use case captura en/MZN) '
       'e confirma com snackbar', (tester) async {
+    // Viewport alto — mesmo motivo do teste anterior (chips abaixo da dobra).
+    tester.view.physicalSize = const Size(600, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
     final settings = _CapturingUpdateTenantSettings();
     await tester.pumpWidget(build(settings));
     await tester.pumpAndSettle();
@@ -167,7 +179,7 @@ void main() {
     await tester.tap(find.text('Metical (MZN)'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Salvar'));
+    await tester.tap(find.text('Guardar'));
     await tester.pumpAndSettle();
 
     // A escolha foi persistida (repositório recebeu en + MZN).
@@ -178,17 +190,17 @@ void main() {
     expect(find.text('Ajustes salvos!'), findsOneWidget);
   });
 
-  testWidgets('falha ao salvar mostra erro e não confirma', (tester) async {
+  testWidgets('falha ao guardar mostra erro e não confirma', (tester) async {
     final settings = _CapturingUpdateTenantSettings(throwOnSave: true);
     await tester.pumpWidget(build(settings));
     await tester.pumpAndSettle();
     await openSettingsTab(tester);
 
     await tester.tap(find.text('English'));
-    await tester.tap(find.text('Salvar'));
+    await tester.tap(find.text('Guardar'));
     await tester.pumpAndSettle();
     expect(
-      find.text('Não foi possível salvar. Tente novamente.'),
+      find.text('Não foi possível guardar. Tente novamente.'),
       findsOneWidget,
     );
     expect(find.text('Ajustes salvos!'), findsNothing);
@@ -223,6 +235,12 @@ void main() {
   testWidgets('aba Ajustes: sem seção Loja activa com uma única loja', (
     tester,
   ) async {
+    // Viewport alto: a asserção "Idioma" fica abaixo da dobra com o Guardar
+    // + switches no topo.
+    tester.view.physicalSize = const Size(600, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
     final settings = _CapturingUpdateTenantSettings();
     await tester.pumpWidget(build(settings)); // 1 loja (fake padrão)
     await tester.pumpAndSettle();
@@ -284,7 +302,7 @@ void main() {
     await openSettingsTab(tester);
     expect(find.text('Idioma'), findsOneWidget);
     expect(find.text('Moeda'), findsOneWidget);
-    expect(find.text('Salvar'), findsOneWidget);
+    expect(find.text('Guardar'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     // Voltar para a aba Lojas em paisagem também funciona.

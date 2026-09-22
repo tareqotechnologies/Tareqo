@@ -157,7 +157,7 @@ Widget _buildApp(
   );
 }
 
-/// Produtos com o usuário logado como FUNCIONÁRIO comum: `currentAccessLevel`
+/// Produtos com o utilizador logado como FUNCIONÁRIO comum: `currentAccessLevel`
 /// resolve `employee` — o botão de NOVO produto some (funcionário só vende).
 Widget _buildAppEmployee(GetProductsUseCase useCase) {
   return ProviderScope(
@@ -181,7 +181,7 @@ void main() {
   group('ProductListScreen', () {
     // A11y (Fase 6): busca, filtros e linhas de produto passam nos
     // guidelines de toque (≥48dp) e contraste de texto.
-    testWidgets('a11y: estoque passa nos guidelines de toque e contraste', (
+    testWidgets('a11y: stock passa nos guidelines de toque e contraste', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -304,7 +304,7 @@ void main() {
       expect(find.text('Limpar filtros'), findsOneWidget);
     });
 
-    testWidgets('busca combina com o filtro de estoque baixo', (tester) async {
+    testWidgets('busca combina com o filtro de stock baixo', (tester) async {
       await tester.pumpWidget(
         _buildApp(
           _FakeGetProductsUseCase(const [
@@ -327,7 +327,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Abre o sheet avançado e seleciona o chip "Estoque baixo" da
+      // Abre o sheet avançado e seleciona o chip "Stock baixo" da
       // seção STATUS (a seção Disponibilidade tem um chip homônimo —
       // escopa pela primeira SheetSection para acertar o status).
       await tester.tap(find.byIcon(Icons.tune_rounded));
@@ -335,7 +335,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(SheetSection).first,
-          matching: find.text('Estoque baixo'),
+          matching: find.text('Stock baixo'),
         ),
       );
       await tester.pumpAndSettle();
@@ -439,7 +439,7 @@ void main() {
         '15,00',
       );
       await tester.enterText(
-        find.widgetWithText(TextFormField, 'Quantidade em estoque'),
+        find.widgetWithText(TextFormField, 'Quantidade em stock'),
         '50',
       );
 
@@ -502,7 +502,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Editar produto'), findsOneWidget);
-      expect(find.text('Salvar alterações'), findsOneWidget);
+      expect(find.text('Guardar alterações'), findsOneWidget);
       // Pré-preenchido com os valores atuais.
       expect(find.widgetWithText(TextFormField, 'Caneta'), findsOneWidget);
       expect(
@@ -550,14 +550,14 @@ void main() {
         '2.50',
       );
 
-      // O botão "Salvar alterações" fica no rodapé da sheet.
-      await tester.ensureVisible(find.text('Salvar alterações'));
+      // O botão "Guardar alterações" fica no rodapé da sheet.
+      await tester.ensureVisible(find.text('Guardar alterações'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Salvar alterações'), warnIfMissed: false);
+      await tester.tap(find.text('Guardar alterações'), warnIfMissed: false);
       await tester.pumpAndSettle();
       await tester.pumpAndSettle(); // Extra wait for async operations
 
-      // Snackbar de sucesso + persistência no repositório (estoque intacto).
+      // Snackbar de sucesso + persistência no repositório (stock intacto).
       expect(find.text('Produto atualizado!'), findsOneWidget);
       expect(repository.products.single.name, 'Caneta Azul');
       expect(repository.products.single.salePriceCents, 250);
@@ -600,10 +600,10 @@ void main() {
       await tester.tap(find.byType(Switch).last);
       await tester.pumpAndSettle();
 
-      // O botão "Salvar alterações" fica no rodapé da sheet.
-      await tester.ensureVisible(find.text('Salvar alterações'));
+      // O botão "Guardar alterações" fica no rodapé da sheet.
+      await tester.ensureVisible(find.text('Guardar alterações'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Salvar alterações'), warnIfMissed: false);
+      await tester.tap(find.text('Guardar alterações'), warnIfMissed: false);
       await tester.pumpAndSettle();
       await tester.pumpAndSettle(); // Extra wait for async operations
 

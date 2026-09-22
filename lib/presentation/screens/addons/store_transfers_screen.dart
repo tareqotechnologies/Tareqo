@@ -146,7 +146,7 @@ class _TransferCard extends StatelessWidget {
                       // (nunca truncar o percurso da transferência).
                       '${transfer.fromStoreName}  →  ${transfer.toStoreName}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 1),
@@ -389,7 +389,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             Text(
               l10n.transfersNewFab,
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -540,7 +540,7 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
         letterSpacing: 0.2,
       ),
     );

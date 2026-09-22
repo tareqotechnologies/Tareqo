@@ -84,7 +84,7 @@ Future<ProviderContainer> _pump(
 }
 
 void main() {
-  testWidgets('registrar fiado chama o AddDebtUseCase e mostra o snackbar', (
+  testWidgets('registar fiado chama o AddDebtUseCase e mostra o snackbar', (
     tester,
   ) async {
     final addDebt = _FakeAddDebtUseCase();
@@ -94,8 +94,8 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(0), 'Maria Souza');
     await tester.enterText(find.byType(TextFormField).at(1), '50,00');
 
-    // O cabeçalho também se chama 'Registrar fiado' — toca no botão.
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar fiado'));
+    // O cabeçalho também se chama 'Registar fiado' — toca no botão.
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar fiado'));
     await tester.pumpAndSettle();
 
     expect(addDebt.calls, 1);
@@ -120,7 +120,7 @@ void main() {
     expect(find.widgetWithText(TextFormField, 'João Macuácua'), findsOneWidget);
 
     await tester.enterText(find.byType(TextFormField).at(1), '75,50');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar fiado'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar fiado'));
     await tester.pumpAndSettle();
 
     // then — snapshot do nome + vínculo persistidos.
@@ -143,7 +143,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField).at(0), 'Cliente Avulso');
     await tester.enterText(find.byType(TextFormField).at(1), '10,00');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar fiado'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar fiado'));
     await tester.pumpAndSettle();
 
     // then — dívida sem vínculo, nome digitado manualmente preservado.
@@ -160,7 +160,7 @@ void main() {
 
     await tester.enterText(find.byType(TextFormField).at(0), 'Maria');
     await tester.enterText(find.byType(TextFormField).at(1), '0,00');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar fiado'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar fiado'));
     await tester.pumpAndSettle();
 
     // then — use case NÃO é chamado; mensagem de validação visível.
@@ -178,10 +178,10 @@ void main() {
 
     await tester.enterText(find.byType(TextFormField).at(0), 'Maria');
     await tester.enterText(find.byType(TextFormField).at(1), '50,00');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar fiado'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar fiado'));
     await tester.pumpAndSettle();
 
-    // then — mensagem de sucesso offline (NÃO é erro para o usuário).
+    // then — mensagem de sucesso offline (NÃO é erro para o utilizador).
     expect(find.textContaining('salva e será sincronizada'), findsOneWidget);
     expect(addDebt.calls, 1);
   });
@@ -189,22 +189,22 @@ void main() {
   testWidgets('falha da pendência não sugere retry (evita duplicar o fiado)', (
     tester,
   ) async {
-    // given — a dívida FOI registrada; só a entrada do caixa falhou.
+    // given — a dívida FOI registada; só a entrada do caixa falhou.
     final addDebt = _FakeAddDebtUseCase()
       ..error = PendingEntryRegistrationException(StateError('x'));
     await _pump(tester, addDebt);
 
     await tester.enterText(find.byType(TextFormField).at(0), 'Maria');
     await tester.enterText(find.byType(TextFormField).at(1), '50,00');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar fiado'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar fiado'));
     await tester.pumpAndSettle();
 
     // then — orienta conferir o Financeiro (não "tente novamente").
     expect(
-      find.text('Fiado registrado, mas a pendência não pôde ser criada.'),
+      find.text('Fiado registado, mas a pendência não pôde ser criada.'),
       findsOneWidget,
     );
-    // O formulário permanece aberto (sem pop) para o usuário ver o erro.
+    // O formulário permanece aberto (sem pop) para o utilizador ver o erro.
     expect(find.byType(AddDebtSheet), findsOneWidget);
   });
 
@@ -217,12 +217,12 @@ void main() {
 
     await tester.enterText(find.byType(TextFormField).at(0), 'Maria');
     await tester.enterText(find.byType(TextFormField).at(1), '50,00');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar fiado'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar fiado'));
     await tester.pumpAndSettle();
 
     // then — mensagem amigável; sheet aberto para nova tentativa.
     expect(
-      find.text('Não foi possível registrar o fiado. Tente novamente.'),
+      find.text('Não foi possível registar o fiado. Tente novamente.'),
       findsOneWidget,
     );
     expect(find.byType(AddDebtSheet), findsOneWidget);

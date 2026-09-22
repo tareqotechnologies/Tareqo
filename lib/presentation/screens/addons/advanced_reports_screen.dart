@@ -81,7 +81,7 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
         title: Text(
           l10n.reportsAdvancedTitle,
           style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
         actions: [
@@ -254,7 +254,7 @@ class _SalesReportTab extends ConsumerWidget {
                     child: Text(
                       l10n.reportsBestSellers,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -273,7 +273,6 @@ class _SalesReportTab extends ConsumerWidget {
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
-                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ),
@@ -308,9 +307,6 @@ class _SalesReportTab extends ConsumerWidget {
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: scheme.onPrimaryContainer,
                               fontWeight: FontWeight.w500,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ],
                             ),
                           ),
                         ),
@@ -329,9 +325,6 @@ class _SalesReportTab extends ConsumerWidget {
                               Formatters.currency(best.revenueCents),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 fontWeight: FontWeight.w500,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
                               ),
                             ),
                             // W11: quantidade em milésimos → unidades.
@@ -342,9 +335,6 @@ class _SalesReportTab extends ConsumerWidget {
                               ),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: scheme.onSurfaceVariant,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
                               ),
                             ),
                           ],
@@ -508,7 +498,7 @@ class _FinancialReportTab extends ConsumerWidget {
                   Text(
                     l10n.reportsCashFlow,
                     style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -685,7 +675,7 @@ class _StockReportTab extends ConsumerWidget {
                     child: Text(
                       l10n.reportsKpiLowStock,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -704,7 +694,6 @@ class _StockReportTab extends ConsumerWidget {
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: ModuleColors.credit,
                           fontWeight: FontWeight.w500,
-                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ),
@@ -741,7 +730,6 @@ class _StockReportTab extends ConsumerWidget {
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: ModuleColors.credit,
                             fontWeight: FontWeight.w500,
-                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -852,7 +840,7 @@ class _KpiTile extends StatelessWidget {
                     child: Text(
                       value,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         color: color,
                         letterSpacing: -0.2,
                       ),
@@ -962,7 +950,7 @@ class _CashFlowBars extends StatelessWidget {
               Text(
                 Formatters.currency(cents),
                 style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

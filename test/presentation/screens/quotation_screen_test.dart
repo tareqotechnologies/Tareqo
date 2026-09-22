@@ -70,7 +70,7 @@ Future<void> _pumpQuotation(WidgetTester tester, Database db) async {
 }
 
 /// Cria uma cotação inteira pela UI (FAB → cliente → produto → item →
-/// salvar). Número sequencial atribuído pelo banco; estado inicial = rascunho.
+/// guardar). Número sequencial atribuído pelo banco; estado inicial = rascunho.
 Future<void> _createQuotation(
   WidgetTester tester, {
   required String clientName,
@@ -91,8 +91,8 @@ Future<void> _createQuotation(
   await tester.tap(find.text('Adicionar'));
   await tester.pumpAndSettle();
 
-  await tester.ensureVisible(find.text('Salvar Cotação'));
-  await tester.tap(find.text('Salvar Cotação'));
+  await tester.ensureVisible(find.text('Guardar Cotação'));
+  await tester.tap(find.text('Guardar Cotação'));
   await tester.pumpAndSettle();
 }
 
@@ -142,7 +142,7 @@ void main() {
     await tester.tap(find.text('Enviar'));
     await tester.pumpAndSettle();
     expect(find.text('Enviada'), findsOneWidget);
-    expect(find.text('Estado da cotação actualizado'), findsOneWidget);
+    expect(find.text('Estado da cotação atualizado'), findsOneWidget);
 
     // ── Prova de persistência: árvore NOVA, mesmo banco → a transição
     // veio do SQLite. Sem botão Enviar; acções de enviada (aceitar/rejeitar).
@@ -154,7 +154,7 @@ void main() {
     expect(find.text('Rejeitar'), findsOneWidget);
   });
 
-  testWidgets('botão salvar só habilita com cliente e item válidos', (
+  testWidgets('botão guardar só habilita com cliente e item válidos', (
     tester,
   ) async {
     await _pumpQuotation(tester, db);
@@ -164,7 +164,7 @@ void main() {
 
     final saveButton = tester.widget<FilledButton>(
       find.ancestor(
-        of: find.text('Salvar Cotação'),
+        of: find.text('Guardar Cotação'),
         matching: find.byType(FilledButton),
       ),
     );
@@ -207,7 +207,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // when — partilha por WhatsApp.
-      await tester.tap(find.text('WhatsApp'));
+      // Acções viraram ÍCONES com tooltip (card minimalista V3).
+      await tester.tap(find.byTooltip('WhatsApp'));
       await tester.pumpAndSettle();
 
       // then — wa.me aberto com a mensagem montada (URL-encoded). O
@@ -258,7 +259,8 @@ void main() {
     // O tap + espera acontecem dentro de runAsync (contexto real), com
     // espera por CONDIÇÃO (calls não vazio) — sem delays fixos.
     await tester.runAsync(() async {
-      await tester.tap(find.text('PDF'));
+      // Acções viraram ÍCONES com tooltip (card minimalista V3).
+      await tester.tap(find.byTooltip('PDF'));
       for (var i = 0; i < 100 && calls.isEmpty; i++) {
         await Future<void>.delayed(const Duration(milliseconds: 50));
       }

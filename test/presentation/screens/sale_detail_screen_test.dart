@@ -308,7 +308,7 @@ void main() {
   );
 
   testWidgets('funcionário comum NÃO vê a ação Anular venda', (tester) async {
-    // Tenant de OUTRO dono + vínculo 'employee' do usuário logado →
+    // Tenant de OUTRO dono + vínculo 'employee' do utilizador logado →
     // currentAccessLevel = employee (mesma regra de Compras/Relatórios).
     final overrides = [
       authStateProvider.overrideWith(

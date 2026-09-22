@@ -94,7 +94,6 @@ class DailySummaryHeader extends StatelessWidget {
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.5,
-                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ),
@@ -182,7 +181,7 @@ class _DeltaPill extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 12,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 color: color,
                 // Percentuais (+25% / -10%) alinhados dígito a dígito.
                 fontFeatures: [FontFeature.tabularFigures()],

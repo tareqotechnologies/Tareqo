@@ -68,7 +68,7 @@ class TransactionCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: -0.1,
                   ),
                 ),
@@ -79,7 +79,6 @@ class TransactionCard extends StatelessWidget {
                 Formatters.time(transaction.date),
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: scheme.onSurfaceVariant,
-                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
               const SizedBox(width: 12),
@@ -96,7 +95,6 @@ class TransactionCard extends StatelessWidget {
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: color,
                       fontWeight: FontWeight.w600,
-                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ),
@@ -137,7 +135,7 @@ class DateSectionHeader extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 letterSpacing: 0.2,
               ),
             ),
@@ -153,7 +151,6 @@ class DateSectionHeader extends StatelessWidget {
               style: theme.textTheme.labelSmall?.copyWith(
                 color: totalColor,
                 fontWeight: FontWeight.w500,
-                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -230,7 +227,6 @@ class TransactionDetailSheet extends StatelessWidget {
                 color: color,
                 fontWeight: FontWeight.w600,
                 letterSpacing: -0.5,
-                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),

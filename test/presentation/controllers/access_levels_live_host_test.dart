@@ -130,7 +130,7 @@ void main() {
         addTearDown(container.dispose);
 
         // Espera o authStateProvider (stream REAL do repositório) emitir o
-        // usuário — a mesma condição do AuthGate antes de resolver o nível.
+        // utilizador — a mesma condição do AuthGate antes de resolver o nível.
         // O provider só assina o stream quando EXISTE listener (no app quem
         // assina é o widget). container.read inicializa sem assinar —
         // authStateChanges emite no onListen, então SEM listener fica em
@@ -152,7 +152,7 @@ void main() {
           await Future<void>.delayed(const Duration(milliseconds: 250));
         }
         if (user == null || user.email != email) {
-          fail('authStateProvider não emitiu o usuário $email em 30s');
+          fail('authStateProvider não emitiu o utilizador $email em 30s');
         }
         final currentUser = user;
 

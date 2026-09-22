@@ -43,14 +43,14 @@ class _FakePlanRepository implements IPlanRepository {
   @override
   Future<void> add(Plan plan) async {
     addCalls++;
-    if (throwOnWrite) throw Exception('falha ao salvar');
+    if (throwOnWrite) throw Exception('falha ao guardar');
     plans.add(plan);
   }
 
   @override
   Future<void> update(Plan plan) async {
     updateCalls++;
-    if (throwOnWrite) throw Exception('falha ao salvar');
+    if (throwOnWrite) throw Exception('falha ao guardar');
     final i = plans.indexWhere((p) => p.id == plan.id);
     if (i >= 0) plans[i] = plan;
   }
@@ -250,7 +250,7 @@ void main() {
   });
 
   testWidgets(
-    'botão Salvar do sheet de detalhes abre o editor pré-preenchido',
+    'botão Guardar do sheet de detalhes abre o editor pré-preenchido',
     (tester) async {
       _useWideViewport(tester);
       final h = _Harness();
@@ -260,8 +260,8 @@ void main() {
       await tester.tap(find.textContaining('Essencial'));
       await tester.pumpAndSettle();
 
-      // O botão "Salvar" do DETALHE abre o editor (rota: pop + editor).
-      await tester.tap(find.text('Salvar'));
+      // O botão "Guardar" do DETALHE abre o editor (rota: pop + editor).
+      await tester.tap(find.text('Guardar'));
       await tester.pumpAndSettle();
 
       // Editor em modo edição: título "Editar plano" + campos pré-preenchidos.
@@ -284,7 +284,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Novo plano'), findsOneWidget);
 
-    // Salvar vazio → erro de nome (validação no use case, via _formError).
+    // Guardar vazio → erro de nome (validação no use case, via _formError).
     await tester.tap(find.text('Criar plano'));
     await tester.pumpAndSettle();
     expect(find.text('Informe o nome do plano.'), findsOneWidget);
@@ -346,7 +346,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Preço mensal'),
       '39.90',
     );
-    await tester.tap(find.text('Salvar'));
+    await tester.tap(find.text('Guardar'));
     await tester.pumpAndSettle();
 
     expect(h.repository.updateCalls, 1);

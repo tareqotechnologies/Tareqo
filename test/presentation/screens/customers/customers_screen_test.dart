@@ -261,9 +261,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Sheet de edição vem preenchida (nome em .at(1) — depois do busca).
-    expect(find.text('Salvar alterações'), findsOneWidget);
+    expect(find.text('Guardar alterações'), findsOneWidget);
     await tester.enterText(find.byType(TextField).at(1), 'Ana Costa Vidal');
-    await tester.tap(find.text('Salvar alterações'));
+    await tester.tap(find.text('Guardar alterações'));
     await tester.pumpAndSettle();
 
     expect(repository.updateCalls, 1);

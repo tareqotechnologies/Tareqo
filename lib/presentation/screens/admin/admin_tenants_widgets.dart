@@ -48,7 +48,7 @@ class _AdminTenantCard extends ConsumerWidget {
               children: [
                 Text(
                   tenant.businessName,
-                  style: theme.textTheme.labelMedium?.copyWith(),
+                  style: theme.textTheme.labelMedium,
                 ),
                 Text(
                   '$planName · ${tenant.createdAt.day}/${tenant.createdAt.month}/${tenant.createdAt.year}',
@@ -84,7 +84,6 @@ class _AdminTenantCard extends ConsumerWidget {
                       color: AppColors.statusPurple,
                       fontWeight: FontWeight.w400,
                       fontSize: 11,
-                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ],
@@ -165,7 +164,7 @@ class _PendingTenantCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     tenant.businessName,
-                    style: theme.textTheme.bodySmall?.copyWith(),
+                    style: theme.textTheme.bodySmall,
                   ),
                 ),
                 StatusChip(
@@ -325,7 +324,6 @@ class _TenantDetailSheet extends ConsumerWidget {
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurfaceVariant,
                               fontFamily: 'monospace',
-                              fontSize: 12,
                             ),
                           ),
                         ),
@@ -627,9 +625,7 @@ class _InfoRow extends StatelessWidget {
             ),
             Text(
               value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
+              style: theme.textTheme.bodyMedium,
             ),
             if (onTap != null) ...[
               const SizedBox(width: 4),
@@ -695,7 +691,6 @@ class _UsageBar extends StatelessWidget {
           '$current/$max',
           style: theme.textTheme.labelSmall?.copyWith(
             color: isFull ? scheme.error : scheme.onSurfaceVariant,
-            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],
@@ -727,7 +722,7 @@ class _SectionHeader extends StatelessWidget {
         Icon(icon, size: 18, color: scheme.onSurfaceVariant),
         const SizedBox(width: AppSpacing.xs),
         Expanded(
-          child: Text(label, style: theme.textTheme.labelMedium?.copyWith()),
+          child: Text(label, style: theme.textTheme.labelMedium),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -739,7 +734,6 @@ class _SectionHeader extends StatelessWidget {
             countLabel,
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.onSurfaceVariant,
-              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
         ),
@@ -838,7 +832,7 @@ class _StoreTile extends StatelessWidget {
               children: [
                 Text(
                   store.name,
-                  style: theme.textTheme.bodyMedium?.copyWith(),
+                  style: theme.textTheme.bodyMedium,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -961,7 +955,7 @@ class _ActivityTile extends StatelessWidget {
               children: [
                 Text(
                   entry.actionLabel,
-                  style: theme.textTheme.bodyMedium?.copyWith(),
+                  style: theme.textTheme.bodyMedium,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -970,7 +964,6 @@ class _ActivityTile extends StatelessWidget {
                     status.toUpperCase(),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: color,
-                      fontSize: 12,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -984,14 +977,12 @@ class _ActivityTile extends StatelessWidget {
                 dateFormat.format(entry.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
-                  fontSize: 12,
                 ),
               ),
               Text(
                 timeFormat.format(entry.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
-                  fontSize: 12,
                 ),
               ),
             ],
@@ -1179,9 +1170,7 @@ class _SelectionBar extends StatelessWidget {
           // Count
           Text(
             '$selectedCount / $totalCount',
-            style: theme.textTheme.labelMedium?.copyWith(
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
+            style: theme.textTheme.labelMedium,
           ),
           const SizedBox(width: AppSpacing.sm),
 

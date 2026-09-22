@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 /// | `titleSmall` | 14 | destaque de linha (peso) |
 /// | `bodyLarge` | 17 | corpo destacado |
 /// | `bodyMedium` | 15 | corpo |
-/// | `bodySmall` | 13 | nota |
+/// | `bodySmall` | 13 | nota · CÉLULA DE TABELA (admin/dados) |
 /// | `labelLarge` | 14 | ações |
 /// | `labelMedium` | 12 | labels |
 /// | `labelSmall` | 11 | caption/badge |
@@ -27,9 +27,18 @@ import 'package:flutter/material.dart';
 /// - **eixo óptico** `opsz`: títulos ≥20px usam o corte *Display*
 ///   (24–32); corpo/captions ficam no corte *Texto* (sem variação).
 ///
-/// `tabularFigures` apenas nos estilos **numéricos** (preços MZN e
-/// quantidades alinham dígito a dígito); rótulos (titleSmall,
-/// labelLarge/Medium/Small) não carregam números e não o usam.
+/// `tabularFigures` em TODOS os papéis (decisão P1 da auditoria
+/// tipográfica): preços, quantidades, percentagens e contagens aparecem
+/// também em titleSmall/label* (destaques de linha, chips de filtro,
+/// células de tabela) — em texto corrido o recurso é inócuo (só dígitos
+/// mudam de largura), então não há custo em carregá-lo globalmente.
+/// O ponto único de DINHEIRO continua sendo o SmartAmount; números fora
+/// dele usam NumText (ambos reforçam o tabular por segurança).
+///
+/// Célula de tabela (P1 da auditoria): dados em listas/tabelas densas —
+/// ex. painel admin — usam `bodySmall` PURO (13/w400/tabular, cor via
+/// copyWith). Não reduza para 12 inline: 12 é papel de LABEL (labelMedium)
+/// ou caption (labelSmall), não de dado.
 abstract final class AppTypography {
   /// Constrói o [TextTheme] do app. As cores vêm do [scheme] — o mesmo
   /// tema serve aos modos claro e escuro.
@@ -86,6 +95,7 @@ abstract final class AppTypography {
         letterSpacing: -0.15,
         height: 1.35,
         color: scheme.onSurface,
+        fontFeatures: const [FontFeature.tabularFigures()],
       ),
       bodyLarge: TextStyle(
         fontSize: 17,
@@ -117,6 +127,7 @@ abstract final class AppTypography {
         letterSpacing: 0,
         height: 1.25,
         color: scheme.onSurface,
+        fontFeatures: const [FontFeature.tabularFigures()],
       ),
       labelMedium: TextStyle(
         fontSize: 12,
@@ -124,6 +135,7 @@ abstract final class AppTypography {
         letterSpacing: 0,
         height: 1.25,
         color: scheme.onSurfaceVariant,
+        fontFeatures: const [FontFeature.tabularFigures()],
       ),
       labelSmall: TextStyle(
         fontSize: 11,
@@ -131,6 +143,7 @@ abstract final class AppTypography {
         letterSpacing: 0.2,
         height: 1.25,
         color: scheme.onSurfaceVariant,
+        fontFeatures: const [FontFeature.tabularFigures()],
       ),
     );
   }

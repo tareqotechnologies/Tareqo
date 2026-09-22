@@ -1787,7 +1787,7 @@ BEGIN
   END IF;
 
   IF v_tenant_id IS NULL THEN
-    RAISE EXCEPTION 'Tenant do usuário não encontrado.';
+    RAISE EXCEPTION 'Tenant do utilizador não encontrado.';
   END IF;
 
   SELECT p.max_stores INTO v_max
@@ -1962,7 +1962,7 @@ BEGIN
         WHERE id = (v_item->>'product_id') AND store_id = p_store
           AND stock_quantity >= (v_item->>'quantity')::int;
       IF NOT FOUND THEN
-        RAISE EXCEPTION 'Estoque insuficiente para o produto % (loja %).',
+        RAISE EXCEPTION 'Stock insuficiente para o produto % (loja %).',
           v_item->>'product_id', p_store;
       END IF;
     END IF;
@@ -2004,18 +2004,18 @@ DECLARE
   v_take bigint;
 BEGIN
   IF v_uid IS NULL THEN
-    RAISE EXCEPTION 'Sessão necessária para ajustar o estoque.';
+    RAISE EXCEPTION 'Sessão necessária para ajustar o stock.';
   END IF;
   -- P1 (MFA server-side): ajuste muta estoque e cria/consume lotes.
   IF NOT public.mfa_ok(v_uid) THEN
-    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para ajustar o estoque.';
+    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para ajustar o stock.';
   END IF;
   IF NOT public.is_manager_of_store(p_store_id) THEN
-    RAISE EXCEPTION 'Apenas o dono ou um gerente podem ajustar o estoque na loja %.',
+    RAISE EXCEPTION 'Apenas o dono ou um gerente podem ajustar o stock na loja %.',
       p_store_id;
   END IF;
   IF p_new_quantity < 0 THEN
-    RAISE EXCEPTION 'O estoque não pode ficar negativo.';
+    RAISE EXCEPTION 'O stock não pode ficar negativo.';
   END IF;
 
   -- Trava o produto (fecha corrida) e lê estoque atual + custo do catálogo.
@@ -2065,7 +2065,7 @@ BEGIN
     IF v_remaining > 0 THEN
       -- Defesa em profundidade: os lotes não cobrem o ajuste — a
       -- invariante foi quebrada por fora; aborta sem mutar nada.
-      RAISE EXCEPTION 'Estoque insuficiente para ajustar o produto % (loja %).',
+      RAISE EXCEPTION 'Stock insuficiente para ajustar o produto % (loja %).',
         p_product_id, p_store_id;
     END IF;
   END IF;
@@ -2098,7 +2098,7 @@ DECLARE
   v_take bigint;
 BEGIN
   IF v_uid IS NULL THEN
-    RAISE EXCEPTION 'Sessão necessária para registrar a venda.';
+    RAISE EXCEPTION 'Sessão necessária para registar a venda.';
   END IF;
   -- P1 (MFA server-side): escrita do dinheiro exige aal2 quando o tenant
   -- do dono/funcionário ativou a exigência (venda é operação de caixa —
@@ -2109,7 +2109,7 @@ BEGIN
   -- Guarda de acesso: a loja precisa pertencer ao usuário (dono do tenant
   -- ou funcionário vinculado). Substitui o RLS dentro do SECURITY DEFINER.
   IF NOT public.is_my_store(v_store) THEN
-    RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', v_store;
+    RAISE EXCEPTION 'A loja % não pertence ao utilizador autenticado.', v_store;
   END IF;
   -- Idioma do tenant (escolha do dono) — define a descrição/categoria
   -- gravadas na entrada do caixa (padrão pt).
@@ -2197,7 +2197,7 @@ BEGIN
       -- Defesa em profundidade (o lock_products_or_raise acima já validou
       -- pelo total do produto): os lotes não cobrem a venda — o estoque
       -- nunca fica negativo por esta RPC.
-      RAISE EXCEPTION 'Estoque insuficiente para o produto % (loja %).',
+      RAISE EXCEPTION 'Stock insuficiente para o produto % (loja %).',
         v_item->>'product_id', v_store;
     END IF;
     UPDATE public.products
@@ -2551,14 +2551,14 @@ DECLARE
   v_debt_number bigint;
 BEGIN
   IF v_uid IS NULL THEN
-    RAISE EXCEPTION 'Sessão necessária para registrar o fiado.';
+    RAISE EXCEPTION 'Sessão necessária para registar o fiado.';
   END IF;
   -- P1 (MFA server-side): fiado cria dívida + pendência no caixa.
   IF NOT public.mfa_ok(v_uid) THEN
-    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para registrar fiado.';
+    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para registar fiado.';
   END IF;
   IF NOT public.is_my_store(v_store) THEN
-    RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', v_store;
+    RAISE EXCEPTION 'A loja % não pertence ao utilizador autenticado.', v_store;
   END IF;
   SELECT t.language INTO v_lang
   FROM public.stores s
@@ -2641,7 +2641,7 @@ BEGIN
     RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para quitar o fiado.';
   END IF;
   IF NOT public.is_my_store(p_store) THEN
-    RAISE EXCEPTION 'A loja % não pertence ao usuário logado.', p_store;
+    RAISE EXCEPTION 'A loja % não pertence ao utilizador autenticado.', p_store;
   END IF;
   SELECT t.language INTO v_lang
   FROM public.stores s
@@ -2728,18 +2728,18 @@ DECLARE
   v_expiry timestamptz;
 BEGIN
   IF v_uid IS NULL THEN
-    RAISE EXCEPTION 'Sessão necessária para registrar a compra.';
+    RAISE EXCEPTION 'Sessão necessária para registar a compra.';
   END IF;
   -- P1 (MFA server-side): compra muta estoque e caixa (nível gerencial).
   IF NOT public.mfa_ok(v_uid) THEN
-    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para registrar compras.';
+    RAISE EXCEPTION 'MFA exigido: conclua a verificação em dois fatores para registar compras.';
   END IF;
   -- Guarda de nível gerencial (matriz de acesso Aug 6): compras exigem
   -- DONO ou GERENTE da loja — o funcionário comum opera vendas/estoque,
   -- mas NÃO registra compras. Substitui o RLS dentro do SECURITY DEFINER
   -- (e o RLS de purchases também exige is_manager_of_store).
   IF NOT public.is_manager_of_store(v_store) THEN
-    RAISE EXCEPTION 'Apenas o dono ou um gerente podem registrar compras na loja %.', v_store;
+    RAISE EXCEPTION 'Apenas o dono ou um gerente podem registar compras na loja %.', v_store;
   END IF;
   SELECT t.language INTO v_lang
   FROM public.stores s

@@ -106,17 +106,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportUserGuideHint =>
-      'Sign-in, stores, products, sales, credit, finance and reports';
+      'Sign-in, stores, products, sales, credit and reports';
 
   @override
   String get supportTroubleshooting => 'Troubleshooting';
 
   @override
   String get supportTroubleshootingHint =>
-      'Common issues: sign-in, sales, stock and connection';
+      'Resolve sign-in, sales, stock and connection issues';
 
   @override
   String get supportReadingError => 'Could not open the document.';
+
+  @override
+  String get supportSearchHint => 'Search help';
+
+  @override
+  String get supportContactSupport => 'Contact support';
+
+  @override
+  String get supportContactSupportHint => 'Our team can help you';
+
+  @override
+  String get supportHelpCenter => 'Help center';
+
+  @override
+  String get supportContactMessage => 'Hi! I need help with TAREQO.';
+
+  @override
+  String get supportOpenError => 'Could not open support.';
 
   @override
   String get commonSearch => 'Search...';
@@ -1207,6 +1225,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get purchasesHeaderVsYesterday => 'vs yesterday';
+
+  @override
+  String get purchaseDetailTitle => 'Purchase details';
+
+  @override
+  String get purchaseDetailSupplier => 'Supplier';
+
+  @override
+  String get purchaseDetailDate => 'Date and time';
+
+  @override
+  String get purchaseDetailPayment => 'Payment';
+
+  @override
+  String get purchaseDetailExpiry => 'Batch expiry';
+
+  @override
+  String get purchaseDetailNoExpiry => 'No expiry';
+
+  @override
+  String get purchaseDetailStockNote => 'Stock updated via FIFO batch.';
 
   @override
   String purchasesStockAdded(int units, String unit) {

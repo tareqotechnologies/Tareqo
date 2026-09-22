@@ -138,7 +138,7 @@ class _TenantOnboardingScreenState
                   l10n.onboardingHeading,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -394,7 +394,7 @@ class _PlanCard extends StatelessWidget {
                   plan.name,
                   style: Theme.of(
                     context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w500),
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -413,7 +413,7 @@ class _PlanCard extends StatelessWidget {
               language: language,
             ),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               color: scheme.primary,
             ),
           ),

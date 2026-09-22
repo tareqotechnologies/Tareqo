@@ -44,7 +44,7 @@ class TenantPendingScreen extends ConsumerWidget {
                   l10n.tenantPendingTitle,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: -0.5,
                   ),
                 ),

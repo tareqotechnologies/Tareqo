@@ -126,7 +126,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('exibe as vendas registradas pelo repositório', (tester) async {
+  testWidgets('exibe as vendas registadas pelo repositório', (tester) async {
     await tester.pumpWidget(
       _buildApp(
         _FakeSalesRepository([
@@ -183,7 +183,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Nenhuma venda registrada'), findsOneWidget);
+    expect(find.text('Nenhuma venda registada'), findsOneWidget);
     // CTA ÚNICO: no estado vazio o FAB some e o botão do EmptyState é o
     // único "Nova venda" (sem duplicação).
     expect(find.text('Nova venda'), findsOneWidget);
@@ -454,7 +454,7 @@ void main() {
 
     final before = headerHeight();
 
-    // Usuário ajusta a escala de texto do sistema DEPOIS da montagem:
+    // Utilizador ajusta a escala de texto do sistema DEPOIS da montagem:
     // a altura da barra fixa precisa ser re-medida (senão o conteúdo
     // ficaria cortado pelo extent antigo).
     tester.platformDispatcher.textScaleFactorTestValue = 2.0;
@@ -544,7 +544,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // O card segue renderizado e nenhum overflow foi registrado.
+    // O card segue renderizado e nenhum overflow foi registado.
     expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

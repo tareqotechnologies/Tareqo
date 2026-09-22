@@ -40,19 +40,25 @@
   "currencyUsd": "Dólar (USD)",
   "currencyEur": "Euro (EUR)",
   "currencyMzn": "Metical (MZN)",
-  "settingsSave": "Salvar",
+  "settingsSave": "Guardar",
   "settingsSaved": "Ajustes salvos!",
-  "settingsGenericError": "Não foi possível salvar. Tente novamente.",
+  "settingsGenericError": "Não foi possível guardar. Tente novamente.",
   "settingsSupportSection": "Suporte",
   "settingsSupportEntry": "Ajuda e documentação",
-  "settingsSupportEntryHint": "Guia do Usuário e Troubleshooting — offline",
+  "settingsSupportEntryHint": "Guia do Utilizador e Solução de Problemas — offline",
   "supportTitle": "Ajuda",
-  "supportSubtitle": "Guia do usuário e solução de problemas.",
-  "supportUserGuide": "Guia do Usuário",
-  "supportUserGuideHint": "Login, lojas, produtos, vendas, fiado, financeiro e relatórios",
-  "supportTroubleshooting": "Troubleshooting",
-  "supportTroubleshootingHint": "Problemas comuns: login, vendas, estoque e conexão",
+  "supportSubtitle": "Guia do utilizador e solução de problemas.",
+  "supportUserGuide": "Guia do Utilizador",
+  "supportUserGuideHint": "Login, lojas, produtos, vendas, fiado e relatórios",
+  "supportTroubleshooting": "Solução de problemas",
+  "supportTroubleshootingHint": "Resolva problemas de login, vendas, stock e conexão",
   "supportReadingError": "Não foi possível abrir o documento.",
+  "supportSearchHint": "Buscar na ajuda",
+  "supportContactSupport": "Fale com o suporte",
+  "supportContactSupportHint": "Nossa equipe pode ajudar você",
+  "supportHelpCenter": "Central de ajuda",
+  "supportContactMessage": "Olá! Preciso de ajuda com o TAREQO.",
+  "supportOpenError": "Não foi possível abrir o suporte.",
   "commonSearch": "Buscar...",
   "commonRetry": "Tentar novamente",
   "commonSignOut": "Terminar sess\u00e3o",
@@ -129,7 +135,7 @@
   "forgotPasswordError": "Não foi possível enviar o link. Tente novamente.",
   "setNewPasswordTitle": "Definir nova senha",
   "setNewPasswordHint": "Mín. 8 caracteres com minúscula, maiúscula, número e símbolo.",
-  "setNewPasswordSubmit": "Salvar nova senha",
+  "setNewPasswordSubmit": "Guardar nova senha",
   "setNewPasswordSuccess": "Senha atualizada!",
   "setNewPasswordError": "Não foi possível atualizar a senha. Tente novamente.",
   "setNewPasswordSamePassword": "A nova senha deve ser diferente da atual.",
@@ -161,12 +167,12 @@
   "commonSignOutConfirmTitle": "Terminar sess\u00e3o?",
   "commonSignOutConfirmMessage": "Vai sair da sua conta neste dispositivo.",
   "fabMenuNewSale": "Nova venda",
-  "fabMenuNewSaleHint": "Carrinho · baixa de estoque · caixa",
-  "fabMenuExpense": "Registrar despesa",
+  "fabMenuNewSaleHint": "Carrinho · baixa de stock · caixa",
+  "fabMenuExpense": "Registar despesa",
   "fabMenuExpenseHint": "Saída de caixa com categoria",
   "fabMenuAddProduct": "Adicionar produto",
-  "fabMenuAddProductHint": "Catálogo · preço · estoque inicial",
-  "fabMenuAddDebt": "Registrar fiado",
+  "fabMenuAddProductHint": "Catálogo · preço · stock inicial",
+  "fabMenuAddDebt": "Registar fiado",
   "fabMenuAddDebtHint": "A receber ou a pagar",
   "fabMenuAddCustomer": "Adicionar cliente",
   "fabMenuAddCustomerHint": "Contactos · fiado vinculado",
@@ -213,7 +219,7 @@
   "dashboardModulePurchases": "Compras",
   "dashboardModuleReports": "Relatórios",
   "dashboardModuleStores": "Lojas",
-  "dashboardLowStock": "Estoque baixo",
+  "dashboardLowStock": "Stock baixo",
   "dashboardKpisError": "Não foi possível carregar os indicadores.",
   "dashboardActivityTitle": "Atividade de hoje",
   "dashboardActivityEvents": "{count, plural, =1{1 evento} other{{count} eventos}}",
@@ -229,8 +235,8 @@
       }
     }
   },
-  "dashboardActivityEmpty": "Nenhuma atividade registrada ainda.",
-  "dashboardStockEntry": "Estoque · {product}",
+  "dashboardActivityEmpty": "Nenhuma atividade registada ainda.",
+  "dashboardStockEntry": "Stock · {product}",
   "@dashboardStockEntry": {
     "placeholders": {
       "product": {
@@ -392,7 +398,7 @@
   "commonDescription": "Descrição",
   "commonNoResults": "Nenhum resultado",
   "commonNoResultsHint": "Tente buscar por outro termo.",
-  "commonSave": "Salvar",
+  "commonSave": "Guardar",
   "commonSoldOut": "Esgotado",
   "periodToday": "Hoje",
   "periodMonth": "Este mês",
@@ -417,23 +423,23 @@
   "productsDescriptionLabel": "Descrição (opcional)",
   "productsPurchasePrice": "Preço de compra",
   "productsSalePrice": "Preço de venda",
-  "productsStockQuantity": "Quantidade em estoque",
+  "productsStockQuantity": "Quantidade em stock",
   "productsAddSubmit": "Adicionar produto",
   "productsEditTitle": "Editar produto",
-  "productsEditSubmit": "Salvar alterações",
+  "productsEditSubmit": "Guardar alterações",
   "productsEditSaved": "Produto atualizado!",
   "productsEditSavedNoPhoto": "Produto atualizado! (sem permissão de armazenamento)",
   "productsEditError": "Não foi possível atualizar o produto. Tente novamente.",
   "productsInactive": "Inactivo",
   "productsFilterTooltip": "Filtrar",
   "productsFilterAdvanced": "Filtros avançados",
-  "productsFilterStockType": "Tipo de estoque",
+  "productsFilterStockType": "Tipo de stock",
   "productsFilterStockTypeAll": "Todos",
   "productsFilterStockTypeWeight": "Peso (kg/g/l/ml)",
   "productsFilterStockTypeUnit": "Unidade (un)",
   "productsFilterAvailability": "Disponibilidade",
-  "productsFilterAvailable": "Em estoque",
-  "productsFilterLowStock": "Estoque baixo",
+  "productsFilterAvailable": "Em stock",
+  "productsFilterLowStock": "Stock baixo",
   "productsFilterOutOfStock": "Esgotado",
   "productsFilterPriceRange": "Faixa de preço",
   "productsFilterMinPrice": "Preço mínimo",
@@ -461,10 +467,10 @@
   },
   "productsActiveLabel": "Produto activo",
   "productsActiveHint": "Desactive para tirar do PDV e compras.",
-  "productsStockAdjustHint": "Ajuste manual: define o estoque exato (FIFO).",
+  "productsStockAdjustHint": "Ajuste manual: define o stock exato (FIFO).",
   "productsSectionInfo": "Informações",
   "productsSectionPricing": "Preços",
-  "productsSectionStock": "Estoque",
+  "productsSectionStock": "Stock",
   "productsSectionStatus": "Status",
   "productsPhotoTake": "Tirar fotografia",
   "productsPhotoGallery": "Escolher da galeria",
@@ -516,9 +522,9 @@
     "placeholders": { "name": {} }
   },
   "customersEditError": "Não foi possível atualizar o cliente. Tente novamente.",
-  "customersEditSubmit": "Salvar alterações",
+  "customersEditSubmit": "Guardar alterações",
   "customersDeleteConfirmTitle": "Remover cliente?",
-  "customersDeleteConfirmMessage": "{name} será removido permanentemente. Registros de fiado são preservados.",
+  "customersDeleteConfirmMessage": "{name} será removido permanentemente. Registos de fiado são preservados.",
   "@customersDeleteConfirmMessage": {
     "placeholders": { "name": {} }
   },
@@ -527,7 +533,7 @@
   "purchasesTitle": "Compras",
   "purchasesAddNew": "Nova compra",
   "purchasesLoadError": "Não foi possível carregar as compras.",
-  "purchasesEmptyTitle": "Nenhuma compra registrada",
+  "purchasesEmptyTitle": "Nenhuma compra registada",
   "purchasesEmptySubtitle": "Toque em \"Nova compra\" para registrar.",
   "purchasesHeaderCount": "{count, plural, =0{0 compras} =1{1 compra} other{{count} compras}}",
   "@purchasesHeaderCount": {
@@ -539,7 +545,14 @@
     }
   },
   "purchasesHeaderVsYesterday": "vs ontem",
-  "purchasesStockAdded": "Estoque +{units} {unit}",
+  "purchaseDetailTitle": "Detalhes da compra",
+  "purchaseDetailSupplier": "Fornecedor",
+  "purchaseDetailDate": "Data e hora",
+  "purchaseDetailPayment": "Pagamento",
+  "purchaseDetailExpiry": "Validade do lote",
+  "purchaseDetailNoExpiry": "Sem validade",
+  "purchaseDetailStockNote": "Stock atualizado via lote FIFO.",
+  "purchasesStockAdded": "Stock +{units} {unit}",
   "@purchasesStockAdded": {
     "description": "Chip do card de compra: unidades adicionadas ao estoque",
     "placeholders": {
@@ -556,7 +569,7 @@
   "purchasesClearFilters": "Limpar filtros",
   "purchasesSupplierError": "Informe o fornecedor da compra.",
   "purchasesCartItemUnavailable": "Item do carrinho não disponível. Tente novamente.",
-  "purchasesRegistered": "Compra registrada: {amount}!",
+  "purchasesRegistered": "Compra registada: {amount}!",
   "@purchasesRegistered": {
     "placeholders": {
       "amount": {
@@ -572,12 +585,12 @@
       }
     }
   },
-  "purchasesRegisterError": "Não foi possível registrar a compra. Tente novamente.",
+  "purchasesRegisterError": "Não foi possível registar a compra. Tente novamente.",
   "purchasesSupplierLabel": "Fornecedor",
   "purchasesNoProductsTitle": "Nenhum produto para comprar",
-  "purchasesNoProductsSubtitle": "Cadastre produtos para registrar compras.",
+  "purchasesNoProductsSubtitle": "Cadastre produtos para registar compras.",
   "purchasesConfirm": "Confirmar compra",
-  "purchasesStockLabel": "{quantity} {unit} em estoque",
+  "purchasesStockLabel": "{quantity} {unit} em stock",
   "@purchasesStockLabel": {
     "placeholders": {
       "quantity": {
@@ -589,13 +602,13 @@
     }
   },
   "reportsTitle": "Relatórios",
-  "reportsRevenue": "Faturamento",
+  "reportsRevenue": "Receita",
   "reportsProfit": "Lucro bruto",
   "reportsMargin": "Margem",
   "reportsBestSellers": "Mais vendidos",
   "reportsLoadError": "Não foi possível carregar o relatório.",
   "reportsEmptyTitle": "Sem vendas no período",
-  "reportsEmptySubtitle": "Registre vendas para ver o relatório.",
+  "reportsEmptySubtitle": "Registe vendas para ver o relatório.",
   "reportsSalesPerDay": "Vendas por dia",
   "reportsRevenueLabel": "{amount} vendidos",
   "@reportsRevenueLabel": {
@@ -623,7 +636,7 @@
   "reportsExportDay": "Dia",
   "reportsExportTotal": "Total",
   "financialTitle": "Financeiro",
-  "financialRegister": "Registrar",
+  "financialRegister": "Registar",
   "financialIncome": "Entradas",
   "financialExpense": "Saídas",
   "financialPeriodBalance": "Saldo líquido do período",
@@ -631,7 +644,7 @@
   "financialLoadError": "Não foi possível carregar as movimentações.",
   "financialCashFlowError": "Não foi possível carregar o fluxo de caixa.",
   "financialEmptyTitle": "Nenhuma movimentação",
-  "financialEmptySubtitle": "Registre entradas e saídas para acompanhar o caixa.",
+  "financialEmptySubtitle": "Registe entradas e saídas para acompanhar o caixa.",
   "financialReceivePendingTitle": "Receber pendência?",
   "financialReceivePendingBody": "Confirmar recebimento de {amount}?",
   "@financialReceivePendingBody": {
@@ -656,7 +669,7 @@
   },
   "financialPaid": "Saída paga!",
   "financialPayError": "Não foi possível pagar a pendência. Tente novamente.",
-  "financialAddTitle": "Registrar movimentação",
+  "financialAddTitle": "Registar movimentação",
   "financialIncomingType": "Entrada",
   "financialOutgoingType": "Saída",
   "financialDescriptionLabel": "Descrição",
@@ -666,8 +679,8 @@
   "financialAmountError": "Informe um valor maior que zero.",
   "financialPendingLabel": "Pendente (fiado)",
   "financialPendingHint": "Não conta no caixa até ser recebido.",
-  "financialRegistered": "Movimentação registrada!",
-  "financialRegisterError": "Não foi possível registrar. Tente novamente.",
+  "financialRegistered": "Movimentação registada!",
+  "financialRegisterError": "Não foi possível registar. Tente novamente.",
   "financialDefaultCategoryIncome": "Vendas",
   "financialDefaultCategoryExpense": "Despesas",
   "financialDetailDescription": "Descrição",
@@ -707,10 +720,10 @@
   "cashClosingSuccess": "Caixa fechado!",
   "cashClosingUpdated": "Fecho atualizado!",
   "cashClosingError": "Não foi possível fechar o caixa. Tente novamente.",
-  "cashClosingEmpty": "Nenhuma venda registrada neste dia.",
+  "cashClosingEmpty": "Nenhuma venda registada neste dia.",
   "debtsTitle": "Crédito (fiado)",
   "debtsHeaderSubtitle": "Fiado a receber e a pagar",
-  "debtsAddDebt": "Registrar fiado",
+  "debtsAddDebt": "Registar fiado",
   "debtsSearchHint": "Buscar por nome do cliente...",
   "debtsTabPending": "Pendentes",
   "debtsTabSettled": "Quitadas",
@@ -782,7 +795,7 @@
     }
   },
   "debtsDueDateHelp": "Vencimento do fiado",
-  "debtsRegisteredFor": "Fiado registrado para {name}!",
+  "debtsRegisteredFor": "Fiado registado para {name}!",
   "@debtsRegisteredFor": {
     "placeholders": {
       "name": {
@@ -790,8 +803,8 @@
       }
     }
   },
-  "debtsPendingEntryError": "Fiado registrado, mas a pendência não pôde ser criada.",
-  "debtsRegisterError": "Não foi possível registrar o fiado. Tente novamente.",
+  "debtsPendingEntryError": "Fiado registado, mas a pendência não pôde ser criada.",
+  "debtsRegisterError": "Não foi possível registar o fiado. Tente novamente.",
   "debtsCustomerLinkLabel": "Cliente vinculado (opcional)",
   "debtsNoCustomer": "Sem vínculo",
   "debtsCustomerNameLabel": "Nome do cliente",
@@ -809,7 +822,7 @@
     }
   },
   "salesLoadError": "Não foi possível carregar as vendas.",
-  "salesEmptyTitle": "Nenhuma venda registrada",
+  "salesEmptyTitle": "Nenhuma venda registada",
   "salesEmptySubtitle": "Toque em \"Nova venda\" para registrar a primeira.",
   "periodYesterday": "Ontem",
   "periodWeek": "Esta semana",
@@ -851,7 +864,7 @@
     }
   },
   "salesItemUnavailable": "Item do carrinho não disponível. Tente novamente.",
-  "salesRegistered": "Venda registrada: {amount}!",
+  "salesRegistered": "Venda registada: {amount}!",
   "@salesRegistered": {
     "placeholders": {
       "amount": {
@@ -859,7 +872,7 @@
       }
     }
   },
-  "salesInsufficientStock": "Estoque insuficiente{product}. Disponível: {available}.",
+  "salesInsufficientStock": "Stock insuficiente{product}. Disponível: {available}.",
   "@salesInsufficientStock": {
     "placeholders": {
       "product": {
@@ -878,7 +891,7 @@
       }
     }
   },
-  "salesProductNotFound": "Produto {id} não encontrado no estoque.",
+  "salesProductNotFound": "Produto {id} não encontrado no stock.",
   "@salesProductNotFound": {
     "placeholders": {
       "id": {
@@ -886,10 +899,10 @@
       }
     }
   },
-  "salesRegisterError": "Não foi possível registrar a venda. Tente novamente.",
+  "salesRegisterError": "Não foi possível registar a venda. Tente novamente.",
   "salesSearchProducts": "Buscar produto...",
   "salesNoProductsTitle": "Nenhum produto para vender",
-  "salesNoProductsSubtitle": "Cadastre produtos para registrar vendas.",
+  "salesNoProductsSubtitle": "Cadastre produtos para registar vendas.",
   "salesConfirm": "Confirmar venda",
   "saleDetailTitle": "Detalhes da venda",
   "saleDetailId": "Venda {id}",
@@ -907,7 +920,7 @@
   "salesStatusCancelled": "Anulada",
   "saleDetailCancelAction": "Anular venda",
   "saleDetailCancelConfirmTitle": "Anular esta venda?",
-  "saleDetailCancelConfirmBody": "Estoque será devolvido e caixa estornado ({amount}).",
+  "saleDetailCancelConfirmBody": "Stock será devolvido e caixa estornado ({amount}).",
   "@saleDetailCancelConfirmBody": {
     "description": "Confirmação de anulação de venda — avisa que estoque e caixa serão estornados",
     "placeholders": {
@@ -948,7 +961,7 @@
       }
     }
   },
-  "adminTenantsEmpty": "Nenhum tenant registrado ainda.",
+  "adminTenantsEmpty": "Nenhum tenant registado ainda.",
   "adminRequestsLoadError": "Não foi possível carregar as solicitações.",
   "adminNothingPendingTitle": "Nada pendente",
   "adminNothingPendingSubtitle": "Novas solicitações aparecem aqui.",
@@ -1015,7 +1028,7 @@
       }
     }
   },
-  "adminPlanSaveError": "Não foi possível salvar o plano. Tente novamente.",
+  "adminPlanSaveError": "Não foi possível guardar o plano. Tente novamente.",
   "adminPlanNewTitle": "Novo plano",
   "adminPlanEditTitle": "Editar plano",
   "adminPlanNameLabel": "Nome do plano",
@@ -1060,7 +1073,7 @@
   },
   "salesBarcodeNotFound": "Produto não encontrado para este código.",
   "salesBarcodeInvalid": "Código de balança inválido.",
-  "salesStockLimit": "Limite de estoque atingido para {product}.",
+  "salesStockLimit": "Limite de stock atingido para {product}.",
   "@salesStockLimit": {
     "description": "Erro ao adicionar mais do que o estoque disponível",
     "placeholders": {
@@ -1390,7 +1403,7 @@
   "customInvoiceTaxIdOptional": "NIF / NUIT (opcional)",
   "customInvoiceProductSection": "Produto",
   "customInvoiceProductPlaceholder": "Sem produtos cadastrados",
-  "customInvoiceProductOption": "Estoque: {stock} {unit}  •  {price}",
+  "customInvoiceProductOption": "Stock: {stock} {unit}  •  {price}",
   "customInvoicePrice": "Preço (MT)",
   "customInvoiceQty": "Qtd",
   "customInvoiceAddItem": "Adicionar",
@@ -1410,7 +1423,7 @@
   "customInvoiceTemplateStyleClassic": "Clássico",
   "customInvoiceTemplateStyleModern": "Moderno",
   "customInvoiceTemplateStyleCompact": "Compacto",
-  "customInvoiceTemplateSave": "Salvar Modelo",
+  "customInvoiceTemplateSave": "Guardar Modelo",
   "customInvoicePreviewCompanyFallback": "Nome da Empresa",
   "customInvoicePreviewSampleItemA": "Produto A",
   "customInvoicePreviewSampleItemB": "Produto B",
@@ -1434,8 +1447,8 @@
     }
   },
   "quotationSaveError": "Não foi possível criar a cotação. Tente novamente.",
-  "quotationStatusSaved": "Estado da cotação actualizado",
-  "quotationStatusError": "Não foi possível actualizar a cotação. Tente novamente.",
+  "quotationStatusSaved": "Estado da cotação atualizado",
+  "quotationStatusError": "Não foi possível atualizar a cotação. Tente novamente.",
   "quotationTemplateTooltip": "Modelo da Cotação",
   "quotationNewFab": "Nova Cotação",
   "quotationItemsCount": "{count, plural, =1{1 item} other{{count} itens}}",
@@ -1450,7 +1463,7 @@
   "quotationStatusRejected": "Rejeitada",
   "quotationPhoneOptional": "Telefone (opcional)",
   "quotationNumberPrefix": "Nº {number}",
-  "quotationSave": "Salvar Cotação",
+  "quotationSave": "Guardar Cotação",
   "quotationTemplatePhone": "Telefone",
   "quotationTemplatePreview": "Cotação • Preview",
   "quotationTemplatePreviewBadge": "Preview",
@@ -1512,7 +1525,7 @@
   "employeeCommissionNoRate": "Sem taxa definida",
   "employeeCommissionSetRate": "Definir Taxa",
   "employeeCommissionRateLabel": "Taxa de comissão (%)",
-  "employeeCommissionRateSaved": "Taxa de comissão actualizada.",
+  "employeeCommissionRateSaved": "Taxa de comissão atualizada.",
   "employeeCommissionRateError": "Não foi possível guardar a taxa.",
   "employeeTargetsActive": "Metas Activas",
   "employeeTargetsReached": "Atingidas",
@@ -1533,7 +1546,7 @@
   "employeeTargetEmployee": "Funcionário",
   "employeeTargetAllHave": "Todos os funcionários já possuem meta definida",
   "employeeTargetMonthly": "Meta Mensal (MT)",
-  "employeeTargetSave": "Salvar Meta",
+  "employeeTargetSave": "Guardar Meta",
   "employeeTargetProgress": "{progress}% da meta",
   "@employeeTargetProgress": {
     "placeholders": {
@@ -1564,16 +1577,16 @@
   "addonQuotationName": "Cotação / Orçamento",
   "addonQuotationDesc": "Crie e envie cotações e orçamentos para clientes antes da venda. Inclui conversão automática para venda, validade configurável e envio por SMS/WhatsApp.",
   "addonReportsName": "Relatórios Avançados",
-  "addonReportsDesc": "Relatórios financeiros, de vendas e estoque com filtros avançados, comparativos período a período e exportação em PDF/Excel. Inclui gráficos interativos e dashboards personalizados.",
+  "addonReportsDesc": "Relatórios financeiros, de vendas e stock com filtros avançados, comparativos período a período e exportação em PDF/Excel. Inclui gráficos interativos e dashboards personalizados.",
   "addonEmployeesName": "Gestão de Funcionários",
   "addonEmployeesDesc": "Controle de ponto (entrada/saída), cálculo automático de comissões por venda, definição de metas mensais e relatório de desempenho individual.",
   "addonMultiStoreName": "Multi-Loja Avançado",
-  "addonMultiStoreDesc": "Transferência de estoque entre lojas, relatórios consolidados comparando lojas, gestão centralizada de preços e promoções e alertas de reposição automática.",
+  "addonMultiStoreDesc": "Transferência de stock entre lojas, relatórios consolidados comparando lojas, gestão centralizada de preços e promoções e alertas de reposição automática.",
   "addonMobileMoneyName": "Integração M-Pesa / E-Mola",
   "addonMobileMoneyDesc": "Pagamentos automáticos via mobile money com reconciliação automática, notificações de recebimento em tempo real e relatório de transações mobile money.",
   "transfersTitle": "Transferências entre Lojas",
   "transfersEmpty": "Sem transferências",
-  "transfersEmptySubtitle": "Transfira estoque entre lojas do\nmesmo tenant de forma rastreável",
+  "transfersEmptySubtitle": "Transfira stock entre lojas do\nmesmo tenant de forma rastreável",
   "transfersNewFab": "Nova Transferência",
   "transfersOriginStore": "Loja de Origem",
   "transfersDestStore": "Loja de Destino",
@@ -1584,7 +1597,7 @@
   "transfersExecuting": "A transferir...",
   "transfersExecute": "Executar Transferência",
   "transfersNoStoresTitle": "Cadastre pelo menos 2 lojas",
-  "transfersNoStoresSubtitle": "É necessário ter 2+ lojas para\ntransferir estoque entre elas",
+  "transfersNoStoresSubtitle": "É necessário ter 2+ lojas para\ntransferir stock entre elas",
   "transfersSuccess": "{count, plural, =1{1 produto transferido} other{{count} produtos transferidos}} com sucesso",
   "transfersError": "Erro na transferência: {error}",
   "transferStatusPending": "Pendente",
@@ -1596,22 +1609,22 @@
   "reportsAdvancedTitle": "Relatórios Avançados",
   "reportsTabSales": "Vendas",
   "reportsTabFinancial": "Financeiro",
-  "reportsTabStock": "Estoque",
+  "reportsTabStock": "Stock",
   "reportsKpiProducts": "Produtos",
-  "reportsKpiLowStock": "Estoque Baixo",
-  "reportsKpiStockValue": "Valor Estoque",
+  "reportsKpiLowStock": "Stock Baixo",
+  "reportsKpiStockValue": "Valor Stock",
   "reportsKpiRevenue": "Receitas",
   "reportsKpiExpenses": "Despesas",
   "reportsKpiNetProfit": "Lucro Líquido",
   "reportsCashFlow": "Fluxo de Caixa",
   "reportsCashFlowChart": "Gráfico de fluxo de caixa",
-  "reportsStockHealthy": "Todos os produtos com estoque adequado",
+  "reportsStockHealthy": "Todos os produtos com stock adequado",
   "reportsExportSales": "Exportar Relatório (PDF)",
   "reportsExportFinancial": "Exportar Financeiro (PDF)",
-  "reportsExportStock": "Exportar Estoque (PDF)",
+  "reportsExportStock": "Exportar Stock (PDF)",
   "reportsNoSalesData": "Sem dados para este período",
   "reportsPeriodYear": "Este Ano",
-  "reportsKpiStockOut": "Sem Estoque",
+  "reportsKpiStockOut": "Sem Stock",
   "reportsKpiTotalProducts": "Total Produtos",
   "pdfGeneratedOn": "Gerado: {date}",
   "pdfIndicators": "Indicadores",
@@ -1628,6 +1641,9 @@
   "pdfNifLine": "NIF: {value}",
   "pdfItemHeader": "Item",
   "pdfUnitPriceHeader": "Preço Unit.",
+  "@pdfUnitPriceHeader": {
+    "description": "Header da coluna de preço unitário — preview em tela usa 10px; PDF usa a sua própria escala"
+  },
   "pdfSubtotalHeader": "Subtotal",
   "pdfDiscountLabel": "Desconto",
   "pdfTaxLabel": "IVA",
@@ -1651,7 +1667,7 @@
   "adminAddonsNoTenantsSearchSub": "Tente outro termo de busca",
   "adminAddonsNoTenantsTitle": "Nenhum tenant encontrado",
   "adminAddonsNoTenantsYetSub": "Nenhum tenant aprovado ainda",
-  "adminAddonsUpdateError": "Erro ao actualizar add-on: {error}",
+  "adminAddonsUpdateError": "Erro ao atualizar add-on: {error}",
   "adminBackToList": "Voltar à lista",
   "adminMessagesBodyHint": "Escreva a mensagem…",
   "adminMessagesTenantHint": "Selecionar tenant...",
@@ -1725,14 +1741,14 @@
   "adminAddonsBulkSheetTitle": "Activar add-on em lote",
   "adminAddonsEditPriceTitle": "Editar preço mensal",
   "adminAddonsEditPriceTooltip": "Editar preço",
-  "adminAddonsPriceUpdated": "Preço de {addonName} actualizado para {price}/mês",
+  "adminAddonsPriceUpdated": "Preço de {addonName} atualizado para {price}/mês",
   "@adminAddonsPriceUpdated": {
     "placeholders": {
       "addonName": {},
       "price": {}
     }
   },
-  "adminAddonsPriceSaveError": "Não foi possível salvar o preço. Tente novamente.",
+  "adminAddonsPriceSaveError": "Não foi possível guardar o preço. Tente novamente.",
   "adminAddonsListHint": "Toque num tenant para gerir os seus add-ons. Toque no ícone ✓ para seleção múltipla.",
   "adminAddOnsCount": "{count, plural, =1{1 add-on} other{{count} add-ons}}",
   "adminRevenueByAddOn": "Receita por Add-on",

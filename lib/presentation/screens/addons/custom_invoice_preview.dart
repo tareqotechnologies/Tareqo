@@ -117,7 +117,7 @@ class CustomInvoicePreview extends StatelessWidget {
                                     businessAddress,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: scheme.onSurfaceVariant,
-                                      fontSize: 10,
+                                      fontSize: 11,
                                     ),
                                   ),
                                 if (businessPhone.isNotEmpty)
@@ -125,7 +125,7 @@ class CustomInvoicePreview extends StatelessWidget {
                                     businessPhone,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: scheme.onSurfaceVariant,
-                                      fontSize: 9,
+                                      fontSize: 11,
                                     ),
                                   ),
                                 if (businessTaxId.isNotEmpty)
@@ -133,7 +133,7 @@ class CustomInvoicePreview extends StatelessWidget {
                                     l10n.pdfNifLine(businessTaxId),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: scheme.onSurfaceVariant,
-                                      fontSize: 9,
+                                      fontSize: 11,
                                     ),
                                   ),
                               ],
@@ -174,7 +174,7 @@ class CustomInvoicePreview extends StatelessWidget {
                     '${l10n.customInvoiceNumberPrefix('00001')}  •  ${Formatters.date(DateTime.now())}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
-                      fontSize: 9,
+                      fontSize: 11,
                     ),
                   ),
                 ),
@@ -189,7 +189,7 @@ class CustomInvoicePreview extends StatelessWidget {
                 Text(
                   l10n.pdfClientHeading,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 8,
+                    fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurfaceVariant,
                     letterSpacing: 0.5,
@@ -199,7 +199,7 @@ class CustomInvoicePreview extends StatelessWidget {
                 Text(
                   l10n.customInvoicePreviewSampleClient,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     fontSize: 11,
                   ),
                 ),
@@ -207,7 +207,7 @@ class CustomInvoicePreview extends StatelessWidget {
                   l10n.pdfPhoneLine('84 123 4567'),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 9,
+                    fontSize: 11,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -232,7 +232,7 @@ class CustomInvoicePreview extends StatelessWidget {
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
-                            fontSize: 8,
+                            fontSize: 10,
                           ),
                         ),
                       ),
@@ -244,7 +244,7 @@ class CustomInvoicePreview extends StatelessWidget {
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
-                            fontSize: 8,
+                            fontSize: 10,
                           ),
                         ),
                       ),
@@ -256,7 +256,7 @@ class CustomInvoicePreview extends StatelessWidget {
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
-                            fontSize: 8,
+                            fontSize: 10,
                           ),
                         ),
                       ),
@@ -314,7 +314,7 @@ class CustomInvoicePreview extends StatelessWidget {
                     l10n.customInvoicePreviewFooter,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
-                      fontSize: 8,
+                      fontSize: 10,
                     ),
                   ),
                 ),
@@ -365,7 +365,7 @@ class _PreviewRow extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              style: theme.textTheme.bodySmall?.copyWith(fontSize: 9),
+              style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -375,7 +375,7 @@ class _PreviewRow extends StatelessWidget {
             child: Text(
               qty,
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(fontSize: 9),
+              style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
             ),
           ),
           SizedBox(
@@ -384,8 +384,8 @@ class _PreviewRow extends StatelessWidget {
               '$price $currencySymbol',
               textAlign: TextAlign.right,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),

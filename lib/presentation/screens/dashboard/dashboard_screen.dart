@@ -316,7 +316,7 @@ class DashboardScreen extends ConsumerWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                             letterSpacing: -0.6,
                           ),
                         ),
@@ -374,7 +374,7 @@ class DashboardScreen extends ConsumerWidget {
                     child: Text(
                       l10n.dashboardActivityTitle,
                       style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         letterSpacing: -0.3,
                       ),
                     ),
@@ -526,7 +526,7 @@ class _BalanceHero extends StatelessWidget {
                             l10n.dashboardMetricCash,
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: scheme.onPrimaryContainer,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -544,7 +544,7 @@ class _BalanceHero extends StatelessWidget {
                         maxLines: 1,
                         style: theme.textTheme.displaySmall?.copyWith(
                           color: cashNegative ? theme.expense : scheme.onSurface,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                           letterSpacing: -1.2,
                           height: 1.1,
                         ),
@@ -638,7 +638,7 @@ class _HeroMetric extends StatelessWidget {
             maxLines: 1,
             style: theme.textTheme.titleLarge?.copyWith(
               color: scheme.onSurface,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               letterSpacing: -0.4,
             ),
           ),
@@ -898,7 +898,7 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
                 child: Text(
                   transfer.productName,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -976,7 +976,7 @@ class _DetailRow extends StatelessWidget {
           child: Text(
             value,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               fontSize: 12,
             ),
             maxLines: 1,
@@ -1081,7 +1081,7 @@ class _ActivityRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1131,11 +1131,8 @@ class _ActivityRow extends StatelessWidget {
                                     ? theme.textTheme.bodyMedium
                                     : theme.textTheme.labelMedium)
                                 ?.copyWith(
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                   color: item.amountColor ?? item.badgeColor,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
                                 ),
                       ),
               ),

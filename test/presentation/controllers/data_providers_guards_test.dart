@@ -8,7 +8,7 @@ import 'package:tareqo/presentation/controllers/products_providers.dart';
 import 'package:tareqo/presentation/controllers/sales_providers.dart';
 
 /// Contratos de GUARDA dos providers de dados (produtos, clientes,
-/// dívidas, vendas): sem usuário logado, os notifiers devolvem estado
+/// dívidas, vendas): sem utilizador logado, os notifiers devolvem estado
 /// VAZIO sem tocar no ServiceLocator — o mesmo padrão validado para
 /// finanças em finance_providers_test.dart. Com sessão, o caminho feliz
 /// é exercitado pelos testes de tela (que sobrescrevem os use cases).
@@ -20,28 +20,28 @@ void main() {
   tearDown(() => GetIt.instance.reset());
 
   group('guarda sem sessão — estados vazios determinísticos', () {
-    test('customersProvider: lista vazia sem usuário logado', () async {
+    test('customersProvider: lista vazia sem utilizador logado', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       expect(await container.read(customersProvider.future), isEmpty);
     });
 
-    test('productsProvider: lista vazia sem usuário logado', () async {
+    test('productsProvider: lista vazia sem utilizador logado', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       expect(await container.read(productsProvider.future), isEmpty);
     });
 
-    test('salesProvider: lista vazia sem usuário logado', () async {
+    test('salesProvider: lista vazia sem utilizador logado', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       expect(await container.read(salesListProvider.future), isEmpty);
     });
 
-    test('pendingDebtsProvider: lista vazia sem usuário logado', () async {
+    test('pendingDebtsProvider: lista vazia sem utilizador logado', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 

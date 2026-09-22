@@ -6,7 +6,7 @@ import 'package:tareqo/presentation/controllers/finance_providers.dart';
 /// Contratos dos providers de FINANÇAS que não exigem backend:
 ///
 /// - o seletor de período (estado puro do notifier);
-/// - as GUARDAS de sessão/loja dos providers de leitura (sem usuário
+/// - as GUARDAS de sessão/loja dos providers de leitura (sem utilizador
 ///   logado, devolvem estado vazio/null sem tocar no ServiceLocator —
 ///   os caminhos com sessão são exercitados pelos testes de tela, que
 ///   sobrescrevem os use cases).
@@ -49,7 +49,7 @@ void main() {
     });
   });
 
-  group('cashFlowProvider — guarda sem usuário logado', () {
+  group('cashFlowProvider — guarda sem utilizador logado', () {
     test('saldo zerado sem consulta ao repositório (sessão ausente)', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -62,7 +62,7 @@ void main() {
     });
   });
 
-  group('transactionsProvider — guarda sem usuário logado', () {
+  group('transactionsProvider — guarda sem utilizador logado', () {
     test('lista vazia sem consulta ao repositório', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -71,7 +71,7 @@ void main() {
     });
   });
 
-  group('cashClosingHistoryProvider — guarda sem usuário logado', () {
+  group('cashClosingHistoryProvider — guarda sem utilizador logado', () {
     test('histórico null (sem sessão não há acesso ao fecho)', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);

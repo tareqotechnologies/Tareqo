@@ -95,7 +95,7 @@ void main() {
       expect(state, messages);
     });
 
-    test('sem usuário logado a lista fica vazia (sem tocar no caso de uso)',
+    test('sem utilizador logado a lista fica vazia (sem tocar no caso de uso)',
         () async {
       final container = ProviderContainer(
         overrides: [
@@ -168,7 +168,7 @@ void main() {
       expect(count, 2);
     });
 
-    test('sem usuário logado a contagem é 0', () async {
+    test('sem utilizador logado a contagem é 0', () async {
       final container = ProviderContainer(
         overrides: [
           authStateProvider.overrideWith((ref) => const Stream.empty()),

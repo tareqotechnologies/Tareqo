@@ -107,17 +107,36 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get supportUserGuideHint =>
-      'Connexion, magasins, produits, ventes, crédit, finances et rapports';
+      'Connexion, magasins, produits, ventes, crédit et rapports';
 
   @override
   String get supportTroubleshooting => 'Dépannage';
 
   @override
   String get supportTroubleshootingHint =>
-      'Problèmes courants : connexion, ventes, stock et réseau';
+      'Résolvez les problèmes de connexion, ventes, stock et réseau';
 
   @override
   String get supportReadingError => 'Impossible d\'ouvrir le document.';
+
+  @override
+  String get supportSearchHint => 'Rechercher dans l\'aide';
+
+  @override
+  String get supportContactSupport => 'Contactez le support';
+
+  @override
+  String get supportContactSupportHint => 'Notre équipe peut vous aider';
+
+  @override
+  String get supportHelpCenter => 'Centre d\'aide';
+
+  @override
+  String get supportContactMessage =>
+      'Bonjour ! J\'ai besoin d\'aide avec TAREQO.';
+
+  @override
+  String get supportOpenError => 'Impossible d\'ouvrir le support.';
 
   @override
   String get commonSearch => 'Rechercher...';
@@ -1225,6 +1244,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get purchasesHeaderVsYesterday => 'vs hier';
+
+  @override
+  String get purchaseDetailTitle => 'Détails de l\'achat';
+
+  @override
+  String get purchaseDetailSupplier => 'Fournisseur';
+
+  @override
+  String get purchaseDetailDate => 'Date et heure';
+
+  @override
+  String get purchaseDetailPayment => 'Paiement';
+
+  @override
+  String get purchaseDetailExpiry => 'Péremption du lot';
+
+  @override
+  String get purchaseDetailNoExpiry => 'Sans péremption';
+
+  @override
+  String get purchaseDetailStockNote => 'Stock mis à jour via lot FIFO.';
 
   @override
   String purchasesStockAdded(int units, String unit) {

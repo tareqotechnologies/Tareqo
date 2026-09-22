@@ -67,7 +67,7 @@ class _IntegrationBlockedBanner extends StatelessWidget {
                 message,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),

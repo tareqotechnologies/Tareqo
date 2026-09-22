@@ -313,13 +313,13 @@ void main() {
       expect(find.text('Total de vendas'), findsOneWidget);
     });
 
-    testWidgets('value cobre indicadores não monetários (ex.: estoque)', (
+    testWidgets('value cobre indicadores não monetários (ex.: stock)', (
       tester,
     ) async {
       await tester.pumpWidget(
         testApp(
           home: const KpiCard(
-            label: 'Estoque',
+            label: 'Stock',
             value: '12 un',
             icon: Icons.inventory_2_outlined,
           ),

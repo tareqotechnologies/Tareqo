@@ -115,8 +115,12 @@ class QuotationPdfExporter {
     String templateStyle = 'Classic',
   }) async {
     final data = await rootBundle.load('assets/fonts/Inter-Variable.ttf');
+    final bold = await rootBundle.load('assets/fonts/Inter-Bold.ttf');
     final doc = pw.Document(
-      theme: pw.ThemeData.withFont(base: pw.Font.ttf(data)),
+      theme: pw.ThemeData.withFont(
+        base: pw.Font.ttf(data),
+        bold: pw.Font.ttf(bold),
+      ),
     );
 
     final daysRemaining = quotation.validUntil

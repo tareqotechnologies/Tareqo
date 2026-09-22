@@ -1,12 +1,12 @@
-# Troubleshooting — TAREQO ERP (resolução de problemas)
+# Solução de Problemas — TAREQO ERP
 
-Guia prático para resolver os problemas mais comuns do app no dia a dia. Para aprender a usar o sistema, veja o [Guia do Usuário](GUIA_DO_USUARIO.md).
+Guia prático para resolver os problemas mais comuns do app no dia a dia. Para aprender a usar o sistema, veja o [Guia do Utilizador](GUIA_DO_USUARIO.md).
 
 ---
 
 ## Como usar este guia
 
-1. Encontre o sintoma do problema na lista abaixo (entrada, vendas, estoque, fotos...).
+1. Encontre o sintoma do problema na lista abaixo (entrada, vendas, stock, fotos...).
 2. Siga os passos na ordem indicada — comece sempre pelo mais simples.
 3. Se o problema persistir, veja a secção **Mensagens de erro comuns** e, por último, **Quando contactar o suporte**.
 
@@ -50,21 +50,21 @@ Guia prático para resolver os problemas mais comuns do app no dia a dia. Para a
 
 ## 3. Problemas com vendas
 
-### "A venda não confirma / 'Não foi possível registrar a venda'"
+### "A venda não confirma / 'Não foi possível registar a venda'"
 1. Verifique a **internet**.
 2. Confirme que preencheu **todos os campos** (produto, quantidade, forma de pagamento).
 3. Confirme que a **quantidade não é zero** e que o **total bate** com os itens.
 4. Se a venda é de um produto **desativado**, reative-o (Produtos → Editar → **Produto ativo**).
 
 ### "Vendi por engano / o cliente não levou"
-- Abra a venda → **Anular venda** (só dono/gerente). O estoque volta e o caixa é estornado.
+- Abra a venda → **Anular venda** (só dono/gerente). O stock volta e o caixa é estornado.
 - **Funcionário não vê o botão Anular** — é uma operação gerencial; peça ao dono/gerente.
 
-### "O estoque não abateu / abateu a mais"
+### "O stock não abateu / abateu a mais"
 1. Confira no **detalhe da venda** se os itens estão corretos.
-2. Vendas **anuladas** devolvem o estoque — se anulou, o stock volta.
-3. Verifique se houve **compras** (aumentam o estoque) ou **ajustes manuais** na edição do produto.
-4. Se ainda houver divergência, use o ajuste de estoque na edição do produto (dono/gerente) para corrigir.
+2. Vendas **anuladas** devolvem o stock — se anulou, o stock volta.
+3. Verifique se houve **compras** (aumentam o stock) ou **ajustes manuais** na edição do produto.
+4. Se ainda houver divergência, use o ajuste de stock na edição do produto (dono/gerente) para corrigir.
 
 ### "A balança etiquetadora não encontra o produto"
 - Confirme o **código (PLU)** cadastrado no produto (até 5 dígitos, formato `20PPPPPWWWWW`).
@@ -72,16 +72,16 @@ Guia prático para resolver os problemas mais comuns do app no dia a dia. Para a
 
 ---
 
-## 4. Problemas com produtos e estoque
+## 4. Problemas com produtos e stock
 
 ### "O produto não aparece na lista / no PDV"
 1. Puxe a tela para baixo para **atualizar** a lista.
 2. Confirme que está na **loja ativa** certa (Lojas → Ajustes → Loja ativa).
 3. Verifique se o produto não está **desativado** (Produtos → Editar → Produto ativo).
 
-### "O estoque está negativo ou errado"
-- O sistema não permite vender mais do que existe — o erro "estoque insuficiente" é o sistema protegendo você.
-- Corrija divergências pelo **ajuste manual de estoque** (edição do produto, dono/gerente).
+### "O stock está negativo ou errado"
+- O sistema não permite vender mais do que existe — o erro "stock insuficiente" é o sistema protegendo você.
+- Corrija divergências pelo **ajuste manual de stock** (edição do produto, dono/gerente).
 
 ### "O alerta de validade não aparece"
 - O alerta aparece quando o produto tem **data de validade** definida (cadastro ou compra com lote).
@@ -157,7 +157,7 @@ Guia prático para resolver os problemas mais comuns do app no dia a dia. Para a
 | **"Acesso pendente de aprovação"** | Conta ainda não aprovada | Aguarde a aprovação (até 24h) ou fale com o suporte |
 | **"Não foi possível adicionar o produto. Tente novamente."** | Erro ao guardar o produto | Verifique a internet, os campos obrigatórios e tente de novo |
 | **"Produto adicionado! (foto não enviada…)"** | Produto salvo, mas a foto não subiu | Adicione a foto depois pela edição do produto |
-| **"Estoque insuficiente"** | Não há stock suficiente para a quantidade | Reduza a quantidade, compre mais ou ajuste o estoque |
+| **"Stock insuficiente"** | Não há stock suficiente para a quantidade | Reduza a quantidade, compre mais ou ajuste o stock |
 | **"O total da venda não corresponde aos itens"** | Soma dos itens ≠ total | Revise os itens e o total antes de confirmar |
 | **"Não foi possível anular a venda. Tente novamente."** | Erro ao anular | Verifique a internet e se a venda ainda está ativa (não anulada) |
 | **"Apenas o dono ou um gerente podem…"** | Operação restrita ao dono/gerente | Peça ao dono/gerente para executar |
@@ -184,4 +184,4 @@ Contacte o suporte quando:
 
 ---
 
-*Baseado no Guia do Usuário — para aprender a usar o app, veja o [Guia do Usuário](GUIA_DO_USUARIO.md).*
+*Baseado no Guia do Utilizador — para aprender a usar o app, veja o [Guia do Utilizador](GUIA_DO_USUARIO.md).*

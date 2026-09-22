@@ -91,7 +91,7 @@ class _ProductPhotoPicker extends StatelessWidget {
                 Text(
                   hasImage ? l10n.productsPhotoTitle : l10n.productsPhotoAdd,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
                 ),
@@ -149,7 +149,7 @@ const _kFieldStyle = TextStyle(fontSize: 12, height: 1.4);
 const _kLabelStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.w400);
 const _kFloatingLabelStyle = TextStyle(
   fontSize: 11,
-  fontWeight: FontWeight.w500,
+  fontWeight: FontWeight.w600,
 );
 const _kHintStyle = TextStyle(fontSize: 11);
 
@@ -275,7 +275,7 @@ class _CompactSwitch extends StatelessWidget {
                 Text(
                   label,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
                 ),
@@ -1274,7 +1274,7 @@ class _ExpiryField extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: hasDate ? scheme.onSurface : scheme.onSurfaceVariant,
-                    fontWeight: hasDate ? FontWeight.w500 : null,
+                    fontWeight: hasDate ? FontWeight.w600 : null,
                   ),
                 ),
               ),

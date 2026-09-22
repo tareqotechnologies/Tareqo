@@ -77,7 +77,7 @@ class _SpyAddProduct implements AddProductUseCase {
 
   /// Pool opcional: registra a cópia criada E o insere na loja de
   /// destino (simula a persistência real — permite encadear uma
-  /// segunda transferência que cai no ramo de SOMAR estoque).
+  /// segunda transferência que cai no ramo de SOMAR stock).
   final Map<String, List<Product>>? _pool;
   final created = <Product>[];
 
@@ -108,7 +108,7 @@ Widget _buildApp({
     Store(id: 'st2', tenantId: 'tn1', name: 'Loja Praia'),
   ],
 }) {
-  // Um único pool de estoque compartilhado entre os fakes — o notifier
+  // Um único pool de stock compartilhado entre os fakes — o notifier
   // lê via GetProducts e grava via UpdateProductUseCase.
   final pool =
       productsByStore ??
@@ -253,7 +253,7 @@ void main() {
       (productId: 'p1', newQuantity: 9000, storeId: 'st1'),
     ]);
     // Produto NÃO existia no destino → cria CÓPIA com novo id e o
-    // estoque transferido (a entrada no destino é a criação, não adjust).
+    // stock transferido (a entrada no destino é a criação, não adjust).
     expect(addSpy.created, hasLength(1));
     expect(addSpy.created.single.id, isNot('p1'));
     expect(addSpy.created.single.storeId, 'st2');
@@ -262,7 +262,7 @@ void main() {
     expect(find.text('1 produto transferido com sucesso'), findsOneWidget);
   });
 
-  testWidgets('estoque insuficiente mostra erro e não muta', (tester) async {
+  testWidgets('stock insuficiente mostra erro e não muta', (tester) async {
     final pool = {
       'st1': [_product('p1', stock: 1000)], // 1 un disponível.
       'st2': <Product>[],
@@ -291,7 +291,7 @@ void main() {
     await tester.tap(find.textContaining('Produto p1').last);
     await tester.pumpAndSettle();
 
-    // Quantia 5 > estoque 1 → o notifier lança ArgumentError.
+    // Quantia 5 > stock 1 → o notifier lança ArgumentError.
     await tester.enterText(find.widgetWithText(TextField, 'Quantidade'), '5');
     await tester.tap(find.widgetWithText(AppButton, 'Adicionar'));
     await tester.pumpAndSettle();
@@ -303,7 +303,7 @@ void main() {
     expect(updateSpy.adjustments, isEmpty);
   });
 
-  testWidgets('destino já tem o produto → SOMA no estoque (sem criar cópia)', (
+  testWidgets('destino já tem o produto → SOMA no stock (sem criar cópia)', (
     tester,
   ) async {
     final pool = {

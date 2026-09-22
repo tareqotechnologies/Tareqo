@@ -343,7 +343,7 @@ class _InvoiceCard extends StatelessWidget {
                   children: [
                     Text(
                       tenantName,
-                      style: theme.textTheme.bodySmall?.copyWith(),
+                      style: theme.textTheme.bodySmall,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),

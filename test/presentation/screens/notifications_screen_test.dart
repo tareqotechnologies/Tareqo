@@ -98,11 +98,11 @@ Widget _buildApp({
 }) {
   return ProviderScope(
     overrides: [
-      // Auth: usuário logado
+      // Auth: utilizador logado
       authStateProvider.overrideWith(
         (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
       ),
-      // Tenant do usuário
+      // Tenant do utilizador
       getMyTenantUseCaseProvider.overrideWithValue(
         _FakeGetMyTenantUseCase(
           Tenant(

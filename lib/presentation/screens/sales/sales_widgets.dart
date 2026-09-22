@@ -148,7 +148,6 @@ class _CompactDelta extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: color,
-              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
         ],

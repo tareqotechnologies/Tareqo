@@ -44,13 +44,19 @@ class AppButton extends StatelessWidget {
 
     final Widget content;
     if (icon != null) {
+      // Flexible no rótulo: numa Row, filho sem flex recebe largura
+      // ilimitada no eixo principal e estoura com texto longo (fr a 360dp
+      // ou escala de texto 2.0). Com Flexible o rótulo quebra em 2 linhas
+      // em vez de vazar do botão.
       content = Row(
         mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           icon!,
           const SizedBox(width: AppSpacing.xs),
-          Text(label),
+          Flexible(
+            child: Text(label, textAlign: TextAlign.center),
+          ),
         ],
       );
     } else {

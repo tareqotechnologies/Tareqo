@@ -28,7 +28,7 @@ void main() {
       expect(await container.read(isSuperAdminProvider('u1').future), isTrue);
     });
 
-    test('resolve false quando o usuário não tem o papel', () async {
+    test('resolve false quando o utilizador não tem o papel', () async {
       final container = ProviderContainer(
         overrides: [
           adminRepositoryProvider.overrideWithValue(
@@ -41,7 +41,7 @@ void main() {
       expect(await container.read(isSuperAdminProvider('u1').future), isFalse);
     });
 
-    test('o provider é cacheado por usuário (chave userId)', () async {
+    test('o provider é cacheado por utilizador (chave userId)', () async {
       final container = ProviderContainer(
         overrides: [
           adminRepositoryProvider.overrideWithValue(

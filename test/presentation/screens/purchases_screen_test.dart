@@ -117,7 +117,7 @@ List<Purchase> get _purchases => [
 ];
 
 void main() {
-  testWidgets('exibe as compras registradas pelo caso de uso', (tester) async {
+  testWidgets('exibe as compras registadas pelo caso de uso', (tester) async {
     await tester.pumpWidget(_buildApp(_FakeGetPurchasesUseCase(_purchases)));
 
     // Estado inicial: carregando (skeleton).
@@ -133,9 +133,9 @@ void main() {
     // Nº de itens por card.
     expect(find.textContaining('2 itens'), findsOneWidget);
     expect(find.textContaining('1 item'), findsOneWidget);
-    // Unidades adicionadas ao estoque (50+20 e 100).
-    expect(find.text('Estoque +70 un.'), findsOneWidget);
-    expect(find.text('Estoque +100 un.'), findsOneWidget);
+    // Unidades adicionadas ao stock (50+20 e 100).
+    expect(find.text('Stock +70 un.'), findsOneWidget);
+    expect(find.text('Stock +100 un.'), findsOneWidget);
     // Valores dos cards.
     expect(find.text('R\$ 85,00'), findsOneWidget);
     expect(find.text('R\$ 20,00'), findsOneWidget);
@@ -149,7 +149,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Nenhuma compra registrada'), findsOneWidget);
+    expect(find.text('Nenhuma compra registada'), findsOneWidget);
     // CTA ÚNICO: no estado vazio o FAB some e o botão do EmptyState é o
     // único "Nova compra" (sem duplicação).
     expect(find.text('Nova compra'), findsOneWidget);
@@ -167,7 +167,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Estado vazio: CTA único no EmptyState, sem FAB.
-    expect(find.text('Nenhuma compra registrada'), findsOneWidget);
+    expect(find.text('Nenhuma compra registada'), findsOneWidget);
     expect(find.text('Nova compra'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
 
@@ -181,7 +181,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Fornecedor Teste'), findsOneWidget);
-    expect(find.text('Nenhuma compra registrada'), findsNothing);
+    expect(find.text('Nenhuma compra registada'), findsNothing);
     // FAB circular visível com dados (sem label — tooltip, igual ao Novo
     // produto); o botão do EmptyState não existe mais.
     expect(find.text('Nova compra'), findsNothing);
@@ -433,7 +433,7 @@ void main() {
 
     final before = headerHeight();
 
-    // Usuário ajusta a escala de texto do sistema DEPOIS da montagem:
+    // Utilizador ajusta a escala de texto do sistema DEPOIS da montagem:
     // a altura da barra fixa precisa ser re-medida (senão o conteúdo
     // ficaria cortado pelo extent antigo).
     tester.platformDispatcher.textScaleFactorTestValue = 2.0;
@@ -505,5 +505,84 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
     expect(find.text('R\$ 0,00'), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  group('detalhes da compra (tap no card)', () {
+    Purchase purchaseWithExpiry() => Purchase(
+      id: 'c1',
+      number: 7,
+      storeId: 'st1',
+      supplierName: 'Distribuidora Central',
+      items: [
+        PurchaseItem(
+          productId: 'p1',
+          productName: 'Caneta',
+          quantity: 50000, // 50 un (W11)
+          unitPriceCents: 50,
+          expiryDate: DateTime(2027, 3, 15),
+        ),
+        const PurchaseItem(
+          productId: 'p2',
+          productName: 'Caderno',
+          quantity: 20000, // 20 un
+          unitPriceCents: 300,
+          // Sem validade — produto não perecível.
+        ),
+      ],
+      totalAmountCents: 8500,
+      paymentMethod: PaymentMethod.mPesa,
+      dateTime: DateTime(2024, 1, 10, 9, 15),
+    );
+
+    testWidgets('abrir a sheet mostra os detalhes da compra', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(_FakeGetPurchasesUseCase([purchaseWithExpiry()])),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap no card da compra (fornecedor na linha do feed).
+      await tester.tap(find.text('Distribuidora Central'));
+      await tester.pumpAndSettle();
+
+      // Cabeçalho padrão da sheet + número sequencial + dados principais.
+      expect(find.text('Detalhes da compra'), findsOneWidget);
+      expect(find.text('C-00007'), findsOneWidget);
+      expect(find.text('Fornecedor'), findsOneWidget);
+      expect(find.text('Distribuidora Central'), findsNWidgets(2));
+      expect(find.text('Data e hora'), findsOneWidget);
+      expect(find.text('10/01/2024 09:15'), findsOneWidget);
+      expect(find.text('Pagamento'), findsOneWidget);
+      // M-Pesa aparece no chip do card (atrás) E no da sheet.
+      expect(find.text('M-Pesa'), findsNWidgets(2));
+      // Total da compra (no card atrás + headline da sheet).
+      expect(find.text('R\$ 85,00'), findsNWidgets(2));
+      // Itens: quantidade × preço unitário e subtotal.
+      expect(find.text('50 × R\$ 0,50'), findsOneWidget);
+      expect(find.text('20 × R\$ 3,00'), findsOneWidget);
+      expect(find.text('R\$ 25,00'), findsOneWidget);
+      expect(find.text('R\$ 60,00'), findsOneWidget);
+      // Validade FIFO: com data e "Sem validade".
+      expect(find.textContaining('15/03/2027'), findsOneWidget);
+      expect(find.textContaining('Sem validade'), findsOneWidget);
+      // Notas de stock/snapshot.
+      expect(find.textContaining('FIFO'), findsOneWidget);
+    });
+
+    testWidgets('fechar a sheet volta para a lista', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(_FakeGetPurchasesUseCase([purchaseWithExpiry()])),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Distribuidora Central'));
+      await tester.pumpAndSettle();
+      expect(find.text('C-00007'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Fechar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('C-00007'), findsNothing);
+      expect(find.text('Distribuidora Central'), findsOneWidget);
+    });
   });
 }

@@ -411,9 +411,8 @@ class _SummaryCard extends StatelessWidget {
                   cents: valueCents,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     color: color,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: -0.5,
-                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
               ],
@@ -437,7 +436,7 @@ class _SummaryCard extends StatelessWidget {
                 '$statValue',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   color: statColor,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -515,7 +514,7 @@ class _DebtCard extends StatelessWidget {
                         Text(
                           debt.personName,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         StatusChip(label: chipLabel, color: chipColor),
@@ -541,8 +540,7 @@ class _DebtCard extends StatelessWidget {
                   cents: debt.amountCents,
                   alignment: Alignment.centerRight,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -595,7 +593,7 @@ class _SettledDebtCard extends StatelessWidget {
                     Text(
                       debt.personName,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     StatusChip(
@@ -626,8 +624,7 @@ class _SettledDebtCard extends StatelessWidget {
               cents: debt.amountCents,
               alignment: Alignment.centerRight,
               style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                fontFeatures: const [FontFeature.tabularFigures()],
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),

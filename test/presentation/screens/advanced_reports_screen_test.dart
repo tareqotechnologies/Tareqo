@@ -128,7 +128,7 @@ void main() {
       await tester.pumpWidget(_buildApp(salesReport: fake));
       await tester.pumpAndSettle();
 
-      // KPIs de vendas do período (antes: KPIs de estoque duplicados).
+      // KPIs de vendas do período (antes: KPIs de stock duplicados).
       expect(find.text('R\$ 1.500,00'), findsOneWidget);
       expect(find.text('R\$ 600,00'), findsOneWidget);
       expect(find.textContaining('40.0%'), findsOneWidget); // margem
@@ -222,7 +222,7 @@ void main() {
   );
 
   testWidgets(
-    'aba Estoque: produto zerado conta como ruptura, estoque saudável vazio',
+    'aba Stock: produto zerado conta como ruptura, stock saudável vazio',
     (tester) async {
       await tester.pumpWidget(
         _buildApp(
@@ -235,22 +235,22 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Estoque'));
+      await tester.tap(find.text('Stock'));
       await tester.pumpAndSettle();
 
-      // 2 produtos em estoque baixo (Açúcar 0 + Sal 0,5 ≤ 10) listados;
+      // 2 produtos em stock baixo (Açúcar 0 + Sal 0,5 ≤ 10) listados;
       // o saudável (Arroz) não aparece na lista de baixos.
       expect(find.text('2'), findsWidgets); // KPI baixo + badge
       expect(find.text('Açúcar'), findsOneWidget);
       expect(find.text('Sal'), findsOneWidget);
       expect(find.text('Arroz'), findsNothing);
-      // Mensagem de estoque saudável só aparece quando NENHUM produto está baixo.
-      expect(find.textContaining('estoque adequado'), findsNothing);
+      // Mensagem de stock saudável só aparece quando NENHUM produto está baixo.
+      expect(find.textContaining('stock adequado'), findsNothing);
     },
   );
 
   testWidgets(
-    'aba Estoque: todos os produtos saudáveis mostra mensagem de estoque adequado',
+    'aba Stock: todos os produtos saudáveis mostra mensagem de stock adequado',
     (tester) async {
       await tester.pumpWidget(
         _buildApp(
@@ -262,11 +262,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Estoque'));
+      await tester.tap(find.text('Stock'));
       await tester.pumpAndSettle();
 
-      // Nenhum produto baixo → lista vazia + mensagem de estoque saudável.
-      expect(find.textContaining('estoque adequado'), findsOneWidget);
+      // Nenhum produto baixo → lista vazia + mensagem de stock saudável.
+      expect(find.textContaining('stock adequado'), findsOneWidget);
       expect(find.text('0'), findsWidgets); // KPIs baixo/ruptura zerados
       // KPI de valor: (50000×1000)/1000 + (25000×1000)/1000 = 75.000 centavos.
       expect(find.text('R\$ 750,00'), findsOneWidget);

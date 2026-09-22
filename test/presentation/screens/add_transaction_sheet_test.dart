@@ -70,7 +70,7 @@ Future<void> _openSheet(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('registrar entrada chama o caso de uso e mostra o snackbar', (
+  testWidgets('registar entrada chama o caso de uso e mostra o snackbar', (
     tester,
   ) async {
     final useCase = _FakeAddTransactionUseCase();
@@ -89,7 +89,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Valor').first,
       '120,50',
     );
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar'));
     await tester.pumpAndSettle();
 
     expect(useCase.calls, 1);
@@ -98,7 +98,7 @@ void main() {
     expect(useCase.lastTransaction?.type, TransactionType.income);
     expect(useCase.lastTransaction?.category, 'Vendas');
     expect(useCase.lastTransaction?.status, TransactionStatus.paid);
-    expect(find.text('Movimentação registrada!'), findsOneWidget);
+    expect(find.text('Movimentação registada!'), findsOneWidget);
   });
 
   testWidgets('valida descrição e valor maiores que zero', (tester) async {
@@ -106,7 +106,7 @@ void main() {
 
     await tester.pumpWidget(_buildApp(useCase));
     await _openSheet(tester);
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar'));
     await tester.pumpAndSettle();
 
     expect(find.text('Informe a descrição.'), findsOneWidget);
@@ -126,7 +126,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Valor').first,
       '10',
     );
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar'));
     await tester.pumpAndSettle();
 
     // A UI localiza pelo TIPO da exceção (o message é fallback/legado).
@@ -151,10 +151,10 @@ void main() {
       '10',
     );
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar'));
     await tester.pumpAndSettle();
     expect(
-      find.text('Não foi possível registrar. Tente novamente.'),
+      find.text('Não foi possível registar. Tente novamente.'),
       findsOneWidget,
     );
   });
@@ -180,7 +180,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Pendente (fiado)'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrar'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Registar'));
     await tester.pumpAndSettle();
 
     expect(useCase.lastTransaction?.status, TransactionStatus.pending);

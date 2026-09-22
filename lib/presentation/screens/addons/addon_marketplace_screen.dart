@@ -222,7 +222,7 @@ class _AddOnCard extends StatelessWidget {
                     Text(
                       addonDisplayName(context.l10n, addon),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 2),

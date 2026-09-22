@@ -220,12 +220,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Nenhuma venda registrada'), findsOneWidget);
+    expect(find.text('Nenhuma venda registada'), findsOneWidget);
 
     // Navega para a Carteira (Financeiro — lista vazia no fake).
     await tester.tap(find.text('Carteira'));
     await tester.pumpAndSettle();
-    expect(find.text('Registrar movimentação'), findsNothing);
+    expect(find.text('Registar movimentação'), findsNothing);
   });
 
   // Rotação/responsividade: em paisagem com largura >= 880px o AppShell
@@ -233,7 +233,7 @@ void main() {
   // conteúdo fica centralizado num ConstrainedBox (maxWidth 1040). Gira do
   // retrato (barra) para a paisagem larga (rail) e verifica: o rail
   // aparece, a barra some, os destinos continuam navegáveis e nenhum
-  // overflow foi registrado.
+  // overflow foi registado.
   testWidgets('AppShell em paisagem larga usa NavigationRail (>= 880px)', (
     tester,
   ) async {
@@ -292,7 +292,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Nenhuma venda registrada'), findsOneWidget);
+    expect(find.text('Nenhuma venda registada'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -332,13 +332,13 @@ void main() {
     await tester.pumpAndSettle();
 
     // A Home do canvas V3 não tem ações rápidas — as 4 acções do menu do
-    // FAB são exclusivas dele (findsOneWidget). 'Registrar despesa' e
+    // FAB são exclusivas dele (findsOneWidget). 'Registar despesa' e
     // 'Cancelar' também são exclusivos do menu.
     for (final label in [
       'Nova venda',
-      'Registrar despesa',
+      'Registar despesa',
       'Adicionar produto',
-      'Registrar fiado',
+      'Registar fiado',
     ]) {
       expect(find.text(label), findsOneWidget);
     }
@@ -347,13 +347,13 @@ void main() {
     // Fecha pelo Cancelar.
     await tester.tap(find.text('Cancelar'));
     await tester.pumpAndSettle();
-    expect(find.text('Registrar despesa'), findsNothing);
+    expect(find.text('Registar despesa'), findsNothing);
   });
 
   // Regressão: na aba Crédito o FAB central NÃO abre o menu "Nova ação" —
-  // vai DIRETO ao "Registrar fiado" (AddDebtSheet), a única ação que faz
+  // vai DIRETO ao "Registar fiado" (AddDebtSheet), a única ação que faz
   // sentido na seção.
-  testWidgets('na aba Crédito o FAB abre direto o Registrar fiado', (
+  testWidgets('na aba Crédito o FAB abre direto o Registar fiado', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -390,18 +390,18 @@ void main() {
     container.read(shellIndexProvider.notifier).goTo(AppSection.credit);
     await tester.pumpAndSettle();
 
-    // O FAB da aba Crédito tem o tooltip do "Registrar fiado" (o botão do
+    // O FAB da aba Crédito tem o tooltip do "Registar fiado" (o botão do
     // estado vazio tem o mesmo rótulo, mas sem tooltip).
-    expect(find.byTooltip('Registrar fiado'), findsOneWidget);
+    expect(find.byTooltip('Registar fiado'), findsOneWidget);
 
     // Toca no FAB: abre a sheet de fiado — NÃO o menu de ações.
-    await tester.tap(find.byTooltip('Registrar fiado'));
+    await tester.tap(find.byTooltip('Registar fiado'));
     await tester.pumpAndSettle();
 
     expect(find.byType(AddDebtSheet), findsOneWidget);
     // O menu global de ações não abriu (ações exclusivas dele).
     expect(find.text('Nova venda'), findsNothing);
-    expect(find.text('Registrar despesa'), findsNothing);
+    expect(find.text('Registar despesa'), findsNothing);
   });
 
   testWidgets(
@@ -472,7 +472,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
-      // O cenário exato do log do usuário: empurra StoresScreen por cima do
+      // O cenário exato do log do utilizador: empurra StoresScreen por cima do
       // AppShell. No canvas V3 o dashboard não tem mais os cards de módulos
       // (Lojas saiu da Home) — o hub é a aba Menu. O viewport 1280px largo
       // usa o NavigationRail (web/desktop).
@@ -558,7 +558,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    expect(find.text('Nenhuma venda registrada'), findsOneWidget);
+    expect(find.text('Nenhuma venda registada'), findsOneWidget);
   });
 
   /// Hierarquia de voltar (Fase 2): em seção ≠ Home, o botão voltar do
@@ -701,7 +701,7 @@ void main() {
     // distinguir "1 com erro" — sincronizar de novo não resolve.
     await pumpShellWithOutbox(
       tester,
-      replayer: (_) async => throw Exception('estoque insuficiente'),
+      replayer: (_) async => throw Exception('stock insuficiente'),
     );
 
     expect(find.text('1 operação aguardando sincronização'), findsOneWidget);

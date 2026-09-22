@@ -40,9 +40,12 @@ class AdminThin extends StatelessWidget {
       labelLarge: fn(base.labelLarge, weight: FontWeight.w400),
       labelMedium: fn(base.labelMedium, weight: FontWeight.w400),
       // Corpo e captions mantêm o peso (400/500) — densidade legível.
+      // labelSmall preserva o peso ESTRUTURAL do base (w500): o default
+      // w400 do fn() rebaixaria o caption silenciosamente, contradizendo
+      // este contrato.
       bodyMedium: fn(base.bodyMedium),
       bodySmall: fn(base.bodySmall),
-      labelSmall: fn(base.labelSmall),
+      labelSmall: fn(base.labelSmall, weight: base.labelSmall?.fontWeight),
     );
   }
 
@@ -152,7 +155,6 @@ class AdminStatValue extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 12,
             color: scheme.onSurfaceVariant,
           ),
           maxLines: 1,

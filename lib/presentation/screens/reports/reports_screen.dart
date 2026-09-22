@@ -372,7 +372,7 @@ class _BestSellerRow extends StatelessWidget {
               '$rank',
               style: TextStyle(
                 color: theme.colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 // Ranks (1..N) na coluna de posição — alinhados.
                 fontFeatures: [FontFeature.tabularFigures()],
               ),
@@ -388,7 +388,7 @@ class _BestSellerRow extends StatelessWidget {
                 Text(
                   name,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -452,7 +452,7 @@ class _DailyRow extends StatelessWidget {
           Text(
             Formatters.currency(total),
             style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

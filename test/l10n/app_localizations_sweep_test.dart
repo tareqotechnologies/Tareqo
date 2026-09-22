@@ -19,9 +19,9 @@ import 'package:tareqo/l10n/generated/app_localizations.dart';
 import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_fr.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
-/// Total de membros do catálogo: 1123 (994 getters + 129 métodos).
-const int kTotalMembers = 1123;
-const int kTotalGetters = 994;
+/// Total de membros do catálogo: 1136 (1007 getters + 129 métodos).
+const int kTotalMembers = 1136;
+const int kTotalGetters = 1007;
 const int kTotalMethods = 129;
 const Set<String> kMethodNames = <String>{  'onboardingPlanDetails',  'onboardingSuccess',  'storeSwitcherA11yLabel',  'tenantPendingSubtitle',  'tenantRejectedSubtitle',  'syncPendingCount',  'syncErrorsCount',  'syncDone',  'dashboardGreeting',  'dashboardActivityEvents',  'dashboardActivityMinutesAgo',  'dashboardFiadoCount',  'dashboardStockEntry',  'dashboardStockEntryDetail',  'dashboardExpenseRow',  'dashboardLowStockDetail',  'dashboardSaleItems',  'employeeDeactivateConfirm',  'employeeReactivateConfirm',  'upgradesRequestedOn',  'planDetails',  'addStoreSuccess',  'productsHeaderCount',  'productsFilteredCount',  'customersHeaderCount',  'customersCreditLabel',  'customersAdded',  'customersEditSuccess',  'customersDeleteConfirmMessage',  'purchasesHeaderCount',  'purchasesStockAdded',  'purchasesRegistered',  'purchasesProductNotFound',  'purchasesStockLabel',  'reportsRevenueLabel',  'financialReceivePendingBody',  'financialPayPendingBody',  'cashClosingSurplus',  'cashClosingShortage',  'debtsSettleBody',  'debtsSettled',  'debtsDueIn',  'debtsDueAgo',  'debtsSettledOn',  'debtsRegisteredFor',  'salesCartSection',  'salesHeaderTransactions',  'salesPdvCount',  'salesFilteredSummary',  'salesRegistered',  'salesInsufficientStock',  'salesStockFor',  'salesProductNotFound',  'saleDetailId',  'saleDetailCancelConfirmBody',  'adminAwaitingCount',  'adminAccessApproved',  'adminRequestRejected',  'adminRejectTitle',  'adminPlanLabel',  'adminPlanCreated',  'adminPlanUpdated',  'salesBarcodeCameraUnavailable',  'salesStockLimit',  'dashboardExpiredIn',  'dashboardExpiresIn',  'adminTenantDetailStoresCount',  'adminTenantDetailEmployeesCount',  'adminTenantDetailActivityCount',  'adminTenantDetailEmployeeRole',  'adminBulkApprove',  'adminBulkReject',  'adminBulkRejectTitle',  'adminBulkApproveSuccess',  'adminBulkRejectSuccess',  'adminPendingActionRequired',  'adminGrowthUp',  'adminGrowthDown',  'adminInvoiceCancelConfirm',  'notificationSinceDaysAgo',  'notificationBodyInvoiceGenerated',  'notificationBodyInvoiceDueSoon',  'notificationBodyInvoiceExpired',  'notificationBodyInvoicePaid',  'notificationBodyAddOnExpired',  'notificationBodyAddOnExpiringSoon',  'notificationDaysShort',  'customInvoiceCreated',  'customInvoiceItemsCount',  'customInvoiceProductOption',  'customInvoiceBillTotal',  'customInvoiceNumberPrefix',  'customInvoicePreviewTotal',  'quotationCreated',  'quotationItemsCount',  'quotationDays',  'quotationNumberPrefix',  'employeeCommissionRate',  'employeeTargetMeta',  'employeeTargetProgress',  'addonsPerMonth',  'transfersSuccess',  'transfersError',  'pdfGeneratedOn',  'pdfFooter',  'pdfPhoneLine',  'pdfEmailLine',  'pdfNifLine',  'pdfPaymentLine',  'pdfReferenceLine',  'pdfValidityDaysLeft',  'pdfConditionValidBullet',  'adminAddonsLoadError',  'adminAddonsUpdateError',  'dashboardSaleEntry',  'mfaExpiresIn',  'mfaInitError',  'mfaVerifyError',  'adminAddonsBulkActivated',  'adminAddonsBulkDeactivated',  'adminAddonsBulkSheetCount',  'adminAddonsPriceUpdated',  'adminAddOnsCount',  'adminTenantCount',  'adminTenantCycleActiveLeft',  'adminTenantCycleExpiresIn',  'adminTenantCycleTrialLeft',  'planLimitStores',  'planLimitEmployees',};/// Carrega os valores de string do ARB (chaves sem `@`).
 Map<String, String> _loadArb(String locale) {
@@ -109,6 +109,12 @@ void main() {
         'supportTroubleshooting': l.supportTroubleshooting,
         'supportTroubleshootingHint': l.supportTroubleshootingHint,
         'supportReadingError': l.supportReadingError,
+        'supportSearchHint': l.supportSearchHint,
+        'supportContactSupport': l.supportContactSupport,
+        'supportContactSupportHint': l.supportContactSupportHint,
+        'supportHelpCenter': l.supportHelpCenter,
+        'supportContactMessage': l.supportContactMessage,
+        'supportOpenError': l.supportOpenError,
         'commonSearch': l.commonSearch,
         'commonRetry': l.commonRetry,
         'commonSignOut': l.commonSignOut,
@@ -396,6 +402,13 @@ void main() {
         'purchasesEmptyTitle': l.purchasesEmptyTitle,
         'purchasesEmptySubtitle': l.purchasesEmptySubtitle,
         'purchasesHeaderVsYesterday': l.purchasesHeaderVsYesterday,
+        'purchaseDetailTitle': l.purchaseDetailTitle,
+        'purchaseDetailSupplier': l.purchaseDetailSupplier,
+        'purchaseDetailDate': l.purchaseDetailDate,
+        'purchaseDetailPayment': l.purchaseDetailPayment,
+        'purchaseDetailExpiry': l.purchaseDetailExpiry,
+        'purchaseDetailNoExpiry': l.purchaseDetailNoExpiry,
+        'purchaseDetailStockNote': l.purchaseDetailStockNote,
         'purchasesEmptyFilteredTitle': l.purchasesEmptyFilteredTitle,
         'purchasesEmptyFilteredSubtitle': l.purchasesEmptyFilteredSubtitle,
         'purchasesClearFilters': l.purchasesClearFilters,
@@ -1132,6 +1145,12 @@ void main() {
         'supportTroubleshooting': l.supportTroubleshooting,
         'supportTroubleshootingHint': l.supportTroubleshootingHint,
         'supportReadingError': l.supportReadingError,
+        'supportSearchHint': l.supportSearchHint,
+        'supportContactSupport': l.supportContactSupport,
+        'supportContactSupportHint': l.supportContactSupportHint,
+        'supportHelpCenter': l.supportHelpCenter,
+        'supportContactMessage': l.supportContactMessage,
+        'supportOpenError': l.supportOpenError,
         'commonSearch': l.commonSearch,
         'commonRetry': l.commonRetry,
         'commonSignOut': l.commonSignOut,
@@ -1419,6 +1438,13 @@ void main() {
         'purchasesEmptyTitle': l.purchasesEmptyTitle,
         'purchasesEmptySubtitle': l.purchasesEmptySubtitle,
         'purchasesHeaderVsYesterday': l.purchasesHeaderVsYesterday,
+        'purchaseDetailTitle': l.purchaseDetailTitle,
+        'purchaseDetailSupplier': l.purchaseDetailSupplier,
+        'purchaseDetailDate': l.purchaseDetailDate,
+        'purchaseDetailPayment': l.purchaseDetailPayment,
+        'purchaseDetailExpiry': l.purchaseDetailExpiry,
+        'purchaseDetailNoExpiry': l.purchaseDetailNoExpiry,
+        'purchaseDetailStockNote': l.purchaseDetailStockNote,
         'purchasesEmptyFilteredTitle': l.purchasesEmptyFilteredTitle,
         'purchasesEmptyFilteredSubtitle': l.purchasesEmptyFilteredSubtitle,
         'purchasesClearFilters': l.purchasesClearFilters,
@@ -2155,6 +2181,12 @@ void main() {
         'supportTroubleshooting': l.supportTroubleshooting,
         'supportTroubleshootingHint': l.supportTroubleshootingHint,
         'supportReadingError': l.supportReadingError,
+        'supportSearchHint': l.supportSearchHint,
+        'supportContactSupport': l.supportContactSupport,
+        'supportContactSupportHint': l.supportContactSupportHint,
+        'supportHelpCenter': l.supportHelpCenter,
+        'supportContactMessage': l.supportContactMessage,
+        'supportOpenError': l.supportOpenError,
         'commonSearch': l.commonSearch,
         'commonRetry': l.commonRetry,
         'commonSignOut': l.commonSignOut,
@@ -2442,6 +2474,13 @@ void main() {
         'purchasesEmptyTitle': l.purchasesEmptyTitle,
         'purchasesEmptySubtitle': l.purchasesEmptySubtitle,
         'purchasesHeaderVsYesterday': l.purchasesHeaderVsYesterday,
+        'purchaseDetailTitle': l.purchaseDetailTitle,
+        'purchaseDetailSupplier': l.purchaseDetailSupplier,
+        'purchaseDetailDate': l.purchaseDetailDate,
+        'purchaseDetailPayment': l.purchaseDetailPayment,
+        'purchaseDetailExpiry': l.purchaseDetailExpiry,
+        'purchaseDetailNoExpiry': l.purchaseDetailNoExpiry,
+        'purchaseDetailStockNote': l.purchaseDetailStockNote,
         'purchasesEmptyFilteredTitle': l.purchasesEmptyFilteredTitle,
         'purchasesEmptyFilteredSubtitle': l.purchasesEmptyFilteredSubtitle,
         'purchasesClearFilters': l.purchasesClearFilters,

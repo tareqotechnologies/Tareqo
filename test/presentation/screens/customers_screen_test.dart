@@ -175,7 +175,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // O cliente continua visível e nenhum overflow foi registrado.
+    // O cliente continua visível e nenhum overflow foi registado.
     expect(
       find.text('Empresa de Equipamentos Industriais Ltda'),
       findsOneWidget,

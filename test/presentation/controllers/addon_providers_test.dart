@@ -199,7 +199,7 @@ void main() {
     expect(ds.activateCalls, isEmpty);
   });
 
-  testWidgets('activate retorna AsyncData com o conjunto actualizado', (
+  testWidgets('activate retorna AsyncData com o conjunto atualizado', (
     tester,
   ) async {
     final (c, ds) = buildContainer();

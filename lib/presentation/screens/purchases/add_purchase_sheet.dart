@@ -494,7 +494,7 @@ class _CartProductRow extends StatelessWidget {
                 Text(
                   product.name,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),

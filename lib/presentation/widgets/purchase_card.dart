@@ -15,12 +15,17 @@ import 'status_chip.dart';
 /// compras recentes do dashboard: forma de pagamento com selo colorido por
 /// método, fornecedor, número sequencial, itens, unidades adicionadas ao
 /// estoque, dia/hora inteligente e valor em destaque. Mesma linguagem
-/// visual do [SalesCard] (linha única compacta, design system 2026) — mas
-/// estático: a compra não tem tela de detalhes, então sem hover/ripple.
+/// visual do [SalesCard] (linha única compacta, design system 2026).
+///
+/// [onTap] abre os DETALHES da compra (sheet de leitura) — usado na lista
+/// de Compras; no feed do dashboard o card segue estático (sem ação).
 class PurchaseCard extends StatelessWidget {
-  const PurchaseCard({super.key, required this.purchase});
+  const PurchaseCard({super.key, required this.purchase, this.onTap});
 
   final Purchase purchase;
+
+  /// Abre os detalhes da compra; `null` = card estático (dashboard).
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +42,9 @@ class PurchaseCard extends StatelessWidget {
     ).round();
 
     // Linha do feed (estilo Home): transparente dentro da [FeedCard] —
-    // sem chrome próprio; estática (a compra não tem tela de detalhes).
-    return Padding(
+    // sem chrome próprio. Com [onTap], ganha InkWell (ripple contido);
+    // sem, segue estática (dashboard).
+    final row = Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm + 2,
@@ -56,7 +62,7 @@ class PurchaseCard extends StatelessWidget {
                 Text(
                   purchase.supplierName,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -95,8 +101,7 @@ class PurchaseCard extends StatelessWidget {
                     cents: purchase.totalAmountCents,
                     alignment: Alignment.centerRight,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -111,6 +116,12 @@ class PurchaseCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (onTap == null) return row;
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(onTap: onTap, child: row),
     );
   }
 }

@@ -289,7 +289,6 @@ class _CompactStats extends StatelessWidget {
               '${stats.rate}%',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: _rateColor(stats.rate),
-                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -323,14 +322,12 @@ class _Pill extends StatelessWidget {
           style: theme.textTheme.labelSmall?.copyWith(
             color: color,
             fontSize: 12,
-            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
         const SizedBox(width: 3),
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 12,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
@@ -585,7 +582,6 @@ class _AuditTile extends StatelessWidget {
               _relativeTime(entry.createdAt),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: scheme.onSurfaceVariant,
-                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ],
@@ -726,7 +722,6 @@ class _AuditDetailSheet extends StatelessWidget {
               '${entry.entityTypeLabel}  ${entry.entityId ?? '—'}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
-                fontSize: 12,
               ),
             ),
             if (status != null) ...[

@@ -69,7 +69,7 @@ void main() {
     );
 
     testWidgets('erro bloqueante do use case dispara vibrate', (tester) async {
-      // Insuficiência de estoque: erro de negócio que exige atenção.
+      // Insuficiência de stock: erro de negócio que exige atenção.
       final processSale = _FakeProcessSaleUseCase(
         const InsufficientStockException(
           productId: 'p1',
@@ -162,7 +162,7 @@ void main() {
 
       await tester.enterText(find.byType(TextFormField).at(0), 'Maria Souza');
       await tester.enterText(find.byType(TextFormField).at(1), '50,00');
-      await tester.tap(find.widgetWithText(FilledButton, 'Registrar fiado'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Registar fiado'));
       await tester.pumpAndSettle();
 
       expect(addDebt.calls, 1);
@@ -179,7 +179,7 @@ void main() {
 
       await tester.enterText(find.byType(TextFormField).at(0), 'Maria');
       await tester.enterText(find.byType(TextFormField).at(1), '50,00');
-      await tester.tap(find.widgetWithText(FilledButton, 'Registrar fiado'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Registar fiado'));
       await tester.pumpAndSettle();
 
       expect(addDebt.calls, 1);

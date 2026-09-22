@@ -242,7 +242,6 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
               Text(
                 'Selecionar um tipo preenche automaticamente os campos',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 12,
                   color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
               ),
@@ -326,7 +325,6 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                     Text(
                       'Template aplicado — edite conforme necessário',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontSize: 12,
                         color: scheme.primary,
                       ),
                     ),
@@ -449,7 +447,6 @@ class _TenantInfoChip extends StatelessWidget {
             child: Text(
               '${tenant.businessName} · ${planName(tenant.planId)}',
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 12,
                 color: scheme.onSurface,
               ),
               maxLines: 1,
@@ -467,7 +464,6 @@ class _TenantInfoChip extends StatelessWidget {
             Text(
               DateFormat('dd/MM').format(tenant.planExpiresAt!),
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 12,
                 color: scheme.onSurfaceVariant,
               ),
             ),
@@ -612,7 +608,6 @@ class _TemplateCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -661,7 +656,6 @@ class _MessagePreview extends StatelessWidget {
               Text(
                 'Preview',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 12,
                   fontWeight: FontWeight.w300,
                   color: scheme.onSurfaceVariant,
                 ),
@@ -673,14 +667,12 @@ class _MessagePreview extends StatelessWidget {
             title,
             style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w400,
-              fontSize: 12,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             body,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 12,
               color: scheme.onSurfaceVariant,
               height: 1.5,
             ),

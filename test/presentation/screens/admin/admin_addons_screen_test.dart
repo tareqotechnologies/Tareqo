@@ -304,7 +304,7 @@ void main() {
 
     expect(
       find.textContaining(
-        'Erro ao actualizar add-on: Exception: falha na activação',
+        'Erro ao atualizar add-on: Exception: falha na activação',
       ),
       findsOneWidget,
     );

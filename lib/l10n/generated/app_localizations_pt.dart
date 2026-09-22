@@ -78,14 +78,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get currencyMzn => 'Metical (MZN)';
 
   @override
-  String get settingsSave => 'Salvar';
+  String get settingsSave => 'Guardar';
 
   @override
   String get settingsSaved => 'Ajustes salvos!';
 
   @override
   String get settingsGenericError =>
-      'Não foi possível salvar. Tente novamente.';
+      'Não foi possível guardar. Tente novamente.';
 
   @override
   String get settingsSupportSection => 'Suporte';
@@ -95,30 +95,48 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get settingsSupportEntryHint =>
-      'Guia do Usuário e Troubleshooting — offline';
+      'Guia do Utilizador e Solução de Problemas — offline';
 
   @override
   String get supportTitle => 'Ajuda';
 
   @override
-  String get supportSubtitle => 'Guia do usuário e solução de problemas.';
+  String get supportSubtitle => 'Guia do utilizador e solução de problemas.';
 
   @override
-  String get supportUserGuide => 'Guia do Usuário';
+  String get supportUserGuide => 'Guia do Utilizador';
 
   @override
   String get supportUserGuideHint =>
-      'Login, lojas, produtos, vendas, fiado, financeiro e relatórios';
+      'Login, lojas, produtos, vendas, fiado e relatórios';
 
   @override
-  String get supportTroubleshooting => 'Troubleshooting';
+  String get supportTroubleshooting => 'Solução de problemas';
 
   @override
   String get supportTroubleshootingHint =>
-      'Problemas comuns: login, vendas, estoque e conexão';
+      'Resolva problemas de login, vendas, stock e conexão';
 
   @override
   String get supportReadingError => 'Não foi possível abrir o documento.';
+
+  @override
+  String get supportSearchHint => 'Buscar na ajuda';
+
+  @override
+  String get supportContactSupport => 'Fale com o suporte';
+
+  @override
+  String get supportContactSupportHint => 'Nossa equipe pode ajudar você';
+
+  @override
+  String get supportHelpCenter => 'Central de ajuda';
+
+  @override
+  String get supportContactMessage => 'Olá! Preciso de ajuda com o TAREQO.';
+
+  @override
+  String get supportOpenError => 'Não foi possível abrir o suporte.';
 
   @override
   String get commonSearch => 'Buscar...';
@@ -304,7 +322,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Mín. 8 caracteres com minúscula, maiúscula, número e símbolo.';
 
   @override
-  String get setNewPasswordSubmit => 'Salvar nova senha';
+  String get setNewPasswordSubmit => 'Guardar nova senha';
 
   @override
   String get setNewPasswordSuccess => 'Senha atualizada!';
@@ -408,10 +426,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get fabMenuNewSale => 'Nova venda';
 
   @override
-  String get fabMenuNewSaleHint => 'Carrinho · baixa de estoque · caixa';
+  String get fabMenuNewSaleHint => 'Carrinho · baixa de stock · caixa';
 
   @override
-  String get fabMenuExpense => 'Registrar despesa';
+  String get fabMenuExpense => 'Registar despesa';
 
   @override
   String get fabMenuExpenseHint => 'Saída de caixa com categoria';
@@ -420,10 +438,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get fabMenuAddProduct => 'Adicionar produto';
 
   @override
-  String get fabMenuAddProductHint => 'Catálogo · preço · estoque inicial';
+  String get fabMenuAddProductHint => 'Catálogo · preço · stock inicial';
 
   @override
-  String get fabMenuAddDebt => 'Registrar fiado';
+  String get fabMenuAddDebt => 'Registar fiado';
 
   @override
   String get fabMenuAddDebtHint => 'A receber ou a pagar';
@@ -507,7 +525,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get dashboardModuleStores => 'Lojas';
 
   @override
-  String get dashboardLowStock => 'Estoque baixo';
+  String get dashboardLowStock => 'Stock baixo';
 
   @override
   String get dashboardKpisError => 'Não foi possível carregar os indicadores.';
@@ -552,11 +570,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get dashboardActivityEmpty => 'Nenhuma atividade registrada ainda.';
+  String get dashboardActivityEmpty => 'Nenhuma atividade registada ainda.';
 
   @override
   String dashboardStockEntry(String product) {
-    return 'Estoque · $product';
+    return 'Stock · $product';
   }
 
   @override
@@ -881,7 +899,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get commonNoResultsHint => 'Tente buscar por outro termo.';
 
   @override
-  String get commonSave => 'Salvar';
+  String get commonSave => 'Guardar';
 
   @override
   String get commonSoldOut => 'Esgotado';
@@ -958,7 +976,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsSalePrice => 'Preço de venda';
 
   @override
-  String get productsStockQuantity => 'Quantidade em estoque';
+  String get productsStockQuantity => 'Quantidade em stock';
 
   @override
   String get productsAddSubmit => 'Adicionar produto';
@@ -967,7 +985,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsEditTitle => 'Editar produto';
 
   @override
-  String get productsEditSubmit => 'Salvar alterações';
+  String get productsEditSubmit => 'Guardar alterações';
 
   @override
   String get productsEditSaved => 'Produto atualizado!';
@@ -990,7 +1008,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsFilterAdvanced => 'Filtros avançados';
 
   @override
-  String get productsFilterStockType => 'Tipo de estoque';
+  String get productsFilterStockType => 'Tipo de stock';
 
   @override
   String get productsFilterStockTypeAll => 'Todos';
@@ -1005,10 +1023,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsFilterAvailability => 'Disponibilidade';
 
   @override
-  String get productsFilterAvailable => 'Em estoque';
+  String get productsFilterAvailable => 'Em stock';
 
   @override
-  String get productsFilterLowStock => 'Estoque baixo';
+  String get productsFilterLowStock => 'Stock baixo';
 
   @override
   String get productsFilterOutOfStock => 'Esgotado';
@@ -1068,7 +1086,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productsStockAdjustHint =>
-      'Ajuste manual: define o estoque exato (FIFO).';
+      'Ajuste manual: define o stock exato (FIFO).';
 
   @override
   String get productsSectionInfo => 'Informações';
@@ -1077,7 +1095,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsSectionPricing => 'Preços';
 
   @override
-  String get productsSectionStock => 'Estoque';
+  String get productsSectionStock => 'Stock';
 
   @override
   String get productsSectionStatus => 'Status';
@@ -1178,14 +1196,14 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível atualizar o cliente. Tente novamente.';
 
   @override
-  String get customersEditSubmit => 'Salvar alterações';
+  String get customersEditSubmit => 'Guardar alterações';
 
   @override
   String get customersDeleteConfirmTitle => 'Remover cliente?';
 
   @override
   String customersDeleteConfirmMessage(Object name) {
-    return '$name será removido permanentemente. Registros de fiado são preservados.';
+    return '$name será removido permanentemente. Registos de fiado são preservados.';
   }
 
   @override
@@ -1205,7 +1223,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get purchasesLoadError => 'Não foi possível carregar as compras.';
 
   @override
-  String get purchasesEmptyTitle => 'Nenhuma compra registrada';
+  String get purchasesEmptyTitle => 'Nenhuma compra registada';
 
   @override
   String get purchasesEmptySubtitle =>
@@ -1227,8 +1245,29 @@ class AppLocalizationsPt extends AppLocalizations {
   String get purchasesHeaderVsYesterday => 'vs ontem';
 
   @override
+  String get purchaseDetailTitle => 'Detalhes da compra';
+
+  @override
+  String get purchaseDetailSupplier => 'Fornecedor';
+
+  @override
+  String get purchaseDetailDate => 'Data e hora';
+
+  @override
+  String get purchaseDetailPayment => 'Pagamento';
+
+  @override
+  String get purchaseDetailExpiry => 'Validade do lote';
+
+  @override
+  String get purchaseDetailNoExpiry => 'Sem validade';
+
+  @override
+  String get purchaseDetailStockNote => 'Stock atualizado via lote FIFO.';
+
+  @override
   String purchasesStockAdded(int units, String unit) {
-    return 'Estoque +$units $unit';
+    return 'Stock +$units $unit';
   }
 
   @override
@@ -1249,7 +1288,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String purchasesRegistered(String amount) {
-    return 'Compra registrada: $amount!';
+    return 'Compra registada: $amount!';
   }
 
   @override
@@ -1259,7 +1298,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get purchasesRegisterError =>
-      'Não foi possível registrar a compra. Tente novamente.';
+      'Não foi possível registar a compra. Tente novamente.';
 
   @override
   String get purchasesSupplierLabel => 'Fornecedor';
@@ -1269,21 +1308,21 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get purchasesNoProductsSubtitle =>
-      'Cadastre produtos para registrar compras.';
+      'Cadastre produtos para registar compras.';
 
   @override
   String get purchasesConfirm => 'Confirmar compra';
 
   @override
   String purchasesStockLabel(int quantity, String unit) {
-    return '$quantity $unit em estoque';
+    return '$quantity $unit em stock';
   }
 
   @override
   String get reportsTitle => 'Relatórios';
 
   @override
-  String get reportsRevenue => 'Faturamento';
+  String get reportsRevenue => 'Receita';
 
   @override
   String get reportsProfit => 'Lucro bruto';
@@ -1301,7 +1340,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportsEmptyTitle => 'Sem vendas no período';
 
   @override
-  String get reportsEmptySubtitle => 'Registre vendas para ver o relatório.';
+  String get reportsEmptySubtitle => 'Registe vendas para ver o relatório.';
 
   @override
   String get reportsSalesPerDay => 'Vendas por dia';
@@ -1367,7 +1406,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get financialTitle => 'Financeiro';
 
   @override
-  String get financialRegister => 'Registrar';
+  String get financialRegister => 'Registar';
 
   @override
   String get financialIncome => 'Entradas';
@@ -1394,7 +1433,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get financialEmptySubtitle =>
-      'Registre entradas e saídas para acompanhar o caixa.';
+      'Registe entradas e saídas para acompanhar o caixa.';
 
   @override
   String get financialReceivePendingTitle => 'Receber pendência?';
@@ -1433,7 +1472,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível pagar a pendência. Tente novamente.';
 
   @override
-  String get financialAddTitle => 'Registrar movimentação';
+  String get financialAddTitle => 'Registar movimentação';
 
   @override
   String get financialIncomingType => 'Entrada';
@@ -1463,11 +1502,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get financialPendingHint => 'Não conta no caixa até ser recebido.';
 
   @override
-  String get financialRegistered => 'Movimentação registrada!';
+  String get financialRegistered => 'Movimentação registada!';
 
   @override
   String get financialRegisterError =>
-      'Não foi possível registrar. Tente novamente.';
+      'Não foi possível registar. Tente novamente.';
 
   @override
   String get financialDefaultCategoryIncome => 'Vendas';
@@ -1551,7 +1590,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível fechar o caixa. Tente novamente.';
 
   @override
-  String get cashClosingEmpty => 'Nenhuma venda registrada neste dia.';
+  String get cashClosingEmpty => 'Nenhuma venda registada neste dia.';
 
   @override
   String get debtsTitle => 'Crédito (fiado)';
@@ -1560,7 +1599,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get debtsHeaderSubtitle => 'Fiado a receber e a pagar';
 
   @override
-  String get debtsAddDebt => 'Registrar fiado';
+  String get debtsAddDebt => 'Registar fiado';
 
   @override
   String get debtsSearchHint => 'Buscar por nome do cliente...';
@@ -1676,16 +1715,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String debtsRegisteredFor(String name) {
-    return 'Fiado registrado para $name!';
+    return 'Fiado registado para $name!';
   }
 
   @override
   String get debtsPendingEntryError =>
-      'Fiado registrado, mas a pendência não pôde ser criada.';
+      'Fiado registado, mas a pendência não pôde ser criada.';
 
   @override
   String get debtsRegisterError =>
-      'Não foi possível registrar o fiado. Tente novamente.';
+      'Não foi possível registar o fiado. Tente novamente.';
 
   @override
   String get debtsCustomerLinkLabel => 'Cliente vinculado (opcional)';
@@ -1723,7 +1762,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get salesLoadError => 'Não foi possível carregar as vendas.';
 
   @override
-  String get salesEmptyTitle => 'Nenhuma venda registrada';
+  String get salesEmptyTitle => 'Nenhuma venda registada';
 
   @override
   String get salesEmptySubtitle =>
@@ -1797,12 +1836,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String salesRegistered(String amount) {
-    return 'Venda registrada: $amount!';
+    return 'Venda registada: $amount!';
   }
 
   @override
   String salesInsufficientStock(String product, int available) {
-    return 'Estoque insuficiente$product. Disponível: $available.';
+    return 'Stock insuficiente$product. Disponível: $available.';
   }
 
   @override
@@ -1812,12 +1851,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String salesProductNotFound(String id) {
-    return 'Produto $id não encontrado no estoque.';
+    return 'Produto $id não encontrado no stock.';
   }
 
   @override
   String get salesRegisterError =>
-      'Não foi possível registrar a venda. Tente novamente.';
+      'Não foi possível registar a venda. Tente novamente.';
 
   @override
   String get salesSearchProducts => 'Buscar produto...';
@@ -1827,7 +1866,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get salesNoProductsSubtitle =>
-      'Cadastre produtos para registrar vendas.';
+      'Cadastre produtos para registar vendas.';
 
   @override
   String get salesConfirm => 'Confirmar venda';
@@ -1863,7 +1902,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String saleDetailCancelConfirmBody(String amount) {
-    return 'Estoque será devolvido e caixa estornado ($amount).';
+    return 'Stock será devolvido e caixa estornado ($amount).';
   }
 
   @override
@@ -1949,7 +1988,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get adminTenantsEmpty => 'Nenhum tenant registrado ainda.';
+  String get adminTenantsEmpty => 'Nenhum tenant registado ainda.';
 
   @override
   String get adminRequestsLoadError =>
@@ -2040,7 +2079,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get adminPlanSaveError =>
-      'Não foi possível salvar o plano. Tente novamente.';
+      'Não foi possível guardar o plano. Tente novamente.';
 
   @override
   String get adminPlanNewTitle => 'Novo plano';
@@ -2159,7 +2198,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String salesStockLimit(String product) {
-    return 'Limite de estoque atingido para $product.';
+    return 'Limite de stock atingido para $product.';
   }
 
   @override
@@ -2822,7 +2861,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String customInvoiceProductOption(Object price, Object stock, Object unit) {
-    return 'Estoque: $stock $unit  •  $price';
+    return 'Stock: $stock $unit  •  $price';
   }
 
   @override
@@ -2887,7 +2926,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get customInvoiceTemplateStyleCompact => 'Compacto';
 
   @override
-  String get customInvoiceTemplateSave => 'Salvar Modelo';
+  String get customInvoiceTemplateSave => 'Guardar Modelo';
 
   @override
   String get customInvoicePreviewCompanyFallback => 'Nome da Empresa';
@@ -2935,11 +2974,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível criar a cotação. Tente novamente.';
 
   @override
-  String get quotationStatusSaved => 'Estado da cotação actualizado';
+  String get quotationStatusSaved => 'Estado da cotação atualizado';
 
   @override
   String get quotationStatusError =>
-      'Não foi possível actualizar a cotação. Tente novamente.';
+      'Não foi possível atualizar a cotação. Tente novamente.';
 
   @override
   String get quotationTemplateTooltip => 'Modelo da Cotação';
@@ -3002,7 +3041,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get quotationSave => 'Salvar Cotação';
+  String get quotationSave => 'Guardar Cotação';
 
   @override
   String get quotationTemplatePhone => 'Telefone';
@@ -3165,7 +3204,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get employeeCommissionRateLabel => 'Taxa de comissão (%)';
 
   @override
-  String get employeeCommissionRateSaved => 'Taxa de comissão actualizada.';
+  String get employeeCommissionRateSaved => 'Taxa de comissão atualizada.';
 
   @override
   String get employeeCommissionRateError => 'Não foi possível guardar a taxa.';
@@ -3211,7 +3250,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get employeeTargetMonthly => 'Meta Mensal (MT)';
 
   @override
-  String get employeeTargetSave => 'Salvar Meta';
+  String get employeeTargetSave => 'Guardar Meta';
 
   @override
   String employeeTargetProgress(int progress) {
@@ -3291,7 +3330,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addonReportsDesc =>
-      'Relatórios financeiros, de vendas e estoque com filtros avançados, comparativos período a período e exportação em PDF/Excel. Inclui gráficos interativos e dashboards personalizados.';
+      'Relatórios financeiros, de vendas e stock com filtros avançados, comparativos período a período e exportação em PDF/Excel. Inclui gráficos interativos e dashboards personalizados.';
 
   @override
   String get addonEmployeesName => 'Gestão de Funcionários';
@@ -3305,7 +3344,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addonMultiStoreDesc =>
-      'Transferência de estoque entre lojas, relatórios consolidados comparando lojas, gestão centralizada de preços e promoções e alertas de reposição automática.';
+      'Transferência de stock entre lojas, relatórios consolidados comparando lojas, gestão centralizada de preços e promoções e alertas de reposição automática.';
 
   @override
   String get addonMobileMoneyName => 'Integração M-Pesa / E-Mola';
@@ -3322,7 +3361,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get transfersEmptySubtitle =>
-      'Transfira estoque entre lojas do\nmesmo tenant de forma rastreável';
+      'Transfira stock entre lojas do\nmesmo tenant de forma rastreável';
 
   @override
   String get transfersNewFab => 'Nova Transferência';
@@ -3356,7 +3395,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get transfersNoStoresSubtitle =>
-      'É necessário ter 2+ lojas para\ntransferir estoque entre elas';
+      'É necessário ter 2+ lojas para\ntransferir stock entre elas';
 
   @override
   String transfersSuccess(num count) {
@@ -3403,16 +3442,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportsTabFinancial => 'Financeiro';
 
   @override
-  String get reportsTabStock => 'Estoque';
+  String get reportsTabStock => 'Stock';
 
   @override
   String get reportsKpiProducts => 'Produtos';
 
   @override
-  String get reportsKpiLowStock => 'Estoque Baixo';
+  String get reportsKpiLowStock => 'Stock Baixo';
 
   @override
-  String get reportsKpiStockValue => 'Valor Estoque';
+  String get reportsKpiStockValue => 'Valor Stock';
 
   @override
   String get reportsKpiRevenue => 'Receitas';
@@ -3430,7 +3469,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportsCashFlowChart => 'Gráfico de fluxo de caixa';
 
   @override
-  String get reportsStockHealthy => 'Todos os produtos com estoque adequado';
+  String get reportsStockHealthy => 'Todos os produtos com stock adequado';
 
   @override
   String get reportsExportSales => 'Exportar Relatório (PDF)';
@@ -3439,7 +3478,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportsExportFinancial => 'Exportar Financeiro (PDF)';
 
   @override
-  String get reportsExportStock => 'Exportar Estoque (PDF)';
+  String get reportsExportStock => 'Exportar Stock (PDF)';
 
   @override
   String get reportsNoSalesData => 'Sem dados para este período';
@@ -3448,7 +3487,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportsPeriodYear => 'Este Ano';
 
   @override
-  String get reportsKpiStockOut => 'Sem Estoque';
+  String get reportsKpiStockOut => 'Sem Stock';
 
   @override
   String get reportsKpiTotalProducts => 'Total Produtos';
@@ -3597,7 +3636,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String adminAddonsUpdateError(Object error) {
-    return 'Erro ao actualizar add-on: $error';
+    return 'Erro ao atualizar add-on: $error';
   }
 
   @override
@@ -3871,12 +3910,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String adminAddonsPriceUpdated(Object addonName, Object price) {
-    return 'Preço de $addonName actualizado para $price/mês';
+    return 'Preço de $addonName atualizado para $price/mês';
   }
 
   @override
   String get adminAddonsPriceSaveError =>
-      'Não foi possível salvar o preço. Tente novamente.';
+      'Não foi possível guardar o preço. Tente novamente.';
 
   @override
   String get adminAddonsListHint =>

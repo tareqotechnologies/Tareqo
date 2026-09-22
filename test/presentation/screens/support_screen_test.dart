@@ -31,7 +31,7 @@ void main() {
     test('pt → documentos em português', () {
       expect(
         SupportDocument.userGuide.assetPath('pt'),
-        'docs/pt/GUIA_DO_USUARIO.md',
+        'docs/pt/GUIA_DO_UTILIZADOR.md',
       );
       expect(
         SupportDocument.troubleshooting.assetPath('pt'),
@@ -64,7 +64,7 @@ void main() {
     test('idioma desconhecido cai no português (padrão do produto)', () {
       expect(
         SupportDocument.userGuide.assetPath('zz'),
-        'docs/pt/GUIA_DO_USUARIO.md',
+        'docs/pt/GUIA_DO_UTILIZADOR.md',
       );
       expect(
         SupportDocument.troubleshooting.assetPath('zz'),
@@ -74,42 +74,100 @@ void main() {
   });
 
   group('SupportScreen (Ajuda)', () {
-    testWidgets('lista o Guia do Usuário e o Troubleshooting', (tester) async {
-      await tester.pumpWidget(testApp(home: const SupportScreen()));
-
-      expect(find.text('Ajuda'), findsOneWidget); // AppBar
-      expect(find.text('Guia do Usuário'), findsOneWidget);
-      expect(
-        find.text('Troubleshooting'),
-        findsOneWidget,
-      ); // Dicas de cada documento (hints) presentes.
-      expect(find.textContaining('Login, lojas, produtos'), findsOneWidget);
-      expect(find.textContaining('Problemas comuns: login'), findsOneWidget);
-    });
-
-    testWidgets('abre o Guia do Usuário (pt) no leitor interno', (
+    testWidgets('lista os 3 tópicos: guia, solução de problemas e suporte', (
       tester,
     ) async {
       await tester.pumpWidget(testApp(home: const SupportScreen()));
 
-      await tester.tap(find.text('Guia do Usuário'));
+      expect(find.text('Ajuda'), findsOneWidget); // AppBar
+      expect(find.text('Guia do Utilizador'), findsOneWidget);
+      expect(find.text('Solução de problemas'), findsOneWidget);
+      expect(find.text('Fale com o suporte'), findsOneWidget);
+      // Dicas de cada tópico (hints) presentes.
+      expect(find.textContaining('Login, lojas, produtos'), findsOneWidget);
+      expect(
+        find.textContaining('Resolva problemas de login'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Nossa equipe pode ajudar'), findsOneWidget);
+      // Campo de busca e rodapé da referência.
+      expect(find.text('Buscar na ajuda'), findsOneWidget);
+      expect(find.text('Central de ajuda'), findsOneWidget);
+    });
+
+    testWidgets('abre o Guia do Utilizador (pt) no leitor interno', (
+      tester,
+    ) async {
+      await tester.pumpWidget(testApp(home: const SupportScreen()));
+
+      await tester.tap(find.text('Guia do Utilizador'));
       await settleAfterTap(tester);
 
       expect(find.byType(DocReaderScreen), findsOneWidget);
       // Markdown embutido renderizado: h1 do guia em português.
-      expect(find.textContaining('Guia do Usuário — TAREQO'), findsOneWidget);
+      expect(find.textContaining('Guia do Utilizador — TAREQO'), findsOneWidget);
     });
 
-    testWidgets('abre o Troubleshooting (pt) no leitor interno', (
+    testWidgets('abre a Solução de problemas (pt) no leitor interno', (
       tester,
     ) async {
       await tester.pumpWidget(testApp(home: const SupportScreen()));
 
-      await tester.tap(find.text('Troubleshooting'));
+      await tester.tap(find.text('Solução de problemas'));
       await settleAfterTap(tester);
 
       expect(find.byType(DocReaderScreen), findsOneWidget);
-      expect(find.textContaining('Troubleshooting — TAREQO'), findsOneWidget);
+      expect(find.textContaining('Solução de Problemas — TAREQO'), findsOneWidget);
+    });
+
+    testWidgets('busca filtra os tópicos e o estado vazio aparece', (
+      tester,
+    ) async {
+      await tester.pumpWidget(testApp(home: const SupportScreen()));
+
+      // Filtra por "guia" — só o Guia do Utilizador permanece.
+      await tester.enterText(find.byType(TextField), 'guia');
+      await tester.pump();
+
+      expect(find.text('Guia do Utilizador'), findsOneWidget);
+      expect(find.text('Solução de problemas'), findsNothing);
+      expect(find.text('Fale com o suporte'), findsNothing);
+      // Rodapé some durante a busca (estado filtrado).
+      expect(find.text('Central de ajuda'), findsNothing);
+
+      // Busca sem acento encontra "Solução" (normalização).
+      await tester.enterText(find.byType(TextField), 'solucao');
+      await tester.pump();
+
+      expect(find.text('Solução de problemas'), findsOneWidget);
+      expect(find.text('Guia do Utilizador'), findsNothing);
+
+      // Termo sem correspondência → estado vazio.
+      await tester.enterText(find.byType(TextField), 'zzz');
+      await tester.pump();
+
+      expect(find.text('Nenhum resultado'), findsOneWidget);
+
+      // Limpar a busca restaura a lista completa + rodapé.
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pump();
+
+      expect(find.text('Guia do Utilizador'), findsOneWidget);
+      expect(find.text('Solução de problemas'), findsOneWidget);
+      expect(find.text('Fale com o suporte'), findsOneWidget);
+      expect(find.text('Central de ajuda'), findsOneWidget);
+    });
+
+    testWidgets('busca por hint do suporte encontra o tile de contato', (
+      tester,
+    ) async {
+      await tester.pumpWidget(testApp(home: const SupportScreen()));
+
+      await tester.enterText(find.byType(TextField), 'equipe');
+      await tester.pump();
+
+      expect(find.text('Fale com o suporte'), findsOneWidget);
+      expect(find.text('Guia do Utilizador'), findsNothing);
     });
 
     testWidgets('no idioma inglês abre o documento em inglês', (tester) async {

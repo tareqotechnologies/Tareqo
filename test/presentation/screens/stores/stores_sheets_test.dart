@@ -270,7 +270,7 @@ void main() {
   ) async {
     await openStoreSheet(tester);
 
-    // Salvar sem nome → erro do use case (InvalidStoreException).
+    // Guardar sem nome → erro do use case (InvalidStoreException).
     await tester.ensureVisible(find.text('Criar loja'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Criar loja'));
@@ -375,7 +375,7 @@ void main() {
     tester,
   ) async {
     accountService.throwOnCreate = const EmployeeAccountCreationException(
-      'E-mail já registrado.',
+      'E-mail já registado.',
       code: 'emailInUse',
     );
     await openEmployeeSheet(tester);

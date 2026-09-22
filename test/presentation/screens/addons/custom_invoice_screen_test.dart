@@ -184,7 +184,7 @@ void main() {
     expect(find.text('Não foi possível carregar as facturas.'), findsOneWidget);
   });
 
-  testWidgets('criar factura: produto, qty, desconto, IVA e salvar', (
+  testWidgets('criar factura: produto, qty, desconto, IVA e guardar', (
     tester,
   ) async {
     _useWideViewport(tester);
@@ -220,7 +220,7 @@ void main() {
     await tester.enterText(find.byType(TextField).at(5), '5');
     await tester.enterText(find.byType(TextField).at(6), '3');
 
-    // O total e o botão salvar só re-avaliam no próximo setState (em
+    // O total e o botão guardar só re-avaliam no próximo setState (em
     // produção o teclado dispara via viewInsets). Re-selecionar o produto
     // é o setState mais limpo disponível — repõe o preço (15.00) sem
     // alterar o resto.
@@ -244,7 +244,7 @@ void main() {
     expect(find.textContaining('criada!'), findsOneWidget);
   });
 
-  testWidgets('erro ao salvar mostra snackbar e mantém a sheet', (
+  testWidgets('erro ao guardar mostra snackbar e mantém a sheet', (
     tester,
   ) async {
     _useWideViewport(tester);
@@ -315,7 +315,7 @@ void main() {
 
     // Escolhe a cor "Moderno" (segunda pílula de cor) e salva.
     await tester.enterText(find.byType(TextField).first, 'Farmácia Vida');
-    await tester.tap(find.text('Salvar Modelo'));
+    await tester.tap(find.text('Guardar Modelo'));
     await tester.pumpAndSettle();
 
     expect(find.text('Modelo guardado com sucesso'), findsOneWidget);
@@ -340,6 +340,6 @@ void main() {
 
     // Sheet continua aberta com os estilos visíveis.
     expect(find.text('Estilo'), findsOneWidget);
-    expect(find.text('Salvar Modelo'), findsOneWidget);
+    expect(find.text('Guardar Modelo'), findsOneWidget);
   });
 }

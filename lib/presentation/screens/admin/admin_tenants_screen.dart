@@ -236,7 +236,6 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
                           '$filteredCount',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: scheme.primary,
-                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ),

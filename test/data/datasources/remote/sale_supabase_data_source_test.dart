@@ -86,7 +86,7 @@ void main() {
 
         Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
           throw PostgrestException(
-            message: 'Estoque insuficiente para o produto Arroz.',
+            message: 'Stock insuficiente para o produto Arroz.',
             code: 'P0001',
           );
         }
@@ -99,7 +99,7 @@ void main() {
             isA<PostgrestException>().having(
               (error) => error.message,
               'message',
-              contains('Estoque insuficiente'),
+              contains('Stock insuficiente'),
             ),
           ),
         );

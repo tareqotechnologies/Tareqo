@@ -54,7 +54,7 @@ class _MoneyLivePreviewState extends State<MoneyLivePreview> {
           '= ${Formatters.currency(cents)}',
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

@@ -8,7 +8,7 @@ import 'package:tareqo/presentation/widgets/barcode_scan_sheet.dart';
 
 /// O BarcodeScanSheet usa a CÂMERA real (MobileScannerController) — em
 /// testes de widget o plugin não existe e o `errorBuilder` entra em ação.
-/// O contrato observável: a moldura e o texto guiam o usuário mesmo sem
+/// O contrato observável: a moldura e o texto guiam o utilizador mesmo sem
 /// câmera; cancelar devolve null.
 ///
 /// NOTA: pumps FIXOS em vez de pumpAndSettle — o controlador do scanner
@@ -20,7 +20,7 @@ void main() {
   // Responde às chamadas do method channel do mobile_scanner: sem mock,
   // o MissingPluginException mata a rota antes do frame ser exibido.
   // A resposta devolve uma câmera "parada" — suficiente para o widget
-  // montar e o usuário ver a interface de escaneamento.
+  // montar e o utilizador ver a interface de escaneamento.
   const scannerChannel = MethodChannel(
     'dev.steenbakker.mobile_scanner/scanner/method',
   );
@@ -84,7 +84,7 @@ void main() {
     await pumpSheet(tester);
 
     expect(find.byType(BarcodeScanSheet), findsOneWidget);
-    // Texto guia do usuário (sempre visível, com ou sem câmera).
+    // Texto guia do utilizador (sempre visível, com ou sem câmera).
     expect(find.textContaining('código de barras'), findsOneWidget);
     // Botão de fechar identificável (acessibilidade).
     expect(find.byIcon(Icons.close), findsOneWidget);

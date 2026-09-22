@@ -42,7 +42,7 @@ class StockTransfersNotifier extends Notifier<List<StockTransfer>> {
 
     final currentStockMilli = originProduct.stockQuantity;
     if (quantityMilli > currentStockMilli) {
-      throw ArgumentError('Estoque insuficiente na loja de origem');
+      throw ArgumentError('Stock insuficiente na loja de origem');
     }
 
     // 2. Baixar estoque na loja de origem.

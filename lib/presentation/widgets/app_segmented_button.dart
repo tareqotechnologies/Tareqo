@@ -38,7 +38,7 @@ class AppSegmentedButton<T> extends StatelessWidget {
         selectedForegroundColor: scheme.onPrimaryContainer,
         foregroundColor: scheme.onSurfaceVariant,
         textStyle: theme.textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
         ),
       ),
       segments: segments,

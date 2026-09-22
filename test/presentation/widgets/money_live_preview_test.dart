@@ -24,7 +24,7 @@ void main() {
     expect(find.textContaining('='), findsNothing);
 
     // "1390" digitado sem separador → preview mostra 1.390,00 ANTES do
-    // save (o erro clássico de registrar 100× o pretendido).
+    // save (o erro clássico de registar 100× o pretendido).
     controller.text = '1390';
     await tester.pump();
     expect(find.text('= MZN 1.390,00'), findsOneWidget);

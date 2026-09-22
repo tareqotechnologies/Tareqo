@@ -131,7 +131,7 @@ Widget _buildApp({
   );
 }
 
-/// Funcionário com vínculo DESATIVADO (o tenant pertence a outro usuário e
+/// Funcionário com vínculo DESATIVADO (o tenant pertence a outro utilizador e
 /// o link `store_employees` tem `isActive: false`) — o AuthGate deve
 /// bloquear com a tela de acesso suspenso.
 class _InactiveEmployeeLink implements GetEmployeesUseCase {
@@ -174,7 +174,7 @@ class _ThrowingEmployeeLink implements GetEmployeesUseCase {
       throw StateError('falha de rede simulada');
 }
 
-/// Estoque MUTÁVEL de vínculos — simula a mudança feita pelo DONO em
+/// Stock MUTÁVEL de vínculos — simula a mudança feita pelo DONO em
 /// OUTRO dispositivo (o próximo poll do AuthGate re-busca e reavalia).
 class _MutableEmployeeLink implements GetEmployeesUseCase {
   // ignore: prefer_initializing_formals
@@ -426,7 +426,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Sem dados de vínculo, um erro de rede não pode decidir um bloqueio:
-    // o acesso segue (o servidor negaria operações se o usuário estivesse
+    // o acesso segue (o servidor negaria operações se o utilizador estivesse
     // realmente suspenso; o polling reavalia em seguida).
     expect(find.text('Acesso suspenso'), findsNothing);
     expect(find.byType(AppShell), findsOneWidget);
@@ -563,7 +563,7 @@ void main() {
       ),
     );
 
-    // Usuário entra via link de recuperação (flag marcado).
+    // Utilizador entra via link de recuperação (flag marcado).
     events.add(AuthEvent.passwordRecovery);
     auth.add(AppUser(id: 'u1', email: 'dono@loja.com'));
     await tester.pump();

@@ -72,8 +72,8 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(0), 'NovaSenha2@');
     await tester.enterText(find.byType(TextFormField).at(1), 'NovaSenha2@');
 
-    await tester.ensureVisible(find.text('Salvar nova senha'));
-    await tester.tap(find.text('Salvar nova senha'));
+    await tester.ensureVisible(find.text('Guardar nova senha'));
+    await tester.tap(find.text('Guardar nova senha'));
     await tester.pumpAndSettle();
 
     expect(repository.lastSetNew, 'NovaSenha2@');
@@ -89,8 +89,8 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(0), 'fraca123');
     await tester.enterText(find.byType(TextFormField).at(1), 'fraca123');
 
-    await tester.ensureVisible(find.text('Salvar nova senha'));
-    await tester.tap(find.text('Salvar nova senha'));
+    await tester.ensureVisible(find.text('Guardar nova senha'));
+    await tester.tap(find.text('Guardar nova senha'));
     await tester.pumpAndSettle();
 
     expect(
@@ -107,8 +107,8 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(0), 'NovaSenha2@');
     await tester.enterText(find.byType(TextFormField).at(1), 'OutraSenha3#');
 
-    await tester.ensureVisible(find.text('Salvar nova senha'));
-    await tester.tap(find.text('Salvar nova senha'));
+    await tester.ensureVisible(find.text('Guardar nova senha'));
+    await tester.tap(find.text('Guardar nova senha'));
     await tester.pumpAndSettle();
 
     expect(find.text('As senhas não coincidem.'), findsOneWidget);
@@ -129,8 +129,8 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(0), 'NovaSenha2@');
     await tester.enterText(find.byType(TextFormField).at(1), 'NovaSenha2@');
 
-    await tester.ensureVisible(find.text('Salvar nova senha'));
-    await tester.tap(find.text('Salvar nova senha'));
+    await tester.ensureVisible(find.text('Guardar nova senha'));
+    await tester.tap(find.text('Guardar nova senha'));
     await tester.pumpAndSettle();
 
     expect(
@@ -157,8 +157,8 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(0), 'NovaSenha2@');
     await tester.enterText(find.byType(TextFormField).at(1), 'NovaSenha2@');
 
-    await tester.ensureVisible(find.text('Salvar nova senha'));
-    await tester.tap(find.text('Salvar nova senha'));
+    await tester.ensureVisible(find.text('Guardar nova senha'));
+    await tester.tap(find.text('Guardar nova senha'));
     await tester.pumpAndSettle();
 
     expect(
@@ -181,8 +181,8 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(0), 'NovaSenha2@');
     await tester.enterText(find.byType(TextFormField).at(1), 'NovaSenha2@');
 
-    await tester.ensureVisible(find.text('Salvar nova senha'));
-    await tester.tap(find.text('Salvar nova senha'));
+    await tester.ensureVisible(find.text('Guardar nova senha'));
+    await tester.tap(find.text('Guardar nova senha'));
     await tester.pumpAndSettle();
 
     expect(

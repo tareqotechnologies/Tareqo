@@ -49,7 +49,7 @@ class SyncPendingBanner extends ConsumerWidget {
                   : l10n.syncPendingCount(count),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),

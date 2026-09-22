@@ -38,7 +38,7 @@ void main() {
       const MaterialApp(home: ProductImage(imagePath: '')),
     );
 
-    // Fallback = container quadrado arredondado com ícone de estoque.
+    // Fallback = container quadrado arredondado com ícone de stock.
     final container = tester.widget<Container>(
       find
           .descendant(
