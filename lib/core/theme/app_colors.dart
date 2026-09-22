@@ -1,43 +1,69 @@
 import 'package:flutter/material.dart';
 
-/// Paleta e cores semânticas que NÃO vivem no [ColorScheme].
+/// Paleta oficial e cores semânticas que NÃO vivem no [ColorScheme].
+///
+/// RE2 — Paleta base do produto (fonte única dos hexadecimais):
+/// * `petrol`     #10282A — azul-petróleo escuro (identidade, superfícies)
+/// * `slate`      #3D4D55 — cinza azulado (primário claro, estrutura)
+/// * `warmGray`   #A79E9C — cinza quente (texto secundário, neutros)
+/// * `warmBeige`  #D3C3B9 — bege claro (acento no escuro, texto sobre petrol)
+/// * `terracotta` #B58863 — terracota (destaque único, usada com parcimônia)
+/// * `softBlack`  #161616 — preto suave (texto, snackbar)
 ///
 /// Regra do design system: cor representa **função**, nunca aparência.
-/// Os nomes seguem o papel que a cor cumpre no UI (`income`, `expense`,
-/// `warning`, `accent`…). Onde existe um par para os dois temas, o sufixo
-/// `*Light` refere-se ao modo claro — não é uma cor "mais clara".
+/// A hierarquia vem dos NEUTROS (petróleo/slate/cinza quente); a terracota
+/// e o bege são destaques reservados — nunca preenchimentos de massa.
+/// Onde existe um par para os dois temas, o sufixo `*Light` refere-se ao
+/// modo claro — não é uma cor "mais clara".
 ///
 /// As variantes usadas como TEXTO sobre superfícies claras foram calibradas
 /// para WCAG AA (≥ 4.5:1) e, como ícone/chip (≥ 3:1) — ver
 /// `test/core/theme/theme_contrast_test.dart`.
 abstract final class AppColors {
-  // ── Marca — escala única de verdes (fonte única dos hexadecimais) ──
-  /// Verde vivo — ícones, destaques e FAB no modo escuro.
-  static const Color brand = Color(0xFF16A34A);
+  // ── Paleta base (não alterar sem justificativa técnica) ──
+  static const Color petrol = Color(0xFF10282A);
+  static const Color slate = Color(0xFF3D4D55);
+  static const Color warmGray = Color(0xFFA79E9C);
+  static const Color warmBeige = Color(0xFFD3C3B9);
+  static const Color terracotta = Color(0xFFB58863);
+  static const Color softBlack = Color(0xFF161616);
 
-  /// Verde médio — superfícies primárias com texto branco (branco = 5.0:1).
-  static const Color brandMuted = Color(0xFF15803D);
+  // ── Marca — derivadas da paleta base ──
+  /// Acento da marca no MODO ESCURO: terracota — destaque sóbrio sobre
+  /// superfícies petróleo (ícones, FAB, cursor; não é cor de preenchimento
+  /// de massa). Ícone/chip ≥ 3:1 sobre as superfícies escuras.
+  static const Color brand = terracotta;
 
-  /// Containers do verde de marca (chips selecionados, indicador de navegação).
-  static const Color brandContainerLight = Color(0xFFD1FAE5);
-  static const Color brandContainerDark = Color(0xFF14532D);
+  /// Acento da marca no MODO CLARO: slate-escuro (#2C3E45) derivado do
+  /// `slate` — botão primário com texto branco a 8.6:1 (AA/AAA). O antigo
+  /// verde-médio foi substituído: a marca deixa de ter verde como padrão.
+  static const Color brandMuted = Color(0xFF2C3E45);
 
-  /// Texto sobre os containers da marca.
-  static const Color onBrandContainerLight = Color(0xFF064E3B);
-  static const Color onBrandContainerDark = Color(0xFFBBF7D0);
+  /// Container do acento (chips selecionados, indicador de navegação):
+  /// bege no claro (sobreposição suave do `warmBeige`); petróleo no escuro.
+  static const Color brandContainerLight = warmBeige;
+  static const Color brandContainerDark = petrol;
+
+  /// Conteúdo sobre os containers do acento: preto suave no bege claro
+  /// (12.2:1) e bege no petróleo escuro (8.8:1) — ambos ≥ AA.
+  static const Color onBrandContainerLight = softBlack;
+  static const Color onBrandContainerDark = warmBeige;
 
   // ── API legada (mantida para compatibilidade) ──
-  // `accent`/`success` são o mesmo verde vivo da marca; `accentLight`/
-  // `successLight` o verde médio. Valores idênticos aos anteriores — o
-  // `success` verde-claro AA (≥4.5:1 sobre branco e chip@14%) é o `brandMuted`.
+  // `accent`/`success` apontam para o acento da marca (terracota no escuro,
+  // slate-escuro no claro). Nenhum uso de "verde de sucesso" permanece:
+  // aprovação/conclusão usa o neutro quente da marca (regra: sem verde).
   static const Color accent = brand;
   static const Color accentLight = brandMuted;
   static const Color success = brand;
   static const Color successLight = brandMuted;
 
-  // ── Fluxo de caixa (entradas/saídas) — calibrado AA no teste de contraste ──
-  static const Color income = Color(0xFF34D399);
-  static const Color incomeLight = Color(0xFF03754F);
+  // ── Fluxo de caixa (entradas/saídas) — calibrado AA no teste de contraste.
+  // Entrada (income): tom quente terroso (verde removido da semântica);
+  // mantém ≥ 4.5:1 sobre branco e sobre chip@14% nos DOIS temas.
+  static const Color income = Color(0xFFD8B08C);
+  static const Color incomeLight = Color(0xFF5A4632);
+  // Saída (expense) e alertas: vermelho/âmbar já auditados — preservados.
   static const Color expense = Color(0xFFF87171);
   static const Color expenseLight = Color(0xFFC81E1E);
 
@@ -45,11 +71,13 @@ abstract final class AppColors {
   static const Color warning = Color(0xFFFBBF24);
   static const Color warningLight = Color(0xFF9A5308);
 
-  // ── Neutros do modo escuro (superfícies por papel) ──
-  static const Color surfaceDark = Color(0xFF131316);
-  static const Color surfaceElevatedDark = Color(0xFF1A1A1F);
-  static const Color backgroundDark = Color(0xFF09090B);
-  static const Color borderDark = Color(0xFF27272A);
+  // ── Neutros do modo escuro (família petróleo — superfícies por papel) ──
+  // Escala derivada do petrol com gradação de luminosidade (antes cinza
+  // puro #131316/#09090B): as superfícies ganham a temperatura da marca.
+  static const Color surfaceDark = Color(0xFF10232A);
+  static const Color surfaceElevatedDark = Color(0xFF16303A);
+  static const Color backgroundDark = Color(0xFF0B161A);
+  static const Color borderDark = Color(0xFF24363C);
 
   // ── Papéis do modo CLARO (fonte única dos hex do AppTheme.light) ──
   // Espelham os mesmos hex usados inline no `_base(Brightness.light)` —
@@ -60,24 +88,27 @@ abstract final class AppColors {
   static const Color scaffoldLight = Color(0xFFFAFAFA);
 
   /// Texto principal sobre superfícies claras (mesmo papel do `onSurface`).
-  static const Color onSurfaceLight = Color(0xFF18181B);
+  static const Color onSurfaceLight = Color(0xFF161616);
 
   /// Texto secundário no escuro (mesmo papel do `onSurfaceVariant` dark).
-  static const Color onSurfaceVariantDark = Color(0xFFA1A1AA);
+  static const Color onSurfaceVariantDark = warmGray;
 
   /// Texto secundário no claro (mesmo papel do `onSurfaceVariant` light).
-  static const Color onSurfaceVariantLight = Color(0xFF6E6E77);
+  static const Color onSurfaceVariantLight = Color(0xFF63646A);
 
   /// Bordas/linhas no claro (mesmo papel do `outlineVariant` light).
-  static const Color borderLight = Color(0xFFE4E4E7);
+  static const Color borderLight = Color(0xFFE7E1DD);
 
   // ── Status semânticos (centralizados; cores de ícone/decorativas) ──
+  // Paleta RE2: os antigos roxo/índigo/teal viram os três matizes da paleta
+  // base — a diferenciação entre tipos de notificação/mensagem continua
+  // existindo (petrol ≠ terracota ≠ slate), sem cores fora do sistema.
   static const Color statusError = Color(0xFFDC2626);
   static const Color statusWarning = Color(0xFFF59E0B);
-  static const Color statusInfo = Color(0xFF3B82F6);
-  static const Color statusPurple = Color(0xFF7C3AED);
-  static const Color statusIndigo = Color(0xFF6366F1);
-  static const Color statusTeal = Color(0xFF10B981);
+  static const Color statusInfo = petrol;
+  static const Color statusPurple = terracotta;
+  static const Color statusIndigo = slate;
+  static const Color statusTeal = terracotta;
 
   /// Cor semântica para um status de decisão (`approved`/`rejected`/
   /// `pending`) usado nas telas admin — aprovação de tenants/planos e

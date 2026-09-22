@@ -3,6 +3,16 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [Unreleased]
+
+### Alterado — RE2: paleta petróleo/bege/terracota (fim do verde como padrão)
+- **Nova paleta base oficial** (`AppColors`): `petrol #10282A`, `slate #3D4D55`, `warmGray #A79E9C`, `warmBeige #D3C3B9`, `terracota #B58863` e `softBlack #161616` como fonte única dos hex. Complementos criados apenas onde faltava papel: rampa de superfícies do escuro derivada do PETRÓLEO (antes cinza puro #131316/#09090B), rampa de neutros do claro com temperatura quente (`borderLight #E7E1DD`, `fieldFill #F1EDE9`) e dois tons médios derivados do petróleo para diferenciar módulos (`#2E6E75` relatórios, `#223A41` lojas).
+- **Identidade por tema, sem verde**: primário = slate (#3D4D55) no claro com texto branco (8.8:1) e BEGE (#D3C3B9) no escuro com texto preto suave (10.6:1); container de seleção = bege no claro (12.2:1) e slate no escuro (5.1:1); FAB/progresso recebem a TERRACOTA como acento reservado no escuro (5.1:1, ícone preto suave) — preenchimentos de massa continuam neutros (regra anti-excesso). Snackbars invertem com a paleta (preto suave/bege). Seed M3 alterado para petrol com todos os papéis explícitos.
+- **Semântica sem verde**: `income` (entradas de caixa) migrou do verde para tom terroso quente (#D8B08C escuro / #5A4632 claro, AA auditado); `success`/`accent` apontam para o acento da marca (terracota/slate); `statusInfo/statusIndigo/statusTeal/statusPurple` re-mapeados para petrol/terracota/slate (diferenciação de notificações preservada dentro da paleta). `expense`/`warning` e os pares de erro/aviso já auditados foram preservados.
+- **Módulos e IconTone na paleta**: `ModuleColors` mapeado para petrol/slate/terracota/warmGray + os 2 derivados do petróleo; `IconTone.green` (vendas do feed) virou terracota, `slate` usa o hex real da paleta, `blue/teal/violet` alinhados à família petróleo. `IconTone.darkBackground/lightForeground` continuam derivando automaticamente (contraste garantido).
+- **Login premium petróleo**: o verde #22C55E exclusivo do login foi removido (hex local eliminado — guard de hex atualizado); CTA bege com conteúdo preto suave (10.6:1), acento bege/slate via tokens.
+- **Contraste auditado nos DOIS temas** (1778/1778 verde, `flutter analyze` 0 issues): todos os pares do ColorScheme ≥ 4.5:1 (texto), ícones/selos ≥ 3:1, bordas outline ≥ 3:1, hover/pressed neutros que só escurecem, disabled ≤ 2.5:1 — o teste `theme_contrast_test` valida os valores EFETIVOS renderizados. Cartão de pagamento no escuro usa bege luminoso dedicado (#CFA984, ≥ 3:1 sobre o selo).
+
 ## [2.4.0+29] — 2026-09-20
 
 ### Testes (tipografia — itens P2)

@@ -89,28 +89,33 @@ abstract final class DashedBorders {
 /// Cores de módulo — conjunto fechado de 6 cores profissionais
 /// para os módulos do Menu e ícones de navegação.
 ///
+/// RE2 — derivadas da paleta base (petróleo/slate/terracota/cinza quente):
+/// a diferenciação entre módulos vem de matiz E luminosidade dentro da
+/// mesma família — sem cores fora do sistema. `reports` e `stores` usam
+/// a rampa do petróleo (tons médios derivados) para não repetir o hex
+/// de `products`.
 /// Cada cor tem uma versão escura (fundo circular) e uma versão
 /// clara (ícone sobre fundo escuro) derivadas automaticamente.
 /// ATENÇÃO: estas cores são pré-definidas e NÃO devem ser
 /// substituídas por cores aleatórias nos ecrãs.
 abstract final class ModuleColors {
-  /// Produtos — azul confiável (estoque, inventário)
-  static const Color products = Color(0xFF3B82F6);
+  /// Produtos — azul-petróleo (estoque, inventário)
+  static const Color products = Color(0xFF10282A);
 
-  /// Clientes — teal profissional (relações, CRM)
-  static const Color customers = Color(0xFF14B8A6);
+  /// Clientes — slate azulado (relações, CRM)
+  static const Color customers = Color(0xFF3D4D55);
 
-  /// Crédito/Fiado — âmbar quente (atenção, pendências)
-  static const Color credit = Color(0xFFD97706);
+  /// Crédito/Fiado — terracota quente (atenção, pendências)
+  static const Color credit = Color(0xFFB58863);
 
-  /// Compras — violeta sofisticado (approvisionnement)
-  static const Color purchases = Color(0xFF7C3AED);
+  /// Compras — cinza quente (aprovisionamento)
+  static const Color purchases = Color(0xFFA79E9C);
 
-  /// Relatórios — azul-profundo (análise, dados)
-  static const Color reports = Color(0xFF2563EB);
+  /// Relatórios — petróleo médio (análise, dados)
+  static const Color reports = Color(0xFF2E6E75);
 
-  /// Lojas — slate profissional (administração)
-  static const Color stores = Color(0xFF475569);
+  /// Lojas — petróleo-ardósia (administração)
+  static const Color stores = Color(0xFF223A41);
 }
 
 /// Padrão de ícones com fundo sólido escuro — replicado do feed
@@ -139,17 +144,21 @@ abstract final class IconTone {
   }
 
   // ── Cores pré-definidas (padrão do activity feed) ──
-  static const Color green = Color(0xFF16A34A);
-  static const Color greenDark = Color(0xFF123F26);
+  // RE2: o "verde de venda" virou TERRACOTA (acento quente da marca);
+  // `slate` usa o slate REAL da paleta. `amber`/`red` permanecem — são
+  // tons SEMÂNTICOS (aviso/erro), não de marca. `blue`/`teal`/`violet`
+  // alinham-se à família petróleo/cinza quente.
+  static const Color green = Color(0xFFB58863);
+  static const Color greenDark = Color(0xFF2A1F15);
   static const Color amber = Color(0xFFD97706);
   static const Color amberDark = Color(0xFF3A2810);
   static const Color red = Color(0xFFDC2626);
   static const Color redDark = Color(0xFF3A1618);
-  static const Color slate = Color(0xFF2A3034);
-  static const Color blue = Color(0xFF2563EB);
-  static const Color blueDark = Color(0xFF0F1D3A);
-  static const Color teal = Color(0xFF0D9488);
-  static const Color tealDark = Color(0xFF0A2E2B);
-  static const Color violet = Color(0xFF7C3AED);
-  static const Color violetDark = Color(0xFF1E1540);
+  static const Color slate = Color(0xFF3D4D55);
+  static const Color blue = Color(0xFF2E6E75);
+  static const Color blueDark = Color(0xFF0F2A2E);
+  static const Color teal = Color(0xFF223A41);
+  static const Color tealDark = Color(0xFF0A1E21);
+  static const Color violet = Color(0xFFA79E9C);
+  static const Color violetDark = Color(0xFF1F1D1C);
 }

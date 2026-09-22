@@ -30,12 +30,13 @@ extension PaymentMethodIcon on PaymentMethod {
 extension PaymentMethodAccent on PaymentMethod {
   Color accent(ThemeData theme) => switch (this) {
     PaymentMethod.cash => theme.income,
-    // Cartão: no escuro usa um VERDE VIVO dedicado (o primary do tema
-    // é verde-médio para o botão sólido — sobre o selo 22% do card o
-    // contraste do ícone cairia para 2.7:1; calibrado para ≥ 3:1).
+    // Cartão: no escuro usa o BEGE da paleta (o primary do tema escuro é
+    // o próprio bege — mas o selo do card precisa de um tom mais luminoso
+    // para ≥ 3:1 sobre a sobreposição de 22%; calibrado no teste de
+    // contraste). No claro, o slate do primário.
     PaymentMethod.debitCard || PaymentMethod.creditCard => AppColors.of(
       theme.brightness,
-      const Color(0xFF4ADE80),
+      const Color(0xFFCFA984),
       theme.colorScheme.primary,
     ), // Dinheiro móvel de Moçambique: M-Pesa em vermelho, E-Mola (Movitel)
     // em laranja — cores sólidas que seguem o padrão do activity feed.
@@ -46,7 +47,7 @@ extension PaymentMethodAccent on PaymentMethod {
     ),
     PaymentMethod.eMola => AppColors.of(
       theme.brightness,
-      const Color(0xFFF59E0B),
+      const Color(0xFFC9822C),
       // E-Mola claro: #D97706 dava 2.51:1 sobre o selo do card (teste de
       // contraste) — âmbar-700 (#B45309) atinge 3.69:1 (ícone ≥ 3:1) e
       // 5.02:1 como texto sobre branco (AA).

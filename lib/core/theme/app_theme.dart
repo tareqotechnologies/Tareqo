@@ -8,7 +8,7 @@ import 'app_typography.dart';
 // `AppStatusColors` acessíveis para quem importa apenas `app_theme.dart`.
 export 'app_colors.dart';
 
-/// Tema central — Material 3, dark-first, acento verde profissional.
+/// Tema central — Material 3, dark-first, identidade petróleo/terracota.
 ///
 /// Arquitetura:
 /// * `AppTheme` — constrói os dois [ThemeData] (light/dark) sobre um único
@@ -17,67 +17,81 @@ export 'app_colors.dart';
 /// * Cores fora do [ColorScheme] (income/expense/warning/accent) vivem em
 ///   [AppStatusColors] (ThemeExtension) e são interpoladas na troca de tema.
 /// * Tipografia em `AppTypography`; espaçamento/raios/tamanhos em `AppTokens`.
+///
+/// Calibração de contraste (WCAG 2.x, auditada em
+/// `test/core/theme/theme_contrast_test.dart`):
+/// * Claro: primário = slate (#3D4D55) — branco sobre ele 8.8:1.
+/// * Escuro: primário = bege (#D3C3B9) — preto suave sobre ele 10.6:1 e o
+///   preenchimento destaca 9.5:1 contra a superfície petróleo.
+/// * Terracota (#B58863) = acento RESERVADO do escuro (FAB, links, cursor,
+///   ícones): 5.1:1 sobre as superfícies petróleo — nunca preenchimento de
+///   massa (regra anti-excesso).
+/// * Nenhum verde no tema: hover/pressed são véus neutros (preto nos
+///   preenchidos, onSurface nos de superfície).
 abstract final class AppTheme {
-  /// Tema claro — superfícies brancas/cinza-claro, texto quase-preto.
+  /// Tema claro — superfícies brancas/creme quente, texto preto suave.
   static final ThemeData light = _base(Brightness.light);
 
-  /// Tema escuro — superfícies quase-pretas azuladas, texto quase-branco.
+  /// Tema escuro — superfícies petróleo, texto quase-branco, acento bege.
   static final ThemeData dark = _base(Brightness.dark);
 
   static ThemeData _base(Brightness brightness) {
     final isLight = brightness == Brightness.light;
 
     // ── ColorScheme M3 (funções do Material 3) ─────────────────────────────
-    // Calibração AA (WCAG 2.x):
-    // * primary = verde-médio (#15803D): branco sobre ele = 5.0:1 nos DOIS
-    //   temas — o verde vivo (#16A34A) fica para ícones/destaques/FAB.
-    // * onSurfaceVariant sobre fieldFill ≥ 4.5:1 (auditado em teste).
-    // * outline ≥ 3:1 sobre superfícies (bordas de controles interativos).
+    // Todos os papéis explícitos — o seed não influencia o resultado.
     final scheme =
         ColorScheme.fromSeed(
-          seedColor: AppColors.brand,
+          seedColor: AppColors.petrol,
           brightness: brightness,
         ).copyWith(
-          primary: AppColors.brandMuted,
-          onPrimary: Colors.white,
+          // Primário: slate no claro (texto branco 8.8:1) e bege no escuro
+          // (texto preto suave 10.6:1) — ambos AA/AAA nos dois temas.
+          primary: isLight ? AppColors.slate : AppColors.warmBeige,
+          onPrimary: isLight ? Colors.white : AppColors.softBlack,
+          // Container do primário (chips selecionados, indicador de navegação):
+          // bege no claro com preto suave (12.2:1); slate no escuro com bege
+          // (5.1:1) — pílula visível (1.9:1 de preenchimento contra a
+          // superfície petróleo) sem competir com o botão primário.
           primaryContainer: isLight
-              ? AppColors.brandContainerLight
-              : AppColors.brandContainerDark,
+              ? AppColors.warmBeige
+              : AppColors.slate,
           onPrimaryContainer: isLight
-              ? AppColors.onBrandContainerLight
-              : AppColors.onBrandContainerDark,
+              ? AppColors.softBlack
+              : AppColors.warmBeige,
           secondary: isLight
-              ? const Color(0xFF64748B)
-              : const Color(0xFF71717A),
+              ? const Color(0xFF6B7B82)
+              : const Color(0xFF9FB0B5),
           secondaryContainer: isLight
-              ? const Color(0xFFF1F5F9)
-              : const Color(0xFF27272A),
+              ? AppColors.borderLight
+              : const Color(0xFF1E3A41),
           onSecondaryContainer: isLight
-              ? const Color(0xFF334155)
-              : const Color(0xFFE4E4E7),
+              ? AppColors.slate
+              : const Color(0xFFCDD6D8),
           surface: isLight ? Colors.white : AppColors.surfaceDark,
           onSurface: isLight
-              ? const Color(0xFF18181B)
+              ? AppColors.onSurfaceLight
               : const Color(0xFFFAFAFA),
           onSurfaceVariant: isLight
-              ? const Color(0xFF6E6E77)
-              : const Color(0xFFA1A1AA),
+              ? AppColors.onSurfaceVariantLight
+              : AppColors.onSurfaceVariantDark,
           surfaceContainerHighest: isLight
-              ? const Color(0xFFF4F4F5)
+              ? const Color(0xFFF1EDE9)
               : AppColors.surfaceElevatedDark,
           surfaceContainerHigh: isLight
-              ? const Color(0xFFE4E4E7)
-              : const Color(0xFF232328),
+              ? AppColors.borderLight
+              : const Color(0xFF142B32),
           surfaceContainerLow: isLight
               ? const Color(0xFFFAFAFA)
-              : const Color(0xFF111114),
+              : const Color(0xFF0E1E24),
           outlineVariant: isLight
-              ? const Color(0xFFE4E4E7)
+              ? AppColors.borderLight
               : AppColors.borderDark,
           // outline: bordas de CONTROLES interativos (botões outline) — ≥ 3:1
-          // sobre as superfícies. No claro é um cinza médio; no escuro é mais
-          // claro que o antigo #52525B para não sumir sobre #131316.
-          outline: isLight ? const Color(0xFF8A8A94) : const Color(0xFF71717A),
+          // sobre as superfícies (3.9:1 no claro, 4.7:1 no escuro).
+          outline: isLight
+              ? const Color(0xFF85817E)
+              : const Color(0xFF7E8C90),
           error: isLight ? const Color(0xFFDC2626) : const Color(0xFFF87171),
           // onError explícito: texto/ícones sobre a cor de erro. No escuro o
           // branco daria só 2.8:1 sobre #F87171 — usa-se o vermelho-escuro.
@@ -94,10 +108,10 @@ abstract final class AppTheme {
     final surface = scheme.surface;
     final border = scheme.outlineVariant;
     final fieldFill = isLight
-        ? const Color(0xFFF4F4F5)
-        : const Color(0xFF1F1F23);
+        ? const Color(0xFFF1EDE9)
+        : const Color(0xFF172A31);
     final navBackground = isLight ? Colors.white : AppColors.backgroundDark;
-    // Indicador de navegação/chips selecionados = container do verde de marca.
+    // Indicador de navegação/chips selecionados = container do primário.
     final selectionFill = scheme.primaryContainer;
     // Conteúdo sobre o indicador: o "on" do container — legível nos dois temas.
     final selectionContent = scheme.onPrimaryContainer;
@@ -117,15 +131,14 @@ abstract final class AppTheme {
     });
 
     // ── Estados de interação (hover/pressed/focus) — SOBRES e NEUTROS ────
-    // O padrão M3 deriva o véu de hover do `primary` (verde) — trocado aqui
-    // por feedback discreto e funcional, em ambos os temas:
+    // O padrão M3 deriva o véu de hover do `primary` — mantido aqui neutro
+    // e discreto, em ambos os temas:
     // * Botões de SUPERFÍCIE (outline/texto/ícone/segmented/elevated): véu
     //   cinza via `onSurface` com alfa baixo — cinza claro no tema claro,
-    //   clareamento sutil no escuro. Sem verde, brilho ou gradiente.
+    //   clareamento sutil no escuro. Sem acento, brilho ou gradiente.
     // * Botões PREENCHIDOS (primário/destrutivo): véu PRETO translúcido —
-    //   ESCURECE o preenchimento (o verde da marca fica mais escuro e
-    //   sóbrio no hover; o vermelho do destrutivo idem). Neutro (r=g=b),
-    //   nunca neon nem luminoso.
+    //   ESCURECE o preenchimento (slate e bege ficam mais sóbrios no hover;
+    //   o vermelho do destrutivo idem). Neutro (r=g=b), nunca neon.
     // Transição de 150ms (AppDurations.fast) — dentro da faixa 120–180ms.
     WidgetStateProperty<Color?> surfaceOverlay() =>
         WidgetStateProperty.resolveWith((states) {
@@ -164,7 +177,7 @@ abstract final class AppTheme {
       fontFamily: 'Inter',
       colorScheme: scheme,
       scaffoldBackgroundColor: isLight
-          ? const Color(0xFFFAFAFA)
+          ? AppColors.scaffoldLight
           : AppColors.backgroundDark,
       splashFactory: InkRipple.splashFactory,
       visualDensity: VisualDensity.standard,
@@ -254,12 +267,12 @@ abstract final class AppTheme {
           ),
         ).copyWith(
           animationDuration: AppDurations.fast,
-          // Normal: verde sóbrio da marca + texto branco (AA 5.0:1).
-          // Disabled: cinza neutro (SEM verde), sem sombra.
+          // Normal: primário sóbrio (slate/bege) + conteúdo auditado.
+          // Disabled: cinza neutro, sem sombra.
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.disabled)) {
-              // Cinza neutro sutil sobre a superfície (SEM verde) —
-              // desabilitado lê-se como "inativo", não como ação.
+              // Cinza neutro sutil sobre a superfície — desabilitado lê-se
+              // como "inativo", não como ação.
               return scheme.onSurface.withValues(alpha: 0.08);
             }
             return scheme.primary;
@@ -268,13 +281,13 @@ abstract final class AppTheme {
             if (states.contains(WidgetState.disabled)) {
               // Texto desabilitado: neutro desatenue com contraste
               // suficiente (~2.8:1 composto; isento de AA na WCAG, mas
-              // legível) — nunca verde.
+              // legível).
               return scheme.onSurface.withValues(alpha: 0.45);
             }
             return scheme.onPrimary;
           }),
-          // Hover/pressed: escurece o preenchimento — verde mais escuro e
-          // sóbrio, sem verde vivo, brilho, gradiente ou elevação extra.
+          // Hover/pressed: escurece o preenchimento — véu preto translúcido,
+          // sem brilho, gradiente ou elevação extra.
           overlayColor: filledOverlay(),
           elevation: const WidgetStatePropertyAll(0),
         ),
@@ -295,7 +308,7 @@ abstract final class AppTheme {
           ),
         ).copyWith(
           animationDuration: AppDurations.fast,
-          // Hover/pressed: véu cinza neutro — nada de verde no feedback.
+          // Hover/pressed: véu cinza neutro.
           overlayColor: surfaceOverlay(),
         ),
       ),
@@ -315,8 +328,7 @@ abstract final class AppTheme {
         ).copyWith(
           side: outlinedSide,
           animationDuration: AppDurations.fast,
-          // Hover/pressed: véu cinza claro discreto — borda/texto neutros,
-          // sem verde intenso, brilho ou gradiente.
+          // Hover/pressed: véu cinza claro discreto — borda/texto neutros.
           overlayColor: surfaceOverlay(),
         ),
       ),
@@ -332,8 +344,8 @@ abstract final class AppTheme {
           ),
         ).copyWith(
           animationDuration: AppDurations.fast,
-          // Hover/pressed: véu cinza neutro (o rótulo verde da marca fica —
-          // ação de marca — mas o FUNDO de hover nunca é verde).
+          // Hover/pressed: véu cinza neutro (o rótulo no acento da marca —
+          // ação de marca — mas o FUNDO de hover nunca é colorido).
           overlayColor: surfaceOverlay(),
         ),
       ),
@@ -343,8 +355,7 @@ abstract final class AppTheme {
           minimumSize: const Size(AppSizes.touchTarget, AppSizes.touchTarget),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.smAll),
         ).copyWith(
-          // Hover/pressed/focus: véu cinza neutro — o padrão M3 derivaria
-          // do primary (verde).
+          // Hover/pressed/focus: véu cinza neutro.
           overlayColor: surfaceOverlay(),
         ),
       ),
@@ -357,11 +368,8 @@ abstract final class AppTheme {
         shape: const StadiumBorder(),
         side: BorderSide.none,
         // Rótulo em onSurface (≥ 13:1 sobre fieldFill E sobre o container
-        // selecionado, nos dois temas): o antigo onSurfaceVariant dava só
-        // 4.45:1 (claro) e 3.55:1 (escuro) quando o chip estava selecionado.
-        // (Neste SDK o labelStyle do chip é fixo — sem estados por tema.)
-        // Rótulo do chip em corpo/nota da escala (13/w600): legível e
-        // consistente com os textos inline de status (StatusChip).
+        // selecionado, nos dois temas). Rótulo do chip em corpo/nota da
+        // escala (13/w600): legível e consistente com o StatusChip.
         labelStyle: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
@@ -422,13 +430,16 @@ abstract final class AppTheme {
       ),
 
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: isLight ? AppColors.brandMuted : AppColors.brand,
-        foregroundColor: isLight ? Colors.white : const Color(0xFF052E16),
+        // FAB = ação mais importante do ecrã → recebe o acento RESERVADO:
+        // slate no claro (ícone branco 8.8:1) e terracota no escuro
+        // (ícone preto suave 5.7:1) — o primário preenchido continua bege
+        // no escuro; a terracota fica só onde o destaque é justificado.
+        backgroundColor: isLight ? AppColors.slate : AppColors.terracotta,
+        foregroundColor: isLight ? Colors.white : AppColors.softBlack,
         elevation: 2,
         highlightElevation: 4,
-        // Hover/focus: escurece o verde da marca com véu preto sutil (mesma
-        // linguagem dos botões preenchidos) — sem verde vivo, brilho ou
-        // lift exagerado (hover não altera a elevação).
+        // Hover/focus: escurece o preenchimento com véu preto sutil (mesma
+        // linguagem dos botões preenchidos) — sem brilho ou lift exagerado.
         hoverColor: Colors.black.withValues(alpha: 0.08),
         focusColor: Colors.black.withValues(alpha: 0.10),
         hoverElevation: 2,
@@ -472,21 +483,22 @@ abstract final class AppTheme {
         behavior: SnackBarBehavior.floating,
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
+        // Inversão por brilho: claro = preto suave da paleta; escuro = bege
+        // (mesma voz do primário). Conteúdo sempre auditado:
+        // branco/preto suave ≥ 10:1.
         backgroundColor: isLight
-            ? const Color(0xFF18181B)
-            : const Color(0xFFFAFAFA),
+            ? AppColors.softBlack
+            : AppColors.warmBeige,
         contentTextStyle: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           letterSpacing: 0,
-          color: isLight ? Colors.white : const Color(0xFF18181B),
+          color: isLight ? Colors.white : AppColors.softBlack,
         ),
         // Ação explícita (padrão M3 usa inversePrimary não auditado):
-        // snackbar claro = fundo escuro → verde-claro; escuro = fundo claro
-        // → verde-médio da marca. Ambos ≥ 4.5:1 (testado).
-        actionTextColor: isLight
-            ? const Color(0xFF34D399)
-            : AppColors.brandMuted,
+        // snackbar claro = preto suave → bege (10.6:1); escuro = bege →
+        // slate (5.1:1). Ambos ≥ 4.5:1.
+        actionTextColor: isLight ? AppColors.warmBeige : AppColors.slate,
       ),
 
       // Menus de seleção (PopupMenu/Dropdown) — minimalistas e reais:
@@ -536,16 +548,16 @@ abstract final class AppTheme {
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(borderRadius: AppRadius.smAll),
           ),
-          // Hover/pressed: véu cinza neutro (sem o verde do padrão M3).
+          // Hover/pressed: véu cinza neutro.
           overlayColor: surfaceOverlay(),
           animationDuration: AppDurations.fast,
         ),
       ),
 
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        // No escuro o primary (#15803D) é pouco visível sobre as superfícies
-        // escuras; o verde vivo da marca garante ≥ 3:1 (não-texto).
-        color: isLight ? scheme.primary : AppColors.brand,
+        // No escuro o acento RESERVADO (terracota) garante 5.1:1 sobre as
+        // superfícies petróleo (não-texto ≥ 3:1); no claro, o primário.
+        color: isLight ? scheme.primary : AppColors.terracotta,
         linearTrackColor: scheme.surfaceContainerHighest,
       ),
 

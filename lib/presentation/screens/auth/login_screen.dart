@@ -34,6 +34,7 @@ class _LoginPalette {
     required this.textSecondary,
     required this.green,
     required this.greenDark,
+    required this.onCta,
   });
 
   /// Fundo da página (atrás dos campos).
@@ -51,18 +52,20 @@ class _LoginPalette {
   /// Fundo do botão principal (CTA).
   final Color greenDark;
 
-  /// Modo escuro — dark premium.
+  /// Conteúdo sobre o CTA (o bege do escuro exige conteúdo escuro).
+  final Color onCta;
+
+  /// Modo escuro — dark premium petróleo.
   static const _LoginPalette dark = _LoginPalette(
     background: AppColors.backgroundDark,
-    // Branco puro e verde vivo #22C55E são exclusivos da identidade
-    // premium do login (não são papéis do tema).
     textPrimary: Colors.white,
     textSecondary: AppColors.onSurfaceVariantDark,
-    green: Color(0xFF22C55E),
-    // Botão Entrar com branco por cima: o verde vivo (#16A34A) dá 3.30:1 —
-    // abaixo do AA para texto (guideline textContrast falhava no escuro).
-    // O verde médio atinge 5.01:1 (mesmo verde do botão no modo claro).
-    greenDark: AppColors.brandMuted,
+    // Acento da marca: bege no escuro (identidade petróleo premium) e
+    // slate no claro (mesmo tom do botão primário).
+    green: AppColors.warmBeige,
+    // CTA bege com conteúdo preto suave — par auditado 10.6:1 (AA/AAA).
+    greenDark: AppColors.warmBeige,
+    onCta: AppColors.softBlack,
   );
 
   /// Modo claro — espelha os neutros do `AppTheme.light` via tokens.
@@ -72,6 +75,7 @@ class _LoginPalette {
     textSecondary: AppColors.onSurfaceVariantLight,
     green: AppColors.brandMuted,
     greenDark: AppColors.brandMuted,
+    onCta: Colors.white,
   );
 }
 
@@ -371,7 +375,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onPressed: _isSubmitting ? null : _submit,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: palette.greenDark,
-                          foregroundColor: Colors.white,
+                          foregroundColor: palette.onCta,
                           disabledBackgroundColor: palette.greenDark.withValues(
                             alpha: 0.5,
                           ),

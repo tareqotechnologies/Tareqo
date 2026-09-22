@@ -306,7 +306,7 @@ void main() {
 
       // Título em texto escuro (não o branco do dark premium).
       final title = tester.widget<Text>(find.text('TAREQO'));
-      expect(title.style?.color, const Color(0xFF18181B));
+      expect(title.style?.color, AppColors.onSurfaceLight);
 
       // System UI (status bar / navegação) com ícones escuros sobre claro.
       final overlay = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(

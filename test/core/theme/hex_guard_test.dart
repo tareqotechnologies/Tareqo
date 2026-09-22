@@ -41,8 +41,8 @@ void main() {
       'screens/dashboard/dashboard_screen.dart': 1,
       // Template persistente de Factura/Cotação.
       'controllers/invoice_template_providers.dart': 2,
-      // Verde #22C55E exclusivo da identidade do login.
-      'screens/auth/login_screen.dart': 1,
+      // RE2: o verde #22C55E exclusivo do login foi removido — a identidade
+      // agora usa tokens (bege/slate de AppColors), sem hex local.
     };
 
     final problems = <String>[];

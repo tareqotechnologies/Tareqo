@@ -493,7 +493,9 @@ class _SplashScreen extends StatelessWidget {
     final textSecondary = isDark
         ? AppColors.onSurfaceVariantDark
         : AppColors.onSurfaceVariantLight;
-    final green = isDark ? AppColors.brand : AppColors.brandMuted;
+    // Acento da marca: bege no escuro (primário do tema escuro) e slate
+    // no claro — o logo/pulse ganha a identidade petróleo sem verde.
+    final accent = isDark ? AppColors.warmBeige : AppColors.brandMuted;
 
     return Scaffold(
       backgroundColor: bg,
@@ -533,14 +535,14 @@ class _SplashScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 48),
-            // Spinner verde.
+            // Spinner no acento da marca (bege/slate — sem verde).
             SizedBox(
               height: 24,
               width: 24,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                color: green,
-                backgroundColor: green.withValues(alpha: 0.125),
+                color: accent,
+                backgroundColor: accent.withValues(alpha: 0.125),
               ),
             ),
             const SizedBox(height: 20),
