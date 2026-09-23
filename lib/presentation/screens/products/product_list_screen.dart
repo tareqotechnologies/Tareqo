@@ -24,6 +24,7 @@ import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../widgets/smart_amount.dart';
 import '../../widgets/status_chip.dart';
+import '../../widgets/semantics_composed.dart';
 import 'product_form_sheets.dart';
 
 /// Tela de listagem de produtos — busca local, pull-to-refresh e
@@ -691,123 +692,151 @@ class _ProductTileState extends State<_ProductTile> {
         ? (_product.description.isEmpty ? null : _product.description)
         : _product.code;
 
+    // A11y (plano UI/UX — Fase 3.1): o card inteiro é UM nó semântico —
+    // "Caderno: 8,00, 10 un., Stock baixo, Inactivo" — em vez de nome,
+    // detalhe, preço, estoque e chips anunciados como nós separados. O
+    // label vem do helper do design system (mesmo padrão do SalesCard).
+    final semanticLabel = buildComposedLabel([
+      detail == null ? _product.name : '${_product.name}: $detail',
+      Formatters.currency(_product.salePriceCents),
+      Quantity.format(
+        _product.stockQuantity,
+        unitLabel: _product.vendaPorFracao ? _product.unitLabel : null,
+        language: Formatters.currentLanguage,
+      ),
+      if (!_product.vendaPorFracao) l10n.commonUnits,
+      if (lowStock) l10n.dashboardLowStock,
+      if (inactive) l10n.productsInactive,
+    ]);
+
     // Padrão de hover unificado (Lote 2): mesmo feedback do SalesCard.
     return HoverableTile(
       enabled: _onTap != null,
       child: MouseRegion(
-      cursor: _onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: Material(
-        color: _hovered
-            ? scheme.surfaceContainerHighest.withValues(alpha: 0.6)
-            : scheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
-        ),
-        child: InkWell(
-          onTap: _onTap,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                // ── Foto/ícone do produto ──
-                ProductImage(
-                  imagePath: _product.imagePath,
-                  size: 36,
-                  radius: 8,
-                ),
-                const SizedBox(width: 12),
-                // ── Coluna central: nome + detalhe + chips ──
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Nome do produto
-                      Text(
-                        _product.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w400,
-                          color: inactive ? scheme.onSurfaceVariant : null,
-                        ),
-                      ),
-                      if (detail != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          detail,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
+        cursor: _onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: Material(
+          color: _hovered
+              ? scheme.surfaceContainerHighest.withValues(alpha: 0.6)
+              : scheme.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            side: BorderSide(
+              color: scheme.outlineVariant.withValues(alpha: 0.6),
+            ),
+          ),
+          child: InkWell(
+            onTap: _onTap,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              // Mesmo padrão do SalesCard: o toque do card é roteado ao nó
+              // combinado — duplo-toque do leitor ativa o card inteiro.
+              child: Semantics(
+                container: true,
+                excludeSemantics: true,
+                label: semanticLabel,
+                child: Row(
+                  children: [
+                    // ── Foto/ícone do produto ──
+                    ProductImage(
+                      imagePath: _product.imagePath,
+                      size: 36,
+                      radius: 8,
+                    ),
+                    const SizedBox(width: 12),
+                    // ── Coluna central: nome + detalhe + chips ──
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Nome do produto
+                          Text(
+                            _product.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w400,
+                              color: inactive ? scheme.onSurfaceVariant : null,
+                            ),
                           ),
-                        ),
-                      ],
-                      if (inactive) ...[
-                        const SizedBox(height: 4),
-                        StatusChip(
-                          label: l10n.productsInactive,
-                          color: scheme.outline,
-                          icon: Icons.block_outlined,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // ── Coluna direita: preço + estoque ──
-                // Flexible: o rótulo de estoque (que agora pode incluir
-                // "· Estoque baixo") encolhe com ellipsis em vez de estourar
-                // a linha em ecrãs estreitos.
-                Flexible(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerRight,
-                        child: SmartAmount(
-                          cents: _product.salePriceCents,
-                          alignment: Alignment.centerRight,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: inactive ? scheme.onSurfaceVariant : null,
-                          ),
-                        ),
+                          if (detail != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              detail,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                          if (inactive) ...[
+                            const SizedBox(height: 4),
+                            StatusChip(
+                              label: l10n.productsInactive,
+                              color: scheme.outline,
+                              icon: Icons.block_outlined,
+                            ),
+                          ],
+                        ],
                       ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${Quantity.format(_product.stockQuantity, unitLabel: _product.vendaPorFracao ? _product.unitLabel : null, language: Formatters.currentLanguage)}'
-                      '${_product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}'
-                      // Estado por TEXTO, não só pela cor (daltónicos e
-                      // leitores de ecrã): a mesma mensagem do alerta do
-                      // dashboard (dashboardLowStock).
-                      '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: lowStock
-                            ? theme.expense
-                            : scheme.onSurfaceVariant,
-                        fontWeight: lowStock
-                            ? FontWeight.w500
-                            : FontWeight.w300,
+                    ),
+                    const SizedBox(width: 12),
+                    // ── Coluna direita: preço + estoque ──
+                    // Flexible: o rótulo de estoque (que agora pode incluir
+                    // "· Estoque baixo") encolhe com ellipsis em vez de estourar
+                    // a linha em ecrãs estreitos.
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: SmartAmount(
+                              cents: _product.salePriceCents,
+                              alignment: Alignment.centerRight,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: inactive
+                                    ? scheme.onSurfaceVariant
+                                    : null,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${Quantity.format(_product.stockQuantity, unitLabel: _product.vendaPorFracao ? _product.unitLabel : null, language: Formatters.currentLanguage)}'
+                            '${_product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}'
+                            // Estado por TEXTO, não só pela cor (daltónicos e
+                            // leitores de ecrã): a mesma mensagem do alerta do
+                            // dashboard (dashboardLowStock).
+                            '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: lowStock
+                                  ? theme.expense
+                                  : scheme.onSurfaceVariant,
+                              fontWeight: lowStock
+                                  ? FontWeight.w500
+                                  : FontWeight.w300,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                  ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 

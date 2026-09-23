@@ -23,6 +23,7 @@ import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/smart_amount.dart';
+import '../../widgets/semantics_composed.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/status_chip.dart';
@@ -488,6 +489,10 @@ class _DebtCard extends StatelessWidget {
     // Card premium (estilo Apple): cantos 18, superfície elevada e borda
     // TINGIDA pelo estado de vencimento (vermelho para atrasada, âmbar
     // para vence hoje, neutra para em dia).
+    //
+    // A11y (plano UI/UX — Fase 3.1): as informações do card são UM nó —
+    // "João: Atrasada, D-00001 · venceu há 3 dias, 25,00" — e o botão de
+    // quitação mantém NÓ PRÓPRIO (ação anunciável com gesto padrão).
     return AppCard(
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
@@ -496,59 +501,72 @@ class _DebtCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Nome + tag de vencimento inline (canvas) — Wrap para
-                    // não estourar em telas estreitas com escala alta.
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        // Nome COMPLETO do cliente — quebra em linhas
-                        // quando necessário (nada de truncar nomes).
-                        Text(
-                          debt.personName,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+          // A11y (plano UI/UX — Fase 3.1): a linha de informações é UM nó —
+          // "João: Atrasada, D-00001 · venceu há 3 dias, 25,00" — e o botão
+          // de quitação fica FORA dele, com nó próprio: a ação segue
+          // anunciável e acionável com o gesto padrão do leitor de ecrã.
+          Semantics(
+            container: true,
+            excludeSemantics: true,
+            label: buildComposedLabel([
+              '${debt.personName}: $chipLabel',
+              '${Formatters.debtLabel(debt.number)} · $dueDesc',
+              Formatters.currency(debt.amountCents),
+            ]),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Nome + tag de vencimento inline (canvas) — Wrap para
+                      // não estourar em telas estreitas com escala alta.
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          // Nome COMPLETO do cliente — quebra em linhas
+                          // quando necessário (nada de truncar nomes).
+                          Text(
+                            debt.personName,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        StatusChip(label: chipLabel, color: chipColor),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    // Descrição: número SEQUENCIAL + vencimento relativo
-                    // (ex.: "D-00001 · venceu há 3 dias").
-                    Text(
-                      '${Formatters.debtLabel(debt.number)} · $dueDesc',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                          StatusChip(label: chipLabel, color: chipColor),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Valor — SmartAmount (design system ultra-clean): ENCOLHE
-              // para caber — nunca trunca. Tabular: alinhado na coluna.
-              Flexible(
-                child: SmartAmount(
-                  cents: debt.amountCents,
-                  alignment: Alignment.centerRight,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                      const SizedBox(height: 4),
+                      // Descrição: número SEQUENCIAL + vencimento relativo
+                      // (ex.: "D-00001 · venceu há 3 dias").
+                      Text(
+                        '${Formatters.debtLabel(debt.number)} · $dueDesc',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                // Valor — SmartAmount (design system ultra-clean): ENCOLHE
+                // para caber — nunca trunca. Tabular: alinhado na coluna.
+                Flexible(
+                  child: SmartAmount(
+                    cents: debt.amountCents,
+                    alignment: Alignment.centerRight,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 10),
           // Botão de quitação verde em largura total (canvas): a ação
-          // principal do card, sólida e clara.
+          // principal do card, sólida e clara — FORA do nó de informações.
           AppButton.primary(onPressed: onSettle, label: l10n.debtsSettleAction),
         ],
       ),
@@ -571,64 +589,79 @@ class _SettledDebtCard extends StatelessWidget {
 
     // Card premium (estilo Apple): cantos 18, superfície elevada e borda
     // tingida de verde (baixa) — mesmo padrão do card pendente.
+    //
+    // A11y (Fase 3.1): o card do histórico é UM nó — nome, data da baixa,
+    // número e valor falados de uma vez.
     return AppCard(
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       borderColor: theme.income.withValues(alpha: 0.35),
       padding: const EdgeInsets.all(14),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Nome + chip de baixa inline (mesmo padrão do pendente).
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    // Nome COMPLETO do cliente — quebra em linhas quando
-                    // necessário (nada de truncar nomes no histórico).
-                    Text(
-                      debt.personName,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+      child: Semantics(
+        container: true,
+        excludeSemantics: true,
+        label: buildComposedLabel([
+          '${debt.personName}: '
+              '${debt.paidAt == null ? l10n.debtsSettledLabel : l10n.debtsSettledOn(Formatters.date(debt.paidAt!))}',
+          Formatters.debtLabel(debt.number),
+          Formatters.currency(debt.amountCents),
+        ]),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Nome + chip de baixa inline (mesmo padrão do pendente).
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      // Nome COMPLETO do cliente — quebra em linhas quando
+                      // necessário (nada de truncar nomes no histórico).
+                      Text(
+                        debt.personName,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    StatusChip(
-                      label: debt.paidAt == null
-                          ? l10n.debtsSettledLabel
-                          : l10n.debtsSettledOn(Formatters.date(debt.paidAt!)),
-                      color: theme.income,
-                      icon: Icons.check_circle_outline,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                // Número SEQUENCIAL do fiado (D-00001).
-                Text(
-                  Formatters.debtLabel(debt.number),
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                      StatusChip(
+                        label: debt.paidAt == null
+                            ? l10n.debtsSettledLabel
+                            : l10n.debtsSettledOn(
+                                Formatters.date(debt.paidAt!),
+                              ),
+                        color: theme.income,
+                        icon: Icons.check_circle_outline,
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          // Valor — SmartAmount (design system ultra-clean): ENCOLHE para
-          // caber — nunca trunca; visível no histórico. Tabular: alinhado.
-          Flexible(
-            child: SmartAmount(
-              cents: debt.amountCents,
-              alignment: Alignment.centerRight,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+                  const SizedBox(height: 4),
+                  // Número SEQUENCIAL do fiado (D-00001).
+                  Text(
+                    Formatters.debtLabel(debt.number),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            // Valor — SmartAmount (design system ultra-clean): ENCOLHE para
+            // caber — nunca trunca; visível no histórico. Tabular: alinhado.
+            Flexible(
+              child: SmartAmount(
+                cents: debt.amountCents,
+                alignment: Alignment.centerRight,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

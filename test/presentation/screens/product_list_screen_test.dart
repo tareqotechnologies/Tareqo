@@ -205,6 +205,41 @@ void main() {
       handle.dispose();
     });
 
+    // A11y (plano UI/UX — Fase 3.1): o tile de produto é UM nó semântico —
+    // nome, detalhe, preço, estoque e estado lidos de uma vez (o texto
+    // visual do nome NÃO tem nó próprio — excludeSemantics).
+    testWidgets('tile de produto expõe rótulo composto', (tester) async {
+      // Handle ANTES do pump: a árvore de semântica é construída no frame.
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _buildApp(
+          _FakeGetProductsUseCase(const [
+            Product(
+              id: '1',
+              name: 'Caderno',
+              description: '200 folhas',
+              purchasePriceCents: 500,
+              salePriceCents: 800,
+              stockQuantity: 5000,
+            ),
+          ]),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.bySemanticsLabel(RegExp(r'^Caderno: 200 folhas, R\$ 8,00, ')),
+        findsOneWidget,
+      );
+      // O texto visual resolve para o nó PAI composto — nunca anunciado
+      // sozinho.
+      expect(
+        tester.getSemantics(find.text('Caderno')).label,
+        startsWith('Caderno: 200 folhas, R\$ 8,00'),
+      );
+      handle.dispose();
+    });
+
     testWidgets('exibe os produtos retornados pelo caso de uso', (
       tester,
     ) async {
@@ -690,7 +725,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Caneta'), findsOneWidget);
-    });    testWidgets('funcionário comum NÃO vê o botão de novo produto (só vende)', (
+    });
+    testWidgets('funcionário comum NÃO vê o botão de novo produto (só vende)', (
       tester,
     ) async {
       await tester.pumpWidget(

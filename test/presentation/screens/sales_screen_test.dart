@@ -126,6 +126,48 @@ void main() {
     handle.dispose();
   });
 
+  // A11y (plano UI/UX — Fase 3.1): o card de venda é UM nó semântico com
+  // rótulo composto (método, valor, número+itens, status) — lido de uma
+  // vez — e o toque fica roteado ao nó combinado (duplo-toque ativa o
+  // card inteiro, como num botão).
+  testWidgets('card de venda expõe rótulo composto e toque acionável', (
+    tester,
+  ) async {
+    var tapped = false;
+    // Handle ANTES do pump: a árvore de semântica é construída no frame.
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      testApp(
+        home: Scaffold(
+          body: SalesCard(
+            sale: _pastSale(
+              items: const [
+                SaleItem(
+                  productId: 'p1',
+                  productName: 'Caneta',
+                  quantity: 2,
+                  unitPriceCents: 200,
+                ),
+              ],
+            ),
+            onTap: () => tapped = true,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final card = find.bySemanticsLabel(
+      'M-Pesa: R\$ 4,00, S-00001 · 1 item, Pago',
+    );
+    expect(card, findsOneWidget);
+    // O toque no nó composto aciona o card (duplo-toque do leitor).
+    await tester.tap(card);
+    await tester.pumpAndSettle();
+    expect(tapped, isTrue);
+    handle.dispose();
+  });
+
   testWidgets('exibe as vendas registadas pelo repositório', (tester) async {
     await tester.pumpWidget(
       _buildApp(

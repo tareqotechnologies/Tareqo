@@ -116,6 +116,51 @@ void main() {
     handle.dispose();
   });
 
+  // A11y (plano UI/UX — Fase 3.1): o card de fiado fala as informações
+  // como UM nó (nome, vencimento, número, valor) e o botão "Quitar dívida"
+  // mantém NÓ PRÓPRIO — a ação é anunciável e acionável com gesto padrão.
+  testWidgets('card de fiado expõe rótulo composto e ação de quitação', (
+    tester,
+  ) async {
+    // Handle ANTES do pump: a árvore de semântica é construída no frame.
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _buildApp(
+        useCase: _FakeGetPendingDebtsUseCase([
+          Debt(
+            id: 'd9',
+            number: 9,
+            personName: 'Beatriz',
+            amountCents: 2500,
+            dueDate: DateTime(2026, 8, 6),
+            isCustomerDebt: true,
+          ),
+        ]),
+        settleUseCase: _FakeSettleDebtUseCase(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Nome + chip + descrição (D-00009) + valor em UM rótulo.
+    expect(
+      find.bySemanticsLabel(RegExp(r'^Beatriz: .*D-00009.*25,00$')),
+      findsOneWidget,
+    );
+    // O texto visual do nome resolve para o nó PAI composto.
+    expect(
+      tester.getSemantics(find.text('Beatriz')).label,
+      startsWith('Beatriz: '),
+    );
+    // A ação de quitar segue anunciável com NÓ PRÓPRIO (não foi engolida
+    // pelo excludeSemantics do card) — a execução em si já é coberta pelo
+    // teste 'quitar dívida confirma, chama o use case e a dívida some'.
+    expect(
+      tester.getSemantics(find.text('Quitar dívida')).label,
+      'Quitar dívida',
+    );
+    handle.dispose();
+  });
+
   late HapticSpy spy;
   setUp(() => spy = HapticSpy()..install());
   tearDown(() => spy.uninstall());
