@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
+import 'package:tareqo/app.dart';
 import 'package:tareqo/domain/entities/app_user.dart';
 import 'package:tareqo/domain/repositories/i_auth_repository.dart';
 import 'package:tareqo/presentation/controllers/auth_providers.dart';
@@ -95,5 +96,40 @@ void main() {
     await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
     await expectLater(tester, meetsGuideline(textContrastGuideline));
     handle.dispose();
+  });
+
+  // A11y (plano UI/UX — Fase 3.2): o builder do [TareqoApp] aplica teto
+  // global de 1.6× na escala de texto — o sistema pede 2.0, o app entrega
+  // 1.6 (legibilidade ampliada SEM layouts quebrados).
+  testWidgets('app aplica teto global de 1.6x na escala de texto', (
+    tester,
+  ) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // App completo sem sessão (stream sem emissão → splash do AuthGate):
+    // o builder do MaterialApp roda para QUALQUER tela filha, incluindo
+    // login/splash — não exige o bootstrap do shell logado.
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
+        ],
+        child: const TareqoApp(),
+      ),
+    );
+    await tester.pump();
+
+    // O app entrega 1.6 (o sistema pediu 2.0): um bodyMedium (14) renderiza a 22.4 (não 28) e um
+    // labelSmall (11) a 17.6 — probe abaixo do builder (AppLockOverlay),
+    // onde a MediaQuery mais próxima já é a do clamp.
+    final navigatorContext = tester.element(find.byType(Navigator).first);
+    final scaler = MediaQuery.of(navigatorContext).textScaler;
+    expect(scaler.scale(14), closeTo(22.4, 0.01));
+    expect(scaler.scale(11), closeTo(17.6, 0.01));
+
+    // Nada estourou com o teto aplicado (overflows de RenderFlex falham
+    // o teste automaticamente).
+    expect(tester.takeException(), isNull);
   });
 }

@@ -42,8 +42,22 @@ class TareqoApp extends ConsumerWidget {
       // O bloqueio biométrico vive no `builder` (acima do Navigator): cobre
       // também sheets/diálogos abertos quando o app é bloqueado em segundo
       // plano — ver app_lock_overlay.dart.
-      builder: (context, child) =>
-          AppLockOverlay(child: child ?? const SizedBox.shrink()),
+      builder: (context, child) {
+        // A11y (plano UI/UX — Fase 3.2): teto global de 1.6× na escala de
+        // texto — acessibilidade SEM layouts quebrados. Os componentes
+        // críticos (PDV, cards, sheets) absorvem o texto ampliado até o
+        // teto com Flexible/FittedBox/maxLines; acima disso o conteúdo
+        // perde legibilidade estrutural (Row rígidas estouram).
+        final mq = MediaQuery.of(context);
+        final clampedScaler = mq.textScaler.clamp(
+          minScaleFactor: 1.0,
+          maxScaleFactor: 1.6,
+        );
+        return MediaQuery(
+          data: mq.copyWith(textScaler: clampedScaler),
+          child: AppLockOverlay(child: child ?? const SizedBox.shrink()),
+        );
+      },
     );
   }
 }

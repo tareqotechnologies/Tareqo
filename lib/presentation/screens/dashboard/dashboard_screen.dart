@@ -496,94 +496,103 @@ class _BalanceHero extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            // Coluna da métrica CAIXA — chave cobre rótulo + valor
-            // (os testes localizam label e número pelo mesmo key).
-                Column(
-                  key: const ValueKey('metric-cash'),
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Rótulo da métrica CAIXA em pílula de marca — o mesmo
-                    // papel visual dos chips selecionados do tema.
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
+          // Coluna da métrica CAIXA — chave cobre rótulo + valor
+          // (os testes localizam label e número pelo mesmo key).
+          // A11y (plano UI/UX — Fase 3.1): o leitor de ecrã lê RÓTULO +
+          // VALOR como UM nó ("Caixa: 1.234,00 MZN") em vez de percorrer
+          // pílula e número dígito a dígito.
+          Semantics(
+            key: const ValueKey('metric-cash'),
+            container: true,
+            excludeSemantics: true,
+            label:
+                '${l10n.dashboardMetricCash}: ${cashLoading ? '—' : cashValue}',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Rótulo da métrica CAIXA em pílula de marca — o mesmo
+                // papel visual dos chips selecionados do tema.
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: scheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 14,
+                        color: scheme.onPrimaryContainer,
                       ),
-                      decoration: BoxDecoration(
-                        color: scheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(AppRadius.full),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.account_balance_wallet_rounded,
-                            size: 14,
-                            color: scheme.onPrimaryContainer,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            l10n.dashboardMetricCash,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: scheme.onPrimaryContainer,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Valor grande e tabular — o destaque visual da Home.
-                    // Formato "1.000,00 MZN": valor + código da moeda.
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        cashLoading ? '—' : cashValue,
-                        maxLines: 1,
-                        style: theme.textTheme.displaySmall?.copyWith(
-                          color: cashNegative ? theme.expense : scheme.onSurface,
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.dashboardMetricCash,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: scheme.onPrimaryContainer,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: -1.2,
-                          height: 1.1,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                // Régua fina separando o saldo das métricas secundárias.
-                const Divider(height: 1),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _HeroMetric(
-                        label: l10n.dashboardMetricSales,
-                        value: salesValue,
-                        subtext: salesSubtext,
-                        subtextColor: salesSubtextColor,
-                        loading: salesLoading,
-                        valueKey: const ValueKey('metric-sales'),
-                      ),
+                const SizedBox(height: 8),
+                // Valor grande e tabular — o destaque visual da Home.
+                // Formato "1.000,00 MZN": valor + código da moeda.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    cashLoading ? '—' : cashValue,
+                    maxLines: 1,
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      color: cashNegative ? theme.expense : scheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -1.2,
+                      height: 1.1,
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Container(width: 1, height: 40, color: scheme.outlineVariant),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: _HeroMetric(
-                        label: l10n.dashboardMetricReceivables,
-                        value: receivablesValue,
-                        subtext: receivablesSubtext,
-                        subtextColor: theme.warning,
-                        loading: receivablesLoading,
-                        valueKey: const ValueKey('metric-receivables'),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // Régua fina separando o saldo das métricas secundárias.
+          const Divider(height: 1),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _HeroMetric(
+                  label: l10n.dashboardMetricSales,
+                  value: salesValue,
+                  subtext: salesSubtext,
+                  subtextColor: salesSubtextColor,
+                  loading: salesLoading,
+                  valueKey: const ValueKey('metric-sales'),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Container(width: 1, height: 40, color: scheme.outlineVariant),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _HeroMetric(
+                  label: l10n.dashboardMetricReceivables,
+                  value: receivablesValue,
+                  subtext: receivablesSubtext,
+                  subtextColor: theme.warning,
+                  loading: receivablesLoading,
+                  valueKey: const ValueKey('metric-receivables'),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -613,49 +622,57 @@ class _HeroMetric extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-
-    return Column(
+    return Semantics(
       key: valueKey,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: scheme.onSurfaceVariant,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.2,
-          ),
-        ),
-        const SizedBox(height: 4),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            loading ? '—' : value,
-            maxLines: 1,
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: scheme.onSurface,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.4,
-            ),
-          ),
-        ),
-        if (subtext != null) ...[
-          const SizedBox(height: 2),
+      container: true,
+      excludeSemantics: true,
+      // A11y (Fase 3.1): rótulo + valor (+ delta/contagem) lidos como UM
+      // nó — "Vendas: 1.250,00 MZN, +18%" — em vez de nós separados.
+      label: subtext == null
+          ? '$label: ${loading ? '—' : value}'
+          : '$label: ${loading ? '—' : value}, $subtext',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
           Text(
-            subtext!,
+            label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: subtextColor ?? scheme.onSurfaceVariant,
+              color: scheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
+              letterSpacing: 0.2,
             ),
           ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              loading ? '—' : value,
+              maxLines: 1,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: scheme.onSurface,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.4,
+              ),
+            ),
+          ),
+          if (subtext != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              subtext!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: subtextColor ?? scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -781,8 +798,8 @@ class _ActivityItem {
       details: expired
           ? l10n.dashboardExpiredIn(-alert.daysRemaining)
           : l10n.dashboardExpiresIn(alert.daysRemaining),
-    dateTime: AppClock.now(),
-    icon: expired ? Icons.dangerous_outlined : Icons.hourglass_top_rounded,
+      dateTime: AppClock.now(),
+      icon: expired ? Icons.dangerous_outlined : Icons.hourglass_top_rounded,
       iconBackground: color.withValues(alpha: 0.18),
       iconColor: color,
       badge: Quantity.format(

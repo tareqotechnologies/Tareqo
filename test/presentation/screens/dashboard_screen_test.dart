@@ -314,6 +314,59 @@ void main() {
     handle.dispose();
   });
 
+  // A11y (plano UI/UX — Fase 3.1): cada KPI do hero é UM nó semântico com
+  // rótulo + valor (o leitor de ecrã anuncia "Vendas: 30,00 BRL" de uma
+  // vez, não dígito a dígito) e os textos visuais ficam EXCLUÍDOS da
+  // árvore de semântica (excludeSemantics — o rótulo composto é a única
+  // fonte falada).
+  testWidgets('KPIs do hero expõem rótulo completo e excluem nós filhos', (
+    tester,
+  ) async {
+    await pumpDashboard(
+      tester,
+      _buildApp(
+        products: const [],
+        sales: [_sale(totalCents: 3000, number: 1)],
+        cashFlow: const CashFlow(incomeCents: 10000, expenseCents: 4000),
+        debts: [
+          Debt(
+            id: 'd1',
+            personName: 'Cliente A',
+            amountCents: 1500,
+            dueDate: DateTime.now(),
+            isCustomerDebt: true,
+          ),
+        ],
+      ),
+    );
+
+    final handle = tester.ensureSemantics();
+
+    // Vendas: 30,00 sem delta (não há vendas no período anterior).
+    expect(
+      tester.getSemantics(find.byKey(const ValueKey('metric-sales'))).label,
+      'Vendas: 30,00 BRL',
+    );
+    // Caixa: saldo do fluxo (10000−4000 centavos = 60,00).
+    expect(
+      tester.getSemantics(find.byKey(const ValueKey('metric-cash'))).label,
+      'Caixa: 60,00 BRL',
+    );
+    // A receber: valor dos KPIs + contagem de fiados no subtexto.
+    expect(
+      tester
+          .getSemantics(find.byKey(const ValueKey('metric-receivables')))
+          .label,
+      'A receber: 15,00 BRL, 1 fiado',
+    );
+
+    // excludeSemantics: o texto visual do rótulo NÃO tem nó próprio — o
+    // elemento resolve para o nó PAI composto ("Vendas: 30,00 BRL"), então
+    // o leitor nunca anuncia "Vendas" e "30,00 BRL" separados.
+    expect(tester.getSemantics(find.text('Vendas')).label, 'Vendas: 30,00 BRL');
+    handle.dispose();
+  });
+
   testWidgets('exibe saudação, data, pílula de período, loja e métricas', (
     tester,
   ) async {
