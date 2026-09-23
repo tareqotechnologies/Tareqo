@@ -7,6 +7,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
+import 'pdf_accent.dart';
+
 /// Exportação de relatórios avançados para PDF.
 ///
 /// Gera documentos A4 para os 3 tipos de relatório:
@@ -152,7 +154,7 @@ class AdvancedReportsPdfExporter {
                     style: pw.TextStyle(
                       fontSize: 18,
                       fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.indigo900,
+                      color: PdfAccents.slateDeep,
                     ),
                   ),
                   pw.SizedBox(height: 4),
@@ -174,7 +176,7 @@ class AdvancedReportsPdfExporter {
                       vertical: 6,
                     ),
                     decoration: pw.BoxDecoration(
-                      color: PdfColors.indigo700,
+                      color: PdfAccents.petrol,
                       borderRadius: pw.BorderRadius.circular(6),
                     ),
                     child: pw.Text(
@@ -237,7 +239,7 @@ class AdvancedReportsPdfExporter {
                   color: PdfColors.white,
                 ),
                 headerDecoration: const pw.BoxDecoration(
-                  color: PdfColors.indigo700,
+                  color: PdfAccents.petrol,
                 ),
                 cellStyle: const pw.TextStyle(fontSize: 9),
                 cellPadding: const pw.EdgeInsets.all(6),
@@ -290,7 +292,7 @@ class AdvancedReportsPdfExporter {
     child: pw.Container(
       padding: const pw.EdgeInsets.all(10),
       decoration: pw.BoxDecoration(
-        color: PdfColors.indigo50,
+        color: PdfAccents.warmBeige,
         borderRadius: pw.BorderRadius.circular(6),
       ),
       child: pw.Column(
@@ -306,7 +308,7 @@ class AdvancedReportsPdfExporter {
             style: pw.TextStyle(
               fontSize: 12,
               fontWeight: pw.FontWeight.bold,
-              color: PdfColors.indigo900,
+              color: PdfAccents.slateDeep,
             ),
           ),
         ],

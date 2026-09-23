@@ -27,8 +27,9 @@ void main() {
 
     // Arquivo → ocorrências `Color(0x…)` documentadas (caminho com `/`).
     const documented = <String, int>{
-      // Paleta de template escolhida pelo utilizador (Fase 0).
-      'widgets/color_palette.dart': 8,
+    // Paleta de template escolhida pelo utilizador (Fase 0; RE2 — 8
+    // swatches da paleta base + derivados auditados, sem verde).
+    'widgets/color_palette.dart': 8,
       // Papel do recibo impresso (cores de tinta, não de UI).
       'widgets/sale_receipt_view.dart': 5,
       // Identidade das formas de pagamento: M-Pesa, E-Mola, cartão.
@@ -39,7 +40,9 @@ void main() {
       // card-hero perdeu o gradiente (Fase de des-artificialização) e
       // passou a usar só tokens do tema.
       'screens/dashboard/dashboard_screen.dart': 1,
-      // Template persistente de Factura/Cotação.
+      // Template persistente de Factura/Cotação (default RE2 = slate
+      // 0xFF3D4D55 — ctor + check de default; o hex do fromJson fica em
+      // linha própria e não conta no grep).
       'controllers/invoice_template_providers.dart': 2,
       // RE2: o verde #22C55E exclusivo do login foi removido — a identidade
       // agora usa tokens (bege/slate de AppColors), sem hex local.

@@ -690,9 +690,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Caneta'), findsOneWidget);
-    });
-
-    testWidgets('funcionário comum NÃO vê o botão de novo produto (só vende)', (
+    });    testWidgets('funcionário comum NÃO vê o botão de novo produto (só vende)', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -711,6 +709,57 @@ void main() {
 
       expect(find.byIcon(Icons.add), findsNothing);
       expect(find.text('Novo produto'), findsNothing);
+    });
+  });
+
+  group('Guard de remoção de foto do produto', () {
+    // Produto COM foto (caminho não-vazio ativa a lixeira no picker).
+    Product photoProduct() => const Product(
+      id: '1',
+      name: 'Caneta',
+      purchasePriceCents: 100,
+      salePriceCents: 200,
+      imagePath: '/tmp/foto.jpg',
+    );
+
+    Future<void> openEditSheet(WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildApp(_FakeGetProductsUseCase([photoProduct()])),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Caneta'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('toque na lixeira NÃO remove a foto sem confirmar', (
+      tester,
+    ) async {
+      await openEditSheet(tester);
+
+      // Anti-flicker: a lixeira só entra na árvore se há foto (i.i.).
+      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+
+      // Um toque NÃO pode remover — o diálogo de confirmação aparece.
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Remover fotografia'), findsOneWidget);
+      expect(find.text('Guardar alterações'), findsOneWidget);
+    });
+
+    testWidgets('cancelar mantém a foto intacta', (tester) async {
+      await openEditSheet(tester);
+
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+      // Cancela (TextButton do confirm dialog).
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+
+      // A foto continua no preview (não removida) e o sheet segue aberto.
+      expect(find.text('Remover fotografia'), findsNothing);
+      expect(find.text('Guardar alterações'), findsOneWidget);
     });
   });
 }

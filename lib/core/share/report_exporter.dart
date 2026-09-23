@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../domain/usecases/get_sales_report_use_case.dart';
 import '../utils/formatters.dart';
 import '../utils/quantity.dart';
+import 'pdf_accent.dart';
 
 /// Rótulos LOCALIZADOS do relatório exportado (CSV/PDF).
 ///
@@ -281,7 +282,7 @@ class ReportExporter {
                 color: PdfColors.white,
               ),
               headerDecoration: const pw.BoxDecoration(
-                color: PdfColors.indigo700,
+                color: PdfAccents.petrol,
               ),
               cellStyle: const pw.TextStyle(fontSize: 9),
               cellPadding: const pw.EdgeInsets.all(6),
@@ -314,7 +315,7 @@ class ReportExporter {
                 color: PdfColors.white,
               ),
               headerDecoration: const pw.BoxDecoration(
-                color: PdfColors.indigo700,
+                color: PdfAccents.petrol,
               ),
               cellStyle: const pw.TextStyle(fontSize: 9),
               cellPadding: const pw.EdgeInsets.all(6),
@@ -370,7 +371,7 @@ class ReportExporter {
       margin: const pw.EdgeInsets.only(right: 8),
       padding: const pw.EdgeInsets.all(12),
       decoration: pw.BoxDecoration(
-        color: PdfColors.indigo50,
+        color: PdfAccents.warmBeige,
         borderRadius: pw.BorderRadius.circular(8),
       ),
       child: pw.Column(
@@ -386,7 +387,7 @@ class ReportExporter {
             style: pw.TextStyle(
               fontSize: 13,
               fontWeight: pw.FontWeight.bold,
-              color: PdfColors.indigo900,
+              color: PdfAccents.slateDeep,
             ),
           ),
         ],

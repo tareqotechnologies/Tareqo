@@ -17,7 +17,9 @@ class InvoiceTemplateConfig {
     this.businessAddress = '',
     this.businessPhone = '',
     this.businessTaxId = '',
-    this.primaryColor = const Color(0xFF2563EB),
+    // RE2: default alinhado ao tema (slate) — antes azul #2563EB, fora do
+    // sistema visual. O utilizado persiste nos prefs do utilizador.
+    this.primaryColor = const Color(0xFF3D4D55),
     this.templateStyle = 'Classic',
   });
 
@@ -69,7 +71,7 @@ class InvoiceTemplateConfig {
         businessPhone: json['phone'] is String ? json['phone'] as String : '',
         businessTaxId: json['taxId'] is String ? json['taxId'] as String : '',
         primaryColor: Color(
-          json['color'] is int ? json['color'] as int : 0xFF2563EB,
+          json['color'] is int ? json['color'] as int : 0xFF3D4D55,
         ),
         templateStyle: _knownStyles.contains(json['style'])
             ? json['style']! as String
@@ -107,7 +109,7 @@ class InvoiceTemplateNotifier extends Notifier<InvoiceTemplateConfig> {
           current.businessTaxId.isEmpty &&
           current.logoBytes == null &&
           current.templateStyle == 'Classic' &&
-          current.primaryColor == const Color(0xFF2563EB);
+          current.primaryColor == const Color(0xFF3D4D55);
       if (untouched) state = decoded;
     } catch (_) {
       // Prefs indisponível (ex.: teste) — mantém default sem quebrar.

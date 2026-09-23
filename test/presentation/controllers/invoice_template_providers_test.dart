@@ -31,7 +31,7 @@ void main() {
         businessAddress: 'Av. 24 de Julho, 100',
         businessPhone: '840000000',
         businessTaxId: '400123456',
-        primaryColor: const Color(0xFF16A34A),
+        primaryColor: const Color(0xFFB58863),
         templateStyle: 'Modern',
       );
 
@@ -42,7 +42,7 @@ void main() {
       expect(restored.businessAddress, 'Av. 24 de Julho, 100');
       expect(restored.businessPhone, '840000000');
       expect(restored.businessTaxId, '400123456');
-      expect(restored.primaryColor, const Color(0xFF16A34A));
+      expect(restored.primaryColor, const Color(0xFFB58863));
       expect(restored.templateStyle, 'Modern');
       expect(restored.logoBytes, isNotNull);
       expect(restored.logoBytes, Uint8List.fromList(const [1, 2, 3, 255]));
@@ -56,7 +56,7 @@ void main() {
       });
 
       expect(restored.businessName, '');
-      expect(restored.primaryColor, const Color(0xFF2563EB));
+      expect(restored.primaryColor, const Color(0xFF3D4D55));
       expect(restored.templateStyle, 'Classic');
       expect(restored.logoBytes, isNull);
     });

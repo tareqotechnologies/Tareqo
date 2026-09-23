@@ -21,6 +21,7 @@ import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/confirm_dialog.dart';
 import '../../widgets/money_live_preview.dart';
 import '../../widgets/product_image.dart';
 import '../../../core/observability/crash_reporting.dart';
@@ -30,6 +31,24 @@ import '../../../core/observability/crash_reporting.dart';
 /// edição + os helpers exclusivos do formulário (picker de foto, campos,
 /// rótulos de seção, switch compacto, validade).
 class _ProductPhotoPicker extends StatelessWidget {
+  /// Guard anti-toque-acidental (mesma abordagem do `confirm_dialog`):
+  /// apagar a foto é destrutivo PERMANENTE na edição — no guardar, o
+  /// storage perde o arquivo e a edição continua sem foto. Tocar sem
+  /// querer na lixeira não pode perder a imagem: o `showConfirmDialog`
+  /// destrutivo exige intenção explícita (§3 do design system — estado
+  /// destrutivo nunca é só um tap longe do dado).
+  static Future<bool> _confirmRemove(BuildContext context) async {
+    final l10n = context.l10n;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.productsPhotoRemove,
+      message: l10n.productsPhotoRemoveConfirm,
+      confirmLabel: l10n.commonDelete,
+      destructive: true,
+    );
+    return confirmed == true;
+  }
+
   const _ProductPhotoPicker({
     required this.bytes,
     required this.imagePath,
@@ -125,7 +144,13 @@ class _ProductPhotoPicker extends StatelessWidget {
                       _PhotoActionButton(
                         icon: Icons.delete_outline,
                         tooltip: l10n.productsPhotoRemove,
-                        onTap: onRemove,
+                        onTap: () async {
+                          // O diálogo bloqueia toques acidentais: sem a
+                          // confirmação explícita, a foto fica intacta.
+                          if (await _confirmRemove(context) && context.mounted) {
+                            onRemove();
+                          }
+                        },
                         isDestructive: true,
                       ),
                     ],
@@ -172,24 +197,27 @@ class _PhotoActionButton extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final color = isDestructive ? scheme.error : scheme.onSurfaceVariant;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isDestructive
-              ? scheme.error.withValues(alpha: 0.08)
-              : scheme.surface,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 32,
+          height: 32,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
             color: isDestructive
-                ? scheme.error.withValues(alpha: 0.2)
-                : scheme.outlineVariant.withValues(alpha: 0.5),
+                ? scheme.error.withValues(alpha: 0.08)
+                : scheme.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isDestructive
+                  ? scheme.error.withValues(alpha: 0.2)
+                  : scheme.outlineVariant.withValues(alpha: 0.5),
+            ),
           ),
+          child: Icon(icon, size: 16, color: color),
         ),
-        child: Icon(icon, size: 16, color: color),
       ),
     );
   }

@@ -1110,6 +1110,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsPhotoRemove => 'Retirer la photo';
 
   @override
+  String get productsPhotoRemoveConfirm =>
+      'Supprimer la photo du produit ? L\'image actuelle sera retirée à l\'enregistrement.';
+
+  @override
   String get productsPhotoTitle => 'Photo du produit';
 
   @override
@@ -3061,28 +3065,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get quotationTemplatePreviewBadge => 'Aperçu';
 
   @override
-  String get paletteBlue => 'Bleu';
-
-  @override
-  String get paletteGreen => 'Vert';
-
-  @override
-  String get paletteRed => 'Rouge';
-
-  @override
-  String get paletteAmber => 'Ambre';
+  String get palettePetrol => 'Bleu pétrole';
 
   @override
   String get paletteSlate => 'Ardoise';
 
   @override
-  String get paletteViolet => 'Violet';
+  String get paletteTerracotta => 'Terracotta';
 
   @override
-  String get paletteTeal => 'Sarcelle';
+  String get paletteBeige => 'Beige';
 
   @override
-  String get paletteIndigo => 'Indigo';
+  String get paletteWarmGray => 'Gris chaud';
+
+  @override
+  String get palettePetrolInk => 'Encre pétrole';
+
+  @override
+  String get paletteSlateInk => 'Encre ardoise';
+
+  @override
+  String get paletteSoftBlack => 'Noir doux';
 
   @override
   String get customInvoicePdf => 'PDF';

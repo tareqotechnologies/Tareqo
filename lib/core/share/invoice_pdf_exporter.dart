@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../domain/entities/custom_invoice.dart';
 import '../utils/formatters.dart';
+import 'pdf_accent.dart';
 
 /// Rótulos LOCALIZADOS do PDF da factura personalizada.
 ///
@@ -106,7 +107,7 @@ class InvoicePdfExporter {
     String? businessPhone,
     String? businessTaxId,
     Uint8List? logoBytes,
-    PdfColor primaryColor = PdfColors.indigo700,
+    PdfColor primaryColor = PdfAccents.slate,
     String templateStyle = 'Classic',
   }) async {
     final data = await rootBundle.load('assets/fonts/Inter-Variable.ttf');
@@ -310,7 +311,7 @@ class InvoicePdfExporter {
             pw.Container(
               padding: const pw.EdgeInsets.all(10),
               decoration: pw.BoxDecoration(
-                color: PdfColors.green50,
+                color: PdfAccents.paymentSurface,
                 borderRadius: pw.BorderRadius.circular(6),
               ),
               child: pw.Row(
@@ -320,7 +321,7 @@ class InvoicePdfExporter {
                     style: pw.TextStyle(
                       fontSize: 9,
                       fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.green900,
+                      color: PdfAccents.paymentText,
                     ),
                   ),
                   if (invoice.paymentReference.isNotEmpty) ...[
@@ -332,7 +333,7 @@ class InvoicePdfExporter {
                       ),
                       style: const pw.TextStyle(
                         fontSize: 9,
-                        color: PdfColors.green800,
+                        color: PdfAccents.paymentTextMuted,
                       ),
                     ),
                   ],
@@ -385,7 +386,7 @@ class InvoicePdfExporter {
     String? businessPhone,
     String? businessTaxId,
     Uint8List? logoBytes,
-    PdfColor primaryColor = PdfColors.indigo700,
+    PdfColor primaryColor = PdfAccents.slate,
     String templateStyle = 'Classic',
   }) async {
     final bytes = await buildPdf(

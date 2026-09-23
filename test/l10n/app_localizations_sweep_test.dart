@@ -19,9 +19,9 @@ import 'package:tareqo/l10n/generated/app_localizations.dart';
 import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_fr.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
-/// Total de membros do catálogo: 1136 (1007 getters + 129 métodos).
-const int kTotalMembers = 1136;
-const int kTotalGetters = 1007;
+/// Total de membros do catálogo: 1137 (1008 getters + 129 métodos).
+const int kTotalMembers = 1137;
+const int kTotalGetters = 1008;
 const int kTotalMethods = 129;
 const Set<String> kMethodNames = <String>{  'onboardingPlanDetails',  'onboardingSuccess',  'storeSwitcherA11yLabel',  'tenantPendingSubtitle',  'tenantRejectedSubtitle',  'syncPendingCount',  'syncErrorsCount',  'syncDone',  'dashboardGreeting',  'dashboardActivityEvents',  'dashboardActivityMinutesAgo',  'dashboardFiadoCount',  'dashboardStockEntry',  'dashboardStockEntryDetail',  'dashboardExpenseRow',  'dashboardLowStockDetail',  'dashboardSaleItems',  'employeeDeactivateConfirm',  'employeeReactivateConfirm',  'upgradesRequestedOn',  'planDetails',  'addStoreSuccess',  'productsHeaderCount',  'productsFilteredCount',  'customersHeaderCount',  'customersCreditLabel',  'customersAdded',  'customersEditSuccess',  'customersDeleteConfirmMessage',  'purchasesHeaderCount',  'purchasesStockAdded',  'purchasesRegistered',  'purchasesProductNotFound',  'purchasesStockLabel',  'reportsRevenueLabel',  'financialReceivePendingBody',  'financialPayPendingBody',  'cashClosingSurplus',  'cashClosingShortage',  'debtsSettleBody',  'debtsSettled',  'debtsDueIn',  'debtsDueAgo',  'debtsSettledOn',  'debtsRegisteredFor',  'salesCartSection',  'salesHeaderTransactions',  'salesPdvCount',  'salesFilteredSummary',  'salesRegistered',  'salesInsufficientStock',  'salesStockFor',  'salesProductNotFound',  'saleDetailId',  'saleDetailCancelConfirmBody',  'adminAwaitingCount',  'adminAccessApproved',  'adminRequestRejected',  'adminRejectTitle',  'adminPlanLabel',  'adminPlanCreated',  'adminPlanUpdated',  'salesBarcodeCameraUnavailable',  'salesStockLimit',  'dashboardExpiredIn',  'dashboardExpiresIn',  'adminTenantDetailStoresCount',  'adminTenantDetailEmployeesCount',  'adminTenantDetailActivityCount',  'adminTenantDetailEmployeeRole',  'adminBulkApprove',  'adminBulkReject',  'adminBulkRejectTitle',  'adminBulkApproveSuccess',  'adminBulkRejectSuccess',  'adminPendingActionRequired',  'adminGrowthUp',  'adminGrowthDown',  'adminInvoiceCancelConfirm',  'notificationSinceDaysAgo',  'notificationBodyInvoiceGenerated',  'notificationBodyInvoiceDueSoon',  'notificationBodyInvoiceExpired',  'notificationBodyInvoicePaid',  'notificationBodyAddOnExpired',  'notificationBodyAddOnExpiringSoon',  'notificationDaysShort',  'customInvoiceCreated',  'customInvoiceItemsCount',  'customInvoiceProductOption',  'customInvoiceBillTotal',  'customInvoiceNumberPrefix',  'customInvoicePreviewTotal',  'quotationCreated',  'quotationItemsCount',  'quotationDays',  'quotationNumberPrefix',  'employeeCommissionRate',  'employeeTargetMeta',  'employeeTargetProgress',  'addonsPerMonth',  'transfersSuccess',  'transfersError',  'pdfGeneratedOn',  'pdfFooter',  'pdfPhoneLine',  'pdfEmailLine',  'pdfNifLine',  'pdfPaymentLine',  'pdfReferenceLine',  'pdfValidityDaysLeft',  'pdfConditionValidBullet',  'adminAddonsLoadError',  'adminAddonsUpdateError',  'dashboardSaleEntry',  'mfaExpiresIn',  'mfaInitError',  'mfaVerifyError',  'adminAddonsBulkActivated',  'adminAddonsBulkDeactivated',  'adminAddonsBulkSheetCount',  'adminAddonsPriceUpdated',  'adminAddOnsCount',  'adminTenantCount',  'adminTenantCycleActiveLeft',  'adminTenantCycleExpiresIn',  'adminTenantCycleTrialLeft',  'planLimitStores',  'planLimitEmployees',};/// Carrega os valores de string do ARB (chaves sem `@`).
 Map<String, String> _loadArb(String locale) {
@@ -832,14 +832,14 @@ void main() {
         'quotationTemplatePhone': l.quotationTemplatePhone,
         'quotationTemplatePreview': l.quotationTemplatePreview,
         'quotationTemplatePreviewBadge': l.quotationTemplatePreviewBadge,
-        'paletteBlue': l.paletteBlue,
-        'paletteGreen': l.paletteGreen,
-        'paletteRed': l.paletteRed,
-        'paletteAmber': l.paletteAmber,
+        'palettePetrol': l.palettePetrol,
         'paletteSlate': l.paletteSlate,
-        'paletteViolet': l.paletteViolet,
-        'paletteTeal': l.paletteTeal,
-        'paletteIndigo': l.paletteIndigo,
+        'paletteTerracotta': l.paletteTerracotta,
+        'paletteBeige': l.paletteBeige,
+        'paletteWarmGray': l.paletteWarmGray,
+        'palettePetrolInk': l.palettePetrolInk,
+        'paletteSlateInk': l.paletteSlateInk,
+        'paletteSoftBlack': l.paletteSoftBlack,
         'customInvoicePdf': l.customInvoicePdf,
         'imageSourceGallery': l.imageSourceGallery,
         'imageSourceCamera': l.imageSourceCamera,
@@ -1084,6 +1084,7 @@ void main() {
         'validationAccountEmailInUse': l.validationAccountEmailInUse,
         'validationAccountOwnerOnly': l.validationAccountOwnerOnly,
         'validationAccountWeakPassword': l.validationAccountWeakPassword,
+        'productsPhotoRemoveConfirm': l.productsPhotoRemoveConfirm,
       };
       expect(getters, hasLength(kTotalGetters));
       final arb = _loadArb('pt');
@@ -1868,14 +1869,14 @@ void main() {
         'quotationTemplatePhone': l.quotationTemplatePhone,
         'quotationTemplatePreview': l.quotationTemplatePreview,
         'quotationTemplatePreviewBadge': l.quotationTemplatePreviewBadge,
-        'paletteBlue': l.paletteBlue,
-        'paletteGreen': l.paletteGreen,
-        'paletteRed': l.paletteRed,
-        'paletteAmber': l.paletteAmber,
+        'palettePetrol': l.palettePetrol,
         'paletteSlate': l.paletteSlate,
-        'paletteViolet': l.paletteViolet,
-        'paletteTeal': l.paletteTeal,
-        'paletteIndigo': l.paletteIndigo,
+        'paletteTerracotta': l.paletteTerracotta,
+        'paletteBeige': l.paletteBeige,
+        'paletteWarmGray': l.paletteWarmGray,
+        'palettePetrolInk': l.palettePetrolInk,
+        'paletteSlateInk': l.paletteSlateInk,
+        'paletteSoftBlack': l.paletteSoftBlack,
         'customInvoicePdf': l.customInvoicePdf,
         'imageSourceGallery': l.imageSourceGallery,
         'imageSourceCamera': l.imageSourceCamera,
@@ -2120,6 +2121,7 @@ void main() {
         'validationAccountEmailInUse': l.validationAccountEmailInUse,
         'validationAccountOwnerOnly': l.validationAccountOwnerOnly,
         'validationAccountWeakPassword': l.validationAccountWeakPassword,
+        'productsPhotoRemoveConfirm': l.productsPhotoRemoveConfirm,
       };
       expect(getters, hasLength(kTotalGetters));
       final arb = _loadArb('en');
@@ -2904,14 +2906,14 @@ void main() {
         'quotationTemplatePhone': l.quotationTemplatePhone,
         'quotationTemplatePreview': l.quotationTemplatePreview,
         'quotationTemplatePreviewBadge': l.quotationTemplatePreviewBadge,
-        'paletteBlue': l.paletteBlue,
-        'paletteGreen': l.paletteGreen,
-        'paletteRed': l.paletteRed,
-        'paletteAmber': l.paletteAmber,
+        'palettePetrol': l.palettePetrol,
         'paletteSlate': l.paletteSlate,
-        'paletteViolet': l.paletteViolet,
-        'paletteTeal': l.paletteTeal,
-        'paletteIndigo': l.paletteIndigo,
+        'paletteTerracotta': l.paletteTerracotta,
+        'paletteBeige': l.paletteBeige,
+        'paletteWarmGray': l.paletteWarmGray,
+        'palettePetrolInk': l.palettePetrolInk,
+        'paletteSlateInk': l.paletteSlateInk,
+        'paletteSoftBlack': l.paletteSoftBlack,
         'customInvoicePdf': l.customInvoicePdf,
         'imageSourceGallery': l.imageSourceGallery,
         'imageSourceCamera': l.imageSourceCamera,
@@ -3156,6 +3158,7 @@ void main() {
         'validationAccountEmailInUse': l.validationAccountEmailInUse,
         'validationAccountOwnerOnly': l.validationAccountOwnerOnly,
         'validationAccountWeakPassword': l.validationAccountWeakPassword,
+        'productsPhotoRemoveConfirm': l.productsPhotoRemoveConfirm,
       };
       expect(getters, hasLength(kTotalGetters));
       final arb = _loadArb('fr');

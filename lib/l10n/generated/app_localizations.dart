@@ -2020,6 +2020,12 @@ abstract class AppLocalizations {
   /// **'Remover fotografia'**
   String get productsPhotoRemove;
 
+  /// No description provided for @productsPhotoRemoveConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar a foto do produto? A imagem atual será removida ao guardar.'**
+  String get productsPhotoRemoveConfirm;
+
   /// No description provided for @productsPhotoTitle.
   ///
   /// In pt, this message translates to:
@@ -5234,53 +5240,53 @@ abstract class AppLocalizations {
   /// **'Preview'**
   String get quotationTemplatePreviewBadge;
 
-  /// No description provided for @paletteBlue.
+  /// No description provided for @palettePetrol.
   ///
   /// In pt, this message translates to:
-  /// **'Azul'**
-  String get paletteBlue;
-
-  /// No description provided for @paletteGreen.
-  ///
-  /// In pt, this message translates to:
-  /// **'Verde'**
-  String get paletteGreen;
-
-  /// No description provided for @paletteRed.
-  ///
-  /// In pt, this message translates to:
-  /// **'Vermelho'**
-  String get paletteRed;
-
-  /// No description provided for @paletteAmber.
-  ///
-  /// In pt, this message translates to:
-  /// **'Âmbar'**
-  String get paletteAmber;
+  /// **'Azul-petróleo'**
+  String get palettePetrol;
 
   /// No description provided for @paletteSlate.
   ///
   /// In pt, this message translates to:
-  /// **'Slate'**
+  /// **'Ardósia'**
   String get paletteSlate;
 
-  /// No description provided for @paletteViolet.
+  /// No description provided for @paletteTerracotta.
   ///
   /// In pt, this message translates to:
-  /// **'Violeta'**
-  String get paletteViolet;
+  /// **'Terracota'**
+  String get paletteTerracotta;
 
-  /// No description provided for @paletteTeal.
+  /// No description provided for @paletteBeige.
   ///
   /// In pt, this message translates to:
-  /// **'Teal'**
-  String get paletteTeal;
+  /// **'Bege'**
+  String get paletteBeige;
 
-  /// No description provided for @paletteIndigo.
+  /// No description provided for @paletteWarmGray.
   ///
   /// In pt, this message translates to:
-  /// **'Indigo'**
-  String get paletteIndigo;
+  /// **'Cinza quente'**
+  String get paletteWarmGray;
+
+  /// No description provided for @palettePetrolInk.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tinta petróleo'**
+  String get palettePetrolInk;
+
+  /// No description provided for @paletteSlateInk.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tinta ardósia'**
+  String get paletteSlateInk;
+
+  /// No description provided for @paletteSoftBlack.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preto suave'**
+  String get paletteSoftBlack;
 
   /// No description provided for @customInvoicePdf.
   ///

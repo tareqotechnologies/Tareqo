@@ -10,14 +10,15 @@
 
 | Token | Arquivo | Conteúdo |
 | --- | --- | --- |
-| `AppColors` | `lib/core/theme/app_colors.dart` | Paleta da marca (`brand`/`brandMuted`), cores semânticas por brilho (`income`, `expense`, `warning`), neutros e `onBrandContainer*`. Toda cor nova nasce aqui |
+| `AppColors` | `lib/core/theme/app_colors.dart` | Paleta RE2 base (`petrol`/`slate`/`warmGray`/`warmBeige`/`terracotta`/`softBlack` — fonte única dos hex), marca (`brand`/`brandMuted`), cores semânticas por brilho (`income`, `expense`, `warning`), neutros e `onBrandContainer*`. Toda cor nova nasce aqui. RE2: a paleta NÃO tem verde — nem como marca, nem como semântica |
 | `AppStatusColors` | idem | `ThemeExtension` com pares claro/escuro; acessado por `Theme.of(context).income/expense/warning/accent` |
 | `AppSpacing` | `lib/core/theme/app_tokens.dart` | Grelha de 4px (`xxs`=4 … `huge`=48) + `pagePaddingForWidth` (720px quebra mobile/tablet) |
 | `AppRadius` | idem | Raios `xs`=8 … `full`=999 + helpers `mdAll` etc. |
 | `AppDurations` | idem | `fast`=150ms, `normal`=220ms, `slow`=320ms — teto do plano para QUALQUER animação |
 | `AppCurves` | idem | `standard` (easeOutCubic), `decelerate`, `emphasized` (easeInOutCubic) |
 | `AppSizes` | idem | `touchTarget`=48dp (mínimo WCAG), ícones, avatares, `contentMaxWidth` |
-| `ModuleColors` | idem | 6 cores de módulo (Produtos/Clientes/Fiado/Compras/Relatórios/Lojas) — conjunto FECHADO |
+| `ModuleColors` | idem | 6 cores de módulo na RE2 — conjunto FECHADO: Produtos=`petrol` #10282A, Clientes=`slate` #3D4D55, Fiado=`terracotta` #B58863, Compras=`warmGray` #A79E9C, Relatórios=tinta petróleo #2E6E75, Lojas=petróleo-ardósia #223A41 |
+| `PdfAccents` | `lib/core/share/pdf_accent.dart` | Acentos de PDF (`PdfColor`) espelhando a RE2 para os exporters (factura/cotação/relatórios). O pacote `pdf` não depende de Flutter, então não importa `AppColors` — os tokens duplicam os valores com contraste medido no doc |
 | `IconTone` | idem | Derivação HSL de fundo escuro + foreground claro para ícones em container |
 
 **Regra:** cor nova → `AppColors`; nunca `Color(0x…)` inline. Os hex literais

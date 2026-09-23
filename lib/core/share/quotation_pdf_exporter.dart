@@ -7,6 +7,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
+import 'pdf_accent.dart';
+
 import '../../domain/entities/quotation.dart';
 import '../utils/formatters.dart';
 
@@ -111,7 +113,7 @@ class QuotationPdfExporter {
     String? businessPhone,
     String? businessTaxId,
     Uint8List? logoBytes,
-    PdfColor primaryColor = PdfColors.amber700,
+    PdfColor primaryColor = PdfAccents.terracotta,
     String templateStyle = 'Classic',
   }) async {
     final data = await rootBundle.load('assets/fonts/Inter-Variable.ttf');
@@ -441,7 +443,7 @@ class QuotationPdfExporter {
     String? businessPhone,
     String? businessTaxId,
     Uint8List? logoBytes,
-    PdfColor primaryColor = PdfColors.amber700,
+    PdfColor primaryColor = PdfAccents.terracotta,
     String templateStyle = 'Classic',
   }) async {
     final bytes = await buildPdf(
