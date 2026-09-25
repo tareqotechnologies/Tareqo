@@ -287,9 +287,9 @@ class _CompactStats extends StatelessWidget {
             ),
             child: Text(
               '${stats.rate}%',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: _rateColor(stats.rate),
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: _rateColor(stats.rate)),
             ),
           ),
         ],
@@ -447,7 +447,7 @@ class _FilterRow extends StatelessWidget {
             onTap: () => onSelected(i),
             child: AnimatedContainer(
               duration: AppDurations.fast,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               decoration: BoxDecoration(
                 color: active
                     ? scheme.primary
@@ -735,33 +735,33 @@ class _AuditDetailSheet extends StatelessWidget {
             // ── Fields ──
             DetailRow(
               labelWidth: 80,
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
               label: context.l10n.commonId,
               value: '#${entry.id}',
             ),
             DetailRow(
               labelWidth: 80,
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
               label: l10n.adminAuditLogDate,
               value: DateFormat.yMMMd().add_Hm().format(entry.createdAt),
             ),
             if (entry.actorUserId != null)
               DetailRow(
                 labelWidth: 80,
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                 label: l10n.adminAuditLogActor,
                 value: entry.actorUserId!,
               ),
             DetailRow(
               labelWidth: 80,
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
               label: l10n.adminAuditLogEntity,
               value: entry.entityTypeLabel,
             ),
             if (entry.entityId != null)
               DetailRow(
                 labelWidth: 80,
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                 label: l10n.adminAuditLogAction,
                 value: entry.entityId!,
               ),
@@ -780,7 +780,7 @@ class _AuditDetailSheet extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               ...entry.detail!.entries.map(
                 (e) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

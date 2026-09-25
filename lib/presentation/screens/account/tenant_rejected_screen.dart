@@ -24,14 +24,14 @@ class TenantRejectedScreen extends ConsumerWidget {
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 440),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(AppSpacing.xl),
                   decoration: BoxDecoration(
                     color: scheme.errorContainer,
                     shape: BoxShape.circle,
@@ -66,7 +66,9 @@ class TenantRejectedScreen extends ConsumerWidget {
                     // Card premium (estilo Apple): cantos 18 + superfície
                     // elevada com fundo tingido pelo estado de erro.
                     elevated: true,
-                    borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(AppRadius.lg),
+                    ),
                     color: scheme.errorContainer.withValues(alpha: 0.5),
                     padding: const EdgeInsets.all(14),
                     child: Row(

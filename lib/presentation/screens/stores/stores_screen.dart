@@ -143,7 +143,9 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
             TabBar(
               controller: _tabController,
               isScrollable: true,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+              labelPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+              ),
               tabs: [
                 for (final label in [
                   l10n.storesTabStores,
@@ -243,7 +245,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                 onTap: () => _openStoreDetail(store),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
+                    horizontal: AppSpacing.md,
                     vertical: 10,
                   ),
                   child: Row(
@@ -349,7 +351,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                 onTap: () => _openEmployeeDetail(employee, stores, isOwner),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
+                    horizontal: AppSpacing.md,
                     vertical: 10,
                   ),
                   child: Row(

@@ -309,7 +309,10 @@ class _CustomerTile extends StatelessWidget {
         onTap: onTap,
         borderRadius: AppRadius.lgAll,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: 14,
+          ),
           child: Row(
             children: [
               CircleAvatar(

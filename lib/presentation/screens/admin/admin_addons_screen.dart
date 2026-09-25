@@ -239,14 +239,14 @@ class _TenantPicker extends ConsumerWidget {
                     }
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(AppSpacing.xs),
                     decoration: BoxDecoration(
                       color: bulkMode
                           ? scheme.primary.withValues(alpha: 0.12)
                           : scheme.surfaceContainerHighest.withValues(
                               alpha: 0.5,
                             ),
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Icon(
                       bulkMode
@@ -325,7 +325,12 @@ class _TenantPicker extends ConsumerWidget {
                   );
                 }
                 return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.xs,
+                    AppSpacing.lg,
+                    AppSpacing.xl,
+                  ),
                   itemCount: filtered.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 6),
                   itemBuilder: (_, i) {
@@ -473,7 +478,7 @@ class _TenantTile extends ConsumerWidget {
       child: AppCard(
         elevated: true,
         borderRadius: const BorderRadius.all(Radius.circular(14)),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         borderColor: isSelected ? scheme.primary.withValues(alpha: 0.5) : null,
         onTap: onTap,
         child: Row(
@@ -560,7 +565,9 @@ class _BulkAddOnSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xl),
+        ),
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -573,7 +580,10 @@ class _BulkAddOnSheet extends StatelessWidget {
               child: Container(
                 width: 40,
                 height: 4,
-                margin: const EdgeInsets.only(top: 12, bottom: 20),
+                margin: const EdgeInsets.only(
+                  top: AppSpacing.sm,
+                  bottom: AppSpacing.lg,
+                ),
                 decoration: BoxDecoration(
                   color: scheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
@@ -842,7 +852,9 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xl),
+        ),
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -855,7 +867,10 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
               child: Container(
                 width: 40,
                 height: 4,
-                margin: const EdgeInsets.only(top: 12, bottom: 20),
+                margin: const EdgeInsets.only(
+                  top: AppSpacing.sm,
+                  bottom: AppSpacing.lg,
+                ),
                 decoration: BoxDecoration(
                   color: scheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
@@ -907,9 +922,7 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 _formError!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.error,
-                ),
+                style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
@@ -1026,8 +1039,9 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
     // Catálogo EFECTIVO (overrides do banco — preço editado pelo admin);
     // fallback no seed estático enquanto carrega/erro.
     final catalog = ref.watch(allAddOnsProvider).value;
-    final addOns =
-        (catalog ?? AddOnCatalog.addOns()).where((a) => a.isAvailable).toList();
+    final addOns = (catalog ?? AddOnCatalog.addOns())
+        .where((a) => a.isAvailable)
+        .toList();
 
     return Scaffold(
       backgroundColor: scheme.surface,

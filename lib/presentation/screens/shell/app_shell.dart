@@ -136,104 +136,104 @@ class AppShell extends ConsumerWidget {
         ref.read(shellIndexProvider.notifier).goTo(AppSection.dashboard);
       },
       child: Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 48,
-        title: Text(
-          'TAREQO',
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.2,
+        appBar: AppBar(
+          toolbarHeight: 48,
+          title: Text(
+            'TAREQO',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
+            ),
           ),
+          titleSpacing: 16,
+          actions: [
+            // Badge de notificações com pulso
+            PulseBadge(
+              count: unreadCount,
+              child: IconButton(
+                icon: const Icon(Icons.notifications_outlined, size: 20),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const NotificationsScreen(),
+                    ),
+                  );
+                },
+                tooltip: l10n.notificationTitle,
+              ),
+            ),
+            const SizedBox(width: 4),
+          ],
         ),
-        titleSpacing: 16,
-        actions: [
-          // Badge de notificações com pulso
-          PulseBadge(
-            count: unreadCount,
-            child: IconButton(
-              icon: const Icon(Icons.notifications_outlined, size: 20),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const NotificationsScreen(),
+        body: wide
+            ? Row(
+                children: [
+                  NavigationRail(
+                    selectedIndex: _barIndex(index),
+                    onDestinationSelected: onSelect,
+                    labelType: NavigationRailLabelType.all,
+                    leading: const Padding(
+                      padding: EdgeInsets.only(
+                        top: AppSpacing.md,
+                        bottom: AppSpacing.sm,
+                      ),
+                    ),
+                    destinations: [
+                      for (final (icon, selected, label) in destinations)
+                        NavigationRailDestination(
+                          icon: Icon(icon),
+                          selectedIcon: Icon(selected),
+                          label: _NavLabel(text: label),
+                        ),
+                    ],
                   ),
-                );
-              },
-              tooltip: l10n.notificationTitle,
-            ),
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-      body: wide
-          ? Row(
-              children: [
-                NavigationRail(
-                  selectedIndex: _barIndex(index),
-                  onDestinationSelected: onSelect,
-                  labelType: NavigationRailLabelType.all,
-                  leading: const Padding(
-                    padding: EdgeInsets.only(
-                      top: AppSpacing.md,
-                      bottom: AppSpacing.sm,
+                  VerticalDivider(width: 1, color: scheme.outlineVariant),
+                  Expanded(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: AppSizes.contentMaxWidth,
+                        ),
+                        child: content,
+                      ),
                     ),
                   ),
-                  destinations: [
-                    for (final (icon, selected, label) in destinations)
-                      NavigationRailDestination(
-                        icon: Icon(icon),
-                        selectedIcon: Icon(selected),
-                        label: _NavLabel(text: label),
-                      ),
-                  ],
-                ),
-                VerticalDivider(width: 1, color: scheme.outlineVariant),
-                Expanded(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: AppSizes.contentMaxWidth,
-                      ),
-                      child: content,
+                ],
+              )
+            : content,
+        bottomNavigationBar: wide
+            ? null
+            : NavigationBar(
+                selectedIndex: _barIndex(index),
+                onDestinationSelected: onSelect,
+                destinations: [
+                  for (final (icon, selected, label) in destinations)
+                    NavigationDestination(
+                      icon: Icon(icon),
+                      selectedIcon: Icon(selected),
+                      label: label,
                     ),
-                  ),
-                ),
-              ],
-            )
-          : content,
-      bottomNavigationBar: wide
-          ? null
-          : NavigationBar(
-              selectedIndex: _barIndex(index),
-              onDestinationSelected: onSelect,
-              destinations: [
-                for (final (icon, selected, label) in destinations)
-                  NavigationDestination(
-                    icon: Icon(icon),
-                    selectedIcon: Icon(selected),
-                    label: label,
-                  ),
-              ],
-            ),
-      // Seções que já trazem o seu próprio FAB: ocultamos o FAB do shell
-      // para evitar duplicação visual (Sales, Financial, Products, Customers).
-      // Na seção Crédito, o FAB pula o menu e abre DIRETO o "Registrar
-      // fiado" (AddDebtSheet) — é a única ação que faz sentido ali.
-      floatingActionButton: _hasOwnFab(index)
-          ? null
-          : FloatingActionButton(
-              heroTag: 'fab-shell',
-              onPressed: AppSection.values[index] == AppSection.credit
-                  ? () => showAppSheet<void>(
+                ],
+              ),
+        // Seções que já trazem o seu próprio FAB: ocultamos o FAB do shell
+        // para evitar duplicação visual (Sales, Financial, Products, Customers).
+        // Na seção Crédito, o FAB pula o menu e abre DIRETO o "Registrar
+        // fiado" (AddDebtSheet) — é a única ação que faz sentido ali.
+        floatingActionButton: _hasOwnFab(index)
+            ? null
+            : FloatingActionButton(
+                heroTag: 'fab-shell',
+                onPressed: AppSection.values[index] == AppSection.credit
+                    ? () => showAppSheet<void>(
                         context,
                         builder: (_) => const AddDebtSheet(),
                       )
-                  : openActionMenu,
-              tooltip: AppSection.values[index] == AppSection.credit
-                  ? l10n.debtsAddDebt
-                  : l10n.fabMenuTitle,
-              child: const Icon(Icons.add_rounded, size: 28),
-            ),
+                    : openActionMenu,
+                tooltip: AppSection.values[index] == AppSection.credit
+                    ? l10n.debtsAddDebt
+                    : l10n.fabMenuTitle,
+                child: const Icon(Icons.add_rounded, size: 28),
+              ),
       ),
     );
   }

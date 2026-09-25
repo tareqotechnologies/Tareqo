@@ -121,8 +121,7 @@ String? _activeStoreName(WidgetRef ref) {
   if (user == null) return null;
   final tenant = ref.watch(myTenantProvider(user.id)).value;
   if (tenant == null) return null;
-  final stores =
-      ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
+  final stores = ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
   if (stores.isEmpty) return null;
   final storeId = ref.watch(activeStoreIdProvider(user.id));
   return stores.where((s) => s.id == storeId).firstOrNull?.name ??
@@ -183,7 +182,7 @@ class _SalesReportTab extends ConsumerWidget {
         // Loading real enquanto o servidor agrega as vendas.
         if (reportAsync?.isLoading ?? false)
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
           ),
         // KPIs de VENDAS do período (reais — RPC get_sales_report, em
@@ -354,17 +353,18 @@ class _SalesReportTab extends ConsumerWidget {
           onPressed: () => const AdvancedReportsPdfExporter().shareSalesReport(
             title: context.l10n.reportsTabSales,
             period: selectedPeriod,
-            businessName:
-                _activeStoreName(ref) ?? l10n.businessFallbackName,
+            businessName: _activeStoreName(ref) ?? l10n.businessFallbackName,
             generatedOnLabel: context.l10n.pdfGeneratedOn('{date}'),
             indicatorsLabel: context.l10n.pdfIndicators,
             noDataLabel: context.l10n.reportsNoSalesData,
             footerLabel: context.l10n.pdfFooter('{date}'),
             kpis: {
-              l10n.reportsRevenue:
-                  Formatters.currency(report?.totalRevenueCents ?? 0),
-              l10n.reportsProfit:
-                  Formatters.currency(report?.totalProfitCents ?? 0),
+              l10n.reportsRevenue: Formatters.currency(
+                report?.totalRevenueCents ?? 0,
+              ),
+              l10n.reportsProfit: Formatters.currency(
+                report?.totalProfitCents ?? 0,
+              ),
               l10n.reportsMargin: report != null
                   ? '${report.margin.toStringAsFixed(1)}%'
                   : '0,0%',
@@ -429,7 +429,7 @@ class _FinancialReportTab extends ConsumerWidget {
         // Loading real enquanto busca o fluxo de caixa.
         if (cashFlowAsync?.isLoading ?? false)
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
           ),
         // KPIs (reais — fluxo de caixa do período, em centavos).
@@ -747,8 +747,7 @@ class _StockReportTab extends ConsumerWidget {
           onPressed: () => const AdvancedReportsPdfExporter().shareStockReport(
             title: context.l10n.reportsTabStock,
             period: selectedPeriod,
-            businessName:
-                _activeStoreName(ref) ?? l10n.businessFallbackName,
+            businessName: _activeStoreName(ref) ?? l10n.businessFallbackName,
             generatedOnLabel: context.l10n.pdfGeneratedOn('{date}'),
             indicatorsLabel: context.l10n.pdfIndicators,
             noDataLabel: context.l10n.reportsNoSalesData,

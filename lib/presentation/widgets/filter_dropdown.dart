@@ -88,7 +88,10 @@ class FilterDropdown<T> extends StatelessWidget {
         // o mínimo de acessibilidade.
         constraints: const BoxConstraints(minHeight: AppSizes.touchTarget),
         alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
         decoration: BoxDecoration(
           color: active ? scheme.primaryContainer : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.full),

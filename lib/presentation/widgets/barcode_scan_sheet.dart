@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../l10n/generated/app_localizations.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Abre a câmera de leitura de código de barras em um bottom sheet e
 /// devolve o primeiro código lido (ou `null` se o usuário cancelar).
@@ -75,7 +76,7 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                       errorBuilder: (context, error) => Container(
                         color: Colors.black,
                         alignment: Alignment.center,
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.all(AppSpacing.xl),
                         child: Text(
                           l10n.salesBarcodeCameraUnavailable('$error'),
                           textAlign: TextAlign.center,
@@ -91,7 +92,7 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                       height: 240,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.white, width: 3),
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(AppRadius.xxl),
                       ),
                     ),
                   ),

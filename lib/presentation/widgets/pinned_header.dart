@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Barra FIXA no topo de uma lista (`SliverPersistentHeader` `pinned`): o
 /// restante do conteúdo rola por baixo enquanto a barra permanece visível.
@@ -71,7 +72,12 @@ class _PinnedHeaderState extends State<PinnedHeader> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         child: Padding(
           key: _contentKey,
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.xxs,
+            AppSpacing.lg,
+            AppSpacing.sm,
+          ),
           child: widget.child,
         ),
       ),

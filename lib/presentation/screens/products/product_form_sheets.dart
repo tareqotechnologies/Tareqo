@@ -93,7 +93,7 @@ class _ProductPhotoPicker extends StatelessWidget {
           // Preview
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(
                 color: scheme.outlineVariant.withValues(alpha: 0.5),
               ),
@@ -147,7 +147,8 @@ class _ProductPhotoPicker extends StatelessWidget {
                         onTap: () async {
                           // O diálogo bloqueia toques acidentais: sem a
                           // confirmação explícita, a foto fica intacta.
-                          if (await _confirmRemove(context) && context.mounted) {
+                          if (await _confirmRemove(context) &&
+                              context.mounted) {
                             onRemove();
                           }
                         },
@@ -209,7 +210,7 @@ class _PhotoActionButton extends StatelessWidget {
             color: isDestructive
                 ? scheme.error.withValues(alpha: 0.08)
                 : scheme.surface,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppRadius.xs),
             border: Border.all(
               color: isDestructive
                   ? scheme.error.withValues(alpha: 0.2)
@@ -291,7 +292,7 @@ class _CompactSwitch extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Row(
         children: [
@@ -949,9 +950,9 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
       // 2) Ajuste MANUAL do estoque (apenas se o valor mudou): define a
       // quantidade exata criando/consumindo lotes FIFO na mesma transação.
       final stockMilli = Quantity.parse(
-      _stockController.text.trim(),
-      language: Formatters.currentLanguage,
-    );
+        _stockController.text.trim(),
+        language: Formatters.currentLanguage,
+      );
       if (stockMilli != _product.stockQuantity) {
         await useCase.adjustStock(
           _product.id,
@@ -1271,7 +1272,7 @@ class _ExpiryField extends StatelessWidget {
       button: true,
       child: InkWell(
         onTap: onPick,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         child: Container(
           // minHeight (e não altura fixa): com escala de texto alta a data
           // 'Validade · dd/mm/aaaa' quebra em 2 linhas sem cortar o texto.
@@ -1279,7 +1280,7 @@ class _ExpiryField extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           decoration: BoxDecoration(
             color: scheme.surface,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(color: scheme.outlineVariant),
           ),
           child: Row(

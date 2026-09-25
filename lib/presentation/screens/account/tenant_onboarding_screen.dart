@@ -109,7 +109,7 @@ class _TenantOnboardingScreenState
       appBar: AppBar(title: Text(l10n.onboardingTitle)),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
             child: Column(
@@ -155,8 +155,10 @@ class _TenantOnboardingScreenState
                 // elevada — o formulário flutua sobre o fundo.
                 AppCard(
                   elevated: true,
-                  borderRadius: const BorderRadius.all(Radius.circular(AppRadius.xl)),
-                  padding: const EdgeInsets.all(20),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(AppRadius.xl),
+                  ),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -233,7 +235,7 @@ class _TenantOnboardingScreenState
                         const SizedBox(height: 10),
                         plansAsync.when(
                           loading: () => const Padding(
-                            padding: EdgeInsets.all(16),
+                            padding: EdgeInsets.all(AppSpacing.md),
                             child: Center(child: CircularProgressIndicator()),
                           ),
                           error: (error, _) => Text(

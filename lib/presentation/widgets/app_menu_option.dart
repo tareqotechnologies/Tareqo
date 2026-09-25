@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Pílula de seleção minimalista ("Hoje ▾") — UM único padrão para todos
 /// os menus de opção do app (período, exportação, ações, troca de loja).
@@ -44,7 +45,10 @@ class AppMenuOption<T> extends StatelessWidget {
       position: PopupMenuPosition.under,
       constraints: const BoxConstraints(minWidth: 160),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 6,
+          vertical: AppSpacing.xs,
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

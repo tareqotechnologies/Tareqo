@@ -22,15 +22,13 @@ final addOnRepositoryProvider = Provider<IAddOnRepository>((ref) {
 /// Catálogo EFECTIVO de add-ons: seed estático mesclado com os overrides
 /// persistidos (`add_ons` — preço mensal editado pelo super admin).
 /// Fallback: se o banco falhar/estiver vazio, mantém o seed — nunca vazio.
-final allAddOnsProvider =
-    AsyncNotifierProvider<AllAddOnsNotifier, List<AddOn>>(
-      AllAddOnsNotifier.new,
-    );
+final allAddOnsProvider = AsyncNotifierProvider<AllAddOnsNotifier, List<AddOn>>(
+  AllAddOnsNotifier.new,
+);
 
 class AllAddOnsNotifier extends AsyncNotifier<List<AddOn>> {
   @override
-  Future<List<AddOn>> build() =>
-      ref.watch(addOnRepositoryProvider).all();
+  Future<List<AddOn>> build() => ref.watch(addOnRepositoryProvider).all();
 
   Future<void> refresh() async {
     ref.invalidateSelf();
@@ -40,10 +38,9 @@ class AllAddOnsNotifier extends AsyncNotifier<List<AddOn>> {
   /// Persiste o novo preço mensal (CENTAVOS) de um add-on e actualiza o
   /// estado local imediatamente (a UI reflete sem recarregar o banco).
   Future<void> updatePrice(String addOnId, int priceMonthlyCents) async {
-    await ref.read(addOnRepositoryProvider).updatePrice(
-          addOnId,
-          priceMonthlyCents,
-        );
+    await ref
+        .read(addOnRepositoryProvider)
+        .updatePrice(addOnId, priceMonthlyCents);
     final current = state.value ?? const <AddOn>[];
     state = AsyncValue.data([
       for (final addon in current)

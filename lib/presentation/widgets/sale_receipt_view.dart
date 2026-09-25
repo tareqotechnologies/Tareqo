@@ -6,6 +6,7 @@ import '../../core/utils/formatters.dart';
 import '../../core/utils/quantity.dart';
 import '../../domain/entities/sale.dart';
 import '../../domain/entities/sale_item.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Recibo de venda VISUAL — a cara de um recibo térmico impresso.
 ///
@@ -189,7 +190,7 @@ class _ReceiptItemRow extends StatelessWidget {
         children: [
           Text(item.productName, style: _bodyStyle),
           Padding(
-            padding: const EdgeInsets.only(left: 8),
+            padding: const EdgeInsets.only(left: AppSpacing.xs),
             child: Row(
               children: [
                 Expanded(

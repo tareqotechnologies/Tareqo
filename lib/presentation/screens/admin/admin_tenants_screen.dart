@@ -211,7 +211,7 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
                             color: scheme.surfaceContainerHighest.withValues(
                               alpha: 0.5,
                             ),
-                            borderRadius: BorderRadius.circular(999),
+                            borderRadius: BorderRadius.circular(AppRadius.full),
                           ),
                           child: Icon(
                             Icons.close,
@@ -225,12 +225,12 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
                       const SizedBox(width: AppSpacing.xs),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                          horizontal: AppSpacing.xs,
+                          vertical: AppSpacing.xxs,
                         ),
                         decoration: BoxDecoration(
                           color: scheme.primaryContainer.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: Text(
                           '$filteredCount',
@@ -245,7 +245,12 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
               ),
               if (!_showAll && pending.isNotEmpty && !_selectionMode)
                 Container(
-                  margin: const EdgeInsets.fromLTRB(20, 4, 20, 4),
+                  margin: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.xxs,
+                    AppSpacing.lg,
+                    AppSpacing.xxs,
+                  ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.xs,
@@ -336,7 +341,12 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
         return RefreshIndicator(
           onRefresh: () => ref.read(pendingTenantsProvider.notifier).refresh(),
           child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.lg,
+              AppSpacing.xl,
+            ),
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: filtered.length,
             separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -395,7 +405,12 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
           );
         }
         return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.xl,
+          ),
           itemCount: filtered.length,
           separatorBuilder: (_, _) => const SizedBox(height: 8),
           itemBuilder: (context, index) {

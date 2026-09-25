@@ -382,7 +382,7 @@ class DashboardScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 4,
+                      vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerHighest,
@@ -515,7 +515,7 @@ class _BalanceHero extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
-                    vertical: 4,
+                    vertical: AppSpacing.xxs,
                   ),
                   decoration: BoxDecoration(
                     color: scheme.primaryContainer,
@@ -887,7 +887,10 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
             child: Container(
               width: 40,
               height: 4,
-              margin: const EdgeInsets.only(top: 12, bottom: 20),
+              margin: const EdgeInsets.only(
+                top: AppSpacing.sm,
+                bottom: AppSpacing.lg,
+              ),
               decoration: BoxDecoration(
                 color: scheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
@@ -1124,7 +1127,7 @@ class _ActivityRow extends StatelessWidget {
                     ? Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
-                          vertical: 4,
+                          vertical: AppSpacing.xxs,
                         ),
                         decoration: BoxDecoration(
                           color: item.badgeBackground,

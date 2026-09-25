@@ -21,6 +21,7 @@ import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/money_live_preview.dart';
 import '../../widgets/smart_amount.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Bottom sheet do FECHO DE CAIXA DIÁRIO (Z-report).
 ///
@@ -139,11 +140,11 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
             SheetHeader(title: l10n.cashClosingTitle),
             summaryAsync.when(
               loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 48),
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.huge),
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (error, _) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                 child: Text(
                   l10n.cashClosingError,
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -154,7 +155,9 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
               data: (summary) {
                 if (summary == null) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xl,
+                    ),
                     child: Text(l10n.cashClosingError),
                   );
                 }
@@ -179,10 +182,10 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
       children: [
         if (isAlreadyClosed) ...[
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Row(
               children: [
@@ -395,7 +398,7 @@ class _ByMethodBreakdown extends StatelessWidget {
 
     if (summary.salesByMethodCents.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child: Text(
           l10n.cashClosingEmpty,
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -409,7 +412,7 @@ class _ByMethodBreakdown extends StatelessWidget {
       children: [
         for (final entry in summary.salesByMethodCents.entries)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
             child: Row(
               children: [
                 Icon(

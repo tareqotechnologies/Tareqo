@@ -88,7 +88,7 @@ class _EmployeeManagementScreenState
         children: [
           TabBar(
             controller: _tabController,
-            labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+            labelPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
             tabs: [
               Tab(text: l10n.employeeMgmtTabAttendance),
               Tab(text: l10n.employeeMgmtTabCommissions),

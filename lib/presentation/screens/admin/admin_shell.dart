@@ -237,7 +237,10 @@ class _AdminFab extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
           color: scheme.primary,
           borderRadius: BorderRadius.circular(AppRadius.full),
@@ -329,7 +332,7 @@ class _NavBottomSheet extends StatelessWidget {
           // Handle
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: 10, bottom: 16),
+              margin: const EdgeInsets.only(top: 10, bottom: AppSpacing.md),
               width: 36,
               height: 4,
               decoration: BoxDecoration(
@@ -341,7 +344,7 @@ class _NavBottomSheet extends StatelessWidget {
 
           // Title
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -360,7 +363,7 @@ class _NavBottomSheet extends StatelessWidget {
           // Items — scrollável para ecrãs pequenos
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
               child: Column(
                 children: List.generate(items.length, (i) {
                   final item = items[i];
@@ -404,7 +407,10 @@ class _NavSheetItem extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: 14,
+          ),
           child: Row(
             children: [
               // Icon
@@ -416,7 +422,7 @@ class _NavSheetItem extends StatelessWidget {
                   color: selected
                       ? scheme.primary
                       : scheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Icon(
                   selected ? item.selectedIcon : item.icon,
@@ -501,7 +507,10 @@ class _MinimalSidebar extends StatelessWidget {
           const SizedBox(height: 8),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xs,
+                vertical: AppSpacing.xxs,
+              ),
               itemCount: items.length,
               itemBuilder: (context, i) {
                 final item = items[i];
@@ -537,7 +546,7 @@ class _SidebarIcon extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
@@ -547,7 +556,7 @@ class _SidebarIcon extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: selected ? scheme.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: Stack(
             clipBehavior: Clip.none,

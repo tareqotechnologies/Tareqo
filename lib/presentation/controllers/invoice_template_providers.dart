@@ -103,7 +103,8 @@ class InvoiceTemplateNotifier extends Notifier<InvoiceTemplateConfig> {
       // Só aplica se o estado actual ainda é o default vazio (não houve
       // edição local enquanto carregava).
       final current = state;
-      final untouched = current.businessName.isEmpty &&
+      final untouched =
+          current.businessName.isEmpty &&
           current.businessAddress.isEmpty &&
           current.businessPhone.isEmpty &&
           current.businessTaxId.isEmpty &&

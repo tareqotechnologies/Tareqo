@@ -65,7 +65,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             onPressed: _markAllAsRead,
             style: TextButton.styleFrom(
               // A11y: alvo de toque padrão (48dp) — sem shrinkWrap.
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
             ),
             child: Text(
               l10n.notificationMarkAllRead,
@@ -196,7 +196,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     if (isLoading && items.isEmpty) {
       items.add(
         const Padding(
-          padding: EdgeInsets.symmetric(vertical: 48),
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.huge),
           child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
         ),
       );
@@ -392,7 +392,10 @@ class _NotificationTile extends StatelessWidget {
             onTap: onTap,
             borderRadius: BorderRadius.circular(AppRadius.md),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+              padding: const EdgeInsets.symmetric(
+                vertical: AppSpacing.sm,
+                horizontal: AppSpacing.xxs,
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -403,7 +406,7 @@ class _NotificationTile extends StatelessWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: iconBg.withValues(alpha: isRead ? 0.08 : 0.14),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: Icon(icon, size: 20, color: iconFg),
                   ),
@@ -600,7 +603,7 @@ class _DetailBottomSheet extends StatelessWidget {
           // ── Handle ──
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: 10, bottom: 4),
+              margin: const EdgeInsets.only(top: 10, bottom: AppSpacing.xxs),
               width: 36,
               height: 4,
               decoration: BoxDecoration(
@@ -711,7 +714,12 @@ class _DetailBottomSheet extends StatelessWidget {
           // ── Body ──
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                AppSpacing.xl,
+              ),
               child: Text(
                 body,
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -773,66 +781,71 @@ class _Pill extends StatelessWidget {
           child: Center(
             widthFactor: 1,
             child: AnimatedContainer(
-        duration: AppDurations.fast,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected
-              ? activeColor.withValues(alpha: 0.1)
-              : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(AppRadius.full),
-          border: Border.all(
-            color: selected
-                ? activeColor.withValues(alpha: 0.25)
-                : scheme.outlineVariant.withValues(alpha: 0.3),
-            width: selected ? 1.2 : 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.labelMedium?.copyWith(
-                // Rótulo sempre legível (onSurface/onSurfaceVariant ≥ 4.5:1):
-                // a seleção é sinalizada pela pílula, borda e badge — o
-                // rótulo em activeColor dava ~4.4:1 (claro) e 3.6:1 (escuro).
-                color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                fontSize: 12,
+              duration: AppDurations.fast,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: selected
+                    ? activeColor.withValues(alpha: 0.1)
+                    : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(AppRadius.full),
+                border: Border.all(
+                  color: selected
+                      ? activeColor.withValues(alpha: 0.25)
+                      : scheme.outlineVariant.withValues(alpha: 0.3),
+                  width: selected ? 1.2 : 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      // Rótulo sempre legível (onSurface/onSurfaceVariant ≥ 4.5:1):
+                      // a seleção é sinalizada pela pílula, borda e badge — o
+                      // rótulo em activeColor dava ~4.4:1 (claro) e 3.6:1 (escuro).
+                      color: selected
+                          ? scheme.onSurface
+                          : scheme.onSurfaceVariant,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                      fontSize: 12,
+                    ),
+                  ),
+                  if (count > 0) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 0.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? activeColor
+                            : scheme.onSurfaceVariant.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Text(
+                        '$count',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: selected
+                              // Badge sólido: usa o "on" do papel de fundo
+                              // (primary ou error) — branco puro falhava 3:1 no
+                              // escuro sobre #F87171.
+                              ? (accent ? scheme.onError : scheme.onPrimary)
+                              : scheme.onSurfaceVariant,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            if (count > 0) ...[
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 5,
-                  vertical: 0.5,
-                ),
-                decoration: BoxDecoration(
-                  color: selected
-                      ? activeColor
-                      : scheme.onSurfaceVariant.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Text(
-                  '$count',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: selected
-                        // Badge sólido: usa o "on" do papel de fundo
-                        // (primary ou error) — branco puro falhava 3:1 no
-                        // escuro sobre #F87171.
-                        ? (accent ? scheme.onError : scheme.onPrimary)
-                        : scheme.onSurfaceVariant,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        ),
-        ),
+          ),
         ),
       ),
     );
@@ -910,33 +923,37 @@ abstract final class _InvoiceTypeLabel {
     if (p == null) return notification.body;
     final days = int.tryParse(p['days'] ?? '') ?? 0;
     return switch (notification.type) {
-      InvoiceNotificationType.invoiceGenerated => l10n
-          .notificationBodyInvoiceGenerated(
-            p['period'] ?? '',
-            p['amount'] ?? '',
-            p['currency'] ?? '',
-            p['dueDate'] ?? '',
-          ),
-      InvoiceNotificationType.invoiceDueSoon => l10n
-          .notificationBodyInvoiceDueSoon(
-            p['period'] ?? '',
-            p['amount'] ?? '',
-            p['currency'] ?? '',
-            days,
-          ),
-      InvoiceNotificationType.invoiceExpired => l10n
-          .notificationBodyInvoiceExpired(
-            p['period'] ?? '',
-            p['amount'] ?? '',
-            p['currency'] ?? '',
-          ),
+      InvoiceNotificationType.invoiceGenerated =>
+        l10n.notificationBodyInvoiceGenerated(
+          p['period'] ?? '',
+          p['amount'] ?? '',
+          p['currency'] ?? '',
+          p['dueDate'] ?? '',
+        ),
+      InvoiceNotificationType.invoiceDueSoon =>
+        l10n.notificationBodyInvoiceDueSoon(
+          p['period'] ?? '',
+          p['amount'] ?? '',
+          p['currency'] ?? '',
+          days,
+        ),
+      InvoiceNotificationType.invoiceExpired =>
+        l10n.notificationBodyInvoiceExpired(
+          p['period'] ?? '',
+          p['amount'] ?? '',
+          p['currency'] ?? '',
+        ),
       InvoiceNotificationType.invoicePaid => l10n.notificationBodyInvoicePaid(
         p['period'] ?? '',
         p['amount'] ?? '',
         p['currency'] ?? '',
       ),
-      InvoiceNotificationType.addOnExpiringSoon => l10n
-          .notificationBodyAddOnExpiringSoon(p['addonName'] ?? '', days, p['date'] ?? ''),
+      InvoiceNotificationType.addOnExpiringSoon =>
+        l10n.notificationBodyAddOnExpiringSoon(
+          p['addonName'] ?? '',
+          days,
+          p['date'] ?? '',
+        ),
       InvoiceNotificationType.addOnExpired => l10n.notificationBodyAddOnExpired(
         p['addonName'] ?? '',
         p['date'] ?? '',

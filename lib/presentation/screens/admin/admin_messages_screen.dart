@@ -11,6 +11,7 @@ import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_picker_field.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Templates profissionais para cada tipo de mensagem admin→tenant.
 ///
@@ -182,7 +183,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.adminMessagesTitle)),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Form(
           key: _formKey,
           child: Column(
@@ -275,11 +276,11 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                     fontSize: 12,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty)
@@ -303,11 +304,11 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   ),
                   alignLabelWithHint: true,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty)
@@ -434,10 +435,13 @@ class _TenantInfoChip extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: scheme.primaryContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Row(
         children: [
@@ -567,12 +571,12 @@ class _TemplateCard extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
           color: isSelected
               ? color.withValues(alpha: 0.08)
               : scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           border: Border.all(
             color: isSelected
                 ? color.withValues(alpha: 0.4)
@@ -588,7 +592,7 @@ class _TemplateCard extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: isSelected ? 0.15 : 0.08),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.xs),
               ),
               child: Icon(icon, size: 18, color: color),
             ),
@@ -639,7 +643,7 @@ class _MessagePreview extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Column(

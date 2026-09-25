@@ -42,7 +42,8 @@ class QuotationScreen extends ConsumerStatefulWidget {
 class _QuotationScreenState extends ConsumerState<QuotationScreen> {
   /// Template PERSISTENTE (prefs via [invoiceTemplateProvider]) — antes
   /// vivia só no State da tela e era perdido ao reabrir o app.
-  InvoiceTemplateConfig get _templateConfig => ref.watch(invoiceTemplateProvider);
+  InvoiceTemplateConfig get _templateConfig =>
+      ref.watch(invoiceTemplateProvider);
 
   /// Loja activa (as cotações são documento POR loja — número sequencial
   /// dentro da loja). Resolvida como nas demais telas de dados.
@@ -758,8 +759,8 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
                   prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
                 ),
                 child: const Text(''),
@@ -799,7 +800,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
               const SizedBox(height: AppSpacing.md),
               ..._items.asMap().entries.map(
                 (entry) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
                   child: Row(
                     children: [
                       Icon(
@@ -1028,7 +1029,7 @@ class _QuotationTemplateSettingsSheetState
                             child: GestureDetector(
                               onTap: _removeLogo,
                               child: Container(
-                                padding: const EdgeInsets.all(4),
+                                padding: const EdgeInsets.all(AppSpacing.xxs),
                                 decoration: BoxDecoration(
                                   color: scheme.error,
                                   shape: BoxShape.circle,
@@ -1188,12 +1189,12 @@ class _QuotationTemplateSettingsSheetState
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: AppSpacing.xs,
+                      vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
                       color: _selectedColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppRadius.xs),
                     ),
                     child: Text(
                       l10n.quotationTemplatePreviewBadge,
@@ -1265,10 +1266,13 @@ class _StatusChip extends StatelessWidget {
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: 2,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppRadius.xs),
       ),
       child: Text(
         label,

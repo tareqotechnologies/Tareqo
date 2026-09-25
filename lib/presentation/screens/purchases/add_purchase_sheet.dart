@@ -350,7 +350,9 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                 }
 
                 return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xl,
+                  ),
                   itemCount: filtered.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 6),
                   itemBuilder: (context, index) => _CartProductRow(
@@ -482,7 +484,10 @@ class _CartProductRow extends StatelessWidget {
     return AppCard(
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       child: Row(
         children: [
           Expanded(
@@ -562,7 +567,7 @@ class _CartProductRow extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -575,11 +580,11 @@ class _CartProductRow extends StatelessWidget {
                         ),
                         InkWell(
                           onTap: isWeight ? onEdit : null,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppRadius.xs),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 6,
-                              vertical: 8,
+                              vertical: AppSpacing.xs,
                             ),
                             child: Text(
                               Quantity.format(

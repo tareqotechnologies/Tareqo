@@ -98,7 +98,7 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
                             .colorScheme
                             .surfaceContainerHighest
                             .withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
                       ),
                       child: Icon(
                         Icons.close,
@@ -191,7 +191,12 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
             await ref.read(allInvoicesProvider.notifier).refresh();
           },
           child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.lg,
+              AppSpacing.xl,
+            ),
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: filtered.length,
             separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -435,7 +440,7 @@ class _InfoPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: effectiveColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

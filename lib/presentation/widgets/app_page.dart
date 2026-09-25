@@ -371,10 +371,9 @@ class _HoverableTileState extends State<HoverableTile> {
           duration: AppDurations.fast,
           decoration: BoxDecoration(
             color: _hovered
-                ? Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withValues(alpha: 0.3)
+                ? Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
                 : null,
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),

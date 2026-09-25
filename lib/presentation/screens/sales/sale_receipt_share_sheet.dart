@@ -12,6 +12,7 @@ import '../../../core/utils/receipt_text.dart';
 import '../../../domain/entities/sale.dart';
 import '../../controllers/sales_providers.dart';
 import '../../widgets/sale_receipt_view.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Bottom sheet de partilha do recibo — o coração da funcionalidade:
 ///
@@ -118,7 +119,12 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.xs,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,

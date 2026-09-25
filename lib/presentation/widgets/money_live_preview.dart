@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/utils/formatters.dart';
 import '../../core/utils/money.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Preview AO VIVO do valor que será REGISTADO a partir do texto digitado
 /// num campo de moeda.
@@ -47,7 +48,7 @@ class _MoneyLivePreviewState extends State<MoneyLivePreview> {
     if (cents <= 0) return const SizedBox.shrink();
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.only(top: AppSpacing.xxs),
       child: Align(
         alignment: Alignment.centerRight,
         child: Text(

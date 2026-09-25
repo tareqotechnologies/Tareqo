@@ -46,10 +46,7 @@ class _AdminTenantCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  tenant.businessName,
-                  style: theme.textTheme.labelMedium,
-                ),
+                Text(tenant.businessName, style: theme.textTheme.labelMedium),
                 Text(
                   '$planName · ${tenant.createdAt.day}/${tenant.createdAt.month}/${tenant.createdAt.year}',
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -276,7 +273,9 @@ class _TenantDetailSheet extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: scheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppRadius.xl),
+            ),
           ),
           child: ListView(
             controller: scrollController,
@@ -623,10 +622,7 @@ class _InfoRow extends StatelessWidget {
                 ),
               ),
             ),
-            Text(
-              value,
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text(value, style: theme.textTheme.bodyMedium),
             if (onTap != null) ...[
               const SizedBox(width: 4),
               Icon(Icons.copy, size: 14, color: scheme.onSurfaceVariant),
@@ -721,9 +717,7 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: scheme.onSurfaceVariant),
         const SizedBox(width: AppSpacing.xs),
-        Expanded(
-          child: Text(label, style: theme.textTheme.labelMedium),
-        ),
+        Expanded(child: Text(label, style: theme.textTheme.labelMedium)),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(

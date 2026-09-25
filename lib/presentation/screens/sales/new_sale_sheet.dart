@@ -608,7 +608,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                                 case final product?) ...[
                               Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
+                                  horizontal: AppSpacing.xl,
                                 ),
                                 child: _CartPill(
                                   product: product,
@@ -622,7 +622,9 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                         ],
                         for (final product in filtered) ...[
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.xl,
+                            ),
                             child: _CartProductRow(
                               product: product,
                               quantity: _cart[product.id] ?? 0,
@@ -865,7 +867,10 @@ class _CartProductRow extends StatelessWidget {
       color: outOfStock
           ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4)
           : null,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       child: Row(
         children: [
           // Foto do produto (fallback: ícone) — imagem cadastrada,
@@ -907,7 +912,7 @@ class _CartProductRow extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(AppRadius.full),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -925,11 +930,11 @@ class _CartProductRow extends StatelessWidget {
                     // produtos (por peso: fração decimal; por unidade:
                     // inteiro). Atalho de balcão — 25 canetas em 2 toques.
                     onTap: onEdit,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
-                        vertical: 8,
+                        vertical: AppSpacing.xs,
                       ),
                       child: Text(
                         Quantity.format(
@@ -976,10 +981,13 @@ class _CartPill extends StatelessWidget {
     final isWeight = product.vendaPorFracao;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(AppRadius.full),
         border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Row(
@@ -991,7 +999,7 @@ class _CartPill extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: theme.colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(AppRadius.full),
             ),
             child: Text(
               isWeight

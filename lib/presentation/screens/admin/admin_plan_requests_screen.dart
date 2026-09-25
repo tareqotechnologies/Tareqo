@@ -63,7 +63,12 @@ class _AdminPlanRequestsScreenState
             onRefresh: () =>
                 ref.read(pendingPlanRequestsProvider.notifier).refresh(),
             child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                AppSpacing.xl,
+              ),
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: requests.length,
               separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -170,10 +175,7 @@ class _RequestCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      tenantName,
-                      style: theme.textTheme.bodySmall,
-                    ),
+                    Text(tenantName, style: theme.textTheme.bodySmall),
                     Text(
                       _timeAgo(),
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -201,7 +203,7 @@ class _RequestCard extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                 child: Icon(
                   Icons.arrow_forward,
                   size: 18,
@@ -265,10 +267,13 @@ class _PlanBadge extends StatelessWidget {
     final color = isUpgrade ? scheme.primary : scheme.outline;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Column(
         children: [

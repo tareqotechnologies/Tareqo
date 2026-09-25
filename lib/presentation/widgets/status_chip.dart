@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'num_text.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Pílula de status — rótulo com fundo colorido translúcido.
 class StatusChip extends StatelessWidget {
@@ -19,10 +20,13 @@ class StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: 3,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

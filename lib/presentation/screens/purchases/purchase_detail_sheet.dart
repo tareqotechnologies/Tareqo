@@ -87,10 +87,7 @@ class _PurchaseDetailSheet extends ConsumerWidget {
                 color: scheme.outlineVariant.withValues(alpha: 0.4),
               ),
             ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             child: Column(
               children: [
                 DetailRow(
@@ -166,11 +163,7 @@ class _PurchaseDetailSheet extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.inventory_2_outlined,
-                size: 14,
-                color: scheme.outline,
-              ),
+              Icon(Icons.inventory_2_outlined, size: 14, color: scheme.outline),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
@@ -210,7 +203,10 @@ class _PurchaseItemRow extends StatelessWidget {
         .firstOrNull;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: AppSpacing.sm,
+      ),
       child: Row(
         children: [
           ProductImage(imagePath: imagePath ?? '', size: 40, radius: 10),

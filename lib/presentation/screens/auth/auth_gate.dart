@@ -22,6 +22,7 @@ import '../../widgets/app_sheet.dart';
 import 'login_screen.dart';
 import 'mfa_verification_sheet.dart';
 import 'set_new_password_screen.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Portão de autenticação e de **acesso**: decide a tela raiz com base na
 /// sessão e no papel do usuário logado.
@@ -382,7 +383,7 @@ class _BlockedEmployeeScreen extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 440),
             child: Column(
@@ -432,7 +433,7 @@ class _TenantErrorScreen extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 440),
             child: Column(
@@ -486,9 +487,7 @@ class _SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark
-        ? AppColors.backgroundDark
-        : AppColors.scaffoldLight;
+    final bg = isDark ? AppColors.backgroundDark : AppColors.scaffoldLight;
     final textPrimary = isDark ? Colors.white : AppColors.onSurfaceLight;
     final textSecondary = isDark
         ? AppColors.onSurfaceVariantDark
@@ -505,7 +504,7 @@ class _SplashScreen extends StatelessWidget {
           children: [
             // Logo direto (TQ monograma branco sobre fundo preto).
             ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(AppRadius.xxl),
               child: Image.asset(
                 'assets/branding/icon_official.png',
                 width: 120,

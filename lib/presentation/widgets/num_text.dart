@@ -51,9 +51,7 @@ class NumText extends StatelessWidget {
         ],
       );
     } else {
-      effective = const TextStyle(
-        fontFeatures: [FontFeature.tabularFigures()],
-      );
+      effective = const TextStyle(fontFeatures: [FontFeature.tabularFigures()]);
     }
     return Text(
       text,

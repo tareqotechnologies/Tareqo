@@ -674,10 +674,10 @@ class _GrowthKpi extends StatelessWidget {
         : l10n.adminGrowthFlat;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -693,7 +693,7 @@ class _GrowthKpi extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
                   color: trendColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
                 child: Text(
                   trendLabel,
@@ -800,7 +800,7 @@ class _TrendChart extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppRadius.xs),
             ),
             child: Text(
               l10n.adminGrowthNoData,
@@ -1050,12 +1050,12 @@ class _DistributionCard extends StatelessWidget {
                 // Approval rate inline
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
+                    horizontal: AppSpacing.xs,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
                     color: rateColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(AppRadius.full),
                   ),
                   child: Text(
                     '$approvalRate%',
@@ -1121,14 +1121,11 @@ class _LegendDot extends StatelessWidget {
           height: 6,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
         ),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
@@ -1175,10 +1172,7 @@ class _PlanBarRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
-        Text(
-          '$count',
-          style: theme.textTheme.bodySmall,
-        ),
+        Text('$count', style: theme.textTheme.bodySmall),
       ],
     );
   }
@@ -1289,7 +1283,7 @@ class _ActivityRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: 8,
+        vertical: AppSpacing.xs,
       ),
       child: Row(
         children: [
@@ -1298,7 +1292,7 @@ class _ActivityRow extends StatelessWidget {
             height: 6,
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(AppRadius.full),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -1408,12 +1402,12 @@ class _QuickActionCard extends StatelessWidget {
                 // imprevisível nos dois temas).
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
+                    horizontal: AppSpacing.xs,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
                     color: action.color.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(AppRadius.full),
                   ),
                   child: Text(
                     '${action.badge}',

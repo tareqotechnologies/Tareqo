@@ -448,8 +448,8 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                   prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
                 ),
                 child: const Text(''),
@@ -480,7 +480,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
               const SizedBox(height: AppSpacing.md),
               ..._items.asMap().entries.map(
                 (entry) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
                   child: Row(
                     children: [
                       Icon(

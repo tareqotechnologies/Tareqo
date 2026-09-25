@@ -215,8 +215,8 @@ class CustomInvoicePreview extends StatelessWidget {
                 // Header
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                    horizontal: AppSpacing.xs,
+                    vertical: AppSpacing.xxs,
                   ),
                   decoration: BoxDecoration(
                     color: primaryColor,
@@ -286,7 +286,7 @@ class CustomInvoicePreview extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 4,
+                      vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
                       color: primaryColor.withValues(alpha: 0.08),
@@ -351,7 +351,10 @@ class _PreviewRow extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: AppSpacing.xxs,
+      ),
       decoration: BoxDecoration(
         color: last
             ? null

@@ -73,7 +73,10 @@ class _SalesCardState extends State<SalesCard> {
             onTap: _onTap ?? () => _openDetails(context),
             borderRadius: BorderRadius.circular(AppRadius.md),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: 14,
+              ),
               // DENTRO do InkWell: o toque do card é roteado para o nó
               // combinado — duplo-toque do leitor ativa o card inteiro,
               // como num botão.

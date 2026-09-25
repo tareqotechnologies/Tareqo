@@ -141,10 +141,13 @@ class DateSectionHeader extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xs,
+              vertical: 2,
+            ),
             decoration: BoxDecoration(
               color: totalColor.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(AppRadius.full),
             ),
             child: Text(
               Formatters.signedAmount(totalCents),
@@ -295,4 +298,3 @@ class TransactionDetailSheet extends StatelessWidget {
     );
   }
 }
-

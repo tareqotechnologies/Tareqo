@@ -403,11 +403,11 @@ class _CashStack extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 4,
+                      vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
                       color: scheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Text(
                       currency,
@@ -463,11 +463,11 @@ class _CashStack extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 4,
+                      vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
                       color: scheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Text(
                       currency,
@@ -572,10 +572,13 @@ class _CashLine extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xs,
+              vertical: 3,
+            ),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(AppRadius.full),
             ),
             child: Text(
               value,
@@ -685,7 +688,7 @@ class _CashStackSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Skeleton(
       child: AppCard(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
@@ -715,11 +718,16 @@ class _TransactionsSkeleton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Padding(
-            padding: EdgeInsets.fromLTRB(20, 12, 20, 8),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.lg,
+              AppSpacing.xs,
+            ),
             child: SkeletonBlock(width: 120, height: 14),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: AppCard(
               padding: const EdgeInsets.all(14),
               child: Column(

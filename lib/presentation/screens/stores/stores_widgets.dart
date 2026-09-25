@@ -1314,7 +1314,6 @@ class _EmployeeDetailSheet extends StatelessWidget {
   }
 }
 
-
 /// Sheet de detalhes de uma loja — exibida ao tocar no card.
 class _StoreDetailSheet extends StatelessWidget {
   const _StoreDetailSheet({required this.store});

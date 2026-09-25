@@ -21,10 +21,7 @@ Widget adminThinIfNeeded(
   required Widget child,
 }) {
   if (!thinStyle) return child;
-  return Theme(
-    data: adminThinTheme(Theme.of(context)),
-    child: child,
-  );
+  return Theme(data: adminThinTheme(Theme.of(context)), child: child);
 }
 
 /// ThemeData derivado com a escala thin (espelha `AdminThin`).
@@ -71,7 +68,10 @@ ThemeData adminThinTheme(ThemeData theme) {
 /// Estilo explícito do título do dialog — usado quando o caller quer
 /// aplicar o peso thin mesmo sem envolver a subtree (respeita o tema
 /// raiz quando `thinStyle` é falso).
-TextStyle? adminDialogTitleStyle(BuildContext context, {bool thinStyle = false}) {
+TextStyle? adminDialogTitleStyle(
+  BuildContext context, {
+  bool thinStyle = false,
+}) {
   final theme = Theme.of(context);
   if (!thinStyle) return null; // null = usa o dialogTheme global (22/w600).
   return TextStyle(

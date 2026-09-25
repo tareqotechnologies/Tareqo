@@ -30,7 +30,9 @@ Future<T?> showAppSheet<T>(
               color: scheme.surface,
               borderRadius: fullscreen
                   ? BorderRadius.zero
-                  : const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+                  : const BorderRadius.vertical(
+                      top: Radius.circular(AppRadius.xl),
+                    ),
               border: fullscreen
                   ? null
                   : Border(top: BorderSide(color: scheme.outlineVariant)),
@@ -40,7 +42,7 @@ Future<T?> showAppSheet<T>(
               children: [
                 if (fullscreen)
                   const Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 4),
+                    padding: EdgeInsets.only(top: 10, bottom: AppSpacing.xxs),
                     child: _SheetHandle(),
                   )
                 else
@@ -96,7 +98,12 @@ class SheetSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -258,4 +265,3 @@ class _SheetHandle extends StatelessWidget {
     );
   }
 }
-

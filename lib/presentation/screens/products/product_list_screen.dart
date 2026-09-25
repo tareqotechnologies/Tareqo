@@ -377,7 +377,10 @@ class _CompactFilterChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: 7,
+        ),
         decoration: BoxDecoration(
           color: isSelected
               ? color.withValues(alpha: 0.14)
@@ -527,7 +530,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 14,
-                        vertical: 12,
+                        vertical: AppSpacing.sm,
                       ),
                     ),
                   ),
@@ -730,7 +733,10 @@ class _ProductTileState extends State<_ProductTile> {
             onTap: _onTap,
             borderRadius: BorderRadius.circular(AppRadius.md),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: 14,
+              ),
               // Mesmo padrão do SalesCard: o toque do card é roteado ao nó
               // combinado — duplo-toque do leitor ativa o card inteiro.
               child: Semantics(

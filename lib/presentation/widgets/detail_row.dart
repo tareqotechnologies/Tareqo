@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Linha chave → valor de listas de detalhe — padrão único das sheets de
 /// detalhe (transação financeira, loja e log de auditoria).
@@ -17,7 +18,7 @@ class DetailRow extends StatelessWidget {
     this.labelWidth = 100,
     this.icon,
     this.gap = 8,
-    this.padding = const EdgeInsets.symmetric(vertical: 8),
+    this.padding = const EdgeInsets.symmetric(vertical: AppSpacing.xs),
     this.valueColor,
     this.maxLines,
   });

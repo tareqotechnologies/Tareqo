@@ -44,7 +44,7 @@ class SalesSummaryHeader extends StatelessWidget {
         : null;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -135,7 +135,7 @@ class _CompactDelta extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

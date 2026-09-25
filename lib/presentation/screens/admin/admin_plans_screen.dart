@@ -314,7 +314,7 @@ class _PlanTile extends ConsumerWidget {
                         ),
                         decoration: BoxDecoration(
                           color: scheme.primaryContainer.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: Text(
                           context.l10n.adminTenantCount(tenantCount),
@@ -335,7 +335,10 @@ class _PlanTile extends ConsumerWidget {
             // ── Status badge ──
             if (!plan.isActive)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xs,
+                  vertical: AppSpacing.xxs,
+                ),
                 decoration: BoxDecoration(
                   color: scheme.errorContainer.withValues(alpha: 0.5),
                   borderRadius: AppRadius.smAll,
@@ -394,7 +397,9 @@ class _PlanDetailSheet extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: scheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppRadius.xl),
+            ),
           ),
           child: ListView(
             controller: scrollController,
@@ -405,7 +410,10 @@ class _PlanDetailSheet extends ConsumerWidget {
                 child: Container(
                   width: 40,
                   height: 4,
-                  margin: const EdgeInsets.only(top: 12, bottom: 20),
+                  margin: const EdgeInsets.only(
+                    top: AppSpacing.sm,
+                    bottom: AppSpacing.lg,
+                  ),
                   decoration: BoxDecoration(
                     color: scheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
@@ -469,8 +477,8 @@ class _PlanDetailSheet extends ConsumerWidget {
               // ── Status chip ──
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
                 ),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.12),
@@ -553,14 +561,14 @@ class _PlanDetailSheet extends ConsumerWidget {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
+                      horizontal: AppSpacing.xs,
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
                       color: scheme.surfaceContainerHighest.withValues(
                         alpha: 0.5,
                       ),
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Text(
                       context.l10n.adminTenantCount(planTenants.length),
@@ -649,7 +657,10 @@ class _InfoRow extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      padding: const EdgeInsets.symmetric(
+        vertical: 6,
+        horizontal: AppSpacing.xxs,
+      ),
       child: Row(
         children: [
           Icon(icon, size: 18, color: scheme.onSurfaceVariant),
@@ -662,11 +673,7 @@ class _InfoRow extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            value,
-            style: theme.textTheme.bodySmall?.copyWith(
-            ),
-          ),
+          Text(value, style: theme.textTheme.bodySmall?.copyWith()),
         ],
       ),
     );
@@ -689,16 +696,17 @@ class _TenantStatChip extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: AppSpacing.xxs,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: AppRadius.smAll,
       ),
       child: Text(
         '$count $label',
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: color,
-        ),
+        style: theme.textTheme.labelSmall?.copyWith(color: color),
       ),
     );
   }
@@ -761,7 +769,7 @@ class _TenantMiniTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(AppRadius.full),
             ),
             child: Text(
               statusLabel,
@@ -936,7 +944,9 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xl),
+        ),
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -950,7 +960,10 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
                 child: Container(
                   width: 40,
                   height: 4,
-                  margin: const EdgeInsets.only(top: 12, bottom: 20),
+                  margin: const EdgeInsets.only(
+                    top: AppSpacing.sm,
+                    bottom: AppSpacing.lg,
+                  ),
                   decoration: BoxDecoration(
                     color: scheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),

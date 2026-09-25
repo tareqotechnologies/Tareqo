@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../controllers/auth_providers.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// [AppLockOverlay] — bloqueio biométrico do app.
 ///
@@ -234,7 +235,7 @@ class _BiometricLockScreen extends StatelessWidget {
           child: SingleChildScrollView(
             // Rola em viewports baixas/escala de texto grande — o conteúdo
             // nunca fica truncado nem estoura.
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 380),
               child: Column(

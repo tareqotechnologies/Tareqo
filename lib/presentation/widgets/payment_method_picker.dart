@@ -137,7 +137,7 @@ class _CollapsedSummary extends StatelessWidget {
         onTap: onTap,
         child: Container(
           height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           child: Row(
             children: [
               Icon(icon, size: 18, color: theme.colorScheme.primary),
@@ -188,14 +188,14 @@ class _PrimaryTab extends StatelessWidget {
       color: selected
           ? theme.colorScheme.primaryContainer
           : theme.colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppRadius.md),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(
               color: selected ? primary : Colors.transparent,
               width: 1.5,
@@ -263,7 +263,10 @@ class _SecondaryTile extends StatelessWidget {
         child: Container(
           // Padding vertical 14: linha com ≥ 48dp de altura — alvo de toque
           // acessível (WCAG/androidTapTargetGuideline). Era 6 (≈37px).
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: 14,
+          ),
           decoration: BoxDecoration(
             borderRadius: AppRadius.mdAll,
             border: Border.all(

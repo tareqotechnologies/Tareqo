@@ -175,7 +175,7 @@ class _SalesBody extends StatelessWidget {
           // altura em runtime, então a barra cresce sem estourar.
           PinnedHeader(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 4,

@@ -195,7 +195,7 @@ class ReportsScreen extends ConsumerWidget {
                     children: List.generate(
                       4,
                       (_) => const Padding(
-                        padding: EdgeInsets.only(bottom: 8),
+                        padding: EdgeInsets.only(bottom: AppSpacing.xs),
                         child: SkeletonBlock(height: 56, radius: 16),
                       ),
                     ),
@@ -362,7 +362,7 @@ class _BestSellerRow extends StatelessWidget {
     return AppCard(
       elevated: true,
       borderRadius: AppRadius.lgAll,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       child: Row(
         children: [
           CircleAvatar(

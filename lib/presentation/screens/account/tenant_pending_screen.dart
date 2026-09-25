@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/auth_providers.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Tela exibida ao dono enquanto a solicitação de acesso aguarda a
 /// aprovação manual do super admin (prazo de até 24h).
@@ -21,14 +22,14 @@ class TenantPendingScreen extends ConsumerWidget {
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 440),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(AppSpacing.xl),
                   decoration: BoxDecoration(
                     color: scheme.tertiaryContainer,
                     shape: BoxShape.circle,

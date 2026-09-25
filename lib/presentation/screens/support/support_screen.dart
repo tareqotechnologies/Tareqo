@@ -43,14 +43,10 @@ class _SupportScreenState extends State<SupportScreen> {
   static String _normalize(String value) {
     const accented = 'áàâãéêíóôõúüçñ';
     const plain = 'aaaaeeiooouucn';
-    return value
-        .toLowerCase()
-        .split('')
-        .map((c) {
-          final i = accented.indexOf(c);
-          return i >= 0 ? plain[i] : c;
-        })
-        .join();
+    return value.toLowerCase().split('').map((c) {
+      final i = accented.indexOf(c);
+      return i >= 0 ? plain[i] : c;
+    }).join();
   }
 
   bool _matches(String title, String hint) {
@@ -127,7 +123,11 @@ class _SupportScreenState extends State<SupportScreen> {
               shape: BoxShape.circle,
               color: IconTone.darkBackground(accent),
             ),
-            child: Icon(icon, size: 22, color: IconTone.lightForeground(accent)),
+            child: Icon(
+              icon,
+              size: 22,
+              color: IconTone.lightForeground(accent),
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -168,8 +168,7 @@ class _SupportScreenState extends State<SupportScreen> {
     final scheme = theme.colorScheme;
     return Center(
       child: InkWell(
-        onTap: () =>
-            _launchExternal(context, Uri.parse('https://tareqo.app')),
+        onTap: () => _launchExternal(context, Uri.parse('https://tareqo.app')),
         borderRadius: BorderRadius.circular(AppRadius.full),
         child: Container(
           padding: const EdgeInsets.symmetric(
@@ -237,9 +236,7 @@ class _SupportScreenState extends State<SupportScreen> {
         onTap: () => _contactSupport(context),
       ),
     ];
-    final visible = topics
-        .where((t) => _matches(t.title, t.hint))
-        .toList();
+    final visible = topics.where((t) => _matches(t.title, t.hint)).toList();
 
     return AppPage(
       title: l10n.supportTitle,
@@ -265,7 +262,7 @@ class _SupportScreenState extends State<SupportScreen> {
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 14,
-                vertical: 12,
+                vertical: AppSpacing.sm,
               ),
             ),
           ),
@@ -275,10 +272,7 @@ class _SupportScreenState extends State<SupportScreen> {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
               child: Column(
                 children: [
-                  Text(
-                    l10n.commonNoResults,
-                    style: theme.textTheme.titleSmall,
-                  ),
+                  Text(l10n.commonNoResults, style: theme.textTheme.titleSmall),
                   const SizedBox(height: 4),
                   Text(
                     l10n.commonNoResultsHint,

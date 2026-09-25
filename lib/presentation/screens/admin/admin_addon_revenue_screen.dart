@@ -342,7 +342,7 @@ class _CategoryTile extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           Container(

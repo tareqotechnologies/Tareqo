@@ -197,156 +197,159 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
       // token, sem gradiente decorativo).
       backgroundColor: scheme.surface,
       body: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 460),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: scheme.primary,
-                        borderRadius: BorderRadius.circular(AppRadius.xl),
-                      ),
-                      child: Icon(
-                        Icons.lock_reset,
-                        size: 38,
-                        color: scheme.onPrimary,
-                      ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.xxl,
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: scheme.primary,
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                    ),
+                    child: Icon(
+                      Icons.lock_reset,
+                      size: 38,
+                      color: scheme.onPrimary,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    l10n.setNewPasswordTitle,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  l10n.setNewPasswordTitle,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    l10n.setNewPasswordHint,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      height: 1.4,
-                    ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.setNewPasswordHint,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    height: 1.4,
                   ),
-                  const SizedBox(height: 28),
-                  // Card premium (estilo Apple): cantos 20 + superfície
-                  // elevada — mesmo padrão do login e do onboarding.
-                  AppCard(
-                    elevated: true,
-                    borderRadius: const BorderRadius.all(Radius.circular(AppRadius.xl)),
-                    padding: const EdgeInsets.all(20),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          AppTextField(
-                            controller: _newController,
-                            obscureText: _obscureNew,
-                            textInputAction: TextInputAction.next,
-                            autofillHints: const [AutofillHints.newPassword],
-                            label: l10n.changePasswordNewLabel,
-                            prefixIcon: Icons.lock_reset_outlined,
-                            suffixIcon: IconButton(
-                              tooltip: _obscureNew
-                                  ? l10n.loginShowPassword
-                                  : l10n.loginHidePassword,
-                              icon: Icon(
-                                _obscureNew
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                              ),
-                              onPressed: () =>
-                                  setState(() => _obscureNew = !_obscureNew),
+                ),
+                const SizedBox(height: 28),
+                // Card premium (estilo Apple): cantos 20 + superfície
+                // elevada — mesmo padrão do login e do onboarding.
+                AppCard(
+                  elevated: true,
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(AppRadius.xl),
+                  ),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AppTextField(
+                          controller: _newController,
+                          obscureText: _obscureNew,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.newPassword],
+                          label: l10n.changePasswordNewLabel,
+                          prefixIcon: Icons.lock_reset_outlined,
+                          suffixIcon: IconButton(
+                            tooltip: _obscureNew
+                                ? l10n.loginShowPassword
+                                : l10n.loginHidePassword,
+                            icon: Icon(
+                              _obscureNew
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
                             ),
-                            validator: (value) {
-                              final issue = passwordIssue(
-                                value ?? '',
-                                requireStrong: true,
-                              );
-                              return switch (issue) {
-                                PasswordIssue.tooShort =>
-                                  l10n.loginPasswordError,
-                                PasswordIssue.weak =>
-                                  l10n.loginWeakPasswordError,
-                                null => null,
-                              };
-                            },
+                            onPressed: () =>
+                                setState(() => _obscureNew = !_obscureNew),
                           ),
-                          const SizedBox(height: 14),
-                          AppTextField(
-                            controller: _confirmController,
-                            obscureText: _obscureConfirm,
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (_) => _submit(),
-                            autofillHints: const [AutofillHints.newPassword],
-                            label: l10n.changePasswordConfirmLabel,
-                            prefixIcon: Icons.lock_outline,
-                            suffixIcon: IconButton(
-                              tooltip: _obscureConfirm
-                                  ? l10n.loginShowPassword
-                                  : l10n.loginHidePassword,
-                              icon: Icon(
-                                _obscureConfirm
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                              ),
-                              onPressed: () => setState(
-                                () => _obscureConfirm = !_obscureConfirm,
-                              ),
+                          validator: (value) {
+                            final issue = passwordIssue(
+                              value ?? '',
+                              requireStrong: true,
+                            );
+                            return switch (issue) {
+                              PasswordIssue.tooShort => l10n.loginPasswordError,
+                              PasswordIssue.weak => l10n.loginWeakPasswordError,
+                              null => null,
+                            };
+                          },
+                        ),
+                        const SizedBox(height: 14),
+                        AppTextField(
+                          controller: _confirmController,
+                          obscureText: _obscureConfirm,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _submit(),
+                          autofillHints: const [AutofillHints.newPassword],
+                          label: l10n.changePasswordConfirmLabel,
+                          prefixIcon: Icons.lock_outline,
+                          suffixIcon: IconButton(
+                            tooltip: _obscureConfirm
+                                ? l10n.loginShowPassword
+                                : l10n.loginHidePassword,
+                            icon: Icon(
+                              _obscureConfirm
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
                             ),
-                            validator: (value) {
-                              if (value != _newController.text) {
-                                return l10n.loginConfirmError;
-                              }
-                              return null;
-                            },
+                            onPressed: () => setState(
+                              () => _obscureConfirm = !_obscureConfirm,
+                            ),
                           ),
-                          const SizedBox(height: 24),
-                          AppButton.primary(
-                            onPressed: _isSubmitting ? null : _submit,
-                            icon: _isSubmitting
-                                ? SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: scheme.onPrimary,
-                                    ),
-                                  )
-                                : null,
-                            label: l10n.setNewPasswordSubmit,
-                          ),
-                        ],
-                      ),
+                          validator: (value) {
+                            if (value != _newController.text) {
+                              return l10n.loginConfirmError;
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        AppButton.primary(
+                          onPressed: _isSubmitting ? null : _submit,
+                          icon: _isSubmitting
+                              ? SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: scheme.onPrimary,
+                                  ),
+                                )
+                              : null,
+                          label: l10n.setNewPasswordSubmit,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  // Sair: o usuário pode desistir do fluxo de recuperação
-                  // (ex.: clicou no link sem querer).
-                  Center(
-                    child: TextButton(
-                      onPressed: _isSubmitting
-                          ? null
-                          : () => ref.read(signOutUseCaseProvider).call(),
-                      child: Text(l10n.setNewPasswordSignOut),
-                    ),
+                ),
+                const SizedBox(height: 12),
+                // Sair: o usuário pode desistir do fluxo de recuperação
+                // (ex.: clicou no link sem querer).
+                Center(
+                  child: TextButton(
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => ref.read(signOutUseCaseProvider).call(),
+                    child: Text(l10n.setNewPasswordSignOut),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 }

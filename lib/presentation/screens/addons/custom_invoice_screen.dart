@@ -43,7 +43,8 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
   /// Template PERSISTENTE do PDF (prefs via [invoiceTemplateProvider]) —
   /// antes vivia só no State da tela e era perdido ao reabrir o app,
   /// fazendo o PDF sair sempre com o design padrão.
-  InvoiceTemplateConfig get _templateConfig => ref.watch(invoiceTemplateProvider);
+  InvoiceTemplateConfig get _templateConfig =>
+      ref.watch(invoiceTemplateProvider);
 
   /// Loja activa (as facturas são documento POR loja — número sequencial
   /// dentro da loja). Resolvida como nas demais telas de dados.
@@ -249,11 +250,7 @@ class _InvoiceItemData {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _InvoiceCard extends StatelessWidget {
-  const _InvoiceCard({
-    required this.invoice,
-    this.templateConfig,
-    this.store,
-  });
+  const _InvoiceCard({required this.invoice, this.templateConfig, this.store});
 
   /// Factura PERSISTIDA (número sequencial real da loja vem da entidade).
   final CustomInvoice invoice;
@@ -684,8 +681,8 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
                   prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
                   enabled: false,
                 ),
@@ -726,7 +723,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
               const SizedBox(height: AppSpacing.md),
               ..._items.asMap().entries.map(
                 (entry) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
                   child: Row(
                     children: [
                       Expanded(
@@ -973,7 +970,7 @@ class _TemplateSettingsSheetState
                             child: GestureDetector(
                               onTap: _removeLogo,
                               child: Container(
-                                padding: const EdgeInsets.all(4),
+                                padding: const EdgeInsets.all(AppSpacing.xxs),
                                 decoration: BoxDecoration(
                                   color: scheme.error,
                                   shape: BoxShape.circle,

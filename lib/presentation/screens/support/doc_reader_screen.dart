@@ -4,6 +4,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_tokens.dart';
 
 /// Documentos de suporte embutidos no app (assets) — os MESMOS markdowns de
 /// `docs/`, empacotados para leitura OFFLINE no ecrã Ajuda. O asset é
@@ -84,7 +85,7 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
           if (snapshot.hasError || !snapshot.hasData) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppSpacing.xl),
                 child: Text(
                   l10n.supportReadingError,
                   textAlign: TextAlign.center,
@@ -161,10 +162,15 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                 fontStyle: FontStyle.italic,
                 height: 1.45,
               ),
-              blockquotePadding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              blockquotePadding: const EdgeInsets.fromLTRB(
+                AppSpacing.sm,
+                AppSpacing.xs,
+                AppSpacing.sm,
+                AppSpacing.xs,
+              ),
               blockquoteDecoration: BoxDecoration(
                 color: scheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
                 border: Border(
                   left: BorderSide(color: scheme.primary, width: 3),
                 ),
@@ -187,10 +193,10 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                 fontWeight: FontWeight.w600,
                 backgroundColor: scheme.surfaceContainerHighest,
               ),
-              codeblockPadding: const EdgeInsets.all(12),
+              codeblockPadding: const EdgeInsets.all(AppSpacing.sm),
               codeblockDecoration: BoxDecoration(
                 color: scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.xs),
               ),
               tableHead: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
