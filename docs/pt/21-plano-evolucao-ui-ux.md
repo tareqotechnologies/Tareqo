@@ -24,7 +24,7 @@ O app já parte de uma base **acima da média** para um ERP Flutter. Evidências
 | Motion | ❌ Gargalo 1 | Apenas 9 arquivos com animações; **0 `HapticFeedback`** (nenhum feedback tátil em PDV, pagamento, finalização de venda); transições de rota padrão; fade 220ms único entre abas |
 | A11y de conteúdo | ❌ Gargalo 2 | Apenas 5 `Semantics(` em 498 arquivos; gráficos/valores/estados sem rótulo para leitor de tela |
 | Tipografia dinâmica | ⚠️ | Nenhum clamp de `textScaler`; layouts com `Row` rígido podem estourar em fontes ampliadas |
-| Pulir inconsistencies | ⚠️ | Alguns pesos/respiros foram normalizados à mão (varreduras `sed` do painel admin); dois headers de sheet (`SheetHeader` + `AppSheetHeader`); undo via `showUndoSnackBar` nas ações destrutivas reversíveis (F1.3 concluída — sem animação de progresso) |
+| Pulir inconsistencies | ⚠️ | Alguns pesos/respiros foram normalizados à mão (varreduras `sed` do painel admin); header de sheet UNIFICADO (`SheetHeader` — 2.1 concluída no commit 58a74f5); undo via `showUndoSnackBar` COM countdown de progresso nas ações destrutivas reversíveis (F1.3 concluída) |
 
 **Conclusão do diagnóstico:** o gap para "nível Apple" **não é estético — é sensorial e de
 consistência**. O que falta é o que se *sente*: resposta tátil, movimento com propósito,
@@ -96,9 +96,11 @@ teste manual de haptics em device real.
 
 ### Fase 2 — Design system unificado (varredura de coerência) · *~2 dias · risco médio-baixo*
 
-**2.1 Um único header de sheet.** Consolidar `SheetHeader` (com ação) e
-`AppSheetHeader` (título + fechar) em **um** componente com parâmetros opcionais.
-Varredura: ~60 chamadas. Migração mecânica, validada por análise estática.
+**2.1 Um único header de sheet.** ✅ **CONCLUÍDA** (commit 58a74f5):
+`AppSheetHeader` foi absorvido pelo `SheetHeader` unificado (fechar à
+esquerda, título/subtítulo centrado, acção à direita) — varredura por
+`AppSheetHeader` retorna zero usos em `lib/` e `test/`; só este plano e o
+doc comment do barrel citavam o nome antigo (referências atualizadas).
 
 **2.2 Um único " destructive".** Hoje: `AppButton.danger`, `ConfirmDialog`,
 `InlineErrorCard`. Definir que **toda** confirmação destrutiva usa

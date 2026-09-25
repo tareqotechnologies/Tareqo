@@ -3,8 +3,8 @@
 /// confirmação ([showConfirmDialog]) / entrada ([showInputDialog]) e o
 /// snackbar com undo ([showUndoSnackBar]).
 ///
-/// Componentes de layout de sheet (`SheetSection`, `SheetHeader`,
-/// `AppSheetHeader`) continuam em `app_sheet.dart` e importam-se à parte.
+/// Componentes de layout de sheet (`SheetSection`, `SheetHeader`) continuam
+/// em `app_sheet.dart` e importam-se à parte.
 library;
 
 export 'app_sheet.dart' show showAppSheet;
