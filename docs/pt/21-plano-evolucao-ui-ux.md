@@ -158,6 +158,11 @@ MediaQuery(textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.
 * Nos componentes críticos (PDV, teclado numérico, listas), usar
   `maxLines` + `ellipsis` + `Flexible` para absorver o texto ampliado.
 * Auditoria com `flutter run --dart-define=A11Y_BIG_FONT=1` (flag de dev) em 1.3×, 1.6×, 2.0×.
+  ✅ **Auditado (automatizado)**: `text_scale_visual_audit_test.dart` renderiza
+  login, suporte, lojas e detalhe de loja em 1.3× e 1.6× — zero overflows
+  (com o teto global, 1.6× é o pior caso de produção) e capturas PNG por
+  tela/escala em `test/presentation/screens/goldens/text_scale_audit/`.
+  A auditoria roda na CI a cada push — regressão de texto ampliado quebra a suíte.
 
 **3.3 Foco visível em teclado físico/Bluetooth** (lojas usam scanner+teclado):
 `FocusRing`-like: borda primária de 2px no widget focado (já parcial no input,
