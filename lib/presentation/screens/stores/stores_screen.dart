@@ -273,8 +273,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                               store.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(fontWeight: FontWeight.w300),
+                              style: Theme.of(context).textTheme.bodySmall,
                             ),
                             if (store.address.isNotEmpty) ...[
                               const SizedBox(height: 1),
@@ -377,8 +376,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                           employee.fullName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(fontWeight: FontWeight.w300),
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
                       // Indicador de estado discreto + chevron.
