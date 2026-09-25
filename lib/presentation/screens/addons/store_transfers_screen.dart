@@ -160,10 +160,10 @@ class _TransferCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(AppRadius.xs),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -421,7 +421,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             const Divider(),
             const SizedBox(height: AppSpacing.sm),
             _SectionLabel(text: l10n.transfersProduct),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             if (activeProducts.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedProductId,

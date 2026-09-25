@@ -83,7 +83,7 @@ class _ProductPhotoPicker extends StatelessWidget {
         : ProductImage(imagePath: imagePath, size: 76, iconSize: 30);
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: AppRadius.mdAll,
@@ -100,7 +100,7 @@ class _ProductPhotoPicker extends StatelessWidget {
             ),
             child: preview,
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 16),
           // Labels + botões
           Expanded(
             child: Column(
@@ -133,14 +133,14 @@ class _ProductPhotoPicker extends StatelessWidget {
                       tooltip: l10n.productsPhotoTake,
                       onTap: onTakePhoto,
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     _PhotoActionButton(
                       icon: Icons.photo_library_outlined,
                       tooltip: l10n.productsPhotoGallery,
                       onTap: onPickGallery,
                     ),
                     if (hasImage) ...[
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       _PhotoActionButton(
                         icon: Icons.delete_outline,
                         tooltip: l10n.productsPhotoRemove,
@@ -242,7 +242,7 @@ class _SectionLabel extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: IconTone.darkBackground(ModuleColors.products),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(AppRadius.xs),
           ),
           child: Icon(
             icon,
@@ -289,7 +289,7 @@ class _CompactSwitch extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -524,7 +524,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
         maxHeight: MediaQuery.sizeOf(context).height * 0.88,
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        padding: AppSpacing.sheetPadding,
         child: Form(
           key: _formKey,
           child: Column(
@@ -547,7 +547,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                 icon: Icons.inventory_2_outlined,
                 title: l10n.productsSectionInfo,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               AppTextField(
                 controller: _nameController,
                 textInputAction: TextInputAction.next,
@@ -627,7 +627,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                           : null,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: AppTextField(
                       controller: _salePriceController,
@@ -657,7 +657,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                       controller: _purchasePriceController,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: MoneyLivePreview(controller: _salePriceController),
                   ),
@@ -744,7 +744,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                 ),
               ],
               if (_formError != null) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
                 Text(
                   _formError!,
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -999,7 +999,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
         maxHeight: MediaQuery.sizeOf(context).height * 0.9,
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        padding: AppSpacing.sheetPadding,
         child: Form(
           key: _formKey,
           child: Column(
@@ -1022,7 +1022,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 icon: Icons.inventory_2_outlined,
                 title: l10n.productsSectionInfo,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               AppTextField(
                 controller: _nameController,
                 textInputAction: TextInputAction.next,
@@ -1100,7 +1100,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                           : null,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: AppTextField(
                       controller: _salePriceController,
@@ -1128,7 +1128,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                       controller: _purchasePriceController,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: MoneyLivePreview(controller: _salePriceController),
                   ),
@@ -1203,7 +1203,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 icon: Icons.toggle_on_outlined,
                 title: l10n.productsSectionStatus,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               _CompactSwitch(
                 label: l10n.productsActiveLabel,
                 subtitle: l10n.productsActiveHint,
@@ -1211,7 +1211,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 onChanged: (value) => setState(() => _isActive = value),
               ),
               if (_formError != null) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
                 Text(
                   _formError!,
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -1277,7 +1277,7 @@ class _ExpiryField extends StatelessWidget {
           // minHeight (e não altura fixa): com escala de texto alta a data
           // 'Validade · dd/mm/aaaa' quebra em 2 linhas sem cortar o texto.
           constraints: const BoxConstraints(minHeight: 56),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
           decoration: BoxDecoration(
             color: scheme.surface,
             borderRadius: BorderRadius.circular(AppRadius.md),

@@ -255,7 +255,7 @@ class _PlanTile extends ConsumerWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: AppSpacing.sm),
         child: Row(
           children: [
             // ── Color accent bar ──
@@ -309,7 +309,7 @@ class _PlanTile extends ConsumerWidget {
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
+                          horizontal: AppSpacing.xs,
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
@@ -403,7 +403,7 @@ class _PlanDetailSheet extends ConsumerWidget {
           ),
           child: ListView(
             controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            padding: AppSpacing.sheetPadding,
             children: [
               // Handle bar
               Center(
@@ -494,7 +494,7 @@ class _PlanDetailSheet extends ConsumerWidget {
                       size: 16,
                       color: accent,
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Text(
                       plan.isActive
                           ? l10n.statusApproved
@@ -658,7 +658,7 @@ class _InfoRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        vertical: 6,
+        vertical: AppSpacing.xs,
         horizontal: AppSpacing.xxs,
       ),
       child: Row(
@@ -729,7 +729,7 @@ class _TenantMiniTile extends StatelessWidget {
     };
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Row(
         children: [
           Container(
@@ -766,7 +766,7 @@ class _TenantMiniTile extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppRadius.full),
@@ -949,7 +949,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
         ),
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        padding: AppSpacing.sheetPadding,
         child: Form(
           child: Column(
             mainAxisSize: MainAxisSize.min,

@@ -246,7 +246,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
-                    vertical: 10,
+                    vertical: AppSpacing.sm,
                   ),
                   child: Row(
                     children: [
@@ -265,7 +265,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       // Nome fino + endereço compacto.
                       Expanded(
                         child: Column(
@@ -352,7 +352,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
-                    vertical: 10,
+                    vertical: AppSpacing.sm,
                   ),
                   child: Row(
                     children: [
@@ -371,7 +371,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       // Nome fino — sem bold, sem chips.
                       Expanded(
                         child: Text(
@@ -386,7 +386,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                         Container(
                           width: 6,
                           height: 6,
-                          margin: const EdgeInsets.only(right: 6),
+                          margin: const EdgeInsets.only(right: AppSpacing.xs),
                           decoration: BoxDecoration(
                             color: scheme.error,
                             shape: BoxShape.circle,

@@ -437,7 +437,7 @@ class _NotificationTile extends StatelessWidget {
                               ),
                             ),
                             if (!isRead) ...[
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 8),
                               Container(
                                 width: 7,
                                 height: 7,
@@ -462,7 +462,7 @@ class _NotificationTile extends StatelessWidget {
                             height: 1.35,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 8),
                         Row(
                           children: [
                             Text(
@@ -477,7 +477,7 @@ class _NotificationTile extends StatelessWidget {
                             const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
+                                horizontal: AppSpacing.xs,
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
@@ -603,7 +603,7 @@ class _DetailBottomSheet extends StatelessWidget {
           // ── Handle ──
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: 10, bottom: AppSpacing.xxs),
+              margin: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xxs),
               width: 36,
               height: 4,
               decoration: BoxDecoration(
@@ -647,7 +647,7 @@ class _DetailBottomSheet extends StatelessWidget {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
+                              horizontal: AppSpacing.xs,
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
@@ -783,7 +783,7 @@ class _Pill extends StatelessWidget {
             child: AnimatedContainer(
               duration: AppDurations.fast,
               padding: const EdgeInsets.symmetric(
-                horizontal: 14,
+                horizontal: AppSpacing.md,
                 vertical: AppSpacing.xs,
               ),
               decoration: BoxDecoration(
@@ -815,10 +815,10 @@ class _Pill extends StatelessWidget {
                     ),
                   ),
                   if (count > 0) ...[
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
+                        horizontal: AppSpacing.xs,
                         vertical: 0.5,
                       ),
                       decoration: BoxDecoration(

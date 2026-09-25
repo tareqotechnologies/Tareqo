@@ -270,7 +270,7 @@ class _AdminFab extends StatelessWidget {
             if (totalBadge > 0) ...[
               const SizedBox(width: 4),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 1),
                 decoration: BoxDecoration(
                   color: scheme.error,
                   borderRadius: BorderRadius.circular(AppRadius.full),
@@ -332,7 +332,7 @@ class _NavBottomSheet extends StatelessWidget {
           // Handle
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: 10, bottom: AppSpacing.md),
+              margin: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.md),
               width: 36,
               height: 4,
               decoration: BoxDecoration(
@@ -409,7 +409,7 @@ class _NavSheetItem extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
-            vertical: 14,
+            vertical: AppSpacing.md,
           ),
           child: Row(
             children: [
@@ -430,7 +430,7 @@ class _NavSheetItem extends StatelessWidget {
                   color: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 16),
 
               // Label
               Expanded(
@@ -448,7 +448,7 @@ class _NavSheetItem extends StatelessWidget {
               if (item.badge > 0)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
+                    horizontal: AppSpacing.xs,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(

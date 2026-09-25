@@ -137,7 +137,7 @@ class _PulseBadgeState extends State<PulseBadge>
               );
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 1),
               decoration: BoxDecoration(
                 color: badgeColor,
                 borderRadius: BorderRadius.circular(AppRadius.full),

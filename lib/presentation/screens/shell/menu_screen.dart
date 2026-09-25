@@ -236,7 +236,7 @@ class MenuScreen extends ConsumerWidget {
             borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.sm,
-              vertical: 10,
+              vertical: AppSpacing.sm,
             ),
             child: Row(
               children: [
@@ -312,7 +312,7 @@ class _MenuTile extends StatelessWidget {
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
-        vertical: 10,
+        vertical: AppSpacing.sm,
       ),
       child: Row(
         children: [

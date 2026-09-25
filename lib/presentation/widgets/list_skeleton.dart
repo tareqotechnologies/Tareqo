@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_tokens.dart';
 import 'skeleton.dart';
 
 /// Skeleton de LISTA — blocos no formato dos cards reais (resumo opcional
@@ -22,7 +23,7 @@ class ListSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Skeleton(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.fabBottomClearance),
         physics: const NeverScrollableScrollPhysics(),
         children: [
           if (showHeader) ...[

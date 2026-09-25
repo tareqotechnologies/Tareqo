@@ -102,14 +102,30 @@ esquerda, título/subtítulo centrado, acção à direita) — varredura por
 `AppSheetHeader` retorna zero usos em `lib/` e `test/`; só este plano e o
 doc comment do barrel citavam o nome antigo (referências atualizadas).
 
-**2.2 Um único " destructive".** Hoje: `AppButton.danger`, `ConfirmDialog`,
-`InlineErrorCard`. Definir que **toda** confirmação destrutiva usa
-`ConfirmDialog` (thin no admin via ponte existente) + `Haptics.warning` antes
-de abrir. Varredura por `AlertDialog(` custom inline.
+**2.2 Um único " destructive".** ✅ **CONCLUÍDA**: a unificação já era real
+(`showConfirmDialog` centraliza a variante `.danger` + `Haptics.warning` no
+toque — a varredura não encontrou `AlertDialog(` inline em telas nem
+confirmações ad-hoc). Trancada por dois guard rails: fonte
+(`destructive_dialog_guard_test.dart` — proíbe `AlertDialog(`/
+`CupertinoAlertDialog(` fora dos componentes do design system e
+`HapticFeedback.` direto fora da fachada `Haptics`) e comportamento
+(`confirm_dialog_test.dart` via `HapticSpy` — confirmar destrutivo dispara
+exatamente 1 `heavyImpact`; cancelar/não-destrutivo não vibram).
 
-**2.3 Espaçamento/raios via tokens em 100%.** Corrigir os ~10% de paddings
-hardcoded remanescentes (ex.: `EdgeInsets.symmetric(horizontal: 14)`). Regra:
-se um número aparece em >1 arquivo, vira token.
+**2.3 Espaçamento/raios via tokens em 100%.** ✅ **CONCLUÍDA**: varredura
+`grep` dos valores fora da grelha de 4px (`5|6|7|9|10|11|13|14|15|17|18|22|26|28|30`)
+em `EdgeInsets` e `SizedBox` retorna **zero ocorrências** em `lib/presentation`
+— os ~10% remanescentes foram normalizados para o token da grelha mais próximo
+(5/6→8, 10/14→12/16, 28→24; `circular(12)`→`AppRadius.md`). Dois números
+repetidos em >1 arquivo viraram tokens (regra do plano):
+`AppSpacing.sheetPadding` (`fromLTRB(24, 0, 24, 24)` — 21 usos em 13 arquivos)
+e `AppSpacing.fabBottomClearance` (recuo inferior sob FAB — vendas/compras/
+financeiro/skeleton). Trancada por guard rail: `spacing_grid_guard_test.dart`
+(mesma abordagem de grepping dos guards 2.2/2.4) proíbe valores off-grid em
+`EdgeInsets`/`SizedBox`/`Wrap`/`Divider` fora do inventário estrutural
+documentado (indents de timeline e alinhamento sob checkbox) — entrada
+obsoleta do inventário também falha, para o teto encolher. Literais restantes
+são compostos on-grid ou micro-ajustes de 1–4px (baseline de texto, hairlines).
 
 **2.4 Unificar pesos tipográficos.** O painel admin Thin (w300/w400) e o app
 principal (w500/w600) coexistem — intencional (densidade admin), mas os *estilos*

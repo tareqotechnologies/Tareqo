@@ -206,7 +206,7 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
                           setState(() => _searchQuery = '');
                         },
                         child: Container(
-                          padding: const EdgeInsets.all(6),
+                          padding: const EdgeInsets.all(AppSpacing.xs),
                           decoration: BoxDecoration(
                             color: scheme.surfaceContainerHighest.withValues(
                               alpha: 0.5,

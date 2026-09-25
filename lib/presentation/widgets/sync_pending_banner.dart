@@ -32,7 +32,7 @@ class SyncPendingBanner extends ConsumerWidget {
       borderColor: theme.warning.withValues(alpha: 0.30),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: 6,
+        vertical: AppSpacing.xs,
       ),
       child: Row(
         children: [

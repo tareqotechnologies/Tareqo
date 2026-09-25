@@ -337,8 +337,8 @@ class _FilterChipGroup<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Wrap(
-      spacing: 6,
-      runSpacing: 6,
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
       children: [
         for (final option in options)
           _CompactFilterChip(
@@ -379,7 +379,7 @@ class _CompactFilterChip extends StatelessWidget {
         curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
-          vertical: 7,
+          vertical: AppSpacing.xs,
         ),
         decoration: BoxDecoration(
           color: isSelected
@@ -529,7 +529,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                       prefixIcon: const Icon(Icons.search_rounded, size: 20),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
+                        horizontal: AppSpacing.md,
                         vertical: AppSpacing.sm,
                       ),
                     ),
@@ -630,7 +630,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                               suffixText: Formatters.currencySymbol,
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: AppTextField(
                               controller: _maxPriceController,
@@ -735,7 +735,7 @@ class _ProductTileState extends State<_ProductTile> {
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
-                vertical: 14,
+                vertical: AppSpacing.md,
               ),
               // Mesmo padrão do SalesCard: o toque do card é roteado ao nó
               // combinado — duplo-toque do leitor ativa o card inteiro.

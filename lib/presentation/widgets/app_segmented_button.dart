@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_tokens.dart';
+
 /// SegmentedButton no padrão do design system V4: pílulas estilo Apple
 /// (StadiumBorder), segmento ativo em primaryContainer, rótulo w500 e
 /// alvo de toque ≥ 48dp (sem densidade compacta — o segmento é botão de
@@ -30,7 +32,7 @@ class AppSegmentedButton<T> extends StatelessWidget {
       showSelectedIcon: false,
       style: SegmentedButton.styleFrom(
         // Alvo de toque ≥ 48dp (guideline a11y).
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
         shape: const StadiumBorder(),
         side: BorderSide(color: scheme.outlineVariant),
         backgroundColor: Colors.transparent,

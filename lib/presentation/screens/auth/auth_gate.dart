@@ -512,7 +512,7 @@ class _SplashScreen extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSpacing.xl),
             // Título.
             Text(
               'TAREQO',

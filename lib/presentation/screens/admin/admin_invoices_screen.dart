@@ -92,7 +92,7 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
                       setState(() => _searchQuery = '');
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(AppSpacing.xs),
                       decoration: BoxDecoration(
                         color: Theme.of(context)
                             .colorScheme
@@ -321,7 +321,7 @@ class _InvoiceCard extends StatelessWidget {
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       borderColor: statusColor.withValues(alpha: 0.3),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -366,10 +366,10 @@ class _InvoiceCard extends StatelessWidget {
               StatusChip(label: statusLabel, color: statusColor),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
-            runSpacing: 6,
+            runSpacing: AppSpacing.xs,
             children: [
               _InfoPill(
                 icon: Icons.attach_money,
@@ -392,7 +392,7 @@ class _InvoiceCard extends StatelessWidget {
           if (invoice.status == InvoiceStatus.pending) ...[
             const SizedBox(height: 12),
             Wrap(
-              spacing: 10,
+              spacing: AppSpacing.sm,
               runSpacing: 8,
               children: [
                 SizedBox(
@@ -437,7 +437,7 @@ class _InfoPill extends StatelessWidget {
     final effectiveColor = color ?? scheme.onSurfaceVariant;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       decoration: BoxDecoration(
         color: effectiveColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppRadius.sm),

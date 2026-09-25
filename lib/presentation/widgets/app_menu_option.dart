@@ -46,7 +46,7 @@ class AppMenuOption<T> extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 160),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: 6,
+          horizontal: AppSpacing.xs,
           vertical: AppSpacing.xs,
         ),
         child: Row(
@@ -58,7 +58,7 @@ class AppMenuOption<T> extends StatelessWidget {
                 size: 16,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
             ],
             Flexible(
               child: Text(
@@ -98,7 +98,7 @@ class AppMenuOption<T> extends StatelessWidget {
                         ? theme.accent
                         : theme.colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                 ],
                 Flexible(
                   child: Text(

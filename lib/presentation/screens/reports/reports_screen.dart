@@ -245,7 +245,7 @@ class ReportsScreen extends ConsumerWidget {
                       children: [
                         for (var i = 0; i < data.perDay.length; i++) ...[
                           if (i > 0)
-                            const Divider(height: 1, indent: 14, endIndent: 14),
+                            const Divider(height: 1, indent: AppSpacing.md, endIndent: AppSpacing.md),
                           _DailyRow(
                             day: data.perDay[i].day,
                             total: data.perDay[i].totalCents,
@@ -438,7 +438,7 @@ class _DailyRow extends StatelessWidget {
       _ => l10n.weekdaySunday,
     };
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
       child: Row(
         children: [
           Expanded(

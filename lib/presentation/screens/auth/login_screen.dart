@@ -227,7 +227,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
-                horizontal: 28,
+                horizontal: AppSpacing.xxl,
                 vertical: AppSpacing.xl,
               ),
               child: ConstrainedBox(
@@ -248,7 +248,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // ── Título + subtítulo ──
                     Text(
@@ -480,7 +480,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             color: palette.textSecondary.withValues(alpha: 0.6),
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
                         Flexible(
                           child: Text(
                             l10n.loginSecurityFooter,

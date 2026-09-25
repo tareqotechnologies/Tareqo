@@ -256,7 +256,7 @@ class _PurchasesBody extends StatelessWidget {
             )
           else
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(horizontal, 0, horizontal, 112),
+              padding: EdgeInsets.fromLTRB(horizontal, 0, horizontal, AppSpacing.fabBottomClearance + AppSpacing.md),
               // Folha única estilo Home (FeedCard): um só card com as
               // compras como linhas separadas por divisórias hairline.
               sliver: SliverToBoxAdapter(
@@ -296,7 +296,7 @@ class _PurchasesSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Skeleton(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 96),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.fabBottomClearance),
         children: [
           // Resumo do dia.
           const SkeletonBlock(height: 118, radius: 20),

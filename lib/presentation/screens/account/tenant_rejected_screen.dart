@@ -70,7 +70,7 @@ class TenantRejectedScreen extends ConsumerWidget {
                       Radius.circular(AppRadius.lg),
                     ),
                     color: scheme.errorContainer.withValues(alpha: 0.5),
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -92,7 +92,7 @@ class TenantRejectedScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: 28),
+                const SizedBox(height: AppSpacing.xl),
                 AppButton.secondary(
                   onPressed: () async {
                     await ref.read(signOutUseCaseProvider).call();

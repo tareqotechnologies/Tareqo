@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:tareqo/core/ui/haptics.dart';
 import 'package:tareqo/presentation/widgets/confirm_dialog.dart';
 
+import '../../helpers/haptic_spy.dart';
 import '../../helpers/test_app.dart';
 
 /// Testes do [showConfirmDialog] — o dialog de confirmação unificado:
@@ -213,6 +215,72 @@ void main() {
       await tester.tap(find.text('Depois'));
       await tester.pumpAndSettle();
       expect(await result, isFalse);
+    });
+  });
+
+  /// Contrato de haptics da Fase 2.2 (plano UI/UX): O "destrutivo" único —
+  /// o `Haptics.warning` dispara SOMENTE no toque de confirmação destrutiva
+  /// (heavyImpact via HapticSpy — o canal de plataforma é espiado sem
+  /// tocá-lo); cancelar e confirmar não-destrutivo não vibram.
+  group('haptics do diálogo destrutivo (contrato 2.2)', () {
+    late HapticSpy spy;
+    setUp(() => spy = HapticSpy()..install());
+    tearDown(() {
+      spy.uninstall();
+      Haptics.debugOverrideEnabled = null;
+    });
+
+    testWidgets('confirmar destrutivo dispara Haptics.warning (heavyImpact)', (
+      tester,
+    ) async {
+      await openDialog(
+        tester,
+        title: 'Apagar cliente?',
+        message: 'Essa acção não pode ser desfeita.',
+        confirmLabel: 'Apagar',
+        destructive: true,
+      );
+
+      expect(spy.heavyImpacts, 0, reason: 'nada vibra ao ABRIR o diálogo');
+
+      await tester.tap(find.text('Apagar'));
+      await tester.pumpAndSettle();
+
+      expect(await result, isTrue);
+      expect(spy.heavyImpacts, 1);
+    });
+
+    testWidgets('cancelar NÃO dispara o warning destrutivo', (tester) async {
+      await openDialog(
+        tester,
+        title: 'Apagar cliente?',
+        message: 'Essa acção não pode ser desfeita.',
+        confirmLabel: 'Apagar',
+        destructive: true,
+      );
+
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+
+      expect(await result, isFalse);
+      expect(spy.heavyImpacts, 0);
+    });
+
+    testWidgets('confirmar não-destrutivo não vibra como risco', (
+      tester,
+    ) async {
+      await openDialog(
+        tester,
+        title: 'Quitar dívida?',
+        message: 'Confirma a baixa de 100,00 MT?',
+        confirmLabel: 'Quitar',
+      );
+
+      await tester.tap(find.text('Quitar'));
+      await tester.pumpAndSettle();
+
+      expect(await result, isTrue);
+      expect(spy.heavyImpacts, 0);
     });
   });
 }

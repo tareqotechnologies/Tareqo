@@ -287,7 +287,7 @@ class _AttendanceTab extends ConsumerWidget {
                           _clockOut(context, ref, employee, workDate),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: IconTone.red,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                         minimumSize: const Size(0, 32),
                       ),
                     )
@@ -317,7 +317,7 @@ class _AttendanceTab extends ConsumerWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(AppRadius.full),
@@ -338,7 +338,7 @@ class _AttendanceTab extends ConsumerWidget {
               padding: const EdgeInsets.only(bottom: AppSpacing.xs),
               child: AppCard(
                 elevated: false,
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                borderRadius: AppRadius.mdAll,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
                   vertical: AppSpacing.sm,
@@ -861,7 +861,7 @@ class _TargetsTab extends ConsumerWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(AppRadius.full),
@@ -1101,7 +1101,7 @@ class _TargetCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ClipRRect(
-            borderRadius: BorderRadius.circular(99),
+            borderRadius: BorderRadius.circular(AppRadius.full),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
@@ -1109,7 +1109,7 @@ class _TargetCard extends StatelessWidget {
               color: reached ? IconTone.green : scheme.primary,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             l10n.employeeTargetProgress((progress * 100).round()),
             style: theme.textTheme.labelSmall?.copyWith(

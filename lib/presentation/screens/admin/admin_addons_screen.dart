@@ -332,7 +332,7 @@ class _TenantPicker extends ConsumerWidget {
                     AppSpacing.xl,
                   ),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 6),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (_, i) {
                     final tenant = filtered[i];
                     return _TenantTile(
@@ -570,7 +570,7 @@ class _BulkAddOnSheet extends StatelessWidget {
         ),
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        padding: AppSpacing.sheetPadding,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -733,17 +733,17 @@ class _BulkAddOnOption extends StatelessWidget {
             label: context.l10n.adminAddonsActivateBtn,
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.success,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               minimumSize: const Size(0, 32),
             ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
           AppButton.secondary(
             onPressed: onDeactivate,
             label: context.l10n.adminAddonsDeactivateBtn,
             style: OutlinedButton.styleFrom(
               foregroundColor: scheme.error,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               minimumSize: const Size(0, 32),
             ),
           ),
@@ -857,7 +857,7 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
         ),
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        padding: AppSpacing.sheetPadding,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1227,7 +1227,7 @@ class _AddOnToggleTile extends StatelessWidget {
     final iconData = _iconForName(addon.iconName);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: [
           // Color accent bar

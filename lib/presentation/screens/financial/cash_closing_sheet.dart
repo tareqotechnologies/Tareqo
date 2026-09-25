@@ -132,7 +132,7 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
       top: false,
       child: SingleChildScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        padding: AppSpacing.sheetPadding,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -194,7 +194,7 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
                   size: 20,
                   color: theme.colorScheme.onTertiaryContainer,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     '${l10n.cashClosingClosedAt} '

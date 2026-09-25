@@ -65,7 +65,7 @@ class TenantPendingScreen extends ConsumerWidget {
                     color: scheme.outline,
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: AppSpacing.xl),
                 OutlinedButton.icon(
                   onPressed: () async {
                     await ref.read(signOutUseCaseProvider).call();

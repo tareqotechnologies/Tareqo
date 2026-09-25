@@ -52,7 +52,7 @@ class DailySummaryHeader extends StatelessWidget {
     return AppCard(
       elevated: true,
       borderRadius: AppRadius.lgAll,
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      padding: const EdgeInsets.fromLTRB(16, AppSpacing.md, 16, AppSpacing.md),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -162,7 +162,7 @@ class _DeltaPill extends StatelessWidget {
     final text = label.isEmpty ? '$sign$percent%' : '$sign$percent% $label';
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppRadius.full),

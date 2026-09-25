@@ -42,12 +42,12 @@ Future<T?> showAppSheet<T>(
               children: [
                 if (fullscreen)
                   const Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: AppSpacing.xxs),
+                    padding: EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xxs),
                     child: _SheetHandle(),
                   )
                 else
                   const Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 6),
+                    padding: EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),
                     child: _SheetHandle(),
                   ),
                 Flexible(
@@ -112,7 +112,7 @@ class SheetSection extends StatelessWidget {
               children: [
                 if (icon != null) ...[
                   Icon(icon, size: 18, color: scheme.primary),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                 ],
                 Text(
                   title!,
@@ -124,7 +124,7 @@ class SheetSection extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
           ],
           ...children,
         ],

@@ -276,7 +276,7 @@ class _InvoiceCard extends StatelessWidget {
     return AppCard(
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -333,7 +333,7 @@ class _InvoiceCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           // Acções como ÍCONES discretos no canto (padrão das linhas de
           // itens da sheet): WhatsApp e PDF — rótulos ficam nos tooltips.
           Row(
@@ -570,7 +570,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
 
             // ─── Cliente ──
             _SectionLabel(text: l10n.customInvoiceClientSection),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             if (customers.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedCustomerId,
@@ -622,7 +622,7 @@ class _NewInvoiceSheetState extends ConsumerState<_NewInvoiceSheet> {
 
             // ─── Produto ──
             _SectionLabel(text: l10n.customInvoiceProductSection),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             if (activeProducts.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedProductId,
@@ -995,7 +995,7 @@ class _TemplateSettingsSheetState
                               alpha: 0.5,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
                           Text(
                             l10n.customInvoiceTemplateLogoHint,
                             style: theme.textTheme.bodySmall?.copyWith(

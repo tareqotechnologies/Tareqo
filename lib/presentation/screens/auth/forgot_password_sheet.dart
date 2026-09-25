@@ -1,3 +1,4 @@
+import '../../../core/theme/app_tokens.dart';
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
@@ -119,7 +120,7 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Form(
         key: _formKey,
         child: Column(

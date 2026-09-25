@@ -111,7 +111,7 @@ class _SupportScreenState extends State<SupportScreen> {
     final accent = theme.accent;
     return AppCard(
       elevated: true,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       onTap: onTap,
       child: Row(
@@ -129,7 +129,7 @@ class _SupportScreenState extends State<SupportScreen> {
               color: IconTone.lightForeground(accent),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,7 +173,7 @@ class _SupportScreenState extends State<SupportScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.sm,
-            vertical: 6,
+            vertical: AppSpacing.xs,
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.full),
@@ -261,7 +261,7 @@ class _SupportScreenState extends State<SupportScreen> {
               prefixIcon: const Icon(Icons.search, size: 22),
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
+                horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
               ),
             ),
@@ -298,7 +298,7 @@ class _SupportScreenState extends State<SupportScreen> {
           // Rodapé apenas no estado completo (sem busca ativa) — a
           // referência o mantém ancorado no fim da página.
           if (_query.trim().isEmpty) ...[
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSpacing.xl),
             _helpCenterFooter(context),
           ],
         ],

@@ -161,7 +161,7 @@ class _SalesReportTab extends ConsumerWidget {
             child: Row(
               children: [
                 Icon(Icons.error_outline, size: 16, color: scheme.error),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     l10n.reportsLoadError,
@@ -260,7 +260,7 @@ class _SalesReportTab extends ConsumerWidget {
                   if (report != null && report.bestSellers.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
+                        horizontal: AppSpacing.xs,
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
@@ -290,7 +290,7 @@ class _SalesReportTab extends ConsumerWidget {
               else
                 for (final (index, best) in report.bestSellers.indexed) ...[
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                     child: Row(
                       children: [
                         Container(
@@ -408,7 +408,7 @@ class _FinancialReportTab extends ConsumerWidget {
             child: Row(
               children: [
                 Icon(Icons.error_outline, size: 16, color: scheme.error),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     l10n.reportsLoadError,
@@ -682,7 +682,7 @@ class _StockReportTab extends ConsumerWidget {
                   if (lowStock > 0)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
+                        horizontal: AppSpacing.xs,
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
@@ -713,7 +713,7 @@ class _StockReportTab extends ConsumerWidget {
                         .where((p) => (p.stockQuantity ~/ 1000) <= 10)
                         .take(5)) ...[
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                     child: Row(
                       children: [
                         Icon(Icons.circle, size: 6, color: ModuleColors.credit),

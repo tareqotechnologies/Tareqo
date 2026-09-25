@@ -49,7 +49,7 @@ class _PurchaseDetailSheet extends ConsumerWidget {
     final itemsLabel = l10n.dashboardSaleItems(purchase.items.length);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -63,7 +63,7 @@ class _PurchaseDetailSheet extends ConsumerWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             '${Formatters.dateTime(purchase.dateTime)}  ·  $itemsLabel',
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -87,7 +87,7 @@ class _PurchaseDetailSheet extends ConsumerWidget {
                 color: scheme.outlineVariant.withValues(alpha: 0.4),
               ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
             child: Column(
               children: [
                 DetailRow(
@@ -117,7 +117,7 @@ class _PurchaseDetailSheet extends ConsumerWidget {
               color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           SmartAmount(
             cents: purchase.totalAmountCents,
             alignment: Alignment.centerLeft,
@@ -145,8 +145,8 @@ class _PurchaseDetailSheet extends ConsumerWidget {
                   if (i > 0)
                     Divider(
                       height: 1,
-                      indent: 14,
-                      endIndent: 14,
+                      indent: AppSpacing.md,
+                      endIndent: AppSpacing.md,
                       color: scheme.outlineVariant.withValues(alpha: 0.5),
                     ),
                   _PurchaseItemRow(
@@ -164,7 +164,7 @@ class _PurchaseDetailSheet extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.inventory_2_outlined, size: 14, color: scheme.outline),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               Flexible(
                 child: Text(
                   '${l10n.purchaseDetailStockNote} ${l10n.saleDetailSnapshot}',
@@ -204,7 +204,7 @@ class _PurchaseItemRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: 14,
+        horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
       child: Row(

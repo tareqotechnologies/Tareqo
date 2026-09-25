@@ -231,7 +231,7 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   l10n.setNewPasswordHint,
                   textAlign: TextAlign.center,
@@ -240,7 +240,7 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
                     height: 1.4,
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: AppSpacing.xl),
                 // Card premium (estilo Apple): cantos 20 + superfície
                 // elevada — mesmo padrão do login e do onboarding.
                 AppCard(
@@ -286,7 +286,7 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
                             };
                           },
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 16),
                         AppTextField(
                           controller: _confirmController,
                           obscureText: _obscureConfirm,

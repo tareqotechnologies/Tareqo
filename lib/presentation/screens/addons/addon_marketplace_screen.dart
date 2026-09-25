@@ -234,18 +234,18 @@ class _AddOnCard extends StatelessWidget {
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     // Badges + preço — Wrap: nunca corta o rótulo em ecrãs
                     // estreitos (fluem para a linha seguinte).
                     Wrap(
-                      spacing: 6,
+                      spacing: AppSpacing.xs,
                       runSpacing: 4,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         if (isIncluded)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
+                              horizontal: AppSpacing.xs,
                               vertical: 1,
                             ),
                             decoration: BoxDecoration(
@@ -263,7 +263,7 @@ class _AddOnCard extends StatelessWidget {
                         if (!isIncluded && isActive)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
+                              horizontal: AppSpacing.xs,
                               vertical: 1,
                             ),
                             decoration: BoxDecoration(

@@ -150,7 +150,7 @@ class _RequestCard extends StatelessWidget {
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       borderColor: theme.warning.withValues(alpha: 0.3),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -192,7 +192,7 @@ class _RequestCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -229,7 +229,7 @@ class _RequestCard extends StatelessWidget {
                   label: l10n.adminApprove,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: AppButton.secondary(
                   onPressed: () => onDecide(false),
@@ -268,7 +268,7 @@ class _PlanBadge extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 10,
+        horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(

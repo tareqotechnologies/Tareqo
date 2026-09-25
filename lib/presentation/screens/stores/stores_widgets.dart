@@ -60,7 +60,7 @@ class _PlanCard extends StatelessWidget {
             ],
           ),
           if (plan != null) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               plan!.description,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -150,7 +150,7 @@ class _LimitMeter extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         ClipRRect(
-          borderRadius: BorderRadius.circular(99),
+          borderRadius: BorderRadius.circular(AppRadius.full),
           child: LinearProgressIndicator(
             value: ratio,
             minHeight: 6,
@@ -247,7 +247,7 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Form(
         key: _formKey,
         child: Column(
@@ -290,7 +290,7 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             SheetSection(
               icon: Icons.receipt_long_outlined,
               title: l10n.storeDetailNuit,
@@ -310,7 +310,7 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
               ],
             ),
             if (_formError != null) ...[
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               Text(
                 _formError!,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -441,7 +441,7 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
     final storesAsync = ref.watch(storesProvider(widget.tenant.id));
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Form(
         key: _formKey,
         child: Column(
@@ -500,7 +500,7 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             // Seção: Vínculo — loja e cargo.
             SheetSection(
               icon: Icons.work_outline,
@@ -563,7 +563,7 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
               ],
             ),
             if (_formError != null) ...[
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               Text(
                 _formError!,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -658,7 +658,7 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
         .toList();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -694,7 +694,7 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
                       selected: _selectedPlanId == plan.id,
                       onTap: () => setState(() => _selectedPlanId = plan.id),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                   ],
                 ],
               );
@@ -746,11 +746,11 @@ class _UpgradePlanTile extends StatelessWidget {
     final l10n = context.l10n;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: AppRadius.mdAll,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppRadius.mdAll,
           border: Border.all(
             color: selected ? scheme.primary : scheme.outlineVariant,
           ),
@@ -949,7 +949,7 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
           label: l10n.settingsSave,
         ),
         if (_formError != null) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             _formError!,
             style: theme.textTheme.bodySmall?.copyWith(
@@ -1129,10 +1129,9 @@ class _SettingsEntry extends StatelessWidget {
 
     return AppCard(
       onTap: onTap,
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      padding: const EdgeInsets.symmetric(
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),        padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
-        vertical: 10,
+        vertical: AppSpacing.sm,
       ),
       child: Row(
         children: [
@@ -1201,7 +1200,7 @@ class _EmployeeDetailSheet extends StatelessWidget {
         employee.storeId;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1248,21 +1247,18 @@ class _EmployeeDetailSheet extends StatelessWidget {
           // ── Detalhes ──
           DetailRow(
             labelWidth: 70,
-            padding: const EdgeInsets.symmetric(vertical: 5),
             label: l10n.employeeDetailEmail,
             value: employee.email,
             icon: Icons.email_outlined,
           ),
           DetailRow(
             labelWidth: 70,
-            padding: const EdgeInsets.symmetric(vertical: 5),
             label: l10n.employeeDetailStore,
             value: storeName,
             icon: Icons.store_outlined,
           ),
           DetailRow(
             labelWidth: 70,
-            padding: const EdgeInsets.symmetric(vertical: 5),
             label: l10n.employeeDetailRole,
             value: isManager ? l10n.roleManager : l10n.roleEmployee,
             icon: isManager
@@ -1272,7 +1268,6 @@ class _EmployeeDetailSheet extends StatelessWidget {
           ),
           DetailRow(
             labelWidth: 70,
-            padding: const EdgeInsets.symmetric(vertical: 5),
             label: l10n.employeeDetailStatus,
             value: employee.isActive
                 ? l10n.employeeDetailActive
@@ -1327,7 +1322,7 @@ class _StoreDetailSheet extends StatelessWidget {
     final l10n = context.l10n;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1371,7 +1366,6 @@ class _StoreDetailSheet extends StatelessWidget {
           if (store.phone.isNotEmpty)
             DetailRow(
               labelWidth: 70,
-              padding: const EdgeInsets.symmetric(vertical: 5),
               label: l10n.storeDetailPhone,
               value: store.phone,
               icon: Icons.phone_outlined,
@@ -1379,7 +1373,6 @@ class _StoreDetailSheet extends StatelessWidget {
           if (store.email.isNotEmpty)
             DetailRow(
               labelWidth: 70,
-              padding: const EdgeInsets.symmetric(vertical: 5),
               label: l10n.storeDetailEmail,
               value: store.email,
               icon: Icons.email_outlined,
@@ -1387,7 +1380,6 @@ class _StoreDetailSheet extends StatelessWidget {
           if (store.nuit.isNotEmpty)
             DetailRow(
               labelWidth: 70,
-              padding: const EdgeInsets.symmetric(vertical: 5),
               label: l10n.storeDetailNuit,
               value: store.nuit,
               icon: Icons.receipt_long_outlined,
@@ -1395,7 +1387,6 @@ class _StoreDetailSheet extends StatelessWidget {
           if (store.city.isNotEmpty)
             DetailRow(
               labelWidth: 70,
-              padding: const EdgeInsets.symmetric(vertical: 5),
               label: l10n.storeDetailCity,
               value: store.city,
               icon: Icons.location_city_outlined,
@@ -1403,7 +1394,6 @@ class _StoreDetailSheet extends StatelessWidget {
           if (store.address.isNotEmpty)
             DetailRow(
               labelWidth: 70,
-              padding: const EdgeInsets.symmetric(vertical: 5),
               label: l10n.storeDetailAddress,
               value: store.address,
               icon: Icons.place_outlined,

@@ -75,7 +75,7 @@ class _SalesCardState extends State<SalesCard> {
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
-                vertical: 14,
+                vertical: AppSpacing.md,
               ),
               // DENTRO do InkWell: o toque do card é roteado para o nó
               // combinado — duplo-toque do leitor ativa o card inteiro,

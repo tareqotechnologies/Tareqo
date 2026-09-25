@@ -497,7 +497,7 @@ class _DebtCard extends StatelessWidget {
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       borderColor: chipColor.withValues(alpha: 0.35),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -564,7 +564,7 @@ class _DebtCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           // Botão de quitação verde em largura total (canvas): a ação
           // principal do card, sólida e clara — FORA do nó de informações.
           AppButton.primary(onPressed: onSettle, label: l10n.debtsSettleAction),
@@ -596,7 +596,7 @@ class _SettledDebtCard extends StatelessWidget {
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       borderColor: theme.income.withValues(alpha: 0.35),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Semantics(
         container: true,
         excludeSemantics: true,

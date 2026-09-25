@@ -381,7 +381,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
+                      horizontal: AppSpacing.sm,
                       vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
@@ -514,7 +514,7 @@ class _BalanceHero extends StatelessWidget {
                 // papel visual dos chips selecionados do tema.
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
+                    horizontal: AppSpacing.sm,
                     vertical: AppSpacing.xxs,
                   ),
                   decoration: BoxDecoration(
@@ -529,7 +529,7 @@ class _BalanceHero extends StatelessWidget {
                         size: 14,
                         color: scheme.onPrimaryContainer,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       Text(
                         l10n.dashboardMetricCash,
                         style: theme.textTheme.labelMedium?.copyWith(
@@ -878,7 +878,7 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
   showModalBottomSheet<void>(
     context: context,
     builder: (_) => Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -991,7 +991,7 @@ class _DetailRow extends StatelessWidget {
             fontSize: 12,
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 8),
         Expanded(
           child: Text(
             value,
@@ -1126,7 +1126,7 @@ class _ActivityRow extends StatelessWidget {
                     // texto escuro, igual ao canvas.
                     ? Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
+                          horizontal: AppSpacing.sm,
                           vertical: AppSpacing.xxs,
                         ),
                         decoration: BoxDecoration(

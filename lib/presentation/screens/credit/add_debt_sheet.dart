@@ -168,7 +168,7 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
     final customersAsync = ref.watch(customersProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Form(
         key: _formKey,
         child: Column(
@@ -183,7 +183,7 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
               data: (customers) => customers.isEmpty
                   ? const SizedBox.shrink()
                   : Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
                       child: SheetSection(
                         icon: Icons.people_outline,
                         title: l10n.debtsCustomerLinkLabel,

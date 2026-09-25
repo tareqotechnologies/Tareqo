@@ -640,7 +640,7 @@ class _MessagePreview extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -656,7 +656,7 @@ class _MessagePreview extends StatelessWidget {
                 size: 14,
                 color: scheme.onSurfaceVariant,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               Text(
                 'Preview',
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -673,7 +673,7 @@ class _MessagePreview extends StatelessWidget {
               fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             body,
             style: theme.textTheme.bodySmall?.copyWith(

@@ -484,7 +484,7 @@ class _PendingBanner extends StatelessWidget {
       borderColor: scheme.tertiary.withValues(alpha: 0.3),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: 10,
+        vertical: AppSpacing.sm,
       ),
       onTap: onTap,
       child: Row(
@@ -690,7 +690,7 @@ class _GrowthKpi extends StatelessWidget {
               // 12% + texto na cor de estado — branco sobre o verde/âmbar
               // do tema não atinge AA (texto pequeno exige 4.5:1).
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 1),
                 decoration: BoxDecoration(
                   color: trendColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppRadius.full),
@@ -706,7 +706,7 @@ class _GrowthKpi extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
@@ -779,7 +779,7 @@ class _TrendChart extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 title,

@@ -193,7 +193,7 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
                   : const Icon(Icons.image_outlined),
               label: Text(l10n.saleDetailShareImage),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             // WhatsApp: abre o app com o recibo em texto pré-preenchido.
             OutlinedButton.icon(
               onPressed: _sharing ? null : _shareWhatsApp,

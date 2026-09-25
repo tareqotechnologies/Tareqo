@@ -67,7 +67,7 @@ class FilterDropdown<T> extends StatelessWidget {
                       ? theme.accent
                       : scheme.onSurfaceVariant,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Flexible(
                   child: Text(
                     labelOf(option),
@@ -109,7 +109,7 @@ class FilterDropdown<T> extends StatelessWidget {
                   ? scheme.onPrimaryContainer
                   : scheme.onSurfaceVariant,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             Text(
               labelOf(selected),
               style: theme.textTheme.labelLarge?.copyWith(

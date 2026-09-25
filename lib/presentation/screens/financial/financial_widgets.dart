@@ -57,7 +57,7 @@ class TransactionCard extends StatelessWidget {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
-            vertical: 10,
+            vertical: AppSpacing.sm,
           ),
           child: Row(
             children: [
@@ -125,7 +125,7 @@ class DateSectionHeader extends StatelessWidget {
     final totalColor = totalCents >= 0 ? theme.income : theme.expense;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 10, AppSpacing.lg, 4),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 4),
       child: Row(
         children: [
           Expanded(

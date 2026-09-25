@@ -318,7 +318,7 @@ class _QuotationCard extends StatelessWidget {
     return AppCard(
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -383,7 +383,7 @@ class _QuotationCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           // Ações em UMA linha: fluxo de estado (rótulos — decisão de
           // negócio, precisa ser legível) à esquerda; WhatsApp e PDF como
           // ÍCONES discretos à direita (padrão da Factura Personalizada).
@@ -654,7 +654,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
 
             // ─── Cliente ──
             _SectionLabel(text: l10n.customInvoiceClientSection),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             if (customers.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedCustomerId,
@@ -700,7 +700,7 @@ class _NewQuotationSheetState extends ConsumerState<_NewQuotationSheet> {
 
             // ─── Produto ──
             _SectionLabel(text: l10n.customInvoiceProductSection),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             if (activeProducts.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedProductId,
@@ -1054,7 +1054,7 @@ class _QuotationTemplateSettingsSheetState
                               alpha: 0.5,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
                           Text(
                             l10n.customInvoiceTemplateLogoHint,
                             style: theme.textTheme.bodySmall?.copyWith(

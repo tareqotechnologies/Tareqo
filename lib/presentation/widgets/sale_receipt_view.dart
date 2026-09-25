@@ -41,7 +41,7 @@ class SaleReceiptView extends StatelessWidget {
     return Container(
       // "Papel" do recibo: branco com leve viés quente, como um cupom.
       color: const Color(0xFFFFFEFA),
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+      padding: const EdgeInsets.fromLTRB(20, AppSpacing.xl, 20, 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -61,10 +61,10 @@ class SaleReceiptView extends StatelessWidget {
                 style: _mutedStyle,
               ),
             ],
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             const _DashedDivider(),
           ],
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           // Título do recibo + identificação da venda.
           Text(
             cancelled
@@ -82,12 +82,12 @@ class SaleReceiptView extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const _DashedDivider(),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           // Itens: nome + `qtd × unitário = subtotal`.
           for (final item in sale.items) _ReceiptItemRow(item: item),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           const _DashedDivider(),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           // Total.
           Row(
             children: [
@@ -120,7 +120,7 @@ class SaleReceiptView extends StatelessWidget {
             ],
           ),
           if (cancelled && sale.cancelledAt != null) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               '${l10n.saleDetailCancelledAt} '
               '${Formatters.dateTime(sale.cancelledAt!)}',
@@ -130,7 +130,7 @@ class SaleReceiptView extends StatelessWidget {
           ],
           const SizedBox(height: 12),
           const _DashedDivider(),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             l10n.saleDetailReceiptThanks,
             textAlign: TextAlign.center,

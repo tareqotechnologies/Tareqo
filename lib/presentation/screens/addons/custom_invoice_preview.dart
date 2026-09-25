@@ -73,7 +73,7 @@ class CustomInvoicePreview extends StatelessWidget {
           // Barra superior simulando o topo da página PDF
           Container(height: 4, color: primaryColor),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            padding: const EdgeInsets.fromLTRB(16, AppSpacing.md, 16, AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -146,8 +146,8 @@ class CustomInvoicePreview extends StatelessWidget {
                     // Badge FACTURA
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
                         color: primaryColor,
@@ -210,7 +210,7 @@ class CustomInvoicePreview extends StatelessWidget {
                     fontSize: 11,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 // ─── Tabela de itens (miniatura) ──
                 // Header
                 Container(
@@ -285,7 +285,7 @@ class CustomInvoicePreview extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
+                      horizontal: AppSpacing.sm,
                       vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
@@ -302,13 +302,13 @@ class CustomInvoicePreview extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 // Rodapé
                 Divider(
                   height: 1,
                   color: scheme.outlineVariant.withValues(alpha: 0.4),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Center(
                   child: Text(
                     l10n.customInvoicePreviewFooter,

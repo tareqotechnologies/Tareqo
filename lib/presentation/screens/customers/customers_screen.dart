@@ -311,7 +311,7 @@ class _CustomerTile extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
-            vertical: 14,
+            vertical: AppSpacing.md,
           ),
           child: Row(
             children: [
@@ -396,7 +396,7 @@ class _CustomerTile extends StatelessWidget {
                             size: 18,
                             color: theme.colorScheme.onSurface,
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 12),
                           Text(
                             l10n.customersEditTitle,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -416,7 +416,7 @@ class _CustomerTile extends StatelessWidget {
                             size: 18,
                             color: theme.colorScheme.error,
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 12),
                           Text(
                             l10n.commonDelete,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -516,7 +516,7 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Form(
         key: _formKey,
         child: Column(
@@ -566,7 +566,7 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
               ],
             ),
             if (_formError != null) ...[
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               Text(
                 _formError!,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -675,7 +675,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Form(
         key: _formKey,
         child: Column(
@@ -722,7 +722,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
               ],
             ),
             if (_formError != null) ...[
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               Text(
                 _formError!,
                 style: theme.textTheme.bodySmall?.copyWith(

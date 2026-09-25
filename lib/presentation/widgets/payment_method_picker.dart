@@ -94,7 +94,7 @@ class _PaymentMethodPickerState extends State<PaymentMethodPicker> {
             ],
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         // -------------------------------------------------------------
         // Secundários — lista com radio
         // -------------------------------------------------------------
@@ -193,7 +193,7 @@ class _PrimaryTab extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.md),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs, horizontal: AppSpacing.xs),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(
@@ -265,7 +265,7 @@ class _SecondaryTile extends StatelessWidget {
           // acessível (WCAG/androidTapTargetGuideline). Era 6 (≈37px).
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.sm,
-            vertical: 14,
+            vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
             borderRadius: AppRadius.mdAll,

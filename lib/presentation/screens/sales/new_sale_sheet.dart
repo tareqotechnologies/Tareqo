@@ -482,7 +482,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     // catálogo) rola num ÚNICO scroll. Em ecrãs baixos/paisagem o corpo
     // rola em vez de estourar — sem "bottom overflowed".
     final scannerZone = Padding(
-      padding: const EdgeInsets.fromLTRB(24, 4, 24, 10),
+      padding: const EdgeInsets.fromLTRB(24, 4, 24, AppSpacing.sm),
       child: _ScannerZone(
         barcodeController: _barcodeController,
         barcodeError: _barcodeError,
@@ -581,7 +581,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                         // com o catálogo: resumo visível sem altura fixa.
                         if (_cart.isNotEmpty) ...[
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 0, 24, 6),
+                            padding: const EdgeInsets.fromLTRB(24, 0, 24, AppSpacing.xs),
                             child: Row(
                               children: [
                                 Expanded(
@@ -615,10 +615,10 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                                   quantity: entry.value,
                                 ),
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 8),
                             ],
                           ],
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
                         ],
                         for (final product in filtered) ...[
                           Padding(
@@ -634,7 +634,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                               onEdit: () => _editQuantity(product),
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
                         ],
                       ]),
                     ),
@@ -653,7 +653,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
               top: BorderSide(color: theme.colorScheme.outlineVariant),
             ),
           ),
-          padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
+          padding: const EdgeInsets.fromLTRB(24, AppSpacing.sm, 24, 16),
           // O rodapé é COMPACTO (alturas calibradas) para caber junto com
           // o catálogo mesmo em sheets baixos/paisagem — o Expanded do
           // catálogo é o que encolhe primeiro.
@@ -692,7 +692,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                 ],
               ),
               if (_error != null) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   _error!,
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -748,7 +748,7 @@ class _ScannerZone extends StatelessWidget {
     final l10n = context.l10n;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.md, 12, AppSpacing.md, AppSpacing.sm),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
         borderRadius: AppRadius.lgAll,
@@ -806,7 +806,7 @@ class _ScannerZone extends StatelessWidget {
               ],
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           AppTextField(
             controller: barcodeController,
             textInputAction: TextInputAction.done,
@@ -933,7 +933,7 @@ class _CartProductRow extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadius.xs),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
+                        horizontal: AppSpacing.xs,
                         vertical: AppSpacing.xs,
                       ),
                       child: Text(

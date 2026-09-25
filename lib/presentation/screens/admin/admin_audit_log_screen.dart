@@ -280,7 +280,7 @@ class _CompactStats extends StatelessWidget {
           ),
           const Spacer(),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
             decoration: BoxDecoration(
               color: _rateColor(stats.rate).withValues(alpha: 0.1),
               borderRadius: AppRadius.smAll,
@@ -440,7 +440,7 @@ class _FilterRow extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: labels.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 6),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
           final active = selected == i;
           return GestureDetector(
@@ -517,7 +517,7 @@ class _AuditTile extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
-          vertical: 10,
+          vertical: AppSpacing.sm,
         ),
         child: Row(
           children: [

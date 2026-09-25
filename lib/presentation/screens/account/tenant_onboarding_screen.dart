@@ -142,7 +142,7 @@ class _TenantOnboardingScreenState
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   l10n.onboardingSubtitle,
                   textAlign: TextAlign.center,
@@ -232,7 +232,7 @@ class _TenantOnboardingScreenState
                           l10n.onboardingPlanLabel,
                           style: theme.textTheme.titleSmall,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 12),
                         plansAsync.when(
                           loading: () => const Padding(
                             padding: EdgeInsets.all(AppSpacing.md),
@@ -255,7 +255,7 @@ class _TenantOnboardingScreenState
                                   onTap: () =>
                                       setState(() => _selectedPlan = plan),
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 12),
                               ],
                             ],
                           ),
@@ -372,7 +372,7 @@ class _PlanCard extends StatelessWidget {
       // Card premium (estilo Apple): cantos 18 + superfície elevada.
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       // Seleção: borda no acento + fundo em primaryContainer; em repouso
       // segue a borda sutil (0.5px) e o fundo da superfície do design system.
       borderColor: selected ? scheme.primary : null,

@@ -104,7 +104,7 @@ class AppPage extends StatelessWidget {
         titleWidget,
         const SizedBox(width: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
           decoration: BoxDecoration(
             color: scheme.error,
             borderRadius: BorderRadius.circular(AppRadius.full),
@@ -316,7 +316,7 @@ class AppPill extends StatelessWidget {
               size: 14,
               color: selected ? theme.accent : scheme.onSurfaceVariant,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
           ],
           Text(label, style: theme.textTheme.labelMedium?.copyWith(color: fg)),
           if (onTap != null) ...[

@@ -156,7 +156,7 @@ class FinancialScreen extends ConsumerWidget {
 
               // ── Transactions ──
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(0, 12, 0, 96),
+                padding: const EdgeInsets.fromLTRB(0, AppSpacing.sm, 0, AppSpacing.fabBottomClearance),
                 sliver: transactionsAsync.when(
                   loading: () =>
                       const SliverToBoxAdapter(child: _TransactionsSkeleton()),
@@ -364,7 +364,7 @@ class _CashStack extends StatelessWidget {
       child: AppCard(
         elevated: true,
         borderRadius: AppRadius.xlAll,
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
+        padding: const EdgeInsets.fromLTRB(20, AppSpacing.lg, 20, AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -402,7 +402,7 @@ class _CashStack extends StatelessWidget {
                   const SizedBox(width: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
+                      horizontal: AppSpacing.sm,
                       vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
@@ -422,7 +422,7 @@ class _CashStack extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Divider(height: 1, color: scheme.outlineVariant),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               // Landscape: income e expense lado a lado
               Row(
                 children: [
@@ -462,7 +462,7 @@ class _CashStack extends StatelessWidget {
                   const SizedBox(width: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
+                      horizontal: AppSpacing.sm,
                       vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
@@ -504,14 +504,14 @@ class _CashStack extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Divider(height: 1, color: scheme.outlineVariant),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               _CashLine(
                 icon: Icons.north_east,
                 color: theme.income,
                 label: incomeLabel,
                 value: Formatters.signedAmount(incomeCents),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               _CashLine(
                 icon: Icons.south_west,
                 color: theme.expense,
@@ -559,7 +559,7 @@ class _CashLine extends StatelessWidget {
             ),
             child: Icon(icon, size: 14, color: IconTone.lightForeground(color)),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
@@ -571,22 +571,27 @@ class _CashLine extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xs,
-              vertical: 3,
-            ),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppRadius.full),
-            ),
-            child: Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
+          // Badge com folga ENCOLHÍVEL: o padding horizontal cede antes de
+          // a Row estourar (escala de texto 2.0 em 360dp — migração 2.3
+          // apanhou este limite: sm 12px +2px de folga zero).
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xxs,
+                vertical: 3,
+              ),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppRadius.full),
+              ),
+              child: Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -693,7 +698,7 @@ class _CashStackSkeleton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             SkeletonBlock(width: 96, height: 14),
-            SizedBox(height: 10),
+            SizedBox(height: 12),
             SkeletonBlock(width: 180, height: 32),
             SizedBox(height: 20),
             SkeletonBlock(width: 999, height: 1),
@@ -729,7 +734,7 @@ class _TransactionsSkeleton extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: AppCard(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 children: [
                   for (var i = 0; i < 3; i++) ...[
@@ -742,7 +747,7 @@ class _TransactionsSkeleton extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SkeletonBlock(width: 160, height: 14),
-                              SizedBox(height: 6),
+                              SizedBox(height: 8),
                               SkeletonBlock(width: 96, height: 12),
                             ],
                           ),
@@ -751,7 +756,7 @@ class _TransactionsSkeleton extends StatelessWidget {
                         SkeletonBlock(width: 72, height: 20),
                       ],
                     ),
-                    if (i < 2) SizedBox(height: 14),
+                    if (i < 2) SizedBox(height: 16),
                   ],
                 ],
               ),

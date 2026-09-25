@@ -207,7 +207,7 @@ class _KpiCard extends StatelessWidget {
             Row(
               children: [
                 Icon(icon, size: 16, color: color),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     label,
@@ -259,7 +259,7 @@ class _AddOnRevenueTile extends StatelessWidget {
     final maxRevenue = addon.priceMonthlyCents * tenantCount;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: [
           // ── Accent bar ──

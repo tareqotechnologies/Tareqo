@@ -233,7 +233,7 @@ class _SalesBody extends StatelessWidget {
             )
           else
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 112),
+              padding: EdgeInsets.fromLTRB(horizontal, AppSpacing.xs, horizontal, AppSpacing.fabBottomClearance + AppSpacing.md),
               sliver: SliverList.separated(
                 itemCount: filtered.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -260,7 +260,7 @@ class _SalesSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Skeleton(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 96),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.fabBottomClearance),
         children: [
           const SkeletonBlock(height: 108, radius: 16),
           const SizedBox(height: 16),

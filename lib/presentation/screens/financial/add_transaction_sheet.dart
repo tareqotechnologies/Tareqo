@@ -1,3 +1,4 @@
+import '../../../core/theme/app_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -123,7 +124,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       top: false,
       child: SingleChildScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        padding: AppSpacing.sheetPadding,
         child: Form(
           key: _formKey,
           child: Column(
@@ -159,7 +160,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               // Seção: Detalhes — descrição, categoria e valor.
               SheetSection(
                 icon: Icons.notes_outlined,

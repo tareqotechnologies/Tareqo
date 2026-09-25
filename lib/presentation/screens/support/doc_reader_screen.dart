@@ -99,7 +99,7 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
           final scheme = theme.colorScheme;
           return Markdown(
             data: snapshot.data!,
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 56),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, AppSpacing.huge),
             // Links internos entre os documentos (GUIA ↔ TROUBLESHOOTING)
             // navegam DENTRO do leitor; http(s) abrem no navegador externo;
             // outros são ignorados (sem url_launcher sem contexto).

@@ -354,7 +354,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                     horizontal: AppSpacing.xl,
                   ),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 6),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) => _CartProductRow(
                     product: filtered[index],
                     quantity: _cart[filtered[index].id] ?? 0,
@@ -378,7 +378,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                 top: BorderSide(color: theme.colorScheme.outlineVariant),
               ),
             ),
-            padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
+            padding: const EdgeInsets.fromLTRB(24, AppSpacing.sm, 24, 16),
             // O rodapé é COMPACTO (alturas calibradas) para caber junto com
             // o catálogo mesmo em sheets baixos/paisagem — o Expanded do
             // catálogo é o que encolhe primeiro.
@@ -418,7 +418,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                   ],
                 ),
                 if (_error != null) ...[
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     _error!,
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -583,7 +583,7 @@ class _CartProductRow extends StatelessWidget {
                           borderRadius: BorderRadius.circular(AppRadius.xs),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
+                              horizontal: AppSpacing.xs,
                               vertical: AppSpacing.xs,
                             ),
                             child: Text(

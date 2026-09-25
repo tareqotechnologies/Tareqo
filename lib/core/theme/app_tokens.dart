@@ -23,6 +23,15 @@ abstract final class AppSpacing {
   /// Resolve o padding horizontal conforme a largura do ecrã.
   static double pagePaddingForWidth(double width) =>
       width >= 720 ? pageHorizontalWide : pageHorizontal;
+
+  /// Padding de conteúdo de sheet: horizontal e bottom 24, top 0 (o
+  /// [SheetHeader] já dá o respiro superior). O idioma mais repetido
+  /// do app — um único token para as 13 telas que o copiavam.
+  static const EdgeInsets sheetPadding = EdgeInsets.fromLTRB(24, 0, 24, 24);
+
+  /// Recuo inferior de listas/corpos com FAB flutuante sobreposto —
+  /// mantém o último item visível acima do botão (96 = FAB + margens).
+  static const double fabBottomClearance = 96;
 }
 
 /// Raios de canto do design system V4.

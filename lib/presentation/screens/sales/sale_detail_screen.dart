@@ -182,7 +182,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             '${Formatters.dateTime(sale.dateTime)}  ·  $itemsLabel',
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -221,7 +221,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
               color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           SmartAmount(
             cents: sale.totalAmountCents,
             alignment: Alignment.centerLeft,
@@ -234,7 +234,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                     fontWeight: FontWeight.w600,
                   ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.xl),
 
           // ── Items ──
           SectionHeader(title: l10n.saleDetailItems),
@@ -254,8 +254,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   if (i > 0)
                     Divider(
                       height: 1,
-                      indent: 14,
-                      endIndent: 14,
+                      indent: AppSpacing.md,
+                      endIndent: AppSpacing.md,
                       color: scheme.outlineVariant.withValues(alpha: 0.5),
                     ),
                   _ItemRow(item: sale.items[i]),
@@ -270,7 +270,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.lock_clock_outlined, size: 14, color: scheme.outline),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               Flexible(
                 child: Text(
                   l10n.saleDetailSnapshot,
@@ -282,7 +282,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.xl),
 
           // ── Actions ──
           AppButton.primary(
@@ -336,7 +336,7 @@ class _ItemRow extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: 14,
+        horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
       child: Row(

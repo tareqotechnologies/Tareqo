@@ -26,7 +26,7 @@ class _AdminTenantCard extends ConsumerWidget {
     return AppCard(
       elevated: true,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.md),
       borderColor: color.withValues(alpha: 0.3),
       onTap: onTap,
       child: Row(
@@ -61,7 +61,7 @@ class _AdminTenantCard extends ConsumerWidget {
           if (addOnCount > 0) ...[
             const SizedBox(width: AppSpacing.xs),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
               decoration: BoxDecoration(
                 color: AppColors.statusPurple.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(999),
@@ -142,7 +142,7 @@ class _PendingTenantCard extends StatelessWidget {
         elevated: true,
         borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
         borderColor: scheme.tertiary.withValues(alpha: 0.4),
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(AppSpacing.md),
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,7 +188,7 @@ class _PendingTenantCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: AppSpacing.xs),
             Padding(
               padding: selectionMode
                   ? const EdgeInsets.only(left: 44)
@@ -211,7 +211,7 @@ class _PendingTenantCard extends StatelessWidget {
                       label: l10n.adminApprove,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: AppButton.secondary(
                       onPressed: onReject,
@@ -279,14 +279,14 @@ class _TenantDetailSheet extends ConsumerWidget {
           ),
           child: ListView(
             controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            padding: AppSpacing.sheetPadding,
             children: [
               // Handle bar
               Center(
                 child: Container(
                   width: 40,
                   height: 4,
-                  margin: const EdgeInsets.only(top: 12, bottom: 20),
+                  margin: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.lg),
                   decoration: BoxDecoration(
                     color: scheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
@@ -609,7 +609,7 @@ class _InfoRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: AppRadius.smAll,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs, horizontal: 4),
         child: Row(
           children: [
             Icon(icon, size: 18, color: scheme.onSurfaceVariant),
@@ -806,7 +806,7 @@ class _StoreTile extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Row(
         children: [
           Container(
@@ -864,7 +864,7 @@ class _EmployeeTile extends StatelessWidget {
     final roleLabel = l10n.adminTenantDetailEmployeeRole(employee.role.name);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Row(
         children: [
           CircleAvatar(
@@ -929,7 +929,7 @@ class _ActivityTile extends StatelessWidget {
     final color = AppColors.decisionStatusColor(status);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Row(
         children: [
           Container(

@@ -1,3 +1,4 @@
+import '../../../core/theme/app_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -117,7 +118,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
     final l10n = context.l10n;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: AppSpacing.sheetPadding,
       child: Form(
         key: _formKey,
         child: Column(
@@ -148,7 +149,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                   ? l10n.loginPasswordError
                   : null,
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             AppTextField(
               controller: _newController,
               obscureText: _obscureNew,
@@ -176,7 +177,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 };
               },
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             AppTextField(
               controller: _confirmController,
               obscureText: _obscureConfirm,
