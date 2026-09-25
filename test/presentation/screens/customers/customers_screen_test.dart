@@ -319,4 +319,39 @@ void main() {
     );
     expect(find.text('Cliente removido.'), findsNothing);
   });
+
+  testWidgets('undo do snackbar de remoção recadastra o cliente', (
+    tester,
+  ) async {
+    _useWideViewport(tester);
+    final repository = _FakeCustomerRepository([_customer()]);
+    await tester.pumpWidget(_buildApp(repository: repository));
+    await tester.pumpAndSettle();
+
+    // Remove com confirmação.
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar').last);
+    await tester.pumpAndSettle();
+
+    // Removido com snackbar + undo disponível (a lista local do fake
+    // não tem mais o cliente).
+    expect(repository.deleteCalls, 1);
+    expect(find.text('Cliente removido.'), findsOneWidget);
+    expect(find.text('Desfazer'), findsOneWidget);
+    expect(repository._customers, isEmpty);
+
+    // Toca em Desfazer: o cliente volta (regravado com o MESMO snapshot).
+    await tester.tap(find.text('Desfazer'));
+    await tester.pumpAndSettle();
+
+    expect(repository.addCalls, 1);
+    expect(repository.lastAdded?.id, 'c1');
+    expect(repository.lastAdded?.name, 'Ana Costa');
+    expect(repository.lastAdded?.phone, '841234567');
+    expect(find.text('Ana Costa'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

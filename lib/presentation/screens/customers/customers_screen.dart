@@ -18,6 +18,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/confirm_dialog.dart';
+import '../../widgets/snackbar_with_undo.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
@@ -75,9 +76,31 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     try {
       await ref.read(deleteCustomerUseCaseProvider).call(customer.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      // Undo (plano UI/UX — Fase 1.3): o cadastro é RESTAURÁVEL com o
+      // mesmo id (mesmo snapshot de dados) — o toque em "Desfazer" regrava
+      // o cliente e a lista volta exatamente ao estado anterior.
+      showUndoSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text(l10n.customersDeleteSuccess)));
+        message: l10n.customersDeleteSuccess,
+        undoLabel: l10n.commonUndo,
+        onUndo: () async {
+          try {
+            await ref.read(addCustomerUseCaseProvider).call(customer);
+            if (!mounted) return;
+            ref.invalidate(customersProvider);
+          } catch (error, stackTrace) {
+            CrashReporting.capture(
+              error,
+              stackTrace,
+              hint: 'Erro ao desfazer remoção de cliente',
+            );
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n.customersAddError)),
+            );
+          }
+        },
+      );
       ref.invalidate(customersProvider);
     } catch (error, stackTrace) {
       CrashReporting.capture(

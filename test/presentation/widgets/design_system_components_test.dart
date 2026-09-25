@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -346,6 +347,35 @@ void main() {
   });
 
   group('Temas globais (design system)', () {
+    testWidgets('transições de rota: Zoom (android/desktop) e Cupertino '
+        '(iOS/macOS) — plano UI/UX Fase 1.2', (tester) async {
+      for (final theme in [AppTheme.dark, AppTheme.light]) {
+        final builders = theme.pageTransitionsTheme.builders;
+        expect(
+          builders[TargetPlatform.android],
+          isA<ZoomPageTransitionsBuilder>(),
+          reason: 'Android M3 usa zoom contínuo',
+        );
+        expect(
+          builders[TargetPlatform.iOS],
+          isA<CupertinoPageTransitionsBuilder>(),
+          reason: 'iOS preserva o swipe-back nativo',
+        );
+        expect(
+          builders[TargetPlatform.macOS],
+          isA<CupertinoPageTransitionsBuilder>(),
+        );
+        expect(
+          builders[TargetPlatform.windows],
+          isA<ZoomPageTransitionsBuilder>(),
+        );
+        expect(
+          builders[TargetPlatform.linux],
+          isA<ZoomPageTransitionsBuilder>(),
+        );
+      }
+    });
+
     testWidgets('labels da navegação usam peso leve (w500) — hierarquia '
         'pela cor', (tester) async {
       final theme = AppTheme.dark;

@@ -392,6 +392,7 @@
   "upgradeError": "Could not send the request. Try again.",
   "upgradeSubmit": "Request upgrade",
   "commonCancel": "Cancel",
+  "commonUndo": "Undo",
   "commonCopied": "Copied to clipboard",
   "commonConfirm": "Confirm",
   "commonDelete": "Delete",
@@ -820,6 +821,15 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "salesCartItemRemoved": "Item removed from the cart: {name}.",
+  "@salesCartItemRemoved": {
+    "description": "Snackbar with undo when an item is emptied from the POS cart",
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },

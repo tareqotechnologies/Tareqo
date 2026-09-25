@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
@@ -53,9 +54,7 @@ abstract final class AppTheme {
           // bege no claro com preto suave (12.2:1); slate no escuro com bege
           // (5.1:1) — pílula visível (1.9:1 de preenchimento contra a
           // superfície petróleo) sem competir com o botão primário.
-          primaryContainer: isLight
-              ? AppColors.warmBeige
-              : AppColors.slate,
+          primaryContainer: isLight ? AppColors.warmBeige : AppColors.slate,
           onPrimaryContainer: isLight
               ? AppColors.softBlack
               : AppColors.warmBeige,
@@ -89,9 +88,7 @@ abstract final class AppTheme {
               : AppColors.borderDark,
           // outline: bordas de CONTROLES interativos (botões outline) — ≥ 3:1
           // sobre as superfícies (3.9:1 no claro, 4.7:1 no escuro).
-          outline: isLight
-              ? const Color(0xFF85817E)
-              : const Color(0xFF7E8C90),
+          outline: isLight ? const Color(0xFF85817E) : const Color(0xFF7E8C90),
           error: isLight ? const Color(0xFFDC2626) : const Color(0xFFF87171),
           // onError explícito: texto/ícones sobre a cor de erro. No escuro o
           // branco daria só 2.8:1 sobre #F87171 — usa-se o vermelho-escuro.
@@ -254,110 +251,118 @@ abstract final class AppTheme {
       ),
 
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          minimumSize: const Size(0, AppSizes.touchTarget),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
-          // Texto de ação ultra-clean: 15/w400 — o peso vem da superfície
-          // (Filled) e da hierarquia, não do peso da fonte.
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w400,
-            letterSpacing: 0,
-          ),
-        ).copyWith(
-          animationDuration: AppDurations.fast,
-          // Normal: primário sóbrio (slate/bege) + conteúdo auditado.
-          // Disabled: cinza neutro, sem sombra.
-          backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) {
-              // Cinza neutro sutil sobre a superfície — desabilitado lê-se
-              // como "inativo", não como ação.
-              return scheme.onSurface.withValues(alpha: 0.08);
-            }
-            return scheme.primary;
-          }),
-          foregroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) {
-              // Texto desabilitado: neutro desatenue com contraste
-              // suficiente (~2.8:1 composto; isento de AA na WCAG, mas
-              // legível).
-              return scheme.onSurface.withValues(alpha: 0.45);
-            }
-            return scheme.onPrimary;
-          }),
-          // Hover/pressed: escurece o preenchimento — véu preto translúcido,
-          // sem brilho, gradiente ou elevação extra.
-          overlayColor: filledOverlay(),
-          elevation: const WidgetStatePropertyAll(0),
-        ),
+        style:
+            FilledButton.styleFrom(
+              minimumSize: const Size(0, AppSizes.touchTarget),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+              // Texto de ação ultra-clean: 15/w400 — o peso vem da superfície
+              // (Filled) e da hierarquia, não do peso da fonte.
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                letterSpacing: 0,
+              ),
+            ).copyWith(
+              animationDuration: AppDurations.fast,
+              // Normal: primário sóbrio (slate/bege) + conteúdo auditado.
+              // Disabled: cinza neutro, sem sombra.
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) {
+                  // Cinza neutro sutil sobre a superfície — desabilitado lê-se
+                  // como "inativo", não como ação.
+                  return scheme.onSurface.withValues(alpha: 0.08);
+                }
+                return scheme.primary;
+              }),
+              foregroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) {
+                  // Texto desabilitado: neutro desatenue com contraste
+                  // suficiente (~2.8:1 composto; isento de AA na WCAG, mas
+                  // legível).
+                  return scheme.onSurface.withValues(alpha: 0.45);
+                }
+                return scheme.onPrimary;
+              }),
+              // Hover/pressed: escurece o preenchimento — véu preto translúcido,
+              // sem brilho, gradiente ou elevação extra.
+              overlayColor: filledOverlay(),
+              elevation: const WidgetStatePropertyAll(0),
+            ),
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(0, AppSizes.touchTarget),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-          backgroundColor: scheme.surfaceContainerLow,
-          foregroundColor: scheme.primary,
-          elevation: 1,
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w400,
-            letterSpacing: 0,
-          ),
-        ).copyWith(
-          animationDuration: AppDurations.fast,
-          // Hover/pressed: véu cinza neutro.
-          overlayColor: surfaceOverlay(),
-        ),
+        style:
+            ElevatedButton.styleFrom(
+              minimumSize: const Size(0, AppSizes.touchTarget),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+              backgroundColor: scheme.surfaceContainerLow,
+              foregroundColor: scheme.primary,
+              elevation: 1,
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                letterSpacing: 0,
+              ),
+            ).copyWith(
+              animationDuration: AppDurations.fast,
+              // Hover/pressed: véu cinza neutro.
+              overlayColor: surfaceOverlay(),
+            ),
       ),
 
       outlinedButtonTheme: OutlinedButtonThemeData(
         // A borda varia por estado; como o styleFrom só aceita BorderSide
         // fixa, aplica-se a propriedade por cima com copyWith.
-        style: OutlinedButton.styleFrom(
-          minimumSize: const Size(0, AppSizes.touchTarget),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w400,
-            letterSpacing: 0,
-          ),
-        ).copyWith(
-          side: outlinedSide,
-          animationDuration: AppDurations.fast,
-          // Hover/pressed: véu cinza claro discreto — borda/texto neutros.
-          overlayColor: surfaceOverlay(),
-        ),
+        style:
+            OutlinedButton.styleFrom(
+              minimumSize: const Size(0, AppSizes.touchTarget),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                letterSpacing: 0,
+              ),
+            ).copyWith(
+              side: outlinedSide,
+              animationDuration: AppDurations.fast,
+              // Hover/pressed: véu cinza claro discreto — borda/texto neutros.
+              overlayColor: surfaceOverlay(),
+            ),
       ),
 
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          minimumSize: const Size(0, AppSizes.touchTarget),
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w400,
-            letterSpacing: 0,
-          ),
-        ).copyWith(
-          animationDuration: AppDurations.fast,
-          // Hover/pressed: véu cinza neutro (o rótulo no acento da marca —
-          // ação de marca — mas o FUNDO de hover nunca é colorido).
-          overlayColor: surfaceOverlay(),
-        ),
+        style:
+            TextButton.styleFrom(
+              minimumSize: const Size(0, AppSizes.touchTarget),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                letterSpacing: 0,
+              ),
+            ).copyWith(
+              animationDuration: AppDurations.fast,
+              // Hover/pressed: véu cinza neutro (o rótulo no acento da marca —
+              // ação de marca — mas o FUNDO de hover nunca é colorido).
+              overlayColor: surfaceOverlay(),
+            ),
       ),
 
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          minimumSize: const Size(AppSizes.touchTarget, AppSizes.touchTarget),
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.smAll),
-        ).copyWith(
-          // Hover/pressed/focus: véu cinza neutro.
-          overlayColor: surfaceOverlay(),
-        ),
+        style:
+            IconButton.styleFrom(
+              minimumSize: const Size(
+                AppSizes.touchTarget,
+                AppSizes.touchTarget,
+              ),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.smAll),
+            ).copyWith(
+              // Hover/pressed/focus: véu cinza neutro.
+              overlayColor: surfaceOverlay(),
+            ),
       ),
 
       chipTheme: ChipThemeData(
@@ -486,9 +491,7 @@ abstract final class AppTheme {
         // Inversão por brilho: claro = preto suave da paleta; escuro = bege
         // (mesma voz do primário). Conteúdo sempre auditado:
         // branco/preto suave ≥ 10:1.
-        backgroundColor: isLight
-            ? AppColors.softBlack
-            : AppColors.warmBeige,
+        backgroundColor: isLight ? AppColors.softBlack : AppColors.warmBeige,
         contentTextStyle: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
@@ -538,7 +541,9 @@ abstract final class AppTheme {
           // densidade compacta — o segmento é um botão de baixa frequência,
           // não um stepper (onde o compacto já passou no guideline).
           // minimumSize: 0 desvia para o default M3 (40dp) — fixado em 48.
-          minimumSize: const WidgetStatePropertyAll(Size(0, AppSizes.touchTarget)),
+          minimumSize: const WidgetStatePropertyAll(
+            Size(0, AppSizes.touchTarget),
+          ),
           padding: WidgetStateProperty.all(
             const EdgeInsets.symmetric(
               horizontal: AppSpacing.sm,
@@ -559,6 +564,19 @@ abstract final class AppTheme {
         // superfícies petróleo (não-texto ≥ 3:1); no claro, o primário.
         color: isLight ? scheme.primary : AppColors.terracotta,
         linearTrackColor: scheme.surfaceContainerHighest,
+      ),
+
+      // Transições de rota nativas da plataforma (plano UI/UX — Fase 1.2):
+      // Android M3 com zoom contínuo; iOS/macOS com swipe-back nativo
+      // (CupertinoPageTransitionsBuilder). Desktop alternativo usa zoom.
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+          TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+        },
       ),
 
       textTheme: AppTypography.forScheme(scheme),

@@ -881,6 +881,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commonCancel => 'Annuler';
 
   @override
+  String get commonUndo => 'Annuler l\'action';
+
+  @override
   String get commonCopied => 'Copié dans le presse-papiers';
 
   @override
@@ -1761,6 +1764,11 @@ class AppLocalizationsFr extends AppLocalizations {
       one: '1 article',
     );
     return 'Panier · $_temp0';
+  }
+
+  @override
+  String salesCartItemRemoved(String name) {
+    return 'Article retiré du panier : $name.';
   }
 
   @override

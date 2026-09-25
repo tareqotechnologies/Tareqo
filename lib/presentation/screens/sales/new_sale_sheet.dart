@@ -124,14 +124,33 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     final current = _cart[product.id] ?? 0;
     if (current <= 0) return;
     Haptics.selection();
+    final step = product.vendaPorFracao ? 100 : Quantity.milliFactor;
+    final removingItem = current <= step;
     setState(() {
-      if (current <= (product.vendaPorFracao ? 100 : Quantity.milliFactor)) {
+      if (removingItem) {
         _cart.remove(product.id);
       } else {
-        _cart[product.id] =
-            current - (product.vendaPorFracao ? 100 : Quantity.milliFactor);
+        _cart[product.id] = current - step;
       }
     });
+    // Undo (plano UI/UX — Fase 1.3): esvaziar o item do carrinho é
+    // destrutivo-REVERSÍVEL — o "Desfazer" devolve a quantidade exata
+    // que havia antes do toque (respeitando o teto de estoque). Reduzir
+    // 1 de N não abre undo (ação trivial, repita o "+").
+    if (removingItem && mounted) {
+      final l10n = context.l10n;
+      showUndoSnackBar(
+        context,
+        message: l10n.salesCartItemRemoved(product.name),
+        undoLabel: l10n.commonUndo,
+        onUndo: () {
+          if (!mounted) return;
+          setState(() {
+            _cart[product.id] = math.min(current, product.stockQuantity);
+          });
+        },
+      );
+    }
   }
 
   /// Define a quantidade exata (em milésimos) de um item do carrinho.
@@ -170,9 +189,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       label: l10n.salesQuantityLabel,
       hintText: l10n.salesQuantityHint,
       suffixText: product.unitLabel,
-      keyboardType: TextInputType.numberWithOptions(
-        decimal: isWeight,
-      ),
+      keyboardType: TextInputType.numberWithOptions(decimal: isWeight),
       initialValue: Quantity.format(
         _cart[product.id] ?? 0,
         unitLabel: product.unitLabel,

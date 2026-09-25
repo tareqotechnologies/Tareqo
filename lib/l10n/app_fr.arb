@@ -392,6 +392,7 @@
   "upgradeError": "Impossible d'envoyer la demande. Réessayez.",
   "upgradeSubmit": "Demander l'évolution",
   "commonCancel": "Annuler",
+  "commonUndo": "Annuler l'action",
   "commonCopied": "Copié dans le presse-papiers",
   "commonConfirm": "Confirmer",
   "commonDelete": "Supprimer",
@@ -820,6 +821,15 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "salesCartItemRemoved": "Article retiré du panier : {name}.",
+  "@salesCartItemRemoved": {
+    "description": "Snackbar avec annulation quand un article est retiré du panier du PDV",
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },

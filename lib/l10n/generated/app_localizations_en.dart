@@ -870,6 +870,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonCancel => 'Cancel';
 
   @override
+  String get commonUndo => 'Undo';
+
+  @override
   String get commonCopied => 'Copied to clipboard';
 
   @override
@@ -1734,6 +1737,11 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 item',
     );
     return 'Cart · $_temp0';
+  }
+
+  @override
+  String salesCartItemRemoved(String name) {
+    return 'Item removed from the cart: $name.';
   }
 
   @override

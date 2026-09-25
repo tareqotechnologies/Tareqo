@@ -1606,6 +1606,12 @@ abstract class AppLocalizations {
   /// **'Cancelar'**
   String get commonCancel;
 
+  /// No description provided for @commonUndo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desfazer'**
+  String get commonUndo;
+
   /// No description provided for @commonCopied.
   ///
   /// In pt, this message translates to:
@@ -3135,6 +3141,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Carrinho · {count, plural, =1{1 item} other{{count} itens}}'**
   String salesCartSection(int count);
+
+  /// Snackbar com desfazer quando um item é esvaziado do carrinho do PDV
+  ///
+  /// In pt, this message translates to:
+  /// **'Item removido do carrinho: {name}.'**
+  String salesCartItemRemoved(String name);
 
   /// No description provided for @salesLoadError.
   ///

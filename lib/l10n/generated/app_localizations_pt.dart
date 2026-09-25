@@ -881,6 +881,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get commonCancel => 'Cancelar';
 
   @override
+  String get commonUndo => 'Desfazer';
+
+  @override
   String get commonCopied => 'Copiado para a área de transferência';
 
   @override
@@ -1760,6 +1763,11 @@ class AppLocalizationsPt extends AppLocalizations {
       one: '1 item',
     );
     return 'Carrinho · $_temp0';
+  }
+
+  @override
+  String salesCartItemRemoved(String name) {
+    return 'Item removido do carrinho: $name.';
   }
 
   @override

@@ -20,11 +20,11 @@ O app já parte de uma base **acima da média** para um ERP Flutter. Evidências
 | Acessibilidade | ✅ Forte | Contraste AA calibrado por teste automatizado (`theme_contrast_test.dart`); `tooltip` nos ícones; touch target 48px |
 | i18n | ✅ Forte | pt/en/fr com plurais e gênero; tabular figures; padrão V4 consolidado |
 | Estados de UI | ✅ Consistente | `EmptyState` (21 telas), `ListSkeleton` (15), `ErrorView` (15), `RefreshIndicator` (16) |
-| Navegação | ⚠️ Misto | `NavigationBar` mobile ↔ `NavigationRail` wide; indicador pílula (Stadium) — mas **sem `pageTransitionsTheme`** |
+| Navegação | ✅ Forte | `NavigationBar` mobile ↔ `NavigationRail` wide; indicador pílula (Stadium); `pageTransitionsTheme` com Zoom (Android/desktop) e Cupertino (iOS/macOS) — F1.2 concluída |
 | Motion | ❌ Gargalo 1 | Apenas 9 arquivos com animações; **0 `HapticFeedback`** (nenhum feedback tátil em PDV, pagamento, finalização de venda); transições de rota padrão; fade 220ms único entre abas |
 | A11y de conteúdo | ❌ Gargalo 2 | Apenas 5 `Semantics(` em 498 arquivos; gráficos/valores/estados sem rótulo para leitor de tela |
 | Tipografia dinâmica | ⚠️ | Nenhum clamp de `textScaler`; layouts com `Row` rígido podem estourar em fontes ampliadas |
-| Pulir inconsistencies | ⚠️ | Alguns pesos/respiros foram normalizados à mão (varreduras `sed` do painel admin); dois headers de sheet (`SheetHeader` + `AppSheetHeader`); `SnackBar` sem animação de progresso/undo |
+| Pulir inconsistencies | ⚠️ | Alguns pesos/respiros foram normalizados à mão (varreduras `sed` do painel admin); dois headers de sheet (`SheetHeader` + `AppSheetHeader`); undo via `showUndoSnackBar` nas ações destrutivas reversíveis (F1.3 concluída — sem animação de progresso) |
 
 **Conclusão do diagnóstico:** o gap para "nível Apple" **não é estético — é sensorial e de
 consistência**. O que falta é o que se *sente*: resposta tátil, movimento com propósito,

@@ -392,6 +392,7 @@
   "upgradeError": "Não foi possível enviar o pedido. Tente novamente.",
   "upgradeSubmit": "Solicitar upgrade",
   "commonCancel": "Cancelar",
+  "commonUndo": "Desfazer",
   "commonCopied": "Copiado para a área de transferência",
   "commonConfirm": "Confirmar",
   "commonDelete": "Apagar",
@@ -820,6 +821,15 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "salesCartItemRemoved": "Item removido do carrinho: {name}.",
+  "@salesCartItemRemoved": {
+    "description": "Snackbar com desfazer quando um item é esvaziado do carrinho do PDV",
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },
