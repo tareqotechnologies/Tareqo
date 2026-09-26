@@ -374,7 +374,7 @@ class _BestSellerRow extends StatelessWidget {
                 color: theme.colorScheme.onPrimaryContainer,
                 fontWeight: FontWeight.w600,
                 // Ranks (1..N) na coluna de posição — alinhados.
-                fontFeatures: [FontFeature.tabularFigures()],
+                fontFeatures: [const FontFeature.tabularFigures()],
               ),
             ),
           ),

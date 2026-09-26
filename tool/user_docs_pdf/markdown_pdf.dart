@@ -511,7 +511,7 @@ pw.Document buildDoc({
               ),
               child: pw.Text(
                 'D',
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   fontSize: 30,
                   fontWeight: pw.FontWeight.bold,
                   color: onCover,
@@ -522,7 +522,7 @@ pw.Document buildDoc({
             pw.Text(
               appName,
               textAlign: pw.TextAlign.center,
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 fontSize: 13,
                 letterSpacing: 4,
                 color: onCoverMuted,
@@ -532,7 +532,7 @@ pw.Document buildDoc({
             pw.Text(
               doc.title,
               textAlign: pw.TextAlign.center,
-              style: pw.TextStyle(fontSize: 32, color: onCover, lineSpacing: 6),
+              style: const pw.TextStyle(fontSize: 32, color: onCover, lineSpacing: 6),
             ),
             pw.SizedBox(height: 12),
             if (subtitle.isNotEmpty)
@@ -571,7 +571,7 @@ pw.Document buildDoc({
       build: (ctx) => [
         pw.Text(
           tocTitle,
-          style: pw.TextStyle(
+          style: const pw.TextStyle(
             fontSize: 20,
             fontWeight: pw.FontWeight.bold,
             color: textColor,
@@ -764,7 +764,7 @@ pw.Widget _heading2({
     ),
     child: pw.RichText(
       text: pw.TextSpan(
-        style: pw.TextStyle(
+        style: const pw.TextStyle(
           fontSize: 15.5,
           fontWeight: pw.FontWeight.bold,
           color: textColor,
@@ -772,7 +772,7 @@ pw.Widget _heading2({
         ),
         children: parseInline(
           heading.text,
-          base: pw.TextStyle(
+          base: const pw.TextStyle(
             fontSize: 15.5,
             fontWeight: pw.FontWeight.bold,
             color: textColor,
@@ -798,7 +798,7 @@ pw.Widget _heading3({
     margin: const pw.EdgeInsets.only(top: 14, bottom: 6),
     child: pw.RichText(
       text: pw.TextSpan(
-        style: pw.TextStyle(
+        style: const pw.TextStyle(
           fontSize: 12.5,
           fontWeight: pw.FontWeight.bold,
           color: accentDark,
@@ -806,7 +806,7 @@ pw.Widget _heading3({
         ),
         children: parseInline(
           heading.text,
-          base: pw.TextStyle(
+          base: const pw.TextStyle(
             fontSize: 12.5,
             fontWeight: pw.FontWeight.bold,
             color: accentDark,
@@ -944,7 +944,7 @@ List<pw.Widget> _quote(String text) {
         padding: const pw.EdgeInsets.fromLTRB(12, 9, 12, 9),
         // Sem `borderRadius`: o pacote pdf não aceita raio com borda não
         // uniforme (só a esquerda) — a régua verde + fundo claro bastam.
-        decoration: pw.BoxDecoration(
+        decoration: const pw.BoxDecoration(
           color: quoteBg,
           border: pw.Border(left: pw.BorderSide(color: accent, width: 3)),
         ),

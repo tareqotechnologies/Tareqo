@@ -217,8 +217,8 @@ void main() {
     testWidgets('ícone e seta só aparecem quando configurados', (tester) async {
       await tester.pumpWidget(
         testApp(
-          home: Column(
-            children: const [
+          home: const Column(
+            children: [
               AppPill(label: 'Com ícone', icon: Icons.filter_list),
               AppPill(label: 'Sem nada'),
             ],

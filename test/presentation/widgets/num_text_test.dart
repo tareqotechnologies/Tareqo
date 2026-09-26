@@ -65,9 +65,9 @@ void main() {
   ) async {
     await pump(
       tester,
-      (_) => NumText(
+      (_) => const NumText(
         '7',
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontFeatures: [FontFeature.enable('smcp')],
         ),
@@ -82,10 +82,10 @@ void main() {
   testWidgets('encaminha semanticsLabel ao Text', (tester) async {
     await pump(
       tester,
-      (_) => NumText(
+      (_) => const NumText(
         '3',
         semanticsLabel: '3 unidades',
-        style: const TextStyle(fontSize: 12),
+        style: TextStyle(fontSize: 12),
       ),
     );
 

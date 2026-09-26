@@ -85,7 +85,7 @@ void main() {
             processSaleUseCaseProvider.overrideWithValue(processSale),
             salesRepositoryProvider.overrideWithValue(_FakeSalesRepository()),
           ],
-          child: testApp(home: Scaffold(body: NewSaleSheet())),
+          child: testApp(home: const Scaffold(body: NewSaleSheet())),
         ),
       );
       await tester.pumpAndSettle();
@@ -279,7 +279,7 @@ Future<void> _pumpPdv(WidgetTester tester) async {
         processSaleUseCaseProvider.overrideWithValue(_FakeProcessSaleUseCase()),
         salesRepositoryProvider.overrideWithValue(_FakeSalesRepository()),
       ],
-      child: testApp(home: Scaffold(body: NewSaleSheet())),
+      child: testApp(home: const Scaffold(body: NewSaleSheet())),
     ),
   );
   await tester.pumpAndSettle();
@@ -340,7 +340,7 @@ Future<void> _pumpDebtSheet(
               child: FilledButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => Scaffold(body: AddDebtSheet()),
+                    builder: (_) => const Scaffold(body: AddDebtSheet()),
                   ),
                 ),
                 child: const Text('abrir'),

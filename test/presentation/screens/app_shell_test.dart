@@ -198,7 +198,7 @@ void main() {
             _FakeGetCustomersUseCase(),
           ),
         ],
-        child: testApp(home: AppShell()),
+        child: testApp(home: const AppShell()),
       ),
     );
 
@@ -262,7 +262,7 @@ void main() {
             _FakeGetCustomersUseCase(),
           ),
         ],
-        child: testApp(home: AppShell()),
+        child: testApp(home: const AppShell()),
       ),
     );
     await tester.pumpAndSettle();
@@ -321,7 +321,7 @@ void main() {
             _FakeGetCustomersUseCase(),
           ),
         ],
-        child: testApp(home: AppShell()),
+        child: testApp(home: const AppShell()),
       ),
     );
     await tester.pumpAndSettle();
@@ -378,7 +378,7 @@ void main() {
             _FakeGetCustomersUseCase(),
           ),
         ],
-        child: testApp(home: AppShell()),
+        child: testApp(home: const AppShell()),
       ),
     );
     await tester.pumpAndSettle();
@@ -524,7 +524,7 @@ void main() {
             _FakeGetCustomersUseCase(),
           ),
         ],
-        child: testApp(home: AppShell()),
+        child: testApp(home: const AppShell()),
       ),
     );
     await tester.pumpAndSettle();
@@ -591,7 +591,7 @@ void main() {
             _FakeGetCustomersUseCase(),
           ),
         ],
-        child: testApp(home: AppShell()),
+        child: testApp(home: const AppShell()),
       ),
     );
     await tester.pumpAndSettle();
@@ -664,7 +664,7 @@ void main() {
           ),
           offlineSyncServiceProvider.overrideWithValue(sync),
         ],
-        child: testApp(home: AppShell()),
+        child: testApp(home: const AppShell()),
       ),
     );
     await tester.pumpAndSettle();

@@ -220,7 +220,7 @@ class QuotationPdfExporter {
                   children: [
                     pw.Text(
                       labels.clientHeading,
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 10,
                         fontWeight: pw.FontWeight.bold,
                         color: PdfColors.grey600,
@@ -229,7 +229,7 @@ class QuotationPdfExporter {
                     pw.SizedBox(height: 4),
                     pw.Text(
                       quotation.customerName,
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 12,
                         fontWeight: pw.FontWeight.bold,
                       ),
@@ -253,7 +253,7 @@ class QuotationPdfExporter {
                 children: [
                   pw.Text(
                     labels.validityHeading,
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 10,
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.grey600,
@@ -310,7 +310,7 @@ class QuotationPdfExporter {
               2: pw.FixedColumnWidth(80),
               3: pw.FixedColumnWidth(80),
             },
-            headerStyle: pw.TextStyle(
+            headerStyle: const pw.TextStyle(
               fontSize: 9,
               fontWeight: pw.FontWeight.bold,
               color: PdfColors.white,
@@ -359,7 +359,7 @@ class QuotationPdfExporter {
             pw.SizedBox(height: gapTable),
             pw.Text(
               labels.notesHeading,
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 fontSize: 9,
                 fontWeight: pw.FontWeight.bold,
                 color: PdfColors.grey600,
@@ -385,7 +385,7 @@ class QuotationPdfExporter {
               children: [
                 pw.Text(
                   labels.generalConditionsHeading,
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     fontSize: 9,
                     fontWeight: pw.FontWeight.bold,
                     color: PdfColors.grey700,
@@ -574,7 +574,7 @@ class QuotationPdfExporter {
               ),
               child: pw.Text(
                 labels.docWord,
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.white,
@@ -584,7 +584,7 @@ class QuotationPdfExporter {
             pw.SizedBox(height: 8),
             pw.Text(
               labels.numberLabelTemplate.replaceFirst('{number}', quotationNumber),
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 fontSize: 12,
                 fontWeight: pw.FontWeight.bold,
               ),

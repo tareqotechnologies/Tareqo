@@ -252,7 +252,7 @@ Widget _buildMenuAsEmployee({required EmployeeRole role}) {
   return ProviderScope(
     overrides: [
       authStateProvider.overrideWith(
-        (ref) => Stream.value(AppUser(id: '1', email: 'func@loja.com')),
+        (ref) => Stream.value(const AppUser(id: '1', email: 'func@loja.com')),
       ),
       getMyTenantUseCaseProvider.overrideWithValue(
         FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),

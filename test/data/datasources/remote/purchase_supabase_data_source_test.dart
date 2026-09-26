@@ -94,7 +94,7 @@ void main() {
           );
 
           Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-            throw PostgrestException(
+            throw const PostgrestException(
               message: 'Produto não encontrado no catálogo.',
               code: 'P0001',
             );

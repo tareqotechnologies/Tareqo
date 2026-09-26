@@ -28,8 +28,13 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    # Guard rail do design system (plano UI/UX — F5.1): const em
+    # constructors = menos rebuilds desnecessários (performance de render —
+    # relevante para as listas densas do PDV/dashboard). Fix mecânico via
+    # `dart fix --apply`; os ~250 existentes foram corrigidos na ativação.
+    # NOTA: `always_use_package_imports` (sugerido pelo plano) NÃO se aplica
+    # — a convenção dominante do projeto é import relativo.
+    - prefer_const_constructors
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

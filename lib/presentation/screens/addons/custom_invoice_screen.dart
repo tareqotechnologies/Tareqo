@@ -165,7 +165,7 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
     final navigator = Navigator.of(context);
 
     try {
-      final entity = CreateCustomInvoiceUseCase().call(
+      final entity = const CreateCustomInvoiceUseCase().call(
         storeId: storeId,
         clientName: data.clientName,
         clientPhone: data.clientPhone,
@@ -405,7 +405,7 @@ class _InvoiceCard extends StatelessWidget {
 
     final config = templateConfig ?? InvoiceTemplateConfig();
     final l10n = context.l10n;
-    await InvoicePdfExporter().sharePdf(
+    await const InvoicePdfExporter().sharePdf(
       invoiceEntity,
       templateStyle: config.templateStyle,
       labels: InvoicePdfLabels(

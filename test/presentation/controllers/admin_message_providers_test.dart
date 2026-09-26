@@ -69,7 +69,7 @@ List<dynamic> _overrides({
   required GetTenantAdminMessagesUseCase messages,
 }) => [
   authStateProvider.overrideWith(
-    (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+    (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
   ),
   if (tenant != null)
     getMyTenantUseCaseProvider.overrideWithValue(tenant),

@@ -65,7 +65,7 @@ void main() {
   group('ScaleBarcode.weightMilliUnits', () {
     test('deriva a fração de peso do valor total ÷ preço unitário', () {
       // 20000 centavos (200,00) ÷ 8000 centavos/kg = 2,5 kg = 2500 milésimos.
-      final data = ScaleBarcodeData(
+      final data = const ScaleBarcodeData(
         productCode: '00001',
         totalValueCents: 20000,
       );
@@ -74,7 +74,7 @@ void main() {
 
     test('divisão inteira (chão) nunca cobra a mais', () {
       // 1750 centavos ÷ 8000 centavos/kg → 0,21875 → 218 milésimos (0,218 kg).
-      final data = ScaleBarcodeData(
+      final data = const ScaleBarcodeData(
         productCode: '00001',
         totalValueCents: 1750,
       );
@@ -84,7 +84,7 @@ void main() {
     });
 
     test('retorna 0 para preço unitário inválido (≤ 0)', () {
-      final data = ScaleBarcodeData(
+      final data = const ScaleBarcodeData(
         productCode: '00001',
         totalValueCents: 1750,
       );

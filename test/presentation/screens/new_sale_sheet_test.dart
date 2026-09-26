@@ -111,7 +111,7 @@ void main() {
             _FakeSalesRepository(const []),
           ),
         ],
-        child: testApp(home: Scaffold(body: NewSaleSheet())),
+        child: testApp(home: const Scaffold(body: NewSaleSheet())),
       ),
     );
     await tester.pumpAndSettle();
@@ -152,7 +152,7 @@ void main() {
             _FakeSalesRepository(const []),
           ),
         ],
-        child: testApp(home: Scaffold(body: NewSaleSheet())),
+        child: testApp(home: const Scaffold(body: NewSaleSheet())),
       ),
     );
     await tester.pumpAndSettle();
@@ -234,7 +234,7 @@ void main() {
             _FakeSalesRepository(const []),
           ),
         ],
-        child: testApp(home: Scaffold(body: NewSaleSheet())),
+        child: testApp(home: const Scaffold(body: NewSaleSheet())),
       );
 
       // Superfície mais alta: no padrão 800x600 o stepper fica fora da tela e

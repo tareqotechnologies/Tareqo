@@ -691,12 +691,12 @@ class _CashStackSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Skeleton(
+    return const Skeleton(
       child: AppCard(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             SkeletonBlock(width: 96, height: 14),
             SizedBox(height: 12),
             SkeletonBlock(width: 180, height: 32),
@@ -738,8 +738,8 @@ class _TransactionsSkeleton extends StatelessWidget {
               child: Column(
                 children: [
                   for (var i = 0; i < 3; i++) ...[
-                    Row(
-                      children: const [
+                    const Row(
+                      children: [
                         SkeletonBlock(width: 42, height: 42),
                         SizedBox(width: 12),
                         Expanded(
@@ -756,7 +756,7 @@ class _TransactionsSkeleton extends StatelessWidget {
                         SkeletonBlock(width: 72, height: 20),
                       ],
                     ),
-                    if (i < 2) SizedBox(height: 16),
+                    if (i < 2) const SizedBox(height: 16),
                   ],
                 ],
               ),

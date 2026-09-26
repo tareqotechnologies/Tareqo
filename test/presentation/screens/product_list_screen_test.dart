@@ -153,7 +153,7 @@ Widget _buildApp(
         const ProductImageStoreNoop(),
       ),
     ],
-    child: testApp(home: ProductListScreen()),
+    child: testApp(home: const ProductListScreen()),
   );
 }
 
@@ -173,7 +173,7 @@ Widget _buildAppEmployee(GetProductsUseCase useCase) {
         const ProductImageStoreNoop(),
       ),
     ],
-    child: testApp(home: ProductListScreen()),
+    child: testApp(home: const ProductListScreen()),
   );
 }
 

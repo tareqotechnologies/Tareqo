@@ -158,32 +158,32 @@ abstract final class AppDatabase {
   /// adicionar `_Migration(version: 2, description: ..., up: _migracaoV2)`
   /// e a função — o [initialize] roda apenas as pendentes.
   static final List<_Migration> _migrations = [
-    _Migration(
+    const _Migration(
       version: 1,
       description: 'schema completo + W4 (centavos) + numerações/backfills',
       up: _schemaV1,
     ),
-    _Migration(
+    const _Migration(
       version: 2,
       description: 'fila offline (outbox) — tabela pending_ops',
       up: _schemaV2,
     ),
-    _Migration(
+    const _Migration(
       version: 3,
       description: 'facturas personalizadas (add-on) — tabela custom_invoices',
       up: _schemaV3,
     ),
-    _Migration(
+    const _Migration(
       version: 4,
       description: 'cotações (add-on) — tabela quotations',
       up: _schemaV4,
     ),
-    _Migration(
+    const _Migration(
       version: 5,
       description: 'gestão de funcionários (add-on) — ponto, comissões, metas',
       up: _schemaV5,
     ),
-    _Migration(
+    const _Migration(
       version: 6,
       description: 'fila offline (A3) — backoff exponencial + dead-letter',
       up: _schemaV6,

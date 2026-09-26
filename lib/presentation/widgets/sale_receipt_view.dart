@@ -222,9 +222,9 @@ class _DashedDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(double.infinity, 1),
-      painter: _DashedLinePainter(color: const Color(0xFF9A9A9A)),
+    return const CustomPaint(
+      size: Size(double.infinity, 1),
+      painter: _DashedLinePainter(color: Color(0xFF9A9A9A)),
     );
   }
 }

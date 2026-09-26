@@ -49,7 +49,7 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     );
     final user = response.user;
     if (user == null) {
-      throw AuthException('Falha ao autenticar: nenhum usuário retornado.');
+      throw const AuthException('Falha ao autenticar: nenhum usuário retornado.');
     }
     return _toAppUser(user);
   }
@@ -67,7 +67,7 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     final email = _auth.currentUser?.email;
     if (email == null) {
-      throw AuthException('Sessão expirada — entre novamente.');
+      throw const AuthException('Sessão expirada — entre novamente.');
     }
     // O GoTrue exige sessão RECENTE para `updateUser`: reautentica com a
     // senha atual (valida a senha E renova a sessão) antes de gravar a nova.

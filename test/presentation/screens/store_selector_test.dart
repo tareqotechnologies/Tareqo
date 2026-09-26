@@ -132,7 +132,7 @@ void main() {
           salesRepositoryProvider.overrideWithValue(_EmptySalesRepository()),
           getCashFlowUseCaseProvider.overrideWithValue(_ZeroCashFlowUseCase()),
         ],
-        child: testApp(home: AppShell()),
+        child: testApp(home: const AppShell()),
       ),
     );
     await tester.pumpAndSettle();
@@ -163,7 +163,7 @@ void main() {
             _StoreScopedGetPurchasesUseCase(),
           ),
         ],
-        child: testApp(home: PurchasesScreen()),
+        child: testApp(home: const PurchasesScreen()),
       ),
     );
     await tester.pumpAndSettle();
@@ -197,7 +197,7 @@ void main() {
           salesRepositoryProvider.overrideWithValue(_EmptySalesRepository()),
           getCashFlowUseCaseProvider.overrideWithValue(_ZeroCashFlowUseCase()),
         ],
-        child: testApp(home: AppShell()),
+        child: testApp(home: const AppShell()),
       ),
     );
     await tester.pumpAndSettle();
@@ -268,7 +268,7 @@ void main() {
           salesRepositoryProvider.overrideWithValue(_EmptySalesRepository()),
           getCashFlowUseCaseProvider.overrideWithValue(_ZeroCashFlowUseCase()),
         ],
-        child: testApp(home: AppShell()),
+        child: testApp(home: const AppShell()),
       ),
     );
     await tester.pumpAndSettle();

@@ -117,7 +117,7 @@ void main() {
       'PostgrestException da RPC propaga como está (sem tradução)',
       () async {
         Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-          throw PostgrestException(
+          throw const PostgrestException(
             message: 'Acesso negado a esta loja.',
             code: 'P0001',
           );

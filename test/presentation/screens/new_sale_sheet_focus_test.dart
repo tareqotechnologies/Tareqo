@@ -75,7 +75,7 @@ Future<void> _pump(WidgetTester tester) async {
         processSaleUseCaseProvider.overrideWithValue(_FakeProcessSaleUseCase()),
         salesRepositoryProvider.overrideWithValue(_FakeSalesRepository()),
       ],
-      child: testApp(home: Scaffold(body: NewSaleSheet())),
+      child: testApp(home: const Scaffold(body: NewSaleSheet())),
     ),
   );
   await tester.pumpAndSettle();

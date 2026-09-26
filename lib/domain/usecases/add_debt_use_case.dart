@@ -69,7 +69,7 @@ class AddDebtUseCase {
   /// gravada mas a pendência falhou.
   Future<void> call(Debt debt) async {
     if (debt.amountCents <= 0) {
-      throw InvalidDebtAmountException(
+      throw const InvalidDebtAmountException(
         'O valor da dívida deve ser maior que zero.',
       );
     }

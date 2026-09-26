@@ -117,7 +117,7 @@ void main() {
     ) async {
       var tapped = false;
       await tester.pumpWidget(
-        testApp(home: AppButton.primary(label: 'Bloqueado', onPressed: null)),
+        testApp(home: const AppButton.primary(label: 'Bloqueado', onPressed: null)),
       );
 
       await tester.tap(find.text('Bloqueado'));
@@ -168,7 +168,7 @@ void main() {
     testWidgets('aceita hintText e erro', (tester) async {
       await tester.pumpWidget(
         testApp(
-          home: Scaffold(
+          home: const Scaffold(
             body: Center(
               child: AppTextField(
                 label: 'Código de barras',

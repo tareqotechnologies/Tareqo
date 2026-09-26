@@ -37,7 +37,7 @@ SalesReport _report() => SalesReport(
   totalRevenueCents: 5400,
   totalProfitCents: 1800,
   bestSellers: [
-    BestSeller(
+    const BestSeller(
       productId: 'p1',
       productName: 'Caneta azul',
       quantity: 12000,

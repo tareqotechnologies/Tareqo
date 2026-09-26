@@ -151,7 +151,7 @@ class AdvancedReportsPdfExporter {
                 children: [
                   pw.Text(
                     businessName,
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 18,
                       fontWeight: pw.FontWeight.bold,
                       color: PdfAccents.slateDeep,
@@ -160,7 +160,7 @@ class AdvancedReportsPdfExporter {
                   pw.SizedBox(height: 4),
                   pw.Text(
                     title,
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
                     ),
@@ -181,7 +181,7 @@ class AdvancedReportsPdfExporter {
                     ),
                     child: pw.Text(
                       period,
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 10,
                         fontWeight: pw.FontWeight.bold,
                         color: PdfColors.white,
@@ -208,7 +208,7 @@ class AdvancedReportsPdfExporter {
           // ─── KPI Cards ──────────────────────────────────
           pw.Text(
             indicatorsLabel,
-            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 8),
           ..._buildKpiRows(kpis),
@@ -218,7 +218,7 @@ class AdvancedReportsPdfExporter {
             pw.SizedBox(height: 20),
             pw.Text(
               section.title,
-              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+              style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 8),
             if (section.rows.isEmpty)
@@ -233,7 +233,7 @@ class AdvancedReportsPdfExporter {
               pw.TableHelper.fromTextArray(
                 headers: section.headers,
                 data: section.rows,
-                headerStyle: pw.TextStyle(
+                headerStyle: const pw.TextStyle(
                   fontSize: 9,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.white,
@@ -305,7 +305,7 @@ class AdvancedReportsPdfExporter {
           pw.SizedBox(height: 2),
           pw.Text(
             value,
-            style: pw.TextStyle(
+            style: const pw.TextStyle(
               fontSize: 12,
               fontWeight: pw.FontWeight.bold,
               color: PdfAccents.slateDeep,

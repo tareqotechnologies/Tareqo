@@ -66,7 +66,7 @@ Future<ProviderContainer> _pump(
               child: FilledButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => Scaffold(body: AddDebtSheet()),
+                    builder: (_) => const Scaffold(body: AddDebtSheet()),
                   ),
                 ),
                 child: const Text('abrir'),

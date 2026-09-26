@@ -33,7 +33,7 @@ void main() {
       () async {
         final dataSource = ProductSqliteDataSourceImpl(db);
         await dataSource.add(
-          Product(
+          const Product(
             id: 'p-centro',
             storeId: 'st1',
             name: 'Caneta Centro',
@@ -44,7 +44,7 @@ void main() {
           ),
         );
         await dataSource.add(
-          Product(
+          const Product(
             id: 'p-shopping',
             storeId: 'st2',
             name: 'Café Shopping',
@@ -185,10 +185,10 @@ void main() {
       () async {
         final dataSource = CustomerSqliteDataSourceImpl(db);
         await dataSource.add(
-          Customer(id: 'c-centro', storeId: 'st1', name: 'Ana Centro'),
+          const Customer(id: 'c-centro', storeId: 'st1', name: 'Ana Centro'),
         );
         await dataSource.add(
-          Customer(id: 'c-shopping', storeId: 'st2', name: 'Bia Shopping'),
+          const Customer(id: 'c-shopping', storeId: 'st2', name: 'Bia Shopping'),
         );
 
         final fromSt1 = await dataSource.getAll(storeId: 'st1');
@@ -306,7 +306,7 @@ void main() {
       () async {
         final dataSource = ProductSqliteDataSourceImpl(db);
         await dataSource.add(
-          Product(
+          const Product(
             id: 'p-centro',
             storeId: 'st1',
             name: 'Caneta Centro',
@@ -332,7 +332,7 @@ void main() {
       () async {
         final dataSource = ProductSqliteDataSourceImpl(db);
         await dataSource.add(
-          Product(
+          const Product(
             id: 'p-centro',
             storeId: 'st1',
             name: 'Caneta Centro',

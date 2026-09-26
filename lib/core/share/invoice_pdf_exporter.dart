@@ -198,7 +198,7 @@ class InvoicePdfExporter {
           // ─── Dados do Cliente ────────────────────────────────
           pw.Text(
             labels.clientHeading,
-            style: pw.TextStyle(
+            style: const pw.TextStyle(
               fontSize: 10,
               fontWeight: pw.FontWeight.bold,
               color: PdfColors.grey600,
@@ -207,7 +207,7 @@ class InvoicePdfExporter {
           pw.SizedBox(height: 4),
           pw.Text(
             invoice.clientName,
-            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
           if (invoice.clientPhone.isNotEmpty)
             pw.Text(
@@ -255,7 +255,7 @@ class InvoicePdfExporter {
               2: pw.FixedColumnWidth(80),
               3: pw.FixedColumnWidth(80),
             },
-            headerStyle: pw.TextStyle(
+            headerStyle: const pw.TextStyle(
               fontSize: 9,
               fontWeight: pw.FontWeight.bold,
               color: PdfColors.white,
@@ -318,7 +318,7 @@ class InvoicePdfExporter {
                 children: [
                   pw.Text(
                     _fill(labels.paymentLabelTemplate, invoice.paymentMethod),
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 9,
                       fontWeight: pw.FontWeight.bold,
                       color: PdfAccents.paymentText,
@@ -347,7 +347,7 @@ class InvoicePdfExporter {
             pw.SizedBox(height: gapTable),
             pw.Text(
               labels.notesHeading,
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 fontSize: 9,
                 fontWeight: pw.FontWeight.bold,
                 color: PdfColors.grey600,
@@ -520,7 +520,7 @@ class InvoicePdfExporter {
               ),
               child: pw.Text(
                 labels.docWord,
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.white,
@@ -530,7 +530,7 @@ class InvoicePdfExporter {
             pw.SizedBox(height: 8),
             pw.Text(
               labels.numberLabelTemplate.replaceFirst('{number}', invoiceNumber),
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 fontSize: 12,
                 fontWeight: pw.FontWeight.bold,
               ),

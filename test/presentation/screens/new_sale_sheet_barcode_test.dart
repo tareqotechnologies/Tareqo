@@ -180,7 +180,7 @@ Future<_FakeProcessSaleUseCase> _pumpSheet(WidgetTester tester) async {
           _FakeSalesRepository(const []),
         ),
       ],
-      child: testApp(home: Scaffold(body: NewSaleSheet())),
+      child: testApp(home: const Scaffold(body: NewSaleSheet())),
     ),
   );
   await tester.pumpAndSettle();

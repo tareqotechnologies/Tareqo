@@ -173,7 +173,7 @@ Widget _support() => testApp(home: const SupportScreen());
 Widget _stores(Tenant tenant) => ProviderScope(
   overrides: [
     authStateProvider.overrideWith(
-      (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+      (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
     ),
     getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
     getStoresUseCaseProvider.overrideWithValue(_FakeGetStoresUseCase()),

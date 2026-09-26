@@ -450,13 +450,13 @@ final class ServiceLocator {
         () => OfflineAwareDebtProcessor(debtProcessor, sync),
       )
       ..registerLazySingleton<ProductLocalDataSource>(
-        () => ProductSupabaseDataSourceImpl(),
+        () => const ProductSupabaseDataSourceImpl(),
       )
       ..registerLazySingleton<SaleLocalDataSource>(
-        () => SaleSupabaseDataSourceImpl(),
+        () => const SaleSupabaseDataSourceImpl(),
       )
       ..registerLazySingleton<FinancialTransactionLocalDataSource>(
-        () => FinancialTransactionSupabaseDataSourceImpl(),
+        () => const FinancialTransactionSupabaseDataSourceImpl(),
       )
       ..registerLazySingleton<CashClosingLocalDataSource>(
         () => const CashClosingSupabaseDataSourceImpl(),
@@ -467,13 +467,13 @@ final class ServiceLocator {
         ),
       )
       ..registerLazySingleton<DebtLocalDataSource>(
-        () => DebtSupabaseDataSourceImpl(),
+        () => const DebtSupabaseDataSourceImpl(),
       )
       ..registerLazySingleton<CustomerLocalDataSource>(
-        () => CustomerSupabaseDataSourceImpl(),
+        () => const CustomerSupabaseDataSourceImpl(),
       )
       ..registerLazySingleton<PurchaseLocalDataSource>(
-        () => PurchaseSupabaseDataSourceImpl(),
+        () => const PurchaseSupabaseDataSourceImpl(),
       )
       ..registerLazySingleton<StockLotLocalDataSource>(
         () => const StockLotSupabaseDataSourceImpl(),

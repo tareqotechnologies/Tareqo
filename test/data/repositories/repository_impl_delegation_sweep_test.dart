@@ -440,7 +440,7 @@ void main() {
 
   group('AuditLogRepositoryImpl', () {
     test('getAuditLog delega ao datasource local', () async {
-      final repo = AuditLogRepositoryImpl(AuditLogLocalDataSourceImpl());
+      final repo = const AuditLogRepositoryImpl(AuditLogLocalDataSourceImpl());
       expect(await repo.getAuditLog(), isEmpty);
       expect(await repo.getAuditLog(limit: 5), isEmpty);
     });

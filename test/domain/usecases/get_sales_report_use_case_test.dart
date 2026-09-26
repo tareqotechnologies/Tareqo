@@ -308,7 +308,7 @@ void main() {
         Sale(
           id: 's1',
           items: [
-            SaleItem(
+            const SaleItem(
               productId: 'p1',
               productName: 'Caneta',
               quantity: 1000,
@@ -323,7 +323,7 @@ void main() {
         Sale(
           id: 's2',
           items: [
-            SaleItem(
+            const SaleItem(
               productId: 'p1',
               productName: 'Caneta',
               quantity: 1000,

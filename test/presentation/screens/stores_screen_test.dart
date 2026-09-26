@@ -122,7 +122,7 @@ void main() {
       // Sessão do DONO do tenant (u1) — habilita o interruptor de
       // ativar/desativar na aba Funcionários.
       authStateProvider.overrideWith(
-        (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+        (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
       ),
       getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
       getStoresUseCaseProvider.overrideWithValue(_FakeGetStoresUseCase()),
@@ -208,7 +208,7 @@ void main() {
       ProviderScope(
         overrides: [
           authStateProvider.overrideWith(
-            (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+            (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
           ),
           getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
           getStoresUseCaseProvider.overrideWithValue(_FakeGetStoresUseCase()),
@@ -330,7 +330,7 @@ void main() {
       ProviderScope(
         overrides: [
           authStateProvider.overrideWith(
-            (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+            (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
           ),
           getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
           getStoresUseCaseProvider.overrideWithValue(_FakeGetStoresUseCase()),
@@ -372,7 +372,7 @@ void main() {
     app = ProviderScope(
       overrides: [
         authStateProvider.overrideWith(
-          (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+          (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
         ),
         getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
         getStoresUseCaseProvider.overrideWithValue(useCase),

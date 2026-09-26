@@ -214,7 +214,7 @@ class ReportExporter {
         build: (context) => [
           pw.Text(
             labels.title,
-            style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 6),
           pw.Text(
@@ -245,7 +245,7 @@ class ReportExporter {
           pw.SizedBox(height: 28),
           pw.Text(
             labels.bestSellers,
-            style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 8),
           if (report.bestSellers.isEmpty)
@@ -290,7 +290,7 @@ class ReportExporter {
           pw.SizedBox(height: 24),
           pw.Text(
             labels.perDay,
-            style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 8),
           if (report.perDay.isEmpty)
@@ -384,7 +384,7 @@ class ReportExporter {
           pw.SizedBox(height: 4),
           pw.Text(
             value,
-            style: pw.TextStyle(
+            style: const pw.TextStyle(
               fontSize: 13,
               fontWeight: pw.FontWeight.bold,
               color: PdfAccents.slateDeep,

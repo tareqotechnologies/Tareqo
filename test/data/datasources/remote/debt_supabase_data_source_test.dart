@@ -84,7 +84,7 @@ void main() {
       'PostgrestException da RPC propaga como está (sem tradução)',
       () async {
         Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-          throw PostgrestException(
+          throw const PostgrestException(
             message: 'Dívida não encontrada para a loja informada.',
             code: 'P0001',
           );

@@ -48,7 +48,7 @@ void main() {
     final saleDataSource = SaleSqliteDataSourceImpl(db);
 
     await productDataSource.add(
-      Product(
+      const Product(
         id: 'p-centro',
         storeId: 'st1',
         name: 'Caneta Centro',
@@ -59,7 +59,7 @@ void main() {
       ),
     );
     await productDataSource.add(
-      Product(
+      const Product(
         id: 'p-shopping',
         storeId: 'st2',
         name: 'Café Shopping',

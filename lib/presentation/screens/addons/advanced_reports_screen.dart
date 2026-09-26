@@ -716,7 +716,7 @@ class _StockReportTab extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                     child: Row(
                       children: [
-                        Icon(Icons.circle, size: 6, color: ModuleColors.credit),
+                        const Icon(Icons.circle, size: 6, color: ModuleColors.credit),
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(

@@ -189,7 +189,7 @@ Widget _buildApp(
       if (isEmployee)
         currentAccessLevelProvider.overrideWithValue(UserAccessLevel.employee),
     ],
-    child: testApp(home: FinancialScreen()),
+    child: testApp(home: const FinancialScreen()),
   );
 }
 
@@ -415,7 +415,7 @@ void main() {
             _FakeCloseCashRegisterUseCase(),
           ),
         ],
-        child: testApp(home: FinancialScreen()),
+        child: testApp(home: const FinancialScreen()),
       ),
     );
     await tester.pumpAndSettle();

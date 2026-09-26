@@ -82,11 +82,11 @@ void main() {
   // O estado das abas é preservado (IndexedStack).
   testWidgets('FadeIndexedStack faz fade-through entre índices', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: FadeIndexedStack(
             index: 0,
-            children: const [
+            children: [
               Text('A', key: Key('a')),
               Text('B', key: Key('b')),
             ],
@@ -102,11 +102,11 @@ void main() {
 
     // Troca de índice — reconstrói com index 1 (o shell passa a nova aba).
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: FadeIndexedStack(
             index: 1,
-            children: const [
+            children: [
               Text('A', key: Key('a')),
               Text('B', key: Key('b')),
             ],
@@ -139,13 +139,13 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(disableAnimations: true),
+      const MediaQuery(
+        data: MediaQueryData(disableAnimations: true),
         child: MaterialApp(
           home: Scaffold(
             body: FadeIndexedStack(
               index: 0,
-              children: const [Text('A'), Text('B')],
+              children: [Text('A'), Text('B')],
             ),
           ),
         ),
@@ -154,13 +154,13 @@ void main() {
     await tester.pump();
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(disableAnimations: true),
+      const MediaQuery(
+        data: MediaQueryData(disableAnimations: true),
         child: MaterialApp(
           home: Scaffold(
             body: FadeIndexedStack(
               index: 1,
-              children: const [Text('A'), Text('B')],
+              children: [Text('A'), Text('B')],
             ),
           ),
         ),

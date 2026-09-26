@@ -72,7 +72,7 @@ Widget _buildApp({
       getSettledDebtsUseCaseProvider.overrideWithValue(settledUseCase),
       settleDebtUseCaseProvider.overrideWithValue(settleUseCase),
     ],
-    child: testApp(home: DebtsScreen()),
+    child: testApp(home: const DebtsScreen()),
   );
 }
 

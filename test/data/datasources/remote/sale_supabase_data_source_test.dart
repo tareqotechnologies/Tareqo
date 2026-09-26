@@ -85,7 +85,7 @@ void main() {
         );
 
         Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-          throw PostgrestException(
+          throw const PostgrestException(
             message: 'Stock insuficiente para o produto Arroz.',
             code: 'P0001',
           );

@@ -59,7 +59,7 @@ class _FakeAuthRepository implements IAuthRepository {
 Widget _buildApp(ThemeData? theme) {
   return ProviderScope(
     overrides: [authRepositoryProvider.overrideWithValue(_FakeAuthRepository())],
-    child: testApp(theme: theme, home: LoginScreen()),
+    child: testApp(theme: theme, home: const LoginScreen()),
   );
 }
 

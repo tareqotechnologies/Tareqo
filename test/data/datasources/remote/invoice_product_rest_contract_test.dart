@@ -231,7 +231,7 @@ void main() {
         };
 
         await ds.update(
-          Product(
+          const Product(
             id: 'p1',
             storeId: 'st1',
             name: 'Arroz',
@@ -249,7 +249,7 @@ void main() {
     test('update em produto inexistente lança StateError', () async {
       await expectLater(
         ds.update(
-          Product(
+          const Product(
             id: 'p-fantasma',
             storeId: 'st1',
             name: 'X',

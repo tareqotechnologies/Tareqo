@@ -23,7 +23,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.dark(),
-        home: Scaffold(
+        home: const Scaffold(
           body: Center(
             // Âncora estreita de um card (largura típica em mobile).
             child: SizedBox(
@@ -63,7 +63,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.dark(),
-        home: Scaffold(
+        home: const Scaffold(
           body: Center(
             child: StatusChip(
               label: 'Pago',

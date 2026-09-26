@@ -81,7 +81,7 @@ Future<void> _pumpPdv(
         processSaleUseCaseProvider.overrideWithValue(processSale),
         salesRepositoryProvider.overrideWithValue(_FakeSalesRepository()),
       ],
-      child: testApp(home: Scaffold(body: NewSaleSheet())),
+      child: testApp(home: const Scaffold(body: NewSaleSheet())),
     ),
   );
   await tester.pumpAndSettle();

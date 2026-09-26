@@ -62,7 +62,7 @@ Widget _buildApp(ISaleRepository repository) {
       ...storeContextOverrides(),
       salesRepositoryProvider.overrideWithValue(repository),
     ],
-    child: testApp(home: SalesScreen()),
+    child: testApp(home: const SalesScreen()),
   );
 }
 

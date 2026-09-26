@@ -41,7 +41,7 @@ void main() {
 
     test('traduz e-mail duplicado da RPC em mensagem amigável', () async {
       Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-        throw PostgrestException(
+        throw const PostgrestException(
           message: 'Já existe uma conta com este e-mail.',
           code: 'P0001',
         );
@@ -63,7 +63,7 @@ void main() {
 
     test('traduz não-dono da RPC em mensagem amigável', () async {
       Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-        throw PostgrestException(
+        throw const PostgrestException(
           message: 'Apenas o dono do tenant pode cadastrar funcionários.',
           code: 'P0001',
         );
@@ -85,7 +85,7 @@ void main() {
 
     test('traduz loja inválida da RPC em mensagem amigável', () async {
       Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-        throw PostgrestException(
+        throw const PostgrestException(
           message: 'Escolha uma loja do seu tenant.',
           code: 'P0001',
         );
@@ -107,7 +107,7 @@ void main() {
 
     test('erro genérico da RPC vira mensagem genérica amigável', () async {
       Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-        throw PostgrestException(
+        throw const PostgrestException(
           message: 'internal server error',
           code: 'P0001',
         );

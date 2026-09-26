@@ -31,7 +31,7 @@ void main() {
         'PostgrestException da RPC propaga como está (sem tradução)',
         () async {
           Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-            throw PostgrestException(
+            throw const PostgrestException(
               message: 'Apenas o dono ou um gerente podem ajustar o estoque.',
               code: 'P0001',
             );

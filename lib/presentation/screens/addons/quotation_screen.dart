@@ -165,7 +165,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
     final navigator = Navigator.of(context);
 
     try {
-      final entity = CreateQuotationUseCase().call(
+      final entity = const CreateQuotationUseCase().call(
         storeId: storeId,
         customer: Customer(
           id: data.customerId ?? '',
@@ -496,7 +496,7 @@ class _QuotationCard extends StatelessWidget {
 
     final config = templateConfig ?? InvoiceTemplateConfig();
     final l10n = context.l10n;
-    await QuotationPdfExporter().sharePdf(
+    await const QuotationPdfExporter().sharePdf(
       quotationEntity,
       templateStyle: config.templateStyle,
       labels: QuotationPdfLabels(

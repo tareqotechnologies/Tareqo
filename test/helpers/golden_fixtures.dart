@@ -313,15 +313,15 @@ List<dynamic> dashboardGoldenOverrides() {
     getProductsUseCaseProvider.overrideWithValue(FakeGetProductsUseCase()),
     salesRepositoryProvider.overrideWithValue(FakeSalesRepository()),
     getCashFlowUseCaseProvider.overrideWithValue(
-      _FixedGetCashFlowUseCase(),
+      const _FixedGetCashFlowUseCase(),
     ),
     getPendingDebtsUseCaseProvider.overrideWithValue(
-      _FixedGetPendingDebtsUseCase(),
+      const _FixedGetPendingDebtsUseCase(),
     ),
     getSettledDebtsUseCaseProvider.overrideWithValue(
-      _FixedGetSettledDebtsUseCase(),
+      const _FixedGetSettledDebtsUseCase(),
     ),
-    getPurchasesUseCaseProvider.overrideWithValue(FakeGetPurchasesUseCase()),
+    getPurchasesUseCaseProvider.overrideWithValue(const FakeGetPurchasesUseCase()),
     financeRepositoryProvider.overrideWithValue(FakeFinanceRepository()),
     dashboardKpisProvider.overrideWith(FixedDashboardKpisNotifier.new),
   ];
@@ -354,7 +354,7 @@ Widget newSaleGoldenApp({ThemeData? theme, Locale? locale}) {
     child: testApp(
       theme: theme,
       locale: locale ?? const Locale('pt'),
-      home: Scaffold(body: NewSaleSheet()),
+      home: const Scaffold(body: NewSaleSheet()),
     ),
   );
 }

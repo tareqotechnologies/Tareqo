@@ -62,7 +62,7 @@ void main() {
                     actionLabel: 'Ver tudo',
                   ),
                   const SizedBox(height: 12),
-                  Row(
+                  const Row(
                     children: [
                       Expanded(
                         child: KpiCard(
@@ -71,7 +71,7 @@ void main() {
                           icon: Icons.payments_outlined,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: KpiCard(
                           label: 'Produtos',
@@ -118,8 +118,8 @@ void main() {
                     errorText: 'Informe um e-mail válido.',
                   ),
                   const SizedBox(height: 12),
-                  AppCard(
-                    child: const SheetSection(
+                  const AppCard(
+                    child: SheetSection(
                       icon: Icons.receipt_long_outlined,
                       title: 'Pagamento',
                       children: [Text('M-Pesa · e-Mola · Dinheiro · Crédito')],
@@ -140,11 +140,11 @@ void main() {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
+                  const ClipRRect(
+                    borderRadius: BorderRadius.vertical(
                       top: Radius.circular(AppRadius.xl),
                     ),
-                    child: const SheetHeader(title: 'Detalhes da venda'),
+                    child: SheetHeader(title: 'Detalhes da venda'),
                   ),
                   const SizedBox(height: 24),
                   AppButton.primary(

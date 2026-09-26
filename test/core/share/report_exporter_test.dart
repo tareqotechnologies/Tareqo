@@ -29,13 +29,13 @@ SalesReport _report() => SalesReport(
   totalProfitCents: 1800,
   bestSellers: [
     // Nome com vírgula: campo CSV precisa ser entre-aspado (escape).
-    BestSeller(
+    const BestSeller(
       productId: 'p1',
       productName: 'Caneta, azul',
       quantity: 12000, // 12 unidades em MILÉSIMOS (W11)
       revenueCents: 2400,
     ),
-    BestSeller(
+    const BestSeller(
       productId: 'p2',
       productName: 'Caderno',
       quantity: 5000,
@@ -87,7 +87,7 @@ void main() {
     });
 
     test('escapa aspas e quebras de linha dentro de campos', () {
-      final report = SalesReport(
+      final report = const SalesReport(
         totalRevenueCents: 100,
         totalProfitCents: 0,
         bestSellers: [
@@ -98,7 +98,7 @@ void main() {
             revenueCents: 100,
           ),
         ],
-        perDay: const [],
+        perDay: [],
       );
 
       final csv = exporter.buildCsv(

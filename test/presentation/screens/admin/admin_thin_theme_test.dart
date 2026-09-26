@@ -109,7 +109,7 @@ void main() {
     final value = tester.widget<Text>(find.text('128'));
     expect(value.style?.fontWeight, FontWeight.w300);
     expect(value.style?.letterSpacing, -0.4);
-    expect(value.style?.fontFeatures, contains(FontFeature.tabularFigures()));
+    expect(value.style?.fontFeatures, contains(const FontFeature.tabularFigures()));
     // Sem cor explícita: onSurface.
     final scheme = Theme.of(
       tester.element(find.text('128')),

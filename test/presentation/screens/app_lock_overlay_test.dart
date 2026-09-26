@@ -93,7 +93,7 @@ void main() {
 
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+        authStream: Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
         service: service,
       ),
     );
@@ -127,7 +127,7 @@ void main() {
     await tester.pumpWidget(
       _buildApp(authStream: auth.stream, service: service, bioEnabled: false),
     );
-    auth.add(AppUser(id: 'u1', email: 'dono@loja.com'));
+    auth.add(const AppUser(id: 'u1', email: 'dono@loja.com'));
     await tester.pumpAndSettle();
 
     expect(find.text(_lockTitle), findsNothing);
@@ -159,7 +159,7 @@ void main() {
     // biometria já na hora (só no próximo regresso do fundo / arranque).
     auth.add(null);
     await tester.pumpAndSettle();
-    auth.add(AppUser(id: 'u1', email: 'dono@loja.com'));
+    auth.add(const AppUser(id: 'u1', email: 'dono@loja.com'));
     await tester.pumpAndSettle();
 
     expect(find.text(_lockTitle), findsNothing);
@@ -190,7 +190,7 @@ void main() {
 
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+        authStream: Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
         service: service,
       ),
     );
@@ -221,7 +221,7 @@ void main() {
       _buildApp(authStream: auth.stream, service: service),
     );
     service.pending = unlock;
-    auth.add(AppUser(id: 'u1', email: 'dono@loja.com'));
+    auth.add(const AppUser(id: 'u1', email: 'dono@loja.com'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 

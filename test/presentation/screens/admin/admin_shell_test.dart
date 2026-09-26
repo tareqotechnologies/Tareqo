@@ -125,7 +125,7 @@ List<dynamic> _overrides({
   final tenants = List.generate(pendingTenants, (i) => _pendingTenant('tn$i'));
   return [
     authStateProvider.overrideWith(
-      (ref) => Stream.value(AppUser(id: 'admin-1', email: 'admin@tareqo.com')),
+      (ref) => Stream.value(const AppUser(id: 'admin-1', email: 'admin@tareqo.com')),
     ),
     adminRepositoryProvider.overrideWithValue(
       const FakeAdminRepository(isAdmin: true),
@@ -137,8 +137,8 @@ List<dynamic> _overrides({
       _PendingTenants(tenants),
     ),
     getAllTenantsUseCaseProvider.overrideWithValue(_AllTenants(tenants)),
-    getAllPlansUseCaseProvider.overrideWithValue(_AllPlans(_plans)),
-    getPlansUseCaseProvider.overrideWithValue(_ActivePlans(_plans)),
+    getAllPlansUseCaseProvider.overrideWithValue(const _AllPlans(_plans)),
+    getPlansUseCaseProvider.overrideWithValue(const _ActivePlans(_plans)),
     getPendingPlanRequestsUseCaseProvider.overrideWithValue(
       _PendingPlanRequests(
         List.generate(pendingUpgrades, (i) => _pendingRequest('pr$i')),

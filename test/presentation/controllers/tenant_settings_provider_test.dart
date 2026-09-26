@@ -35,7 +35,7 @@ void main() {
     return ProviderContainer(
       overrides: [
         authStateProvider.overrideWith(
-          (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+          (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
         ),
         getMyTenantUseCaseProvider.overrideWithValue(
           FakeGetMyTenantUseCase(tenant),

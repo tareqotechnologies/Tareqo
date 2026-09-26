@@ -45,7 +45,7 @@ void main() {
         'não-dono da RPC vira StateError amigável (nunca a mensagem crua)',
         () async {
           Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-            throw PostgrestException(
+            throw const PostgrestException(
               message:
                   'Apenas o dono do tenant pode ativar/desativar funcionários.',
               code: 'P0001',
@@ -69,7 +69,7 @@ void main() {
 
       test('vínculo inexistente da RPC vira StateError amigável', () async {
         Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-          throw PostgrestException(
+          throw const PostgrestException(
             message: 'Funcionário não encontrado.',
             code: 'P0002',
           );
@@ -91,7 +91,7 @@ void main() {
 
       test('erro inesperado da RPC vira mensagem amigável padrão', () async {
         Future<dynamic> rpc(String fn, Map<String, dynamic> params) async {
-          throw PostgrestException(
+          throw const PostgrestException(
             message: 'internal server error',
             code: '500',
           );

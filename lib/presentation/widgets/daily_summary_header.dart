@@ -184,7 +184,7 @@ class _DeltaPill extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 color: color,
                 // Percentuais (+25% / -10%) alinhados dígito a dígito.
-                fontFeatures: [FontFeature.tabularFigures()],
+                fontFeatures: [const FontFeature.tabularFigures()],
               ),
             ),
           ),

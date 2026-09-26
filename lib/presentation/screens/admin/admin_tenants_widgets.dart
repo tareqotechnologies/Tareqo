@@ -69,7 +69,7 @@ class _AdminTenantCard extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.extension_outlined,
                     size: 12,
                     color: AppColors.statusPurple,

@@ -352,7 +352,7 @@ void main() {
   group('SetEmployeeActiveUseCase — mudança de status do vínculo', () {
     test('desativa funcionário ativo (chama setActive false)', () async {
       final repo = _MemEmployeeRepo([
-        StoreEmployee(
+        const StoreEmployee(
           id: 'emp-1',
           tenantId: 'tn-1',
           storeId: 'st-1',
@@ -374,7 +374,7 @@ void main() {
       'status IGUAL não re-persiste (sem escrita redundante no banco)',
       () async {
         final repo = _MemEmployeeRepo([
-          StoreEmployee(
+          const StoreEmployee(
             id: 'emp-1',
             tenantId: 'tn-1',
             storeId: 'st-1',
@@ -414,7 +414,7 @@ void main() {
 
     test('loja válida dentro do limite é persistida', () async {
       final storeRepo = _MemStoreRepo([
-        Store(id: 'st-1', tenantId: 'tn-1', name: 'Matriz'),
+        const Store(id: 'st-1', tenantId: 'tn-1', name: 'Matriz'),
       ]);
       await AddStoreUseCase(
         storeRepo,
@@ -458,8 +458,8 @@ void main() {
       'limite do plano atingido lança PlanLimitExceededException com contagem',
       () async {
         final storeRepo = _MemStoreRepo([
-          Store(id: 'st-1', tenantId: 'tn-1', name: 'Matriz'),
-          Store(id: 'st-2', tenantId: 'tn-1', name: 'Filial'),
+          const Store(id: 'st-1', tenantId: 'tn-1', name: 'Matriz'),
+          const Store(id: 'st-2', tenantId: 'tn-1', name: 'Filial'),
         ]);
         await expectLater(
           AddStoreUseCase(
@@ -483,7 +483,7 @@ void main() {
       'singular do plural: plano de 1 loja diz "1 loja" (não "1 lojas")',
       () async {
         final storeRepo = _MemStoreRepo([
-          Store(id: 'st-1', tenantId: 'tn-1', name: 'Matriz'),
+          const Store(id: 'st-1', tenantId: 'tn-1', name: 'Matriz'),
         ]);
         await expectLater(
           AddStoreUseCase(

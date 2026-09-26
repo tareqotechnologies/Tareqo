@@ -74,7 +74,7 @@ Widget _build(
       requestTenantAccessUseCaseProvider.overrideWithValue(request),
     ],
     child: testApp(
-      home: TenantOnboardingScreen(user: _user),
+      home: const TenantOnboardingScreen(user: _user),
       locale: locale,
     ),
   );

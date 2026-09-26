@@ -123,7 +123,7 @@ void main() {
       // Sessão + tenant: o save invalida o myTenantProvider do utilizador
       // (é assim que o tenantSettingsProvider reage e troca o locale).
       authStateProvider.overrideWith(
-        (ref) => Stream.value(AppUser(id: 'u1', email: 'dono@loja.com')),
+        (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
       ),
       getMyTenantUseCaseProvider.overrideWithValue(
         FakeGetMyTenantUseCase(tenant),

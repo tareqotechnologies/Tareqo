@@ -65,14 +65,14 @@ void main() {
     // Símbolo explícito: moeda ativa do tenant aparece nos preços.
     await tester.pumpWidget(
       testApp(
-        home: Scaffold(
+        home: const Scaffold(
           body: SingleChildScrollView(
             child: CustomInvoicePreview(
               businessName: 'Loja Teste',
               businessAddress: '',
               businessPhone: '',
               businessTaxId: '',
-              primaryColor: const Color(0xFF3D4D55),
+              primaryColor: Color(0xFF3D4D55),
               currencySymbol: r'R$',
             ),
           ),
