@@ -25,46 +25,81 @@ Future<T?> showAppSheet<T>(
           padding: EdgeInsets.only(
             bottom: MediaQuery.viewInsetsOf(context).bottom,
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: scheme.surface,
-              borderRadius: fullscreen
-                  ? BorderRadius.zero
-                  : const BorderRadius.vertical(
-                      top: Radius.circular(AppRadius.xl),
+          child: _SheetScaleIn(
+            child: Container(
+              decoration: BoxDecoration(
+                color: scheme.surface,
+                borderRadius: fullscreen
+                    ? BorderRadius.zero
+                    : const BorderRadius.vertical(
+                        top: Radius.circular(AppRadius.xl),
+                      ),
+                border: fullscreen
+                    ? null
+                    : Border(top: BorderSide(color: scheme.outlineVariant)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (fullscreen)
+                    const Padding(
+                      padding: EdgeInsets.only(
+                        top: AppSpacing.sm,
+                        bottom: AppSpacing.xxs,
+                      ),
+                      child: _SheetHandle(),
+                    )
+                  else
+                    const Padding(
+                      padding: EdgeInsets.only(
+                        top: AppSpacing.sm,
+                        bottom: AppSpacing.xs,
+                      ),
+                      child: _SheetHandle(),
                     ),
-              border: fullscreen
-                  ? null
-                  : Border(top: BorderSide(color: scheme.outlineVariant)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (fullscreen)
-                  const Padding(
-                    padding: EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xxs),
-                    child: _SheetHandle(),
-                  )
-                else
-                  const Padding(
-                    padding: EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),
-                    child: _SheetHandle(),
+                  Flexible(
+                    child: fullscreen
+                        ? SizedBox(
+                            height: MediaQuery.sizeOf(context).height,
+                            child: builder(context),
+                          )
+                        : builder(context),
                   ),
-                Flexible(
-                  child: fullscreen
-                      ? SizedBox(
-                          height: MediaQuery.sizeOf(context).height,
-                          child: builder(context),
-                        )
-                      : builder(context),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       );
     },
   );
+}
+
+/// Entrada da sheet (plano UI/UX — F4.3): **scale 0.92 + fade** — o padrão
+/// iOS "card stack" de abertura. Encapsulado AQUI (não no chamador): toda
+/// sheet do app herda a mesma física de entrada sem propagação de flags.
+/// O slide nativo do `showModalBottomSheet` continua existindo — o scale
+/// é o acabamento por cima. Respeita `MediaQuery.disableAnimationsOf`
+/// (movimento reduzido = entrada estática, o slide de rota cuida do resto).
+class _SheetScaleIn extends StatelessWidget {
+  const _SheetScaleIn({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: AppDurations.normal,
+      curve: AppCurves.standard,
+      builder: (context, t, child) => Opacity(
+        opacity: t,
+        child: Transform.scale(scale: 0.92 + 0.08 * t, child: child),
+      ),
+      child: child,
+    );
+  }
 }
 
 /// Seção agrupada dentro de uma sheet — container com fundo sutil,

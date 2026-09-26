@@ -70,6 +70,21 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   bool _isSubmitting = false;
   String? _error;
 
+  /// Modo foco (plano UI/UX — F4.1): a busca está focada — o catálogo
+  /// recua (dim) e o carrinho, o conteúdo em progresso, fica em evidência.
+  bool _searchFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchFocus.addListener(_onSearchFocusChanged);
+  }
+
+  void _onSearchFocusChanged() {
+    if (!mounted) return;
+    setState(() => _searchFocused = _searchFocus.hasFocus);
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -504,6 +519,25 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       ),
     );
 
+    // Modo foco (F4.1): com a busca focada, o que NÃO é o carrinho recua
+    // 40% (dim) — deferência ao conteúdo: a venda em progresso é o
+    // protagonista. O carrinho (pills + resumo) fica a 100%; o estado
+    // vazio NÃO escurece (é a resposta à busca). 200ms, e estático com
+    // movimento reduzido.
+    Widget focusDim(Widget child, {bool keepFocus = false}) {
+      if (!_searchFocused) return child;
+      const dimmedOpacity = 0.6;
+      final opacity = keepFocus ? 1.0 : dimmedOpacity;
+      if (MediaQuery.disableAnimationsOf(context)) {
+        return Opacity(opacity: opacity, child: child);
+      }
+      return AnimatedOpacity(
+        opacity: opacity,
+        duration: AppDurations.normal,
+        child: child,
+      );
+    }
+
     return Column(
       children: [
         SheetHeader(
@@ -559,7 +593,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
               // rodapé fica fixo e nada estoura.
               return CustomScrollView(
                 slivers: [
-                  SliverToBoxAdapter(child: scannerZone),
+                  SliverToBoxAdapter(child: focusDim(scannerZone)),
                   SliverToBoxAdapter(child: searchField),
                   if (filtered.isEmpty)
                     // SliverFillRemaining: o estado vazio ocupa o espaço
@@ -581,7 +615,12 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                         // com o catálogo: resumo visível sem altura fixa.
                         if (_cart.isNotEmpty) ...[
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 0, 24, AppSpacing.xs),
+                            padding: const EdgeInsets.fromLTRB(
+                              24,
+                              0,
+                              24,
+                              AppSpacing.xs,
+                            ),
                             child: Row(
                               children: [
                                 Expanded(
@@ -620,17 +659,19 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                           const SizedBox(height: 12),
                         ],
                         for (final product in filtered) ...[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xl,
-                            ),
-                            child: _CartProductRow(
-                              product: product,
-                              quantity: _cart[product.id] ?? 0,
-                              onAdd: () => _add(product),
-                              onAddFraction: () => _addFraction(product),
-                              onRemove: () => _remove(product),
-                              onEdit: () => _editQuantity(product),
+                          focusDim(
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.xl,
+                              ),
+                              child: _CartProductRow(
+                                product: product,
+                                quantity: _cart[product.id] ?? 0,
+                                onAdd: () => _add(product),
+                                onAddFraction: () => _addFraction(product),
+                                onRemove: () => _remove(product),
+                                onEdit: () => _editQuantity(product),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -701,9 +742,14 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
               ],
               const SizedBox(height: 8),
               // AppButton ultra-clean: altura 48, cantos 12, texto w400.
+              // F4.1: gradiente sutil quando HABILITADO + escala 0.98 no
+              // press (80ms) — a resposta "física" da ação mais importante.
               AppButton.primary(
                 label: l10n.salesConfirm,
                 onPressed: _cart.isEmpty || _isSubmitting ? null : _confirm,
+                expanded: true,
+                gradient: true,
+                pressScale: true,
                 icon: _isSubmitting
                     ? const SizedBox(
                         height: 18,
@@ -747,7 +793,12 @@ class _ScannerZone extends StatelessWidget {
     final l10n = context.l10n;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.md, 12, AppSpacing.md, AppSpacing.sm),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        12,
+        AppSpacing.md,
+        AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
         borderRadius: AppRadius.lgAll,
