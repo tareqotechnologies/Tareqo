@@ -178,7 +178,8 @@ Visão do dia do canvas V3 — a aba Início NÃO tem avatar (o **Sair** vive na
 - **Diretrizes visuais:** superfícies neutras, cards com borda sutil sem sombra pesada (`elevation: 0`), cantos arredondados (14–20px), campos **preenchidos sem contorno**, botões `FilledButton` com altura 52;
 - **Navegação:** `NavigationBar` (altura 68, indicador `primaryContainer`) e `NavigationRail` (`groupAlignment: -0.9`);
 - **Tipografia:** escala modular (Apple HIG/SF Pro): **34** (Large Title — login/boas-vindas) → **28** (títulos de página) → **24** (KPIs/totais) → **22** (cartões/modais/AppBar) → **20** (subtítulos/seções) → **17/15/14/13/12/11** (corpo destacado/corpo/destaques/nota/labels/caption); hierarquia por tamanho + peso (w300 display, w400 corpo, w600+ valores), **`tabularFigures`** nos estilos numéricos (preços MZN e quantidades kg/un alinham dígito a dígito) e **três eixos de precisão** como o SF Pro: (1) **eixo óptico `opsz`** — a Inter é variável (14–32) e títulos ≥20px usam o corte *Display* (opsz 24–32) enquanto o corpo fica no corte *Texto*; (2) **tracking** negativo nos títulos (−0.15 a −0.6), neutro no corpo e positivo leve nos captions; (3) **entrelinha** na razão do SF Pro (~1.2 títulos, ~1.4 corpo); a decisão completa (tabela da escala, papéis e regras de ouro) está no [capítulo 12 — Decisões de Arquitetura](12-decisoes-de-arquitetura.md);
-- **SnackBars flutuantes** com tema invertido (escuro no tema claro e vice-versa).
+- **SnackBars flutuantes** com tema invertido (escuro no tema claro e vice-versa);
+- **Teto de escala de texto (plano UI/UX — 3.2):** o `builder` do `MaterialApp` aplica `textScaler.clamp(maxScaleFactor: 1.6)` — o app honra a fonte ampliada do sistema até 1.6× sem layouts quebrados (acima disso `Row` rígidas estouram); o teto vive num único ponto, acima do Navigator (cobre tabs, sheets e diálogos).
 
 O tema é aplicado em `app.dart`:
 
@@ -206,6 +207,23 @@ MaterialApp(
 - `day(DateTime)` → `Hoje`, `Ontem` ou `04/08`;
 - `compact(double)` → `12,4k` (valores compactos das métricas);
 - `signedAmount(int cents)` → `+500,00` / `-500,00` (valores do feed).
+
+---
+
+## Movimento, feedback e acessibilidade (plano UI/UX)
+
+O acabamento "nível Apple" vem do [plano de evolução UI/UX](21-plano-evolucao-ui-ux.md) (Fases 1–5, concluídas) — as decisões que afetam a apresentação no dia a dia:
+
+- **Haptics por fachada** (`lib/core/ui/haptics.dart`): `Haptics.selection/success/warning/error` — nenhum `HapticFeedback.` direto fora da fachada (guard `destructive_dialog_guard_test.dart`); a preferência do tenant (`hapticsEnabled`) é respeitada num único ponto. Nunca por tecla no PDV (fadiga);
+- **Transições de rota nativas da plataforma:** `ZoomPageTransitionsBuilder` (Android/desktop) e `CupertinoPageTransitionsBuilder` (iOS/macOS, swipe-back preservado);
+- **Sheets** abrem com scale 0.92 + fade (iOS "card stack") via `showAppSheet` — zero mudanças nos chamadores; abas do shell usam **fade-through M3** (out 90ms → slide 24px → in 220ms) mantendo `IndexedStack`;
+- **PDV em modo foco:** com a busca focada, catálogo/scanner recuam a 40% e o carrinho fica a 100%; o botão de pagamento tem gradiente sutil quando habilitado e escala 0.98 no press (80ms);
+- **KPIs do hero** com contagem animada de 0 ao total (600ms, `easeOutCubic`) — `disableAnimations` renderiza o valor final direto; o leitor de ecrã sempre lê o valor FINAL, nunca a contagem;
+- **Login** com Large Title da escala (`displaySmall` 34/w300) e parallax de meio-speed no scroll (desligado com `disableAnimations`);
+- **Movimento com propósito:** toda animação ≤ 320ms, curva `easeOutCubic`/`emphasized`, e SEMPRE condicionada a `MediaQuery.disableAnimationsOf` — o movimento nunca é requisito para concluir uma tarefa;
+- **Undo com countdown** (`showUndoSnackBar`) nas ações destrutivas reversíveis; confirmação destrutiva única via `showConfirmDialog` (`.danger` + `Haptics.warning`);
+- **Guard rails executáveis** na suíte (falham a CI, não dependem de revisão humana): `font_weight_guard`, `spacing_grid_guard`, `destructive_dialog_guard`, `hex_guard` — inventários que só encolhem; `prefer_const_constructors` ativo no analyzer;
+- **A11y auditada por guideline:** `androidTapTargetGuideline` + `iOSTapTargetGuideline` + `textContrastGuideline` em 10 telas-chave (ver [doc 23](23-design-system-e-convencoes-ui-ux.md)); auditoria visual de texto ampliado (1.3×/1.6×) com capturas por tela.
 
 ---
 

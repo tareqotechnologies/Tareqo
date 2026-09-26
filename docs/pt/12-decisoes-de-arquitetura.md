@@ -203,6 +203,16 @@ A `TextTheme` do app não é um conjunto de tamanhos arbitrários: ela segue uma
 2. **Alinhamento numérico (`tabularFigures`).** Preços (MZN) e quantidades (kg/unidades) aparecem em colunas — relatórios, carrinho, chips de estado. O `FontFeature.tabularFigures()` dá a **todos os dígitos a mesma largura** (largura tabular), fazendo as colunas de valores alinharem dígito a dígito, como em planilhas. É aplicado aos estilos **numéricos** (`displaySmall`, `headlineMedium/Small`, `titleLarge/Medium`, `bodyLarge/Medium/Small`) e deliberadamente **não** aos rótulos (`titleSmall`, `labelLarge/Medium/Small`), que não carregam números.
 3. **Legibilidade em qualquer ecrã.** `sp` é *scale-independent pixel*: respeita a escala de acessibilidade de texto do SO. A suíte valida até fonte 2.0× sem overflow — tanto no tablet de balcão quanto no telemóvel.
 4. **Escala travada por teste.** O `typography_scale_test.dart` audita tamanho, peso e a presença/ausência de `tabularFigures` em cada papel tipográfico (claro e escuro) — qualquer regressão na escala quebra o teste deliberadamente.
+5. **Pesos só pela escala (plano UI/UX — 2.4).** `copyWith(fontWeight:)` inline é exceção documentada, não padrão: o guard `font_weight_guard_test.dart` tranca o teto em 3 usos estruturais (ponte thin do admin e recibo impresso — papel de tinta); qualquer uso novo quebra a CI. O login usa o Large Title da escala (`displaySmall` 34/w300) em vez de um estilo ad-hoc — a "primeira impressão" também obedece à hierarquia.
+
+## Por que toda animação é ≤ 320ms e condicionada a `disableAnimations`?
+
+Decisão do plano de evolução UI/UX (docs/pt/21 — Fases 1/4): o movimento no TAREQO é **feedback de transição de contexto** (entrada, rota, confirmação), nunca decoração nem requisito para concluir uma tarefa.
+
+1. **Duração e curva por token:** todas as animações usam `AppDurations` (150/220/320ms) e `AppCurves` (`easeOutCubic`/`emphasized`) — nada acima de 320ms; em dispositivos de 2GB o custo se mantém perceptível mas não atrapalha o balcão.
+2. **Acessibilidade como contrato:** cada animação checa `MediaQuery.disableAnimationsOf(context)` — com "reduzir movimento" ativo no SO, sheets entram sem scale, o parallax do login desliga e os KPIs do dashboard renderizam o valor final sem contagem. Quem desligou movimento nunca recebe movimento.
+3. **Movimento nunca anuncia dados:** os rótulos semânticos (leitor de ecrã) são montados com o valor FINAL (ex.: KPIs do hero) — a contagem animada é só visual; o leitor nunca lê números intermediários dígito a dígito.
+4. **Travado por teste:** os padrões de motion (fade-through das abas, scale-in das sheets, contagem, parallax) têm testes de widget que verificam tanto o caminho animado quanto o caminho `disableAnimations` — regressão em qualquer um dos dois quebra a suíte.
 
 ## Por que uma entidade financeira separada da venda?
 

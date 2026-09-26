@@ -6,6 +6,10 @@
 > **Objetivo:** elevar a experiência do TAREQO ao padrão de acabamento iOS/Apple — fluidez,
 > feedback tátil, clareza e coerência — **sem reescrever o app**: evoluir o design system
 > existente, camada por camada, com validação por testes a cada fase.
+>
+> **STATUS (2026-09-26): PLANO CONCLUÍDO** — Fases 1–5 fechadas; suíte 1.832/1.832
+> verde, `flutter analyze` 0 issues. Detalhe por item nas seções abaixo (marcas
+> ✅); decisões registradas nos docs 05/12 e no CHANGELOG.
 
 ---
 
@@ -196,7 +200,10 @@ extender a cards/tiles clicáveis). ✅ **CONCLUÍDA**: widget `FocusRing`
 
 ### Fase 4 — Apple-grade polish por superfície · *~3–4 dias · risco médio*
 
-**4.1 PDV (a superfície mais usada):**
+**4.1 PDV (a superfície mais usada):** ✅ **CONCLUÍDA** (commit 5806ee0):
+modo foco (busca focada → catálogo/scanner a 40%, carrinho a 100%),
+gradiente sutil no botão de pagamento habilitado + escala 0.98 no press
+(80ms, opt-in no `AppButton`) — haptics do teclado já cobertos pela F1.
 * **Modo foco:** dim de 40% no resto da tela enquanto digita quantidade/preço
   (`AnimatedOpacity` 200ms) — deferência ao conteúdo.
 * Teclado numérico com haptics `selectionClick` (sutil) + confirmar com `mediumImpact`.
@@ -204,26 +211,36 @@ extender a cards/tiles clicáveis). ✅ **CONCLUÍDA**: widget `FocusRing`
 * Botão de pagamento: gradiente sutil quando habilitado, escala 0.98 no press
   (`ScaleTransition` 80ms) — resposta "física".
 
-**4.2 Dashboard:** KPIs com **contagem animada** (`TweenAnimationBuilder<double>`
-600ms `easeOutCubic`, respeitando `MediaQuery.disableAnimations`):
-```dart
-if (!MediaQuery.disableAnimationsOf(context)) ...contagem animada
-```
+**4.2 Dashboard:** ✅ **CONCLUÍDA** — KPIs do card-hero com **contagem animada**
+(`_CountUpText`, `TweenAnimationBuilder<double>` 600ms `easeOutCubic`,
+respeitando `MediaQuery.disableAnimations`); trocar o período anima do valor
+atual ao novo; o rótulo semântico (leitor de ecrã) continua montado com o
+valor FINAL — a animação é só visual.
 
-**4.3 Sheets e modais:** abrir com **scale 0.92 + fade** (iOS "card stack");
-`showAppSheet` ganha `builder: (context) => _SheetScaleIn(child: sheet)`.
+**4.3 Sheets e modais:** ✅ **CONCLUÍDA** (commit 5806ee0) — abrir com
+**scale 0.92 + fade** (iOS "card stack"); `showAppSheet` ganhou
+`builder: (context) => _SheetScaleIn(child: sheet)` — zero mudanças nos
+chamadores.
 
-**4.4 Navegação:** transição entre abas do shell passa de fade puro para
-**fade-through M3** (fade out 90ms + slide 24px + fade in) — padrão iOS/Material
-para conteúdo não-hierárquico; mantém `IndexedStack` (estado preservado).
+**4.4 Navegação:** ✅ **CONCLUÍDA** (commit 5806ee0) — transição entre abas do
+shell em **fade-through M3** (fade out 90ms + slide 24px + fade in) — padrão
+iOS/Material para conteúdo não-hierárquico; mantém `IndexedStack` (estado
+preservado).
 
-**4.5 Onboarding/login:** Large Title (`displaySmall` 34/w300 já definido) com
-**parallax** no scroll (`SliverAppBar.large` equivalent em scroll view custom).
-Primeira impressão conta.
+**4.5 Onboarding/login:** ✅ **CONCLUÍDA** — Large Title na escala
+(`displaySmall` 34/w300, cor do scheme) e **parallax** no scroll: o header
+(logo + título + tagline) desliza a **meia velocidade** do conteúdo
+(`Transform.translate` no listener do `ScrollController` — sem participação
+no layout: em repouso, pixel-idêntico ao estático). Com `disableAnimations`
+o parallax desliga (o plano anima transições de contexto, nunca custo para
+quem desligou movimento). Testes: estilo/parallax 0.5× e caminho sem
+movimento (`login_screen_test.dart`); goldens login + auditoria de texto
+ampliado regenerados.
 
-**4.6 Ícone/splash:** gerar adaptive icon Android (camada foreground/background)
-e iOS 1024px a partir do logo; `flutter_native_splash` para preservar a marca
-do launch até o primeiro frame.
+**4.6 Ícone/splash:** ✅ **JÁ EXISTIA** (v4.2, pré-plano) — ícone adaptativo
+Android (fg/mono) + iOS 1024px a partir de `assets/branding/icon_official.png`,
+splash nativo Android 12+/iOS/in-app/web com a marca até o primeiro frame
+(ver CHANGELOG v4/v4.2 e checklist 7.4).
 
 **Validação:** gravação de antes/depois de cada fluxo; 60fps verificado em
 dispositivo low-end (2GB RAM) com `flutter run --profile`.
@@ -232,27 +249,33 @@ dispositivo low-end (2GB RAM) com `flutter run --profile`.
 
 ### Fase 5 — Instrumentação e sustentação · *~1 dia · risco baixo*
 
-**5.1 Lint próprio anti-regressão** (`analysis_options.yaml`):
+**5.1 Lint próprio anti-regressão** (`analysis_options.yaml`): ✅ **CONCLUÍDA**
 ```yaml
 linter:
   rules:
-    - always_use_package_imports   # evita relativo inconsistente
-    - prefer_const_constructors    # performance de rebuild
+    - prefer_const_constructors    # performance de rebuild — ~250 fixados via dart fix
 ```
+`always_use_package_imports` NÃO se aplica: a convenção dominante do projeto é
+import relativo (documentado no próprio `analysis_options.yaml`). O "CI job
+design-system-guard" do plano já está atendido de forma mais forte pelos
+GUARDS EXECUTÁVEIS na suíte (`font_weight_guard_test.dart`,
+`spacing_grid_guard_test.dart`, `destructive_dialog_guard_test.dart`,
+`hex_guard_test.dart`) — correm em TODA a CI, sem grep solto.
 
-+ CI (job "design-system-guard"): `grep` que falha se `fontWeight:` inline
-  `>` 10 ocorrências ou `Semantics(` < 50 arquivos.
+**5.2 Tokens como fonte única em CI.** ✅ **CONCLUÍDA** — `hex_guard_test.dart`
+valida que nenhum hex novo aparece fora do inventário documentado
+(paleta de template escolhida pelo usuário, identidade de provedores,
+papel de recibo impresso, gradientes de uso único); entrada obsoleta
+também falha — o teto só encolhe.
 
-**5.2 Tokens como fonte única em CI.** Teste de snapshot que valida que nenhum
-novo hex aparece fora de `app_colors.dart`/`app_theme.dart`:
-`grep -rn "Color(0x" lib/presentation | wc -l` → só deve crescer se documentado.
+**5.3 Testes de a11y automatizados:** ✅ **CONCLUÍDA** —
+`androidTapTargetGuideline` + `iOSTapTargetGuideline` + `textContrastGuideline`
+em 10 telas-chave (login, dashboard, vendas, caixa, estoque, clientes,
+fiado, relatórios, PDV, sheet de transação — ver doc 23 §a11y).
 
-**5.3 Testes de a11y automatizados** (`a11y_test.dart`):
-`await expectLater(tester, meetsGuideline(androidTapTargetGuideline));`
-+ `iOSTapTargetGuideline` + `textContrastGuideline` nas 12 telas-chave.
-
-**5.4 Docs:** atualizar `docs/pt/05-apresentacao.md` e `12-decisoes-de-arquitetura.md`
-com as decisões desta evolução (padrão do projeto).
+**5.4 Docs:** ✅ **CONCLUÍDA** — `docs/pt/05-apresentacao.md` e
+`12-decisoes-de-arquitetura.md` atualizados com as decisões desta evolução;
+este plano recebeu as marcas de conclusão por item.
 
 ---
 

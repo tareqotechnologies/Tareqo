@@ -94,18 +94,47 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _confirmController = TextEditingController();
   final _nameController = TextEditingController();
 
+  /// Parallax do Large Title (item 4.5 do plano UI/UX, docs/pt/21): o
+  /// header (logo + TAREQO + tagline) desliza a MEIA velocidade do
+  /// conteúdo durante o scroll — profundidade iOS. O [Transform.translate]
+  /// não participa do layout: em repouso (offset 0) a página é
+  /// pixel-idêntica à v4; rolando, o formulário sobe por cima do header
+  /// (pintado depois na coluna).
+  final _scrollController = ScrollController();
+  double _headerParallax = 0;
+
   bool _isSignUpMode = false;
   bool _isSubmitting = false;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
     _nameController.dispose();
     super.dispose();
+  }
+
+  /// Progresso do parallax (4.5): o header acompanha o scroll a 0.5×.
+  /// Com `disableAnimations` (acessibilidade) o movimento é desligado —
+  /// o header rola à velocidade normal e nada se move "sozinho".
+  void _onScroll() {
+    final parallax = MediaQuery.disableAnimationsOf(context)
+        ? 0.0
+        : _scrollController.offset * 0.5;
+    if (parallax != _headerParallax) {
+      setState(() => _headerParallax = parallax);
+    }
   }
 
   Future<void> _openForgotPassword() async {
@@ -226,6 +255,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
+              controller: _scrollController,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.xxl,
                 vertical: AppSpacing.xl,
@@ -236,41 +266,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ── Logo ──
-                    Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(AppRadius.xl),
-                        child: Image.asset(
-                          'assets/branding/icon_official.png',
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
+                    // ── Header com parallax (4.5): Large Title da escala
+                    // (`displaySmall` 34/w300, tracking negativo) — a
+                    // "primeira impressão" do plano. O bloco desliza a
+                    // meia velocidade do conteúdo; o formulário sobe por
+                    // cima (pintado depois). Em repouso, translate 0 —
+                    // layout/pixels idênticos ao login anterior.
+                    Transform.translate(
+                      offset: Offset(0, _headerParallax),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // ── Logo ──
+                          Center(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.xl,
+                              ),
+                              child: Image.asset(
+                                'assets/branding/icon_official.png',
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
 
-                    // ── Título + subtítulo ──
-                    Text(
-                      'TAREQO',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 2,
-                        color: palette.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _isSignUpMode
-                          ? l10n.loginSubtitleSignUp
-                          : l10n.loginTagline,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: palette.textSecondary,
-                        fontWeight: FontWeight.w400,
+                          // ── Título + subtítulo ──
+                          Text(
+                            'TAREQO',
+                            textAlign: TextAlign.center,
+                            // Large Title da escala — cor do tema (mesmos
+                            // pares auditados: branco no escuro, #161616
+                            // no claro).
+                            style: Theme.of(context).textTheme.displaySmall,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            _isSignUpMode
+                                ? l10n.loginSubtitleSignUp
+                                : l10n.loginTagline,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: palette.textSecondary,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -427,6 +472,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                       ),
+
                     const SizedBox(height: 16),
                     Center(
                       child: GestureDetector(

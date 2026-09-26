@@ -344,10 +344,12 @@ class DashboardScreen extends ConsumerWidget {
                 )
               else
                 _BalanceHero(
-                  cashValue: Formatters.amountWithCode(cashCents / 100),
+                  // 4.2: os KPIs chegam em centavos (int) — a contagem
+                  // animada acontece no widget, o formato no final.
+                  cashCents: cashCents,
                   cashNegative: cashCents < 0,
                   cashLoading: cashFlowAsync.isLoading,
-                  salesValue: Formatters.amountWithCode(periodSalesCents / 100),
+                  salesCents: periodSalesCents,
                   salesSubtext: salesDelta == null
                       ? null
                       : '${salesDelta >= 0 ? '+' : ''}$salesDelta%',
@@ -357,9 +359,7 @@ class DashboardScreen extends ConsumerWidget {
                       ? theme.income
                       : theme.expense,
                   salesLoading: salesAsync.isLoading,
-                  receivablesValue: Formatters.amountWithCode(
-                    (kpis?.pendingTotalCents ?? 0) / 100,
-                  ),
+                  receivablesCents: kpis?.pendingTotalCents ?? 0,
                   receivablesSubtext: l10n.dashboardFiadoCount(
                     (pendingAsync.value ?? const <Debt>[]).length,
                   ),
@@ -458,29 +458,29 @@ class _PeriodPill extends ConsumerWidget {
 /// régua fina.
 class _BalanceHero extends StatelessWidget {
   const _BalanceHero({
-    required this.cashValue,
+    required this.cashCents,
     required this.cashNegative,
     required this.cashLoading,
-    required this.salesValue,
+    required this.salesCents,
     required this.salesSubtext,
     required this.salesSubtextColor,
     required this.salesLoading,
-    required this.receivablesValue,
+    required this.receivablesCents,
     required this.receivablesSubtext,
     required this.receivablesLoading,
   });
 
-  final String cashValue;
+  final int cashCents;
   final bool cashNegative;
   final bool cashLoading;
 
-  final String salesValue;
+  final int salesCents;
   final String? salesSubtext;
   final Color? salesSubtextColor;
   final bool salesLoading;
 
-  final String receivablesValue;
-  final String receivablesSubtext;
+  final int receivablesCents;
+  final String? receivablesSubtext;
   final bool receivablesLoading;
 
   @override
@@ -506,7 +506,7 @@ class _BalanceHero extends StatelessWidget {
             container: true,
             excludeSemantics: true,
             label:
-                '${l10n.dashboardMetricCash}: ${cashLoading ? '—' : cashValue}',
+                '${l10n.dashboardMetricCash}: ${cashLoading ? '—' : Formatters.amountWithCode(cashCents / 100)}',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -544,12 +544,13 @@ class _BalanceHero extends StatelessWidget {
                 const SizedBox(height: 8),
                 // Valor grande e tabular — o destaque visual da Home.
                 // Formato "1.000,00 MZN": valor + código da moeda.
+                // 4.2: contagem animada até o valor final.
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    cashLoading ? '—' : cashValue,
-                    maxLines: 1,
+                  child: _CountUpText(
+                    cents: cashCents,
+                    loading: cashLoading,
                     style: theme.textTheme.displaySmall?.copyWith(
                       color: cashNegative ? theme.expense : scheme.onSurface,
                       fontWeight: FontWeight.w600,
@@ -571,7 +572,7 @@ class _BalanceHero extends StatelessWidget {
               Expanded(
                 child: _HeroMetric(
                   label: l10n.dashboardMetricSales,
-                  value: salesValue,
+                  cents: salesCents,
                   subtext: salesSubtext,
                   subtextColor: salesSubtextColor,
                   loading: salesLoading,
@@ -584,7 +585,7 @@ class _BalanceHero extends StatelessWidget {
               Expanded(
                 child: _HeroMetric(
                   label: l10n.dashboardMetricReceivables,
-                  value: receivablesValue,
+                  cents: receivablesCents,
                   subtext: receivablesSubtext,
                   subtextColor: theme.warning,
                   loading: receivablesLoading,
@@ -599,12 +600,54 @@ class _BalanceHero extends StatelessWidget {
   }
 }
 
+/// Contagem animada dos KPIs do hero (plano UI/UX — item 4.2): o valor
+/// sobe de 0 ao total em 600ms (`easeOutCubic`) — a Home "acorda". Com
+/// `disableAnimations` (acessibilidade) renderiza o valor final direto;
+/// trocar o período anima do valor atual ao novo. O rótulo semântico
+/// (leitor de ecrã) é montado pelo PAI com o valor final — a animação é
+/// só visual, nunca anunciada dígito a dígito.
+class _CountUpText extends StatelessWidget {
+  const _CountUpText({
+    required this.cents,
+    required this.loading,
+    required this.style,
+  });
+
+  final int cents;
+  final bool loading;
+  final TextStyle? style;
+
+  /// 600ms — o valor do plano (4.2) para a contagem do hero.
+  static const Duration _countUp = Duration(milliseconds: 600);
+
+  @override
+  Widget build(BuildContext context) {
+    if (loading) {
+      return Text('—', maxLines: 1, style: style);
+    }
+    final valueText = Formatters.amountWithCode(cents / 100);
+    if (MediaQuery.disableAnimationsOf(context)) {
+      return Text(valueText, maxLines: 1, style: style);
+    }
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: cents / 100),
+      duration: _countUp,
+      curve: AppCurves.standard,
+      builder: (context, units, _) => Text(
+        Formatters.amountWithCode(units),
+        maxLines: 1,
+        style: style,
+      ),
+    );
+  }
+}
+
 /// Coluna de métrica dentro do card-hero — rótulo, valor e subtexto
 /// colorido (delta de vendas / contagem de fiados).
 class _HeroMetric extends StatelessWidget {
   const _HeroMetric({
     required this.label,
-    required this.value,
+    required this.cents,
     required this.subtext,
     required this.subtextColor,
     required this.loading,
@@ -612,7 +655,7 @@ class _HeroMetric extends StatelessWidget {
   });
 
   final String label;
-  final String value;
+  final int cents;
   final String? subtext;
   final Color? subtextColor;
   final bool loading;
@@ -622,6 +665,7 @@ class _HeroMetric extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final valueText = Formatters.amountWithCode(cents / 100);
     return Semantics(
       key: valueKey,
       container: true,
@@ -629,8 +673,8 @@ class _HeroMetric extends StatelessWidget {
       // A11y (Fase 3.1): rótulo + valor (+ delta/contagem) lidos como UM
       // nó — "Vendas: 1.250,00 MZN, +18%" — em vez de nós separados.
       label: subtext == null
-          ? '$label: ${loading ? '—' : value}'
-          : '$label: ${loading ? '—' : value}, $subtext',
+          ? '$label: ${loading ? '—' : valueText}'
+          : '$label: ${loading ? '—' : valueText}, $subtext',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -649,9 +693,9 @@ class _HeroMetric extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(
-              loading ? '—' : value,
-              maxLines: 1,
+            child: _CountUpText(
+              cents: cents,
+              loading: loading,
               style: theme.textTheme.titleLarge?.copyWith(
                 color: scheme.onSurface,
                 fontWeight: FontWeight.w600,

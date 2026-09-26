@@ -78,7 +78,7 @@ class _FakeAuthRepository implements IAuthRepository {
 Widget _buildApp(IAuthRepository repository, {ThemeData? theme}) {
   return ProviderScope(
     overrides: [authRepositoryProvider.overrideWithValue(repository)],
-    child: testApp(theme: theme, home: LoginScreen()),
+    child: testApp(theme: theme, home: const LoginScreen()),
   );
 }
 
@@ -326,10 +326,10 @@ void main() {
     await tester.pumpAndSettle();
 
     final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-    expect(scaffold.backgroundColor, AppColors.backgroundDark);
-
-    final title = tester.widget<Text>(find.text('TAREQO'));
-    expect(title.style?.color, Colors.white);
+    expect(scaffold.backgroundColor, AppColors.backgroundDark);      // Título na escala (Large Title 4.5): a cor vem do scheme — branco
+      // quase puro do tema escuro (mesmo par auditado de contraste).
+      final title = tester.widget<Text>(find.text('TAREQO'));
+      expect(title.style?.color, AppTheme.dark.colorScheme.onSurface);
 
     final overlay = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
       find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
@@ -338,4 +338,77 @@ void main() {
     expect(overlay.value.systemNavigationBarColor, AppColors.backgroundDark);
     expect(overlay.value.systemNavigationBarIconBrightness, Brightness.light);
   });
+
+  testWidgets(
+    'Large Title (4.5): título segue a escala (displaySmall 34/w300) e o '
+    'header desliza a meia velocidade do conteúdo (parallax)',
+    (tester) async {
+      final repository = _FakeAuthRepository();
+      await tester.pumpWidget(_buildApp(repository));
+      await tester.pumpAndSettle();
+
+      // Título na escala tipográfica — o papel "Large Title —
+      // login/boas-vindas" do `displaySmall` (34/w300, tracking negativo).
+      final title = tester.widget<Text>(find.text('TAREQO'));
+      expect(title.style?.fontSize, 34);
+      expect(title.style?.fontWeight, FontWeight.w300);
+
+      // Em repouso (sem scroll) o translate é 0 — a página renderiza
+      // pixel-idêntica ao layout estático.
+      Transform headerAtRest() => tester.widget<Transform>(
+        find
+            .ancestor(of: find.text('TAREQO'), matching: find.byType(Transform))
+            .first,
+      );
+      expect(headerAtRest().transform.getRow(1)[3], 0.0);
+
+      // Viewport curta → scroll real; arrastar 120px desliza o header
+      // só 60px (0.5× — profundidade iOS do item 4.5 do plano).
+      tester.view.physicalSize = const Size(800, 400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpAndSettle();
+
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -120),
+      );
+      await tester.pumpAndSettle();
+
+      expect(headerAtRest().transform.getRow(1)[3], 60.0);
+    },
+  );
+
+  testWidgets(
+    'disableAnimations (acessibilidade): parallax desligado — o header rola '
+    'à velocidade normal, nada se move sozinho',
+    (tester) async {
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+
+      final repository = _FakeAuthRepository();
+      tester.view.physicalSize = const Size(800, 400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_buildApp(repository));
+      await tester.pumpAndSettle();
+
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -120),
+      );
+      await tester.pumpAndSettle();
+
+      final header = tester.widget<Transform>(
+        find
+            .ancestor(of: find.text('TAREQO'), matching: find.byType(Transform))
+            .first,
+      );
+      expect(header.transform.getRow(1)[3], 0.0);
+    },
+  );
 }
