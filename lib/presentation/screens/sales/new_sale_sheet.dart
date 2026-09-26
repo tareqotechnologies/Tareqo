@@ -1070,9 +1070,12 @@ class _CartPill extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Nome COMPLETO do produto — mesmo tratamento da linha
+                // do carrinho (maxLines: 2): nomes longos quebram em vez
+                // de truncar (auditoria de legibilidade — #2).
                 Text(
                   product.name,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
