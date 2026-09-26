@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_tokens.dart';
+import 'focus_ring.dart';
 
 /// Card padrão V4 — superfície elevada, borda sutil, ripple opcional.
-class AppCard extends StatelessWidget {
+class AppCard extends StatefulWidget {
   const AppCard({
     super.key,
     this.padding = const EdgeInsets.all(AppSpacing.md),
@@ -28,25 +29,46 @@ class AppCard extends StatelessWidget {
   final Widget child;
 
   @override
+  State<AppCard> createState() => _AppCardState();
+}
+
+class _AppCardState extends State<AppCard> {
+  bool _focused = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final border = scheme.outlineVariant;
     final bg =
-        color ?? (elevated ? scheme.surfaceContainerHighest : scheme.surface);
+        widget.color ??
+        (widget.elevated ? scheme.surfaceContainerHighest : scheme.surface);
+
+    // A11y (plano UI/UX — Fase 3.3): teclado físico/Bluetooth (scanner +
+    // teclado nas lojas) precisa de foco VISÍVEL — o fill sutil do InkWell
+    // não basta. O anel de 2px primário só existe com [onTap] (card
+    // clicável) e pinta POR CIMA dentro dos limites (não soma layout).
+    final ring = widget.onTap != null;
 
     return Material(
       color: bg,
-      elevation: elevated ? 1 : 0,
+      elevation: widget.elevated ? 1 : 0,
       shadowColor: Colors.black.withValues(alpha: 0.2),
       shape: RoundedRectangleBorder(
-        borderRadius: borderRadius,
-        side: BorderSide(color: borderColor ?? border, width: 1),
+        borderRadius: widget.borderRadius,
+        side: BorderSide(color: widget.borderColor ?? border, width: 1),
       ),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(padding: padding, child: child),
+      child: Stack(
+        children: [
+          InkWell(
+            onTap: widget.onTap,
+            onFocusChange: ring ? (f) => setState(() => _focused = f) : null,
+            child: Padding(padding: widget.padding, child: widget.child),
+          ),
+          if (ring)
+            FocusRing(visible: _focused, borderRadius: widget.borderRadius),
+        ],
       ),
     );
   }

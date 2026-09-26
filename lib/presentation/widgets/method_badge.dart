@@ -20,16 +20,22 @@ class PaymentMethodBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 42,
-      height: 42,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: accent.withValues(alpha: 0.14),
-        border: Border.all(color: accent.withValues(alpha: 0.25)),
+    // A11y (plano UI/UX — Fase 3.1): o selo é PURAMENTE DECORATIVO — a cor
+    // e o ícone só comunicam junto com o método que o card de compra anuncia
+    // em texto ("M-Pesa · C-00001").Marcado como tal para o leitor de ecrã
+    // NÃO anunciar um círculo vazio antes do conteúdo do card.
+    return ExcludeSemantics(
+      child: Container(
+        width: 42,
+        height: 42,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: accent.withValues(alpha: 0.14),
+          border: Border.all(color: accent.withValues(alpha: 0.25)),
+        ),
+        child: Icon(icon, size: 20, color: accent),
       ),
-      child: Icon(icon, size: 20, color: accent),
     );
   }
 }

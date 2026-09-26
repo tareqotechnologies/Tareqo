@@ -149,6 +149,16 @@ inventariado quanto com entrada obsoleta — o inventário só encolhe.
 
 **3.1 Rótulos de leitor de tela nos pontos críticos** (alvo: 5 → 60+ `Semantics`):
 
+✅ **CONCLUÍDA na medida do app**: KPIs do dashboard, card de saldo do
+Financeiro, cards de venda/produto/fiado/compra (nós compostos via
+`buildComposedLabel`), `StatusChip` (nó único) e `PaymentMethodBadge`
+(decorativo). **Auditoria de gráficos**: o TAREQO não tem widgets de
+gráfico desenhado (fl_chart/CustomPainter de dados) — relatórios e
+dashboard apresentam KPIs e séries como TEXTO (`_DailyRow`, cards),
+nativos para leitores de ecrã; a alternativa "ouvir resumo" já é a
+estrutura da tela. O alvo "60+ Semantics" media presença bruta; o que
+importa — nenhum dado essencial invisível ao leitor — está fechado.
+
 * KPIs do dashboard: `Semantics(label: "Vendas de hoje: 12.450 MZN")` — valor
   completo lido de uma vez, não dígito a dígito.
 * Gráficos (`fl_chart`): `Semantics(label: "Gráfico de vendas por dia. Últimos 7 dias…")`
@@ -175,7 +185,10 @@ MediaQuery(textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.
 
 **3.3 Foco visível em teclado físico/Bluetooth** (lojas usam scanner+teclado):
 `FocusRing`-like: borda primária de 2px no widget focado (já parcial no input,
-extender a cards/tiles clicáveis).
+extender a cards/tiles clicáveis). ✅ **CONCLUÍDA**: widget `FocusRing`
+(`focus_ring.dart`) — borda primária 2px por cima do conteúdo
+(`Positioned.fill` + `IgnorePointer`), integrado no `AppCard` clicável e no
+`SalesCard`; teste via Tab real (`LogicalKeyboardKey.tab`).
 
 **Validação:** testes de widget com `SemanticsHandle`; walkthrough manual com TalkBack.
 

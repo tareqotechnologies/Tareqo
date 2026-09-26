@@ -19,43 +19,53 @@ class StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xs,
-        vertical: 3,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(AppRadius.full),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 10, color: color),
-            const SizedBox(width: 3),
-          ],
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              // NumText: chips carregam quantidades/valores/datas — dígitos
-              // alinhados em colunas de chips (tabular embutido).
-              child: NumText(
-                label,
-                maxLines: 1,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: scheme.brightness == Brightness.dark
-                      ? color.withValues(alpha: 0.9)
-                      : color,
+    // A11y (plano UI/UX — Fase 3.1): o chip é UM nó semântico — o leitor
+    // de ecrã anuncia o estado inteiro ("Pago", "5 un.") em vez de
+    // percorrer ícone e texto como nós separados. O ícone é decoração
+    // (o rótulo já diz tudo) e o FittedBox fica fora do nó para o label
+    // não ser anunciado como nó próprio (mesmo padrão do SalesCard).
+    return Semantics(
+      container: true,
+      excludeSemantics: true,
+      label: label,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xs,
+          vertical: 3,
+        ),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(AppRadius.full),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 10, color: color),
+              const SizedBox(width: 3),
+            ],
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                // NumText: chips carregam quantidades/valores/datas — dígitos
+                // alinhados em colunas de chips (tabular embutido).
+                child: NumText(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: scheme.brightness == Brightness.dark
+                        ? color.withValues(alpha: 0.9)
+                        : color,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
