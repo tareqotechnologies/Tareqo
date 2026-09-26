@@ -687,7 +687,7 @@ class _CommissionsTab extends ConsumerWidget {
               l10n.employeeCommissionSetRate,
               style: Theme.of(
                 sheetContext,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ).textTheme.titleMedium,
             ),
             const SizedBox(height: 4),
             Text(
@@ -981,7 +981,7 @@ class _TargetsTab extends ConsumerWidget {
               l10n.employeeTargetNewTitle,
               style: Theme.of(
                 sheetContext,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
             AppPickerField<String>(

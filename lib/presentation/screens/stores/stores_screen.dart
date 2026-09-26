@@ -543,7 +543,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                   '${planName(request.requestedPlanId)}',
                   style: Theme.of(
                     context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  ).textTheme.titleSmall,
                 ),
                 subtitle: Text(
                   l10n.upgradesRequestedOn(

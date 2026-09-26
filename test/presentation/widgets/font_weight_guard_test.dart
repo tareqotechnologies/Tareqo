@@ -9,9 +9,14 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// Histórico: a v2.4.0 (auditoria P1–P2) migrou 158 usos → 10; a Fase 2.4
 /// corrigiu os 2× w300 remanescentes em `stores_screen.dart` (13px w300 =
-/// legibilidade degradada) — teto atual: 8. O inventário registra o que já
-/// está justificado; NÃO é alvo a crescer. Novos usos DEVEM ir para a
-/// escala (`app_typography.dart`) ou para um componente; se uma entrada da
+/// legibilidade degradada) — teto: 8. **Fase 2.4 (fecho)**: os 5 usos de
+/// "ênfase sancionada" eram no-ops — `copyWith(fontWeight: w600)` sobre
+/// papéis que a escala JÁ define como w600 (titleSmall, titleMedium,
+/// labelMedium), defesa contra uma escala anterior aos pesos — removidos;
+/// restam só os estruturais (ponte thin do admin + recibo impresso).
+/// Teto atual: **3**. O inventário registra o que já está justificado;
+/// NÃO é alvo a crescer. Novos usos DEVEM ir para a escala
+/// (`app_typography.dart`) ou para um componente; se uma entrada da
 /// lista zerar, REMOVA-A — o teste também falha com teto obsoleto
 /// (contagem a menos).
 ///
@@ -23,7 +28,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// Grepping simples, não AST (o analyzer não tem regra para isso; mesma
 /// abordagem do `hex_guard_test.dart`).
 void main() {
-  test('copyWith(fontWeight:) inline = inventário documentado (teto 8)', () {
+  test('copyWith(fontWeight:) inline = inventário documentado (teto 3)', () {
     final root = Directory('lib/presentation');
     expect(root.existsSync(), isTrue,
         reason: 'Rode o teste a partir da raiz do projeto.');
@@ -31,12 +36,6 @@ void main() {
     // Arquivo → ocorrências `copyWith(fontWeight` documentadas (caminho
     // com `/`).
     const documented = <String, int>{
-      // Ênfase sancionada (v2.4.0): w600 sobre papéis que já são w400 —
-      // reforço local onde a hierarquia pede destaque estrutural.
-      'screens/account/tenant_onboarding_screen.dart': 1,
-      'screens/addons/employee_management_screen.dart': 2,
-      'screens/sales/new_sale_sheet.dart': 1,
-      'screens/stores/stores_screen.dart': 1,
       // A própria ponte do tema Thin do admin (derivação w300/w400
       // documentada do painel) — corrigida na v2.4.0 para preservar pesos.
       'widgets/admin_thin_bridge.dart': 1,

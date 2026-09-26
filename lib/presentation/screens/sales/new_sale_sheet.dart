@@ -596,8 +596,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                                   child: SmartAmount(
                                     cents: _totalCents,
                                     alignment: Alignment.centerRight,
-                                    style: theme.textTheme.labelMedium
-                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                    style: theme.textTheme.labelMedium,
                                   ),
                                 ),
                               ],

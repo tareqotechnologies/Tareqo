@@ -131,6 +131,15 @@ são compostos on-grid ou micro-ajustes de 1–4px (baseline de texto, hairlines
 principal (w500/w600) coexistem — intencional (densidade admin), mas os *estilos*
 devem vir sempre do `textTheme`, nunca `copyWith(fontWeight:)` inline.
 Varredura: `grep -rn "copyWith(fontWeight" lib/presentation | wc -l` → reduzir >50%.
+✅ **CONCLUÍDA** (teto executável via `font_weight_guard_test.dart`):
+158 → 10 (v2.4.0) → 8 → **3** — os 5 "ênfases sancionadas" finais eram
+no-ops (`copyWith(fontWeight: w600)` sobre papéis que a escala já define
+como w600: `titleSmall`, `titleMedium`, `labelMedium`) e foram removidos.
+Os 3 restantes são estruturais e documentados no inventário do guard:
+ponte thin do admin (`admin_thin_bridge.dart`, derivação w300/w400 do
+painel) e recibo impresso (`sale_receipt_view.dart`, papel de tinta —
+total w700/subtotal w600). O guard falha tanto com uso novo NÃO
+inventariado quanto com entrada obsoleta — o inventário só encolhe.
 
 **Validação:** analyzer + snapshot visual (screenshots de 12 telas-chave antes/depois).
 
@@ -258,7 +267,7 @@ F1 (1d) ──► F2 (2d) ──► F3 (2d) ──► F4 (3-4d) ──► F5 (1d
 |---|---|---|
 | `HapticFeedback` em arquivos | 0 | ≥ 12 arquivos-chave |
 | `Semantics(` em arquivos | 5 | ≥ 25 |
-| Peso inline (`copyWith(fontWeight:`) | ~200 | < 100 |
+| Peso inline (`copyWith(fontWeight:`) | ~200 | 3 (guard `font_weight_guard_test.dart` — ponte thin admin + recibo impresso; meta original < 100) |
 | Hex inline em `lib/presentation` | 46 ocorrências (medido na F0) → 29 **legítimas documentadas** (paleta de template escolhida pelo usuário, identidade visual de provedores de pagamento/WhatsApp, papel de recibo impresso, gradientes hero de uso único, default de template) — os 17 duplicados de papéis do tema viraram `AppColors.*` | 0 não-documentados |
 | Headers de sheet distintos | 2 | 1 |
 | Transição de rota | padrão | plataforma-nativa (zoom/cupertino) |

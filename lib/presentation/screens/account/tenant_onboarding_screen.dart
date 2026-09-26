@@ -396,7 +396,7 @@ class _PlanCard extends StatelessWidget {
                   plan.name,
                   style: Theme.of(
                     context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  ).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 2),
                 Text(
