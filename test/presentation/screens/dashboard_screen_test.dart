@@ -753,6 +753,58 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Badge do feed ("Alerta"/"Alert"/"Alerte") SEM cortar: a pílula usa
+  // FittedBox scaleDown (mesmo padrão do StatusChip) — com fonte ampliada
+  // (2.0×, pior caso do badge localizado) o texto encolhe em vez de
+  // cortar (clip) ou estourar a Row (auditoria de legibilidade — #1).
+  testWidgets(
+    'badge do feed não corta com fonte 2.0 (auto-size)',
+    (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+      addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+      tester.view.physicalSize = const Size(360, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        _buildApp(
+          products: const [
+            Product(
+              id: 'p1',
+              name: 'Produto',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+              stockQuantity: 4, // < 5 un — entra no feed como stock baixo.
+            ),
+          ],
+          sales: [_sale(totalCents: 500)],
+          cashFlow: const CashFlow(incomeCents: 10000, expenseCents: 0),
+          debts: const [],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.dragUntilVisible(
+        find.textContaining('Alert'),
+        find.byType(ListView),
+        const Offset(0, -200),
+      );
+      await tester.pumpAndSettle();
+
+      // A pílula do badge é auto-size (FittedBox): o texto nunca é
+      // cortado — o padrão fica trancado por este teste.
+      expect(
+        find.ancestor(
+          of: find.textContaining('Alert'),
+          matching: find.byType(FittedBox),
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   // Regressão (UI): o dashboard precisa sobreviver à rotação — as 3 métricas
   // continuam no topo e o feed íntegro após a rolagem.
   testWidgets('métricas e feed sobrevivem à rotação para paisagem', (

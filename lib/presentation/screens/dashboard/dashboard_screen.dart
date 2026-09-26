@@ -1177,12 +1177,18 @@ class _ActivityRow extends StatelessWidget {
                           color: item.badgeBackground,
                           borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
-                        child: Text(
-                          item.badge!,
-                          maxLines: 1,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: const Color(0xFF101413),
-                            fontWeight: FontWeight.w500,
+                        // FittedBox scaleDown (mesmo padrão do StatusChip):
+                        // badge longo (locale fr, fonte ampliada) ENCOLHE
+                        // em vez de cortar — o texto da pílula fica 100%
+                        // legível e nunca estoura a Row do feed.
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            item.badge!,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: const Color(0xFF101413),
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       )
