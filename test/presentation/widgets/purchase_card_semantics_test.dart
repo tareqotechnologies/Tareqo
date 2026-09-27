@@ -66,7 +66,13 @@ void main() {
 
     final node = find.bySemanticsLabel(RegExp('Distribuidora Maputo'));
     expect(node, findsOneWidget);
-    await tester.tap(node);
+    // `warnIfMissed: false`: o CENTRO do nó composto cai no espaço vazio do
+    // meio do card (a coluna da esquerda para antes do centro e a da direita
+    // é ancorada à direita), então o hit test pousa no InkWell que ENVOLVE o
+    // nó — que é o alvo real do toque — e não no RenderBox do próprio
+    // Semantics. O toque continua verdadeiro: `expect(taps, 1)` falha se não
+    // chegar ao card.
+    await tester.tap(node, warnIfMissed: false);
     expect(taps, 1);
     handle.dispose();
   });

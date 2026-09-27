@@ -3,7 +3,7 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
-## [Unreleased]
+## [2.5.0+30] — 2026-09-27
 
 ### Aplicação no live — DEV vs. PRODUÇÃO (migrações 34/35)
 - **DEV `dotklbpqmlnhcdifiukd` (aplicado 2026-09-27)**: PARTE 34 (`products.type` + índice `idx_products_store_type`) e PARTE 35 (ficha técnica + produção: 4 tabelas, RLS gerencial, RPC `process_production`) aplicadas em transações únicas (scripts isolados `add_product_type_2026_09_27.sql`/`add_production_2026_09_27.sql`). Verificação read-only: **checks 1–44 do `scripts/sql_check_live.sh` passam**; dados intactos (30 produtos / 46 vendas / 5 compras, nenhum reclassificado pela migração). Backfill one-off aplicado com a sessão do dono: 1 reclassificação (`Oleo Maeva` → `rawMaterial`).
