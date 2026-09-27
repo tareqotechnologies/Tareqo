@@ -33,6 +33,7 @@ Ce dossier rassemble tous les documents sur l'application : de ce qu'elle fait �
 | 17 | [Checklist de préparation à la production](17-production-checklist.md) | Miroir français de la checklist de production : intégrité des données, sécurité, architecture, performance, tests, ops, dépendances et statut des docs |
 | 18 | [Runbook de migration live W11](18-migracao-w11.md) | Runbook pas à pas pour la Partie 22 (lots FIFO + péremption + ventes au poids) : millièmes, backfill des lots, vérification post-migration et fenêtre de publication |
 | 19 | [Runbook de migration de la clôture de caisse quotidienne](19-migracao-cash-closing.md) | Runbook pas à pas pour la Partie 25 (rapport Z) : table `cash_closings` + RPC `close_cash_register` (calcul côté serveur + garde managériale), vérification post-migration (checks 32–34) et publication |
+| 24 | [Runbook de migration du type de produit](24-migration-type-produit.md) | Runbook pas à pas pour la Partie 34 (Phase 1) : colonne `products.type` (TEXT, défaut `resale`), index `idx_products_store_type`, vérification (check 43), reclassement manuel (avec le backfill `tool/backfill_product_types.dart`) et rollback |
 
 ---
 
