@@ -84,4 +84,61 @@ void main() {
           'texto histórico deliberado:\n${problems.join('\n')}',
     );
   });
+
+  test('runbooks de migração 24/25/26 referenciam o projeto de produção', () {
+    // Os runbooks de migração (tipo do produto = 24, produção = 25,
+    // body_params = 26) precisam apontar a PRODUÇÃO — antes apontavam o
+    // projeto de DEV por engano. Aqui o guard fecha o outro lado: mesmo que
+    // a frase passe, o ref tem de estar presente.
+    const prodRef = 'bcyolmheltzlddfwgqcq';
+    const languages = <String>['pt', 'en', 'fr'];
+    final found = <String>{};
+    final problems = <String>[];
+
+    for (final lang in languages) {
+      final dir = Directory('docs/$lang');
+      expect(dir.existsSync(), isTrue, reason: 'docs/$lang ausente.');
+      final runbooks =
+          dir
+              .listSync()
+              .whereType<File>()
+              .where(
+                (f) => RegExp(
+                  r'/(24|25|26)-[^/]*\.md$',
+                ).hasMatch(f.path.replaceAll('\\', '/')),
+              )
+              .toList()
+            ..sort((a, b) => a.path.compareTo(b.path));
+      for (final file in runbooks) {
+        final name = file.path.replaceAll('\\', '/').split('/').last;
+        found.add('$lang:${name.substring(0, 2)}');
+        if (!file.readAsStringSync().contains(prodRef)) {
+          problems.add(
+            'docs/$lang/$name não menciona o projeto de produção '
+            '(`$prodRef`).',
+          );
+        }
+      }
+    }
+
+    for (final lang in languages) {
+      for (final number in const ['24', '25', '26']) {
+        if (!found.contains('$lang:$number')) {
+          problems.add(
+            'Runbook $number ausente em docs/$lang (se foi '
+            'renomeado, atualize este guard).',
+          );
+        }
+      }
+    }
+
+    expect(
+      problems,
+      isEmpty,
+      reason:
+          'Os runbooks de migração (tipo do produto, produção e body_params) '
+          'precisam apontar a PRODUÇÃO pelo ref `$prodRef` (DEV é '
+          '`dotklbpqmlnhcdifiukd`):\n${problems.join('\n')}',
+    );
+  });
 }
