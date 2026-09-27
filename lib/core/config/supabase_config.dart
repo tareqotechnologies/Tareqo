@@ -31,11 +31,14 @@ abstract final class SupabaseConfig {
   /// O build forneceu as credenciais do Supabase EXPLICITAMENTE?
   ///
   /// O Dart não consegue distinguir "define passado com o mesmo valor do
-  /// default" de "default usado" comparando apenas valores (o deploy atual
-  /// usa um projeto único dev/prod, então os valores são idênticos) — por
-  /// isso o marcador `SUPABASE_CREDENTIALS_EXPLICIT=true` acompanha os
-  /// defines de SUPABASE_URL/SUPABASE_ANON_KEY em env/*.env, fastlane e CI
-  /// (auditoria A1).
+  /// default" de "default usado" comparando apenas valores — os defaults
+  /// embutidos apontam para DEV, então um build de dev tem valores
+  /// idênticos e não é distinguível só pela comparação; por isso o marcador
+  /// `SUPABASE_CREDENTIALS_EXPLICIT=true` acompanha os defines de
+  /// SUPABASE_URL/SUPABASE_ANON_KEY em env/*.env, fastlane e CI (auditoria
+  /// A1). Dev e produção são projetos SEPARADOS desde Set/2026
+  /// (`dotklbpqmlnhcdifiukd` / `bcyolmheltzlddfwgqcq`), logo um release de
+  /// produção tem valores diferentes do default.
   static const bool credentialsExplicit = bool.fromEnvironment(
     'SUPABASE_CREDENTIALS_EXPLICIT',
     defaultValue: false,

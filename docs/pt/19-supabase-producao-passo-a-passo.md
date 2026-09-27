@@ -18,7 +18,7 @@
 | Arquivo | Quando usar | O que contém |
 |---|---|---|
 | `supabase/schema.sql` | **Projeto NOVO** (1ª instalação) | Tudo: PARTE 1 (estrutura + RLS + RPCs + storage), PARTE 1.9 (add-ons + billing + admin_messages), PARTE 2 (catálogo de planos). Idempotente, roda em 1 transação |
-| `supabase/upgrade.sql` | **Base EXISTENTE** (p.ex. o live atual) | 31 partes idempotentes que levam qualquer versão anterior ao estado atual. **Pode reexecutar à vontade** (aplicação dupla validada no CI) |
+| `supabase/upgrade.sql` | **Base EXISTENTE** (p.ex. o live atual) | As partes idempotentes (até à PARTE 35) que levam qualquer versão anterior ao estado atual. **Pode reexecutar à vontade** (aplicação dupla validada no CI) |
 | `supabase/promote_super_admin.sql` | Depois do 1º cadastro no app | Promove um e-mail a super admin (papel na tabela `super_admins`) |
 | `supabase/cleanup_demo_data.sql` | Opcional (manutenção) | Remove dados de demonstração |
 | `supabase/reset_tenant_data.sql` | Opcional (manutenção) | Zera os dados de UM tenant |

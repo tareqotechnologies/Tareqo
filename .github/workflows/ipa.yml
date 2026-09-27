@@ -18,8 +18,9 @@
 #   SUPABASE_URL/SUPABASE_ANON_KEY explícitos + o marcador
 #   SUPABASE_CREDENTIALS_EXPLICIT=true — a guarda de release rejeita
 #   defaults embutidos (ver lib/core/network/supabase_bootstrap.dart).
-#   Enquanto o projeto prod separado não existir, os secrets apontam para o
-#   projeto único atual (dotklbpqmlnhcdifiukd).
+#   Os secrets apontam para o projeto de PRODUÇÃO (`bcyolmheltzlddfwgqcq`) —
+#   dev e prod são projetos Supabase SEPARADOS desde Set/2026 (dev =
+#   `dotklbpqmlnhcdifiukd`, em env/dev.env).
 name: iOS IPA (release artifact)
 
 on:

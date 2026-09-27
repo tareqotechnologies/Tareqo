@@ -9,7 +9,10 @@ import 'package:http/io_client.dart';
 ///
 /// PEM do intermediário **WE1** (Google Trust Services) — o mesmo que assina
 /// o leaf de `dotklbpqmlnhcdifiukd.supabase.co` (cadeia: leaf → WE1 → GTS
-/// Root R4). O `SecurityContext` é criado com `withTrustedRoots: false` e
+/// Root R4). Dev e produção são projetos `.supabase.co` distintos
+/// (`dotklbpqmlnhcdifiukd` e `bcyolmheltzlddfwgqcq`) e ambos emitem o leaf
+/// via WE1 (verificado por handshake TLS em Set/2026) — o mesmo pin cobre os
+/// dois, sem host-specificidade. O `SecurityContext` é criado com `withTrustedRoots: false` e
 /// esta âncora: a app só aceita cadeias que terminam no WE1. Um MITM com CA
 /// user-installed (proxy, malware, rede hostil) é rejeitado porque o trust
 /// store do SO é ignorado — a validação usa APENAS este pin.
