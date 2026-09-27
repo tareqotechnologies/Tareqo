@@ -13,6 +13,9 @@
 | `cleanup_demo_data.sql` | (Opcional) Remove dados de demonstração. |
 | `reset_tenant_data.sql` | (Opcional) Zera os dados de UM tenant. |
 | `test_notification.sql` | (Opcional) Notificação de teste para debug de Realtime. |
+| `add_notification_body_params_2026_09_27.sql` | **PARTE 33 isolada** — `invoice_notifications.body_params` (parâmetros para localizar a notificação na exibição) num banco que já está nas partes anteriores. |
+| `add_product_type_2026_09_27.sql` | **PARTE 34 isolada** — `products.type` + índice `idx_products_store_type` (Fase 1) num banco que já está nas partes anteriores. |
+| `add_production_2026_09_27.sql` | **PARTE 35 isolada** — ficha técnica + produção (Fase 2: 4 tabelas, RLS gerencial e RPC `process_production`) num banco que já está nas partes anteriores. |
 | `archived_migrations/` | **Histórico — NÃO aplicar.** As 7 migrações (add-ons + billing + admin_messages) cujos objetos foram fundidos no `schema.sql` (PARTE 1.9) e no `upgrade.sql` (PARTE 31), com correções de idempotência. |
 
 ## Regra de ouro
