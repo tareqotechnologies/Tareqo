@@ -35,6 +35,7 @@ This folder gathers every document about the app: from what it does to how each 
 | 19 | [Daily cash closing migration runbook](19-migracao-cash-closing.md) | Step-by-step runbook for Part 25 (Z-report): `cash_closings` table + `close_cash_register` RPC (server-side calculation + manager guard), post-migration verification (checks 32–34) and publishing |
 | 24 | [Product type migration runbook](24-product-type-migration.md) | Step-by-step runbook for Part 34 (Phase 1): `products.type` column (TEXT, default `resale`), `idx_products_store_type` index, verification (check 43), manual reclassification (with the `tool/backfill_product_types.dart` backfill) and rollback |
 | 25 | [Recipe + production migration runbook](25-production-migration.md) | Step-by-step runbook for Part 35 (Phase 2): `recipes`/`recipe_items`/`production_orders`/`production_order_items` tables, manager RLS, `process_production` RPC, verification (check 44) and rollback |
+| 26 | [Notification `body_params` migration runbook](26-notification-body-params-migration.md) | Step-by-step runbook for Part 33: `invoice_notifications.body_params` (JSONB) column to localise the notification at display time — standalone script, verification (REST probe) and rollback |
 
 ---
 

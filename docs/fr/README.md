@@ -35,6 +35,7 @@ Ce dossier rassemble tous les documents sur l'application : de ce qu'elle fait �
 | 19 | [Runbook de migration de la clôture de caisse quotidienne](19-migracao-cash-closing.md) | Runbook pas à pas pour la Partie 25 (rapport Z) : table `cash_closings` + RPC `close_cash_register` (calcul côté serveur + garde managériale), vérification post-migration (checks 32–34) et publication |
 | 24 | [Runbook de migration du type de produit](24-migration-type-produit.md) | Runbook pas à pas pour la Partie 34 (Phase 1) : colonne `products.type` (TEXT, défaut `resale`), index `idx_products_store_type`, vérification (check 43), reclassement manuel (avec le backfill `tool/backfill_product_types.dart`) et rollback |
 | 25 | [Runbook de migration de la fiche technique + production](25-migration-production.md) | Runbook pas à pas pour la Partie 35 (Phase 2) : tables `recipes`/`recipe_items`/`production_orders`/`production_order_items`, RLS managériale, RPC `process_production`, vérification (check 44) et rollback |
+| 26 | [Runbook de migration des notifications (`body_params`)](26-migration-notifications-body-params.md) | Runbook pas à pas pour la Partie 33 : colonne `invoice_notifications.body_params` (JSONB) pour localiser la notification à l'affichage — script isolé, vérification (sonde REST) et rollback |
 
 ---
 
