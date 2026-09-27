@@ -10,7 +10,7 @@
 > referência do que cada objeto faz e de como foi verificado no live.
 
 > **Objetivo:** aplicar as migrações que tornam os add-ons **realmente persistentes**
-> no projeto de produção (`dotklbpqmlnhcdifiukd`), seguindo as mesmas convenções
+> no projeto de produção (`bcyolmheltzlddfwgqcq`), seguindo as mesmas convenções
 > das migrações anteriores (Partes de `upgrade.sql`): `CREATE TABLE IF NOT EXISTS`,
 > `DROP POLICY/TRIGGER IF EXISTS` + `CREATE`, `CREATE OR REPLACE FUNCTION`,
 > triggers de `user_id`/`store_id` com os helpers do schema (`set_tenant_user_id`,
@@ -101,8 +101,8 @@ Usando a anon key do app (mesmo caminho do PostgREST):
 
 ```bash
 # Tabelas existem e anon não vê linhas (RLS filtra leituras)
-curl -s -H "apikey: $ANON" "https://dotklbpqmlnhcdifiukd.supabase.co/rest/v1/custom_invoices?select=id"   # → []
-curl -s -H "apikey: $ANON" "https://dotklbpqmlnhcdifiukd.supabase.co/rest/v1/quotations?select=id"     # → []
+curl -s -H "apikey: $ANON" "https://bcyolmheltzlddfwgqcq.supabase.co/rest/v1/custom_invoices?select=id"   # → []
+curl -s -H "apikey: $ANON" "https://bcyolmheltzlddfwgqcq.supabase.co/rest/v1/quotations?select=id"     # → []
 
 # RLS ativo: INSERT anon deve ser REJEITADO com 42501 (payload com user_id
 # inexistente em auth.users — mesmo se o RLS falhasse, a FK rejeitaria; nunca
@@ -110,12 +110,12 @@ curl -s -H "apikey: $ANON" "https://dotklbpqmlnhcdifiukd.supabase.co/rest/v1/quo
 curl -s -X POST -H "apikey: $ANON" -H "Content-Type: application/json" \
   -H "Authorization: Bearer $ANON" \
   -d '{"id":"probe","store_id":"st1","payload":{},"user_id":"00000000-0000-0000-0000-000000000000"}' \
-  "https://dotklbpqmlnhcdifiukd.supabase.co/rest/v1/custom_invoices"   # → 42501 RLS
+  "https://bcyolmheltzlddfwgqcq.supabase.co/rest/v1/custom_invoices"   # → 42501 RLS
 
 # Funções de numeração presentes (SELECT MAX+1 puro, sem escrita)
 curl -s -X POST -H "apikey: $ANON" -H "Content-Type: application/json" \
   -d '{"store_id":"st1"}' \
-  "https://dotklbpqmlnhcdifiukd.supabase.co/rest/v1/rpc/get_next_custom_invoice_number"  # → 1
+  "https://bcyolmheltzlddfwgqcq.supabase.co/rest/v1/rpc/get_next_custom_invoice_number"  # → 1
 ```
 
 Verificação executada em 2026-09-05: **RLS confirmado ativo** nas duas tabelas

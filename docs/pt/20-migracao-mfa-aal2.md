@@ -2,7 +2,7 @@
 
 > **Objetivo:** aplicar as guardas **MFA server-side (P1)** e a correção do
 > **overload de `update_tenant_settings` (PGRST203)** no projeto de produção
-> (`dotklbpqmlnhcdifiukd`), usando o `supabase/upgrade.sql` consolidado —
+> (`bcyolmheltzlddfwgqcq`), usando o `supabase/upgrade.sql` consolidado —
 > mesmas convenções dos runbooks 15 (W4/H2), 16 (W11) e 17 (fecho de caixa).
 >
 > O que esta aplicação traz (idempotente):
@@ -51,7 +51,7 @@
 Defina a URL (substitua `SENHA`):
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Passo 1 — Backup (obrigatório)
@@ -61,7 +61,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 - **Opção via CLI** (porta **5432** *session* do pooler, adequada a `pg_dump`):
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
   --schema=public -f backup_pre_mfa.sql
 ```
 

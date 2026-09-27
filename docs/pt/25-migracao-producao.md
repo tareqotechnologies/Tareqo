@@ -1,7 +1,7 @@
 # 25 — Migração da ficha técnica + produção (`recipes`/`production_orders`) no Supabase de produção (runbook)
 
 > **Objetivo:** aplicar a **PARTE 35 — produção: ficha técnica + ordens
-> (Fase 2)** no projeto de produção (`dotklbpqmlnhcdifiukd`), usando o
+> (Fase 2)** no projeto de produção (`bcyolmheltzlddfwgqcq`), usando o
 > `supabase/upgrade.sql` consolidado — mesmas convenções dos runbooks 15
 > (W4/H2), 16 (W11), 17 (fecho de caixa), 20 (MFA aal2) e 24 (tipo do
 > produto/Fase 1).
@@ -29,6 +29,21 @@
 
 ---
 
+## Registo de aplicação
+
+| Data | Projeto | Estado |
+|------|---------|--------|
+| 2026-09-27 | **DEV** — `dotklbpqmlnhcdifiukd` | ✅ PARTE 35 aplicada: `recipes`/`recipe_items`/`production_orders`/`production_order_items` + RLS + RPC `process_production`; `scripts/sql_check_live.sh` → check 44 passa |
+| — | **PRODUÇÃO** — `bcyolmheltzlddfwgqcq` | ⏳ pendente — diagnóstico REST (2026-09-27): faltam a PARTE 35 (4 tabelas de produção + RPC `process_production`) e também a PARTE 33 (`invoice_notifications.body_params`); projeto praticamente vazio (1 loja, 0 produtos/vendas/compras) |
+
+> **DEV vs. produção:** `env/dev.env` → `dotklbpqmlnhcdifiukd` (**DEV**) e
+> `env/prod.env` → `bcyolmheltzlddfwgqcq` (**PRODUÇÃO**). Os exemplos abaixo
+> usam a referência de **produção**; para DEV use `env/db.env`
+> (`SUPABASE_DB_URL`). O host do pooler (`aws-0-<região>...`) deve ser o do
+> projeto alvo (Dashboard → Settings → Database).
+
+---
+
 ## Passo 0 — Pré-requisitos
 
 - Acesso ao Dashboard do projeto + **senha do banco**
@@ -49,7 +64,7 @@
 Defina a URL (substitua `SENHA`):
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Passo 1 — Backup (obrigatório)
@@ -59,7 +74,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 - **Opção via CLI** (porta **5432** *session* do pooler, adequada a `pg_dump`):
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
   --schema=public -f backup_pre_production.sql
 ```
 

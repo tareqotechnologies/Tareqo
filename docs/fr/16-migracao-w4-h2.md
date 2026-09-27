@@ -1,7 +1,7 @@
 # 16 — Migration W4 + H2 sur le Supabase de production (runbook)
 
 > **Objectif :** appliquer **`supabase/upgrade.sql`** au projet de production
-> (`dotklbpqmlnhcdifiukd`) — amène la base EXISTANTE à l'état actuel :
+> (`bcyolmheltzlddfwgqcq`) — amène la base EXISTANTE à l'état actuel :
 > **Partie 7** = W4 (argent en centimes entiers : `NUMERIC` → `BIGINT`) et
 > **Partie 8** = H2 (RPC `get_cash_flow` / `get_sales_report` + toutes les
 > autres fonctions finales). C'étaient autrefois les migrations `010`/`011` ;
@@ -30,7 +30,7 @@
 Définir l'URL (remplacer `SENHA`) :
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Étape 1 — Sauvegarde (obligatoire)
@@ -40,7 +40,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 - **Option CLI** (port **5432** *session* pooler, adapté à `pg_dump`) :
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
  --schema=public -f backup_pre_w4.sql
 ```
 

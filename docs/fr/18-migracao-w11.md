@@ -1,7 +1,7 @@
 # 18 — Migration W11 sur le Supabase de production (runbook)
 
 > **Objectif :** appliquer la **Partie 22** de `supabase/upgrade.sql` au projet
-> de production (`dotklbpqmlnhcdifiukd`) — amène la base EXISTANTE à l'état
+> de production (`bcyolmheltzlddfwgqcq`) — amène la base EXISTANTE à l'état
 > W11 : **lots de stock FIFO + suivi des péremptions** et **ventes au
 > poids/bascule**, avec TOUTES les quantités converties d'unités entières en
 > **MILLIÈMES** (×1000).
@@ -53,7 +53,7 @@
 Définir l'URL (remplacer `SENHA`) :
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Étape 1 — Sauvegarde (obligatoire)
@@ -63,7 +63,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 - **Option CLI** (port **5432** *session* pooler, adapté à `pg_dump`) :
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
  --schema=public -f backup_pre_w11.sql
 ```
 

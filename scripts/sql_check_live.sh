@@ -65,6 +65,12 @@
 #   SUPABASE_DB_URL='...' MSYS_NO_PATHCONV=1 docker run --rm -i \
 #     -e SUPABASE_DB_URL postgres:16 bash /workspace/scripts/sql_check_live.sh
 #
+# Sem psql E sem docker? Há um fallback em Python (requer psycopg2 ou
+# psycopg3): o script executa os mesmos checks numa transação READ ONLY e
+# traduz os NOTICE/PASS para a saída — nada precisa ser instalado além do
+# driver. Use-o quando o psql não existir na máquina (ex.: Windows sem o
+# client do PostgreSQL).
+#
 # ⚠️ NUNCA rode o scripts/sql_check.sh contra este banco: ele apaga o
 # schema public. Use SOMENTE este script (ou inspeção manual no SQL Editor).
 
@@ -1062,7 +1068,7 @@ BEGIN
 END $$;
 SQL
 
-# ── Executor: psql local ou container postgres:16 ───────────────────────
+# ── Executor: psql local, container postgres:16 ou fallback Python ──────
 export PGCONNECT_TIMEOUT=15
 if command -v psql >/dev/null 2>&1; then
   psql "$DB_URL" -X -q -v ON_ERROR_STOP=1 -1 -f "$CHECKS"
@@ -1070,8 +1076,94 @@ elif command -v docker >/dev/null 2>&1 && docker image inspect postgres:16 >/dev
   echo "(sem psql local — usando docker postgres:16)"
   docker run --rm -i -e PGCONNECT_TIMEOUT=15 postgres:16 \
     psql "$DB_URL" -X -q -v ON_ERROR_STOP=1 -1 < "$CHECKS"
+elif command -v python >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1; then
+  PY_BIN=$(command -v python || command -v python3)
+  echo "(sem psql e sem docker — fallback Python/psycopg, mesma transação READ ONLY)"
+  SUPABASE_DB_URL="$DB_URL" "$PY_BIN" - "$CHECKS" <<'PYEOF'
+import os
+import re
+import sys
+
+# Sem psql: roda o MESMO arquivo de checks (heredoc SQL) via psycopg,
+# dentro de UMA transação READ ONLY — equivalente ao `psql -1`. Os
+# comandos meta `echo` do psql viram os cabeçalhos impressos; os
+# NOTICE/PASS e as consultas informativas vão para stdout. Sai != 0 no
+# primeiro erro (ON_ERROR_STOP), como o psql.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
+checks_path = sys.argv[1]
+with open(checks_path, encoding="utf-8") as fh:
+    script = fh.read()
+
+try:
+    import psycopg2 as _driver
+
+    def _connect(url):
+        return _driver.connect(url)
+except ImportError:
+    try:
+        import psycopg as _driver
+
+        def _connect(url):
+            return _driver.connect(url)
+    except ImportError:
+        sys.stderr.write(
+            "ERRO: Python sem psycopg2/psycopg3 "
+            "(pip install psycopg2-binary).\n"
+        )
+        sys.exit(2)
+
+url = os.environ.get("SUPABASE_DB_URL", "")
+if not url:
+    sys.stderr.write("ERRO: SUPABASE_DB_URL ausente.\n")
+    sys.exit(2)
+
+sep = chr(92) + "echo"  # o meta-comando `echo` do psql (barra invertida)
+parts = script.split(sep)
+preamble = parts[0]
+blocks = []
+for part in parts[1:]:
+    m = re.match(r"\s*'([^']*)'\s*\n(.*)", part, re.S)
+    if m:
+        blocks.append((m.group(1), m.group(2)))
+
+conn = _connect(url)
+conn.autocommit = False
+cur = conn.cursor()
+status = 0
+try:
+    cur.execute(preamble)
+    for label, body in blocks:
+        print(label, flush=True)
+        notices = getattr(conn, "notices", None)
+        if notices is not None:
+            del notices[:]
+        cur.execute(body)
+        if notices is not None:
+            for note in notices:
+                line = note.strip()
+                if line:
+                    print("  " + line, flush=True)
+        if cur.description:
+            for row in cur.fetchall():
+                print("  -> " + str(row), flush=True)
+    conn.commit()
+except Exception as exc:
+    conn.rollback()
+    msg = str(exc).strip().splitlines()
+    sys.stderr.write("FAIL: " + (msg[0] if msg else repr(exc)) + "\n")
+    status = 1
+finally:
+    cur.close()
+    conn.close()
+sys.exit(status)
+PYEOF
 else
-  echo "ERRO: psql não encontrado e docker postgres:16 indisponível." >&2
+  echo "ERRO: psql ausente, docker postgres:16 indisponível e Python não encontrado." >&2
+  echo "      Instale o psql (ou use o Docker) e reexecute." >&2
   exit 2
 fi
 

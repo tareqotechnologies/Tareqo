@@ -82,8 +82,8 @@
 
 ## 4. (Opcional, recomendado) Reforço em base existente — `upgrade.sql`
 
-Use **apenas** se estiver atualizando um projeto que JÁ tem dados (ex.: o live
-`dotklbpqmlnhcdifiukd`), para levá-lo ao mesmo estado final:
+Use **apenas** se estiver atualizando um projeto que JÁ tem dados (ex.: o projeto de DEV
+`dotklbpqmlnhcdifiukd`, que já tem dados), para levá-lo ao mesmo estado final:
 
 1. SQL Editor → cole TODO o `supabase/upgrade.sql` → **Run**;
 2. Pode rodar **2x sem erro** (idempotência validada pelo CI e pelo

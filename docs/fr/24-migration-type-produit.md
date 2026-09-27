@@ -1,7 +1,7 @@
 # 24 — Migration du type structurel du produit (`products.type`) sur le Supabase de production (runbook)
 
 > **Objectif :** appliquer la **Partie 34 — type structurel du produit
-> (Phase 1)** au projet de production (`dotklbpqmlnhcdifiukd`) à l'aide du
+> (Phase 1)** au projet de production (`bcyolmheltzlddfwgqcq`) à l'aide du
 > `supabase/upgrade.sql` consolidé — mêmes conventions que les runbooks 15
 > (W4/H2), 16 (W11), 17 (clôture de caisse), 18 (add-ons) et 20 (MFA aal2).
 >
@@ -27,6 +27,21 @@
 
 ---
 
+## Registre d'application
+
+| Date | Projet | État |
+|------|--------|------|
+| 2026-09-27 | **DEV** — `dotklbpqmlnhcdifiukd` | ✅ Partie 34 appliquée : colonne `products.type` (TEXT NOT NULL DEFAULT `resale`) + index `idx_products_store_type` ; `scripts/sql_check_live.sh` → checks 1–44 passent ; le backfill ponctuel a reclassé 1 produit (`Oleo Maeva` → `rawMaterial`) |
+| — | **PRODUCTION** — `bcyolmheltzlddfwgqcq` | ⏳ en attente — diagnostic REST (2026-09-27) : la colonne `products.type` existe déjà, mais l'index/CHECK ne sont pas observables via REST (confirmer avec le check 43, qui nécessite un `SUPABASE_DB_URL`). Projet pratiquement vide (1 magasin, 0 produit) |
+
+> **DEV vs. production :** `env/dev.env` → `dotklbpqmlnhcdifiukd` (**DEV**) et
+> `env/prod.env` → `bcyolmheltzlddfwgqcq` (**PRODUCTION**). Les exemples
+> ci-dessous utilisent la référence de **production** ; pour DEV, utilisez
+> `env/db.env` (`SUPABASE_DB_URL`). L'hôte du pooler (`aws-0-<région>...`)
+> doit être celui du projet cible (Dashboard → Settings → Database).
+
+---
+
 ## Étape 0 — Prérequis
 
 - Accès au Dashboard du projet + **mot de passe de la base**
@@ -49,7 +64,7 @@
 Définissez l'URL (remplacez `MOT_DE_PASSE`) :
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:MOT_DE_PASSE@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:MOT_DE_PASSE@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Étape 1 — Sauvegarde (obligatoire)
@@ -59,7 +74,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:MOT_DE_PASSE@
 - **Option CLI** (port **5432** *session* du pooler, adapté à `pg_dump`) :
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:MOT_DE_PASSE@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:MOT_DE_PASSE@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
   --schema=public -f backup_pre_product_type.sql
 ```
 

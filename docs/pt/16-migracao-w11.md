@@ -1,7 +1,7 @@
 # 16 — Migração W11 no Supabase de produção (runbook)
 
 > **Objetivo:** aplicar a **Parte 22** de `supabase/upgrade.sql` no projeto de
-> produção (`dotklbpqmlnhcdifiukd`) — leva o banco EXISTENTE ao estado W11:
+> produção (`bcyolmheltzlddfwgqcq`) — leva o banco EXISTENTE ao estado W11:
 > **FIFO por lotes + controlo de validade** e **vendas por peso (balanças)**,
 > com TODAS as quantidades convertidas de unidades inteiras para
 > **MILÉSIMOS** (×1000).
@@ -47,7 +47,7 @@
 Defina a URL (substitua `SENHA`):
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Passo 1 — Backup (obrigatório)
@@ -57,7 +57,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 - **Opção via CLI** (porta **5432** *session* do pooler, adequada a `pg_dump`):
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
  --schema=public -f backup_pre_w11.sql
 ```
 

@@ -1,7 +1,7 @@
 # 18 — W11 Migration on the Production Supabase (runbook)
 
 > **Goal:** apply **Part 22** of `supabase/upgrade.sql` to the production
-> project (`dotklbpqmlnhcdifiukd`) — brings the EXISTING database to the W11
+> project (`bcyolmheltzlddfwgqcq`) — brings the EXISTING database to the W11
 > state: **FIFO stock lots + expiry tracking** and **weight/scale sales**,
 > with ALL quantities converted from whole units to **MILLESIMALS** (×1000).
 >
@@ -48,7 +48,7 @@
 Set the URL (replace `SENHA`):
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Step 1 — Backup (mandatory)
@@ -58,7 +58,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 - **CLI option** (port **5432** *session* pooler, suitable for `pg_dump`):
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
  --schema=public -f backup_pre_w11.sql
 ```
 

@@ -1,7 +1,7 @@
 # 19 — Daily Cash Closing Migration on the Production Supabase (runbook)
 
 > **Goal:** apply **Part 25** of `supabase/upgrade.sql` to the production
-> project (`dotklbpqmlnhcdifiukd`) — enables the **daily cash closing
+> project (`bcyolmheltzlddfwgqcq`) — enables the **daily cash closing
 > (Z-report)** on the EXISTING database: the `cash_closings` table (one
 > closing per store per day) + the `close_cash_register` RPC that computes
 > the expected drawer amount SERVER-SIDE and persists the closing
@@ -62,7 +62,7 @@
 Set the URL (replace `SENHA`):
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Step 1 — Backup (mandatory)
@@ -72,7 +72,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 - **CLI option** (pooler **5432** *session* port, suitable for `pg_dump`):
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
  --schema=public -f backup_pre_cash_closing.sql
 ```
 

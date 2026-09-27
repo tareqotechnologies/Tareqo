@@ -61,8 +61,10 @@ Future<void> main(List<String> args) async {
     }
   }
 
+  // A conexão vem do env da app (dev/prod); as credenciais do dono vivem
+  // sempre em `env/test_accounts.env` (`PROD_OWNER_*` para a produção).
   final envFile = useProd ? 'env/prod.env' : 'env/dev.env';
-  final accountsFile = useProd ? 'env/prod.env' : 'env/test_accounts.env';
+  final accountsFile = 'env/test_accounts.env';
   final ownerEmailKey = useProd ? 'PROD_OWNER_EMAIL' : 'TEST_OWNER_EMAIL';
   final ownerPasswordKey = useProd
       ? 'PROD_OWNER_PASSWORD'

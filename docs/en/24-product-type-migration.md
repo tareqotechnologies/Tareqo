@@ -1,7 +1,7 @@
 # 24 — Product structural type migration (`products.type`) on the Production Supabase (runbook)
 
 > **Goal:** apply **Part 34 — product structural type (Phase 1)** to the
-> production project (`dotklbpqmlnhcdifiukd`) using the consolidated
+> production project (`bcyolmheltzlddfwgqcq`) using the consolidated
 > `supabase/upgrade.sql` — same conventions as runbooks 15 (W4/H2), 16 (W11),
 > 17 (cash closing), 18 (add-ons) and 20 (MFA aal2).
 >
@@ -27,6 +27,21 @@
 
 ---
 
+## Application record
+
+| Date | Project | Status |
+|------|---------|--------|
+| 2026-09-27 | **DEV** — `dotklbpqmlnhcdifiukd` | ✅ Part 34 applied: `products.type` column (TEXT NOT NULL DEFAULT `resale`) + `idx_products_store_type` index; `scripts/sql_check_live.sh` → checks 1–44 pass; the one-off backfill reclassified 1 product (`Oleo Maeva` → `rawMaterial`) |
+| — | **PRODUCTION** — `bcyolmheltzlddfwgqcq` | ⏳ pending — REST diagnosis (2026-09-27): the `products.type` column already exists, but the index/CHECK are not observable over REST (confirm with check 43, which needs a `SUPABASE_DB_URL`). Project essentially empty (1 store, 0 products) |
+
+> **Dev vs. production:** `env/dev.env` → `dotklbpqmlnhcdifiukd` (**DEV**) and
+> `env/prod.env` → `bcyolmheltzlddfwgqcq` (**PRODUCTION**). The examples below
+> use the **production** ref; for DEV use `env/db.env` (`SUPABASE_DB_URL`). The
+> pooler host (`aws-0-<region>...`) must be the target project's (Dashboard →
+> Settings → Database).
+
+---
+
 ## Step 0 — Prerequisites
 
 - Access to the project Dashboard + the **database password**
@@ -49,7 +64,7 @@
 Set the URL (replace `PASSWORD`):
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:PASSWORD@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:PASSWORD@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Step 1 — Backup (mandatory)
@@ -59,7 +74,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:PASSWORD@aws-
 - **CLI option** (port **5432** *session* pooler, suitable for `pg_dump`):
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:PASSWORD@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:PASSWORD@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
   --schema=public -f backup_pre_product_type.sql
 ```
 

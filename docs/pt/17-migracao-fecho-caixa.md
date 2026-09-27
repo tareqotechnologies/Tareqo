@@ -1,7 +1,7 @@
 # 17 — Migração do Fecho de Caixa diário no Supabase de produção (runbook)
 
 > **Objetivo:** aplicar a **Parte 25** de `supabase/upgrade.sql` no projeto de
-> produção (`dotklbpqmlnhcdifiukd`) — habilita o **fecho de caixa diário
+> produção (`bcyolmheltzlddfwgqcq`) — habilita o **fecho de caixa diário
 > (Z-report)** no banco EXISTENTE: tabela `cash_closings` (um fecho por loja
 > por dia) + RPC `close_cash_register` que calcula NO SERVIDOR o esperado na
 > gaveta e persiste o fecho atomicamente.
@@ -61,7 +61,7 @@
 Defina a URL (substitua `SENHA`):
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Passo 1 — Backup (obrigatório)
@@ -71,7 +71,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 - **Opção via CLI** (porta **5432** *session* do pooler, adequada a `pg_dump`):
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
  --schema=public -f backup_pre_fecho.sql
 ```
 

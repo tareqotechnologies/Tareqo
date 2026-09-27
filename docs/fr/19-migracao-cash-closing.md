@@ -1,7 +1,7 @@
 # 19 — Migration de la clôture de caisse quotidienne sur le Supabase de production (runbook)
 
 > **Objectif :** appliquer la **Partie 25** de `supabase/upgrade.sql` au projet
-> de production (`dotklbpqmlnhcdifiukd`) — active la **clôture de caisse
+> de production (`bcyolmheltzlddfwgqcq`) — active la **clôture de caisse
 > quotidienne (rapport Z)** sur la base EXISTANTE : la table `cash_closings`
 > (une clôture par magasin par jour) + le RPC `close_cash_register` qui
 > calcule le montant attendu du tiroir-caisse CÔTÉ SERVEUR et persiste la
@@ -66,7 +66,7 @@
 Définir l'URL (remplacer `SENHA`) :
 
 ```bash
-export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
+export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
 ## Étape 1 — Sauvegarde (obligatoire)
@@ -76,7 +76,7 @@ export SUPABASE_DB_URL='postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-e
 - **Option CLI** (port **5432** *session* pooler, adapté à `pg_dump`) :
 
 ```bash
-pg_dump "postgresql://postgres.dotklbpqmlnhcdifiukd:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+pg_dump "postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require" \
  --schema=public -f backup_pre_cash_closing.sql
 ```
 
