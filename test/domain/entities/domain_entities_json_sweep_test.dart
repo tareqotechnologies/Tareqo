@@ -261,6 +261,37 @@ void main() {
       expect(restored.isActive, isTrue);
       expect(restored.imagePath, '');
     });
+
+    test('fromJson preserva o tipo do produto (round-trip)', () {
+      const product = Product(
+        id: 'p1',
+        name: 'Farinha de trigo',
+        purchasePriceCents: 450000,
+        salePriceCents: 600000,
+        type: ProductType.rawMaterial,
+      );
+
+      final restored = Product.fromJson(product.toJson());
+
+      expect(restored.type, ProductType.rawMaterial);
+    });
+
+    test('fromJson tolera tipo desconhecido → resale (nunca lança)', () {
+      // Simula um payload gravado por uma versão mais nova do app: o valor
+      // do enum não existe neste build. Mesma tolerância dos datasources
+      // SQLite/Supabase (firstWhere(...orElse: resale)) — não pode quebrar.
+      final json = <String, dynamic>{
+        'id': 'p1',
+        'name': 'Produto do futuro',
+        'purchasePriceCents': 100,
+        'salePriceCents': 200,
+        'type': 'tipoDeVersaoFutura',
+      };
+
+      final restored = Product.fromJson(json);
+
+      expect(restored.type, ProductType.resale);
+    });
   });
 
   group('StockLot', () {

@@ -69,7 +69,7 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
                 .select(
                   'id, store_id, name, description, image_path, purchase_price, '
                   'sale_price, stock_quantity, code, venda_por_fracao, '
-                  'unit_label, is_active',
+                  'unit_label, is_active, type',
                 )
                 .eq('store_id', storeId),
           )
@@ -89,7 +89,7 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
         .select(
           'id, store_id, name, description, image_path, purchase_price, '
           'sale_price, stock_quantity, code, venda_por_fracao, unit_label, '
-          'is_active',
+          'is_active, type',
         )
         .eq('id', id)
         .eq('store_id', storeId)
@@ -113,6 +113,7 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
       'venda_por_fracao': product.vendaPorFracao,
       'unit_label': product.unitLabel,
       'is_active': product.isActive,
+      'type': product.type.name,
     });
   }
 
@@ -133,6 +134,7 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
           'venda_por_fracao': product.vendaPorFracao,
           'unit_label': product.unitLabel,
           'is_active': product.isActive,
+          'type': product.type.name,
         })
         .eq('id', product.id)
         .eq('store_id', product.storeId)
@@ -180,5 +182,11 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
     // Default true: linhas criadas antes do campo preservam produtos como
     // ATIVOS (a coluna no schema tem DEFAULT true).
     isActive: row['is_active'] as bool? ?? true,
+    // Fase 1: default resale — linhas criadas antes da coluna `type` (ou
+    // com valor desconhecido) permanecem de revenda, como sempre foram.
+    type: ProductType.values.firstWhere(
+      (type) => type.name == row['type'] as String?,
+      orElse: () => ProductType.resale,
+    ),
   );
 }

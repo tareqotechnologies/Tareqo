@@ -40,6 +40,15 @@ class _FakeGetProductsUseCase implements GetProductsUseCase {
   ];
 }
 
+class _ListProductsUseCase implements GetProductsUseCase {
+  _ListProductsUseCase(this._products);
+
+  final List<Product> _products;
+
+  @override
+  Future<List<Product>> call({required String storeId}) async => _products;
+}
+
 /// Registra a venda sem tocar em infraestrutura (o ProcessSaleUseCase já é
 /// coberto por testes de domínio — aqui validamos apenas a orquestração da UI).
 class _FakeProcessSaleUseCase implements ProcessSaleUseCase {
@@ -166,6 +175,9 @@ void main() {
 
     expect(find.text('Carrinho · 1 item'), findsOneWidget);
     expect(find.text('1×'), findsOneWidget);
+    // O papel do produto (Revenda no catálogo demo) aparece nas DUAS
+    // superfícies: a linha do catálogo e a pill do carrinho.
+    expect(find.text('Revenda'), findsNWidgets(2));
   });
 
   testWidgets(
@@ -284,6 +296,130 @@ void main() {
       expect(find.text('Carrinho · 1 item'), findsOneWidget);
       expect(find.text('1×'), findsOneWidget);
       expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'PDV só mostra produtos de papel VENDÁVEL (esconde MP e embalagem)',
+    (tester) async {
+      // Superfície mais alta: com o selo do tipo as linhas ficam mais altas
+      // e a 3ª linha sairia da área construída da SliverList em 800x600.
+      await tester.binding.setSurfaceSize(const Size(800, 1400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...storeContextOverrides(),
+            getProductsUseCaseProvider.overrideWithValue(
+              _ListProductsUseCase(const [
+                Product(
+                  id: 'p1',
+                  name: 'Farinha',
+                  purchasePriceCents: 100,
+                  salePriceCents: 200,
+                  type: ProductType.rawMaterial,
+                ),
+                Product(
+                  id: 'p2',
+                  name: 'Saco plástico',
+                  purchasePriceCents: 100,
+                  salePriceCents: 200,
+                  type: ProductType.packaging,
+                ),
+                Product(
+                  id: 'p3',
+                  name: 'Água',
+                  purchasePriceCents: 100,
+                  salePriceCents: 200,
+                  type: ProductType.resale,
+                ),
+                Product(
+                  id: 'p4',
+                  name: 'Pão',
+                  purchasePriceCents: 100,
+                  salePriceCents: 200,
+                  type: ProductType.manufactured,
+                ),
+                Product(
+                  id: 'p5',
+                  name: 'Hambúrguer',
+                  purchasePriceCents: 100,
+                  salePriceCents: 200,
+                  type: ProductType.composite,
+                ),
+              ]),
+            ),
+            processSaleUseCaseProvider.overrideWithValue(
+              _FakeProcessSaleUseCase(),
+            ),
+            salesRepositoryProvider.overrideWithValue(
+              _FakeSalesRepository(const []),
+            ),
+          ],
+          child: testApp(home: const Scaffold(body: NewSaleSheet())),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Vendáveis: revenda, produzido e composto.
+      expect(find.text('Água'), findsOneWidget);
+      expect(find.text('Pão'), findsOneWidget);
+      expect(find.text('Hambúrguer'), findsOneWidget);
+      // Não vendáveis: matéria-prima e embalagem.
+      expect(find.text('Farinha'), findsNothing);
+      expect(find.text('Saco plástico'), findsNothing);
+
+      // Selo do TIPO em TODAS as linhas do PDV — inclui Revenda.
+      expect(find.text('Revenda'), findsOneWidget);
+      expect(find.text('Produzido'), findsOneWidget);
+      expect(find.text('Composto'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'PDV sem produtos vendáveis mostra estado vazio explicativo (por papel)',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...storeContextOverrides(),
+            getProductsUseCaseProvider.overrideWithValue(
+              _ListProductsUseCase(const [
+                Product(
+                  id: 'p1',
+                  name: 'Farinha',
+                  purchasePriceCents: 100,
+                  salePriceCents: 200,
+                  type: ProductType.rawMaterial,
+                ),
+                Product(
+                  id: 'p2',
+                  name: 'Saco plástico',
+                  purchasePriceCents: 100,
+                  salePriceCents: 200,
+                  type: ProductType.packaging,
+                ),
+              ]),
+            ),
+            processSaleUseCaseProvider.overrideWithValue(
+              _FakeProcessSaleUseCase(),
+            ),
+            salesRepositoryProvider.overrideWithValue(
+              _FakeSalesRepository(const []),
+            ),
+          ],
+          child: testApp(home: const Scaffold(body: NewSaleSheet())),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Estado vazio ESPECÍFICO (não o genérico "sem produtos"): há
+      // produtos, mas nenhum é vendável.
+      expect(find.text('Nenhum produto vendável'), findsOneWidget);
+      expect(find.text('Nenhum produto para vender'), findsNothing);
+      expect(find.textContaining('revenda'), findsOneWidget);
+      expect(find.text('Farinha'), findsNothing);
     },
   );
 }

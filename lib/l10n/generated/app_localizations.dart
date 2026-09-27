@@ -1936,6 +1936,48 @@ abstract class AppLocalizations {
   /// **'Inactivos'**
   String get productsFilterInactive;
 
+  /// No description provided for @productsTypeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo de produto'**
+  String get productsTypeLabel;
+
+  /// No description provided for @productsTypeRawMaterial.
+  ///
+  /// In pt, this message translates to:
+  /// **'Matéria-prima'**
+  String get productsTypeRawMaterial;
+
+  /// No description provided for @productsTypeResale.
+  ///
+  /// In pt, this message translates to:
+  /// **'Revenda'**
+  String get productsTypeResale;
+
+  /// No description provided for @productsTypeManufactured.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produzido'**
+  String get productsTypeManufactured;
+
+  /// No description provided for @productsTypeComposite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Composto'**
+  String get productsTypeComposite;
+
+  /// No description provided for @productsTypePackaging.
+  ///
+  /// In pt, this message translates to:
+  /// **'Embalagem'**
+  String get productsTypePackaging;
+
+  /// No description provided for @productsFilterType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo'**
+  String get productsFilterType;
+
   /// No description provided for @productsHeaderCount.
   ///
   /// In pt, this message translates to:
@@ -2355,6 +2397,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Cadastre produtos para registar compras.'**
   String get purchasesNoProductsSubtitle;
+
+  /// No description provided for @purchasesNoPurchasableTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum produto comprável'**
+  String get purchasesNoPurchasableTitle;
+
+  /// No description provided for @purchasesNoPurchasableSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produtos produzidos e compostos vêm da produção interna. Apenas matéria-prima, revenda e embalagem entram por compra.'**
+  String get purchasesNoPurchasableSubtitle;
 
   /// No description provided for @purchasesConfirm.
   ///
@@ -3291,6 +3345,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Cadastre produtos para registar vendas.'**
   String get salesNoProductsSubtitle;
+
+  /// No description provided for @salesNoSellableTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum produto vendável'**
+  String get salesNoSellableTitle;
+
+  /// No description provided for @salesNoSellableSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Matéria-prima e embalagem não são vendidas no balcão. Mude o tipo do produto para revenda, produzido ou composto para o vender.'**
+  String get salesNoSellableSubtitle;
 
   /// No description provided for @salesConfirm.
   ///

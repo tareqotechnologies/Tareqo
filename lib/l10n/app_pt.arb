@@ -447,6 +447,13 @@
   "productsFilterMaxPrice": "Preço máximo",
   "productsFilterApply": "Aplicar",
   "productsFilterInactive": "Inactivos",
+  "productsTypeLabel": "Tipo de produto",
+  "productsTypeRawMaterial": "Matéria-prima",
+  "productsTypeResale": "Revenda",
+  "productsTypeManufactured": "Produzido",
+  "productsTypeComposite": "Composto",
+  "productsTypePackaging": "Embalagem",
+  "productsFilterType": "Tipo",
   "productsHeaderCount": "{count, plural, =1{1 produto} other{{count} produtos}}",
   "@productsHeaderCount": {
     "placeholders": {
@@ -592,6 +599,8 @@
   "purchasesSupplierLabel": "Fornecedor",
   "purchasesNoProductsTitle": "Nenhum produto para comprar",
   "purchasesNoProductsSubtitle": "Cadastre produtos para registar compras.",
+  "purchasesNoPurchasableTitle": "Nenhum produto comprável",
+  "purchasesNoPurchasableSubtitle": "Produtos produzidos e compostos vêm da produção interna. Apenas matéria-prima, revenda e embalagem entram por compra.",
   "purchasesConfirm": "Confirmar compra",
   "purchasesStockLabel": "{quantity} {unit} em stock",
   "@purchasesStockLabel": {
@@ -915,6 +924,8 @@
   "salesSearchProducts": "Buscar produto...",
   "salesNoProductsTitle": "Nenhum produto para vender",
   "salesNoProductsSubtitle": "Cadastre produtos para registar vendas.",
+  "salesNoSellableTitle": "Nenhum produto vendável",
+  "salesNoSellableSubtitle": "Matéria-prima e embalagem não são vendidas no balcão. Mude o tipo do produto para revenda, produzido ou composto para o vender.",
   "salesConfirm": "Confirmar venda",
   "saleDetailTitle": "Detalhes da venda",
   "saleDetailId": "Venda {id}",

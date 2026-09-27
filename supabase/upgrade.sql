@@ -3922,5 +3922,38 @@ ANALYZE public.invoice_notifications;
 -- REPLACE é atômico e chamadas em voo terminam na definição antiga.
 -- =============================================================
 
+
+-- ═══════════════════════════════════════════════════════════════════════
+-- PARTE 34 — PRODUTO: TIPO ESTRUTURAL (products.type)  [Fase 1]
+-- ═══════════════════════════════════════════════════════════════════════
+-- Coluna `type` (TEXT, nome do enum ProductType) com DEFAULT 'resale':
+-- produtos existentes já eram compráveis e vendáveis e CONTINUAM
+-- funcionando exatamente igual (sem reclassificação automática; o dono
+-- reclassifica produto a produto na UI). O cliente lê pelo NOME e trata
+-- valor desconhecido como 'resale'.
+-- SEM CHECK de enum (mesma decisão do SQLite): SQLite não altera CHECKs
+-- sem rebuild, então um enum futuro ficaria bloqueado pela restrição
+-- antiga; aqui também não restringimos — a validação de enum vive no
+-- datasource (valor desconhecido → 'resale', nunca lança).
+-- Idempotente: ADD COLUMN IF NOT EXISTS + CREATE INDEX IF NOT EXISTS.
+-- Espelha schema.sql (a instalação nova já nasce com a coluna).
+ALTER TABLE IF EXISTS public.products
+  ADD COLUMN IF NOT EXISTS type TEXT NOT NULL DEFAULT 'resale';
+
+-- Limpa o CHECK de enum caso uma versão anterior desta migração o tenha
+-- criado (o Postgres nomeia a restrição inline como products_type_check).
+ALTER TABLE IF EXISTS public.products
+  DROP CONSTRAINT IF EXISTS products_type_check;
+
+COMMENT ON COLUMN public.products.type
+  IS 'Tipo estrutural do produto (enum ProductType): rawMaterial, resale (default/legado), manufactured, composite, packaging.';
+
+-- Consulta por tipo fica constante na listagem/filtro do catálogo.
+CREATE INDEX IF NOT EXISTS idx_products_store_type
+  ON public.products (store_id, type);
+
+ANALYZE public.products;
+
+
 COMMIT;
 

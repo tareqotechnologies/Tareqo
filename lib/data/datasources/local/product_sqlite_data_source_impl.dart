@@ -3,6 +3,17 @@ import 'package:sqlite3/sqlite3.dart';
 import '../../../domain/entities/product.dart';
 import 'product_local_data_source.dart';
 
+/// Converte o nome persistido do [ProductType] de volta ao enum.
+///
+/// Default [ProductType.resale] para `null` (linha criada antes da coluna
+/// `type`) ou valor desconhecido (banco escrito por versão mais nova do
+/// app) — a leitura de produtos legados NUNCA quebra por valor inesperado.
+ProductType _productTypeFromName(String? name) =>
+    ProductType.values.firstWhere(
+      (type) => type.name == name,
+      orElse: () => ProductType.resale,
+    );
+
 /// Implementação SQLite do [ProductLocalDataSource].
 ///
 /// Mantém **as mesmas assinaturas** do contrato, então a troca de
@@ -16,7 +27,7 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
   static const _columns =
       'id, store_id, name, description, image_path, purchase_price, '
       'sale_price, stock_quantity, code, venda_por_fracao, unit_label, '
-      'is_active';
+      'is_active, type';
 
   @override
   Future<List<Product>> getAll({required String storeId}) async {
@@ -42,7 +53,7 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
   Future<void> add(Product product) async {
     _db.execute(
       'INSERT INTO products ($_columns) VALUES '
-      '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         product.id,
         product.storeId,
@@ -56,6 +67,7 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
         product.vendaPorFracao ? 1 : 0,
         product.unitLabel,
         product.isActive ? 1 : 0,
+        product.type.name,
       ],
     );
   }
@@ -70,7 +82,7 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
     _db.execute(
       'UPDATE products SET name = ?, description = ?, image_path = ?, '
       'purchase_price = ?, sale_price = ?, code = ?, venda_por_fracao = ?, '
-      'unit_label = ?, is_active = ? WHERE id = ? AND store_id = ?',
+      'unit_label = ?, is_active = ?, type = ? WHERE id = ? AND store_id = ?',
       [
         product.name,
         product.description,
@@ -81,6 +93,7 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
         product.vendaPorFracao ? 1 : 0,
         product.unitLabel,
         product.isActive ? 1 : 0,
+        product.type.name,
         product.id,
         product.storeId,
       ],
@@ -126,5 +139,9 @@ final class ProductSqliteDataSourceImpl implements ProductLocalDataSource {
     // Default true: bancos criados antes do campo (sem a coluna ou com
     // NULL) preservam produtos existentes como ATIVOS.
     isActive: (row['is_active'] as int? ?? 1) == 1,
+    // Fase 1: default resale — produtos criados antes da coluna `type`
+    // (ou com valor desconhecido) permanecem de revenda, como sempre
+    // foram. Nunca lança por valor legado inesperado.
+    type: _productTypeFromName(row['type'] as String?),
   );
 }

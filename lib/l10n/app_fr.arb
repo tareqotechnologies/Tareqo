@@ -447,6 +447,13 @@
   "productsFilterMaxPrice": "Prix max",
   "productsFilterApply": "Appliquer",
   "productsFilterInactive": "Inactifs",
+  "productsTypeLabel": "Type de produit",
+  "productsTypeRawMaterial": "Matière première",
+  "productsTypeResale": "Revente",
+  "productsTypeManufactured": "Fabriqué",
+  "productsTypeComposite": "Composé",
+  "productsTypePackaging": "Emballage",
+  "productsFilterType": "Type",
   "productsHeaderCount": "{count, plural, =1{1 produit} other{{count} produits}}",
   "@productsHeaderCount": {
     "placeholders": {
@@ -592,6 +599,8 @@
   "purchasesSupplierLabel": "Fournisseur",
   "purchasesNoProductsTitle": "Aucun produit à acheter",
   "purchasesNoProductsSubtitle": "Enregistrez des produits pour faire des achats.",
+  "purchasesNoPurchasableTitle": "Aucun produit achetable",
+  "purchasesNoPurchasableSubtitle": "Les produits fabriqués et composés viennent de la production interne. Seules les matières premières, la revente et les emballages s'achètent.",
   "purchasesConfirm": "Confirmer l'achat",
   "purchasesStockLabel": "{quantity} {unit} en stock",
   "@purchasesStockLabel": {
@@ -915,6 +924,8 @@
   "salesSearchProducts": "Rechercher un produit...",
   "salesNoProductsTitle": "Aucun produit à vendre",
   "salesNoProductsSubtitle": "Enregistrez des produits pour pouvoir vendre.",
+  "salesNoSellableTitle": "Aucun produit vendable",
+  "salesNoSellableSubtitle": "Les matières premières et les emballages ne sont pas vendus au comptoir. Changez le type du produit en revente, fabriqué ou composé pour le vendre.",
   "salesConfirm": "Confirmer la vente",
   "saleDetailTitle": "Détails de la vente",
   "saleDetailId": "Vente {id}",

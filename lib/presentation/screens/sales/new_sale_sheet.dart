@@ -33,6 +33,7 @@ import '../../widgets/barcode_scan_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/payment_method_picker.dart';
 import '../../widgets/product_image.dart';
+import '../../widgets/product_type_badge.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/smart_amount.dart';
 import '../../../core/observability/crash_reporting.dart';
@@ -231,10 +232,11 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     final digits = raw.trim().replaceAll(RegExp(r'\D'), '');
     if (digits.isEmpty) return;
 
-    // Só produtos ATIVOS são vendáveis (desativado some do PDV — o
-    // servidor também nega via lock_products_or_raise).
+    // Só produtos ATIVOS e de papel VENDÁVEL são vendáveis no PDV
+    // (desativado some; matéria-prima/embalagem não vão ao balcão) — o
+    // servidor também nega desativados via lock_products_or_raise.
     final products = (ref.read(productsProvider).value ?? const <Product>[])
-        .where((product) => product.isActive)
+        .where((product) => product.isActive && product.type.isSellable)
         .toList();
 
     // 1) Formato de balança: 20 + 5 dígitos do produto + 5 dígitos do valor.
@@ -327,8 +329,10 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     // dispara o pipeline de barcode.
     if (digits.contains(RegExp(r'\D'))) return;
 
+    // Mesmo papel VENDÁVEL do catálogo: o quick-add por PLU nunca resolve
+    // matéria-prima/embalagem (que não são vendidas no balcão).
     final active = (ref.read(productsProvider).value ?? const <Product>[])
-        .where((product) => product.isActive);
+        .where((product) => product.isActive && product.type.isSellable);
     // Resolve ANTES de delegar: se o texto não casa com nenhum produto
     // (nem por id, nem por código), é busca por nome — sai sem tocar nada.
     final digitsKey = ScaleBarcode.lookupKey(digits);
@@ -571,9 +575,12 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
               ],
             ),
             data: (all) {
-              // Só produtos ATIVOS (desativado não pode ser vendido — o
-              // servidor também nega via lock_products_or_raise).
-              final active = all.where((product) => product.isActive).toList();
+              // Só produtos ATIVOS e de papel VENDÁVEL (desativado não pode
+              // ser vendido; matéria-prima/embalagem não vão ao balcão — o
+              // servidor também nega desativados via lock_products_or_raise).
+              final active = all
+                  .where((product) => product.isActive && product.type.isSellable)
+                  .toList();
               // Query NORMALIZADO para minúsculas (mesmo padrão da busca
               // de Produtos): sem isso, digitar 'CANETA' não achava o
               // produto no balcão.
@@ -587,6 +594,10 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                               product.code.toLowerCase().contains(query),
                         )
                         .toList();
+              // Há produtos, mas NENHUM vendável (matéria-prima/embalagem)
+              // → estado vazio explicativo em vez de "sem produtos".
+              final roleOnly =
+                  active.isEmpty && all.any((product) => product.isActive);
 
               // Corpo rolável único: scanner + busca + conteúdo (estado
               // vazio OU catálogo) — em ecrãs baixos tudo rola junto, o
@@ -603,9 +614,15 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: EmptyState(
-                        icon: Icons.search_off,
-                        title: l10n.salesNoProductsTitle,
-                        subtitle: l10n.salesNoProductsSubtitle,
+                        icon: roleOnly
+                            ? Icons.category_outlined
+                            : Icons.search_off,
+                        title: roleOnly
+                            ? l10n.salesNoSellableTitle
+                            : l10n.salesNoProductsTitle,
+                        subtitle: roleOnly
+                            ? l10n.salesNoSellableSubtitle
+                            : l10n.salesNoProductsSubtitle,
                       ),
                     )
                   else
@@ -955,6 +972,11 @@ class _CartProductRow extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
+                // Fase 1: papel do produto no balcão — o operador vê o selo
+                // do tipo (revenda, produzido ou composto) em TODA a linha,
+                // sem abrir o cadastro.
+                const SizedBox(height: 2),
+                ProductTypeBadge(type: product.type),
               ],
             ),
           ),
@@ -1090,6 +1112,10 @@ class _CartPill extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
+                // Fase 1: a pill do carrinho também mostra o papel do
+                // produto — o resumo em progresso nunca esconde o tipo.
+                const SizedBox(height: 2),
+                ProductTypeBadge(type: product.type),
               ],
             ),
           ),

@@ -1050,6 +1050,27 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsFilterInactive => 'Inactivos';
 
   @override
+  String get productsTypeLabel => 'Tipo de produto';
+
+  @override
+  String get productsTypeRawMaterial => 'Matéria-prima';
+
+  @override
+  String get productsTypeResale => 'Revenda';
+
+  @override
+  String get productsTypeManufactured => 'Produzido';
+
+  @override
+  String get productsTypeComposite => 'Composto';
+
+  @override
+  String get productsTypePackaging => 'Embalagem';
+
+  @override
+  String get productsFilterType => 'Tipo';
+
+  @override
   String productsHeaderCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -1316,6 +1337,13 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get purchasesNoProductsSubtitle =>
       'Cadastre produtos para registar compras.';
+
+  @override
+  String get purchasesNoPurchasableTitle => 'Nenhum produto comprável';
+
+  @override
+  String get purchasesNoPurchasableSubtitle =>
+      'Produtos produzidos e compostos vêm da produção interna. Apenas matéria-prima, revenda e embalagem entram por compra.';
 
   @override
   String get purchasesConfirm => 'Confirmar compra';
@@ -1879,6 +1907,13 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get salesNoProductsSubtitle =>
       'Cadastre produtos para registar vendas.';
+
+  @override
+  String get salesNoSellableTitle => 'Nenhum produto vendável';
+
+  @override
+  String get salesNoSellableSubtitle =>
+      'Matéria-prima e embalagem não são vendidas no balcão. Mude o tipo do produto para revenda, produzido ou composto para o vender.';
 
   @override
   String get salesConfirm => 'Confirmar venda';

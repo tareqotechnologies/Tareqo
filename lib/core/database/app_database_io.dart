@@ -149,7 +149,7 @@ abstract final class AppDatabase {
   static void initialize(Database db) => _migrate(db);
 
   /// Versão atual do schema (`PRAGMA user_version`).
-  static const int currentSchemaVersion = 6;
+  static const int currentSchemaVersion = 7;
 
   /// Migrações versionadas, em ordem crescente de versão.
   ///
@@ -187,6 +187,11 @@ abstract final class AppDatabase {
       version: 6,
       description: 'fila offline (A3) — backoff exponencial + dead-letter',
       up: _schemaV6,
+    ),
+    const _Migration(
+      version: 7,
+      description: 'tipo do produto (Fase 1) — coluna products.type',
+      up: _schemaV7,
     ),
   ];
 
@@ -342,6 +347,15 @@ abstract final class AppDatabase {
  -- das compras, mas permanece na lista com o selo "Inativo" — o
  -- estoque é preservado para a reativação.
  is_active INTEGER NOT NULL DEFAULT 1,
+ -- Fase 1: tipo estrutural do produto ('rawMaterial'|'resale'|
+ -- 'manufactured'|'composite'|'packaging' — nome do enum). DEFAULT
+ -- 'resale': produtos antigos já eram compráveis e vendáveis e
+ -- continuam funcionando exatamente igual. SEM CHECK de enum:
+ -- SQLite não altera CHECKs sem rebuild da tabela — valores futuros
+ -- (nova versão do app) não podem ficar bloqueados pela restrição
+ -- antiga; a validação vive no datasource (valor desconhecido →
+ -- default resale, nunca lança).
+ type TEXT NOT NULL DEFAULT 'resale',
  -- Foto do produto (opcional): caminho de arquivo local (modo
  -- SQLite) ou URL do Supabase Storage (modo SaaS). Vazio = sem foto.
  image_path TEXT
@@ -665,6 +679,18 @@ abstract final class AppDatabase {
       db.execute('ALTER TABLE products ADD COLUMN image_path TEXT');
     }
 
+    // Migração leve (Fase 1 — tipo do produto): bancos criados antes da
+    // coluna `type` recebem a coluna com DEFAULT 'resale' — produtos
+    // antigos já eram compráveis e vendáveis e continuam funcionando
+    // igual (sem classificação automática sem confirmação). Idempotente
+    // para bancos novos, que já criam a coluna no CREATE TABLE acima.
+    if (!productColumns.any((row) => row['name'] == 'type')) {
+      db.execute(
+        "ALTER TABLE products ADD COLUMN type TEXT NOT NULL "
+        "DEFAULT 'resale'",
+      );
+    }
+
     // Migração leve W11: bancos criados antes do `expiry_date` (validade
     // opcional por item de compra) recebem a coluna NULL. Idempotente.
     final purchaseItemColumns = db.select('PRAGMA table_info(purchase_items)');
@@ -884,6 +910,25 @@ abstract final class AppDatabase {
       'CREATE INDEX IF NOT EXISTS idx_pending_ops_due '
       'ON pending_ops(dead, next_retry_at)',
     );
+  }
+
+  /// v7 — Tipo do produto (Fase 1 — pastelaria/produção).
+  ///
+  /// Coluna `products.type` (nome do enum ProductType) com DEFAULT
+  /// 'resale' — produtos antigos já eram compráveis e vendáveis e
+  /// continuam funcionando exatamente igual (sem classificação automática
+  /// sem confirmação; o dono reclassifica produto a produto na UI).
+  /// Idempotente para bancos novos e legados (guarda por presença de
+  /// coluna — mesmo padrão da v5/v6).
+  static void _schemaV7(Database db) {
+    final columns = db.select('PRAGMA table_info(products)');
+    final names = columns.map((row) => row['name']).toSet();
+    if (!names.contains('type')) {
+      db.execute(
+        "ALTER TABLE products ADD COLUMN type TEXT NOT NULL "
+        "DEFAULT 'resale'",
+      );
+    }
   }
 
   /// v5 — Gestão de funcionários (add-on `ao_employee_mgmt`).

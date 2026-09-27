@@ -20,11 +20,13 @@ import 'package:tareqo/domain/repositories/i_customer_repository.dart';
 import 'package:tareqo/domain/repositories/i_debt_processor.dart';
 import 'package:tareqo/domain/repositories/i_financial_transaction_repository.dart';
 import 'package:tareqo/domain/repositories/i_product_repository.dart';
+import 'package:tareqo/domain/repositories/i_purchase_processor.dart';
 import 'package:tareqo/domain/repositories/i_sale_processor.dart';
 import 'package:tareqo/domain/repositories/i_sale_repository.dart';
 import 'package:tareqo/domain/repositories/i_unit_of_work.dart';
 import 'package:tareqo/domain/usecases/add_customer_use_case.dart';
 import 'package:tareqo/domain/usecases/add_product_use_case.dart';
+import 'package:tareqo/domain/usecases/add_purchase_use_case.dart';
 import 'package:tareqo/domain/usecases/close_cash_register_use_case.dart';
 import 'package:tareqo/domain/usecases/delete_customer_use_case.dart';
 import 'package:tareqo/domain/usecases/fifo_stock_use_case.dart';
@@ -54,6 +56,7 @@ import 'package:tareqo/presentation/screens/customers/customers_screen.dart';
 import 'package:tareqo/presentation/screens/dashboard/dashboard_screen.dart';
 import 'package:tareqo/presentation/screens/financial/financial_screen.dart';
 import 'package:tareqo/presentation/screens/products/product_list_screen.dart';
+import 'package:tareqo/presentation/screens/purchases/add_purchase_sheet.dart';
 import 'package:tareqo/presentation/screens/sales/new_sale_sheet.dart';
 import 'package:tareqo/presentation/screens/sales/sales_screen.dart';
 import 'fake_stock_lot_repository.dart';
@@ -220,6 +223,17 @@ class FakeProcessSaleUseCase implements ProcessSaleUseCase {
   ISaleAtomicProcessor? get processor => null;
 }
 
+/// Compra sem efeito — o golden é leitura e nunca confirma o carrinho.
+class FakeProcessPurchaseUseCase implements ProcessPurchaseUseCase {
+  const FakeProcessPurchaseUseCase();
+
+  @override
+  IPurchaseAtomicProcessor? get processor => null;
+
+  @override
+  Future<void> call(Purchase purchase) async {}
+}
+
 class FakeSalesRepository implements ISaleRepository {
   FakeSalesRepository([List<Sale>? sales]) : _sales = sales ?? demoSales;
 
@@ -355,6 +369,26 @@ Widget newSaleGoldenApp({ThemeData? theme, Locale? locale}) {
       theme: theme,
       locale: locale ?? const Locale('pt'),
       home: const Scaffold(body: NewSaleSheet()),
+    ),
+  );
+}
+
+/// Carrinho de NOVA COMPRA (AddPurchaseSheet) pronto para golden — mesma
+/// tela real aberta pelo FAB de Compras (mais um sheet de tela cheia).
+/// [locale] permite exercitar traduções (ex.: teste de overflow em fr).
+Widget addPurchaseGoldenApp({ThemeData? theme, Locale? locale}) {
+  return ProviderScope(
+    overrides: [
+      ...storeContextOverrides(),
+      getProductsUseCaseProvider.overrideWithValue(FakeGetProductsUseCase()),
+      processPurchaseUseCaseProvider.overrideWithValue(
+        const FakeProcessPurchaseUseCase(),
+      ),
+    ],
+    child: testApp(
+      theme: theme,
+      locale: locale ?? const Locale('pt'),
+      home: const Scaffold(body: AddPurchaseSheet()),
     ),
   );
 }

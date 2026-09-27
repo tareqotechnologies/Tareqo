@@ -41,7 +41,17 @@ mixin _$Product {
 // lista de Produtos com o selo "Inativo" — o dono/gerente pode
 // reativá-lo quando quiser. O estoque existente é preservado (volta a
 // ser vendível na reativação).
- bool get isActive;
+ bool get isActive;// Tipo estrutural do produto (Fase 1). Default [ProductType.resale]
+// por compatibilidade: produtos antigos (sem a coluna no banco) já
+// eram compráveis e vendáveis — a leitura preserva o comportamento;
+// o JSON externo sem o campo também cai no default.
+//
+// `unknownEnumValue`: um valor NÃO reconhecido (ex.: gravado por uma
+// versão mais nova do app) cai em [ProductType.resale] em vez de
+// lançar `ArgumentError` — mesma tolerância dos datasources SQLite e
+// Supabase, que fazem `firstWhere(...orElse: resale)` ao mapear a
+// coluna `type`.
+@JsonKey(unknownEnumValue: ProductType.resale) ProductType get type;
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,16 +64,16 @@ $ProductCopyWith<Product> get copyWith => _$ProductCopyWithImpl<Product>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.purchasePriceCents, purchasePriceCents) || other.purchasePriceCents == purchasePriceCents)&&(identical(other.salePriceCents, salePriceCents) || other.salePriceCents == salePriceCents)&&(identical(other.stockQuantity, stockQuantity) || other.stockQuantity == stockQuantity)&&(identical(other.code, code) || other.code == code)&&(identical(other.vendaPorFracao, vendaPorFracao) || other.vendaPorFracao == vendaPorFracao)&&(identical(other.unitLabel, unitLabel) || other.unitLabel == unitLabel)&&(identical(other.isActive, isActive) || other.isActive == isActive));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.purchasePriceCents, purchasePriceCents) || other.purchasePriceCents == purchasePriceCents)&&(identical(other.salePriceCents, salePriceCents) || other.salePriceCents == salePriceCents)&&(identical(other.stockQuantity, stockQuantity) || other.stockQuantity == stockQuantity)&&(identical(other.code, code) || other.code == code)&&(identical(other.vendaPorFracao, vendaPorFracao) || other.vendaPorFracao == vendaPorFracao)&&(identical(other.unitLabel, unitLabel) || other.unitLabel == unitLabel)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.type, type) || other.type == type));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,storeId,name,description,imagePath,purchasePriceCents,salePriceCents,stockQuantity,code,vendaPorFracao,unitLabel,isActive);
+int get hashCode => Object.hash(runtimeType,id,storeId,name,description,imagePath,purchasePriceCents,salePriceCents,stockQuantity,code,vendaPorFracao,unitLabel,isActive,type);
 
 @override
 String toString() {
-  return 'Product(id: $id, storeId: $storeId, name: $name, description: $description, imagePath: $imagePath, purchasePriceCents: $purchasePriceCents, salePriceCents: $salePriceCents, stockQuantity: $stockQuantity, code: $code, vendaPorFracao: $vendaPorFracao, unitLabel: $unitLabel, isActive: $isActive)';
+  return 'Product(id: $id, storeId: $storeId, name: $name, description: $description, imagePath: $imagePath, purchasePriceCents: $purchasePriceCents, salePriceCents: $salePriceCents, stockQuantity: $stockQuantity, code: $code, vendaPorFracao: $vendaPorFracao, unitLabel: $unitLabel, isActive: $isActive, type: $type)';
 }
 
 
@@ -74,7 +84,7 @@ abstract mixin class $ProductCopyWith<$Res>  {
   factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
 @useResult
 $Res call({
- String id, String storeId, String name, String description, String imagePath, int purchasePriceCents, int salePriceCents, int stockQuantity, String code, bool vendaPorFracao, String unitLabel, bool isActive
+ String id, String storeId, String name, String description, String imagePath, int purchasePriceCents, int salePriceCents, int stockQuantity, String code, bool vendaPorFracao, String unitLabel, bool isActive,@JsonKey(unknownEnumValue: ProductType.resale) ProductType type
 });
 
 
@@ -91,7 +101,7 @@ class _$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? name = null,Object? description = null,Object? imagePath = null,Object? purchasePriceCents = null,Object? salePriceCents = null,Object? stockQuantity = null,Object? code = null,Object? vendaPorFracao = null,Object? unitLabel = null,Object? isActive = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? storeId = null,Object? name = null,Object? description = null,Object? imagePath = null,Object? purchasePriceCents = null,Object? salePriceCents = null,Object? stockQuantity = null,Object? code = null,Object? vendaPorFracao = null,Object? unitLabel = null,Object? isActive = null,Object? type = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
@@ -105,7 +115,8 @@ as int,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nu
 as String,vendaPorFracao: null == vendaPorFracao ? _self.vendaPorFracao : vendaPorFracao // ignore: cast_nullable_to_non_nullable
 as bool,unitLabel: null == unitLabel ? _self.unitLabel : unitLabel // ignore: cast_nullable_to_non_nullable
 as String,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as ProductType,
   ));
 }
 
@@ -190,10 +201,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  String name,  String description,  String imagePath,  int purchasePriceCents,  int salePriceCents,  int stockQuantity,  String code,  bool vendaPorFracao,  String unitLabel,  bool isActive)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String storeId,  String name,  String description,  String imagePath,  int purchasePriceCents,  int salePriceCents,  int stockQuantity,  String code,  bool vendaPorFracao,  String unitLabel,  bool isActive, @JsonKey(unknownEnumValue: ProductType.resale)  ProductType type)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imagePath,_that.purchasePriceCents,_that.salePriceCents,_that.stockQuantity,_that.code,_that.vendaPorFracao,_that.unitLabel,_that.isActive);case _:
+return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imagePath,_that.purchasePriceCents,_that.salePriceCents,_that.stockQuantity,_that.code,_that.vendaPorFracao,_that.unitLabel,_that.isActive,_that.type);case _:
   return orElse();
 
 }
@@ -211,10 +222,10 @@ return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imageP
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  String name,  String description,  String imagePath,  int purchasePriceCents,  int salePriceCents,  int stockQuantity,  String code,  bool vendaPorFracao,  String unitLabel,  bool isActive)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String storeId,  String name,  String description,  String imagePath,  int purchasePriceCents,  int salePriceCents,  int stockQuantity,  String code,  bool vendaPorFracao,  String unitLabel,  bool isActive, @JsonKey(unknownEnumValue: ProductType.resale)  ProductType type)  $default,) {final _that = this;
 switch (_that) {
 case _Product():
-return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imagePath,_that.purchasePriceCents,_that.salePriceCents,_that.stockQuantity,_that.code,_that.vendaPorFracao,_that.unitLabel,_that.isActive);case _:
+return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imagePath,_that.purchasePriceCents,_that.salePriceCents,_that.stockQuantity,_that.code,_that.vendaPorFracao,_that.unitLabel,_that.isActive,_that.type);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -231,10 +242,10 @@ return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imageP
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  String name,  String description,  String imagePath,  int purchasePriceCents,  int salePriceCents,  int stockQuantity,  String code,  bool vendaPorFracao,  String unitLabel,  bool isActive)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String storeId,  String name,  String description,  String imagePath,  int purchasePriceCents,  int salePriceCents,  int stockQuantity,  String code,  bool vendaPorFracao,  String unitLabel,  bool isActive, @JsonKey(unknownEnumValue: ProductType.resale)  ProductType type)?  $default,) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imagePath,_that.purchasePriceCents,_that.salePriceCents,_that.stockQuantity,_that.code,_that.vendaPorFracao,_that.unitLabel,_that.isActive);case _:
+return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imagePath,_that.purchasePriceCents,_that.salePriceCents,_that.stockQuantity,_that.code,_that.vendaPorFracao,_that.unitLabel,_that.isActive,_that.type);case _:
   return null;
 
 }
@@ -246,7 +257,7 @@ return $default(_that.id,_that.storeId,_that.name,_that.description,_that.imageP
 @JsonSerializable()
 
 class _Product implements Product {
-  const _Product({required this.id, this.storeId = 'st1', required this.name, this.description = '', this.imagePath = '', required this.purchasePriceCents, required this.salePriceCents, this.stockQuantity = 0, this.code = '', this.vendaPorFracao = false, this.unitLabel = 'un', this.isActive = true});
+  const _Product({required this.id, this.storeId = 'st1', required this.name, this.description = '', this.imagePath = '', required this.purchasePriceCents, required this.salePriceCents, this.stockQuantity = 0, this.code = '', this.vendaPorFracao = false, this.unitLabel = 'un', this.isActive = true, @JsonKey(unknownEnumValue: ProductType.resale) this.type = ProductType.resale});
   factory _Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
 
 @override final  String id;
@@ -287,6 +298,17 @@ class _Product implements Product {
 // reativá-lo quando quiser. O estoque existente é preservado (volta a
 // ser vendível na reativação).
 @override@JsonKey() final  bool isActive;
+// Tipo estrutural do produto (Fase 1). Default [ProductType.resale]
+// por compatibilidade: produtos antigos (sem a coluna no banco) já
+// eram compráveis e vendáveis — a leitura preserva o comportamento;
+// o JSON externo sem o campo também cai no default.
+//
+// `unknownEnumValue`: um valor NÃO reconhecido (ex.: gravado por uma
+// versão mais nova do app) cai em [ProductType.resale] em vez de
+// lançar `ArgumentError` — mesma tolerância dos datasources SQLite e
+// Supabase, que fazem `firstWhere(...orElse: resale)` ao mapear a
+// coluna `type`.
+@override@JsonKey(unknownEnumValue: ProductType.resale) final  ProductType type;
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
@@ -301,16 +323,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.purchasePriceCents, purchasePriceCents) || other.purchasePriceCents == purchasePriceCents)&&(identical(other.salePriceCents, salePriceCents) || other.salePriceCents == salePriceCents)&&(identical(other.stockQuantity, stockQuantity) || other.stockQuantity == stockQuantity)&&(identical(other.code, code) || other.code == code)&&(identical(other.vendaPorFracao, vendaPorFracao) || other.vendaPorFracao == vendaPorFracao)&&(identical(other.unitLabel, unitLabel) || other.unitLabel == unitLabel)&&(identical(other.isActive, isActive) || other.isActive == isActive));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.id, id) || other.id == id)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.purchasePriceCents, purchasePriceCents) || other.purchasePriceCents == purchasePriceCents)&&(identical(other.salePriceCents, salePriceCents) || other.salePriceCents == salePriceCents)&&(identical(other.stockQuantity, stockQuantity) || other.stockQuantity == stockQuantity)&&(identical(other.code, code) || other.code == code)&&(identical(other.vendaPorFracao, vendaPorFracao) || other.vendaPorFracao == vendaPorFracao)&&(identical(other.unitLabel, unitLabel) || other.unitLabel == unitLabel)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.type, type) || other.type == type));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,storeId,name,description,imagePath,purchasePriceCents,salePriceCents,stockQuantity,code,vendaPorFracao,unitLabel,isActive);
+int get hashCode => Object.hash(runtimeType,id,storeId,name,description,imagePath,purchasePriceCents,salePriceCents,stockQuantity,code,vendaPorFracao,unitLabel,isActive,type);
 
 @override
 String toString() {
-  return 'Product(id: $id, storeId: $storeId, name: $name, description: $description, imagePath: $imagePath, purchasePriceCents: $purchasePriceCents, salePriceCents: $salePriceCents, stockQuantity: $stockQuantity, code: $code, vendaPorFracao: $vendaPorFracao, unitLabel: $unitLabel, isActive: $isActive)';
+  return 'Product(id: $id, storeId: $storeId, name: $name, description: $description, imagePath: $imagePath, purchasePriceCents: $purchasePriceCents, salePriceCents: $salePriceCents, stockQuantity: $stockQuantity, code: $code, vendaPorFracao: $vendaPorFracao, unitLabel: $unitLabel, isActive: $isActive, type: $type)';
 }
 
 
@@ -321,7 +343,7 @@ abstract mixin class _$ProductCopyWith<$Res> implements $ProductCopyWith<$Res> {
   factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String storeId, String name, String description, String imagePath, int purchasePriceCents, int salePriceCents, int stockQuantity, String code, bool vendaPorFracao, String unitLabel, bool isActive
+ String id, String storeId, String name, String description, String imagePath, int purchasePriceCents, int salePriceCents, int stockQuantity, String code, bool vendaPorFracao, String unitLabel, bool isActive,@JsonKey(unknownEnumValue: ProductType.resale) ProductType type
 });
 
 
@@ -338,7 +360,7 @@ class __$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? name = null,Object? description = null,Object? imagePath = null,Object? purchasePriceCents = null,Object? salePriceCents = null,Object? stockQuantity = null,Object? code = null,Object? vendaPorFracao = null,Object? unitLabel = null,Object? isActive = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? storeId = null,Object? name = null,Object? description = null,Object? imagePath = null,Object? purchasePriceCents = null,Object? salePriceCents = null,Object? stockQuantity = null,Object? code = null,Object? vendaPorFracao = null,Object? unitLabel = null,Object? isActive = null,Object? type = null,}) {
   return _then(_Product(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,storeId: null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
@@ -352,7 +374,8 @@ as int,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nu
 as String,vendaPorFracao: null == vendaPorFracao ? _self.vendaPorFracao : vendaPorFracao // ignore: cast_nullable_to_non_nullable
 as bool,unitLabel: null == unitLabel ? _self.unitLabel : unitLabel // ignore: cast_nullable_to_non_nullable
 as String,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as ProductType,
   ));
 }
 

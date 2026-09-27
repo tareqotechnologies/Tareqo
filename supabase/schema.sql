@@ -65,6 +65,14 @@ CREATE TABLE IF NOT EXISTS public.products (
   -- compras (lock_products_or_raise nega), mas permanece no histórico com
   -- o estoque preservado para a reativação.
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  -- Fase 1: tipo estrutural do produto (nome do enum ProductType):
+  -- rawMaterial | resale | manufactured | composite | packaging.
+  -- DEFAULT 'resale': produtos antigos já eram compráveis e vendáveis e
+  -- continuam funcionando igual. SEM CHECK de enum (mesma decisão do
+  -- SQLite — ver upgrade.sql, PARTE 34): valores futuros de versões novas
+  -- do app não podem ficar bloqueados pela restrição antiga; a validação
+  -- vive no datasource (valor desconhecido → 'resale', nunca lança).
+  type TEXT NOT NULL DEFAULT 'resale',
   -- Foto do produto (opcional): URL pública do Supabase Storage (modo
   -- SaaS) ou caminho de arquivo local (modo SQLite). Vazio = sem foto.
   image_path TEXT
@@ -905,6 +913,9 @@ CREATE INDEX IF NOT EXISTS idx_products_user_name
   ON public.products (user_id, name);
 CREATE INDEX IF NOT EXISTS idx_products_store
   ON public.products (store_id);
+-- Fase 1: consulta por tipo fica constante na listagem/filtro do catálogo.
+CREATE INDEX IF NOT EXISTS idx_products_store_type
+  ON public.products (store_id, type);
 CREATE INDEX IF NOT EXISTS idx_sales_user_datetime
   ON public.sales (user_id, date_time DESC);
 CREATE INDEX IF NOT EXISTS idx_sales_store

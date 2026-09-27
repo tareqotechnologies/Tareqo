@@ -187,6 +187,15 @@ Perecíveis e validade são o dia a dia de uma mercearia: o estoque precisa sair
 3. **Invariante `stock = Σ lotes`.** O `products.stock_quantity` é sempre a soma dos lotes ativos — verificada por teste (`sql_check.sh`) e pela query read-only do `sql_check_live.sh`. A migração W11 cria um lote inicial (`lot-mig-…`) para cada produto com estoque, então a invariante vale desde o primeiro dia.
 4. **Alertas de validade.** O dashboard mostra **vermelho** (lote vencido com estoque) e **amarelo** (vence em < 30 dias) — ação preventiva antes do prejuízo.
 
+## Por que o tipo do produto é um enum persistido por NOME (Fase 1)?
+
+Uma padaria/pastelaria não trata tudo como item de compra e venda: farinha é matéria-prima consumida pela produção (nunca vendida), pão é produzido internamente (nunca comprado) e um hambúrguer completo é montado a partir de componentes. O papel do produto precisa ser **dado**, não inferência da UI.
+
+1. **Enum, não tabela.** Os valores são fixos e conhecidos em tempo de compilação — um enum (`rawMaterial`, `resale`, `manufactured`, `composite`, `packaging`) dá exhaustividade em `switch`, zero migração de catálogo e nenhuma latência extra. Uma tabela só se justificaria se os tipos fossem configuráveis pelo dono (não é o caso desta fase).
+2. **Persistido pelo NOME, não pelo índice.** SQLite/Postgres/JSON gravam `resale`/`rawMaterial` — reordenar o enum ou inserir um valor no meio nunca corrompe linhas existentes (igual a `PaymentMethod`). `@Default(resale)` e `@JsonKey(unknownEnumValue: resale)` preservam produtos legados e toleram o campo ausente.
+3. **Sem `CHECK` de enum no banco.** SQLite não altera um `CHECK` sem rebuild da tabela: um tipo adicionado numa versão nova do app ficaria bloqueado pela restrição antiga e quebraria a gravação. A validação fica no datasource, onde um valor desconhecido vira `resale` (mesma `orElse` do Postgres e do SQLite) — **a leitura nunca lança**.
+4. **Papéis derivados no domínio.** `isPurchasable`/`isSellable` são getters do enum (não condições espalhadas nas telas): compras repõe matéria-prima/revenda/embalagem, o PDV vende revenda/produzido/composto. O servidor continua negando produtos inativos (`lock_products_or_raise`); a filtragem por papel é de UI/seleção de catálogo.
+
 ## Por que o formato de balança `20PPPPPWWWWW`?
 
 É o padrão das balanças etiquetadoras de mercado: prefixo `20`, 5 dígitos do produto (PLU) e 5 do valor da pesagem.

@@ -292,6 +292,109 @@ void main() {
         });
       },
     );
+
+    // ---- Fase 1: tipo do produto (coluna `type`) ----
+    // O datasource remoto lê/grava o enum ProductType PELO NOME e trata
+    // valor ausente/desconhecido como 'resale' — mesma regra do SQLite.
+    Map<String, dynamic> rowWithType(String id, String name, Object? type) => {
+      ...row(id, name),
+      'type': type,
+    };
+
+    test('select do getAll inclui a coluna type', () async {
+      stub.handler = (path, request) => path.contains('products')
+          ? FakeResponse([row('p1', 'Arroz')])
+          : FakeResponse(<dynamic>[]);
+
+      await ds.getAll(storeId: 'st1');
+
+      final select = stub.requests.first.url.queryParameters['select'];
+      expect(select, isNotNull);
+      expect(select, contains('type'));
+    });
+
+    test(
+      'getAll mapeia o type e cai em resale para valor legado/desconhecido',
+      () async {
+        stub.handler = (path, request) {
+          if (path.contains('products')) {
+            return FakeResponse([
+              rowWithType('p1', 'Farinha', 'rawMaterial'),
+              rowWithType('p2', 'Água', 'resale'),
+              // Bancos antigos: coluna ausente/NULL.
+              rowWithType('p3', 'Antigo', null),
+              // Escrito por versão futura do app: enum desconhecido.
+              rowWithType('p4', 'Futuro', 'tipoDeVersaoFutura'),
+            ]);
+          }
+          return FakeResponse(<dynamic>[]);
+        };
+
+        final products = await ds.getAll(storeId: 'st1');
+        final typeById = {for (final p in products) p.id: p.type};
+
+        expect(typeById['p1'], ProductType.rawMaterial);
+        expect(typeById['p2'], ProductType.resale);
+        expect(typeById['p3'], ProductType.resale);
+        expect(typeById['p4'], ProductType.resale);
+      },
+    );
+
+    test('add grava o type pelo nome do enum', () async {
+      final bodies = <Map<String, dynamic>>[];
+      stub.handler = (path, request) {
+        if (path.contains('products')) {
+          bodies.add(
+            jsonDecode((request as http.Request).body)
+                as Map<String, dynamic>,
+          );
+          return FakeResponse(<dynamic>[]);
+        }
+        return FakeResponse(<dynamic>[]);
+      };
+
+      await ds.add(
+        const Product(
+          id: 'p1',
+          storeId: 'st1',
+          name: 'Farinha',
+          purchasePriceCents: 100,
+          salePriceCents: 200,
+          type: ProductType.rawMaterial,
+        ),
+      );
+
+      expect(bodies.single['type'], 'rawMaterial');
+    });
+
+    test('update grava o type pelo nome do enum', () async {
+      final bodies = <Map<String, dynamic>>[];
+      stub.handler = (path, request) {
+        if (path.contains('products')) {
+          bodies.add(
+            jsonDecode((request as http.Request).body)
+                as Map<String, dynamic>,
+          );
+          return FakeResponse([
+            {'id': 'p1'},
+          ]);
+        }
+        return FakeResponse(<dynamic>[]);
+      };
+
+      await ds.update(
+        const Product(
+          id: 'p1',
+          storeId: 'st1',
+          name: 'Hambúrguer',
+          purchasePriceCents: 100,
+          salePriceCents: 200,
+          type: ProductType.composite,
+        ),
+      );
+
+      expect(bodies.single['type'], 'composite');
+    });
   });
 
   group('CustomerSupabaseDataSourceImpl', () {

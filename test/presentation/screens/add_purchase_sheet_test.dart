@@ -390,4 +390,97 @@ void main() {
     expect(processPurchase.lastPurchase?.totalAmountCents, 50);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'compras só mostram produtos de papel COMPRÁVEL (esconde produzido/composto)',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildApp(
+          products: const [
+            Product(
+              id: 'p1',
+              name: 'Farinha',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+              type: ProductType.rawMaterial,
+            ),
+            Product(
+              id: 'p2',
+              name: 'Saco plástico',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+              type: ProductType.packaging,
+            ),
+            Product(
+              id: 'p3',
+              name: 'Água',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+              type: ProductType.resale,
+            ),
+            Product(
+              id: 'p4',
+              name: 'Pão',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+              type: ProductType.manufactured,
+            ),
+            Product(
+              id: 'p5',
+              name: 'Hambúrguer',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+              type: ProductType.composite,
+            ),
+          ],
+        ),
+      );
+      await _openSheet(tester);
+
+      // Compraveis: matéria-prima, revenda e embalagem.
+      expect(find.text('Farinha'), findsOneWidget);
+      expect(find.text('Água'), findsOneWidget);
+      expect(find.text('Saco plástico'), findsOneWidget);
+      // Não compraveis: produzido e composto (vêm da produção interna).
+      expect(find.text('Pão'), findsNothing);
+      expect(find.text('Hambúrguer'), findsNothing);
+
+      // Selo do TIPO em TODAS as linhas das compras — inclui Revenda.
+      expect(find.text('Matéria-prima'), findsOneWidget);
+      expect(find.text('Embalagem'), findsOneWidget);
+      expect(find.text('Revenda'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'compras sem produtos compráveis mostram estado vazio explicativo (por papel)',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildApp(
+          products: const [
+            Product(
+              id: 'p1',
+              name: 'Pão',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+              type: ProductType.manufactured,
+            ),
+            Product(
+              id: 'p2',
+              name: 'Hambúrguer',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+              type: ProductType.composite,
+            ),
+          ],
+        ),
+      );
+      await _openSheet(tester);
+
+      // Estado vazio ESPECÍFICO: há produtos, mas nenhum é comprável.
+      expect(find.text('Nenhum produto comprável'), findsOneWidget);
+      expect(find.text('Nenhum produto para comprar'), findsNothing);
+      expect(find.text('Pão'), findsNothing);
+    },
+  );
 }

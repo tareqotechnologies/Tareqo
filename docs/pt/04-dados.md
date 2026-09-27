@@ -143,7 +143,8 @@ CREATE TABLE products (
  stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0), -- milésimos (W11)
  code TEXT, -- PLU/código de balança etiquetadora (W11, opcional)
  venda_por_fracao INTEGER NOT NULL DEFAULT 0, -- 0/1: venda por peso (W11)
- unit_label TEXT NOT NULL DEFAULT 'un' -- kg | un (W11)
+ unit_label TEXT NOT NULL DEFAULT 'un', -- kg | un (W11)
+ type TEXT NOT NULL DEFAULT 'resale' -- tipo estrutural (Fase 1): nome do enum ProductType
 );
 
 CREATE TABLE sales (
@@ -294,6 +295,7 @@ Os `CHECK` (`stock_quantity >= 0`, `amount >= 0`, `quantity > 0`) são a **salva
 8. **`purchases.payment_method`** — forma de pagamento do fornecedor (mesmo enum de vendas), adicionada como `'cash'` (compras antigas eram despesas imediatas à vista);
 9. **`sales.status` + `sales.cancelled_at`** (anulação de venda) — `status` com `DEFAULT 'active'` (todas as vendas existentes são ativas — nunca foram anuladas) e `cancelled_at` NULL. Guard idempotente: presença da coluna `status`;
 10. **W11 (FIFO + validade + milésimos)** — bancos antigos recebem as colunas `code`/`venda_por_fracao`/`unit_label` (products) e `expiry_date` (purchase_items); **todas as quantidades** (products, sale_items, purchase_items) são convertidas de unidades inteiras para **milésimos (×1000)**; e cada produto com estoque ganha um **lote inicial** (`lot-mig-…`, sem validade, custo = preço de compra) para a invariante `stock = Σ lotes` valer desde o primeiro dia. Guard idempotente: presença da coluna `code` (adicionada só nesta migração) — a reconversão ×1000 nunca reexecuta.
+11. **Fase 1 (tipo estrutural do produto)** — bancos antigos recebem a coluna `products.type` com `DEFAULT 'resale'` (produtos existentes já eram compráveis e vendáveis e **não** são reclassificados automaticamente). **Sem `CHECK` de enum**: a validação vive no datasource (`firstWhere(...orElse: resale)`), então um valor futuro de uma versão nova do app não fica bloqueado pela restrição antiga nem quebra a leitura. Guard idempotente: presença da coluna `type`; `PRAGMA user_version` passa a **7** (`AppDatabase.currentSchemaVersion`).
 
 As migrações de numeração rodam **depois** da de `store_id` (os backfills referenciam `store_id`). Todas usam `PRAGMA table_info` para verificar a coluna antes — **seguras para re-execução** (bancos novos já criam as colunas no `CREATE TABLE`).
 

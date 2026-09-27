@@ -447,6 +447,13 @@
   "productsFilterMaxPrice": "Max price",
   "productsFilterApply": "Apply",
   "productsFilterInactive": "Inactive",
+  "productsTypeLabel": "Product type",
+  "productsTypeRawMaterial": "Raw material",
+  "productsTypeResale": "Resale",
+  "productsTypeManufactured": "Manufactured",
+  "productsTypeComposite": "Composite",
+  "productsTypePackaging": "Packaging",
+  "productsFilterType": "Type",
   "productsHeaderCount": "{count, plural, =1{1 product} other{{count} products}}",
   "@productsHeaderCount": {
     "placeholders": {
@@ -592,6 +599,8 @@
   "purchasesSupplierLabel": "Supplier",
   "purchasesNoProductsTitle": "No products to buy",
   "purchasesNoProductsSubtitle": "Register products to record purchases.",
+  "purchasesNoPurchasableTitle": "No purchasable products",
+  "purchasesNoPurchasableSubtitle": "Manufactured and composite products come from internal production. Only raw materials, resale and packaging items are bought.",
   "purchasesConfirm": "Confirm purchase",
   "purchasesStockLabel": "{quantity} {unit} in stock",
   "@purchasesStockLabel": {
@@ -915,6 +924,8 @@
   "salesSearchProducts": "Search product...",
   "salesNoProductsTitle": "No products to sell",
   "salesNoProductsSubtitle": "Register products to record sales.",
+  "salesNoSellableTitle": "No sellable products",
+  "salesNoSellableSubtitle": "Raw materials and packaging are not sold at the counter. Change the product type to resale, manufactured or composite to sell it.",
   "salesConfirm": "Confirm sale",
   "saleDetailTitle": "Sale details",
   "saleDetailId": "Sale {id}",

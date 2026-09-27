@@ -24,6 +24,7 @@ import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../widgets/smart_amount.dart';
 import '../../widgets/status_chip.dart';
+import '../../widgets/product_type_badge.dart';
 import '../../widgets/semantics_composed.dart';
 import 'product_form_sheets.dart';
 
@@ -148,6 +149,10 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                         product.vendaPorFracao) ||
                     (_advanced.stockType == _StockTypeFilter.unit &&
                         !product.vendaPorFracao);
+                // Fase 1: filtra pelo tipo estrutural do produto.
+                final matchesType =
+                    _advanced.type == _ProductTypeFilter.all ||
+                    product.type == _advanced.type.value;
                 final matchesAvailability =
                     _advanced.availability == _AvailabilityFilter.all ||
                     (_advanced.availability == _AvailabilityFilter.available &&
@@ -168,6 +173,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 return matchesQuery &&
                     matchesStatus &&
                     matchesStockType &&
+                    matchesType &&
                     matchesAvailability &&
                     matchesPrice;
               }).toList()..sort(
@@ -264,6 +270,36 @@ enum _ProductFilter {
   };
 }
 
+/// Filtro por TIPO estrutural do produto (Fase 1) — matéria-prima,
+/// revenda, produzido, composto, embalagem. `all` não filtra.
+enum _ProductTypeFilter {
+  all,
+  rawMaterial,
+  resale,
+  manufactured,
+  composite,
+  packaging;
+
+  String label(AppLocalizations l10n) => switch (this) {
+    _ProductTypeFilter.all => l10n.productsFilterAll,
+    _ProductTypeFilter.rawMaterial => l10n.productsTypeRawMaterial,
+    _ProductTypeFilter.resale => l10n.productsTypeResale,
+    _ProductTypeFilter.manufactured => l10n.productsTypeManufactured,
+    _ProductTypeFilter.composite => l10n.productsTypeComposite,
+    _ProductTypeFilter.packaging => l10n.productsTypePackaging,
+  };
+
+  /// Tipo de domínio correspondente (`null` para `all` — não filtra).
+  ProductType? get value => switch (this) {
+    _ProductTypeFilter.all => null,
+    _ProductTypeFilter.rawMaterial => ProductType.rawMaterial,
+    _ProductTypeFilter.resale => ProductType.resale,
+    _ProductTypeFilter.manufactured => ProductType.manufactured,
+    _ProductTypeFilter.composite => ProductType.composite,
+    _ProductTypeFilter.packaging => ProductType.packaging,
+  };
+}
+
 /// Filtros avançados — imutável, copiado no submit.
 /// Contém TODOS os filtros da tela (incluindo o antigo filtro rápido).
 class _AdvancedFilters {
@@ -272,6 +308,7 @@ class _AdvancedFilters {
     this.status = _ProductFilter.all,
     this.stockType = _StockTypeFilter.all,
     this.availability = _AvailabilityFilter.all,
+    this.type = _ProductTypeFilter.all,
     this.minPriceCents,
     this.maxPriceCents,
   });
@@ -280,6 +317,8 @@ class _AdvancedFilters {
   final _ProductFilter status;
   final _StockTypeFilter stockType;
   final _AvailabilityFilter availability;
+  // Fase 1: filtro por tipo estrutural do produto.
+  final _ProductTypeFilter type;
   final int? minPriceCents;
   final int? maxPriceCents;
 
@@ -288,6 +327,7 @@ class _AdvancedFilters {
       status != _ProductFilter.all ||
       stockType != _StockTypeFilter.all ||
       availability != _AvailabilityFilter.all ||
+      type != _ProductTypeFilter.all ||
       minPriceCents != null ||
       maxPriceCents != null;
 
@@ -296,6 +336,7 @@ class _AdvancedFilters {
     _ProductFilter? status,
     _StockTypeFilter? stockType,
     _AvailabilityFilter? availability,
+    _ProductTypeFilter? type,
     int? minPriceCents,
     int? maxPriceCents,
   }) {
@@ -304,6 +345,7 @@ class _AdvancedFilters {
       status: status ?? this.status,
       stockType: stockType ?? this.stockType,
       availability: availability ?? this.availability,
+      type: type ?? this.type,
       minPriceCents: minPriceCents ?? this.minPriceCents,
       maxPriceCents: maxPriceCents ?? this.maxPriceCents,
     );
@@ -435,6 +477,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   late _ProductFilter _status;
   late _StockTypeFilter _stockType;
   late _AvailabilityFilter _availability;
+  late _ProductTypeFilter _type;
   late final TextEditingController _minPriceController;
   late final TextEditingController _maxPriceController;
 
@@ -445,6 +488,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
     _status = widget.initial.status;
     _stockType = widget.initial.stockType;
     _availability = widget.initial.availability;
+    _type = widget.initial.type;
     _minPriceController = TextEditingController(
       text: widget.initial.minPriceCents != null
           ? Money.toReais(widget.initial.minPriceCents!).toStringAsFixed(2)
@@ -477,6 +521,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
         status: _status,
         stockType: _stockType,
         availability: _availability,
+        type: _type,
         minPriceCents: _parsePrice(_minPriceController.text),
         maxPriceCents: _parsePrice(_maxPriceController.text),
       ),
@@ -489,6 +534,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
       _status = _ProductFilter.all;
       _stockType = _StockTypeFilter.all;
       _availability = _AvailabilityFilter.all;
+      _type = _ProductTypeFilter.all;
       _minPriceController.clear();
       _maxPriceController.clear();
     });
@@ -577,6 +623,28 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                           _StockTypeFilter.unit => Icons.inventory_2_outlined,
                         },
                         onChanged: (f) => setState(() => _stockType = f),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Fase 1: filtro por TIPO estrutural do produto.
+                  SheetSection(
+                    icon: Icons.category_outlined,
+                    title: l10n.productsFilterType,
+                    children: [
+                      _FilterChipGroup<_ProductTypeFilter>(
+                        options: _ProductTypeFilter.values,
+                        selected: _type,
+                        labelOf: (f) => f.label(l10n),
+                        icon: (f) => switch (f) {
+                          _ProductTypeFilter.all => Icons.all_inclusive_rounded,
+                          _ProductTypeFilter.rawMaterial => Icons.grain,
+                          _ProductTypeFilter.resale => Icons.storefront_outlined,
+                          _ProductTypeFilter.manufactured => Icons.bakery_dining_outlined,
+                          _ProductTypeFilter.composite => Icons.lunch_dining_outlined,
+                          _ProductTypeFilter.packaging => Icons.inventory_outlined,
+                        },
+                        onChanged: (f) => setState(() => _type = f),
                       ),
                     ],
                   ),
@@ -785,6 +853,14 @@ class _ProductTileState extends State<_ProductTile> {
                               color: scheme.outline,
                               icon: Icons.block_outlined,
                             ),
+                          ],
+                          // Fase 1: selo do tipo — matérias-primas,
+                          // produzidos, compostos e embalagens são
+                          // identificáveis na lista (revenda fica sem selo:
+                          // é o estado comum do varejo, evitar ruído).
+                          if (_product.type != ProductType.resale) ...[
+                            const SizedBox(height: 4),
+                            ProductTypeBadge(type: _product.type),
                           ],
                         ],
                       ),

@@ -23,6 +23,7 @@ import '../../widgets/app_text_field.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/payment_method_picker.dart';
+import '../../widgets/product_type_badge.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/smart_amount.dart';
 import '../../../core/observability/crash_reporting.dart';
@@ -323,10 +324,15 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                 ),
               ),
               data: (all) {
-                // Só produtos ATIVOS (desativado não pode ser reposto — o
-                // servidor também nega via lock_products_or_raise).
+                // Só produtos ATIVOS e de papel COMPRÁVEL (desativado não
+                // pode ser reposto; produzidos/compostos nascem da produção
+                // interna, não de uma compra) — o servidor também nega
+                // desativados via lock_products_or_raise.
                 final active = all
-                    .where((product) => product.isActive)
+                    .where(
+                      (product) =>
+                          product.isActive && product.type.isPurchasable,
+                    )
                     .toList();
                 // Query NORMALIZADO para minúsculas (mesmo padrão da busca
                 // de Produtos): sem isso, digitar 'CANETA' não achava o
@@ -342,10 +348,21 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                           .toList();
 
                 if (filtered.isEmpty) {
+                  // Há produtos, mas NENHUM comprável (produzido/composto)
+                  // → estado vazio explicativo em vez de "sem produtos".
+                  final roleOnly =
+                      active.isEmpty &&
+                      all.any((product) => product.isActive);
                   return EmptyState(
-                    icon: Icons.search_off,
-                    title: l10n.purchasesNoProductsTitle,
-                    subtitle: l10n.purchasesNoProductsSubtitle,
+                    icon: roleOnly
+                        ? Icons.category_outlined
+                        : Icons.search_off,
+                    title: roleOnly
+                        ? l10n.purchasesNoPurchasableTitle
+                        : l10n.purchasesNoProductsTitle,
+                    subtitle: roleOnly
+                        ? l10n.purchasesNoPurchasableSubtitle
+                        : l10n.purchasesNoProductsSubtitle,
                   );
                 }
 
@@ -510,6 +527,11 @@ class _CartProductRow extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
+                // Fase 1: papel do produto na compra — o operador vê o selo
+                // do tipo (matéria-prima, revenda ou embalagem) em TODA a
+                // linha, sem abrir o cadastro.
+                const SizedBox(height: 2),
+                ProductTypeBadge(type: product.type),
                 // Validade definida (lote FIFO da entrada).
                 if (expiry != null) ...[
                   const SizedBox(height: 4),

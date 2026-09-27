@@ -19,6 +19,13 @@ _Product _$ProductFromJson(Map<String, dynamic> json) => _Product(
   vendaPorFracao: json['vendaPorFracao'] as bool? ?? false,
   unitLabel: json['unitLabel'] as String? ?? 'un',
   isActive: json['isActive'] as bool? ?? true,
+  type:
+      $enumDecodeNullable(
+        _$ProductTypeEnumMap,
+        json['type'],
+        unknownValue: ProductType.resale,
+      ) ??
+      ProductType.resale,
 );
 
 Map<String, dynamic> _$ProductToJson(_Product instance) => <String, dynamic>{
@@ -34,4 +41,13 @@ Map<String, dynamic> _$ProductToJson(_Product instance) => <String, dynamic>{
   'vendaPorFracao': instance.vendaPorFracao,
   'unitLabel': instance.unitLabel,
   'isActive': instance.isActive,
+  'type': _$ProductTypeEnumMap[instance.type]!,
+};
+
+const _$ProductTypeEnumMap = {
+  ProductType.rawMaterial: 'rawMaterial',
+  ProductType.resale: 'resale',
+  ProductType.manufactured: 'manufactured',
+  ProductType.composite: 'composite',
+  ProductType.packaging: 'packaging',
 };

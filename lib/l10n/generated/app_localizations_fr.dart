@@ -1049,6 +1049,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsFilterInactive => 'Inactifs';
 
   @override
+  String get productsTypeLabel => 'Type de produit';
+
+  @override
+  String get productsTypeRawMaterial => 'Matière première';
+
+  @override
+  String get productsTypeResale => 'Revente';
+
+  @override
+  String get productsTypeManufactured => 'Fabriqué';
+
+  @override
+  String get productsTypeComposite => 'Composé';
+
+  @override
+  String get productsTypePackaging => 'Emballage';
+
+  @override
+  String get productsFilterType => 'Type';
+
+  @override
   String productsHeaderCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -1318,6 +1339,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get purchasesNoProductsSubtitle =>
       'Enregistrez des produits pour faire des achats.';
+
+  @override
+  String get purchasesNoPurchasableTitle => 'Aucun produit achetable';
+
+  @override
+  String get purchasesNoPurchasableSubtitle =>
+      'Les produits fabriqués et composés viennent de la production interne. Seules les matières premières, la revente et les emballages s\'achètent.';
 
   @override
   String get purchasesConfirm => 'Confirmer l\'achat';
@@ -1881,6 +1909,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get salesNoProductsSubtitle =>
       'Enregistrez des produits pour pouvoir vendre.';
+
+  @override
+  String get salesNoSellableTitle => 'Aucun produit vendable';
+
+  @override
+  String get salesNoSellableSubtitle =>
+      'Les matières premières et les emballages ne sont pas vendus au comptoir. Changez le type du produit en revente, fabriqué ou composé pour le vendre.';
 
   @override
   String get salesConfirm => 'Confirmer la vente';

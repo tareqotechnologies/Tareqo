@@ -19,9 +19,9 @@ import 'package:tareqo/l10n/generated/app_localizations.dart';
 import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_fr.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
-/// Total de membros do catálogo: 1139 (1009 getters + 130 métodos).
-const int kTotalMembers = 1139;
-const int kTotalGetters = 1009;
+/// Total de membros do catálogo: 1150 (1020 getters + 130 métodos).
+const int kTotalMembers = 1150;
+const int kTotalGetters = 1020;
 const int kTotalMethods = 130;
 const Set<String> kMethodNames = <String>{  'onboardingPlanDetails',  'onboardingSuccess',  'storeSwitcherA11yLabel',  'tenantPendingSubtitle',  'tenantRejectedSubtitle',  'syncPendingCount',  'syncErrorsCount',  'syncDone',  'dashboardGreeting',  'dashboardActivityEvents',  'dashboardActivityMinutesAgo',  'dashboardFiadoCount',  'dashboardStockEntry',  'dashboardStockEntryDetail',  'dashboardExpenseRow',  'dashboardLowStockDetail',  'dashboardSaleItems',  'employeeDeactivateConfirm',  'employeeReactivateConfirm',  'upgradesRequestedOn',  'planDetails',  'addStoreSuccess',  'productsHeaderCount',  'productsFilteredCount',  'customersHeaderCount',  'customersCreditLabel',  'customersAdded',  'customersEditSuccess',  'customersDeleteConfirmMessage',  'purchasesHeaderCount',  'purchasesStockAdded',  'purchasesRegistered',  'purchasesProductNotFound',  'purchasesStockLabel',  'reportsRevenueLabel',  'financialReceivePendingBody',  'financialPayPendingBody',  'cashClosingSurplus',  'cashClosingShortage',  'debtsSettleBody',  'debtsSettled',  'debtsDueIn',  'debtsDueAgo',  'debtsSettledOn',  'debtsRegisteredFor',  'salesCartSection',  'salesCartItemRemoved',  'salesHeaderTransactions',  'salesPdvCount',  'salesFilteredSummary',  'salesRegistered',  'salesInsufficientStock',  'salesStockFor',  'salesProductNotFound',  'saleDetailId',  'saleDetailCancelConfirmBody',  'adminAwaitingCount',  'adminAccessApproved',  'adminRequestRejected',  'adminRejectTitle',  'adminPlanLabel',  'adminPlanCreated',  'adminPlanUpdated',  'salesBarcodeCameraUnavailable',  'salesStockLimit',  'dashboardExpiredIn',  'dashboardExpiresIn',  'adminTenantDetailStoresCount',  'adminTenantDetailEmployeesCount',  'adminTenantDetailActivityCount',  'adminTenantDetailEmployeeRole',  'adminBulkApprove',  'adminBulkReject',  'adminBulkRejectTitle',  'adminBulkApproveSuccess',  'adminBulkRejectSuccess',  'adminPendingActionRequired',  'adminGrowthUp',  'adminGrowthDown',  'adminInvoiceCancelConfirm',  'notificationSinceDaysAgo',  'notificationBodyInvoiceGenerated',  'notificationBodyInvoiceDueSoon',  'notificationBodyInvoiceExpired',  'notificationBodyInvoicePaid',  'notificationBodyAddOnExpired',  'notificationBodyAddOnExpiringSoon',  'notificationDaysShort',  'customInvoiceCreated',  'customInvoiceItemsCount',  'customInvoiceProductOption',  'customInvoiceBillTotal',  'customInvoiceNumberPrefix',  'customInvoicePreviewTotal',  'quotationCreated',  'quotationItemsCount',  'quotationDays',  'quotationNumberPrefix',  'employeeCommissionRate',  'employeeTargetMeta',  'employeeTargetProgress',  'addonsPerMonth',  'transfersSuccess',  'transfersError',  'pdfGeneratedOn',  'pdfFooter',  'pdfPhoneLine',  'pdfEmailLine',  'pdfNifLine',  'pdfPaymentLine',  'pdfReferenceLine',  'pdfValidityDaysLeft',  'pdfConditionValidBullet',  'adminAddonsLoadError',  'adminAddonsUpdateError',  'dashboardSaleEntry',  'mfaExpiresIn',  'mfaInitError',  'mfaVerifyError',  'adminAddonsBulkActivated',  'adminAddonsBulkDeactivated',  'adminAddonsBulkSheetCount',  'adminAddonsPriceUpdated',  'adminAddOnsCount',  'adminTenantCount',  'adminTenantCycleActiveLeft',  'adminTenantCycleExpiresIn',  'adminTenantCycleTrialLeft',  'planLimitStores',  'planLimitEmployees',};/// Carrega os valores de string do ARB (chaves sem `@`).
 Map<String, String> _loadArb(String locale) {
@@ -361,6 +361,13 @@ void main() {
         'productsFilterMaxPrice': l.productsFilterMaxPrice,
         'productsFilterApply': l.productsFilterApply,
         'productsFilterInactive': l.productsFilterInactive,
+        'productsTypeLabel': l.productsTypeLabel,
+        'productsTypeRawMaterial': l.productsTypeRawMaterial,
+        'productsTypeResale': l.productsTypeResale,
+        'productsTypeManufactured': l.productsTypeManufactured,
+        'productsTypeComposite': l.productsTypeComposite,
+        'productsTypePackaging': l.productsTypePackaging,
+        'productsFilterType': l.productsFilterType,
         'productsClearFilters': l.productsClearFilters,
         'productsEmptyFilteredTitle': l.productsEmptyFilteredTitle,
         'productsEmptyFilteredSubtitle': l.productsEmptyFilteredSubtitle,
@@ -420,6 +427,8 @@ void main() {
         'purchasesSupplierLabel': l.purchasesSupplierLabel,
         'purchasesNoProductsTitle': l.purchasesNoProductsTitle,
         'purchasesNoProductsSubtitle': l.purchasesNoProductsSubtitle,
+        'purchasesNoPurchasableTitle': l.purchasesNoPurchasableTitle,
+        'purchasesNoPurchasableSubtitle': l.purchasesNoPurchasableSubtitle,
         'purchasesConfirm': l.purchasesConfirm,
         'reportsTitle': l.reportsTitle,
         'reportsRevenue': l.reportsRevenue,
@@ -555,6 +564,8 @@ void main() {
         'salesSearchProducts': l.salesSearchProducts,
         'salesNoProductsTitle': l.salesNoProductsTitle,
         'salesNoProductsSubtitle': l.salesNoProductsSubtitle,
+        'salesNoSellableTitle': l.salesNoSellableTitle,
+        'salesNoSellableSubtitle': l.salesNoSellableSubtitle,
         'salesConfirm': l.salesConfirm,
         'saleDetailTitle': l.saleDetailTitle,
         'saleDetailTotalLabel': l.saleDetailTotalLabel,
@@ -1399,6 +1410,13 @@ void main() {
         'productsFilterMaxPrice': l.productsFilterMaxPrice,
         'productsFilterApply': l.productsFilterApply,
         'productsFilterInactive': l.productsFilterInactive,
+        'productsTypeLabel': l.productsTypeLabel,
+        'productsTypeRawMaterial': l.productsTypeRawMaterial,
+        'productsTypeResale': l.productsTypeResale,
+        'productsTypeManufactured': l.productsTypeManufactured,
+        'productsTypeComposite': l.productsTypeComposite,
+        'productsTypePackaging': l.productsTypePackaging,
+        'productsFilterType': l.productsFilterType,
         'productsClearFilters': l.productsClearFilters,
         'productsEmptyFilteredTitle': l.productsEmptyFilteredTitle,
         'productsEmptyFilteredSubtitle': l.productsEmptyFilteredSubtitle,
@@ -1458,6 +1476,8 @@ void main() {
         'purchasesSupplierLabel': l.purchasesSupplierLabel,
         'purchasesNoProductsTitle': l.purchasesNoProductsTitle,
         'purchasesNoProductsSubtitle': l.purchasesNoProductsSubtitle,
+        'purchasesNoPurchasableTitle': l.purchasesNoPurchasableTitle,
+        'purchasesNoPurchasableSubtitle': l.purchasesNoPurchasableSubtitle,
         'purchasesConfirm': l.purchasesConfirm,
         'reportsTitle': l.reportsTitle,
         'reportsRevenue': l.reportsRevenue,
@@ -1593,6 +1613,8 @@ void main() {
         'salesSearchProducts': l.salesSearchProducts,
         'salesNoProductsTitle': l.salesNoProductsTitle,
         'salesNoProductsSubtitle': l.salesNoProductsSubtitle,
+        'salesNoSellableTitle': l.salesNoSellableTitle,
+        'salesNoSellableSubtitle': l.salesNoSellableSubtitle,
         'salesConfirm': l.salesConfirm,
         'saleDetailTitle': l.saleDetailTitle,
         'saleDetailTotalLabel': l.saleDetailTotalLabel,
@@ -2437,6 +2459,13 @@ void main() {
         'productsFilterMaxPrice': l.productsFilterMaxPrice,
         'productsFilterApply': l.productsFilterApply,
         'productsFilterInactive': l.productsFilterInactive,
+        'productsTypeLabel': l.productsTypeLabel,
+        'productsTypeRawMaterial': l.productsTypeRawMaterial,
+        'productsTypeResale': l.productsTypeResale,
+        'productsTypeManufactured': l.productsTypeManufactured,
+        'productsTypeComposite': l.productsTypeComposite,
+        'productsTypePackaging': l.productsTypePackaging,
+        'productsFilterType': l.productsFilterType,
         'productsClearFilters': l.productsClearFilters,
         'productsEmptyFilteredTitle': l.productsEmptyFilteredTitle,
         'productsEmptyFilteredSubtitle': l.productsEmptyFilteredSubtitle,
@@ -2496,6 +2525,8 @@ void main() {
         'purchasesSupplierLabel': l.purchasesSupplierLabel,
         'purchasesNoProductsTitle': l.purchasesNoProductsTitle,
         'purchasesNoProductsSubtitle': l.purchasesNoProductsSubtitle,
+        'purchasesNoPurchasableTitle': l.purchasesNoPurchasableTitle,
+        'purchasesNoPurchasableSubtitle': l.purchasesNoPurchasableSubtitle,
         'purchasesConfirm': l.purchasesConfirm,
         'reportsTitle': l.reportsTitle,
         'reportsRevenue': l.reportsRevenue,
@@ -2631,6 +2662,8 @@ void main() {
         'salesSearchProducts': l.salesSearchProducts,
         'salesNoProductsTitle': l.salesNoProductsTitle,
         'salesNoProductsSubtitle': l.salesNoProductsSubtitle,
+        'salesNoSellableTitle': l.salesNoSellableTitle,
+        'salesNoSellableSubtitle': l.salesNoSellableSubtitle,
         'salesConfirm': l.salesConfirm,
         'saleDetailTitle': l.saleDetailTitle,
         'saleDetailTotalLabel': l.saleDetailTotalLabel,

@@ -3,6 +3,64 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'product.freezed.dart';
 part 'product.g.dart';
 
+/// Tipo estrutural do produto (Fase 1 — pastelaria/produção).
+///
+/// Distingue o papel do produto na operação real — matéria-prima que entra
+/// na receita, item comprado pronto para revender, produto fabricado
+/// internamente (ficha técnica/produção), produto composto montado a partir
+/// de componentes (ex.: hambúrguer completo) e embalagem/material de
+/// consumo — em vez de tratar tudo como simples item de compra e venda.
+///
+/// O valor é persistido PELO NOME (JSON/SQLite/Postgres gravam `resale`,
+/// `rawMaterial`...). O default é [resale] por compatibilidade: produtos
+/// antigos (sem a coluna) já eram compráveis e vendáveis — continuam
+/// funcionando exatamente igual.
+enum ProductType {
+  /// Matéria-prima: farinha, açúcar, ovos, leite, carne... — consumida
+  /// pela produção (ficha técnica), nunca vendida diretamente no balcão.
+  rawMaterial('Matéria-prima'),
+
+  /// Produto comprado pronto para revenda: água, refrigerante, sumo
+  /// engarrafado, embalados. Entrada por compra, baixa por venda.
+  resale('Revenda'),
+
+  /// Produto produzido internamente: pão francês, croissant, empada,
+  /// bolo, hambúrguer de carne. Nasce de uma ordem de produção (ficha
+  /// técnica baixa os ingredientes e cria o lote do produto acabado).
+  manufactured('Produzido'),
+
+  /// Produto composto/montado: hambúrguer completo, sanduíche, menu,
+  /// pequeno-almoço — vendido pela explosão dos componentes da receita
+  /// (ou pelo produto acabado pré-produzido, no modo híbrido).
+  composite('Composto'),
+
+  /// Embalagem e material de consumo: caixa, saco, copo, tampa,
+  /// guardanapo, talher. Comprado e consumido pela produção/montagem.
+  packaging('Embalagem');
+
+  const ProductType(this.label);
+
+  /// Rótulo exibido na UI (a serialização JSON usa o nome do enum).
+  final String label;
+
+  /// Papel no fluxo de COMPRAS: itens repostos por uma entrada de estoque
+  /// comprada de fornecedores — matéria-prima, revenda e embalagem. Os
+  /// produzidos/compostos nascem da produção interna (ficha técnica), não
+  /// de uma compra, então não aparecem no carrinho de compras.
+  bool get isPurchasable =>
+      this == ProductType.rawMaterial ||
+      this == ProductType.resale ||
+      this == ProductType.packaging;
+
+  /// Papel no PDV: itens vendáveis ao balcão — revenda, produzidos e
+  /// compostos. Matéria-prima e embalagem são consumidas internamente
+  /// (produção/montagem), nunca vendidas directamente.
+  bool get isSellable =>
+      this == ProductType.resale ||
+      this == ProductType.manufactured ||
+      this == ProductType.composite;
+}
+
 /// Entidade de domínio que representa um produto do ERP.
 ///
 /// Imutável por construção (Freezed): todos os campos são `final`, o
@@ -49,6 +107,19 @@ abstract class Product with _$Product {
     // reativá-lo quando quiser. O estoque existente é preservado (volta a
     // ser vendível na reativação).
     @Default(true) bool isActive,
+    // Tipo estrutural do produto (Fase 1). Default [ProductType.resale]
+    // por compatibilidade: produtos antigos (sem a coluna no banco) já
+    // eram compráveis e vendáveis — a leitura preserva o comportamento;
+    // o JSON externo sem o campo também cai no default.
+    //
+    // `unknownEnumValue`: um valor NÃO reconhecido (ex.: gravado por uma
+    // versão mais nova do app) cai em [ProductType.resale] em vez de
+    // lançar `ArgumentError` — mesma tolerância dos datasources SQLite e
+    // Supabase, que fazem `firstWhere(...orElse: resale)` ao mapear a
+    // coluna `type`.
+    @JsonKey(unknownEnumValue: ProductType.resale)
+    @Default(ProductType.resale)
+    ProductType type,
   }) = _Product;
 
   factory Product.fromJson(Map<String, dynamic> json) =>

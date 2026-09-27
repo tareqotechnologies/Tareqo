@@ -1036,6 +1036,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsFilterInactive => 'Inactive';
 
   @override
+  String get productsTypeLabel => 'Product type';
+
+  @override
+  String get productsTypeRawMaterial => 'Raw material';
+
+  @override
+  String get productsTypeResale => 'Resale';
+
+  @override
+  String get productsTypeManufactured => 'Manufactured';
+
+  @override
+  String get productsTypeComposite => 'Composite';
+
+  @override
+  String get productsTypePackaging => 'Packaging';
+
+  @override
+  String get productsFilterType => 'Type';
+
+  @override
   String productsHeaderCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -1298,6 +1319,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get purchasesNoProductsSubtitle =>
       'Register products to record purchases.';
+
+  @override
+  String get purchasesNoPurchasableTitle => 'No purchasable products';
+
+  @override
+  String get purchasesNoPurchasableSubtitle =>
+      'Manufactured and composite products come from internal production. Only raw materials, resale and packaging items are bought.';
 
   @override
   String get purchasesConfirm => 'Confirm purchase';
@@ -1850,6 +1878,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get salesNoProductsSubtitle => 'Register products to record sales.';
+
+  @override
+  String get salesNoSellableTitle => 'No sellable products';
+
+  @override
+  String get salesNoSellableSubtitle =>
+      'Raw materials and packaging are not sold at the counter. Change the product type to resale, manufactured or composite to sell it.';
 
   @override
   String get salesConfirm => 'Confirm sale';

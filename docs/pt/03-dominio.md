@@ -29,6 +29,9 @@ Todas as entidades são classes `@freezed` (imutáveis, com `copyWith`, `==`/`ha
 | `code` | `String` | Código de barras/PLU do produto (opcional, numérico, até 5 dígitos) — usado pelas balanças etiquetadoras e pelo campo de código do PDV. Default `''` |
 | `vendaPorFracao` | `bool` | Venda por FRAÇÃO (peso/granel): quando `true`, o PDV aceita decimais (ex.: 1,75 kg) e intercepta códigos de balança. Default `false` |
 | `unitLabel` | `String` | Unidade dos produtos por peso (`kg`, `g`, `l`, `ml`…). `'un'` (padrão) = unidade inteira normal |
+| `type` | `ProductType` | Tipo estrutural do produto (Fase 1 — pastelaria/produção). Default `resale` por compatibilidade: produtos antigos já eram compráveis e vendáveis. Ver papéis abaixo |
+
+**Tipo do produto (`ProductType`) — Fase 1.** O papel do produto na operação, em vez de tratar tudo como item de compra e venda: `rawMaterial` (matéria-prima), `resale` (comprado pronto para revenda — o default/legado), `manufactured` (produzido internamente), `composite` (montado a partir de componentes) e `packaging` (embalagem/material de consumo). Dois papéis derivados governam os fluxos: `isPurchasable` (matéria-prima, revenda, embalagem — entram por compra) e `isSellable` (revenda, produzido, composto — vão ao balcão); a revenda é o único tipo comprado **e** vendido. O valor é persistido **pelo nome do enum** (`resale`, `rawMaterial`…); valor desconhecido cai no default `resale` (nunca lança).
 
 **Regra de negócio associada:** `salePriceCents >= purchasePriceCents` — validada no `AddProductUseCase`. O estoque em milésimos segue a mesma filosofia dos centavos (W4): `int` exato, sem artefatos de `double` em somas, baixa FIFO e comparações.
 

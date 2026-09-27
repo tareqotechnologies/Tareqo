@@ -348,6 +348,11 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
   bool _vendaPorFracao = false;
   String _unitLabel = 'un';
 
+  // Fase 1: tipo estrutural do produto. Default 'resale' — o produto
+  // comum do varejo nasce vendável/comprável como sempre foi; matérias-
+  // primas e produtos de produção são classificados explicitamente aqui.
+  ProductType _type = ProductType.resale;
+
   // W11: validade opcional do produto — o lote inicial do estoque de
   // abertura nasce com ela e o dashboard alerta quando está para expirar.
   DateTime? _expiryDate;
@@ -478,6 +483,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
               code: _codeController.text.trim(),
               vendaPorFracao: _vendaPorFracao,
               unitLabel: _unitLabel,
+              type: _type,
             ),
             // W11: validade opcional do lote inicial (alimenta os alertas
             // de validade do dashboard: vermelho = vencido, amarelo =
@@ -600,6 +606,22 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 8),
+              // Fase 1: tipo estrutural do produto (matéria-prima,
+              // revenda, produzido, composto, embalagem). Define o papel
+              // na produção/receitas das fases seguintes — o default
+              // 'revenda' mantém o comportamento do varejo.
+              AppPickerField<ProductType>(
+                value: _type,
+                label: l10n.productsTypeLabel,
+                prefixIcon: Icons.category_outlined,
+                items: [
+                  for (final type in ProductType.values)
+                    DropdownMenuItem(value: type, child: Text(type.label)),
+                ],
+                onChanged: (value) =>
+                    setState(() => _type = value ?? ProductType.resale),
               ),
               const SizedBox(height: 16),
               // PREÇOS — compra e venda lado a lado.
@@ -797,6 +819,8 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
   late bool _vendaPorFracao;
   late String _unitLabel;
   late bool _isActive;
+  // Fase 1: tipo estrutural (pré-preenchido com o tipo atual do produto).
+  late ProductType _type = widget.product.type;
 
   // Foto do produto: bytes da foto NOVA escolhida, referência ATUAL
   // persistida e referência de uma foto REMOVIDA (apagada no submit).
@@ -941,6 +965,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
         vendaPorFracao: _vendaPorFracao,
         unitLabel: _unitLabel,
         isActive: _isActive,
+        type: _type,
       );
 
       // 1) Campos do catálogo (nome/preços/código/fração/status ativo) —
@@ -1073,6 +1098,20 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 8),
+              // Fase 1: tipo estrutural do produto — pré-preenchido com o
+              // tipo atual; reclassificar é permitido ao dono/gerente.
+              AppPickerField<ProductType>(
+                value: _type,
+                label: l10n.productsTypeLabel,
+                prefixIcon: Icons.category_outlined,
+                items: [
+                  for (final type in ProductType.values)
+                    DropdownMenuItem(value: type, child: Text(type.label)),
+                ],
+                onChanged: (value) =>
+                    setState(() => _type = value ?? ProductType.resale),
               ),
               const SizedBox(height: 16),
               // PREÇOS — compra e venda lado a lado.

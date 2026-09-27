@@ -69,6 +69,7 @@ final class ProductLocalDataSourceImpl implements ProductLocalDataSource {
       vendaPorFracao: product.vendaPorFracao,
       unitLabel: product.unitLabel,
       isActive: product.isActive,
+      type: product.type,
     );
   }
 
