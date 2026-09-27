@@ -36,6 +36,13 @@ Set a URL (substitua `SENHA` e a região):
 export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:SENHA@aws-0-<região>.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
+> **Onde guardar:** ponha esta linha num arquivo **gitignored** (`env/prod.db.env`)
+> e exporte-a (ou passe-a inline) — **nunca** faça commit dela nem cole a senha no
+> chat/PR (a senha antiga de DEV vazou assim e foi rotacionada em Aug/2026); a
+> SENHA e a região vêm do Dashboard → Settings → Database. Para DEV o caminho já
+> existe: `env/db.env` (`SUPABASE_DB_URL`). Alternativa sem arquivo:
+> `set -a; . env/prod.db.env; set +a` antes de rodar o `psql`.
+
 ## Passo 0 — Pré-requisitos
 
 - Dashboard + **senha do banco** (Settings → Database); host direto é IPv6-only →
@@ -61,18 +68,21 @@ WHERE table_schema = 'public' AND table_name = 'invoice_notifications'
 
 ## Passo 3 — Aplicar
 
-**Opção A — script isolado (recomendada):**
+**Padrão (recomendado) — `upgrade.sql` completo.** É o caminho para um banco
+atrasado em MAIS de uma parte (ex.: a produção, que está sem as partes 33 e 35):
+leva a todas as partes que faltam de uma só vez. A PARTE 33 é a seção de
+`body_params`.
+
+```bash
+psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
+```
+
+**Alternativa — script isolado** (use APENAS quando o banco já está em dia e
+falta só esta parte — evita reexecutar as demais partes à toa):
 
 ```bash
 psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 \
   -f supabase/add_notification_body_params_2026_09_27.sql
-```
-
-**Opção B — `upgrade.sql` completo** (se o banco está atrasado em mais de uma
-parte; a PARTE 33 é a seção de `body_params`):
-
-```bash
-psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
 ```
 
 Ambos os comandos são `-1` = transação única: se algo falhar, tudo é revertido.

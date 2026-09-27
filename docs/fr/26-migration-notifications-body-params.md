@@ -41,6 +41,14 @@ Définissez l'URL (remplacez `MOTDEPASSE` et la région) :
 export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:MOTDEPASSE@aws-0-<région>.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
+> **Où la conserver :** mettez cette ligne dans un fichier **gitignored**
+> (`env/prod.db.env`) et exportez-la (ou passez-la en ligne) — **jamais** de
+> commit ni de mot de passe collé dans le chat/PR (l'ancien mot de passe DEV a
+> fuité ainsi et a été changé en Aug/2026) ; le MOTDEPASSE et la région viennent
+> du Dashboard → Settings → Database. Pour DEV, le chemin existe déjà :
+> `env/db.env` (`SUPABASE_DB_URL`). Sans fichier : `set -a; . env/prod.db.env;
+> set +a` avant le `psql`.
+
 ## Étape 0 — Prérequis
 
 - Dashboard + le **mot de passe de la base** (Settings → Database) ; l'hôte direct
@@ -67,18 +75,21 @@ WHERE table_schema = 'public' AND table_name = 'invoice_notifications'
 
 ## Étape 3 — Appliquer
 
-**Option A — script isolé (recommandée) :**
+**Défaut (recommandé) — `upgrade.sql` complet.** C'est la voie pour une base en
+retard de PLUS d'une partie (ex. : la production, à qui il manque les parties 33
+et 35) : elle applique d'un coup toutes les parties manquantes. La Partie 33 est
+la section `body_params`.
+
+```bash
+psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
+```
+
+**Alternative — script isolé** (à utiliser UNIQUEMENT quand la base est déjà à
+jour et qu'il ne manque que cette partie — évite de réexécuter les autres) :
 
 ```bash
 psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 \
   -f supabase/add_notification_body_params_2026_09_27.sql
-```
-
-**Option B — `upgrade.sql` complet** (si la base est en retard de plus d'une
-partie ; la Partie 33 est la section `body_params`) :
-
-```bash
-psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
 ```
 
 Les deux utilisent `-1` = transaction unique : si quoi que ce soit échoue, tout

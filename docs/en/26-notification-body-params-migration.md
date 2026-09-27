@@ -38,6 +38,13 @@ Set the URL (replace `PASSWORD` and the region):
 export SUPABASE_DB_URL='postgresql://postgres.bcyolmheltzlddfwgqcq:PASSWORD@aws-0-<region>.pooler.supabase.com:6543/postgres?sslmode=require'
 ```
 
+> **Where to keep it:** put this line in a **gitignored** file
+> (`env/prod.db.env`) and export it (or pass it inline) — **never** commit it or
+> paste the password into the chat/PR (dev's old password leaked that way and was
+> rotated in Aug/2026); the PASSWORD and region come from Dashboard → Settings →
+> Database. For DEV the path already exists: `env/db.env` (`SUPABASE_DB_URL`).
+> Alternative without a file: `set -a; . env/prod.db.env; set +a` before `psql`.
+
 ## Step 0 — Prerequisites
 
 - Dashboard + the **database password** (Settings → Database); the direct host is
@@ -64,18 +71,20 @@ WHERE table_schema = 'public' AND table_name = 'invoice_notifications'
 
 ## Step 3 — Apply
 
-**Option A — standalone script (recommended):**
+**Default (recommended) — full `upgrade.sql`.** This is the path for a database
+behind by MORE than one part (e.g. production, missing parts 33 and 35): it
+brings every missing part at once. Part 33 is the `body_params` section.
+
+```bash
+psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
+```
+
+**Alternative — standalone script** (use ONLY when the database is already up to
+date and this part is the only one missing — avoids re-running the others):
 
 ```bash
 psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 \
   -f supabase/add_notification_body_params_2026_09_27.sql
-```
-
-**Option B — full `upgrade.sql`** (if the database is behind by more than one
-part; Part 33 is the `body_params` section):
-
-```bash
-psql "$SUPABASE_DB_URL" -X -v ON_ERROR_STOP=1 -1 -f supabase/upgrade.sql
 ```
 
 Both use `-1` = single transaction: if anything fails, everything is rolled back.
