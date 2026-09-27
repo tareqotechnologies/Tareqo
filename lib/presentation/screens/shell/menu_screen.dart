@@ -11,10 +11,12 @@ import '../../../domain/entities/tenant.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/notification_providers.dart';
+import '../../controllers/production_providers.dart';
 import '../../controllers/purchases_providers.dart';
 import '../../controllers/reports_providers.dart';
 import '../../widgets/pulse_badge.dart';
 import '../dashboard/notifications_screen.dart';
+import '../production/production_screen.dart';
 import '../purchases/purchases_screen.dart';
 import '../reports/reports_screen.dart';
 import '../shell/app_shell.dart';
@@ -57,6 +59,14 @@ class MenuScreen extends ConsumerWidget {
       Navigator.of(
         context,
       ).push(MaterialPageRoute<void>(builder: (_) => const ReportsScreen()));
+    }
+
+    void openProduction() {
+      ref.invalidate(recipesProvider);
+      ref.invalidate(productionOrdersProvider);
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const ProductionScreen()));
     }
 
     void openStores(Tenant tenant) {
@@ -160,6 +170,16 @@ class MenuScreen extends ConsumerWidget {
                     label: l10n.dashboardModulePurchases,
                     iconColor: ModuleColors.purchases,
                     onTap: openPurchases,
+                  ),
+                ),
+              if (accessLevel != UserAccessLevel.employee)
+                SizedBox(
+                  width: tileWidth,
+                  child: _MenuTile(
+                    icon: Icons.bakery_dining_outlined,
+                    label: l10n.productionTitle,
+                    iconColor: ModuleColors.production,
+                    onTap: openProduction,
                   ),
                 ),
               if (accessLevel != UserAccessLevel.employee)

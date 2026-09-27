@@ -45,6 +45,12 @@
 #        (linter 0029) e helpers de policy (is_my_store, mfa_ok, is_super_admin
 #        etc.) COM EXECUTE — sem isso o app quebra com 42501 — check 42
 #        (fix_hardening_linter_2026_09.sql)
+#   Tipo do produto (Fase 1, Sep 2026) → coluna products.type TEXT NOT NULL
+#        DEFAULT 'resale' + índice idx_products_store_type, SEM CHECK de
+#        enum (check 43 — sem a coluna o app novo grava/lê o campo em vão)
+#   Produção (Fase 2, Sep 2026) → tabelas recipes/recipe_items/
+#        production_orders/production_order_items (RLS) + RPC atômica
+#        process_production (check 44 — sem elas o módulo Produção não grava)
 #   Migração → quantidade de super_admins registrados (informativo)
 #
 # Uso:
@@ -984,6 +990,75 @@ BEGIN
     RAISE EXCEPTION 'FAIL: public.rls_auto_enable() executável por authenticated (rodar supabase/fix_hardening_linter_2026_09.sql — seção 2.6)';
   END IF;
   RAISE NOTICE 'PASS: storage sem listing + funções internas restritas + helpers de policy executáveis';
+END $$;
+
+\echo '== 43. Fase 1: products.type (tipo estrutural do produto) =='
+DO $$
+DECLARE
+  v_data_type text;
+  v_nullable text;
+  v_default text;
+  v_index int;
+BEGIN
+  SELECT data_type, is_nullable, column_default
+    INTO v_data_type, v_nullable, v_default
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'products'
+    AND column_name = 'type';
+  IF v_data_type IS NULL THEN
+    RAISE EXCEPTION 'FAIL: coluna products.type ausente (upgrade.sql PARTE 34 nao aplicado?)';
+  END IF;
+  IF v_data_type <> 'text' OR v_nullable <> 'NO'
+     OR v_default IS NULL OR position('resale' IN v_default) = 0 THEN
+    RAISE EXCEPTION 'FAIL: products.type deve ser TEXT NOT NULL DEFAULT resale (obtido: % / % / %)',
+      v_data_type, v_nullable, v_default;
+  END IF;
+  SELECT count(*) INTO v_index FROM pg_indexes
+  WHERE schemaname = 'public' AND tablename = 'products'
+    AND indexname = 'idx_products_store_type';
+  IF v_index = 0 THEN
+    RAISE EXCEPTION 'FAIL: indice idx_products_store_type ausente (upgrade.sql PARTE 34 nao aplicado?)';
+  END IF;
+  RAISE NOTICE 'PASS: products.type TEXT NOT NULL DEFAULT resale + idx_products_store_type OK';
+END $$;
+
+\echo '== 44. Fase 2: ficha técnica + produção (recipes/production_orders + RPC) =='
+DO $$
+DECLARE
+  v_tab text;
+  v_rls int;
+BEGIN
+  FOREACH v_tab IN ARRAY ARRAY[
+    'recipes', 'recipe_items', 'production_orders', 'production_order_items'
+  ] LOOP
+    IF to_regclass('public.' || v_tab) IS NULL THEN
+      RAISE EXCEPTION 'FAIL: tabela public.% ausente (upgrade.sql PARTE 35 nao aplicado?)', v_tab;
+    END IF;
+  END LOOP;
+  SELECT count(*) INTO v_rls
+  FROM pg_class c
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'public'
+    AND c.relname IN (
+      'recipes', 'recipe_items', 'production_orders',
+      'production_order_items'
+    )
+    AND c.relrowsecurity;
+  IF v_rls < 4 THEN
+    RAISE EXCEPTION 'FAIL: RLS nao esta ativo nas 4 tabelas de producao';
+  END IF;
+  IF to_regprocedure('public.process_production(jsonb,jsonb)') IS NULL THEN
+    RAISE EXCEPTION 'FAIL: RPC process_production ausente (upgrade.sql PARTE 35 nao aplicado?)';
+  END IF;
+  IF NOT (SELECT prosecdef FROM pg_proc
+          WHERE oid = to_regprocedure('public.process_production(jsonb,jsonb)')) THEN
+    RAISE EXCEPTION 'FAIL: process_production nao e SECURITY DEFINER';
+  END IF;
+  IF NOT has_function_privilege('authenticated',
+        to_regprocedure('public.process_production(jsonb,jsonb)'), 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: authenticated sem EXECUTE em process_production';
+  END IF;
+  RAISE NOTICE 'PASS: recipes/recipe_items/production_orders/production_order_items + RPC process_production OK';
 END $$;
 SQL
 

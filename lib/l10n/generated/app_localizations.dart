@@ -7021,6 +7021,174 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O plano {planName} permite até {limit, plural, =1{1 funcionário} other{{limit} funcionários}}. Solicite um upgrade de plano para contratar mais.'**
   String planLimitEmployees(String planName, int limit);
+
+  /// No description provided for @productionTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produção'**
+  String get productionTitle;
+
+  /// No description provided for @productionEmptyTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda sem ficha técnica'**
+  String get productionEmptyTitle;
+
+  /// No description provided for @productionEmptySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'A ficha técnica define os componentes (matéria-prima, embalagem…) que produzem um produto acabado.'**
+  String get productionEmptySubtitle;
+
+  /// No description provided for @productionNewRecipe.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova ficha técnica'**
+  String get productionNewRecipe;
+
+  /// No description provided for @productionRecipesSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fichas técnicas'**
+  String get productionRecipesSection;
+
+  /// No description provided for @productionHistorySection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico de produção'**
+  String get productionHistorySection;
+
+  /// No description provided for @productionHistoryEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma produção registrada'**
+  String get productionHistoryEmpty;
+
+  /// No description provided for @productionHistoryEmptySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'As ordens de produção aparecem aqui após produzir.'**
+  String get productionHistoryEmptySubtitle;
+
+  /// No description provided for @productionRecipeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ficha técnica'**
+  String get productionRecipeTitle;
+
+  /// No description provided for @productionFinishedProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto acabado'**
+  String get productionFinishedProduct;
+
+  /// No description provided for @productionYieldLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rendimento da base (unidades)'**
+  String get productionYieldLabel;
+
+  /// No description provided for @productionComponents.
+  ///
+  /// In pt, this message translates to:
+  /// **'Componentes'**
+  String get productionComponents;
+
+  /// No description provided for @productionAddComponent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar componente'**
+  String get productionAddComponent;
+
+  /// No description provided for @productionComponentLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Componente'**
+  String get productionComponentLabel;
+
+  /// No description provided for @productionQuantityLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantidade'**
+  String get productionQuantityLabel;
+
+  /// No description provided for @productionProduce.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produzir'**
+  String get productionProduce;
+
+  /// No description provided for @productionBasesLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bases a produzir'**
+  String get productionBasesLabel;
+
+  /// No description provided for @productionProduced.
+  ///
+  /// In pt, this message translates to:
+  /// **'A produzir: {quantity}'**
+  String productionProduced(String quantity);
+
+  /// No description provided for @productionCostTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Custo da ordem: {amount}'**
+  String productionCostTotal(String amount);
+
+  /// No description provided for @productionConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar produção'**
+  String get productionConfirm;
+
+  /// No description provided for @productionSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produção registrada'**
+  String get productionSaved;
+
+  /// No description provided for @productionRecipeSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ficha técnica guardada'**
+  String get productionRecipeSaved;
+
+  /// No description provided for @productionDeleteTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover ficha técnica'**
+  String get productionDeleteTitle;
+
+  /// No description provided for @productionDeleteMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'A ficha técnica será removida. O histórico de produção é mantido.'**
+  String get productionDeleteMessage;
+
+  /// No description provided for @productionItemCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 componente} other{{count} componentes}}'**
+  String productionItemCount(int count);
+
+  /// No description provided for @productionNoProducibleTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum produto produzível'**
+  String get productionNoProducibleTitle;
+
+  /// No description provided for @productionNoProducibleSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Classifique um produto como \"Produzido\" ou \"Composto\" no cadastro para criar uma ficha técnica.'**
+  String get productionNoProducibleSubtitle;
+
+  /// No description provided for @productionInsufficientProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque insuficiente para {product}'**
+  String productionInsufficientProduct(String product);
 }
 
 class _AppLocalizationsDelegate

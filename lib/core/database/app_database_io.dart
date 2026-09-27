@@ -23,6 +23,8 @@ import '../../data/datasources/local/financial_transaction_local_data_source.dar
 import '../../data/datasources/local/financial_transaction_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/product_local_data_source.dart';
 import '../../data/datasources/local/product_sqlite_data_source_impl.dart';
+import '../../data/datasources/local/production_local_data_source.dart';
+import '../../data/datasources/local/production_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/purchase_local_data_source.dart';
 import '../../data/datasources/local/purchase_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/sale_local_data_source.dart';
@@ -102,6 +104,9 @@ abstract final class AppDatabase {
       ..registerLazySingleton<StockLotLocalDataSource>(
         () => StockLotSqliteDataSourceImpl(db),
       )
+      ..registerLazySingleton<ProductionLocalDataSource>(
+        () => ProductionSqliteDataSourceImpl(db),
+      )
       ..registerLazySingleton<CashClosingLocalDataSource>(
         () => CashClosingSqliteDataSourceImpl(db),
       )
@@ -149,7 +154,7 @@ abstract final class AppDatabase {
   static void initialize(Database db) => _migrate(db);
 
   /// Versão atual do schema (`PRAGMA user_version`).
-  static const int currentSchemaVersion = 7;
+  static const int currentSchemaVersion = 8;
 
   /// Migrações versionadas, em ordem crescente de versão.
   ///
@@ -192,6 +197,11 @@ abstract final class AppDatabase {
       version: 7,
       description: 'tipo do produto (Fase 1) — coluna products.type',
       up: _schemaV7,
+    ),
+    const _Migration(
+      version: 8,
+      description: 'ficha técnica + produção (Fase 2) — recipes e ordens',
+      up: _schemaV8,
     ),
   ];
 
@@ -929,6 +939,78 @@ abstract final class AppDatabase {
         "DEFAULT 'resale'",
       );
     }
+  }
+
+  /// v8 — Ficha técnica + produção (Fase 2 — pastelaria/produção).
+  ///
+  /// Quatro tabelas por loja:
+  ///  - `recipes` — a FICHA TÉCNICA do produto acabado (`manufactured`/
+  ///    `composite`): rendimento da base (`yield_quantity`, milésimos) e
+  ///    status ativo. Uma ficha por produto acabado (UNIQUE store+produto).
+  ///  - `recipe_items` — os componentes consumidos (produto + quantidade
+  ///    em milésimos) por base.
+  ///  - `production_orders` — o HISTÓRICO de ordens de produção: produto
+  ///    acabado, quantidade produzida, custo unitário/total (snapshot) e a
+  ///    ficha de origem (opcional).
+  ///  - `production_order_items` — snapshot dos componentes consumidos por
+  ///    ordem (nome + custo unitário na data).
+  ///
+  /// Idempotente (IF NOT EXISTS) — bancos novos e legados convergem.
+  static void _schemaV8(Database db) {
+    db.execute('''
+CREATE TABLE IF NOT EXISTS recipes (
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ product_id TEXT NOT NULL,
+ -- Rendimento da base em MILÉSIMOS (W11): 1000 = 1 unidade.
+ yield_quantity INTEGER NOT NULL CHECK (yield_quantity > 0),
+ is_active INTEGER NOT NULL DEFAULT 1,
+ created_at INTEGER NOT NULL,
+ updated_at INTEGER
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_recipes_store_product
+ ON recipes(store_id, product_id);
+''');
+    db.execute('''
+CREATE TABLE IF NOT EXISTS recipe_items (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ recipe_id TEXT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+ product_id TEXT NOT NULL,
+ quantity INTEGER NOT NULL CHECK (quantity > 0),
+ UNIQUE (recipe_id, product_id)
+);
+CREATE INDEX IF NOT EXISTS idx_recipe_items_recipe
+ ON recipe_items(recipe_id);
+''');
+    db.execute('''
+CREATE TABLE IF NOT EXISTS production_orders (
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ product_id TEXT NOT NULL,
+ product_name TEXT NOT NULL,
+ quantity INTEGER NOT NULL CHECK (quantity > 0),
+ recipe_id TEXT,
+ cost_price INTEGER NOT NULL CHECK (cost_price >= 0),
+ total_cost INTEGER NOT NULL CHECK (total_cost >= 0),
+ date_time INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_production_orders_store
+ ON production_orders(store_id, date_time DESC);
+''');
+    db.execute('''
+CREATE TABLE IF NOT EXISTS production_order_items (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ production_id TEXT NOT NULL REFERENCES production_orders(id)
+   ON DELETE CASCADE,
+ product_id TEXT NOT NULL,
+ product_name TEXT NOT NULL,
+ quantity INTEGER NOT NULL CHECK (quantity > 0),
+ unit_cost INTEGER NOT NULL CHECK (unit_cost >= 0),
+ UNIQUE (production_id, product_id)
+);
+CREATE INDEX IF NOT EXISTS idx_production_order_items_order
+ ON production_order_items(production_id);
+''');
   }
 
   /// v5 — Gestão de funcionários (add-on `ao_employee_mgmt`).

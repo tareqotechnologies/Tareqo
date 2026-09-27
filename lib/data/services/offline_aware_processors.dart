@@ -1,7 +1,9 @@
 import '../../domain/entities/debt.dart';
+import '../../domain/entities/production_order.dart';
 import '../../domain/entities/purchase.dart';
 import '../../domain/entities/sale.dart';
 import '../../domain/repositories/i_debt_processor.dart';
+import '../../domain/repositories/i_production_processor.dart';
 import '../../domain/repositories/i_purchase_processor.dart';
 import '../../domain/repositories/i_sale_processor.dart';
 import 'offline_sync_service.dart';
@@ -15,7 +17,7 @@ import 'offline_sync_service.dart';
 ///
 /// Tipos de op registrados (replay idempotente nas RPCs):
 /// `process_sale` · `process_purchase` · `register_debt` ·
-/// `settle_debt` · `cancel_sale`
+/// `settle_debt` · `cancel_sale` · `process_production`
 final class OfflineAwareSaleProcessor implements ISaleAtomicProcessor {
   const OfflineAwareSaleProcessor(this._inner, this._sync);
 
@@ -41,6 +43,20 @@ final class OfflineAwarePurchaseProcessor implements IPurchaseAtomicProcessor {
     opType: 'process_purchase',
     payload: {'purchase': purchase.toJson()},
     rpc: () => _inner.process(purchase),
+  );
+}
+
+final class OfflineAwareProductionProcessor implements IProductionProcessor {
+  const OfflineAwareProductionProcessor(this._inner, this._sync);
+
+  final IProductionProcessor _inner;
+  final OfflineSyncService _sync;
+
+  @override
+  Future<void> process(ProductionOrder order) => _sync.run(
+    opType: 'process_production',
+    payload: {'order': order.toJson()},
+    rpc: () => _inner.process(order),
   );
 }
 

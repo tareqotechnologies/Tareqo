@@ -33,7 +33,9 @@ import '../../data/datasources/local/invoice_notification_local_data_source.dart
 import '../../data/datasources/local/invoice_notification_local_data_source_impl.dart';
 import '../../data/datasources/remote/supabase_invoice_notification_data_source.dart';
 import '../../data/datasources/local/product_local_data_source.dart';
+import '../../data/datasources/local/production_local_data_source.dart';
 import '../../data/datasources/local/product_local_data_source_impl.dart';
+import '../../data/datasources/local/production_local_data_source_impl.dart';
 import '../../data/datasources/local/pending_op_queue.dart';
 import '../../data/datasources/local/pending_op_queue_memory_impl.dart';
 import '../../data/datasources/local/purchase_local_data_source.dart';
@@ -60,6 +62,7 @@ import '../../data/datasources/remote/supabase_plan_data_source.dart';
 import '../../data/datasources/remote/supabase_plan_request_data_source.dart';
 import '../../data/datasources/remote/supabase_invoice_data_source.dart';
 import '../../data/datasources/remote/supabase_product_data_source.dart';
+import '../../data/datasources/remote/supabase_production_data_source.dart';
 import '../../data/datasources/remote/supabase_purchase_data_source.dart';
 import '../../data/datasources/remote/supabase_sale_data_source.dart';
 import '../../data/datasources/remote/supabase_stock_lot_data_source.dart';
@@ -84,6 +87,7 @@ import '../../data/repositories/invoice_repository_impl.dart';
 import '../../data/repositories/invoice_notification_repository_impl.dart';
 
 import '../../data/repositories/product_repository_impl.dart';
+import '../../data/repositories/production_repository_impl.dart';
 import '../../data/repositories/purchase_repository_impl.dart';
 import '../../data/repositories/sale_repository_impl.dart';
 import '../../data/repositories/stock_lot_repository_impl.dart';
@@ -98,12 +102,14 @@ import '../../data/services/local_employee_account_service.dart';
 import '../../data/services/supabase_debt_processor.dart';
 import '../../data/services/supabase_employee_processor.dart';
 import '../../data/services/supabase_employee_realtime_signal_source.dart';
+import '../../data/services/supabase_production_processor.dart';
 import '../../data/services/supabase_purchase_processor.dart';
 import '../../data/services/supabase_sale_cancellation_processor.dart';
 import '../../data/services/supabase_sale_processor.dart';
 import '../../data/services/supabase_cash_closing_processor.dart';
 import '../../data/services/supabase_stock_adjustment_processor.dart';
 import '../../domain/entities/debt.dart';
+import '../../domain/entities/production_order.dart';
 import '../../domain/entities/purchase.dart';
 import '../../domain/entities/sale.dart';
 import '../../domain/repositories/i_addon_repository.dart';
@@ -130,6 +136,8 @@ import '../../domain/repositories/i_plan_request_repository.dart';
 import '../../domain/repositories/i_invoice_repository.dart';
 import '../../domain/repositories/i_invoice_notification_repository.dart';
 import '../../domain/repositories/i_product_repository.dart';
+import '../../domain/repositories/i_production_processor.dart';
+import '../../domain/repositories/i_production_repository.dart';
 import '../../domain/repositories/i_purchase_processor.dart';
 import '../../domain/repositories/i_purchase_repository.dart';
 import '../../domain/repositories/i_sale_processor.dart';
@@ -187,7 +195,9 @@ import '../../domain/usecases/get_products_use_case.dart';
 import '../../domain/usecases/fifo_stock_use_case.dart';
 import '../../domain/usecases/mark_transaction_as_paid_use_case.dart';
 import '../../domain/usecases/cancel_sale_use_case.dart';
+import '../../domain/usecases/process_production_use_case.dart';
 import '../../domain/usecases/process_sale_use_case.dart';
+import '../../domain/usecases/production_use_cases.dart';
 import '../../domain/usecases/reject_tenant_use_case.dart';
 import '../../domain/usecases/request_plan_upgrade_use_case.dart';
 import '../../domain/usecases/request_tenant_access_use_case.dart';
@@ -383,6 +393,9 @@ final class ServiceLocator {
     final cancellationProcessor = const SupabaseSaleCancellationProcessor(
       SaleSupabaseDataSourceImpl(),
     );
+    final productionProcessor = const SupabaseProductionProcessor(
+      ProductionSupabaseDataSourceImpl(),
+    );
 
     sync
       ..registerReplayer(
@@ -415,6 +428,12 @@ final class ServiceLocator {
         (payload) => cancellationProcessor.cancel(
           payload['saleId'] as String,
           storeId: payload['storeId'] as String,
+        ),
+      )
+      ..registerReplayer(
+        'process_production',
+        (payload) => productionProcessor.process(
+          ProductionOrder.fromJson(payload['order'] as Map<String, dynamic>),
         ),
       );
 
@@ -451,6 +470,14 @@ final class ServiceLocator {
       )
       ..registerLazySingleton<ProductLocalDataSource>(
         () => const ProductSupabaseDataSourceImpl(),
+      )
+      // Produção (Fase 2): fichas técnicas e histórico por REST; a ORDEM de
+      // produção delega à RPC atómica `process_production`.
+      ..registerLazySingleton<ProductionLocalDataSource>(
+        () => const ProductionSupabaseDataSourceImpl(),
+      )
+      ..registerLazySingleton<IProductionProcessor>(
+        () => OfflineAwareProductionProcessor(productionProcessor, sync),
       )
       ..registerLazySingleton<SaleLocalDataSource>(
         () => const SaleSupabaseDataSourceImpl(),
@@ -644,6 +671,9 @@ final class ServiceLocator {
       ..registerLazySingleton<PurchaseLocalDataSource>(
         () => PurchaseLocalDataSourceImpl(),
       )
+      ..registerLazySingleton<ProductionLocalDataSource>(
+        ProductionLocalDataSourceImpl.new,
+      )
       ..registerLazySingleton<StockLotLocalDataSource>(
         () => StockLotLocalDataSourceImpl(),
       )
@@ -729,6 +759,10 @@ final class ServiceLocator {
       )
       ..registerLazySingleton<IPurchaseRepository>(
         () => PurchaseRepositoryImpl(instance<PurchaseLocalDataSource>()),
+      )
+      // Produção (Fase 2): fichas técnicas + histórico de ordens.
+      ..registerLazySingleton<IProductionRepository>(
+        () => ProductionRepositoryImpl(instance<ProductionLocalDataSource>()),
       )
       ..registerLazySingleton<IStockLotRepository>(
         () => StockLotRepositoryImpl(instance<StockLotLocalDataSource>()),
@@ -1017,6 +1051,34 @@ final class ServiceLocator {
           // no modo remoto.
           processor: instance.isRegistered<IPurchaseAtomicProcessor>()
               ? instance<IPurchaseAtomicProcessor>()
+              : null,
+        ),
+      )
+      // Produção (Fase 2): ficha técnica + ordem de produção. No Supabase a
+      // ordem delega à RPC atómica `process_production`; no local usa o
+      // caminho composto (FifoStockUseCase + IUnitOfWork).
+      ..registerLazySingleton<GetRecipesUseCase>(
+        () => GetRecipesUseCase(instance<IProductionRepository>()),
+      )
+      ..registerLazySingleton<GetProductionOrdersUseCase>(
+        () => GetProductionOrdersUseCase(instance<IProductionRepository>()),
+      )
+      ..registerLazySingleton<SaveRecipeUseCase>(
+        () => SaveRecipeUseCase(
+          instance<IProductionRepository>(),
+          instance<IUnitOfWork>(),
+        ),
+      )
+      ..registerLazySingleton<DeleteRecipeUseCase>(
+        () => DeleteRecipeUseCase(instance<IProductionRepository>()),
+      )
+      ..registerLazySingleton<ProcessProductionUseCase>(
+        () => ProcessProductionUseCase(
+          instance<IProductionRepository>(),
+          instance<FifoStockUseCase>(),
+          instance<IUnitOfWork>(),
+          processor: instance.isRegistered<IProductionProcessor>()
+              ? instance<IProductionProcessor>()
               : null,
         ),
       )

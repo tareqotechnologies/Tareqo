@@ -1815,5 +1815,53 @@
       "planName": { "type": "String" },
       "limit": { "type": "int" }
     }
+  },
+  "productionTitle": "Production",
+  "productionEmptyTitle": "No recipe yet",
+  "productionEmptySubtitle": "A recipe defines the components (raw material, packaging…) that produce a finished product.",
+  "productionNewRecipe": "New recipe",
+  "productionRecipesSection": "Recipes",
+  "productionHistorySection": "Production history",
+  "productionHistoryEmpty": "No production recorded",
+  "productionHistoryEmptySubtitle": "Production orders appear here after you produce.",
+  "productionRecipeTitle": "Recipe",
+  "productionFinishedProduct": "Finished product",
+  "productionYieldLabel": "Base yield (units)",
+  "productionComponents": "Components",
+  "productionAddComponent": "Add component",
+  "productionComponentLabel": "Component",
+  "productionQuantityLabel": "Quantity",
+  "productionProduce": "Produce",
+  "productionBasesLabel": "Bases to produce",
+  "productionProduced": "To produce: {quantity}",
+  "@productionProduced": {
+    "placeholders": {
+      "quantity": { "type": "String" }
+    }
+  },
+  "productionCostTotal": "Order cost: {amount}",
+  "@productionCostTotal": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "productionConfirm": "Record production",
+  "productionSaved": "Production recorded",
+  "productionRecipeSaved": "Recipe saved",
+  "productionDeleteTitle": "Remove recipe",
+  "productionDeleteMessage": "The recipe will be removed. Production history is kept.",
+  "productionItemCount": "{count, plural, =1{1 component} other{{count} components}}",
+  "@productionItemCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "productionNoProducibleTitle": "No producible products",
+  "productionNoProducibleSubtitle": "Set a product type to \"Manufactured\" or \"Composite\" to create a recipe.",
+  "productionInsufficientProduct": "Insufficient stock for {product}",
+  "@productionInsufficientProduct": {
+    "placeholders": {
+      "product": { "type": "String" }
+    }
   }
 }

@@ -31,7 +31,7 @@ Todas as entidades são classes `@freezed` (imutáveis, com `copyWith`, `==`/`ha
 | `unitLabel` | `String` | Unidade dos produtos por peso (`kg`, `g`, `l`, `ml`…). `'un'` (padrão) = unidade inteira normal |
 | `type` | `ProductType` | Tipo estrutural do produto (Fase 1 — pastelaria/produção). Default `resale` por compatibilidade: produtos antigos já eram compráveis e vendáveis. Ver papéis abaixo |
 
-**Tipo do produto (`ProductType`) — Fase 1.** O papel do produto na operação, em vez de tratar tudo como item de compra e venda: `rawMaterial` (matéria-prima), `resale` (comprado pronto para revenda — o default/legado), `manufactured` (produzido internamente), `composite` (montado a partir de componentes) e `packaging` (embalagem/material de consumo). Dois papéis derivados governam os fluxos: `isPurchasable` (matéria-prima, revenda, embalagem — entram por compra) e `isSellable` (revenda, produzido, composto — vão ao balcão); a revenda é o único tipo comprado **e** vendido. O valor é persistido **pelo nome do enum** (`resale`, `rawMaterial`…); valor desconhecido cai no default `resale` (nunca lança).
+**Tipo do produto (`ProductType`) — Fase 1.** O papel do produto na operação, em vez de tratar tudo como item de compra e venda: `rawMaterial` (matéria-prima), `resale` (comprado pronto para revenda — o default/legado), `manufactured` (produzido internamente), `composite` (montado a partir de componentes) e `packaging` (embalagem/material de consumo). Três papéis derivados governam os fluxos: `isPurchasable` (matéria-prima, revenda, embalagem — entram por compra), `isSellable` (revenda, produzido, composto — vão ao balcão) e `isProducible` (produzido e composto — podem ser o produto ACABADO de uma ficha técnica, **Fase 2**); a revenda é o único tipo comprado **e** vendido. O valor é persistido **pelo nome do enum** (`resale`, `rawMaterial`…); valor desconhecido cai no default `resale` (nunca lança).
 
 **Regra de negócio associada:** `salePriceCents >= purchasePriceCents` — validada no `AddProductUseCase`. O estoque em milésimos segue a mesma filosofia dos centavos (W4): `int` exato, sem artefatos de `double` em somas, baixa FIFO e comparações.
 
@@ -51,6 +51,52 @@ Cada **entrada de mercadoria cria um lote** associado ao produto — a base do c
 | `costPriceCents` | `int` | Custo de aquisição em CENTAVOS inteiros (W4) |
 
 **Invariante central do módulo:** `product.stockQuantity = Σ lotes ativos` (soma de `currentQuantity` dos lotes com estoque). Ela nasce do backfill da migração W11 e é mantida pelas RPCs/use cases — nunca diverge.
+
+### `Recipe` (ficha técnica) + `RecipeItem` — Fase 2
+
+A **ficha técnica** (receita/BOM) descreve como produzir um produto acabado (`manufactured`/`composite`): quantos milésimos do produto a base rende e quais componentes consome.
+
+| `Recipe` | Tipo | Observação |
+| -------- | ---- | ---------- |
+| `id` | `String` | Identificador da ficha |
+| `storeId` | `String` | Loja dona da ficha (default `'st1'`) |
+| `productId` | `String` | Produto **ACABADO** que a ficha produz (`isProducible`) — uma produção cria um lote novo dele |
+| `yieldQuantity` | `int` | Rendimento da base, em MILÉSIMOS (W11): `1000` = 1 unidade. Deve ser > 0 |
+| `items` | `List<RecipeItem>` | Componentes consumidos por base (ao menos um) |
+| `isActive` | `bool` | Ficha ativa (default `true`); inativa fica no histórico mas não aparece para produzir |
+| `createdAt` / `updatedAt` | `DateTime` / `DateTime?` | Datas |
+
+| `RecipeItem` | Tipo | Observação |
+| ----------- | ---- | ---------- |
+| `productId` | `String` | Produto COMPONENTE consumido |
+| `quantity` | `int` | Quantidade consumida por base, em MILÉSIMOS (W11) |
+
+> **Sem snapshot de preço:** a ficha é **configuração** (não documento histórico) — o nome exibido vem do catálogo vivo e o custo é calculado no momento da produção a partir do preço de compra ATUAL. O snapshot vive na ordem de produção.
+
+### `ProductionOrder` (ordem de produção) + `ProductionItem` — Fase 2
+
+A **ordem de produção** é o documento HISTÓRICO de uma execução: baixou os componentes (FIFO por lotes) e criou um lote do produto acabado.
+
+| `ProductionOrder` | Tipo | Observação |
+| ----------------- | ---- | ---------- |
+| `id` | `String` | `prod<microsecondsSinceEpoch>` |
+| `storeId` | `String` | Loja da ordem (default `'st1'`) |
+| `productId` / `productName` | `String` | Produto acabado (nome é snapshot) |
+| `quantity` | `int` | Quantidade produzida, em MILÉSIMOS (W11) = `yieldQuantity × bases` |
+| `recipeId` | `String?` | Ficha de origem (opcional — produção avulsa) |
+| `costPriceCents` | `int` | Custo por unidade do acabado (CENTAVOS, W4) — vira o `cost_price` do lote criado |
+| `totalCostCents` | `int` | Custo total = Σ (componente × custo unitário), em CENTAVOS |
+| `dateTime` | `DateTime` | Momento da produção |
+| `items` | `List<ProductionItem>` | Snapshot dos componentes consumidos |
+
+| `ProductionItem` | Tipo | Observação |
+| --------------- | ---- | ---------- |
+| `productId` | `String` | Componente consumido |
+| `productName` | `String` | **Snapshot** do nome na data |
+| `quantity` | `int` | Quantidade consumida, em MILÉSIMOS (W11) |
+| `unitCostCents` | `int` | **Snapshot** do custo unitário (CENTAVOS) na data |
+
+> **Snapshot de propósito**, como `SaleItem`/`PurchaseItem`: o custo do lote produzido fica auditável mesmo se o catálogo mudar depois.
 
 ### `Sale` (venda) + `SaleItem` (item)
 
@@ -140,6 +186,8 @@ Vivem em `lib/domain/repositories/`. Declaram **o que** o sistema precisa, nunca
 | `ICustomerRepository` | `getAll(storeId)`, `add(customer)` |
 | `IPurchaseRepository` | `getAll(storeId)`, `add(purchase)` |
 | `IAuthRepository` | `signUp(...)`, `signIn(...)`, `signOut()`, `authStateChanges` (Stream) |
+| `IProductionRepository` | `getRecipes(storeId)`, `saveRecipe(recipe)`, `deleteRecipe(id, storeId)`, `getProductionOrders(storeId)`, `addProductionOrder(order)` (Fase 2) |
+| `IProductionProcessor` | `process(order)` — processador **atômico** de produção (só o Supabase registra, via RPC) (Fase 2) |
 | `IUnitOfWork` | `run<T>(action)` — executa ação em uma transação atômica |
 
 > Os métodos de leitura (`getAll`/`getByPeriod`) recebem **`storeId`** obrigatório: os módulos de negócio são escopados pela loja ativa (Fase 2).
@@ -162,6 +210,16 @@ Regras documentadas nos contratos:
 | `UpdateProductStockUseCase` | **Única porta de entrada para mutar o total do estoque** (agora por baixo do `FifoStockUseCase`). `ensureSufficientStock`, `increase`/`decrease` (revalidam e gravam **valor absoluto**). Lança `ProductNotFoundException` / `InsufficientStockException`. |
 | `FifoStockUseCase` | **Orquestra estoque + lotes (W11).** `increase(productId, qty)` — cria lote novo (validade opcional + custo) e aumenta o total; `decrease(productId, qty)` — pré-valida a soma dos lotes, abate em ordem FIFO (`data_validade` mais próxima primeiro; sem validade por `data_entrada`) e reduz o total; `ensureSufficientStock` — pré-validação pela soma dos lotes. Lança `ProductNotFoundException` / `InsufficientStockException` (com a quantidade REAL disponível). |
 | `GetStockLotsUseCase` | Leitura dos lotes ativos da loja (ordem FIFO) — alimenta os **alertas de validade** do dashboard (vencidos / < 30 dias). |
+
+### Produção (ficha técnica) — Fase 2
+
+| Caso de uso | Comportamento |
+| ----------- | ------------- |
+| `GetRecipesUseCase` | Lista as fichas técnicas da loja (mais recentes primeiro). |
+| `GetProductionOrdersUseCase` | Lista o histórico de ordens de produção da loja. |
+| `SaveRecipeUseCase` | Valida a ficha (produto acabado não vazio, rendimento > 0, ao menos um componente, quantidade > 0, **sem autocomposição** e **sem componente duplicado**) e grava ficha + itens em `IUnitOfWork`. Lança `InvalidRecipeException`. |
+| `DeleteRecipeUseCase` | Remove a ficha da loja. |
+| `ProcessProductionUseCase` | Executa uma ordem a partir da ficha: `producedQuantity = yieldQuantity × bases`; consome cada componente (`quantidade × bases`) em ordem FIFO e cria o **lote** do produto acabado com o custo calculado. Com `IProductionProcessor` (Supabase) delega à RPC atômica; sem ele, roda em `IUnitOfWork`. Lança `InvalidProductionException`, `ProductNotFoundException` / `InsufficientStockException`. **Não movimenta o caixa.** |
 
 ### Vendas
 
@@ -209,6 +267,8 @@ Regras documentadas nos contratos:
 | `InvalidDebtAmountException` | `AddDebtUseCase` | Valor ≤ 0 |
 | `PendingEntryRegistrationException` | `AddDebtUseCase` | Fiado gravado, pendência falhou |
 | `DebtNotFoundException` | `SettleDebtUseCase` | Dívida inexistente |
+| `InvalidRecipeException` | `SaveRecipeUseCase` | Ficha sem produto/componentes, rendimento/quantidade ≤ 0, autocomposição ou componente duplicado |
+| `InvalidProductionException` | `ProcessProductionUseCase` | Produto acabado não producível, componente ausente/desativado, bases ≤ 0 ou autocomposição |
 
 As telas capturam essas exceções e exibem mensagens amigáveis; nenhuma exceção de infraestrutura chega à UI.
 

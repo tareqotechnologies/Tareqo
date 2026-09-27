@@ -34,6 +34,8 @@ Este diretório reúne todos os documentos do app: do que ele faz até como cada
 | 20 | [Migração do MFA server-side (aal2) no live](20-migracao-mfa-aal2.md) | Runbook do P1: coluna `tenants.mfa_enforced`, helpers aal2, guardas `mfa_ok` nas RPCs/políticas do dinheiro, correção do overload PGRST203 de `update_tenant_settings`, verificação (checks 36–39) e ativação por tenant |
 | 21 | [Plano de evolução UI/UX](21-plano-evolucao-ui-ux.md) | Plano histórico (haptics, design system, a11y, motion, guard rails) que originou o documento 23 |
 | 23 | [Design system e convenções de UI/UX](23-design-system-e-convencoes-ui-ux.md) | Tokens, componentes fundamentais, estados, regras de haptics/motion/acessibilidade e os guard rails que o CI protege — leitura obrigatória antes de criar ou revisar telas |
+| 24 | [Migração do tipo do produto no live](24-migracao-tipo-produto.md) | Runbook da PARTE 34 (Fase 1): coluna `products.type` (TEXT, default `resale`), índice `idx_products_store_type`, verificação (check 43), reclassificação manual (com o backfill `tool/backfill_product_types.dart`) e rollback |
+| 25 | [Migração da ficha técnica + produção no live](25-migracao-producao.md) | Runbook da PARTE 35 (Fase 2): tabelas `recipes`/`recipe_items`/`production_orders`/`production_order_items`, RLS gerencial, RPC `process_production`, verificação (check 44) e rollback |
 
 ---
 

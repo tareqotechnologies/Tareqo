@@ -267,6 +267,53 @@ CREATE TABLE cash_closings (
 );
 CREATE UNIQUE INDEX uq_cash_closings_store_day ON cash_closings(store_id, closing_date);
 CREATE INDEX idx_cash_closings_store ON cash_closings(store_id);
+
+-- Fase 2 — Ficha técnica + produção. A ficha (configuração) aponta para o
+-- produto ACABADO e seus componentes; a ORDEM de produção guarda o snapshot
+-- histórico do custo. Quantidades em milésimos (W11), dinheiro em centavos.
+CREATE TABLE recipes (
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ product_id TEXT NOT NULL, -- produto ACABADO (manufactured/composite)
+ yield_quantity INTEGER NOT NULL CHECK (yield_quantity > 0), -- milésimos (W11)
+ is_active INTEGER NOT NULL DEFAULT 1,
+ created_at INTEGER NOT NULL, -- epoch millis
+ updated_at INTEGER
+);
+CREATE UNIQUE INDEX uq_recipes_store_product ON recipes(store_id, product_id);
+
+CREATE TABLE recipe_items (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ recipe_id TEXT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+ product_id TEXT NOT NULL, -- componente consumido
+ quantity INTEGER NOT NULL CHECK (quantity > 0), -- milésimos (W11)
+ UNIQUE (recipe_id, product_id)
+);
+CREATE INDEX idx_recipe_items_recipe ON recipe_items(recipe_id);
+
+CREATE TABLE production_orders (
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ product_id TEXT NOT NULL,
+ product_name TEXT NOT NULL, -- snapshot
+ quantity INTEGER NOT NULL CHECK (quantity > 0), -- milésimos (W11)
+ recipe_id TEXT, -- ficha de origem (NULL = avulsa)
+ cost_price INTEGER NOT NULL CHECK (cost_price >= 0), -- centavos/unidade
+ total_cost INTEGER NOT NULL CHECK (total_cost >= 0), -- centavos
+ date_time INTEGER NOT NULL -- epoch millis
+);
+CREATE INDEX idx_production_orders_store ON production_orders(store_id, date_time DESC);
+
+CREATE TABLE production_order_items (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ production_id TEXT NOT NULL REFERENCES production_orders(id) ON DELETE CASCADE,
+ product_id TEXT NOT NULL,
+ product_name TEXT NOT NULL, -- snapshot
+ quantity INTEGER NOT NULL CHECK (quantity > 0), -- milésimos (W11)
+ unit_cost INTEGER NOT NULL CHECK (unit_cost >= 0), -- centavos (snapshot)
+ UNIQUE (production_id, product_id)
+);
+CREATE INDEX idx_production_order_items_order ON production_order_items(production_id);
 ```
 
 **Convenções de serialização:**
@@ -296,6 +343,7 @@ Os `CHECK` (`stock_quantity >= 0`, `amount >= 0`, `quantity > 0`) são a **salva
 9. **`sales.status` + `sales.cancelled_at`** (anulação de venda) — `status` com `DEFAULT 'active'` (todas as vendas existentes são ativas — nunca foram anuladas) e `cancelled_at` NULL. Guard idempotente: presença da coluna `status`;
 10. **W11 (FIFO + validade + milésimos)** — bancos antigos recebem as colunas `code`/`venda_por_fracao`/`unit_label` (products) e `expiry_date` (purchase_items); **todas as quantidades** (products, sale_items, purchase_items) são convertidas de unidades inteiras para **milésimos (×1000)**; e cada produto com estoque ganha um **lote inicial** (`lot-mig-…`, sem validade, custo = preço de compra) para a invariante `stock = Σ lotes` valer desde o primeiro dia. Guard idempotente: presença da coluna `code` (adicionada só nesta migração) — a reconversão ×1000 nunca reexecuta.
 11. **Fase 1 (tipo estrutural do produto)** — bancos antigos recebem a coluna `products.type` com `DEFAULT 'resale'` (produtos existentes já eram compráveis e vendáveis e **não** são reclassificados automaticamente). **Sem `CHECK` de enum**: a validação vive no datasource (`firstWhere(...orElse: resale)`), então um valor futuro de uma versão nova do app não fica bloqueado pela restrição antiga nem quebra a leitura. Guard idempotente: presença da coluna `type`; `PRAGMA user_version` passa a **7** (`AppDatabase.currentSchemaVersion`).
+12. **Fase 2 (ficha técnica + produção)** — bancos antigos recebem as 4 tabelas novas (`recipes`, `recipe_items`, `production_orders`, `production_order_items`) via `_schemaV8`, todas com `CREATE TABLE IF NOT EXISTS` + índices `IF NOT EXISTS` (**puramente aditivas**, sem reclassificar nem migrar dados existentes). Não há backfill: fichas e ordens começam vazias e são criadas pelo dono/gerente. `PRAGMA user_version` passa a **8** (`AppDatabase.currentSchemaVersion`).
 
 As migrações de numeração rodam **depois** da de `store_id` (os backfills referenciam `store_id`). Todas usam `PRAGMA table_info` para verificar a coluna antes — **seguras para re-execução** (bancos novos já criam as colunas no `CREATE TABLE`).
 

@@ -4156,4 +4156,106 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return 'Le plan $planName autorise jusqu\'à $_temp0. Demandez une mise à niveau du plan pour embaucher plus.';
   }
+
+  @override
+  String get productionTitle => 'Production';
+
+  @override
+  String get productionEmptyTitle => 'Aucune fiche technique';
+
+  @override
+  String get productionEmptySubtitle =>
+      'La fiche technique définit les composants (matière première, emballage…) qui produisent un produit fini.';
+
+  @override
+  String get productionNewRecipe => 'Nouvelle fiche technique';
+
+  @override
+  String get productionRecipesSection => 'Fiches techniques';
+
+  @override
+  String get productionHistorySection => 'Historique de production';
+
+  @override
+  String get productionHistoryEmpty => 'Aucune production enregistrée';
+
+  @override
+  String get productionHistoryEmptySubtitle =>
+      'Les ordres de production apparaissent ici après la production.';
+
+  @override
+  String get productionRecipeTitle => 'Fiche technique';
+
+  @override
+  String get productionFinishedProduct => 'Produit fini';
+
+  @override
+  String get productionYieldLabel => 'Rendement de la base (unités)';
+
+  @override
+  String get productionComponents => 'Composants';
+
+  @override
+  String get productionAddComponent => 'Ajouter un composant';
+
+  @override
+  String get productionComponentLabel => 'Composant';
+
+  @override
+  String get productionQuantityLabel => 'Quantité';
+
+  @override
+  String get productionProduce => 'Produire';
+
+  @override
+  String get productionBasesLabel => 'Bases à produire';
+
+  @override
+  String productionProduced(String quantity) {
+    return 'À produire : $quantity';
+  }
+
+  @override
+  String productionCostTotal(String amount) {
+    return 'Coût de l\'ordre : $amount';
+  }
+
+  @override
+  String get productionConfirm => 'Enregistrer la production';
+
+  @override
+  String get productionSaved => 'Production enregistrée';
+
+  @override
+  String get productionRecipeSaved => 'Fiche technique enregistrée';
+
+  @override
+  String get productionDeleteTitle => 'Supprimer la fiche technique';
+
+  @override
+  String get productionDeleteMessage =>
+      'La fiche technique sera supprimée. L\'historique de production est conservé.';
+
+  @override
+  String productionItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count composants',
+      one: '1 composant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productionNoProducibleTitle => 'Aucun produit productible';
+
+  @override
+  String get productionNoProducibleSubtitle =>
+      'Définissez le type d\'un produit sur \"Produit\" ou \"Composé\" pour créer une fiche technique.';
+
+  @override
+  String productionInsufficientProduct(String product) {
+    return 'Stock insuffisant pour $product';
+  }
 }

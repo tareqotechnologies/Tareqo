@@ -59,6 +59,14 @@ enum ProductType {
       this == ProductType.resale ||
       this == ProductType.manufactured ||
       this == ProductType.composite;
+
+  /// Papel na PRODUÇÃO (Fase 2 — ficha técnica): itens que podem nascer de
+  /// uma ordem de produção interna — produzidos (pão, bolo) e compostos
+  /// (hambúrguer, menu). Matéria-prima/embalagem são CONSUMIDAS pela
+  /// produção e a revenda já entra pronta pela compra — nenhum deles pode
+  /// ser o produto ACABADO de uma ficha técnica.
+  bool get isProducible =>
+      this == ProductType.manufactured || this == ProductType.composite;
 }
 
 /// Entidade de domínio que representa um produto do ERP.

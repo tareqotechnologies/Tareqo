@@ -1815,5 +1815,53 @@
       "planName": { "type": "String" },
       "limit": { "type": "int" }
     }
+  },
+  "productionTitle": "Production",
+  "productionEmptyTitle": "Aucune fiche technique",
+  "productionEmptySubtitle": "La fiche technique définit les composants (matière première, emballage…) qui produisent un produit fini.",
+  "productionNewRecipe": "Nouvelle fiche technique",
+  "productionRecipesSection": "Fiches techniques",
+  "productionHistorySection": "Historique de production",
+  "productionHistoryEmpty": "Aucune production enregistrée",
+  "productionHistoryEmptySubtitle": "Les ordres de production apparaissent ici après la production.",
+  "productionRecipeTitle": "Fiche technique",
+  "productionFinishedProduct": "Produit fini",
+  "productionYieldLabel": "Rendement de la base (unités)",
+  "productionComponents": "Composants",
+  "productionAddComponent": "Ajouter un composant",
+  "productionComponentLabel": "Composant",
+  "productionQuantityLabel": "Quantité",
+  "productionProduce": "Produire",
+  "productionBasesLabel": "Bases à produire",
+  "productionProduced": "À produire : {quantity}",
+  "@productionProduced": {
+    "placeholders": {
+      "quantity": { "type": "String" }
+    }
+  },
+  "productionCostTotal": "Coût de l'ordre : {amount}",
+  "@productionCostTotal": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "productionConfirm": "Enregistrer la production",
+  "productionSaved": "Production enregistrée",
+  "productionRecipeSaved": "Fiche technique enregistrée",
+  "productionDeleteTitle": "Supprimer la fiche technique",
+  "productionDeleteMessage": "La fiche technique sera supprimée. L'historique de production est conservé.",
+  "productionItemCount": "{count, plural, =1{1 composant} other{{count} composants}}",
+  "@productionItemCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "productionNoProducibleTitle": "Aucun produit productible",
+  "productionNoProducibleSubtitle": "Définissez le type d'un produit sur \"Produit\" ou \"Composé\" pour créer une fiche technique.",
+  "productionInsufficientProduct": "Stock insuffisant pour {product}",
+  "@productionInsufficientProduct": {
+    "placeholders": {
+      "product": { "type": "String" }
+    }
   }
 }

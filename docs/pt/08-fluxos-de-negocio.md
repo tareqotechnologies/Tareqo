@@ -229,6 +229,47 @@ leitura → 20 + 5 + 5 dígitos?
 
 > A balança imprime o **valor total** da pesagem (não o peso); a fração de peso é derivada matematicamente de `valor ÷ preço unitário` — ex.: etiqueta de 200,00 a 80,00/kg → 2,5 kg → 2500 milésimos.
 
+### 4.4 Produção por ficha técnica (Fase 2)
+
+Um produto `manufactured`/`composite` nasce de uma **ficha técnica** (receita/BOM) — nunca de uma compra. A ficha é **configuração**: rendimento da base (`yieldQuantity`, milésimos) + componentes (`items`). Executar a produção **transforma estoque** (consome componentes → cria lote do acabado), sem movimentar o caixa.
+
+```text
+Receita (ficha técnica) + N bases
+ ▼
+ProcessProductionUseCase
+ ├─ valida: produto acabado `isProducible` · bases > 0 · ficha com componentes
+ │ · sem autocomposição
+ ├─ produzido = yieldQuantity × bases
+ ├─ por componente: consumido = item.quantity × bases
+ │ └─ totalCostCents += lineTotal(consumido, purchasePriceCents ATUAL)
+ ├─ costPriceCents = totalCostCents × 1000 ~/ produzido (centavo inteiro)
+ │
+ ├─ MODO SUPABASE (IProductionProcessor → RPC process_production, UMA transação):
+ │ ├─ idempotente pelo id da ordem
+ │ ├─ produto acabado travado com FOR UPDATE + ativo (lock_products_or_raise)
+ │ ├─ custo pelo purchase_price atual · consumo FIFO por componente
+ │ └─ lote do acabado: 'lot-production-<id>' (sem movimento de caixa)
+ │
+ └─ MODO LOCAL (SQLite/memória, em IUnitOfWork):
+ ├─ requireActive(acabado) e requireActive(cada componente) ANTES de mutar
+ ├─ decrease FIFO de cada componente (levanta se faltar estoque)
+ ├─ increase do acabado → cria LOTE (entryDate = data, custo = costPriceCents)
+ └─ addProductionOrder POR ÚLTIMO (falha de estoque não deixa ordem órfã)
+ ▼
+Estoque transformado (stock = Σ lotes em ambos os lados) + ordem no histórico
+```
+
+**Decisões de negócio**
+
+| Decisão | Por quê |
+| ------- | ------- |
+| **Produção não movimenta o caixa** | Os componentes já foram pagos na compra; a produção só transforma estoque (o custo entra no lote, não no fluxo de caixa) |
+| **Custo pelo preço de compra ATUAL do componente** | Mesmo critério do servidor (`products.purchase_price`); simples e determinístico — o snapshot do valor fica na ordem |
+| **Ficha sem snapshot; ordem com snapshot** | A ficha é configuração viva (nome/custo do catálogo); o histórico de produção precisa ser auditável mesmo se o catálogo mudar |
+| **Ordem gravada por último no caminho local** | Uma falha de estoque (o caso comum) não deixa ordem órfã nem no caminho em memória |
+| **Só `manufactured`/`composite` são acabados** | `isProducible` — matéria-prima/embalagem são consumidas e a revenda entra pronta pela compra |
+| **Produção é gerencial** | Como compras e anulação: `is_manager_of_store` + `mfa_ok()` no servidor (RLS); a UI esconde de funcionário comum |
+
 ---
 
 ## 5. Fecho de caixa diário (Z-report)

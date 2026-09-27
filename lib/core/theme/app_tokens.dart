@@ -125,6 +125,9 @@ abstract final class ModuleColors {
 
   /// Lojas — petróleo-ardósia (administração)
   static const Color stores = Color(0xFF223A41);
+
+  /// Produção — terra queimada (fabricação a partir de matéria-prima)
+  static const Color production = Color(0xFF5A4632);
 }
 
 /// Padrão de ícones com fundo sólido escuro — replicado do feed

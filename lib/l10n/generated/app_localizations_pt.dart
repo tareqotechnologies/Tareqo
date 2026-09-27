@@ -4141,4 +4141,106 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return 'O plano $planName permite até $_temp0. Solicite um upgrade de plano para contratar mais.';
   }
+
+  @override
+  String get productionTitle => 'Produção';
+
+  @override
+  String get productionEmptyTitle => 'Ainda sem ficha técnica';
+
+  @override
+  String get productionEmptySubtitle =>
+      'A ficha técnica define os componentes (matéria-prima, embalagem…) que produzem um produto acabado.';
+
+  @override
+  String get productionNewRecipe => 'Nova ficha técnica';
+
+  @override
+  String get productionRecipesSection => 'Fichas técnicas';
+
+  @override
+  String get productionHistorySection => 'Histórico de produção';
+
+  @override
+  String get productionHistoryEmpty => 'Nenhuma produção registrada';
+
+  @override
+  String get productionHistoryEmptySubtitle =>
+      'As ordens de produção aparecem aqui após produzir.';
+
+  @override
+  String get productionRecipeTitle => 'Ficha técnica';
+
+  @override
+  String get productionFinishedProduct => 'Produto acabado';
+
+  @override
+  String get productionYieldLabel => 'Rendimento da base (unidades)';
+
+  @override
+  String get productionComponents => 'Componentes';
+
+  @override
+  String get productionAddComponent => 'Adicionar componente';
+
+  @override
+  String get productionComponentLabel => 'Componente';
+
+  @override
+  String get productionQuantityLabel => 'Quantidade';
+
+  @override
+  String get productionProduce => 'Produzir';
+
+  @override
+  String get productionBasesLabel => 'Bases a produzir';
+
+  @override
+  String productionProduced(String quantity) {
+    return 'A produzir: $quantity';
+  }
+
+  @override
+  String productionCostTotal(String amount) {
+    return 'Custo da ordem: $amount';
+  }
+
+  @override
+  String get productionConfirm => 'Registrar produção';
+
+  @override
+  String get productionSaved => 'Produção registrada';
+
+  @override
+  String get productionRecipeSaved => 'Ficha técnica guardada';
+
+  @override
+  String get productionDeleteTitle => 'Remover ficha técnica';
+
+  @override
+  String get productionDeleteMessage =>
+      'A ficha técnica será removida. O histórico de produção é mantido.';
+
+  @override
+  String productionItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count componentes',
+      one: '1 componente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productionNoProducibleTitle => 'Nenhum produto produzível';
+
+  @override
+  String get productionNoProducibleSubtitle =>
+      'Classifique um produto como \"Produzido\" ou \"Composto\" no cadastro para criar uma ficha técnica.';
+
+  @override
+  String productionInsufficientProduct(String product) {
+    return 'Estoque insuficiente para $product';
+  }
 }

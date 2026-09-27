@@ -196,6 +196,16 @@ Uma padaria/pastelaria não trata tudo como item de compra e venda: farinha é m
 3. **Sem `CHECK` de enum no banco.** SQLite não altera um `CHECK` sem rebuild da tabela: um tipo adicionado numa versão nova do app ficaria bloqueado pela restrição antiga e quebraria a gravação. A validação fica no datasource, onde um valor desconhecido vira `resale` (mesma `orElse` do Postgres e do SQLite) — **a leitura nunca lança**.
 4. **Papéis derivados no domínio.** `isPurchasable`/`isSellable` são getters do enum (não condições espalhadas nas telas): compras repõe matéria-prima/revenda/embalagem, o PDV vende revenda/produzido/composto. O servidor continua negando produtos inativos (`lock_products_or_raise`); a filtragem por papel é de UI/seleção de catálogo.
 
+## Por que a produção usa uma ficha técnica (BOM) e recalcula o custo no momento (Fase 2)?
+
+Numa pastelaria o produto acabado não nasce de uma compra: pão, bolo e hambúrguer são **transformados** a partir de ingredientes. A Fase 2 modela isso com uma ficha técnica (receita/BOM) e ordens de produção — sem duplicar o conceito de estoque.
+
+1. **A ficha é configuração, não documento.** `Recipe`/`RecipeItem` guardam só o produto acabado, o rendimento da base e os componentes/quantidades — **sem snapshot de nome/preço**. O nome exibido vem do catálogo vivo e o custo é calculado na produção. Guardar preço na ficha criaria dois lugares de verdade a manter sincronizados.
+2. **Custo pelo preço de compra ATUAL, com snapshot na ordem.** Na produção, `custo = Σ (componente × purchase_price atual)` e `costPriceCents = total × 1000 ÷ produzido`. O valor é gravado na `ProductionOrder` (`ProductionItem.unitCostCents`) e vira o `cost_price` do **lote** criado — o histórico fica auditável mesmo se o catálogo mudar (mesmo padrão de `SaleItem`/`PurchaseItem`).
+3. **Produção transforma estoque, não caixa.** Consome lotes (FIFO) dos componentes e cria um lote novo do acabado, mantendo `stock = Σ lotes` nos dois lados. Não há entrada/saída financeira: os componentes já foram pagos na compra.
+4. **Atomicidade real, não "quase".** No Supabase toda a ordem roda na RPC `process_production` (`SECURITY DEFINER`, uma transação, idempotente pelo id); no SQLite/memória o `ProcessProductionUseCase` usa `IUnitOfWork` e grava a ordem **por último** — uma falha de estoque nunca deixa ordem órfã. O mesmo contrato nos três modos (memória/SQLite/Supabase), coberto por `sql_check.sh`/`check 44`.
+5. **Produção é gerencial.** Como compras e anulação de venda: RLS `is_manager_of_store` + `mfa_ok()` no INSERT/UPDATE — a matriz de acesso no app é só orientação de UX; o servidor é a autoridade.
+
 ## Por que o formato de balança `20PPPPPWWWWW`?
 
 É o padrão das balanças etiquetadoras de mercado: prefixo `20`, 5 dígitos do produto (PLU) e 5 do valor da pesagem.

@@ -4090,4 +4090,106 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return 'The $planName plan allows up to $_temp0. Request a plan upgrade to hire more.';
   }
+
+  @override
+  String get productionTitle => 'Production';
+
+  @override
+  String get productionEmptyTitle => 'No recipe yet';
+
+  @override
+  String get productionEmptySubtitle =>
+      'A recipe defines the components (raw material, packaging…) that produce a finished product.';
+
+  @override
+  String get productionNewRecipe => 'New recipe';
+
+  @override
+  String get productionRecipesSection => 'Recipes';
+
+  @override
+  String get productionHistorySection => 'Production history';
+
+  @override
+  String get productionHistoryEmpty => 'No production recorded';
+
+  @override
+  String get productionHistoryEmptySubtitle =>
+      'Production orders appear here after you produce.';
+
+  @override
+  String get productionRecipeTitle => 'Recipe';
+
+  @override
+  String get productionFinishedProduct => 'Finished product';
+
+  @override
+  String get productionYieldLabel => 'Base yield (units)';
+
+  @override
+  String get productionComponents => 'Components';
+
+  @override
+  String get productionAddComponent => 'Add component';
+
+  @override
+  String get productionComponentLabel => 'Component';
+
+  @override
+  String get productionQuantityLabel => 'Quantity';
+
+  @override
+  String get productionProduce => 'Produce';
+
+  @override
+  String get productionBasesLabel => 'Bases to produce';
+
+  @override
+  String productionProduced(String quantity) {
+    return 'To produce: $quantity';
+  }
+
+  @override
+  String productionCostTotal(String amount) {
+    return 'Order cost: $amount';
+  }
+
+  @override
+  String get productionConfirm => 'Record production';
+
+  @override
+  String get productionSaved => 'Production recorded';
+
+  @override
+  String get productionRecipeSaved => 'Recipe saved';
+
+  @override
+  String get productionDeleteTitle => 'Remove recipe';
+
+  @override
+  String get productionDeleteMessage =>
+      'The recipe will be removed. Production history is kept.';
+
+  @override
+  String productionItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count components',
+      one: '1 component',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productionNoProducibleTitle => 'No producible products';
+
+  @override
+  String get productionNoProducibleSubtitle =>
+      'Set a product type to \"Manufactured\" or \"Composite\" to create a recipe.';
+
+  @override
+  String productionInsufficientProduct(String product) {
+    return 'Insufficient stock for $product';
+  }
 }
