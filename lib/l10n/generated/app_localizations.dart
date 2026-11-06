@@ -1480,6 +1480,36 @@ abstract class AppLocalizations {
   /// **'Criar loja'**
   String get addStoreSubmit;
 
+  /// No description provided for @editStoreTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar loja'**
+  String get editStoreTitle;
+
+  /// No description provided for @editStoreSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar alterações'**
+  String get editStoreSubmit;
+
+  /// No description provided for @editStoreSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Loja {name} atualizada!'**
+  String editStoreSuccess(String name);
+
+  /// No description provided for @editStoreError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível atualizar a loja. Tente novamente.'**
+  String get editStoreError;
+
+  /// No description provided for @editStoreAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar'**
+  String get editStoreAction;
+
   /// No description provided for @addEmployeeTitle.
   ///
   /// In pt, this message translates to:
@@ -2949,6 +2979,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Registar fiado'**
   String get debtsAddDebt;
+
+  /// No description provided for @debtsDataSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados do fiado'**
+  String get debtsDataSection;
 
   /// No description provided for @debtsSearchHint.
   ///

@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
 import '../../core/utils/app_clock.dart';
-import '../../core/utils/period_utils.dart';
 import '../../data/services/offline_sync_service.dart';
 import '../../domain/entities/sale.dart';
 import '../../domain/usecases/get_cash_flow_use_case.dart';
@@ -54,7 +53,9 @@ final dashboardCashFlowProvider = FutureProvider.autoDispose<CashFlow>((
   ref,
 ) async {
   final period = ref.watch(dashboardPeriodProvider);
-  final now = DateTime.now();
+  // AppClock (relógio injetável nos testes) — é a regra do projeto para
+  // código de UI (ver core/utils/app_clock.dart).
+  final now = AppClock.now();
   final user = ref.watch(authStateProvider).value;
   final storeId = user == null
       ? null
@@ -62,12 +63,7 @@ final dashboardCashFlowProvider = FutureProvider.autoDispose<CashFlow>((
   if (storeId == null) {
     return const CashFlow(incomeCents: 0, expenseCents: 0);
   }
-  final start = switch (period) {
-    CashFlowPeriod.today => startOfDay(now),
-    CashFlowPeriod.week => startOfDay(now.subtract(const Duration(days: 7))),
-    CashFlowPeriod.month => DateTime(now.year, now.month, 1),
-    CashFlowPeriod.all => DateTime(2000),
-  };
+  final start = period.startOf(now);
   return ref
       .read(getCashFlowUseCaseProvider)
       .call(storeId: storeId, start: start, end: now);
@@ -131,12 +127,7 @@ class DashboardKpisNotifier extends AsyncNotifier<DashboardKpis> {
     // apenas entradas/saídas — vendas, fiado e estoque são totais da loja.
     final period = ref.watch(cashFlowPeriodProvider);
     final now = AppClock.now();
-    final start = switch (period) {
-      CashFlowPeriod.today => startOfDay(now),
-      CashFlowPeriod.week => startOfDay(now.subtract(const Duration(days: 7))),
-      CashFlowPeriod.month => DateTime(now.year, now.month, 1),
-      CashFlowPeriod.all => DateTime(2000),
-    };
+    final start = period.startOf(now);
 
     final useCase = ref.watch(getDashboardKpisUseCaseProvider);
     if (useCase != null) {

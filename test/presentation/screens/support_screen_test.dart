@@ -85,10 +85,7 @@ void main() {
       expect(find.text('Fale com o suporte'), findsOneWidget);
       // Dicas de cada tópico (hints) presentes.
       expect(find.textContaining('Login, lojas, produtos'), findsOneWidget);
-      expect(
-        find.textContaining('Resolva problemas de login'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Resolva problemas de login'), findsOneWidget);
       expect(find.textContaining('Nossa equipe pode ajudar'), findsOneWidget);
       // Campo de busca e rodapé da referência.
       expect(find.text('Buscar na ajuda'), findsOneWidget);
@@ -105,7 +102,10 @@ void main() {
 
       expect(find.byType(DocReaderScreen), findsOneWidget);
       // Markdown embutido renderizado: h1 do guia em português.
-      expect(find.textContaining('Guia do Utilizador — TAREQO'), findsOneWidget);
+      expect(
+        find.textContaining('Guia do Utilizador — TAREQO'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('abre a Solução de problemas (pt) no leitor interno', (
@@ -117,7 +117,10 @@ void main() {
       await settleAfterTap(tester);
 
       expect(find.byType(DocReaderScreen), findsOneWidget);
-      expect(find.textContaining('Solução de Problemas — TAREQO'), findsOneWidget);
+      expect(
+        find.textContaining('Solução de Problemas — TAREQO'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('busca filtra os tópicos e o estado vazio aparece', (

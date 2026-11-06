@@ -34,15 +34,16 @@ abstract final class PdfAccents {
   static const terracotta = PdfColor.fromInt(0xFFB58863);
 
   // ── Tinta quente da caixa de pagamento (factura) ──
-  // Substituem `green50/800/900`: a família verde saiu da semântica do
-  // app (RE2) e o papel também não a usa. Terroso = família do `income`.
+  // Cores terrosas substituem a família verde que saiu da semântica do
+  // design system TAREQO. O papel usa tons terrosos (income/success)
+  // ao invés de verde para indicadores financeiros.
 
-  /// Fundo da caixa de pagamento (equivalente ao antigo `green50`).
+  /// Fundo da caixa de pagamento (terroso, substitui o antigo green50).
   static const paymentSurface = PdfColor.fromInt(0xFFFBF6F0);
 
-  /// Texto principal da caixa de pagamento (equivalente ao `green900`).
+  /// Texto principal da caixa de pagamento (terroso, substitui o antigo green900).
   static const paymentText = PdfColor.fromInt(0xFF5A4632);
 
-  /// Texto secundário da caixa de pagamento (equivalente ao `green800`).
+  /// Texto secundário da caixa de pagamento (terroso, substitui o antigo green800).
   static const paymentTextMuted = PdfColor.fromInt(0xFF6E5A44);
 }

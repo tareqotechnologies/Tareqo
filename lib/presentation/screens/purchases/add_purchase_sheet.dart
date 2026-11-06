@@ -351,12 +351,9 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                   // Há produtos, mas NENHUM comprável (produzido/composto)
                   // → estado vazio explicativo em vez de "sem produtos".
                   final roleOnly =
-                      active.isEmpty &&
-                      all.any((product) => product.isActive);
+                      active.isEmpty && all.any((product) => product.isActive);
                   return EmptyState(
-                    icon: roleOnly
-                        ? Icons.category_outlined
-                        : Icons.search_off,
+                    icon: roleOnly ? Icons.category_outlined : Icons.search_off,
                     title: roleOnly
                         ? l10n.purchasesNoPurchasableTitle
                         : l10n.purchasesNoProductsTitle,

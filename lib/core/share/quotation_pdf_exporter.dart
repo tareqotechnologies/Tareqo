@@ -1,16 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:share_plus/share_plus.dart';
 
 import 'pdf_accent.dart';
 
 import '../../domain/entities/quotation.dart';
 import '../utils/formatters.dart';
+import 'document_pdf_scaffold.dart';
 
 /// Rótulos LOCALIZADOS do PDF da cotação/orçamento.
 ///
@@ -100,7 +96,9 @@ class QuotationPdfLabels {
 /// Exportação de cotações/orçamentos para PDF.
 ///
 /// Gera um documento A4 profissional com validade, condições e tabela de
-/// itens. Compartilhado pelo share sheet do sistema.
+/// itens. Compartilhado pelo share sheet do sistema. As PEÇAS comuns
+/// vivem em [document_pdf_scaffold] — este arquivo só extrai os campos da
+/// [Quotation] e compõe o layout da cotação.
 class QuotationPdfExporter {
   const QuotationPdfExporter();
 
@@ -116,14 +114,7 @@ class QuotationPdfExporter {
     PdfColor primaryColor = PdfAccents.terracotta,
     String templateStyle = 'Classic',
   }) async {
-    final data = await rootBundle.load('assets/fonts/Inter-Variable.ttf');
-    final bold = await rootBundle.load('assets/fonts/Inter-Bold.ttf');
-    final doc = pw.Document(
-      theme: pw.ThemeData.withFont(
-        base: pw.Font.ttf(data),
-        bold: pw.Font.ttf(bold),
-      ),
-    );
+    final doc = await newPdfDocument();
 
     final daysRemaining = quotation.validUntil
         .difference(DateTime.now())
@@ -131,60 +122,48 @@ class QuotationPdfExporter {
     final statusLabel = labels.statusText(quotation.status);
     final validityDaysLabel = labels.daysLeftText(daysRemaining);
 
-    // Pré-carregar o logotipo se fornecido.
-    pw.ImageProvider? logoImage;
-    if (logoBytes != null && logoBytes.isNotEmpty) {
-      logoImage = pw.MemoryImage(logoBytes);
-    }
+    final logoImage = pdfLogo(logoBytes);
 
     // Cor escura para texto sobre fundo claro.
-    final primaryDark = _darken(primaryColor);
+    final primaryDark = pdfDarken(primaryColor);
 
     final quotationNumber = quotation.number.toString().padLeft(5, '0');
-    final dateLine = _formatDate(quotation.createdAt);
-    final validUntilLine = _formatDate(quotation.validUntil);
+    final dateLine = pdfFormatDate(quotation.createdAt);
+    final validUntilLine = pdfFormatDate(quotation.validUntil);
 
     // Mesmos 3 estilos do template da Factura (Classic/Modern/Compact).
-    final isModern = templateStyle == 'Modern';
-    final isCompact = templateStyle == 'Compact';
-    final gapSection = isCompact ? 12.0 : (isModern ? 28.0 : 20.0);
-    final gapTable = isCompact ? 8.0 : 16.0;
-    final tablePadding = isCompact ? 4.0 : 6.0;
+    final style = pdfStyleGaps(templateStyle);
+    final gapSection = style.gapSection;
+    final gapTable = style.gapTable;
 
     doc.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: pw.EdgeInsets.fromLTRB(
-          isModern ? 0 : 32,
+          style.isModern ? 0 : 32,
           32,
-          isModern ? 0 : 32,
+          style.isModern ? 0 : 32,
           32,
         ),
         build: (context) => [
           // ─── Cabeçalho ───────────────────────────────────────
           // Modern: faixa lateral colorida + fundo suave (mesma identidade
           // da Factura) — o PDF da cotação segue o ESTILO do template.
-          if (isModern)
-            // Borda lateral + fundo suave (identidade Modern). Container
-            // puro: Row+stretch teria altura infinita no MultiPage.
-            pw.Container(
-              padding: const pw.EdgeInsets.fromLTRB(24, 32, 32, 24),
-              decoration: pw.BoxDecoration(
-                color: PdfColor.fromInt(
-                  0x0D000000 | (primaryColor.toInt() & 0x00FFFFFF),
-                ),
-                border: pw.Border(
-                  left: pw.BorderSide(color: primaryColor, width: 10),
-                ),
-              ),
-              child: _header(
+          if (style.isModern)
+            pdfModernHeaderBand(
+              primaryColor: primaryColor,
+              child: pdfDocumentHeader(
                 logoImage: logoImage,
                 businessName: businessName,
                 businessAddress: businessAddress,
                 businessPhone: businessPhone,
                 businessTaxId: businessTaxId,
-                labels: labels,
-                quotationNumber: quotationNumber,
+                taxIdLabelTemplate: labels.taxIdLabelTemplate,
+                docWord: labels.docWord,
+                numberText: labels.numberLabelTemplate.replaceFirst(
+                  '{number}',
+                  quotationNumber,
+                ),
                 dateLine: dateLine,
                 statusLabel: statusLabel,
                 primaryColor: primaryColor,
@@ -192,14 +171,18 @@ class QuotationPdfExporter {
               ),
             )
           else
-            _header(
+            pdfDocumentHeader(
               logoImage: logoImage,
               businessName: businessName,
               businessAddress: businessAddress,
               businessPhone: businessPhone,
               businessTaxId: businessTaxId,
-              labels: labels,
-              quotationNumber: quotationNumber,
+              taxIdLabelTemplate: labels.taxIdLabelTemplate,
+              docWord: labels.docWord,
+              numberText: labels.numberLabelTemplate.replaceFirst(
+                '{number}',
+                quotationNumber,
+              ),
               dateLine: dateLine,
               statusLabel: statusLabel,
               primaryColor: primaryColor,
@@ -208,9 +191,9 @@ class QuotationPdfExporter {
 
           pw.SizedBox(height: gapSection),
           pw.Divider(color: PdfColors.grey300),
-          pw.SizedBox(height: isCompact ? 8 : 16),
+          pw.SizedBox(height: style.isCompact ? 8 : 16),
 
-          // ─── Dados do Cliente ────────────────────────────────
+          // ─── Dados do Cliente + Validade ─────────────────────
           pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
@@ -236,7 +219,7 @@ class QuotationPdfExporter {
                     ),
                     if (quotation.customerPhone.isNotEmpty)
                       pw.Text(
-                        _fill(
+                        pdfFill(
                           labels.phoneLabelTemplate,
                           quotation.customerPhone,
                         ),
@@ -286,91 +269,52 @@ class QuotationPdfExporter {
           pw.SizedBox(height: gapSection),
 
           // ─── Tabela de Itens ─────────────────────────────────
-          pw.TableHelper.fromTextArray(
+          pdfItemsTable(
             headers: [
               labels.itemHeader,
               labels.qtyHeader,
               labels.unitPriceHeader,
               labels.subtotalHeader,
             ],
-            data: [
+            rows: [
               for (final item in quotation.items)
                 [
                   item.productName,
-                  _formatQty(item.quantity),
+                  pdfFormatQty(item.quantity),
                   Formatters.currency(item.unitPriceCents),
                   Formatters.currency(
                     item.quantity * item.unitPriceCents ~/ 1000,
                   ),
                 ],
             ],
-            columnWidths: const {
-              0: pw.FlexColumnWidth(),
-              1: pw.FixedColumnWidth(60),
-              2: pw.FixedColumnWidth(80),
-              3: pw.FixedColumnWidth(80),
-            },
-            headerStyle: const pw.TextStyle(
-              fontSize: 9,
-              fontWeight: pw.FontWeight.bold,
-              color: PdfColors.white,
-            ),
-            headerDecoration: pw.BoxDecoration(color: primaryColor),
-            cellStyle: const pw.TextStyle(fontSize: 9),
-            cellPadding: pw.EdgeInsets.all(tablePadding),
-            cellAlignments: {
-              1: pw.Alignment.center,
-              2: pw.Alignment.centerRight,
-              3: pw.Alignment.centerRight,
-            },
+            primaryColor: primaryColor,
+            tablePadding: style.tablePadding,
           ),
 
           pw.SizedBox(height: gapTable),
 
           // ─── Totais ──────────────────────────────────────────
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
-            children: [
-              pw.SizedBox(
-                width: 220,
-                child: pw.Column(
-                  children: [
-                    if (quotation.discountCents > 0)
-                      _totalRow(
-                        labels.discountLabel,
-                        '-${Formatters.currency(quotation.discountCents)}',
-                        PdfColors.red700,
-                      ),
-                    pw.Divider(color: PdfColors.grey300),
-                    _totalRow(
-                      labels.totalLabel,
-                      Formatters.currency(quotation.totalAmountCents),
-                      primaryDark,
-                      isBold: true,
-                    ),
-                  ],
+          pdfTotalsBlock(
+            extraRows: [
+              if (quotation.discountCents > 0)
+                pdfTotalRow(
+                  labels.discountLabel,
+                  '-${Formatters.currency(quotation.discountCents)}',
+                  PdfColors.red700,
                 ),
-              ),
             ],
+            totalLabel: labels.totalLabel,
+            totalValue: Formatters.currency(quotation.totalAmountCents),
+            totalColor: primaryDark,
           ),
 
           // ─── Notas ───────────────────────────────────────────
-          if (quotation.notes.isNotEmpty) ...[
-            pw.SizedBox(height: gapTable),
-            pw.Text(
-              labels.notesHeading,
-              style: const pw.TextStyle(
-                fontSize: 9,
-                fontWeight: pw.FontWeight.bold,
-                color: PdfColors.grey600,
-              ),
+          if (quotation.notes.isNotEmpty)
+            ...pdfNotesBlock(
+              spacer: pw.SizedBox(height: gapTable),
+              heading: labels.notesHeading,
+              notes: quotation.notes,
             ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              quotation.notes,
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
-            ),
-          ],
 
           // ─── Condições Gerais ────────────────────────────────
           pw.SizedBox(height: gapSection),
@@ -418,14 +362,8 @@ class QuotationPdfExporter {
           ),
 
           // ─── Rodapé ──────────────────────────────────────────
-          pw.SizedBox(height: 40),
-          pw.Divider(color: PdfColors.grey300),
-          pw.SizedBox(height: 8),
-          pw.Center(
-            child: pw.Text(
-              labels.footerTemplate.replaceFirst('{date}', dateLine),
-              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
-            ),
+          ...pdfFooterBlock(
+            footerText: labels.footerTemplate.replaceFirst('{date}', dateLine),
           ),
         ],
       ),
@@ -462,216 +400,6 @@ class QuotationPdfExporter {
     final subject =
         '${labels.subjectWord} '
         '${labels.numberLabelTemplate.replaceFirst('{number}', number)}';
-    await _share(bytes, fileName, subject);
-  }
-
-  Future<void> _share(Uint8List bytes, String fileName, String subject) async {
-    if (kIsWeb) {
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [
-            XFile.fromData(bytes, mimeType: 'application/pdf', name: fileName),
-          ],
-          subject: subject,
-        ),
-      );
-      return;
-    }
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/$fileName');
-    await file.writeAsBytes(bytes);
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path, mimeType: 'application/pdf')],
-        subject: subject,
-      ),
-    );
-  }
-
-  /// Cabeçalho do PDF da cotação (logotipo + empresa + selo/estado).
-  /// Extraído para as variantes por ESTILO (Modern embrulha na faixa).
-  pw.Widget _header({
-    required pw.ImageProvider? logoImage,
-    required String businessName,
-    String? businessAddress,
-    String? businessPhone,
-    String? businessTaxId,
-    required QuotationPdfLabels labels,
-    required String quotationNumber,
-    required String dateLine,
-    required String statusLabel,
-    required PdfColor primaryColor,
-    required PdfColor primaryDark,
-  }) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        // Lado esquerdo: logotipo + dados da empresa
-        pw.Expanded(
-          child: pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              if (logoImage != null) ...[
-                pw.Container(
-                  width: 48,
-                  height: 48,
-                  child: pw.Image(logoImage, fit: pw.BoxFit.contain),
-                ),
-                pw.SizedBox(width: 12),
-              ],
-              pw.Expanded(
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(
-                      businessName,
-                      style: pw.TextStyle(
-                        fontSize: 20,
-                        fontWeight: pw.FontWeight.bold,
-                        color: primaryDark,
-                      ),
-                    ),
-                    if (businessAddress != null && businessAddress.isNotEmpty)
-                      pw.Text(
-                        businessAddress,
-                        style: const pw.TextStyle(
-                          fontSize: 9,
-                          color: PdfColors.grey700,
-                        ),
-                      ),
-                    if (businessPhone != null && businessPhone.isNotEmpty)
-                      pw.Text(
-                        businessPhone,
-                        style: const pw.TextStyle(
-                          fontSize: 9,
-                          color: PdfColors.grey700,
-                        ),
-                      ),
-                    if (businessTaxId != null && businessTaxId.isNotEmpty)
-                      pw.Text(
-                        _fill(labels.taxIdLabelTemplate, businessTaxId),
-                        style: const pw.TextStyle(
-                          fontSize: 9,
-                          color: PdfColors.grey700,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Lado direito: selo COTAÇÃO + nº + data + estado
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.end,
-          children: [
-            pw.Container(
-              padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: pw.BoxDecoration(
-                color: primaryColor,
-                borderRadius: pw.BorderRadius.circular(6),
-              ),
-              child: pw.Text(
-                labels.docWord,
-                style: const pw.TextStyle(
-                  fontSize: 14,
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.white,
-                ),
-              ),
-            ),
-            pw.SizedBox(height: 8),
-            pw.Text(
-              labels.numberLabelTemplate.replaceFirst('{number}', quotationNumber),
-              style: const pw.TextStyle(
-                fontSize: 12,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-            pw.Text(
-              dateLine,
-              style: const pw.TextStyle(
-                fontSize: 9,
-                color: PdfColors.grey700,
-              ),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Container(
-              padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: pw.BoxDecoration(
-                color: PdfColor(
-                  primaryColor.red,
-                  primaryColor.green,
-                  primaryColor.blue,
-                ),
-                borderRadius: pw.BorderRadius.circular(4),
-              ),
-              child: pw.Text(
-                statusLabel,
-                style: pw.TextStyle(
-                  fontSize: 8,
-                  fontWeight: pw.FontWeight.bold,
-                  color: primaryColor,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  /// Substitui o marcador `{value}` pelo valor fornecido.
-  String _fill(String template, String value) =>
-      template.replaceFirst('{value}', value);
-
-  String _formatDate(DateTime d) =>
-      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-
-  String _formatQty(int millesimos) {
-    if (millesimos % 1000 == 0) return '${millesimos ~/ 1000}';
-    return (millesimos / 1000).toStringAsFixed(1);
-  }
-
-  pw.Widget _totalRow(
-    String label,
-    String value,
-    PdfColor color, {
-    bool isBold = false,
-  }) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 3),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(
-            label,
-            style: pw.TextStyle(
-              fontSize: isBold ? 12 : 9,
-              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
-              color: color,
-            ),
-          ),
-          pw.Text(
-            value,
-            style: pw.TextStyle(
-              fontSize: isBold ? 14 : 10,
-              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Escurece uma cor PDF para usar como texto sobre fundo claro.
-  PdfColor _darken(PdfColor color) {
-    return PdfColor(
-      (color.red * 0.7).clamp(0, 1),
-      (color.green * 0.7).clamp(0, 1),
-      (color.blue * 0.7).clamp(0, 1),
-    );
+    await sharePdfFile(bytes, fileName, subject);
   }
 }

@@ -208,7 +208,8 @@ void main() {
       ProviderScope(
         overrides: [
           authStateProvider.overrideWith(
-            (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
+            (ref) =>
+                Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
           ),
           getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
           getStoresUseCaseProvider.overrideWithValue(_FakeGetStoresUseCase()),
@@ -243,7 +244,11 @@ void main() {
     final chip = tester.widget<StatusChip>(find.byType(StatusChip));
     final context = tester.element(find.byType(StatusChip));
     expect(chip.color, Theme.of(context).warning);
-    expect(chip.color, isNot(Theme.of(context).colorScheme.tertiary));
+    // "Não roxo": a guarda é contra o papel de MARCA (primary, o Electric
+    // Violet). A asserção anterior comparava com `tertiary`, que na paleta
+    // atual É o papel semântico de aviso (tertiary == warning) — uma
+    // tautologia que passou a falhar por construção, não por regressão.
+    expect(chip.color, isNot(Theme.of(context).colorScheme.primary));
   });
 
   testWidgets(
@@ -330,7 +335,8 @@ void main() {
       ProviderScope(
         overrides: [
           authStateProvider.overrideWith(
-            (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
+            (ref) =>
+                Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
           ),
           getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
           getStoresUseCaseProvider.overrideWithValue(_FakeGetStoresUseCase()),
@@ -372,7 +378,8 @@ void main() {
     app = ProviderScope(
       overrides: [
         authStateProvider.overrideWith(
-          (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
+          (ref) =>
+              Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
         ),
         getPlansUseCaseProvider.overrideWithValue(_FakeGetPlansUseCase()),
         getStoresUseCaseProvider.overrideWithValue(useCase),

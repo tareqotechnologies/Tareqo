@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../widgets/app_button.dart';
@@ -50,8 +51,7 @@ class TransactionCard extends StatelessWidget {
         onTap: onTap,
         // Alvo de toque ≥ 48dp (WCAG/androidTapTargetGuideline): a linha é
         // compacta por design, mas abrir o detalhe é o gesto principal da
-        // lista — o Container garante a altura mínima (o texto de 18dp de
-        // linha + padding 10 ficava a 46dp).
+        // lista — o Container garante a altura mínima mesmo com 12sp.
         child: Container(
           constraints: const BoxConstraints(minHeight: AppSizes.touchTarget),
           alignment: Alignment.center,
@@ -61,30 +61,37 @@ class TransactionCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // ── Tipo / categoria ──
+              // ── Descrição + data/hora em área própria ──
               Expanded(
-                child: Text(
-                  transaction.category,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.1,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // ── Hora ──
-              Text(
-                Formatters.time(transaction.date),
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      transaction.category,
+                      // Duas linhas: descrições longas nunca são cortadas.
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      // Descrição = 14/w400. O valor deixa de ser o
+                      // elemento dominante da lista.
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      Formatters.time(transaction.date),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      // Metadado = 12/w400.
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: 12),
-              // ── Valor ──
+              // ── Valor, alinhado à direita ──
               // FittedBox scaleDown: com fonte grande (Dynamic Type) o
-              // valor encolhe em vez de estourar a Row — nunca é truncado.
+              // valor encolhe em vez de estourar a Row — nunca é cortado.
               Flexible(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -92,10 +99,9 @@ class TransactionCard extends StatelessWidget {
                   child: Text(
                     '$sign ${Formatters.currency(transaction.amountCents)}',
                     maxLines: 1,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    // Valor de transação (15/w500, tabular) — alinha
+                    // coluna a coluna sem competir com a descrição.
+                    style: AppTypography.amountInRow(color),
                   ),
                 ),
               ),
@@ -125,7 +131,12 @@ class DateSectionHeader extends StatelessWidget {
     final totalColor = totalCents >= 0 ? theme.income : theme.expense;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 4),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        4,
+      ),
       child: Row(
         children: [
           Expanded(
@@ -133,27 +144,35 @@ class DateSectionHeader extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              // Cabeçalho de data = 12/w500 (a escala já traz o peso).
               style: theme.textTheme.labelMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xs,
-              vertical: 2,
-            ),
-            decoration: BoxDecoration(
-              color: totalColor.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(AppRadius.full),
-            ),
-            child: Text(
-              Formatters.signedAmount(totalCents),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: totalColor,
-                fontWeight: FontWeight.w500,
+          // Flexible + FittedBox: o total do dia encolhe em vez de cortar
+          // quando o valor é longo ou a escala de texto aumenta.
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xs,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: totalColor.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(AppRadius.full),
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  Formatters.signedAmount(totalCents),
+                  maxLines: 1,
+                  // Total do dia: 12/w500, discreto no cabeçalho do grupo.
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: totalColor,
+                  ),
+                ),
               ),
             ),
           ),
@@ -226,11 +245,8 @@ class TransactionDetailSheet extends StatelessWidget {
           Center(
             child: Text(
               '$sign ${Formatters.currency(transaction.amountCents)}',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.5,
-              ),
+              // Valor principal do detalhe: 24/w600 da escala.
+              style: AppTypography.headline.copyWith(color: color),
             ),
           ),
           const SizedBox(height: 4),

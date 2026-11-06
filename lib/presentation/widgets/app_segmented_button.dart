@@ -32,16 +32,18 @@ class AppSegmentedButton<T> extends StatelessWidget {
       showSelectedIcon: false,
       style: SegmentedButton.styleFrom(
         // Alvo de toque ≥ 48dp (guideline a11y).
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
         shape: const StadiumBorder(),
         side: BorderSide(color: scheme.outlineVariant),
         backgroundColor: Colors.transparent,
         selectedBackgroundColor: scheme.primaryContainer,
         selectedForegroundColor: scheme.onPrimaryContainer,
         foregroundColor: scheme.onSurfaceVariant,
-        textStyle: theme.textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        // Filtros são controlos discretos: 14/w500, nunca semibold.
+        textStyle: theme.textTheme.labelLarge,
       ),
       segments: segments,
       selected: selected,

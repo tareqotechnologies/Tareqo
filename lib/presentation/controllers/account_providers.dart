@@ -14,6 +14,7 @@ import '../../domain/entities/tenant.dart';
 import '../../domain/usecases/add_employee_use_case.dart';
 import '../../domain/usecases/add_plan_use_case.dart';
 import '../../domain/usecases/add_store_use_case.dart';
+import '../../domain/usecases/update_store_use_case.dart';
 import '../../domain/usecases/approve_tenant_use_case.dart';
 import '../../domain/usecases/get_employees_use_case.dart';
 import '../../domain/usecases/get_my_plan_requests_use_case.dart';
@@ -83,6 +84,10 @@ final getStoresUseCaseProvider = Provider<GetStoresUseCase>(
 
 final addStoreUseCaseProvider = Provider<AddStoreUseCase>(
   (ref) => ServiceLocator.instance<AddStoreUseCase>(),
+);
+
+final updateStoreUseCaseProvider = Provider<UpdateStoreUseCase>(
+  (ref) => ServiceLocator.instance<UpdateStoreUseCase>(),
 );
 
 final getEmployeesUseCaseProvider = Provider<GetEmployeesUseCase>(

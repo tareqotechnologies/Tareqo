@@ -371,6 +371,18 @@
   },
   "addStoreError": "Não foi possível criar a loja. Tente novamente.",
   "addStoreSubmit": "Criar loja",
+  "editStoreTitle": "Editar loja",
+  "editStoreSubmit": "Salvar alterações",
+  "editStoreSuccess": "Loja {name} atualizada!",
+  "@editStoreSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "editStoreError": "Não foi possível atualizar a loja. Tente novamente.",
+  "editStoreAction": "Editar",
   "addEmployeeTitle": "Novo funcionário",
   "addEmployeeNameLabel": "Nome completo",
   "addEmployeeNameError": "Informe o nome do funcionário.",
@@ -736,6 +748,7 @@
   "debtsTitle": "Crédito (fiado)",
   "debtsHeaderSubtitle": "Fiado a receber e a pagar",
   "debtsAddDebt": "Registar fiado",
+  "debtsDataSection": "Dados do fiado",
   "debtsSearchHint": "Buscar por nome do cliente...",
   "debtsTabPending": "Pendentes",
   "debtsTabSettled": "Quitadas",

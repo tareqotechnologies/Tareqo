@@ -34,25 +34,18 @@ extension PaymentMethodAccent on PaymentMethod {
     // o próprio bege — mas o selo do card precisa de um tom mais luminoso
     // para ≥ 3:1 sobre a sobreposição de 22%; calibrado no teste de
     // contraste). No claro, o slate do primário.
-    PaymentMethod.debitCard || PaymentMethod.creditCard => AppColors.of(
-      theme.brightness,
-      const Color(0xFFCFA984),
-      theme.colorScheme.primary,
-    ), // Dinheiro móvel de Moçambique: M-Pesa em vermelho, E-Mola (Movitel)
+    PaymentMethod.debitCard || PaymentMethod.creditCard =>
+      theme.brightness == Brightness.light
+          ? AppColors.warningText
+          : AppColors.darkAccentOrange,
+    // Dinheiro móvel de Moçambique: M-Pesa em vermelho, E-Mola (Movitel)
     // em laranja — cores sólidas que seguem o padrão do activity feed.
-    PaymentMethod.mPesa => AppColors.of(
-      theme.brightness,
-      const Color(0xFFE05B64),
-      const Color(0xFFDC2626),
-    ),
-    PaymentMethod.eMola => AppColors.of(
-      theme.brightness,
-      const Color(0xFFC9822C),
-      // E-Mola claro: #D97706 dava 2.51:1 sobre o selo do card (teste de
-      // contraste) — âmbar-700 (#B45309) atinge 3.69:1 (ícone ≥ 3:1) e
-      // 5.02:1 como texto sobre branco (AA).
-      const Color(0xFFB45309),
-    ),
+    PaymentMethod.mPesa => theme.brightness == Brightness.light
+        ? const Color(0xFFC0262F)
+        : const Color(0xFFDC2626),
+    PaymentMethod.eMola => theme.brightness == Brightness.light
+        ? const Color(0xFFB25000)
+        : AppColors.darkAccentOrange,
     PaymentMethod.transfer => theme.warning,
   };
 }

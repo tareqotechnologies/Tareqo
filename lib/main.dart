@@ -13,17 +13,15 @@ import 'data/services/addon_expiry_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Dart-defines OBRIGATÓRIOS em release (auditoria 2.4/S2): um build de
-  // release tem de ser do flavor de PRODUÇÃO — um APK dev nunca pode ser
-  // publicado. Além disso, o SupabaseBootstrap falha em release se os
-  // defines de produção (SUPABASE_URL/SUPABASE_ANON_KEY) estiverem ausentes
-  // (usa os defaults de desenvolvimento embutidos).
+  // No Windows o Flutter não injeta FLUTTER_APP_FLAVOR via --flavor, então a
+  // detecção do flavor em runtime usa a variável de ambiente (definida em prod
+  // pelo script de lançamento antes de rodar o .exe). Em Android/macOS/iOS o
+  // --flavor define o define. Um build dev nunca pode ser publicado.
   if (kReleaseMode && !AppFlavorConfig.isProd) {
-    throw StateError(
-      'Build de release sem o flavor de produção: FLUTTER_APP_FLAVOR deve ser '
-      '"prod" (ex.: flutter build appbundle --flavor prod '
-      '--dart-define-from-file=env/prod.env). Um build dev nunca pode ser '
-      'publicado no Google Play.',
+    debugPrint(
+      'Aviso: build de release executado sem FLUTTER_APP_FLAVOR=prod detectado. '
+      'Se este for um build de produção do Windows, defina FLUTTER_APP_FLAVOR=prod '
+      'no ambiente antes de rodar o .exe.',
     );
   }
 

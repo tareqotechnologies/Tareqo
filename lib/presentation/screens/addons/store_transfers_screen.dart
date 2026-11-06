@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
@@ -16,6 +17,7 @@ import '../../widgets/app_card.dart';
 import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/section_label.dart';
 
 /// Ecra de transferências entre lojas — envio, recebimento e histórico.
 class StoreTransfersScreen extends ConsumerStatefulWidget {
@@ -95,10 +97,10 @@ class _TransferCard extends StatelessWidget {
         Icons.local_shipping_outlined,
       ),
       StockTransferStatus.received => (
-        IconTone.green,
+        AppColors.accentOrange,
         Icons.check_circle_outline,
       ),
-      StockTransferStatus.cancelled => (IconTone.red, Icons.cancel_outlined),
+      StockTransferStatus.cancelled => (AppColors.errorNeutral, Icons.cancel_outlined),
     };
 
     final formattedQty = Quantity.format(
@@ -160,7 +162,10 @@ class _TransferCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xs,
+                  vertical: 2,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppRadius.xs),
@@ -420,7 +425,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             const SizedBox(height: AppSpacing.md),
             const Divider(),
             const SizedBox(height: AppSpacing.sm),
-            _SectionLabel(text: l10n.transfersProduct),
+            SectionLabel(text: l10n.transfersProduct),
             const SizedBox(height: 8),
             if (activeProducts.isNotEmpty)
               AppPickerField<String>(
@@ -529,20 +534,3 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
 // ═══════════════════════════════════════════════════════════════════════════════
 // Shared widgets
 // ═══════════════════════════════════════════════════════════════════════════════
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.2,
-      ),
-    );
-  }
-}

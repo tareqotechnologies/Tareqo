@@ -7,7 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/money.dart';
-import '../../../data/datasources/local/addon_catalog.dart';
+import '../../../domain/entities/addon_catalog.dart';
 import '../../../domain/entities/addon.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/addon_providers.dart';
@@ -20,6 +20,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/money_live_preview.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../widgets/search_field.dart';
+import '../../widgets/metric_pill.dart';
 
 /// Painel do super admin — gestão de add-ons por tenant.
 ///
@@ -732,7 +733,7 @@ class _BulkAddOnOption extends StatelessWidget {
             onPressed: onActivate,
             label: context.l10n.adminAddonsActivateBtn,
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.success,
+              foregroundColor: AppColors.successNeutral,
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               minimumSize: const Size(0, 32),
             ),
@@ -1149,19 +1150,19 @@ class _CompactStats extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _Pill(
+          MetricPill(
             count: total,
             label: context.l10n.commonTotal,
             color: scheme.onSurface,
           ),
           const SizedBox(width: AppSpacing.xs),
-          _Pill(
+          MetricPill(
             count: active,
             label: context.l10n.adminAddonsActivePill,
-            color: AppColors.success,
+            color: AppColors.successNeutral,
           ),
           const SizedBox(width: AppSpacing.xs),
-          _Pill(
+          MetricPill(
             count: total - active,
             label: context.l10n.adminAddonsInactivePill,
             color: AppColors.statusError,
@@ -1171,39 +1172,6 @@ class _CompactStats extends StatelessWidget {
     );
   }
 }
-
-class _Pill extends StatelessWidget {
-  const _Pill({required this.count, required this.label, required this.color});
-
-  final int count;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          '$count',
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: color,
-            fontSize: 12,
-          ),
-        ),
-        const SizedBox(width: 3),
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 // ─── Add-On Toggle Tile ─────────────────────────────────────────────────────
 
 class _AddOnToggleTile extends StatelessWidget {

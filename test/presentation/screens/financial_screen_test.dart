@@ -329,9 +329,9 @@ void main() {
     // As cores semânticas resolvem para a variante ESCURA no tema escuro
     // (testApp aplica AppTheme.dark — V3) — texto de valor com AA sobre o card.
     final incomeText = tester.widget<Text>(find.text('+ R\$ 1.000,00'));
-    expect(incomeText.style?.color, AppColors.income);
+    expect(incomeText.style?.color, AppColors.incomeDark);
     final expenseText = tester.widget<Text>(find.text('- R\$ 200,00'));
-    expect(expenseText.style?.color, AppColors.expense);
+    expect(expenseText.style?.color, AppColors.expenseDark);
   });
 
   testWidgets('botão Pagar marca a saída pendente como paga', (tester) async {
@@ -510,7 +510,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Saldo POSITIVO (padrão: 150000 − 45000 = 105000) → verde.
-    expect(saldoColor(tester), AppColors.income);
+    expect(saldoColor(tester), AppColors.incomeDark);
   });
 
   testWidgets('saldo negativo usa a cor de saída (vermelho)', (tester) async {
@@ -537,7 +537,7 @@ void main() {
 
     // Saldo NEGATIVO (10000 − 20000 = −100) → o valor na faixa fica vermelho.
     final text = tester.widget<Text>(find.text('R\$ -100,00'));
-    expect(text.style?.color, AppColors.expense);
+    expect(text.style?.color, AppColors.expenseDark);
     expect(tester.takeException(), isNull);
   });
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/employee_management.dart';
@@ -196,7 +197,7 @@ class _AttendanceTab extends ConsumerWidget {
               child: _MiniStat(
                 label: l10n.employeePresentCount,
                 value: '${openByUser.length}',
-                color: IconTone.green,
+                color: AppColors.accentOrange,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -204,7 +205,7 @@ class _AttendanceTab extends ConsumerWidget {
               child: _MiniStat(
                 label: l10n.employeeAbsentCount,
                 value: '${storeEmployees.length - openByUser.length}',
-                color: IconTone.red,
+                color: AppColors.errorNeutral,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -246,7 +247,7 @@ class _AttendanceTab extends ConsumerWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: record != null
-                          ? IconTone.darkBackground(IconTone.green)
+                          ? IconTone.darkBackground(AppColors.accentOrange)
                           : scheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
@@ -256,7 +257,7 @@ class _AttendanceTab extends ConsumerWidget {
                           : Icons.logout_rounded,
                       size: 16,
                       color: record != null
-                          ? IconTone.lightForeground(IconTone.green)
+                          ? IconTone.lightForeground(AppColors.accentOrange)
                           : scheme.onSurfaceVariant,
                     ),
                   ),
@@ -286,8 +287,10 @@ class _AttendanceTab extends ConsumerWidget {
                       onPressed: () =>
                           _clockOut(context, ref, employee, workDate),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: IconTone.red,
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                        foregroundColor: AppColors.errorNeutral,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                        ),
                         minimumSize: const Size(0, 32),
                       ),
                     )
@@ -317,7 +320,10 @@ class _AttendanceTab extends ConsumerWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xs,
+                  vertical: 2,
+                ),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(AppRadius.full),
@@ -351,8 +357,8 @@ class _AttendanceTab extends ConsumerWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: record.clockOut == null
-                            ? IconTone.green
-                            : IconTone.red,
+                            ? AppColors.accentOrange
+                            : AppColors.errorNeutral,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
@@ -558,7 +564,7 @@ class _CommissionsTab extends ConsumerWidget {
                       Formatters.currency(totalCommission),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: IconTone.green,
+                        color: AppColors.accentOrange,
                         letterSpacing: -0.3,
                       ),
                     ),
@@ -685,9 +691,7 @@ class _CommissionsTab extends ConsumerWidget {
           children: [
             Text(
               l10n.employeeCommissionSetRate,
-              style: Theme.of(
-                sheetContext,
-              ).textTheme.titleMedium,
+              style: Theme.of(sheetContext).textTheme.titleMedium,
             ),
             const SizedBox(height: 4),
             Text(
@@ -828,7 +832,7 @@ class _TargetsTab extends ConsumerWidget {
               child: _MiniStat(
                 label: l10n.employeeTargetsReached,
                 value: '$reached',
-                color: IconTone.green,
+                color: AppColors.accentOrange,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -861,7 +865,10 @@ class _TargetsTab extends ConsumerWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xs,
+                  vertical: 2,
+                ),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(AppRadius.full),
@@ -979,9 +986,7 @@ class _TargetsTab extends ConsumerWidget {
           children: [
             Text(
               l10n.employeeTargetNewTitle,
-              style: Theme.of(
-                sheetContext,
-              ).textTheme.titleMedium,
+              style: Theme.of(sheetContext).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
             AppPickerField<String>(
@@ -1106,14 +1111,14 @@ class _TargetCard extends StatelessWidget {
               value: progress,
               minHeight: 6,
               backgroundColor: scheme.surfaceContainerHighest,
-              color: reached ? IconTone.green : scheme.primary,
+              color: reached ? AppColors.accentOrange : scheme.primary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.employeeTargetProgress((progress * 100).round()),
             style: theme.textTheme.labelSmall?.copyWith(
-              color: reached ? IconTone.green : scheme.onSurfaceVariant,
+              color: reached ? AppColors.accentOrange : scheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),

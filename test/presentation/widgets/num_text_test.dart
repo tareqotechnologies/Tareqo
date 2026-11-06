@@ -24,11 +24,8 @@ void main() {
   }
 
   Text textOf(WidgetTester tester) => tester.widget<Text>(
-        find.descendant(
-          of: find.byType(NumText),
-          matching: find.byType(Text),
-        ),
-      );
+    find.descendant(of: find.byType(NumText), matching: find.byType(Text)),
+  );
 
   testWidgets('aplica tabularFigures ao estilo herdado do TextTheme', (
     tester,
@@ -54,15 +51,14 @@ void main() {
     );
 
     expect(
-      textOf(tester).style!.fontFeatures!
-          .contains(const FontFeature.tabularFigures()),
+      textOf(
+        tester,
+      ).style!.fontFeatures!.contains(const FontFeature.tabularFigures()),
       isTrue,
     );
   });
 
-  testWidgets('preserva fontFeatures pré-existentes do estilo', (
-    tester,
-  ) async {
+  testWidgets('preserva fontFeatures pré-existentes do estilo', (tester) async {
     await pump(
       tester,
       (_) => const NumText(

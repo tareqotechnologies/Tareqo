@@ -153,15 +153,9 @@ void main() {
                     onPressed: () {},
                   ),
                   const SizedBox(height: 12),
-                  AppButton.secondary(
-                    label: 'Cancelar',
-                    onPressed: () {},
-                  ),
+                  AppButton.secondary(label: 'Cancelar', onPressed: () {}),
                   const SizedBox(height: 12),
-                  const AppButton.primary(
-                    label: 'Guardar',
-                    onPressed: null,
-                  ),
+                  const AppButton.primary(label: 'Guardar', onPressed: null),
                   const SizedBox(height: 24),
                   const EmptyState(
                     icon: Icons.inventory_2_outlined,

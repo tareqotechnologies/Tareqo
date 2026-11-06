@@ -32,12 +32,15 @@ void main() {
     expect(Haptics.isEnabled, isFalse);
   });
 
-  test('chamadas de feedback respeitam o gate (sem exceção com preferência off)', () async {
-    await Haptics.setEnabled(false);
-    // Nenhuma destas deve lançar nem vibrar com a preferência desligada.
-    Haptics.selection();
-    Haptics.success();
-    Haptics.warning();
-    Haptics.error();
-  });
+  test(
+    'chamadas de feedback respeitam o gate (sem exceção com preferência off)',
+    () async {
+      await Haptics.setEnabled(false);
+      // Nenhuma destas deve lançar nem vibrar com a preferência desligada.
+      Haptics.selection();
+      Haptics.success();
+      Haptics.warning();
+      Haptics.error();
+    },
+  );
 }

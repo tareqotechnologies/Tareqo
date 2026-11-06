@@ -249,7 +249,9 @@ void main() {
       _buildApp(
         // O caso inverso do teste anterior: e-mail que seria admin no
         // esquema antigo NÃO abre o painel — o banco é a autoridade.
-        authStream: Stream.value(const AppUser(id: 'u1', email: 'admin@tareqo.com')),
+        authStream: Stream.value(
+          const AppUser(id: 'u1', email: 'admin@tareqo.com'),
+        ),
         adminRepository: const FakeAdminRepository(isAdmin: false),
         getMyTenant: FakeGetMyTenantUseCase(_pendingTenant(ownerUserId: 'u1')),
       ),
@@ -264,7 +266,9 @@ void main() {
       '(fail-open na navegação; o banco segue autoritativo)', (tester) async {
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
+        authStream: Stream.value(
+          const AppUser(id: 'u1', email: 'dono@loja.com'),
+        ),
         adminRepository: const _ThrowingAdminRepository(),
         getMyTenant: FakeGetMyTenantUseCase(_pendingTenant(ownerUserId: 'u1')),
       ),
@@ -323,7 +327,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(const AppUser(id: 'u1', email: 'carlos@loja.com')),
+        authStream: Stream.value(
+          const AppUser(id: 'u1', email: 'carlos@loja.com'),
+        ),
         adminRepository: const FakeAdminRepository(),
         // Tenant APROVADO de OUTRO dono + vínculo inativo → bloqueado.
         getMyTenant: FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),
@@ -346,7 +352,9 @@ void main() {
     final links = _DelayedEmployeeLink();
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(const AppUser(id: 'u1', email: 'carlos@loja.com')),
+        authStream: Stream.value(
+          const AppUser(id: 'u1', email: 'carlos@loja.com'),
+        ),
         adminRepository: const FakeAdminRepository(),
         // Tenant aprovado de OUTRO dono — funcionário legítimo cujo
         // vínculo ainda não chegou do servidor.
@@ -391,7 +399,9 @@ void main() {
     final links = _MutableEmployeeLink(isActive: true);
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(const AppUser(id: 'u1', email: 'carlos@loja.com')),
+        authStream: Stream.value(
+          const AppUser(id: 'u1', email: 'carlos@loja.com'),
+        ),
         adminRepository: const FakeAdminRepository(),
         getMyTenant: FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),
         getEmployees: links,
@@ -417,7 +427,9 @@ void main() {
       'funcionário (fail-open; o servidor segue autoritativo)', (tester) async {
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(const AppUser(id: 'u1', email: 'carlos@loja.com')),
+        authStream: Stream.value(
+          const AppUser(id: 'u1', email: 'carlos@loja.com'),
+        ),
         adminRepository: const FakeAdminRepository(),
         getMyTenant: FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),
         getEmployees: const _ThrowingEmployeeLink(),
@@ -437,7 +449,9 @@ void main() {
     final links = _MutableEmployeeLink(isActive: true);
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(const AppUser(id: 'u1', email: 'carlos@loja.com')),
+        authStream: Stream.value(
+          const AppUser(id: 'u1', email: 'carlos@loja.com'),
+        ),
         adminRepository: const FakeAdminRepository(),
         // Tenant aprovado de OUTRO dono + vínculo ATIVO no início.
         getMyTenant: FakeGetMyTenantUseCase(approvedTenant(ownerUserId: '9')),

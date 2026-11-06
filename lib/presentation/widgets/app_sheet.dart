@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/i18n/l10n_ext.dart';
 import '../../core/theme/app_tokens.dart';
 import '../widgets/app_button.dart';
+import 'premium_decor.dart';
 
 /// Abre uma bottom sheet V4 com animação suave e suporte fullscreen.
 Future<T?> showAppSheet<T>(
@@ -36,7 +37,14 @@ Future<T?> showAppSheet<T>(
                       ),
                 border: fullscreen
                     ? null
-                    : Border(top: BorderSide(color: scheme.outlineVariant)),
+                    : Border(
+                        top: BorderSide(color: PremiumDecor.hairline(scheme)),
+                      ),
+                // Sombra que "sobe" do rodapé — a sheet flutua sobre o
+                // ecrã em vez de colar-se a ele.
+                boxShadow: fullscreen
+                    ? null
+                    : PremiumDecor.upwardShadow(scheme),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -102,12 +110,15 @@ class _SheetScaleIn extends StatelessWidget {
   }
 }
 
-/// Seção agrupada dentro de uma sheet — container com fundo sutil,
-/// cantos arredondados e padding interno. Inspira-se no card de atividade
-/// do dashboard (surfaceContainerHighest, AppRadius.xl, borda sutil)
-/// para dar hierarquia visual aos formulários.
+/// Seção agrupada dentro de uma sheet — o grupo de campos do formulário.
 ///
-/// Use [icon] + [title] para rótulo de seção (opcional), e coloque os
+/// Uma única superfície neutra (o tint quente do tema a 45%), cantos 16 e
+/// **sem borda**: a hierarquia vem do agrupamento, do espaçamento e do
+/// rótulo — não de uma caixa dentro da caixa. O ícone do rótulo é discreto
+/// (`onSurfaceVariant`); o acento fica reservado para a ação principal da
+/// sheet.
+///
+/// Use [icon] + [title] para o rótulo da seção (opcional) e coloque os
 /// campos do formulário como [children].
 class SheetSection extends StatelessWidget {
   const SheetSection({
@@ -129,16 +140,10 @@ class SheetSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
       ),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
-      ),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -146,20 +151,22 @@ class SheetSection extends StatelessWidget {
             Row(
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 18, color: scheme.primary),
-                  const SizedBox(width: 12),
+                  Icon(icon, size: 18, color: scheme.onSurfaceVariant),
+                  const SizedBox(width: 8),
                 ],
-                Text(
-                  title!,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.2,
+                Expanded(
+                  child: Text(
+                    title!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.sm),
           ],
           ...children,
         ],
@@ -225,6 +232,7 @@ class SheetHeader extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.close, size: 20),
+            color: scheme.onSurfaceVariant,
             onPressed: onClose ?? () => Navigator.of(context).pop(),
             tooltip: l10n.appSheetClose,
           ),
@@ -241,9 +249,11 @@ class SheetHeader extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: Text(
                     title,
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    // Título de sheet no papel "Título 2" (17/w600): a
+                    // sheet é um ecrã, e o título dela lê-se como tal.
+                    style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
-                      fontSize: 15,
+                      letterSpacing: -0.2,
                     ),
                     textAlign: TextAlign.center,
                     softWrap: false,
@@ -291,10 +301,12 @@ class _SheetHandle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 40,
-      height: 4,
+      width: 36,
+      height: 5,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.outlineVariant,
+        color: Theme.of(
+          context,
+        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.28),
         borderRadius: BorderRadius.circular(AppRadius.full),
       ),
     );

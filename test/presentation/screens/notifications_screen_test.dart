@@ -201,7 +201,8 @@ void main() {
       final invoiceGenerated = _notif(
         id: 'n1',
         type: InvoiceNotificationType.invoiceGenerated,
-        body: 'Factura Agosto 2026 no valor de 50.00 MZN. Vencimento: 15/9/2026.',
+        body:
+            'Factura Agosto 2026 no valor de 50.00 MZN. Vencimento: 15/9/2026.',
         bodyParams: const {
           'period': 'Agosto 2026',
           'amount': '50.00',

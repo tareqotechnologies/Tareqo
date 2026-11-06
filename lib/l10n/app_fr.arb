@@ -371,6 +371,18 @@
   },
   "addStoreError": "Impossible de créer le magasin. Réessayez.",
   "addStoreSubmit": "Créer le magasin",
+  "editStoreTitle": "Modifier le magasin",
+  "editStoreSubmit": "Enregistrer les modifications",
+  "editStoreSuccess": "Magasin {name} mis à jour !",
+  "@editStoreSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "editStoreError": "Impossible de mettre à jour le magasin. Réessayez.",
+  "editStoreAction": "Modifier",
   "addEmployeeTitle": "Nouvel employé",
   "addEmployeeNameLabel": "Nom complet",
   "addEmployeeNameError": "Indiquez le nom de l'employé.",
@@ -736,6 +748,7 @@
   "debtsTitle": "Crédit",
   "debtsHeaderSubtitle": "Crédit à recevoir et à payer",
   "debtsAddDebt": "Enregistrer un crédit",
+  "debtsDataSection": "Détails du crédit",
   "debtsSearchHint": "Rechercher par nom du client...",
   "debtsTabPending": "En attente",
   "debtsTabSettled": "Soldées",

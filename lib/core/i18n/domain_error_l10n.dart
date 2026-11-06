@@ -21,56 +21,58 @@ import '../../l10n/generated/app_localizations.dart';
 ///
 /// Usar nos `catch` tipados das telas: `_formError = domainErrorMessage(
 /// error, l10n)` em vez de `error.message` direto.
-String domainErrorMessage(Object error, AppLocalizations l10n) => switch (error) {
-  // ── Variantes únicas: mapeamento direto por tipo ──
-  InvalidCustomerException() => l10n.validationCustomerNameRequired,
-  InvalidDebtAmountException() => l10n.validationDebtAmountPositive,
-  InvalidAmountException() => l10n.validationAmountPositive,
-  InvalidCashCountException() => l10n.validationCashCountNonNegative,
-  InvalidPriceException() => l10n.validationSalePriceBelowPurchase,
-  InvalidStoreException() => l10n.validationStoreNameRequired,
-  TenantNotApprovedException() => l10n.validationTenantNotApproved,
+String domainErrorMessage(Object error, AppLocalizations l10n) =>
+    switch (error) {
+      // ── Variantes únicas: mapeamento direto por tipo ──
+      InvalidCustomerException() => l10n.validationCustomerNameRequired,
+      InvalidDebtAmountException() => l10n.validationDebtAmountPositive,
+      InvalidAmountException() => l10n.validationAmountPositive,
+      InvalidCashCountException() => l10n.validationCashCountNonNegative,
+      InvalidPriceException() => l10n.validationSalePriceBelowPurchase,
+      InvalidStoreException() => l10n.validationStoreNameRequired,
+      TenantNotApprovedException() => l10n.validationTenantNotApproved,
 
-  // ── Variantes múltiplas: mapeamento por `code` ──
-  InvalidEmployeeException() => switch (error.code) {
-    'noStore' => l10n.validationEmployeeStoreRequired,
-    _ => l10n.validationEmployeeNameEmailRequired,
-  },
-  InvalidPlanException() => switch (error.code) {
-    'minStores' => l10n.validationPlanMinStores,
-    'minEmployees' => l10n.validationPlanMinEmployees,
-    'negativePrice' => l10n.validationPlanPriceNonNegative,
-    _ => l10n.validationPlanNameRequired,
-  },
-  InvalidTenantRequestException() => switch (error.code) {
-    'noPlan' => l10n.validationAccessPlanRequired,
-    'alreadyRegistered' => l10n.validationAccessAlreadyRequested,
-    _ => l10n.validationBusinessNameRequired,
-  },
-  InvalidPlanRequestException() => switch (error.code) {
-    'samePlan' => l10n.validationUpgradePlanDifferent,
-    'pendingRequest' => l10n.validationUpgradePendingExists,
-    _ => l10n.validationTenantNotApproved,
-  },
-  EmployeeAccountCreationException() => switch (error.code) {
-    'emailInUse' => l10n.validationAccountEmailInUse,
-    'ownerOnly' => l10n.validationAccountOwnerOnly,
-    'weakPassword' => l10n.validationAccountWeakPassword,
-    'noStore' => l10n.validationEmployeeStoreRequired,
-    _ => l10n.validationAccountGeneric,
-  },
+      // ── Variantes múltiplas: mapeamento por `code` ──
+      InvalidEmployeeException() => switch (error.code) {
+        'noStore' => l10n.validationEmployeeStoreRequired,
+        _ => l10n.validationEmployeeNameEmailRequired,
+      },
+      InvalidPlanException() => switch (error.code) {
+        'minStores' => l10n.validationPlanMinStores,
+        'minEmployees' => l10n.validationPlanMinEmployees,
+        'negativePrice' => l10n.validationPlanPriceNonNegative,
+        _ => l10n.validationPlanNameRequired,
+      },
+      InvalidTenantRequestException() => switch (error.code) {
+        'noPlan' => l10n.validationAccessPlanRequired,
+        'alreadyRegistered' => l10n.validationAccessAlreadyRequested,
+        _ => l10n.validationBusinessNameRequired,
+      },
+      InvalidPlanRequestException() => switch (error.code) {
+        'samePlan' => l10n.validationUpgradePlanDifferent,
+        'pendingRequest' => l10n.validationUpgradePendingExists,
+        _ => l10n.validationTenantNotApproved,
+      },
+      EmployeeAccountCreationException() => switch (error.code) {
+        'emailInUse' => l10n.validationAccountEmailInUse,
+        'ownerOnly' => l10n.validationAccountOwnerOnly,
+        'weakPassword' => l10n.validationAccountWeakPassword,
+        'noStore' => l10n.validationEmployeeStoreRequired,
+        _ => l10n.validationAccountGeneric,
+      },
 
-  // ── Interpolação com dados estruturados ──
-  PlanLimitExceededException() => error.forEmployees
-      ? l10n.planLimitEmployees(error.planName, error.limit)
-      : l10n.planLimitStores(error.planName, error.limit),
+      // ── Interpolação com dados estruturados ──
+      PlanLimitExceededException() =>
+        error.forEmployees
+            ? l10n.planLimitEmployees(error.planName, error.limit)
+            : l10n.planLimitStores(error.planName, error.limit),
 
-  // Fallback defensivo (os catch são tipados; não deveria acontecer).
-  _ => () {
-    try {
-      return (error as dynamic).message as String? ?? error.toString();
-    } on Object {
-      return error.toString();
-    }
-  }(),
-};
+      // Fallback defensivo (os catch são tipados; não deveria acontecer).
+      _ => () {
+        try {
+          return (error as dynamic).message as String? ?? error.toString();
+        } on Object {
+          return error.toString();
+        }
+      }(),
+    };

@@ -4,6 +4,7 @@ import '../../core/i18n/l10n_ext.dart';
 import '../../core/i18n/payment_method_l10n.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/utils/formatters.dart';
 import '../../domain/entities/sale.dart';
 import '../screens/sales/sale_detail_screen.dart';
@@ -13,16 +14,31 @@ import 'semantics_composed.dart';
 import 'payment_filter.dart' show PaymentMethodAccent, PaymentMethodIcon;
 import 'status_chip.dart';
 
-/// Card de venda minimalista — Google Apps style.
+/// Linha de venda — superfície única da lista agrupada.
 ///
-/// Layout em duas linhas:
-/// - Linha 1: payment icon (sutil) + method name à esquerda, valor à direita
-/// - Linha 2: sale number · items · date à esquerda, status à direita
+/// Layout em duas linhas, com o montante alinhado à direita em TODAS as
+/// linhas (tabular figures):
+/// - Linha 1: método de pagamento (título) + valor total (destaque)
+/// - Linha 2: referência · itens + estado do pagamento
+///
+/// A linha não desenha caixa própria: quem a hospeda (a lista de Vendas)
+/// é a superfície — a separação entre vendas é uma régua de cabelo
+/// fornecida pelo [SliverList.separated] do ecrã. Assim a lista lê-se como
+/// um painel contínuo e não como uma pilha de cartões.
 class SalesCard extends StatefulWidget {
-  const SalesCard({super.key, required this.sale, this.onTap});
+  const SalesCard({
+    super.key,
+    required this.sale,
+    this.onTap,
+    this.borderRadius,
+  });
 
   final Sale sale;
   final VoidCallback? onTap;
+
+  /// Raio aplicado ao realce de toque — a primeira e a última linha do
+  /// painel recebem os cantos do grupo; as do meio ficam retas.
+  final BorderRadius? borderRadius;
 
   @override
   State<SalesCard> createState() => _SalesCardState();
@@ -36,6 +52,7 @@ class _SalesCardState extends State<SalesCard> {
 
   Sale get _sale => widget.sale;
   VoidCallback? get _onTap => widget.onTap;
+  BorderRadius get _radius => widget.borderRadius ?? AppRadius.lgAll;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +63,7 @@ class _SalesCardState extends State<SalesCard> {
     final itemsLabel = l10n.dashboardSaleItems(_sale.items.length);
     final isCancelled = _sale.status == SaleStatus.cancelled;
 
-    // A11y (plano UI/UX — Fase 3.1): o card inteiro é UM nó semântico —
+    // A11y (plano UI/UX — Fase 3.1): a linha inteira é UM nó semântico —
     // "M-Pesa: R$ 4,00, S-00001 · 1 item, Pago" — em vez de método, valor,
     // número, itens e status anunciados como nós separados. Mesma
     // convenção "Tema: valor, extras" dos KPIs do dashboard.
@@ -57,7 +74,6 @@ class _SalesCardState extends State<SalesCard> {
       isCancelled ? l10n.salesStatusCancelled : l10n.salesStatusPaid,
     ]);
 
-    // Padrão de hover unificado (Lote 2) — o tile de produto usa o mesmo.
     return HoverableTile(
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
@@ -65,21 +81,15 @@ class _SalesCardState extends State<SalesCard> {
         onExit: (_) => setState(() => _hovered = false),
         child: Material(
           color: _hovered
-              ? scheme.surfaceContainerHighest.withValues(alpha: 0.6)
-              : scheme.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            side: BorderSide(
-              color: scheme.outlineVariant.withValues(alpha: 0.6),
-            ),
-          ),
+              ? scheme.surfaceContainerHighest.withValues(alpha: 0.55)
+              : Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: _radius),
           child: Stack(
             children: [
               InkWell(
                 onTap: _onTap ?? () => _openDetails(context),
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                // A11y (plano UI/UX — Fase 3.3): foco visível para teclado
-                // físico/Bluetooth — anel primário de 2px por cima do card.
+                borderRadius: _radius,
+                // A11y (Fase 3.3): foco visível para teclado físico/Bluetooth.
                 onFocusChange: (f) => setState(() => _focused = f),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -87,18 +97,18 @@ class _SalesCardState extends State<SalesCard> {
                     vertical: AppSpacing.md,
                   ),
                   // DENTRO do InkWell: o toque do card é roteado para o nó
-                  // combinado — duplo-toque do leitor ativa o card inteiro,
-                  // como num botão.
+                  // combinado — duplo-toque do leitor ativa a linha inteira.
                   child: Semantics(
                     container: true,
                     excludeSemantics: true,
                     label: semanticLabel,
                     child: Row(
                       children: [
-                        // ── Left: payment icon (dark solid bg + light fg) ──
+                        // Selo do método: fundo escuro derivado da cor do
+                        // provedor + ícone claro (o mesmo padrão do feed).
                         Container(
-                          width: 36,
-                          height: 36,
+                          width: 38,
+                          height: 38,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: IconTone.darkBackground(accent),
@@ -110,12 +120,11 @@ class _SalesCardState extends State<SalesCard> {
                             color: IconTone.lightForeground(accent),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Primary line: payment method + amount
                               Row(
                                 children: [
                                   Expanded(
@@ -123,18 +132,14 @@ class _SalesCardState extends State<SalesCard> {
                                       _sale.paymentMethod.labelFor(l10n),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                      // Nome/descrição da linha = 14/w400; a
+                                      // hierarquia vem do valor à direita.
+                                      style: theme.textTheme.bodyMedium,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  // FittedBox scaleDown: com fonte grande (Dynamic
-                                  // Type) o valor encolhe em vez de estourar a Row —
-                                  // nunca é truncado (Flexible dá constraints
-                                  // limitadas ao FittedBox, senão ele usa a largura
-                                  // natural do texto).
+                                  // FittedBox scaleDown: com Dynamic Type o
+                                  // valor encolhe em vez de estourar a Row.
                                   Flexible(
                                     child: FittedBox(
                                       fit: BoxFit.scaleDown,
@@ -144,16 +149,15 @@ class _SalesCardState extends State<SalesCard> {
                                           _sale.totalAmountCents,
                                         ),
                                         maxLines: 1,
-                                        // Destaque de linha = titleSmall (14/w600,
-                                        // tabular) — padrão P1 da auditoria.
-                                        style: theme.textTheme.titleSmall,
+                                        style: AppTypography.amountInRow(
+                                          scheme.onSurface,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 3),
-                              // Secondary line: sale number · items (date visible in details)
+                              const SizedBox(height: 4),
                               Row(
                                 children: [
                                   Expanded(
@@ -164,7 +168,6 @@ class _SalesCardState extends State<SalesCard> {
                                       overflow: TextOverflow.ellipsis,
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
-                                            fontSize: 12,
                                             color: scheme.onSurfaceVariant,
                                           ),
                                     ),
@@ -191,10 +194,7 @@ class _SalesCardState extends State<SalesCard> {
                   ),
                 ),
               ),
-              FocusRing(
-                visible: _focused,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
+              FocusRing(visible: _focused, borderRadius: _radius),
             ],
           ),
         ),
@@ -202,9 +202,8 @@ class _SalesCardState extends State<SalesCard> {
     );
   }
 
-  void _openDetails(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => SaleDetailScreen(sale: _sale)),
-    );
-  }
+  /// Abre o detalhe no sheet padrão de eventos (mesmo chrome da Home), em
+  /// vez de empurrar uma página inteira por cima da lista.
+  void _openDetails(BuildContext context) =>
+      showSaleDetailSheet(context, _sale);
 }

@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Rede: o app é SaaS (Supabase/Sentry) e o modo release NÃO herda o
+         manifest de debug/profile — sem esta permissão o APK/AAB release não
+         abre conexões e login/operacões online falham (auditoria 2026-10,
+         F-01). -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- Leitura de código de barras por câmera no PDV (mobile_scanner). -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />

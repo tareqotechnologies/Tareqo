@@ -32,11 +32,7 @@ void main() {
   setUp(() => AppClock.inject(() => kGoldenNow));
   tearDown(AppClock.reset);
 
-  Future<void> golden(
-    WidgetTester tester,
-    Widget app,
-    String name,
-  ) async {
+  Future<void> golden(WidgetTester tester, Widget app, String name) async {
     usePortraitViewport(tester, size: const Size(412, 915));
     await tester.pumpWidget(app);
     await tester.pumpAndSettle();
@@ -47,7 +43,11 @@ void main() {
   }
 
   testWidgets('produtos — dark', (tester) async {
-    await golden(tester, productGoldenApp(theme: AppTheme.dark), 'produtos_dark');
+    await golden(
+      tester,
+      productGoldenApp(theme: AppTheme.dark),
+      'produtos_dark',
+    );
   });
 
   testWidgets('produtos — light', (tester) async {

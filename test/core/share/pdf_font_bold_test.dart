@@ -76,21 +76,33 @@ void main() {
     );
   });
 
-  test('sem bold registrado, o PDF só embute a base (estado antigo — bug)', () async {
-    final bytes = await _buildDoc(registerBold: false);
-    expect(_contains(bytes, _latin('Inter')), isTrue);
-    expect(
-      _contains(bytes, _latin('Inter-Bold')),
-      isFalse,
-      reason: 'sem withFont(bold:) o bold cai na base — é o bug corrigido',
-    );
-  });
+  test(
+    'sem bold registrado, o PDF só embute a base (estado antigo — bug)',
+    () async {
+      final bytes = await _buildDoc(registerBold: false);
+      expect(_contains(bytes, _latin('Inter')), isTrue);
+      expect(
+        _contains(bytes, _latin('Inter-Bold')),
+        isFalse,
+        reason: 'sem withFont(bold:) o bold cai na base — é o bug corrigido',
+      );
+    },
+  );
 
-  test('com bold registrado, os pesos bold embutem o Inter-Bold real', () async {
-    final bytes = await _buildDoc(registerBold: true);
-    expect(_contains(bytes, _latin('Inter')), isTrue,
-        reason: 'base variável continua embutida para o texto normal');
-    expect(_contains(bytes, _latin('Inter-Bold')), isTrue,
-        reason: 'os títulos em bold devem usar o TTF estático Inter-Bold');
-  });
+  test(
+    'com bold registrado, os pesos bold embutem o Inter-Bold real',
+    () async {
+      final bytes = await _buildDoc(registerBold: true);
+      expect(
+        _contains(bytes, _latin('Inter')),
+        isTrue,
+        reason: 'base variável continua embutida para o texto normal',
+      );
+      expect(
+        _contains(bytes, _latin('Inter-Bold')),
+        isTrue,
+        reason: 'os títulos em bold devem usar o TTF estático Inter-Bold',
+      );
+    },
+  );
 }

@@ -158,6 +158,7 @@ import '../../domain/usecases/add_plan_use_case.dart';
 import '../../domain/usecases/add_product_use_case.dart';
 import '../../domain/usecases/add_purchase_use_case.dart';
 import '../../domain/usecases/add_store_use_case.dart';
+import '../../domain/usecases/update_store_use_case.dart';
 import '../../domain/usecases/approve_tenant_use_case.dart';
 import '../../domain/usecases/decide_plan_request_use_case.dart';
 import '../../domain/usecases/generate_invoice_use_case.dart';
@@ -843,6 +844,12 @@ final class ServiceLocator {
           instance<IStoreRepository>(),
           instance<ITenantRepository>(),
           instance<IPlanRepository>(),
+        ),
+      )
+      ..registerLazySingleton<UpdateStoreUseCase>(
+        () => UpdateStoreUseCase(
+          instance<IStoreRepository>(),
+          instance<ITenantRepository>(),
         ),
       )
       ..registerLazySingleton<GetEmployeesUseCase>(

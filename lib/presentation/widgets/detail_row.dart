@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Linha chave → valor de listas de detalhe — padrão único das sheets de
 /// detalhe (transação financeira, loja e log de auditoria).
@@ -21,7 +22,22 @@ class DetailRow extends StatelessWidget {
     this.padding = const EdgeInsets.symmetric(vertical: AppSpacing.xs),
     this.valueColor,
     this.maxLines,
-  });
+  }) : inline = false;
+
+  /// Variante INLINE (rótulo na frente do valor, ex.: `Origem: Loja A`) —
+  /// usada nos bottom sheets do dashboard (feed de transferências).
+  /// Consolida a última cópia privada `_DetailRow` (dashboard_screen).
+  const DetailRow.inline({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.labelWidth = 100,
+    this.gap = 8,
+    this.valueColor,
+    this.maxLines,
+  }) : padding = EdgeInsets.zero,
+       inline = true;
 
   final String label;
   final String value;
@@ -32,10 +48,40 @@ class DetailRow extends StatelessWidget {
   final Color? valueColor;
   final int? maxLines;
 
+  /// Variante inline: rótulo `Label:` junto ao valor (font/tamanho
+  /// compressos) em vez da coluna fixa de rótulo.
+  final bool inline;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+
+    if (inline) {
+      return Row(
+        children: [
+          Icon(icon, size: 16, color: scheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Text(
+            '$label:',
+            style: AppTypography.bodySmall.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: AppTypography.labelMedium.copyWith(
+                color: scheme.onSurface,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      );
+    }
 
     return Padding(
       padding: padding,
@@ -50,9 +96,10 @@ class DetailRow extends StatelessWidget {
             width: labelWidth,
             child: Text(
               label,
-              style: theme.textTheme.labelSmall?.copyWith(
+              // Rótulo = metadado (12) — nunca 11, que corta em nomes de
+              // campo longos ("Método de pagamento").
+              style: AppTypography.bodySmall.copyWith(
                 color: scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -61,9 +108,9 @@ class DetailRow extends StatelessWidget {
               value,
               maxLines: maxLines,
               overflow: maxLines == null ? null : TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              // Valor = 14/w500: enfatiza sem o w600 reservado a títulos.
+              style: AppTypography.labelLarge.copyWith(
                 color: valueColor ?? scheme.onSurface,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ),

@@ -4,7 +4,7 @@ import '../../core/di/service_locator.dart';
 import '../../core/utils/ids.dart';
 import '../../domain/entities/invoice_notification.dart';
 import '../../domain/repositories/i_invoice_notification_repository.dart';
-import '../datasources/local/addon_catalog.dart';
+import '../../domain/entities/addon_catalog.dart';
 import '../datasources/local/addon_local_data_source.dart';
 
 /// Janelas (em dias) que disparam aviso de expiração — ordem ascendente:
@@ -94,10 +94,7 @@ class AddOnExpiryService {
               body:
                   'O serviço "$addOnName" expirou em $expiryKey. '
                   'Renove a assinatura para continuar a usar.',
-              bodyParams: {
-                'addonName': addOnName,
-                'date': expiryKey,
-              },
+              bodyParams: {'addonName': addOnName, 'date': expiryKey},
             );
           }
           continue;

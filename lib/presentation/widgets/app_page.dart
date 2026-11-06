@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/ui/dashed_circle_painter.dart';
 
 /// Layout padrão de página — AppBar opcional, padding responsivo e
@@ -23,12 +24,12 @@ class AppPage extends StatelessWidget {
     required this.body,
   });
 
-  /// Título do AppBar (escala do tema — `titleLarge` 22/w600).
+  /// Título do AppBar (escala do tema — `headline` 24/w600).
   final String? title;
 
-  /// Estilo do título do AppBar (default: `titleLarge`). Telas com
+  /// Estilo do título do AppBar (default: `headline`). Telas com
   /// rótulos longos (ex.: add-ons 'Factura Personalizada') usam
-  /// `titleMedium` (20/w600) para não truncar em idiomas verbosos.
+  /// `titleMedium` (16/w500) para não truncar em idiomas verbosos.
   final TextStyle? titleStyle;
 
   /// Subtítulo discreto abaixo do título (ex.: contagem de itens) —
@@ -78,7 +79,7 @@ class AppPage extends StatelessWidget {
   Widget _titleContent(ThemeData theme, ColorScheme scheme) {
     final Widget titleWidget = Text(
       title!,
-      style: titleStyle,
+      style: titleStyle ?? AppTypography.headline,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -90,7 +91,7 @@ class AppPage extends StatelessWidget {
           titleWidget,
           Text(
             subtitle!,
-            style: theme.textTheme.labelSmall?.copyWith(
+            style: AppTypography.bodySmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
@@ -104,17 +105,21 @@ class AppPage extends StatelessWidget {
         titleWidget,
         const SizedBox(width: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xs,
+            vertical: 2,
+          ),
           decoration: BoxDecoration(
             color: scheme.error,
             borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: Text(
             '$badge',
-            style: theme.textTheme.labelSmall?.copyWith(
+            // Contador = badge: labelMedium (12) em w600 — o w700 saía da
+            // escala permitida (400/500/600).
+            style: AppTypography.labelMedium.copyWith(
               color: scheme.onError,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -212,12 +217,9 @@ class AppListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     final content = Padding(
       padding:
-          padding ??
-          const EdgeInsets.symmetric(
+          padding ?? const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
           ),
@@ -235,9 +237,7 @@ class AppListTile extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTypography.labelLarge,
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
@@ -245,7 +245,7 @@ class AppListTile extends StatelessWidget {
                     subtitle!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelSmall,
+                    style: AppTypography.labelSmall,
                   ),
                 ],
               ],
@@ -297,7 +297,11 @@ class AppPill extends StatelessWidget {
         ? scheme.primary.withValues(alpha: 0.4)
         : scheme.outlineVariant;
 
-    final child = Container(
+    // AnimatedContainer: a troca de seleção desliza (cor/borda) em vez de
+    // saltar — microinteração finita, assenta em pumpAndSettle.
+    final child = AnimatedContainer(
+      duration: AppDurations.fast,
+      curve: Curves.easeOutCubic,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
@@ -306,6 +310,16 @@ class AppPill extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(AppRadius.full),
         border: Border.all(color: border),
+        boxShadow: selected
+            ? [
+                BoxShadow(
+                  color: scheme.primary.withValues(alpha: 0.14),
+                  blurRadius: 12,
+                  spreadRadius: -4,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -318,7 +332,7 @@ class AppPill extends StatelessWidget {
             ),
             const SizedBox(width: 8),
           ],
-          Text(label, style: theme.textTheme.labelMedium?.copyWith(color: fg)),
+          Text(label, style: AppTypography.labelMedium.copyWith(color: fg)),
           if (onTap != null) ...[
             const SizedBox(width: 2),
             Icon(
@@ -371,9 +385,7 @@ class _HoverableTileState extends State<HoverableTile> {
           duration: AppDurations.fast,
           decoration: BoxDecoration(
             color: _hovered
-                ? Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
+                ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
                 : null,
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),

@@ -149,22 +149,24 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('disableAnimations (movimento reduzido): badge visível, pulso parado',
-      (tester) async {
-    tester.platformDispatcher.accessibilityFeaturesTestValue =
-        const FakeAccessibilityFeatures(disableAnimations: true);
-    addTearDown(tester.platformDispatcher.clearAllTestValues);
+  testWidgets(
+    'disableAnimations (movimento reduzido): badge visível, pulso parado',
+    (tester) async {
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(tester.platformDispatcher.clearAllTestValues);
 
-    await pumpBadge(tester, count: 5);
+      await pumpBadge(tester, count: 5);
 
-    // A INFORMAÇÃO continua lá (badge visível com o número exato).
-    expect(find.text('5'), findsOneWidget);
+      // A INFORMAÇÃO continua lá (badge visível com o número exato).
+      expect(find.text('5'), findsOneWidget);
 
-    // O MOVIMENTO não: a escala fica estável em 1.0 entre frames —
-    // nenhuma animação infinita com movimento reduzido ativo (Fase 7).
-    await tester.pump(const Duration(milliseconds: 400));
-    expect(badgeScale(tester), 1.0);
-    await tester.pump(const Duration(milliseconds: 400));
-    expect(badgeScale(tester), 1.0);
-  });
+      // O MOVIMENTO não: a escala fica estável em 1.0 entre frames —
+      // nenhuma animação infinita com movimento reduzido ativo (Fase 7).
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(badgeScale(tester), 1.0);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(badgeScale(tester), 1.0);
+    },
+  );
 }

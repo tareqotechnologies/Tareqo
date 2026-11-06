@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/debt.dart';
@@ -27,6 +28,7 @@ import '../../widgets/semantics_composed.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/status_chip.dart';
+import '../../widgets/summary_hero.dart';
 import 'add_debt_sheet.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../data/services/offline_sync_service.dart';
@@ -167,7 +169,6 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
               // (vencidas) ao lado — o número de contas em atraso num
               // relance, em vez de apenas o total.
               _SummaryCard(
-                color: theme.warning,
                 title: l10n.debtsTotalPending,
                 valueCents: pendingTotalCents,
                 statLabel: l10n.debtsOverdueStat,
@@ -227,7 +228,6 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
               ),
             ] else ...[
               _SummaryCard(
-                color: theme.income,
                 title: l10n.debtsTotalSettled,
                 valueCents: settledTotalCents,
                 statLabel: l10n.debtsSettledStat,
@@ -293,7 +293,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
 
-    final confirmed = await showConfirmDialog(
+    final confirmed = await showConfirmDialog(context: 
       context,
       title: l10n.debtsSettleTitle,
       message: l10n.debtsSettleBody(
@@ -353,19 +353,14 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
   }
 }
 
-/// Card de resumo V3 (canvas) — usado nas abas Pendentes ("Total a
-/// receber" + contagem de atrasados) e Quitadas ("Total quitado" +
-/// contagem de baixas).
+/// Card de resumo das abas de Crédito — o hero partilhado ([SummaryHero])
+/// com a estatística secundária ancorada à direita.
 ///
-/// Layout do canvas: valor em destaque à esquerda e uma **stat** à
-/// direita (label + contagem com cor própria) — a informação de quantas
-/// contas estão em atraso / foram baixadas fica num relance, em vez de
-/// apenas o total. O valor é renderizado com [SmartAmount] (auto-size):
-/// em telas estreitas ou com escala de texto alta, ENCOLHE em vez de
-/// quebrar em duas linhas — mesmo padrão dos KPIs do dashboard.
+/// Pendentes: total a receber + quantas contas estão atrasadas. Quitadas:
+/// total baixado + quantas quitações. O valor principal fica neutro (é um
+/// total, não um alerta); a cor do estado aparece só na estatística.
 class _SummaryCard extends StatelessWidget {
   const _SummaryCard({
-    required this.color,
     required this.title,
     required this.valueCents,
     required this.statLabel,
@@ -373,7 +368,6 @@ class _SummaryCard extends StatelessWidget {
     required this.statColor,
   });
 
-  final Color color;
   final String title;
   final int valueCents;
   final String statLabel;
@@ -383,64 +377,27 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
-    // Card premium (estilo Apple): cantos 20, superfície elevada e
-    // fundo/borda tingidos pela cor do estado.
-    return AppCard(
-      elevated: true,
-      borderRadius: AppRadius.xlAll,
-      color: color.withValues(alpha: 0.1),
-      borderColor: color.withValues(alpha: 0.35),
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Row(
+    return SummaryHero(
+      label: title,
+      value: Formatters.currency(valueCents),
+      trailing: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                // SmartAmount (design system ultra-clean): o valor em
-                // destaque ENCOLHE para caber — nunca trunca nem quebra.
-                // Tabular figures: dígitos alinhados.
-                SmartAmount(
-                  cents: valueCents,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ],
+          Text(
+            statLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(width: 16),
-          // Stat à direita (canvas): label pequeno + contagem em destaque
-          // com a cor do estado (vermelho para atrasados, verde para
-          // baixas).
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                statLabel,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '$statValue',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: statColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          const SizedBox(height: 2),
+          Text(
+            '$statValue',
+            style: theme.textTheme.headlineSmall?.copyWith(color: statColor),
           ),
         ],
       ),
@@ -460,6 +417,7 @@ class _DebtCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final due = DateTime(
@@ -486,17 +444,16 @@ class _DebtCard extends StatelessWidget {
         ? l10n.debtsDueTodayDesc
         : l10n.debtsDueIn(-daysUntilDue);
 
-    // Card premium (estilo Apple): cantos 18, superfície elevada e borda
-    // TINGIDA pelo estado de vencimento (vermelho para atrasada, âmbar
-    // para vence hoje, neutra para em dia).
+    // Card com ação: superfície do tema + borda de cabelo, cantos 16. O
+    // estado de vencimento vive no [StatusChip] — o card não tinge o fundo
+    // nem a borda pela cor semântica (regra "cor = função no indicador").
     //
     // A11y (plano UI/UX — Fase 3.1): as informações do card são UM nó —
     // "João: Atrasada, D-00001 · venceu há 3 dias, 25,00" — e o botão de
     // quitação mantém NÓ PRÓPRIO (ação anunciável com gesto padrão).
     return AppCard(
-      elevated: true,
+      color: theme.colorScheme.surface,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      borderColor: chipColor.withValues(alpha: 0.35),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -530,9 +487,7 @@ class _DebtCard extends StatelessWidget {
                           // quando necessário (nada de truncar nomes).
                           Text(
                             debt.personName,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: theme.textTheme.titleSmall,
                           ),
                           StatusChip(label: chipLabel, color: chipColor),
                         ],
@@ -556,9 +511,7 @@ class _DebtCard extends StatelessWidget {
                   child: SmartAmount(
                     cents: debt.amountCents,
                     alignment: Alignment.centerRight,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTypography.amountInRow(scheme.onSurface),
                   ),
                 ),
               ],
@@ -585,17 +538,17 @@ class _SettledDebtCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    // Card premium (estilo Apple): cantos 18, superfície elevada e borda
-    // tingida de verde (baixa) — mesmo padrão do card pendente.
+    // Mesmo card do pendente — sem tingir a superfície: o estado de baixa
+    // está no chip verde do cabeçalho.
     //
     // A11y (Fase 3.1): o card do histórico é UM nó — nome, data da baixa,
     // número e valor falados de uma vez.
     return AppCard(
-      elevated: true,
+      color: theme.colorScheme.surface,
       borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      borderColor: theme.income.withValues(alpha: 0.35),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Semantics(
         container: true,
@@ -620,12 +573,7 @@ class _SettledDebtCard extends StatelessWidget {
                     children: [
                       // Nome COMPLETO do cliente — quebra em linhas quando
                       // necessário (nada de truncar nomes no histórico).
-                      Text(
-                        debt.personName,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      Text(debt.personName, style: theme.textTheme.titleSmall),
                       StatusChip(
                         label: debt.paidAt == null
                             ? l10n.debtsSettledLabel
@@ -655,9 +603,7 @@ class _SettledDebtCard extends StatelessWidget {
               child: SmartAmount(
                 cents: debt.amountCents,
                 alignment: Alignment.centerRight,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTypography.amountInRow(scheme.onSurface),
               ),
             ),
           ],

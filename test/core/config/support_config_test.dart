@@ -9,8 +9,11 @@ void main() {
     test('número de WhatsApp embutido tem formato wa.me válido', () {
       // Apenas dígitos, com código do país (258 = Moçambique) — formato
       // exigido pelo wa.me (sem +, sem espaços, sem traços).
-      expect(RegExp(r'^\d{12,15}$').hasMatch(SupportConfig.whatsAppNumber),
-          isTrue, reason: 'número: ${SupportConfig.whatsAppNumber}');
+      expect(
+        RegExp(r'^\d{12,15}$').hasMatch(SupportConfig.whatsAppNumber),
+        isTrue,
+        reason: 'número: ${SupportConfig.whatsAppNumber}',
+      );
     });
 
     test('whatsappUri monta o deep link com número e mensagem', () {

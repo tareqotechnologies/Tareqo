@@ -188,7 +188,11 @@ void main() {
           const Customer(id: 'c-centro', storeId: 'st1', name: 'Ana Centro'),
         );
         await dataSource.add(
-          const Customer(id: 'c-shopping', storeId: 'st2', name: 'Bia Shopping'),
+          const Customer(
+            id: 'c-shopping',
+            storeId: 'st2',
+            name: 'Bia Shopping',
+          ),
         );
 
         final fromSt1 = await dataSource.getAll(storeId: 'st1');

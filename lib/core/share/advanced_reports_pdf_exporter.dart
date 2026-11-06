@@ -208,7 +208,10 @@ class AdvancedReportsPdfExporter {
           // ─── KPI Cards ──────────────────────────────────
           pw.Text(
             indicatorsLabel,
-            style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(
+              fontSize: 12,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ),
           pw.SizedBox(height: 8),
           ..._buildKpiRows(kpis),
@@ -218,7 +221,10 @@ class AdvancedReportsPdfExporter {
             pw.SizedBox(height: 20),
             pw.Text(
               section.title,
-              style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+              style: const pw.TextStyle(
+                fontSize: 12,
+                fontWeight: pw.FontWeight.bold,
+              ),
             ),
             pw.SizedBox(height: 8),
             if (section.rows.isEmpty)

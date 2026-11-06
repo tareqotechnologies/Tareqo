@@ -58,8 +58,7 @@ abstract final class Haptics {
   }
 
   /// Estado atual (para o switch da tela de Ajustes).
-  static bool get isEnabled =>
-      debugOverrideEnabled ?? _enabled;
+  static bool get isEnabled => debugOverrideEnabled ?? _enabled;
 
   static void _perform(VoidCallback action) {
     if (!isEnabled) return;
@@ -67,8 +66,7 @@ abstract final class Haptics {
   }
 
   /// Seleção relevante: leve "clique" seco (aba, filtro, toggle).
-  static void selection() =>
-      _perform(HapticFeedback.selectionClick);
+  static void selection() => _perform(HapticFeedback.selectionClick);
 
   /// Conclusão bem-sucedida de uma ação importante (venda, pagamento).
   static void success() => _perform(HapticFeedback.mediumImpact);

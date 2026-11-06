@@ -78,12 +78,15 @@ const _plans = [
 ];
 
 /// now-1h → dentro da semana/mês correntes (janelas do dashboard);
-/// now-40d → fora de ambas.
+/// now-100d → fora de ambas. O default NÃO pode ser ~40d: 40 dias atrás
+/// cai no mês anterior apenas a partir do dia ~10 de cada mês (flaky
+/// dependente da data); 100d garante outside both windows o ano inteiro
+/// (máx. ~62 dias para atravessar semana+mês anterior).
 Tenant _tenant({
   required String id,
   required TenantStatus status,
   required String planId,
-  int daysAgo = 40,
+  int daysAgo = 100,
 }) => Tenant(
   id: id,
   ownerUserId: 'owner12345',
@@ -240,7 +243,9 @@ void main() {
     expect(find.text('Esta semana: 1 · Semana passada: 0'), findsOneWidget);
     // Aprovações: 2 nesta semana, 0 na passada → +2.
     expect(find.text('Esta semana: 2 · Semana passada: 0'), findsOneWidget);
-    expect(find.text('+1'), findsOneWidget);
+    // tn1 foi criado hoje → conta na semana E no mês correntes; ambos os
+    // KPIs (semanal e mensal) calculam diff +1, logo "+1" aparece 2×.
+    expect(find.text('+1'), findsNWidgets(2));
     expect(find.text('+2'), findsOneWidget);
     // Tendências 8 semanas com dados → sem mensagem de vazio.
     expect(

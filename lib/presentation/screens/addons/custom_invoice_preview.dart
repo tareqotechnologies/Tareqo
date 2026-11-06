@@ -73,7 +73,12 @@ class CustomInvoicePreview extends StatelessWidget {
           // Barra superior simulando o topo da página PDF
           Container(height: 4, color: primaryColor),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, AppSpacing.md, 16, AppSpacing.md),
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              AppSpacing.md,
+              16,
+              AppSpacing.md,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

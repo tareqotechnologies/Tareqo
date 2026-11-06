@@ -5,6 +5,7 @@ import '../../../core/config/support_config.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
 import 'doc_reader_screen.dart';
@@ -136,17 +137,11 @@ class _SupportScreenState extends State<SupportScreen> {
               children: [
                 Text(
                   title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTypography.titleLarge,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  hint,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    height: 1.35,
-                  ),
+                  hint,style: AppTypography.bodySmall,
                 ),
               ],
             ),
@@ -196,10 +191,7 @@ class _SupportScreenState extends State<SupportScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.l10n.supportHelpCenter,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
+                context.l10n.supportHelpCenter,style: AppTypography.bodySmall.copyWith(color: scheme.onSurfaceVariant,            ),
               ),
             ],
           ),
@@ -245,11 +237,7 @@ class _SupportScreenState extends State<SupportScreen> {
         padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 48),
         children: [
           Text(
-            l10n.supportSubtitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              height: 1.45,
-            ),
+            l10n.supportSubtitle,style: AppTypography.bodyMedium.copyWith(              color: theme.colorScheme.onSurfaceVariant,              height: 1.45,            ),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -272,7 +260,7 @@ class _SupportScreenState extends State<SupportScreen> {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
               child: Column(
                 children: [
-                  Text(l10n.commonNoResults, style: theme.textTheme.titleSmall),
+                  Text(l10n.commonNoResults, style: AppTypography.titleLarge),
                   const SizedBox(height: 4),
                   Text(
                     l10n.commonNoResultsHint,

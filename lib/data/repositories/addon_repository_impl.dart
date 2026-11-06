@@ -1,6 +1,6 @@
 import '../../../domain/entities/addon.dart';
 import '../../../domain/repositories/i_addon_repository.dart';
-import '../datasources/local/addon_catalog.dart';
+import '../../domain/entities/addon_catalog.dart';
 import '../datasources/remote/supabase_addon_catalog_data_source.dart';
 
 /// Repositório do catálogo de add-ons: seed estático mesclado com os

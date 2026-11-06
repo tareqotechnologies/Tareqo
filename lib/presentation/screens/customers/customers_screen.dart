@@ -64,7 +64,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 
   Future<void> _deleteCustomer(Customer customer) async {
     final l10n = context.l10n;
-    final confirmed = await showConfirmDialog(
+    final confirmed = await showConfirmDialog(context: 
       context,
       title: l10n.customersDeleteConfirmTitle,
       message: l10n.customersDeleteConfirmMessage(customer.name),

@@ -24,7 +24,7 @@ void main() {
     final keys = readArbKeys('pt');
     expect(keys, isNotEmpty, reason: 'Nenhuma chave encontrada nos ARBs');
 
-    final code = _dartSources().map(stripDartComments).join('\n');
+    final code = _dartSources().map(_stripCommentLines).join('\n');
     final missing = keys.where((key) => !_isReferenced(code, key)).toList()
       ..sort();
 
@@ -146,4 +146,16 @@ String stripDartComments(String source) {
     i++;
   }
   return out.toString();
+}
+
+
+/// Remove blocos /* */ e linhas de comentario // (sem seguir strings). Mais simples e
+/// verificavel que a maquina de estados de stripDartComments, que desalinhava
+/// codigo apos comentarios com aspas.
+String _stripCommentLines(String source) {
+  final noBlocks = source.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
+  return noBlocks
+      .split(RegExp(r'\r\n|\r|\n'))
+      .where((line) => !line.trimLeft().startsWith('//'))
+      .join('\n');
 }

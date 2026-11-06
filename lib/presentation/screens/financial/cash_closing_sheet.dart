@@ -22,6 +22,7 @@ import '../../widgets/app_text_field.dart';
 import '../../widgets/money_live_preview.dart';
 import '../../widgets/smart_amount.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Bottom sheet do FECHO DE CAIXA DIÁRIO (Z-report).
 ///
@@ -218,7 +219,7 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
         ),
         const SizedBox(height: 16),
         // Abertura por forma de pagamento (o Z).
-        Text(l10n.cashClosingByMethod, style: theme.textTheme.titleSmall),
+        Text(l10n.cashClosingByMethod, style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
         _ByMethodBreakdown(summary: summary),
         const SizedBox(height: 20),
@@ -263,9 +264,8 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
           Text(
             _successMessage!,
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: theme.textTheme.labelLarge?.copyWith(
               color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -320,7 +320,7 @@ class _SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.cashClosingDaySummary, style: theme.textTheme.titleSmall),
+          Text(l10n.cashClosingDaySummary, style: theme.textTheme.titleMedium),
           const SizedBox(height: 12),
           _row(theme, l10n.cashClosingTotalSales, summary.totalSalesCents),
           const SizedBox(height: 8),
@@ -338,10 +338,8 @@ class _SummaryCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  // Indicador de atenção do fecho: 14/w500 + cor.
+                  style: theme.textTheme.labelLarge?.copyWith(color: color),
                 ),
               ),
             ],
@@ -373,11 +371,10 @@ class _SummaryCard extends StatelessWidget {
         SmartAmount(
           cents: cents,
           alignment: Alignment.centerRight,
+          // Total da secção = 16/w500; linha comum = 14/w400.
           style: emphasize
-              ? theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                )
-              : theme.textTheme.titleSmall,
+              ? theme.textTheme.titleMedium
+              : theme.textTheme.bodyMedium,
         ),
       ],
     );
@@ -432,9 +429,8 @@ class _ByMethodBreakdown extends StatelessWidget {
                 SmartAmount(
                   cents: entry.value,
                   alignment: Alignment.centerRight,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  // Valor por forma = 15/w500, alinhado à direita.
+                  style: AppTypography.amountInRow(theme.colorScheme.onSurface),
                 ),
               ],
             ),

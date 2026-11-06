@@ -24,16 +24,23 @@ enum PeriodFilter {
 
   /// Verifica se a [date] cai no período selecionado (dias corridos no fuso
   /// do dispositivo, como o resto da UI).
+  ///
+  /// A comparação é feita em DIAS DE CALENDÁRIO normalizados em UTC: somar ou
+  /// subtrair `Duration(days:)` a uma meia-noite local erra nos dias de
+  /// mudança de hora (23h/25h no fuso) — "ontem" deixava de casar com a
+  /// venda de ontem. Em UTC o dia tem sempre 24h e o resultado é o mesmo em
+  /// qualquer fuso.
   bool matches(DateTime date) {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final that = DateTime(date.year, date.month, date.day);
+    final today = DateTime.utc(now.year, now.month, now.day);
+    final that = DateTime.utc(date.year, date.month, date.day);
     return switch (this) {
       PeriodFilter.all => true,
       PeriodFilter.today => that == today,
-      PeriodFilter.yesterday => that == today.subtract(const Duration(days: 1)),
+      PeriodFilter.yesterday => that ==
+          DateTime.utc(today.year, today.month, today.day - 1),
       PeriodFilter.week => !that.isBefore(
-        today.subtract(const Duration(days: 6)),
+        DateTime.utc(today.year, today.month, today.day - 6),
       ),
     };
   }

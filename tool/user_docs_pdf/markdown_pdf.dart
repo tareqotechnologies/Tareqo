@@ -532,7 +532,11 @@ pw.Document buildDoc({
             pw.Text(
               doc.title,
               textAlign: pw.TextAlign.center,
-              style: const pw.TextStyle(fontSize: 32, color: onCover, lineSpacing: 6),
+              style: const pw.TextStyle(
+                fontSize: 32,
+                color: onCover,
+                lineSpacing: 6,
+              ),
             ),
             pw.SizedBox(height: 12),
             if (subtitle.isNotEmpty)

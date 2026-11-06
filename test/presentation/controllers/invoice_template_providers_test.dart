@@ -72,13 +72,15 @@ void main() {
       expect(container.read(invoiceTemplateProvider).templateStyle, 'Classic');
 
       // Salva um template preenchido.
-      await container.read(invoiceTemplateProvider.notifier).save(
-        InvoiceTemplateConfig(
-          businessName: 'Loja Centro',
-          primaryColor: const Color(0xFFDC2626),
-          templateStyle: 'Compact',
-        ),
-      );
+      await container
+          .read(invoiceTemplateProvider.notifier)
+          .save(
+            InvoiceTemplateConfig(
+              businessName: 'Loja Centro',
+              primaryColor: const Color(0xFFDC2626),
+              templateStyle: 'Compact',
+            ),
+          );
 
       expect(
         container.read(invoiceTemplateProvider).businessName,
@@ -138,9 +140,9 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      await container.read(invoiceTemplateProvider.notifier).save(
-        InvoiceTemplateConfig(businessName: 'Sem Prefs'),
-      );
+      await container
+          .read(invoiceTemplateProvider.notifier)
+          .save(InvoiceTemplateConfig(businessName: 'Sem Prefs'));
 
       expect(container.read(invoiceTemplateProvider).businessName, 'Sem Prefs');
     });

@@ -93,7 +93,9 @@ void main() {
 
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
+        authStream: Stream.value(
+          const AppUser(id: 'u1', email: 'dono@loja.com'),
+        ),
         service: service,
       ),
     );
@@ -190,7 +192,9 @@ void main() {
 
     await tester.pumpWidget(
       _buildApp(
-        authStream: Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
+        authStream: Stream.value(
+          const AppUser(id: 'u1', email: 'dono@loja.com'),
+        ),
         service: service,
       ),
     );

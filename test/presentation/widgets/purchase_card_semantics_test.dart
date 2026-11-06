@@ -37,7 +37,9 @@ void main() {
     final handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
-      testApp(home: Scaffold(body: PurchaseCard(purchase: _purchase()))),
+      testApp(
+        home: Scaffold(body: PurchaseCard(purchase: _purchase())),
+      ),
     );
 
     // O nó combinado carrega fornecedor, método, número e valor JUNTOS.
@@ -80,7 +82,9 @@ void main() {
   // A11y (plano UI/UX — Fase 3.3): o anel pinta POR CIMA do conteúdo
   // (Positioned.fill + IgnorePointer) quando o widget está focado — e
   // sai da árvore quando o foco sai.
-  testWidgets('FocusRing aparece com foco e desaparece sem ele', (tester) async {
+  testWidgets('FocusRing aparece com foco e desaparece sem ele', (
+    tester,
+  ) async {
     final node = FocusNode(debugLabel: 'probe');
     addTearDown(node.dispose);
     var focused = false;
@@ -159,7 +163,10 @@ void main() {
 
     // Sem foco: nenhum anel pintado sobre o card.
     expect(
-      find.descendant(of: find.byType(AppCard), matching: find.byType(Positioned)),
+      find.descendant(
+        of: find.byType(AppCard),
+        matching: find.byType(Positioned),
+      ),
       findsNothing,
     );
 
@@ -169,11 +176,17 @@ void main() {
     await tester.pump();
 
     expect(
-      find.descendant(of: find.byType(AppCard), matching: find.byType(Positioned)),
+      find.descendant(
+        of: find.byType(AppCard),
+        matching: find.byType(Positioned),
+      ),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: find.byType(AppCard), matching: find.byType(IgnorePointer)),
+      find.descendant(
+        of: find.byType(AppCard),
+        matching: find.byType(IgnorePointer),
+      ),
       findsOneWidget,
     );
   });

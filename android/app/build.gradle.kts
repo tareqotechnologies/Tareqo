@@ -20,7 +20,7 @@ plugins {
 //   keytool -genkey -v -keystore upload-keystore.jks -alias upload \
 //     -keyalg RSA -keysize 2048 -validity 10000
 val keystoreProperties = Properties()
-val keystorePropertiesFile = rootProject.file("key.properties")
+val keystorePropertiesFile = project.rootProject.file("key.properties")
 val hasReleaseKeystore = keystorePropertiesFile.exists()
 if (hasReleaseKeystore) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
@@ -61,7 +61,10 @@ android {
                     ?: error("key.properties: 'keyAlias' ausente")
                 keyPassword = (keystoreProperties["keyPassword"] as String?)
                     ?: error("key.properties: 'keyPassword' ausente")
-                storeFile = file(
+                // storeFile é relativo à raiz do projeto do app (android/app/).
+                // key.properties pode apontar para ../upload-keystore.jks (em
+                // android/) ou para upload-keystore.jks (em android/app/).
+                storeFile = project.file(
                     (keystoreProperties["storeFile"] as String?)
                         ?: error("key.properties: 'storeFile' ausente"),
                 )

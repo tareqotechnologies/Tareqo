@@ -2,361 +2,275 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:tareqo/core/theme/app_theme.dart';
+import 'package:tareqo/core/theme/app_typography.dart';
 import 'package:tareqo/presentation/screens/admin/admin_thin_theme.dart';
 
-/// Auditoria da ESCALA TIPOGRÁFICA (Apple HIG / SF Pro, adaptada ao ERP
-/// — ver docs/pt/05-apresentacao.md): trava os tamanhos
-/// 34/28/24/22/20/17/15/14/13/12/11, os pesos de cada papel, o uso de
-/// `tabularFigures` nos estilos numéricos (alinhamento dígito a dígito de
-/// preços MZN e quantidades kg/un) e os três eixos de precisão do mestre
-/// de tipografia:
+/// **Especificação executável da tipografia do TAREQO.**
 ///
-/// - **tracking** (`letterSpacing`): negativo nos títulos (SF Pro usa
-/// ~-0.4 a -0.6), neutro no corpo e positivo leve nos captions;
-/// - **entrelinha** (`height`) na razão do SF Pro (~1.2 títulos, ~1.4
-/// corpo — nunca 1.5+ que estica o layout);
-/// - **eixo óptico** (`opsz`): a Inter é variável (14–32) e títulos
-/// (≥20px) usam o corte Display (24–32); corpo fica no corte Texto.
+/// Trava a escala global (tamanho / entrelinha / peso / tracking), a família
+/// Inter, o `tabularFigures` dos valores financeiros e o mapeamento dos 15
+/// papéis do [TextTheme] — este último é o que impede um papel sem mapeamento
+/// de herdar a escala padrão do Material (outra família e outros tamanhos).
 ///
-/// Qualquer mudança na escala quebra aqui DELIBERADAMENTE — ao alterar o
-/// tema, atualize este teste junto (a tabela é a especificação executável).
+/// Qualquer mudança na escala quebra aqui DELIBERADAMENTE: ao alterar o tema,
+/// atualize esta tabela junto (ela é o contrato, não um snapshot acidental).
 void main() {
-  // (nome, papel do TextTheme, tamanho, peso, tracking, entrelinha, opsz,
-  // usa tabular figures?)
-  final cases = <_Case>[
+  // (nome, getter, tamanho, peso, tracking, entrelinha)
+  final tokens = <_Token>[
     (
-      name: 'displaySmall — Large Title (34) — LIGHT w300',
-      style: _displaySmall,
-      size: 34,
-      weight: FontWeight.w300,
-      tracking: -0.6,
-      height: 1.2,
-      opsz: 32,
-      tabular: true,
-    ),
-    (
-      name: 'headlineMedium — Título 1 (28) — LIGHT w300',
-      style: _headlineMedium,
+      name: 'display',
+      style: () => AppTypography.display,
       size: 28,
-      weight: FontWeight.w300,
-      tracking: -0.5,
-      height: 1.2,
-      opsz: 32,
-      tabular: true,
+      weight: FontWeight.w600,
+      tracking: -0.6,
+      lineHeight: 36,
     ),
     (
-      name: 'headlineSmall — Título 1.5 (24)',
-      style: _headlineSmall,
+      name: 'headline',
+      style: () => AppTypography.headline,
       size: 24,
       weight: FontWeight.w600,
-      tracking: -0.4,
-      height: 1.25,
-      opsz: 32,
-      tabular: true,
+      tracking: -0.5,
+      lineHeight: 32,
     ),
     (
-      name: 'titleLarge — Título 2 (22)',
-      style: _titleLarge,
-      size: 22,
-      weight: FontWeight.w600,
-      tracking: -0.35,
-      height: 1.27,
-      opsz: 24,
-      tabular: true,
-    ),
-    (
-      name: 'titleMedium — Título 3 (20)',
-      style: _titleMedium,
+      name: 'titleLarge',
+      style: () => AppTypography.titleLarge,
       size: 20,
       weight: FontWeight.w600,
+      tracking: -0.35,
+      lineHeight: 28,
+    ),
+    (
+      name: 'titleMedium',
+      style: () => AppTypography.titleMedium,
+      size: 16,
+      weight: FontWeight.w500,
       tracking: -0.3,
-      height: 1.3,
-      opsz: 24,
-      tabular: true,
+      lineHeight: 24,
     ),
     (
-      name: 'titleSmall — destaque de linha (14)',
-      style: _titleSmall,
-      size: 14,
-      weight: FontWeight.w600,
-      tracking: -0.15,
-      height: 1.35,
-      opsz: 0, // corpo (sem eixo Display)
-      tabular: true,
-    ),
-    (
-      name: 'bodyLarge — corpo destacado (17)',
-      style: _bodyLarge,
-      size: 17,
+      name: 'bodyLarge',
+      style: () => AppTypography.bodyLarge,
+      size: 16,
       weight: FontWeight.w400,
       tracking: -0.1,
-      height: 1.4,
-      opsz: 0,
-      tabular: true,
+      lineHeight: 24,
     ),
     (
-      name: 'bodyMedium — corpo (15)',
-      style: _bodyMedium,
-      size: 15,
+      name: 'bodyMedium',
+      style: () => AppTypography.bodyMedium,
+      size: 14,
       weight: FontWeight.w400,
       tracking: -0.1,
-      height: 1.4,
-      opsz: 0,
-      tabular: true,
+      lineHeight: 20,
     ),
     (
-      name: 'bodySmall — nota (13)',
-      style: _bodySmall,
-      size: 13,
-      weight: FontWeight.w400,
-      tracking: 0,
-      height: 1.35,
-      opsz: 0,
-      tabular: true,
-    ),
-    (
-      name: 'labelLarge — ações (14)',
-      style: _labelLarge,
-      size: 14,
-      weight: FontWeight.w600,
-      tracking: 0,
-      height: 1.25,
-      opsz: 0,
-      tabular: true,
-    ),
-    (
-      name: 'labelMedium — labels (12)',
-      style: _labelMedium,
+      name: 'bodySmall',
+      style: () => AppTypography.bodySmall,
       size: 12,
-      weight: FontWeight.w600,
+      weight: FontWeight.w400,
       tracking: 0,
-      height: 1.25,
-      opsz: 0,
-      tabular: true,
+      lineHeight: 16,
     ),
     (
-      name: 'labelSmall — caption/badge (11)',
-      style: _labelSmall,
+      name: 'labelLarge',
+      style: () => AppTypography.labelLarge,
+      size: 14,
+      weight: FontWeight.w500,
+      tracking: 0,
+      lineHeight: 20,
+    ),
+    (
+      name: 'labelMedium',
+      style: () => AppTypography.labelMedium,
+      size: 12,
+      weight: FontWeight.w500,
+      tracking: 0,
+      lineHeight: 16,
+    ),
+    (
+      name: 'labelSmall',
+      style: () => AppTypography.labelSmall,
       size: 11,
       weight: FontWeight.w500,
-      tracking: 0.2,
-      height: 1.25,
-      opsz: 0,
-      tabular: true,
+      tracking: 0,
+      lineHeight: 16,
     ),
   ];
 
-  for (final theme in [AppTheme.light, AppTheme.dark]) {
-    final brightness = theme.brightness.name;
-    final textTheme = theme.textTheme;
-
-    test('$brightness — escala de tamanhos e pesos', () {
-      for (final c in cases) {
-        final style = c.style(textTheme);
-        expect(
-          style,
-          isNotNull,
-          reason: '${c.name}: papel não definido no TextTheme',
-        );
-        expect(
-          style!.fontSize,
-          c.size,
-          reason: '${c.name}: fontSize esperado ${c.size}',
-        );
-        expect(
-          style.fontWeight,
-          c.weight,
-          reason: '${c.name}: peso esperado ${c.weight}',
-        );
-      }
-    });
-
-    test('$brightness — tracking, entrelinha e eixo óptico (SF Pro)', () {
-      for (final c in cases) {
-        final style = c.style(textTheme)!;
+  group('escala global', () {
+    for (final t in tokens) {
+      test('${t.name}: ${t.size}/${t.weight} e entrelinha ${t.lineHeight}', () {
+        final style = t.style();
+        expect(style.fontSize, t.size, reason: '${t.name}: fontSize');
+        expect(style.fontWeight, t.weight, reason: '${t.name}: peso');
         expect(
           style.letterSpacing,
-          c.tracking,
-          reason: '${c.name}: tracking esperado ${c.tracking}',
+          t.tracking,
+          reason: '${t.name}: tracking',
         );
         expect(
           style.height,
-          c.height,
-          reason: '${c.name}: entrelinha esperada ${c.height}',
-        );
-        // opsz = 0 → o estilo NÃO carrega o eixo (fica no corte Texto,
-        // default da fonte). opsz > 0 → corte Display esperado.
-        final opsz = style.fontVariations
-            ?.where((v) => v.axis == 'opsz')
-            .map((v) => v.value)
-            .firstOrNull;
-        expect(
-          opsz ?? 0,
-          c.opsz,
-          reason: '${c.name}: eixo óptico esperado opsz=${c.opsz}',
-        );
-      }
-    });
-
-    test('$brightness — tabularFigures apenas nos estilos numéricos', () {
-      for (final c in cases) {
-        final style = c.style(textTheme)!;
-        // Comparação pelo NOME da feature: FontFeature não sobrescreve ==
-        // em dart:ui (igualdade por identidade) — `contains` com instância
-        // const não casaria com a instância de runtime do tema.
-        final hasTnum =
-            style.fontFeatures?.any((f) => f.feature == 'tnum') ?? false;
-        expect(
-          hasTnum,
-          c.tabular,
+          closeTo(t.lineHeight / t.size, 1e-9),
           reason:
-              '${c.name}: ${c.tabular ? 'deve ter' : 'não deve ter'} '
-              'tabular figures (só estilos numéricos alinham)',
+              '${t.name}: entrelinha deve ser ${t.lineHeight}px '
+              '(height = ${t.lineHeight}/${t.size})',
+        );
+        expect(
+          style.fontFamily,
+          'Inter',
+          reason: '${t.name}: família única do app',
+        );
+        // Valores financeiros alinham coluna a coluna em todos os papéis.
+        expect(
+          style.fontFeatures?.any((f) => f.feature == 'tnum') ?? false,
+          isTrue,
+          reason: '${t.name}: tabular figures obrigatórias',
+        );
+      });
+    }
+
+    test('família é o nome puro da Inter (nunca um stack CSS)', () {
+      // Regressão: `'Inter, -apple-system, …'` NÃO é resolvido pelo motor e
+      // caía silenciosamente na fonte padrão da plataforma.
+      expect(AppTypography.family, 'Inter');
+      expect(AppTypography.family.contains(','), isFalse);
+      expect(AppTypography.familyFallback, isNotEmpty);
+      expect(AppTypography.familyFallback.contains('Inter'), isFalse);
+    });
+
+    test('pesos usados são apenas 400/500/600', () {
+      final allowed = {FontWeight.w400, FontWeight.w500, FontWeight.w600};
+      for (final t in tokens) {
+        expect(
+          allowed.contains(t.style().fontWeight),
+          isTrue,
+          reason: '${t.name}: peso ${t.style().fontWeight} fora da escala',
         );
       }
     });
-  }
 
-  // Painel do super admin — tema thin DERIVADO (AdminThin.thinTextTheme).
-  // A escala é a MESMA do app; só os PESOS mudam (hierarquia por tamanho
-  // e cor, não por peso). Qualquer drift do segundo sistema quebra aqui.
-  group('admin thin — pesos derivados da escala base', () {
+    test('nenhum papel fica abaixo de 12 exceto labelSmall', () {
+      for (final t in tokens) {
+        if (t.name == 'labelSmall') continue;
+        expect(
+          t.size,
+          greaterThanOrEqualTo(12),
+          reason: '${t.name}: texto essencial nunca abaixo de 12',
+        );
+      }
+    });
+  });
+
+  group('TextTheme', () {
     for (final theme in [AppTheme.light, AppTheme.dark]) {
       final brightness = theme.brightness.name;
-      final thin = AdminThin.thinTextTheme(theme.textTheme);
+      final textTheme = theme.textTheme;
 
-      test('$brightness — títulos w300, ações w400, corpo preservado', () {
-        // Títulos — leve (a hierarquia vem do tamanho e da cor).
-        expect(thin.titleLarge?.fontSize, 22);
-        expect(thin.titleLarge?.fontWeight, FontWeight.w300);
-        expect(thin.titleMedium?.fontSize, 20);
-        expect(thin.titleMedium?.fontWeight, FontWeight.w300);
-        expect(thin.titleSmall?.fontSize, 14);
-        expect(thin.titleSmall?.fontWeight, FontWeight.w400);
-        // Ações/rótulos — sem o peso pesado do M3.
-        expect(thin.labelLarge?.fontSize, 14);
-        expect(thin.labelLarge?.fontWeight, FontWeight.w400);
-        expect(thin.labelMedium?.fontSize, 12);
-        expect(thin.labelMedium?.fontWeight, FontWeight.w400);
-        // Corpo/captions — peso estrutural preservado.
-        expect(thin.bodyMedium?.fontSize, 15);
-        expect(thin.bodyMedium?.fontWeight, FontWeight.w400);
-        expect(thin.bodySmall?.fontSize, 13);
-        expect(thin.bodySmall?.fontWeight, FontWeight.w400);
-        expect(thin.labelSmall?.fontSize, 11);
-        expect(thin.labelSmall?.fontWeight, FontWeight.w500);
-      });
-
-      test('$brightness — tamanhos e tabular sobrevivem à derivação', () {
-        // Nenhum tamanho muda no thin — só pesos; tabular figures do base
-        // (preços/KPIs alinhados) não podem se perder na cópia.
-        for (final pair in [
-          MapEntry(thin.titleLarge, theme.textTheme.titleLarge),
-          MapEntry(thin.titleSmall, theme.textTheme.titleSmall),
-          MapEntry(thin.bodySmall, theme.textTheme.bodySmall),
-          MapEntry(thin.labelSmall, theme.textTheme.labelSmall),
-        ]) {
-          expect(pair.key?.fontSize, pair.value?.fontSize);
-          final tnumThin = pair.key?.fontFeatures
-                  ?.any((f) => f.feature == 'tnum') ??
-              false;
-          final tnumBase = pair.value?.fontFeatures
-                  ?.any((f) => f.feature == 'tnum') ??
-              false;
-          expect(tnumThin, tnumBase,
-              reason: 'tabular do base deve sobreviver ao thin');
+      test('$brightness — os 15 papéis mapeiam para a escala', () {
+        // (papel, tamanho esperado)
+        final roles = <String, (TextStyle?, double)>{
+          'displayLarge': (textTheme.displayLarge, 28),
+          'displayMedium': (textTheme.displayMedium, 28),
+          'displaySmall': (textTheme.displaySmall, 28),
+          'headlineLarge': (textTheme.headlineLarge, 24),
+          'headlineMedium': (textTheme.headlineMedium, 24),
+          'headlineSmall': (textTheme.headlineSmall, 24),
+          'titleLarge': (textTheme.titleLarge, 20),
+          'titleMedium': (textTheme.titleMedium, 16),
+          'titleSmall': (textTheme.titleSmall, 14),
+          'bodyLarge': (textTheme.bodyLarge, 16),
+          'bodyMedium': (textTheme.bodyMedium, 14),
+          'bodySmall': (textTheme.bodySmall, 12),
+          'labelLarge': (textTheme.labelLarge, 14),
+          'labelMedium': (textTheme.labelMedium, 12),
+          'labelSmall': (textTheme.labelSmall, 11),
+        };
+        for (final entry in roles.entries) {
+          final style = entry.value.$1;
+          expect(style, isNotNull, reason: '${entry.key}: não definido');
+          expect(
+            style!.fontSize,
+            entry.value.$2,
+            reason: '${entry.key}: tamanho fora da escala',
+          );
+          expect(
+            style.fontFamily,
+            'Inter',
+            reason: '${entry.key}: precisa usar a Inter',
+          );
         }
       });
 
-      testWidgets(
-        '$brightness — superfícies thin: AppBar 19/w300, inputs/chips 13/w400, snackbar 14/w400',
-        (tester) async {
-          late ThemeData derived;
-          await tester.pumpWidget(
-            MaterialApp(
-              theme: theme,
-              home: AdminThin(
-                child: Builder(
-                  builder: (context) {
-                    derived = Theme.of(context);
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
-            ),
-          );
-
-          final appBar = derived.appBarTheme.titleTextStyle!;
-          expect(appBar.fontSize, 19);
-          expect(appBar.fontWeight, FontWeight.w300);
-          expect(appBar.letterSpacing, -0.2);
-          expect(derived.appBarTheme.toolbarHeight, 52);
-
-          expect(derived.inputDecorationTheme.labelStyle!.fontSize, 13);
+      test('$brightness — o w600 fica restrito a títulos', () {
+        // Títulos dominantes em w600; corpo/labels nunca.
+        for (final style in [
+          textTheme.displayLarge!,
+          textTheme.headlineLarge!,
+          textTheme.titleLarge!,
+        ]) {
+          expect(style.fontWeight, FontWeight.w600);
+        }
+        for (final style in [
+          textTheme.bodyLarge!,
+          textTheme.bodyMedium!,
+          textTheme.bodySmall!,
+          textTheme.labelLarge!,
+          textTheme.labelMedium!,
+        ]) {
           expect(
-            derived.inputDecorationTheme.labelStyle!.fontWeight,
-            FontWeight.w400,
+            style.fontWeight == FontWeight.w600,
+            isFalse,
+            reason: '${style.fontSize}: corpo/label não usa w600',
           );
-          expect(derived.chipTheme.labelStyle!.fontSize, 13);
-          expect(derived.chipTheme.labelStyle!.fontWeight, FontWeight.w400);
-          expect(derived.snackBarTheme.contentTextStyle!.fontSize, 14);
-          expect(
-            derived.snackBarTheme.contentTextStyle!.fontWeight,
-            FontWeight.w400,
-          );
-        },
-      );
+        }
+      });
     }
   });
 
-  // Superfícies com tipografia própria (fora do TextTheme).
-  test('superfícies: AppBar 22, diálogo 22 e chips 13 seguem a escala', () {
+  test('superfícies com tipografia própria seguem a escala', () {
     for (final theme in [AppTheme.light, AppTheme.dark]) {
+      // Título de página (AppBar) = headline 24/w600.
       final appBar = theme.appBarTheme.titleTextStyle!;
-      expect(appBar.fontSize, 22, reason: 'AppBar — Título 2 da escala');
+      expect(appBar.fontSize, 24);
       expect(appBar.fontWeight, FontWeight.w600);
-      // Tracking/entrelinha alinhados ao titleLarge (hierarquia conversa).
-      expect(appBar.letterSpacing, -0.35);
-      expect(appBar.height, 1.25);
+      expect(appBar.letterSpacing, -0.5);
 
+      // Diálogo = titleMedium 16/w500.
       final dialog = theme.dialogTheme.titleTextStyle!;
-      expect(dialog.fontSize, 22, reason: 'diálogo — Título 2 da escala');
-      expect(dialog.fontWeight, FontWeight.w600);
-      expect(dialog.letterSpacing, -0.35);
-      expect(dialog.height, 1.27);
+      expect(dialog.fontSize, 16);
+      expect(dialog.fontWeight, FontWeight.w500);
 
+      // Chip/status = labelMedium 12/w500.
       final chip = theme.chipTheme.labelStyle!;
-      expect(chip.fontSize, 13, reason: 'chip — corpo/nota da escala');
-      expect(chip.fontWeight, FontWeight.w600);
+      expect(chip.fontSize, 12);
+      expect(chip.fontWeight, FontWeight.w500);
 
-      // Rótulos/hints dos CAMPOS (InputDecorationTheme): discretos e
-      // MENORES que o texto digitado (bodyLarge 17) — sem fontSize, o
-      // label herdava o 17 e truncava em campos estreitos ('Purchase
-      // pr...', 'Stock quan...' — formulário de produto). floatingLabel
-      // fixa o mesmo 13 quando o rótulo sobe para a borda do campo.
+      // Campos: rótulo 12, flutuante 14, hint 14, erro/auxiliar 12.
       final input = theme.inputDecorationTheme;
-      expect(
-        input.labelStyle!.fontSize,
-        13,
-        reason: 'label do campo — rótulo discreto (13)',
-      );
-      expect(input.labelStyle!.fontWeight, FontWeight.w400);
-      expect(
-        input.floatingLabelStyle!.fontSize,
-        13,
-        reason: 'label flutuante — mesmo 13 na borda (sem encolher p/ 0.75×)',
-      );
-      expect(
-        input.hintStyle!.fontSize,
-        14,
-        reason: 'hint do campo — nota discreta (14), abaixo do texto 17',
-      );
+      expect(input.labelStyle!.fontSize, 12);
+      expect(input.labelStyle!.fontWeight, FontWeight.w500);
+      expect(input.floatingLabelStyle!.fontSize, 14);
+      expect(input.hintStyle!.fontSize, 14);
+      expect(input.errorStyle!.fontSize, 12);
+      expect(input.helperStyle!.fontSize, 12);
+
+      // Navegação = labelMedium (12), nunca 11; ativo w600.
+      final navSelected =
+          theme.navigationBarTheme.labelTextStyle!.resolve({
+            WidgetState.selected,
+          })!;
+      final navUnselected =
+          theme.navigationBarTheme.labelTextStyle!.resolve({})!;
+      expect(navSelected.fontSize, 12);
+      expect(navSelected.fontWeight, FontWeight.w600);
+      expect(navUnselected.fontSize, 12);
+      expect(navUnselected.fontWeight, FontWeight.w500);
     }
   });
 
-  testWidgets('título de AlertDialog renderiza com 22/w600 (Título 2)', (
-    tester,
-  ) async {
+  testWidgets('título de AlertDialog renderiza com 16/w500', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light,
@@ -377,13 +291,11 @@ void main() {
     final effective = DefaultTextStyle.of(
       tester.element(find.text('Confirmar')),
     ).style;
-    expect(effective.fontSize, 22, reason: 'título do diálogo — Título 2');
-    expect(effective.fontWeight, FontWeight.w600);
+    expect(effective.fontSize, 16);
+    expect(effective.fontWeight, FontWeight.w500);
   });
 
-  testWidgets('botão primário renderiza com 15/w400 (ultra-clean)', (
-    tester,
-  ) async {
+  testWidgets('botão primário renderiza com 14/w500', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light,
@@ -396,34 +308,101 @@ void main() {
     final effective = DefaultTextStyle.of(
       tester.element(find.text('Ok')),
     ).style;
-    expect(effective.fontSize, 15);
-    expect(effective.fontWeight, FontWeight.w400);
+    expect(effective.fontSize, 14);
+    expect(effective.fontWeight, FontWeight.w500);
+  });
+
+  // ── Painel do super admin (tema thin DERIVADO) ─────────────────────────
+  // Exceção documentada: a escala é a MESMA do app; só os PESOS mudam
+  // (hierarquia por tamanho e cor). Qualquer drift do segundo sistema
+  // quebra aqui.
+  group('admin thin — pesos derivados da escala base', () {
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
+      final brightness = theme.brightness.name;
+      final thin = AdminThin.thinTextTheme(theme.textTheme);
+
+      test('$brightness — tamanhos da escala, pesos leves', () {
+        expect(thin.titleLarge?.fontSize, 20);
+        expect(thin.titleLarge?.fontWeight, FontWeight.w300);
+        expect(thin.titleMedium?.fontSize, 16);
+        expect(thin.titleMedium?.fontWeight, FontWeight.w300);
+        expect(thin.titleSmall?.fontSize, 14);
+        expect(thin.titleSmall?.fontWeight, FontWeight.w400);
+        expect(thin.labelLarge?.fontSize, 14);
+        expect(thin.labelLarge?.fontWeight, FontWeight.w400);
+        expect(thin.labelMedium?.fontSize, 12);
+        expect(thin.labelMedium?.fontWeight, FontWeight.w400);
+        expect(thin.bodyMedium?.fontSize, 14);
+        expect(thin.bodyMedium?.fontWeight, FontWeight.w400);
+        expect(thin.bodySmall?.fontSize, 12);
+        expect(thin.bodySmall?.fontWeight, FontWeight.w400);
+        expect(thin.labelSmall?.fontSize, 11);
+        expect(thin.labelSmall?.fontWeight, FontWeight.w500);
+      });
+
+      test('$brightness — tamanhos e tabular sobrevivem à derivação', () {
+        for (final pair in [
+          MapEntry(thin.titleLarge, theme.textTheme.titleLarge),
+          MapEntry(thin.titleSmall, theme.textTheme.titleSmall),
+          MapEntry(thin.bodySmall, theme.textTheme.bodySmall),
+          MapEntry(thin.labelSmall, theme.textTheme.labelSmall),
+        ]) {
+          expect(pair.key?.fontSize, pair.value?.fontSize);
+          final tnumThin =
+              pair.key?.fontFeatures?.any((f) => f.feature == 'tnum') ?? false;
+          final tnumBase =
+              pair.value?.fontFeatures?.any((f) => f.feature == 'tnum') ??
+              false;
+          expect(
+            tnumThin,
+            tnumBase,
+            reason: 'tabular do base deve sobreviver ao thin',
+          );
+        }
+      });
+
+      testWidgets(
+        '$brightness — superfícies thin: AppBar 19/w300, inputs/chips 13, snackbar 14',
+        (tester) async {
+          late ThemeData derived;
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: theme,
+              home: AdminThin(
+                child: Builder(
+                  builder: (context) {
+                    derived = Theme.of(context);
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ),
+          );
+
+          final appBar = derived.appBarTheme.titleTextStyle!;
+          expect(appBar.fontSize, 19);
+          expect(appBar.fontWeight, FontWeight.w300);
+          expect(derived.appBarTheme.toolbarHeight, 52);
+
+          expect(derived.inputDecorationTheme.labelStyle!.fontSize, 13);
+          expect(
+            derived.inputDecorationTheme.labelStyle!.fontWeight,
+            FontWeight.w400,
+          );
+          expect(derived.chipTheme.labelStyle!.fontSize, 13);
+          expect(derived.snackBarTheme.contentTextStyle!.fontSize, 14);
+        },
+      );
+    }
   });
 }
 
-// (nome, papel do TextTheme, tamanho, peso, tracking, entrelinha, opsz,
-// usa tabular figures?)
-typedef _Case = ({
+// (nome, getter, tamanho, peso, tracking, altura de linha em px)
+typedef _Token = ({
   String name,
-  TextStyle? Function(TextTheme) style,
+  TextStyle Function() style,
   double size,
   FontWeight weight,
   double tracking,
-  double height,
-  double opsz,
-  bool tabular,
+  double lineHeight,
 });
-
-// Seletores dos papéis — função top-level para uso na lista.
-TextStyle? _displaySmall(TextTheme t) => t.displaySmall;
-TextStyle? _headlineMedium(TextTheme t) => t.headlineMedium;
-TextStyle? _headlineSmall(TextTheme t) => t.headlineSmall;
-TextStyle? _titleLarge(TextTheme t) => t.titleLarge;
-TextStyle? _titleMedium(TextTheme t) => t.titleMedium;
-TextStyle? _titleSmall(TextTheme t) => t.titleSmall;
-TextStyle? _bodyLarge(TextTheme t) => t.bodyLarge;
-TextStyle? _bodyMedium(TextTheme t) => t.bodyMedium;
-TextStyle? _bodySmall(TextTheme t) => t.bodySmall;
-TextStyle? _labelLarge(TextTheme t) => t.labelLarge;
-TextStyle? _labelMedium(TextTheme t) => t.labelMedium;
-TextStyle? _labelSmall(TextTheme t) => t.labelSmall;

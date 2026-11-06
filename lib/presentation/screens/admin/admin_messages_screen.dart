@@ -505,7 +505,7 @@ class _TemplateGrid extends StatelessWidget {
         Icons.calendar_month_outlined,
         'Alterar Validade',
         'Nova data de expiração',
-        AppColors.statusPurple,
+        AppColors.statusPrimary,
       ),
       (
         AdminMessageType.planExpiringSoon,
@@ -519,7 +519,7 @@ class _TemplateGrid extends StatelessWidget {
         Icons.mail_outline,
         'Mensagem Livre',
         'Texto personalizado',
-        AppColors.statusIndigo,
+        AppColors.statusPrimary,
       ),
     ];
 

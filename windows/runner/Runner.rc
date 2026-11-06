@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.dumbhanengue" "\0"
-            VALUE "FileDescription", "dumbhanengue" "\0"
+            VALUE "CompanyName", "com.tareqo" "\0"
+            VALUE "FileDescription", "tareqo" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "dumbhanengue" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.dumbhanengue. All rights reserved." "\0"
-            VALUE "OriginalFilename", "dumbhanengue.exe" "\0"
-            VALUE "ProductName", "dumbhanengue" "\0"
+            VALUE "InternalName", "tareqo" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.tareqo. All rights reserved." "\0"
+            VALUE "OriginalFilename", "tareqo.exe" "\0"
+            VALUE "ProductName", "tareqo" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

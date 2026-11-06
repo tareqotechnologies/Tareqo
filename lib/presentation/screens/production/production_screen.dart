@@ -55,7 +55,7 @@ class ProductionScreen extends ConsumerWidget {
     String name,
   ) async {
     final l10n = context.l10n;
-    final confirmed = await showConfirmDialog(
+    final confirmed = await showConfirmDialog(context: 
       context,
       title: l10n.productionDeleteTitle,
       message: l10n.productionDeleteMessage,

@@ -4,13 +4,13 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/purchase.dart';
-import '../../widgets/daily_summary_header.dart';
+import '../../widgets/summary_hero.dart';
 
-/// Cabeçalho-resumo da tela de compras: gasto de HOJE + delta opcional vs
-/// ontem — mesmo visual de Vendas ([DailySummaryHeader] compartilhado).
+/// Cabeçalho-resumo da tela de compras — o hero partilhado ([SummaryHero]).
 ///
 /// Para COMPRAS (despesa), gastar MAIS que ontem é negativo (vermelho) e
-/// gastar menos é positivo (verde) — cores invertidas em relação a Vendas.
+/// gastar menos é positivo (verde) — as cores do comparativo são invertidas
+/// em relação a Vendas.
 ///
 /// O card de compra vive em `widgets/purchase_card.dart` (compartilhado com
 /// o dashboard).
@@ -48,11 +48,8 @@ class PurchasesSummaryHeader extends StatelessWidget {
         ? ((todayCents - yesterdayCents) / yesterdayCents * 100).round()
         : null;
 
-    return DailySummaryHeader(
-      icon: Icons.local_shipping_outlined,
-      iconBackground: theme.colorScheme.secondaryContainer,
-      iconColor: theme.colorScheme.onSecondaryContainer,
-      label: l10n.periodToday,
+    return SummaryHero(
+      label: l10n.periodToday.toUpperCase(),
       value: Formatters.currency(todayCents),
       subtitle: l10n.purchasesHeaderCount(todayCount),
       deltaPercent: deltaPercent,

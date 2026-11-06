@@ -39,7 +39,7 @@ class _ProductPhotoPicker extends StatelessWidget {
   /// destrutivo nunca é só um tap longe do dado).
   static Future<bool> _confirmRemove(BuildContext context) async {
     final l10n = context.l10n;
-    final confirmed = await showConfirmDialog(
+    final confirmed = await showConfirmDialog(context: 
       context,
       title: l10n.productsPhotoRemove,
       message: l10n.productsPhotoRemoveConfirm,
@@ -85,8 +85,10 @@ class _ProductPhotoPicker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: AppRadius.mdAll,
+        // Mesma superfície de grupo do [SheetSection] (o formulário inteiro
+        // fala a mesma língua).
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        borderRadius: AppRadius.lgAll,
       ),
       child: Row(
         children: [
@@ -109,19 +111,15 @@ class _ProductPhotoPicker extends StatelessWidget {
               children: [
                 Text(
                   hasImage ? l10n.productsPhotoTitle : l10n.productsPhotoAdd,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
+                  style: theme.textTheme.titleSmall,
                 ),
-                const SizedBox(height: 1),
+                const SizedBox(height: 2),
                 Text(
                   hasImage
                       ? l10n.productsPhotoChangeHint
                       : l10n.productsPhotoOptionalHint,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 11,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -166,19 +164,9 @@ class _ProductPhotoPicker extends StatelessWidget {
   }
 }
 
-/// Rótulo de seção do formulário (design system ultra-clean): pequeno
-/// rótulo com letter-spacing e o ícone da seção em acento — hierarquia
-/// sutil que organiza os campos sem pesar visualmente.
-// Estilo minimalista para campos de formulário do produto —
-// labels e texto digitado menores, poluição visual reduzida.
-const _kFieldStyle = TextStyle(fontSize: 12, height: 1.4);
-const _kLabelStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.w400);
-const _kFloatingLabelStyle = TextStyle(
-  fontSize: 11,
-  fontWeight: FontWeight.w600,
-);
-const _kHintStyle = TextStyle(fontSize: 11);
-
+/// Rótulo de seção do formulário — a mesma voz de `SheetSection`:
+/// ícone discreto (`onSurfaceVariant`) + título 14/w600. Sem quadrado
+/// escuro nem cor de módulo: o acento não decora rótulos.
 /// Botão de ação minimalista para o seletor de foto.
 class _PhotoActionButton extends StatelessWidget {
   const _PhotoActionButton({
@@ -203,21 +191,23 @@ class _PhotoActionButton extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 32,
-          height: 32,
+          // Alvo de toque do design system (48dp) — a fileira de ações da
+          // foto não pode ficar abaixo do mínimo de acessibilidade.
+          width: AppSizes.touchTarget,
+          height: AppSizes.touchTarget,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: isDestructive
                 ? scheme.error.withValues(alpha: 0.08)
                 : scheme.surface,
-            borderRadius: BorderRadius.circular(AppRadius.xs),
+            borderRadius: BorderRadius.circular(AppRadius.sm),
             border: Border.all(
               color: isDestructive
                   ? scheme.error.withValues(alpha: 0.2)
                   : scheme.outlineVariant.withValues(alpha: 0.5),
             ),
           ),
-          child: Icon(icon, size: 16, color: color),
+          child: Icon(icon, size: 18, color: color),
         ),
       ),
     );
@@ -233,23 +223,11 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 24,
-          height: 24,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: IconTone.darkBackground(ModuleColors.products),
-            borderRadius: BorderRadius.circular(AppRadius.xs),
-          ),
-          child: Icon(
-            icon,
-            size: 12,
-            color: IconTone.lightForeground(ModuleColors.products),
-          ),
-        ),
+        Icon(icon, size: 18, color: scheme.onSurfaceVariant),
         const SizedBox(width: 8),
         Flexible(
           child: FittedBox(
@@ -258,9 +236,8 @@ class _SectionLabel extends StatelessWidget {
             child: Text(
               title,
               maxLines: 1,
-              style: theme.textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: scheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -289,10 +266,13 @@ class _CompactSwitch extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Row(
         children: [
@@ -301,19 +281,12 @@ class _CompactSwitch extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  label,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 1),
+                Text(label, style: theme.textTheme.titleSmall),
+                const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 11,
                   ),
                 ),
               ],
@@ -324,6 +297,21 @@ class _CompactSwitch extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Lê a foto escolhida (câmera ou galeria) — já comprimida na origem
+/// (1024px, JPEG 80) para uploads leves. `null` = o usuário cancelou.
+///
+/// Auxiliar COMUM a Add/Edit — antes duplicado em ambos os sheets.
+Future<Uint8List?> _pickPhotoBytes(ImageSource source) async {
+  final picked = await ImagePicker().pickImage(
+    source: source,
+    maxWidth: 1024,
+    maxHeight: 1024,
+    imageQuality: 80,
+  );
+  if (picked == null) return null;
+  return picked.readAsBytes();
 }
 
 class AddProductSheet extends ConsumerStatefulWidget {
@@ -375,23 +363,11 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
     super.dispose();
   }
 
-  /// Captura/pick de foto (câmera ou galeria) — comprimida na origem
-  /// (1024px, JPEG 80) para uploads leves.
   Future<void> _pickPhoto(ImageSource source) async {
-    final picked = await ImagePicker().pickImage(
-      source: source,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 80,
-    );
-    if (picked == null || !mounted) return;
-    final bytes = await picked.readAsBytes();
-    if (!mounted) return;
+    final bytes = await _pickPhotoBytes(source);
+    if (bytes == null || !mounted) return;
     setState(() => _imageBytes = bytes);
   }
-
-  // Interpreta o preço digitado como CENTAVOS inteiros (W4).
-  int _parsePrice(String value) => Money.parse(value);
 
   /// Abre o seletor de data de validade do produto (lote inicial W11).
   Future<void> _pickExpiry() async {
@@ -421,8 +397,8 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
       _formError = null;
     });
 
-    final purchasePriceCents = _parsePrice(_purchasePriceController.text);
-    final salePriceCents = _parsePrice(_salePriceController.text);
+    final purchasePriceCents = Money.parse(_purchasePriceController.text);
+    final salePriceCents = Money.parse(_salePriceController.text);
     // W11: estoque digitado em UNIDADES (ou kg) → MILÉSIMOS.
     final stockMilli = Quantity.parse(
       _stockController.text.trim(),
@@ -549,141 +525,22 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
               ),
               const SizedBox(height: 24),
               // INFORMAÇÕES — identidade do produto.
-              _SectionLabel(
-                icon: Icons.inventory_2_outlined,
-                title: l10n.productsSectionInfo,
-              ),
-              const SizedBox(height: 12),
-              AppTextField(
-                controller: _nameController,
-                textInputAction: TextInputAction.next,
-                label: l10n.loginNameLabel,
-                prefixIcon: Icons.inventory_2_outlined,
-                style: _kFieldStyle,
-                labelStyle: _kLabelStyle,
-                floatingLabelStyle: _kFloatingLabelStyle,
-                decorationHintStyle: _kHintStyle,
-                isDense: true,
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? l10n.productsNameError
-                    : null,
-              ),
-              const SizedBox(height: 8),
-              AppTextField(
-                controller: _descriptionController,
-                textInputAction: TextInputAction.next,
-                label: l10n.productsDescriptionLabel,
-                prefixIcon: Icons.notes_outlined,
-                style: _kFieldStyle,
-                labelStyle: _kLabelStyle,
-                floatingLabelStyle: _kFloatingLabelStyle,
-                decorationHintStyle: _kHintStyle,
-                isDense: true,
-              ),
-              const SizedBox(height: 8),
-              // W11: código de barras/PLU — usado pelas balanças
-              // etiquetadoras (20PPPPPWWWWW) e pelo campo do PDV.
-              AppTextField(
-                controller: _codeController,
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.number,
-                maxLength: 5,
-                label: l10n.productsCodeLabel,
-                helperText: l10n.productsCodeHint,
-                prefixIcon: Icons.qr_code_2_outlined,
-                style: _kFieldStyle,
-                labelStyle: _kLabelStyle,
-                floatingLabelStyle: _kFloatingLabelStyle,
-                decorationHintStyle: _kHintStyle,
-                // Helper longo + counter (0/5): fonte menor para não truncar.
-                helperStyle: const TextStyle(fontSize: 10),
-                isDense: true,
-                validator: (value) {
-                  final digits = value?.trim() ?? '';
-                  if (digits.isNotEmpty &&
-                      !RegExp(r'^\d{1,5}$').hasMatch(digits)) {
-                    return l10n.productsCodeError;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 8),
-              // Fase 1: tipo estrutural do produto (matéria-prima,
-              // revenda, produzido, composto, embalagem). Define o papel
-              // na produção/receitas das fases seguintes — o default
-              // 'revenda' mantém o comportamento do varejo.
-              AppPickerField<ProductType>(
-                value: _type,
-                label: l10n.productsTypeLabel,
-                prefixIcon: Icons.category_outlined,
-                items: [
-                  for (final type in ProductType.values)
-                    DropdownMenuItem(value: type, child: Text(type.label)),
-                ],
-                onChanged: (value) =>
+              // INFORMAÇÕES — identidade do produto (widget compartilhado
+              // por Add/Edit; antes era ~100 linhas duplicadas nos dois
+              // builds, já divergentes em comentários).
+              ProductIdentitySection(
+                nameController: _nameController,
+                descriptionController: _descriptionController,
+                codeController: _codeController,
+                type: _type,
+                onTypeChanged: (value) =>
                     setState(() => _type = value ?? ProductType.resale),
               ),
               const SizedBox(height: 16),
               // PREÇOS — compra e venda lado a lado.
-              _SectionLabel(
-                icon: Icons.payments_outlined,
-                title: l10n.productsSectionPricing,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      controller: _purchasePriceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      label: l10n.productsPurchasePrice,
-                      style: _kFieldStyle,
-                      labelStyle: _kLabelStyle,
-                      floatingLabelStyle: _kFloatingLabelStyle,
-                      decorationHintStyle: _kHintStyle,
-                      isDense: true,
-                      validator: (value) => _parsePrice(value ?? '') <= 0
-                          ? l10n.productsPurchasePriceError
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppTextField(
-                      controller: _salePriceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      label: l10n.productsSalePrice,
-                      style: _kFieldStyle,
-                      labelStyle: _kLabelStyle,
-                      floatingLabelStyle: _kFloatingLabelStyle,
-                      decorationHintStyle: _kHintStyle,
-                      isDense: true,
-                      validator: (value) => _parsePrice(value ?? '') <= 0
-                          ? l10n.productsSalePriceError
-                          : null,
-                    ),
-                  ),
-                ],
-              ),
-              // A2: preview ao vivo dos preços digitados (compra e venda) —
-              // alinhado com os campos acima, mostrando "= R$ 1.390,00" ANTES
-              // de salvar (evita registrar 100× o pretendido).
-              Row(
-                children: [
-                  Expanded(
-                    child: MoneyLivePreview(
-                      controller: _purchasePriceController,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: MoneyLivePreview(controller: _salePriceController),
-                  ),
-                ],
+              ProductPricingFields(
+                purchaseController: _purchasePriceController,
+                saleController: _salePriceController,
               ),
 
               const SizedBox(height: 16),
@@ -703,10 +560,6 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                     ? l10n.productsStockWeightHint
                     : null,
                 prefixIcon: Icons.warehouse_outlined,
-                style: _kFieldStyle,
-                labelStyle: _kLabelStyle,
-                floatingLabelStyle: _kFloatingLabelStyle,
-                decorationHintStyle: _kHintStyle,
                 isDense: true,
                 validator: (value) {
                   // W11: aceita decimais (ex.: 1,75) — convertido para
@@ -743,28 +596,16 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
               // (DecoratedBox) o Flutter emite a assertion "ListTile
               // background color or ink splashes may be invisible" (mesmo
               // padrão já usado no add_transaction_sheet).
-              _CompactSwitch(
-                label: l10n.productsWeighLabel,
-                subtitle: l10n.productsWeighHint,
-                value: _vendaPorFracao,
-                onChanged: (value) => setState(() {
+              ProductWeightFields(
+                vendaPorFracao: _vendaPorFracao,
+                unitLabel: _unitLabel,
+                onWeightChanged: (value) => setState(() {
                   _vendaPorFracao = value;
                   _unitLabel = value ? 'kg' : 'un';
                 }),
+                onUnitChanged: (value) =>
+                    setState(() => _unitLabel = value ?? 'kg'),
               ),
-              if (_vendaPorFracao) ...[
-                AppPickerField<String>(
-                  value: _unitLabel,
-                  label: l10n.productsUnitLabel,
-                  prefixIcon: Icons.scale_outlined,
-                  items: [
-                    for (final unit in const ['kg', 'g', 'l', 'ml'])
-                      DropdownMenuItem(value: unit, child: Text(unit)),
-                  ],
-                  onChanged: (value) =>
-                      setState(() => _unitLabel = value ?? 'kg'),
-                ),
-              ],
               if (_formError != null) ...[
                 const SizedBox(height: 16),
                 Text(
@@ -871,21 +712,9 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
     super.dispose();
   }
 
-  // Interpreta o preço digitado como CENTAVOS inteiros (W4).
-  int _parsePrice(String value) => Money.parse(value);
-
-  /// Captura/pick de foto (câmera ou galeria) — comprimida na origem
-  /// (1024px, JPEG 80) para uploads leves.
   Future<void> _pickPhoto(ImageSource source) async {
-    final picked = await ImagePicker().pickImage(
-      source: source,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 80,
-    );
-    if (picked == null || !mounted) return;
-    final bytes = await picked.readAsBytes();
-    if (!mounted) return;
+    final bytes = await _pickPhotoBytes(source);
+    if (bytes == null || !mounted) return;
     setState(() => _imageBytes = bytes);
   }
 
@@ -959,8 +788,8 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
         imagePath: imagePath,
-        purchasePriceCents: _parsePrice(_purchasePriceController.text),
-        salePriceCents: _parsePrice(_salePriceController.text),
+        purchasePriceCents: Money.parse(_purchasePriceController.text),
+        salePriceCents: Money.parse(_salePriceController.text),
         code: _codeController.text.trim(),
         vendaPorFracao: _vendaPorFracao,
         unitLabel: _unitLabel,
@@ -1043,135 +872,22 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
               ),
               const SizedBox(height: 24),
               // INFORMAÇÕES — identidade do produto.
-              _SectionLabel(
-                icon: Icons.inventory_2_outlined,
-                title: l10n.productsSectionInfo,
-              ),
-              const SizedBox(height: 12),
-              AppTextField(
-                controller: _nameController,
-                textInputAction: TextInputAction.next,
-                label: l10n.loginNameLabel,
-                prefixIcon: Icons.inventory_2_outlined,
-                style: _kFieldStyle,
-                labelStyle: _kLabelStyle,
-                floatingLabelStyle: _kFloatingLabelStyle,
-                decorationHintStyle: _kHintStyle,
-                isDense: true,
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? l10n.productsNameError
-                    : null,
-              ),
-              const SizedBox(height: 8),
-              AppTextField(
-                controller: _descriptionController,
-                textInputAction: TextInputAction.next,
-                label: l10n.productsDescriptionLabel,
-                prefixIcon: Icons.notes_outlined,
-                style: _kFieldStyle,
-                labelStyle: _kLabelStyle,
-                floatingLabelStyle: _kFloatingLabelStyle,
-                decorationHintStyle: _kHintStyle,
-                isDense: true,
-              ),
-              const SizedBox(height: 8),
-              AppTextField(
-                controller: _codeController,
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.number,
-                maxLength: 5,
-                label: l10n.productsCodeLabel,
-                helperText: l10n.productsCodeHint,
-                prefixIcon: Icons.qr_code_2_outlined,
-                style: _kFieldStyle,
-                labelStyle: _kLabelStyle,
-                floatingLabelStyle: _kFloatingLabelStyle,
-                decorationHintStyle: _kHintStyle,
-                // Helper longo + counter (0/5): fonte menor para não truncar.
-                helperStyle: const TextStyle(fontSize: 10),
-                isDense: true,
-                validator: (value) {
-                  final digits = value?.trim() ?? '';
-                  if (digits.isNotEmpty &&
-                      !RegExp(r'^\d{1,5}$').hasMatch(digits)) {
-                    return l10n.productsCodeError;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 8),
-              // Fase 1: tipo estrutural do produto — pré-preenchido com o
-              // tipo atual; reclassificar é permitido ao dono/gerente.
-              AppPickerField<ProductType>(
-                value: _type,
-                label: l10n.productsTypeLabel,
-                prefixIcon: Icons.category_outlined,
-                items: [
-                  for (final type in ProductType.values)
-                    DropdownMenuItem(value: type, child: Text(type.label)),
-                ],
-                onChanged: (value) =>
+              // INFORMAÇÕES — identidade do produto (widget compartilhado
+              // por Add/Edit; antes era ~100 linhas duplicadas nos dois
+              // builds, já divergentes em comentários).
+              ProductIdentitySection(
+                nameController: _nameController,
+                descriptionController: _descriptionController,
+                codeController: _codeController,
+                type: _type,
+                onTypeChanged: (value) =>
                     setState(() => _type = value ?? ProductType.resale),
               ),
               const SizedBox(height: 16),
               // PREÇOS — compra e venda lado a lado.
-              _SectionLabel(
-                icon: Icons.payments_outlined,
-                title: l10n.productsSectionPricing,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      controller: _purchasePriceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      label: l10n.productsPurchasePrice,
-                      style: _kFieldStyle,
-                      labelStyle: _kLabelStyle,
-                      floatingLabelStyle: _kFloatingLabelStyle,
-                      decorationHintStyle: _kHintStyle,
-                      isDense: true,
-                      validator: (value) => _parsePrice(value ?? '') <= 0
-                          ? l10n.productsPurchasePriceError
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppTextField(
-                      controller: _salePriceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      label: l10n.productsSalePrice,
-                      style: _kFieldStyle,
-                      labelStyle: _kLabelStyle,
-                      floatingLabelStyle: _kFloatingLabelStyle,
-                      decorationHintStyle: _kHintStyle,
-                      isDense: true,
-                      validator: (value) => _parsePrice(value ?? '') <= 0
-                          ? l10n.productsSalePriceError
-                          : null,
-                    ),
-                  ),
-                ],
-              ),
-              // A2: preview ao vivo dos preços digitados (compra e venda).
-              Row(
-                children: [
-                  Expanded(
-                    child: MoneyLivePreview(
-                      controller: _purchasePriceController,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: MoneyLivePreview(controller: _salePriceController),
-                  ),
-                ],
+              ProductPricingFields(
+                purchaseController: _purchasePriceController,
+                saleController: _salePriceController,
               ),
               const SizedBox(height: 16),
               // ESTOQUE — quantidade exata + venda por peso (FIFO).
@@ -1190,10 +906,6 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                     ? l10n.productsStockWeightHint
                     : l10n.productsStockAdjustHint,
                 prefixIcon: Icons.warehouse_outlined,
-                style: _kFieldStyle,
-                labelStyle: _kLabelStyle,
-                floatingLabelStyle: _kFloatingLabelStyle,
-                decorationHintStyle: _kHintStyle,
                 isDense: true,
                 validator: (value) {
                   // Edição: aceita ZERO explícito (zerar o estoque é um
@@ -1212,28 +924,16 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 },
               ),
               const SizedBox(height: 4),
-              _CompactSwitch(
-                label: l10n.productsWeighLabel,
-                subtitle: l10n.productsWeighHint,
-                value: _vendaPorFracao,
-                onChanged: (value) => setState(() {
+              ProductWeightFields(
+                vendaPorFracao: _vendaPorFracao,
+                unitLabel: _unitLabel,
+                onWeightChanged: (value) => setState(() {
                   _vendaPorFracao = value;
                   _unitLabel = value ? 'kg' : 'un';
                 }),
+                onUnitChanged: (value) =>
+                    setState(() => _unitLabel = value ?? 'kg'),
               ),
-              if (_vendaPorFracao) ...[
-                AppPickerField<String>(
-                  value: _unitLabel,
-                  label: l10n.productsUnitLabel,
-                  prefixIcon: Icons.scale_outlined,
-                  items: [
-                    for (final unit in const ['kg', 'g', 'l', 'ml'])
-                      DropdownMenuItem(value: unit, child: Text(unit)),
-                  ],
-                  onChanged: (value) =>
-                      setState(() => _unitLabel = value ?? 'kg'),
-                ),
-              ],
               const SizedBox(height: 24),
               // STATUS — ativar/desativar (inativo some do PDV e das
               // compras; o estoque é preservado — a reativação devolve a
@@ -1316,7 +1016,10 @@ class _ExpiryField extends StatelessWidget {
           // minHeight (e não altura fixa): com escala de texto alta a data
           // 'Validade · dd/mm/aaaa' quebra em 2 linhas sem cortar o texto.
           constraints: const BoxConstraints(minHeight: 56),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
           decoration: BoxDecoration(
             color: scheme.surface,
             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -1363,6 +1066,214 @@ class _ExpiryField extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Campos de IDENTIDADE do produto (nome, descrição, código/PLU e tipo
+/// estrutural) — widget COMUM aos sheets de adicionar/editar produto.
+/// Antes: blocos duplicados (~100 linhas) nos dois builds, que já haviam
+/// divergido em comentários. Esta é a fonte única.
+class ProductIdentitySection extends StatelessWidget {
+  const ProductIdentitySection({
+    super.key,
+    required this.nameController,
+    required this.descriptionController,
+    required this.codeController,
+    required this.type,
+    required this.onTypeChanged,
+  });
+
+  final TextEditingController nameController;
+  final TextEditingController descriptionController;
+  final TextEditingController codeController;
+  final ProductType type;
+  final ValueChanged<ProductType?> onTypeChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SectionLabel(
+          icon: Icons.inventory_2_outlined,
+          title: l10n.productsSectionInfo,
+        ),
+        const SizedBox(height: 12),
+        AppTextField(
+          controller: nameController,
+          textInputAction: TextInputAction.next,
+          label: l10n.loginNameLabel,
+          prefixIcon: Icons.inventory_2_outlined,
+          isDense: true,
+          // Validação: campo obrigatório; erro aparece abaixo do campo          validator: (value) => (value == null || value.trim().isEmpty)
+              ? l10n.productsNameError
+              : null,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        AppTextField(
+          controller: descriptionController,
+          textInputAction: TextInputAction.next,
+          label: l10n.productsDescriptionLabel,
+          prefixIcon: Icons.notes_outlined,
+          isDense: true,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        // W11: código de barras/PLU — usado pelas balanças etiquetadoras
+        // (20PPPPPWWWWW) e pelo campo do PDV.
+        AppTextField(
+          controller: codeController,
+          textInputAction: TextInputAction.next,
+          keyboardType: TextInputType.number,
+          maxLength: 5,
+          label: l10n.productsCodeLabel,
+          helperText: l10n.productsCodeHint,
+          prefixIcon: Icons.qr_code_2_outlined,
+          // Helper/counter usam o helperStyle do tema (12) — 10 px saía da
+          // escala e deixava a instrução do código quase ilegível.
+          isDense: true,
+          // Validação: apenas 1-5 dígitos; erro abaixo do campo          validator: (value) {
+            final digits = value?.trim() ?? '';
+            if (digits.isNotEmpty && !RegExp(r'^\d{1,5}$').hasMatch(digits)) {
+              return l10n.productsCodeError;
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 8),
+        // Fase 1: tipo estrutural do produto (matéria-prima, revenda,
+        // produzido, composto, embalagem). Define o papel na
+        // produção/receitas das fases seguintes — o default 'revenda'
+        // mantém o comportamento do varejo.
+        AppPickerField<ProductType>(
+          value: type,
+          label: l10n.productsTypeLabel,
+          prefixIcon: Icons.category_outlined,
+          items: [
+            for (final t in ProductType.values)
+              DropdownMenuItem(value: t, child: Text(t.label)),
+          ],
+          onChanged: onTypeChanged,
+        ),
+      ],
+    );
+  }
+}
+
+/// Par de PREÇOS (compra/venda) + preview ao vivo (A2) — widget COMUM aos
+/// sheets de adicionar/editar produto. Antes duplicado nos dois builds.
+class ProductPricingFields extends StatelessWidget {
+  const ProductPricingFields({
+    super.key,
+    required this.purchaseController,
+    required this.saleController,
+  });
+
+  final TextEditingController purchaseController;
+  final TextEditingController saleController;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SectionLabel(
+          icon: Icons.payments_outlined,
+          title: l10n.productsSectionPricing,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: AppTextField(
+                controller: purchaseController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                label: l10n.productsPurchasePrice,
+                isDense: true,
+                validator: (value) => Money.parse(value ?? '') <= 0
+                    ? l10n.productsPurchasePriceError
+                    : null,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: AppTextField(
+                controller: saleController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                label: l10n.productsSalePrice,
+                isDense: true,
+                validator: (value) => Money.parse(value ?? '') <= 0
+                    ? l10n.productsSalePriceError
+                    : null,
+              ),
+            ),
+          ],
+        ),
+        // A2: preview ao vivo dos preços digitados (compra e venda) —
+        // alinhado com os campos acima, mostrando "= R$ 1.390,00" ANTES
+        // de salvar (evita registrar 100× o pretendido).
+        Row(
+          children: [
+            Expanded(child: MoneyLivePreview(controller: purchaseController)),
+            const SizedBox(width: 12),
+            Expanded(child: MoneyLivePreview(controller: saleController)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Bloco de VENDA POR PESO (switch + seletor de unidade) — widget COMUM
+/// aos sheets de adicionar/editar produto. Antes duplicado nos dois
+/// builds. O RESET da unidade ao alternar o switch (`'kg' : 'un'`) fica
+/// no estado do chamador — aqui é só UI.
+class ProductWeightFields extends StatelessWidget {
+  const ProductWeightFields({
+    super.key,
+    required this.vendaPorFracao,
+    required this.unitLabel,
+    required this.onWeightChanged,
+    required this.onUnitChanged,
+  });
+
+  final bool vendaPorFracao;
+  final String unitLabel;
+  final ValueChanged<bool> onWeightChanged;
+  final ValueChanged<String?> onUnitChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _CompactSwitch(
+          label: l10n.productsWeighLabel,
+          subtitle: l10n.productsWeighHint,
+          value: vendaPorFracao,
+          onChanged: onWeightChanged,
+        ),
+        if (vendaPorFracao) ...[
+          AppPickerField<String>(
+            value: unitLabel,
+            label: l10n.productsUnitLabel,
+            prefixIcon: Icons.scale_outlined,
+            items: [
+              for (final unit in const ['kg', 'g', 'l', 'ml'])
+                DropdownMenuItem(value: unit, child: Text(unit)),
+            ],
+            onChanged: onUnitChanged,
+          ),
+        ],
+      ],
     );
   }
 }

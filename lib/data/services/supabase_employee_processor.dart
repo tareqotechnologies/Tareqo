@@ -68,7 +68,10 @@ final class SupabaseEmployeeProcessor implements IEmployeeAccountProcessor {
       );
     }
     if (serverMessage.contains('Apenas o dono')) {
-      return ('ownerOnly', 'Apenas o dono do tenant pode cadastrar funcionários.');
+      return (
+        'ownerOnly',
+        'Apenas o dono do tenant pode cadastrar funcionários.',
+      );
     }
     if (serverMessage.contains('pelo menos 8 caracteres')) {
       return ('weakPassword', 'A senha deve ter pelo menos 8 caracteres.');

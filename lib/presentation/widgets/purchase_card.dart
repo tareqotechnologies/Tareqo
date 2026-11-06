@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/i18n/l10n_ext.dart';
 import '../../core/i18n/payment_method_l10n.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/quantity.dart';
 import '../../domain/entities/purchase.dart';
@@ -121,9 +122,9 @@ class PurchaseCard extends StatelessWidget {
                     SmartAmount(
                       cents: purchase.totalAmountCents,
                       alignment: Alignment.centerRight,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      // Mesmo papel monetário das linhas de Vendas — o
+                      // montante alinha coluna a coluna entre as listas.
+                      style: AppTypography.amountInRow(scheme.onSurface),
                     ),
                     const SizedBox(height: 4),
                     StatusChip(

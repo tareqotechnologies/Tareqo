@@ -28,6 +28,8 @@ import '../../widgets/search_field.dart';
 import '../../widgets/status_chip.dart';
 import '../../../core/observability/crash_reporting.dart';
 part 'admin_tenants_widgets.dart';
+part 'admin_tenants_widgets_sheets.dart'; // _TenantDetailSheet + detail widgets
+part 'admin_tenants_widgets_billing.dart'; // _BillingInfoCard + _SelectionBar
 
 /// Painel do super admin — aprovar/rejeitar solicitações de acesso de
 /// novos tenants e acompanhar o histórico de decisões.

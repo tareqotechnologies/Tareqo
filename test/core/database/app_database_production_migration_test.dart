@@ -26,9 +26,10 @@ void main() {
         'production_order_items',
       ]) {
         expect(
-          db.select("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", [
-            table,
-          ]),
+          db.select(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name = ?",
+            [table],
+          ),
           isNotEmpty,
           reason: 'tabela $table',
         );

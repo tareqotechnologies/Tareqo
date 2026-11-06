@@ -2,8 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_tokens.dart';
 import 'focus_ring.dart';
+import 'premium_decor.dart';
 
-/// Card padrão V4 — superfície elevada, borda sutil, ripple opcional.
+/// Card padrão V4 (acabamento premium) — superfície com borda de cabelo,
+/// sombra neutra em camadas, ripple opcional e microinteração de toque.
+///
+/// * Repouso: [PremiumDecor.softShadow] (contacto + ambiente).
+/// * Hover (desktop/web) em card clicável: sobe para
+///   [PremiumDecor.liftShadow].
+/// * Press em card clicável: escala 0.985 (respeita
+///   `MediaQuery.disableAnimationsOf`).
+/// * Cards com fundo translúcido (ex.: `Colors.transparent`) não projectam
+///   sombra — a sombra apareceria através da superfície.
 class AppCard extends StatefulWidget {
   const AppCard({
     super.key,
@@ -11,6 +21,7 @@ class AppCard extends StatefulWidget {
     this.onTap,
     this.borderColor,
     this.color,
+    this.gradient,
     this.elevated = false,
     this.borderRadius = const BorderRadius.all(Radius.circular(AppRadius.md)),
     required this.child,
@@ -20,6 +31,10 @@ class AppCard extends StatefulWidget {
   final VoidCallback? onTap;
   final Color? borderColor;
   final Color? color;
+
+  /// Fundo em gradiente (heroes). Quando presente, substitui [color].
+  final Gradient? gradient;
+
   final bool elevated;
 
   /// Cantos do card — telas "premium" passam raios maiores (ex.: 20) para
@@ -34,12 +49,19 @@ class AppCard extends StatefulWidget {
 
 class _AppCardState extends State<AppCard> {
   bool _focused = false;
+  bool _hovered = false;
+  bool _pressed = false;
+
+  void _setPressed(bool value) {
+    if (_pressed == value) return;
+    setState(() => _pressed = value);
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final border = scheme.outlineVariant;
+    final border = widget.borderColor ?? PremiumDecor.hairline(scheme);
     final bg =
         widget.color ??
         (widget.elevated ? scheme.surfaceContainerHighest : scheme.surface);
@@ -48,28 +70,61 @@ class _AppCardState extends State<AppCard> {
     // teclado nas lojas) precisa de foco VISÍVEL — o fill sutil do InkWell
     // não basta. O anel de 2px primário só existe com [onTap] (card
     // clicável) e pinta POR CIMA dentro dos limites (não soma layout).
-    final ring = widget.onTap != null;
+    final interactive = widget.onTap != null;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
-    return Material(
-      color: bg,
-      elevation: widget.elevated ? 1 : 0,
-      shadowColor: Colors.black.withValues(alpha: 0.2),
-      shape: RoundedRectangleBorder(
+    final opaque = widget.gradient != null || bg.a >= 1.0;
+    final List<BoxShadow>? shadows = !opaque
+        ? null
+        : (interactive && _hovered) || widget.elevated
+        ? PremiumDecor.liftShadow(scheme)
+        : PremiumDecor.softShadow(scheme);
+
+    Widget card = AnimatedContainer(
+      duration: AppDurations.fast,
+      curve: Curves.easeOutCubic,
+      decoration: BoxDecoration(
         borderRadius: widget.borderRadius,
-        side: BorderSide(color: widget.borderColor ?? border, width: 1),
+        gradient: widget.gradient,
+        color: widget.gradient == null ? null : bg,
+        boxShadow: shadows,
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          InkWell(
-            onTap: widget.onTap,
-            onFocusChange: ring ? (f) => setState(() => _focused = f) : null,
-            child: Padding(padding: widget.padding, child: widget.child),
-          ),
-          if (ring)
-            FocusRing(visible: _focused, borderRadius: widget.borderRadius),
-        ],
+      child: Material(
+        color: widget.gradient != null ? Colors.transparent : bg,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: widget.borderRadius,
+          side: BorderSide(color: border, width: 1),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            InkWell(
+              onTap: widget.onTap,
+              onFocusChange: interactive
+                  ? (f) => setState(() => _focused = f)
+                  : null,
+              onHover: interactive ? (h) => setState(() => _hovered = h) : null,
+              onHighlightChanged: interactive && !reduceMotion
+                  ? _setPressed
+                  : null,
+              child: Padding(padding: widget.padding, child: widget.child),
+            ),
+            if (interactive)
+              FocusRing(visible: _focused, borderRadius: widget.borderRadius),
+          ],
+        ),
       ),
     );
+
+    if (interactive && !reduceMotion) {
+      card = AnimatedScale(
+        scale: _pressed ? 0.985 : 1,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOutCubic,
+        child: card,
+      );
+    }
+    return card;
   }
 }

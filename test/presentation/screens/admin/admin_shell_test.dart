@@ -6,6 +6,7 @@ import '../../../helpers/store_context.dart';
 import '../../../helpers/test_app.dart';
 import '../../../helpers/viewport.dart';
 
+import 'package:tareqo/core/theme/app_theme.dart';
 import 'package:tareqo/domain/entities/app_user.dart';
 import 'package:tareqo/domain/entities/invoice.dart';
 import 'package:tareqo/domain/entities/plan.dart';
@@ -125,7 +126,8 @@ List<dynamic> _overrides({
   final tenants = List.generate(pendingTenants, (i) => _pendingTenant('tn$i'));
   return [
     authStateProvider.overrideWith(
-      (ref) => Stream.value(const AppUser(id: 'admin-1', email: 'admin@tareqo.com')),
+      (ref) =>
+          Stream.value(const AppUser(id: 'admin-1', email: 'admin@tareqo.com')),
     ),
     adminRepositoryProvider.overrideWithValue(
       const FakeAdminRepository(isAdmin: true),
@@ -174,12 +176,14 @@ Widget _buildShell({
 void main() {
   /// Badges têm tipografia única no painel: label w600 branco (KPIs e
   /// rótulos são w300/w400 herdados do tema thin).
+  // O badge escreve com o `onError` do tema (não branco fixo): no escuro o
+  // vermelho do badge é claro e exige tinta escura para manter o AA.
   Iterable<Text> badgeTexts(WidgetTester tester, String s) => tester
       .widgetList<Text>(find.text(s))
       .where(
         (t) =>
             t.style?.fontWeight == FontWeight.w600 &&
-            t.style?.color == Colors.white,
+            t.style?.color == AppTheme.dark.colorScheme.onError,
       );
 
   testWidgets('FAB mostra a secção atual e o total de pendências em badge', (

@@ -23,6 +23,7 @@ import 'login_screen.dart';
 import 'mfa_verification_sheet.dart';
 import 'set_new_password_screen.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Portão de autenticação e de **acesso**: decide a tela raiz com base na
 /// sessão e no papel do usuário logado.
@@ -71,12 +72,8 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       }
     });
 
-    // Se o auth state resolveu, resetar o flag.
-    authState.whenData((_) => _timeoutReached = false);
-
     return authState.when(
-      loading: () =>
-          _timeoutReached ? const LoginScreen() : const _SplashScreen(),
+      loading: () => _timeoutReached ? const LoginScreen() : const _SplashScreen(),
       error: (error, stackTrace) {
         CrashReporting.capture(
           error,
@@ -494,7 +491,7 @@ class _SplashScreen extends StatelessWidget {
         : AppColors.onSurfaceVariantLight;
     // Acento da marca: bege no escuro (primário do tema escuro) e slate
     // no claro — o logo/pulse ganha a identidade petróleo sem verde.
-    final accent = isDark ? AppColors.warmBeige : AppColors.brandMuted;
+    final accent = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
 
     return Scaffold(
       backgroundColor: bg,
@@ -516,9 +513,9 @@ class _SplashScreen extends StatelessWidget {
             // Título.
             Text(
               'TAREQO',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
+              // Logótipo: degrau `display` (28/w600); o tracking aberto é
+              // decisão de marca (não um estilo de texto funcional).
+              style: AppTypography.display.copyWith(
                 letterSpacing: 2,
                 color: textPrimary,
               ),
@@ -527,10 +524,8 @@ class _SplashScreen extends StatelessWidget {
             // Subtítulo (localizado).
             Text(
               l10n.loginTagline,
-              style: TextStyle(
-                fontSize: 14,
+              style: AppTypography.bodyMedium.copyWith(
                 color: textSecondary.withValues(alpha: 0.7),
-                fontWeight: FontWeight.w400,
               ),
             ),
             const SizedBox(height: 48),
@@ -548,11 +543,7 @@ class _SplashScreen extends StatelessWidget {
             // Texto de loading.
             Text(
               l10n.splashLoading,
-              style: TextStyle(
-                fontSize: 14,
-                color: textSecondary,
-                fontWeight: FontWeight.w400,
-              ),
+              style: AppTypography.bodyMedium.copyWith(color: textSecondary),
             ),
           ],
         ),

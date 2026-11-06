@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/ui/dashed_circle_painter.dart';
 import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
@@ -27,10 +28,12 @@ import '../../controllers/purchases_providers.dart';
 import '../../controllers/sales_providers.dart';
 import '../../controllers/stock_transfers_provider.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/app_menu_option.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/inline_error_card.dart';
 import '../../widgets/store_switcher.dart';
+import '../../widgets/detail_row.dart';
 import '../credit/debts_screen.dart';
 import '../financial/financial_screen.dart';
 import '../products/product_list_screen.dart';
@@ -78,21 +81,8 @@ class DashboardScreen extends ConsumerWidget {
 
     // ----- Métricas (3 cards compactos — app de referência) --------------
     final now = AppClock.now();
-    final (start, previousStart) = switch (period) {
-      CashFlowPeriod.today => (
-        startOfDay(now),
-        startOfDay(now).subtract(const Duration(days: 1)),
-      ),
-      CashFlowPeriod.week => (
-        startOfDay(now).subtract(const Duration(days: 7)),
-        startOfDay(now).subtract(const Duration(days: 14)),
-      ),
-      CashFlowPeriod.month => (
-        DateTime(now.year, now.month, 1),
-        DateTime(now.year, now.month - 1, 1),
-      ),
-      CashFlowPeriod.all => (DateTime(2000), null),
-    };
+    final start = period.startOf(now);
+    final previousStart = period.previousStartOf(now);
 
     // Vendas do período + delta vs o período anterior ("+18%").
     var periodSalesCents = 0;
@@ -356,8 +346,8 @@ class DashboardScreen extends ConsumerWidget {
                   salesSubtextColor: salesDelta == null
                       ? null
                       : salesDelta >= 0
-                      ? theme.income
-                      : theme.expense,
+                      ? AppColors.successNeutral
+                      : AppColors.errorNeutral,
                   salesLoading: salesAsync.isLoading,
                   receivablesCents: kpis?.pendingTotalCents ?? 0,
                   receivablesSubtext: l10n.dashboardFiadoCount(
@@ -489,8 +479,11 @@ class _BalanceHero extends StatelessWidget {
     final l10n = context.l10n;
     final scheme = theme.colorScheme;
 
+    // Acabamento premium: superfície com véu de marca nos cantos e sombra
+    // elevada em camadas — o conteúdo e a semântica são os mesmos.
     return AppCard(
       elevated: true,
+      gradient: PremiumDecor.heroSurface(scheme, tint: theme.accent),
       borderRadius: AppRadius.xlAll,
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -551,11 +544,11 @@ class _BalanceHero extends StatelessWidget {
                   child: _CountUpText(
                     cents: cashCents,
                     loading: cashLoading,
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      color: cashNegative ? theme.expense : scheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -1.2,
-                      height: 1.1,
+                    // Mesmo papel monetário do hero de Vendas — o app tem
+                    // UMA escala de dinheiro (AppTypography.heroAmount).
+                    style: AppTypography.heroAmount(
+                      cashNegative ? AppColors.errorNeutral : scheme.onSurface,
+
                     ),
                   ),
                 ),
@@ -633,11 +626,8 @@ class _CountUpText extends StatelessWidget {
       tween: Tween(begin: 0, end: cents / 100),
       duration: _countUp,
       curve: AppCurves.standard,
-      builder: (context, units, _) => Text(
-        Formatters.amountWithCode(units),
-        maxLines: 1,
-        style: style,
-      ),
+      builder: (context, units, _) =>
+          Text(Formatters.amountWithCode(units), maxLines: 1, style: style),
     );
   }
 }
@@ -751,10 +741,10 @@ class _ActivityItem {
           '${_timeLabel(sale.dateTime, l10n)}',
       dateTime: sale.dateTime,
       icon: Icons.north_east_rounded,
-      iconBackground: IconTone.greenDark,
-      iconColor: IconTone.green,
+      iconBackground: AppColors.accentOrange,
+      iconColor: Colors.white,
       amount: Formatters.signedAmount(sale.totalAmountCents),
-      amountColor: IconTone.green,
+      amountColor: AppColors.accentOrange,
       onTap: onTap,
     );
   }
@@ -791,7 +781,7 @@ class _ActivityItem {
       iconBackground: IconTone.amberDark,
       iconColor: IconTone.amber,
       amount: Formatters.signedAmount(debt.amountCents),
-      amountColor: IconTone.green,
+      amountColor: AppColors.accentOrange,
       dashedBorder: true,
       onTap: onTap,
     );
@@ -805,10 +795,10 @@ class _ActivityItem {
     details: _timeLabel(transaction.date, l10n),
     dateTime: transaction.date,
     icon: Icons.south_west_rounded,
-    iconBackground: IconTone.redDark,
-    iconColor: IconTone.red,
+    iconBackground: IconTone.errorNeutralDark,
+    iconColor: IconTone.errorNeutral,
     amount: Formatters.signedAmount(-transaction.amountCents),
-    amountColor: IconTone.red,
+    amountColor: IconTone.errorNeutral,
     onTap: onTap,
   );
   factory _ActivityItem.lowStock({
@@ -836,7 +826,7 @@ class _ActivityItem {
     VoidCallback? onTap,
   }) {
     final expired = alert.isExpired;
-    final color = expired ? IconTone.red : IconTone.amber;
+    final color = expired ? IconTone.errorNeutral : IconTone.amber;
     return _ActivityItem(
       title: alert.product.name,
       details: expired
@@ -971,31 +961,31 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
             ],
           ),
           const SizedBox(height: 16),
-          _DetailRow(
+          DetailRow.inline(
             icon: Icons.store_outlined,
             label: context.l10n.transfersRowOrigin,
             value: transfer.fromStoreName,
           ),
           const SizedBox(height: 8),
-          _DetailRow(
+          DetailRow.inline(
             icon: Icons.storefront_outlined,
             label: context.l10n.transfersRowDest,
             value: transfer.toStoreName,
           ),
           const SizedBox(height: 8),
-          _DetailRow(
+          DetailRow.inline(
             icon: Icons.inventory_2_outlined,
             label: context.l10n.transfersQuantity,
             value: formattedQty,
           ),
           const SizedBox(height: 8),
-          _DetailRow(
+          DetailRow.inline(
             icon: Icons.calendar_today_outlined,
             label: context.l10n.transfersRowDate,
             value: Formatters.date(transfer.createdAt),
           ),
           const SizedBox(height: 8),
-          _DetailRow(
+          DetailRow.inline(
             icon: Icons.info_outline,
             label: context.l10n.transfersRowStatus,
             value: transferStatusLabel(transfer.status),
@@ -1005,51 +995,6 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
       ),
     ),
   );
-}
-
-/// Linha de detalhe para o bottom sheet de transferência.
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: scheme.onSurfaceVariant),
-        const SizedBox(width: 8),
-        Text(
-          '$label:',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: scheme.onSurfaceVariant,
-            fontSize: 12,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            value,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 /// Rótulo de tempo do feed: < 1h → "há X min"; senão → hora absoluta.

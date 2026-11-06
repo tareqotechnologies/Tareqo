@@ -29,6 +29,8 @@ target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${FLUTT
 
 # Disable Windows macros that collide with C++ standard library functions.
 target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
+# Suppress deprecation warnings for unsafe CRT functions (wcscpy, strcpy) in flutter_secure_storage_windows
+target_compile_definitions(${BINARY_NAME} PRIVATE "_CRT_SECURE_NO_WARNINGS")
 
 # Add dependency libraries and include directories. Add any application-specific
 # dependencies here.
@@ -38,3 +40,12 @@ target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)
+
+# Copy Flutter Windows engine DLL to the output directory so the executable can find it at runtime.
+# The DLL is produced by the Flutter engine build and needs to be alongside the exe.
+set(FLUTTER_ENGINE_DLL_PATH "/c/src/flutter/bin/cache/artifacts/engine/windows-x64-release/flutter_windows.dll")
+if(EXISTS "${FLUTTER_ENGINE_DLL_PATH}")
+  add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy "${FLUTTER_ENGINE_DLL_PATH}" $<TARGET_FILE_DIR:${BINARY_NAME}>/
+  )
+endif()

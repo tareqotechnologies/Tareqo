@@ -83,7 +83,7 @@ class MenuScreen extends ConsumerWidget {
     }
 
     Future<void> confirmSignOut() async {
-      final confirmed = await showConfirmDialog(
+      final confirmed = await showConfirmDialog(context: 
         context,
         title: l10n.commonSignOutConfirmTitle,
         message: l10n.commonSignOutConfirmMessage,
@@ -219,7 +219,7 @@ class MenuScreen extends ConsumerWidget {
                   child: _MenuTile(
                     icon: Icons.extension_outlined,
                     label: l10n.addonsTitle,
-                    iconColor: AppColors.statusPurple,
+                    iconColor: AppColors.accentOrange,
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
@@ -234,7 +234,7 @@ class MenuScreen extends ConsumerWidget {
                 child: _MenuTile(
                   icon: Icons.shield_outlined,
                   label: l10n.securitySectionTitle,
-                  iconColor: AppColors.statusIndigo,
+                  iconColor: AppColors.accentOrange,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -302,7 +302,7 @@ class MenuScreen extends ConsumerWidget {
 /// Tile de módulo HORIZONTAL da referência — card elevado (cantos 16) com
 /// ícone circular tintado à esquerda, rótulo e chevron à direita.
 ///
-/// Substitui o card vertical antigo ([ModuleCard]): no Menu a hierarquia é
+/// Substitui o card vertical antigo: no Menu a hierarquia é
 /// de LISTA de destino (navegar), não de grade de abertura — o chevron
 /// comunica "ir", os módulos continuam com a cor própria (IconTone).
 class _MenuTile extends StatelessWidget {
@@ -383,7 +383,7 @@ class _NotificationsModuleTile extends ConsumerWidget {
       child: _MenuTile(
         icon: Icons.notifications_outlined,
         label: l10n.menuNotifications,
-        iconColor: AppColors.statusWarning,
+        iconColor: AppColors.accentOrange,
         onTap: onTap,
       ),
     );

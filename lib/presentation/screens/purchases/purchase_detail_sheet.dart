@@ -87,7 +87,10 @@ class _PurchaseDetailSheet extends ConsumerWidget {
                 color: scheme.outlineVariant.withValues(alpha: 0.4),
               ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
             child: Column(
               children: [
                 DetailRow(
@@ -219,16 +222,14 @@ class _PurchaseItemRow extends StatelessWidget {
                   item.productName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  // Nome do produto = 12/w500 (labelMedium).
+                  style: theme.textTheme.labelMedium,
                 ),
                 const SizedBox(height: 1),
                 Text(
                   '${Quantity.format(item.quantity, language: Formatters.currentLanguage)} × '
                   '${Formatters.currency(item.unitPriceCents)}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 12,
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -236,8 +237,9 @@ class _PurchaseItemRow extends StatelessWidget {
                 Text(
                   '${l10n.purchaseDetailExpiry}: '
                   '${item.expiryDate != null ? Formatters.date(item.expiryDate!) : l10n.purchaseDetailNoExpiry}',
+                  // Metadado (validade) = 12 — nunca 11: é informação
+                  // operacional, não decoração.
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 11,
                     color: scheme.outline,
                   ),
                 ),

@@ -69,9 +69,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             ),
             child: Text(
               l10n.notificationMarkAllRead,
-              style: theme.textTheme.labelSmall?.copyWith(
+              // Ação de texto = labelLarge (14/w500), como os demais
+              // TextButton do app.
+              style: theme.textTheme.labelLarge?.copyWith(
                 color: scheme.primary,
-                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -424,15 +425,15 @@ class _NotificationTile extends StatelessWidget {
                                 title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodyMedium?.copyWith(
+                                // Título da notificação = labelMedium (12):
+                                // não lida sobe para w600, lida fica w500.
+                                style: theme.textTheme.labelMedium?.copyWith(
                                   fontWeight: isRead
-                                      ? FontWeight.w400
+                                      ? FontWeight.w500
                                       : FontWeight.w600,
                                   color: isRead
                                       ? scheme.onSurfaceVariant
                                       : scheme.onSurface,
-                                  fontSize: 12,
-                                  letterSpacing: -0.1,
                                 ),
                               ),
                             ),
@@ -458,8 +459,6 @@ class _NotificationTile extends StatelessWidget {
                             color: scheme.onSurfaceVariant.withValues(
                               alpha: 0.7,
                             ),
-                            fontSize: 12,
-                            height: 1.35,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -467,11 +466,11 @@ class _NotificationTile extends StatelessWidget {
                           children: [
                             Text(
                               _formatTime(time, l10n),
-                              style: theme.textTheme.labelSmall?.copyWith(
+                              // Horário = metadado (bodySmall 12).
+                              style: theme.textTheme.bodySmall?.copyWith(
                                 color: scheme.onSurfaceVariant.withValues(
                                   alpha: 0.5,
                                 ),
-                                fontSize: 12,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -488,10 +487,9 @@ class _NotificationTile extends StatelessWidget {
                               ),
                               child: Text(
                                 typeLabel,
-                                style: theme.textTheme.labelSmall?.copyWith(
+                                // Selo de tipo = labelMedium (12/w500).
+                                style: theme.textTheme.labelMedium?.copyWith(
                                   color: typeColor,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
@@ -603,7 +601,10 @@ class _DetailBottomSheet extends StatelessWidget {
           // ── Handle ──
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xxs),
+              margin: const EdgeInsets.only(
+                top: AppSpacing.sm,
+                bottom: AppSpacing.xxs,
+              ),
               width: 36,
               height: 4,
               decoration: BoxDecoration(
@@ -636,11 +637,8 @@ class _DetailBottomSheet extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.2,
-                          height: 1.2,
-                        ),
+                        // Título do detalhe = titleMedium (16/w500).
+                        style: theme.textTheme.titleMedium,
                       ),
                       const SizedBox(height: 4),
                       Row(
@@ -658,21 +656,20 @@ class _DetailBottomSheet extends StatelessWidget {
                             ),
                             child: Text(
                               typeLabel,
-                              style: theme.textTheme.labelSmall?.copyWith(
+                              // Selo de tipo = labelMedium (12/w500).
+                              style: theme.textTheme.labelMedium?.copyWith(
                                 color: typeColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
                           Text(
                             _DetailBottomSheet._formatTime(time, l10n),
-                            style: theme.textTheme.labelSmall?.copyWith(
+                            // Horário = metadado (bodySmall 12).
+                            style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurfaceVariant.withValues(
                                 alpha: 0.5,
                               ),
-                              fontSize: 12,
                             ),
                           ),
                         ],
@@ -722,10 +719,10 @@ class _DetailBottomSheet extends StatelessWidget {
               ),
               child: Text(
                 body,
+                // Corpo da mensagem = bodyMedium (14) com a entrelinha do
+                // token; o 12 anterior deixava o conteúdo abaixo do corpo.
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: scheme.onSurfaceVariant,
-                  height: 1.6,
-                  fontSize: 12,
                 ),
               ),
             ),
@@ -810,8 +807,7 @@ class _Pill extends StatelessWidget {
                       color: selected
                           ? scheme.onSurface
                           : scheme.onSurfaceVariant,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                      fontSize: 12,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                     ),
                   ),
                   if (count > 0) ...[
@@ -829,15 +825,15 @@ class _Pill extends StatelessWidget {
                       ),
                       child: Text(
                         '$count',
-                        style: theme.textTheme.labelSmall?.copyWith(
+                        style: theme.textTheme.labelMedium?.copyWith(
                           color: selected
                               // Badge sólido: usa o "on" do papel de fundo
                               // (primary ou error) — branco puro falhava 3:1 no
                               // escuro sobre #F87171.
                               ? (accent ? scheme.onError : scheme.onPrimary)
                               : scheme.onSurfaceVariant,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                          // w600 (o w700 saía da escala 400/500/600).
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -864,11 +860,8 @@ abstract final class _AdminMessageTypeLabel {
     AdminMessageType.general => Icons.mail_outline,
   };
 
-  static Color color(AdminMessageType type) => switch (type) {
-    AdminMessageType.billingQuote => AppColors.statusInfo,
-    AdminMessageType.planExpiryChange => AppColors.statusPurple,
-    AdminMessageType.planExpiringSoon => AppColors.statusWarning,
-    AdminMessageType.general => AppColors.statusIndigo,
+  static Color color(AdminMessageType type) => switch (type) {AdminMessageType.billingQuote => AppColors.accentOrange,    AdminMessageType.planExpiryChange => AppColors.accentOrange,
+    AdminMessageType.planExpiringSoon => AppColors.accentOrange,    AdminMessageType.general => AppColors.accentOrange,
   };
 
   static String label(
@@ -892,13 +885,7 @@ abstract final class _InvoiceTypeLabel {
     InvoiceNotificationType.addOnExpired => Icons.extension_off_outlined,
   };
 
-  static Color color(InvoiceNotificationType type) => switch (type) {
-    InvoiceNotificationType.invoiceGenerated => AppColors.statusPurple,
-    InvoiceNotificationType.invoiceDueSoon => AppColors.statusWarning,
-    InvoiceNotificationType.invoiceExpired => AppColors.statusError,
-    InvoiceNotificationType.invoicePaid => AppColors.statusTeal,
-    InvoiceNotificationType.addOnExpiringSoon => AppColors.statusWarning,
-    InvoiceNotificationType.addOnExpired => AppColors.statusError,
+  static Color color(InvoiceNotificationType type) => switch (type) {InvoiceNotificationType.invoiceGenerated => AppColors.accentOrange,    InvoiceNotificationType.invoiceDueSoon => AppColors.accentOrange,    InvoiceNotificationType.invoiceExpired => AppColors.errorNeutral,    InvoiceNotificationType.invoicePaid => AppColors.successNeutral,    InvoiceNotificationType.addOnExpiringSoon => AppColors.accentOrange,    InvoiceNotificationType.addOnExpired => AppColors.errorNeutral,
   };
 
   static String label(

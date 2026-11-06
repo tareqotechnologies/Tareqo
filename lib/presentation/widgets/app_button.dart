@@ -4,10 +4,9 @@ import '../../core/theme/app_tokens.dart';
 
 /// Botão padrão V4 — variantes primary, secondary e danger.
 ///
-/// Física de press (plano UI/UX — F4.1): o primary da CONFIRMAÇÃO de
-/// pagamento ([AppButton.primary] com `pressScale: true`) responde ao toque
-/// com escala 0.98 (80ms) — resposta "física" do botão mais importante do
-/// app. O gradiente sutil (`gradient: true`) só existe quando o botão está
+/// Física de press (estilo Apple): TODOS os botões respondem ao toque com
+/// escala 0.98 (80ms) e regressam suavemente; `pressScale: false` desliga-a
+/// onde o botão vive dentro de gestos próprios. O gradiente sutil (`gradient: true`) só existe quando o botão está
 /// HABILITADO — o estado desabilitado recua para o fill flat padrão (a
 /// desmotivação visual do gesto é parte do feedback).
 class AppButton extends StatefulWidget {
@@ -19,7 +18,7 @@ class AppButton extends StatefulWidget {
     this.style,
     this.expanded = false,
     this.gradient = false,
-    this.pressScale = false,
+    this.pressScale = true,
   }) : _variant = _AppButtonVariant.primary;
 
   const AppButton.secondary({
@@ -31,7 +30,7 @@ class AppButton extends StatefulWidget {
     this.expanded = false,
   }) : _variant = _AppButtonVariant.secondary,
        gradient = false,
-       pressScale = false;
+       pressScale = true;
 
   const AppButton.danger({
     super.key,
@@ -42,7 +41,7 @@ class AppButton extends StatefulWidget {
     this.expanded = false,
   }) : _variant = _AppButtonVariant.danger,
        gradient = false,
-       pressScale = false;
+       pressScale = true;
 
   final String label;
   final VoidCallback? onPressed;
@@ -50,8 +49,8 @@ class AppButton extends StatefulWidget {
   final ButtonStyle? style;
   final bool expanded;
 
-  /// Gradiente sutil (primary → tertiary) no fundo — só no primary
-  /// HABILITADO (F4.1: o botão de pagamento "acende" quando o carrinho
+  /// Gradiente sutil (primary → véu neutro de onPrimary, brilho metálico)
+  /// no fundo — só no primary HABILITADO (F4.1: o botão de pagamento "acende" quando o carrinho
   /// permite confirmar).
   final bool gradient;
 
@@ -79,9 +78,10 @@ class _AppButtonState extends State<AppButton>
       duration: AppDurations.fast, // 150ms; opress usa 80ms — ver build
       value: 1,
     );
-    _scale = Tween<double>(begin: 0.98, end: 1).animate(
-      CurvedAnimation(parent: _press, curve: Curves.easeOutCubic),
-    );
+    _scale = Tween<double>(
+      begin: 0.98,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _press, curve: Curves.easeOutCubic));
   }
 
   @override
@@ -139,13 +139,14 @@ class _AppButtonState extends State<AppButton>
             ).merge(widget.style),
             child: Ink(
               decoration: BoxDecoration(
-                // Sutil: dois papéis do scheme — sem hex fora do tema.
+                // Sutil: dois papéis do scheme — sem hex fora do tema. O
+                // segundo tom é um brilho NEUTRO (nunca o âmbar de alerta).
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
                     scheme.primary,
-                    Color.lerp(scheme.primary, scheme.tertiary, 0.35)!,
+                    Color.lerp(scheme.primary, scheme.onPrimary, 0.18)!,
                   ],
                 ),
                 borderRadius: BorderRadius.circular(AppRadius.md),

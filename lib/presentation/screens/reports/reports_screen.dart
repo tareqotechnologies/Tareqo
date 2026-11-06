@@ -245,7 +245,11 @@ class ReportsScreen extends ConsumerWidget {
                       children: [
                         for (var i = 0; i < data.perDay.length; i++) ...[
                           if (i > 0)
-                            const Divider(height: 1, indent: AppSpacing.md, endIndent: AppSpacing.md),
+                            const Divider(
+                              height: 1,
+                              indent: AppSpacing.md,
+                              endIndent: AppSpacing.md,
+                            ),
                           _DailyRow(
                             day: data.perDay[i].day,
                             total: data.perDay[i].totalCents,
@@ -405,7 +409,10 @@ class _BestSellerRow extends StatelessWidget {
             // W11: quantidade em MILÉSIMOS — exibe em unidades.
             label:
                 '${Quantity.format(quantity, language: Formatters.currentLanguage)} ${l10n.commonUnits}',
-            color: theme.colorScheme.primary,
+            // Texto do chip sobre o próprio tint a 14%: `primary` no escuro
+            // (#6B4AB3) rendia 1.97:1 — a quantidade é um dado neutro e usa
+            // o tom de texto secundário (AA em claro e escuro).
+            color: theme.colorScheme.onSurfaceVariant,
             icon: Icons.shopping_bag_outlined,
           ),
         ],
@@ -438,7 +445,10 @@ class _DailyRow extends StatelessWidget {
       _ => l10n.weekdaySunday,
     };
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       child: Row(
         children: [
           Expanded(

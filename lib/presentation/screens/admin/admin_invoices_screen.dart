@@ -272,7 +272,7 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
 
   Future<bool?> _confirmCancel(Invoice invoice) {
     final l10n = context.l10n;
-    return showConfirmDialog(
+    return showConfirmDialog(context: 
       context,
       title: l10n.adminInvoiceCancelTitle,
       message: l10n.adminInvoiceCancelConfirm(invoice.period),
@@ -437,7 +437,10 @@ class _InfoPill extends StatelessWidget {
     final effectiveColor = color ?? scheme.onSurfaceVariant;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: effectiveColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppRadius.sm),

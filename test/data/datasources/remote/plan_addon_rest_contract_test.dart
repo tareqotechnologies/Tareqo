@@ -9,7 +9,7 @@ import 'package:tareqo/data/datasources/remote/supabase_admin_message_data_sourc
 import 'package:tareqo/data/datasources/remote/supabase_addon_catalog_data_source.dart';
 import 'package:tareqo/data/datasources/remote/supabase_addon_data_source.dart';
 import 'package:tareqo/data/datasources/remote/supabase_audit_log_data_source.dart';
-import 'package:tareqo/data/datasources/local/addon_catalog.dart';
+import 'package:tareqo/domain/entities/addon_catalog.dart';
 import 'package:tareqo/data/repositories/addon_repository_impl.dart';
 import 'package:tareqo/domain/entities/plan.dart';
 import 'package:tareqo/domain/entities/plan_request.dart';
@@ -547,8 +547,16 @@ void main() {
       stub.handler = (path, request) {
         if (path.contains('add_ons')) {
           return FakeResponse([
-            {'id': 'ao_custom_invoice', 'price_monthly': 25000, 'is_available': true},
-            {'id': 'ao_quotation', 'price_monthly': 10000, 'is_available': false},
+            {
+              'id': 'ao_custom_invoice',
+              'price_monthly': 25000,
+              'is_available': true,
+            },
+            {
+              'id': 'ao_quotation',
+              'price_monthly': 10000,
+              'is_available': false,
+            },
           ]);
         }
         return FakeResponse(<dynamic>[]);
@@ -598,10 +606,7 @@ void main() {
       () async {
         final repo = AddOnRepositoryImpl(
           remote: _StubCatalogDataSource({
-            'ao_custom_invoice': (
-              priceMonthlyCents: 12345,
-              isAvailable: true,
-            ),
+            'ao_custom_invoice': (priceMonthlyCents: 12345, isAvailable: true),
           }),
         );
 
@@ -623,7 +628,7 @@ void main() {
     test('updatePrice delega ao remote (upsert do override)', () async {
       final stubSource = _StubCatalogDataSource({});
       final repo = AddOnRepositoryImpl(remote: stubSource);
- 
+
       await repo.updatePrice('ao_custom_invoice', 99000);
       expect(stubSource.upserts.single, ('ao_custom_invoice', 99000));
     });
@@ -634,7 +639,7 @@ void main() {
 /// os upserts para asserção (o repository nunca toca rede aqui).
 class _StubCatalogDataSource implements SupabaseAddOnCatalogDataSource {
   _StubCatalogDataSource(this._overrides);
- 
+
   final Map<String, ({int priceMonthlyCents, bool isAvailable})> _overrides;
   final List<(String, int)> upserts = [];
 

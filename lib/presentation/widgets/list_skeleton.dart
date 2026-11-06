@@ -23,7 +23,12 @@ class ListSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Skeleton(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.fabBottomClearance),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.fabBottomClearance,
+        ),
         physics: const NeverScrollableScrollPhysics(),
         children: [
           if (showHeader) ...[

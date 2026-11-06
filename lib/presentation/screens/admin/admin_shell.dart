@@ -270,7 +270,10 @@ class _AdminFab extends StatelessWidget {
             if (totalBadge > 0) ...[
               const SizedBox(width: 4),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 1),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xs,
+                  vertical: 1,
+                ),
                 decoration: BoxDecoration(
                   color: scheme.error,
                   borderRadius: BorderRadius.circular(AppRadius.full),
@@ -281,7 +284,7 @@ class _AdminFab extends StatelessWidget {
                   // tema thin do painel rebaixa os labels para w400, mas o
                   // badge sobre vermelho precisa de peso de destaque.
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: Colors.white,
+                    color: scheme.onError,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -332,7 +335,10 @@ class _NavBottomSheet extends StatelessWidget {
           // Handle
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.md),
+              margin: const EdgeInsets.only(
+                top: AppSpacing.sm,
+                bottom: AppSpacing.md,
+              ),
               width: 36,
               height: 4,
               decoration: BoxDecoration(
@@ -460,7 +466,7 @@ class _NavSheetItem extends StatelessWidget {
                     // labelMedium 12 + w600 explícito — mesmo padrão do
                     // badge do FAB (o tema thin rebaixa labels para w400).
                     style: theme.textTheme.labelMedium?.copyWith(
-                      color: Colors.white,
+                      color: scheme.onError,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -580,8 +586,8 @@ class _SidebarIcon extends StatelessWidget {
                     ),
                     child: Text(
                       '${item.badge}',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: scheme.onError,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),

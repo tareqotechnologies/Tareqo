@@ -814,6 +814,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addStoreSubmit => 'Créer le magasin';
 
   @override
+  String get editStoreTitle => 'Modifier le magasin';
+
+  @override
+  String get editStoreSubmit => 'Enregistrer les modifications';
+
+  @override
+  String editStoreSuccess(String name) {
+    return 'Magasin $name mis à jour !';
+  }
+
+  @override
+  String get editStoreError =>
+      'Impossible de mettre à jour le magasin. Réessayez.';
+
+  @override
+  String get editStoreAction => 'Modifier';
+
+  @override
   String get addEmployeeTitle => 'Nouvel employé';
 
   @override
@@ -1634,6 +1652,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debtsAddDebt => 'Enregistrer un crédit';
+
+  @override
+  String get debtsDataSection => 'Détails du crédit';
 
   @override
   String get debtsSearchHint => 'Rechercher par nom du client...';

@@ -300,9 +300,9 @@ void main() {
       await tester.pumpWidget(_buildApp(repository, theme: AppTheme.light));
       await tester.pumpAndSettle();
 
-      // Fundo do scaffold = neutro claro do AppTheme.light.
+      // Fundo do scaffold = token de canvas do AppTheme.light.
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-      expect(scaffold.backgroundColor, const Color(0xFFFAFAFA));
+      expect(scaffold.backgroundColor, AppColors.scaffoldLight);
 
       // Título em texto escuro (não o branco do dark premium).
       final title = tester.widget<Text>(find.text('TAREQO'));
@@ -313,7 +313,10 @@ void main() {
         find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
       );
       expect(overlay.value.statusBarIconBrightness, Brightness.dark);
-      expect(overlay.value.systemNavigationBarColor, const Color(0xFFFAFAFA));
+      expect(
+        overlay.value.systemNavigationBarColor,
+        AppColors.scaffoldLight,
+      );
       expect(overlay.value.systemNavigationBarIconBrightness, Brightness.dark);
     },
   );
@@ -326,10 +329,13 @@ void main() {
     await tester.pumpAndSettle();
 
     final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-    expect(scaffold.backgroundColor, AppColors.backgroundDark);      // Título na escala (Large Title 4.5): a cor vem do scheme — branco
-      // quase puro do tema escuro (mesmo par auditado de contraste).
-      final title = tester.widget<Text>(find.text('TAREQO'));
-      expect(title.style?.color, AppTheme.dark.colorScheme.onSurface);
+    expect(
+      scaffold.backgroundColor,
+      AppColors.backgroundDark,
+    ); // Título na escala (Large Title 4.5): a cor vem do scheme — branco
+    // quase puro do tema escuro (mesmo par auditado de contraste).
+    final title = tester.widget<Text>(find.text('TAREQO'));
+    expect(title.style?.color, AppTheme.dark.colorScheme.onSurface);
 
     final overlay = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
       find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
@@ -340,7 +346,7 @@ void main() {
   });
 
   testWidgets(
-    'Large Title (4.5): título segue a escala (displaySmall 34/w300) e o '
+    'Large Title (4.5): título segue a escala (displaySmall 28/w600) e o '
     'header desliza a meia velocidade do conteúdo (parallax)',
     (tester) async {
       final repository = _FakeAuthRepository();
@@ -348,10 +354,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Título na escala tipográfica — o papel "Large Title —
-      // login/boas-vindas" do `displaySmall` (34/w300, tracking negativo).
+      // login/boas-vindas" do `displaySmall` (token `display`: 28/w600).
       final title = tester.widget<Text>(find.text('TAREQO'));
-      expect(title.style?.fontSize, 34);
-      expect(title.style?.fontWeight, FontWeight.w300);
+      expect(title.style?.fontSize, 28);
+      expect(title.style?.fontWeight, FontWeight.w600);
 
       // Em repouso (sem scroll) o translate é 0 — a página renderiza
       // pixel-idêntica ao layout estático.

@@ -8,11 +8,10 @@ import 'product_local_data_source.dart';
 /// Default [ProductType.resale] para `null` (linha criada antes da coluna
 /// `type`) ou valor desconhecido (banco escrito por versão mais nova do
 /// app) — a leitura de produtos legados NUNCA quebra por valor inesperado.
-ProductType _productTypeFromName(String? name) =>
-    ProductType.values.firstWhere(
-      (type) => type.name == name,
-      orElse: () => ProductType.resale,
-    );
+ProductType _productTypeFromName(String? name) => ProductType.values.firstWhere(
+  (type) => type.name == name,
+  orElse: () => ProductType.resale,
+);
 
 /// Implementação SQLite do [ProductLocalDataSource].
 ///

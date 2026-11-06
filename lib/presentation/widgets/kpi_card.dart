@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 import 'app_card.dart';
+import 'premium_decor.dart';
 import 'smart_amount.dart';
 
 /// Card de indicador (KPI) V4 — ícone em badge + valor + rótulo.
@@ -40,7 +42,7 @@ class KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final background = iconBackground ?? theme.accent.withValues(alpha: 0.1);
+    final dark = theme.brightness == Brightness.dark;
     final foreground = iconColor ?? theme.accent;
 
     return AppCard(
@@ -50,14 +52,19 @@ class KpiCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Badge do ícone: gradiente subtil da própria cor + aro fino —
+          // lê-se como "joia" do card sem competir com o valor.
           Container(
             width: AppSizes.avatarMd,
             height: AppSizes.avatarMd,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: background,
+              color: iconBackground,
+              gradient: iconBackground == null
+                  ? PremiumDecor.iconTint(foreground, dark: dark)
+                  : null,
               borderRadius: AppRadius.mdAll,
-              border: Border.all(color: foreground.withValues(alpha: 0.4)),
+              border: Border.all(color: foreground.withValues(alpha: 0.22)),
             ),
             child: Icon(icon, size: 20, color: foreground),
           ),
@@ -75,7 +82,7 @@ class KpiCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             // Rótulo do indicador ligeiramente menor que a nota padrão (13 → 12)
             // para o rótulo não competir com o valor do card (pedido de UI).
-            style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
+            style: AppTypography.labelSmall,
           ),
           if (caption != null) ...[
             const SizedBox(height: AppSpacing.xs),
@@ -83,7 +90,7 @@ class KpiCard extends StatelessWidget {
               caption!,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall,
+              style: AppTypography.labelSmall,
             ),
           ],
         ],
@@ -107,8 +114,13 @@ class _Value extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.headlineSmall?.copyWith(color: color);
+    // Valor do KPI em 600 com tracking negativo: números "desenhados",
+    // sem mudar o degrau da escala (o FittedBox absorve a largura extra).
+    final style = AppTypography.titleMedium.copyWith(
+      color: color,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.3,
+    );
 
     if (loading) {
       return FittedBox(

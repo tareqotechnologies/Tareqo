@@ -122,29 +122,28 @@ void main() {
     },
   );
 
-  testWidgets(
-    'quick-add com busca por NOME não dispara o pipeline de código',
-    (tester) async {
-      final processSale = _FakeProcessSaleUseCase();
-      await _pumpPdv(tester, processSale: processSale);
+  testWidgets('quick-add com busca por NOME não dispara o pipeline de código', (
+    tester,
+  ) async {
+    final processSale = _FakeProcessSaleUseCase();
+    await _pumpPdv(tester, processSale: processSale);
 
-      // "caneta" tem letras — Enter não deve adicionar nada (é busca por
-      // nome; o filtro em tempo real já respondeu no onChanged).
-      await tester.enterText(find.byType(TextField).at(1), 'caneta');
-      await tester.testTextInput.receiveAction(TextInputAction.search);
-      await tester.pumpAndSettle();
+    // "caneta" tem letras — Enter não deve adicionar nada (é busca por
+    // nome; o filtro em tempo real já respondeu no onChanged).
+    await tester.enterText(find.byType(TextField).at(1), 'caneta');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
 
-      // Carrinho vazio: o botão de confirmar segue desabilitado.
-      final confirmButton = tester.widget<AppButton>(
-        find.ancestor(
-          of: find.text('Confirmar venda'),
-          matching: find.byType(AppButton),
-        ),
-      );
-      expect(confirmButton.onPressed, isNull);
-      expect(processSale.calls, 0);
-    },
-  );
+    // Carrinho vazio: o botão de confirmar segue desabilitado.
+    final confirmButton = tester.widget<AppButton>(
+      find.ancestor(
+        of: find.text('Confirmar venda'),
+        matching: find.byType(AppButton),
+      ),
+    );
+    expect(confirmButton.onPressed, isNull);
+    expect(processSale.calls, 0);
+  });
 
   testWidgets(
     'toque na quantidade de produto por UNIDADE abre edição e aplica inteiro',
@@ -191,31 +190,30 @@ void main() {
     },
   );
 
-  testWidgets(
-    'produto por peso mantém fração decimal ao editar quantidade',
-    (tester) async {
-      final processSale = _FakeProcessSaleUseCase();
-      await _pumpPdv(tester, processSale: processSale);
+  testWidgets('produto por peso mantém fração decimal ao editar quantidade', (
+    tester,
+  ) async {
+    final processSale = _FakeProcessSaleUseCase();
+    await _pumpPdv(tester, processSale: processSale);
 
-      // Arroz por peso com quantidade 0: o stepper mostra "0 kg" (com
-      // unidade). Rola até a linha (lazy) e digita 1,75 direto, sem tocar
-      // no "+".
-      await tester.scrollUntilVisible(
-        find.text('0 kg'),
-        150,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('0 kg'));
-      await tester.pumpAndSettle();
-      await tester.enterText(_dialogField(), '1,75');
-      await tester.tap(find.text('Confirmar'));
-      await tester.pumpAndSettle();
+    // Arroz por peso com quantidade 0: o stepper mostra "0 kg" (com
+    // unidade). Rola até a linha (lazy) e digita 1,75 direto, sem tocar
+    // no "+".
+    await tester.scrollUntilVisible(
+      find.text('0 kg'),
+      150,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('0 kg'));
+    await tester.pumpAndSettle();
+    await tester.enterText(_dialogField(), '1,75');
+    await tester.tap(find.text('Confirmar'));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Confirmar venda'));
-      await tester.pumpAndSettle();
-      expect(processSale.lastSale!.items.single.productId, 'f1');
-      expect(processSale.lastSale!.items.single.quantity, 1750);
-    },
-  );
+    await tester.tap(find.text('Confirmar venda'));
+    await tester.pumpAndSettle();
+    expect(processSale.lastSale!.items.single.productId, 'f1');
+    expect(processSale.lastSale!.items.single.quantity, 1750);
+  });
 }

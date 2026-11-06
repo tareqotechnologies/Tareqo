@@ -49,7 +49,9 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     );
     final user = response.user;
     if (user == null) {
-      throw const AuthException('Falha ao autenticar: nenhum usuário retornado.');
+      throw const AuthException(
+        'Falha ao autenticar: nenhum usuário retornado.',
+      );
     }
     return _toAppUser(user);
   }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
+import '../../core/utils/app_clock.dart';
 import '../../core/utils/period_utils.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/financial_transaction.dart';
@@ -17,6 +18,38 @@ import 'auth_providers.dart';
 
 /// Período de análise do fluxo de caixa.
 enum CashFlowPeriod { today, week, month, all }
+
+/// Início do PERIODO (inclusive) — REGRA ÚNICA para dashboard/financeiro.
+///
+/// Substitui as 4 cópias do switch `CashFlowPeriod → DateTime` que
+/// existiam em `finance_providers` (x1), `dashboard_providers` (x2) e
+/// `dashboard_screen` (x1) — cópias essas que já haviam divergido no
+/// Uso do relógio ([AppClock.now] vs `DateTime.now()`).
+extension CashFlowPeriodStart on CashFlowPeriod {
+  /// Início do período (inclusive): hoje → [startOfDay]; semana → 7 dias
+  /// atrás alinhado ao início do dia; mês → dia 1 do mês; tudo → 2000.
+  DateTime startOf(DateTime now) {
+    final todayStart = startOfDay(now);
+    return switch (this) {
+      CashFlowPeriod.today => todayStart,
+      CashFlowPeriod.week => todayStart.subtract(const Duration(days: 7)),
+      CashFlowPeriod.month => DateTime(now.year, now.month, 1),
+      CashFlowPeriod.all => DateTime(2000),
+    };
+  }
+
+  /// Início do período ANTERIOR (para o delta "+18%" do dashboard);
+  /// `null` em `all` (não há "tudo anterior").
+  DateTime? previousStartOf(DateTime now) {
+    final todayStart = startOfDay(now);
+    return switch (this) {
+      CashFlowPeriod.today => todayStart.subtract(const Duration(days: 1)),
+      CashFlowPeriod.week => todayStart.subtract(const Duration(days: 14)),
+      CashFlowPeriod.month => DateTime(now.year, now.month - 1, 1),
+      CashFlowPeriod.all => null,
+    };
+  }
+}
 
 extension CashFlowPeriodLabel on CashFlowPeriod {
   String label(AppLocalizations l10n) => switch (this) {
@@ -117,19 +150,15 @@ class CashFlowNotifier extends AsyncNotifier<CashFlow> {
   @override
   Future<CashFlow> build() {
     final period = ref.watch(cashFlowPeriodProvider);
-    final now = DateTime.now();
+    // AppClock (relógio injetável nos testes) — é a regra do projeto para
+    // código de UI (ver core/utils/app_clock.dart).
+    final now = AppClock.now();
     final user = ref.watch(authStateProvider).value;
     final storeId = user == null
         ? null
         : ref.watch(activeStoreIdProvider(user.id));
 
-    final start = switch (period) {
-      // Todos os períodos alinhados ao início do dia (semântica única).
-      CashFlowPeriod.today => startOfDay(now),
-      CashFlowPeriod.week => startOfDay(now.subtract(const Duration(days: 7))),
-      CashFlowPeriod.month => DateTime(now.year, now.month, 1),
-      CashFlowPeriod.all => DateTime(2000),
-    };
+    final start = period.startOf(now);
 
     if (storeId == null) {
       return Future.value(const CashFlow(incomeCents: 0, expenseCents: 0));

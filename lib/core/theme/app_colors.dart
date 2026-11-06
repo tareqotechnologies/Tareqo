@@ -1,225 +1,418 @@
 import 'package:flutter/material.dart';
 
-/// Paleta oficial e cores semânticas que NÃO vivem no [ColorScheme].
+/// Paleta TAREQO Signature (DESIGN_SYSTEM.md §2–3).
 ///
-/// RE2 — Paleta base do produto (fonte única dos hexadecimais):
-/// * `petrol`     #10282A — azul-petróleo escuro (identidade, superfícies)
-/// * `slate`      #3D4D55 — cinza azulado (primário claro, estrutura)
-/// * `warmGray`   #A79E9C — cinza quente (texto secundário, neutros)
-/// * `warmBeige`  #D3C3B9 — bege claro (acento no escuro, texto sobre petrol)
-/// * `terracotta` #B58863 — terracota (destaque único, usada com parcimônia)
-/// * `softBlack`  #161616 — preto suave (texto, snackbar)
-///
-/// Regra do design system: cor representa **função**, nunca aparência.
-/// A hierarquia vem dos NEUTROS (petróleo/slate/cinza quente); a terracota
-/// e o bege são destaques reservados — nunca preenchimentos de massa.
-/// Onde existe um par para os dois temas, o sufixo `*Light` refere-se ao
-/// modo claro — não é uma cor "mais clara".
-///
-/// As variantes usadas como TEXTO sobre superfícies claras foram calibradas
-/// para WCAG AA (≥ 4.5:1) e, como ícone/chip (≥ 3:1) — ver
-/// `test/core/theme/theme_contrast_test.dart`.
+/// Orçamento de cor: ~90% neutros, ~8% azul de ação, ~2% semântica.
+/// Nomes mantidos por compatibilidade com os ecrãs existentes: só os valores
+/// mudam. Não usar as cores semânticas como decoração.
 abstract final class AppColors {
-  // ── Paleta base (não alterar sem justificativa técnica) ──
-  static const Color petrol = Color(0xFF10282A);
-  static const Color slate = Color(0xFF3D4D55);
-  static const Color warmGray = Color(0xFFA79E9C);
-  static const Color warmBeige = Color(0xFFD3C3B9);
-  static const Color terracotta = Color(0xFFB58863);
-  static const Color softBlack = Color(0xFF161616);
+  // ─────────────────────────────────────────────────────────────────────
+  // 1. Tema claro
+  // ─────────────────────────────────────────────────────────────────────
 
-  // ── Marca — derivadas da paleta base ──
-  /// Acento da marca no MODO ESCURO: terracota — destaque sóbrio sobre
-  /// superfícies petróleo (ícones, FAB, cursor; não é cor de preenchimento
-  /// de massa). Ícone/chip ≥ 3:1 sobre as superfícies escuras.
-  static const Color brand = terracotta;
+  /// canvas — fundo da aplicação.
+  static const Color lightBackground = Color(0xFFF5F5F7);
 
-  /// Acento da marca no MODO CLARO: slate-escuro (#2C3E45) derivado do
-  /// `slate` — botão primário com texto branco a 8.6:1 (AA/AAA). O antigo
-  /// verde-médio foi substituído: a marca deixa de ter verde como padrão.
-  static const Color brandMuted = Color(0xFF2C3E45);
+  /// surface — cartões, listas, sheets, campos.
+  static const Color lightSurface = Color(0xFFFFFFFF);
 
-  /// Container do acento (chips selecionados, indicador de navegação):
-  /// bege no claro (sobreposição suave do `warmBeige`); petróleo no escuro.
-  static const Color brandContainerLight = warmBeige;
-  static const Color brandContainerDark = petrol;
+  /// surfaceSunken — zonas agrupadas e fundo de inputs.
+  static const Color lightSurfaceSecondary = Color(0xFFEDEDF0);
 
-  /// Conteúdo sobre os containers do acento: preto suave no bege claro
-  /// (12.2:1) e bege no petróleo escuro (8.8:1) — ambos ≥ AA.
-  static const Color onBrandContainerLight = softBlack;
-  static const Color onBrandContainerDark = warmBeige;
+  /// surfaceRaised — superfície com elevação (menus, diálogos).
+  static const Color lightSurfaceElevated = Color(0xFFFFFFFF);
 
-  // ── API legada (mantida para compatibilidade) ──
-  // `accent`/`success` apontam para o acento da marca (terracota no escuro,
-  // slate-escuro no claro). Nenhum uso de "verde de sucesso" permanece:
-  // aprovação/conclusão usa o neutro quente da marca (regra: sem verde).
-  static const Color accent = brand;
-  static const Color accentLight = brandMuted;
-  static const Color success = brand;
-  static const Color successLight = brandMuted;
+  /// textPrimary — 16.83:1 sobre surface.
+  static const Color lightTextPrimary = Color(0xFF1D1D1F);
 
-  // ── Fluxo de caixa (entradas/saídas) — calibrado AA no teste de contraste.
-  // Entrada (income): tom quente terroso (verde removido da semântica);
-  // mantém ≥ 4.5:1 sobre branco e sobre chip@14% nos DOIS temas.
-  static const Color income = Color(0xFFD8B08C);
-  static const Color incomeLight = Color(0xFF5A4632);
-  // Saída (expense) e alertas: vermelho/âmbar já auditados — preservados.
-  static const Color expense = Color(0xFFF87171);
-  static const Color expenseLight = Color(0xFFC81E1E);
+  /// textSecondary — 5.07:1 sobre surface.
+  static const Color lightTextSecondary = Color(0xFF5E5E63);
 
-  // ── Alertas genéricos (texto curto em negrito sobre superfície clara) ──
-  static const Color warning = Color(0xFFFBBF24);
-  static const Color warningLight = Color(0xFF9A5308);
+  /// textTertiary — 5.99:1 sobre surface.
+  static const Color lightTextTertiary = Color(0xFF636366);
 
-  // ── Neutros do modo escuro (família petróleo — superfícies por papel) ──
-  // Escala derivada do petrol com gradação de luminosidade (antes cinza
-  // puro #131316/#09090B): as superfícies ganham a temperatura da marca.
-  static const Color surfaceDark = Color(0xFF10232A);
-  static const Color surfaceElevatedDark = Color(0xFF16303A);
-  static const Color backgroundDark = Color(0xFF0B161A);
-  static const Color borderDark = Color(0xFF24363C);
+  /// border — divisores e contornos decorativos.
+  static const Color lightBorder = Color(0xFFD2D2D7);
 
-  // ── Papéis do modo CLARO (fonte única dos hex do AppTheme.light) ──
-  // Espelham os mesmos hex usados inline no `_base(Brightness.light)` —
-  // quem precisa de um papel do tema FORA do ThemeData (splash, paletas
-  // const de telas) importa daqui em vez de repetir o hex.
+  /// borderStrong — contorno de controlos (≥3:1).
+  static const Color lightBorderStrong = Color(0xFFC7C7CC);
 
-  /// Fundo de scaffold claro (mesmo papel do `scaffoldBackgroundColor`).
-  static const Color scaffoldLight = Color(0xFFFAFAFA);
+  /// Control border (outline buttons, fields): 3.3:1 on white, 5.4:1 on dark (WCAG 1.4.11). borderStrong does NOT reach 3:1.
+  static const Color controlBorder = Color(0xFF8A8A8F);
 
-  /// Texto principal sobre superfícies claras (mesmo papel do `onSurface`).
-  static const Color onSurfaceLight = Color(0xFF161616);
+  /// separator — linhas de lista e tabela.
+  static const Color lightDivider = Color(0xFFE5E5EA);
 
-  /// Texto secundário no escuro (mesmo papel do `onSurfaceVariant` dark).
-  static const Color onSurfaceVariantDark = warmGray;
+  /// textDisabled — isento de AA.
+  static const Color lightTextDisabled = Color(0xFFAEAEB2);
 
-  /// Texto secundário no claro (mesmo papel do `onSurfaceVariant` light).
-  static const Color onSurfaceVariantLight = Color(0xFF63646A);
+  /// actionFill — fundo de botão primário (branco sobre ele: 4.70:1).
+  static const Color lightPrimary = Color(0xFF0071E3);
 
-  /// Bordas/linhas no claro (mesmo papel do `outlineVariant` light).
-  static const Color borderLight = Color(0xFFE7E1DD);
+  /// textOnAction — texto sobre preenchimento de ação.
+  static const Color lightOnPrimary = Color(0xFFFFFFFF);
 
-  // ── Status semânticos (centralizados; cores de ícone/decorativas) ──
-  // Paleta RE2: os antigos roxo/índigo/teal viram os três matizes da paleta
-  // base — a diferenciação entre tipos de notificação/mensagem continua
-  // existindo (petrol ≠ terracota ≠ slate), sem cores fora do sistema.
-  static const Color statusError = Color(0xFFDC2626);
-  static const Color statusWarning = Color(0xFFF59E0B);
-  static const Color statusInfo = petrol;
-  static const Color statusPurple = terracotta;
-  static const Color statusIndigo = slate;
-  static const Color statusTeal = terracotta;
+  /// Botão secundário: superfície com contorno (sem preenchimento colorido).
+  static const Color lightSecondaryAction = Color(0xFFFFFFFF);
 
-  /// Cor semântica para um status de decisão (`approved`/`rejected`/
-  /// `pending`) usado nas telas admin — aprovação de tenants/planos e
-  /// entradas de auditoria. Valor desconhecido → cinza neutro (sem papel
-  /// de cor no design system). Fonte única do mapeamento (antes duplicado
-  /// em tenants/audit/dashboard).
-  static Color decisionStatusColor(String? status) => switch (status) {
-    'approved' => success,
-    'rejected' => statusError,
-    'pending' => statusWarning,
-    _ => Colors.grey,
-  };
+  /// Texto do botão secundário.
+  static const Color lightOnSecondary = Color(0xFF1D1D1F);
 
-  /// Resolve um par (escuro, claro) conforme o brilho do tema.
-  static Color of(Brightness brightness, Color dark, Color light) =>
-      brightness == Brightness.light ? light : dark;
+  /// action — ícones, foco, indicador de seleção (não-texto).
+  static const Color lightAction = Color(0xFF007AFF);
 
-  // ── Variantes por brilho (mantidas para compatibilidade) ──
-  static Color errorOf(Brightness brightness) =>
-      brightness == Brightness.light ? statusError : const Color(0xFFF87171);
+  /// actionText — links e texto de ação sobre superfície (5.80:1).
+  static const Color lightActionText = Color(0xFF0062CC);
 
-  static Color successOf(Brightness brightness) =>
-      brightness == Brightness.light ? successLight : success;
+  /// actionPressed — estado premido.
+  static const Color lightActionPressed = Color(0xFF0051A8);
 
-  static Color warningOf(Brightness brightness) =>
-      brightness == Brightness.light ? warningLight : const Color(0xFFFBBF24);
+  /// actionSoft — fundo de chip selecionado.
+  static const Color lightActionSoft = Color(0xFFE8F1FF);
+
+  /// actionBorder — contorno de seleção.
+  static const Color lightActionBorder = Color(0xFFB3D4FF);
+
+  /// warningBright — ícone de alerta (não-texto, ≥3:1). Mantém o nome
+  /// `accentOrange` usado pelos ecrãs existentes.
+  static const Color accentOrange = Color(0xFFD97706);
+
+  /// warningSoft — fundo de badge de alerta.
+  static const Color accentOrangeSoft = Color(0xFFFFF3E0);
+
+  /// warning — texto de alerta (5.20:1 sobre branco).
+  static const Color warningText = Color(0xFF9A4500);
+
+  /// Alias para `of(...)` e testes de contraste.
+  static const Color warning = warningText;
+
+  /// warningLight — fundo suave de aviso.
+  static const Color warningLight = accentOrangeSoft;
+
+  /// success — ícone/badge de sucesso (não-texto, 4.40:1).
+  static const Color successNeutral = Color(0xFF248A3D);
+
+  /// successText — texto de sucesso (5.40:1).
+  static const Color successText = Color(0xFF176A2C);
+
+  /// successSoft — fundo de badge de sucesso.
+  static const Color successSoft = Color(0xFFE7F4EA);
+
+  /// error — erro e ações destrutivas (5.38:1).
+  static const Color errorNeutral = Color(0xFFB0000F);
+
+  /// errorSoft — fundo de badge de erro.
+  static const Color lightErrorSoft = Color(0xFFFDECEF);
+
+  /// info — informação (6.87:1).
+  static const Color info = Color(0xFF0057B8);
+
+  /// infoSoft — fundo de badge de informação.
+  static const Color infoSoft = Color(0xFFE8F1FB);
+
+  // ─────────────────────────────────────────────────────────────────────
+  // 2. Tema escuro (paleta própria, não é inversão)
+  // ─────────────────────────────────────────────────────────────────────
+
+  /// canvas escuro.
+  static const Color darkBackground = Color(0xFF0B0B0D);
+
+  /// surface escuro — cartões e listas.
+  static const Color darkSurface = Color(0xFF161618);
+
+  /// surfaceSunken escuro — inputs e zonas agrupadas.
+  static const Color darkSurfaceSecondary = Color(0xFF0F0F11);
+
+  /// surfaceRaised escuro — sheets, diálogos, menus.
+  static const Color darkSurfaceElevated = Color(0xFF1C1C1E);
+
+  /// textPrimary escuro — 16.60:1 sobre surface.
+  static const Color darkTextPrimary = Color(0xFFF5F5F7);
+
+  /// textSecondary escuro — 7.03:1 sobre surface.
+  static const Color darkTextSecondary = Color(0xFFA1A1A6);
+
+  /// textTertiary escuro — 5.54:1 sobre surface.
+  static const Color darkTextTertiary = Color(0xFF8E8E93);
+
+  /// border escuro — decorativo.
+  static const Color darkBorder = Color(0xFF2C2C2E);
+
+  /// borderStrong escuro — contorno de controlos.
+  static const Color darkBorderStrong = Color(0xFF3A3A3C);
+
+  /// separator escuro.
+  static const Color darkDivider = Color(0xFF242426);
+
+  /// textDisabled escuro.
+  static const Color darkTextDisabled = Color(0xFF636366);
+
+  /// Botão primário escuro: fundo azul com rótulo ESCURO (5.39:1).
+  /// Branco sobre este azul falha AA (3.65:1) — decisão de identidade.
+  static const Color darkPrimary = Color(0xFF0A84FF);
+
+  /// Rótulo escuro sobre o primário escuro.
+  static const Color darkOnPrimary = Color(0xFF0B0B0D);
+
+  /// Botão secundário escuro.
+  static const Color darkSecondaryAction = Color(0xFF1C1C1E);
+
+  /// Texto do botão secundário escuro.
+  static const Color darkOnSecondary = Color(0xFFF5F5F7);
+
+  /// action escuro — ícones, foco, seleção (4.95:1).
+  static const Color darkAction = Color(0xFF0A84FF);
+
+  /// actionPressed escuro — clareia, não escurece.
+  static const Color darkActionPressed = Color(0xFF409CFF);
+
+  /// actionSoft escuro — fundo de seleção.
+  static const Color darkActionSoft = Color(0xFF0F2A44);
+
+  /// Alerta escuro (warning 8.28:1). Mantém o nome `darkAccentOrange`.
+  static const Color darkAccentOrange = Color(0xFFFF9F0A);
+
+  /// Fundo suave de alerta escuro.
+  static const Color darkAccentOrangeSoft = Color(0xFF3A260D);
+
+  /// Texto de alerta escuro.
+  static const Color darkWarningText = Color(0xFFFF9F0A);
+
+  /// error escuro (4.99:1).
+  static const Color darkErrorNeutral = Color(0xFFFF453A);
+
+  /// Fundo suave de erro escuro.
+  static const Color darkErrorSoft = Color(0xFF3B1714);
+
+  /// success escuro (8.42:1).
+  static const Color successNeutralDark = Color(0xFF30D158);
+
+  /// info escuro (9.89:1).
+  static const Color darkInfo = Color(0xFF64D2FF);
+
+  /// Rótulo sobre preenchimentos semânticos no escuro.
+  static const Color onSemanticDark = Color(0xFF0B0B0D);
+
+  // ─────────────────────────────────────────────────────────────────────
+  // 3. Alertas (laranja) — mantidos por compatibilidade
+  // ─────────────────────────────────────────────────────────────────────
+
+  static const Color accentOrangeAlert = accentOrange;
+  static const Color accentOrangeSoftAlert = accentOrangeSoft;
+  static const Color warningTextDark = darkWarningText;
+  static const Color errorNeutralDark = darkErrorNeutral;
+  static const Color successNeutralDarkAlias = successNeutralDark;
+
+  // ─────────────────────────────────────────────────────────────────────
+  // 4. API de compatibilidade
+  // ─────────────────────────────────────────────────────────────────────
+
+  static Color get income => successNeutral;
+  static Color get expense => errorNeutral;
+  static Color get incomeDark => successNeutralDark;
+  static Color get expenseDark => darkErrorNeutral;
+  static Color get accent => accentOrange;
+  static Color get accentDark => darkAccentOrange;
+  static Color get incomeLight => successText;
+  static Color get expenseLight => errorNeutral;
+
+  /// Escolhe a variante do brilho corrente: `dark` no escuro, `light` no claro.
+  static Color of(Brightness brightness, Color dark, Color light) {
+    return brightness == Brightness.light ? light : dark;
+  }
+
+  /// Cor do status de decisão (aprovação/rejeição).
+  static Color decisionStatusColor(Object? status) {
+    if (status == null || status == '') return lightBorder;
+    if (status == 'approved' || status == 'aprovado') return successNeutral;
+    if (status == 'rejected' || status == 'rejeitado') return errorNeutral;
+    if (status == 'pending' || status == 'pendente') return accentOrange;
+    return lightTextSecondary;
+  }
+
+  /// Variante por brilho (mantida para compatibilidade).
+  static Color getIncomeLight(ColorScheme scheme, Brightness brightness) {
+    return brightness == Brightness.light ? lightSurfaceSecondary : darkSurfaceSecondary;
+  }
+
+  // ── Aliases de migração ──
+  static const Color statusError = errorNeutral;
+  static const Color statusWarning = accentOrange;
+  static const Color statusInfo = info;
+  static const Color statusPrimary = lightPrimary;
+  static const Color statusSuccess = successNeutral;
+  static const Color petrol = darkBackground;
+  static const Color backgroundDark = darkBackground;
+  static const Color surfaceDark = darkSurface;
+  static const Color scaffoldLight = lightBackground;
+  static const Color scaffoldDark = darkBackground;
+  static const Color cardLight = lightSurface;
+  static const Color cardDark = darkSurface;
+  static const Color onSurfaceLight = lightTextPrimary;
+  static const Color onSurfaceDark = darkTextPrimary;
+  static const Color onSurfaceVariantLight = lightTextSecondary;
+  static const Color onSurfaceVariantDark = darkTextSecondary;
+  static const Color surfaceLight = lightSurface;
+  static const Color primaryLight = lightPrimary;
+  static const Color primaryDark = darkPrimary;
+  static const Color brandMuted = lightPrimary;
+  static const Color outlineLight = lightBorder;
+  static const Color outlineDark = darkBorder;
+  static const Color outlineVariantLight = lightDivider;
+  static const Color outlineVariantDark = darkDivider;
 }
 
-/// Cores semânticas do app que dependem do brilho do tema e não existem no
-/// [ColorScheme] do Material 3 (sucesso/entrada/saída/alerta/acento).
+/// Cores semânticas que não cabem no [ColorScheme] (entrada, saída, alerta).
 ///
-/// Implementado como [ThemeExtension] para que a troca claro ⇄ escuro seja
-/// interpolada suavemente (lerp) junto com o resto do tema — em vez de
-/// "saltar" entre as duas variantes.
+/// [ThemeExtension] para que a troca claro ⇄ escuro seja interpolada.
 @immutable
-class AppStatusColors extends ThemeExtension<AppStatusColors> {
-  const AppStatusColors({
-    required this.income,
-    required this.expense,
-    required this.warning,
-    required this.accent,
+class AppStatusColors implements ThemeExtension<AppStatusColors> {
+  const AppStatusColors._({
+    this.primary = Colors.transparent,
+    this.onPrimary = Colors.transparent,
+    this.surface = Colors.transparent,
+    this.onSurface = Colors.transparent,
+    this.error = Colors.transparent,
+    this.warning = Colors.transparent,
+    this.success = Colors.transparent,
+    this.income = Colors.transparent,
+    this.expense = Colors.transparent,
+    this.accent = Colors.transparent,
+    this.incomeLight = Colors.transparent,
+    this.expenseLight = Colors.transparent,
+    this.warningLight = Colors.transparent,
+    this.accentLight = Colors.transparent,
   });
 
-  /// Variantes do modo claro (tons mais escuros para AA sobre superfícies claras).
-  static const AppStatusColors light = AppStatusColors(
-    income: AppColors.incomeLight,
-    expense: AppColors.expenseLight,
-    warning: AppColors.warningLight,
-    accent: AppColors.accentLight,
-  );
+  /// Tipo da extensão (compatibilidade com a assinatura anterior).
+  Type get type => runtimeType;
 
-  /// Variantes do modo escuro (tons luminosos sobre superfícies escuras).
-  static const AppStatusColors dark = AppStatusColors(
-    income: AppColors.income,
-    expense: AppColors.expense,
-    warning: AppColors.warning,
-    accent: AppColors.accent,
-  );
-
+  final Color primary;
+  final Color onPrimary;
+  final Color surface;
+  final Color onSurface;
+  final Color error;
+  final Color warning;
+  final Color success;
   final Color income;
   final Color expense;
-  final Color warning;
   final Color accent;
+  final Color incomeLight;
+  final Color expenseLight;
+  final Color warningLight;
+  final Color accentLight;
+
+  /// Instância do modo claro (valores vindos de [AppColors]).
+  static const AppStatusColors light = AppStatusColors._(
+    primary: AppColors.lightPrimary,
+    onPrimary: AppColors.lightOnPrimary,
+    surface: AppColors.lightSurface,
+    onSurface: AppColors.lightTextPrimary,
+    error: AppColors.errorNeutral,
+    warning: AppColors.warningText,
+    success: AppColors.successNeutral,
+    income: AppColors.successText,
+    expense: AppColors.errorNeutral,
+    accent: AppColors.accentOrange,
+    incomeLight: AppColors.lightSurfaceSecondary,
+    expenseLight: AppColors.lightErrorSoft,
+    warningLight: AppColors.accentOrangeSoft,
+    accentLight: AppColors.accentOrangeSoft,
+  );
+
+  /// Instância do modo escuro.
+  static const AppStatusColors dark = AppStatusColors._(
+    primary: AppColors.darkPrimary,
+    onPrimary: AppColors.darkOnPrimary,
+    surface: AppColors.darkSurface,
+    onSurface: AppColors.darkTextPrimary,
+    error: AppColors.darkErrorNeutral,
+    warning: AppColors.darkWarningText,
+    success: AppColors.successNeutralDark,
+    income: AppColors.successNeutralDark,
+    expense: AppColors.darkErrorNeutral,
+    accent: AppColors.darkAccentOrange,
+    incomeLight: AppColors.darkSurfaceSecondary,
+    expenseLight: AppColors.darkErrorSoft,
+    warningLight: AppColors.darkAccentOrangeSoft,
+    accentLight: AppColors.darkAccentOrangeSoft,
+  );
 
   @override
   AppStatusColors copyWith({
+    Color? primary,
+    Color? onPrimary,
+    Color? surface,
+    Color? onSurface,
+    Color? error,
+    Color? warning,
+    Color? success,
     Color? income,
     Color? expense,
-    Color? warning,
     Color? accent,
+    Color? incomeLight,
+    Color? expenseLight,
+    Color? warningLight,
+    Color? accentLight,
   }) {
-    return AppStatusColors(
+    return AppStatusColors._(
+      primary: primary ?? this.primary,
+      onPrimary: onPrimary ?? this.onPrimary,
+      surface: surface ?? this.surface,
+      onSurface: onSurface ?? this.onSurface,
+      error: error ?? this.error,
+      warning: warning ?? this.warning,
+      success: success ?? this.success,
       income: income ?? this.income,
       expense: expense ?? this.expense,
-      warning: warning ?? this.warning,
       accent: accent ?? this.accent,
+      incomeLight: incomeLight ?? this.incomeLight,
+      expenseLight: expenseLight ?? this.expenseLight,
+      warningLight: warningLight ?? this.warningLight,
+      accentLight: accentLight ?? this.accentLight,
     );
   }
 
   @override
   AppStatusColors lerp(AppStatusColors? other, double t) {
     if (other == null) return this;
-    return AppStatusColors(
+    return AppStatusColors._(
+      primary: Color.lerp(primary, other.primary, t)!,
+      onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      onSurface: Color.lerp(onSurface, other.onSurface, t)!,
+      error: Color.lerp(error, other.error, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      success: Color.lerp(success, other.success, t)!,
       income: Color.lerp(income, other.income, t)!,
       expense: Color.lerp(expense, other.expense, t)!,
-      warning: Color.lerp(warning, other.warning, t)!,
       accent: Color.lerp(accent, other.accent, t)!,
+      incomeLight: Color.lerp(incomeLight, other.incomeLight, t)!,
+      expenseLight: Color.lerp(expenseLight, other.expenseLight, t)!,
+      warningLight: Color.lerp(warningLight, other.warningLight, t)!,
+      accentLight: Color.lerp(accentLight, other.accentLight, t)!,
     );
   }
 }
 
-/// Acesso ergonômico às cores semânticas a partir de qualquer `ThemeData`:
-/// `Theme.of(context).income`, `.expense`, `.warning` e `.accent`.
-///
-/// Lê o [AppStatusColors] registado no tema; se ausente (temas construídos
-/// fora do design system), cai para a resolução estática por brilho — o
-/// mesmo comportamento da API anterior.
+/// Acesso às cores semânticas: `Theme.of(context).status`, etc.
 extension AppColorsTheme on ThemeData {
-  Color get income =>
-      extension<AppStatusColors>()?.income ??
-      AppColors.of(brightness, AppColors.income, AppColors.incomeLight);
+  AppStatusColors get status => extension<AppStatusColors>() ?? (
+    brightness == Brightness.light ? AppStatusColors.light : AppStatusColors.dark
+  );
 
-  Color get expense =>
-      extension<AppStatusColors>()?.expense ??
-      AppColors.of(brightness, AppColors.expense, AppColors.expenseLight);
+  Color get income => status.income;
+  Color get expense => status.expense;
+  Color get warning => status.warning;
+  Color get accent => status.accent;
 
-  Color get warning =>
-      extension<AppStatusColors>()?.warning ??
-      AppColors.of(brightness, AppColors.warning, AppColors.warningLight);
+  Color get incomeLight => status.incomeLight;
+  Color get expenseLight => status.expenseLight;
+  Color get warningLight => status.warningLight;
+  Color get accentLight => status.accentLight;
 
-  Color get accent =>
-      extension<AppStatusColors>()?.accent ??
-      AppColors.of(brightness, AppColors.accent, AppColors.accentLight);
+  Color get incomeDark => status.income;
+  Color get expenseDark => status.expense;
+  Color get warningDark => status.warning;
+  Color get accentDark => status.accent;
 }

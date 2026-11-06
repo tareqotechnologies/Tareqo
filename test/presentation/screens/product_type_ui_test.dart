@@ -134,9 +134,7 @@ void main() {
   testWidgets('sheet de filtros abre com todas as opções de tipo', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      _buildProductsApp([productOf(ProductType.resale)]),
-    );
+    await tester.pumpWidget(_buildProductsApp([productOf(ProductType.resale)]));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.tune_rounded));

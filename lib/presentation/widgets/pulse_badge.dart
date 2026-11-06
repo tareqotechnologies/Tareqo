@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 
 /// Badge de contagem de notificações.
 ///
@@ -117,6 +118,9 @@ class _PulseBadgeState extends State<PulseBadge>
 
     final scheme = Theme.of(context).colorScheme;
     final badgeColor = widget.color ?? scheme.tertiary;
+    // Rótulo legível sobre o fundo por omissão (tertiary); cor custom do
+    // chamador mantém o branco original.
+    final onBadgeColor = widget.color == null ? scheme.onTertiary : Colors.white;
     final displayText = widget.count > widget.maxCount
         ? '${widget.maxCount}+'
         : '${widget.count}';
@@ -137,7 +141,10 @@ class _PulseBadgeState extends State<PulseBadge>
               );
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 1),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xs,
+                vertical: 1,
+              ),
               decoration: BoxDecoration(
                 color: badgeColor,
                 borderRadius: BorderRadius.circular(AppRadius.full),
@@ -145,10 +152,9 @@ class _PulseBadgeState extends State<PulseBadge>
               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(
                 displayText,
-                style: const TextStyle(
-                  fontSize: 12,
+                style: AppTypography.labelMedium.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: onBadgeColor,
                 ),
                 textAlign: TextAlign.center,
               ),

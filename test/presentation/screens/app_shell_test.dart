@@ -671,7 +671,6 @@ void main() {
     return queue;
   }
 
-
   testWidgets('banner de sincronização pendente aparece em TODAS as abas', (
     tester,
   ) async {

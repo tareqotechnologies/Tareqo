@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'num_text.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Pílula de status — rótulo com fundo colorido translúcido.
 class StatusChip extends StatelessWidget {
@@ -34,8 +35,10 @@ class StatusChip extends StatelessWidget {
           vertical: 3,
         ),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.14),
+          color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(AppRadius.full),
+          // Aro fino da própria cor: contorno nítido sem pesar o chip.
+          border: Border.all(color: color.withValues(alpha: 0.22), width: 0.8),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -54,9 +57,9 @@ class StatusChip extends StatelessWidget {
                 child: NumText(
                   label,
                   maxLines: 1,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                  // Status = labelMedium (12/w500) do design system; a cor
+                  // reforça o estado, mas o texto já o comunica sozinho.
+                  style: AppTypography.labelMedium.copyWith(
                     color: scheme.brightness == Brightness.dark
                         ? color.withValues(alpha: 0.9)
                         : color,

@@ -803,6 +803,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addStoreSubmit => 'Create store';
 
   @override
+  String get editStoreTitle => 'Edit store';
+
+  @override
+  String get editStoreSubmit => 'Save changes';
+
+  @override
+  String editStoreSuccess(String name) {
+    return 'Store $name updated!';
+  }
+
+  @override
+  String get editStoreError => 'Could not update the store. Try again.';
+
+  @override
+  String get editStoreAction => 'Edit';
+
+  @override
   String get addEmployeeTitle => 'New employee';
 
   @override
@@ -1610,6 +1627,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get debtsAddDebt => 'Register credit';
+
+  @override
+  String get debtsDataSection => 'Credit details';
 
   @override
   String get debtsSearchHint => 'Search by customer name...';

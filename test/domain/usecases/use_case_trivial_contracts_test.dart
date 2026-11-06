@@ -34,25 +34,27 @@ void main() {
     expect(remaining, inInclusiveRange(1, 30));
   });
 
-  test('getTimeRemaining: relógio injetado nos limites da janela (flake fix)',
-      () {
-    final service = MFAService();
+  test(
+    'getTimeRemaining: relógio injetado nos limites da janela (flake fix)',
+    () {
+      final service = MFAService();
 
-    // Instante do bug: múltiplo EXATO de 30s → antes devolvia 30 no
-    // limite `inExclusiveRange(0, 30)` (falhava 1 em 30 execuções,
-    // conforme o relógio da máquina).
-    AppClock.inject(
-      () => DateTime.fromMillisecondsSinceEpoch(30 * 1000, isUtc: true),
-    );
-    addTearDown(AppClock.reset);
-    expect(service.getTimeRemaining(), 30); // janela completa, não 0
+      // Instante do bug: múltiplo EXATO de 30s → antes devolvia 30 no
+      // limite `inExclusiveRange(0, 30)` (falhava 1 em 30 execuções,
+      // conforme o relógio da máquina).
+      AppClock.inject(
+        () => DateTime.fromMillisecondsSinceEpoch(30 * 1000, isUtc: true),
+      );
+      addTearDown(AppClock.reset);
+      expect(service.getTimeRemaining(), 30); // janela completa, não 0
 
-    // 1s dentro da janela → 29 restantes.
-    AppClock.inject(
-      () => DateTime.fromMillisecondsSinceEpoch(31 * 1000, isUtc: true),
-    );
-    expect(service.getTimeRemaining(), 29);
-  });
+      // 1s dentro da janela → 29 restantes.
+      AppClock.inject(
+        () => DateTime.fromMillisecondsSinceEpoch(31 * 1000, isUtc: true),
+      );
+      expect(service.getTimeRemaining(), 29);
+    },
+  );
 
   test(
     'BiometricAuthUseCase.getAvailableBiometrics mapeia tipos para String',

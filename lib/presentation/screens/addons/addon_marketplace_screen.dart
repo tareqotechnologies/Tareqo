@@ -249,13 +249,13 @@ class _AddOnCard extends StatelessWidget {
                               vertical: 1,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.success.withValues(alpha: 0.1),
+                              color: AppColors.successNeutral.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               context.l10n.addonsIncluded,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: AppColors.success,
+                                color: AppColors.successNeutral,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),

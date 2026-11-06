@@ -398,10 +398,7 @@ void main() {
 
       // A quarta leitura não cabe no stock → erro de limite.
       await _scan(tester, '200012399999');
-      expect(
-        find.text('Limite de stock atingido para Arroz.'),
-        findsOneWidget,
-      );
+      expect(find.text('Limite de stock atingido para Arroz.'), findsOneWidget);
 
       // Nada além do stock entra no carrinho.
       await tester.tap(find.text('Confirmar venda'));
@@ -410,37 +407,40 @@ void main() {
     },
   );
 
-  testWidgets('código exato de produto por UNIDADE adiciona 1 e limpa o campo',
-      (tester) async {
-    await _pumpSheet(tester);
+  testWidgets(
+    'código exato de produto por UNIDADE adiciona 1 e limpa o campo',
+    (tester) async {
+      await _pumpSheet(tester);
 
-    // '77777' casa com o código EXATO do Sal (p.code == digits) — +1
-    // unidade pelo caminho de código simples (sem normalização necessária).
-    await _scan(tester, '77777');
+      // '77777' casa com o código EXATO do Sal (p.code == digits) — +1
+      // unidade pelo caminho de código simples (sem normalização necessária).
+      await _scan(tester, '77777');
 
-    // Campo limpo após leitura bem-sucedida — verificado ANTES de rolar:
-    // ao rolar até o catálogo, o campo lazy sai da viewport e é destruído.
-    final field = tester.widget<TextField>(_barcodeField());
-    expect(field.controller?.text, isEmpty);
+      // Campo limpo após leitura bem-sucedida — verificado ANTES de rolar:
+      // ao rolar até o catálogo, o campo lazy sai da viewport e é destruído.
+      final field = tester.widget<TextField>(_barcodeField());
+      expect(field.controller?.text, isEmpty);
 
-    await tester.scrollUntilVisible(
-      find.widgetWithText(AppCard, 'Sal'),
-      100,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.widgetWithText(AppCard, 'Sal'),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
 
-    expect(
-      find.descendant(
-        of: find.widgetWithText(AppCard, 'Sal'),
-        matching: find.text('1'),
-      ),
-      findsOneWidget,
-    );
-  });
+      expect(
+        find.descendant(
+          of: find.widgetWithText(AppCard, 'Sal'),
+          matching: find.text('1'),
+        ),
+        findsOneWidget,
+      );
+    },
+  );
 
-  testWidgets('leitura por ID do produto resolve quando o id contém dígitos',
-      (tester) async {
+  testWidgets('leitura por ID do produto resolve quando o id contém dígitos', (
+    tester,
+  ) async {
     await _pumpSheet(tester);
 
     // 'p555' = id do produto Entrega (p.id == raw.trim()) — o caminho de id
@@ -464,8 +464,9 @@ void main() {
     );
   });
 
-  testWidgets('código de produto INATIVO é erro de busca (some do PDV)',
-      (tester) async {
+  testWidgets('código de produto INATIVO é erro de busca (some do PDV)', (
+    tester,
+  ) async {
     await _pumpSheet(tester);
 
     // '88888' está cadastrado no Disco Vinil, mas ele está inativo — o PDV
@@ -479,8 +480,9 @@ void main() {
     );
   });
 
-  testWidgets('entrada SEM dígitos é no-op silencioso (nem erro mostra)',
-      (tester) async {
+  testWidgets('entrada SEM dígitos é no-op silencioso (nem erro mostra)', (
+    tester,
+  ) async {
     final processSale = await _pumpSheet(tester);
 
     // QR/texto sem nenhum dígito: digits.isEmpty → return ANTES de qualquer
@@ -488,10 +490,7 @@ void main() {
     // código) e o carrinho segue vazio.
     await _scan(tester, 'QR SEM NÚMEROS');
 
-    expect(
-      find.text('Produto não encontrado para este código.'),
-      findsNothing,
-    );
+    expect(find.text('Produto não encontrado para este código.'), findsNothing);
     final confirmButton = tester.widget<AppButton>(
       find.ancestor(
         of: find.text('Confirmar venda'),
@@ -545,10 +544,7 @@ void main() {
       );
 
       await _scan(tester, '77777');
-      expect(
-        find.text('Limite de stock atingido para Sal.'),
-        findsOneWidget,
-      );
+      expect(find.text('Limite de stock atingido para Sal.'), findsOneWidget);
 
       await tester.tap(find.text('Confirmar venda'));
       await tester.pumpAndSettle();

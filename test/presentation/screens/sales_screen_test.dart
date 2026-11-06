@@ -231,7 +231,7 @@ void main() {
     expect(find.text('Nova venda'), findsOneWidget);
   });
 
-  testWidgets('tocar no card abre a tela de detalhes da venda', (tester) async {
+  testWidgets('tocar no card abre o sheet de detalhes da venda', (tester) async {
     await tester.pumpWidget(
       _buildApp(
         _FakeSalesRepository([
@@ -254,8 +254,8 @@ void main() {
     await tester.tap(find.text('S-00001 · 1 item'));
     await tester.pumpAndSettle();
 
-    // Tela de detalhes com os itens expandidos.
-    expect(find.text('Detalhes da venda'), findsOneWidget);
+    // Sheet padrão de eventos com os itens expandidos (mesmo chrome da Home).
+    expect(find.byType(BottomSheet), findsOneWidget);
     expect(find.text('Caneta'), findsOneWidget);
     expect(find.text('2 × R\$ 2,00'), findsOneWidget);
     // Subtotal do item + total (resumo e rodapé) da venda.

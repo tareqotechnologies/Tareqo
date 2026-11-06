@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:tareqo/core/i18n/addon_localization.dart';
-import 'package:tareqo/data/datasources/local/addon_catalog.dart';
+import 'package:tareqo/domain/entities/addon_catalog.dart';
 import 'package:tareqo/domain/entities/addon.dart';
 import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';

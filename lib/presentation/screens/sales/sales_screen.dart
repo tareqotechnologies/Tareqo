@@ -209,9 +209,9 @@ class _SalesBody extends StatelessWidget {
                           textAlign: TextAlign.right,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelSmall?.copyWith(
+                          // Nota auxiliar do filtro: 12/400, sem ênfase.
+                          style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -233,7 +233,12 @@ class _SalesBody extends StatelessWidget {
             )
           else
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(horizontal, AppSpacing.xs, horizontal, AppSpacing.fabBottomClearance + AppSpacing.md),
+              padding: EdgeInsets.fromLTRB(
+                horizontal,
+                AppSpacing.xs,
+                horizontal,
+                AppSpacing.fabBottomClearance + AppSpacing.md,
+              ),
               sliver: SliverList.separated(
                 itemCount: filtered.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -260,7 +265,12 @@ class _SalesSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Skeleton(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.fabBottomClearance),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.xs,
+          AppSpacing.lg,
+          AppSpacing.fabBottomClearance,
+        ),
         children: [
           const SkeletonBlock(height: 108, radius: 16),
           const SizedBox(height: 16),

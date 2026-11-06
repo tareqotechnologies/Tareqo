@@ -82,52 +82,70 @@ class FilterDropdown<T> extends StatelessWidget {
             ),
           ),
       ],
-      child: Container(
+      child: AnimatedContainer(
         // Alvo de toque ≥ 48dp (WCAG/androidTapTargetGuideline): o chip é
         // compacto por design, mas a área tocável não pode ser menor que
         // o mínimo de acessibilidade.
+        // Movimento reduzido (acessibilidade): troca de estado instantânea.
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : AppDurations.fast,
+        curve: AppCurves.standard,
         constraints: const BoxConstraints(minHeight: AppSizes.touchTarget),
-        alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
           vertical: AppSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: active ? scheme.primaryContainer : Colors.transparent,
+          // Estado normal: superfície do cartão + borda de cabelo (o chip
+          // lê-se como controlo, não como texto solto). Ativo: o container
+          // do primário — o único momento em que o acento aparece no chip.
+          color: active ? scheme.primaryContainer : scheme.surface,
           borderRadius: BorderRadius.circular(AppRadius.full),
           border: Border.all(
-            color: active ? Colors.transparent : scheme.outlineVariant,
+            color: active
+                ? Colors.transparent
+                : scheme.outlineVariant.withValues(alpha: 0.7),
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: active
-                  ? scheme.onPrimaryContainer
-                  : scheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              labelOf(selected),
-              style: theme.textTheme.labelLarge?.copyWith(
+        // Align com widthFactor 1: CENTRA o conteúdo na altura de toque de
+        // 48dp sem esticar a largura. Um Container com `alignment` e
+        // constraints limitadas expandiria até à largura do Wrap — era o
+        // que transformava cada chip de filtro numa barra de ecrã inteiro.
+        child: Align(
+          alignment: Alignment.center,
+          widthFactor: 1,
+          heightFactor: 1,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 16,
                 color: active
                     ? scheme.onPrimaryContainer
                     : scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
               ),
-            ),
-            const SizedBox(width: 2),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 18,
-              color: active
-                  ? scheme.onPrimaryContainer
-                  : scheme.onSurfaceVariant,
-            ),
-          ],
+              const SizedBox(width: 8),
+              Text(
+                labelOf(selected),
+                // Filtro = 12/w500: lê-se como controlo, não como título.
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: active
+                      ? scheme.onPrimaryContainer
+                      : scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 2),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 18,
+                color: active
+                    ? scheme.onPrimaryContainer
+                    : scheme.onSurfaceVariant,
+              ),
+            ],
+          ),
         ),
       ),
     );

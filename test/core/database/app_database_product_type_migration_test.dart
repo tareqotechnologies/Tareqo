@@ -58,9 +58,7 @@ void main() {
       // CHECKs sem rebuild — valores futuros de versões novas do app não
       // podem ficar bloqueados pela restrição antiga. A validação vive no
       // datasource (valor desconhecido → default resale, nunca lança).
-      db.execute(
-        "UPDATE products SET type = 'tipoQualquer' WHERE id = 'p1'",
-      );
+      db.execute("UPDATE products SET type = 'tipoQualquer' WHERE id = 'p1'");
       expect(
         db.select("SELECT type FROM products WHERE id = 'p1'").first['type'],
         'tipoQualquer',
@@ -111,26 +109,29 @@ void main() {
       );
     });
 
-    test('todos os valores do enum são persistíveis e legíveis (round-trip)', () async {
-      final db = sqlite3.openInMemory();
-      addTearDown(db.close);
-      AppDatabase.initialize(db);
+    test(
+      'todos os valores do enum são persistíveis e legíveis (round-trip)',
+      () async {
+        final db = sqlite3.openInMemory();
+        addTearDown(db.close);
+        AppDatabase.initialize(db);
 
-      final dataSource = ProductSqliteDataSourceImpl(db);
-      for (final (index, type) in ProductType.values.indexed) {
-        await dataSource.add(
-          Product(
-            id: 'p$type',
-            name: 'Produto ${type.name}',
-            purchasePriceCents: 100 + index,
-            salePriceCents: 200 + index,
-            type: type,
-          ),
-        );
-        final loaded = await dataSource.getById('p$type', storeId: 'st1');
-        expect(loaded?.type, type, reason: 'tipo ${type.name}');
-      }
-    });
+        final dataSource = ProductSqliteDataSourceImpl(db);
+        for (final (index, type) in ProductType.values.indexed) {
+          await dataSource.add(
+            Product(
+              id: 'p$type',
+              name: 'Produto ${type.name}',
+              purchasePriceCents: 100 + index,
+              salePriceCents: 200 + index,
+              type: type,
+            ),
+          );
+          final loaded = await dataSource.getById('p$type', storeId: 'st1');
+          expect(loaded?.type, type, reason: 'tipo ${type.name}');
+        }
+      },
+    );
 
     test('valor desconhecido no banco cai no default resale (nunca lança)', () {
       final db = sqlite3.openInMemory();

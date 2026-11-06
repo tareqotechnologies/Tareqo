@@ -6,6 +6,7 @@ import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
 import '../../../data/services/offline_sync_service.dart';
@@ -21,6 +22,7 @@ import '../../controllers/products_providers.dart';
 import '../../controllers/sales_providers.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_sheet.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/payment_filter.dart'
     show PaymentMethodAccent, PaymentMethodIcon;
@@ -29,6 +31,152 @@ import '../../widgets/section_header.dart';
 import '../../widgets/smart_amount.dart';
 import '../../widgets/status_chip.dart';
 import 'sale_receipt_share_sheet.dart';
+
+/// Abre o detalhe da venda no **sheet padrão de eventos** — o mesmo chrome
+/// usado pela Home ("Atividade de hoje"): handle, cabeçalho com ícone
+/// circular e o conteúdo em linhas agrupadas sobre a superfície do sheet.
+///
+/// A tela completa ([SaleDetailScreen]) continua a ser usada pelo feed da
+/// Home; na lista de Vendas o toque abre este sheet.
+Future<void> showSaleDetailSheet(BuildContext context, Sale sale) {
+  return showAppSheet<void>(
+    context,
+    builder: (_) => _SaleDetailSheet(sale: sale),
+  );
+}
+
+/// Conteúdo do sheet de detalhe da venda.
+class _SaleDetailSheet extends StatelessWidget {
+  const _SaleDetailSheet({required this.sale});
+
+  final Sale sale;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final accent = sale.paymentMethod.accent(theme);
+    final isCancelled = sale.status == SaleStatus.cancelled;
+    final itemsLabel = l10n.dashboardSaleItems(sale.items.length);
+
+    return Padding(
+      padding: AppSpacing.sheetPadding,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Cabeçalho do sheet de eventos: ícone circular + referência.
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: IconTone.darkBackground(accent),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    sale.paymentMethod.icon,
+                    size: 18,
+                    color: IconTone.lightForeground(accent),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        Formatters.saleLabel(sale.number),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.micro),
+                      Text(
+                        '${Formatters.dateTime(sale.dateTime)} · $itemsLabel',
+                        maxLines: 2,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                StatusChip(
+                  label: isCancelled
+                      ? l10n.salesStatusCancelled
+                      : l10n.salesStatusPaid,
+                  color: isCancelled ? theme.expense : theme.income,
+                  icon: isCancelled ? Icons.block : Icons.check_circle_outline,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            // Itens da venda — o mesmo painel agrupado dos eventos da Home.
+            Container(
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(
+                  color: scheme.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (var i = 0; i < sale.items.length; i++) ...[
+                    if (i > 0)
+                      Divider(
+                        height: 1,
+                        indent: AppSpacing.md,
+                        endIndent: AppSpacing.md,
+                        color: scheme.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                    _ItemRow(item: sale.items[i]),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            // Total da venda — âncora do sheet.
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.saleDetailTotalLabel,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Flexible(
+                  child: SmartAmount(
+                    cents: sale.totalAmountCents,
+                    alignment: Alignment.centerRight,
+                    style: isCancelled
+                        ? theme.textTheme.headlineMedium?.copyWith(
+                            color: scheme.outline,
+                            decoration: TextDecoration.lineThrough,
+                          )
+                        : AppTypography.summaryAmount(scheme.onSurface),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 /// Tela de detalhes de uma venda — layout clean Google-style.
 ///
@@ -77,7 +225,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     final l10n = context.l10n;
 
     final confirmed = await showConfirmDialog(
-      context,
+      context: context,
       title: l10n.saleDetailCancelConfirmTitle,
       message: l10n.saleDetailCancelConfirmBody(
         Formatters.currency(sale.totalAmountCents),
@@ -178,9 +326,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           // ── Header: sale ID + date + payment chip ──
           Text(
             l10n.saleDetailId(Formatters.saleLabel(sale.number)),
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            // Referência da venda = título de secção (20/w600).
+            style: theme.textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
@@ -230,9 +377,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                     color: scheme.outline,
                     decoration: TextDecoration.lineThrough,
                   )
-                : theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                // Total da venda = valor principal da tela (24/w600).
+                : theme.textTheme.headlineMedium,
           ),
           const SizedBox(height: AppSpacing.xl),
 
@@ -351,16 +497,14 @@ class _ItemRow extends ConsumerWidget {
                   item.productName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  // Nome do produto = 14/w400 (descrição da linha).
+                  style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 1),
                 Text(
                   '${Quantity.format(item.quantity, language: Formatters.currentLanguage)} × '
                   '${Formatters.currency(item.unitPriceCents)}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 12,
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -370,9 +514,8 @@ class _ItemRow extends ConsumerWidget {
           const SizedBox(width: 12),
           Text(
             Formatters.currency(subtotal),
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            // Total da linha = 15/w500, alinhado à direita.
+            style: AppTypography.amountInRow(scheme.onSurface),
           ),
         ],
       ),

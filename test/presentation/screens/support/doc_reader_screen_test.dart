@@ -74,10 +74,15 @@ void main() {
 
       // then — appBar com o título l10n e o H1 do markdown visível.
       expect(find.text('Solução de problemas'), findsOneWidget);
-      expect(find.textContaining('Solução de Problemas — TAREQO ERP'), findsWidgets);
+      expect(
+        find.textContaining('Solução de Problemas — TAREQO ERP'),
+        findsWidgets,
+      );
     });
 
-    testWidgets('exibe o guia do utilizador com o título correto', (tester) async {
+    testWidgets('exibe o guia do utilizador com o título correto', (
+      tester,
+    ) async {
       // given
       await tester.pumpWidget(
         testApp(

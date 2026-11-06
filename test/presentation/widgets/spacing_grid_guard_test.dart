@@ -48,6 +48,7 @@ void main() {
       'screens/dashboard/dashboard_screen.dart': 1, // indent: 60 (timeline)
       'screens/dashboard/notifications_screen.dart': 2, // indent: 56 + h 120
       'screens/financial/financial_screen.dart': 1, // indent: 60 (timeline)
+      'screens/sales/sales_widgets.dart': 1, // indent: 60 (timeline)
       'widgets/feed_card.dart': 1, // indent: 60 (timeline)
     };
 

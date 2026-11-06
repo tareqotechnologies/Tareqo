@@ -7,6 +7,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../widgets/pulse_badge.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../widgets/app_sheet.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/fade_indexed_stack.dart';
 import '../../widgets/store_scoped_content.dart';
 import '../../widgets/sync_pending_banner.dart';
@@ -137,13 +138,47 @@ class AppShell extends ConsumerWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          toolbarHeight: 48,
-          title: Text(
-            'TAREQO',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
-            ),
+          toolbarHeight: 52,
+          // Marca: monograma em gradiente + wordmark espaçado.
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ExcludeSemantics(
+                child: Container(
+                  width: 26,
+                  height: 26,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        theme.accent,
+                        Color.lerp(theme.accent, scheme.primary, 0.45)!,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                    boxShadow: PremiumDecor.glow(theme.accent, strength: 0.8),
+                  ),
+                  child: Text(
+                    'T',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.onPrimary,
+                      fontWeight: FontWeight.w600,
+                      height: 1,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'TAREQO',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.6,
+                ),
+              ),
+            ],
           ),
           titleSpacing: 16,
           actions: [
@@ -201,19 +236,49 @@ class AppShell extends ConsumerWidget {
                 ],
               )
             : content,
+        // Barra inferior flutuante (cápsula): mesma NavigationBar e mesmos
+        // destinos — só o invólucro muda (margem, raio 28, borda de cabelo
+        // e sombra neutra). O SafeArea fica POR FORA para a área segura do
+        // sistema não ser somada dentro da cápsula.
         bottomNavigationBar: wide
             ? null
-            : NavigationBar(
-                selectedIndex: _barIndex(index),
-                onDestinationSelected: onSelect,
-                destinations: [
-                  for (final (icon, selected, label) in destinations)
-                    NavigationDestination(
-                      icon: Icon(icon),
-                      selectedIcon: Icon(selected),
-                      label: label,
+            : SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.xxs,
+                    AppSpacing.md,
+                    AppSpacing.sm,
+                  ),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: scheme.surface,
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(color: PremiumDecor.hairline(scheme)),
+                      boxShadow: PremiumDecor.liftShadow(scheme),
                     ),
-                ],
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: NavigationBar(
+                        height: 70,
+                        backgroundColor: Colors.transparent,
+                        surfaceTintColor: Colors.transparent,
+                        elevation: 0,
+                        selectedIndex: _barIndex(index),
+                        onDestinationSelected: onSelect,
+                        destinations: [
+                          for (final (icon, selected, label) in destinations)
+                            NavigationDestination(
+                              icon: Icon(icon),
+                              selectedIcon: Icon(selected),
+                              label: label,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
         // Seções que já trazem o seu próprio FAB: ocultamos o FAB do shell
         // para evitar duplicação visual (Sales, Financial, Products, Customers).
@@ -370,12 +435,19 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Material(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: AppRadius.lgAll,
+        color: Color.alphaBlend(
+          scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+          scheme.surface,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.lgAll,
+          side: BorderSide(color: PremiumDecor.hairline(scheme)),
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
@@ -390,6 +462,7 @@ class _ActionTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: IconTone.darkBackground(color),
                     shape: BoxShape.circle,
+                    border: Border.all(color: color.withValues(alpha: 0.25)),
                   ),
                   child: Icon(
                     icon,

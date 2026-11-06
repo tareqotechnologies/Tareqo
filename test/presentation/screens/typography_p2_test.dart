@@ -63,8 +63,11 @@ void main() {
       );
       expect(confirmFinder, findsOneWidget);
       final rect = tester.getRect(confirmFinder);
-      expect(rect.bottom, lessThanOrEqualTo(915),
-          reason: 'botão Confirmar empurrado para fora da viewport na escala 2.0');
+      expect(
+        rect.bottom,
+        lessThanOrEqualTo(915),
+        reason: 'botão Confirmar empurrado para fora da viewport na escala 2.0',
+      );
       expect(rect.top, greaterThanOrEqualTo(0));
     });
 
@@ -104,22 +107,21 @@ void main() {
       );
     });
 
-    testWidgets(
-      'dashboard em fr a 360dp sem exceções de layout',
-      (tester) async {
-        usePortraitViewport(tester, size: const Size(360, 800));
-        await tester.pumpWidget(dashboardGoldenApp(locale: const Locale('fr')));
-        await tester.pumpAndSettle();
+    testWidgets('dashboard em fr a 360dp sem exceções de layout', (
+      tester,
+    ) async {
+      usePortraitViewport(tester, size: const Size(360, 800));
+      await tester.pumpWidget(dashboardGoldenApp(locale: const Locale('fr')));
+      await tester.pumpAndSettle();
 
-        expect(tester.takeException(), isNull);
-        // Rótulos fr longos presentes — a tela carregou em francês (não
-        // caiu no fallback pt). "Activité du jour" fica abaixo do fold em
-        // 800px; o greeting e as métricas são a prova visível.
-        expect(find.textContaining('Bonjour'), findsOneWidget);
-        expect(find.text('Ventes'), findsWidgets);
-        expect(find.text('Caisse'), findsOneWidget);
-      },
-    );
+      expect(tester.takeException(), isNull);
+      // Rótulos fr longos presentes — a tela carregou em francês (não
+      // caiu no fallback pt). "Activité du jour" fica abaixo do fold em
+      // 800px; o greeting e as métricas são a prova visível.
+      expect(find.textContaining('Bonjour'), findsOneWidget);
+      expect(find.text('Ventes'), findsWidgets);
+      expect(find.text('Caisse'), findsOneWidget);
+    });
   });
 
   group('P2-C — cobertura de glifos da Inter (cmap)', () {
@@ -145,7 +147,8 @@ void main() {
         expect(
           missing,
           isEmpty,
-          reason: 'Glifos ausentes em $fontPath: '
+          reason:
+              'Glifos ausentes em $fontPath: '
               '${missing.map((c) => '$c (U+${c.codeUnitAt(0).toRadixString(16)})').join(', ')}',
         );
       });
@@ -165,7 +168,8 @@ void main() {
       expect(
         missingInBold,
         isEmpty,
-        reason: 'Bold estático não pode ter menos glifos que a variável '
+        reason:
+            'Bold estático não pode ter menos glifos que a variável '
             '(mesma versão upstream 4.001 — regressão de asset)',
       );
     });
@@ -190,7 +194,8 @@ void main() {
       expect(
         missing,
         isEmpty,
-        reason: 'Glifos ausentes na mono: '
+        reason:
+            'Glifos ausentes na mono: '
             '${missing.map((c) => '$c (U+${c.codeUnitAt(0).toRadixString(16)})').join(', ')}',
       );
     });

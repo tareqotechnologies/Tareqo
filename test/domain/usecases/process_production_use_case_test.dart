@@ -40,10 +40,7 @@ void main() {
     productionRepo = ProductionRepositoryImpl(productionDs);
     final productRepo = ProductRepositoryImpl(productDs);
     final lotRepo = StockLotRepositoryImpl(lotDs);
-    fifo = FifoStockUseCase(
-      lotRepo,
-      UpdateProductStockUseCase(productRepo),
-    );
+    fifo = FifoStockUseCase(lotRepo, UpdateProductStockUseCase(productRepo));
     processProduction = ProcessProductionUseCase(
       productionRepo,
       fifo,
@@ -96,72 +93,75 @@ void main() {
     createdAt: DateTime(2026, 1, 1),
   );
 
-  test('consome componentes em FIFO, produz o lote e calcula o custo', () async {
-    final flour = await seedProduct(
-      id: 'p-flour',
-      name: 'Farinha',
-      type: ProductType.rawMaterial,
-      stock: 10000,
-      purchasePriceCents: 200,
-    );
-    final sugar = await seedProduct(
-      id: 'p-sugar',
-      name: 'Açúcar',
-      type: ProductType.rawMaterial,
-      stock: 5000,
-      purchasePriceCents: 300,
-    );
-    final bread = await seedProduct(
-      id: 'p-bread',
-      name: 'Pão',
-      type: ProductType.manufactured,
-      stock: 0,
-      purchasePriceCents: 0,
-    );
+  test(
+    'consome componentes em FIFO, produz o lote e calcula o custo',
+    () async {
+      final flour = await seedProduct(
+        id: 'p-flour',
+        name: 'Farinha',
+        type: ProductType.rawMaterial,
+        stock: 10000,
+        purchasePriceCents: 200,
+      );
+      final sugar = await seedProduct(
+        id: 'p-sugar',
+        name: 'Açúcar',
+        type: ProductType.rawMaterial,
+        stock: 5000,
+        purchasePriceCents: 300,
+      );
+      final bread = await seedProduct(
+        id: 'p-bread',
+        name: 'Pão',
+        type: ProductType.manufactured,
+        stock: 0,
+        purchasePriceCents: 0,
+      );
 
-    final recipe = recipeOf(
-      productId: bread.id,
-      yieldQuantity: 1000,
-      items: const [
-        RecipeItem(productId: 'p-flour', quantity: 500),
-        RecipeItem(productId: 'p-sugar', quantity: 1000),
-      ],
-    );
+      final recipe = recipeOf(
+        productId: bread.id,
+        yieldQuantity: 1000,
+        items: const [
+          RecipeItem(productId: 'p-flour', quantity: 500),
+          RecipeItem(productId: 'p-sugar', quantity: 1000),
+        ],
+      );
 
-    final order = await processProduction.call(
-      recipe: recipe,
-      finishedProduct: bread,
-      components: {flour.id: flour, sugar.id: sugar},
-      batches: 2,
-      dateTime: DateTime(2026, 2, 1),
-    );
+      final order = await processProduction.call(
+        recipe: recipe,
+        finishedProduct: bread,
+        components: {flour.id: flour, sugar.id: sugar},
+        batches: 2,
+        dateTime: DateTime(2026, 2, 1),
+      );
 
-    // Consumo: 2 bases → 1000 farinha + 2000 açúcar.
-    final flourAfter = await productDs.getById('p-flour', storeId: 'st1');
-    final sugarAfter = await productDs.getById('p-sugar', storeId: 'st1');
-    final breadAfter = await productDs.getById('p-bread', storeId: 'st1');
-    expect(flourAfter!.stockQuantity, 9000);
-    expect(sugarAfter!.stockQuantity, 3000);
-    // Produzido: 2 × 1000 = 2000 milésimos.
-    expect(breadAfter!.stockQuantity, 2000);
+      // Consumo: 2 bases → 1000 farinha + 2000 açúcar.
+      final flourAfter = await productDs.getById('p-flour', storeId: 'st1');
+      final sugarAfter = await productDs.getById('p-sugar', storeId: 'st1');
+      final breadAfter = await productDs.getById('p-bread', storeId: 'st1');
+      expect(flourAfter!.stockQuantity, 9000);
+      expect(sugarAfter!.stockQuantity, 3000);
+      // Produzido: 2 × 1000 = 2000 milésimos.
+      expect(breadAfter!.stockQuantity, 2000);
 
-    // Custo: (1000×200 + 2000×300)/1000 = 200 + 600 = 800; por unidade
-    // 800×1000/2000 = 400.
-    expect(order.totalCostCents, 800);
-    expect(order.costPriceCents, 400);
-    expect(order.quantity, 2000);
-    expect(order.items.length, 2);
+      // Custo: (1000×200 + 2000×300)/1000 = 200 + 600 = 800; por unidade
+      // 800×1000/2000 = 400.
+      expect(order.totalCostCents, 800);
+      expect(order.costPriceCents, 400);
+      expect(order.quantity, 2000);
+      expect(order.items.length, 2);
 
-    // O lote do produto acabado nasce com o custo calculado.
-    final lots = await lotDs.getActiveByProduct('p-bread', storeId: 'st1');
-    expect(lots.single.currentQuantity, 2000);
-    expect(lots.single.costPriceCents, 400);
+      // O lote do produto acabado nasce com o custo calculado.
+      final lots = await lotDs.getActiveByProduct('p-bread', storeId: 'st1');
+      expect(lots.single.currentQuantity, 2000);
+      expect(lots.single.costPriceCents, 400);
 
-    // A ordem fica no histórico.
-    final orders = await productionRepo.getProductionOrders(storeId: 'st1');
-    expect(orders.single.id, order.id);
-    expect(orders.single.productName, 'Pão');
-  });
+      // A ordem fica no histórico.
+      final orders = await productionRepo.getProductionOrders(storeId: 'st1');
+      expect(orders.single.id, order.id);
+      expect(orders.single.productName, 'Pão');
+    },
+  );
 
   test('estoque insuficiente não muta nada (nem grava a ordem)', () async {
     final flour = await seedProduct(
@@ -199,29 +199,32 @@ void main() {
     expect(await productionRepo.getProductionOrders(storeId: 'st1'), isEmpty);
   });
 
-  test('produto acabado precisa ser produzível (manufactured/composite)', () async {
-    final bread = await seedProduct(
-      id: 'p-water',
-      name: 'Água',
-      type: ProductType.resale,
-      stock: 0,
-      purchasePriceCents: 0,
-    );
-    final recipe = recipeOf(
-      productId: bread.id,
-      items: const [RecipeItem(productId: 'p-flour', quantity: 100)],
-    );
+  test(
+    'produto acabado precisa ser produzível (manufactured/composite)',
+    () async {
+      final bread = await seedProduct(
+        id: 'p-water',
+        name: 'Água',
+        type: ProductType.resale,
+        stock: 0,
+        purchasePriceCents: 0,
+      );
+      final recipe = recipeOf(
+        productId: bread.id,
+        items: const [RecipeItem(productId: 'p-flour', quantity: 100)],
+      );
 
-    await expectLater(
-      processProduction.call(
-        recipe: recipe,
-        finishedProduct: bread,
-        components: const {},
-        batches: 1,
-      ),
-      throwsA(isA<InvalidProductionException>()),
-    );
-  });
+      await expectLater(
+        processProduction.call(
+          recipe: recipe,
+          finishedProduct: bread,
+          components: const {},
+          batches: 1,
+        ),
+        throwsA(isA<InvalidProductionException>()),
+      );
+    },
+  );
 
   test('o produto acabado não pode ser componente da própria ficha', () async {
     final bread = await seedProduct(

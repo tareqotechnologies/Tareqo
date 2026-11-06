@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 
 /// Cabeçalho de seção V4 — título + ação opcional à direita.
 class SectionHeader extends StatelessWidget {
@@ -31,10 +32,9 @@ class SectionHeader extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.3,
-                ),
+                // Título de secção = 18/w600. O peso já vem da escala;
+                // nada de semibold inline.
+                style: AppTypography.sectionTitle,
               ),
               if (subtitle != null) ...[
                 const SizedBox(height: 2),
@@ -58,7 +58,24 @@ class SectionHeader extends StatelessWidget {
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             ),
-            child: Text(actionLabel!, style: theme.textTheme.labelMedium),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  actionLabel!,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                ),
+              ],
+            ),
           ),
       ],
     );

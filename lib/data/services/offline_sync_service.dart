@@ -106,8 +106,9 @@ class OfflineSyncService {
   /// replay (têm `lastError` e ainda são reenviáveis — dead-letter não
   /// conta: saiu da fila de replay). A op volta a "sem erro" quando o
   /// replay dela tem sucesso e ela sai da fila.
-  Future<int> failedCount() async =>
-      (await _queue.list()).where((op) => !op.dead && op.lastError != null).length;
+  Future<int> failedCount() async => (await _queue.list())
+      .where((op) => !op.dead && op.lastError != null)
+      .length;
 
   /// Reenvia as operações pendentes em FIFO.
   ///

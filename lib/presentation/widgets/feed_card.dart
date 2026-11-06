@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_tokens.dart';
+import 'premium_decor.dart';
 
-/// Folha de feed estilo Apple — um ÚNICO card elevado com as linhas
-/// separadas por divisórias hairline, a mesma linguagem do feed
-/// "Atividade de hoje" da Home. Replica o estilo da tela inicial nas
-/// listas (Vendas, Movimentos, etc.): o contêiner é o card; cada linha
-/// entra transparente e com padding de feed.
+/// Folha de feed — um ÚNICO painel com as linhas separadas por divisórias
+/// hairline, a mesma linguagem da lista agrupada de Vendas e dos grupos do
+/// Financeiro: o contêiner é a superfície; cada linha entra transparente e
+/// com o próprio padding.
+///
+/// Superfície do cartão (branca no claro) e raio 16 — a regra do sistema:
+/// painéis de lista = 16, heroes = 20.
 class FeedCard extends StatelessWidget {
   const FeedCard({super.key, required this.rows});
 
@@ -15,31 +18,40 @@ class FeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final radius = BorderRadius.circular(AppRadius.lg);
 
-    return Material(
-      color: theme.colorScheme.surfaceContainerHighest,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
-        ),
+    // Sombra neutra em camadas por baixo do painel — o mesmo acabamento
+    // do AppCard, para listas e cards lerem-se como uma família.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: PremiumDecor.softShadow(theme.colorScheme),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < rows.length; i++) ...[
-            if (i > 0)
-              Divider(
-                height: 1,
-                indent: 60,
-                endIndent: AppSpacing.md,
-                color: theme.colorScheme.outlineVariant,
-              ),
-            rows[i],
+      child: Material(
+        color: theme.colorScheme.surface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: PremiumDecor.hairline(theme.colorScheme)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < rows.length; i++) ...[
+              if (i > 0)
+                Divider(
+                  height: 1,
+                  indent: 60,
+                  endIndent: AppSpacing.md,
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.5,
+                  ),
+                ),
+              rows[i],
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
-import '../../data/datasources/local/addon_catalog.dart';
+import '../../domain/entities/addon_catalog.dart';
 import '../../data/datasources/local/addon_local_data_source.dart';
 import '../../domain/entities/addon.dart';
 import '../../domain/repositories/i_addon_repository.dart';

@@ -30,8 +30,11 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('copyWith(fontWeight:) inline = inventário documentado (teto 3)', () {
     final root = Directory('lib/presentation');
-    expect(root.existsSync(), isTrue,
-        reason: 'Rode o teste a partir da raiz do projeto.');
+    expect(
+      root.existsSync(),
+      isTrue,
+      reason: 'Rode o teste a partir da raiz do projeto.',
+    );
 
     // Arquivo → ocorrências `copyWith(fontWeight` documentadas (caminho
     // com `/`).
@@ -49,8 +52,7 @@ void main() {
     const prefix = 'lib/presentation/';
     for (final entity in root.listSync(recursive: true)) {
       if (entity is! File || !entity.path.endsWith('.dart')) continue;
-      final rel =
-          entity.path.replaceAll('\\', '/').replaceFirst(prefix, '');
+      final rel = entity.path.replaceAll('\\', '/').replaceFirst(prefix, '');
       final actual = RegExp(
         r'copyWith\(fontWeight',
       ).allMatches(entity.readAsStringSync()).length;
@@ -69,16 +71,20 @@ void main() {
     for (final entry in documented.entries) {
       final file = File('lib/presentation/${entry.key}');
       if (!file.existsSync()) {
-        problems.add('${entry.key}: arquivo não existe mais — remova a '
-            'entrada do inventário.');
+        problems.add(
+          '${entry.key}: arquivo não existe mais — remova a '
+          'entrada do inventário.',
+        );
         continue;
       }
       final actual = RegExp(
         r'copyWith\(fontWeight',
       ).allMatches(file.readAsStringSync()).length;
       if (actual < entry.value) {
-        problems.add('${entry.key}: $actual ocorrência(s) (documentadas: '
-            '${entry.value}) — entrada obsoleta, remova-a do inventário.');
+        problems.add(
+          '${entry.key}: $actual ocorrência(s) (documentadas: '
+          '${entry.value}) — entrada obsoleta, remova-a do inventário.',
+        );
       }
     }
 

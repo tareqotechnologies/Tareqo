@@ -23,6 +23,7 @@ import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../widgets/admin_thin_bridge.dart';
+import '../../widgets/metric_pill.dart';
 
 /// Painel do super admin — gestão de planos (criar, editar, ativar/desativar).
 /// Os planos limitam a estrutura de cada tenant (nº de lojas e funcionários).
@@ -171,19 +172,19 @@ class _CompactStats extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _Pill(
+          MetricPill(
             count: total,
             label: context.l10n.commonTotal,
             color: scheme.onSurface,
           ),
           const SizedBox(width: AppSpacing.xs),
-          _Pill(
+          MetricPill(
             count: active,
             label: context.l10n.adminPlansActive,
-            color: AppColors.success,
+            color: AppColors.successNeutral,
           ),
           const SizedBox(width: AppSpacing.xs),
-          _Pill(
+          MetricPill(
             count: inactive,
             label: context.l10n.adminPlansInactive,
             color: AppColors.statusError,
@@ -193,39 +194,6 @@ class _CompactStats extends StatelessWidget {
     );
   }
 }
-
-class _Pill extends StatelessWidget {
-  const _Pill({required this.count, required this.label, required this.color});
-
-  final int count;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          '$count',
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: color,
-            fontSize: 12,
-          ),
-        ),
-        const SizedBox(width: 3),
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 // ─── Tile minimalista ────────────────────────────────────────────────────────
 
 class _PlanTile extends ConsumerWidget {
@@ -255,7 +223,10 @@ class _PlanTile extends ConsumerWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 0,
+          vertical: AppSpacing.sm,
+        ),
         child: Row(
           children: [
             // ── Color accent bar ──
@@ -766,7 +737,10 @@ class _TenantMiniTile extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xs,
+              vertical: 2,
+            ),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppRadius.full),

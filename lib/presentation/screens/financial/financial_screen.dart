@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -156,7 +157,12 @@ class FinancialScreen extends ConsumerWidget {
 
               // ── Transactions ──
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(0, AppSpacing.sm, 0, AppSpacing.fabBottomClearance),
+                padding: const EdgeInsets.fromLTRB(
+                  0,
+                  AppSpacing.sm,
+                  0,
+                  AppSpacing.fabBottomClearance,
+                ),
                 sliver: transactionsAsync.when(
                   loading: () =>
                       const SliverToBoxAdapter(child: _TransactionsSkeleton()),
@@ -241,7 +247,7 @@ class FinancialScreen extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
 
     final confirmed = await showConfirmDialog(
-      context,
+      context: context,
       title: title,
       message: body(Formatters.currency(transaction.amountCents)),
       confirmLabel: confirmLabel,
@@ -350,6 +356,8 @@ class _CashStack extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final balance = incomeCents - expenseCents;
+    // Saldo com a cor da DIREÇÃO: positivo = entrada (income), negativo =
+    // saída (expense). A cor é semântica, não decorativa.
     final balanceColor = balance < 0 ? theme.expense : theme.income;
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
@@ -362,9 +370,16 @@ class _CashStack extends StatelessWidget {
           '$incomeLabel: ${Formatters.signedAmount(incomeCents)}, '
           '$expenseLabel: ${Formatters.signedAmount(-expenseCents)}',
       child: AppCard(
-        elevated: true,
+        // Superfície do cartão (branca no claro) + borda de cabelo: o hero
+        // não tinge o fundo — a cor fica só no NÚMERO (saldo negativo).
+        color: scheme.surface,
         borderRadius: AppRadius.xlAll,
-        padding: const EdgeInsets.fromLTRB(20, AppSpacing.lg, 20, AppSpacing.md),
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          AppSpacing.lg,
+          20,
+          AppSpacing.md,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -381,19 +396,19 @@ class _CashStack extends StatelessWidget {
                           balanceLabel,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelLarge?.copyWith(
+                          // Rótulo do saldo = 12/w400, discreto.
+                          style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          Formatters.currency(balance),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            color: balanceColor,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.6,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            Formatters.currency(balance),
+                            maxLines: 1,
+                            style: AppTypography.heroAmount(balanceColor),
                           ),
                         ),
                       ],
@@ -413,7 +428,6 @@ class _CashStack extends StatelessWidget {
                       currency,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
                         letterSpacing: 0.4,
                       ),
                     ),
@@ -454,7 +468,8 @@ class _CashStack extends StatelessWidget {
                       balanceLabel,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelLarge?.copyWith(
+                      // Rótulo do saldo = 12/w400, discreto.
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
@@ -473,7 +488,6 @@ class _CashStack extends StatelessWidget {
                       currency,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
                         letterSpacing: 0.4,
                       ),
                     ),
@@ -481,26 +495,17 @@ class _CashStack extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final text = Formatters.currency(balance);
-                  final baseSize =
-                      theme.textTheme.displaySmall?.fontSize ?? 34.0;
-                  final scale =
-                      (constraints.maxWidth / (text.length * baseSize * 0.52))
-                          .clamp(0.55, 1.0);
-                  return Text(
-                    text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      fontSize: baseSize * scale,
-                      color: balanceColor,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.8,
-                    ),
-                  );
-                },
+              // Mesmo papel monetário dos heroes de Vendas/Compras: 26/w600
+              // tabular; o FittedBox encolhe em telas estreitas ou com
+              // Dynamic Type em vez de truncar.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  Formatters.currency(balance),
+                  maxLines: 1,
+                  style: AppTypography.heroAmount(balanceColor),
+                ),
               ),
               const SizedBox(height: 16),
               Divider(height: 1, color: scheme.outlineVariant),
@@ -584,13 +589,17 @@ class _CashLine extends StatelessWidget {
                 color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppRadius.full),
               ),
-              child: Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
+              // FittedBox: o valor encolhe em telas estreitas/Dynamic Type
+              // em vez de ser cortado com reticências.
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  // Entradas/saídas secundárias = 14/w400; a cor já as
+                  // distingue sem precisar de semibold.
+                  style: theme.textTheme.bodyMedium?.copyWith(color: color),
                 ),
               ),
             ),
@@ -638,10 +647,12 @@ class _DateGroup extends StatelessWidget {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: horizontal),
           child: Material(
-            color: scheme.surfaceContainerHighest,
+            // Painel de lista = superfície do cartão + raio 16 (a regra do
+            // sistema; os heroes usam 20).
+            color: scheme.surface,
             elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.xl),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
               side: BorderSide(
                 color: scheme.outlineVariant.withValues(alpha: 0.6),
               ),

@@ -14,6 +14,7 @@ import '../../widgets/detail_row.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
+import '../../widgets/metric_pill.dart';
 
 /// Registro de auditoria — visual minimalista com detalhes claros.
 class AdminAuditLogScreen extends ConsumerStatefulWidget {
@@ -261,26 +262,29 @@ class _CompactStats extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _Pill(
+          MetricPill(
             count: stats.total,
             label: l10n.adminAuditLogAll,
             color: scheme.onSurface,
           ),
           const SizedBox(width: AppSpacing.xs),
-          _Pill(
+          MetricPill(
             count: stats.approved,
             label: l10n.adminAuditLogApproved,
-            color: AppColors.success,
+            color: AppColors.successNeutral,
           ),
           const SizedBox(width: AppSpacing.xs),
-          _Pill(
+          MetricPill(
             count: stats.rejected,
             label: l10n.adminAuditLogRejected,
             color: AppColors.statusError,
           ),
           const Spacer(),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
             decoration: BoxDecoration(
               color: _rateColor(stats.rate).withValues(alpha: 0.1),
               borderRadius: AppRadius.smAll,
@@ -298,44 +302,11 @@ class _CompactStats extends StatelessWidget {
   }
 
   Color _rateColor(int rate) {
-    if (rate >= 70) return AppColors.success;
+    if (rate >= 70) return AppColors.successNeutral;
     if (rate >= 40) return AppColors.statusWarning;
     return AppColors.statusError;
   }
 }
-
-class _Pill extends StatelessWidget {
-  const _Pill({required this.count, required this.label, required this.color});
-
-  final int count;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          '$count',
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: color,
-            fontSize: 12,
-          ),
-        ),
-        const SizedBox(width: 3),
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 // ─── Search + Filters ────────────────────────────────────────────────────────
 
 class _SearchField extends StatelessWidget {
@@ -591,7 +562,7 @@ class _AuditTile extends StatelessWidget {
   }
 
   Color _accentColor(String action, String? status) {
-    if (status == 'approved') return AppColors.success;
+    if (status == 'approved') return AppColors.successNeutral;
     if (status == 'rejected') return AppColors.statusError;
     switch (action) {
       case 'tenant_decision':
@@ -599,7 +570,7 @@ class _AuditTile extends StatelessWidget {
       case 'plan_request_decision':
         return AppColors.statusWarning;
       case 'plan_change':
-        return AppColors.statusPurple;
+        return AppColors.statusPrimary;
       default:
         // Neutro semântico (sem papel de cor): mantém cinza neutro.
         return Colors.grey;

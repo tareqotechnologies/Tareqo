@@ -121,7 +121,11 @@ List<Sale> demoSales = List.unmodifiable([
   _sale(number: 2, totalCents: 12700, minuteOfDay: 6),
 ]);
 
-Sale _sale({required int number, required int totalCents, required int minuteOfDay}) => Sale(
+Sale _sale({
+  required int number,
+  required int totalCents,
+  required int minuteOfDay,
+}) => Sale(
   id: 's-$number',
   number: number,
   items: [
@@ -189,11 +193,7 @@ final List<Customer> demoCustomers = [
     phone: '841234567',
     email: 'ana.costa@example.com',
   ),
-  const Customer(
-    id: 'c2',
-    name: 'Ernesto Nhamirre',
-    phone: '847654321',
-  ),
+  const Customer(id: 'c2', name: 'Ernesto Nhamirre', phone: '847654321'),
   const Customer(id: 'c3', name: 'Lurdes Chissano', phone: '861122334'),
 ];
 
@@ -272,9 +272,8 @@ class FakeSalesRepository implements ISaleRepository {
 }
 
 class FakeFinanceRepository implements IFinancialTransactionRepository {
-  FakeFinanceRepository([
-    List<FinancialTransaction>? transactions,
-  ]) : _transactions = transactions ?? demoTransactions;
+  FakeFinanceRepository([List<FinancialTransaction>? transactions])
+    : _transactions = transactions ?? demoTransactions;
 
   final List<FinancialTransaction> _transactions;
 
@@ -335,7 +334,9 @@ List<dynamic> dashboardGoldenOverrides() {
     getSettledDebtsUseCaseProvider.overrideWithValue(
       const _FixedGetSettledDebtsUseCase(),
     ),
-    getPurchasesUseCaseProvider.overrideWithValue(const FakeGetPurchasesUseCase()),
+    getPurchasesUseCaseProvider.overrideWithValue(
+      const FakeGetPurchasesUseCase(),
+    ),
     financeRepositoryProvider.overrideWithValue(FakeFinanceRepository()),
     dashboardKpisProvider.overrideWith(FixedDashboardKpisNotifier.new),
   ];
@@ -504,9 +505,7 @@ List<dynamic> productGoldenOverrides() {
   final repository = FakeProductRepository();
   return [
     ...storeContextOverrides(),
-    getProductsUseCaseProvider.overrideWithValue(
-      FakeGetProductsUseCase(),
-    ),
+    getProductsUseCaseProvider.overrideWithValue(FakeGetProductsUseCase()),
     addProductUseCaseProvider.overrideWithValue(
       AddProductUseCase(
         repository,

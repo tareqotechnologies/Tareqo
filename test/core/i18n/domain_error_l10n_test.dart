@@ -30,28 +30,36 @@ void main() {
       );
       expect(
         domainErrorMessage(
-          const InvalidDebtAmountException('O valor da dívida deve ser maior que zero.'),
+          const InvalidDebtAmountException(
+            'O valor da dívida deve ser maior que zero.',
+          ),
           l10n,
         ),
         'O valor da dívida deve ser maior que zero.',
       );
       expect(
         domainErrorMessage(
-          const InvalidAmountException('O valor da transação deve ser maior que zero.'),
+          const InvalidAmountException(
+            'O valor da transação deve ser maior que zero.',
+          ),
           l10n,
         ),
         'O valor da transação deve ser maior que zero.',
       );
       expect(
         domainErrorMessage(
-          const InvalidCashCountException('A contagem física não pode ser negativa.'),
+          const InvalidCashCountException(
+            'A contagem física não pode ser negativa.',
+          ),
           l10n,
         ),
         'A contagem física não pode ser negativa.',
       );
       expect(
         domainErrorMessage(
-          const InvalidPriceException('O preço de venda (100) não pode ser menor que o preço de compra (200).'),
+          const InvalidPriceException(
+            'O preço de venda (100) não pode ser menor que o preço de compra (200).',
+          ),
           l10n,
         ),
         'O preço de venda não pode ser menor que o preço de compra.',
@@ -65,7 +73,9 @@ void main() {
       );
       expect(
         domainErrorMessage(
-          const TenantNotApprovedException('Seu acesso ao ERP ainda não foi aprovado.'),
+          const TenantNotApprovedException(
+            'Seu acesso ao ERP ainda não foi aprovado.',
+          ),
           l10n,
         ),
         'Seu acesso ao ERP ainda não foi aprovado.',

@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Documentos de suporte embutidos no app (assets) — os MESMOS markdowns de
 /// `docs/`, empacotados para leitura OFFLINE no ecrã Ajuda. O asset é
@@ -129,27 +130,15 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
               }
             },
             styleSheet: MarkdownStyleSheet(
-              h1: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.5,
-              ),
-              h2: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              h3: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              h4: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              h5: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              h6: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              h1: AppTypography.headline,
+              h2: AppTypography.titleLarge,
+              h3: AppTypography.titleMedium,
+              h4: AppTypography.bodyLarge,
+              h5: AppTypography.bodyLarge,
+              h6: AppTypography.bodyLarge,
+
               // Corpo — entrelinha confortável para leitura longa.
-              p: theme.textTheme.bodyMedium?.copyWith(
+              p: AppTypography.bodyMedium.copyWith(
                 color: scheme.onSurface,
                 height: 1.5,
                 letterSpacing: 0.1,
@@ -157,7 +146,7 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
               // Blockquotes (dicas Atenção://✓): fundo da MARCA com filete à
               // esquerda — antes usavam o padrão AZUL da biblioteca
               // (Colors.blue.shade100) que atrapalhava a leitura.
-              blockquote: theme.textTheme.bodyMedium?.copyWith(
+              blockquote: AppTypography.bodyMedium.copyWith(
                 color: scheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
                 height: 1.45,
@@ -175,22 +164,19 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                   left: BorderSide(color: scheme.primary, width: 3),
                 ),
               ),
-              listBullet: theme.textTheme.bodyMedium?.copyWith(
-                color: scheme.primary,
-              ),
-              strong: theme.textTheme.bodyMedium?.copyWith(
+              listBullet: AppTypography.bodyMedium.copyWith(color: scheme.primary),
+
+              strong: AppTypography.bodyMedium.copyWith(
                 color: scheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
-              em: theme.textTheme.bodyMedium?.copyWith(
-                fontStyle: FontStyle.italic,
-              ),
+              em: AppTypography.bodyMedium.copyWith(fontStyle: FontStyle.italic),
+
               // Código inline — chip discreto, texto com contraste.
-              code: theme.textTheme.bodySmall?.copyWith(
+              // Código inline = labelMedium (12/w500) na família mono.
+              code: AppTypography.labelMedium.copyWith(
                 fontFamily: 'monospace',
-                fontSize: 12,
                 color: scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
                 backgroundColor: scheme.surfaceContainerHighest,
               ),
               codeblockPadding: const EdgeInsets.all(AppSpacing.sm),
@@ -198,16 +184,15 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                 color: scheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppRadius.xs),
               ),
-              tableHead: theme.textTheme.bodySmall?.copyWith(
+              tableHead: AppTypography.bodySmall.copyWith(
                 fontWeight: FontWeight.w600,
                 color: scheme.onSurface,
               ),
-              tableBody: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
+              tableBody: AppTypography.bodySmall.copyWith(color: scheme.onSurfaceVariant),
+
               tableBorder: TableBorder.all(color: scheme.outlineVariant),
               // Hiperlinks — cor da marca, sublinhado suave, peso médio.
-              a: theme.textTheme.bodyMedium?.copyWith(
+              a: AppTypography.bodyMedium.copyWith(
                 color: scheme.primary,
                 fontWeight: FontWeight.w600,
                 decoration: TextDecoration.underline,

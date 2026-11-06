@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
@@ -579,7 +580,9 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
               // ser vendido; matéria-prima/embalagem não vão ao balcão — o
               // servidor também nega desativados via lock_products_or_raise).
               final active = all
-                  .where((product) => product.isActive && product.type.isSellable)
+                  .where(
+                    (product) => product.isActive && product.type.isSellable,
+                  )
                   .toList();
               // Query NORMALIZADO para minúsculas (mesmo padrão da busca
               // de Produtos): sem isso, digitar 'CANETA' não achava o
@@ -643,7 +646,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                                 Expanded(
                                   child: Text(
                                     l10n.salesCartSection(_cart.length),
-                                    style: theme.textTheme.labelSmall?.copyWith(
+                                    style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
@@ -652,7 +655,9 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                                   child: SmartAmount(
                                     cents: _totalCents,
                                     alignment: Alignment.centerRight,
-                                    style: theme.textTheme.labelMedium,
+                                    style: AppTypography.amountInRow(
+                                      theme.colorScheme.onSurface,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -741,8 +746,10 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                     child: SmartAmount(
                       cents: _totalCents,
                       alignment: Alignment.centerRight,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: theme.colorScheme.primary,
+                      // Total da tela = valor de destaque do resumo
+                      // (22/w600), sem competir com o título.
+                      style: AppTypography.summaryAmount(
+                        theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -765,7 +772,6 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                 label: l10n.salesConfirm,
                 onPressed: _cart.isEmpty || _isSubmitting ? null : _confirm,
                 expanded: true,
-                gradient: true,
                 pressScale: true,
                 icon: _isSubmitting
                     ? const SizedBox(
@@ -848,9 +854,8 @@ class _ScannerZone extends StatelessWidget {
                   children: [
                     Text(
                       l10n.salesBarcodeLabel,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      // Descrição/título de apoio = 14/w400.
+                      style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -954,8 +959,9 @@ class _CartProductRow extends StatelessWidget {
                   product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  // Nome do produto = 14/w400; o preço e a quantidade
+                  // ficam como metadados de 12.
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: outOfStock ? theme.colorScheme.outline : null,
                   ),
                 ),
@@ -968,7 +974,6 @@ class _CartProductRow extends StatelessWidget {
                             '${isWeight ? '' : ' ${l10n.commonUnits}'}'
                             '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 12,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -1081,9 +1086,9 @@ class _CartPill extends StatelessWidget {
                       language: Formatters.currentLanguage,
                     )
                   : '${Quantity.format(quantity, language: Formatters.currentLanguage)}×',
+              // Quantidade = badge 12/w500 (a escala já traz o peso).
               style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -1099,16 +1104,14 @@ class _CartPill extends StatelessWidget {
                   product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  // Nome do produto = 14/w400 (descrição da linha).
+                  style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 1),
                 Text(
                   '${Formatters.currency(product.salePriceCents)} '
                   '${isWeight ? product.unitLabel : l10n.commonUnits}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 12,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -1124,9 +1127,8 @@ class _CartPill extends StatelessWidget {
             child: SmartAmount(
               cents: Quantity.lineTotal(quantity, product.salePriceCents),
               alignment: Alignment.centerRight,
-              // Destaque de linha = titleSmall (14/w600, tabular) — padrão
-              // P1 da auditoria tipográfica.
-              style: theme.textTheme.titleSmall,
+              // Total da linha = 15/w500, alinhado à direita.
+              style: AppTypography.amountInRow(theme.colorScheme.onSurface),
             ),
           ),
         ],

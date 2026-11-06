@@ -51,7 +51,8 @@ void main() {
       ProviderScope(
         overrides: [
           authStateProvider.overrideWith(
-            (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
+            (ref) =>
+                Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
           ),
           adminRepositoryProvider.overrideWithValue(
             const FakeAdminRepository(),

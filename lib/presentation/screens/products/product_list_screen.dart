@@ -448,10 +448,10 @@ class _CompactFilterChip extends StatelessWidget {
             ],
             Text(
               label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontSize: 11,
+              // Filtro = labelMedium (12/w500); selecionado sobe para w600.
+              style: theme.textTheme.labelMedium?.copyWith(
                 color: isSelected ? color : scheme.onSurfaceVariant,
-                fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
           ],
@@ -639,10 +639,14 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                         icon: (f) => switch (f) {
                           _ProductTypeFilter.all => Icons.all_inclusive_rounded,
                           _ProductTypeFilter.rawMaterial => Icons.grain,
-                          _ProductTypeFilter.resale => Icons.storefront_outlined,
-                          _ProductTypeFilter.manufactured => Icons.bakery_dining_outlined,
-                          _ProductTypeFilter.composite => Icons.lunch_dining_outlined,
-                          _ProductTypeFilter.packaging => Icons.inventory_outlined,
+                          _ProductTypeFilter.resale =>
+                            Icons.storefront_outlined,
+                          _ProductTypeFilter.manufactured =>
+                            Icons.bakery_dining_outlined,
+                          _ProductTypeFilter.composite =>
+                            Icons.lunch_dining_outlined,
+                          _ProductTypeFilter.packaging =>
+                            Icons.inventory_outlined,
                         },
                         onChanged: (f) => setState(() => _type = f),
                       ),
@@ -899,13 +903,16 @@ class _ProductTileState extends State<_ProductTile> {
                             '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelSmall?.copyWith(
+                            // Estoque = metadado (bodySmall 12/w400); em
+                            // falta sobe para w500 + cor de alerta. O w300
+                            // anterior saía da escala e degradava a leitura.
+                            style: theme.textTheme.bodySmall?.copyWith(
                               color: lowStock
                                   ? theme.expense
                                   : scheme.onSurfaceVariant,
                               fontWeight: lowStock
                                   ? FontWeight.w500
-                                  : FontWeight.w300,
+                                  : FontWeight.w400,
                             ),
                           ),
                         ],

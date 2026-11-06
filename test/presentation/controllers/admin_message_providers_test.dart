@@ -71,8 +71,7 @@ List<dynamic> _overrides({
   authStateProvider.overrideWith(
     (ref) => Stream.value(const AppUser(id: 'u1', email: 'dono@loja.com')),
   ),
-  if (tenant != null)
-    getMyTenantUseCaseProvider.overrideWithValue(tenant),
+  if (tenant != null) getMyTenantUseCaseProvider.overrideWithValue(tenant),
   getTenantAdminMessagesUseCaseProvider.overrideWithValue(messages),
 ];
 
@@ -95,18 +94,20 @@ void main() {
       expect(state, messages);
     });
 
-    test('sem utilizador logado a lista fica vazia (sem tocar no caso de uso)',
-        () async {
-      final container = ProviderContainer(
-        overrides: [
-          authStateProvider.overrideWith((ref) => const Stream.empty()),
-        ],
-      );
-      addTearDown(container.dispose);
+    test(
+      'sem utilizador logado a lista fica vazia (sem tocar no caso de uso)',
+      () async {
+        final container = ProviderContainer(
+          overrides: [
+            authStateProvider.overrideWith((ref) => const Stream.empty()),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      final state = await container.read(tenantAdminMessagesProvider.future);
-      expect(state, isEmpty);
-    });
+        final state = await container.read(tenantAdminMessagesProvider.future);
+        expect(state, isEmpty);
+      },
+    );
 
     test('tenant sem valor (dono pendente) → lista vazia, sem erro', () async {
       final container = ProviderContainer(

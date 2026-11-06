@@ -295,20 +295,16 @@ void main() {
       final filledDisabledFg = filledStyle?.foregroundColor?.resolve(
         const <WidgetState>{WidgetState.disabled},
       );
-      final hoverVeil = filledStyle?.overlayColor?.resolve(
-        const <WidgetState>{WidgetState.hovered},
-      );
+      final hoverVeil = filledStyle?.overlayColor?.resolve(const <WidgetState>{
+        WidgetState.hovered,
+      });
       if (filledBg != null &&
           filledFg != null &&
           hoverVeil != null &&
           hoverVeil.a > 0) {
         // Color.a já é 0.0–1.0 (sem divisão por 255).
         final hoveredBg = compose(filledBg, hoverVeil, hoverVeil.a);
-        _expectContrast(
-          filledFg,
-          hoveredBg,
-          'primário hover ($name)',
-        );
+        _expectContrast(filledFg, hoveredBg, 'primário hover ($name)');
         // O hover NÃO deve ficar mais claro que o repouso (verde vivo é
         // proibido — escurece ou mantém, nunca clareia o primário).
         expect(
@@ -345,9 +341,9 @@ void main() {
         ('texto', theme.textButtonTheme.style),
         ('ícone', theme.iconButtonTheme.style),
       ]) {
-        final veil = style?.overlayColor?.resolve(
-          const <WidgetState>{WidgetState.hovered},
-        );
+        final veil = style?.overlayColor?.resolve(const <WidgetState>{
+          WidgetState.hovered,
+        });
         if (veil == null || veil.a == 0) continue;
         final hoveredSurface = compose(surface, veil, veil.a);
         _expectContrast(
@@ -373,7 +369,9 @@ void main() {
         );
         expect(
           fabHoverBg.computeLuminance(),
-          lessThanOrEqualTo(fabTheme.backgroundColor!.computeLuminance() + 0.001),
+          lessThanOrEqualTo(
+            fabTheme.backgroundColor!.computeLuminance() + 0.001,
+          ),
           reason: 'FAB hover deve escurecer o verde, não clarear ($name)',
         );
         _expectContrast(

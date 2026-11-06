@@ -80,7 +80,9 @@ void main() {
   // Troca de abas (plano UI/UX — F4.4): fade-through M3 — fade out rápido
   // do conteúdo antigo, troca de índice, fade in + slide de 24px do novo.
   // O estado das abas é preservado (IndexedStack).
-  testWidgets('FadeIndexedStack faz fade-through entre índices', (tester) async {
+  testWidgets('FadeIndexedStack faz fade-through entre índices', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -143,10 +145,7 @@ void main() {
         data: MediaQueryData(disableAnimations: true),
         child: MaterialApp(
           home: Scaffold(
-            body: FadeIndexedStack(
-              index: 0,
-              children: [Text('A'), Text('B')],
-            ),
+            body: FadeIndexedStack(index: 0, children: [Text('A'), Text('B')]),
           ),
         ),
       ),
@@ -158,10 +157,7 @@ void main() {
         data: MediaQueryData(disableAnimations: true),
         child: MaterialApp(
           home: Scaffold(
-            body: FadeIndexedStack(
-              index: 1,
-              children: [Text('A'), Text('B')],
-            ),
+            body: FadeIndexedStack(index: 1, children: [Text('A'), Text('B')]),
           ),
         ),
       ),

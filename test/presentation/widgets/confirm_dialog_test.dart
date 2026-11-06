@@ -28,7 +28,7 @@ void main() {
         home: Builder(
           builder: (context) => Center(
             child: ElevatedButton(
-              onPressed: () => result = showConfirmDialog(
+              onPressed: () => result = showConfirmDialog(context: 
                 context,
                 title: title,
                 message: message,
@@ -95,7 +95,7 @@ void main() {
           home: Builder(
             builder: (context) => Center(
               child: ElevatedButton(
-                onPressed: () => result = showConfirmDialog(
+                onPressed: () => result = showConfirmDialog(context: 
                   context,
                   title: 'Sair?',
                   confirmLabel: 'Sair',

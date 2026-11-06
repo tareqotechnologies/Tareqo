@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/i18n/l10n_ext.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 import 'app_button.dart';
 
 /// Estado de erro V4 — mensagem + detalhe técnico + retry.
@@ -47,7 +48,7 @@ class ErrorView extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium,
+              style: AppTypography.titleMedium,
             ),
             if (details != null) ...[
               const SizedBox(height: AppSpacing.xs),
@@ -56,9 +57,7 @@ class ErrorView extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.outline,
-                ),
+                style: AppTypography.bodySmall,
               ),
             ],
             const SizedBox(height: AppSpacing.lg),

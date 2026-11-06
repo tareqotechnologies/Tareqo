@@ -345,8 +345,7 @@ void main() {
       stub.handler = (path, request) {
         if (path.contains('products')) {
           bodies.add(
-            jsonDecode((request as http.Request).body)
-                as Map<String, dynamic>,
+            jsonDecode((request as http.Request).body) as Map<String, dynamic>,
           );
           return FakeResponse(<dynamic>[]);
         }
@@ -372,8 +371,7 @@ void main() {
       stub.handler = (path, request) {
         if (path.contains('products')) {
           bodies.add(
-            jsonDecode((request as http.Request).body)
-                as Map<String, dynamic>,
+            jsonDecode((request as http.Request).body) as Map<String, dynamic>,
           );
           return FakeResponse([
             {'id': 'p1'},

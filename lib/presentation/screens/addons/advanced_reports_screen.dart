@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../domain/entities/store.dart';
 import '../../../core/share/advanced_reports_pdf_exporter.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
@@ -197,7 +198,7 @@ class _SalesReportTab extends ConsumerWidget {
                     ? Formatters.currency(report.totalRevenueCents)
                     : '—',
                 icon: Icons.arrow_downward_rounded,
-                color: IconTone.green,
+                color: AppColors.accentOrange,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -442,7 +443,7 @@ class _FinancialReportTab extends ConsumerWidget {
                     ? Formatters.currency(cashFlow.incomeCents)
                     : '—',
                 icon: Icons.arrow_downward_rounded,
-                color: IconTone.green,
+                color: AppColors.accentOrange,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -453,7 +454,7 @@ class _FinancialReportTab extends ConsumerWidget {
                     ? Formatters.currency(cashFlow.expenseCents)
                     : '—',
                 icon: Icons.arrow_upward_rounded,
-                color: IconTone.red,
+                color: AppColors.errorNeutral,
               ),
             ),
           ],
@@ -639,7 +640,7 @@ class _StockReportTab extends ConsumerWidget {
                 label: l10n.reportsKpiStockOut,
                 value: '$outOfStock',
                 icon: Icons.inventory_2,
-                color: IconTone.red,
+                color: AppColors.errorNeutral,
               ),
             ),
           ],
@@ -716,7 +717,11 @@ class _StockReportTab extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                     child: Row(
                       children: [
-                        const Icon(Icons.circle, size: 6, color: ModuleColors.credit),
+                        const Icon(
+                          Icons.circle,
+                          size: 6,
+                          color: ModuleColors.credit,
+                        ),
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
@@ -977,13 +982,13 @@ class _CashFlowBars extends StatelessWidget {
         bar(
           label: l10n.reportsKpiRevenue,
           cents: cashFlow.incomeCents,
-          color: IconTone.green,
+          color: AppColors.accentOrange,
         ),
         const SizedBox(height: AppSpacing.md),
         bar(
           label: l10n.reportsKpiExpenses,
           cents: cashFlow.expenseCents,
-          color: IconTone.red,
+          color: AppColors.errorNeutral,
         ),
       ],
     );

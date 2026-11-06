@@ -371,6 +371,18 @@
   },
   "addStoreError": "Could not create the store. Try again.",
   "addStoreSubmit": "Create store",
+  "editStoreTitle": "Edit store",
+  "editStoreSubmit": "Save changes",
+  "editStoreSuccess": "Store {name} updated!",
+  "@editStoreSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "editStoreError": "Could not update the store. Try again.",
+  "editStoreAction": "Edit",
   "addEmployeeTitle": "New employee",
   "addEmployeeNameLabel": "Full name",
   "addEmployeeNameError": "Enter the employee name.",
@@ -736,6 +748,7 @@
   "debtsTitle": "Credit",
   "debtsHeaderSubtitle": "Credit to receive and pay",
   "debtsAddDebt": "Register credit",
+  "debtsDataSection": "Credit details",
   "debtsSearchHint": "Search by customer name...",
   "debtsTabPending": "Pending",
   "debtsTabSettled": "Settled",

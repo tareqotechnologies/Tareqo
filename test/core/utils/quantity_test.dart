@@ -21,8 +21,14 @@ void main() {
       expect(Quantity.parse('1,250', language: 'en'), 1250 * 1000);
       // Round-trips reais do PDV/estoque (pt) — mesmo recorte do dialog
       // (o dialog faz split(' ').first para descartar o rótulo):
-      expect(Quantity.parse(Quantity.format(1250000).split(' ').first), 1250000);
-      expect(Quantity.parse(Quantity.format(1250, unitLabel: 'kg').split(' ').first), 1250);
+      expect(
+        Quantity.parse(Quantity.format(1250000).split(' ').first),
+        1250000,
+      );
+      expect(
+        Quantity.parse(Quantity.format(1250, unitLabel: 'kg').split(' ').first),
+        1250,
+      );
       expect(Quantity.parse(Quantity.format(25000).split(' ').first), 25000);
     });
 

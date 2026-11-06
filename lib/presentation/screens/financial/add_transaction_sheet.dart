@@ -176,14 +176,14 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                         ? l10n.financialDescriptionError
                         : null,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.sm),
                   AppTextField(
                     controller: _categoryController,
                     label: l10n.financialCategoryLabel,
                     prefixIcon: Icons.category_outlined,
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.sm),
                   AppTextField(
                     controller: _amountController,
                     label: l10n.financialAmountLabel,

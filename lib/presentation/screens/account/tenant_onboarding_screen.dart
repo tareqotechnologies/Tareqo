@@ -392,12 +392,7 @@ class _PlanCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  plan.name,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall,
-                ),
+                Text(plan.name, style: Theme.of(context).textTheme.titleSmall),
                 const SizedBox(height: 2),
                 Text(
                   l10n.onboardingPlanDetails(plan.maxStores, plan.maxEmployees),

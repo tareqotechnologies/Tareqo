@@ -9,7 +9,9 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_sheet.dart';
+import '../../widgets/premium_decor.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../core/theme/app_typography.dart';
 import 'forgot_password_sheet.dart';
 
 /// Paleta da tela de login — variante clara e escura.
@@ -20,23 +22,22 @@ import 'forgot_password_sheet.dart';
 /// (antes, a auth era SEMPRE escura mesmo no light mode).
 ///
 /// Os neutros vêm dos tokens do design system: no escuro,
-/// `AppColors.backgroundDark`/`surfaceDark`/`borderDark`; no claro, os
+/// `AppColors.darkBackground`/`surfaceDark`/`borderDark`; no claro, os
 /// valores espelham os do `AppTheme.light` (scaffold #FAFAFA, superfície
-/// branca, texto #18181B/#6E6E77, borda #E4E4E7). O verde de link/texto
-/// segue a regra AA do design system: no claro é o `brandMuted` (#15803D,
-/// ≥ 4.5:1 sobre branco) — o vivo #16A34A fica só para a borda de foco
-/// (não-texto) no escuro.
+/// branca, texto #18181B/#6E6E77, borda #E4E4E7). A cor de acento/links
+/// segue a regra AA do design system: laranja #F28C00 no claro, laranja
+/// #FF9800 no escuro — usadas somente em links de ação e estado
+/// de foco.
 @immutable
 class _LoginPalette {
   const _LoginPalette({
     required this.background,
     required this.textPrimary,
     required this.textSecondary,
-    required this.green,
-    required this.greenDark,
+    required this.accent,
+    required this.accentDark,
     required this.onCta,
   });
-
   /// Fundo da página (atrás dos campos).
   final Color background;
 
@@ -47,35 +48,41 @@ class _LoginPalette {
   final Color textSecondary;
 
   /// Acento: links, cursor e ícone dos campos com foco.
-  final Color green;
+  final Color accent;
 
   /// Fundo do botão principal (CTA).
-  final Color greenDark;
+  final Color accentDark;
 
-  /// Conteúdo sobre o CTA (o bege do escuro exige conteúdo escuro).
+  /// Conteúdo sobre o CTA: tinta escura sobre o laranja do botão —
+  /// branco sobre #FF9800 dá só 2.06:1 (reprovava o AA de 4.5:1); a tinta
+  /// escura sobe para ~7.9:1.
   final Color onCta;
 
   /// Modo escuro — dark premium petróleo.
-  static const _LoginPalette dark = _LoginPalette(
-    background: AppColors.backgroundDark,
+  static final _LoginPalette dark = _LoginPalette(
+    background: AppColors.darkBackground,
     textPrimary: Colors.white,
-    textSecondary: AppColors.onSurfaceVariantDark,
-    // Acento da marca: bege no escuro (identidade petróleo premium) e
-    // slate no claro (mesmo tom do botão primário).
-    green: AppColors.warmBeige,
-    // CTA bege com conteúdo preto suave — par auditado 10.6:1 (AA/AAA).
-    greenDark: AppColors.warmBeige,
-    onCta: AppColors.softBlack,
+    textSecondary: AppColors.darkTextSecondary,
+    // Acento laranja (links, cursor, ícone em foco) sobre o fundo neutro.
+    // #F28C00 no claro, #FF9800 no escuro — usadas somente em links
+    // de ação e estado de foco, ≥ 4.5:1 AA sobre as respectivas
+    // superfícies.
+    accent: AppColors.accentOrange,
+    accentDark: AppColors.darkAccentOrange,
+    onCta: AppColors.lightTextPrimary,
   );
 
   /// Modo claro — espelha os neutros do `AppTheme.light` via tokens.
-  static const _LoginPalette light = _LoginPalette(
-    background: AppColors.scaffoldLight,
-    textPrimary: AppColors.onSurfaceLight,
-    textSecondary: AppColors.onSurfaceVariantLight,
-    green: AppColors.brandMuted,
-    greenDark: AppColors.brandMuted,
-    onCta: Colors.white,
+  static final _LoginPalette light = _LoginPalette(
+    background: AppColors.lightBackground,
+    textPrimary: AppColors.lightTextPrimary,
+    textSecondary: AppColors.lightTextSecondary,
+    // Acento laranja: usado somente em links de ação e estado de foco.
+    // #F28C00 no claro, #FF9800 no escuro — ≥ 4.5:1 AA sobre as
+    // superfícies respectivas.
+    accent: AppColors.accentOrange,
+    accentDark: AppColors.darkAccentOrange,
+    onCta: AppColors.lightTextPrimary,
   );
 }
 
@@ -237,7 +244,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final palette = isDark ? _LoginPalette.dark : _LoginPalette.light;
 
@@ -252,7 +258,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       child: Scaffold(
         backgroundColor: palette.background,
-        body: SafeArea(
+        // Fundo premium: dois halos de luz da cor da marca (canto superior
+        // direito e inferior esquerdo) por trás do formulário — puramente
+        // decorativos, sem toque nem semântica.
+        body: Stack(
+          children: [
+            Positioned(
+              top: -140,
+              right: -120,
+              child: PremiumGlow(
+                color: palette.accent,
+                size: 380,
+                opacity: isDark ? 0.16 : 0.12,
+              ),
+            ),
+            Positioned(
+              bottom: -160,
+              left: -140,
+              child: PremiumGlow(
+                color: palette.accentDark,
+                size: 420,
+                opacity: isDark ? 0.12 : 0.08,
+              ),
+            ),
+            Positioned.fill(child: _buildBody(context, palette)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Conteúdo do login (logo, campos, CTA e links) — o mesmo de antes,
+  /// agora pintado por cima dos halos do fundo.
+  Widget _buildBody(BuildContext context, _LoginPalette palette) {
+    final l10n = context.l10n;
+    return SafeArea(
           child: Center(
             child: SingleChildScrollView(
               controller: _scrollController,
@@ -279,16 +319,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           // ── Logo ──
+                          // Logo com brilho da marca por baixo e aro de
+                          // cabelo — "joia" de abertura do app.
                           Center(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.xl,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.xl,
+                                ),
+                                boxShadow: PremiumDecor.glow(
+                                  palette.accent,
+                                  strength: 1.2,
+                                ),
                               ),
-                              child: Image.asset(
-                                'assets/branding/icon_official.png',
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.contain,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.xl,
+                                ),
+                                child: Image.asset(
+                                  'assets/branding/icon_official.png',
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.contain,
+                                ),
                               ),
                             ),
                           ),
@@ -309,10 +362,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ? l10n.loginSubtitleSignUp
                                 : l10n.loginTagline,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14,
+                            style: AppTypography.bodyMedium.copyWith(
                               color: palette.textSecondary,
-                              fontWeight: FontWeight.w400,
                             ),
                           ),
                         ],
@@ -323,7 +374,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // ── Nome (modo cadastro) ──
                     if (_isSignUpMode) ...[
                       _buildLabel(palette, l10n.loginNameLabel),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       _buildTextField(
                         palette,
                         controller: _nameController,
@@ -332,7 +383,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         textInputAction: TextInputAction.next,
                         obscure: false,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                     ],
 
                     // ── Email ──
@@ -417,14 +468,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 32),
 
                     // ── Botão Entrar ──
-                    SizedBox(
+                    // CTA com brilho da marca quando habilitado (o brilho
+                    // apaga-se durante o envio — feedback de estado).
+                    AnimatedContainer(
+                      duration: AppDurations.fast,
                       height: 52,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        boxShadow: _isSubmitting
+                            ? null
+                            : PremiumDecor.glow(palette.accentDark),
+                      ),
                       child: ElevatedButton(
                         onPressed: _isSubmitting ? null : _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: palette.greenDark,
+                          backgroundColor: palette.accentDark,
                           foregroundColor: palette.onCta,
-                          disabledBackgroundColor: palette.greenDark.withValues(
+                          disabledBackgroundColor: palette.accentDark.withValues(
                             alpha: 0.5,
                           ),
                           elevation: 0,
@@ -433,9 +493,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             // (botões/campos) — o 14 ad-hoc divergia.
                             borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
-                          textStyle: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                          // CTA = labelLarge (14/w500), o mesmo degrau dos
+                          // demais botões primários do app.
+                          textStyle: AppTypography.labelLarge.copyWith(
                             letterSpacing: 0.3,
                           ),
                         ),
@@ -464,10 +524,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onTap: _isSubmitting ? null : _openForgotPassword,
                           child: Text(
                             l10n.loginForgotPassword,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: palette.green,
-                              fontWeight: FontWeight.w600,
+                            style: AppTypography.labelLarge.copyWith(
+                              color: palette.accent,
                             ),
                           ),
                         ),
@@ -487,20 +545,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             text: _isSignUpMode
                                 ? '${l10n.loginPromptHaveAccount} '
                                 : '${l10n.loginPromptNoAccount} ',
-                            style: TextStyle(
-                              fontSize: 14,
+                            style: AppTypography.bodyMedium.copyWith(
                               color: palette.textSecondary,
-                              fontWeight: FontWeight.w400,
                             ),
                             children: [
                               TextSpan(
                                 text: _isSignUpMode
                                     ? l10n.loginSignIn
                                     : l10n.loginSignUp,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: palette.green,
-                                  fontWeight: FontWeight.w600,
+                                style: AppTypography.labelLarge.copyWith(
+                                  color: palette.accent,
                                 ),
                               ),
                             ],
@@ -531,12 +585,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: Text(
                             l10n.loginSecurityFooter,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 12,
+                            style: AppTypography.bodySmall.copyWith(
                               color: palette.textSecondary.withValues(
                                 alpha: 0.6,
                               ),
-                              fontWeight: FontWeight.w400,
                             ),
                           ),
                         ),
@@ -548,9 +600,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-        ),
-      ),
-    );
+        );
   }
 
   // ── Helpers ──
@@ -558,11 +608,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildLabel(_LoginPalette palette, String text) {
     return Text(
       text,
-      style: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: palette.textPrimary,
-      ),
+      // Rótulo visível do campo = labelLarge (14/w500).
+      style: AppTypography.labelLarge.copyWith(color: palette.textPrimary),
     );
   }
 
@@ -588,13 +635,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       onSubmitted: onSubmitted,
-      style: TextStyle(fontSize: 15, color: palette.textPrimary),
-      cursorColor: palette.green,
+      // Texto digitado = bodyLarge (16) — o mesmo do corpo dos formulários.
+      style: AppTypography.bodyLarge.copyWith(color: palette.textPrimary),
+      cursorColor: palette.accent,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, size: 20),
         suffixIcon: suffixIcon,
+        // Alinhado ao design system: erro aparecendo abaixo do campo
+        errorMaxLines: 2,
+        errorStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+        ),
       ),
     );
   }
 }
+

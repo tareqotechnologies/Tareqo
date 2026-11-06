@@ -84,7 +84,10 @@ Future<void> _pump(WidgetTester tester) async {
 /// AnimatedOpacity que envolve [of], se houver — o MAIS INTERNO é o dim
 /// do modo foco (o campo pode ter AnimatedOpacity próprio de erro).
 AnimatedOpacity? _dimOf(WidgetTester tester, Finder of) {
-  final ancestors = find.ancestor(of: of, matching: find.byType(AnimatedOpacity));
+  final ancestors = find.ancestor(
+    of: of,
+    matching: find.byType(AnimatedOpacity),
+  );
   if (ancestors.evaluate().isEmpty) return null;
   return tester.widget<AnimatedOpacity>(ancestors.last);
 }

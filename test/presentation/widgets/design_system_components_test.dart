@@ -117,7 +117,9 @@ void main() {
     ) async {
       var tapped = false;
       await tester.pumpWidget(
-        testApp(home: const AppButton.primary(label: 'Bloqueado', onPressed: null)),
+        testApp(
+          home: const AppButton.primary(label: 'Bloqueado', onPressed: null),
+        ),
       );
 
       await tester.tap(find.text('Bloqueado'));
@@ -376,18 +378,18 @@ void main() {
       }
     });
 
-    testWidgets('labels da navegação usam peso leve (w500) — hierarquia '
-        'pela cor', (tester) async {
+    testWidgets('labels da navegação usam w500/w600 — cor + peso', (
+      tester,
+    ) async {
       final theme = AppTheme.dark;
-      // Estado NÃO selecionado (set vazio) e o SELECIONADO — a hierarquia
-      // é pela COR (peso leve w500 nos dois estados); travar ambos evita
-      // regressão silenciosa.
+      // Signature: o estado selecionado ganha peso (w600) além da cor;
+      // o não selecionado mantém w500. Travar ambos evita regressão.
       final unselected = theme.navigationBarTheme.labelTextStyle!.resolve({});
       final selected = theme.navigationBarTheme.labelTextStyle!.resolve({
         WidgetState.selected,
       });
       expect(unselected?.fontWeight, FontWeight.w500);
-      expect(selected?.fontWeight, FontWeight.w500);
+      expect(selected?.fontWeight, FontWeight.w600);
     });
 
     testWidgets('pílula do NavigationRail é StadiumBorder (igual à barra)', (

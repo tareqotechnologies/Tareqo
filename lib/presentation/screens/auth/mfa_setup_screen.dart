@@ -10,6 +10,7 @@ import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_text_field.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Tela de configuração de MFA (Multi-Factor Authentication)
 class MFASetupScreen extends ConsumerStatefulWidget {
@@ -146,16 +147,13 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
         // Título longo ("Configurar Autenticação em Dois Fatores") a 22px
         // truncava em ecrãs estreitos — fonte menor e quebra em 2 linhas
         // (nunca ellipsis) para a frase completa ficar visível.
+        // Título longo ("Configurar Autenticação em Dois Fatores") quebra em
+        // 2 linhas com o token `titleMedium` (16/w500) — sem tamanho inline.
         title: Text(
           l10n.mfaSetupTitle,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.2,
-            height: 1.2,
-          ),
+          style: theme.textTheme.titleMedium,
         ),
         leading: IconButton(
           // A11y: leitor de ecrã anuncia a ação (mesmo padrão das sheets).
@@ -196,17 +194,16 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   l10n.mfaManualEntryTitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: theme.textTheme.labelMedium,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 if (_secret != null)
                   SelectableText(
                     _secret!,
-                    style: TextStyle(
-                      fontSize: 16,
+                    // Código MFA: família mono (códigos/IDs) no degrau de
+                    // corpo 16 do design system — sem tamanho solto.
+                    style: AppTypography.bodyLarge.copyWith(
                       fontFamily: 'monospace',
                       color: scheme.primary,
                     ),
@@ -215,9 +212,7 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
                 const SizedBox(height: AppSpacing.xl),
                 Text(
                   l10n.mfaConfirmPrompt,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: theme.textTheme.labelMedium,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.md),

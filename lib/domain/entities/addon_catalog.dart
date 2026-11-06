@@ -1,4 +1,4 @@
-import '../../../domain/entities/addon.dart';
+import 'addon.dart';
 
 /// Catálogo de add-ons disponíveis para compra.
 ///

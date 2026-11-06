@@ -9,11 +9,11 @@ import 'status_chip.dart';
 /// paleta RE2 (petróleo/slate/terracota/cinza quente), sem cor fora do
 /// sistema.
 Color productTypeColor(ProductType type) => switch (type) {
-  ProductType.rawMaterial => AppColors.warmGray,
-  ProductType.resale => AppColors.slate,
-  ProductType.manufactured => AppColors.petrol,
-  ProductType.composite => AppColors.terracotta,
-  ProductType.packaging => AppColors.warmBeige,
+  ProductType.rawMaterial => AppColors.accentOrangeSoft,
+  ProductType.resale => AppColors.accentOrangeSoft,
+  ProductType.manufactured => AppColors.lightPrimary,
+  ProductType.composite => AppColors.accentOrange,
+  ProductType.packaging => AppColors.lightSurfaceSecondary,
 };
 
 /// Rótulo localizado do tipo estrutural do produto (Fase 1).

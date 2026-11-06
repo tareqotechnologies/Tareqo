@@ -5,7 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../data/datasources/local/addon_catalog.dart';
+import '../../../domain/entities/addon_catalog.dart';
 import '../../../domain/entities/addon.dart';
 import '../../controllers/admin_providers.dart';
 
@@ -54,7 +54,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
                       value: Formatters.currency(totalPotentialRevenue),
                       subtitle: l10n.adminRevenuePotentialSub,
                       icon: Icons.trending_up,
-                      color: AppColors.success,
+                      color: AppColors.successNeutral,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
@@ -305,7 +305,7 @@ class _AddOnRevenueTile extends StatelessWidget {
                 Formatters.currency(maxRevenue),
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w400,
-                  color: AppColors.success,
+                  color: AppColors.successNeutral,
                 ),
               ),
               Text(
@@ -383,7 +383,7 @@ class _CategoryTile extends StatelessWidget {
             Formatters.currency(revenue),
             style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w400,
-              color: AppColors.success,
+              color: AppColors.successNeutral,
             ),
           ),
         ],

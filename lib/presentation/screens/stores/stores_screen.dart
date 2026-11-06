@@ -38,8 +38,13 @@ import '../../widgets/store_scoped_content.dart';
 import '../auth/change_password_sheet.dart';
 import '../support/support_screen.dart';
 import '../../../core/observability/crash_reporting.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../domain/repositories/i_employee_account_service.dart';
 part 'stores_widgets.dart';
+part 'stores_widgets_sheets.dart'; // _AddStoreSheet + _AddEmployeeSheet
+part 'stores_widgets_upgrade.dart'; // _UpgradeSheet + _UpgradePlanTile
+part 'stores_widgets_settings.dart'; // _SettingsTab + _SettingsEntry
+part 'stores_widgets_details.dart'; // _EmployeeDetailSheet + _StoreDetailSheet
 
 /// Gestão do tenant (dono): lojas, funcionários e plano contratado.
 ///
@@ -116,6 +121,8 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
     final storesAsync = ref.watch(storesProvider(tenant.id));
     final employeesAsync = ref.watch(employeesProvider(tenant.id));
     final requestsAsync = ref.watch(myPlanRequestsProvider(tenant.id));
+    final user = ref.watch(authStateProvider).value;
+    final isOwner = user != null && tenant.ownerUserId == user.id;
 
     final currentPlan = planAsync.value
         ?.where((plan) => plan.id == tenant.planId)
@@ -175,7 +182,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildStores(storesAsync),
+                  _buildStores(storesAsync, isOwner: isOwner),
                   _buildEmployees(employeesAsync),
                   _buildUpgrades(requestsAsync),
                   _SettingsTab(tenant: tenant),
@@ -207,7 +214,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
     );
   }
 
-  Widget _buildStores(AsyncValue<List<Store>> async) {
+  Widget _buildStores(AsyncValue<List<Store>> async, {required bool isOwner}) {
     final l10n = context.l10n;
     return async.when(
       // Skeleton no primeiro carregamento (padrão das listas).
@@ -242,7 +249,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
               padding: EdgeInsets.zero,
               child: InkWell(
                 borderRadius: BorderRadius.circular(AppRadius.lg),
-                onTap: () => _openStoreDetail(store),
+                onTap: () => _openStoreDetail(store, isOwner: isOwner),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
@@ -258,10 +265,9 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                           store.name.isEmpty
                               ? '?'
                               : store.name.substring(0, 1).toUpperCase(),
-                          style: TextStyle(
+                          // Inicial do avatar = labelMedium (12/w500).
+                          style: AppTypography.labelMedium.copyWith(
                             color: scheme.onTertiaryContainer,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 12,
                           ),
                         ),
                       ),
@@ -364,10 +370,9 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                           employee.fullName.isEmpty
                               ? '?'
                               : employee.fullName.substring(0, 1).toUpperCase(),
-                          style: TextStyle(
+                          // Inicial do avatar = labelMedium (12/w500).
+                          style: AppTypography.labelMedium.copyWith(
                             color: scheme.onPrimaryContainer,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 12,
                           ),
                         ),
                       ),
@@ -424,17 +429,31 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
     );
   }
 
-  void _openStoreDetail(Store store) {
+  void _openStoreDetail(Store store, {required bool isOwner}) {
     showAppSheet<void>(
       context,
-      builder: (_) => _StoreDetailSheet(store: store),
+      builder: (_) => _StoreDetailSheet(
+        store: store,
+        isOwner: isOwner,
+        onEdit: () => _openEditStore(store),
+      ),
     );
+  }
+
+  Future<void> _openEditStore(Store store) async {
+    final changed = await showAppSheet<bool>(
+      context,
+      builder: (_) => _EditStoreSheet(store: store),
+    );
+    if (changed == true && mounted) {
+      ref.invalidate(storesProvider(widget.tenant.id));
+    }
   }
 
   /// Confirma e ativa/desativa o funcionário (só o dono chega aqui).
   Future<void> _toggleEmployee(StoreEmployee employee, bool isActive) async {
     final l10n = context.l10n;
-    final confirmed = await showConfirmDialog(
+    final confirmed = await showConfirmDialog(context: 
       context,
       title: isActive
           ? l10n.employeeReactivateConfirm(employee.fullName)
@@ -541,9 +560,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                 title: Text(
                   '${planName(request.currentPlanId)} → '
                   '${planName(request.requestedPlanId)}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall,
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
                 subtitle: Text(
                   l10n.upgradesRequestedOn(

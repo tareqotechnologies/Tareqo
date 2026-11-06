@@ -163,32 +163,35 @@ void main() {
     expect(_chipSelected(tester, 'Metical (MZN)'), isFalse);
   });
 
-  testWidgets('guardar inglês + MZN propaga a escolha (use case captura en/MZN) '
-      'e confirma com snackbar', (tester) async {
-    // Viewport alto — mesmo motivo do teste anterior (chips abaixo da dobra).
-    tester.view.physicalSize = const Size(600, 1600);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+  testWidgets(
+    'guardar inglês + MZN propaga a escolha (use case captura en/MZN) '
+    'e confirma com snackbar',
+    (tester) async {
+      // Viewport alto — mesmo motivo do teste anterior (chips abaixo da dobra).
+      tester.view.physicalSize = const Size(600, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
 
-    final settings = _CapturingUpdateTenantSettings();
-    await tester.pumpWidget(build(settings));
-    await tester.pumpAndSettle();
-    await openSettingsTab(tester);
+      final settings = _CapturingUpdateTenantSettings();
+      await tester.pumpWidget(build(settings));
+      await tester.pumpAndSettle();
+      await openSettingsTab(tester);
 
-    await tester.tap(find.text('English'));
-    await tester.tap(find.text('Metical (MZN)'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('English'));
+      await tester.tap(find.text('Metical (MZN)'));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Guardar'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Guardar'));
+      await tester.pumpAndSettle();
 
-    // A escolha foi persistida (repositório recebeu en + MZN).
-    expect(settings.tenantId, 'tn1');
-    expect(settings.language, 'en');
-    expect(settings.currencyCode, 'MZN');
+      // A escolha foi persistida (repositório recebeu en + MZN).
+      expect(settings.tenantId, 'tn1');
+      expect(settings.language, 'en');
+      expect(settings.currencyCode, 'MZN');
 
-    expect(find.text('Ajustes salvos!'), findsOneWidget);
-  });
+      expect(find.text('Ajustes salvos!'), findsOneWidget);
+    },
+  );
 
   testWidgets('falha ao guardar mostra erro e não confirma', (tester) async {
     final settings = _CapturingUpdateTenantSettings(throwOnSave: true);
