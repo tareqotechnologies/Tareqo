@@ -49,9 +49,8 @@ class TransactionCard extends StatelessWidget {
           '${transaction.category}, $sign ${Formatters.currency(transaction.amountCents)}, ${Formatters.time(transaction.date)}',
       child: InkWell(
         onTap: onTap,
-        // Alvo de toque ≥ 48dp (WCAG/androidTapTargetGuideline): a linha é
-        // compacta por design, mas abrir o detalhe é o gesto principal da
-        // lista — o Container garante a altura mínima mesmo com 12sp.
+        // Alvo de toque ≥ 48dp: a linha é compacta, mas abrir o detalhe é o
+        // gesto principal — o Container garante altura mínima.
         child: Container(
           constraints: const BoxConstraints(minHeight: AppSizes.touchTarget),
           alignment: Alignment.center,
@@ -61,47 +60,50 @@ class TransactionCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // ── Descrição + data/hora em área própria ──
+              // ── Descrição (esquerda) ──
               Expanded(
+                flex: 2,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       transaction.category,
-                      // Duas linhas: descrições longas nunca são cortadas.
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      // Descrição = 14/w400. O valor deixa de ser o
-                      // elemento dominante da lista.
-                      style: theme.textTheme.bodyMedium,
+                      // Minimalista: labelMedium = 14/w400, igual vendas
+                      style: theme.textTheme.labelMedium,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       Formatters.time(transaction.date),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      // Metadado = 12/w400.
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      // Metadado = 12/w400, discreto.
+                      style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
-              // ── Valor, alinhado à direita ──
-              // FittedBox scaleDown: com fonte grande (Dynamic Type) o
-              // valor encolhe em vez de estourar a Row — nunca é cortado.
+              const SizedBox(width: 8),
+              // ── Valor, alinhado à direita, fonte menor ──
+              // FittedBox agressivo: encolhe em escala 2.0 sem estourar.
               Flexible(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerRight,
-                  child: Text(
-                    '$sign ${Formatters.currency(transaction.amountCents)}',
-                    maxLines: 1,
-                    // Valor de transação (15/w500, tabular) — alinha
-                    // coluna a coluna sem competir com a descrição.
-                    style: AppTypography.amountInRow(color),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Text(
+                      '$sign ${Formatters.currency(transaction.amountCents)}',
+                      maxLines: 1,
+                      // Minimalista: labelMedium = 14/w400, sem bold.
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                   ),
                 ),
               ),

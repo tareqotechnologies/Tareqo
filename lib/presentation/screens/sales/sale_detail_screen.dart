@@ -416,9 +416,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       ),
     );
   }
-}
-
-/// Linha de item de venda no padrão do feed de atividade — ícone circular
+}/// Linha de item de venda no padrão do feed de atividade — ícone circular
 /// laranja à esquerda, título e quantidade × preço ao centro, valor à direita.
 class _SaleItemRow extends ConsumerWidget {
   const _SaleItemRow({required this.item});
@@ -436,7 +434,7 @@ class _SaleItemRow extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          // Container circular do ícone (40px) — padrão do feed, cor laranja.
+          // Ícone circular laranja — padrão do feed.
           Container(
             width: 40,
             height: 40,

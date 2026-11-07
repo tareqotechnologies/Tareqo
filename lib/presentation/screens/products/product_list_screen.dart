@@ -22,7 +22,6 @@ import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
-import '../../widgets/smart_amount.dart';
 import '../../widgets/status_chip.dart';
 import '../../widgets/product_type_badge.dart';
 import '../../widgets/semantics_composed.dart';
@@ -228,7 +227,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                       AppSpacing.pagePaddingForWidth(
                         MediaQuery.sizeOf(context).width,
                       ),
-                      8,
+                      16,
                       AppSpacing.pagePaddingForWidth(
                         MediaQuery.sizeOf(context).width,
                       ),
@@ -236,7 +235,12 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                     ),
                     sliver: SliverList.separated(
                       itemCount: filtered.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 8),
+                      separatorBuilder: (_, _) => Divider(
+                        height: 1,
+                        indent: 72,
+                        endIndent: AppSpacing.md,
+                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                      ),
                       itemBuilder: (context, index) {
                         final product = filtered[index];
                         return _ProductTile(
@@ -730,10 +734,11 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
 }
 
 /// Linha do card de produto (estilo Apple): foto, nome + detalhe à
-/// Tile de produto minimalista — estilo Google Apps (inspirado no SalesCard).
+/// Tile de produto premium — estilo minimalista profissional.
 ///
-/// Layout em row: foto do produto (36px) à esquerda, nome + detalhe no
-/// centro, preço + estoque à direita. Borda sutil com hover.
+/// Layout em row: foto do produto (40px) à esquerda, informações à
+/// direita alinhadas. Preço em destaque com fonte pequena mas bold.
+/// Borda sutil com hover elegante.
 class _ProductTile extends StatefulWidget {
   const _ProductTile({required this.product, this.onTap});
 
@@ -767,10 +772,7 @@ class _ProductTileState extends State<_ProductTile> {
         ? (_product.description.isEmpty ? null : _product.description)
         : _product.code;
 
-    // A11y (plano UI/UX — Fase 3.1): o card inteiro é UM nó semântico —
-    // "Caderno: 8,00, 10 un., Stock baixo, Inactivo" — em vez de nome,
-    // detalhe, preço, estoque e chips anunciados como nós separados. O
-    // label vem do helper do design system (mesmo padrão do SalesCard).
+    // A11y: o card inteiro é UM nó semântico.
     final semanticLabel = buildComposedLabel([
       detail == null ? _product.name : '${_product.name}: $detail',
       Formatters.currency(_product.salePriceCents),
@@ -784,7 +786,7 @@ class _ProductTileState extends State<_ProductTile> {
       if (inactive) l10n.productsInactive,
     ]);
 
-    // Padrão de hover unificado (Lote 2): mesmo feedback do SalesCard.
+    // Hover elegante: fundo sutil com elevacao.
     return HoverableTile(
       enabled: _onTap != null,
       child: MouseRegion(
@@ -792,13 +794,14 @@ class _ProductTileState extends State<_ProductTile> {
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
         child: Material(
-          color: _hovered
-              ? scheme.surfaceContainerHighest.withValues(alpha: 0.6)
-              : scheme.surface,
+          color: scheme.surface,
+          elevation: _hovered ? 2 : 0,
+          shadowColor: scheme.shadow.withValues(alpha: 0.1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
             side: BorderSide(
-              color: scheme.outlineVariant.withValues(alpha: 0.6),
+              color: scheme.outlineVariant.withValues(alpha: _hovered ? 0.8 : 0.4),
+              width: _hovered ? 1.0 : 0.5,
             ),
           ),
           child: InkWell(
@@ -807,10 +810,8 @@ class _ProductTileState extends State<_ProductTile> {
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
-                vertical: AppSpacing.md,
+                vertical: AppSpacing.md + 2,
               ),
-              // Mesmo padrão do SalesCard: o toque do card é roteado ao nó
-              // combinado — duplo-toque do leitor ativa o card inteiro.
               child: Semantics(
                 container: true,
                 excludeSemantics: true,
@@ -820,23 +821,25 @@ class _ProductTileState extends State<_ProductTile> {
                     // ── Foto/ícone do produto ──
                     ProductImage(
                       imagePath: _product.imagePath,
-                      size: 36,
-                      radius: 8,
+                      size: 40,
+                      radius: 10,
                     ),
                     const SizedBox(width: 12),
-                    // ── Coluna central: nome + detalhe + chips ──
+                    // ── Coluna: nome + detalhe + tipo ──
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Nome do produto
+                          // Nome do produto - font pequena elegante
                           Text(
                             _product.name,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w400,
-                              color: inactive ? scheme.onSurfaceVariant : null,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: inactive
+                                  ? scheme.onSurfaceVariant
+                                  : scheme.onSurface,
                             ),
                           ),
                           if (detail != null) ...[
@@ -845,74 +848,67 @@ class _ProductTileState extends State<_ProductTile> {
                               detail,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall?.copyWith(
+                              style: theme.textTheme.labelSmall?.copyWith(
                                 color: scheme.onSurfaceVariant,
                               ),
                             ),
                           ],
+                          // Chips apenas se necessário
                           if (inactive) ...[
                             const SizedBox(height: 4),
                             StatusChip(
                               label: l10n.productsInactive,
                               color: scheme.outline,
                               icon: Icons.block_outlined,
+                              
                             ),
                           ],
-                          // Fase 1: selo do tipo — matérias-primas,
-                          // produzidos, compostos e embalagens são
-                          // identificáveis na lista (revenda fica sem selo:
-                          // é o estado comum do varejo, evitar ruído).
-                          if (_product.type != ProductType.resale) ...[
+                          if (_product.type != ProductType.resale && !inactive) ...[
                             const SizedBox(height: 4),
                             ProductTypeBadge(type: _product.type),
                           ],
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     // ── Coluna direita: preço + estoque ──
-                    // Flexible: o rótulo de estoque (que agora pode incluir
-                    // "· Estoque baixo") encolhe com ellipsis em vez de estourar
-                    // a linha em ecrãs estreitos.
-                    Flexible(
+                    // Alinhado à direita, fontes pequenas premium
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 100),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerRight,
-                            child: SmartAmount(
-                              cents: _product.salePriceCents,
-                              alignment: Alignment.centerRight,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: inactive
-                                    ? scheme.onSurfaceVariant
-                                    : null,
-                              ),
+                          // Preço em destaque - font pequena mas bold
+                          Text(
+                            Formatters.currency(_product.salePriceCents),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: inactive
+                                  ? scheme.onSurfaceVariant
+                                  : theme.colorScheme.primary,
                             ),
                           ),
                           const SizedBox(height: 2),
+                          // Estoque - font pequena discreta
                           Text(
-                            '${Quantity.format(_product.stockQuantity, unitLabel: _product.vendaPorFracao ? _product.unitLabel : null, language: Formatters.currentLanguage)}'
+                            '${Quantity.format(
+                              _product.stockQuantity,
+                              unitLabel: _product.vendaPorFracao ? _product.unitLabel : null,
+                              language: Formatters.currentLanguage,
+                            )}'
                             '${_product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}'
-                            // Estado por TEXTO, não só pela cor (daltónicos e
-                            // leitores de ecrã): a mesma mensagem do alerta do
-                            // dashboard (dashboardLowStock).
+                            // Estado por texto (acessibilidade)
                             '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            // Estoque = metadado (bodySmall 12/w400); em
-                            // falta sobe para w500 + cor de alerta. O w300
-                            // anterior saía da escala e degradava a leitura.
-                            style: theme.textTheme.bodySmall?.copyWith(
+                            style: theme.textTheme.labelSmall?.copyWith(
                               color: lowStock
                                   ? theme.expense
                                   : scheme.onSurfaceVariant,
-                              fontWeight: lowStock
-                                  ? FontWeight.w500
-                                  : FontWeight.w400,
+                              fontWeight: lowStock ? FontWeight.w500 : FontWeight.w400,
                             ),
                           ),
                         ],
