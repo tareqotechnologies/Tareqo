@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/confirm_dialog.dart';
@@ -91,16 +92,13 @@ class MenuScreen extends ConsumerWidget {
         destructive: true,
       );
       if (confirmed == true) {
-        // B4: apenas `ref` é usado após o await (nada de context) — o
-        // ignore era desnecessário.
         ref.read(signOutUseCaseProvider).call();
       }
     }
 
     final width = MediaQuery.sizeOf(context).width;
     final horizontal = AppSpacing.pagePaddingForWidth(width);
-    // Largura do tile: metade do conteúdo menos o vão entre as colunas —
-    // os dois tiles da linha ficam sempre espelhados (referência).
+    // Largura do tile: metade do conteúdo menos o vão entre as colunas.
     final tileWidth = (width - 2 * horizontal - AppSpacing.xs) / 2;
 
     return AppPage(
@@ -113,24 +111,24 @@ class MenuScreen extends ConsumerWidget {
           AppSpacing.xxl,
         ),
         children: [
-          // Cabeçalho grande da referência — "Menu" como heading do corpo
-          // (o AppBar do shell mantém a marca TAREQO + sino).
+          // Cabeçalho premium — título elegante + subtítulo discreto.
           Text(
             l10n.appNavMenu,
-            style: theme.textTheme.headlineMedium?.copyWith(
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              letterSpacing: -0.5,
+              letterSpacing: -0.3,
             ),
           ),
-          const SizedBox(height: AppSpacing.xxs),
+          const SizedBox(height: 4),
           Text(
             l10n.menuSubtitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
+              fontSize: 13,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          // Grelha 2 colunas — tiles horizontais, módulos por frequência.
+          // Grelha 2 colunas — tiles com ícone laranja padronizado.
           Wrap(
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
@@ -140,7 +138,6 @@ class MenuScreen extends ConsumerWidget {
                 child: _MenuTile(
                   icon: Icons.inventory_2_outlined,
                   label: l10n.appNavProducts,
-                  iconColor: ModuleColors.products,
                   onTap: () => goTo(AppSection.products),
                 ),
               ),
@@ -149,7 +146,6 @@ class MenuScreen extends ConsumerWidget {
                 child: _MenuTile(
                   icon: Icons.people_outline_rounded,
                   label: l10n.appNavCustomers,
-                  iconColor: ModuleColors.customers,
                   onTap: () => goTo(AppSection.customers),
                 ),
               ),
@@ -158,7 +154,6 @@ class MenuScreen extends ConsumerWidget {
                 child: _MenuTile(
                   icon: Icons.receipt_long_outlined,
                   label: l10n.appNavCredit,
-                  iconColor: ModuleColors.credit,
                   onTap: () => goTo(AppSection.credit),
                 ),
               ),
@@ -168,7 +163,6 @@ class MenuScreen extends ConsumerWidget {
                   child: _MenuTile(
                     icon: Icons.local_shipping_outlined,
                     label: l10n.dashboardModulePurchases,
-                    iconColor: ModuleColors.purchases,
                     onTap: openPurchases,
                   ),
                 ),
@@ -178,7 +172,6 @@ class MenuScreen extends ConsumerWidget {
                   child: _MenuTile(
                     icon: Icons.bakery_dining_outlined,
                     label: l10n.productionTitle,
-                    iconColor: ModuleColors.production,
                     onTap: openProduction,
                   ),
                 ),
@@ -188,7 +181,6 @@ class MenuScreen extends ConsumerWidget {
                   child: _MenuTile(
                     icon: Icons.bar_chart_outlined,
                     label: l10n.dashboardModuleReports,
-                    iconColor: ModuleColors.reports,
                     onTap: openReports,
                   ),
                 ),
@@ -200,7 +192,6 @@ class MenuScreen extends ConsumerWidget {
                   child: _MenuTile(
                     icon: Icons.storefront_outlined,
                     label: l10n.dashboardModuleStores,
-                    iconColor: ModuleColors.stores,
                     onTap: () => openStores(tenant),
                   ),
                 ),
@@ -219,7 +210,6 @@ class MenuScreen extends ConsumerWidget {
                   child: _MenuTile(
                     icon: Icons.extension_outlined,
                     label: l10n.addonsTitle,
-                    iconColor: AppColors.accentOrange,
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
@@ -234,7 +224,6 @@ class MenuScreen extends ConsumerWidget {
                 child: _MenuTile(
                   icon: Icons.shield_outlined,
                   label: l10n.securitySectionTitle,
-                  iconColor: AppColors.accentOrange,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -247,50 +236,65 @@ class MenuScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          // Terminar sessão — card vermelho destrutivo em largura total
-          // (referência), com confirmação antes de deslogar.
-          AppCard(
-            onTap: confirmSignOut,
-            color: IconTone.darkBackground(scheme.error),
-            borderColor: scheme.error.withValues(alpha: 0.45),
-            borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.sm,
+          // Terminar sessão — botão Apple style: ícone laranja, texto elegante.
+          _SignOutButton(onTap: confirmSignOut, label: l10n.commonSignOut),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tile de módulo — ícone circular laranja padronizado, texto pequeno.
+class _MenuTile extends StatelessWidget {
+  const _MenuTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return AppCard(
+      onTap: onTap,
+      elevated: true,
+      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.md)),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
+      child: Row(
+        children: [
+          // Ícone circular laranja padronizado.
+          Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              color: AppColors.accentOrange,
+              shape: BoxShape.circle,
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: IconTone.darkBackground(scheme.error),
-                  ),
-                  child: Icon(
-                    Icons.logout_rounded,
-                    size: 20,
-                    color: IconTone.lightForeground(scheme.error),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    l10n.commonSignOut,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.error,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.xxs),
-                Icon(
-                  Icons.chevron_right,
-                  size: 18,
-                  color: scheme.onSurfaceVariant,
-                ),
-              ],
+            child: Icon(
+              icon,
+              size: 18,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: scheme.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -299,69 +303,65 @@ class MenuScreen extends ConsumerWidget {
   }
 }
 
-/// Tile de módulo HORIZONTAL da referência — card elevado (cantos 16) com
-/// ícone circular tintado à esquerda, rótulo e chevron à direita.
-///
-/// Substitui o card vertical antigo: no Menu a hierarquia é
-/// de LISTA de destino (navegar), não de grade de abertura — o chevron
-/// comunica "ir", os módulos continuam com a cor própria (IconTone).
-class _MenuTile extends StatelessWidget {
-  const _MenuTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.iconColor,
-  });
+/// Botão "Sair" no estilo Apple — minimalista, ícone laranja, texto discreto.
+class _SignOutButton extends StatelessWidget {
+  const _SignOutButton({required this.onTap, required this.label});
 
-  final IconData icon;
-  final String label;
   final VoidCallback onTap;
-
-  /// Cor do ícone — se nulo, usa [ThemeData.accent].
-  final Color? iconColor;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final color = iconColor ?? theme.accent;
 
-    return AppCard(
+    return InkWell(
       onTap: onTap,
-      elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: IconTone.darkBackground(color),
-            ),
-            child: Icon(icon, size: 20, color: IconTone.lightForeground(color)),
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
+        decoration: BoxDecoration(
+          color: scheme.surface,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: scheme.outlineVariant.withValues(alpha: 0.5),
+            width: 0.5,
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: scheme.onSurface,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.1,
+        ),
+        child: Row(
+          children: [
+            // Ícone circular laranja discreto.
+            Container(
+              width: 32,
+              height: 32,
+              decoration: const BoxDecoration(
+                color: AppColors.accentOrange,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                size: 16,
+                color: Colors.white,
               ),
             ),
-          ),
-          const SizedBox(width: AppSpacing.xxs),
-          Icon(Icons.chevron_right, size: 18, color: scheme.onSurfaceVariant),
-        ],
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -383,7 +383,6 @@ class _NotificationsModuleTile extends ConsumerWidget {
       child: _MenuTile(
         icon: Icons.notifications_outlined,
         label: l10n.menuNotifications,
-        iconColor: AppColors.accentOrange,
         onTap: onTap,
       ),
     );
