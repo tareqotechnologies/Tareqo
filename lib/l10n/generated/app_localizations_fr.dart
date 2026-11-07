@@ -1950,6 +1950,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get saleDetailView => 'Voir les détails';
+
+  @override
   String get saleDetailTotalLabel => 'Total de la vente';
 
   @override

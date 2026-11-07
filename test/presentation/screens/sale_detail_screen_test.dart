@@ -184,8 +184,8 @@ void main() {
         (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color == AppColors.accentOrange &&
-            (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+            (widget.decoration).color == AppColors.accentOrange &&
+            (widget.decoration).shape == BoxShape.circle &&
             widget.constraints?.maxWidth == 40 && widget.constraints?.maxHeight == 40,
       ),
       findsNWidgets(3), // header + Caneta + Caderno
@@ -195,8 +195,8 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is Divider &&
-            (widget as Divider).indent == 60 &&
-            (widget as Divider).endIndent == AppSpacing.md,
+            (widget).indent == 60 &&
+            (widget).endIndent == AppSpacing.md,
       ),
       findsOneWidget, // após Caneta (o total é o _SaleFeedRow, sem divisória extra)
     );

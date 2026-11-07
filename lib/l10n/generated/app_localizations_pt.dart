@@ -1948,6 +1948,9 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get saleDetailView => 'Ver detalhes';
+
+  @override
   String get saleDetailTotalLabel => 'Total da venda';
 
   @override

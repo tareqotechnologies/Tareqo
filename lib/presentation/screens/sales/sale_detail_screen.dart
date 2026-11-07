@@ -6,7 +6,6 @@ import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
 import '../../../data/services/offline_sync_service.dart';
@@ -24,14 +23,9 @@ import '../../widgets/app_page.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/confirm_dialog.dart';
-import '../../widgets/payment_filter.dart'
-    show PaymentMethodAccent, PaymentMethodIcon;
-import '../../widgets/product_image.dart';
-import '../../widgets/section_header.dart';
-import '../../widgets/smart_amount.dart';
+import '../../widgets/payment_filter.dart';
 import '../../widgets/status_chip.dart';
 import 'sale_receipt_share_sheet.dart';
-import '../../../l10n/generated/app_localizations.dart';
 
 /// Abre o detalhe da venda no **sheet padrão de eventos** — o mesmo chrome
 /// usado pela Home ("Atividade de hoje"): handle, cabeçalho com ícone
@@ -58,7 +52,6 @@ class _SaleDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final isCancelled = sale.status == SaleStatus.cancelled;
 
     return Padding(
       padding: AppSpacing.sheetPadding,
@@ -140,7 +133,7 @@ class _SaleFeedRow extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.accentOrange,
               shape: BoxShape.circle,
             ),
@@ -327,7 +320,6 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final l10n = context.l10n;
     final canCancel = ref.watch(canCancelSalesProvider);
     final isCancelled = sale.status == SaleStatus.cancelled;
@@ -337,7 +329,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       title: l10n.saleDetailTitle,
       useSafeArea: false,
       body: ListView(
-        padding: EdgeInsets.fromLTRB(8, 8, 8, 32),
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 32),
         children: [
           // ── Header: sale ID + date + payment chip ──
           Text(
@@ -346,7 +338,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '${Formatters.dateTime(sale.dateTime)}',
+            Formatters.dateTime(sale.dateTime),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -437,15 +429,6 @@ class _SaleItemRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final subtotal = Quantity.lineTotal(item.quantity, item.unitPriceCents);
-    final imagePath =
-        ref
-            .watch(productsProvider)
-            .value
-            ?.where((p) => p.id == item.productId)
-            .map((p) => p.imagePath)
-            .firstOrNull ??
-        '';
-
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -457,7 +440,7 @@ class _SaleItemRow extends ConsumerWidget {
           Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.accentOrange,
               shape: BoxShape.circle,
             ),

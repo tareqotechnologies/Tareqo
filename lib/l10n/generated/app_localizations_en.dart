@@ -1918,6 +1918,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get saleDetailView => 'View details';
+
+  @override
   String get saleDetailTotalLabel => 'Sale total';
 
   @override

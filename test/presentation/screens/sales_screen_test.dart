@@ -16,7 +16,6 @@ import 'package:tareqo/presentation/widgets/payment_filter.dart';
 import 'package:tareqo/presentation/widgets/period_filter.dart';
 
 import 'package:tareqo/core/theme/app_colors.dart';
-import 'package:tareqo/core/theme/app_tokens.dart';
 import 'package:tareqo/presentation/widgets/sale_card.dart';
 
 import '../../helpers/store_context.dart';

@@ -3412,6 +3412,12 @@ abstract class AppLocalizations {
   /// **'Venda {id}'**
   String saleDetailId(String id);
 
+  /// No description provided for @saleDetailView.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver detalhes'**
+  String get saleDetailView;
+
   /// No description provided for @saleDetailTotalLabel.
   ///
   /// In pt, this message translates to:
