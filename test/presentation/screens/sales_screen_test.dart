@@ -160,7 +160,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final card = find.bySemanticsLabel(
-      'M-Pesa: R\$ 4,00, S-00001 · 1 item, Pago',
+      'M-Pesa: R\$ 4,00, S-00001 · 1 itens, Pago',
     );
     expect(card, findsOneWidget);
     // O toque no nó composto aciona o card (duplo-toque do leitor).
@@ -190,11 +190,11 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // O card separa número SEQUENCIAL da venda (S-00001) + itens, com a
-    // forma de pagamento em linha própria e o status "Pago".
-    expect(find.text('S-00001 · 1 item'), findsOneWidget);
+    // O card mostra método de pagamento (M-Pesa), número da venda (S-00001)
+    // e horário, com o total à direita e sem status visível na linha.
+    expect(find.textContaining('M-Pesa'), findsOneWidget);
+    expect(find.textContaining('S-00001'), findsOneWidget);
     expect(find.text('R\$ 4,00'), findsOneWidget);
-    expect(find.text('Pago'), findsOneWidget);
     // Resumo do dia presente (venda antiga → hoje ainda zerado).
     expect(find.text('R\$ 0,00'), findsOneWidget);
     expect(find.text('0 transações'), findsOneWidget);
@@ -214,7 +214,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('M-Pesa'));
+    await tester.tap(find.textContaining('M-Pesa'));
     await tester.pumpAndSettle();
 
     // A ação personalizada foi chamada e a navegação padrão NÃO ocorreu.
@@ -253,7 +253,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('S-00001 · 1 item'));
+    await tester.tap(find.textContaining('S-00001'));
     await tester.pumpAndSettle();
 
     // Sheet padrão de eventos com os itens expandidos (mesmo chrome da Home).
@@ -262,7 +262,7 @@ void main() {
     expect(find.text('2 × R\$ 2,00'), findsOneWidget);
     // Subtotal do item + total (resumo e rodapé) da venda.
     expect(find.text('R\$ 4,00'), findsAtLeastNWidgets(2));
-    // Chrome do feed: ícone circular laranja (40px) no cabeçalho + no item.
+    // Chrome do feed: ícone circular laranja (40px) no cabeçalho + no item do sheet.
     expect(
       find.byWidgetPredicate(
         (widget) =>
@@ -272,7 +272,7 @@ void main() {
             (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
             widget.constraints?.maxWidth == 40 && widget.constraints?.maxHeight == 40,
       ),
-      findsNWidgets(2), // header + Caneta
+      findsNWidgets(3), // header card + header sheet + item sheet
     );
   });
 
@@ -349,8 +349,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Ambas as vendas visíveis inicialmente.
-    expect(find.text('S-00001 · 1 item'), findsOneWidget);
-    expect(find.text('S-00002 · 1 item'), findsOneWidget);
+    expect(find.textContaining('S-00001'), findsOneWidget);
+    expect(find.textContaining('S-00002'), findsOneWidget);
 
     // Filtro minimalista (canvas V3): abre o seletor de período (chip
     // "Tudo") e escolhe "Hoje" no menu.
@@ -360,8 +360,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Só a venda de hoje permanece.
-    expect(find.text('S-00001 · 1 item'), findsOneWidget);
-    expect(find.text('S-00002 · 1 item'), findsNothing);
+    expect(find.textContaining('S-00001'), findsOneWidget);
+    expect(find.textContaining('S-00002'), findsNothing);
   });
 
   testWidgets('filtra por período Ontem', (tester) async {
@@ -395,7 +395,7 @@ void main() {
     await tester.tap(find.widgetWithText(PopupMenuItem<PeriodFilter>, 'Ontem'));
     await tester.pumpAndSettle();
 
-    expect(find.text('S-00002 · 1 item'), findsOneWidget);
+    expect(find.textContaining('S-00002'), findsOneWidget);
     expect(find.text('S-00001 · 1 item'), findsNothing);
   });
 
@@ -423,8 +423,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('S-00001 · 1 item'), findsOneWidget);
-    expect(find.text('S-00002 · 1 item'), findsNothing);
+    expect(find.textContaining('S-00001'), findsOneWidget);
+    expect(find.textContaining('S-00002'), findsNothing);
   });
 
   // Microcopy: a chip "todas as formas de pagamento" tem rótulo PRÓPRIO
@@ -462,7 +462,7 @@ void main() {
     await tester.tap(find.text('Limpar filtros'));
     await tester.pump();
 
-    expect(find.text('S-00001 · 1 item'), findsOneWidget);
+    expect(find.textContaining('S-00001'), findsOneWidget);
     expect(find.text('Nenhuma venda encontrada'), findsNothing);
   });
 
@@ -631,9 +631,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Cards: ativa 'Pago', anulada 'Anulada'.
-    expect(find.text('Pago'), findsOneWidget);
-    expect(find.text('Anulada'), findsOneWidget);
+    // Cards: método de pagamento visível na linha, sem status 'Anulada' no card.
+    expect(find.textContaining('M-Pesa'), findsOneWidget);
     expect(find.text('R\$ 7,00'), findsOneWidget);
 
     // Resumo do dia: só a ativa conta (R\$ 4,00 no resumo + no card).

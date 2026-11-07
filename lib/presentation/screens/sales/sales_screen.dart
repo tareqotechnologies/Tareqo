@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/sale.dart';
@@ -241,7 +242,12 @@ class _SalesBody extends StatelessWidget {
               ),
               sliver: SliverList.separated(
                 itemCount: filtered.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 8),
+                separatorBuilder: (_, _) => const Divider(
+                  height: 1,
+                  indent: 60,
+                  endIndent: AppSpacing.md,
+                  color: AppColors.lightDivider,
+                ),
                 itemBuilder: (context, index) {
                   final sale = filtered[index];
                   return RepaintBoundary(

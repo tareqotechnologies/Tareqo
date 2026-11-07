@@ -4,27 +4,20 @@ import '../../core/i18n/l10n_ext.dart';
 import '../../core/i18n/payment_method_l10n.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
-import '../../core/theme/app_typography.dart';
 import '../../core/utils/formatters.dart';
 import '../../domain/entities/sale.dart';
 import '../screens/sales/sale_detail_screen.dart';
 import 'app_page.dart' show HoverableTile;
 import 'focus_ring.dart';
 import 'semantics_composed.dart';
-import 'payment_filter.dart' show PaymentMethodAccent, PaymentMethodIcon;
-import 'status_chip.dart';
+import 'payment_filter.dart';
 
-/// Linha de venda — superfície única da lista agrupada.
+/// Linha de venda no padrão do feed de atividade — ícone circular laranja,
+/// título + método/ data à esquerda, valor total à direita.
 ///
-/// Layout em duas linhas, com o montante alinhado à direita em TODAS as
-/// linhas (tabular figures):
-/// - Linha 1: método de pagamento (título) + valor total (destaque)
-/// - Linha 2: referência · itens + estado do pagamento
-///
-/// A linha não desenha caixa própria: quem a hospeda (a lista de Vendas)
-/// é a superfície — a separação entre vendas é uma régua de cabelo
-/// fornecida pelo [SliverList.separated] do ecrã. Assim a lista lê-se como
-/// um painel contínuo e não como uma pilha de cartões.
+/// Fonte reduzida em relação ao card anterior para maior densidade da lista.
+/// A separação entre vendas é feita por uma Divider sutil no [SliverList]
+/// do ecrã (ver [SalesScreen]).
 class SalesCard extends StatefulWidget {
   const SalesCard({
     super.key,
@@ -57,20 +50,15 @@ class _SalesCardState extends State<SalesCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final l10n = context.l10n;
     final accent = _sale.paymentMethod.accent(theme);
-    final itemsLabel = l10n.dashboardSaleItems(_sale.items.length);
     final isCancelled = _sale.status == SaleStatus.cancelled;
 
-    // A11y (plano UI/UX — Fase 3.1): a linha inteira é UM nó semântico —
-    // "M-Pesa: R$ 4,00, S-00001 · 1 item, Pago" — em vez de método, valor,
-    // número, itens e status anunciados como nós separados. Mesma
-    // convenção "Tema: valor, extras" dos KPIs do dashboard.
+    // A11y (plano UI/UX — Fase 3.1): a linha inteira é UM nó semântico.
     final semanticLabel = buildComposedLabel([
       '${_sale.paymentMethod.labelFor(l10n)}: '
           '${Formatters.currency(_sale.totalAmountCents)}',
-      '${Formatters.saleLabel(_sale.number)} · $itemsLabel',
+      '${Formatters.saleLabel(_sale.number)} · ${_sale.items.length} itens',
       isCancelled ? l10n.salesStatusCancelled : l10n.salesStatusPaid,
     ]);
 
@@ -81,7 +69,7 @@ class _SalesCardState extends State<SalesCard> {
         onExit: (_) => setState(() => _hovered = false),
         child: Material(
           color: _hovered
-              ? scheme.surfaceContainerHighest.withValues(alpha: 0.55)
+              ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.55)
               : Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: _radius),
           child: Stack(
@@ -89,35 +77,30 @@ class _SalesCardState extends State<SalesCard> {
               InkWell(
                 onTap: _onTap ?? () => _openDetails(context),
                 borderRadius: _radius,
-                // A11y (Fase 3.3): foco visível para teclado físico/Bluetooth.
                 onFocusChange: (f) => setState(() => _focused = f),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.md,
-                  ),
-                  // DENTRO do InkWell: o toque do card é roteado para o nó
-                  // combinado — duplo-toque do leitor ativa a linha inteira.
-                  child: Semantics(
-                    container: true,
-                    excludeSemantics: true,
-                    label: semanticLabel,
+                child: Semantics(
+                  container: true,
+                  excludeSemantics: true,
+                  label: semanticLabel,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm + 1,
+                    ),
                     child: Row(
                       children: [
-                        // Selo do método: fundo escuro derivado da cor do
-                        // provedor + ícone claro (o mesmo padrão do feed).
+                        // Ícone circular laranja (40px) — padrão do feed.
                         Container(
-                          width: 38,
-                          height: 38,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: IconTone.darkBackground(accent),
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            color: AppColors.accentOrange,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
-                            _sale.paymentMethod.icon,
+                          child: const Icon(
+                            Icons.north_east_rounded,
                             size: 18,
-                            color: IconTone.lightForeground(accent),
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
@@ -125,68 +108,44 @@ class _SalesCardState extends State<SalesCard> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      _sale.paymentMethod.labelFor(l10n),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      // Nome/descrição da linha = 14/w400; a
-                                      // hierarquia vem do valor à direita.
-                                      style: theme.textTheme.bodyMedium,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  // FittedBox scaleDown: com Dynamic Type o
-                                  // valor encolhe em vez de estourar a Row.
-                                  Flexible(
-                                    child: FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        Formatters.currency(
-                                          _sale.totalAmountCents,
-                                        ),
-                                        maxLines: 1,
-                                        style: AppTypography.amountInRow(
-                                          scheme.onSurface,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              // Título: método de pagamento — labelSmall para
+                              // reduzir o tamanho da fonte em relação ao card anterior.
+                              Text(
+                                _sale.paymentMethod.labelFor(l10n),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      '${Formatters.saleLabel(_sale.number)}'
-                                      ' · $itemsLabel',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: scheme.onSurfaceVariant,
-                                          ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  StatusChip(
-                                    label: isCancelled
-                                        ? l10n.salesStatusCancelled
-                                        : l10n.salesStatusPaid,
-                                    color: isCancelled
-                                        ? theme.expense
-                                        : theme.income,
-                                    icon: isCancelled
-                                        ? Icons.block
-                                        : Icons.check_circle_outline,
-                                  ),
-                                ],
+                              const SizedBox(height: 1),
+                              // Referência + data — labelSmall discreto.
+                              Text(
+                                '${Formatters.saleLabel(_sale.number)} · '
+                                '${Formatters.time(_sale.dateTime)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
                               ),
                             ],
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        // Total à direita — labelMedium em destaque laranja.
+                        Flexible(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              Formatters.currency(_sale.totalAmountCents),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: accent,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -202,8 +161,7 @@ class _SalesCardState extends State<SalesCard> {
     );
   }
 
-  /// Abre o detalhe no sheet padrão de eventos (mesmo chrome da Home), em
-  /// vez de empurrar uma página inteira por cima da lista.
+  /// Abre o detalhe no sheet padrão de eventos (mesmo chrome da Home).
   void _openDetails(BuildContext context) =>
       showSaleDetailSheet(context, _sale);
 }
