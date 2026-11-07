@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:tareqo/core/theme/app_colors.dart';
+import 'package:tareqo/core/theme/app_tokens.dart';
+
 import '../../helpers/store_context.dart';
 import '../../helpers/test_app.dart';
 
@@ -162,7 +165,9 @@ void main() {
     expect(find.text('Venda S-00001'), findsOneWidget);
     expect(find.text('M-Pesa'), findsOneWidget);
 
-    // Itens com quantidade × preço unitário e subtotal.
+    // Itens com quantidade × preço unitário e subtotal — mesmo padrão do
+    // feed de "Atividade de hoje": ícone circular laranja, título + linha de
+    // quantidade × preço à esquerda, valor à direita, divisórias indent: 60.
     expect(find.text('Caneta'), findsOneWidget);
     expect(find.text('2 × R\$ 2,00'), findsOneWidget);
     expect(find.text('R\$ 4,00'), findsOneWidget); // subtotal de Caneta
@@ -171,8 +176,30 @@ void main() {
       find.text('1 × R\$ 9,90'),
       findsOneWidget,
     ); // Total em destaque e nota de snapshot.
-    expect(find.text('R\$ 13,90'), findsOneWidget);
-    expect(find.text('Preços congelados no momento da venda.'), findsOneWidget);
+    expect(find.text('R\$ 13,90'), findsAtLeastNWidgets(1)); // total (header + rodapé)
+    // Chrome do feed: ícone circular laranja (40px) no cabeçalho da venda +
+    // em cada item — header + 2 itens = 3 ícones.  
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Container &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration as BoxDecoration).color == AppColors.accentOrange &&
+            (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+            widget.constraints?.maxWidth == 40 && widget.constraints?.maxHeight == 40,
+      ),
+      findsNWidgets(3), // header + Caneta + Caderno
+    );
+    // Divisória do item: indent: 60, mesma largura usada pelo dashboard feed.
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Divider &&
+            (widget as Divider).indent == 60 &&
+            (widget as Divider).endIndent == AppSpacing.md,
+      ),
+      findsOneWidget, // após Caneta (o total é o _SaleFeedRow, sem divisória extra)
+    );
   });
 
   testWidgets('dono vê Anular venda e o fluxo confirma e chama o use case', (

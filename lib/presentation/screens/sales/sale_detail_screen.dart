@@ -31,6 +31,7 @@ import '../../widgets/section_header.dart';
 import '../../widgets/smart_amount.dart';
 import '../../widgets/status_chip.dart';
 import 'sale_receipt_share_sheet.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 /// Abre o detalhe da venda no **sheet padrão de eventos** — o mesmo chrome
 /// usado pela Home ("Atividade de hoje"): handle, cabeçalho com ícone
@@ -45,7 +46,9 @@ Future<void> showSaleDetailSheet(BuildContext context, Sale sale) {
   );
 }
 
-/// Conteúdo do sheet de detalhe da venda.
+/// Conteúdo do sheet de detalhe da venda — layout idêntico ao feed de
+/// "Atividade de hoje" na Home: ícone circular tingido, título/detalhes à
+/// esquerda e valor/badge à direita, com divisórias de 60px entre itens.
 class _SaleDetailSheet extends StatelessWidget {
   const _SaleDetailSheet({required this.sale});
 
@@ -54,123 +57,52 @@ class _SaleDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final l10n = context.l10n;
-    final accent = sale.paymentMethod.accent(theme);
     final isCancelled = sale.status == SaleStatus.cancelled;
-    final itemsLabel = l10n.dashboardSaleItems(sale.items.length);
 
     return Padding(
       padding: AppSpacing.sheetPadding,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Cabeçalho do sheet de eventos: ícone circular + referência.
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: IconTone.darkBackground(accent),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    sale.paymentMethod.icon,
-                    size: 18,
-                    color: IconTone.lightForeground(accent),
-                  ),
+            // Linha do sale no feed — ícone circular + título + detalhes + total
+            _SaleFeedRow(
+              sale: sale,
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xxs,
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        Formatters.saleLabel(sale.number),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.micro),
-                      Text(
-                        '${Formatters.dateTime(sale.dateTime)} · $itemsLabel',
-                        maxLines: 2,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+                decoration: BoxDecoration(
+                  color: AppColors.accentOrange,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
-                const SizedBox(width: AppSpacing.xs),
-                StatusChip(
-                  label: isCancelled
-                      ? l10n.salesStatusCancelled
-                      : l10n.salesStatusPaid,
-                  color: isCancelled ? theme.expense : theme.income,
-                  icon: isCancelled ? Icons.block : Icons.check_circle_outline,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Itens da venda — o mesmo painel agrupado dos eventos da Home.
-            Container(
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                border: Border.all(
-                  color: scheme.outlineVariant.withValues(alpha: 0.5),
-                ),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: [
-                  for (var i = 0; i < sale.items.length; i++) ...[
-                    if (i > 0)
-                      Divider(
-                        height: 1,
-                        indent: AppSpacing.md,
-                        endIndent: AppSpacing.md,
-                        color: scheme.outlineVariant.withValues(alpha: 0.5),
-                      ),
-                    _ItemRow(item: sale.items[i]),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Total da venda — âncora do sheet.
-            Row(
-              children: [
-                Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
                   child: Text(
-                    l10n.saleDetailTotalLabel,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                    l10n.saleDetailView,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: const Color(0xFF101413),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Flexible(
-                  child: SmartAmount(
-                    cents: sale.totalAmountCents,
-                    alignment: Alignment.centerRight,
-                    style: isCancelled
-                        ? theme.textTheme.headlineMedium?.copyWith(
-                            color: scheme.outline,
-                            decoration: TextDecoration.lineThrough,
-                          )
-                        : AppTypography.summaryAmount(scheme.onSurface),
-                  ),
-                ),
-              ],
+              ),
             ),
+            const SizedBox(height: AppSpacing.md),
+            // Itens expandidos — mesmo padrão do feed: ícone circular laranja,
+            // título + quantidade × preço à esquerda, subtotal à direita.
+            for (var i = 0; i < sale.items.length; i++) ...[
+              if (i > 0)
+                const Divider(
+                  height: 1,
+                  indent: 60,
+                  endIndent: AppSpacing.md,
+                ),
+              _SaleItemRow(item: sale.items[i]),
+            ],
+            const SizedBox(height: AppSpacing.md),
           ],
         ),
       ),
@@ -178,8 +110,97 @@ class _SaleDetailSheet extends StatelessWidget {
   }
 }
 
+/// Linha de sale no feed — ícone circular laranja à esquerda, título, data e
+/// quantidade de itens ao centro, valor total à direita, seguindo o mesmo
+/// padrão do _ActivityRow do dashboard.
+class _SaleFeedRow extends StatelessWidget {
+  const _SaleFeedRow({
+    required this.sale,
+    this.trailing,
+  });
+
+  final Sale sale;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final subtotal = sale.items.fold(0, (sum, item) =>
+        sum + Quantity.lineTotal(item.quantity, item.unitPriceCents));
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm + 2,
+      ),
+      child: Row(
+        children: [
+          // Container circular do ícone (40px) — padrão do feed, cor laranja.
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.accentOrange,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.north_east_rounded,
+              size: 18,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  Formatters.saleLabel(sale.number),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${sale.paymentMethod.labelFor(l10n)} · ${Formatters.time(sale.dateTime)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          // Total à direita, igual ao padrão do feed.
+          Flexible(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: trailing ?? Text(
+                Formatters.signedAmount(subtotal),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.accentOrange,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Linha de item de venda no padrão do feed de atividade — ícone circular
+/// laranja à esquerda, título e quantidade × preço ao centro, valor à direita.
+
 /// Tela de detalhes de uma venda — layout clean Google-style.
-///
 /// Quando a venda está ativa e o usuário tem acesso gerencial,
 /// oferece a ação de anular venda.
 class SaleDetailScreen extends ConsumerStatefulWidget {
@@ -311,29 +332,23 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     final canCancel = ref.watch(canCancelSalesProvider);
     final isCancelled = sale.status == SaleStatus.cancelled;
     final activeStore = _activeStore();
-    final accent = sale.paymentMethod.accent(theme);
-    final itemsLabel = l10n.dashboardSaleItems(sale.items.length);
-    final horizontal = AppSpacing.pagePaddingForWidth(
-      MediaQuery.sizeOf(context).width,
-    );
 
     return AppPage(
       title: l10n.saleDetailTitle,
       useSafeArea: false,
       body: ListView(
-        padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 32),
+        padding: EdgeInsets.fromLTRB(8, 8, 8, 32),
         children: [
           // ── Header: sale ID + date + payment chip ──
           Text(
             l10n.saleDetailId(Formatters.saleLabel(sale.number)),
-            // Referência da venda = título de secção (20/w600).
             style: theme.textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
-            '${Formatters.dateTime(sale.dateTime)}  ·  $itemsLabel',
+            '${Formatters.dateTime(sale.dateTime)}',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 12),
@@ -346,89 +361,40 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           else
             StatusChip(
               label: sale.paymentMethod.labelFor(context.l10n),
-              color: accent,
+              color: AppColors.accentOrange,
               icon: sale.paymentMethod.icon,
             ),
           if (isCancelled && sale.cancelledAt != null) ...[
             const SizedBox(height: 8),
             Text(
-              '${l10n.saleDetailCancelledAt} '
-              '${Formatters.dateTime(sale.cancelledAt!)}',
+              '${l10n.saleDetailCancelledAt} ${Formatters.dateTime(sale.cancelledAt!)}',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ],
           const SizedBox(height: 24),
 
-          // ── Total ──
-          Text(
-            l10n.saleDetailTotalLabel,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SmartAmount(
-            cents: sale.totalAmountCents,
-            alignment: Alignment.centerLeft,
-            style: isCancelled
-                ? theme.textTheme.headlineMedium?.copyWith(
-                    color: scheme.outline,
-                    decoration: TextDecoration.lineThrough,
-                  )
-                // Total da venda = valor principal da tela (24/w600).
-                : theme.textTheme.headlineMedium,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-
           // ── Items ──
-          SectionHeader(title: l10n.saleDetailItems),
-          const SizedBox(height: 12),
-          Container(
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(
-                color: scheme.outlineVariant.withValues(alpha: 0.5),
+          // Usa o mesmo padrão de linhas do feed de atividade da Home,
+          // com indent: 60 e ícone circular em laranja.
+          for (var i = 0; i < sale.items.length; i++) ...[
+            if (i > 0)
+              Divider(
+                height: 1,
+                indent: 60,
+                endIndent: AppSpacing.md,
+                color: theme.colorScheme.outlineVariant,
               ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                for (var i = 0; i < sale.items.length; i++) ...[
-                  if (i > 0)
-                    Divider(
-                      height: 1,
-                      indent: AppSpacing.md,
-                      endIndent: AppSpacing.md,
-                      color: scheme.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                  _ItemRow(item: sale.items[i]),
-                ],
-              ],
-            ),
-          ),
+            _SaleItemRow(item: sale.items[i]),
+          ],
           const SizedBox(height: 16),
 
-          // ── Snapshot note ──
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.lock_clock_outlined, size: 14, color: scheme.outline),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  l10n.saleDetailSnapshot,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.outline,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xl),
+          // ── Total ──
+          // Feed row de total: ícone circular laranja + label + valor em
+          // destaque à direita — mesmo chrome do "Atividade de hoje".
+          _SaleFeedRow(sale: sale),
+          const SizedBox(height: AppSpacing.md),
 
           // ── Actions ──
           AppButton.primary(
@@ -460,16 +426,16 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   }
 }
 
-/// Single item row: product image, name, quantity × price, subtotal.
-class _ItemRow extends ConsumerWidget {
-  const _ItemRow({required this.item});
+/// Linha de item de venda no padrão do feed de atividade — ícone circular
+/// laranja à esquerda, título e quantidade × preço ao centro, valor à direita.
+class _SaleItemRow extends ConsumerWidget {
+  const _SaleItemRow({required this.item});
 
   final SaleItem item;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final subtotal = Quantity.lineTotal(item.quantity, item.unitPriceCents);
     final imagePath =
         ref
@@ -483,39 +449,62 @@ class _ItemRow extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+        vertical: AppSpacing.sm + 2,
       ),
       child: Row(
         children: [
-          ProductImage(imagePath: imagePath, size: 40, radius: 10),
-          const SizedBox(width: 12),
+          // Container circular do ícone (40px) — padrão do feed, cor laranja.
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.accentOrange,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.north_east_rounded,
+              size: 18,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   item.productName,
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  // Nome do produto = 14/w400 (descrição da linha).
-                  style: theme.textTheme.bodyMedium,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 1),
                 Text(
                   '${Quantity.format(item.quantity, language: Formatters.currentLanguage)} × '
                   '${Formatters.currency(item.unitPriceCents)}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          Text(
-            Formatters.currency(subtotal),
-            // Total da linha = 15/w500, alinhado à direita.
-            style: AppTypography.amountInRow(scheme.onSurface),
+          const SizedBox(width: AppSpacing.xs),
+          Flexible(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                Formatters.currency(subtotal),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.accentOrange,
+                ),
+              ),
+            ),
           ),
         ],
       ),

@@ -14,6 +14,9 @@ import 'package:tareqo/presentation/controllers/sales_providers.dart';
 import 'package:tareqo/presentation/screens/sales/sales_screen.dart';
 import 'package:tareqo/presentation/widgets/payment_filter.dart';
 import 'package:tareqo/presentation/widgets/period_filter.dart';
+
+import 'package:tareqo/core/theme/app_colors.dart';
+import 'package:tareqo/core/theme/app_tokens.dart';
 import 'package:tareqo/presentation/widgets/sale_card.dart';
 
 import '../../helpers/store_context.dart';
@@ -260,6 +263,18 @@ void main() {
     expect(find.text('2 × R\$ 2,00'), findsOneWidget);
     // Subtotal do item + total (resumo e rodapé) da venda.
     expect(find.text('R\$ 4,00'), findsAtLeastNWidgets(2));
+    // Chrome do feed: ícone circular laranja (40px) no cabeçalho + no item.
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Container &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration as BoxDecoration).color == AppColors.accentOrange &&
+            (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+            widget.constraints?.maxWidth == 40 && widget.constraints?.maxHeight == 40,
+      ),
+      findsNWidgets(2), // header + Caneta
+    );
   });
 
   testWidgets('resumo mostra o total e o número de transações de hoje', (
