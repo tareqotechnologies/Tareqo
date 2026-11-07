@@ -66,7 +66,7 @@ class _AdminTenantCard extends ConsumerWidget {
                 vertical: 2,
               ),
               decoration: BoxDecoration(
-                color: AppColors.statusPrimary.withValues(alpha: 0.1),
+                color: AppColors.accentOrange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
@@ -75,13 +75,13 @@ class _AdminTenantCard extends ConsumerWidget {
                   const Icon(
                     Icons.extension_outlined,
                     size: 12,
-                    color: AppColors.statusPrimary,
+                    color: AppColors.accentOrange,
                   ),
                   const SizedBox(width: 3),
                   Text(
                     '$addOnCount',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.statusPrimary,
+                      color: AppColors.accentOrange,
                       fontWeight: FontWeight.w400,
                       fontSize: 11,
                     ),

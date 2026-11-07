@@ -83,7 +83,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
                       value: '${tenants.length}',
                       subtitle: l10n.adminRevenueActiveTenantsSub,
                       icon: Icons.business_outlined,
-                      color: AppColors.statusInfo,
+                      color: AppColors.accentOrange,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),

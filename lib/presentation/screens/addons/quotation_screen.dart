@@ -515,7 +515,7 @@ class _StatusChip extends StatelessWidget {
         l10n.quotationStatusDraft,
         AppColors.statusWarning,
       ),
-      QuotationStatus.sent => (l10n.quotationStatusSent, AppColors.statusInfo),
+      QuotationStatus.sent => (l10n.quotationStatusSent, AppColors.accentOrange),
       QuotationStatus.accepted => (
         l10n.quotationStatusAccepted,
         AppColors.successNeutral,

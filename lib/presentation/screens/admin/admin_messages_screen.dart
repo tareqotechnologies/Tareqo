@@ -498,14 +498,14 @@ class _TemplateGrid extends StatelessWidget {
         Icons.request_quote_outlined,
         'Cotação',
         'Valor, período e vencimento',
-        AppColors.statusInfo,
+        AppColors.accentOrange,
       ),
       (
         AdminMessageType.planExpiryChange,
         Icons.calendar_month_outlined,
         'Alterar Validade',
         'Nova data de expiração',
-        AppColors.statusPrimary,
+        AppColors.accentOrange,
       ),
       (
         AdminMessageType.planExpiringSoon,
@@ -519,7 +519,7 @@ class _TemplateGrid extends StatelessWidget {
         Icons.mail_outline,
         'Mensagem Livre',
         'Texto personalizado',
-        AppColors.statusPrimary,
+        AppColors.accentOrange,
       ),
     ];
 

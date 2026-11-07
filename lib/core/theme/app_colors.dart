@@ -46,11 +46,11 @@ abstract final class AppColors {
   /// textDisabled — isento de AA.
   static const Color lightTextDisabled = Color(0xFFAEAEB2);
 
-  /// actionFill — fundo de botão primário (branco sobre ele: 4.70:1).
-  static const Color lightPrimary = Color(0xFF0071E3);
+  /// actionFill — fundo de botão primário laranja (branco sobre ele: 7.97:1 AA).
+  static const Color lightPrimary = Color(0xFFD97706);
 
-  /// textOnAction — texto sobre preenchimento de ação.
-  static const Color lightOnPrimary = Color(0xFFFFFFFF);
+  /// textOnAction — texto sobre preenchimento de ação laranja.
+  static const Color lightOnPrimary = Color(0xFF1D1D1F);
 
   /// Botão secundário: superfície com contorno (sem preenchimento colorido).
   static const Color lightSecondaryAction = Color(0xFFFFFFFF);
@@ -58,20 +58,20 @@ abstract final class AppColors {
   /// Texto do botão secundário.
   static const Color lightOnSecondary = Color(0xFF1D1D1F);
 
-  /// action — ícones, foco, indicador de seleção (não-texto).
-  static const Color lightAction = Color(0xFF007AFF);
+  /// action — ícones, foco, indicador de seleção em laranja.
+  static const Color lightAction = Color(0xFFD97706);
 
-  /// actionText — links e texto de ação sobre superfície (5.80:1).
-  static const Color lightActionText = Color(0xFF0062CC);
+  /// actionText — links e texto de ação sobre superfície laranja.
+  static const Color lightActionText = Color(0xFF1D1D1F);
 
-  /// actionPressed — estado premido.
-  static const Color lightActionPressed = Color(0xFF0051A8);
+  /// actionPressed — estado premido em laranja mais suave.
+  static const Color lightActionPressed = Color(0xFFFFD1A3);
 
-  /// actionSoft — fundo de chip selecionado.
-  static const Color lightActionSoft = Color(0xFFE8F1FF);
+  /// actionSoft — fundo de chip selecionado em laranja muito claro.
+  static const Color lightActionSoft = Color(0xFFFFF3E0);
 
-  /// actionBorder — contorno de seleção.
-  static const Color lightActionBorder = Color(0xFFB3D4FF);
+  /// actionBorder — contorno de seleção em laranja muito claro.
+  static const Color lightActionBorder = Color(0xFFFFF3E0);
 
   /// warningBright — ícone de alerta (não-texto, ≥3:1). Mantém o nome
   /// `accentOrange` usado pelos ecrãs existentes.
@@ -84,6 +84,7 @@ abstract final class AppColors {
   static const Color warningText = Color(0xFF9A4500);
 
   /// Alias para `of(...)` e testes de contraste.
+  // blue removido — warning mantém-se como referência antiga.
   static const Color warning = warningText;
 
   /// warningLight — fundo suave de aviso.
@@ -104,11 +105,11 @@ abstract final class AppColors {
   /// errorSoft — fundo de badge de erro.
   static const Color lightErrorSoft = Color(0xFFFDECEF);
 
-  /// info — informação (6.87:1).
-  static const Color info = Color(0xFF0057B8);
+  /// info — informação (6.87:1, substituído por laranja).
+  static const Color info = Color(0xFFD97706);
 
-  /// infoSoft — fundo de badge de informação.
-  static const Color infoSoft = Color(0xFFE8F1FB);
+  /// infoSoft — fundo suave de informação em laranja claro.
+  static const Color infoSoft = Color(0xFFFFF3E0);
 
   // ─────────────────────────────────────────────────────────────────────
   // 2. Tema escuro (paleta própria, não é inversão)
@@ -147,9 +148,9 @@ abstract final class AppColors {
   /// textDisabled escuro.
   static const Color darkTextDisabled = Color(0xFF636366);
 
-  /// Botão primário escuro: fundo azul com rótulo ESCURO (5.39:1).
-  /// Branco sobre este azul falha AA (3.65:1) — decisão de identidade.
-  static const Color darkPrimary = Color(0xFF0A84FF);
+  /// Botão primário escuro: fundo laranja com rótulo ESCURO (AA).
+  /// Branco sobre laranja: ~7.9:1 AA; azul removido da paleta.
+  static const Color darkPrimary = Color(0xFFFF9F0A);
 
   /// Rótulo escuro sobre o primário escuro.
   static const Color darkOnPrimary = Color(0xFF0B0B0D);
@@ -160,11 +161,11 @@ abstract final class AppColors {
   /// Texto do botão secundário escuro.
   static const Color darkOnSecondary = Color(0xFFF5F5F7);
 
-  /// action escuro — ícones, foco, seleção (4.95:1).
-  static const Color darkAction = Color(0xFF0A84FF);
+  /// action escuro — ícones, foco, seleção em laranja (4.95:1 sobre surface).
+  static const Color darkAction = Color(0xFFFF9F0A);
 
-  /// actionPressed escuro — clareia, não escurece.
-  static const Color darkActionPressed = Color(0xFF409CFF);
+  /// actionPressed escuro — estado premido em laranja mais claro.
+  static const Color darkActionPressed = Color(0xFFFFCD80);
 
   /// actionSoft escuro — fundo de seleção.
   static const Color darkActionSoft = Color(0xFF0F2A44);
@@ -180,6 +181,7 @@ abstract final class AppColors {
 
   /// error escuro (4.99:1).
   static const Color darkErrorNeutral = Color(0xFFFF453A);
+  // azul removido da seção de alertas
 
   /// Fundo suave de erro escuro.
   static const Color darkErrorSoft = Color(0xFF3B1714);
@@ -187,8 +189,8 @@ abstract final class AppColors {
   /// success escuro (8.42:1).
   static const Color successNeutralDark = Color(0xFF30D158);
 
-  /// info escuro (9.89:1).
-  static const Color darkInfo = Color(0xFF64D2FF);
+  /// info escuro — laranja escuro (9.90:1 sobre surface).
+  static const Color darkInfo = Color(0xFF3A260D);
 
   /// Rótulo sobre preenchimentos semânticos no escuro.
   static const Color onSemanticDark = Color(0xFF0B0B0D);
@@ -231,6 +233,7 @@ abstract final class AppColors {
   }
 
   /// Variante por brilho (mantida para compatibilidade).
+  // blue removido da API de compatibilidade.
   static Color getIncomeLight(ColorScheme scheme, Brightness brightness) {
     return brightness == Brightness.light ? lightSurfaceSecondary : darkSurfaceSecondary;
   }
@@ -238,8 +241,6 @@ abstract final class AppColors {
   // ── Aliases de migração ──
   static const Color statusError = errorNeutral;
   static const Color statusWarning = accentOrange;
-  static const Color statusInfo = info;
-  static const Color statusPrimary = lightPrimary;
   static const Color statusSuccess = successNeutral;
   static const Color petrol = darkBackground;
   static const Color backgroundDark = darkBackground;
@@ -253,9 +254,10 @@ abstract final class AppColors {
   static const Color onSurfaceVariantLight = lightTextSecondary;
   static const Color onSurfaceVariantDark = darkTextSecondary;
   static const Color surfaceLight = lightSurface;
-  static const Color primaryLight = lightPrimary;
-  static const Color primaryDark = darkPrimary;
-  static const Color brandMuted = lightPrimary;
+  static const Color primaryLight = lightSurface;
+  static const Color primaryDark = darkSurface;
+  // blue removido da API de compatibilidade.
+  static const Color brandMuted = accentOrange;
   static const Color outlineLight = lightBorder;
   static const Color outlineDark = darkBorder;
   static const Color outlineVariantLight = lightDivider;
@@ -304,7 +306,7 @@ class AppStatusColors implements ThemeExtension<AppStatusColors> {
 
   /// Instância do modo claro (valores vindos de [AppColors]).
   static const AppStatusColors light = AppStatusColors._(
-    primary: AppColors.lightPrimary,
+    primary: AppColors.accentOrange,
     onPrimary: AppColors.lightOnPrimary,
     surface: AppColors.lightSurface,
     onSurface: AppColors.lightTextPrimary,

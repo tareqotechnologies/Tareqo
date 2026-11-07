@@ -566,11 +566,11 @@ class _AuditTile extends StatelessWidget {
     if (status == 'rejected') return AppColors.statusError;
     switch (action) {
       case 'tenant_decision':
-        return AppColors.statusInfo;
+        return AppColors.accentOrange;
       case 'plan_request_decision':
         return AppColors.statusWarning;
       case 'plan_change':
-        return AppColors.statusPrimary;
+        return AppColors.accentOrange;
       default:
         // Neutro semântico (sem papel de cor): mantém cinza neutro.
         return Colors.grey;

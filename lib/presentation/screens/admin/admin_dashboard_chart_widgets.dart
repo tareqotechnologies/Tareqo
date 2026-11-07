@@ -662,9 +662,9 @@ class _DistributionCard extends StatelessWidget {
     final maxPlanCount = sorted.isNotEmpty ? sorted.first.value : 1;
     final planColors = [
       scheme.primary,
-      AppColors.statusPrimary,
+      AppColors.accentOrange,
       AppColors.statusWarning,
-      AppColors.statusInfo,
+      AppColors.accentOrange,
       scheme.secondary,
     ];
 

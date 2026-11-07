@@ -282,7 +282,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                           icon: Icons.upgrade_outlined,
                           label: l10n.adminPlanUpgrades,
                           badge: pendingUpgrades.length,
-                          color: AppColors.statusPrimary,
+                          color: AppColors.accentOrange,
                           onTap: () => onNavigateToTab?.call(3),
                         ),
                         _QuickAction(
