@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
-import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
@@ -25,7 +25,6 @@ import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/sales_providers.dart';
-import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
@@ -36,7 +35,6 @@ import '../../widgets/payment_method_picker.dart';
 import '../../widgets/product_image.dart';
 import '../../widgets/product_type_badge.dart';
 import '../../widgets/search_field.dart';
-import '../../widgets/smart_amount.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../data/services/offline_sync_service.dart';
 
@@ -98,14 +96,14 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   // Total do carrinho em CENTAVOS inteiros (W4 + W11): cada item é
   // `qtd(milésimos) × preço em centavos ~/ 1000` — soma exata.
   int get _totalCents => _cart.entries.fold<int>(
-    0,
-    (sum, entry) =>
-        sum +
-        Quantity.lineTotal(
-          entry.value,
-          _productById(entry.key)?.salePriceCents ?? 0,
-        ),
-  );
+        0,
+        (sum, entry) =>
+            sum +
+            Quantity.lineTotal(
+              entry.value,
+              _productById(entry.key)?.salePriceCents ?? 0,
+            ),
+      );
 
   /// Contagem de itens em UNIDADES (milésimos ÷ 1000) para exibição.
   int get _itemCount =>
@@ -225,17 +223,17 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   /// Intercepta leituras de código de barras (scanner USB tipo teclado ou
   /// digitação manual) e preenche o carrinho:
   /// - `20PPPPPWWWWW` (balança etiquetadora) → busca o produto pelo PLU,
-  /// deriva a fração de peso do valor total ÷ preço unitário;
+  ///   deriva a fração de peso do valor total ÷ preço unitário;
   /// - outro código numérico → busca pelo campo `code` (PLU) e adiciona
-  /// 1 unidade.
+  ///   1 unidade.
   Future<void> _handleBarcode(String raw) async {
     final l10n = context.l10n;
     final digits = raw.trim().replaceAll(RegExp(r'\D'), '');
     if (digits.isEmpty) return;
 
     // Só produtos ATIVOS e de papel VENDÁVEL são vendáveis no PDV
-    // (desativado some; matéria-prima/embalagem não vão ao balcão) — o
-    // servidor também nega desativados via lock_products_or_raise.
+    // (desativado some; matéria-prima/embalagem não vão ao balcão)
+    // — o servidor também nega desativados via lock_products_or_raise.
     final products = (ref.read(productsProvider).value ?? const <Product>[])
         .where((product) => product.isActive && product.type.isSellable)
         .toList();
@@ -631,56 +629,23 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                   else
                     SliverList(
                       delegate: SliverChildListDelegate([
-                        // Pills do carrinho (canvas V3) — no topo do scroll
-                        // com o catálogo: resumo visível sem altura fixa.
+                        // Carrinho: pills compactos em laranja + total + itens.
                         if (_cart.isNotEmpty) ...[
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              24,
-                              0,
-                              24,
-                              AppSpacing.xs,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    l10n.salesCartSection(_cart.length),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ),
-                                Flexible(
-                                  child: SmartAmount(
-                                    cents: _totalCents,
-                                    alignment: Alignment.centerRight,
-                                    style: AppTypography.amountInRow(
-                                      theme.colorScheme.onSurface,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          _CartSummary(
+                            itemCount: _cart.length,
+                            totalCents: _totalCents,
                           ),
                           for (final entry in _cart.entries) ...[
-                            if (_productById(entry.key)
-                                case final product?) ...[
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.xl,
-                                ),
-                                child: _CartPill(
-                                  product: product,
-                                  quantity: entry.value,
-                                ),
+                            if (_productById(entry.key) case final product?)
+                              _CartPill(
+                                product: product,
+                                quantity: entry.value,
                               ),
-                              const SizedBox(height: 8),
-                            ],
+                            const SizedBox(height: 8),
                           ],
                           const SizedBox(height: 12),
                         ],
-                        for (final product in filtered) ...[
+                        for (final product in filtered)
                           focusDim(
                             Padding(
                               padding: const EdgeInsets.symmetric(
@@ -696,8 +661,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
-                        ],
+                        const SizedBox(height: 8),
                       ]),
                     ),
                 ],
@@ -705,84 +669,16 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
             },
           ),
         ),
-        // -----------------------------------------------------------
-        // Rodapé: total + forma de pagamento + confirmar
-        // -----------------------------------------------------------
-        Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            border: Border(
-              top: BorderSide(color: theme.colorScheme.outlineVariant),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, AppSpacing.sm, 24, 16),
-          // O rodapé é COMPACTO (alturas calibradas) para caber junto com
-          // o catálogo mesmo em sheets baixos/paisagem — o Expanded do
-          // catálogo é o que encolhe primeiro.
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Forma de pagamento: abas segmentadas + lista com radio
-              // (design system 2026 — igual ao app de referência).
-              PaymentMethodPicker(
-                value: _paymentMethod,
-                onChanged: (method) => setState(() => _paymentMethod = method),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.dashboardSaleItems(_itemCount),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  // Total do carrinho em destaque (22) — SmartAmount:
-                  // o valor encolhe para SEMPRE caber, sem truncar nem
-                  // estourar o rodapé em telas estreitas.
-                  Flexible(
-                    child: SmartAmount(
-                      cents: _totalCents,
-                      alignment: Alignment.centerRight,
-                      // Total da tela = valor de destaque do resumo
-                      // (22/w600), sem competir com o título.
-                      style: AppTypography.summaryAmount(
-                        theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (_error != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  _error!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 8),
-              // AppButton ultra-clean: altura 48, cantos 12, texto w400.
-              // F4.1: gradiente sutil quando HABILITADO + escala 0.98 no
-              // press (80ms) — a resposta "física" da ação mais importante.
-              AppButton.primary(
-                label: l10n.salesConfirm,
-                onPressed: _cart.isEmpty || _isSubmitting ? null : _confirm,
-                expanded: true,
-                pressScale: true,
-                icon: _isSubmitting
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.check, size: 20),
-              ),
-            ],
-          ),
+        // Rodapé: total + forma de pagamento + confirmar.
+        _Footer(
+          paymentMethod: _paymentMethod,
+          onPaymentMethodChanged: (method) =>
+              setState(() => _paymentMethod = method),
+          totalCents: _totalCents,
+          itemCount: _itemCount,
+          isSubmitting: _isSubmitting,
+          error: _error,
+          onConfirm: _cart.isEmpty || _isSubmitting ? null : _confirm,
         ),
       ],
     );
@@ -895,11 +791,11 @@ class _ScannerZone extends StatelessWidget {
   }
 }
 
-/// Linha do produto no carrinho com stepper de quantidade.
+/// Linha do produto no catálogo com stepper de quantidade.
 ///
 /// Produtos por PESO ([Product.vendaPorFracao]) exibem a fração com a
-/// unidade (ex.: "1,75 kg") e permitem edição decimal precisa; produtos
-/// normais usam o stepper de unidades inteiras.
+/// unidade (ex.: "1,75 kg") e permitem edição decimal precisa;
+/// produtos normais usam o stepper de unidades inteiras.
 class _CartProductRow extends StatelessWidget {
   const _CartProductRow({
     required this.product,
@@ -953,7 +849,7 @@ class _CartProductRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nome COMPLETO do produto no carrinho — quebra em
+                // Nome COMPLETO do produto no catálogo — quebra em
                 // linhas quando necessário (nada de truncar nomes).
                 Text(
                   product.name,
@@ -1042,11 +938,13 @@ class _CartProductRow extends StatelessWidget {
   }
 }
 
-/// Pill do carrinho (canvas V3) — resumo display-only: bubble de
-/// quantidade, nome + preço unitário e total da linha. A interação
-/// (steppers, edição de fração) continua nas linhas do catálogo.
+/// Pill do carrinho — resumo compacto em laranja: quantidade, produto,
+/// preço unitário e total da linha. Minimalista e sem poluir.
 class _CartPill extends StatelessWidget {
-  const _CartPill({required this.product, required this.quantity});
+  const _CartPill({
+    required this.product,
+    required this.quantity,
+  });
 
   final Product product;
   final int quantity;
@@ -1054,7 +952,6 @@ class _CartPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = context.l10n;
     final isWeight = product.vendaPorFracao;
 
     return Container(
@@ -1063,19 +960,19 @@ class _CartPill extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: AppColors.accentOrangeSoft,
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(color: AppColors.accentOrange, width: 0.5),
       ),
       child: Row(
         children: [
           // Bubble de quantidade: "2×" em unidades; "1,75 kg" por peso.
           Container(
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
+              color: AppColors.accentOrange,
               borderRadius: BorderRadius.circular(AppRadius.full),
             ),
             child: Text(
@@ -1086,37 +983,32 @@ class _CartPill extends StatelessWidget {
                       language: Formatters.currentLanguage,
                     )
                   : '${Quantity.format(quantity, language: Formatters.currentLanguage)}×',
-              // Quantidade = badge 12/w500 (a escala já traz o peso).
               style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onPrimaryContainer,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nome COMPLETO do produto — mesmo tratamento da linha
-                // do carrinho (maxLines: 2): nomes longos quebram em vez
-                // de truncar (auditoria de legibilidade — #2).
                 Text(
                   product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  // Nome do produto = 14/w400 (descrição da linha).
-                  style: theme.textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  '${Formatters.currency(product.salePriceCents)} '
-                  '${isWeight ? product.unitLabel : l10n.commonUnits}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: const Color(0xFF1D1D1F),
                   ),
                 ),
-                // Fase 1: a pill do carrinho também mostra o papel do
-                // produto — o resumo em progresso nunca esconde o tipo.
+                const SizedBox(height: 2),
+                Text(
+                  Formatters.currency(product.salePriceCents),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: const Color(0xFF5E5E63),
+                  ),
+                ),
                 const SizedBox(height: 2),
                 ProductTypeBadge(type: product.type),
               ],
@@ -1124,11 +1016,194 @@ class _CartPill extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Flexible(
-            child: SmartAmount(
-              cents: Quantity.lineTotal(quantity, product.salePriceCents),
-              alignment: Alignment.centerRight,
-              // Total da linha = 15/w500, alinhado à direita.
-              style: AppTypography.amountInRow(theme.colorScheme.onSurface),
+            child: Text(
+              Formatters.currency(
+                Quantity.lineTotal(quantity, product.salePriceCents),
+              ),
+              textAlign: TextAlign.right,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: AppColors.accentOrange,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Resumo compacto do carrinho no topo do catálogo.
+///
+/// Mostra o contador de itens e o total em laranja, sem altura fixa.
+class _CartSummary extends StatelessWidget {
+  const _CartSummary({
+    required this.itemCount,
+    required this.totalCents,
+  });
+
+  final int itemCount;
+  final int totalCents;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+
+    // Linha compacta (sem cartão alto): o resumo do carrinho não deve
+    // empurrar o catálogo para fora do ecrã em telas baixas.
+    return Row(
+      children: [
+        const Icon(
+          Icons.shopping_cart_outlined,
+          size: 14,
+          color: AppColors.accentOrange,
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            l10n.salesCartSection(itemCount),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: const Color(0xFF5E5E63),
+            ),
+          ),
+        ),
+        Text(
+          Formatters.currency(totalCents),
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: AppColors.accentOrange,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Rodapé do PDV — total + forma de pagamento + confirmar.
+///
+/// Minimalista e profissional: separa a seleção (pagamento) do ação
+/// final (confirmar), mantendo o total sempre visível e alinhado.
+class _Footer extends StatelessWidget {
+  const _Footer({
+    required this.paymentMethod,
+    required this.onPaymentMethodChanged,
+    required this.totalCents,
+    required this.itemCount,
+    required this.isSubmitting,
+    required this.error,
+    required this.onConfirm,
+  });
+
+  final PaymentMethod paymentMethod;
+  final ValueChanged<PaymentMethod> onPaymentMethodChanged;
+  final int totalCents;
+  final int itemCount;
+  final bool isSubmitting;
+  final String? error;
+  final VoidCallback? onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: AppColors.lightBorder, width: 0.5),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.md,
+        AppSpacing.md,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Forma de pagamento: seleção compacta e clara.
+          PaymentMethodPicker(
+            value: paymentMethod,
+            onChanged: onPaymentMethodChanged,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.dashboardSaleItems(itemCount),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: const Color(0xFF5E5E63),
+                  ),
+                ),
+              ),
+              Text(
+                Formatters.currency(totalCents),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: AppColors.accentOrange,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          if (error != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              error!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: const Color(0xFFB91C1C),
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),          // Botão confirmar: gradiente laranja estilo Apple.
+          InkWell(
+            onTap: isSubmitting ? null : onConfirm,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            child: Ink(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    AppColors.accentOrange,
+                    Color(0xFFB45309),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Center(
+              child: isSubmitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.check,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.salesConfirm,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+              ),
             ),
           ),
         ],

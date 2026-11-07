@@ -14,7 +14,6 @@ import 'package:tareqo/domain/usecases/process_sale_use_case.dart';
 import 'package:tareqo/presentation/controllers/products_providers.dart';
 import 'package:tareqo/presentation/controllers/sales_providers.dart';
 import 'package:tareqo/presentation/screens/sales/new_sale_sheet.dart';
-import 'package:tareqo/presentation/widgets/app_button.dart';
 import 'package:tareqo/presentation/widgets/app_card.dart';
 
 import '../../helpers/store_context.dart';
@@ -491,13 +490,13 @@ void main() {
     await _scan(tester, 'QR SEM NÚMEROS');
 
     expect(find.text('Produto não encontrado para este código.'), findsNothing);
-    final confirmButton = tester.widget<AppButton>(
+    final confirmButton = tester.widget<InkWell>(
       find.ancestor(
         of: find.text('Confirmar venda'),
-        matching: find.byType(AppButton),
+        matching: find.byType(InkWell),
       ),
     );
-    expect(confirmButton.onPressed, isNull);
+    expect(confirmButton.onTap, isNull);
     expect(processSale.calls, 0);
   });
 
