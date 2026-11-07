@@ -137,7 +137,6 @@ class FinancialScreen extends ConsumerWidget {
                           incomeLabel: l10n.financialIncome,
                           expenseLabel: l10n.financialExpense,
                           balanceLabel: l10n.financialPeriodBalance,
-                          currency: Formatters.currencySymbol,
                         ),
                 ),
               ),
@@ -331,7 +330,7 @@ class FinancialScreen extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Cash flow card stack — saldo em destaque + entradas/saídas discretas.
+// Cash flow card — rótulo à esquerda, valor à direita, mesma margem.
 // ---------------------------------------------------------------------------
 
 class _CashStack extends StatelessWidget {
@@ -341,7 +340,6 @@ class _CashStack extends StatelessWidget {
     required this.incomeLabel,
     required this.expenseLabel,
     required this.balanceLabel,
-    required this.currency,
   });
 
   final int incomeCents;
@@ -349,18 +347,15 @@ class _CashStack extends StatelessWidget {
   final String incomeLabel;
   final String expenseLabel;
   final String balanceLabel;
-  final String currency;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final balance = incomeCents - expenseCents;
-    // Saldo com a cor da DIREÇÃO: positivo = entrada (income), negativo =
-    // saída (expense). A cor é semântica, não decorativa.
+    // Saldo com a cor da DIREÇÃO: positivo = entrada, negativo = saída.
+    // A cor é semântica, não decorativa.
     final balanceColor = balance < 0 ? theme.expense : theme.income;
-    final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     return Semantics(
       container: true,
@@ -368,150 +363,121 @@ class _CashStack extends StatelessWidget {
       label:
           '$balanceLabel: ${Formatters.currency(balance)}, '
           '$incomeLabel: ${Formatters.signedAmount(incomeCents)}, '
-          '$expenseLabel: ${Formatters.signedAmount(-expenseCents)}',          child: AppCard(
-        // Minimalista: tudo alinhado à direita, fontes menores.
+          '$expenseLabel: ${Formatters.signedAmount(-expenseCents)}',
+      child: AppCard(
         color: scheme.surface,
         borderRadius: AppRadius.xlAll,
-        padding: const EdgeInsets.fromLTRB(
-          0,
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.md,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            if (isLandscape) ...[
-              // Landscape: todas as linhas alinhadas à direita
-              _CashRow(
-                label: balanceLabel,
-                value: Formatters.currency(balance),
-                valueColor: balanceColor,
-                valueFontStyle: AppTypography.heroAmount(balanceColor),
-                currency: currency,
-                scheme: scheme,
-                theme: theme,
-                gapBeforeValue: 0,
+        padding: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Saldo do período: rótulo à esquerda, valor à direita ──
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        balanceLabel,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    // FittedBox: o valor encolhe em telas estreitas /
+                    // Dynamic Type em vez de estourar o Row.
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          Formatters.currency(balance),
+                          maxLines: 1,
+                          style: AppTypography.heroAmount(balanceColor),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              Divider(height: 1, color: scheme.outlineVariant),
-              const SizedBox(height: 12),
-              // income e expense lado a lado, alinhados à direita
-              Row(
-                children: [
-                  Expanded(
-                    child: _CashLine(
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: scheme.outlineVariant.withValues(alpha: 0.6),
+              ),
+              // ── Entradas / Saídas: rótulo à esquerda, valor à direita ──
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Column(
+                  children: [
+                    _CashLine(
                       icon: Icons.north_east,
                       color: theme.income,
                       label: incomeLabel,
                       value: Formatters.signedAmount(incomeCents),
-                      scheme: scheme,
-                      theme: theme,
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _CashLine(
+                    const SizedBox(height: AppSpacing.xs),
+                    _CashLine(
                       icon: Icons.south_west,
                       color: theme.expense,
                       label: expenseLabel,
                       value: Formatters.signedAmount(-expenseCents),
-                      scheme: scheme,
-                      theme: theme,
                     ),
-                  ),
-                ],
-              ),
-            ] else ...[
-              // Portrait: tudo alinhado à direita, fontes menores
-              _CashRow(
-                label: balanceLabel,
-                value: Formatters.currency(balance),
-                valueColor: balanceColor,
-                valueFontStyle: AppTypography.heroAmount(balanceColor),
-                currency: currency,
-                scheme: scheme,
-                theme: theme,
-                gapBeforeValue: 0,
-              ),
-              const SizedBox(height: 16),
-              Divider(height: 1, color: scheme.outlineVariant),
-              const SizedBox(height: 12),
-              _CashLine(
-                icon: Icons.north_east,
-                color: theme.income,
-                label: incomeLabel,
-                value: Formatters.signedAmount(incomeCents),
-                scheme: scheme,
-                theme: theme,
-              ),
-              const SizedBox(height: 8),
-              _CashLine(
-                icon: Icons.south_west,
-                color: theme.expense,
-                label: expenseLabel,
-                value: Formatters.signedAmount(-expenseCents),
-                scheme: scheme,
-                theme: theme,
+                  ],
+                ),
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
+/// Linha de direção do caixa — ícone + rótulo à esquerda, valor à direita.
 class _CashLine extends StatelessWidget {
   const _CashLine({
     required this.icon,
     required this.color,
     required this.label,
     required this.value,
-    required this.scheme,
-    required this.theme,
   });
 
   final IconData icon;
   final Color color;
   final String label;
   final String value;
-  final ColorScheme scheme;
-  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
     return Semantics(
       container: true,
       label: '$label: $value',
       child: Row(
         children: [
-          Container(
-            width: 26,
-            height: 26,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: IconTone.darkBackground(color),
-            ),
-            child: Icon(icon, size: 14, color: IconTone.lightForeground(color)),
-          ),
-          const SizedBox(width: 8),
-          // Label à esquerda, com espaço flexível.
+          Icon(icon, size: AppSizes.iconSm, color: color),
+          const SizedBox(width: AppSpacing.sm),
+          // Rótulo: à esquerda, com espaço flexível.
           Expanded(
             child: Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              // Minimalista: labelMedium = 14/w400, igual a tela de vendas
-              style: theme.textTheme.labelMedium?.copyWith(
+              style: AppTypography.bodyMedium.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),
           ),
-          const SizedBox(width: 4),
-          // Valor alinhado à direita, fonte small (12/w400), sem badge.
-          // FittedBox agressivo: encolhe em escala 2.0 sem estourar.
+          const SizedBox(width: AppSpacing.sm),
+          // Valor: à direita, tabular (coluna alinhada), sem negrito.
           Flexible(
             child: FittedBox(
               fit: BoxFit.scaleDown,
@@ -519,92 +485,7 @@ class _CashLine extends StatelessWidget {
               child: Text(
                 value,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Linha minimalista com label + valor + currency, tudo alinhado à direita.
-class _CashRow extends StatelessWidget {
-  const _CashRow({
-    required this.label,
-    required this.value,
-    required this.valueColor,
-    required this.valueFontStyle,
-    required this.currency,
-    required this.scheme,
-    required this.theme,
-    this.gapBeforeValue = 8,
-  });
-
-  final String label;
-  final String value;
-  final Color valueColor;
-  final TextStyle valueFontStyle;
-  final String currency;
-  final ColorScheme scheme;
-  final ThemeData theme;
-  final double gapBeforeValue;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      label: '$label: $value',
-      child: Row(
-        children: [
-          // Label à esquerda, com espaço flexível.
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              // Minimalista: labelMedium = 14/w400, igual a tela de vendas
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-          // FittedBox: encolhe em telas estreitas/Dynamic Type em vez de
-          // estourar.
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: valueFontStyle,
-              ),
-            ),
-          ),
-          if (gapBeforeValue > 0) const SizedBox(width: 4),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xxs,
-              vertical: 2,
-            ),
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(AppRadius.full),
-            ),
-            child: Text(
-              currency,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-                letterSpacing: 0.4,
+                style: AppTypography.amountInRow(color),
               ),
             ),
           ),

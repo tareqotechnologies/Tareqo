@@ -7,7 +7,6 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../widgets/app_button.dart';
-import '../../widgets/detail_row.dart';
 
 /// Ícone inteligente por direção do movimento: entrada (north_east) em
 /// verde e saída (south_west) em vermelho — mesma direção do feed da
@@ -19,8 +18,12 @@ extension TransactionDirectionIcon on TransactionType {
   };
 }
 
-/// Card de movimentação ultra-compacto — apenas 3 informações:
-/// tipo (categoria), valor e timestamp.
+/// Linha de movimentação — rótulo à esquerda (categoria + hora), valor à
+/// direita na mesma margem de todas as linhas da lista.
+///
+/// A hierarquia é intencionalmente plana: a categoria identifica, a hora
+/// contextualiza e o montante fecha a linha à direita com dígitos tabulares
+/// (coluna alinhada entre linhas consecutivas).
 class TransactionCard extends StatelessWidget {
   const TransactionCard({
     super.key,
@@ -56,54 +59,69 @@ class TransactionCard extends StatelessWidget {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+            vertical: AppSpacing.xs,
           ),
           child: Row(
             children: [
-              // ── Descrição (esquerda) ──
+              // ── Direção (esquerda) ──
+              Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: IconTone.darkBackground(color),
+                ),
+                child: Icon(
+                  transaction.type.icon,
+                  size: AppSizes.iconSm,
+                  color: IconTone.lightForeground(color),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              // ── Categoria + hora (esquerda) ──
               Expanded(
-                flex: 2,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       transaction.category,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      // Minimalista: labelMedium = 14/w400, igual vendas
-                      style: theme.textTheme.labelMedium,
+                      // Categoria = 14/w500: identifica sem competir com o
+                      // valor, que é o número da linha.
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: scheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.micro),
                     Text(
                       Formatters.time(transaction.date),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      // Metadado = 12/w400, discreto.
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      // Hora = metadado (12), discreta.
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              // ── Valor, alinhado à direita, fonte menor ──
-              // FittedBox agressivo: encolhe em escala 2.0 sem estourar.
+              const SizedBox(width: AppSpacing.xs),
+              // ── Valor (direita) ──
+              // FittedBox: encolhe em escala 2.0 em vez de estourar o Row.
               Flexible(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: Text(
-                      '$sign ${Formatters.currency(transaction.amountCents)}',
-                      maxLines: 1,
-                      // Minimalista: labelMedium = 14/w400, sem bold.
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+                  child: Text(
+                    '$sign ${Formatters.currency(transaction.amountCents)}',
+                    maxLines: 1,
+                    // Valor em linha: 15/w500 tabular — alinha coluna a
+                    // coluna sem dominar a lista.
+                    style: AppTypography.amountInRow(color),
                   ),
                 ),
               ),
@@ -115,7 +133,8 @@ class TransactionCard extends StatelessWidget {
   }
 }
 
-/// Cabeçalho de grupo por data — rótulo relativo (Hoje/Ontem) + total do dia.
+/// Cabeçalho de grupo por data — rótulo relativo (Hoje/Ontem) à esquerda e
+/// total do dia à direita, na mesma margem da lista que ele encabeça.
 class DateSectionHeader extends StatelessWidget {
   const DateSectionHeader({
     super.key,
@@ -131,50 +150,41 @@ class DateSectionHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final totalColor = totalCents >= 0 ? theme.income : theme.expense;
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
+      padding: EdgeInsets.fromLTRB(
+        horizontal,
         AppSpacing.sm,
-        AppSpacing.lg,
-        4,
+        horizontal,
+        AppSpacing.xxs,
       ),
       child: Row(
         children: [
+          // Rótulo do dia (esquerda).
           Expanded(
             child: Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              // Cabeçalho de data = 12/w500 (a escala já traz o peso).
-              style: theme.textTheme.labelMedium?.copyWith(
+              style: AppTypography.labelMedium.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),
           ),
-          // Flexible + FittedBox: o total do dia encolhe em vez de cortar
-          // quando o valor é longo ou a escala de texto aumenta.
+          const SizedBox(width: AppSpacing.xs),
+          // Total do dia (direita) — sem pílula: alinha com os valores das
+          // linhas abaixo e mantém o cabeçalho silencioso.
           Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xs,
-                vertical: 2,
-              ),
-              decoration: BoxDecoration(
-                color: totalColor.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(AppRadius.full),
-              ),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerRight,
-                child: Text(
-                  Formatters.signedAmount(totalCents),
-                  maxLines: 1,
-                  // Total do dia: 12/w500, discreto no cabeçalho do grupo.
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: totalColor,
-                  ),
-                ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                Formatters.signedAmount(totalCents),
+                maxLines: 1,
+                style: AppTypography.amountInRow(totalColor),
               ),
             ),
           ),
@@ -226,60 +236,74 @@ class TransactionDetailSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Valor em destaque ──
-          Center(
-            child: Container(
-              width: 56,
-              height: 56,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: IconTone.darkBackground(color),
+          // ── Cabeçalho: tipo à esquerda, valor à direita ──
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: IconTone.darkBackground(color),
+                ),
+                child: Icon(
+                  transaction.type.icon,
+                  size: AppSizes.iconMd,
+                  color: IconTone.lightForeground(color),
+                ),
               ),
-              child: Icon(
-                transaction.type.icon,
-                size: 24,
-                color: IconTone.lightForeground(color),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  transaction.type.label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(
-              '$sign ${Formatters.currency(transaction.amountCents)}',
-              // Valor principal do detalhe: 24/w600 da escala.
-              style: AppTypography.headline.copyWith(color: color),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Center(
-            child: Text(
-              transaction.type.label,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '$sign ${Formatters.currency(transaction.amountCents)}',
+                    maxLines: 1,
+                    style: AppTypography.headline.copyWith(color: color),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: scheme.outlineVariant.withValues(alpha: 0.6),
+          ),
+          const SizedBox(height: AppSpacing.xs),
 
-          // ── Detalhes ──
-          DetailRow(
+          // ── Detalhes: rótulo à esquerda, valor à direita ──
+          _DetailLine(
             label: l10n.financialDetailDescription,
             value: transaction.description,
           ),
-          DetailRow(
+          _DetailLine(
             label: l10n.financialDetailCategory,
             value: transaction.category,
           ),
-          DetailRow(
+          _DetailLine(
             label: l10n.financialDetailNumber,
             value: Formatters.entityNumber(transaction.id),
           ),
-          DetailRow(
+          _DetailLine(
             label: l10n.financialDetailDate,
             value: Formatters.dateTime(transaction.date),
           ),
-          DetailRow(
+          _DetailLine(
             label: l10n.financialDetailStatus,
             value: transaction.status.label,
             valueColor: pending ? theme.warning : theme.income,
@@ -287,7 +311,7 @@ class TransactionDetailSheet extends StatelessWidget {
 
           // ── Ação pendente ──
           if (pending && isIncome && onReceive != null) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -299,7 +323,7 @@ class TransactionDetailSheet extends StatelessWidget {
             ),
           ],
           if (pending && !isIncome && onPay != null) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -310,7 +334,59 @@ class TransactionDetailSheet extends StatelessWidget {
               icon: const Icon(Icons.payments_outlined, size: 18),
             ),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
+        ],
+      ),
+    );
+  }
+}
+
+/// Linha chave → valor da sheet de detalhe: rótulo à esquerda, valor
+/// alinhado à direita (mesma margem em todas as linhas).
+class _DetailLine extends StatelessWidget {
+  const _DetailLine({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  final String label;
+  final String value;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Rótulo (esquerda) — metadado de 12, nunca 11 (corta em nomes
+          // de campo longos).
+          Expanded(
+            child: Text(
+              label,
+              style: AppTypography.bodySmall.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          // Valor (direita) — 14/w500, quebra em linhas quando necessário
+          // sem esconder dados de contato/descrição.
+          Flexible(
+            flex: 2,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: AppTypography.labelLarge.copyWith(
+                color: valueColor ?? scheme.onSurface,
+              ),
+            ),
+          ),
         ],
       ),
     );
