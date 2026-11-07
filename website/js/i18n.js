@@ -36,6 +36,7 @@
       'nav.features': 'Funcionalidades',
       'nav.addons': 'Add-ons',
       'nav.how': 'Como funciona',
+      'nav.security': 'Segurança',
       'nav.pricing': 'Planos',
       'nav.faq': 'FAQ',
       'nav.contact': 'Contacto',
@@ -64,6 +65,9 @@
       'ph.week': 'Vendas da semana',
       'ph.viewall': 'Ver tudo',
       'ph.lowstock': 'Estoque baixo',
+      'ph.sync': 'Tudo sincronizado',
+      'ph.syncAgo': 'há 2 min',
+      'ph.sale': 'Venda',
 
       't1': 'Funciona 100% offline',
       't2': 'Multi-loja & equipa',
@@ -276,6 +280,7 @@
       'cta.sub': 'Descarregue o TAREQO e faça a primeira venda hoje.',
       'cta.btn': 'Descarregar grátis',
       'cta.btn.ios': 'Descarregar para iOS',
+      'cta.kicker': 'Comece hoje',
 
       'ft.tagline': 'O ERP do comerciante — estoque, vendas, caixa e relatórios, offline e na nuvem.',
       'ft.product': 'Produto',
@@ -296,6 +301,7 @@
       'nav.features': 'Features',
       'nav.addons': 'Add-ons',
       'nav.how': 'How it works',
+      'nav.security': 'Security',
       'nav.pricing': 'Pricing',
       'nav.faq': 'FAQ',
       'nav.contact': 'Contact',
@@ -324,6 +330,9 @@
       'ph.week': 'This week’s sales',
       'ph.viewall': 'View all',
       'ph.lowstock': 'Low stock',
+      'ph.sync': 'All synced',
+      'ph.syncAgo': '2 min ago',
+      'ph.sale': 'Sale',
 
       't1': 'Works 100% offline',
       't2': 'Multi-store & team',
@@ -536,6 +545,7 @@
       'cta.sub': 'Download TAREQO and make your first sale today.',
       'cta.btn': 'Download free',
       'cta.btn.ios': 'Download for iOS',
+      'cta.kicker': 'Start today',
 
       'ft.tagline': 'The merchant’s ERP — stock, sales, cash and reports, offline and in the cloud.',
       'ft.product': 'Product',
@@ -556,6 +566,7 @@
       'nav.features': 'Fonctionnalités',
       'nav.addons': 'Add-ons',
       'nav.how': 'Comment ça marche',
+      'nav.security': 'Sécurité',
       'nav.pricing': 'Tarifs',
       'nav.faq': 'FAQ',
       'nav.contact': 'Contact',
@@ -584,6 +595,9 @@
       'ph.week': 'Ventes de la semaine',
       'ph.viewall': 'Tout voir',
       'ph.lowstock': 'Stock faible',
+      'ph.sync': 'Tout est synchronisé',
+      'ph.syncAgo': 'il y a 2 min',
+      'ph.sale': 'Vente',
 
       't1': 'Fonctionne 100 % hors ligne',
       't2': 'Multi-magasins & équipe',
@@ -796,6 +810,7 @@
       'cta.sub': 'Téléchargez TAREQO et réalisez votre première vente aujourd’hui.',
       'cta.btn': 'Télécharger gratuitement',
       'cta.btn.ios': 'Télécharger pour iOS',
+      'cta.kicker': 'Commencez aujourd’hui',
 
       'ft.tagline': 'L’ERP du commerçant — stock, ventes, caisse et rapports, hors ligne et dans le cloud.',
       'ft.product': 'Produit',
