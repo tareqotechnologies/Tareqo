@@ -259,7 +259,10 @@ class TransactionDetailSheet extends StatelessWidget {
     final sign = isIncome ? '+' : '-';
     final pending = transaction.status == TransactionStatus.pending;
 
-    return Padding(
+    // U-19/U-03: sheet de detalhe — SingleChildScrollView para conteúdo
+    // longo em ecrãs baixos/escala 2.0 sem overflow (showAppSheet já
+    // envolve em SafeArea + AnimatedPadding; o scroll é da sheet).
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.xl,
         AppSpacing.md,
@@ -270,18 +273,6 @@ class TransactionDetailSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Handle visual para sheets
-          Center(
-            child: Container(
-              width: AppSpacing.xxl,
-              height: AppSpacing.xxs,
-              margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: scheme.outlineVariant,
-                borderRadius: BorderRadius.circular(AppRadius.microRadius),
-              ),
-            ),
-          ),
           // ── Cabeçalho ──
           Row(
             children: [
