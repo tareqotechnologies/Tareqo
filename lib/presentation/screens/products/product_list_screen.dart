@@ -8,6 +8,7 @@ import '../../widgets/product_image.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/money.dart';
@@ -227,23 +228,24 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                       AppSpacing.pagePaddingForWidth(
                         MediaQuery.sizeOf(context).width,
                       ),
-                      16,
+                      AppSpacing.md,
                       AppSpacing.pagePaddingForWidth(
                         MediaQuery.sizeOf(context).width,
                       ),
-                      112,
+                      // Folga do FAB (o botão flutua sobre a lista).
+                      AppSpacing.fabBottomClearance + AppSpacing.md,
                     ),
-                    sliver: SliverList.separated(
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, _) => Divider(
-                        height: 1,
-                        indent: 72,
-                        endIndent: AppSpacing.md,
-                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    sliver: SliverGrid.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: AppSpacing.md,
+                        mainAxisSpacing: AppSpacing.md,
+                        childAspectRatio: 0.98,
                       ),
+                      itemCount: filtered.length,
                       itemBuilder: (context, index) {
                         final product = filtered[index];
-                        return _ProductTile(
+                        return _ProductCard(
                           product: product,
                           onTap: canManageProducts
                               ? () => _openEditSheet(product)
@@ -733,29 +735,28 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   }
 }
 
-/// Linha do card de produto (estilo Apple): foto, nome + detalhe à
-/// Tile de produto premium — estilo minimalista profissional.
+/// Card de produto PROFISSIONAL — grelha de 2 colunas (mestre UI/UX).
 ///
-/// Layout em row: foto do produto (40px) à esquerda, informações à
-/// direita alinhadas. Preço em destaque com fonte pequena mas bold.
-/// Borda sutil com hover elegante.
-class _ProductTile extends StatefulWidget {
-  const _ProductTile({required this.product, this.onTap});
+/// Layout vertical de cartão:
+/// - **Foto quadrada** (canto a canto no topo do cartão, raio lg) com
+///   sobreposição de selos: tipo estrutural (canto superior esquerdo)
+///   e estado inativo/esgotado (canto superior direito).
+/// - **Nome** (2 linhas, elipse), **código/descrição** (1 linha).
+/// - **Rodapé do cartão**: preço (destaque, `amountInRow`) à esquerda e
+///   stock (com ícone e estado) à direita, dentro de `Flexible` +
+///   `FittedBox` para não estourar com escala de texto 2.0 (U-03).
+///
+/// Espaçamento profissional: grelha 2 colunas com `md` (16) de
+/// cross/main-axis, padding de página por `pagePaddingForWidth` e
+/// folga `fabBottomClearance` em baixo. O cartão inteiro é UM nó
+/// semântico com `InkWell` (alvo ≥48, ripple e foco do tema).
+class _ProductCard extends StatelessWidget {
+  const _ProductCard({required this.product, this.onTap});
 
   final Product product;
 
   /// `null` para funcionário comum (só vende — não edita produtos).
   final VoidCallback? onTap;
-
-  @override
-  State<_ProductTile> createState() => _ProductTileState();
-}
-
-class _ProductTileState extends State<_ProductTile> {
-  bool _hovered = false;
-
-  Product get _product => widget.product;
-  VoidCallback? get _onTap => widget.onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -764,160 +765,175 @@ class _ProductTileState extends State<_ProductTile> {
     final l10n = context.l10n;
 
     final lowStock =
-        _product.stockQuantity <
+        product.stockQuantity <
         Quantity.lowStockThresholdUnits * Quantity.milliFactor;
-    final inactive = !_product.isActive;
+    final inactive = !product.isActive;
+    final outOfStock = product.stockQuantity <= 0;
 
-    final detail = _product.code.isEmpty
-        ? (_product.description.isEmpty ? null : _product.description)
-        : _product.code;
+    final detail = product.code.isEmpty
+        ? (product.description.isEmpty ? null : product.description)
+        : product.code;
 
-    // A11y: o card inteiro é UM nó semântico.
+    final stockText =
+        '${Quantity.format(product.stockQuantity, unitLabel: product.vendaPorFracao ? product.unitLabel : null, language: Formatters.currentLanguage)}'
+        '${product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}';
+
+    // A11y: o card inteiro é UM nó semântico (mesmo contrato do feed).
     final semanticLabel = buildComposedLabel([
-      detail == null ? _product.name : '${_product.name}: $detail',
-      Formatters.currency(_product.salePriceCents),
-      Quantity.format(
-        _product.stockQuantity,
-        unitLabel: _product.vendaPorFracao ? _product.unitLabel : null,
-        language: Formatters.currentLanguage,
-      ),
-      if (!_product.vendaPorFracao) l10n.commonUnits,
+      detail == null ? product.name : '${product.name}: $detail',
+      Formatters.currency(product.salePriceCents),
+      stockText,
       if (lowStock) l10n.dashboardLowStock,
       if (inactive) l10n.productsInactive,
     ]);
 
-    // Hover elegante: fundo sutil com elevacao.
-    return HoverableTile(
-      enabled: _onTap != null,
-      child: MouseRegion(
-        cursor: _onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: Material(
-          color: scheme.surface,
-          elevation: _hovered ? 2 : 0,
-          shadowColor: scheme.shadow.withValues(alpha: 0.1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            side: BorderSide(
-              color: scheme.outlineVariant.withValues(alpha: _hovered ? 0.8 : 0.4),
-              width: _hovered ? 1.0 : 0.5,
-            ),
-          ),
-          child: InkWell(
-            onTap: _onTap,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.md + 2,
-              ),
-              child: Semantics(
-                container: true,
-                excludeSemantics: true,
-                label: semanticLabel,
-                child: Row(
-                  children: [
-                    // ── Foto/ícone do produto ──
-                    ProductImage(
-                      imagePath: _product.imagePath,
-                      size: 40,
-                      radius: 10,
+    return Semantics(
+      container: true,
+      excludeSemantics: true,
+      label: semanticLabel,
+      child: Material(
+        color: scheme.surface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              // ── Foto (topo, canto a canto) + selos sobrepostos ──
+              Stack(
+                children: [
+                  ProductImage.fluid(
+                    imagePath: product.imagePath,
+                    fluidHeight: AppSpacing.huge * 2,
+                    radius: AppRadius.lg,
+                  ),
+                  if (!inactive && product.type != ProductType.resale)
+                    Positioned(
+                      top: AppSpacing.xs,
+                      left: AppSpacing.xs,
+                      child: ProductTypeBadge(type: product.type),
                     ),
-                    const SizedBox(width: 12),
-                    // ── Coluna: nome + detalhe + tipo ──
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Nome do produto - font pequena elegante
-                          Text(
-                            _product.name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: inactive
-                                  ? scheme.onSurfaceVariant
-                                  : scheme.onSurface,
-                            ),
-                          ),
-                          if (detail != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              detail,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                          // Chips apenas se necessário
-                          if (inactive) ...[
-                            const SizedBox(height: 4),
-                            StatusChip(
-                              label: l10n.productsInactive,
-                              color: scheme.outline,
-                              icon: Icons.block_outlined,
-                              
-                            ),
-                          ],
-                          if (_product.type != ProductType.resale && !inactive) ...[
-                            const SizedBox(height: 4),
-                            ProductTypeBadge(type: _product.type),
-                          ],
-                        ],
+                  if (inactive || outOfStock)
+                    Positioned(
+                      top: AppSpacing.xs,
+                      right: AppSpacing.xs,
+                      child: StatusChip(
+                        label: inactive
+                            ? l10n.productsInactive
+                            : l10n.dashboardLowStock,
+                        color: inactive ? scheme.outline : theme.warning,
+                        icon: inactive
+                            ? Icons.block_outlined
+                            : Icons.warning_amber_rounded,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    // ── Coluna direita: preço + estoque ──
-                    // Alinhado à direita, fontes pequenas premium
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 100),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // Preço em destaque - font pequena mas bold
-                          Text(
-                            Formatters.currency(_product.salePriceCents),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: inactive
-                                  ? scheme.onSurfaceVariant
-                                  : theme.colorScheme.primary,
-                            ),
+                ],
+              ),
+              // ── Corpo: nome + detalhe ──
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.sm,
+                  AppSpacing.xs,
+                  AppSpacing.sm,
+                  0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: inactive
+                            ? scheme.onSurfaceVariant
+                            : scheme.onSurface,
+                      ),
+                    ),
+                    if (detail != null) ...[
+                      const SizedBox(height: AppSpacing.micro),
+                      Text(
+                        detail,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const Spacer(),
+              // ── Rodapé: preço (esquerda) + stock (direita) ──
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.sm,
+                  AppSpacing.xs,
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          Formatters.currency(product.salePriceCents),
+                          maxLines: 1,
+                          style: AppTypography.amountInRow(
+                            inactive ? scheme.onSurfaceVariant : scheme.primary,
                           ),
-                          const SizedBox(height: 2),
-                          // Estoque - font pequena discreta
-                          Text(
-                            '${Quantity.format(
-                              _product.stockQuantity,
-                              unitLabel: _product.vendaPorFracao ? _product.unitLabel : null,
-                              language: Formatters.currentLanguage,
-                            )}'
-                            '${_product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}'
-                            // Estado por texto (acessibilidade)
-                            '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelSmall?.copyWith(
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              lowStock
+                                  ? Icons.warning_amber_rounded
+                                  : Icons.inventory_2_outlined,
+                              size: AppSizes.iconSm,
                               color: lowStock
                                   ? theme.expense
                                   : scheme.onSurfaceVariant,
-                              fontWeight: lowStock ? FontWeight.w500 : FontWeight.w400,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: AppSpacing.xxs),
+                            Text(
+                              stockText,
+                              maxLines: 1,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: lowStock
+                                    ? theme.expense
+                                    : scheme.onSurfaceVariant,
+                                fontWeight: lowStock
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),

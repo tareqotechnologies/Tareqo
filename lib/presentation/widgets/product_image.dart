@@ -16,7 +16,17 @@ class ProductImage extends StatelessWidget {
     this.size = 44,
     this.radius = 12,
     this.iconSize = 20,
-  });
+  }) : fluidHeight = 0;
+
+  /// Variância fluida (card em grelha): preenche a largura da coluna
+  /// com altura fixa de [fluidHeight].
+  const ProductImage.fluid({
+    super.key,
+    required this.imagePath,
+    this.fluidHeight = 0,
+    this.radius = 12,
+    this.iconSize = 20,
+  }) : size = 0;
 
   /// Referência da foto (URL, caminho local ou vazio = sem foto).
   final String imagePath;
@@ -25,13 +35,17 @@ class ProductImage extends StatelessWidget {
   final double radius;
   final double iconSize;
 
+  /// Com `size == 0` (via `ProductImage.fluid`), a foto é fluida:
+  /// largura disponível × [fluidHeight].
+  final double fluidHeight;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final fallback = Container(
-      width: size,
-      height: size,
+    Widget fallbackOf(double width, double height) => Container(
+      width: width,
+      height: height,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: theme.colorScheme.primaryContainer,
@@ -48,6 +62,29 @@ class ProductImage extends StatelessWidget {
       ),
     );
 
+    if (size == 0) {
+      // Variância fluida: largura disponível × fluidHeight.
+      final fallback = fallbackOf(double.infinity, fluidHeight);
+      if (imagePath.isEmpty) return fallback;
+      final image = imagePath.startsWith('http')
+          ? Image.network(
+              imagePath,
+              fit: BoxFit.cover,
+              cacheWidth: 512,
+              errorBuilder: (_, _, _) => fallback,
+            )
+          : localImageFile(imagePath, fallback, cacheWidth: 512);
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: SizedBox(
+          width: double.infinity,
+          height: fluidHeight,
+          child: image,
+        ),
+      );
+    }
+
+    final fallback = fallbackOf(size, size);
     if (imagePath.isEmpty) return fallback;
 
     // cacheWidth ~= 2× o tamanho exibido: decodifica o thumbnail em
