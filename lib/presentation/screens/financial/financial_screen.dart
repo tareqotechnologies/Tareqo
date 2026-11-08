@@ -112,8 +112,11 @@ class FinancialScreen extends ConsumerWidget {
                       Center(
                         child: Text(
                           _dateRangeLabel(period, l10n),
+                          // U-23: bodySmall 12px em onSurfaceVariant (#757575
+                          // = 3.5:1) falha AA para texto pequeno — usar
+                          // preto #212121 (11.7:1 sobre gelo).
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
+                            color: scheme.onSurface,
                           ),
                         ),
                       ),

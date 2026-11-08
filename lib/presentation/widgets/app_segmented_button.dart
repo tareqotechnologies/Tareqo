@@ -38,10 +38,12 @@ class AppSegmentedButton<T> extends StatelessWidget {
         ),
         shape: const StadiumBorder(),
         side: BorderSide(color: scheme.outlineVariant),
-        backgroundColor: Colors.transparent,
+        backgroundColor: scheme.surfaceContainerHighest,
         selectedBackgroundColor: scheme.primaryContainer,
         selectedForegroundColor: scheme.onPrimaryContainer,
-        foregroundColor: scheme.onSurfaceVariant,
+        // U-23: texto 14/w500 precisa de preto #212121 (11.7:1 sobre gelo);
+        // o cinza #757575 (3.5:1) é só para não-texto/metadata.
+        foregroundColor: scheme.onSurface,
         // Filtros são controlos discretos: 14/w500, nunca semibold.
         textStyle: theme.textTheme.labelLarge,
       ),

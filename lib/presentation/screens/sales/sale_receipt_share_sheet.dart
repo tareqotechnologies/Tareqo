@@ -12,6 +12,7 @@ import '../../../core/utils/receipt_text.dart';
 import '../../../domain/entities/sale.dart';
 import '../../controllers/sales_providers.dart';
 import '../../widgets/sale_receipt_view.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 
 /// Bottom sheet de partilha do recibo — o coração da funcionalidade:
@@ -160,7 +161,7 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
                     borderRadius: AppRadius.xsAll,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: AppColors.black.withValues(alpha: 0.08),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -197,10 +198,13 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
             // WhatsApp: abre o app com o recibo em texto pré-preenchido.
             OutlinedButton.icon(
               onPressed: _sharing ? null : _shareWhatsApp,
+              // Paleta oficial: terracota é terracota em qualquer estado
+              // (o verde brand do WhatsApp é uma cor de terceiros fora da
+              // paleta — proibido na interface geral).
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(52),
-                foregroundColor: const Color(0xFF075E54),
-                side: const BorderSide(color: Color(0xFF25D366)),
+                foregroundColor: AppColors.terracotta,
+                side: const BorderSide(color: AppColors.terracotta),
               ),
               icon: const Icon(Icons.chat_bubble_outline_rounded),
               label: Text(l10n.saleDetailShareWhatsApp),

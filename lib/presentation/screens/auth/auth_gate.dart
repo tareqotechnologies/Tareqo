@@ -73,7 +73,8 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     });
 
     return authState.when(
-      loading: () => _timeoutReached ? const LoginScreen() : const _SplashScreen(),
+      loading: () =>
+          _timeoutReached ? const LoginScreen() : const _SplashScreen(),
       error: (error, stackTrace) {
         CrashReporting.capture(
           error,
@@ -485,7 +486,7 @@ class _SplashScreen extends StatelessWidget {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.backgroundDark : AppColors.scaffoldLight;
-    final textPrimary = isDark ? Colors.white : AppColors.onSurfaceLight;
+    final textPrimary = isDark ? AppColors.ice : AppColors.onSurfaceLight;
     final textSecondary = isDark
         ? AppColors.onSurfaceVariantDark
         : AppColors.onSurfaceVariantLight;

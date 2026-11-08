@@ -1,38 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:tareqo/core/theme/app_colors.dart';
 import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 import 'package:tareqo/presentation/widgets/color_palette.dart';
 
-/// Trava a paleta profissional usada pelas facturas personalizadas e
-/// cotações: as 8 chaves estáveis (pt) com os hexadecimais da paleta RE2
-/// (ver `lib/core/theme/app_colors.dart`) e a resolução localizada do
-/// nome exibido ([paletteColorName]). RE2: a paleta NÃO tem verde — o
-/// antigo swatch #16A34A saiu do sistema.
+/// Trava a paleta OFICIAL (4 cores) usada pelas facturas personalizadas
+/// e cotações: Preto #212121, Cinza #757575, Terracota #B7472A,
+/// Branco gelo #E0E0E0.
 void main() {
   group('kColorPalettes', () {
-    test('expõe as 8 cores estáveis da paleta RE2', () {
-      expect(kColorPalettes, hasLength(8));
+    test('expõe as 4 cores oficiais', () {
+      expect(kColorPalettes, hasLength(4));
     });
 
-    test('chaves estáveis mapeiam para os hexadecimais da paleta RE2', () {
-      expect(kColorPalettes['Petroleo'], const Color(0xFF10282A));
-      expect(kColorPalettes['Slate'], const Color(0xFF3D4D55));
-      expect(kColorPalettes['Terracota'], const Color(0xFFB58863));
-      expect(kColorPalettes['Bege'], const Color(0xFFD3C3B9));
-      expect(kColorPalettes['Cinza quente'], const Color(0xFFA79E9C));
-      expect(kColorPalettes['Tinta petroleo'], const Color(0xFF2E6E75));
-      expect(kColorPalettes['Tinta slate'], const Color(0xFF2C3E45));
-      expect(kColorPalettes['Preto suave'], const Color(0xFF161616));
+    test('valores são exatamente a paleta oficial', () {
+      expect(kColorPalettes['Preto'], AppColors.black);
+      expect(kColorPalettes['Cinza'], AppColors.gray);
+      expect(kColorPalettes['Terracota'], AppColors.terracotta);
+      expect(kColorPalettes['Branco gelo'], AppColors.ice);
     });
 
-    test('nenhum swatch é verde (regra RE2: sem verde no sistema)', () {
-      // Guard de regressão: se alguém reintroduzir o verde da paleta
-      // antiga (#16A34A/#22C55E), este teste falha antes do release.
+    test('nenhuma cor fora da paleta oficial é permitida', () {
+      final allowed = {
+        AppColors.black,
+        AppColors.gray,
+        AppColors.terracotta,
+        AppColors.ice,
+      };
       for (final color in kColorPalettes.values) {
-        expect(color, isNot(const Color(0xFF16A34A)));
-        expect(color, isNot(const Color(0xFF22C55E)));
+        expect(allowed, contains(color));
       }
     });
   });
@@ -41,31 +39,21 @@ void main() {
     final pt = AppLocalizationsPt();
     final en = AppLocalizationsEn();
 
-    test('resolve cada chave da paleta para o nome localizado (pt)', () {
-      expect(paletteColorName('Petroleo', pt), pt.palettePetrol);
-      expect(paletteColorName('Slate', pt), pt.paletteSlate);
+    test('resolve as 4 chaves oficiais', () {
+      expect(paletteColorName('Preto', pt), pt.paletteSoftBlack);
+      expect(paletteColorName('Cinza', pt), pt.paletteWarmGray);
       expect(paletteColorName('Terracota', pt), pt.paletteTerracotta);
-      expect(paletteColorName('Bege', pt), pt.paletteBeige);
-      expect(paletteColorName('Cinza quente', pt), pt.paletteWarmGray);
-      expect(paletteColorName('Tinta petroleo', pt), pt.palettePetrolInk);
-      expect(paletteColorName('Tinta slate', pt), pt.paletteSlateInk);
+      expect(paletteColorName('Branco gelo', pt), pt.paletteBeige);
     });
 
-    test('Preto suave (na paleta, fora do switch) cai no rótulo padrão', () {
-      expect(paletteColorName('Preto suave', pt), pt.paletteSoftBlack);
-      expect(paletteColorName('Preto suave', en), en.paletteSoftBlack);
-    });
-
-    test('chave desconhecida cai no rótulo padrão (Preto suave)', () {
+    test('chave desconhecida cai no rótulo padrão (Preto)', () {
       expect(paletteColorName('Magenta', pt), pt.paletteSoftBlack);
       expect(paletteColorName('', pt), pt.paletteSoftBlack);
     });
 
     test('nome troca de idioma conforme o locale (en)', () {
-      expect(paletteColorName('Petroleo', en), en.palettePetrol);
-      expect(paletteColorName('Slate', en), en.paletteSlate);
-      // O texto em en difere do rótulo do catálogo (pt).
-      expect(paletteColorName('Petroleo', en), isNot(pt.palettePetrol));
+      expect(paletteColorName('Preto', en), en.paletteSoftBlack);
+      expect(paletteColorName('Terracota', en), en.paletteTerracotta);
     });
   });
 }

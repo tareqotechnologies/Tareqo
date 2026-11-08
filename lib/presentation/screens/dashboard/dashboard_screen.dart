@@ -192,19 +192,13 @@ class DashboardScreen extends ConsumerWidget {
         _ActivityItem.lowStock(
           product: product,
           l10n: l10n,
-          onTap: () => AppNavigator.pushSection(
-            context,
-            AppSection.products,
-          ),
+          onTap: () => AppNavigator.pushSection(context, AppSection.products),
         ),
       for (final alert in expiryAlerts)
         _ActivityItem.expiry(
           alert: alert,
           l10n: l10n,
-          onTap: () => AppNavigator.pushSection(
-            context,
-            AppSection.products,
-          ),
+          onTap: () => AppNavigator.pushSection(context, AppSection.products),
         ),
     ];
 
@@ -541,7 +535,6 @@ class _BalanceHero extends StatelessWidget {
                     // UMA escala de dinheiro (AppTypography.heroAmount).
                     style: AppTypography.heroAmount(
                       cashNegative ? AppColors.errorNeutral : scheme.onSurface,
-
                     ),
                   ),
                 ),
@@ -1072,8 +1065,8 @@ class _ActivityRow extends StatelessWidget {
             ? (item.amount!.startsWith('+')
                   ? theme.income
                   : item.amount!.startsWith('-')
-                      ? theme.expense
-                      : scheme.primary)
+                  ? theme.expense
+                  : scheme.primary)
             : item.badgeColor);
 
     final row = Padding(
@@ -1149,7 +1142,7 @@ class _ActivityRow extends StatelessWidget {
                           child: Text(
                             item.badge!,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: const Color(0xFF101413),
+                              color: AppColors.black,
                               fontWeight: FontWeight.w500,
                             ),
                           ),

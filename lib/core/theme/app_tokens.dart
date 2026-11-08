@@ -151,11 +151,12 @@ abstract final class AppCurves {
   static const Curve emphasized = Curves.easeInOutCubic;
 }
 
-/// Elevação Signature — sombras neutras, nunca coloridas.
+/// Elevação Signature — sombras discretas baseadas em #212121 (preto
+/// oficial), nunca coloridas.
 ///
 /// No escuro a elevação é sobretudo contorno; as sombras são mais fortes
-/// para separar superfícies quase pretas. Os valores centrais ficam aqui
-/// para que cartões, sheets, diálogos e menus partilhem a mesma física.
+/// para separar superfícies pretas. Os valores centrais ficam aqui para
+/// que cartões, sheets, diálogos e menus partilhem a mesma física.
 abstract final class AppElevation {
   static const double e0 = 0;
   static const double e1 = 1;
@@ -164,29 +165,29 @@ abstract final class AppElevation {
   static const double e4 = 24;
 
   static const List<BoxShadow> light1 = [
-    BoxShadow(color: Color(0x0F000000), blurRadius: 2, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x0F212121), blurRadius: 2, offset: Offset(0, 1)),
   ];
   static const List<BoxShadow> light2 = [
-    BoxShadow(color: Color(0x14000000), blurRadius: 12, offset: Offset(0, 4)),
+    BoxShadow(color: Color(0x14212121), blurRadius: 12, offset: Offset(0, 4)),
   ];
   static const List<BoxShadow> light3 = [
-    BoxShadow(color: Color(0x1F000000), blurRadius: 28, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x1F212121), blurRadius: 28, offset: Offset(0, 12)),
   ];
   static const List<BoxShadow> light4 = [
-    BoxShadow(color: Color(0x29000000), blurRadius: 48, offset: Offset(0, 24)),
+    BoxShadow(color: Color(0x29212121), blurRadius: 48, offset: Offset(0, 24)),
   ];
 
   static const List<BoxShadow> dark1 = [
-    BoxShadow(color: Color(0x66000000), blurRadius: 1, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x66212121), blurRadius: 1, offset: Offset(0, 1)),
   ];
   static const List<BoxShadow> dark2 = [
-    BoxShadow(color: Color(0x73000000), blurRadius: 16, offset: Offset(0, 6)),
+    BoxShadow(color: Color(0x73212121), blurRadius: 16, offset: Offset(0, 6)),
   ];
   static const List<BoxShadow> dark3 = [
-    BoxShadow(color: Color(0x8C000000), blurRadius: 32, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x8C212121), blurRadius: 32, offset: Offset(0, 12)),
   ];
   static const List<BoxShadow> dark4 = [
-    BoxShadow(color: Color(0x99000000), blurRadius: 56, offset: Offset(0, 24)),
+    BoxShadow(color: Color(0x99212121), blurRadius: 56, offset: Offset(0, 24)),
   ];
 }
 
@@ -201,32 +202,32 @@ abstract final class DashedBorders {
 
 /// Cores de módulo — conjunto fechado para tiles do Menu.
 ///
-/// A diferenciação entre módulos vem de matiz **e** luminosidade dentro
-/// da família Signature (azul, neutros e um acento quente reservado).
+/// A diferenciação entre módulos vem da paleta oficial: terracota para
+/// destaque, preto/cinza para neutros (sem azul/verde/amarelo/roxo).
 abstract final class ModuleColors {
-  /// Produtos — azul-petróleo profundo.
-  static const Color products = Color(0xFF0E3A5C);
+  /// Produtos — preto oficial.
+  static const Color products = Color(0xFF212121);
 
-  /// Clientes — azul-cinza.
-  static const Color customers = Color(0xFF2E5A73);
+  /// Clientes — cinza oficial.
+  static const Color customers = Color(0xFF757575);
 
-  /// Crédito/Fiado — âmbar profundo (atenção).
-  static const Color credit = Color(0xFF9A4A00);
+  /// Crédito/Fiado — terracota (atenção).
+  static const Color credit = Color(0xFFB7472A);
 
-  /// Compras — cinza quente.
-  static const Color purchases = Color(0xFF6E6E73);
+  /// Compras — cinza oficial.
+  static const Color purchases = Color(0xFF757575);
 
-  /// Relatórios — azul de análise.
-  static const Color reports = Color(0xFF0062CC);
+  /// Relatórios — preto oficial.
+  static const Color reports = Color(0xFF212121);
 
-  /// Lojas — petróleo-ardósia.
-  static const Color stores = Color(0xFF223A41);
+  /// Lojas — cinza oficial.
+  static const Color stores = Color(0xFF757575);
 
-  /// Produção — terra queimada.
-  static const Color production = Color(0xFF5A4632);
+  /// Produção — terracota oficial.
+  static const Color production = Color(0xFFB7472A);
 }
 
-/// Ícones com fundo sólido escuro derivado de uma cor.
+/// Ícones com fundo sólido escuro derivado de uma cor (paleta oficial).
 abstract final class IconTone {
   static Color darkBackground(Color color) {
     final hsl = HSLColor.fromColor(color);
@@ -241,26 +242,27 @@ abstract final class IconTone {
         .toColor();
   }
 
-  /// Laranja usado para indicar alertas estoque, pendências e destaques.
-  static const Color accentOrange = Color(0xFFF28C00);
-  /// Laranja escuro para gradiente do botão Confirmar no POS.
-  static const Color accentOrangeDark = Color(0xFFB45309);
+  /// Terracota oficial — alertas, pendências e destaques.
+  static const Color accentOrange = Color(0xFFB7472A);
 
-  /// Cinza neutro para ícones secundários.
-  static const Color slate = Color(0xFF3D4D55);
+  /// Terracota oficial (gradiente do botão Confirmar no POS).
+  static const Color accentOrangeDark = Color(0xFFB7472A);
 
-  /// Cinza escuro para fundos de ícones.
-  static const Color slateDark = Color(0xFF2A3038);
+  /// Cinza oficial para ícones secundários.
+  static const Color slate = Color(0xFF757575);
 
-  /// Vermelho neutro para erros (sem verde dominante).
-  static const Color errorNeutral = Color(0xFFB3261E);
-  static const Color errorNeutralDark = Color(0xFF7A1E16);
+  /// Preto oficial para fundos de ícones.
+  static const Color slateDark = Color(0xFF212121);
 
-  /// Laranja suave para estados de aviso.
-  static const Color amber = Color(0xFFD97706);
-  static const Color amberDark = Color(0xFF3A2810);
+  /// Erro semântico oficial (#C62828 — só em alertas de erro).
+  static const Color errorNeutral = Color(0xFFC62828);
+  static const Color errorNeutralDark = Color(0xFFC62828);
 
-  /// Textos em modo claro/escuro sobre ícones.
-  static const Color onBackgroundLight = Color(0xFF111111);
-  static const Color onBackgroundDark = Color(0xFFF5F5F5);
+  /// Aviso semântico oficial (#F9A825 — só em alertas de aviso).
+  static const Color amber = Color(0xFFF9A825);
+  static const Color amberDark = Color(0xFFF9A825);
+
+  /// Textos em modo claro/escuro sobre ícones (paleta oficial).
+  static const Color onBackgroundLight = Color(0xFF212121);
+  static const Color onBackgroundDark = Color(0xFFE0E0E0);
 }

@@ -1,13 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1024" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0076F6"/>
-      <stop offset="100%" stop-color="#005BBB"/>
-    </linearGradient>
-  </defs>
-  <rect width="1024" height="1024" rx="200" fill="url(#bg)"/>
+  <!-- Paleta oficial: só #212121, #757575, #B7472A, #E0E0E0 -->
+  <rect width="1024" height="1024" rx="200" fill="#212121"/>
   <!-- Simplified storefront shape -->
-  <g fill="#FFFFFF">
+  <g fill="#E0E0E0">
     <!-- Roof -->
     <polygon points="160,170 864,170 834,360 194,360"/>
     <!-- Body -->
@@ -15,11 +10,11 @@
     <!-- Pillars -->
     <rect x="200" y="360" width="55" height="440"/>
     <rect x="769" y="360" width="55" height="440"/>
-    <!-- Door cutout -->
-    <rect x="390" y="500" width="244" height="300" fill="#0076F6"/>
-    <circle cx="512" cy="500" r="122" fill="#0076F6"/>
+    <!-- Door cutout: terracota (destaque oficial) -->
+    <rect x="390" y="500" width="244" height="300" fill="#B7472A"/>
+    <circle cx="512" cy="500" r="122" fill="#B7472A"/>
     <!-- Windows cutout -->
-    <rect x="250" y="400" width="110" height="70" fill="#0076F6"/>
-    <rect x="664" y="400" width="110" height="70" fill="#0076F6"/>
+    <rect x="250" y="400" width="110" height="70" fill="#B7472A"/>
+    <rect x="664" y="400" width="110" height="70" fill="#B7472A"/>
   </g>
 </svg>

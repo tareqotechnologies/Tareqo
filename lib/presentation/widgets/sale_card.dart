@@ -69,7 +69,9 @@ class _SalesCardState extends State<SalesCard> {
         onExit: (_) => setState(() => _hovered = false),
         child: Material(
           color: _hovered
-              ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.55)
+              ? theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.55,
+                )
               : Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: _radius),
           child: Stack(
@@ -100,7 +102,7 @@ class _SalesCardState extends State<SalesCard> {
                           child: const Icon(
                             Icons.north_east_rounded,
                             size: 18,
-                            color: Colors.white,
+                            color: AppColors.ice,
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),

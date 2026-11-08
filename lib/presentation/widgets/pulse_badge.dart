@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/app_typography.dart';
 
@@ -120,7 +121,9 @@ class _PulseBadgeState extends State<PulseBadge>
     final badgeColor = widget.color ?? scheme.tertiary;
     // Rótulo legível sobre o fundo por omissão (tertiary); cor custom do
     // chamador mantém o branco original.
-    final onBadgeColor = widget.color == null ? scheme.onTertiary : Colors.white;
+    final onBadgeColor = widget.color == null
+        ? scheme.onTertiary
+        : AppColors.ice;
     final displayText = widget.count > widget.maxCount
         ? '${widget.maxCount}+'
         : '${widget.count}';

@@ -38,6 +38,7 @@ class _LoginPalette {
     required this.accentDark,
     required this.onCta,
   });
+
   /// Fundo da página (atrás dos campos).
   final Color background;
 
@@ -58,10 +59,10 @@ class _LoginPalette {
   /// escura sobe para ~7.9:1.
   final Color onCta;
 
-  /// Modo escuro — dark premium petróleo.
+  /// Modo escuro — preto oficial com texto gelo.
   static final _LoginPalette dark = _LoginPalette(
     background: AppColors.darkBackground,
-    textPrimary: Colors.white,
+    textPrimary: AppColors.ice,
     textSecondary: AppColors.darkTextSecondary,
     // Acento laranja (links, cursor, ícone em foco) sobre o fundo neutro.
     // #F28C00 no claro, #FF9800 no escuro — usadas somente em links
@@ -293,314 +294,306 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildBody(BuildContext context, _LoginPalette palette) {
     final l10n = context.l10n;
     return SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xxl,
-                vertical: AppSpacing.xl,
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 380),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ── Header com parallax (4.5): Large Title da escala
-                    // (`displaySmall` 34/w300, tracking negativo) — a
-                    // "primeira impressão" do plano. O bloco desliza a
-                    // meia velocidade do conteúdo; o formulário sobe por
-                    // cima (pintado depois). Em repouso, translate 0 —
-                    // layout/pixels idênticos ao login anterior.
-                    Transform.translate(
-                      offset: Offset(0, _headerParallax),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // ── Logo ──
-                          // Logo com brilho da marca por baixo e aro de
-                          // cabelo — "joia" de abertura do app.
-                          Center(
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.xl,
-                                ),
-                                boxShadow: PremiumDecor.glow(
-                                  palette.accent,
-                                  strength: 1.2,
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.xl,
-                                ),
-                                child: Image.asset(
-                                  'assets/branding/icon_official.png',
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
+      child: Center(
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xxl,
+            vertical: AppSpacing.xl,
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 380),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── Header com parallax (4.5): Large Title da escala
+                // (`displaySmall` 34/w300, tracking negativo) — a
+                // "primeira impressão" do plano. O bloco desliza a
+                // meia velocidade do conteúdo; o formulário sobe por
+                // cima (pintado depois). Em repouso, translate 0 —
+                // layout/pixels idênticos ao login anterior.
+                Transform.translate(
+                  offset: Offset(0, _headerParallax),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // ── Logo ──
+                      // Logo com brilho da marca por baixo e aro de
+                      // cabelo — "joia" de abertura do app.
+                      Center(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(AppRadius.xl),
+                            boxShadow: PremiumDecor.glow(
+                              palette.accent,
+                              strength: 1.2,
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.xl),
-
-                          // ── Título + subtítulo ──
-                          Text(
-                            'TAREQO',
-                            textAlign: TextAlign.center,
-                            // Large Title da escala — cor do tema (mesmos
-                            // pares auditados: branco no escuro, #161616
-                            // no claro).
-                            style: Theme.of(context).textTheme.displaySmall,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(AppRadius.xl),
+                            child: Image.asset(
+                              'assets/branding/icon_official.png',
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            _isSignUpMode
-                                ? l10n.loginSubtitleSignUp
-                                : l10n.loginTagline,
-                            textAlign: TextAlign.center,
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: palette.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+
+                      // ── Título + subtítulo ──
+                      Text(
+                        'TAREQO',
+                        textAlign: TextAlign.center,
+                        // Large Title da escala — cor do tema (mesmos
+                        // pares auditados: branco no escuro, #161616
+                        // no claro).
+                        style: Theme.of(context).textTheme.displaySmall,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        _isSignUpMode
+                            ? l10n.loginSubtitleSignUp
+                            : l10n.loginTagline,
+                        textAlign: TextAlign.center,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                // ── Nome (modo cadastro) ──
+                if (_isSignUpMode) ...[
+                  _buildLabel(palette, l10n.loginNameLabel),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildTextField(
+                    palette,
+                    controller: _nameController,
+                    hint: l10n.loginNameHint,
+                    icon: Icons.person_outline_rounded,
+                    textInputAction: TextInputAction.next,
+                    obscure: false,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                ],
+
+                // ── Email ──
+                _buildLabel(palette, l10n.loginEmailLabel),
+                const SizedBox(height: 8),
+                _buildTextField(
+                  palette,
+                  controller: _emailController,
+                  hint: l10n.loginEmailHint,
+                  icon: Icons.mail_outline_rounded,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  obscure: false,
+                ),
+                const SizedBox(height: 20),
+
+                // ── Senha ──
+                _buildLabel(palette, l10n.loginPasswordLabel),
+                const SizedBox(height: 8),
+                _buildTextField(
+                  palette,
+                  controller: _passwordController,
+                  hint: l10n.loginPasswordHint,
+                  icon: Icons.lock_outline_rounded,
+                  obscure: _obscurePassword,
+                  textInputAction: _isSignUpMode
+                      ? TextInputAction.next
+                      : TextInputAction.done,
+                  onSubmitted: (_) {
+                    if (!_isSignUpMode) _submit();
+                  },
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      size: 20,
+                      color: palette.textSecondary,
+                    ),
+                    // A11y: leitor de ecrã anuncia a ação (e o estado
+                    // futuro — o tooltip descreve o que o toque FAZ).
+                    tooltip: _obscurePassword
+                        ? l10n.loginShowPassword
+                        : l10n.loginHidePassword,
+                    onPressed: () => setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    }),
+                  ),
+                ),
+
+                // ── Confirmar senha (modo cadastro) ──
+                if (_isSignUpMode) ...[
+                  const SizedBox(height: 20),
+                  _buildLabel(palette, l10n.loginConfirmPasswordLabel),
+                  const SizedBox(height: 8),
+                  _buildTextField(
+                    palette,
+                    controller: _confirmController,
+                    hint: l10n.loginConfirmPasswordHint,
+                    icon: Icons.lock_outline_rounded,
+                    obscure: _obscureConfirm,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _submit(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirm
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        size: 20,
+                        color: palette.textSecondary,
+                      ),
+                      tooltip: _obscureConfirm
+                          ? l10n.loginShowPassword
+                          : l10n.loginHidePassword,
+                      onPressed: () => setState(() {
+                        _obscureConfirm = !_obscureConfirm;
+                      }),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 32),
+
+                // ── Botão Entrar ──
+                // CTA com brilho da marca quando habilitado (o brilho
+                // apaga-se durante o envio — feedback de estado).
+                AnimatedContainer(
+                  duration: AppDurations.fast,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    boxShadow: _isSubmitting
+                        ? null
+                        : PremiumDecor.glow(palette.accentDark),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: palette.accentDark,
+                      foregroundColor: palette.onCta,
+                      disabledBackgroundColor: palette.accentDark.withValues(
+                        alpha: 0.5,
+                      ),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        // Design system V4: mesmo raio dos controles
+                        // (botões/campos) — o 14 ad-hoc divergia.
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      // CTA = labelLarge (14/w500), o mesmo degrau dos
+                      // demais botões primários do app.
+                      textStyle: AppTypography.labelLarge.copyWith(
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: AppColors.ice,
+                            ),
+                          )
+                        : Text(
+                            _isSignUpMode ? l10n.loginSignUp : l10n.loginSignIn,
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // ── Links ──
+                if (!_isSignUpMode)
+                  Center(
+                    child: GestureDetector(
+                      onTap: _isSubmitting ? null : _openForgotPassword,
+                      child: Text(
+                        l10n.loginForgotPassword,
+                        style: AppTypography.labelLarge.copyWith(
+                          color: palette.accent,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 16),
+                Center(
+                  child: GestureDetector(
+                    onTap: _isSubmitting
+                        ? null
+                        : () => setState(() {
+                            _isSignUpMode = !_isSignUpMode;
+                            _confirmController.clear();
+                          }),
+                    child: RichText(
+                      text: TextSpan(
+                        text: _isSignUpMode
+                            ? '${l10n.loginPromptHaveAccount} '
+                            : '${l10n.loginPromptNoAccount} ',
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: palette.textSecondary,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: _isSignUpMode
+                                ? l10n.loginSignIn
+                                : l10n.loginSignUp,
+                            style: AppTypography.labelLarge.copyWith(
+                              color: palette.accent,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 40),
+                  ),
+                ),
 
-                    // ── Nome (modo cadastro) ──
-                    if (_isSignUpMode) ...[
-                      _buildLabel(palette, l10n.loginNameLabel),
-                      const SizedBox(height: AppSpacing.sm),
-                      _buildTextField(
-                        palette,
-                        controller: _nameController,
-                        hint: l10n.loginNameHint,
-                        icon: Icons.person_outline_rounded,
-                        textInputAction: TextInputAction.next,
-                        obscure: false,
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                    ],
+                const SizedBox(height: 48),
 
-                    // ── Email ──
-                    _buildLabel(palette, l10n.loginEmailLabel),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      palette,
-                      controller: _emailController,
-                      hint: l10n.loginEmailHint,
-                      icon: Icons.mail_outline_rounded,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      obscure: false,
-                    ),
-                    const SizedBox(height: 20),
-
-                    // ── Senha ──
-                    _buildLabel(palette, l10n.loginPasswordLabel),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      palette,
-                      controller: _passwordController,
-                      hint: l10n.loginPasswordHint,
-                      icon: Icons.lock_outline_rounded,
-                      obscure: _obscurePassword,
-                      textInputAction: _isSignUpMode
-                          ? TextInputAction.next
-                          : TextInputAction.done,
-                      onSubmitted: (_) {
-                        if (!_isSignUpMode) _submit();
-                      },
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          size: 20,
-                          color: palette.textSecondary,
-                        ),
-                        // A11y: leitor de ecrã anuncia a ação (e o estado
-                        // futuro — o tooltip descreve o que o toque FAZ).
-                        tooltip: _obscurePassword
-                            ? l10n.loginShowPassword
-                            : l10n.loginHidePassword,
-                        onPressed: () => setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        }),
+                // ── Rodapé de segurança ──
+                // Quebra linha em telas estreitas/escala de texto alta
+                // (o texto NUNCA estoura o container — acessibilidade).
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Icon(
+                        Icons.lock_outline_rounded,
+                        size: 14,
+                        color: palette.textSecondary.withValues(alpha: 0.6),
                       ),
                     ),
-
-                    // ── Confirmar senha (modo cadastro) ──
-                    if (_isSignUpMode) ...[
-                      const SizedBox(height: 20),
-                      _buildLabel(palette, l10n.loginConfirmPasswordLabel),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        palette,
-                        controller: _confirmController,
-                        hint: l10n.loginConfirmPasswordHint,
-                        icon: Icons.lock_outline_rounded,
-                        obscure: _obscureConfirm,
-                        textInputAction: TextInputAction.done,
-                        onSubmitted: (_) => _submit(),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirm
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            size: 20,
-                            color: palette.textSecondary,
-                          ),
-                          tooltip: _obscureConfirm
-                              ? l10n.loginShowPassword
-                              : l10n.loginHidePassword,
-                          onPressed: () => setState(() {
-                            _obscureConfirm = !_obscureConfirm;
-                          }),
-                        ),
-                      ),
-                    ],
-
-                    const SizedBox(height: 32),
-
-                    // ── Botão Entrar ──
-                    // CTA com brilho da marca quando habilitado (o brilho
-                    // apaga-se durante o envio — feedback de estado).
-                    AnimatedContainer(
-                      duration: AppDurations.fast,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        boxShadow: _isSubmitting
-                            ? null
-                            : PremiumDecor.glow(palette.accentDark),
-                      ),
-                      child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: palette.accentDark,
-                          foregroundColor: palette.onCta,
-                          disabledBackgroundColor: palette.accentDark.withValues(
-                            alpha: 0.5,
-                          ),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            // Design system V4: mesmo raio dos controles
-                            // (botões/campos) — o 14 ad-hoc divergia.
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                          ),
-                          // CTA = labelLarge (14/w500), o mesmo degrau dos
-                          // demais botões primários do app.
-                          textStyle: AppTypography.labelLarge.copyWith(
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
-                                _isSignUpMode
-                                    ? l10n.loginSignUp
-                                    : l10n.loginSignIn,
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // ── Links ──
-                    if (!_isSignUpMode)
-                      Center(
-                        child: GestureDetector(
-                          onTap: _isSubmitting ? null : _openForgotPassword,
-                          child: Text(
-                            l10n.loginForgotPassword,
-                            style: AppTypography.labelLarge.copyWith(
-                              color: palette.accent,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    const SizedBox(height: 16),
-                    Center(
-                      child: GestureDetector(
-                        onTap: _isSubmitting
-                            ? null
-                            : () => setState(() {
-                                _isSignUpMode = !_isSignUpMode;
-                                _confirmController.clear();
-                              }),
-                        child: RichText(
-                          text: TextSpan(
-                            text: _isSignUpMode
-                                ? '${l10n.loginPromptHaveAccount} '
-                                : '${l10n.loginPromptNoAccount} ',
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: palette.textSecondary,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: _isSignUpMode
-                                    ? l10n.loginSignIn
-                                    : l10n.loginSignUp,
-                                style: AppTypography.labelLarge.copyWith(
-                                  color: palette.accent,
-                                ),
-                              ),
-                            ],
-                          ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        l10n.loginSecurityFooter,
+                        textAlign: TextAlign.center,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: palette.textSecondary.withValues(alpha: 0.6),
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 48),
-
-                    // ── Rodapé de segurança ──
-                    // Quebra linha em telas estreitas/escala de texto alta
-                    // (o texto NUNCA estoura o container — acessibilidade).
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Icon(
-                            Icons.lock_outline_rounded,
-                            size: 14,
-                            color: palette.textSecondary.withValues(alpha: 0.6),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            l10n.loginSecurityFooter,
-                            textAlign: TextAlign.center,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: palette.textSecondary.withValues(
-                                alpha: 0.6,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
                   ],
                 ),
-              ),
+                const SizedBox(height: 12),
+              ],
             ),
           ),
-        );
+        ),
+      ),
+    );
   }
 
   // ── Helpers ──
@@ -644,10 +637,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         suffixIcon: suffixIcon,
         // Alinhado ao design system: erro aparecendo abaixo do campo
         errorMaxLines: 2,
-        errorStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-        ),
+        errorStyle: Theme.of(context).textTheme.bodySmall?.copyWith(),
       ),
     );
   }
 }
-

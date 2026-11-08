@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/theme/app_colors.dart';
+
 /// Configuração do template de documentos PDF (Factura Avançada e Cotação).
 ///
 /// Persistida via `SharedPreferencesAsync` (JSON) — antes o template vivia
@@ -17,9 +19,9 @@ class InvoiceTemplateConfig {
     this.businessAddress = '',
     this.businessPhone = '',
     this.businessTaxId = '',
-    // RE2: default alinhado ao tema (slate) — antes azul #2563EB, fora do
-    // sistema visual. O utilizado persiste nos prefs do utilizador.
-    this.primaryColor = const Color(0xFF3D4D55),
+    // Paleta oficial: default preto #212121 — antes slate #3D4D55.
+    // O utilizado persiste nos prefs do utilizador.
+    this.primaryColor = AppColors.black,
     this.templateStyle = 'Classic',
   });
 
@@ -110,7 +112,7 @@ class InvoiceTemplateNotifier extends Notifier<InvoiceTemplateConfig> {
           current.businessTaxId.isEmpty &&
           current.logoBytes == null &&
           current.templateStyle == 'Classic' &&
-          current.primaryColor == const Color(0xFF3D4D55);
+          current.primaryColor == AppColors.black;
       if (untouched) state = decoded;
     } catch (_) {
       // Prefs indisponível (ex.: teste) — mantém default sem quebrar.

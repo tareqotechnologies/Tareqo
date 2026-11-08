@@ -3,15 +3,19 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../l10n/generated/app_localizations.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 
 /// Abre a câmera de leitura de código de barras em um bottom sheet e
 /// devolve o primeiro código lido (ou `null` se o usuário cancelar).
+///
+/// Paleta oficial: fundo preto #212121 (a mira precisa de contraste com a
+/// imagem da câmera), moldura e textos gelo #E0E0E0.
 Future<String?> showBarcodeScanner(BuildContext context) {
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.black,
+    backgroundColor: AppColors.black,
     builder: (context) => const BarcodeScanSheet(),
   );
 }
@@ -74,24 +78,24 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                       controller: _controller,
                       onDetect: _onDetect,
                       errorBuilder: (context, error) => Container(
-                        color: Colors.black,
+                        color: AppColors.black,
                         alignment: Alignment.center,
                         padding: const EdgeInsets.all(AppSpacing.xl),
                         child: Text(
                           l10n.salesBarcodeCameraUnavailable('$error'),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white70),
+                          style: const TextStyle(color: AppColors.ice),
                         ),
                       ),
                     ),
                   ),
-                  // Moldura de mira.
+                  // Moldura de mira (gelo sobre preto).
                   IgnorePointer(
                     child: Container(
                       width: 240,
                       height: 240,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white, width: 3),
+                        border: Border.all(color: AppColors.ice, width: 3),
                         borderRadius: BorderRadius.circular(AppRadius.xxl),
                       ),
                     ),
@@ -101,9 +105,9 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                     right: 12,
                     child: IconButton.filled(
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.black54,
+                        backgroundColor: AppColors.gray.withValues(alpha: 0.54),
                       ),
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: const Icon(Icons.close, color: AppColors.ice),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -111,7 +115,7 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                     bottom: 16,
                     child: Text(
                       l10n.salesBarcodeCameraHint,
-                      style: const TextStyle(color: Colors.white70),
+                      style: const TextStyle(color: AppColors.ice),
                     ),
                   ),
                 ],

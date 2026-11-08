@@ -6,6 +6,7 @@ import '../../core/utils/formatters.dart';
 import '../../core/utils/quantity.dart';
 import '../../domain/entities/sale.dart';
 import '../../domain/entities/sale_item.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 
@@ -43,8 +44,8 @@ class SaleReceiptView extends StatelessWidget {
     final cancelled = sale.status == SaleStatus.cancelled;
 
     return Container(
-      // "Papel" do recibo: branco com leve viés quente, como um cupom.
-      color: const Color(0xFFFFFEFA),
+      // "Papel" do recibo: gelo oficial (sem branco puro).
+      color: AppColors.ice,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.xl,
@@ -155,7 +156,7 @@ class SaleReceiptView extends StatelessWidget {
 final TextStyle _headerStyle = const TextStyle(
   fontFamily: AppTypography.family,
   fontFamilyFallback: AppTypography.familyFallback,
-  color: Color(0xFF1B1B1B),
+  color: AppColors.black,
   fontSize: 12,
   fontWeight: FontWeight.w600,
   letterSpacing: 1.2,
@@ -167,17 +168,17 @@ final TextStyle _headerStyle = const TextStyle(
 final TextStyle _bodyStyle = const TextStyle(
   fontFamily: AppTypography.family,
   fontFamilyFallback: AppTypography.familyFallback,
-  color: Color(0xFF1B1B1B),
+  color: AppColors.black,
   fontSize: 12,
   height: 1.5,
   fontFeatures: [FontFeature.tabularFigures()],
 );
 
-/// Texto secundário (endereço, data, agradecimento).
+/// Texto secundário (endereço, data, agradecimento) — cinza oficial.
 final TextStyle _mutedStyle = const TextStyle(
   fontFamily: AppTypography.family,
   fontFamilyFallback: AppTypography.familyFallback,
-  color: Color(0xFF6B6B6B),
+  color: AppColors.gray,
   fontSize: 12,
   height: 1.5,
 );
@@ -239,7 +240,7 @@ class _DashedDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CustomPaint(
       size: Size(double.infinity, 1),
-      painter: _DashedLinePainter(color: Color(0xFF9A9A9A)),
+      painter: _DashedLinePainter(color: AppColors.gray),
     );
   }
 }

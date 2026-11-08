@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 
@@ -66,7 +67,7 @@ class CustomInvoicePreview extends StatelessWidget {
         border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppColors.black.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -163,7 +164,7 @@ class CustomInvoicePreview extends StatelessWidget {
                       child: Text(
                         l10n.pdfInvoiceDocWord,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
+                          color: AppColors.ice,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.5,
                         ),
@@ -231,7 +232,7 @@ class CustomInvoicePreview extends StatelessWidget {
                         child: Text(
                           l10n.pdfItemHeader,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
+                            color: AppColors.ice,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -242,7 +243,7 @@ class CustomInvoicePreview extends StatelessWidget {
                           l10n.customInvoiceQty,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
+                            color: AppColors.ice,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -253,7 +254,7 @@ class CustomInvoicePreview extends StatelessWidget {
                           l10n.pdfUnitPriceHeader,
                           textAlign: TextAlign.right,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
+                            color: AppColors.ice,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -356,9 +357,7 @@ class _PreviewRow extends StatelessWidget {
             ? null
             : scheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: last
-            ? const BorderRadius.vertical(
-                bottom: Radius.circular(AppRadius.xs),
-              )
+            ? const BorderRadius.vertical(bottom: Radius.circular(AppRadius.xs))
             : null,
       ),
       child: Row(

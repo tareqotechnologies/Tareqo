@@ -76,7 +76,7 @@ class _SaleDetailSheet extends StatelessWidget {
                   child: Text(
                     l10n.saleDetailView,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: const Color(0xFF101413),
+                      color: AppColors.black,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -88,11 +88,7 @@ class _SaleDetailSheet extends StatelessWidget {
             // título + quantidade × preço à esquerda, subtotal à direita.
             for (var i = 0; i < sale.items.length; i++) ...[
               if (i > 0)
-                const Divider(
-                  height: 1,
-                  indent: 60,
-                  endIndent: AppSpacing.md,
-                ),
+                const Divider(height: 1, indent: 60, endIndent: AppSpacing.md),
               _SaleItemRow(item: sale.items[i]),
             ],
             const SizedBox(height: AppSpacing.md),
@@ -107,10 +103,7 @@ class _SaleDetailSheet extends StatelessWidget {
 /// quantidade de itens ao centro, valor total à direita, seguindo o mesmo
 /// padrão do _ActivityRow do dashboard.
 class _SaleFeedRow extends StatelessWidget {
-  const _SaleFeedRow({
-    required this.sale,
-    this.trailing,
-  });
+  const _SaleFeedRow({required this.sale, this.trailing});
 
   final Sale sale;
   final Widget? trailing;
@@ -119,8 +112,11 @@ class _SaleFeedRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final subtotal = sale.items.fold(0, (sum, item) =>
-        sum + Quantity.lineTotal(item.quantity, item.unitPriceCents));
+    final subtotal = sale.items.fold(
+      0,
+      (sum, item) =>
+          sum + Quantity.lineTotal(item.quantity, item.unitPriceCents),
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -140,7 +136,7 @@ class _SaleFeedRow extends StatelessWidget {
             child: const Icon(
               Icons.north_east_rounded,
               size: 18,
-              color: Colors.white,
+              color: AppColors.ice,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -173,15 +169,17 @@ class _SaleFeedRow extends StatelessWidget {
           Flexible(
             child: Align(
               alignment: Alignment.centerRight,
-              child: trailing ?? Text(
-                Formatters.signedAmount(subtotal),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.accentOrange,
-                ),
-              ),
+              child:
+                  trailing ??
+                  Text(
+                    Formatters.signedAmount(subtotal),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.accentOrange,
+                    ),
+                  ),
             ),
           ),
         ],
@@ -416,7 +414,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       ),
     );
   }
-}/// Linha de item de venda no padrão do feed de atividade — ícone circular
+}
+
+/// Linha de item de venda no padrão do feed de atividade — ícone circular
 /// laranja à esquerda, título e quantidade × preço ao centro, valor à direita.
 class _SaleItemRow extends ConsumerWidget {
   const _SaleItemRow({required this.item});
@@ -445,7 +445,7 @@ class _SaleItemRow extends ConsumerWidget {
             child: const Icon(
               Icons.north_east_rounded,
               size: 18,
-              color: Colors.white,
+              color: AppColors.ice,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
