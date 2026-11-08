@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:tareqo/core/security/secure_storage_service.dart';
 import 'package:tareqo/core/theme/app_theme.dart';
 import 'package:tareqo/l10n/generated/app_localizations.dart';
+import 'package:tareqo/presentation/navigation/app_routes.dart';
 
 /// Backend em memória — simula o Keychain/Keystore sem plataforma.
 class _InMemoryBackend implements SecureStorageBackend {
@@ -72,5 +73,9 @@ Widget testApp({
     supportedLocales: AppLocalizations.supportedLocales,
     home: home,
     builder: builder,
+    // U-09: os testes de navegação (Dashboard feed, Menu, Suporte, …)
+    // abrem telas por nome — o harness precisa da mesma tabela do app.
+    onGenerateRoute: AppRoutes.onGenerateRoute,
+    onUnknownRoute: AppRoutes.unknownRoute,
   );
 }

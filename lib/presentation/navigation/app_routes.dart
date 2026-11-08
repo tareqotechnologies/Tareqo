@@ -176,32 +176,24 @@ abstract final class AppRoutes {
         final sale = _arg<Sale>(settings, 'sale');
         if (sale == null) return _unknown(settings);
         builder = (_) => SaleDetailScreen(sale: sale);
+      // Secções do shell (pushSection / Home "Atividade de hoje"):
+      // a tela da secção empurrada, sem trocar a aba do shell.
+      case '/dashboard':
+        builder = (_) => const DashboardScreen();
+      case '/sales':
+        builder = (_) => const SalesScreen();
+      case '/financial':
+        builder = (_) => const FinancialScreen();
+      case '/menu':
+        builder = (_) => const MenuScreen();
+      case products:
+        builder = (_) => const ProductListScreen();
+      case credit:
+        builder = (_) => const DebtsScreen();
+      case customers:
+        builder = (_) => const CustomersScreen();
       default:
         return _unknown(settings);
-    }
-
-    // Secções do shell: a tela da secção empurrada (não troca a aba).
-    final isSection = name == '/dashboard' ||
-        name == '/sales' ||
-        name == '/financial' ||
-        name == '/menu' ||
-        name == products ||
-        name == credit ||
-        name == customers;
-    if (isSection) {
-      final sectionBuilder = switch (name) {
-        '/dashboard' => const DashboardScreen(),
-        '/sales' => const SalesScreen(),
-        '/financial' => const FinancialScreen(),
-        '/menu' => const MenuScreen(),
-        _ when name == products => const ProductListScreen(),
-        _ when name == credit => const DebtsScreen(),
-        _ => const CustomersScreen(),
-      };
-      return MaterialPageRoute<dynamic>(
-        settings: settings,
-        builder: (_) => sectionBuilder,
-      );
     }
 
     return MaterialPageRoute<dynamic>(
