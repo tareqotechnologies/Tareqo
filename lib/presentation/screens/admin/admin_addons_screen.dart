@@ -579,15 +579,15 @@ class _BulkAddOnSheet extends StatelessWidget {
             // Handle bar
             Center(
               child: Container(
-                width: 40,
-                height: 4,
+                width: AppSpacing.xxxl,
+                height: AppSpacing.xxs,
                 margin: const EdgeInsets.only(
                   top: AppSpacing.sm,
                   bottom: AppSpacing.lg,
                 ),
                 decoration: BoxDecoration(
                   color: scheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: AppRadius.microAll,
                 ),
               ),
             ),
@@ -866,15 +866,15 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
             // Handle bar
             Center(
               child: Container(
-                width: 40,
-                height: 4,
+                width: AppSpacing.xxxl,
+                height: AppSpacing.xxs,
                 margin: const EdgeInsets.only(
                   top: AppSpacing.sm,
                   bottom: AppSpacing.lg,
                 ),
                 decoration: BoxDecoration(
                   color: scheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: AppRadius.microAll,
                 ),
               ),
             ),
@@ -1200,11 +1200,11 @@ class _AddOnToggleTile extends StatelessWidget {
         children: [
           // Color accent bar
           Container(
-            width: 4,
-            height: 40,
+            width: AppSpacing.xxs,
+            height: AppSpacing.xxxl,
             decoration: BoxDecoration(
               color: isActive ? scheme.primary : scheme.outline,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: AppRadius.microAll,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),

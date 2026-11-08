@@ -1,153 +1,181 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
-import '../../helpers/viewport.dart';
-import 'package:tareqo/core/theme/app_theme.dart';
+
 import 'package:tareqo/core/theme/app_colors.dart';
-import 'package:tareqo/presentation/screens/financial/financial_screen.dart';
+import 'package:tareqo/domain/entities/financial_transaction.dart';
 import 'package:tareqo/presentation/screens/financial/financial_widgets.dart';
+
+/// Transação de fixture: data fixa no passado para o rótulo de dia nunca
+/// depender da data real da execução do teste.
+FinancialTransaction _tx({
+  String id = 't1',
+  String description = 'Venda PIX',
+  int amountCents = 100000,
+  TransactionType type = TransactionType.income,
+  String category = 'Vendas',
+  TransactionStatus status = TransactionStatus.paid,
+}) => FinancialTransaction(
+  id: id,
+  description: description,
+  amountCents: amountCents,
+  type: type,
+  category: category,
+  date: DateTime(2024, 1, 10, 10),
+  status: status,
+);
 
 void main() {
   // ---------------------------------------------------------------------------
-  // FinanceHeader
+  // TransactionCard — a linha da lista de movimentações.
   // ---------------------------------------------------------------------------
-  group('FinanceHeader', () {
-    testWidgets('renders FinanceHeader widget', (tester) async {
-      Widget testWidget() => MaterialApp(home: FinanceHeader());
+  group('TransactionCard', () {
+    testWidgets('mostra categoria, hora e valor com sinal', (tester) async {
+      await tester.pumpWidget(
+        testApp(
+          home: Scaffold(body: TransactionCard(transaction: _tx())),
+        ),
+      );
 
-      await tester.pumpWidget(testWidget());
+      expect(find.text('Vendas'), findsOneWidget);
+      expect(find.text('10:00'), findsOneWidget);
+      expect(find.text('+ R\$ 1.000,00'), findsOneWidget);
+    });
 
-      expect(tester.widgetList<Widget>(find.byType(FinanceHeader)).length, 1);
+    testWidgets('saída usa a cor semântica de despesa', (tester) async {
+      await tester.pumpWidget(
+        testApp(
+          home: Scaffold(
+            body: TransactionCard(
+              transaction: _tx(
+                type: TransactionType.expense,
+                category: 'Contas',
+                amountCents: 20000,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final value = tester.widget<Text>(find.text('- R\$ 200,00'));
+      expect(value.style?.color, AppColors.expenseDark);
+    });
+
+    testWidgets('o toque abre o detalhe (onTap)', (tester) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        testApp(
+          home: Scaffold(
+            body: TransactionCard(transaction: _tx(), onTap: () => taps++),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Vendas'));
+      await tester.pumpAndSettle();
+      expect(taps, 1);
     });
   });
 
   // ---------------------------------------------------------------------------
-  // FinanceFilterPills / FilterPill
+  // DateSectionHeader — cabeçalho do grupo de um dia.
   // ---------------------------------------------------------------------------
-  group('FinanceFilterPills', () {
-    testWidgets('renders FinanceFilterPills com 4 pills', (tester) async {
-      Widget testWidget() => MaterialApp(home: FinanceFilterPills());
+  group('DateSectionHeader', () {
+    testWidgets('mostra o dia e o total assinado', (tester) async {
+      await tester.pumpWidget(
+        testApp(
+          home: const Scaffold(
+            body: DateSectionHeader(label: '10/01', totalCents: 150000),
+          ),
+        ),
+      );
 
-      await tester.pumpWidget(testWidget());
-
-      expect(find.byType(FilterPill), findsNWidgets(4));
-
-      expect(find.text('Hoje'), findsOneWidget);
-      expect(find.text('Esta semana'), findsOneWidget);
-      expect(find.text('Este mês'), findsOneWidget);
-      expect(find.text('Tudo'), findsOneWidget);
+      expect(find.text('10/01'), findsOneWidget);
+      expect(find.text('+1.500,00'), findsOneWidget);
     });
 
-    testWidgets('pill "Este mês" é renderizada', (tester) async {
-      Widget testWidget() => MaterialApp(home: FinanceFilterPills());
+    testWidgets('total negativo usa a cor de despesa', (tester) async {
+      await tester.pumpWidget(
+        testApp(
+          home: const Scaffold(
+            body: DateSectionHeader(label: '10/01', totalCents: -45000),
+          ),
+        ),
+      );
 
-      await tester.pumpWidget(testWidget());
-
-      expect(find.text('Este mês'), findsOneWidget);
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // FinanceSummaryCard
-  // ---------------------------------------------------------------------------
-  group('FinanceSummaryCard', () {
-    testWidgets('rends FinanceSummaryCard com dados', (tester) async {
-      Widget testWidget() => MaterialApp(
-            home: FinanceSummaryCard(
-              incomeCents: 424000,
-              expenseCents: 100000,
-            ),
-          );
-
-      await tester.pumpWidget(testWidget());
-
-      expect(find.text('Saldo líquido do período'), findsOneWidget);
-      expect(find.text('MZN 4.240,00'), findsOneWidget);
-      expect(find.text('Entradas'), findsOneWidget);
-      expect(find.text('Saídas'), findsOneWidget);
-    });
-
-    testWidgets('widgets de saldo existem', (tester) async {
-      Widget testWidget() => MaterialApp(
-            home: FinanceSummaryCard(
-              incomeCents: 424000,
-              expenseCents: 100000,
-            ),
-          );
-
-      await tester.pumpWidget(testWidget());
-
-      final saldoText =
-          tester.widget<Text>(find.text('MZN 4.240,00'));
-      expect(saldoText, isNotNull);
+      final total = tester.widget<Text>(find.text('-450,00'));
+      expect(total.style?.color, AppColors.expenseDark);
     });
   });
 
   // ---------------------------------------------------------------------------
-  // FinanceRowIconLabel
+  // TransactionDetailSheet — detalhe + quitação de pendências.
   // ---------------------------------------------------------------------------
-  group('FinanceRowIconLabel', () {
-    testWidgets('rends FinanceRowIconLabel com ícone rótulo e valor', (tester) async {
-      Widget testWidget() => MaterialApp(
-            home: FinanceRowIconLabel(
-              icon: Icons.arrow_upward_rounded,
-              label: 'Entradas',
-              value: '+4.240,00',
-              color: AppColors.accentOrange,
+  group('TransactionDetailSheet', () {
+    testWidgets('entrada pendente mostra os detalhes e oferece Receber', (
+      tester,
+    ) async {
+      var received = 0;
+      await tester.pumpWidget(
+        testApp(
+          home: Scaffold(
+            body: TransactionDetailSheet(
+              transaction: _tx(
+                status: TransactionStatus.pending,
+                description: 'Venda fiado (João)',
+                category: 'Fiado',
+              ),
+              onReceive: () => received++,
             ),
-          );
+          ),
+        ),
+      );
 
-      await tester.pumpWidget(testWidget());
+      expect(find.text('Venda fiado (João)'), findsOneWidget);
+      // 'Fiado' aparece no header (categoria) e na linha de detalhes
+      expect(find.text('Fiado'), findsExactly(2));
+      expect(find.text('Pendente'), findsOneWidget);
+      expect(find.text('Data e hora'), findsOneWidget);
 
-      expect(find.byIcon(Icons.arrow_upward_rounded), findsOneWidget);
-      expect(find.text('Entradas'), findsOneWidget);
-      expect(find.text('+4.240,00'), findsOneWidget);
+      await tester.tap(find.text('Receber'));
+      await tester.pumpAndSettle();
+      expect(received, 1);
     });
 
-    testWidgets('linha de saídas tem ícone rótulo e valor', (tester) async {
-      Widget testWidget() => MaterialApp(
-            home: FinanceRowIconLabel(
-              icon: Icons.arrow_downward_rounded,
-              label: 'Saídas',
-              value: '-1.000,00',
-              color: AppColors.expense,
+    testWidgets('saída pendente oferece Pagar (nunca Receber)', (tester) async {
+      await tester.pumpWidget(
+        testApp(
+          home: Scaffold(
+            body: TransactionDetailSheet(
+              transaction: _tx(
+                type: TransactionType.expense,
+                status: TransactionStatus.pending,
+                category: 'Contas',
+                description: 'Conta de luz',
+              ),
+              onPay: () {},
             ),
-          );
+          ),
+        ),
+      );
 
-      await tester.pumpWidget(testWidget());
-
-      expect(find.byIcon(Icons.arrow_downward_rounded), findsOneWidget);
-      expect(find.text('Saídas'), findsOneWidget);
-      expect(find.text('-1.000,00'), findsOneWidget);
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // MovementsHeader
-  // ---------------------------------------------------------------------------
-  group('MovementsHeader', () {
-    testWidgets('rends MovementsHeader com título e subtítulo', (tester) async {
-      Widget testWidget() => MaterialApp(
-            home: MovementsHeader(subtitle: 'Pendente (fiado) · 1'),
-          );
-
-      await tester.pumpWidget(testWidget());
-
-      expect(find.text('Movimentos do período'), findsOneWidget);
-      expect(find.text('Pendente (fiado) · 1'), findsOneWidget);
+      expect(find.text('Pagar'), findsOneWidget);
+      expect(find.text('Receber'), findsNothing);
     });
 
-    testWidgets('widgets de header estão presentes', (tester) async {
-      Widget testWidget() => MaterialApp(
-            home: MovementsHeader(subtitle: 'Pendente (fiado) · 1'),
-          );
+    testWidgets('movimentação concluída não oferece ação de quitação', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        testApp(
+          home: Scaffold(body: TransactionDetailSheet(transaction: _tx())),
+        ),
+      );
 
-      await tester.pumpWidget(testWidget());
-
-      expect(find.text('Movimentos do período'), findsOneWidget);
-      expect(find.text('Pendente (fiado) · 1'), findsOneWidget);
+      expect(find.text('Pago'), findsOneWidget);
+      expect(find.text('Receber'), findsNothing);
+      expect(find.text('Pagar'), findsNothing);
     });
   });
 }

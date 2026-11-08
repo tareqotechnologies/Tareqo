@@ -12,12 +12,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/addon_providers.dart';
 import '../../controllers/auth_providers.dart';
-import 'custom_invoice_screen.dart';
-import 'quotation_screen.dart';
-import 'employee_management_screen.dart';
-import 'store_transfers_screen.dart';
-import 'advanced_reports_screen.dart';
-import 'payment_reconciliation_screen.dart';
+import '../../navigation/app_routes.dart';
 
 /// Ecra do marketplace de add-ons — apenas visualização.
 ///
@@ -116,37 +111,21 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
   }
 
   void _openAddOn(BuildContext context, String addOnId) {
+    // U-09: rotas nomeadas por add-on (tabela em app_routes.dart).
+    final route = switch (addOnId) {
+      'ao_custom_invoice' => AppRoutes.addonCustomInvoice,
+      'ao_quotation' => AppRoutes.addonQuotation,
+      'ao_advanced_reports' => AppRoutes.addonAdvancedReports,
+      'ao_employee_mgmt' => AppRoutes.addonEmployeeMgmt,
+      'ao_multi_store' => AppRoutes.addonStoreTransfers,
+      'ao_mobile_money' => AppRoutes.addonMobileMoney,
+      _ => null,
+    };
+    if (route != null) {
+      AppNavigator.push(context, route);
+      return;
+    }
     switch (addOnId) {
-      case 'ao_custom_invoice':
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const CustomInvoiceScreen()),
-        );
-      case 'ao_quotation':
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const QuotationScreen()),
-        );
-      case 'ao_advanced_reports':
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const AdvancedReportsScreen(),
-          ),
-        );
-      case 'ao_employee_mgmt':
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const EmployeeManagementScreen(),
-          ),
-        );
-      case 'ao_multi_store':
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const StoreTransfersScreen()),
-        );
-      case 'ao_mobile_money':
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const PaymentReconciliationScreen(),
-          ),
-        );
       default:
         // Add-on do catálogo sem tela ligada (drift futuro de ids): nunca
         // deixa o toque falhar em silêncio — regista para o backoffice.
@@ -250,7 +229,7 @@ class _AddOnCard extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: AppColors.successNeutral.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: AppRadius.xsAll,
                             ),
                             child: Text(
                               context.l10n.addonsIncluded,
@@ -268,7 +247,7 @@ class _AddOnCard extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: scheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: AppRadius.xsAll,
                             ),
                             child: Text(
                               context.l10n.addonsActive,

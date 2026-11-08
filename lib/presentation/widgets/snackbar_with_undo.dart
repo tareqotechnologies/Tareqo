@@ -102,7 +102,8 @@ class _CountdownContentState extends State<_CountdownContent>
             builder: (context, _) => LinearProgressIndicator(
               value: _controller.value,
               minHeight: 3,
-              borderRadius: BorderRadius.circular(1.5),
+              // U-14: raio mínimo do sistema (2) — antes 1.5 hardcoded.
+              borderRadius: AppRadius.microAll,
               backgroundColor: progressColor.withValues(alpha: 0.25),
               valueColor: AlwaysStoppedAnimation(progressColor),
             ),

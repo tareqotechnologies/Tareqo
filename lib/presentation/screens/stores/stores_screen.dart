@@ -9,6 +9,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../navigation/app_routes.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../domain/entities/plan.dart';

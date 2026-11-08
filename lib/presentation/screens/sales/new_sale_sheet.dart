@@ -25,6 +25,7 @@ import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../controllers/sales_providers.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
@@ -952,6 +953,8 @@ class _CartPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final accent = theme.accent;
     final isWeight = product.vendaPorFracao;
 
     return Container(
@@ -960,9 +963,9 @@ class _CartPill extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.accentOrangeSoft,
+        color: scheme.tertiaryContainer,
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: AppColors.accentOrange, width: 0.5),
+        border: Border.all(color: accent, width: 0.5),
       ),
       child: Row(
         children: [
@@ -972,7 +975,7 @@ class _CartPill extends StatelessWidget {
             height: 36,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.accentOrange,
+              color: accent,
               borderRadius: BorderRadius.circular(AppRadius.full),
             ),
             child: Text(
@@ -984,7 +987,7 @@ class _CartPill extends StatelessWidget {
                     )
                   : '${Quantity.format(quantity, language: Formatters.currentLanguage)}×',
               style: theme.textTheme.labelMedium?.copyWith(
-                color: Colors.white,
+                color: scheme.onTertiary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -999,14 +1002,14 @@ class _CartPill extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: const Color(0xFF1D1D1F),
+                    color: scheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   Formatters.currency(product.salePriceCents),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF5E5E63),
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1022,7 +1025,7 @@ class _CartPill extends StatelessWidget {
               ),
               textAlign: TextAlign.right,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: AppColors.accentOrange,
+                color: accent,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1048,30 +1051,31 @@ class _CartSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
     // Linha compacta (sem cartão alto): o resumo do carrinho não deve
     // empurrar o catálogo para fora do ecrã em telas baixas.
     return Row(
       children: [
-        const Icon(
+        Icon(
           Icons.shopping_cart_outlined,
-          size: 14,
-          color: AppColors.accentOrange,
+          size: AppSizes.iconSm,
+          color: theme.accent,
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: AppSpacing.xxs),
         Expanded(
           child: Text(
             l10n.salesCartSection(itemCount),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF5E5E63),
+              color: scheme.onSurfaceVariant,
             ),
           ),
         ),
         Text(
           Formatters.currency(totalCents),
           style: theme.textTheme.labelMedium?.copyWith(
-            color: AppColors.accentOrange,
+            color: theme.accent,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -1108,12 +1112,11 @@ class _Footer extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
+    final scheme = theme.colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: AppColors.lightBorder, width: 0.5),
-        ),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        border: Border(top: BorderSide(color: scheme.outlineVariant, width: 0.5)),
       ),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
@@ -1136,15 +1139,15 @@ class _Footer extends StatelessWidget {
                 child: Text(
                   l10n.dashboardSaleItems(itemCount),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF5E5E63),
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ),
               Text(
                 Formatters.currency(totalCents),
                 style: theme.textTheme.headlineSmall?.copyWith(
-                  color: AppColors.accentOrange,
-                  fontWeight: FontWeight.w700,
+                  color: scheme.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -1153,58 +1156,30 @@ class _Footer extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               error!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: const Color(0xFFB91C1C),
-              ),
+              style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
             ),
           ],
-          const SizedBox(height: 8),          // Botão confirmar: gradiente laranja estilo Apple.
-          InkWell(
-            onTap: totalCents == 0 || isSubmitting ? null : onConfirm,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            child: Ink(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    AppColors.accentOrange,
-                    Color(0xFFB45309),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              child: Center(
-              child: isSubmitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.check,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n.salesConfirm,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+          const SizedBox(height: AppSpacing.xs),
+          // Botão confirmar: usa AppButton (tema) em vez de InkWell+Ink
+          // custom — herda cor/contraste do ColorScheme e estado
+          // desabilitado visual (U-01). O gradiente sutil é opt-in
+          // (gradient:true só quando habilitado); um ícone spinner
+          // substitui o check durante o envio.
+          AppButton.primary(
+            expanded: true,
+            gradient: true,
+            onPressed: totalCents == 0 || isSubmitting ? null : onConfirm,
+            label: l10n.salesConfirm,
+            icon: isSubmitting
+                ? SizedBox(
+                    height: AppSizes.iconMd,
+                    width: AppSizes.iconMd,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: scheme.onPrimary,
                     ),
-              ),
-            ),
+                  )
+                : const Icon(Icons.check, size: AppSizes.iconMd),
           ),
         ],
       ),

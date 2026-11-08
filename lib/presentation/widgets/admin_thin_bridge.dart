@@ -34,31 +34,25 @@ ThemeData adminThinTheme(ThemeData theme) {
   final base = theme.textTheme;
   return theme.copyWith(
     textTheme: base.copyWith(
-      titleLarge: fn(base.titleLarge, weight: FontWeight.w300),
-      titleMedium: fn(base.titleMedium, weight: FontWeight.w300),
+      titleLarge: fn(base.titleLarge, weight: FontWeight.w400),
+      titleMedium: fn(base.titleMedium, weight: FontWeight.w400),
       titleSmall: fn(base.titleSmall, weight: FontWeight.w400),
       labelLarge: fn(base.labelLarge, weight: FontWeight.w400),
       labelMedium: fn(base.labelMedium, weight: FontWeight.w400),
     ),
-    // Título do AlertDialog: 19/w300 — hierarquia por tamanho, sem peso.
+    // Título do AlertDialog: titleLarge do tema (U-10) — sem 19/w300.
     dialogTheme: theme.dialogTheme.copyWith(
-      titleTextStyle: TextStyle(
-        fontSize: 19,
-        fontWeight: FontWeight.w300,
+      titleTextStyle: base.titleLarge?.copyWith(
+        fontWeight: FontWeight.w400,
         letterSpacing: -0.2,
-        height: 1.25,
         color: theme.colorScheme.onSurface,
       ),
     ),
     inputDecorationTheme: theme.inputDecorationTheme.copyWith(
-      labelStyle: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w400,
+      labelStyle: base.labelMedium?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
       ),
-      floatingLabelStyle: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w400,
+      floatingLabelStyle: base.labelMedium?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
       ),
     ),
@@ -73,12 +67,10 @@ TextStyle? adminDialogTitleStyle(
   bool thinStyle = false,
 }) {
   final theme = Theme.of(context);
-  if (!thinStyle) return null; // null = usa o dialogTheme global (22/w600).
-  return TextStyle(
-    fontSize: 19,
-    fontWeight: FontWeight.w300,
+  if (!thinStyle) return null; // null = usa o dialogTheme global.
+  return theme.textTheme.titleLarge?.copyWith(
+    fontWeight: FontWeight.w400,
     letterSpacing: -0.2,
-    height: 1.25,
     color: theme.colorScheme.onSurface,
   );
 }

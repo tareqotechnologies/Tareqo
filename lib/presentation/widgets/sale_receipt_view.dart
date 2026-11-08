@@ -7,9 +7,13 @@ import '../../core/utils/quantity.dart';
 import '../../domain/entities/sale.dart';
 import '../../domain/entities/sale_item.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Recibo de venda VISUAL — a cara de um recibo térmico impresso.
 ///
+/// Exceção de documento (U-13): cores de papel/tinta fixas, mas a
+/// **família tipográfica é a Inter do app** (antes caía na fonte da
+/// plataforma — recibo diferente por Android/iOS).
 /// Cores fixas (papel branco + tinta escura), independentes do tema do app:
 /// é este widget que vira a IMAGEM partilhada (capturada via
 /// `RepaintBoundary`), então precisa parecer um recibo de verdade em
@@ -41,7 +45,12 @@ class SaleReceiptView extends StatelessWidget {
     return Container(
       // "Papel" do recibo: branco com leve viés quente, como um cupom.
       color: const Color(0xFFFFFEFA),
-      padding: const EdgeInsets.fromLTRB(20, AppSpacing.xl, 20, 20),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -54,17 +63,17 @@ class SaleReceiptView extends StatelessWidget {
               style: _headerStyle.copyWith(fontSize: 16),
             ),
             if (storeAddress != null && storeAddress!.trim().isNotEmpty) ...[
-              const SizedBox(height: 2),
+              const SizedBox(height: AppSpacing.micro),
               Text(
                 storeAddress!,
                 textAlign: TextAlign.center,
                 style: _mutedStyle,
               ),
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
             const _DashedDivider(),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           // Título do recibo + identificação da venda.
           Text(
             cancelled
@@ -73,40 +82,40 @@ class SaleReceiptView extends StatelessWidget {
             textAlign: TextAlign.center,
             style: _headerStyle,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             '${l10n.saleDetailId(Formatters.saleLabel(sale.number))} · '
             '${Formatters.dateTime(sale.dateTime)}',
             textAlign: TextAlign.center,
             style: _mutedStyle,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           const _DashedDivider(),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           // Itens: nome + `qtd × unitário = subtotal`.
           for (final item in sale.items) _ReceiptItemRow(item: item),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           const _DashedDivider(),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           // Total.
           Row(
             children: [
               Expanded(
                 child: Text(
                   l10n.saleDetailTotal.toUpperCase(),
-                  style: _bodyStyle.copyWith(fontWeight: FontWeight.w700),
+                  style: _bodyStyle.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
               Text(
                 Formatters.currency(sale.totalAmountCents),
                 style: _bodyStyle.copyWith(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
           // Forma de pagamento.
           Row(
             children: [
@@ -120,7 +129,7 @@ class SaleReceiptView extends StatelessWidget {
             ],
           ),
           if (cancelled && sale.cancelledAt != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               '${l10n.saleDetailCancelledAt} '
               '${Formatters.dateTime(sale.cancelledAt!)}',
@@ -128,9 +137,9 @@ class SaleReceiptView extends StatelessWidget {
               style: _mutedStyle,
             ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           const _DashedDivider(),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             l10n.saleDetailReceiptThanks,
             textAlign: TextAlign.center,
@@ -144,9 +153,11 @@ class SaleReceiptView extends StatelessWidget {
 
 /// Título do cabeçalho (estabelecimento / título do recibo).
 final TextStyle _headerStyle = const TextStyle(
+  fontFamily: AppTypography.family,
+  fontFamilyFallback: AppTypography.familyFallback,
   color: Color(0xFF1B1B1B),
   fontSize: 12,
-  fontWeight: FontWeight.w700,
+  fontWeight: FontWeight.w600,
   letterSpacing: 1.2,
   height: 1.4,
 );
@@ -154,6 +165,8 @@ final TextStyle _headerStyle = const TextStyle(
 /// Corpo do recibo (total, pagamento, itens) — fonte proporcional com
 /// algarismos tabulares, como uma impressora térmica.
 final TextStyle _bodyStyle = const TextStyle(
+  fontFamily: AppTypography.family,
+  fontFamilyFallback: AppTypography.familyFallback,
   color: Color(0xFF1B1B1B),
   fontSize: 12,
   height: 1.5,
@@ -162,6 +175,8 @@ final TextStyle _bodyStyle = const TextStyle(
 
 /// Texto secundário (endereço, data, agradecimento).
 final TextStyle _mutedStyle = const TextStyle(
+  fontFamily: AppTypography.family,
+  fontFamilyFallback: AppTypography.familyFallback,
   color: Color(0xFF6B6B6B),
   fontSize: 12,
   height: 1.5,
@@ -184,7 +199,7 @@ class _ReceiptItemRow extends StatelessWidget {
     final unit = Formatters.currency(item.unitPriceCents);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.micro),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -202,7 +217,7 @@ class _ReceiptItemRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.xs),
                 Text(
                   Formatters.currency(subtotal),
                   style: _bodyStyle.copyWith(fontWeight: FontWeight.w600),

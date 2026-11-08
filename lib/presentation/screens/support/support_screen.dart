@@ -6,6 +6,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../navigation/app_routes.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
 import 'doc_reader_screen.dart';
@@ -59,11 +60,9 @@ class _SupportScreenState extends State<SupportScreen> {
   // ── Navegação / links externos ──────────────────────────────────────────
 
   void _open(BuildContext context, SupportDocument document) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => DocReaderScreen(document: document),
-      ),
-    );
+    AppNavigator.pushWith(context, AppRoutes.docReader, {
+      'document': document,
+    });
   }
 
   /// Abre um link externo (WhatsApp do suporte / site) no navegador; em caso

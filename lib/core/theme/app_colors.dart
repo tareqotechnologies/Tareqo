@@ -46,10 +46,13 @@ abstract final class AppColors {
   /// textDisabled — isento de AA.
   static const Color lightTextDisabled = Color(0xFFAEAEB2);
 
-  /// actionFill — fundo de botão primário laranja (branco sobre ele: 7.97:1 AA).
+  /// actionFill — fundo de botão primário (âmbar #D97706).
+  /// Rótulo sobre ele = [lightOnPrimary] (tinta #1D1D1F): contraste
+  /// real ≈ 5,0:1 (AA). Branco sobre #D97706 daria ≈ 3,3:1 (falha AA
+  /// para texto) — por isso o rótulo é escuro, não branco (U-21).
   static const Color lightPrimary = Color(0xFFD97706);
 
-  /// textOnAction — texto sobre preenchimento de ação laranja.
+  /// textOnAction — tinta escura sobre o preenchimento de ação.
   static const Color lightOnPrimary = Color(0xFF1D1D1F);
 
   /// Botão secundário: superfície com contorno (sem preenchimento colorido).
@@ -148,8 +151,9 @@ abstract final class AppColors {
   /// textDisabled escuro.
   static const Color darkTextDisabled = Color(0xFF636366);
 
-  /// Botão primário escuro: fundo laranja com rótulo ESCURO (AA).
-  /// Branco sobre laranja: ~7.9:1 AA; azul removido da paleta.
+  /// Botão primário escuro: fundo âmbar claro #FF9F0A com rótulo
+  /// ESCURO [darkOnPrimary] (AA). Branco sobre #FF9F0A daria ≈ 2,2:1
+  /// (falha grave) — o rótulo escuro é a escolha auditada (U-21).
   static const Color darkPrimary = Color(0xFFFF9F0A);
 
   /// Rótulo escuro sobre o primário escuro.
@@ -243,7 +247,10 @@ abstract final class AppColors {
     return brightness == Brightness.light ? lightSurfaceSecondary : darkSurfaceSecondary;
   }
 
-  // ── Aliases de migração ──
+  // ── Aliases de migração (U-21): mantidos por compatibilidade, mas
+  // documentados com o valor REAL — `primaryLight`/`primaryDark` NUNCA
+  // foram a cor de ação (são surfaces, legado de uma paleta anterior);
+  // usar `lightPrimary`/`darkPrimary` (ou scheme.primary) para ação.
   static const Color statusError = errorNeutral;
   static const Color statusWarning = accentOrange;
   static const Color statusSuccess = successNeutral;
@@ -259,9 +266,10 @@ abstract final class AppColors {
   static const Color onSurfaceVariantLight = lightTextSecondary;
   static const Color onSurfaceVariantDark = darkTextSecondary;
   static const Color surfaceLight = lightSurface;
+  /// LEGADO: = lightSurface (não é a ação). Não usar para botões.
   static const Color primaryLight = lightSurface;
+  /// LEGADO: = darkSurface (não é a ação). Não usar para botões.
   static const Color primaryDark = darkSurface;
-  // blue removido da API de compatibilidade.
   static const Color brandMuted = accentOrange;
   static const Color outlineLight = lightBorder;
   static const Color outlineDark = darkBorder;

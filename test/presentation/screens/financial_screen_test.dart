@@ -6,6 +6,7 @@ import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 
 import 'package:tareqo/core/theme/app_theme.dart';
+import 'package:tareqo/core/utils/app_clock.dart';
 import 'package:tareqo/domain/entities/cash_closing.dart';
 import 'package:tareqo/domain/entities/financial_transaction.dart';
 import 'package:tareqo/domain/repositories/i_cash_closing_summary_repository.dart';
@@ -194,6 +195,11 @@ Widget _buildApp(
 }
 
 void main() {
+  // Relógio fixo (10/01/2024): as fixtures datam desse dia e a lista da tela
+  // é recortada pelo período selecionado (padrão: Este mês).
+  setUp(() => AppClock.inject(() => DateTime(2024, 1, 10, 12)));
+  tearDown(AppClock.reset);
+
   // A11y (Fase 6): saldo, pílula de período, linhas de movimentação e botão
   // de fecho passam nos guidelines de toque (≥48dp) e contraste de texto.
   testWidgets('a11y: caixa passa nos guidelines de toque e contraste', (

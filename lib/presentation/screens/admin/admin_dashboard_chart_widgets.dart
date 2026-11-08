@@ -435,14 +435,14 @@ class _TrendChart extends StatelessWidget {
         Row(
           children: [
             Container(
-              width: 8,
-              height: 8,
+              width: AppSpacing.xs,
+              height: AppSpacing.xs,
               decoration: BoxDecoration(
                 color: color,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: AppRadius.microAll,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Text(
                 title,
@@ -677,9 +677,9 @@ class _DistributionCard extends StatelessWidget {
           // Tenant status bar
           if (totalTenants > 0) ...[
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: AppRadius.xsAll,
               child: SizedBox(
-                height: 6,
+                height: AppSpacing.xxs + AppSpacing.micro,
                 child: Row(
                   children: [
                     if (activeTenants > 0)

@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../widgets/pulse_badge.dart';
 import '../../../domain/entities/financial_transaction.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/premium_decor.dart';
 import '../../widgets/fade_indexed_stack.dart';
@@ -27,6 +28,7 @@ import '../products/product_form_sheets.dart';
 import '../products/product_list_screen.dart';
 import '../sales/new_sale_sheet.dart';
 import '../sales/sales_screen.dart';
+import '../../navigation/app_routes.dart';
 import 'menu_screen.dart';
 
 /// Seções principais do ERP, na ordem da navegação.
@@ -79,6 +81,20 @@ class AppShell extends ConsumerWidget {
   static int _barIndex(int sectionIndex) =>
       sectionIndex < _tabCount ? sectionIndex : AppSection.menu.index;
 
+  /// Seções que vivem dentro do hub Menu (U-08): a barra destaca Menu,
+  /// mas a AppBar mostra a secção real para o utilizador saber onde está.
+  static bool _isMenuSubsection(int sectionIndex) =>
+      sectionIndex >= _tabCount;
+
+  static String _subsectionLabel(AppLocalizations l10n, int sectionIndex) {
+    return switch (AppSection.values[sectionIndex]) {
+      AppSection.products => l10n.appNavProducts,
+      AppSection.credit => l10n.appNavCredit,
+      AppSection.customers => l10n.appNavCustomers,
+      _ => l10n.appNavMenu,
+    };
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(shellIndexProvider);
@@ -109,6 +125,9 @@ class AppShell extends ConsumerWidget {
       showAppSheet<void>(context, builder: (_) => const _ActionMenuSheet());
     }
 
+    final isSubsection = _isMenuSubsection(index);
+    final sectionLabel = isSubsection ? _subsectionLabel(l10n, index) : null;
+
     // Pendências do outbox offline ACIMA das seções: estado global do
     // caminho de dinheiro (vendas/movimentações/fiado enfileirados sem
     // conexão), visível em todas as abas — não só no Dashboard.
@@ -138,7 +157,7 @@ class AppShell extends ConsumerWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          toolbarHeight: 52,
+          // Altura do tema (U-15) — sem override local de 52.
           // Marca: monograma em gradiente + wordmark espaçado.
           title: Row(
             mainAxisSize: MainAxisSize.min,
@@ -171,29 +190,48 @@ class AppShell extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                'TAREQO',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.6,
+              // Título da secção atual (U-08): nas subsecções do Menu
+              // (Produtos/Crédito/Clientes) o wordmark é acompanhado do
+              // rótulo real — o utilizador sabe onde está.
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'TAREQO',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.6,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (sectionLabel != null)
+                      Text(
+                        sectionLabel,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
                 ),
               ),
             ],
           ),
-          titleSpacing: 16,
+          titleSpacing: AppSpacing.md,
           actions: [
             // Badge de notificações com pulso
             PulseBadge(
               count: unreadCount,
               child: IconButton(
                 icon: const Icon(Icons.notifications_outlined, size: 20),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const NotificationsScreen(),
-                    ),
-                  );
-                },
+                onPressed: () => AppNavigator.push(
+                  context,
+                  AppRoutes.notifications,
+                ),
                 tooltip: l10n.notificationTitle,
               ),
             ),
@@ -254,14 +292,15 @@ class AppShell extends ConsumerWidget {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: scheme.surface,
-                      borderRadius: BorderRadius.circular(28),
+                      borderRadius: AppRadius.xxlAll,
                       border: Border.all(color: PremiumDecor.hairline(scheme)),
                       boxShadow: PremiumDecor.liftShadow(scheme),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(28),
+                      borderRadius: AppRadius.xxlAll,
                       child: NavigationBar(
-                        height: 70,
+                        // Altura do tema (U-16) — sem override de 70.
+                        height: AppSizes.navBarHeight,
                         backgroundColor: Colors.transparent,
                         surfaceTintColor: Colors.transparent,
                         elevation: 0,
@@ -451,7 +490,12 @@ class _ActionTile extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          child: Padding(
+          // A11y (U-19): tile custom anuncia "botão" + título/hint.
+          child: Semantics(
+            button: true,
+            label: title,
+            hint: hint,
+            child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Row(
               children: [
@@ -487,6 +531,7 @@ class _ActionTile extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ],
+            ),
             ),
           ),
         ),

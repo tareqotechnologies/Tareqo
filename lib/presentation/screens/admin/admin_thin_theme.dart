@@ -32,9 +32,9 @@ class AdminThin extends StatelessWidget {
     }
 
     return base.copyWith(
-      // Títulos — leve, tracking suave; hierarquia por tamanho/cor.
-      titleLarge: fn(base.titleLarge, weight: FontWeight.w300),
-      titleMedium: fn(base.titleMedium, weight: FontWeight.w300),
+      // Títulos — leve mas dentro da escala: w400 (nunca w300, U-10).
+      titleLarge: fn(base.titleLarge, weight: FontWeight.w400),
+      titleMedium: fn(base.titleMedium, weight: FontWeight.w400),
       titleSmall: fn(base.titleSmall, weight: FontWeight.w400),
       // Ações/rótulos — sem o peso pesado do M3.
       labelLarge: fn(base.labelLarge, weight: FontWeight.w400),
@@ -57,40 +57,34 @@ class AdminThin extends StatelessWidget {
       // AppBar do painel: título fino (o shell desenha o próprio; este
       // cobre as telas internas — dashboard, tenants, plans...).
       appBarTheme: theme.appBarTheme.copyWith(
-        titleTextStyle: theme.appBarTheme.titleTextStyle?.copyWith(
-          fontSize: 19,
-          fontWeight: FontWeight.w300,
+        // Mantém identidade tipográfica do painel, sem criar tamanho/peso
+        // paralelo: usa titleLarge do tema (U-10).
+        titleTextStyle: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w400,
           letterSpacing: -0.2,
+          color: theme.colorScheme.onSurface,
         ),
         toolbarHeight: 52,
       ),
-      // Inputs/dropdowns: texto digitado e rótulos leves.
+      // Inputs/dropdowns: texto digitado e rótulos leves (U-10: sem
+      // tamanhos 13 paralelos — herda labelMedium/bodyMedium do tema).
       inputDecorationTheme: theme.inputDecorationTheme.copyWith(
-        labelStyle: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w400,
+        labelStyle: theme.textTheme.labelMedium?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
-        floatingLabelStyle: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w400,
+        floatingLabelStyle: theme.textTheme.labelMedium?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
       // Menus/dropdowns herdam o popupMenuTheme global — apenas o estilo
       // de texto fica explícito aqui para o peso 400 já aplicado.
       chipTheme: theme.chipTheme.copyWith(
-        labelStyle: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w400,
+        labelStyle: theme.textTheme.labelMedium?.copyWith(
           color: theme.colorScheme.onSurface,
         ),
       ),
       snackBarTheme: theme.snackBarTheme.copyWith(
-        contentTextStyle: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          letterSpacing: 0,
+        contentTextStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.snackBarTheme.contentTextStyle?.color,
         ),
       ),
@@ -145,7 +139,7 @@ class AdminStatValue extends StatelessWidget {
         Text(
           value,
           style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w300,
+            fontWeight: FontWeight.w400,
             letterSpacing: -0.4,
             color: color ?? scheme.onSurface,
             fontFeatures: const [FontFeature.tabularFigures()],

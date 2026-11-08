@@ -6,9 +6,9 @@ import '../../../core/observability/crash_reporting.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/financial_transaction.dart';
-import '../../../domain/usecases/get_cash_flow_use_case.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
@@ -19,6 +19,7 @@ import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
+import '../../widgets/inline_error_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/skeleton.dart';
 import 'add_transaction_sheet.dart';
@@ -32,41 +33,42 @@ class FinancialScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final period = ref.watch(cashFlowPeriodProvider);
+    final cashFlowAsync = ref.watch(cashFlowProvider);
+    // Lista recortada pelo período selecionado (mesmo recorte do fluxo).
+    final transactionsAsync = ref.watch(periodTransactionsProvider);
     final l10n = context.l10n;
 
-    // Watch the cash flow provider
-    final cashFlowAsync = ref.watch(cashFlowProvider);
-    final cashFlow = cashFlowAsync.value ?? CashFlow(
-      incomeCents: 424000,
-      expenseCents: 100000,
-    );
-    final transactionsAsync = ref.watch(transactionsProvider);
+    final cashFlow = cashFlowAsync.value;
+    final canClose = ref.watch(canCloseCashRegisterProvider);
     final transactions = transactionsAsync.value ?? const [];
     final pendingCount = transactions
         .where((t) => t.status == TransactionStatus.pending)
         .length;
 
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
+
     return AppPage(
-      title: '',
+      title: l10n.financialTitle,
       useSafeArea: false,
       actions: [
-        // Botão de fechar caixa (cash closing) no app bar
-        IconButton(
-          tooltip: l10n.cashClosingAction,
-          icon: const Icon(Icons.lock_clock_outlined),
-          onPressed: () => _openCashClosing(context, ref),
-        ),
+        if (canClose)
+          IconButton(
+            tooltip: l10n.cashClosingAction,
+            icon: const Icon(Icons.lock_clock_outlined),
+            onPressed: () => _openCashClosing(context, ref),
+          ),
       ],
       floatingActionButton: transactions.isNotEmpty
           ? FloatingActionButton(
               heroTag: 'fab-financial',
               onPressed: () => _openAddTransaction(context, ref),
               tooltip: l10n.financialRegister,
-              backgroundColor: AppColors.accentOrange,
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.add, size: 28),
+              child: const Icon(Icons.add),
             )
           : null,
       body: SafeArea(
@@ -81,28 +83,37 @@ class FinancialScreen extends ConsumerWidget {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              // ── Header: TAREQO badge + Financeiro title + filter pills + date range ──
+              // ── Period selector + date range ──
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+                padding: EdgeInsets.fromLTRB(horizontal, 4, horizontal, 0),
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Linha superior: TAREQO badge + título
-                      FinanceHeader(),
+                      Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: AppSegmentedButton<CashFlowPeriod>(
+                            segments: [
+                              for (final value in CashFlowPeriod.values)
+                                ButtonSegment(
+                                  value: value,
+                                  label: Text(value.label(l10n)),
+                                ),
+                            ],
+                            selected: {period},
+                            onSelectionChanged: (selection) => ref
+                                .read(cashFlowPeriodProvider.notifier)
+                                .select(selection.first),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 8),
-                      // Segmented filter pills com date range abaixo
-                      FinanceFilterPills(),
-                      const SizedBox(height: 8),
-                      // Range de datas centralizado
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Center(
-                          child: Text(
-                            '01/11/2026-30/11/2026',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
+                      Center(
+                        child: Text(
+                          _dateRangeLabel(period, l10n),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -111,26 +122,41 @@ class FinancialScreen extends ConsumerWidget {
                 ),
               ),
 
-              // ── Summary Card: Saldo líquido, Entradas, Saídas ──
+              // ── Cash flow card stack ──
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
+                padding: EdgeInsets.fromLTRB(horizontal, 16, horizontal, 0),
                 sliver: SliverToBoxAdapter(
-                  child: FinanceSummaryCard(
-                    incomeCents: cashFlow.incomeCents,
-                    expenseCents: cashFlow.expenseCents,
+                  child: cashFlowAsync.hasError
+                      ? InlineErrorCard(
+                          message: l10n.financialCashFlowError,
+                          onRetry: () => ref.invalidate(cashFlowProvider),
+                        )
+                      : cashFlowAsync.isLoading
+                      ? const _CashStackSkeleton()
+                      : _CashStack(
+                          incomeCents: cashFlow?.incomeCents ?? 0,
+                          expenseCents: cashFlow?.expenseCents ?? 0,
+                          incomeLabel: l10n.financialIncome,
+                          expenseLabel: l10n.financialExpense,
+                          balanceLabel: l10n.financialPeriodBalance,
+                        ),
+                ),
+              ),
+
+              // ── Transactions section header ──
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(horizontal, 24, horizontal, 0),
+                sliver: SliverToBoxAdapter(
+                  child: SectionHeader(
+                    title: l10n.financialTransactions,
+                    subtitle: pendingCount > 0 && transactionsAsync.hasValue
+                        ? '${l10n.financialPendingLabel} · $pendingCount'
+                        : null,
                   ),
                 ),
               ),
 
-              // ── Movimentos section header ──
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-                sliver: SliverToBoxAdapter(
-                  child: MovementsHeader(subtitle: pendingCount > 0 ? 'Pendente (fiado) · $pendingCount' : null),
-                ),
-              ),
-
-              // ── Transactions list ──
+              // ── Transactions ──
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
                   0,
@@ -182,7 +208,7 @@ class FinancialScreen extends ConsumerWidget {
                             confirmLabel: l10n.financialReceive,
                             success: l10n.financialReceived,
                             failure: l10n.financialReceiveError,
-                            hint: 'Erro ao receber pendência',
+                            hint: 'financial_receive_pending',
                           ),
                           onPay: (tx) => _settlePending(
                             context,
@@ -193,7 +219,7 @@ class FinancialScreen extends ConsumerWidget {
                             confirmLabel: l10n.financialPay,
                             success: l10n.financialPaid,
                             failure: l10n.financialPayError,
-                            hint: 'Erro ao pagar saída pendente',
+                            hint: 'financial_pay_pending',
                           ),
                         );
                       }, childCount: groups.length),
@@ -284,7 +310,7 @@ class FinancialScreen extends ConsumerWidget {
                 confirmLabel: l10n.financialReceive,
                 success: l10n.financialReceived,
                 failure: l10n.financialReceiveError,
-                hint: 'Erro ao receber pendência',
+                hint: 'financial_receive_pending',
               )
             : null,
         onPay: pending && tx.type == TransactionType.expense
@@ -297,7 +323,7 @@ class FinancialScreen extends ConsumerWidget {
                 confirmLabel: l10n.financialPay,
                 success: l10n.financialPaid,
                 failure: l10n.financialPayError,
-                hint: 'Erro ao pagar saída pendente',
+                hint: 'financial_pay_pending',
               )
             : null,
       ),
@@ -329,8 +355,6 @@ class _CashStack extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final balance = incomeCents - expenseCents;
-    // Saldo com a cor da DIREÇÃO: positivo = entrada, negativo = saída.
-    // A cor é semântica, não decorativa.
     final balanceColor = balance < 0 ? theme.expense : theme.income;
 
     return Semantics(
@@ -344,80 +368,84 @@ class _CashStack extends StatelessWidget {
         color: scheme.surface,
         borderRadius: AppRadius.xlAll,
         padding: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── Saldo do período: rótulo à esquerda, valor à direita ──
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Saldo Principal ──
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(AppRadius.xl),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    balanceLabel,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      Formatters.currency(balance),
+                      // Token heroAmount (26/w600) — teto do sistema
+                      // (U-06). Sem copyWith de tamanho/peso.
+                      style: AppTypography.heroAmount(balanceColor),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Entradas e Saídas ──
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: IntrinsicHeight(
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        balanceLabel,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
+                      child: _CashStatItem(
+                        icon: Icons.arrow_downward_rounded,
+                        color: theme.income,
+                        label: incomeLabel,
+                        value: Formatters.currency(incomeCents),
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    // FittedBox: o valor encolhe em telas estreitas /
-                    // Dynamic Type em vez de estourar o Row.
-                    Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          Formatters.currency(balance),
-                          maxLines: 1,
-                          style: AppTypography.heroAmount(balanceColor),
-                        ),
+                    VerticalDivider(
+                      width: 32,
+                      thickness: 1,
+                      color: scheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                    Expanded(
+                      child: _CashStatItem(
+                        icon: Icons.arrow_upward_rounded,
+                        color: theme.expense,
+                        label: expenseLabel,
+                        value: Formatters.currency(expenseCents),
                       ),
                     ),
                   ],
                 ),
               ),
-              Divider(
-                height: 1,
-                thickness: 1,
-                color: scheme.outlineVariant.withValues(alpha: 0.6),
-              ),
-              // ── Entradas / Saídas: rótulo à esquerda, valor à direita ──
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                child: Column(
-                  children: [
-                    _CashLine(
-                      icon: Icons.north_east,
-                      color: theme.income,
-                      label: incomeLabel,
-                      value: Formatters.signedAmount(incomeCents),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    _CashLine(
-                      icon: Icons.south_west,
-                      color: theme.expense,
-                      label: expenseLabel,
-                      value: Formatters.signedAmount(-expenseCents),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// Linha de direção do caixa — ícone + rótulo à esquerda, valor à direita.
-class _CashLine extends StatelessWidget {
-  const _CashLine({
+class _CashStatItem extends StatelessWidget {
+  const _CashStatItem({
     required this.icon,
     required this.color,
     required this.label,
@@ -431,42 +459,39 @@ class _CashLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
 
-    return Semantics(
-      container: true,
-      label: '$label: $value',
-      child: Row(
-        children: [
-          Icon(icon, size: AppSizes.iconSm, color: color),
-          const SizedBox(width: AppSpacing.sm),
-          // Rótulo: à esquerda, com espaço flexível.
-          Expanded(
-            child: Text(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 14, color: color),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
               label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.bodyMedium.copyWith(
+              style: AppTypography.labelSmall.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppTypography.bodyLarge.copyWith(
+            fontWeight: FontWeight.w600,
+            color: scheme.onSurface,
           ),
-          const SizedBox(width: AppSpacing.sm),
-          // Valor: à direita, tabular (coluna alinhada), sem negrito.
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                value,
-                maxLines: 1,
-                style: AppTypography.amountInRow(color),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -508,8 +533,9 @@ class _DateGroup extends StatelessWidget {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: horizontal),
           child: Material(
-            // Painel de lista = superfície do cartão + raio 16 (a regra do
-            // sistema; os heroes usam 20).
+            // Painel de lista = mesmo raio dos cartões (lg/18) — U-17.
+            // (O comentário anterior dizia 16/20, valores que não são
+            // tokens do sistema.)
             color: scheme.surface,
             elevation: 0,
             shape: RoundedRectangleBorder(
@@ -525,7 +551,7 @@ class _DateGroup extends StatelessWidget {
                   if (i > 0)
                     Divider(
                       height: 1,
-                      indent: 60,
+                      indent: AppSpacing.huge + AppSpacing.sm,
                       endIndent: AppSpacing.md,
                       color: scheme.outlineVariant,
                     ),
@@ -690,18 +716,12 @@ class _DateGroupData {
   final List<FinancialTransaction> transactions;
 }
 
+/// Intervalo REAL consultado pelo fluxo de caixa: do início do período
+/// ([CashFlowPeriodStart.startOf] — a mesma regra do provider) até agora.
+/// O rótulo nunca deve divergir do que a soma mostra.
 String _dateRangeLabel(CashFlowPeriod period, AppLocalizations l10n) {
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final fmt = Formatters.date;
-  return switch (period) {
-    CashFlowPeriod.today => fmt(today),
-    CashFlowPeriod.week =>
-      '${fmt(today.subtract(Duration(days: today.weekday - 1)))}–'
-          '${fmt(today.add(Duration(days: 7 - today.weekday)))}',
-    CashFlowPeriod.month =>
-      '${fmt(DateTime(now.year, now.month, 1))}–'
-          '${fmt(DateTime(now.year, now.month + 1, 0))}',
-    CashFlowPeriod.all => l10n.periodAll,
-  };
+  if (period == CashFlowPeriod.all) return l10n.periodAll;
+  final now = AppClock.now();
+  final start = period.startOf(now);
+  return '${Formatters.date(start)}–${Formatters.date(now)}';
 }

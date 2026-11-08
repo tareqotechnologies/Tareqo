@@ -52,15 +52,15 @@ class _TenantDetailSheet extends ConsumerWidget {
               // Handle bar
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
+                  width: AppSpacing.xxxl,
+                  height: AppSpacing.xxs,
                   margin: const EdgeInsets.only(
                     top: AppSpacing.sm,
                     bottom: AppSpacing.lg,
                   ),
                   decoration: BoxDecoration(
                     color: scheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: AppRadius.microAll,
                   ),
                 ),
               ),
@@ -493,10 +493,13 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: AppSpacing.xs),
         Expanded(child: Text(label, style: theme.textTheme.labelMedium)),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xs,
+            vertical: AppSpacing.micro,
+          ),
           decoration: BoxDecoration(
             color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: Text(
             countLabel,

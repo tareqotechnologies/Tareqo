@@ -1,11 +1,11 @@
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/ids.dart';
-import '../../../core/utils/formatters.dart';
 import '../../../core/utils/money.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../../domain/usecases/add_financial_transaction_use_case.dart';
@@ -104,7 +104,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       CrashReporting.capture(
         error,
         stackTrace,
-        hint: 'Erro ao registrar transação',
+        hint: 'financial_add_transaction',
       );
       if (mounted) {
         setState(() {
@@ -132,103 +132,130 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SheetHeader(
-                title: l10n.financialAddTitle,
-                subtitle:
-                    '${l10n.periodToday} · 0 · ' +
-                        Formatters.currency(0),
-              ),
+              SheetHeader(title: l10n.financialAddTitle),
               // Seção: Tipo — pílulas estilo Apple.
-              // Cores laranja padronizadas (igual módulo vendas)
-              // Use AppColors.accentOrange para ações principais e destaque
-              SheetSection(
-                icon: Icons.swap_vert,
-                title: l10n.financialAddTitle,
-                children: [
-                  Semantics(
-                    container: true,
-                    label: l10n.financialAddTitle,
-                    child: AppSegmentedButton<TransactionType>(
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l10n.financialAddTitle,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    AppSegmentedButton<TransactionType>(
                       segments: [
                         ButtonSegment(
                           value: TransactionType.income,
                           label: Text(l10n.financialIncomingType),
-                          icon: const Icon(Icons.north_east),
+                          icon: const Icon(Icons.add_circle_outline),
                         ),
                         ButtonSegment(
                           value: TransactionType.expense,
                           label: Text(l10n.financialOutgoingType),
-                          icon: const Icon(Icons.south_west),
+                          icon: const Icon(Icons.remove_circle_outline),
                         ),
                       ],
                       selected: {_type},
                       onSelectionChanged: (selection) =>
                           setState(() => _type = selection.first),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              // Seção: Detalhes — descrição, categoria e valor.
-              SheetSection(
-                icon: Icons.notes_outlined,
-                title: l10n.financialDescriptionLabel,
+              const SizedBox(height: 24),
+              // Seção: Detalhes ──
+              Text(
+                l10n.financialDescriptionLabel,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(
+                controller: _descriptionController,
+                label: l10n.financialDescriptionLabel,
+                prefixIcon: Icons.edit_note_rounded,
+                textInputAction: TextInputAction.next,
+                validator: (value) =>
+                    (value == null || value.trim().isEmpty)
+                    ? l10n.financialDescriptionError
+                    : null,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
                 children: [
-                  AppTextField(
-                    controller: _descriptionController,
-                    label: l10n.financialDescriptionLabel,
-                    prefixIcon: Icons.notes_outlined,
-                    textInputAction: TextInputAction.next,
-                    validator: (value) =>
-                        (value == null || value.trim().isEmpty)
-                        ? l10n.financialDescriptionError
-                        : null,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  AppTextField(
-                    controller: _categoryController,
-                    label: l10n.financialCategoryLabel,
-                    prefixIcon: Icons.category_outlined,
-                    textInputAction: TextInputAction.next,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  AppTextField(
-                    controller: _amountController,
-                    label: l10n.financialAmountLabel,
-                    prefixIcon: Icons.attach_money,
-                    textInputAction: TextInputAction.done,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                  Expanded(
+                    child: AppTextField(
+                      controller: _categoryController,
+                      label: l10n.financialCategoryLabel,
+                      prefixIcon: Icons.tag_rounded,
+                      textInputAction: TextInputAction.next,
                     ),
-                    validator: (value) => _parseAmount(value ?? '') <= 0
-                        ? l10n.financialAmountError
-                        : null,
                   ),
-                  // A2: mostra ao vivo o valor que será registado.
-                  MoneyLivePreview(controller: _amountController),
                 ],
               ),
-              const SizedBox(height: 4),
-              // Material explícito: o SwitchListTile pinta o fundo e o ink no
-              // Material ancestral; dentro do Container colorido do app_sheet
-              // (DecoratedBox) o Flutter emite a assertion "ListTile background
-              // color or ink splashes may be invisible".
-              Material(
-                type: MaterialType.transparency,
-                child: SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    l10n.financialPendingLabel,
-                    style: theme.textTheme.bodyMedium,
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(
+                controller: _amountController,
+                label: l10n.financialAmountLabel,
+                prefixIcon: Icons.currency_exchange_rounded,
+                textInputAction: TextInputAction.done,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: (value) => _parseAmount(value ?? '') <= 0
+                    ? l10n.financialAmountError
+                    : null,
+              ),
+              // A2: mostra ao vivo o valor que será registado.
+              MoneyLivePreview(controller: _amountController),
+              const SizedBox(height: 12),
+              // Status Pendente (Fiado/A Pagar)
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: _isPending
+                        ? theme.warning.withValues(alpha: 0.5)
+                        : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                   ),
-                  subtitle: Text(
-                    l10n.financialPendingHint,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  color: _isPending
+                      ? theme.warning.withValues(alpha: 0.05)
+                      : null,
+                ),
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: SwitchListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
+                    title: Text(
+                      l10n.financialPendingLabel,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: _isPending ? theme.warning : null,
+                      ),
+                    ),
+                    subtitle: Text(
+                      l10n.financialPendingHint,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    value: _isPending,
+                    activeThumbColor: theme.warning,
+                    onChanged: (value) => setState(() => _isPending = value),
                   ),
-                  value: _isPending,
-                  onChanged: (value) => setState(() => _isPending = value),
                 ),
               ),
               if (_formError != null) ...[

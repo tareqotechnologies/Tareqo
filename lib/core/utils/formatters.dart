@@ -69,9 +69,17 @@ abstract final class Formatters {
   /// `R$ 1.234,56` (pt) ou `US$ 1,234.56` (en).
   static String currency(int cents) => currencyFor(_currencyCode, cents);
 
-  /// Formata como `04/08/2026`.
+  /// Locale do idioma ativo (U-20): `pt_BR` por defeito.
+  static String get _locale => switch (_language) {
+    'en' => 'en_US',
+    'fr' => 'fr_FR',
+    _ => 'pt_BR',
+  };
+
+  /// Formata como `04/08/2026` **no locale ativo** (U-20): en → `08/04/2026`,
+  /// fr → `04/08/2026` (dia/mês nativos). Antes era sempre DD/MM/AAAA.
   static String date(DateTime date) =>
-      '${_two(date.day)}/${_two(date.month)}/${date.year}';
+      DateFormat('dd/MM/yyyy', _locale).format(date);
 
   /// Formata como `17 ago` (dia + mês abreviado no idioma ativo) — o
   /// cabeçalho do dashboard (canvas V3: "Segunda, 17 ago").
@@ -172,7 +180,7 @@ abstract final class Formatters {
     return '$formatted $_currencyCode';
   }
 
-  /// Formata como `04/08/2026 14:30`.
+  /// Formata como `04/08/2026 14:30` (data no locale ativo, U-20).
   static String dateTime(DateTime date) =>
       '${Formatters.date(date)} ${_two(date.hour)}:${_two(date.minute)}';
 
@@ -268,7 +276,7 @@ abstract final class Formatters {
         _ => 'Ontem',
       };
     }
-    return '${_two(date.day)}/${_two(date.month)}';
+    return DateFormat('dd/MM', _locale).format(date);
   }
 
   static String _two(int value) => value.toString().padLeft(2, '0');

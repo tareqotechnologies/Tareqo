@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/network/deep_link_handler.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/formatters.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'presentation/controllers/account_providers.dart';
+import 'presentation/navigation/app_routes.dart';
 import 'presentation/screens/auth/app_lock_overlay.dart';
 import 'presentation/screens/auth/auth_gate.dart';
 
@@ -39,24 +41,25 @@ class TareqoApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const AuthGate(),
+      // U-09: rotas nomeadas para telas empurradas (Menu/Dashboard/
+      // Marketplace/Suporte/…). As secções do shell continuam em
+      // IndexedStack via `goTo(AppSection)` — sem rota.
+      onGenerateRoute: AppRoutes.onGenerateRoute,
+      onUnknownRoute: AppRoutes.unknownRoute,
       // O bloqueio biométrico vive no `builder` (acima do Navigator): cobre
       // também sheets/diálogos abertos quando o app é bloqueado em segundo
       // plano — ver app_lock_overlay.dart.
       builder: (context, child) {
-        // A11y (plano UI/UX — Fase 3.2): teto global de 1.6× na escala de
-        // texto — acessibilidade SEM layouts quebrados. Os componentes
-        // críticos (PDV, cards, sheets) absorvem o texto ampliado até o
-        // teto com Flexible/FittedBox/maxLines; acima disso o conteúdo
-        // perde legibilidade estrutural (Row rígidas estouram).
-        final mq = MediaQuery.of(context);
-        final clampedScaler = mq.textScaler.clamp(
-          minScaleFactor: 1.0,
-          maxScaleFactor: 1.6,
-        );
-        return MediaQuery(
-          data: mq.copyWith(textScaler: clampedScaler),
-          child: AppLockOverlay(child: child ?? const SizedBox.shrink()),
-        );
+        // U-09: regista o contexto para deep links internos
+        // (`tareqo://go/<rota>`) — sem isto, links internos não navegam.
+        DeepLinkHandler.attachNavigator(context);
+        // A11y (U-03): a escala de texto do sistema é respeitada SEM
+        // clamp global — WCAG 1.4.4 exige suportar 200%. Os componentes
+        // críticos (PDV, cards, sheets, feed) usam Flexible/FittedBox/
+        // maxLines para absorver texto ampliado sem overflow; regressões
+        // são apanhadas pelos testes de escala (1,3 / 1,6 / 2,0). O
+        // AppLockOverlay continua acima do Navigator.
+        return AppLockOverlay(child: child ?? const SizedBox.shrink());
       },
     );
   }

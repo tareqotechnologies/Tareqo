@@ -231,11 +231,11 @@ class _PlanTile extends ConsumerWidget {
           children: [
             // ── Color accent bar ──
             Container(
-              width: 4,
-              height: 40,
+              width: AppSpacing.xxs,
+              height: AppSpacing.xxxl,
               decoration: BoxDecoration(
                 color: accent,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: AppRadius.microAll,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -379,15 +379,15 @@ class _PlanDetailSheet extends ConsumerWidget {
               // Handle bar
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
+                  width: AppSpacing.xxxl,
+                  height: AppSpacing.xxs,
                   margin: const EdgeInsets.only(
                     top: AppSpacing.sm,
                     bottom: AppSpacing.lg,
                   ),
                   decoration: BoxDecoration(
                     color: scheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: AppRadius.microAll,
                   ),
                 ),
               ),
@@ -397,11 +397,11 @@ class _PlanDetailSheet extends ConsumerWidget {
                 children: [
                   // Accent bar
                   Container(
-                    width: 4,
-                    height: 36,
+                    width: AppSpacing.xxs,
+                    height: AppSpacing.avatarSm,
                     decoration: BoxDecoration(
                       color: accent,
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: AppRadius.microAll,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -932,15 +932,15 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
               // Handle bar
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
+                  width: AppSpacing.xxxl,
+                  height: AppSpacing.xxs,
                   margin: const EdgeInsets.only(
                     top: AppSpacing.sm,
                     bottom: AppSpacing.lg,
                   ),
                   decoration: BoxDecoration(
                     color: scheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: AppRadius.microAll,
                   ),
                 ),
               ),

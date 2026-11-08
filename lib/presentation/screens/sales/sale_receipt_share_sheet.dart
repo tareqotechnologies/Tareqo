@@ -132,11 +132,11 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
             // Alça de arraste do bottom sheet.
             Center(
               child: Container(
-                width: 40,
-                height: 4,
+                width: AppSpacing.xxxl,
+                height: AppSpacing.xxs,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: AppRadius.microAll,
                 ),
               ),
             ),
@@ -157,7 +157,7 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
               child: SingleChildScrollView(
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: AppRadius.xsAll,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.08),

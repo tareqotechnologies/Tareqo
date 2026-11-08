@@ -171,7 +171,7 @@ void main() {
                   LinearProgressIndicator(
                     value: 0.4,
                     minHeight: 4,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: AppRadius.microAll,
                   ),
                 ],
               ),

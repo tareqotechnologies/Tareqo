@@ -25,13 +25,13 @@ class _PlanBarRow extends StatelessWidget {
             planName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+            style: theme.textTheme.bodySmall,
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
         Expanded(
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: AppRadius.microAll,
             child: LinearProgressIndicator(
               value: fraction,
               minHeight: 6,

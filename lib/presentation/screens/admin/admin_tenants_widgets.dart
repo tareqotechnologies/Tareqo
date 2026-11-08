@@ -67,7 +67,7 @@ class _AdminTenantCard extends ConsumerWidget {
               ),
               decoration: BoxDecoration(
                 color: AppColors.accentOrange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(AppRadius.full),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

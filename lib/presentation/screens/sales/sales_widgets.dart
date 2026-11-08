@@ -64,8 +64,10 @@ class SalesSummaryHeader extends StatelessWidget {
             '${l10n.salesHeaderTransactions(todayCount)}',
         child: _SummaryRow(
           icon: Icons.receipt_long_outlined,
-          iconBackground: IconTone.accentOrange,
-          iconColor: Colors.white,
+          // U-22: antes IconTone.accentOrange (#F28C00, terceiro laranja)
+          // + Colors.white. Agora deriva do acento do tema.
+          iconBackground: IconTone.darkBackground(theme.accent),
+          iconColor: IconTone.lightForeground(theme.accent),
           title: l10n.periodToday,
           details: l10n.salesHeaderTransactions(todayCount),
           trailing: FittedBox(

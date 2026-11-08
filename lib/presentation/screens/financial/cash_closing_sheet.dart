@@ -105,7 +105,7 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
       }
     } catch (error, stackTrace) {
       Haptics.error();
-      CrashReporting.capture(error, stackTrace, hint: 'Erro ao fechar o caixa');
+      CrashReporting.capture(error, stackTrace, hint: 'financial_cash_closing');
       if (mounted) {
         setState(() {
           _isSubmitting = false;

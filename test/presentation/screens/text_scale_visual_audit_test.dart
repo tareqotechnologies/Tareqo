@@ -29,7 +29,7 @@ import 'package:tareqo/presentation/widgets/detail_row.dart';
 
 /// Auditoria visual da Fase 3.2 (plano UI/UX, docs/pt/21) nas telas
 /// migradas pela Fase 2.3 — **login, suporte, lojas e o detalhe de loja**
-/// — renderizadas com tipografia dinâmica em 1.3× e 1.6×.
+/// — renderizadas com tipografia dinâmica em 1.3×, 1.6× e 2.0×.
 ///
 /// O que cada caso valida:
 ///
@@ -40,11 +40,8 @@ import 'package:tareqo/presentation/widgets/detail_row.dart';
 /// 2. **Captura PNG por tela/escala** (`--update-goldens` para gerar) —
 ///    revisão visual do impacto do texto ampliado sem subir o app.
 ///
-/// Sobre o teto: o builder do `TareqoApp` aplica `clamp(maxScaleFactor:
-/// 1.6)` — sistema pedindo 2.0 entrega 1.6 (contrato em
-/// `accessibility_text_scale_test.dart`). Auditamos 1.3× e 1.6× porque,
-/// com o teto, **1.6 é o pior caso renderizável em produção**; o valor
-/// bruto 1.6 abaixo do builder é idêntico ao clamp de qualquer pedido ≥ 1.6.
+/// U-03: já não há clamp global no `TareqoApp` (contrato em
+/// `accessibility_text_scale_test.dart`) — 2.0× é renderizável e auditado.
 ///
 /// As telas de stores usam os MESMOS fakes de `stores_screen_test.dart`
 /// (arquivos de teste não são importáveis entre si sem arrastar `main()`),
@@ -201,7 +198,7 @@ void main() {
     createdAt: DateTime.now(),
   );
 
-  for (final scale in const <double>[1.3, 1.6]) {
+  for (final scale in const <double>[1.3, 1.6, 2.0]) {
     group('auditoria visual — textScaler $scale', () {
       testWidgets('login', (tester) async {
         await _pump(tester, scale, _login());

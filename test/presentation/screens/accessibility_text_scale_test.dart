@@ -98,18 +98,16 @@ void main() {
     handle.dispose();
   });
 
-  // A11y (plano UI/UX — Fase 3.2): o builder do [TareqoApp] aplica teto
-  // global de 1.6× na escala de texto — o sistema pede 2.0, o app entrega
-  // 1.6 (legibilidade ampliada SEM layouts quebrados).
-  testWidgets('app aplica teto global de 1.6x na escala de texto', (
+  // A11y (U-03): a escala de texto do sistema é RESPEITADA sem clamp
+  // global — sistema pedindo 2.0 entrega 2.0 (WCAG 1.4.4, 200%). Sem o
+  // teto de 1.6× anterior.
+  testWidgets('app respeita a escala de texto do sistema sem clamp', (
     tester,
   ) async {
     tester.platformDispatcher.textScaleFactorTestValue = 2.0;
     addTearDown(tester.platformDispatcher.clearAllTestValues);
 
-    // App completo sem sessão (stream sem emissão → splash do AuthGate):
-    // o builder do MaterialApp roda para QUALQUER tela filha, incluindo
-    // login/splash — não exige o bootstrap do shell logado.
+    // App completo sem sessão (stream sem emissão → splash do AuthGate).
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -120,16 +118,13 @@ void main() {
     );
     await tester.pump();
 
-    // O app entrega 1.6 (o sistema pediu 2.0): um bodyMedium (14) renderiza a 22.4 (não 28) e um
-    // labelSmall (11) a 17.6 — probe abaixo do builder (AppLockOverlay),
-    // onde a MediaQuery mais próxima já é a do clamp.
+    // Escala integral: bodyMedium (14) → 28, labelSmall (11) → 22.
     final navigatorContext = tester.element(find.byType(Navigator).first);
     final scaler = MediaQuery.of(navigatorContext).textScaler;
-    expect(scaler.scale(14), closeTo(22.4, 0.01));
-    expect(scaler.scale(11), closeTo(17.6, 0.01));
+    expect(scaler.scale(14), closeTo(28.0, 0.01));
+    expect(scaler.scale(11), closeTo(22.0, 0.01));
 
-    // Nada estourou com o teto aplicado (overflows de RenderFlex falham
-    // o teste automaticamente).
+    // Nada estourou (overflows de RenderFlex falham o teste).
     expect(tester.takeException(), isNull);
   });
 }

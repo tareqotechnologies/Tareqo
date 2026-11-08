@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../controllers/auth_providers.dart';
+import '../../navigation/app_routes.dart';
 import '../../widgets/app_sheet.dart';
 import '../auth/change_password_sheet.dart';
-import '../auth/mfa_setup_screen.dart';
 
 /// Tela de segurança — MFA e autenticação biométrica.
 class SecuritySettingsScreen extends ConsumerStatefulWidget {
@@ -52,8 +52,10 @@ class _SecuritySettingsScreenState
       await ref.read(mfaAuthUseCaseProvider).disable();
       setState(() => _mfaEnabled = false);
     } else {
-      final result = await Navigator.of(context).push<bool>(
-        MaterialPageRoute<bool>(builder: (_) => const MFASetupScreen()),
+      // U-09: rota nomeada com resultado (bool).
+      final result = await AppNavigator.push<bool>(
+        context,
+        AppRoutes.mfaSetup,
       );
       if (result == true && mounted) {
         setState(() => _mfaEnabled = true);

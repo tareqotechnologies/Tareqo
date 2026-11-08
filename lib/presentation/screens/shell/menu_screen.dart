@@ -15,15 +15,9 @@ import '../../controllers/notification_providers.dart';
 import '../../controllers/production_providers.dart';
 import '../../controllers/purchases_providers.dart';
 import '../../controllers/reports_providers.dart';
+import '../../navigation/app_routes.dart';
 import '../../widgets/pulse_badge.dart';
-import '../dashboard/notifications_screen.dart';
-import '../production/production_screen.dart';
-import '../purchases/purchases_screen.dart';
-import '../reports/reports_screen.dart';
 import '../shell/app_shell.dart';
-import '../stores/stores_screen.dart';
-import '../account/security_settings_screen.dart';
-import '../addons/addon_marketplace_screen.dart';
 
 /// Aba Menu — hub dos módulos secundários e acções de conta.
 ///
@@ -48,39 +42,31 @@ class MenuScreen extends ConsumerWidget {
     void goTo(AppSection section) =>
         ref.read(shellIndexProvider.notifier).goTo(section);
 
+    // U-09: rotas nomeadas via AppNavigator (tabela em app_routes.dart).
+    // As transições vêm do PageTransitionsTheme global.
     void openPurchases() {
       ref.invalidate(purchasesProvider);
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => const PurchasesScreen()));
+      AppNavigator.push(context, AppRoutes.purchases);
     }
 
     void openReports() {
       ref.invalidate(salesReportProvider);
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => const ReportsScreen()));
+      AppNavigator.push(context, AppRoutes.reports);
     }
 
     void openProduction() {
       ref.invalidate(recipesProvider);
       ref.invalidate(productionOrdersProvider);
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => const ProductionScreen()));
+      AppNavigator.push(context, AppRoutes.production);
     }
 
     void openStores(Tenant tenant) {
       ref.invalidate(storesProvider(tenant.id));
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => StoresScreen(tenant: tenant)),
-      );
+      AppNavigator.pushWith(context, AppRoutes.stores, {'tenant': tenant});
     }
 
     void openNotifications() {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const NotificationsScreen()),
-      );
+      AppNavigator.push(context, AppRoutes.notifications);
     }
 
     Future<void> confirmSignOut() async {
@@ -124,7 +110,6 @@ class MenuScreen extends ConsumerWidget {
             l10n.menuSubtitle,
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
-              fontSize: 13,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -210,13 +195,7 @@ class MenuScreen extends ConsumerWidget {
                   child: _MenuTile(
                     icon: Icons.extension_outlined,
                     label: l10n.addonsTitle,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const AddOnMarketplaceScreen(),
-                        ),
-                      );
-                    },
+                    onTap: () => AppNavigator.push(context, AppRoutes.addons),
                   ),
                 ),
               SizedBox(
@@ -224,13 +203,7 @@ class MenuScreen extends ConsumerWidget {
                 child: _MenuTile(
                   icon: Icons.shield_outlined,
                   label: l10n.securitySectionTitle,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const SecuritySettingsScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => AppNavigator.push(context, AppRoutes.security),
                 ),
               ),
             ],
@@ -271,18 +244,20 @@ class _MenuTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Ícone circular laranja padronizado.
+          // Ícone circular tingido padronizado (U-04): fundo/foreground
+          // derivados do acento no brilho atual (theme.accent), nunca
+          // o tom claro fixo + branco. O tile inteiro é o alvo (≥48).
           Container(
-            width: 36,
-            height: 36,
-            decoration: const BoxDecoration(
-              color: AppColors.accentOrange,
+            width: AppSizes.avatarSm,
+            height: AppSizes.avatarSm,
+            decoration: BoxDecoration(
+              color: IconTone.darkBackground(theme.accent),
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
-              size: 18,
-              color: Colors.white,
+              size: AppSizes.iconMd,
+              color: IconTone.lightForeground(theme.accent),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -324,6 +299,9 @@ class _SignOutButton extends StatelessWidget {
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
         ),
+        constraints: const BoxConstraints(
+          minHeight: AppSizes.touchTarget,
+        ),
         decoration: BoxDecoration(
           color: scheme.surface,
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -334,18 +312,19 @@ class _SignOutButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Ícone circular laranja discreto.
+            // Ícone circular tingido discreto (U-04): acento no brilho
+            // atual via IconTone (nunca tom claro fixo + branco).
             Container(
-              width: 32,
-              height: 32,
-              decoration: const BoxDecoration(
-                color: AppColors.accentOrange,
+              width: AppSizes.avatarSm,
+              height: AppSizes.avatarSm,
+              decoration: BoxDecoration(
+                color: IconTone.darkBackground(scheme.error),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.logout_rounded,
-                size: 16,
-                color: Colors.white,
+                size: AppSizes.iconSm,
+                color: IconTone.lightForeground(scheme.error),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),

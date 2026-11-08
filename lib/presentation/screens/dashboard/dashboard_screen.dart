@@ -33,12 +33,9 @@ import '../../widgets/app_menu_option.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/inline_error_card.dart';
 import '../../widgets/store_switcher.dart';
+import '../../navigation/app_routes.dart';
 import '../../widgets/detail_row.dart';
-import '../credit/debts_screen.dart';
-import '../financial/financial_screen.dart';
-import '../products/product_list_screen.dart';
-import '../purchases/purchases_screen.dart';
-import '../sales/sale_detail_screen.dart';
+import '../shell/app_shell.dart' show AppSection;
 
 /// Limiar de "stock baixo" (W8 + W11): produtos com estoque inferior a
 /// [Quantity.lowStockThresholdUnits] UNIDADES entram no alerta do
@@ -152,13 +149,10 @@ class DashboardScreen extends ConsumerWidget {
         _ActivityItem.sale(
           sale: sale,
           l10n: l10n,
-          // Tocar na venda do feed abre os detalhes (mesma navegação do
-          // card compartilhado da lista de Vendas).
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => SaleDetailScreen(sale: sale),
-            ),
-          ),
+          // U-09: rotas nomeadas (venda com argumento, resto sem).
+          onTap: () => AppNavigator.pushWith(context, AppRoutes.saleDetail, {
+            'sale': sale,
+          }),
         ),
       for (final purchase in todayPurchases)
         for (final item in purchase.items)
@@ -166,25 +160,22 @@ class DashboardScreen extends ConsumerWidget {
             purchase: purchase,
             item: item,
             l10n: l10n,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const PurchasesScreen()),
-            ),
+            onTap: () => AppNavigator.push(context, AppRoutes.purchases),
           ),
       for (final debt in todaySettled)
         _ActivityItem.fiadoPayment(
           debt: debt,
           l10n: l10n,
-          onTap: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute<void>(builder: (_) => const DebtsScreen())),
+          onTap: () => AppNavigator.pushSection(context, AppSection.credit),
         ),
       for (final transaction in todayExpenses)
         _ActivityItem.expense(
           transaction: transaction,
           l10n: l10n,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => const FinancialScreen()),
-          ),
+          // Despesa → secção Financeiro do shell: abrir a tela via rota da
+          // secção (o Navigator empurra a secção correspondente — ver
+          // AppNavigator.pushSection em app_routes.dart).
+          onTap: () => AppNavigator.pushSection(context, AppSection.financial),
         ),
       for (final transfer in todayTransfers)
         _ActivityItem.transfer(
@@ -201,16 +192,18 @@ class DashboardScreen extends ConsumerWidget {
         _ActivityItem.lowStock(
           product: product,
           l10n: l10n,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => const ProductListScreen()),
+          onTap: () => AppNavigator.pushSection(
+            context,
+            AppSection.products,
           ),
         ),
       for (final alert in expiryAlerts)
         _ActivityItem.expiry(
           alert: alert,
           l10n: l10n,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => const ProductListScreen()),
+          onTap: () => AppNavigator.pushSection(
+            context,
+            AppSection.products,
           ),
         ),
     ];
@@ -734,6 +727,10 @@ class _ActivityItem {
     required AppLocalizations l10n,
     required VoidCallback onTap,
   }) {
+    // Cor de venda derivada do acento no call site (tema-aware) — o
+    // factory não recebe context; o chamador passa scheme.primary /
+    // IconTone derivados. Placeholder neutro mantido via defaults
+    // resolvidos em _ActivityRow (ver amountColor fallback).
     return _ActivityItem(
       title: l10n.dashboardSaleEntry(Formatters.saleLabel(sale.number)),
       details:
@@ -741,10 +738,14 @@ class _ActivityItem {
           '${_timeLabel(sale.dateTime, l10n)}',
       dateTime: sale.dateTime,
       icon: Icons.north_east_rounded,
-      iconBackground: AppColors.accentOrange,
-      iconColor: Colors.white,
+      // Círculo tingido (não sólido) — igual ao padrão IconTone dos
+      // restantes itens; evita branco-sobre-laranja (U-02).
+      iconBackground: IconTone.darkBackground(AppColors.accentOrange),
+      iconColor: IconTone.lightForeground(AppColors.accentOrange),
       amount: Formatters.signedAmount(sale.totalAmountCents),
-      amountColor: AppColors.accentOrange,
+      // amountColor resolvido como scheme.primary em _ActivityRow
+      // quando null (antes: AppColors.accentOrange fixo — claro em
+      // ambos os temas, U-02).
       onTap: onTap,
     );
   }
@@ -761,10 +762,11 @@ class _ActivityItem {
     ),
     dateTime: purchase.dateTime,
     icon: Icons.inventory_2_outlined,
-    iconBackground: IconTone.slate,
-    iconColor: Colors.white,
+    iconBackground: IconTone.darkBackground(IconTone.slate),
+    iconColor: IconTone.lightForeground(IconTone.slate),
     amount: '+${Quantity.format(item.quantity)}',
-    amountColor: Colors.white,
+    // Antes Colors.white incondicional — invisível sobre surface clara
+    // (U-02). Null → _ActivityRow usa scheme.income (tema-aware).
     onTap: onTap,
   );
   factory _ActivityItem.fiadoPayment({
@@ -778,10 +780,10 @@ class _ActivityItem {
       details: '${debt.personName} · ${_timeLabel(paidAt, l10n)}',
       dateTime: paidAt,
       icon: Icons.payments_outlined,
-      iconBackground: IconTone.amberDark,
-      iconColor: IconTone.amber,
+      iconBackground: IconTone.darkBackground(IconTone.amber),
+      iconColor: IconTone.lightForeground(IconTone.amber),
       amount: Formatters.signedAmount(debt.amountCents),
-      amountColor: AppColors.accentOrange,
+      // amountColor null → scheme.primary em _ActivityRow (U-02).
       dashedBorder: true,
       onTap: onTap,
     );
@@ -795,10 +797,10 @@ class _ActivityItem {
     details: _timeLabel(transaction.date, l10n),
     dateTime: transaction.date,
     icon: Icons.south_west_rounded,
-    iconBackground: IconTone.errorNeutralDark,
-    iconColor: IconTone.errorNeutral,
+    iconBackground: IconTone.darkBackground(IconTone.errorNeutral),
+    iconColor: IconTone.lightForeground(IconTone.errorNeutral),
     amount: Formatters.signedAmount(-transaction.amountCents),
-    amountColor: IconTone.errorNeutral,
+    // amountColor null → scheme.expense via _ActivityRow (U-02).
     onTap: onTap,
   );
   factory _ActivityItem.lowStock({
@@ -813,8 +815,8 @@ class _ActivityItem {
     ),
     dateTime: AppClock.now(),
     icon: Icons.warning_amber_rounded,
-    iconBackground: IconTone.amberDark,
-    iconColor: IconTone.amber,
+    iconBackground: IconTone.darkBackground(IconTone.amber),
+    iconColor: IconTone.lightForeground(IconTone.amber),
     badge: l10n.dashboardAlertBadge,
     badgeColor: IconTone.amber,
     badgeBackground: IconTone.amber,
@@ -834,8 +836,8 @@ class _ActivityItem {
           : l10n.dashboardExpiresIn(alert.daysRemaining),
       dateTime: AppClock.now(),
       icon: expired ? Icons.dangerous_outlined : Icons.hourglass_top_rounded,
-      iconBackground: color.withValues(alpha: 0.18),
-      iconColor: color,
+      iconBackground: IconTone.darkBackground(color),
+      iconColor: IconTone.lightForeground(color),
       badge: Quantity.format(
         alert.lot.currentQuantity,
         unitLabel: alert.product.vendaPorFracao
@@ -919,15 +921,15 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
         children: [
           Center(
             child: Container(
-              width: 40,
-              height: 4,
+              width: AppSpacing.xxxl,
+              height: AppSpacing.xxs,
               margin: const EdgeInsets.only(
                 top: AppSpacing.sm,
                 bottom: AppSpacing.lg,
               ),
               decoration: BoxDecoration(
                 color: scheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: AppRadius.microAll,
               ),
             ),
           ),
@@ -1057,6 +1059,20 @@ class _ActivityRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    // Cores tema-aware de fallback (U-02): factories sem cor explícita
+    // herdam do scheme — entrada (+) = income, saída (-) = expense,
+    // restante = primary.
+    final amountFg =
+        item.amountColor ??
+        (item.amount != null
+            ? (item.amount!.startsWith('+')
+                  ? scheme.income
+                  : item.amount!.startsWith('-')
+                      ? scheme.expense
+                      : scheme.primary)
+            : item.badgeColor);
 
     final row = Padding(
       padding: const EdgeInsets.symmetric(
@@ -1147,7 +1163,9 @@ class _ActivityRow extends StatelessWidget {
                                     : theme.textTheme.labelMedium)
                                 ?.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: item.amountColor ?? item.badgeColor,
+                                  color: item.amount != null
+                                      ? amountFg
+                                      : item.badgeColor,
                                 ),
                       ),
               ),

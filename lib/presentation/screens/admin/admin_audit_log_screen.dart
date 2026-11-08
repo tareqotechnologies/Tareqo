@@ -494,11 +494,11 @@ class _AuditTile extends StatelessWidget {
           children: [
             // ── Color accent dot ──
             Container(
-              width: 4,
-              height: 36,
+              width: AppSpacing.xxs,
+              height: AppSpacing.avatarSm,
               decoration: BoxDecoration(
                 color: accent,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: AppRadius.microAll,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -671,12 +671,12 @@ class _AuditDetailSheet extends StatelessWidget {
             // ── Handle ──
             Center(
               child: Container(
-                width: 36,
-                height: 4,
+                width: AppSpacing.avatarSm,
+                height: AppSpacing.xxs,
                 margin: const EdgeInsets.only(bottom: AppSpacing.md),
                 decoration: BoxDecoration(
                   color: scheme.onSurfaceVariant.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: AppRadius.microAll,
                 ),
               ),
             ),

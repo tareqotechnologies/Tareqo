@@ -12,6 +12,12 @@ import '../../../core/utils/formatters.dart';
 /// Extraído de `custom_invoice_screen.dart` (auditoria M5 — tela-god):
 /// isolado aqui porque não tem estado nem dependências da tela; recebe
 /// apenas os dados do negócio e a cor primária do template.
+///
+/// **Exceção de documento (U-12):** esta miniatura espelha um documento
+/// impresso em escala reduzida — os tamanhos 10/11 px e os pesos 400/600
+/// seguem a escala do tema (bodySmall/labelSmall) sem `copyWith` de
+/// tamanho; o texto branco sobre `primaryColor` é a cor do template
+/// escolhido pelo utilizador (identidade do documento, não do app).
 class CustomInvoicePreview extends StatelessWidget {
   const CustomInvoicePreview({
     super.key,
@@ -71,12 +77,12 @@ class CustomInvoicePreview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Barra superior simulando o topo da página PDF
-          Container(height: 4, color: primaryColor),
+          Container(height: AppSpacing.xxs, color: primaryColor),
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              16,
               AppSpacing.md,
-              16,
+              AppSpacing.md,
+              AppSpacing.md,
               AppSpacing.md,
             ),
             child: Column(
@@ -93,15 +99,15 @@ class CustomInvoicePreview extends StatelessWidget {
                         children: [
                           if (logoBytes != null) ...[
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: AppRadius.xsAll,
                               child: Image.memory(
                                 logoBytes!,
-                                width: 32,
-                                height: 32,
+                                width: AppSpacing.xxl,
+                                height: AppSpacing.xxl,
                                 fit: BoxFit.contain,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppSpacing.xs),
                           ],
                           Expanded(
                             child: Column(
@@ -112,7 +118,6 @@ class CustomInvoicePreview extends StatelessWidget {
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: primaryDark,
-                                    fontSize: 13,
                                   ),
                                 ),
                                 if (businessAddress.isNotEmpty)
@@ -122,7 +127,6 @@ class CustomInvoicePreview extends StatelessWidget {
                                     businessAddress,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: scheme.onSurfaceVariant,
-                                      fontSize: 11,
                                     ),
                                   ),
                                 if (businessPhone.isNotEmpty)
@@ -130,7 +134,6 @@ class CustomInvoicePreview extends StatelessWidget {
                                     businessPhone,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: scheme.onSurfaceVariant,
-                                      fontSize: 11,
                                     ),
                                   ),
                                 if (businessTaxId.isNotEmpty)
@@ -138,7 +141,6 @@ class CustomInvoicePreview extends StatelessWidget {
                                     l10n.pdfNifLine(businessTaxId),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: scheme.onSurfaceVariant,
-                                      fontSize: 11,
                                     ),
                                   ),
                               ],
@@ -147,7 +149,7 @@ class CustomInvoicePreview extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.xs),
                     // Badge FACTURA
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -156,66 +158,60 @@ class CustomInvoicePreview extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: primaryColor,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: AppRadius.xsAll,
                       ),
                       child: Text(
                         l10n.pdfInvoiceDocWord,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
                           letterSpacing: 0.5,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                // Nº + data (B5: data DINÂMICA — antes ficava fixa em
-                // 03/09/2026 e envelhecia no preview).
+                const SizedBox(height: AppSpacing.xxs),
+                // Nº + data (data DINÂMICA).
                 Align(
                   alignment: Alignment.centerRight,
                   child: Text(
                     '${l10n.customInvoiceNumberPrefix('00001')}  •  ${Formatters.date(DateTime.now())}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
-                      fontSize: 11,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 // Divisor
                 Divider(
                   height: 1,
                   color: scheme.outlineVariant.withValues(alpha: 0.4),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 // ─── Cliente ──
                 Text(
                   l10n.pdfClientHeading,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: scheme.onSurfaceVariant,
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   l10n.customInvoicePreviewSampleClient,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 11,
                   ),
                 ),
                 Text(
                   l10n.pdfPhoneLine('84 123 4567'),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 11,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 // ─── Tabela de itens (miniatura) ──
                 // Header
                 Container(
@@ -226,7 +222,7 @@ class CustomInvoicePreview extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: primaryColor,
                     borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(4),
+                      top: Radius.circular(AppRadius.xs),
                     ),
                   ),
                   child: Row(
@@ -237,31 +233,28 @@ class CustomInvoicePreview extends StatelessWidget {
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
-                            fontSize: 10,
                           ),
                         ),
                       ),
                       SizedBox(
-                        width: 36,
+                        width: AppSizes.avatarSm,
                         child: Text(
                           l10n.customInvoiceQty,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
-                            fontSize: 10,
                           ),
                         ),
                       ),
                       SizedBox(
-                        width: 52,
+                        width: AppSpacing.huge + AppSpacing.xxs,
                         child: Text(
                           l10n.pdfUnitPriceHeader,
                           textAlign: TextAlign.right,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
-                            fontSize: 10,
                           ),
                         ),
                       ),
@@ -284,7 +277,7 @@ class CustomInvoicePreview extends StatelessWidget {
                   primaryColor: primaryColor,
                   last: true,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 // ─── Total ──
                 Align(
                   alignment: Alignment.centerRight,
@@ -295,31 +288,29 @@ class CustomInvoicePreview extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: primaryColor.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: AppRadius.xsAll,
                     ),
                     child: Text(
                       l10n.customInvoicePreviewTotal('550,00 $currencySymbol'),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: primaryDark,
-                        fontSize: 11,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 // Rodapé
                 Divider(
                   height: 1,
                   color: scheme.outlineVariant.withValues(alpha: 0.4),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Center(
                   child: Text(
                     l10n.customInvoicePreviewFooter,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
-                      fontSize: 10,
                     ),
                   ),
                 ),
@@ -365,7 +356,9 @@ class _PreviewRow extends StatelessWidget {
             ? null
             : scheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: last
-            ? const BorderRadius.vertical(bottom: Radius.circular(4))
+            ? const BorderRadius.vertical(
+                bottom: Radius.circular(AppRadius.xs),
+              )
             : null,
       ),
       child: Row(
@@ -373,26 +366,25 @@ class _PreviewRow extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+              style: theme.textTheme.bodySmall,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
           SizedBox(
-            width: 36,
+            width: AppSizes.avatarSm,
             child: Text(
               qty,
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+              style: theme.textTheme.bodySmall,
             ),
           ),
           SizedBox(
-            width: 52,
+            width: AppSpacing.huge + AppSpacing.xxs,
             child: Text(
               '$price $currencySymbol',
               textAlign: TextAlign.right,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -1,6 +1,8 @@
 import 'package:app_links/app_links.dart';
+import 'package:flutter/material.dart' show BuildContext;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../presentation/navigation/app_routes.dart';
 import '../config/supabase_config.dart';
 import '../observability/crash_reporting.dart';
 
@@ -54,6 +56,15 @@ abstract final class DeepLinkHandler {
   static AppLinks? _appLinks;
   static bool _listening = false;
 
+  /// Contexto para navegação de deep links internos (`tareqo://go/<rota>`).
+  /// Registado pelo `TareqoApp` (acima do Navigator).
+  static BuildContext? _navContext;
+
+  /// Regista o contexto de navegação (chamado pelo `TareqoApp`).
+  static void attachNavigator(BuildContext context) {
+    _navContext = context;
+  }
+
   /// Inicia o listener de deep links (chamado no [AuthGate]). Idempotente.
   ///
   /// Todo o corpo é protegido: em testes de widget o plugin não tem
@@ -63,26 +74,36 @@ abstract final class DeepLinkHandler {
     try {
       final appLinks = _appLinks ??= AppLinks();
 
-      // Cold start: o app foi ABERTO pelo link (getInitialLink). Entrega a
-      // URI ao gotrue para concluir a confirmação/exchange do PKCE —
-      // apenas se for callback legítimo (auditoria 2026-08, V12).
+      // Cold start: o app foi ABERTO pelo link (getInitialLink).
       final initialUri = await appLinks.getInitialLink();
-      if (initialUri != null && isAuthCallbackUri(initialUri)) {
-        await Supabase.instance.client.auth.getSessionFromUrl(initialUri);
+      if (initialUri != null) {
+        if (isAuthCallbackUri(initialUri)) {
+          // Auth (gotrue/PKCE) — apenas callback legítimo.
+          await Supabase.instance.client.auth.getSessionFromUrl(initialUri);
+        } else if (_navContext != null) {
+          // U-09: deep link interno `tareqo://go/<rota>` — navega sem sair.
+          AppRoutes.handleGoDeepLink(_navContext!, initialUri);
+        }
       }
 
       // Warm start: o app já estava aberto e o link foi tocado.
       appLinks.uriLinkStream.listen(
         (uri) async {
-          if (!isAuthCallbackUri(uri)) return;
-          try {
-            await Supabase.instance.client.auth.getSessionFromUrl(uri);
-          } catch (error, stackTrace) {
-            CrashReporting.capture(
-              error,
-              stackTrace,
-              hint: 'Deep link de autenticação (stream)',
-            );
+          if (isAuthCallbackUri(uri)) {
+            try {
+              await Supabase.instance.client.auth.getSessionFromUrl(uri);
+            } catch (error, stackTrace) {
+              CrashReporting.capture(
+                error,
+                stackTrace,
+                hint: 'Deep link de autenticação (stream)',
+              );
+            }
+            return;
+          }
+          // U-09: link interno (não-auth) — navega se houver contexto.
+          if (_navContext != null) {
+            AppRoutes.handleGoDeepLink(_navContext!, uri);
           }
         },
         // Erro no STREAM em si (canal da plataforma): sem handler vira um

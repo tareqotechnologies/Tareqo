@@ -201,3 +201,20 @@ class TransactionsNotifier extends AsyncNotifier<List<FinancialTransaction>> {
     await future;
   }
 }
+
+/// Movimentações recortadas pelo PERÍODO selecionado — mesmo recorte do
+/// fluxo de caixa (ver [CashFlowPeriodStart.startOf]), para que a lista
+/// "Movimentos do período" acompanhe o seletor em vez de mostrar sempre o
+/// histórico completo.
+final periodTransactionsProvider =
+    Provider<AsyncValue<List<FinancialTransaction>>>((ref) {
+      final start = ref.watch(cashFlowPeriodProvider).startOf(AppClock.now());
+      return ref
+          .watch(transactionsProvider)
+          .whenData(
+            (all) => [
+              for (final transaction in all)
+                if (!transaction.date.isBefore(start)) transaction,
+            ],
+          );
+    });

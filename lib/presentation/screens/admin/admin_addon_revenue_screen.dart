@@ -264,11 +264,11 @@ class _AddOnRevenueTile extends StatelessWidget {
         children: [
           // ── Accent bar ──
           Container(
-            width: 4,
-            height: 40,
+            width: AppSpacing.xxs,
+            height: AppSpacing.xxxl,
             decoration: BoxDecoration(
               color: scheme.primary,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: AppRadius.microAll,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),

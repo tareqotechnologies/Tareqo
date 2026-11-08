@@ -45,6 +45,10 @@ abstract final class AppSpacing {
 
 /// Raios de canto do design system Signature.
 abstract final class AppRadius {
+  /// 2 — raio mínimo (handle de sheet, hairline). U-14: antes literal
+  /// `BorderRadius.circular(2)` espalhado por 18 ficheiros.
+  static const double microRadius = 2;
+
   /// 6 — badge pequeno, checkbox.
   static const double xs = 6;
 
@@ -65,6 +69,7 @@ abstract final class AppRadius {
 
   static const double full = 999;
 
+  static BorderRadius get microAll => BorderRadius.circular(microRadius);
   static BorderRadius get xsAll => BorderRadius.circular(xs);
   static BorderRadius get smAll => BorderRadius.circular(sm);
   static BorderRadius get mdAll => BorderRadius.circular(md);

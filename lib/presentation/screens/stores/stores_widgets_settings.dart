@@ -296,9 +296,8 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
           icon: Icons.support_agent_outlined,
           title: l10n.settingsSupportEntry,
           subtitle: l10n.settingsSupportEntryHint,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => const SupportScreen()),
-          ),
+          // U-09: rota nomeada (SupportScreen via AppRoutes.support).
+          onTap: () => AppNavigator.push(context, AppRoutes.support),
         ),
       ],
     );

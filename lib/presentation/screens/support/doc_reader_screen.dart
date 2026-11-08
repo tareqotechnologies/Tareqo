@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../navigation/app_routes.dart';
 
 /// Documentos de suporte embutidos no app (assets) — os MESMOS markdowns de
 /// `docs/`, empacotados para leitura OFFLINE no ecrã Ajuda. O asset é
@@ -122,11 +123,9 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                 _ => null,
               };
               if (target != null && target != widget.document) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => DocReaderScreen(document: target),
-                  ),
-                );
+                AppNavigator.pushWith(context, AppRoutes.docReader, {
+                  'document': target,
+                });
               }
             },
             styleSheet: MarkdownStyleSheet(
