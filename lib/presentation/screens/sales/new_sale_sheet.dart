@@ -678,7 +678,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
           itemCount: _itemCount,
           isSubmitting: _isSubmitting,
           error: _error,
-          onConfirm: _cart.isEmpty || _isSubmitting ? null : _confirm,
+          onConfirm: _cart.isEmpty || _totalCents == 0 || _isSubmitting ? null : _confirm,
         ),
       ],
     );
@@ -1160,7 +1160,7 @@ class _Footer extends StatelessWidget {
           ],
           const SizedBox(height: 8),          // Botão confirmar: gradiente laranja estilo Apple.
           InkWell(
-            onTap: isSubmitting ? null : onConfirm,
+            onTap: totalCents == 0 || isSubmitting ? null : onConfirm,
             borderRadius: BorderRadius.circular(AppRadius.md),
             child: Ink(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),

@@ -5,14 +5,14 @@ import '../../core/theme/app_colors.dart';
 import '../../domain/entities/product.dart';
 import 'status_chip.dart';
 
-/// Cor do selo do TIPO estrutural do produto (Fase 1) — todos dentro da
-/// paleta RE2 (petróleo/slate/terracota/cinza quente), sem cor fora do
-/// sistema.
+/// Cores dos selos de categoria de produto (modo escuro otimizado).
+/// Revenda: cinza; Produzido: laranja; Composto: azul/roxo.
+/// Utilizadas nos selos/badges ao lado dos produtos.
 Color productTypeColor(ProductType type) => switch (type) {
   ProductType.rawMaterial => AppColors.accentOrangeSoft,
-  ProductType.resale => AppColors.accentOrangeSoft,
-  ProductType.manufactured => AppColors.lightPrimary,
-  ProductType.composite => AppColors.accentOrange,
+  ProductType.resale => AppColors.categoryResale,       // gray 300
+  ProductType.manufactured => AppColors.categoryProduzido, // orange accent
+  ProductType.composite => AppColors.categoryComposto,     // violet 400
   ProductType.packaging => AppColors.lightSurfaceSecondary,
 };
 

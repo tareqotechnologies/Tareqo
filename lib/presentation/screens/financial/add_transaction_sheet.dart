@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/ids.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/utils/money.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../../domain/usecases/add_financial_transaction_use_case.dart';
@@ -131,8 +132,15 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SheetHeader(title: l10n.financialAddTitle),
+              SheetHeader(
+                title: l10n.financialAddTitle,
+                subtitle:
+                    '${l10n.periodToday} · 0 · ' +
+                        Formatters.currency(0),
+              ),
               // Seção: Tipo — pílulas estilo Apple.
+              // Cores laranja padronizadas (igual módulo vendas)
+              // Use AppColors.accentOrange para ações principais e destaque
               SheetSection(
                 icon: Icons.swap_vert,
                 title: l10n.financialAddTitle,

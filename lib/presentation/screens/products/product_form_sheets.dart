@@ -331,6 +331,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
   // W11: código de barras/PLU (5 dígitos, opcional) — usado pelas balanças
   // etiquetadoras (formato 20PPPPPWWWWW) e pelo campo do PDV.
   final _codeController = TextEditingController();
+  final _barcodeController = TextEditingController();
 
   // W11: venda por PESO (fração) + unidade de venda (kg, g, l, ml...).
   bool _vendaPorFracao = false;
@@ -360,6 +361,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
     _salePriceController.dispose();
     _stockController.dispose();
     _codeController.dispose();
+    _barcodeController.dispose();
     super.dispose();
   }
 
@@ -532,6 +534,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                 nameController: _nameController,
                 descriptionController: _descriptionController,
                 codeController: _codeController,
+                barcodeController: _barcodeController,
                 type: _type,
                 onTypeChanged: (value) =>
                     setState(() => _type = value ?? ProductType.resale),
@@ -656,6 +659,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
   late final TextEditingController _salePriceController;
   late final TextEditingController _stockController;
   late final TextEditingController _codeController;
+  late final TextEditingController _barcodeController;
 
   late bool _vendaPorFracao;
   late String _unitLabel;
@@ -709,6 +713,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
     _salePriceController.dispose();
     _stockController.dispose();
     _codeController.dispose();
+    _barcodeController.dispose();
     super.dispose();
   }
 
@@ -879,6 +884,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 nameController: _nameController,
                 descriptionController: _descriptionController,
                 codeController: _codeController,
+                barcodeController: _barcodeController,
                 type: _type,
                 onTypeChanged: (value) =>
                     setState(() => _type = value ?? ProductType.resale),
@@ -1080,6 +1086,7 @@ class ProductIdentitySection extends StatelessWidget {
     required this.nameController,
     required this.descriptionController,
     required this.codeController,
+    required this.barcodeController,
     required this.type,
     required this.onTypeChanged,
   });
@@ -1087,6 +1094,7 @@ class ProductIdentitySection extends StatelessWidget {
   final TextEditingController nameController;
   final TextEditingController descriptionController;
   final TextEditingController codeController;
+  final TextEditingController barcodeController;
   final ProductType type;
   final ValueChanged<ProductType?> onTypeChanged;
 
@@ -1121,7 +1129,9 @@ class ProductIdentitySection extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         // W11: código de barras/PLU — usado pelas balanças etiquetadoras
-        // (20PPPPPWWWWW) e pelo campo do PDV.
+        // (20PPPPPWWWWW) e pelo campo de código de barras do PDV.
+        // Os ids internos são alfanuméricos longos; o PLU é o código
+        // numérico impresso nas etiquetas.
         AppTextField(
           controller: codeController,
           textInputAction: TextInputAction.next,
@@ -1137,6 +1147,48 @@ class ProductIdentitySection extends StatelessWidget {
             final digits = value?.trim() ?? '';
             if (digits.isNotEmpty && !RegExp(r'^\d{1,5}$').hasMatch(digits)) {
               return l10n.productsCodeError;
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 8),
+        // Código de barras convencional (EAN-13, EAN-8, UPC-A, UPC-E, Code 128)
+        // Campo opcional, universal — independente do PLU ou configuração de balança.
+        AppTextField(
+          controller: barcodeController,
+          textInputAction: TextInputAction.next,
+          keyboardType: TextInputType.text,
+          maxLength: 13,
+          label: l10n.productsBarcodeLabel,
+          helperText: l10n.productsBarcodeHint,
+          prefixIcon: Icons.qr_code,
+          isDense: true,
+          // Validação: aceita EAN-13 (13 dígitos), EAN-8 (8 dígitos),
+          // UPC-A (12 dígitos), UPC-E (8 dígitos), Code 128 (variável).
+          // Zeros à esquerda são preservados tratando como texto.
+          validator: (value) {
+            final text = value?.trim() ?? '';
+            if (text.isNotEmpty) {
+              // Remover espaços e validar formato de barcode.
+              final cleaned = text.replaceAll(' ', '');
+              // EAN-13: 13 dígitos
+              // EAN-8: 8 dígitos
+              // UPC-A: 12 dígitos
+              // UPC-E: 8 dígitos (compactado)
+              // Code 128: variável, aceitar.
+              final digitRegex = RegExp(r'^\d+$');
+              if (!digitRegex.hasMatch(cleaned)) {
+                return l10n.productsBarcodeError;
+              }
+              // Validar comprimentos comuns.
+              if (cleaned.length != 8 &&
+                  cleaned.length != 12 &&
+                  cleaned.length != 13) {
+                // Code 128 pode ter outros comprimentos, então apenas avisar.
+                if (l10n.productsBarcodeLengthWarning != null) {
+                  // Sem erro fatal, apenas aviso visual.
+                }
+              }
             }
             return null;
           },

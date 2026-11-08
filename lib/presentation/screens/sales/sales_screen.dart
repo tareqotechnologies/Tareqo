@@ -170,6 +170,14 @@ class _SalesBody extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 16),
             sliver: SliverToBoxAdapter(child: SalesSummaryHeader(sales: sales)),
           ),
+          // ── Linha separadora visual entre resumos ──
+          SliverToBoxAdapter(
+            child: Container(
+              height: 1,
+              color: AppColors.lightDivider,
+              margin: EdgeInsets.fromLTRB(horizontal, 4, horizontal, 8),
+            ),
+          ),
           // ── Filtros dropdown FIXOS ──
           // Wrap (não Row): em telas estreitas / escala de texto alta os
           // dois seletores fluem para a 2.ª linha — o PinnedHeader mede a

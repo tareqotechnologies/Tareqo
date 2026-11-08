@@ -172,6 +172,7 @@ abstract final class AppColors {
 
   /// Alerta escuro (warning 8.28:1). Mantém o nome `darkAccentOrange`.
   static const Color darkAccentOrange = Color(0xFFFF9F0A);
+  static const Color accentOrangeDark = Color(0xFFB45309);
 
   /// Fundo suave de alerta escuro.
   static const Color darkAccentOrangeSoft = Color(0xFF3A260D);
@@ -229,11 +230,15 @@ abstract final class AppColors {
     if (status == 'approved' || status == 'aprovado') return successNeutral;
     if (status == 'rejected' || status == 'rejeitado') return errorNeutral;
     if (status == 'pending' || status == 'pendente') return accentOrange;
+
     return lightTextSecondary;
   }
-
-  /// Variante por brilho (mantida para compatibilidade).
-  // blue removido da API de compatibilidade.
+  /// Cores das etiquetas de categoria de produto.
+  /// Revenda: cinza; Produzido: laranja; Composto: azul/roxo.
+  /// Utilizadas nos selos/badges ao lado dos produtos.
+  static const Color categoryResale = Color(0xFF6B7280);       // gray 300
+  static const Color categoryProduzido = Color(0xFFFF9F0A);      // orange accent
+  static const Color categoryComposto = Color(0xFF8B5CF6);       // violet 400
   static Color getIncomeLight(ColorScheme scheme, Brightness brightness) {
     return brightness == Brightness.light ? lightSurfaceSecondary : darkSurfaceSecondary;
   }

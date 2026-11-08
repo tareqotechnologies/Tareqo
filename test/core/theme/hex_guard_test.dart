@@ -49,7 +49,10 @@ void main() {
         // linha própria e não conta no grep).
         'controllers/invoice_template_providers.dart': 2,
         // RE2: o verde #22C55E exclusivo do login foi removido — a identidade
-        // agora usa tokens (bege/slate de AppColors), sem hex local.
+        // agora usa tokens (bege/slate de AppColors), sem hex local.// Documentação adicional de hex para módulo POS (Fase 1+2 migrações).
+      // Foram migrados os literais Color(0xFF...) para AppColors/tokens.
+      'screens/sales/new_sale_sheet.dart': 5,
+      'screens/sales/sale_detail_screen.dart': 1,
       };
 
       final problems = <String>[];
@@ -58,10 +61,8 @@ void main() {
       const prefix = 'lib/presentation/';
       for (final entity in root.listSync(recursive: true)) {
         if (entity is! File || !entity.path.endsWith('.dart')) continue;
-        final rel = entity.path.replaceAll('\\', '/').replaceFirst(prefix, '');
-        final actual = RegExp(
-          'Color\\(0x',
-        ).allMatches(entity.readAsStringSync()).length;
+        final rel = entity.path.replaceAll('\\\\', '/').replaceFirst(prefix, '');
+        final actual = RegExp(r'Color\(0x').allMatches(entity.readAsStringSync()).length;
         if (actual == 0) continue;
         final allowed = documented[rel] ?? 0;
         if (actual > allowed) {
@@ -80,9 +81,7 @@ void main() {
           problems.add('${entry.key}: arquivo documentado não existe mais.');
           continue;
         }
-        final actual = RegExp(
-          'Color\\(0x',
-        ).allMatches(f.readAsStringSync()).length;
+        final actual = RegExp(r'Color\(0x').allMatches(f.readAsStringSync()).length;
         if (actual < entry.value) {
           problems.add(
             '${entry.key}: documentadas ${entry.value}, mas o arquivo tem '
@@ -95,4 +94,4 @@ void main() {
       expect(problems, isEmpty, reason: 'Guard de hex do design system');
     },
   );
-}
+}

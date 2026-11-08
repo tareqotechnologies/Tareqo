@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../domain/entities/purchase.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
@@ -77,12 +78,13 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
       title: l10n.purchasesTitle,
       useSafeArea: false,
       floatingActionButton: hasPurchases
-          // FAB circular (design system — igual ao "Novo produto"): só o
-          // sinal de +, com tooltip — o rótulo nunca é cortado pelo círculo.
+          // FAB minimalista — usando cor da identidade do design system.
           ? FloatingActionButton(
               heroTag: 'fab-purchases',
               onPressed: _openNewPurchase,
               tooltip: l10n.purchasesAddNew,
+              backgroundColor: AppColors.accentOrangeDark,
+              foregroundColor: Colors.white,
               child: const Icon(Icons.add),
             )
           : null,

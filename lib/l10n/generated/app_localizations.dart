@@ -3898,6 +3898,30 @@ abstract class AppLocalizations {
   /// **'Código inválido: use até 5 dígitos.'**
   String get productsCodeError;
 
+  /// No description provided for @productsBarcodeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de barras'**
+  String get productsBarcodeLabel;
+
+  /// No description provided for @productsBarcodeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'EAN-13, EAN-8, UPC-A, UPC-E, Code 128'**
+  String get productsBarcodeHint;
+
+  /// No description provided for @productsBarcodeError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de barras inválido: digite dígitos válidos (8, 12 ou 13).'**
+  String get productsBarcodeError;
+
+  /// No description provided for @productsBarcodeLengthWarning.
+  ///
+  /// In pt, this message translates to:
+  /// **'O comprimento do código de barras deve ser de 8, 12 ou 13 dígitos.'**
+  String get productsBarcodeLengthWarning;
+
   /// No description provided for @productsWeighLabel.
   ///
   /// In pt, this message translates to:

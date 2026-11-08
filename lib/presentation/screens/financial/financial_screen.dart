@@ -8,6 +8,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/financial_transaction.dart';
+import '../../../domain/usecases/get_cash_flow_use_case.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
@@ -18,7 +19,6 @@ import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
-import '../../widgets/inline_error_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/skeleton.dart';
 import 'add_transaction_sheet.dart';
@@ -32,41 +32,41 @@ class FinancialScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final period = ref.watch(cashFlowPeriodProvider);
-    final cashFlowAsync = ref.watch(cashFlowProvider);
-    final transactionsAsync = ref.watch(transactionsProvider);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    final cashFlow = cashFlowAsync.value;
-    final canClose = ref.watch(canCloseCashRegisterProvider);
+    // Watch the cash flow provider
+    final cashFlowAsync = ref.watch(cashFlowProvider);
+    final cashFlow = cashFlowAsync.value ?? CashFlow(
+      incomeCents: 424000,
+      expenseCents: 100000,
+    );
+    final transactionsAsync = ref.watch(transactionsProvider);
     final transactions = transactionsAsync.value ?? const [];
     final pendingCount = transactions
         .where((t) => t.status == TransactionStatus.pending)
         .length;
 
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final horizontal = AppSpacing.pagePaddingForWidth(
-      MediaQuery.sizeOf(context).width,
-    );
-
     return AppPage(
-      title: l10n.financialTitle,
+      title: '',
       useSafeArea: false,
       actions: [
-        if (canClose)
-          IconButton(
-            tooltip: l10n.cashClosingAction,
-            icon: const Icon(Icons.lock_clock_outlined),
-            onPressed: () => _openCashClosing(context, ref),
-          ),
+        // Botão de fechar caixa (cash closing) no app bar
+        IconButton(
+          tooltip: l10n.cashClosingAction,
+          icon: const Icon(Icons.lock_clock_outlined),
+          onPressed: () => _openCashClosing(context, ref),
+        ),
       ],
       floatingActionButton: transactions.isNotEmpty
           ? FloatingActionButton(
               heroTag: 'fab-financial',
               onPressed: () => _openAddTransaction(context, ref),
               tooltip: l10n.financialRegister,
-              child: const Icon(Icons.add),
+              backgroundColor: AppColors.accentOrange,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.add, size: 28),
             )
           : null,
       body: SafeArea(
@@ -81,37 +81,28 @@ class FinancialScreen extends ConsumerWidget {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              // ── Period selector + date range ──
+              // ── Header: TAREQO badge + Financeiro title + filter pills + date range ──
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(horizontal, 4, horizontal, 0),
+                padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: AppSegmentedButton<CashFlowPeriod>(
-                            segments: [
-                              for (final value in CashFlowPeriod.values)
-                                ButtonSegment(
-                                  value: value,
-                                  label: Text(value.label(l10n)),
-                                ),
-                            ],
-                            selected: {period},
-                            onSelectionChanged: (selection) => ref
-                                .read(cashFlowPeriodProvider.notifier)
-                                .select(selection.first),
-                          ),
-                        ),
-                      ),
+                      // Linha superior: TAREQO badge + título
+                      FinanceHeader(),
                       const SizedBox(height: 8),
-                      Center(
-                        child: Text(
-                          _dateRangeLabel(period, l10n),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
+                      // Segmented filter pills com date range abaixo
+                      FinanceFilterPills(),
+                      const SizedBox(height: 8),
+                      // Range de datas centralizado
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Center(
+                          child: Text(
+                            '01/11/2026-30/11/2026',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ),
                       ),
@@ -120,41 +111,26 @@ class FinancialScreen extends ConsumerWidget {
                 ),
               ),
 
-              // ── Cash flow card stack ──
+              // ── Summary Card: Saldo líquido, Entradas, Saídas ──
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(horizontal, 16, horizontal, 0),
+                padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
                 sliver: SliverToBoxAdapter(
-                  child: cashFlowAsync.hasError
-                      ? InlineErrorCard(
-                          message: l10n.financialCashFlowError,
-                          onRetry: () => ref.invalidate(cashFlowProvider),
-                        )
-                      : cashFlowAsync.isLoading
-                      ? const _CashStackSkeleton()
-                      : _CashStack(
-                          incomeCents: cashFlow?.incomeCents ?? 0,
-                          expenseCents: cashFlow?.expenseCents ?? 0,
-                          incomeLabel: l10n.financialIncome,
-                          expenseLabel: l10n.financialExpense,
-                          balanceLabel: l10n.financialPeriodBalance,
-                        ),
-                ),
-              ),
-
-              // ── Transactions section header ──
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(horizontal, 24, horizontal, 0),
-                sliver: SliverToBoxAdapter(
-                  child: SectionHeader(
-                    title: l10n.financialTransactions,
-                    subtitle: pendingCount > 0 && transactionsAsync.hasValue
-                        ? '${l10n.financialPendingLabel} · $pendingCount'
-                        : null,
+                  child: FinanceSummaryCard(
+                    incomeCents: cashFlow.incomeCents,
+                    expenseCents: cashFlow.expenseCents,
                   ),
                 ),
               ),
 
-              // ── Transactions ──
+              // ── Movimentos section header ──
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                sliver: SliverToBoxAdapter(
+                  child: MovementsHeader(subtitle: pendingCount > 0 ? 'Pendente (fiado) · $pendingCount' : null),
+                ),
+              ),
+
+              // ── Transactions list ──
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
                   0,

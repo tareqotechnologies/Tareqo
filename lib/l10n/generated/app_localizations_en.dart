@@ -2181,6 +2181,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsCodeError => 'Invalid code: use up to 5 digits.';
 
   @override
+  String get productsBarcodeLabel => 'Barcode';
+
+  @override
+  String get productsBarcodeHint => 'EAN-13, EAN-8, UPC-A, UPC-E, Code 128';
+
+  @override
+  String get productsBarcodeError =>
+      'Invalid barcode: enter valid digits (8, 12, or 13).';
+
+  @override
+  String get productsBarcodeLengthWarning =>
+      'Barcode length should be 8, 12, or 13 digits.';
+
+  @override
   String get productsWeighLabel => 'Sell by weight (fraction)';
 
   @override

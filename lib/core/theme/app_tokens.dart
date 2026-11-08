@@ -238,7 +238,8 @@ abstract final class IconTone {
 
   /// Laranja usado para indicar alertas estoque, pendências e destaques.
   static const Color accentOrange = Color(0xFFF28C00);
-  static const Color accentOrangeDark = Color(0xFF1A7A00);
+  /// Laranja escuro para gradiente do botão Confirmar no POS.
+  static const Color accentOrangeDark = Color(0xFFB45309);
 
   /// Cinza neutro para ícones secundários.
   static const Color slate = Color(0xFF3D4D55);

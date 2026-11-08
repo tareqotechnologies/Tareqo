@@ -2219,6 +2219,20 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsCodeError => 'Código inválido: use até 5 dígitos.';
 
   @override
+  String get productsBarcodeLabel => 'Código de barras';
+
+  @override
+  String get productsBarcodeHint => 'EAN-13, EAN-8, UPC-A, UPC-E, Code 128';
+
+  @override
+  String get productsBarcodeError =>
+      'Código de barras inválido: digite dígitos válidos (8, 12 ou 13).';
+
+  @override
+  String get productsBarcodeLengthWarning =>
+      'O comprimento do código de barras deve ser de 8, 12 ou 13 dígitos.';
+
+  @override
   String get productsWeighLabel => 'Venda por peso (fração)';
 
   @override

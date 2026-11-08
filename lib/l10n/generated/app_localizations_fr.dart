@@ -2223,6 +2223,20 @@ class AppLocalizationsFr extends AppLocalizations {
       'Code invalide : utilisez jusqu\'à 5 chiffres.';
 
   @override
+  String get productsBarcodeLabel => 'Code-barres';
+
+  @override
+  String get productsBarcodeHint => 'EAN-13, EAN-8, UPC-A, UPC-E, Code 128';
+
+  @override
+  String get productsBarcodeError =>
+      'Code-barres invalide : saisissez des chiffres valides (8, 12 ou 13).';
+
+  @override
+  String get productsBarcodeLengthWarning =>
+      'La longueur du code-barres doit être de 8, 12 ou 13 chiffres.';
+
+  @override
   String get productsWeighLabel => 'Vente au poids (fraction)';
 
   @override
