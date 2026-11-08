@@ -715,6 +715,8 @@ class _ActivityItem {
     required this.iconBackground,
     required this.iconColor,
     this.amount,
+    // ignore: unused_element_parameter — cor explícita é opcional;
+    // quando null, _ActivityRow resolve via ThemeData (U-02).
     this.amountColor,
     this.badge,
     this.badgeColor,
@@ -1062,15 +1064,15 @@ class _ActivityRow extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     // Cores tema-aware de fallback (U-02): factories sem cor explícita
-    // herdam do scheme — entrada (+) = income, saída (-) = expense,
-    // restante = primary.
+    // herdam do ThemeData (income/expense via AppColorsTheme) —entrada (+)
+    // = income, saída (−) = expense, restante = scheme.primary.
     final amountFg =
         item.amountColor ??
         (item.amount != null
             ? (item.amount!.startsWith('+')
-                  ? scheme.income
+                  ? theme.income
                   : item.amount!.startsWith('-')
-                      ? scheme.expense
+                      ? theme.expense
                       : scheme.primary)
             : item.badgeColor);
 

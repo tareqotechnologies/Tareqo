@@ -37,7 +37,6 @@ import '../../widgets/list_skeleton.dart';
 import '../../widgets/status_chip.dart';
 import '../../widgets/store_scoped_content.dart';
 import '../auth/change_password_sheet.dart';
-import '../support/support_screen.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../domain/repositories/i_employee_account_service.dart';

@@ -398,7 +398,7 @@ class _PlanDetailSheet extends ConsumerWidget {
                   // Accent bar
                   Container(
                     width: AppSpacing.xxs,
-                    height: AppSpacing.avatarSm,
+                    height: AppSpacing.xxxl,
                     decoration: BoxDecoration(
                       color: accent,
                       borderRadius: AppRadius.microAll,

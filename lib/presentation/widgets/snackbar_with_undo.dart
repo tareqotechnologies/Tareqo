@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_tokens.dart';
+
 /// Duração da barra — e do countdown: 4s, acima do padrão de ~3s de
 /// leitura; o tempo extra É o custo da segunda chance do undo.
 const Duration _undoDuration = Duration(seconds: 4);

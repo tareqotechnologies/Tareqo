@@ -16,7 +16,6 @@ import '../credit/add_debt_sheet.dart';
 import '../credit/debts_screen.dart';
 import '../customers/customers_screen.dart';
 import '../dashboard/dashboard_screen.dart';
-import '../dashboard/notifications_screen.dart';
 import '../financial/add_transaction_sheet.dart';
 import '../financial/financial_screen.dart';
 import '../../controllers/customers_providers.dart';

@@ -417,7 +417,7 @@ class _CashStack extends StatelessWidget {
                         icon: Icons.arrow_downward_rounded,
                         color: theme.income,
                         label: incomeLabel,
-                        value: Formatters.currency(incomeCents),
+                        value: Formatters.signedAmount(incomeCents),
                       ),
                     ),
                     VerticalDivider(
@@ -430,7 +430,7 @@ class _CashStack extends StatelessWidget {
                         icon: Icons.arrow_upward_rounded,
                         color: theme.expense,
                         label: expenseLabel,
-                        value: Formatters.currency(expenseCents),
+                        value: Formatters.signedAmount(-expenseCents),
                       ),
                     ),
                   ],
@@ -475,10 +475,15 @@ class _CashStatItem extends StatelessWidget {
               child: Icon(icon, size: 14, color: color),
             ),
             const SizedBox(width: AppSpacing.xs),
-            Text(
-              label,
-              style: AppTypography.labelSmall.copyWith(
-                color: scheme.onSurfaceVariant,
+            // U-03: escala 2.0 sem clamp — rótulo encolhe/trunca.
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.labelSmall.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],

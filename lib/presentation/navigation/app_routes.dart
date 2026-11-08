@@ -20,7 +20,6 @@ import '../screens/credit/debts_screen.dart';
 import '../screens/customers/customers_screen.dart';
 
 import '../screens/dashboard/notifications_screen.dart';
-import '../screens/financial/financial_screen.dart';
 import '../screens/products/product_list_screen.dart';
 import '../screens/production/production_screen.dart';
 import '../screens/purchases/purchases_screen.dart';

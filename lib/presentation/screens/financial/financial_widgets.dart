@@ -101,24 +101,30 @@ class TransactionCard extends StatelessWidget {
                         ),
                         if (transaction.status == TransactionStatus.pending) ...[
                           const SizedBox(width: AppSpacing.xs),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xxs,
-                              vertical: AppSpacing.micro,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.warning.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(AppRadius.xs),
-                              border: Border.all(
-                                color: theme.warning.withValues(alpha: 0.2),
+                          // U-03: sem clamp global, a escala 2.0 precisa de
+                          // Flexible+ellipsis também no selo "pendente".
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.xxs,
+                                vertical: AppSpacing.micro,
                               ),
-                            ),
-                            child: Text(
-                              context.l10n.financialPendingLabel.toUpperCase(),
-                              style: AppTypography.labelSmall.copyWith(
-                                color: theme.warning,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.5,
+                              decoration: BoxDecoration(
+                                color: theme.warning.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(AppRadius.xs),
+                                border: Border.all(
+                                  color: theme.warning.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: Text(
+                                context.l10n.financialPendingLabel.toUpperCase(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: theme.warning,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
                           ),

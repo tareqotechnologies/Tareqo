@@ -495,7 +495,7 @@ class _AuditTile extends StatelessWidget {
             // ── Color accent dot ──
             Container(
               width: AppSpacing.xxs,
-              height: AppSpacing.avatarSm,
+              height: AppSpacing.xxxl,
               decoration: BoxDecoration(
                 color: accent,
                 borderRadius: AppRadius.microAll,
@@ -671,7 +671,7 @@ class _AuditDetailSheet extends StatelessWidget {
             // ── Handle ──
             Center(
               child: Container(
-                width: AppSpacing.avatarSm,
+                width: AppSpacing.huge,
                 height: AppSpacing.xxs,
                 margin: const EdgeInsets.only(bottom: AppSpacing.md),
                 decoration: BoxDecoration(
