@@ -736,10 +736,10 @@ class _ActivityItem {
           '${_timeLabel(sale.dateTime, l10n)}',
       dateTime: sale.dateTime,
       icon: Icons.north_east_rounded,
-      // Círculo tingido (não sólido) — igual ao padrão IconTone dos
-      // restantes itens; evita branco-sobre-laranja (U-02).
-      iconBackground: IconTone.darkBackground(AppColors.accentOrange),
-      iconColor: IconTone.lightForeground(AppColors.accentOrange),
+      // Ícone padronizado (U-24): fundo sólido laranja #FF6A2A
+      // oficial + ícone gelo — nunca HSL derivado.
+      iconBackground: AppColors.brandOrange,
+      iconColor: AppColors.softWhite,
       amount: Formatters.signedAmount(sale.totalAmountCents),
       // amountColor resolvido como scheme.primary em _ActivityRow
       // quando null (antes: AppColors.accentOrange fixo — claro em
@@ -760,8 +760,9 @@ class _ActivityItem {
     ),
     dateTime: purchase.dateTime,
     icon: Icons.inventory_2_outlined,
-    iconBackground: IconTone.darkBackground(IconTone.slate),
-    iconColor: IconTone.lightForeground(IconTone.slate),
+    // Ícone padronizado (U-24): fundo laranja oficial.
+    iconBackground: AppColors.brandOrange,
+    iconColor: AppColors.softWhite,
     amount: '+${Quantity.format(item.quantity)}',
     // Antes Colors.white incondicional — invisível sobre surface clara
     // (U-02). Null → _ActivityRow usa scheme.income (tema-aware).
@@ -778,8 +779,9 @@ class _ActivityItem {
       details: '${debt.personName} · ${_timeLabel(paidAt, l10n)}',
       dateTime: paidAt,
       icon: Icons.payments_outlined,
-      iconBackground: IconTone.darkBackground(IconTone.amber),
-      iconColor: IconTone.lightForeground(IconTone.amber),
+      // Ícone padronizado (U-24): fundo laranja oficial.
+      iconBackground: AppColors.brandOrange,
+      iconColor: AppColors.softWhite,
       amount: Formatters.signedAmount(debt.amountCents),
       // amountColor null → scheme.primary em _ActivityRow (U-02).
       dashedBorder: true,
@@ -795,8 +797,9 @@ class _ActivityItem {
     details: _timeLabel(transaction.date, l10n),
     dateTime: transaction.date,
     icon: Icons.south_west_rounded,
-    iconBackground: IconTone.darkBackground(IconTone.errorNeutral),
-    iconColor: IconTone.lightForeground(IconTone.errorNeutral),
+    // Ícone padronizado (U-24): fundo laranja oficial.
+    iconBackground: AppColors.brandOrange,
+    iconColor: AppColors.softWhite,
     amount: Formatters.signedAmount(-transaction.amountCents),
     // amountColor null → scheme.expense via _ActivityRow (U-02).
     onTap: onTap,
@@ -813,8 +816,9 @@ class _ActivityItem {
     ),
     dateTime: AppClock.now(),
     icon: Icons.warning_amber_rounded,
-    iconBackground: IconTone.darkBackground(IconTone.amber),
-    iconColor: IconTone.lightForeground(IconTone.amber),
+    // Ícone padronizado (U-24): fundo laranja oficial.
+    iconBackground: AppColors.brandOrange,
+    iconColor: AppColors.softWhite,
     badge: l10n.dashboardAlertBadge,
     badgeColor: IconTone.amber,
     badgeBackground: IconTone.amber,
