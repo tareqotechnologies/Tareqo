@@ -97,14 +97,14 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   // Total do carrinho em CENTAVOS inteiros (W4 + W11): cada item é
   // `qtd(milésimos) × preço em centavos ~/ 1000` — soma exata.
   int get _totalCents => _cart.entries.fold<int>(
-        0,
-        (sum, entry) =>
-            sum +
-            Quantity.lineTotal(
-              entry.value,
-              _productById(entry.key)?.salePriceCents ?? 0,
-            ),
-      );
+    0,
+    (sum, entry) =>
+        sum +
+        Quantity.lineTotal(
+          entry.value,
+          _productById(entry.key)?.salePriceCents ?? 0,
+        ),
+  );
 
   /// Contagem de itens em UNIDADES (milésimos ÷ 1000) para exibição.
   int get _itemCount =>
@@ -679,7 +679,9 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
           itemCount: _itemCount,
           isSubmitting: _isSubmitting,
           error: _error,
-          onConfirm: _cart.isEmpty || _totalCents == 0 || _isSubmitting ? null : _confirm,
+          onConfirm: _cart.isEmpty || _totalCents == 0 || _isSubmitting
+              ? null
+              : _confirm,
         ),
       ],
     );
@@ -942,10 +944,7 @@ class _CartProductRow extends StatelessWidget {
 /// Pill do carrinho — resumo compacto em laranja: quantidade, produto,
 /// preço unitário e total da linha. Minimalista e sem poluir.
 class _CartPill extends StatelessWidget {
-  const _CartPill({
-    required this.product,
-    required this.quantity,
-  });
+  const _CartPill({required this.product, required this.quantity});
 
   final Product product;
   final int quantity;
@@ -1040,10 +1039,7 @@ class _CartPill extends StatelessWidget {
 ///
 /// Mostra o contador de itens e o total em laranja, sem altura fixa.
 class _CartSummary extends StatelessWidget {
-  const _CartSummary({
-    required this.itemCount,
-    required this.totalCents,
-  });
+  const _CartSummary({required this.itemCount, required this.totalCents});
 
   final int itemCount;
   final int totalCents;
@@ -1116,7 +1112,9 @@ class _Footer extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
-        border: Border(top: BorderSide(color: scheme.outlineVariant, width: 0.5)),
+        border: Border(
+          top: BorderSide(color: scheme.outlineVariant, width: 0.5),
+        ),
       ),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,

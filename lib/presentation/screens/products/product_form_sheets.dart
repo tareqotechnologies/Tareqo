@@ -18,9 +18,11 @@ import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_picker_field.dart';
+import '../../navigation/app_routes.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/barcode_scan_sheet.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/money_live_preview.dart';
 import '../../widgets/product_image.dart';
@@ -39,8 +41,8 @@ class _ProductPhotoPicker extends StatelessWidget {
   /// destrutivo nunca é só um tap longe do dado).
   static Future<bool> _confirmRemove(BuildContext context) async {
     final l10n = context.l10n;
-    final confirmed = await showConfirmDialog(context: 
-      context,
+    final confirmed = await showConfirmDialog(
+      context: context,
       title: l10n.productsPhotoRemove,
       message: l10n.productsPhotoRemoveConfirm,
       confirmLabel: l10n.commonDelete,
@@ -538,6 +540,15 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                 type: _type,
                 onTypeChanged: (value) =>
                     setState(() => _type = value ?? ProductType.resale),
+                onScanBarcode: () async {
+                  final code = await showBarcodeScanner(context);
+                  if (code != null && code.isNotEmpty) {
+                    final digits = code.replaceAll(' ', '').trim();
+                    _barcodeController.text = digits.isNotEmpty
+                        ? digits
+                        : code.trim();
+                  }
+                },
               ),
               const SizedBox(height: 16),
               // PREÇOS — compra e venda lado a lado.
@@ -888,6 +899,15 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 type: _type,
                 onTypeChanged: (value) =>
                     setState(() => _type = value ?? ProductType.resale),
+                onScanBarcode: () async {
+                  final code = await showBarcodeScanner(context);
+                  if (code != null && code.isNotEmpty) {
+                    final digits = code.replaceAll(' ', '').trim();
+                    _barcodeController.text = digits.isNotEmpty
+                        ? digits
+                        : code.trim();
+                  }
+                },
               ),
               const SizedBox(height: 16),
               // PREÇOS — compra e venda lado a lado.
@@ -1089,6 +1109,7 @@ class ProductIdentitySection extends StatelessWidget {
     required this.barcodeController,
     required this.type,
     required this.onTypeChanged,
+    this.onScanBarcode,
   });
 
   final TextEditingController nameController;
@@ -1097,6 +1118,10 @@ class ProductIdentitySection extends StatelessWidget {
   final TextEditingController barcodeController;
   final ProductType type;
   final ValueChanged<ProductType?> onTypeChanged;
+
+  /// Captura por câmera (QR/barcode) — abre o leitor e preenche o
+  /// campo de barcode; `null` = sem botão de scan.
+  final VoidCallback? onScanBarcode;
 
   @override
   Widget build(BuildContext context) {
@@ -1115,7 +1140,8 @@ class ProductIdentitySection extends StatelessWidget {
           label: l10n.loginNameLabel,
           prefixIcon: Icons.inventory_2_outlined,
           isDense: true,
-          // Validação: campo obrigatório; erro aparece abaixo do campo          validator: (value) => (value == null || value.trim().isEmpty)
+          // Validação: campo obrigatório; erro aparece abaixo do campo
+          validator: (value) => (value == null || value.trim().isEmpty)
               ? l10n.productsNameError
               : null,
         ),
@@ -1143,7 +1169,8 @@ class ProductIdentitySection extends StatelessWidget {
           // Helper/counter usam o helperStyle do tema (12) — 10 px saía da
           // escala e deixava a instrução do código quase ilegível.
           isDense: true,
-          // Validação: apenas 1-5 dígitos; erro abaixo do campo          validator: (value) {
+          // Validação: apenas 1-5 dígitos; erro abaixo do campo
+          validator: (value) {
             final digits = value?.trim() ?? '';
             if (digits.isNotEmpty && !RegExp(r'^\d{1,5}$').hasMatch(digits)) {
               return l10n.productsCodeError;
@@ -1162,6 +1189,13 @@ class ProductIdentitySection extends StatelessWidget {
           label: l10n.productsBarcodeLabel,
           helperText: l10n.productsBarcodeHint,
           prefixIcon: Icons.qr_code,
+          suffixIcon: onScanBarcode == null
+              ? null
+              : IconButton(
+                  icon: Icon(Icons.center_focus_strong),
+                  tooltip: l10n.productsBarcodeLabel,
+                  onPressed: onScanBarcode,
+                ),
           isDense: true,
           // Validação: aceita EAN-13 (13 dígitos), EAN-8 (8 dígitos),
           // UPC-A (12 dígitos), UPC-E (8 dígitos), Code 128 (variável).

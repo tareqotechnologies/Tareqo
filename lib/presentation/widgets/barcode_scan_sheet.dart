@@ -95,7 +95,10 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                       width: 240,
                       height: 240,
                       decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.softWhite, width: 3),
+                        border: Border.all(
+                          color: AppColors.softWhite,
+                          width: 3,
+                        ),
                         borderRadius: BorderRadius.circular(AppRadius.xxl),
                       ),
                     ),
@@ -105,7 +108,9 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                     right: 12,
                     child: IconButton.filled(
                       style: IconButton.styleFrom(
-                        backgroundColor: AppColors.surfaceGray.withValues(alpha: 0.54),
+                        backgroundColor: AppColors.surfaceGray.withValues(
+                          alpha: 0.54,
+                        ),
                       ),
                       icon: const Icon(Icons.close, color: AppColors.softWhite),
                       onPressed: () => Navigator.of(context).pop(),
