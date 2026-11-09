@@ -179,21 +179,16 @@ class _StaggeredListViewWithUniqueKeyState
         // Cada item tem seu próprio SlideTransition com base no controller.
         // O controller anima de 0 a 1 ao longo de 300 + itemCount*80ms.
         return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0.1, 0),
-            end: Offset.zero,
-          ).animate(
-            CurvedAnimation(
-              parent: _controller,
-              curve: Curves.easeOutCubic,
-            ),
-          ),
+          position: Tween<Offset>(begin: const Offset(0.1, 0), end: Offset.zero)
+              .animate(
+                CurvedAnimation(
+                  parent: _controller,
+                  curve: Curves.easeOutCubic,
+                ),
+              ),
           child: FadeTransition(
             opacity: Tween<double>(begin: 0, end: 1.0).animate(
-              CurvedAnimation(
-                parent: _controller,
-                curve: Curves.easeOutCubic,
-              ),
+              CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
             ),
             child: widget.itemBuilder(context, index),
           ),

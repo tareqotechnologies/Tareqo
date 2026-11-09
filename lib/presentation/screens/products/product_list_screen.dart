@@ -40,6 +40,14 @@ class ProductListScreen extends ConsumerStatefulWidget {
 
 class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   _AdvancedFilters _advanced = const _AdvancedFilters();
+  final TextEditingController _searchController = TextEditingController();
+  bool _searchOpen = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Future<void> _openFilterSheet() async {
     final result = await showAppSheet<_AdvancedFilters>(
@@ -47,12 +55,46 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       builder: (_) => _AdvancedFilterSheet(initial: _advanced),
     );
     if (result == null || !mounted) return;
-    setState(() => _advanced = result);
+    setState(() {
+      _advanced = result;
+      // O sheet também edita a busca — mantém o campo inline em sincronia.
+      _searchController.text = result.query;
+    });
   }
 
   void _clearFilters() {
     setState(() {
       _advanced = const _AdvancedFilters();
+      _searchController.clear();
+      _searchOpen = false;
+    });
+  }
+
+  void _toggleSearch() {
+    if (_searchOpen) {
+      _closeSearch();
+      return;
+    }
+    setState(() {
+      _searchOpen = true;
+      _searchController.text = _advanced.query;
+      _searchController.selection = TextSelection.collapsed(
+        offset: _searchController.text.length,
+      );
+    });
+  }
+
+  void _closeSearch() {
+    setState(() {
+      _searchOpen = false;
+      _searchController.clear();
+      _advanced = _advanced.copyWith(query: '');
+    });
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      _advanced = _advanced.copyWith(query: value.trim().toLowerCase());
     });
   }
 
@@ -73,6 +115,60 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     ref.invalidate(dashboardKpisProvider);
   }
 
+  /// Busca + filtros avançados + ordenação A-Z — a MESMA lista alimenta o
+  /// subtítulo (contagem visível) e as linhas.
+  List<Product> _applyFilters(List<Product> products) {
+    final q = _advanced.query;
+    return products.where((product) {
+        final matchesQuery =
+            q.isEmpty ||
+            product.name.toLowerCase().contains(q) ||
+            product.description.toLowerCase().contains(q) ||
+            product.code.toLowerCase().contains(q);
+        final matchesStatus = switch (_advanced.status) {
+          _ProductFilter.all => true,
+          _ProductFilter.lowStock =>
+            product.isActive &&
+                product.stockQuantity <
+                    Quantity.lowStockThresholdUnits * Quantity.milliFactor,
+          _ProductFilter.inactive => !product.isActive,
+        };
+        final matchesStockType =
+            _advanced.stockType == _StockTypeFilter.all ||
+            (_advanced.stockType == _StockTypeFilter.weight &&
+                product.vendaPorFracao) ||
+            (_advanced.stockType == _StockTypeFilter.unit &&
+                !product.vendaPorFracao);
+        // Fase 1: filtra pelo tipo estrutural do produto.
+        final matchesType =
+            _advanced.type == _ProductTypeFilter.all ||
+            product.type == _advanced.type.value;
+        final matchesAvailability =
+            _advanced.availability == _AvailabilityFilter.all ||
+            (_advanced.availability == _AvailabilityFilter.available &&
+                product.stockQuantity > 0 &&
+                product.isActive) ||
+            (_advanced.availability == _AvailabilityFilter.lowStock &&
+                product.isActive &&
+                product.stockQuantity <
+                    Quantity.lowStockThresholdUnits * Quantity.milliFactor) ||
+            (_advanced.availability == _AvailabilityFilter.outOfStock &&
+                product.stockQuantity <= 0);
+        final matchesPrice =
+            (_advanced.minPriceCents == null ||
+                product.salePriceCents >= _advanced.minPriceCents!) &&
+            (_advanced.maxPriceCents == null ||
+                product.salePriceCents <= _advanced.maxPriceCents!);
+        return matchesQuery &&
+            matchesStatus &&
+            matchesStockType &&
+            matchesType &&
+            matchesAvailability &&
+            matchesPrice;
+      }).toList()
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -84,21 +180,41 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final canManageProducts =
         ref.watch(currentAccessLevelProvider) != UserAccessLevel.employee;
 
+    final isFiltering = _advanced.hasAny;
+    final total = productsAsync.value?.length ?? 0;
+    // O subtítulo reflete o que está VISÍVEL na lista (não o total) quando
+    // há busca/filtros ativos.
+    final visibleCount = productsAsync.value == null
+        ? total
+        : _applyFilters(productsAsync.value!).length;
+
     return AppPage(
       title: l10n.appNavProducts,
-      subtitle: l10n.productsHeaderCount(productsAsync.value?.length ?? 0),
+      subtitle: isFiltering
+          ? l10n.productsFilteredCount(visibleCount)
+          : l10n.productsHeaderCount(total),
       actions: [
+        IconButton(
+          tooltip: l10n.productsSearchHint,
+          onPressed: _toggleSearch,
+          icon: const Icon(Icons.search_rounded),
+        ),
         IconButton(
           tooltip: l10n.productsFilterTooltip,
           onPressed: _openFilterSheet,
-          icon: const Icon(Icons.tune_rounded),
+          // Ponto de estado: filtros ativos ficam visíveis sem abrir a sheet.
+          icon: Badge(
+            isLabelVisible: isFiltering,
+            smallSize: 7,
+            backgroundColor: theme.colorScheme.primary,
+            child: const Icon(Icons.tune_rounded),
+          ),
         ),
       ],
       useSafeArea: false,
       // CTA único: sem produtos, o FAB some — o estado vazio traz o botão
       // de cadastro centralizado (mantendo a regra canManageProducts).
-      // FAB CIRCULAR verde (design system 2026 — igual ao app de
-      // referência, que mostra apenas o sinal de +).
+      // FAB sólido oficial: laranja #FF6A2A com ícone preto.
       floatingActionButton: canManageProducts
           ? FloatingActionButton(
               heroTag: 'fab-products',
@@ -115,7 +231,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           onRetry: () => ref.invalidate(productsProvider),
         ),
         data: (products) {
-          if (products.isEmpty) {
+          if (products.isEmpty && !isFiltering) {
             return EmptyState(
               icon: Icons.inventory_2_outlined,
               title: l10n.productsEmptyTitle,
@@ -125,137 +241,107 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
             );
           }
 
-          final q = _advanced.query;
-          final isFiltering = _advanced.hasAny;
-          final filtered =
-              products.where((product) {
-                final matchesQuery =
-                    q.isEmpty ||
-                    product.name.toLowerCase().contains(q) ||
-                    product.description.toLowerCase().contains(q) ||
-                    product.code.toLowerCase().contains(q);
-                final matchesStatus = switch (_advanced.status) {
-                  _ProductFilter.all => true,
-                  _ProductFilter.lowStock =>
-                    product.isActive &&
-                        product.stockQuantity <
-                            Quantity.lowStockThresholdUnits *
-                                Quantity.milliFactor,
-                  _ProductFilter.inactive => !product.isActive,
-                };
-                final matchesStockType =
-                    _advanced.stockType == _StockTypeFilter.all ||
-                    (_advanced.stockType == _StockTypeFilter.weight &&
-                        product.vendaPorFracao) ||
-                    (_advanced.stockType == _StockTypeFilter.unit &&
-                        !product.vendaPorFracao);
-                // Fase 1: filtra pelo tipo estrutural do produto.
-                final matchesType =
-                    _advanced.type == _ProductTypeFilter.all ||
-                    product.type == _advanced.type.value;
-                final matchesAvailability =
-                    _advanced.availability == _AvailabilityFilter.all ||
-                    (_advanced.availability == _AvailabilityFilter.available &&
-                        product.stockQuantity > 0 &&
-                        product.isActive) ||
-                    (_advanced.availability == _AvailabilityFilter.lowStock &&
-                        product.isActive &&
-                        product.stockQuantity <
-                            Quantity.lowStockThresholdUnits *
-                                Quantity.milliFactor) ||
-                    (_advanced.availability == _AvailabilityFilter.outOfStock &&
-                        product.stockQuantity <= 0);
-                final matchesPrice =
-                    (_advanced.minPriceCents == null ||
-                        product.salePriceCents >= _advanced.minPriceCents!) &&
-                    (_advanced.maxPriceCents == null ||
-                        product.salePriceCents <= _advanced.maxPriceCents!);
-                return matchesQuery &&
-                    matchesStatus &&
-                    matchesStockType &&
-                    matchesType &&
-                    matchesAvailability &&
-                    matchesPrice;
-              }).toList()..sort(
-                (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-              );
+          final filtered = _applyFilters(products);
+          final hPad = AppSpacing.pagePaddingForWidth(
+            MediaQuery.sizeOf(context).width,
+          );
 
-          return RefreshIndicator(
-            onRefresh: () => ref.read(productsProvider.notifier).refresh(),
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                if (isFiltering)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        AppSpacing.pagePaddingForWidth(
-                          MediaQuery.sizeOf(context).width,
-                        ),
-                        4,
-                        AppSpacing.pagePaddingForWidth(
-                          MediaQuery.sizeOf(context).width,
-                        ),
-                        0,
+          return Column(
+            children: [
+              // Busca inline (abre pela lupa da AppBar): campo discreto e
+              // arredondado no topo da lista — o sheet avançado continua a
+              // ser a porta dos filtros.
+              if (_searchOpen)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    hPad,
+                    AppSpacing.xxs,
+                    hPad,
+                    AppSpacing.xs,
+                  ),
+                  child: _ProductSearchField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    onClose: _closeSearch,
+                  ),
+                ),
+              // Filtros ativos com resultados: limpeza a um toque, direita.
+              if (isFiltering && filtered.isNotEmpty)
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: hPad),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: _clearFilters,
+                      icon: const Icon(
+                        Icons.filter_alt_off_outlined,
+                        size: AppSizes.iconSm,
                       ),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          l10n.productsFilteredCount(filtered.length),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
+                      label: Text(l10n.productsClearFilters),
+                      style: TextButton.styleFrom(
+                        foregroundColor: theme.colorScheme.onSurfaceVariant,
+                        minimumSize: const Size(0, AppSizes.touchTarget),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xs,
+                        ),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        textStyle: theme.textTheme.labelLarge,
+                      ),
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () =>
+                      ref.read(productsProvider.notifier).refresh(),
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      if (filtered.isEmpty)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: EmptyState(
+                            icon: Icons.filter_alt_off_outlined,
+                            title: l10n.productsEmptyFilteredTitle,
+                            subtitle: l10n.productsEmptyFilteredSubtitle,
+                            actionLabel: l10n.productsClearFilters,
+                            onAction: _clearFilters,
+                            outlinedAction: true,
+                          ),
+                        )
+                      else
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(
+                            hPad,
+                            AppSpacing.xxs,
+                            hPad,
+                            // Folga do FAB (o botão flutua sobre a lista).
+                            AppSpacing.fabBottomClearance + AppSpacing.md,
+                          ),
+                          sliver: SliverList.separated(
+                            itemCount: filtered.length,
+                            separatorBuilder: (_, _) => Divider(
+                              height: 1,
+                              thickness: 0.8,
+                              color: theme.colorScheme.outlineVariant
+                                  .withValues(alpha: 0.6),
+                            ),
+                            itemBuilder: (context, index) {
+                              final product = filtered[index];
+                              return _ProductRow(
+                                product: product,
+                                onTap: canManageProducts
+                                    ? () => _openEditSheet(product)
+                                    : null,
+                              );
+                            },
                           ),
                         ),
-                      ),
-                    ),
+                    ],
                   ),
-                if (filtered.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: EmptyState(
-                      icon: Icons.filter_alt_off_outlined,
-                      title: l10n.productsEmptyFilteredTitle,
-                      subtitle: l10n.productsEmptyFilteredSubtitle,
-                      actionLabel: l10n.productsClearFilters,
-                      onAction: _clearFilters,
-                      outlinedAction: true,
-                    ),
-                  )
-                else
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      AppSpacing.pagePaddingForWidth(
-                        MediaQuery.sizeOf(context).width,
-                      ),
-                      AppSpacing.md,
-                      AppSpacing.pagePaddingForWidth(
-                        MediaQuery.sizeOf(context).width,
-                      ),
-                      // Folga do FAB (o botão flutua sobre a lista).
-                      AppSpacing.fabBottomClearance + AppSpacing.md,
-                    ),
-                    sliver: SliverGrid.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: AppSpacing.md,
-                        mainAxisSpacing: AppSpacing.md,
-                        childAspectRatio: 0.98,
-                      ),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final product = filtered[index];
-                        return _ProductCard(
-                          product: product,
-                          onTap: canManageProducts
-                              ? () => _openEditSheet(product)
-                              : null,
-                        );
-                      },
-                    ),
-                  ),
-              ],
-            ),
+                ),
+              ),
+            ],
           );
         },
       ),
@@ -362,10 +448,10 @@ enum _StockTypeFilter { all, weight, unit }
 
 enum _AvailabilityFilter { all, available, lowStock, outOfStock }
 
-/// Chips de filtro (canvas V3): pílulas com rótulo + contagem real — o
-/// ativo usa o container verde (primaryContainer), os inativos neutros.
-/// Grupo de chips de filtro minimalista — substitui o SegmentedButton
-/// para textos longos (ex.: "Peso (kg/g/l/ml)").
+/// Chips de filtro (V4): pílulas com rótulo + ícone — o ativo usa o
+/// laranja oficial (tint 14% + aro) com o rótulo em tinta (AA no claro);
+/// os inativos ficam neutros. Grupo minimalista que substitui o
+/// SegmentedButton para textos longos (ex.: "Peso (kg/g/l/ml)").
 class _FilterChipGroup<T> extends StatelessWidget {
   const _FilterChipGroup({
     required this.options,
@@ -454,10 +540,12 @@ class _CompactFilterChip extends StatelessWidget {
             ],
             Text(
               label,
-              // Filtro = labelMedium (12/w500); selecionado sobe para w600.
+              // Filtro = labelMedium (12/w500). O ativo mantém o rótulo em
+              // tinta: laranja em texto pequeno não atinge AA no claro — a
+              // seleção lê-se pelo tint, aro e ícone.
               style: theme.textTheme.labelMedium?.copyWith(
-                color: isSelected ? color : scheme.onSurfaceVariant,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? scheme.onSurface : scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -735,23 +823,85 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   }
 }
 
-/// Card de produto PROFISSIONAL — grelha de 2 colunas (mestre UI/UX).
+/// Campo de busca inline — abre pela lupa da AppBar, vive acima da lista
+/// enquanto activo. Pílula cheia neutra (sem borda em repouso) e aro
+/// laranja oficial só com foco; o X limpa e fecha.
+class _ProductSearchField extends StatelessWidget {
+  const _ProductSearchField({
+    required this.controller,
+    required this.onChanged,
+    required this.onClose,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final radius = BorderRadius.circular(AppRadius.full);
+
+    return TextField(
+      key: const ValueKey('productSearchField'),
+      controller: controller,
+      autofocus: true,
+      onChanged: onChanged,
+      textInputAction: TextInputAction.search,
+      style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+      decoration: InputDecoration(
+        hintText: context.l10n.productsSearchHint,
+        prefixIcon: Icon(
+          Icons.search_rounded,
+          size: AppSizes.iconMd,
+          color: scheme.onSurfaceVariant,
+        ),
+        suffixIcon: IconButton(
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+          onPressed: onClose,
+          icon: Icon(
+            Icons.close_rounded,
+            size: AppSizes.iconMd,
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+        filled: true,
+        fillColor: scheme.surfaceContainerHighest,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        border: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide(color: scheme.primary, width: 1.2),
+        ),
+      ),
+    );
+  }
+}
+
+/// Linha de produto — lista densa estilo iOS (moderna e minimalista):
+/// thumbnail 52 → nome + metadados → preço/stock alinhados à direita.
 ///
-/// Layout vertical de cartão:
-/// - **Foto quadrada** (canto a canto no topo do cartão, raio lg) com
-///   sobreposição de selos: tipo estrutural (canto superior esquerdo)
-///   e estado inativo/esgotado (canto superior direito).
-/// - **Nome** (2 linhas, elipse), **código/descrição** (1 linha).
-/// - **Rodapé do cartão**: preço (destaque, `amountInRow`) à esquerda e
-///   stock (com ícone e estado) à direita, dentro de `Flexible` +
-///   `FittedBox` para não estourar com escala de texto 2.0 (U-03).
-///
-/// Espaçamento profissional: grelha 2 colunas com `md` (16) de
-/// cross/main-axis, padding de página por `pagePaddingForWidth` e
-/// folga `fabBottomClearance` em baixo. O cartão inteiro é UM nó
-/// semântico com `InkWell` (alvo ≥48, ripple e foco do tema).
-class _ProductCard extends StatelessWidget {
-  const _ProductCard({required this.product, this.onTap});
+/// * Tipo estrutural aparece como TEXTO na linha de metadados (o selo
+///   colorido saiu da lista — ruído desnecessário); [ProductType.resale]
+///   é omitido por ser o estado comum do varejo.
+/// * Inactivo vira [StatusChip] neutro ao lado dos metadados; stock baixo
+///   usa `theme.expense` + ícone de aviso (cor de alerta oficial).
+/// * Preço em tinta (`onSurface`) — AA no claro e no escuro; laranja
+///   fica reservado a acções/destaques.
+/// * A linha inteira é UM nó semântico com `InkWell` (alvo ≥48, ripple e
+///   foco do tema) e a coluna direita é `FittedBox` para não estourar com
+///   escala de texto 2.0 (U-03).
+class _ProductRow extends StatelessWidget {
+  const _ProductRow({required this.product, this.onTap});
 
   final Product product;
 
@@ -768,17 +918,21 @@ class _ProductCard extends StatelessWidget {
         product.stockQuantity <
         Quantity.lowStockThresholdUnits * Quantity.milliFactor;
     final inactive = !product.isActive;
-    final outOfStock = product.stockQuantity <= 0;
 
     final detail = product.code.isEmpty
         ? (product.description.isEmpty ? null : product.description)
         : product.code;
+    final typeLabel = product.type == ProductType.resale
+        ? null
+        : productTypeLabel(context, product.type);
+    // Inactivo explica-se pelo chip; aí o tipo cede o espaço ao detalhe.
+    final meta = [if (!inactive) ?typeLabel, ?detail].join(' · ');
 
     final stockText =
         '${Quantity.format(product.stockQuantity, unitLabel: product.vendaPorFracao ? product.unitLabel : null, language: Formatters.currentLanguage)}'
         '${product.vendaPorFracao ? '' : ' ${l10n.commonUnits}'}';
 
-    // A11y: o card inteiro é UM nó semântico (mesmo contrato do feed).
+    // A11y: a linha inteira é UM nó semântico (mesmo contrato do feed).
     final semanticLabel = buildComposedLabel([
       detail == null ? product.name : '${product.name}: $detail',
       Formatters.currency(product.salePriceCents),
@@ -792,113 +946,90 @@ class _ProductCard extends StatelessWidget {
       excludeSemantics: true,
       label: semanticLabel,
       child: Material(
-        color: scheme.surface,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
-        ),
-        clipBehavior: Clip.antiAlias,
+        type: MaterialType.transparency,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              // ── Foto (topo, canto a canto) + selos sobrepostos ──
-              Stack(
-                children: [
-                  ProductImage.fluid(
-                    imagePath: product.imagePath,
-                    fluidHeight: AppSpacing.huge * 2,
-                    radius: AppRadius.lg,
-                  ),
-                  if (!inactive && product.type != ProductType.resale)
-                    Positioned(
-                      top: AppSpacing.xs,
-                      left: AppSpacing.xs,
-                      child: ProductTypeBadge(type: product.type),
-                    ),
-                  if (inactive || outOfStock)
-                    Positioned(
-                      top: AppSpacing.xs,
-                      right: AppSpacing.xs,
-                      child: StatusChip(
-                        label: inactive
-                            ? l10n.productsInactive
-                            : l10n.dashboardLowStock,
-                        color: inactive ? scheme.outline : theme.warning,
-                        icon: inactive
-                            ? Icons.block_outlined
-                            : Icons.warning_amber_rounded,
-                      ),
-                    ),
-                ],
-              ),
-              // ── Corpo: nome + detalhe ──
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.sm,
-                  AppSpacing.xs,
-                  AppSpacing.sm,
-                  0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: Row(
+              children: [
+                ProductImage(
+                  imagePath: product.imagePath,
+                  size: 52,
+                  radius: AppRadius.md,
+                  iconSize: AppSizes.iconMd,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: inactive
-                            ? scheme.onSurfaceVariant
-                            : scheme.onSurface,
-                      ),
-                    ),
-                    if (detail != null) ...[
-                      const SizedBox(height: AppSpacing.micro),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       Text(
-                        detail,
+                        product.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: inactive
+                              ? scheme.onSurfaceVariant
+                              : scheme.onSurface,
                         ),
                       ),
+                      if (inactive || meta.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            if (inactive) ...[
+                              StatusChip(
+                                label: l10n.productsInactive,
+                                color: scheme.onSurfaceVariant,
+                                icon: Icons.block_outlined,
+                              ),
+                              if (meta.isNotEmpty)
+                                const SizedBox(width: AppSpacing.xs),
+                            ],
+                            if (meta.isNotEmpty)
+                              Expanded(
+                                child: Text(
+                                  meta,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              const Spacer(),
-              // ── Rodapé: preço (esquerda) + stock (direita) ──
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.sm,
-                  AppSpacing.xs,
-                  AppSpacing.sm,
-                  AppSpacing.sm,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: FittedBox(
+                const SizedBox(width: AppSpacing.sm),
+                // Valores à direita — largura fixa + FittedBox: a coluna
+                // nunca empurra o texto para fora em ecrãs estreitos.
+                SizedBox(
+                  width: 108,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      FittedBox(
                         fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
+                        alignment: Alignment.centerRight,
                         child: Text(
                           Formatters.currency(product.salePriceCents),
                           maxLines: 1,
                           style: AppTypography.amountInRow(
-                            inactive ? scheme.onSurfaceVariant : scheme.primary,
+                            inactive
+                                ? scheme.onSurfaceVariant
+                                : scheme.onSurface,
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Flexible(
-                      child: FittedBox(
+                      const SizedBox(height: 2),
+                      FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerRight,
                         child: Row(
@@ -921,19 +1052,17 @@ class _ProductCard extends StatelessWidget {
                                 color: lowStock
                                     ? theme.expense
                                     : scheme.onSurfaceVariant,
-                                fontWeight: lowStock
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

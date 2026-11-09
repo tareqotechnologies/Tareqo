@@ -115,9 +115,9 @@ class ReportsScreen extends ConsumerWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(
               AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-              4,
+              AppSpacing.xxs,
               AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-              32,
+              AppSpacing.xxl,
             ),
             children: [
               Center(
@@ -138,7 +138,7 @@ class ReportsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               // Erro: em vez de uma linha de KPIs com "R\$ 0,00"/"0.0%"
               // (zeros falsos), mostra o aviso compacto com retry — mesmo
               // padrão do Dashboard e do Financeiro. Com dados em cache
@@ -160,7 +160,7 @@ class ReportsScreen extends ConsumerWidget {
                         borderRadius: AppRadius.lgAll,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: KpiCard(
                         label: l10n.reportsProfit,
@@ -172,7 +172,7 @@ class ReportsScreen extends ConsumerWidget {
                         borderRadius: AppRadius.lgAll,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: KpiCard(
                         label: l10n.reportsMargin,
@@ -186,9 +186,9 @@ class ReportsScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               SectionHeader(title: l10n.reportsBestSellers),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               reportAsync.when(
                 loading: () => Skeleton(
                   child: Column(
@@ -223,15 +223,15 @@ class ReportsScreen extends ConsumerWidget {
                           quantity: data.bestSellers[i].quantity,
                           revenue: data.bestSellers[i].revenueCents,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.xs),
                       ],
                     ],
                   );
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               SectionHeader(title: l10n.reportsSalesPerDay),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               reportAsync.when(
                 loading: () => const SizedBox.shrink(),
                 error: (_, _) => const SizedBox.shrink(),
@@ -382,7 +382,7 @@ class _BestSellerRow extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -395,7 +395,7 @@ class _BestSellerRow extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   l10n.reportsRevenueLabel(Formatters.currency(revenue)),
                   style: theme.textTheme.bodySmall?.copyWith(

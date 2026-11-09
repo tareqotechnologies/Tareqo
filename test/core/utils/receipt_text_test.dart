@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:tareqo/core/utils/formatters.dart';
 import 'package:tareqo/core/utils/receipt_text.dart';
@@ -6,6 +7,10 @@ import 'package:tareqo/domain/entities/sale.dart';
 import 'package:tareqo/domain/entities/sale_item.dart';
 
 void main() {
+  // Formatters usa DateFormat com o locale ativo; fora de um MaterialApp a
+  // base de símbolos do intl não está carregada (o delegate só a carrega
+  // dentro da árvore de widgets).
+  setUpAll(() => initializeDateFormatting());
   final sale = Sale(
     id: 's1',
     number: 1,

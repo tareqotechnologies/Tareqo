@@ -24,6 +24,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/payment_filter.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/status_chip.dart';
 import 'sale_receipt_share_sheet.dart';
 
@@ -136,7 +137,7 @@ class _SaleFeedRow extends StatelessWidget {
             child: const Icon(
               Icons.north_east_rounded,
               size: 18,
-              color: AppColors.softWhite,
+              color: AppColors.brandBlack,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -367,14 +368,14 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
 
           // ── Items ──
           // Usa o mesmo padrão de linhas do feed de atividade da Home,
-          // com indent: 60 e ícone circular em laranja.
+          // com recuo alinhado ao avatar e ícone circular em laranja.
           for (var i = 0; i < sale.items.length; i++) ...[
             if (i > 0)
               Divider(
                 height: 1,
                 indent: 60,
                 endIndent: AppSpacing.md,
-                color: theme.colorScheme.outlineVariant,
+                color: PremiumDecor.hairline(theme.colorScheme),
               ),
             _SaleItemRow(item: sale.items[i]),
           ],
@@ -445,7 +446,7 @@ class _SaleItemRow extends ConsumerWidget {
             child: const Icon(
               Icons.north_east_rounded,
               size: 18,
-              color: AppColors.softWhite,
+              color: AppColors.brandBlack,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),

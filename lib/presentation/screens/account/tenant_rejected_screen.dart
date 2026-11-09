@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
@@ -30,47 +32,42 @@ class TenantRejectedScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Estado "rejeitado": erro oficial (#C62828) em véu —
+                // mesmo ícone-em-superfície da tela de pendência.
                 Container(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  width: 72,
+                  height: 72,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: scheme.errorContainer,
+                    color: theme.expense.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.cancel_outlined,
-                    size: 48,
-                    color: scheme.onErrorContainer,
+                    size: 32,
+                    color: theme.expense,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.lg),
                 Text(
                   l10n.tenantRejectedTitle,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.5,
-                  ),
+                  style: AppTypography.headline,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.tenantRejectedSubtitle(tenant.businessName),
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: AppTypography.bodyMedium.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
                 if (tenant.rejectionReason != null &&
                     tenant.rejectionReason!.isNotEmpty) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   AppCard(
-                    // Card premium (estilo Apple): cantos 18 + superfície
-                    // elevada com fundo tingido pelo estado de erro.
-                    elevated: true,
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(AppRadius.lg),
-                    ),
-                    color: scheme.errorContainer.withValues(alpha: 0.5),
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                    color: scheme.errorContainer,
+                    borderColor: theme.expense.withValues(alpha: 0.30),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -79,11 +76,11 @@ class TenantRejectedScreen extends ConsumerWidget {
                           size: 18,
                           color: scheme.onErrorContainer,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
                             tenant.rejectionReason!,
-                            style: theme.textTheme.bodyMedium?.copyWith(
+                            style: AppTypography.bodyMedium.copyWith(
                               color: scheme.onErrorContainer,
                             ),
                           ),

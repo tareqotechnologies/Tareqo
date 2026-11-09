@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// 600/500) — o mesmo padrão "ultra-clean" do resto do app, um passo
 /// mais etéreo para as telas administrativas densas:
 ///
-/// * Títulos/headers: `w300` (antes `w600`) — a hierarquia vem do
+/// * Títulos/headers: `w400` (antes `w600`) — a hierarquia vem do
 ///   TAMANHO e da cor, não do peso da fonte;
 /// * Labels/rótulos de ação: `w400` (antes `w600`);
 /// * Corpo: permanece `w400` (legibilidade);

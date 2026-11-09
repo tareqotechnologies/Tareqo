@@ -2191,10 +2191,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Invalid barcode: enter valid digits (8, 12, or 13).';
 
   @override
-  String get productsBarcodeLengthWarning =>
-      'Barcode length should be 8, 12, or 13 digits.';
-
-  @override
   String get productsWeighLabel => 'Sell by weight (fraction)';
 
   @override
@@ -2220,9 +2216,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get salesBarcodeLabel => 'Barcode';
-
-  @override
-  String get salesBarcodeHint => 'Scale labels and PLUs — camera or USB reader';
 
   @override
   String get salesBarcodeScan => 'Scan with camera';
@@ -3093,12 +3086,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quotationTemplatePreviewBadge => 'Preview';
 
   @override
-  String get palettePetrol => 'Petrol blue';
-
-  @override
-  String get paletteSlate => 'Slate';
-
-  @override
   String get paletteTerracotta => 'Terracotta';
 
   @override
@@ -3106,12 +3093,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paletteWarmGray => 'Warm gray';
-
-  @override
-  String get palettePetrolInk => 'Petrol ink';
-
-  @override
-  String get paletteSlateInk => 'Slate ink';
 
   @override
   String get paletteSoftBlack => 'Soft black';

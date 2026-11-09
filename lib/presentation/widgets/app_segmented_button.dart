@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_tokens.dart';
 
-/// SegmentedButton no padrão do design system V4: pílulas estilo Apple
-/// (StadiumBorder), segmento ativo em primaryContainer, rótulo w500 e
-/// alvo de toque ≥ 48dp (sem densidade compacta — o segmento é botão de
-/// baixa frequência).
+/// SegmentedButton no padrão do anexo: pílula em repouso com contorno
+/// laranja `#FF6A2A`, segmento ativo preenchido (preto no claro, suave
+/// no escuro) e alvo de toque ≥ 48dp. As cores vêm do
+/// [SegmentedButtonTheme] — este widget só garante o formato e o alvo.
 ///
 /// Unifica o estilo que estava copiado em 4 telas (financeiro, relatórios,
 /// fiado e sheet de transação). O [FittedBox] fica no call site: nos
@@ -26,7 +26,6 @@ class AppSegmentedButton<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
 
     return SegmentedButton<T>(
       showSelectedIcon: false,
@@ -37,14 +36,7 @@ class AppSegmentedButton<T> extends StatelessWidget {
           vertical: AppSpacing.md,
         ),
         shape: const StadiumBorder(),
-        side: BorderSide(color: scheme.outlineVariant),
-        backgroundColor: scheme.surfaceContainerHighest,
-        selectedBackgroundColor: scheme.primaryContainer,
-        selectedForegroundColor: scheme.onPrimaryContainer,
-        // U-23: texto 14/w500 precisa de preto #212121 (11.7:1 sobre gelo);
-        // o cinza #757575 (3.5:1) é só para não-texto/metadata.
-        foregroundColor: scheme.onSurface,
-        // Filtros são controlos discretos: 14/w500, nunca semibold.
+        // Cores e contorno: SegmentedButtonTheme (pílula do anexo).
         textStyle: theme.textTheme.labelLarge,
       ),
       segments: segments,

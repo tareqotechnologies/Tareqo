@@ -2233,10 +2233,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Code-barres invalide : saisissez des chiffres valides (8, 12 ou 13).';
 
   @override
-  String get productsBarcodeLengthWarning =>
-      'La longueur du code-barres doit être de 8, 12 ou 13 chiffres.';
-
-  @override
   String get productsWeighLabel => 'Vente au poids (fraction)';
 
   @override
@@ -2263,10 +2259,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get salesBarcodeLabel => 'Code-barres';
-
-  @override
-  String get salesBarcodeHint =>
-      'Étiquettes de balance et PLU — caméra ou lecteur USB';
 
   @override
   String get salesBarcodeScan => 'Lire avec la caméra';
@@ -3146,12 +3138,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get quotationTemplatePreviewBadge => 'Aperçu';
 
   @override
-  String get palettePetrol => 'Bleu pétrole';
-
-  @override
-  String get paletteSlate => 'Ardoise';
-
-  @override
   String get paletteTerracotta => 'Terracotta';
 
   @override
@@ -3159,12 +3145,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get paletteWarmGray => 'Gris chaud';
-
-  @override
-  String get palettePetrolInk => 'Encre pétrole';
-
-  @override
-  String get paletteSlateInk => 'Encre ardoise';
 
   @override
   String get paletteSoftBlack => 'Noir doux';

@@ -37,8 +37,8 @@ enum PeriodFilter {
     return switch (this) {
       PeriodFilter.all => true,
       PeriodFilter.today => that == today,
-      PeriodFilter.yesterday => that ==
-          DateTime.utc(today.year, today.month, today.day - 1),
+      PeriodFilter.yesterday =>
+        that == DateTime.utc(today.year, today.month, today.day - 1),
       PeriodFilter.week => !that.isBefore(
         DateTime.utc(today.year, today.month, today.day - 6),
       ),

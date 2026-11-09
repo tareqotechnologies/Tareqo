@@ -559,7 +559,11 @@ class _BalanceHero extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              Container(width: 1, height: 40, color: scheme.outlineVariant),
+              Container(
+                width: 1,
+                height: 40,
+                color: PremiumDecor.hairline(scheme),
+              ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _HeroMetric(
@@ -711,8 +715,9 @@ class _ActivityItem {
     required this.iconBackground,
     required this.iconColor,
     this.amount,
-    // ignore: unused_element_parameter — cor explícita é opcional;
-    // quando null, _ActivityRow resolve via ThemeData (U-02).
+    // Cor explícita é opcional; quando null, _ActivityRow resolve via
+    // ThemeData (U-02).
+    // ignore: unused_element_parameter
     this.amountColor,
     this.badge,
     this.badgeColor,
@@ -930,7 +935,7 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
                 bottom: AppSpacing.lg,
               ),
               decoration: BoxDecoration(
-                color: scheme.outlineVariant,
+                color: PremiumDecor.hairline(scheme),
                 borderRadius: AppRadius.microAll,
               ),
             ),
@@ -1026,9 +1031,7 @@ class _ActivityFeed extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.xl),
-        side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
-        ),
+        side: BorderSide(color: PremiumDecor.hairline(theme.colorScheme)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -1040,7 +1043,7 @@ class _ActivityFeed extends StatelessWidget {
                 height: 1,
                 indent: 60,
                 endIndent: AppSpacing.md,
-                color: theme.colorScheme.outlineVariant,
+                color: PremiumDecor.hairline(theme.colorScheme),
               ),
             _ActivityRow(item: items[i]),
           ],

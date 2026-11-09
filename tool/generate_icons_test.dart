@@ -6,27 +6,24 @@
 // dart run flutter_launcher_icons # gera os ícones nativos
 //
 // Processa a IMAGEM-FONTE `assets/branding/icon_official.png`
-// (1024×1024, design OFICIAL do utilizador: fundo branco + quadrado azul
-// arredondado com gradiente (azul-céu → azul pálido), arco no topo, "D"
-// branco recortado (haste + bojo) e ponto azul ao centro) e grava os PNGs
-// que alimentam o flutter_launcher_icons (Android/iOS) e o web (manifest
-// + favicon).
+// (1024×1024, monograma TQ oficial — preto #0C0B0A + branco suave
+// #F9F9F9, paleta oficial) e grava os PNGs que alimentam o
+// flutter_launcher_icons (Android/iOS) e o web (manifest + favicon).
 //
-// Atenção: O MESTRE é GERADO a partir do anexo do utilizador (fiel, escala
-// uniforme + key do fundo branco por inundação):
-// python tool/apply_official_icon.py # mestre 1024 + favicon SVG
+// Atenção: o mestre é atualizado por `tool/gen_tq_logo.py`.
+// python tool/gen_tq_logo.py # mestre 1024 + variações
 // python tool/icon_preview.py # contact sheet para revisão visual
 //
-// DESIGN (oficial — anexo do utilizador):
-// - A fonte JÁ É o ícone completo (fundo branco + desenho azul), sem
+// DESIGN (oficial — paleta de 4 cores):
+// - A fonte JÁ É o ícone completo (fundo preto + desenho suave), sem
 // tile separado — os ícones legacy/iOS/web usam a imagem inteira;
 // - icon_legacy.png: a imagem inteira (1024, opaca) — Android <8, iOS e web;
 // - icon_fg.png: o DESENHO em ~92% do canvas transparente — o fundo
-// (branco) sai por INUNDAÇÃO a partir das bordas, preservando o "D"
-// branco e o interior do arco (brancos ENCERRADOS pelo azul).
-// Foreground do adaptativo sobre o fundo branco `adaptive_icon_background`;
+// (preto) sai por INUNDAÇÃO a partir das bordas, preservando o "Q"
+// suave e o interior do arco (brancos ENCERRADOS pelo preto).
+// Foreground do adaptativo sobre o fundo preto `adaptive_icon_background`;
 // - icon_mono.png: silhueta MONOCROMÁTICA do desenho (luminância > 60 —
-// todo o azul do corpo; o fundo já saiu no key) — themed icons do
+// todo o desenho suave; o fundo já saiu no key) — themed icons do
 // Android 13+ (só o alpha conta);
 // - splash_logo.png: o desenho em ~88% do canvas transparente — marca do
 // SPLASH (tela in-app + web);
@@ -34,8 +31,8 @@
 // (iOS) — o logotipo para as telas de abertura NATIVAS;
 // - Web: favicon + manifest a partir da imagem inteira.
 //
-// Key do fundo: o branco da fonte vira transparente nos recortes
-// (fg/splash/launch); o azul do desenho (saturação alta) sobrevive sempre.
+// Key do fundo: o fundo da fonte vira transparente nos recortes
+// (fg/splash/launch); o desenho (branco suave #F9F9F9) sobrevive sempre.
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -44,14 +41,14 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart' show Offset, Rect;
 import 'package:flutter_test/flutter_test.dart';
 
-/// Caminho da imagem-fonte da marca (1024×1024, RGB opaco — design oficial
-/// azul/branco, upscaled a partir do `dumbhanengue.ico`).
+/// Caminho da imagem-fonte da marca (1024×1024, RGB opaco — monograma TQ
+/// preto/branco, paleta oficial).
 const _sourcePath = 'assets/branding/icon_official.png';
 
 /// Fração do canvas ocupada pelo desenho no foreground adaptativo.
 /// O desenho JÁ ocupa ~76%×91% da fonte; desenhá-lo a 92% do canvas deixa
 /// o logotipo com o tamanho "normal" do ícone (a máscara do launcher corta
-/// só os cantos do quadrado azul).
+/// só os cantos do tile preto #0C0B0A).
 const _logoCanvasFraction = 0.92;
 
 /// Frações do canvas nos outros recortes (splash, launch, LaunchImage).
@@ -59,16 +56,15 @@ const _splashLogoFraction = 0.88;
 const _androidLaunchFraction = 0.95;
 const _iosLaunchFraction = 1.0;
 
-/// Limiar de luminância (0-255) que separa o desenho azul do fundo
-/// transparente nos themed icons do Android 13+. O desenho vai do
-/// azul-céu (lum ~240) ao azul pálido (lum ~200); 60 captura tudo e
-/// deixa o fundo (0) de fora.
+/// Limiar de luminância (0-255) que separa o desenho claro do fundo
+/// transparente nos themed icons do Android 13+. O desenho é branco suave
+/// (lum ~249); 60 captura tudo e deixa o fundo (0) de fora.
 const _monoLuminanceThreshold = 60;
 
-/// Limiar de key do fundo: pixel claro com pouca saturação (branco)
-/// vira transparente — o azul do desenho tem saturação alta e sobrevive.
-/// (Saturação 30 preserva TODOS os tons do azul, inclusive os azul-claros
-/// do gradiente do corpo — um key mais agressivo (60) comia essas partes.)
+/// Limiar de key do fundo: pixel claro com pouca saturação vira
+/// transparente; tons com cor (saturação acima de 30) sobrevivem.
+/// (Saturação 30 preserva antialiasing e tons suaves do desenho — um key
+/// mais agressivo comia bordas claras da marca.)
 const _keyMinChannel = 200;
 const _keyMaxSaturation = 30;
 
@@ -237,7 +233,7 @@ void main() {
     expect(source.width, _nativeSize);
     expect(source.height, _nativeSize);
 
-    // A fonte inteira (fundo branco + logotipo azul) — sem tile separado.
+    // A fonte inteira (monograma TQ preto/suave) — sem tile separado.
     final fullSrc = Rect.fromLTWH(
       0,
       0,

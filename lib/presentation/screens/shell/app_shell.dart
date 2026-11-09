@@ -7,6 +7,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../widgets/pulse_badge.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/premium_decor.dart';
 import '../../widgets/fade_indexed_stack.dart';
@@ -82,8 +83,7 @@ class AppShell extends ConsumerWidget {
 
   /// Seções que vivem dentro do hub Menu (U-08): a barra destaca Menu,
   /// mas a AppBar mostra a secção real para o utilizador saber onde está.
-  static bool _isMenuSubsection(int sectionIndex) =>
-      sectionIndex >= _tabCount;
+  static bool _isMenuSubsection(int sectionIndex) => sectionIndex >= _tabCount;
 
   static String _subsectionLabel(AppLocalizations l10n, int sectionIndex) {
     return switch (AppSection.values[sectionIndex]) {
@@ -227,10 +227,8 @@ class AppShell extends ConsumerWidget {
               count: unreadCount,
               child: IconButton(
                 icon: const Icon(Icons.notifications_outlined, size: 20),
-                onPressed: () => AppNavigator.push(
-                  context,
-                  AppRoutes.notifications,
-                ),
+                onPressed: () =>
+                    AppNavigator.push(context, AppRoutes.notifications),
                 tooltip: l10n.notificationTitle,
               ),
             ),
@@ -259,7 +257,10 @@ class AppShell extends ConsumerWidget {
                         ),
                     ],
                   ),
-                  VerticalDivider(width: 1, color: scheme.outlineVariant),
+                  VerticalDivider(
+                    width: 1,
+                    color: PremiumDecor.hairline(scheme),
+                  ),
                   Expanded(
                     child: Center(
                       child: ConstrainedBox(
@@ -448,7 +449,7 @@ class _ActionMenuSheet extends ConsumerWidget {
             },
           ),
           const SizedBox(height: AppSpacing.md),
-          OutlinedButton(onPressed: close, child: Text(l10n.fabMenuCancel)),
+          AppButton.secondary(onPressed: close, label: l10n.fabMenuCancel),
         ],
       ),
     );
@@ -495,42 +496,42 @@ class _ActionTile extends StatelessWidget {
             label: title,
             hint: hint,
             child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              children: [
-                Container(
-                  width: AppSizes.avatarSm,
-                  height: AppSizes.avatarSm,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: IconTone.darkBackground(color),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: color.withValues(alpha: 0.25)),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                children: [
+                  Container(
+                    width: AppSizes.avatarSm,
+                    height: AppSizes.avatarSm,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: IconTone.darkBackground(color),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: color.withValues(alpha: 0.25)),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 18,
+                      color: IconTone.lightForeground(color),
+                    ),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: IconTone.lightForeground(color),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: theme.textTheme.titleSmall),
+                        const SizedBox(height: 2),
+                        Text(hint, style: theme.textTheme.bodySmall),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: theme.textTheme.titleSmall),
-                      const SizedBox(height: 2),
-                      Text(hint, style: theme.textTheme.bodySmall),
-                    ],
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 20,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ],
-            ),
+                ],
+              ),
             ),
           ),
         ),

@@ -118,11 +118,12 @@ abstract final class AppColors {
   /// actionBorder — contorno de seleção.
   static const Color lightActionBorder = brandOrange;
 
-  /// warningBright — ícone de alerta (aviso semântico).
-  static const Color accentOrange = alertWarning;
+  /// Acento da marca — laranja do anexo (#FF6A2A).
+  /// Não é o amarelo de aviso (#F9A825): esse fica só em [alertWarning].
+  static const Color accentOrange = brandOrange;
 
-  /// warningSoft — fundo de badge de alerta.
-  static const Color accentOrangeSoft = alertWarning;
+  /// Fonte do véu de acento (quem pinta aplica o alfa).
+  static const Color accentOrangeSoft = brandOrange;
 
   /// warning — texto de alerta (preto sobre aviso).
   static const Color warningText = brandBlack;
@@ -212,12 +213,12 @@ abstract final class AppColors {
   /// actionSoft escuro — fundo de seleção (laranja a 12%).
   static const Color darkActionSoft = brandOrange;
 
-  /// Alerta escuro (aviso semântico #F9A825).
-  static const Color darkAccentOrange = alertWarning;
-  static const Color accentOrangeDark = alertWarning;
+  /// Acento no escuro — o mesmo laranja #FF6A2A (rótulo sobre ele = preto).
+  static const Color darkAccentOrange = brandOrange;
+  static const Color accentOrangeDark = brandOrange;
 
-  /// Fundo suave de alerta escuro.
-  static const Color darkAccentOrangeSoft = alertWarning;
+  /// Fonte do véu de acento no escuro.
+  static const Color darkAccentOrangeSoft = brandOrange;
 
   /// Texto de alerta escuro (suave sobre preto — aviso é ícone/borda).
   static const Color darkWarningText = softWhite;
@@ -337,6 +338,7 @@ class AppStatusColors implements ThemeExtension<AppStatusColors> {
   });
 
   /// Tipo da extensão (compatibilidade com a assinatura anterior).
+  @override
   Type get type => runtimeType;
 
   final Color primary;

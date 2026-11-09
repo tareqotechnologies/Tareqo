@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/sale.dart';
@@ -14,6 +13,7 @@ import '../../widgets/error_view.dart';
 import '../../widgets/payment_filter.dart' show PaymentFilter, PaymentFilterBar;
 import '../../widgets/period_filter.dart' show PeriodFilter, PeriodFilterBar;
 import '../../widgets/pinned_header.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/sale_card.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/skeleton.dart';
@@ -167,15 +167,25 @@ class _SalesBody extends StatelessWidget {
         slivers: [
           // ── Resumo do dia ──
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 16),
+            padding: EdgeInsets.fromLTRB(
+              horizontal,
+              AppSpacing.xs,
+              horizontal,
+              AppSpacing.md,
+            ),
             sliver: SliverToBoxAdapter(child: SalesSummaryHeader(sales: sales)),
           ),
           // ── Linha separadora visual entre resumos ──
           SliverToBoxAdapter(
             child: Container(
               height: 1,
-              color: AppColors.lightDivider,
-              margin: EdgeInsets.fromLTRB(horizontal, 4, horizontal, 8),
+              color: PremiumDecor.hairline(Theme.of(context).colorScheme),
+              margin: EdgeInsets.fromLTRB(
+                horizontal,
+                AppSpacing.xxs,
+                horizontal,
+                AppSpacing.xs,
+              ),
             ),
           ),
           // ── Filtros dropdown FIXOS ──
@@ -184,10 +194,10 @@ class _SalesBody extends StatelessWidget {
           // altura em runtime, então a barra cresce sem estourar.
           PinnedHeader(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              padding: EdgeInsets.symmetric(horizontal: horizontal),
               child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xxs,
                 children: [
                   PeriodFilterBar(value: period, onChanged: onPeriodChanged),
                   PaymentFilterBar(value: payment, onChanged: onPaymentChanged),
@@ -198,13 +208,13 @@ class _SalesBody extends StatelessWidget {
           // ── Linha-resumo do filtro ──
           SliverToBoxAdapter(
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
+              duration: AppDurations.fast,
               child: isFiltering && filtered.isNotEmpty
                   ? Padding(
                       key: const ValueKey('sales-filtered-summary'),
                       padding: EdgeInsets.fromLTRB(
                         horizontal,
-                        6,
+                        AppSpacing.xs,
                         horizontal,
                         0,
                       ),
@@ -250,11 +260,11 @@ class _SalesBody extends StatelessWidget {
               ),
               sliver: SliverList.separated(
                 itemCount: filtered.length,
-                separatorBuilder: (_, _) => const Divider(
+                separatorBuilder: (_, _) => Divider(
                   height: 1,
                   indent: 60,
                   endIndent: AppSpacing.md,
-                  color: AppColors.lightDivider,
+                  color: PremiumDecor.hairline(theme.colorScheme),
                 ),
                 itemBuilder: (context, index) {
                   final sale = filtered[index];
@@ -277,22 +287,25 @@ class _SalesSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
     return Skeleton(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
+        padding: EdgeInsets.fromLTRB(
+          horizontal,
           AppSpacing.xs,
-          AppSpacing.lg,
+          horizontal,
           AppSpacing.fabBottomClearance,
         ),
         children: [
           const SkeletonBlock(height: 108, radius: 16),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           const SkeletonBlock(height: 48, radius: 24),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           const Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             children: [
               SkeletonBlock(height: 32, width: 88),
               SkeletonBlock(height: 32, width: 70),
@@ -300,10 +313,10 @@ class _SalesSkeleton extends StatelessWidget {
               SkeletonBlock(height: 32, width: 96),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
           for (var i = 0; i < 5; i++) ...[
             const SkeletonBlock(height: 80, radius: 14),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
           ],
         ],
       ),

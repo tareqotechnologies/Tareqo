@@ -3916,12 +3916,6 @@ abstract class AppLocalizations {
   /// **'Código de barras inválido: digite dígitos válidos (8, 12 ou 13).'**
   String get productsBarcodeError;
 
-  /// No description provided for @productsBarcodeLengthWarning.
-  ///
-  /// In pt, this message translates to:
-  /// **'O comprimento do código de barras deve ser de 8, 12 ou 13 dígitos.'**
-  String get productsBarcodeLengthWarning;
-
   /// No description provided for @productsWeighLabel.
   ///
   /// In pt, this message translates to:
@@ -3975,12 +3969,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Código de barras'**
   String get salesBarcodeLabel;
-
-  /// No description provided for @salesBarcodeHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Etiquetas de balança e PLUs — câmera ou leitor USB'**
-  String get salesBarcodeHint;
 
   /// No description provided for @salesBarcodeScan.
   ///
@@ -5384,18 +5372,6 @@ abstract class AppLocalizations {
   /// **'Preview'**
   String get quotationTemplatePreviewBadge;
 
-  /// No description provided for @palettePetrol.
-  ///
-  /// In pt, this message translates to:
-  /// **'Azul-petróleo'**
-  String get palettePetrol;
-
-  /// No description provided for @paletteSlate.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ardósia'**
-  String get paletteSlate;
-
   /// No description provided for @paletteTerracotta.
   ///
   /// In pt, this message translates to:
@@ -5413,18 +5389,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Cinza quente'**
   String get paletteWarmGray;
-
-  /// No description provided for @palettePetrolInk.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tinta petróleo'**
-  String get palettePetrolInk;
-
-  /// No description provided for @paletteSlateInk.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tinta ardósia'**
-  String get paletteSlateInk;
 
   /// No description provided for @paletteSoftBlack.
   ///

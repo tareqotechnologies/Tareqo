@@ -14,20 +14,23 @@ import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/app_segmented_button.dart';
-import '../../widgets/app_card.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/inline_error_card.dart';
-import '../../widgets/section_header.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/skeleton.dart';
 import 'add_transaction_sheet.dart';
 import 'cash_closing_sheet.dart';
 import 'financial_widgets.dart';
 
 /// Tela financeira — fluxo de caixa por período e movimentações agrupadas
-/// por data, estilo Apple Wallet / Stripe Dashboard.
+/// por data.
+///
+/// Linguagem minimalista: o saldo é um hero sem moldura, o resumo fecha em
+/// duas colunas e a lista lê-se como um extrato (hairlines, sem cartões).
+/// O laranja fica reservado à ação de registar e à pendência.
 class FinancialScreen extends ConsumerWidget {
   const FinancialScreen({super.key});
 
@@ -46,8 +49,7 @@ class FinancialScreen extends ConsumerWidget {
         .where((t) => t.status == TransactionStatus.pending)
         .length;
 
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final horizontal = AppSpacing.pagePaddingForWidth(
       MediaQuery.sizeOf(context).width,
     );
@@ -85,7 +87,12 @@ class FinancialScreen extends ConsumerWidget {
             slivers: [
               // ── Period selector + date range ──
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(horizontal, 4, horizontal, 0),
+                padding: EdgeInsets.fromLTRB(
+                  horizontal,
+                  AppSpacing.xxs,
+                  horizontal,
+                  0,
+                ),
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -108,15 +115,12 @@ class FinancialScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.xs),
                       Center(
                         child: Text(
                           _dateRangeLabel(period, l10n),
-                          // U-23: bodySmall 12px em onSurfaceVariant (#757575
-                          // = 3.5:1) falha AA para texto pequeno — usar
-                          // preto #212121 (11.7:1 sobre gelo).
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurface,
+                          style: AppTypography.labelMedium.copyWith(
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -125,9 +129,14 @@ class FinancialScreen extends ConsumerWidget {
                 ),
               ),
 
-              // ── Cash flow card stack ──
+              // ── Balance hero + resumo do período ──
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(horizontal, 16, horizontal, 0),
+                padding: EdgeInsets.fromLTRB(
+                  horizontal,
+                  AppSpacing.xl,
+                  horizontal,
+                  0,
+                ),
                 sliver: SliverToBoxAdapter(
                   child: cashFlowAsync.hasError
                       ? InlineErrorCard(
@@ -135,8 +144,8 @@ class FinancialScreen extends ConsumerWidget {
                           onRetry: () => ref.invalidate(cashFlowProvider),
                         )
                       : cashFlowAsync.isLoading
-                      ? const _CashStackSkeleton()
-                      : _CashStack(
+                      ? const _CashSummarySkeleton()
+                      : _CashSummary(
                           incomeCents: cashFlow?.incomeCents ?? 0,
                           expenseCents: cashFlow?.expenseCents ?? 0,
                           incomeLabel: l10n.financialIncome,
@@ -148,11 +157,16 @@ class FinancialScreen extends ConsumerWidget {
 
               // ── Transactions section header ──
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(horizontal, 24, horizontal, 0),
+                padding: EdgeInsets.fromLTRB(
+                  horizontal,
+                  AppSpacing.xxl,
+                  horizontal,
+                  0,
+                ),
                 sliver: SliverToBoxAdapter(
-                  child: SectionHeader(
+                  child: _TransactionsHeader(
                     title: l10n.financialTransactions,
-                    subtitle: pendingCount > 0 && transactionsAsync.hasValue
+                    pendingLabel: pendingCount > 0 && transactionsAsync.hasValue
                         ? '${l10n.financialPendingLabel} · $pendingCount'
                         : null,
                   ),
@@ -163,7 +177,7 @@ class FinancialScreen extends ConsumerWidget {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
                   0,
-                  AppSpacing.sm,
+                  AppSpacing.xs,
                   0,
                   AppSpacing.fabBottomClearance,
                 ),
@@ -196,7 +210,6 @@ class FinancialScreen extends ConsumerWidget {
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final group = groups[index];
                         return _DateGroup(
-                          date: group.date,
                           label: group.label,
                           totalCents: group.totalCents,
                           transactions: group.transactions,
@@ -335,11 +348,11 @@ class FinancialScreen extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Cash flow card — rótulo à esquerda, valor à direita, mesma margem.
+// Balance hero — saldo sem moldura, resumo do período em duas colunas.
 // ---------------------------------------------------------------------------
 
-class _CashStack extends StatelessWidget {
-  const _CashStack({
+class _CashSummary extends StatelessWidget {
+  const _CashSummary({
     required this.incomeCents,
     required this.expenseCents,
     required this.incomeLabel,
@@ -367,95 +380,72 @@ class _CashStack extends StatelessWidget {
           '$balanceLabel: ${Formatters.currency(balance)}, '
           '$incomeLabel: ${Formatters.signedAmount(incomeCents)}, '
           '$expenseLabel: ${Formatters.signedAmount(-expenseCents)}',
-      child: AppCard(
-        color: scheme.surface,
-        borderRadius: AppRadius.xlAll,
-        padding: EdgeInsets.zero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── Saldo Principal ──
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(AppRadius.xl),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    balanceLabel,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      Formatters.currency(balance),
-                      // Token heroAmount (26/w600) — teto do sistema
-                      // (U-06). Sem copyWith de tamanho/peso.
-                      style: AppTypography.heroAmount(balanceColor),
-                    ),
-                  ),
-                ],
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            balanceLabel,
+            style: AppTypography.labelMedium.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
-
-            // ── Entradas e Saídas ──
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: IntrinsicHeight(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _CashStatItem(
-                        icon: Icons.arrow_downward_rounded,
-                        color: theme.income,
-                        label: incomeLabel,
-                        value: Formatters.signedAmount(incomeCents),
-                      ),
-                    ),
-                    VerticalDivider(
-                      width: 32,
-                      thickness: 1,
-                      color: scheme.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                    Expanded(
-                      child: _CashStatItem(
-                        icon: Icons.arrow_upward_rounded,
-                        color: theme.expense,
-                        label: expenseLabel,
-                        value: Formatters.signedAmount(-expenseCents),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          ),
+          const SizedBox(height: AppSpacing.xxs),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              Formatters.currency(balance),
+              // Token heroAmount (26/w500) — teto do sistema (U-06).
+              style: AppTypography.heroAmount(balanceColor),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          IntrinsicHeight(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _CashStat(
+                    color: theme.income,
+                    label: incomeLabel,
+                    value: Formatters.signedAmount(incomeCents),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                  ),
+                  child: VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: PremiumDecor.hairline(scheme),
+                  ),
+                ),
+                Expanded(
+                  child: _CashStat(
+                    color: theme.expense,
+                    label: expenseLabel,
+                    value: Formatters.signedAmount(-expenseCents),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _CashStatItem extends StatelessWidget {
-  const _CashStatItem({
-    required this.icon,
+/// Estatística do resumo: ponto semântico + rótulo discreto, valor em tinta.
+/// A cor fica no ponto (entrada/saída); os números herdam o contraste do
+/// texto principal — sem repetir verde/vermelho em cada algarismo.
+class _CashStat extends StatelessWidget {
+  const _CashStat({
     required this.color,
     required this.label,
     required this.value,
   });
 
-  final IconData icon;
   final Color color;
   final String label;
   final String value;
@@ -470,12 +460,9 @@ class _CashStatItem extends StatelessWidget {
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 14, color: color),
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(width: AppSpacing.xs),
             // U-03: escala 2.0 sem clamp — rótulo encolhe/trunca.
@@ -484,21 +471,79 @@ class _CashStatItem extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.labelSmall.copyWith(
+                style: AppTypography.labelMedium.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: AppTypography.bodyLarge.copyWith(
-            fontWeight: FontWeight.w600,
-            color: scheme.onSurface,
+        const SizedBox(height: AppSpacing.xxs),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            maxLines: 1,
+            style: AppTypography.titleMedium.copyWith(color: scheme.onSurface),
           ),
         ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Section header — título + estado das pendências.
+// ---------------------------------------------------------------------------
+
+class _TransactionsHeader extends StatelessWidget {
+  const _TransactionsHeader({required this.title, this.pendingLabel});
+
+  final String title;
+  final String? pendingLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final pending = pendingLabel;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.sectionTitle.copyWith(color: scheme.onSurface),
+        ),
+        if (pending != null) ...[
+          const SizedBox(height: AppSpacing.xxs),
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: theme.accent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  pending,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -510,7 +555,6 @@ class _CashStatItem extends StatelessWidget {
 
 class _DateGroup extends StatelessWidget {
   const _DateGroup({
-    required this.date,
     required this.label,
     required this.totalCents,
     required this.transactions,
@@ -519,7 +563,6 @@ class _DateGroup extends StatelessWidget {
     required this.onPay,
   });
 
-  final DateTime date;
   final String label;
   final int totalCents;
   final List<FinancialTransaction> transactions;
@@ -540,47 +583,32 @@ class _DateGroup extends StatelessWidget {
         DateSectionHeader(label: label, totalCents: totalCents),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: horizontal),
-          child: Material(
-            // Painel de lista = mesmo raio dos cartões (lg/18) — U-17.
-            // (O comentário anterior dizia 16/20, valores que não são
-            // tokens do sistema.)
-            color: scheme.surface,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              side: BorderSide(
-                color: scheme.outlineVariant.withValues(alpha: 0.6),
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                for (var i = 0; i < transactions.length; i++) ...[
-                  if (i > 0)
-                    Divider(
-                      height: 1,
-                      indent: AppSpacing.huge + AppSpacing.sm,
-                      endIndent: AppSpacing.md,
-                      color: scheme.outlineVariant,
-                    ),
-                  TransactionCard(
-                    key: ValueKey(transactions[i].id),
-                    transaction: transactions[i],
-                    onTap: () => onTap(transactions[i]),
-                    onReceive:
-                        transactions[i].status == TransactionStatus.pending &&
-                            transactions[i].type == TransactionType.income
-                        ? () => onReceive(transactions[i])
-                        : null,
-                    onPay:
-                        transactions[i].status == TransactionStatus.pending &&
-                            transactions[i].type == TransactionType.expense
-                        ? () => onPay(transactions[i])
-                        : null,
+          child: Column(
+            children: [
+              for (var i = 0; i < transactions.length; i++) ...[
+                if (i > 0)
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: PremiumDecor.hairline(scheme),
                   ),
-                ],
+                TransactionCard(
+                  key: ValueKey(transactions[i].id),
+                  transaction: transactions[i],
+                  onTap: () => onTap(transactions[i]),
+                  onReceive:
+                      transactions[i].status == TransactionStatus.pending &&
+                          transactions[i].type == TransactionType.income
+                      ? () => onReceive(transactions[i])
+                      : null,
+                  onPay:
+                      transactions[i].status == TransactionStatus.pending &&
+                          transactions[i].type == TransactionType.expense
+                      ? () => onPay(transactions[i])
+                      : null,
+                ),
               ],
-            ),
+            ],
           ),
         ),
       ],
@@ -592,28 +620,27 @@ class _DateGroup extends StatelessWidget {
 // Skeletons.
 // ---------------------------------------------------------------------------
 
-class _CashStackSkeleton extends StatelessWidget {
-  const _CashStackSkeleton();
+class _CashSummarySkeleton extends StatelessWidget {
+  const _CashSummarySkeleton();
 
   @override
   Widget build(BuildContext context) {
     return const Skeleton(
-      child: AppCard(
-        padding: EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SkeletonBlock(width: 96, height: 14),
-            SizedBox(height: 12),
-            SkeletonBlock(width: 180, height: 32),
-            SizedBox(height: 20),
-            SkeletonBlock(width: 999, height: 1),
-            SizedBox(height: 12),
-            SkeletonBlock(width: 160, height: 16),
-            SizedBox(height: 8),
-            SkeletonBlock(width: 140, height: 16),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SkeletonBlock(width: 120, height: 12),
+          SizedBox(height: AppSpacing.xs),
+          SkeletonBlock(width: 200, height: 30),
+          SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              SkeletonBlock(width: 96, height: 14),
+              SizedBox(width: AppSpacing.xxl),
+              SkeletonBlock(width: 96, height: 14),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -624,51 +651,42 @@ class _TransactionsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
+
     return Skeleton(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.sm,
-              AppSpacing.lg,
-              AppSpacing.xs,
-            ),
-            child: SkeletonBlock(width: 120, height: 14),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: AppCard(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                children: [
-                  for (var i = 0; i < 3; i++) ...[
-                    const Row(
-                      children: [
-                        SkeletonBlock(width: 42, height: 42),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SkeletonBlock(width: 160, height: 14),
-                              SizedBox(height: 8),
-                              SkeletonBlock(width: 96, height: 12),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        SkeletonBlock(width: 72, height: 20),
-                      ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: horizontal),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SkeletonBlock(width: 120, height: 14),
+            const SizedBox(height: AppSpacing.md),
+            for (var i = 0; i < 3; i++) ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SkeletonBlock(width: 160, height: 14),
+                          SizedBox(height: AppSpacing.xs),
+                          SkeletonBlock(width: 96, height: 12),
+                        ],
+                      ),
                     ),
-                    if (i < 2) const SizedBox(height: 16),
+                    SizedBox(width: AppSpacing.sm),
+                    SkeletonBlock(width: 88, height: 18),
                   ],
-                ],
+                ),
               ),
-            ),
-          ),
-        ],
+              if (i < 2) const SkeletonBlock(width: 999, height: 1, radius: 0),
+            ],
+          ],
+        ),
       ),
     );
   }

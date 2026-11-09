@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Fundo do splash no dark mode: cinza escuro. -->
-    <color name="ic_launcher_background">#121212</color>
+    <!-- Ícone adaptativo e abertura no escuro: preto da marca (#0C0B0A). -->
+    <color name="ic_launcher_background">#0C0B0A</color>
+    <color name="splash_background">#0C0B0A</color>
 </resources>

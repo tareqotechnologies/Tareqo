@@ -157,13 +157,13 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
             SearchField(
               controller: _searchController,
               hintText: l10n.debtsSearchHint,
               onChanged: (value) => setState(() => _query = value.trim()),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             if (_view == _DebtView.pending) ...[
               // Resumo V3 (canvas): valor a receber + contagem de atrasados
               // (vencidas) ao lado — o número de contas em atraso num
@@ -177,9 +177,9 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                     .length,
                 statColor: theme.expense,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               SectionHeader(title: l10n.debtsPendingSection),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               debtsAsync.when(
                 loading: () => const _DebtsListSkeleton(),
                 error: (error, _) => ErrorView(
@@ -220,7 +220,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                           debt: debt,
                           onSettle: () => _settleDebt(context, debt),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.xs),
                       ],
                     ],
                   );
@@ -234,9 +234,9 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                 statValue: visibleSettled.length,
                 statColor: theme.income,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               SectionHeader(title: l10n.debtsSettledSection),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               settledAsync.when(
                 loading: () => const _DebtsListSkeleton(),
                 error: (error, _) => ErrorView(
@@ -266,7 +266,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                     children: [
                       for (final debt in filtered) ...[
                         _SettledDebtCard(debt: debt),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.xs),
                       ],
                     ],
                   );
@@ -293,8 +293,8 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
 
-    final confirmed = await showConfirmDialog(context: 
-      context,
+    final confirmed = await showConfirmDialog(
+      context: context,
       title: l10n.debtsSettleTitle,
       message: l10n.debtsSettleBody(
         Formatters.currency(debt.amountCents),
@@ -394,7 +394,7 @@ class _SummaryCard extends StatelessWidget {
               color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.micro),
           Text(
             '$statValue',
             style: theme.textTheme.headlineSmall?.copyWith(color: statColor),
@@ -479,8 +479,8 @@ class _DebtCard extends StatelessWidget {
                       // Nome + tag de vencimento inline (canvas) — Wrap para
                       // não estourar em telas estreitas com escala alta.
                       Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
+                        spacing: AppSpacing.xs,
+                        runSpacing: AppSpacing.xxs,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           // Nome COMPLETO do cliente — quebra em linhas
@@ -492,7 +492,7 @@ class _DebtCard extends StatelessWidget {
                           StatusChip(label: chipLabel, color: chipColor),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xxs),
                       // Descrição: número SEQUENCIAL + vencimento relativo
                       // (ex.: "D-00001 · venceu há 3 dias").
                       Text(
@@ -504,7 +504,7 @@ class _DebtCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.xs),
                 // Valor — SmartAmount (design system ultra-clean): ENCOLHE
                 // para caber — nunca trunca. Tabular: alinhado na coluna.
                 Flexible(
@@ -517,7 +517,7 @@ class _DebtCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           // Botão de quitação verde em largura total (canvas): a ação
           // principal do card, sólida e clara — FORA do nó de informações.
           AppButton.primary(onPressed: onSettle, label: l10n.debtsSettleAction),
@@ -567,8 +567,8 @@ class _SettledDebtCard extends StatelessWidget {
                 children: [
                   // Nome + chip de baixa inline (mesmo padrão do pendente).
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xxs,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       // Nome COMPLETO do cliente — quebra em linhas quando
@@ -585,7 +585,7 @@ class _SettledDebtCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xxs),
                   // Número SEQUENCIAL do fiado (D-00001).
                   Text(
                     Formatters.debtLabel(debt.number),
@@ -596,7 +596,7 @@ class _SettledDebtCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.xs),
             // Valor — SmartAmount (design system ultra-clean): ENCOLHE para
             // caber — nunca trunca; visível no histórico. Tabular: alinhado.
             Flexible(
@@ -625,9 +625,9 @@ class _DebtsListSkeleton extends StatelessWidget {
       child: Column(
         children: [
           SkeletonBlock(height: 64, radius: 16),
-          SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
           SkeletonBlock(height: 64, radius: 16),
-          SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
           SkeletonBlock(height: 64, radius: 16),
         ],
       ),

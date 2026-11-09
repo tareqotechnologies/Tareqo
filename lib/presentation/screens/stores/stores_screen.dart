@@ -453,8 +453,8 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
   /// Confirma e ativa/desativa o funcionário (só o dono chega aqui).
   Future<void> _toggleEmployee(StoreEmployee employee, bool isActive) async {
     final l10n = context.l10n;
-    final confirmed = await showConfirmDialog(context: 
-      context,
+    final confirmed = await showConfirmDialog(
+      context: context,
       title: isActive
           ? l10n.employeeReactivateConfirm(employee.fullName)
           : l10n.employeeDeactivateConfirm(employee.fullName),

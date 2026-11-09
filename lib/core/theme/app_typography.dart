@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// Tipografia do TAREQO — Inter (variável, eixos wght + opsz).
+/// Tipografia do TAREQO — dois cortes do anexo (Text & Styles):
+/// **Regular (400)** e **Medium (500)**. Semibold não faz parte do tema.
+///
+/// A família desenhada no anexo é Neue Montreal. Os ficheiros dessa fonte
+/// são comerciais e não estão no repositório; a família empacotada é Inter
+/// (OFL), no mesmo papel: Regular no corpo, Medium nos títulos e controlos.
+/// Trocar o ficheiro por Neue Montreal licenciada é só mudar [family] e o
+/// bloco `fonts` do pubspec — a escala não muda.
+///
 /// Escala modular centralizada — todos os textos, títulos, valores financeiros,
 /// botões, campos, cards, filtros, modais, notificações e elementos de navegação
 /// devem usar estes tokens reutilizáveis em vez de definições inline.
@@ -12,10 +20,10 @@ import 'package:flutter/material.dart';
 ///
 /// | Token | px | LH | Peso | Uso |
 /// |-------|----|----|------|-----|
-/// | display | 28 | 36 | 600 | Saldo principal, grandes destaques. O maior elemento da tela. |
-/// | headline | 24 | 32 | 600 | Títulos de página principais. |
-/// | titleLarge | 20 | 28 | 600 | Títulos de blocos e referências. |
-/// | sectionTitle | 18 | 24 | 600 | Títulos de secção. |
+/// | display | 28 | 36 | 500 | Saldo principal, grandes destaques. O maior elemento da tela. |
+/// | headline | 24 | 32 | 500 | Títulos de página principais. |
+/// | titleLarge | 20 | 28 | 500 | Títulos de blocos e referências. |
+/// | sectionTitle | 18 | 24 | 500 | Títulos de secção. |
 /// | titleMedium | 16 | 24 | 500 | Títulos de card e grupos de informações. |
 /// | bodyLarge | 16 | 24 | 400 | Textos principais e descrições importantes. |
 /// | bodyMedium | 14 | 20 | 400 | Textos secundários, listas e informações gerais. |
@@ -24,10 +32,9 @@ import 'package:flutter/material.dart';
 /// | labelMedium | 12 | 16 | 500 | Filtros, status e ações secundárias. |
 /// | labelSmall | 11 | 16 | 500 | Apenas informação não essencial. |
 ///
-/// Pesos permitidos: **400, 500 e 600**. O w600 é reservado a títulos e ao
-/// valor financeiro dominante — não é o peso padrão de nada. Listas de
-/// transações usam valores em 15/w500 ([amountInRow]): o número alinha, mas
-/// não domina a linha.
+/// Pesos permitidos no tema: **400 (Regular) e 500 (Medium)**. O Medium
+/// cobre títulos, botões e o valor dominante. Listas de transações usam
+/// valores em 15/w500 ([amountInRow]): o número alinha, mas não domina a linha.
 abstract final class AppTypography {
   /// Família tipográfica principal.
   ///
@@ -66,7 +73,7 @@ abstract final class AppTypography {
   static const double summaryAmountSize = 22;
   static const double summaryAmountLineHeight = 28;
 
-  /// Saldo principal — 26/600 é o teto de destaque monetário pedido.
+  /// Saldo principal — 26/Medium é o teto de destaque monetário.
   static const double heroAmountSize = 26;
   static const double heroAmountLineHeight = 32;
 
@@ -89,9 +96,9 @@ abstract final class AppTypography {
 
   /// --- Peso ---
 
-  static const FontWeight displayWeight = FontWeight.w600;
-  static const FontWeight headlineWeight = FontWeight.w600;
-  static const FontWeight titleLargeWeight = FontWeight.w600;
+  static const FontWeight displayWeight = FontWeight.w500;
+  static const FontWeight headlineWeight = FontWeight.w500;
+  static const FontWeight titleLargeWeight = FontWeight.w500;
   static const FontWeight titleMediumWeight = FontWeight.w500;
   static const FontWeight bodyLargeWeight = FontWeight.w400;
   static const FontWeight bodyMediumWeight = FontWeight.w400;
@@ -176,12 +183,12 @@ abstract final class AppTypography {
     letterSpacing: titleLargeLetterSpacing,
   );
 
-  /// sectionTitle — Títulos de secção (18/w600), abaixo do título de
+  /// sectionTitle — Títulos de secção (18/Medium), abaixo do título de
   /// página e acima do corpo.
   static TextStyle get sectionTitle => _base(
     fontSize: sectionTitleSize,
     lineHeight: sectionTitleLineHeight,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     letterSpacing: titleLargeLetterSpacing,
   );
 
@@ -277,24 +284,24 @@ abstract final class AppTypography {
 
   /// --- TextStyles específicas para contexto financeiro ---
 
-  /// [TextStyle] do valor-herói de um ecrã (26/w600, tabular) — o saldo
+  /// [TextStyle] do valor-herói de um ecrã (26/Medium, tabular) — o saldo
   /// principal ou o total mais importante do resumo. 26 é o teto: mesmo o
   /// número de destaque não deve parecer um título.
   static TextStyle heroAmount(Color color) => _base(
     fontSize: heroAmountSize,
     lineHeight: heroAmountLineHeight,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     letterSpacing: displayLetterSpacing,
     color: color,
   );
 
-  /// [TextStyle] do total de um resumo compacto (22/w600, tabular) — o
+  /// [TextStyle] do total de um resumo compacto (22/Medium, tabular) — o
   /// valor do dia em Vendas. Hierarquia clara sem competir com o
   /// [heroAmount] nem com o título do ecrã.
   static TextStyle summaryAmount(Color color) => _base(
     fontSize: summaryAmountSize,
     lineHeight: summaryAmountLineHeight,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     letterSpacing: titleLargeLetterSpacing,
     color: color,
   );
@@ -323,14 +330,13 @@ abstract final class AppTypography {
     color: color,
   );
 
-  /// Rótulo da navegação inferior/rail — labelMedium (12/w500), nunca 11:
-  /// os destinos precisam de leitura confortável em ecrãs pequenos.
-  /// O item ativo usa w600 (ênfase de estado, não de carácter).
+  /// Rótulo da navegação inferior/rail — 12 px, nunca 11.
+  /// Repouso = Regular (400); destino ativo = Medium (500).
   static TextStyle navigationLabel(Color color, {bool selected = false}) =>
       _base(
         fontSize: labelMediumSize,
         lineHeight: labelMediumLineHeight,
-        fontWeight: selected ? FontWeight.w600 : labelMediumWeight,
+        fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
         letterSpacing: 0,
         color: color,
       );

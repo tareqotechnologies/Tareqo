@@ -225,16 +225,16 @@ Key widgets (all with design system consistency):
 - **Skeleton**: loading skeleton (various block shapes)
 
 ### 4.4 Asset & Icon System
-- **Branding icon**: `assets/branding/icon_official.png` (blue square + arc + "D" white + blue dot)
+- **Branding icon**: `assets/branding/icon_official.png` (monograma TQ — preto `#0C0B0A` + branco suave `#F9F9F9`, paleta oficial)
 - **Splash logo**: `assets/branding/splash_logo.png`
 - **App icons**: Generated via `flutter_launcher_icons` from `icon_legacy.png`
 - **Font icons**: Material Cupertino icons (`^1.0.8`)
-- **Custom icons**: Generated via `tool/generate_icons_test.dart` + `tool/apply_official_icon.py`
+- **Custom icons**: `tool/gen_tq_logo.py` (mestre 1024) + `tool/generate_icons_test.dart` (PNG por plataforma) + `flutter_launcher_icons`
 
 ### 4.5 Known Theme Issues
 - `always_use_package_imports` excluded by design convention (relative imports used)
 - Font weight mapping: `FontWeight.w600` maps to eixo `wght` ~400-500 in Inter variable
-- No `green` in official theme (terracotta `#B58863` used as "green" in prior versions — now `ModuleColors.green = #B58863` retained as semantic warm accent)
+- Palette is closed: only `#FF6A2A`, `#F0F0F0`, `#F9F9F9`, `#0C0B0A` — alerts `#2E7D32`/`#C62828`/`#F9A825` are the only exception (enforced by `test/core/theme/palette_guard_test.dart`)
 - `OutlineInputBorder` radius consistency: `AppRadius.mdAll` (12) used everywhere
 
 ---

@@ -18,7 +18,6 @@ import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_picker_field.dart';
-import '../../navigation/app_routes.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
@@ -711,6 +710,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
       ).split(' ').first,
     );
     _codeController = TextEditingController(text: _product.code);
+    _barcodeController = TextEditingController(text: _product.barcode);
     _vendaPorFracao = _product.vendaPorFracao;
     _unitLabel = _product.vendaPorFracao ? _product.unitLabel : 'un';
     _isActive = _product.isActive;
@@ -1192,7 +1192,7 @@ class ProductIdentitySection extends StatelessWidget {
           suffixIcon: onScanBarcode == null
               ? null
               : IconButton(
-                  icon: Icon(Icons.center_focus_strong),
+                  icon: const Icon(Icons.center_focus_strong),
                   tooltip: l10n.productsBarcodeLabel,
                   onPressed: onScanBarcode,
                 ),
@@ -1214,15 +1214,8 @@ class ProductIdentitySection extends StatelessWidget {
               if (!digitRegex.hasMatch(cleaned)) {
                 return l10n.productsBarcodeError;
               }
-              // Validar comprimentos comuns.
-              if (cleaned.length != 8 &&
-                  cleaned.length != 12 &&
-                  cleaned.length != 13) {
-                // Code 128 pode ter outros comprimentos, então apenas avisar.
-                if (l10n.productsBarcodeLengthWarning != null) {
-                  // Sem erro fatal, apenas aviso visual.
-                }
-              }
+              // Comprimentos fora de EAN-13/EAN-8/UPC-A são aceitos como
+              // Code 128 (variável) — sem erro.
             }
             return null;
           },

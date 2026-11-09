@@ -5,14 +5,14 @@ import '../../core/theme/app_colors.dart';
 import '../../domain/entities/product.dart';
 import 'status_chip.dart';
 
-/// Cores dos selos de categoria de produto (modo escuro otimizado).
-/// Revenda: cinza; Produzido: laranja; Composto: azul/roxo.
+/// Cores dos selos de categoria de produto — paleta oficial.
+/// Revenda: preto; Produzido: laranja; Composto: cinza.
 /// Utilizadas nos selos/badges ao lado dos produtos.
 Color productTypeColor(ProductType type) => switch (type) {
   ProductType.rawMaterial => AppColors.accentOrangeSoft,
-  ProductType.resale => AppColors.categoryResale,       // gray 300
-  ProductType.manufactured => AppColors.categoryProduzido, // orange accent
-  ProductType.composite => AppColors.categoryComposto,     // violet 400
+  ProductType.resale => AppColors.categoryResale,
+  ProductType.manufactured => AppColors.categoryProduzido,
+  ProductType.composite => AppColors.categoryComposto,
   ProductType.packaging => AppColors.lightSurfaceSecondary,
 };
 
@@ -31,11 +31,11 @@ String productTypeLabel(BuildContext context, ProductType type) =>
 /// operador reconhecer o papel do produto (matéria-prima, revenda,
 /// produzido, composto, embalagem) sem abrir o cadastro.
 ///
-/// Convenção de exibição: as LINHAS do PDV e das compras mostram o selo em
-/// TODOS os tipos (incluindo [ProductType.resale], para o operador ver
-/// sempre o papel); a lista de Produtos omite o selo de [ProductType.resale]
-/// (o estado comum do varejo — evita ruído) e guarda a visibilidade com
-/// `if (type != ProductType.resale)`.
+/// Convenção de exibição: o PDV e a lista de Produtos mostram o tipo como
+/// TEXTO na linha de metadados (via [productTypeLabel]) — superfícies
+/// densas em que o selo colorido competiria com preço e quantidade; no
+/// PDV [ProductType.resale] também aparece (o operador vê sempre o
+/// papel). Compras e Produção mantêm o selo colorido.
 class ProductTypeBadge extends StatelessWidget {
   const ProductTypeBadge({super.key, required this.type});
 

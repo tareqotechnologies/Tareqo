@@ -378,18 +378,17 @@ void main() {
       }
     });
 
-    testWidgets('labels da navegação usam w500/w600 — cor + peso', (
+    testWidgets('labels da navegação usam Regular/Medium — cor + peso', (
       tester,
     ) async {
       final theme = AppTheme.dark;
-      // Signature: o estado selecionado ganha peso (w600) além da cor;
-      // o não selecionado mantém w500. Travar ambos evita regressão.
+      // Anexo: repouso Regular (w400), destino ativo Medium (w500).
       final unselected = theme.navigationBarTheme.labelTextStyle!.resolve({});
       final selected = theme.navigationBarTheme.labelTextStyle!.resolve({
         WidgetState.selected,
       });
-      expect(unselected?.fontWeight, FontWeight.w500);
-      expect(selected?.fontWeight, FontWeight.w600);
+      expect(unselected?.fontWeight, FontWeight.w400);
+      expect(selected?.fontWeight, FontWeight.w500);
     });
 
     testWidgets('pílula do NavigationRail é StadiumBorder (igual à barra)', (

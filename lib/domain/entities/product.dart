@@ -95,7 +95,18 @@ abstract class Product with _$Product {
     // Estoque em MILÉSIMOS de unidade (W11): 1000 = 1 unidade (produtos
     // normais) ou 1 kg/litro (produtos por peso). Inteiro exato — mesma
     // filosofia dos centavos (W4).
-    @Default(0) int stockQuantity,// Código de barras convencional do produto (EAN-13, EAN-8, UPC-A, UPC-E,// Code 128 etc.). Campo opcional, universal — independente do PLU ou// configuração de balança. Prefixo vazio = sem código de barras.@Default('') String barcode,// Código de barras/PLU do produto (opcional, até 5 dígitos): usado// pelas balanças etiquetadoras (formato 20PPPPPWWWWW) e pelo campo de// código de barras do PDV. Os ids internos são alfanuméricos longos;// o PLU é o código numérico impresso nas etiquetas.@Default('') String code,
+    @Default(0)
+    int
+    stockQuantity, // Código de barras convencional do produto (EAN-13, EAN-8, UPC-A, UPC-E,
+    // Code 128 etc.). Campo opcional, universal — independente do PLU ou
+    // configuração de balança. Prefixo vazio = sem código de barras.
+    @Default('')
+    String
+    barcode, // Código de barras/PLU do produto (opcional, até 5 dígitos): usado
+    // pelas balanças etiquetadoras (formato 20PPPPPWWWWW) e pelo campo de
+    // código de barras do PDV. Os ids internos são alfanuméricos longos;
+    // o PLU é o código numérico impresso nas etiquetas.
+    @Default('') String code,
     // Venda por FRAÇÃO (peso/granel): quando verdadeiro, o PDV aceita
     // quantidades decimais (ex.: 1,75 kg) e o código de barras de balança
     // é interpretado. O preço unitário é por UNIDADE da [unitLabel]

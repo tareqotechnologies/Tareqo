@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:tareqo/core/share/report_exporter.dart';
 import 'package:tareqo/domain/usecases/get_sales_report_use_case.dart';
@@ -49,6 +50,9 @@ SalesReport _report() => SalesReport(
 );
 
 void main() {
+  // Formatters usa DateFormat com locale; fora de MaterialApp a base do
+  // intl não está carregada.
+  setUpAll(() => initializeDateFormatting());
   // O buildPdf embute a fonte Inter via rootBundle (asset do pubspec).
   TestWidgetsFlutterBinding.ensureInitialized();
 

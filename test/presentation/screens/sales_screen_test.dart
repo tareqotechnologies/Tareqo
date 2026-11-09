@@ -233,7 +233,9 @@ void main() {
     expect(find.text('Nova venda'), findsOneWidget);
   });
 
-  testWidgets('tocar no card abre o sheet de detalhes da venda', (tester) async {
+  testWidgets('tocar no card abre o sheet de detalhes da venda', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _buildApp(
         _FakeSalesRepository([
@@ -268,9 +270,11 @@ void main() {
         (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color == AppColors.accentOrange &&
+            (widget.decoration as BoxDecoration).color ==
+                AppColors.accentOrange &&
             (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-            widget.constraints?.maxWidth == 40 && widget.constraints?.maxHeight == 40,
+            widget.constraints?.maxWidth == 40 &&
+            widget.constraints?.maxHeight == 40,
       ),
       findsNWidgets(3), // header card + header sheet + item sheet
     );

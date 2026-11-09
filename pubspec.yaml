@@ -152,11 +152,9 @@ flutter:
   # Garante que a fonte de ícones Material esteja incluída no aplicativo.
   uses-material-design: true
 
-  # Logotipo oficial da marca (azul/branco) — usada pela tela de
-  # abertura in-app (_SplashScreen do AuthGate). Gerada por
-  # tool/generate_icons_test.dart a partir de assets/branding/icon_official.png
-  # (que por sua vez é gerado por tool/apply_official_icon.py a partir do
-  # anexo oficial do utilizador).
+  # Logotipo oficial da marca (preto/branco — paleta oficial) — usada pela
+  # tela de abertura in-app (_SplashScreen do AuthGate). Gerada por
+  # tool/generate_icons_test.dart a partir de assets/branding/icon_official.png.
   assets:
     # Branding — imagens da marca oficial (splash, login, onboarding).
     - assets/branding/icon_official.png
@@ -171,6 +169,10 @@ flutter:
     - docs/en/TROUBLESHOOTING.md
     - docs/fr/GUIDE_DE_L_UTILISATEUR.md
     - docs/fr/DEPANNAGE.md
+    # Instância estática em w700 — o package `pdf` NÃO resolve o eixo de
+    # uma fonte variável (o texto sairia todo a w400). Os PDFs carregam este
+    # asset diretamente; a UI continua a usar a variável pelo family Inter.
+    - assets/fonts/Inter-Bold.ttf
 
   # Fonte tipográfica do ERP: Inter (variável, eixo opsz+wght).
   # Escolhida por legibilidade em telas densas de dados (ERP) e suporte
@@ -179,9 +181,8 @@ flutter:
     - family: Inter
       fonts:
         # Instância variável oficial (OFL 1.1, 854 KB) — eixo wght
-        # 100–900 + opsz. A antiga `Inter-Bold.ttf` foi removida: o
-        # motor resolve w700 pelo eixo variável; para PDFs (que não
-        # selecionam wght) usar a instância média documentada.
+        # 100–900 + opsz. O texto da UI resolve w700 pelo eixo variável;
+        # os PDFs usam a estática Inter-Bold.ttf declarada em `assets:`.
         - asset: assets/fonts/Inter-Variable.ttf
     # Mono — família 'monospace' (nome do PAPEL, não da fonte): todos os
     # `fontFamily: 'monospace'` do app (código MFA, IDs do painel admin,
@@ -194,23 +195,20 @@ flutter:
         - asset: assets/fonts/RobotoMono-Variable.ttf
 
 # Ícones nativos (W7) — gerados por tool/generate_icons_test.dart a partir
-# da imagem-fonte assets/branding/icon_official.png (design OFICIAL do
-# utilizador: quadrado azul arredondado + arco + "D" branco + ponto azul,
-# aplicado por tool/apply_official_icon.py). Correr:
-#   python tool/apply_official_icon.py
+# da imagem-fonte assets/branding/icon_official.png (monograma TQ oficial,
+# preto #0C0B0A + branco suave #F9F9F9). Correr:
 #   flutter test tool/generate_icons_test.dart && dart run flutter_launcher_icons
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/branding/icon_legacy.png"
-  # Fundo BRANCO do adaptativo — a mesma cara do .ico oficial (fundo branco
-  # + logotipo azul no foreground, keyado).
-  adaptive_icon_background: "#000000"
+  # Fundo do adaptativo: preto oficial da paleta.
+  adaptive_icon_background: "#0C0B0A"
   adaptive_icon_foreground: "assets/branding/icon_fg.png"
   adaptive_icon_monochrome: "assets/branding/icon_mono.png"
   remove_alpha_ios: true
   # Windows desktop: gera o app_icon.ico (multi-tamanho) com o ícone oficial
-  # completo (fundo branco + sacola azul + D) — mesmo desenho do Android/iOS.
+  # completo (fundo preto + monograma suave) — mesmo desenho do Android/iOS.
   windows:
     generate: true
     image_path: "assets/branding/icon_legacy.png"

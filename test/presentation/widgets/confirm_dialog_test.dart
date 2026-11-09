@@ -28,8 +28,8 @@ void main() {
         home: Builder(
           builder: (context) => Center(
             child: ElevatedButton(
-              onPressed: () => result = showConfirmDialog(context: 
-                context,
+              onPressed: () => result = showConfirmDialog(
+                context: context,
                 title: title,
                 message: message,
                 confirmLabel: confirmLabel,
@@ -95,8 +95,8 @@ void main() {
           home: Builder(
             builder: (context) => Center(
               child: ElevatedButton(
-                onPressed: () => result = showConfirmDialog(context: 
-                  context,
+                onPressed: () => result = showConfirmDialog(
+                  context: context,
                   title: 'Sair?',
                   confirmLabel: 'Sair',
                 ),

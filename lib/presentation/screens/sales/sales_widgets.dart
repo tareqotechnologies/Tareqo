@@ -6,6 +6,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/sale.dart';
+import '../../widgets/premium_decor.dart';
 
 /// Cabeçalho-resumo da tela de vendas.
 ///
@@ -140,7 +141,7 @@ class SalesSummaryHeader extends StatelessWidget {
                 height: 1,
                 indent: 60,
                 endIndent: AppSpacing.md,
-                color: scheme.outlineVariant,
+                color: PremiumDecor.hairline(scheme),
               ),
             rows[i],
           ],

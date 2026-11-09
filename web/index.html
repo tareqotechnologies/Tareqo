@@ -19,7 +19,7 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="TAREQO — gestão empresarial multi-tenant (estoque, vendas, fiado, compras e relatórios).">
-  <meta name="theme-color" content="#0076F6">
+  <meta name="theme-color" content="#FF6A2A">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -34,13 +34,12 @@
   <title>TAREQO</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    /* Tela de abertura do shell web (branca — identidade OFICIAL azul/branco,
-       v4) — o ícone oficial centralizado enquanto o Flutter carrega. */
+    /* Abertura do shell web — canvas do anexo (#F9F9F9 / #0C0B0A). */
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      background: #ffffff;
+      background: #F9F9F9;
     }
     #splash {
       position: fixed;
@@ -48,14 +47,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #ffffff;
+      background: #F9F9F9;
     }
     #splash img {
       width: 96px;
       height: 96px;
     }
     @media (prefers-color-scheme: dark) {
-      #splash { background: #ffffff; }
+      html, body, #splash { background: #0C0B0A; }
     }
   </style>
 </head>

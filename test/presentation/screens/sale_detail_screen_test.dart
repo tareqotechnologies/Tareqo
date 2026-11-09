@@ -176,17 +176,22 @@ void main() {
       find.text('1 × R\$ 9,90'),
       findsOneWidget,
     ); // Total em destaque e nota de snapshot.
-    expect(find.textContaining('13,90'), findsAtLeastNWidgets(1)); // total (header + rodapé)
+    expect(
+      find.textContaining('13,90'),
+      findsAtLeastNWidgets(1),
+    ); // total (header + rodapé)
     // Chrome do feed: ícone circular laranja (40px) no cabeçalho da venda +
-    // em cada item — header + 2 itens = 3 ícones.  
+    // em cada item — header + 2 itens = 3 ícones.
     expect(
       find.byWidgetPredicate(
         (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color == AppColors.accentOrange &&
+            (widget.decoration as BoxDecoration).color ==
+                AppColors.accentOrange &&
             (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-            widget.constraints?.maxWidth == 40 && widget.constraints?.maxHeight == 40,
+            widget.constraints?.maxWidth == 40 &&
+            widget.constraints?.maxHeight == 40,
       ),
       findsNWidgets(3), // header + Caneta + Caderno
     );

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show MethodChannel;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 import 'package:tareqo/core/share/report_exporter.dart';
@@ -67,6 +68,7 @@ void main() {
   late StubSupabaseHttp stub;
 
   setUpAll(() async {
+    await initializeDateFormatting();
     stub = await initStubbedSupabase();
     await signInStubUser();
   });

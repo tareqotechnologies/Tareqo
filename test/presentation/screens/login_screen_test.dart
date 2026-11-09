@@ -313,10 +313,7 @@ void main() {
         find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
       );
       expect(overlay.value.statusBarIconBrightness, Brightness.dark);
-      expect(
-        overlay.value.systemNavigationBarColor,
-        AppColors.scaffoldLight,
-      );
+      expect(overlay.value.systemNavigationBarColor, AppColors.scaffoldLight);
       expect(overlay.value.systemNavigationBarIconBrightness, Brightness.dark);
     },
   );
@@ -346,7 +343,7 @@ void main() {
   });
 
   testWidgets(
-    'Large Title (4.5): título segue a escala (displaySmall 28/w600) e o '
+    'Large Title (4.5): título segue a escala (displaySmall 28/Medium) e o '
     'header desliza a meia velocidade do conteúdo (parallax)',
     (tester) async {
       final repository = _FakeAuthRepository();
@@ -354,10 +351,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Título na escala tipográfica — o papel "Large Title —
-      // login/boas-vindas" do `displaySmall` (token `display`: 28/w600).
+      // login/boas-vindas" do `displaySmall` (token `display`: 28/Medium).
       final title = tester.widget<Text>(find.text('TAREQO'));
       expect(title.style?.fontSize, 28);
-      expect(title.style?.fontWeight, FontWeight.w600);
+      expect(title.style?.fontWeight, FontWeight.w500);
 
       // Em repouso (sem scroll) o translate é 0 — a página renderiza
       // pixel-idêntica ao layout estático.

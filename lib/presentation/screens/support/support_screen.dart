@@ -9,6 +9,8 @@ import '../../../core/theme/app_typography.dart';
 import '../../navigation/app_routes.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/search_field.dart';
 import 'doc_reader_screen.dart';
 
 /// Ecrã Ajuda — hub do fluxo de suporte (Lojas → Ajustes → Suporte → Ajuda).
@@ -60,9 +62,7 @@ class _SupportScreenState extends State<SupportScreen> {
   // ── Navegação / links externos ──────────────────────────────────────────
 
   void _open(BuildContext context, SupportDocument document) {
-    AppNavigator.pushWith(context, AppRoutes.docReader, {
-      'document': document,
-    });
+    AppNavigator.pushWith(context, AppRoutes.docReader, {'document': document});
   }
 
   /// Abre um link externo (WhatsApp do suporte / site) no navegador; em caso
@@ -129,23 +129,18 @@ class _SupportScreenState extends State<SupportScreen> {
               color: IconTone.lightForeground(accent),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: AppTypography.titleLarge,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  hint,style: AppTypography.bodySmall,
-                ),
+                Text(title, style: AppTypography.titleLarge),
+                const SizedBox(height: AppSpacing.micro),
+                Text(hint, style: AppTypography.bodySmall),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.xs),
           Icon(
             Icons.chevron_right,
             size: 24,
@@ -188,9 +183,12 @@ class _SupportScreenState extends State<SupportScreen> {
                   color: scheme.onSurface,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.xs),
               Text(
-                context.l10n.supportHelpCenter,style: AppTypography.bodySmall.copyWith(color: scheme.onSurfaceVariant,            ),
+                context.l10n.supportHelpCenter,
+                style: AppTypography.bodySmall.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -233,46 +231,36 @@ class _SupportScreenState extends State<SupportScreen> {
       title: l10n.supportTitle,
       useSafeArea: false,
       body: ListView(
-        padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 48),
+        padding: EdgeInsets.fromLTRB(
+          horizontal,
+          AppSpacing.xs,
+          horizontal,
+          AppSpacing.huge,
+        ),
         children: [
           Text(
-            l10n.supportSubtitle,style: AppTypography.bodyMedium.copyWith(              color: theme.colorScheme.onSurfaceVariant,              height: 1.45,            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _searchController,
-            textInputAction: TextInputAction.search,
-            onChanged: (value) => setState(() => _query = value),
-            decoration: InputDecoration(
-              hintText: l10n.supportSearchHint,
-              prefixIcon: const Icon(Icons.search, size: 22),
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
+            l10n.supportSubtitle,
+            style: AppTypography.bodyMedium.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.45,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
+          SearchField(
+            controller: _searchController,
+            hintText: l10n.supportSearchHint,
+            onChanged: (value) => setState(() => _query = value),
+          ),
+          const SizedBox(height: AppSpacing.md),
           if (visible.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-              child: Column(
-                children: [
-                  Text(l10n.commonNoResults, style: AppTypography.titleLarge),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.commonNoResultsHint,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+            EmptyState(
+              icon: Icons.search_off,
+              title: l10n.commonNoResults,
+              subtitle: l10n.commonNoResultsHint,
             )
           else ...[
             for (var i = 0; i < visible.length; i++) ...[
-              if (i > 0) const SizedBox(height: 12),
+              if (i > 0) const SizedBox(height: AppSpacing.sm),
               _tile(
                 context,
                 icon: visible[i].icon,

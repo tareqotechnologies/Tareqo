@@ -19,8 +19,8 @@ import 'package:tareqo/presentation/widgets/payment_filter.dart';
 /// equivalente à barra de não-texto do WCAG).
 ///
 /// Os pares usam as cores EFETIVAS (após composição alfa): o [StatusChip]
-/// pinta o fundo com `color@14%` sobre a superfície e, no escuro, o texto
-/// com `color@90%` sobre esse fundo — os valores reais renderizados.
+/// pinta o fundo com `color@12%` sobre a superfície e o texto com a cor
+/// sólida — os valores reais renderizados.
 
 double _luminance(Color color) {
   double linear(double v) =>
@@ -66,7 +66,7 @@ void main() {
         theme.snackBarTheme.backgroundColor ?? const Color(0xFF1C2623);
     final snackFg = theme.snackBarTheme.contentTextStyle?.color ?? Colors.white;
 
-    Color chipBg(Color color) => _compose(surface, color, 0.14);
+    Color chipBg(Color color) => _compose(surface, color, 0.12);
     Color summaryBg(Color color) => _compose(surface, color, 0.10);
 
     test('pares de texto do ColorScheme atingem AA 4.5:1', () {
@@ -104,7 +104,12 @@ void main() {
         ('expense', theme.expense),
         ('warning', theme.warning),
       ]) {
-        _expectContrast(color, surface, '$label/superfície (ícone)', minRatio: 3.0);
+        _expectContrast(
+          color,
+          surface,
+          '$label/superfície (ícone)',
+          minRatio: 3.0,
+        );
         _expectContrast(color, chipBg(color), '$label/chip', minRatio: 3.0);
         // Card de resumo do fiado: fundo com 10% da cor (texto grande, 3:1).
         _expectContrast(
@@ -131,8 +136,8 @@ void main() {
     final snackFg =
         theme.snackBarTheme.contentTextStyle?.color ?? const Color(0xFF101413);
 
-    Color chipBg(Color color) => _compose(surface, color, 0.14);
-    Color chipFg(Color color) => _compose(chipBg(color), color, 0.90);
+    Color chipBg(Color color) => _compose(surface, color, 0.12);
+    Color chipFg(Color color) => color;
     Color summaryBg(Color color) => _compose(surface, color, 0.10);
 
     test('pares de texto do ColorScheme atingem AA 4.5:1', () {
@@ -167,7 +172,12 @@ void main() {
         ('warning', theme.warning),
       ]) {
         // Ícone/valor sobre o card escuro — 3:1 (WCAG não-texto).
-        _expectContrast(color, surface, '$label/card (não-texto)', minRatio: 3.0);
+        _expectContrast(
+          color,
+          surface,
+          '$label/card (não-texto)',
+          minRatio: 3.0,
+        );
         // Chips de status: texto @90% sobre pílula tintada (3:1).
         _expectContrast(
           chipFg(color),

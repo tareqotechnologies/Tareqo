@@ -174,15 +174,15 @@ Widget _buildShell({
 }
 
 void main() {
-  /// Badges têm tipografia única no painel: label w600 branco (KPIs e
-  /// rótulos são w300/w400 herdados do tema thin).
-  // O badge escreve com o `onError` do tema (não branco fixo): no escuro o
-  // vermelho do badge é claro e exige tinta escura para manter o AA.
+  /// Badges têm tipografia única no painel: label Medium (KPIs e
+  /// rótulos são Regular, herdados do tema thin).
+  // O badge escreve com o `onError` do tema: no escuro o vermelho do
+  // badge é claro e exige tinta escura para manter o AA.
   Iterable<Text> badgeTexts(WidgetTester tester, String s) => tester
       .widgetList<Text>(find.text(s))
       .where(
         (t) =>
-            t.style?.fontWeight == FontWeight.w600 &&
+            t.style?.fontWeight == FontWeight.w500 &&
             t.style?.color == AppTheme.dark.colorScheme.onError,
       );
 

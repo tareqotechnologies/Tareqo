@@ -20,8 +20,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="180" height="180"/>
                             </imageView>
                         </subviews>
-                        <!-- Fundo dark premium: #101112 -->
-                        <color key="backgroundColor" red="0.063" green="0.067" blue="0.071" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" name="LaunchBackground"/>
                         <constraints>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="1a2-6s-vTC"/>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="4X2-HB-R7a"/>

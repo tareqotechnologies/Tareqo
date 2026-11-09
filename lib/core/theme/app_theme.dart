@@ -9,19 +9,14 @@ import 'app_typography.dart';
 // `AppStatusColors` acessíveis para quem importa apenas `app_theme.dart`.
 export 'app_colors.dart';
 
-/// Cores auxiliares do [ThemeData] — paleta oficial (U-23).
-/// Delegam para [AppColors] sem fracionamento de nomes.
-final class _AppThemeAuxColors {
-  /// Preto oficial (#0C0B0A) sobre gelo.
-  static const Color inkDark = AppColors.brandBlack;
-  static const Color inkLight = AppColors.softWhite;
-}
-
-/// Tema central TAREQO Signature — Material 3 com linguagem de interação Apple.
+/// Tema central TAREQO — Material 3 sobre a paleta do anexo.
 ///
-/// Identidade: neutros de inspiração Apple (canvas, tinta, preto OLED) e UM
-/// acento quente (laranja) reservado a alertas. A ação principal é a própria
-/// tinta — carvão no claro, branco suave no escuro — como um botão Apple.
+/// Quatro cores sólidas: laranja `#FF6A2A` (ação, foco, seleção),
+/// cinza `#F0F0F0` (campos e divisores), suave `#F9F9F9` (canvas claro)
+/// e preto `#0C0B0A` (tinta e canvas escuro). O botão primário é laranja
+/// com rótulo preto. A pílula selecionada (Regular / Medium do anexo) é
+/// preenchida de preto no claro e de suave no escuro, com contorno laranja
+/// no estado em repouso.
 ///
 /// Arquitetura:
 /// * `AppTheme.light` / `AppTheme.dark` — dois [ThemeData] construídos
@@ -32,20 +27,18 @@ final class _AppThemeAuxColors {
 ///   movimento em `AppTokens`.
 ///
 /// Papéis do [ColorScheme] (contrato):
-/// * `primary` = cor de AÇÃO com contraste forte sobre `surface` (usada como
-///   texto/ícone/borda/seleção em todo o app) e `onPrimary` = o que se lê
-///   sobre ela. Nunca branco-sobre-branco.
-/// * `primaryContainer` = véu neutro de seleção/realce (sem laranja);
-///   `errorContainer`/`tertiaryContainer` = fundos suaves com o respetivo
-///   `on*Container` legível (≥ 4.5:1).
+/// * `primary` = laranja `#FF6A2A`. `onPrimary` = preto `#0C0B0A` (6.1:1, AA).
+/// * `primaryContainer` = o mesmo laranja em véu sobre a superfície.
+///   `errorContainer` guarda o alerta de erro.
 ///
-/// Contraste auditado (WCAG): texto ≥ 4.5:1 sobre todas as superfícies,
-/// `onPrimary/primary` ≥ 16:1 em ambos os temas.
+/// Contraste auditado (WCAG): texto de corpo ≥ 4.5:1 sobre as superfícies.
+/// Preto sobre laranja passa AA de texto; laranja sobre suave fica para
+/// ícone, borda e área grande.
 abstract final class AppTheme {
-  /// Tema claro — canvas #F5F5F7, superfícies brancas, tinta #1D1D1F.
+  /// Tema claro — canvas #F9F9F9, campos #F0F0F0, tinta #0C0B0A, ação #FF6A2A.
   static final ThemeData light = _base(Brightness.light);
 
-  /// Tema escuro — preto OLED, superfícies #1C1C1E, texto branco suave.
+  /// Tema escuro — canvas #0C0B0A, texto #F9F9F9, ação #FF6A2A.
   static final ThemeData dark = _base(Brightness.dark);
 
   static ThemeData _base(Brightness brightness) {
@@ -76,15 +69,13 @@ abstract final class AppTheme {
     final separator = isLight ? AppColors.lightDivider : AppColors.darkDivider;
 
     // ── Ação / Primária ──────────────────────────────────────────────
-    // `action` = preenchimento da ação E cor de destaque em texto/ícone
-    // (carvão no claro, branco suave no escuro). `onAction` = rótulo sobre
-    // o preenchimento (branco no claro, tinta no escuro).
+    // `action` = laranja #FF6A2A nos dois temas. `onAction` = preto sobre
+    // o laranja (6.1:1).
     final action = isLight ? AppColors.lightPrimary : AppColors.darkPrimary;
     final onAction = isLight
         ? AppColors.lightOnPrimary
         : AppColors.darkOnPrimary;
-    // Véu neutro de seleção/realce: a própria tinta a 7% (claro) / 12%
-    // (escuro) sobre a superfície — substitui o creme laranja.
+    // Véu do laranja sobre a superfície: 7% no claro, 12% no escuro.
     final actionTint = Color.alphaBlend(
       action.withValues(alpha: isLight ? 0.07 : 0.12),
       surface,
@@ -191,7 +182,11 @@ abstract final class AppTheme {
       if (states.contains(WidgetState.focused)) {
         return BorderSide(color: action, width: 1.5);
       }
-      return BorderSide(color: AppColors.controlBorder);
+      // Contorno forte da paleta: preto no claro, suave no escuro (o preto
+      // sobre canvas preto daria 1:1 — borda invisível).
+      return BorderSide(
+        color: isLight ? AppColors.controlBorder : AppColors.darkBorderStrong,
+      );
     });
 
     // ── ThemeData ────────────────────────────────────────────────────
@@ -251,7 +246,7 @@ abstract final class AppTheme {
         centerTitle: false,
         titleSpacing: AppSpacing.md,
         toolbarHeight: AppSizes.appBarHeight,
-        // Título de página = token `headline` (24/w600) em toda a app.
+        // Título de página = token `headline` (24/Medium) em toda a app.
         titleTextStyle: AppTypography.headline.copyWith(color: textPrimary),
         iconTheme: IconThemeData(color: textPrimary, size: AppSizes.iconLg),
         actionsIconTheme: IconThemeData(
@@ -465,7 +460,7 @@ abstract final class AppTheme {
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: separator,
         labelStyle: AppTypography.labelMedium.copyWith(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
         ),
         unselectedLabelStyle: AppTypography.labelMedium.copyWith(
           fontWeight: FontWeight.w400,
@@ -581,11 +576,35 @@ abstract final class AppTheme {
               vertical: AppSpacing.xs,
             ),
           ),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: AppRadius.smAll),
-          ),
+          // Pílula do anexo: repouso com contorno laranja; selecionado
+          // preenchido (preto no claro, suave no escuro).
+          shape: const WidgetStatePropertyAll(StadiumBorder()),
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            final selected = states.contains(WidgetState.selected);
+            if (selected) {
+              return isLight ? AppColors.brandBlack : AppColors.softWhite;
+            }
+            return isLight ? AppColors.softWhite : AppColors.brandBlack;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            final selected = states.contains(WidgetState.selected);
+            if (selected) {
+              return isLight ? AppColors.softWhite : AppColors.brandBlack;
+            }
+            return isLight ? AppColors.brandBlack : AppColors.softWhite;
+          }),
+          side: WidgetStateProperty.resolveWith((states) {
+            final selected = states.contains(WidgetState.selected);
+            if (selected) {
+              return BorderSide(
+                color: isLight ? AppColors.brandBlack : AppColors.softWhite,
+              );
+            }
+            return const BorderSide(color: AppColors.brandOrange, width: 1.5);
+          }),
           overlayColor: surfaceOverlay(),
           animationDuration: AppDurations.fast,
+          textStyle: WidgetStatePropertyAll(AppTypography.labelLarge),
         ),
       ),
 

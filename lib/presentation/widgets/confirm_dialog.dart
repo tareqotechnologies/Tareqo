@@ -6,6 +6,7 @@ import 'app_button.dart';
 import 'admin_thin_bridge.dart';
 
 import '../../core/theme/app_typography.dart';
+
 /// Dialog de confirmação unificado do design system.
 ///
 /// Padrão fixo: cancelamento como `TextButton` (peso baixo) e a acção
@@ -42,8 +43,9 @@ Future<bool?> showConfirmDialog({
             FadeTransition(opacity: animation, child: child),
         child: AlertDialog(
           title: Text(title, style: AppTypography.titleMedium),
-          titleTextStyle:
-              AppTypography.titleMedium.copyWith(color: theme.colorScheme.onSurface),
+          titleTextStyle: AppTypography.titleMedium.copyWith(
+            color: theme.colorScheme.onSurface,
+          ),
           content: message == null ? null : Text(message),
           actions: [
             TextButton(

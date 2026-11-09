@@ -7,6 +7,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/premium_decor.dart';
 
 /// Ícone inteligente por direção do movimento: entrada (north_east) em
 /// verde e saída (south_west) em vermelho — mesma direção do feed da
@@ -18,12 +19,11 @@ extension TransactionDirectionIcon on TransactionType {
   };
 }
 
-/// Linha de movimentação — rótulo à esquerda (categoria + hora), valor à
-/// direita na mesma margem de todas as linhas da lista.
+/// Linha de movimentação — categoria e hora à esquerda, valor à direita.
 ///
-/// A hierarquia é intencionalmente plana: a categoria identifica, a hora
-/// contextualiza e o montante fecha a linha à direita com dígitos tabulares
-/// (coluna alinhada entre linhas consecutivas).
+/// Sem ícone nem moldura: a linha lê-se como um extrato. O sinal e a cor
+/// semântica do valor bastam para a direção; a hora contextualiza em
+/// segundo plano e o montante fecha a coluna com dígitos tabulares.
 class TransactionCard extends StatelessWidget {
   const TransactionCard({
     super.key,
@@ -45,6 +45,7 @@ class TransactionCard extends StatelessWidget {
     final isIncome = transaction.type == TransactionType.income;
     final color = isIncome ? theme.income : theme.expense;
     final sign = isIncome ? '+' : '-';
+    final pending = transaction.status == TransactionStatus.pending;
 
     return Semantics(
       container: true,
@@ -58,93 +59,68 @@ class TransactionCard extends StatelessWidget {
         child: Container(
           constraints: const BoxConstraints(minHeight: AppSizes.touchTarget),
           alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.xs,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Row(
             children: [
-              // ── Direção (esquerda) ──
-              Container(
-                width: 32,
-                height: 32,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: IconTone.darkBackground(color),
-                ),
-                child: Icon(
-                  transaction.type.icon,
-                  size: AppSizes.iconSm,
-                  color: IconTone.lightForeground(color),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              // ── Categoria + hora (esquerda) ──
+              // ── Categoria + hora ──
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Text(
+                      transaction.category,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      // Linha de lista = 14/w500 (título da linha).
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: scheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.micro),
+                    // Metadados: hora e, quando existe, o estado pendente —
+                    // ambos em segundo plano face ao valor da linha.
                     Row(
                       children: [
-                        Flexible(
-                          child: Text(
-                            transaction.category,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: scheme.onSurface,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        Text(
+                          Formatters.time(transaction.date),
+                          maxLines: 1,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
-                        if (transaction.status == TransactionStatus.pending) ...[
+                        if (pending) ...[
                           const SizedBox(width: AppSpacing.xs),
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: theme.accent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xxs),
                           // U-03: sem clamp global, a escala 2.0 precisa de
-                          // Flexible+ellipsis também no selo "pendente".
+                          // Flexible+ellipsis também no estado "pendente".
                           Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.xxs,
-                                vertical: AppSpacing.micro,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.warning.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(AppRadius.xs),
-                                border: Border.all(
-                                  color: theme.warning.withValues(alpha: 0.2),
-                                ),
-                              ),
-                              child: Text(
-                                context.l10n.financialPendingLabel.toUpperCase(),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: theme.warning,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.5,
-                                ),
+                            child: Text(
+                              context.l10n.financialPendingLabel.toUpperCase(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                letterSpacing: 0.5,
                               ),
                             ),
                           ),
                         ],
                       ],
                     ),
-                    const SizedBox(height: AppSpacing.micro),
-                    Text(
-                      Formatters.time(transaction.date),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
                   ],
                 ),
               ),
-              const SizedBox(width: AppSpacing.xs),
-              // ── Valor (direita) ──
+              const SizedBox(width: AppSpacing.sm),
+              // ── Valor ──
               // FittedBox: encolhe em escala 2.0 em vez de estourar o Row.
               Flexible(
                 child: FittedBox(
@@ -181,9 +157,7 @@ class DateSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final totalColor = totalCents >= 0 ? theme.income : theme.expense;
+    final scheme = Theme.of(context).colorScheme;
     final horizontal = AppSpacing.pagePaddingForWidth(
       MediaQuery.sizeOf(context).width,
     );
@@ -191,26 +165,24 @@ class DateSectionHeader extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         horizontal,
-        AppSpacing.sm,
+        AppSpacing.md,
         horizontal,
         AppSpacing.xxs,
       ),
       child: Row(
         children: [
-          // Rótulo do dia (esquerda).
+          // Rótulo do dia (esquerda) — etiqueta de contexto, discreta.
           Expanded(
             child: Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.labelMedium.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
+              style: AppTypography.eyebrow(scheme.onSurfaceVariant),
             ),
           ),
           const SizedBox(width: AppSpacing.xs),
-          // Total do dia (direita) — sem pílula: alinha com os valores das
-          // linhas abaixo e mantém o cabeçalho silencioso.
+          // Total do dia (direita) — em tinta: o sinal já indica a direção e
+          // o cabeçalho não compete com os montantes das linhas.
           Flexible(
             child: FittedBox(
               fit: BoxFit.scaleDown,
@@ -218,7 +190,7 @@ class DateSectionHeader extends StatelessWidget {
               child: Text(
                 Formatters.signedAmount(totalCents),
                 maxLines: 1,
-                style: AppTypography.amountInRow(totalColor),
+                style: AppTypography.amountInRow(scheme.onSurface),
               ),
             ),
           ),
@@ -315,36 +287,31 @@ class TransactionDetailSheet extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xl),
 
-          // Valor em destaque
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(
-                color: scheme.outlineVariant.withValues(alpha: 0.5),
-              ),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  l10n.financialAmountLabel,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    letterSpacing: 1,
-                  ),
+          // Valor em destaque — sem moldura: o número é o elemento do sheet.
+          Column(
+            children: [
+              Text(
+                l10n.financialAmountLabel,
+                style: AppTypography.labelSmall.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  letterSpacing: 1,
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
+              ),
+              const SizedBox(height: AppSpacing.xxs),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
                   '$sign ${Formatters.currency(transaction.amountCents)}',
-                  // Token heroAmount (26/w600) — teto do sistema (U-06).
+                  // Token heroAmount (26/w500) — teto do sistema (U-06).
                   style: AppTypography.heroAmount(color),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
 
           const SizedBox(height: AppSpacing.xl),
+          Divider(height: 1, color: PremiumDecor.hairline(scheme)),
+          const SizedBox(height: AppSpacing.xs),
 
           _DetailLine(
             label: l10n.financialDetailDescription,
@@ -352,10 +319,11 @@ class TransactionDetailSheet extends StatelessWidget {
                 ? transaction.description
                 : '-',
           ),
-          if (transaction.category != transaction.description) _DetailLine(
-            label: l10n.financialDetailCategory,
-            value: transaction.category,
-          ),
+          if (transaction.category != transaction.description)
+            _DetailLine(
+              label: l10n.financialDetailCategory,
+              value: transaction.category,
+            ),
           _DetailLine(
             label: l10n.financialDetailNumber,
             value: Formatters.entityNumber(transaction.id),

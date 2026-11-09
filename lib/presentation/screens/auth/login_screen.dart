@@ -21,13 +21,9 @@ import 'forgot_password_sheet.dart';
 /// superfícies claras/texto escuro e no escuro mantém o dark premium
 /// (antes, a auth era SEMPRE escura mesmo no light mode).
 ///
-/// Os neutros vêm dos tokens do design system: no escuro,
-/// `AppColors.darkBackground`/`surfaceDark`/`borderDark`; no claro, os
-/// valores espelham os do `AppTheme.light` (scaffold #FAFAFA, superfície
-/// branca, texto #18181B/#6E6E77, borda #E4E4E7). A cor de acento/links
-/// segue a regra AA do design system: laranja #F28C00 no claro, laranja
-/// #FF9800 no escuro — usadas somente em links de ação e estado
-/// de foco.
+/// Os neutros e o acento vêm dos tokens do anexo: canvas `#F9F9F9` /
+/// `#0C0B0A`, tinta `#0C0B0A` / `#F9F9F9`, ação `#FF6A2A`. O rótulo do
+/// botão é preto sobre o laranja (6.1:1).
 @immutable
 class _LoginPalette {
   const _LoginPalette({
@@ -54,34 +50,25 @@ class _LoginPalette {
   /// Fundo do botão principal (CTA).
   final Color accentDark;
 
-  /// Conteúdo sobre o CTA: tinta escura sobre o laranja do botão —
-  /// branco sobre #FF9800 dá só 2.06:1 (reprovava o AA de 4.5:1); a tinta
-  /// escura sobe para ~7.9:1.
+  /// Conteúdo sobre o CTA: preto `#0C0B0A` sobre laranja `#FF6A2A` (6.1:1).
   final Color onCta;
 
   /// Modo escuro — preto oficial com texto gelo.
-  static final _LoginPalette dark = _LoginPalette(
+  static const _LoginPalette dark = _LoginPalette(
     background: AppColors.darkBackground,
     textPrimary: AppColors.softWhite,
     textSecondary: AppColors.darkTextSecondary,
-    // Acento laranja (links, cursor, ícone em foco) sobre o fundo neutro.
-    // #F28C00 no claro, #FF9800 no escuro — usadas somente em links
-    // de ação e estado de foco, ≥ 4.5:1 AA sobre as respectivas
-    // superfícies.
-    accent: AppColors.accentOrange,
+    accent: AppColors.brandOrange,
     accentDark: AppColors.darkAccentOrange,
     onCta: AppColors.lightTextPrimary,
   );
 
   /// Modo claro — espelha os neutros do `AppTheme.light` via tokens.
-  static final _LoginPalette light = _LoginPalette(
+  static const _LoginPalette light = _LoginPalette(
     background: AppColors.lightBackground,
     textPrimary: AppColors.lightTextPrimary,
     textSecondary: AppColors.lightTextSecondary,
-    // Acento laranja: usado somente em links de ação e estado de foco.
-    // #F28C00 no claro, #FF9800 no escuro — ≥ 4.5:1 AA sobre as
-    // superfícies respectivas.
-    accent: AppColors.accentOrange,
+    accent: AppColors.brandOrange,
     accentDark: AppColors.darkAccentOrange,
     onCta: AppColors.lightTextPrimary,
   );

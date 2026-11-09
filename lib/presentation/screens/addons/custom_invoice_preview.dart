@@ -53,12 +53,12 @@ class CustomInvoicePreview extends StatelessWidget {
         ? businessName
         : l10n.customInvoicePreviewCompanyFallback;
 
-    // Cor escura para texto (mesma lógica do PDF exporter).
-    final primaryDark = HSLColor.fromColor(primaryColor)
-        .withLightness(
-          (HSLColor.fromColor(primaryColor).lightness * 0.7).clamp(0.0, 1.0),
-        )
-        .toColor();
+    // Texto da pré-visualização: preto da marca, sem escurecer em HSL
+    // (isso saía da paleta do anexo).
+    const primaryDark = AppColors.brandBlack;
+    final onPrimaryFill = primaryColor.computeLuminance() > 0.22
+        ? AppColors.brandBlack
+        : AppColors.softWhite;
 
     return Container(
       decoration: BoxDecoration(
@@ -164,7 +164,7 @@ class CustomInvoicePreview extends StatelessWidget {
                       child: Text(
                         l10n.pdfInvoiceDocWord,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: AppColors.softWhite,
+                          color: onPrimaryFill,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.5,
                         ),
@@ -232,7 +232,7 @@ class CustomInvoicePreview extends StatelessWidget {
                         child: Text(
                           l10n.pdfItemHeader,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.softWhite,
+                            color: onPrimaryFill,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -243,7 +243,7 @@ class CustomInvoicePreview extends StatelessWidget {
                           l10n.customInvoiceQty,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.softWhite,
+                            color: onPrimaryFill,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -254,7 +254,7 @@ class CustomInvoicePreview extends StatelessWidget {
                           l10n.pdfUnitPriceHeader,
                           textAlign: TextAlign.right,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.softWhite,
+                            color: onPrimaryFill,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

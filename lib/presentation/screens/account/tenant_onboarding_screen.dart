@@ -5,6 +5,7 @@ import '../../../core/config/app_settings.dart';
 import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../domain/entities/app_user.dart';
@@ -13,6 +14,7 @@ import '../../../domain/usecases/request_tenant_access_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/app_text_field.dart';
 import '../../../core/observability/crash_reporting.dart';
 
@@ -104,9 +106,8 @@ class _TenantOnboardingScreenState
     final l10n = context.l10n;
     final plansAsync = ref.watch(plansProvider);
 
-    return Scaffold(
-      // AppBar estilo iOS large title — mesmo padrão das demais telas.
-      appBar: AppBar(title: Text(l10n.onboardingTitle)),
+    return AppPage(
+      title: l10n.onboardingTitle,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.xl),
@@ -133,16 +134,13 @@ class _TenantOnboardingScreenState
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.lg),
                 Text(
                   l10n.onboardingHeading,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.5,
-                  ),
+                  style: AppTypography.headline,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.onboardingSubtitle,
                   textAlign: TextAlign.center,
@@ -150,7 +148,7 @@ class _TenantOnboardingScreenState
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xl),
                 // Card premium (estilo Apple): cantos 20 + superfície
                 // elevada — o formulário flutua sobre o fundo.
                 AppCard(
@@ -175,12 +173,12 @@ class _TenantOnboardingScreenState
                               ? l10n.onboardingBusinessError
                               : null,
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.lg),
                         Text(
                           l10n.onboardingLanguageLabel,
                           style: theme.textTheme.titleSmall,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.xs),
                         Wrap(
                           spacing: 8,
                           children: [
@@ -207,12 +205,12 @@ class _TenantOnboardingScreenState
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.lg),
                         Text(
                           l10n.onboardingCurrencyLabel,
                           style: theme.textTheme.titleSmall,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.xs),
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
@@ -227,12 +225,12 @@ class _TenantOnboardingScreenState
                               ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.lg),
                         Text(
                           l10n.onboardingPlanLabel,
                           style: theme.textTheme.titleSmall,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.sm),
                         plansAsync.when(
                           loading: () => const Padding(
                             padding: EdgeInsets.all(AppSpacing.md),
@@ -255,13 +253,13 @@ class _TenantOnboardingScreenState
                                   onTap: () =>
                                       setState(() => _selectedPlan = plan),
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: AppSpacing.sm),
                               ],
                             ],
                           ),
                         ),
                         if (_formError != null) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.xs),
                           Text(
                             _formError!,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -269,7 +267,7 @@ class _TenantOnboardingScreenState
                             ),
                           ),
                         ],
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.md),
                         AppButton.primary(
                           onPressed: _isSubmitting ? null : _submit,
                           icon: _isSubmitting
@@ -387,13 +385,13 @@ class _PlanCard extends StatelessWidget {
                 : Icons.radio_button_unchecked,
             color: selected ? scheme.primary : scheme.outline,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(plan.name, style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   l10n.onboardingPlanDetails(plan.maxStores, plan.maxEmployees),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(

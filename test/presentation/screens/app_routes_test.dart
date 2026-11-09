@@ -48,9 +48,7 @@ void main() {
   group('AppRoutes.onGenerateRoute', () {
     testWidgets('resolve rota com argumentos (docReader)', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
-          child: testAppWithRoutes(home: const _Probe()),
-        ),
+        ProviderScope(child: testAppWithRoutes(home: const _Probe())),
       );
       await tester.pumpAndSettle();
 
@@ -61,12 +59,11 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('rota desconhecida mostra ecrã de erro, sem lançar',
-        (tester) async {
+    testWidgets('rota desconhecida mostra ecrã de erro, sem lançar', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        ProviderScope(
-          child: testAppWithRoutes(home: const _Probe()),
-        ),
+        ProviderScope(child: testAppWithRoutes(home: const _Probe())),
       );
       await tester.pumpAndSettle();
 
@@ -77,12 +74,11 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('argumentos com tipo errado caem no ecrã de erro',
-        (tester) async {
+    testWidgets('argumentos com tipo errado caem no ecrã de erro', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        ProviderScope(
-          child: testAppWithRoutes(home: const _Probe()),
-        ),
+        ProviderScope(child: testAppWithRoutes(home: const _Probe())),
       );
       await tester.pumpAndSettle();
 
@@ -130,11 +126,9 @@ class _Probe extends StatelessWidget {
             child: const Text('open-unknown'),
           ),
           TextButton(
-            onPressed: () => AppNavigator.pushWith(
-              context,
-              AppRoutes.stores,
-              {'tenant': 'não-é-um-tenant'},
-            ),
+            onPressed: () => AppNavigator.pushWith(context, AppRoutes.stores, {
+              'tenant': 'não-é-um-tenant',
+            }),
             child: const Text('open-bad-stores'),
           ),
         ],

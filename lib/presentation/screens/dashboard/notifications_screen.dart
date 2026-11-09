@@ -537,12 +537,16 @@ class _NotificationTile extends StatelessWidget {
     );
   }
 
+  /// Glifo sobre o fundo do ícone, só com as cores do anexo.
+  /// Preto e alertas escuros recebem o suave; laranja, cinza e suave
+  /// recebem o preto (rótulo sobre #FF6A2A).
   static Color _deriveFg(Color base) {
-    final hsl = HSLColor.fromColor(base);
-    return hsl
-        .withLightness(0.55)
-        .withSaturation((hsl.saturation * 0.85).clamp(0.0, 1.0))
-        .toColor();
+    if (base == AppColors.brandBlack ||
+        base == AppColors.alertError ||
+        base == AppColors.alertSuccess) {
+      return AppColors.softWhite;
+    }
+    return AppColors.brandBlack;
   }
 
   static String _formatTime(DateTime date, AppLocalizations l10n) {
@@ -860,8 +864,11 @@ abstract final class _AdminMessageTypeLabel {
     AdminMessageType.general => Icons.mail_outline,
   };
 
-  static Color color(AdminMessageType type) => switch (type) {AdminMessageType.billingQuote => AppColors.accentOrange,    AdminMessageType.planExpiryChange => AppColors.accentOrange,
-    AdminMessageType.planExpiringSoon => AppColors.accentOrange,    AdminMessageType.general => AppColors.accentOrange,
+  static Color color(AdminMessageType type) => switch (type) {
+    AdminMessageType.billingQuote => AppColors.accentOrange,
+    AdminMessageType.planExpiryChange => AppColors.accentOrange,
+    AdminMessageType.planExpiringSoon => AppColors.accentOrange,
+    AdminMessageType.general => AppColors.accentOrange,
   };
 
   static String label(
@@ -885,7 +892,13 @@ abstract final class _InvoiceTypeLabel {
     InvoiceNotificationType.addOnExpired => Icons.extension_off_outlined,
   };
 
-  static Color color(InvoiceNotificationType type) => switch (type) {InvoiceNotificationType.invoiceGenerated => AppColors.accentOrange,    InvoiceNotificationType.invoiceDueSoon => AppColors.accentOrange,    InvoiceNotificationType.invoiceExpired => AppColors.errorNeutral,    InvoiceNotificationType.invoicePaid => AppColors.successNeutral,    InvoiceNotificationType.addOnExpiringSoon => AppColors.accentOrange,    InvoiceNotificationType.addOnExpired => AppColors.errorNeutral,
+  static Color color(InvoiceNotificationType type) => switch (type) {
+    InvoiceNotificationType.invoiceGenerated => AppColors.accentOrange,
+    InvoiceNotificationType.invoiceDueSoon => AppColors.accentOrange,
+    InvoiceNotificationType.invoiceExpired => AppColors.errorNeutral,
+    InvoiceNotificationType.invoicePaid => AppColors.successNeutral,
+    InvoiceNotificationType.addOnExpiringSoon => AppColors.accentOrange,
+    InvoiceNotificationType.addOnExpired => AppColors.errorNeutral,
   };
 
   static String label(

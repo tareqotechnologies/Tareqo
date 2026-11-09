@@ -221,16 +221,26 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
                   label: l10n.debtsCustomerNameLabel,
                   prefixIcon: Icons.person_outline,
                   textInputAction: TextInputAction.next,
-                  // Validação: campo obrigatório; erro aparece abaixo                  validator: (value) => (value == null || value.trim().isEmpty)                      ? l10n.debtsCustomerNameError                      : null,                ),
+                  // Validação: campo obrigatório; erro aparece abaixo
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? l10n.debtsCustomerNameError
+                      : null,
+                ),
                 const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _amountController,
                   label: l10n.financialAmountLabel,
                   prefixIcon: Icons.attach_money,
-                  // Teclado com separador decimal: o usuário consegue digitar                  // "13,90" em vez de "1390" (que viraria 1.390,00).                  keyboardType: const TextInputType.numberWithOptions(
+                  // Teclado com separador decimal: o usuário consegue digitar
+                  // "13,90" em vez de "1390" (que viraria 1.390,00).
+                  keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  // Validação: valor deve ser positivo; erro abaixo do campo                  validator: (value) => _parseAmount(value ?? '') <= 0                      ? l10n.financialAmountError                      : null,                ),
+                  // Validação: valor deve ser positivo; erro abaixo do campo
+                  validator: (value) => _parseAmount(value ?? '') <= 0
+                      ? l10n.financialAmountError
+                      : null,
+                ),
                 // A2: mostra ao vivo o valor que será registado — "1390"
                 // aparece como 1.390,00 ANTES de salvar.
                 MoneyLivePreview(controller: _amountController),

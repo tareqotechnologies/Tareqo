@@ -148,7 +148,6 @@ String stripDartComments(String source) {
   return out.toString();
 }
 
-
 /// Remove blocos /* */ e linhas de comentario // (sem seguir strings). Mais simples e
 /// verificavel que a maquina de estados de stripDartComments, que desalinhava
 /// codigo apos comentarios com aspas.

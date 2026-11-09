@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
+import 'package:tareqo/core/theme/app_colors.dart';
 import 'package:tareqo/presentation/controllers/invoice_template_providers.dart';
 
 void main() {
@@ -56,7 +57,7 @@ void main() {
       });
 
       expect(restored.businessName, '');
-      expect(restored.primaryColor, const Color(0xFF3D4D55));
+      expect(restored.primaryColor, AppColors.brandBlack);
       expect(restored.templateStyle, 'Classic');
       expect(restored.logoBytes, isNull);
     });

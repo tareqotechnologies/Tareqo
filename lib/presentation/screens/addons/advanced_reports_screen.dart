@@ -6,6 +6,7 @@ import '../../../domain/entities/store.dart';
 import '../../../core/share/advanced_reports_pdf_exporter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
 import '../../../domain/usecases/get_cash_flow_use_case.dart';
@@ -19,6 +20,7 @@ import '../../controllers/reports_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_menu_option.dart';
+import '../../widgets/app_page.dart';
 
 /// Fluxo de caixa REAL do período seleccionado (entradas/saídas pagas),
 /// via [GetCashFlowUseCase] — o tab financeiro usava zeros fixos antes.
@@ -71,37 +73,26 @@ class _AdvancedReportsScreenState extends ConsumerState<AdvancedReportsScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        // Título em bodyLarge (17/w400) — o AppBar de 56px com o chip de
-        // período à direita truncava até o título 3 (20) em
-        // 'Relatórios Avançad…' em telas estreitas; 17px cabe com folga
-        // e mantém a hierarquia (o chip de período é o elemento primário).
-        title: Text(
-          l10n.reportsAdvancedTitle,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
+    return AppPage(
+      title: l10n.reportsAdvancedTitle,
+      titleStyle: AppTypography.titleMedium,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: AppSpacing.sm),
+          child: _PeriodChip(
+            selected: _selectedPeriod,
+            onChanged: (v) => setState(() => _selectedPeriod = v),
           ),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: _PeriodChip(
-              selected: _selectedPeriod,
-              onChanged: (v) => setState(() => _selectedPeriod = v),
-            ),
-          ),
+      ],
+      bottom: TabBar(
+        controller: _tabController,
+        tabs: [
+          Tab(text: l10n.reportsTabSales),
+          Tab(text: l10n.reportsTabFinancial),
+          Tab(text: l10n.reportsTabStock),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: l10n.reportsTabSales),
-            Tab(text: l10n.reportsTabFinancial),
-            Tab(text: l10n.reportsTabStock),
-          ],
-        ),
       ),
       body: TabBarView(
         controller: _tabController,
@@ -151,8 +142,16 @@ class _SalesReportTab extends ConsumerWidget {
         : ref.watch(advancedSalesReportProvider((storeId, selectedPeriod)));
     final report = reportAsync?.value;
 
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.fromLTRB(
+        horizontal,
+        AppSpacing.md,
+        horizontal,
+        AppSpacing.xl,
+      ),
       children: [
         // Erro real (rede/banco) com retry — nunca silencia falha (mesmo
         // padrão do tab Financeiro).
@@ -399,8 +398,16 @@ class _FinancialReportTab extends ConsumerWidget {
         : ref.watch(advancedReportCashFlowProvider((storeId, selectedPeriod)));
     final cashFlow = cashFlowAsync?.value;
 
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.fromLTRB(
+        horizontal,
+        AppSpacing.md,
+        horizontal,
+        AppSpacing.xl,
+      ),
       children: [
         // Erro real (rede/banco) com retry — nunca silencia falha.
         if (storeId != null && (cashFlowAsync?.hasError ?? false))
@@ -598,8 +605,16 @@ class _StockReportTab extends ConsumerWidget {
         .where((p) => (p.stockQuantity ~/ 1000) == 0)
         .length;
 
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: EdgeInsets.fromLTRB(
+        horizontal,
+        AppSpacing.md,
+        horizontal,
+        AppSpacing.xl,
+      ),
       children: [
         // KPIs
         Row(

@@ -21,7 +21,7 @@ void main() {
       name: 'display',
       style: () => AppTypography.display,
       size: 28,
-      weight: FontWeight.w600,
+      weight: FontWeight.w500,
       tracking: -0.6,
       lineHeight: 36,
     ),
@@ -29,7 +29,7 @@ void main() {
       name: 'headline',
       style: () => AppTypography.headline,
       size: 24,
-      weight: FontWeight.w600,
+      weight: FontWeight.w500,
       tracking: -0.5,
       lineHeight: 32,
     ),
@@ -37,7 +37,7 @@ void main() {
       name: 'titleLarge',
       style: () => AppTypography.titleLarge,
       size: 20,
-      weight: FontWeight.w600,
+      weight: FontWeight.w500,
       tracking: -0.35,
       lineHeight: 28,
     ),
@@ -105,11 +105,7 @@ void main() {
         final style = t.style();
         expect(style.fontSize, t.size, reason: '${t.name}: fontSize');
         expect(style.fontWeight, t.weight, reason: '${t.name}: peso');
-        expect(
-          style.letterSpacing,
-          t.tracking,
-          reason: '${t.name}: tracking',
-        );
+        expect(style.letterSpacing, t.tracking, reason: '${t.name}: tracking');
         expect(
           style.height,
           closeTo(t.lineHeight / t.size, 1e-9),
@@ -140,8 +136,8 @@ void main() {
       expect(AppTypography.familyFallback.contains('Inter'), isFalse);
     });
 
-    test('pesos usados são apenas 400/500/600', () {
-      final allowed = {FontWeight.w400, FontWeight.w500, FontWeight.w600};
+    test('pesos usados são apenas Regular 400 e Medium 500', () {
+      final allowed = {FontWeight.w400, FontWeight.w500};
       for (final t in tokens) {
         expect(
           allowed.contains(t.style().fontWeight),
@@ -203,27 +199,20 @@ void main() {
         }
       });
 
-      test('$brightness — o w600 fica restrito a títulos', () {
-        // Títulos dominantes em w600; corpo/labels nunca.
+      test('$brightness — Medium (w500) nos títulos, Regular no corpo', () {
         for (final style in [
           textTheme.displayLarge!,
           textTheme.headlineLarge!,
           textTheme.titleLarge!,
         ]) {
-          expect(style.fontWeight, FontWeight.w600);
+          expect(style.fontWeight, FontWeight.w500);
         }
         for (final style in [
           textTheme.bodyLarge!,
           textTheme.bodyMedium!,
           textTheme.bodySmall!,
-          textTheme.labelLarge!,
-          textTheme.labelMedium!,
         ]) {
-          expect(
-            style.fontWeight == FontWeight.w600,
-            isFalse,
-            reason: '${style.fontSize}: corpo/label não usa w600',
-          );
+          expect(style.fontWeight, FontWeight.w400);
         }
       });
     }
@@ -231,10 +220,10 @@ void main() {
 
   test('superfícies com tipografia própria seguem a escala', () {
     for (final theme in [AppTheme.light, AppTheme.dark]) {
-      // Título de página (AppBar) = headline 24/w600.
+      // Título de página (AppBar) = headline 24/Medium.
       final appBar = theme.appBarTheme.titleTextStyle!;
       expect(appBar.fontSize, 24);
-      expect(appBar.fontWeight, FontWeight.w600);
+      expect(appBar.fontWeight, FontWeight.w500);
       expect(appBar.letterSpacing, -0.5);
 
       // Diálogo = titleMedium 16/w500.
@@ -256,17 +245,17 @@ void main() {
       expect(input.errorStyle!.fontSize, 12);
       expect(input.helperStyle!.fontSize, 12);
 
-      // Navegação = labelMedium (12), nunca 11; ativo w600.
-      final navSelected =
-          theme.navigationBarTheme.labelTextStyle!.resolve({
-            WidgetState.selected,
-          })!;
-      final navUnselected =
-          theme.navigationBarTheme.labelTextStyle!.resolve({})!;
+      // Navegação = 12, nunca 11. Ativo Medium, repouso Regular.
+      final navSelected = theme.navigationBarTheme.labelTextStyle!.resolve({
+        WidgetState.selected,
+      })!;
+      final navUnselected = theme.navigationBarTheme.labelTextStyle!.resolve(
+        {},
+      )!;
       expect(navSelected.fontSize, 12);
-      expect(navSelected.fontWeight, FontWeight.w600);
+      expect(navSelected.fontWeight, FontWeight.w500);
       expect(navUnselected.fontSize, 12);
-      expect(navUnselected.fontWeight, FontWeight.w500);
+      expect(navUnselected.fontWeight, FontWeight.w400);
     }
   });
 
@@ -323,9 +312,9 @@ void main() {
 
       test('$brightness — tamanhos da escala, pesos leves', () {
         expect(thin.titleLarge?.fontSize, 20);
-        expect(thin.titleLarge?.fontWeight, FontWeight.w300);
+        expect(thin.titleLarge?.fontWeight, FontWeight.w400);
         expect(thin.titleMedium?.fontSize, 16);
-        expect(thin.titleMedium?.fontWeight, FontWeight.w300);
+        expect(thin.titleMedium?.fontWeight, FontWeight.w400);
         expect(thin.titleSmall?.fontSize, 14);
         expect(thin.titleSmall?.fontWeight, FontWeight.w400);
         expect(thin.labelLarge?.fontSize, 14);
@@ -362,7 +351,7 @@ void main() {
       });
 
       testWidgets(
-        '$brightness — superfícies thin: AppBar 19/w300, inputs/chips 13, snackbar 14',
+        '$brightness — superfícies thin: AppBar 20/w400, inputs/chips 12, snackbar 14',
         (tester) async {
           late ThemeData derived;
           await tester.pumpWidget(
@@ -380,16 +369,16 @@ void main() {
           );
 
           final appBar = derived.appBarTheme.titleTextStyle!;
-          expect(appBar.fontSize, 19);
-          expect(appBar.fontWeight, FontWeight.w300);
+          expect(appBar.fontSize, 20);
+          expect(appBar.fontWeight, FontWeight.w400);
           expect(derived.appBarTheme.toolbarHeight, 52);
 
-          expect(derived.inputDecorationTheme.labelStyle!.fontSize, 13);
+          expect(derived.inputDecorationTheme.labelStyle!.fontSize, 12);
           expect(
             derived.inputDecorationTheme.labelStyle!.fontWeight,
-            FontWeight.w400,
+            FontWeight.w500,
           );
-          expect(derived.chipTheme.labelStyle!.fontSize, 13);
+          expect(derived.chipTheme.labelStyle!.fontSize, 12);
           expect(derived.snackBarTheme.contentTextStyle!.fontSize, 14);
         },
       );

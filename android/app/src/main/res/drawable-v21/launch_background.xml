@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tela de abertura Android 21+ (<12) — fundo azul oficial (#0076F6)
-     + logotipo centralizado. Transição invisível com o Flutter. -->
+<!-- Abertura Android 21+ (<12): canvas do anexo (#F9F9F9 / #0C0B0A). -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/ic_launcher_background" />
+    <item android:drawable="@color/splash_background" />
     <item>
         <bitmap
             android:gravity="center"

@@ -1,39 +1,54 @@
-# Verificacao pos-build do icone oficial v4.2 (sacola azul 3D + "D" branco).
+# Verificacao pos-build do icone oficial (monograma TQ, paleta oficial:
+# preto #0C0B0A + branco suave #F9F9F9).
 # Uso: python tool/check_apk_icon.py build/app/outputs/flutter-apk/app-dev-debug.apk
+import io
 import sys
 import zipfile
-import io
 
 from PIL import Image
+
+# Paleta oficial — pixel "claro" e "escuro" (tolerância cobre antialiasing).
+_DARK_MAX = 40
+_LIGHT_MIN = 200
 
 
 def logo_stats(path):
     im = Image.open(path).convert('RGBA')
     w, h = im.size
     px = im.load()
-    blue_xs, blue_ys = [], []
-    white_inside = white_outside = 0
+    light_xs, light_ys = [], []
+    dark = light = blue = 0
     for y in range(0, h, 2):
         for x in range(0, w, 2):
             r, g, b, a = px[x, y]
-            if a > 60 and b > r + 25 and b > g + 10:
-                blue_xs.append(x)
-                blue_ys.append(y)
-    if not blue_xs:
-        return None, None, 0, 0
-    bx0, bx1 = min(blue_xs), max(blue_xs)
-    by0, by1 = min(blue_ys), max(blue_ys)
-    for y in range(0, h, 2):
-        for x in range(0, w, 2):
-            r, g, b, a = px[x, y]
-            if a > 200 and r > 230 and g > 230 and b > 230:
-                if bx0 <= x <= bx1 and by0 <= y <= by1:
-                    white_inside += 1
-                else:
-                    white_outside += 1
-    bw = 100 * (bx1 - bx0) / w
-    bh = 100 * (by1 - by0) / h
-    return bw, bh, white_inside, white_outside
+            if a <= 60:
+                continue
+            if r >= _LIGHT_MIN and g >= _LIGHT_MIN and b >= _LIGHT_MIN:
+                light += 1
+                light_xs.append(x)
+                light_ys.append(y)
+            elif r <= _DARK_MAX and g <= _DARK_MAX and b <= _DARK_MAX:
+                dark += 1
+            # Qualquer azul indica asset antigo fora da paleta.
+            if b > r + 25 and b > g + 10:
+                blue += 1
+    if not light_xs:
+        return None
+    bw = 100 * (max(light_xs) - min(light_xs)) / w
+    bh = 100 * (max(light_ys) - min(light_ys)) / h
+    return bw, bh, dark, light, blue
+
+
+def report(name, stats):
+    if stats is None:
+        print('%s: sem desenho claro — verificar asset' % name)
+        return
+    bw, bh, dark, light, blue = stats
+    warning = ' | AVISO: azul fora da paleta' if blue else ''
+    print(
+        '%s: monograma %.0f%%x%.0f%% | preto %d claro %d%s'
+        % (name, bw, bh, dark, light, warning)
+    )
 
 
 def main():
@@ -41,21 +56,15 @@ def main():
     z = zipfile.ZipFile(apk)
     found = 0
     for n in z.namelist():
-        if n.startswith('res/'):
-            base = n.split('/')[-1]
-            if base == 'ic_launcher.png' and 'xxxhdpi' in n:
-                bw, bh, wi, wo = logo_stats(io.BytesIO(z.read(n)))
-                print('launcher %s: sacola %.0f%%x%.0f%% | brancos dentro: %d fora: %d' % (n, bw, bh, wi, wo))
-                found += 1
-            elif base == 'ic_launcher_foreground.png' and 'xxxhdpi' in n:
-                bw, bh, wi, wo = logo_stats(io.BytesIO(z.read(n)))
-                print('foreground %s: sacola %.0f%%x%.0f%% | D/ilhos dentro: %d fora: %d' % (n, bw, bh, wi, wo))
-                found += 1
-    # splash asset bundlado
+        if not n.startswith('res/'):
+            continue
+        base = n.split('/')[-1]
+        if base in ('ic_launcher.png', 'ic_launcher_foreground.png') and 'xxxhdpi' in n:
+            report(n, logo_stats(io.BytesIO(z.read(n))))
+            found += 1
     for n in z.namelist():
         if 'splash_logo' in n:
-            bw, bh, wi, wo = logo_stats(io.BytesIO(z.read(n)))
-            print('splash_logo: sacola %.0f%%x%.0f%% | D/ilhos dentro: %d fora: %d' % (bw, bh, wi, wo))
+            report('splash_logo', logo_stats(io.BytesIO(z.read(n))))
             found += 1
     print('verificados:', found, 'entradas')
 

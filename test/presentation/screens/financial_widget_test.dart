@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
 
-import 'package:tareqo/core/theme/app_colors.dart';
+import 'package:tareqo/core/theme/app_theme.dart';
 import 'package:tareqo/domain/entities/financial_transaction.dart';
 import 'package:tareqo/presentation/screens/financial/financial_widgets.dart';
 
@@ -95,7 +95,9 @@ void main() {
       expect(find.text('+1.500,00'), findsOneWidget);
     });
 
-    testWidgets('total negativo usa a cor de despesa', (tester) async {
+    testWidgets('total negativo fica em tinta (o sinal indica a direção)', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         testApp(
           home: const Scaffold(
@@ -104,8 +106,10 @@ void main() {
         ),
       );
 
+      // O cabeçalho do dia é um agregado: cor de tinta para não competir
+      // com os montantes coloridos das linhas.
       final total = tester.widget<Text>(find.text('-450,00'));
-      expect(total.style?.color, AppColors.expenseDark);
+      expect(total.style?.color, AppTheme.dark.colorScheme.onSurface);
     });
   });
 

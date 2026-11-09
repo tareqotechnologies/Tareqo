@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Fundo do splash no light mode: branco. -->
-    <color name="ic_launcher_background">#000000</color>
+    <!-- Ícone adaptativo: preto da marca (#0C0B0A). -->
+    <color name="ic_launcher_background">#0C0B0A</color>
+    <!-- Abertura no claro: canvas do anexo (#F9F9F9). -->
+    <color name="splash_background">#F9F9F9</color>
 </resources>

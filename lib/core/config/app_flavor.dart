@@ -23,7 +23,7 @@ abstract final class AppFlavorConfig {
   static AppFlavor get current {
     final fromEnv = Platform.environment['FLUTTER_APP_FLAVOR'];
     if (fromEnv == 'prod') return AppFlavor.prod;
-    final raw = String.fromEnvironment(
+    const raw = String.fromEnvironment(
       'FLUTTER_APP_FLAVOR',
       defaultValue: String.fromEnvironment('APP_FLAVOR', defaultValue: 'dev'),
     );

@@ -73,7 +73,9 @@ void main() {
   });
 
   test('fontFamily só a Inter do tema ou a mono declarada', () {
-    final family = RegExp(r'''fontFamily:\s*'([^']*)'|fontFamily:\s*"([^"]*)"''');
+    final family = RegExp(
+      r'''fontFamily:\s*'([^']*)'|fontFamily:\s*"([^"]*)"''',
+    );
     final allowed = {'Inter', 'monospace'};
     final problems = <String>[];
     for (final (rel, source) in sources()) {

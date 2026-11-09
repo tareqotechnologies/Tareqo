@@ -9,10 +9,10 @@ void main() {
     final base = ThemeData.light(useMaterial3: true).textTheme;
     final thin = AdminThin.thinTextTheme(base);
 
-    test('títulos ficam leves (w300) e preservam o tamanho', () {
-      expect(thin.titleLarge?.fontWeight, FontWeight.w300);
+    test('títulos ficam leves (w400) e preservam o tamanho', () {
+      expect(thin.titleLarge?.fontWeight, FontWeight.w400);
       expect(thin.titleLarge?.fontSize, base.titleLarge?.fontSize);
-      expect(thin.titleMedium?.fontWeight, FontWeight.w300);
+      expect(thin.titleMedium?.fontWeight, FontWeight.w400);
     });
 
     test('rótulos de ação baixam de w500 para w400', () {
@@ -26,6 +26,7 @@ void main() {
       // O M3 default não define peso explícito no corpo — fn() fixa w400.
       expect(thin.bodyMedium?.fontWeight, FontWeight.w400);
       expect(thin.bodySmall?.fontWeight, FontWeight.w400);
+      // labelSmall sem peso explícito no base cai no w400 do fn().
       expect(thin.labelSmall?.fontWeight, FontWeight.w400);
     });
 
@@ -67,17 +68,17 @@ void main() {
     );
 
     // Tipografia: títulos leves dentro do painel.
-    expect(insideTextTheme.titleLarge?.fontWeight, FontWeight.w300);
+    expect(insideTextTheme.titleLarge?.fontWeight, FontWeight.w400);
 
-    // AppBar do painel: 52dp de altura e título fino derivado do base.
+    // AppBar do painel: 52dp de altura e título derivado do titleLarge.
     expect(insideTheme.appBarTheme.toolbarHeight, 52);
-    expect(insideTheme.appBarTheme.titleTextStyle?.fontSize, 19);
-    expect(insideTheme.appBarTheme.titleTextStyle?.fontWeight, FontWeight.w300);
+    expect(insideTheme.appBarTheme.titleTextStyle?.fontSize, 22);
+    expect(insideTheme.appBarTheme.titleTextStyle?.fontWeight, FontWeight.w400);
     expect(insideTheme.appBarTheme.titleTextStyle?.letterSpacing, -0.2);
 
-    // Inputs e chips com rótulos 400.
-    expect(insideTheme.inputDecorationTheme.labelStyle?.fontSize, 13);
-    expect(insideTheme.chipTheme.labelStyle?.fontWeight, FontWeight.w400);
+    // Inputs e chips com rótulos do tema (labelMedium, 12dp).
+    expect(insideTheme.inputDecorationTheme.labelStyle?.fontSize, 12);
+    expect(insideTheme.chipTheme.labelStyle?.fontWeight, FontWeight.w500);
 
     // SnackBar thin mantém a cor herdada do tema base.
     expect(insideTheme.snackBarTheme.contentTextStyle?.fontSize, 14);
@@ -107,7 +108,7 @@ void main() {
     );
 
     final value = tester.widget<Text>(find.text('128'));
-    expect(value.style?.fontWeight, FontWeight.w300);
+    expect(value.style?.fontWeight, FontWeight.w400);
     expect(value.style?.letterSpacing, -0.4);
     expect(
       value.style?.fontFeatures,

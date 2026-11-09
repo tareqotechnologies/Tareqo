@@ -19,7 +19,6 @@ class StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     // A11y (plano UI/UX — Fase 3.1): o chip é UM nó semântico — o leitor
     // de ecrã anuncia o estado inteiro ("Pago", "5 un.") em vez de
     // percorrer ícone e texto como nós separados. O ícone é decoração
@@ -59,11 +58,9 @@ class StatusChip extends StatelessWidget {
                   maxLines: 1,
                   // Status = labelMedium (12/w500) do design system; a cor
                   // reforça o estado, mas o texto já o comunica sozinho.
-                  style: AppTypography.labelMedium.copyWith(
-                    color: scheme.brightness == Brightness.dark
-                        ? color.withValues(alpha: 0.9)
-                        : color,
-                  ),
+                  // No escuro o rótulo usa a cor SEM véu: o erro #C62828 a
+                  // 90% sobre a pílula tingida descia a 2.9:1 (abaixo de 3:1).
+                  style: AppTypography.labelMedium.copyWith(color: color),
                 ),
               ),
             ),

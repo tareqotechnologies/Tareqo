@@ -429,7 +429,6 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
   }
 }
 
-
 /// Sheet de edição de loja (nome, endereço, telefone, e-mail, NUIT, cidade).
 class _EditStoreSheet extends ConsumerStatefulWidget {
   const _EditStoreSheet({required this.store});

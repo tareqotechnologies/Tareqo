@@ -40,8 +40,12 @@ void main() {
       const prefix = 'lib/presentation/';
       for (final entity in root.listSync(recursive: true)) {
         if (entity is! File || !entity.path.endsWith('.dart')) continue;
-        final rel = entity.path.replaceAll('\\\\', '/').replaceFirst(prefix, '');
-        final actual = RegExp(r'Color\(0x').allMatches(entity.readAsStringSync()).length;
+        final rel = entity.path
+            .replaceAll('\\\\', '/')
+            .replaceFirst(prefix, '');
+        final actual = RegExp(
+          r'Color\(0x',
+        ).allMatches(entity.readAsStringSync()).length;
         if (actual == 0) continue;
         final allowed = documented[rel] ?? 0;
         if (actual > allowed) {
@@ -60,7 +64,9 @@ void main() {
           problems.add('${entry.key}: arquivo documentado não existe mais.');
           continue;
         }
-        final actual = RegExp(r'Color\(0x').allMatches(f.readAsStringSync()).length;
+        final actual = RegExp(
+          r'Color\(0x',
+        ).allMatches(f.readAsStringSync()).length;
         if (actual < entry.value) {
           problems.add(
             '${entry.key}: documentadas ${entry.value}, mas o arquivo tem '
@@ -73,4 +79,4 @@ void main() {
       expect(problems, isEmpty, reason: 'Guard de hex do design system');
     },
   );
-}
+}

@@ -28,10 +28,7 @@ class MetricPill extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          '$count',
-          style: AppTypography.labelMedium.copyWith(color: color),
-        ),
+        Text('$count', style: AppTypography.labelMedium.copyWith(color: color)),
         const SizedBox(width: 3),
         Text(
           label,

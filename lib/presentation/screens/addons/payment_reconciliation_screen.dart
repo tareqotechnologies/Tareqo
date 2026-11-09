@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_page.dart';
 
 /// Ecra de reconciliação de pagamentos mobile money — M-Pesa e E-Mola.
 ///
@@ -26,15 +27,23 @@ class _PaymentReconciliationScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.paymentsTitle,
-          style: Theme.of(context).textTheme.titleMedium,
+    return AppPage(
+      title: l10n.paymentsTitle,
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(
+          horizontal,
+          AppSpacing.md,
+          horizontal,
+          AppSpacing.xl,
+        ),
+        child: _IntegrationBlockedBanner(
+          message: l10n.paymentsIntegrationBlocked,
         ),
       ),
-      body: _IntegrationBlockedBanner(message: l10n.paymentsIntegrationBlocked),
     );
   }
 }
@@ -50,29 +59,24 @@ class _IntegrationBlockedBanner extends StatelessWidget {
     final theme = Theme.of(context);
     final warning = IconTone.amber;
 
-    return SafeArea(
-      top: false,
-      child: AppCard(
-        color: warning.withValues(alpha: 0.08),
-        borderColor: warning.withValues(alpha: 0.30),
-        borderRadius: const BorderRadius.all(Radius.circular(0)),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.info_outline_rounded, color: warning, size: 20),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Text(
-                message,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
+    return AppCard(
+      color: warning.withValues(alpha: 0.08),
+      borderColor: warning.withValues(alpha: 0.30),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline_rounded, color: warning, size: 20),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

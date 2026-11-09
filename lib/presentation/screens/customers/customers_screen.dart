@@ -23,6 +23,7 @@ import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/status_chip.dart';
 import '../../../core/observability/crash_reporting.dart';
@@ -64,8 +65,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 
   Future<void> _deleteCustomer(Customer customer) async {
     final l10n = context.l10n;
-    final confirmed = await showConfirmDialog(context: 
-      context,
+    final confirmed = await showConfirmDialog(
+      context: context,
       title: l10n.customersDeleteConfirmTitle,
       message: l10n.customersDeleteConfirmMessage(customer.name),
       confirmLabel: l10n.commonDelete,
@@ -161,9 +162,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
           Padding(
             padding: EdgeInsets.fromLTRB(
               AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-              4,
+              AppSpacing.xxs,
               AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-              12,
+              AppSpacing.sm,
             ),
             child: SearchField(
               controller: _searchController,
@@ -224,15 +225,16 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                       AppSpacing.pagePaddingForWidth(
                         MediaQuery.sizeOf(context).width,
                       ),
-                      4,
+                      AppSpacing.xxs,
                       AppSpacing.pagePaddingForWidth(
                         MediaQuery.sizeOf(context).width,
                       ),
-                      96,
+                      AppSpacing.fabBottomClearance,
                     ),
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: filtered.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.xs),
                     itemBuilder: (context, index) => _CustomerTile(
                       customer: filtered[index],
                       pendingTotalCents:
@@ -304,7 +306,12 @@ class _CustomerTile extends StatelessWidget {
 
     return Material(
       color: theme.colorScheme.surfaceContainerHighest,
-      borderRadius: AppRadius.lgAll,
+      // No escuro, canvas e card são o MESMO preto oficial: a borda de
+      // cabelo é o que dá forma ao card (mesmo acabamento de Fiado/Vendas).
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.lgAll,
+        side: BorderSide(color: PremiumDecor.hairline(theme.colorScheme)),
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: AppRadius.lgAll,
@@ -326,7 +333,7 @@ class _CustomerTile extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,7 +347,7 @@ class _CustomerTile extends StatelessWidget {
                       ),
                     ),
                     if (contacts.isNotEmpty) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.micro),
                       Text(
                         contacts,
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -355,7 +362,7 @@ class _CustomerTile extends StatelessWidget {
               // pílula âmbar com o valor completo fica na borda, alinhada
               // verticalmente com o nome — mesmo padrão dos demais cards.
               if (pendingTotalCents > 0) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.xs),
                 Flexible(
                   child: Align(
                     alignment: Alignment.centerRight,
@@ -371,7 +378,7 @@ class _CustomerTile extends StatelessWidget {
               ],
               // Botão de ações (⋮) para dono/gerente — editar/excluir.
               if (canManage) ...[
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xxs),
                 PopupMenuButton<String>(
                   icon: Icon(
                     Icons.more_vert,
@@ -396,7 +403,7 @@ class _CustomerTile extends StatelessWidget {
                             size: 18,
                             color: theme.colorScheme.onSurface,
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.sm),
                           Text(
                             l10n.customersEditTitle,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -416,7 +423,7 @@ class _CustomerTile extends StatelessWidget {
                             size: 18,
                             color: theme.colorScheme.error,
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.sm),
                           Text(
                             l10n.commonDelete,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -538,7 +545,7 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
                       ? l10n.customersNameError
                       : null,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _phoneController,
                   label: l10n.customersPhoneLabel,
@@ -546,7 +553,7 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _emailController,
                   label: l10n.customersEmailLabel,
@@ -566,7 +573,7 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
               ],
             ),
             if (_formError != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 _formError!,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -574,7 +581,7 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
                 ),
               ),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             // AppButton (design system ultra-clean): altura 48, cantos 12,
             // cores sólidas — o spinner substitui o ícone durante o envio.
             AppButton.primary(
@@ -696,7 +703,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
                       ? l10n.customersNameError
                       : null,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _phoneController,
                   label: l10n.customersPhoneLabel,
@@ -704,7 +711,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _emailController,
                   label: l10n.customersEmailLabel,
@@ -722,7 +729,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
               ],
             ),
             if (_formError != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 _formError!,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -730,7 +737,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
                 ),
               ),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               onPressed: _isSubmitting ? null : _submit,
               label: l10n.customersEditSubmit,

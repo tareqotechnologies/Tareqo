@@ -17,10 +17,13 @@ void main() {
       expect(AppStatusColors.light.accent, AppColors.accentOrange);
     });
 
-    test('incomeLight/expenseLight sao a variante legivel (sucesso/erro) no modo claro', () {
-      expect(AppColors.incomeLight, AppColors.successText);
-      expect(AppColors.expenseLight, AppColors.errorNeutral);
-    });
+    test(
+      'incomeLight/expenseLight sao a variante legivel (sucesso/erro) no modo claro',
+      () {
+        expect(AppColors.incomeLight, AppColors.successText);
+        expect(AppColors.expenseLight, AppColors.errorNeutral);
+      },
+    );
 
     test('lerp with null returns the same instance', () {
       final result = AppStatusColors.dark.lerp(null, 0.5);
@@ -29,14 +32,70 @@ void main() {
 
     test('lerp interpolates each field between the two variants', () {
       final result = AppStatusColors.dark.lerp(AppStatusColors.light, 0.5);
-      expect(result.income, Color.lerp(AppStatusColors.dark.income, AppStatusColors.light.income, 0.5));
-      expect(result.expense, Color.lerp(AppStatusColors.dark.expense, AppStatusColors.light.expense, 0.5));
-      expect(result.warning, Color.lerp(AppStatusColors.dark.warning, AppStatusColors.light.warning, 0.5));
-      expect(result.accent, Color.lerp(AppStatusColors.dark.accent, AppStatusColors.light.accent, 0.5));
-      expect(result.incomeLight, Color.lerp(AppStatusColors.dark.incomeLight, AppStatusColors.light.incomeLight, 0.5));
-      expect(result.expenseLight, Color.lerp(AppStatusColors.dark.expenseLight, AppStatusColors.light.expenseLight, 0.5));
-      expect(result.warningLight, Color.lerp(AppStatusColors.dark.warningLight, AppStatusColors.light.warningLight, 0.5));
-      expect(result.accentLight, Color.lerp(AppStatusColors.dark.accentLight, AppStatusColors.light.accentLight, 0.5));
+      expect(
+        result.income,
+        Color.lerp(
+          AppStatusColors.dark.income,
+          AppStatusColors.light.income,
+          0.5,
+        ),
+      );
+      expect(
+        result.expense,
+        Color.lerp(
+          AppStatusColors.dark.expense,
+          AppStatusColors.light.expense,
+          0.5,
+        ),
+      );
+      expect(
+        result.warning,
+        Color.lerp(
+          AppStatusColors.dark.warning,
+          AppStatusColors.light.warning,
+          0.5,
+        ),
+      );
+      expect(
+        result.accent,
+        Color.lerp(
+          AppStatusColors.dark.accent,
+          AppStatusColors.light.accent,
+          0.5,
+        ),
+      );
+      expect(
+        result.incomeLight,
+        Color.lerp(
+          AppStatusColors.dark.incomeLight,
+          AppStatusColors.light.incomeLight,
+          0.5,
+        ),
+      );
+      expect(
+        result.expenseLight,
+        Color.lerp(
+          AppStatusColors.dark.expenseLight,
+          AppStatusColors.light.expenseLight,
+          0.5,
+        ),
+      );
+      expect(
+        result.warningLight,
+        Color.lerp(
+          AppStatusColors.dark.warningLight,
+          AppStatusColors.light.warningLight,
+          0.5,
+        ),
+      );
+      expect(
+        result.accentLight,
+        Color.lerp(
+          AppStatusColors.dark.accentLight,
+          AppStatusColors.light.accentLight,
+          0.5,
+        ),
+      );
     });
 
     test('lerp at extremes returns first/last variant', () {

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../domain/entities/purchase.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/finance_providers.dart';
@@ -83,8 +82,6 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
               heroTag: 'fab-purchases',
               onPressed: _openNewPurchase,
               tooltip: l10n.purchasesAddNew,
-              backgroundColor: AppColors.accentOrangeDark,
-              foregroundColor: AppColors.softWhite,
               child: const Icon(Icons.add),
             )
           : null,
@@ -211,7 +208,12 @@ class _PurchasesBody extends StatelessWidget {
         slivers: [
           // Resumo do dia rola junto com o conteúdo.
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 16),
+            padding: EdgeInsets.fromLTRB(
+              horizontal,
+              AppSpacing.xs,
+              horizontal,
+              AppSpacing.md,
+            ),
             sliver: SliverToBoxAdapter(
               child: PurchasesSummaryHeader(purchases: purchases),
             ),
@@ -227,13 +229,13 @@ class _PurchasesBody extends StatelessWidget {
                   hintText: l10n.purchasesSearchHint,
                   onChanged: onQueryChanged,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 // Filtros MINIMALISTAS (canvas V3): os dois seletores numa
                 // única linha — chips compactos com menu; fluem para a
                 // linha seguinte em escala de texto alta (nunca estouram).
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
                   children: [
                     PeriodFilterBar(value: period, onChanged: onPeriodChanged),
                     PaymentFilterBar(
@@ -301,25 +303,28 @@ class _PurchasesSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
     return Skeleton(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
+        padding: EdgeInsets.fromLTRB(
+          horizontal,
           AppSpacing.xs,
-          AppSpacing.lg,
+          horizontal,
           AppSpacing.fabBottomClearance,
         ),
         children: [
           // Resumo do dia.
           const SkeletonBlock(height: 118, radius: 20),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           // Busca.
           const SkeletonBlock(height: 52),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           // Filtros: período.
           const Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             children: [
               SkeletonBlock(height: 32, width: 88),
               SkeletonBlock(height: 32, width: 70),
@@ -327,11 +332,11 @@ class _PurchasesSkeleton extends StatelessWidget {
               SkeletonBlock(height: 32, width: 96),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           // Filtros: forma de pagamento.
           const Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             children: [
               SkeletonBlock(height: 32, width: 64),
               SkeletonBlock(height: 32, width: 88),
@@ -340,11 +345,11 @@ class _PurchasesSkeleton extends StatelessWidget {
               SkeletonBlock(height: 32, width: 96),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
           // Cards.
           for (var i = 0; i < 4; i++) ...[
             const SkeletonBlock(height: 96, radius: 20),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
           ],
         ],
       ),

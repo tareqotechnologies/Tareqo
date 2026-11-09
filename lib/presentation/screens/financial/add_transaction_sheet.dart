@@ -137,7 +137,9 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
                 child: Column(
@@ -186,8 +188,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 label: l10n.financialDescriptionLabel,
                 prefixIcon: Icons.edit_note_rounded,
                 textInputAction: TextInputAction.next,
-                validator: (value) =>
-                    (value == null || value.trim().isEmpty)
+                validator: (value) => (value == null || value.trim().isEmpty)
                     ? l10n.financialDescriptionError
                     : null,
               ),
@@ -226,7 +227,9 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                   border: Border.all(
                     color: _isPending
                         ? theme.warning.withValues(alpha: 0.5)
-                        : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                        : theme.colorScheme.outlineVariant.withValues(
+                            alpha: 0.5,
+                          ),
                   ),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   color: _isPending

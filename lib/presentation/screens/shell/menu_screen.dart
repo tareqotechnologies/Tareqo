@@ -70,8 +70,8 @@ class MenuScreen extends ConsumerWidget {
     }
 
     Future<void> confirmSignOut() async {
-      final confirmed = await showConfirmDialog(context: 
-        context,
+      final confirmed = await showConfirmDialog(
+        context: context,
         title: l10n.commonSignOutConfirmTitle,
         message: l10n.commonSignOutConfirmMessage,
         confirmLabel: l10n.commonSignOut,
@@ -257,7 +257,7 @@ class _MenuTile extends StatelessWidget {
             child: Icon(
               icon,
               size: AppSizes.iconMd,
-              color: AppColors.softWhite,
+              color: AppColors.brandBlack,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -299,9 +299,7 @@ class _SignOutButton extends StatelessWidget {
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
         ),
-        constraints: const BoxConstraints(
-          minHeight: AppSizes.touchTarget,
-        ),
+        constraints: const BoxConstraints(minHeight: AppSizes.touchTarget),
         decoration: BoxDecoration(
           color: scheme.surface,
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -324,7 +322,7 @@ class _SignOutButton extends StatelessWidget {
               child: const Icon(
                 Icons.logout_rounded,
                 size: AppSizes.iconSm,
-                color: AppColors.softWhite,
+                color: AppColors.brandBlack,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),

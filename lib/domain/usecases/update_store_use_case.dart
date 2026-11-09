@@ -2,7 +2,8 @@ import '../entities/store.dart';
 import '../entities/tenant.dart';
 import '../repositories/i_store_repository.dart';
 import '../repositories/i_tenant_repository.dart';
-import 'add_store_use_case.dart' show TenantNotApprovedException, InvalidStoreException;
+import 'add_store_use_case.dart'
+    show TenantNotApprovedException, InvalidStoreException;
 
 /// Caso de uso: atualizar os detalhes de uma loja (nome, endereço, etc.).
 ///
@@ -10,10 +11,7 @@ import 'add_store_use_case.dart' show TenantNotApprovedException, InvalidStoreEx
 /// na tela, mas o caso de uso garante que o tenant está aprovado e os
 /// dados são válidos.
 class UpdateStoreUseCase {
-  const UpdateStoreUseCase(
-    this._storeRepository,
-    this._tenantRepository,
-  );
+  const UpdateStoreUseCase(this._storeRepository, this._tenantRepository);
 
   final IStoreRepository _storeRepository;
   final ITenantRepository _tenantRepository;

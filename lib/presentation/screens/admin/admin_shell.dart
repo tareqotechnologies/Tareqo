@@ -253,10 +253,8 @@ class _AdminFab extends StatelessWidget {
             Flexible(
               child: Text(
                 currentLabel,
-                style: theme.textTheme.labelLarge?.copyWith(
+                style: theme.textTheme.labelMedium?.copyWith(
                   color: scheme.onPrimary,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 12,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -280,12 +278,12 @@ class _AdminFab extends StatelessWidget {
                 ),
                 child: Text(
                   '$totalBadge',
-                  // labelMedium 12 + w600 EXPLÍCITO: badges são ênfase — o
-                  // tema thin do painel rebaixa os labels para w400, mas o
-                  // badge sobre vermelho precisa de peso de destaque.
+                  // Badge de ênfase: w500 explícito — a ponte thin do painel
+                  // rebaixa labelMedium para w400, mas o badge sobre vermelho
+                  // precisa de destaque (mesmo contrato do teste).
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: scheme.onError,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -443,9 +441,8 @@ class _NavSheetItem extends StatelessWidget {
                 child: Text(
                   item.label,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w300,
+                    fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
                     color: color,
-                    fontSize: 14,
                   ),
                 ),
               ),
@@ -463,11 +460,11 @@ class _NavSheetItem extends StatelessWidget {
                   ),
                   child: Text(
                     '${item.badge}',
-                    // labelMedium 12 + w600 explícito — mesmo padrão do
-                    // badge do FAB (o tema thin rebaixa labels para w400).
+                    // Mesmo badge de ênfase do FAB: labelMedium (12) + w500
+                    // explícito contra o rebaixamento do tema thin.
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: scheme.onError,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -570,7 +567,7 @@ class _SidebarIcon extends StatelessWidget {
               Icon(
                 selected ? item.selectedIcon : item.icon,
                 size: 22,
-                color: selected ? scheme.primary : scheme.onSurfaceVariant,
+                color: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
               ),
               if (item.badge > 0)
                 Positioned(
@@ -586,10 +583,11 @@ class _SidebarIcon extends StatelessWidget {
                     ),
                     child: Text(
                       '${item.badge}',
-                      style: TextStyle(
+                      // Ícone da sidebar: badge compacto sobre vermelho —
+                      // labelMedium (12) + w500 explícito, em tinta onError.
+                      style: theme.textTheme.labelMedium?.copyWith(
                         color: scheme.onError,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),

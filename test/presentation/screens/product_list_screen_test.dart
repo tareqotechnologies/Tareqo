@@ -313,6 +313,44 @@ void main() {
       expect(find.text('Caderno Vermelho'), findsNothing);
     });
 
+    testWidgets('lupa abre a busca inline e filtra ao digitar', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(
+          _FakeGetProductsUseCase(const [
+            Product(
+              id: '1',
+              name: 'Caneta Azul',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+            ),
+            Product(
+              id: '2',
+              name: 'Caderno Vermelho',
+              purchasePriceCents: 500,
+              salePriceCents: 800,
+            ),
+          ]),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // A lupa da AppBar abre o campo de busca no topo da lista.
+      await tester.tap(find.byIcon(Icons.search_rounded));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'CANETA');
+      await tester.pumpAndSettle();
+      expect(find.text('Caneta Azul'), findsOneWidget);
+      expect(find.text('Caderno Vermelho'), findsNothing);
+
+      // O X limpa e fecha a busca, devolvendo a lista completa.
+      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text('Caderno Vermelho'), findsOneWidget);
+    });
+
     testWidgets('busca sem resultado mostra o estado próprio', (tester) async {
       await tester.pumpWidget(
         _buildApp(

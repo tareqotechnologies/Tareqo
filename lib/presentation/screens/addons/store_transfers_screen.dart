@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
 import '../../../domain/entities/product.dart';
@@ -14,6 +15,7 @@ import '../../controllers/products_providers.dart';
 import '../../controllers/stock_transfers_provider.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
@@ -32,14 +34,19 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
     final transfers = ref.watch(stockTransfersProvider);
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
 
-    return Scaffold(
-      // Título 3 (20/w600) — rótulo longo ('Transferências entre Lojas')
-      // truncava em titleLarge (22) no AppBar de 56px.
-      appBar: AppBar(
-        title: Text(l10n.transfersTitle, style: theme.textTheme.titleMedium),
+    return AppPage(
+      title: l10n.transfersTitle,
+      titleStyle: AppTypography.titleMedium,
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'fab-transfer',
+        onPressed: _openNewTransfer,
+        tooltip: l10n.transfersNewFab,
+        child: const Icon(Icons.add_rounded),
       ),
       body: transfers.isEmpty
           ? EmptyState(
@@ -48,18 +55,17 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
               subtitle: l10n.transfersEmptySubtitle,
             )
           : ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: EdgeInsets.fromLTRB(
+                horizontal,
+                AppSpacing.md,
+                horizontal,
+                AppSpacing.fabBottomClearance,
+              ),
               itemCount: transfers.length,
-              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
               itemBuilder: (context, index) =>
                   _TransferCard(transfer: transfers[index]),
             ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'fab-transfer',
-        onPressed: _openNewTransfer,
-        tooltip: l10n.transfersNewFab,
-        child: const Icon(Icons.add_rounded, size: 28),
-      ),
     );
   }
 
@@ -100,7 +106,10 @@ class _TransferCard extends StatelessWidget {
         AppColors.accentOrange,
         Icons.check_circle_outline,
       ),
-      StockTransferStatus.cancelled => (AppColors.errorNeutral, Icons.cancel_outlined),
+      StockTransferStatus.cancelled => (
+        AppColors.errorNeutral,
+        Icons.cancel_outlined,
+      ),
     };
 
     final formattedQty = Quantity.format(

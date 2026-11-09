@@ -7,6 +7,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../navigation/app_routes.dart';
+import '../../widgets/app_page.dart';
 
 /// Documentos de suporte embutidos no app (assets) — os MESMOS markdowns de
 /// `docs/`, empacotados para leitura OFFLINE no ecrã Ajuda. O asset é
@@ -70,14 +71,13 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.document == SupportDocument.userGuide
-              ? l10n.supportUserGuide
-              : l10n.supportTroubleshooting,
-        ),
-      ),
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
+    return AppPage(
+      title: widget.document == SupportDocument.userGuide
+          ? l10n.supportUserGuide
+          : l10n.supportTroubleshooting,
       body: FutureBuilder<String>(
         future: _load(context),
         builder: (context, snapshot) {
@@ -101,7 +101,12 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
           final scheme = theme.colorScheme;
           return Markdown(
             data: snapshot.data!,
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, AppSpacing.huge),
+            padding: EdgeInsets.fromLTRB(
+              horizontal,
+              AppSpacing.md,
+              horizontal,
+              AppSpacing.huge,
+            ),
             // Links internos entre os documentos (GUIA ↔ TROUBLESHOOTING)
             // navegam DENTRO do leitor; http(s) abrem no navegador externo;
             // outros são ignorados (sem url_launcher sem contexto).
@@ -163,13 +168,17 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                   left: BorderSide(color: scheme.primary, width: 3),
                 ),
               ),
-              listBullet: AppTypography.bodyMedium.copyWith(color: scheme.primary),
+              listBullet: AppTypography.bodyMedium.copyWith(
+                color: scheme.primary,
+              ),
 
               strong: AppTypography.bodyMedium.copyWith(
                 color: scheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
-              em: AppTypography.bodyMedium.copyWith(fontStyle: FontStyle.italic),
+              em: AppTypography.bodyMedium.copyWith(
+                fontStyle: FontStyle.italic,
+              ),
 
               // Código inline — chip discreto, texto com contraste.
               // Código inline = labelMedium (12/w500) na família mono.
@@ -187,7 +196,9 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                 fontWeight: FontWeight.w600,
                 color: scheme.onSurface,
               ),
-              tableBody: AppTypography.bodySmall.copyWith(color: scheme.onSurfaceVariant),
+              tableBody: AppTypography.bodySmall.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
 
               tableBorder: TableBorder.all(color: scheme.outlineVariant),
               // Hiperlinks — cor da marca, sublinhado suave, peso médio.

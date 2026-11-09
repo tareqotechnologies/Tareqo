@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:tareqo/core/config/app_flavor.dart';
@@ -9,9 +8,16 @@ void main() {
     // dart-define (ex.: CI de Windows, `flutter test` nativo). O teste de
     // compilação (build + run) valida o comportamento real; este teste
     // confirma apenas a lógica quando o define está disponível.
-    if (!const bool.fromEnvironment('FLUTTER_APP_FLAVOR', defaultValue: false)) {
-      expect(AppFlavorConfig.isProd, isFalse,
-          reason: 'ambiente sem FLUTTER_APP_FLAVOR=prod — build/deploy valida o comportamento');
+    if (!const bool.fromEnvironment(
+      'FLUTTER_APP_FLAVOR',
+      defaultValue: false,
+    )) {
+      expect(
+        AppFlavorConfig.isProd,
+        isFalse,
+        reason:
+            'ambiente sem FLUTTER_APP_FLAVOR=prod — build/deploy valida o comportamento',
+      );
       return;
     }
     expect(AppFlavorConfig.current, AppFlavor.prod);

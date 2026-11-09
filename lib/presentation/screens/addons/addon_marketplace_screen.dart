@@ -228,7 +228,9 @@ class _AddOnCard extends StatelessWidget {
                               vertical: 1,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.successNeutral.withValues(alpha: 0.1),
+                              color: AppColors.successNeutral.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: AppRadius.xsAll,
                             ),
                             child: Text(

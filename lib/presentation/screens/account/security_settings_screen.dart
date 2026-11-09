@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../controllers/auth_providers.dart';
 import '../../navigation/app_routes.dart';
+import '../../widgets/app_page.dart';
 import '../../widgets/app_sheet.dart';
 import '../auth/change_password_sheet.dart';
 
@@ -53,10 +54,7 @@ class _SecuritySettingsScreenState
       setState(() => _mfaEnabled = false);
     } else {
       // U-09: rota nomeada com resultado (bool).
-      final result = await AppNavigator.push<bool>(
-        context,
-        AppRoutes.mfaSetup,
-      );
+      final result = await AppNavigator.push<bool>(context, AppRoutes.mfaSetup);
       if (result == true && mounted) {
         setState(() => _mfaEnabled = true);
       }
@@ -92,12 +90,20 @@ class _SecuritySettingsScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.securitySectionTitle)),
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
+    return AppPage(
+      title: l10n.securitySectionTitle,
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: EdgeInsets.fromLTRB(
+                horizontal,
+                AppSpacing.md,
+                horizontal,
+                AppSpacing.xl,
+              ),
               children: [
                 // MFA.
                 _SecurityTile(

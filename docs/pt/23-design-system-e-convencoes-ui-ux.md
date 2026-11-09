@@ -10,20 +10,20 @@
 
 | Token | Arquivo | Conteúdo |
 | --- | --- | --- |
-| `AppColors` | `lib/core/theme/app_colors.dart` | Paleta RE2 base (`petrol`/`slate`/`warmGray`/`warmBeige`/`terracotta`/`softBlack` — fonte única dos hex), marca (`brand`/`brandMuted`), cores semânticas por brilho (`income`, `expense`, `warning`), neutros e `onBrandContainer*`. Toda cor nova nasce aqui. RE2: a paleta NÃO tem verde — nem como marca, nem como semântica |
+| `AppColors` | `lib/core/theme/app_colors.dart` | Paleta OFICIAL (fonte única dos hex): laranja `#FF6A2A`, cinza de superfície `#F0F0F0`, branco suave `#F9F9F9`, preto `#0C0B0A` — mais os alertas semânticos `#2E7D32`/`#C62828`/`#F9A825` (só alertas). Cores semânticas por brilho (`income`, `expense`, `warning`) e neutros derivam destas 4. Toda cor nova nasce aqui |
 | `AppStatusColors` | idem | `ThemeExtension` com pares claro/escuro; acessado por `Theme.of(context).income/expense/warning/accent` |
 | `AppSpacing` | `lib/core/theme/app_tokens.dart` | Grelha de 4px (`xxs`=4 … `huge`=48) + `pagePaddingForWidth` (720px quebra mobile/tablet) |
-| `AppRadius` | idem | Raios `xs`=8 … `full`=999 + helpers `mdAll` etc. |
-| `AppDurations` | idem | `fast`=150ms, `normal`=220ms, `slow`=320ms — teto do plano para QUALQUER animação |
+| `AppRadius` | idem | Raios `xs`=6 … `full`=999 + helpers `mdAll` etc. |
+| `AppDurations` | idem | `fast`=120ms, `normal`=240ms, `slow`=320ms — teto do plano para QUALQUER animação |
 | `AppCurves` | idem | `standard` (easeOutCubic), `decelerate`, `emphasized` (easeInOutCubic) |
 | `AppSizes` | idem | `touchTarget`=48dp (mínimo WCAG), ícones, avatares, `contentMaxWidth` |
-| `ModuleColors` | idem | 6 cores de módulo na RE2 — conjunto FECHADO: Produtos=`petrol` #10282A, Clientes=`slate` #3D4D55, Fiado=`terracotta` #B58863, Compras=`warmGray` #A79E9C, Relatórios=tinta petróleo #2E6E75, Lojas=petróleo-ardósia #223A41 |
-| `PdfAccents` | `lib/core/share/pdf_accent.dart` | Acentos de PDF (`PdfColor`) espelhando a RE2 para os exporters (factura/cotação/relatórios). O pacote `pdf` não depende de Flutter, então não importa `AppColors` — os tokens duplicam os valores com contraste medido no doc |
-| `IconTone` | idem | Derivação HSL de fundo escuro + foreground claro para ícones em container |
+| `ModuleColors` | idem | Conjunto FECHADO na paleta: Produtos=laranja, Clientes=preto, Fiado=laranja, Compras=cinza, Relatórios=preto, Lojas=cinza, Produção=laranja |
+| `PdfAccents` | `lib/core/share/pdf_accent.dart` | Acentos de PDF (`PdfColor`) espelhando a paleta oficial para os exporters (factura/cotação/relatórios). O pacote `pdf` não depende de Flutter, então não importa `AppColors` — os tokens duplicam os valores |
+| `IconTone` | `lib/core/theme/app_tokens.dart` | Fundo/foreground sólidos da paleta (laranja/preto/suave), sem HSL |
 
-**Regra:** cor nova → `AppColors`; nunca `Color(0x…)` inline. Os hex literais
-remanescentes em `lib/presentation` são um inventário FECHADO com justificativa
-documentada (ver §6 — o CI falha se crescer).
+**Regra:** cor nova → `AppColors`; nunca `Color(0x…)` inline. A paleta é
+protegida pelo CI em `test/core/theme/palette_guard_test.dart` (qualquer HEX
+fora das 4 cores + 3 alertas falha).
 
 ## 2. Componentes fundamentais
 

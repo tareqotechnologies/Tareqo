@@ -151,8 +151,8 @@ abstract final class AppCurves {
   static const Curve emphasized = Curves.easeInOutCubic;
 }
 
-/// Elevação Signature — sombras discretas baseadas em #212121 (preto
-/// oficial), nunca coloridas.
+/// Elevação — sombras discretas baseadas em #0C0B0A (preto do anexo),
+/// nunca coloridas.
 ///
 /// No escuro a elevação é sobretudo contorno; as sombras são mais fortes
 /// para separar superfícies pretas. Os valores centrais ficam aqui para
@@ -165,29 +165,29 @@ abstract final class AppElevation {
   static const double e4 = 24;
 
   static const List<BoxShadow> light1 = [
-    BoxShadow(color: Color(0x0F212121), blurRadius: 2, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x0F0C0B0A), blurRadius: 2, offset: Offset(0, 1)),
   ];
   static const List<BoxShadow> light2 = [
-    BoxShadow(color: Color(0x14212121), blurRadius: 12, offset: Offset(0, 4)),
+    BoxShadow(color: Color(0x140C0B0A), blurRadius: 12, offset: Offset(0, 4)),
   ];
   static const List<BoxShadow> light3 = [
-    BoxShadow(color: Color(0x1F212121), blurRadius: 28, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x1F0C0B0A), blurRadius: 28, offset: Offset(0, 12)),
   ];
   static const List<BoxShadow> light4 = [
-    BoxShadow(color: Color(0x29212121), blurRadius: 48, offset: Offset(0, 24)),
+    BoxShadow(color: Color(0x290C0B0A), blurRadius: 48, offset: Offset(0, 24)),
   ];
 
   static const List<BoxShadow> dark1 = [
-    BoxShadow(color: Color(0x66212121), blurRadius: 1, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x660C0B0A), blurRadius: 1, offset: Offset(0, 1)),
   ];
   static const List<BoxShadow> dark2 = [
-    BoxShadow(color: Color(0x73212121), blurRadius: 16, offset: Offset(0, 6)),
+    BoxShadow(color: Color(0x730C0B0A), blurRadius: 16, offset: Offset(0, 6)),
   ];
   static const List<BoxShadow> dark3 = [
-    BoxShadow(color: Color(0x8C212121), blurRadius: 32, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x8C0C0B0A), blurRadius: 32, offset: Offset(0, 12)),
   ];
   static const List<BoxShadow> dark4 = [
-    BoxShadow(color: Color(0x99212121), blurRadius: 56, offset: Offset(0, 24)),
+    BoxShadow(color: Color(0x990C0B0A), blurRadius: 56, offset: Offset(0, 24)),
   ];
 }
 
@@ -263,9 +263,10 @@ abstract final class IconTone {
   static const Color errorNeutral = Color(0xFFC62828);
   static const Color errorNeutralDark = Color(0xFFC62828);
 
-  /// Aviso semântico oficial (#F9A825 — só em alertas de aviso).
-  static const Color amber = Color(0xFFF9A825);
-  static const Color amberDark = Color(0xFFF9A825);
+  /// Atenção na interface — laranja da marca (#FF6A2A), não um amarelo
+  /// fora do anexo. Erro continua #C62828.
+  static const Color amber = Color(0xFFFF6A2A);
+  static const Color amberDark = Color(0xFFFF6A2A);
 
   /// Textos em modo claro/escuro sobre ícones (paleta oficial).
   static const Color onBackgroundLight = Color(0xFF0C0B0A);

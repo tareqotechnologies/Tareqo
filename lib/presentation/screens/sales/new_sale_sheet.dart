@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
@@ -500,8 +499,12 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     // forma de pagamento + confirmar) e o corpo (zona de scanner + busca +
     // catálogo) rola num ÚNICO scroll. Em ecrãs baixos/paisagem o corpo
     // rola em vez de estourar — sem "bottom overflowed".
+    // Mesma margem de página das restantes telas (16 → 24 → 32 por largura).
+    final hPad = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
     final scannerZone = Padding(
-      padding: const EdgeInsets.fromLTRB(24, 4, 24, AppSpacing.sm),
+      padding: EdgeInsets.fromLTRB(hPad, AppSpacing.xxs, hPad, AppSpacing.sm),
       child: _ScannerZone(
         barcodeController: _barcodeController,
         barcodeError: _barcodeError,
@@ -510,7 +513,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       ),
     );
     final searchField = Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, AppSpacing.sm),
       child: SearchField(
         controller: _searchController,
         focusNode: _searchFocus,
@@ -525,9 +528,9 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
 
     // Modo foco (F4.1): com a busca focada, o que NÃO é o carrinho recua
     // 40% (dim) — deferência ao conteúdo: a venda em progresso é o
-    // protagonista. O carrinho (pills + resumo) fica a 100%; o estado
-    // vazio NÃO escurece (é a resposta à busca). 200ms, e estático com
-    // movimento reduzido.
+    // protagonista. O painel do carrinho fica a 100%; o estado vazio NÃO
+    // escurece (é a resposta à busca). 240ms, e estático com movimento
+    // reduzido.
     Widget focusDim(Widget child, {bool keepFocus = false}) {
       if (!_searchFocused) return child;
       const dimmedOpacity = 0.6;
@@ -630,28 +633,32 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                   else
                     SliverList(
                       delegate: SliverChildListDelegate([
-                        // Carrinho: pills compactos em laranja + total + itens.
-                        if (_cart.isNotEmpty) ...[
-                          _CartSummary(
-                            itemCount: _cart.length,
-                            totalCents: _totalCents,
+                        // Venda em progresso: UM grupo (cabeçalho + linhas)
+                        // lido como um recibo — o catálogo continua a ser a
+                        // única superfície para adicionar produtos. O grupo
+                        // nunca esmaece no modo foco: é o que está a ser
+                        // construído.
+                        if (_cart.isNotEmpty)
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              hPad,
+                              AppSpacing.xxs,
+                              hPad,
+                              AppSpacing.sm,
+                            ),
+                            child: _CartPanel(
+                              entries: [
+                                for (final entry in _cart.entries)
+                                  if (_productById(entry.key)
+                                      case final product?)
+                                    (product: product, quantity: entry.value),
+                              ],
+                            ),
                           ),
-                          for (final entry in _cart.entries) ...[
-                            if (_productById(entry.key) case final product?)
-                              _CartPill(
-                                product: product,
-                                quantity: entry.value,
-                              ),
-                            const SizedBox(height: 8),
-                          ],
-                          const SizedBox(height: 12),
-                        ],
                         for (final product in filtered)
                           focusDim(
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.xl,
-                              ),
+                              padding: EdgeInsets.symmetric(horizontal: hPad),
                               child: _CartProductRow(
                                 product: product,
                                 quantity: _cart[product.id] ?? 0,
@@ -662,7 +669,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                               ),
                             ),
                           ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.lg),
                       ]),
                     ),
                 ],
@@ -693,9 +700,10 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       !kIsWeb ? Platform.isAndroid || Platform.isIOS : true;
 }
 
-/// Zona de scanner (V3) — área destacada no topo do PDV: botão grande de
-/// câmera + campo de código de barras manual (scanners USB tipo teclado
-/// digitam direto e o Enter cai no [onSubmitted]).
+/// Barra de leitura do balcão — uma linha só: o campo de código de barras
+/// (scanner USB digita direto e o Enter cai no [onSubmitted]) e a ação de
+/// câmera. O peso descritivo ficou fora: o rótulo do campo já diz o que é,
+/// e a busca de produtos vive logo abaixo.
 class _ScannerZone extends StatelessWidget {
   const _ScannerZone({
     required this.barcodeController,
@@ -712,82 +720,48 @@ class _ScannerZone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        12,
-        AppSpacing.md,
         AppSpacing.sm,
+        AppSpacing.xxs,
+        AppSpacing.xxs,
+        AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        color: scheme.surfaceContainerLow,
+        borderRadius: AppRadius.mdAll,
+        border: Border.all(color: scheme.outlineVariant, width: 0.8),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Row(
         children: [
-          Row(
-            children: [
-              // Ícone em container circular tingido — mesma linguagem dos
-              // cards de alerta/módulo.
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.qr_code_scanner,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.salesBarcodeLabel,
-                      // Descrição/título de apoio = 14/w400.
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.salesBarcodeHint,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (onScan != null) ...[
-                const SizedBox(width: 8),
-                // Botão grande de câmera (48px — alvo de toque confortável).
-                IconButton.filled(
-                  tooltip: l10n.salesBarcodeScan,
-                  onPressed: onScan,
-                  icon: const Icon(Icons.photo_camera_outlined, size: 20),
-                ),
-              ],
-            ],
+          Expanded(
+            child: AppTextField(
+              controller: barcodeController,
+              textInputAction: TextInputAction.done,
+              onSubmitted: onSubmitted,
+              isDense: true,
+              label: l10n.salesBarcodeLabel,
+              hintText: '20 12345 00175',
+              prefixIcon: Icons.qr_code_scanner,
+              errorText: barcodeError,
+            ),
           ),
-          const SizedBox(height: 12),
-          AppTextField(
-            controller: barcodeController,
-            textInputAction: TextInputAction.done,
-            onSubmitted: onSubmitted,
-            isDense: true,
-            label: l10n.salesBarcodeLabel,
-            hintText: '20 12345 00175',
-            prefixIcon: Icons.qr_code_scanner,
-            errorText: barcodeError,
-          ),
+          if (onScan != null) ...[
+            const SizedBox(width: AppSpacing.xxs),
+            // 48dp de alvo de toque (androidTapTargetGuideline) — a ação
+            // de câmera é o segundo caminho de entrada da venda.
+            IconButton.filled(
+              tooltip: l10n.salesBarcodeScan,
+              onPressed: onScan,
+              icon: const Icon(
+                Icons.photo_camera_outlined,
+                size: AppSizes.iconMd,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -830,13 +804,13 @@ class _CartProductRow extends StatelessWidget {
         product.stockQuantity <
             Quantity.lowStockThresholdUnits * Quantity.milliFactor;
 
-    // Card premium (estilo Apple): cantos 18 + superfície elevada — o
-    // esgotado recebe fundo esmaecido via `color` (estado especial).
+    // Linha densa (mesma linguagem da lista de Produtos): superfície
+    // limpa, borda de cabelo e sombra discreta — o catálogo é uma lista
+    // de trabalho, não uma galeria. O esgotado recua para o fundo neutro.
     return AppCard(
-      elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       color: outOfStock
-          ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4)
+          ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
           : null,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
@@ -847,24 +821,22 @@ class _CartProductRow extends StatelessWidget {
           // Foto do produto (fallback: ícone) — imagem cadastrada,
           // URL do Supabase Storage ou arquivo local.
           ProductImage(imagePath: product.imagePath),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Nome COMPLETO do produto no catálogo — quebra em
-                // linhas quando necessário (nada de truncar nomes).
                 Text(
                   product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  // Nome do produto = 14/w400; o preço e a quantidade
-                  // ficam como metadados de 12.
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w500,
                     color: outOfStock ? theme.colorScheme.outline : null,
                   ),
                 ),
-                const SizedBox(height: 1),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   outOfStock
                       ? l10n.commonSoldOut
@@ -872,68 +844,40 @@ class _CartProductRow extends StatelessWidget {
                             '${Quantity.format(product.stockQuantity, unitLabel: isWeight ? product.unitLabel : null, language: Formatters.currentLanguage)}'
                             '${isWeight ? '' : ' ${l10n.commonUnits}'}'
                             '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                // Fase 1: papel do produto no balcão — o operador vê o selo
-                // do tipo (revenda, produzido ou composto) em TODA a linha,
-                // sem abrir o cadastro.
-                const SizedBox(height: 2),
-                ProductTypeBadge(type: product.type),
+                // Papel do produto no balcão — como TEXTO na linha de
+                // metadados (mesma linguagem da lista de Produtos): o
+                // operador vê o tipo sem abrir o cadastro, e o selo
+                // colorido deixa de disputar atenção com o preço.
+                const SizedBox(height: AppSpacing.micro),
+                Text(
+                  productTypeLabel(context, product.type),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
+          const SizedBox(width: AppSpacing.xs),
           if (!outOfStock)
-            Container(
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppRadius.full),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Sem visualDensity.compact: o alvo de toque efetivo tem
-                  // que ser ≥ 48dp (WCAG/androidTapTargetGuideline) — o
-                  // stepper é o controle mais usado do app.
-                  IconButton(
-                    icon: const Icon(Icons.remove, size: 18),
-                    tooltip: l10n.a11yDecreaseQuantity,
-                    onPressed: quantity == 0 ? null : onRemove,
-                  ),
-                  InkWell(
-                    // Toque na quantidade: edição digitada para TODOS os
-                    // produtos (por peso: fração decimal; por unidade:
-                    // inteiro). Atalho de balcão — 25 canetas em 2 toques.
-                    onTap: onEdit,
-                    borderRadius: BorderRadius.circular(AppRadius.xs),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.xs,
-                        vertical: AppSpacing.xs,
-                      ),
-                      child: Text(
-                        Quantity.format(
-                          quantity,
-                          unitLabel: isWeight ? product.unitLabel : null,
-                          language: Formatters.currentLanguage,
-                        ),
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.labelMedium,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add, size: 18),
-                    tooltip: isWeight
-                        ? l10n.a11yAddFraction
-                        : l10n.a11yIncreaseQuantity,
-                    onPressed: soldOut
-                        ? null
-                        : (isWeight ? onAddFraction : onAdd),
-                  ),
-                ],
-              ),
+            _Stepper(
+              quantity: quantity,
+              isWeight: isWeight,
+              unitLabel: product.unitLabel,
+              soldOut: soldOut,
+              onAdd: onAdd,
+              onAddFraction: onAddFraction,
+              onRemove: onRemove,
+              onEdit: onEdit,
             ),
         ],
       ),
@@ -941,8 +885,97 @@ class _CartProductRow extends StatelessWidget {
   }
 }
 
-/// Pill do carrinho — resumo compacto em laranja: quantidade, produto,
-/// preço unitário e total da linha. Minimalista e sem poluir.
+/// Stepper da linha do catálogo — cápsula neutra em repouso e tingida de
+/// laranja quando o produto já está no carrinho: o estado da venda fica
+/// óbvio sem gritar. Alvos de 48dp; tocar na quantidade abre a edição
+/// digitada.
+class _Stepper extends StatelessWidget {
+  const _Stepper({
+    required this.quantity,
+    required this.isWeight,
+    required this.unitLabel,
+    required this.soldOut,
+    required this.onAdd,
+    required this.onAddFraction,
+    required this.onRemove,
+    required this.onEdit,
+  });
+
+  final int quantity;
+  final bool isWeight;
+  final String unitLabel;
+  final bool soldOut;
+  final VoidCallback onAdd;
+  final VoidCallback onAddFraction;
+  final VoidCallback onRemove;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final active = quantity > 0;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: active
+            ? scheme.primaryContainer
+            : scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.full),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Sem visualDensity.compact: o alvo de toque efetivo tem que ser
+          // ≥ 48dp (WCAG/androidTapTargetGuideline).
+          IconButton(
+            icon: const Icon(Icons.remove, size: 18),
+            tooltip: l10n.a11yDecreaseQuantity,
+            color: active ? scheme.primary : scheme.onSurfaceVariant,
+            onPressed: quantity == 0 ? null : onRemove,
+          ),
+          InkWell(
+            // Toque na quantidade: edição digitada para TODOS os produtos
+            // (por peso: fração decimal; por unidade: inteiro). Atalho de
+            // balcão — 25 canetas em 2 toques.
+            onTap: onEdit,
+            borderRadius: BorderRadius.circular(AppRadius.xs),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xxs,
+                vertical: AppSpacing.xs,
+              ),
+              child: Text(
+                Quantity.format(
+                  quantity,
+                  unitLabel: isWeight ? unitLabel : null,
+                  language: Formatters.currentLanguage,
+                ),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: scheme.onSurface,
+                  fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.add, size: 18),
+            tooltip: isWeight
+                ? l10n.a11yAddFraction
+                : l10n.a11yIncreaseQuantity,
+            color: scheme.primary,
+            onPressed: soldOut ? null : (isWeight ? onAddFraction : onAdd),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Linha do carrinho — produto que já está na venda: bolha de quantidade
+/// (laranja), nome, preço unitário + papel e total da linha em tinta.
 class _CartPill extends StatelessWidget {
   const _CartPill({required this.product, required this.quantity});
 
@@ -953,28 +986,20 @@ class _CartPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final accent = theme.accent;
     final isWeight = product.vendaPorFracao;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: scheme.tertiaryContainer,
-        borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: accent, width: 0.5),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
       child: Row(
         children: [
-          // Bubble de quantidade: "2×" em unidades; "1,75 kg" por peso.
+          // Bolha de quantidade: "2×" em unidades; "1,75 kg" por peso —
+          // largura mínima fixa para os dois formatos alinharem em coluna.
           Container(
-            width: 36,
-            height: 36,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: accent,
+              color: scheme.primary,
               borderRadius: BorderRadius.circular(AppRadius.full),
             ),
             child: Text(
@@ -985,48 +1010,63 @@ class _CartPill extends StatelessWidget {
                       language: Formatters.currentLanguage,
                     )
                   : '${Quantity.format(quantity, language: Formatters.currentLanguage)}×',
+              textAlign: TextAlign.center,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: scheme.onTertiary,
+                color: scheme.onPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   product.name,
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: scheme.onSurface,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.micro),
-                Text(
-                  Formatters.currency(product.salePriceCents),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        productTypeLabel(context, product.type),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      Formatters.currency(product.salePriceCents),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                ProductTypeBadge(type: product.type),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              Formatters.currency(
-                Quantity.lineTotal(quantity, product.salePriceCents),
-              ),
-              textAlign: TextAlign.right,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: accent,
-                fontWeight: FontWeight.w600,
-              ),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            Formatters.currency(
+              Quantity.lineTotal(quantity, product.salePriceCents),
+            ),
+            textAlign: TextAlign.right,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: scheme.onSurface,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -1035,14 +1075,50 @@ class _CartPill extends StatelessWidget {
   }
 }
 
-/// Resumo compacto do carrinho no topo do catálogo.
-///
-/// Mostra o contador de itens e o total em laranja, sem altura fixa.
+/// Grupo do carrinho — cabeçalho e linhas no mesmo cartão tingido: a venda
+/// em progresso lê-se como um recibo e distingue-se do catálogo.
+class _CartPanel extends StatelessWidget {
+  const _CartPanel({required this.entries});
+
+  final List<({Product product, int quantity})> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.xs,
+        AppSpacing.md,
+        AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: AppRadius.lgAll,
+        border: Border.all(
+          color: scheme.primary.withValues(alpha: 0.22),
+          width: 0.8,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _CartSummary(itemCount: entries.length),
+          const SizedBox(height: AppSpacing.xxs),
+          for (final entry in entries)
+            _CartPill(product: entry.product, quantity: entry.quantity),
+        ],
+      ),
+    );
+  }
+}
+
+/// Cabeçalho do carrinho — contador de produtos distintos.
 class _CartSummary extends StatelessWidget {
-  const _CartSummary({required this.itemCount, required this.totalCents});
+  const _CartSummary({required this.itemCount});
 
   final int itemCount;
-  final int totalCents;
 
   @override
   Widget build(BuildContext context) {
@@ -1050,29 +1126,21 @@ class _CartSummary extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    // Linha compacta (sem cartão alto): o resumo do carrinho não deve
-    // empurrar o catálogo para fora do ecrã em telas baixas.
     return Row(
       children: [
         Icon(
           Icons.shopping_cart_outlined,
           size: AppSizes.iconSm,
-          color: theme.accent,
+          color: scheme.primary,
         ),
-        const SizedBox(width: AppSpacing.xxs),
+        const SizedBox(width: AppSpacing.xs),
         Expanded(
           child: Text(
             l10n.salesCartSection(itemCount),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.onSurface,
+              fontWeight: FontWeight.w600,
             ),
-          ),
-        ),
-        Text(
-          Formatters.currency(totalCents),
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.accent,
-            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -1109,6 +1177,9 @@ class _Footer extends StatelessWidget {
     final l10n = context.l10n;
 
     final scheme = theme.colorScheme;
+    final hPad = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
@@ -1116,12 +1187,7 @@ class _Footer extends StatelessWidget {
           top: BorderSide(color: scheme.outlineVariant, width: 0.5),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.sm,
-        AppSpacing.md,
-        AppSpacing.md,
-      ),
+      padding: EdgeInsets.fromLTRB(hPad, AppSpacing.sm, hPad, AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1132,6 +1198,7 @@ class _Footer extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: Text(
@@ -1141,11 +1208,15 @@ class _Footer extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: AppSpacing.sm),
+              // Total em tinta (AA nos dois temas); o laranja fica para a
+              // ação de confirmar. É o número que fecha a venda.
               Text(
                 Formatters.currency(totalCents),
                 style: theme.textTheme.headlineSmall?.copyWith(
-                  color: scheme.primary,
+                  color: scheme.onSurface,
                   fontWeight: FontWeight.w600,
+                  letterSpacing: -0.4,
                 ),
               ),
             ],
@@ -1157,15 +1228,12 @@ class _Footer extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
             ),
           ],
-          const SizedBox(height: AppSpacing.xs),
-          // Botão confirmar: usa AppButton (tema) em vez de InkWell+Ink
-          // custom — herda cor/contraste do ColorScheme e estado
-          // desabilitado visual (U-01). O gradiente sutil é opt-in
-          // (gradient:true só quando habilitado); um ícone spinner
-          // substitui o check durante o envio.
+          const SizedBox(height: AppSpacing.sm),
+          // Botão confirmar: sólido no laranja oficial (sem gradiente) —
+          // uma única ação primária no rodapé. Um spinner substitui o
+          // check durante o envio.
           AppButton.primary(
             expanded: true,
-            gradient: true,
             onPressed: totalCents == 0 || isSubmitting ? null : onConfirm,
             label: l10n.salesConfirm,
             icon: isSubmitting

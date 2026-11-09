@@ -24,17 +24,21 @@
 
 ## 1. Orçamento de cor (regra de aplicação)
 
+**Paleta oficial (as únicas cores sólidas):** laranja `#FF6A2A`, cinza de
+superfície `#F0F0F0`, branco suave `#F9F9F9` e preto `#0C0B0A`.
+
 | Proporção | Família | Onde |
 |---|---|---|
-| **~90%** | Neutros (canvas, superfície, texto, divisores) | Fundos, listas, tabelas, formulários |
-| **~8%** | Azul de ação (`action`, `actionFill`, `actionText`) | CTA primária, seleção, links, foco, indicador de navegação |
-| **~2%** | Semântica (sucesso, alerta, erro, informação) | Apenas estados e badges; nunca fundos de página |
+| **~90%** | Neutros (suave, cinza, preto) | Fundos, listas, tabelas, formulários |
+| **~8%** | Laranja de ação (`action`, `actionFill`, `actionText`) | CTA primária, seleção, links, foco, indicador de navegação |
+| **~2%** | Alertas semânticos (sucesso, aviso, erro) | Apenas estados e badges; nunca fundos de página |
 
 Regras:
-- **Máximo 1 botão preenchido azul por viewport.** Ações secundárias são contornadas ou textuais.
-- **Semântica nunca é decoração.** Verde só significa sucesso/entrada; vermelho só erro/destrutivo.
+- **Máximo 1 botão preenchido laranja por viewport.** Ações secundárias são contornadas ou textuais.
+- **Semântica nunca é decoração.** Verde `#2E7D32` só significa sucesso/entrada; vermelho `#C62828` só erro/destrutivo; amarelo `#F9A825` só aviso.
+- **Nenhuma cor fora da paleta.** Qualquer HEX novo nasce em `AppColors` (ou `PdfAccents` no PDF) e é validado por `test/core/theme/palette_guard_test.dart`.
 - **Nunca usar duas cores semânticas no mesmo cartão** (exceto “diferença” em fecho de caixa, onde o par é o próprio conteúdo).
-- **Terracota e petróleo saem da UI funcional.** Ficam reservados ao símbolo da marca e à ilustração de arranque. Isto elimina a ambiguidade atual (`IconTone.green` = terracota).
+- **Variações de alfa** (véus, sombras) são permitidas apenas sobre as quatro cores da paleta.
 
 ---
 
@@ -44,82 +48,70 @@ Regras:
 
 | Token | HEX | Uso | Contraste medido |
 |---|---|---|---|
-| `canvas` | `#F5F5F7` | Fundo da aplicação | — |
-| `surface` | `#FFFFFF` | Cartões, listas, sheets, campos | — |
-| `surfaceSunken` | `#EDEDF0` | Zonas agrupadas, fundo de inputs | — |
-| `surfaceRaised` | `#FFFFFF` | Superfície com elevação | — |
-| `surfaceTint` | `#F0F6FF` | Zona informativa/selecionada | — |
-| `border` | `#D2D2D7` | Divisores e contornos decorativos | — |
-| `borderStrong` | `#C7C7CC` | Contorno de controlos (≥3:1) | — |
-| `separator` | `#E5E5EA` | Linhas de lista/tabela | — |
-| `textPrimary` | `#1D1D1F` | Títulos e corpo | **16.83:1** sobre `surface` · **15.46:1** sobre `canvas` |
-| `textSecondary` | `#6E6E73` | Apoio, metadados | **5.07:1** sobre `surface` · **4.66:1** sobre `canvas` |
-| `textTertiary` | `#636366` | Texto menos importante | **5.99:1** sobre `surface` · **5.50:1** sobre `canvas` |
-| `textDisabled` | `#AEAEB2` | Desativado (isento de AA) | — |
-| `textOnAction` | `#FFFFFF` | Texto sobre preenchimento de ação | ver §2.2 |
+| `canvas` | `#F9F9F9` | Fundo da aplicação | — |
+| `surface` | `#F9F9F9` | Cartões, listas, sheets, campos | — |
+| `surfaceSunken` | `#F0F0F0` | Zonas agrupadas, fundo de inputs | — |
+| `surfaceRaised` | `#F9F9F9` | Superfície com elevação | — |
+| `border` | `#F0F0F0` | Divisores e contornos decorativos | — |
+| `borderStrong` | `#0C0B0A` | Contorno de controlos | **17.6:1** sobre `surface` |
+| `separator` | `#F0F0F0` | Linhas de lista/tabela | — |
+| `textPrimary` | `#0C0B0A` | Títulos e corpo | **17.6:1** sobre `surface` |
+| `textSecondary` | `#0C0B0A` | Apoio, metadados | **17.6:1** sobre `surface` |
+| `textTertiary` | `#0C0B0A` | Texto menos importante | **17.6:1** sobre `surface` |
+| `textDisabled` | `#F0F0F0` | Desativado (isento de AA) | — |
+| `textOnAction` | `#0C0B0A` | Texto sobre preenchimento de ação | ver §2.2 |
 
-> `#8E8E93` (usado como terciário em alguns sistemas) dá apenas **3.26:1** sobre branco — **não é permitido para texto pequeno** neste sistema. Fica reservado a ícones decorativos e placeholders de ≥17 px.
+> O cinza `#F0F0F0` sobre `#F9F9F9` dá apenas **1.2:1** — **não é permitido para texto**. Fica reservado a superfícies, divisores e estados desativados.
 
-### 2.2 Azul de ação — três tons, três funções
+### 2.2 Laranja de ação — um tom, dois rótulos
 
 | Token | HEX | Função | Contraste |
 |---|---|---|---|
-| `action` | `#007AFF` | Ícones, foco, indicador de seleção, controlos (não-texto) | **4.02:1** sobre branco (UI ≥3:1 ✓) |
-| `actionFill` | `#0071E3` | Fundo de botão primário | branco sobre ele: **4.70:1** (AA ✓) |
-| `actionText` | `#0062CC` | Links e texto de ação sobre superfície | **5.80:1** (AA ✓) |
-| `actionPressed` | `#0051A8` | Estado premido | **7.66:1** |
-| `actionSoft` | `#E8F1FF` | Fundo de chip selecionado / realce | — |
-| `actionBorder` | `#B3D4FF` | Contorno de seleção | — |
+| `action` | `#FF6A2A` | Ícones, foco, indicador de seleção, botão primário | **2.9:1** sobre `#F9F9F9` (não-texto/área grande ✓) |
+| `onAction` | `#0C0B0A` | Rótulo do botão primário | **6.1:1** sobre o laranja (AA texto ✓) |
+| `actionText` | `#0C0B0A` | Links e texto de ação sobre superfície | **17.6:1** (AAA ✓) |
+| `actionSoft` | `#FF6A2A` a 10% | Fundo de chip selecionado / realce | — |
+| `actionBorder` | `#FF6A2A` | Contorno de seleção | — |
 
-> **Porquê três tons:** `#007AFF` puro com texto branco a 15 px dá 4.02:1 e falha AA. Em vez de reduzir a vivacidade da marca ou aumentar o texto, separa-se a função: ícone/foco usa `#007AFF`; preenchimento de botão usa `#0071E3`; link usa `#0062CC`.
+> **Porquê rótulo preto:** branco sobre `#FF6A2A` dá apenas **2.9:1** e falha AA. O laranja fica para ícone, foco, borda e preenchimento; o texto sobre ele é sempre preto.
 
-### 2.3 Paleta semântica — tema claro
+### 2.3 Paleta semântica — tema claro (exceção: só alertas)
 
 | Token | HEX | Uso | Contraste |
 |---|---|---|---|
-| `success` | `#248A3D` | Ícone/badge de sucesso | **4.40:1** sobre branco (não-texto ✓) |
-| `successText` | `#1E7A34` | Texto de sucesso | **5.40:1** (AA ✓) |
-| `successSoft` | `#E7F4EA` | Fundo de badge sucesso | — |
-| `warning` | `#B25000` | Texto/ícone de alerta | **5.20:1** (AA ✓) |
-| `warningBright` | `#D97706` | Ícone de alerta (não-texto) | ≥3:1 |
-| `warningSoft` | `#FFF3E0` | Fundo de badge alerta | — |
-| `error` | `#D70015` | Erro, destrutivo | **5.38:1** (AA ✓) |
-| `onError` | `#FFFFFF` | Texto sobre erro | **5.38:1** (AA ✓) |
-| `errorSoft` | `#FDECEF` | Fundo de badge erro | — |
-| `info` | `#0057B8` | Informação | **6.87:1** (AA ✓) |
-| `infoSoft` | `#E8F1FB` | Fundo de badge informação | — |
+| `success` | `#2E7D32` | Ícone/badge de sucesso | só em alertas |
+| `error` | `#C62828` | Erro, destrutivo | só em alertas |
+| `warning` | `#F9A825` | Ícone/borda de aviso (texto sobre ele = preto) | só em alertas |
 
 ---
 
 ## 3. Tema escuro completo
 
-O escuro **não é uma inversão**: é uma paleta própria, com superfícies quase pretas, texto quase branco e azul mais luminoso.
+O escuro **não é uma inversão**: usa o preto oficial como canvas e o branco suave como texto, mantendo o laranja `#FF6A2A` como única ação.
 
 | Token | HEX | Uso | Contraste medido |
 |---|---|---|---|
-| `canvas` | `#0B0B0D` | Fundo | — |
-| `surface` | `#161618` | Cartões e listas | — |
-| `surfaceRaised` | `#1C1C1E` | Sheets, diálogos, menus | — |
-| `surfaceSunken` | `#0F0F11` | Inputs, zonas agrupadas | — |
-| `border` | `#2C2C2E` | Divisores decorativos | 1.41:1 (não-texto) |
-| `borderStrong` | `#3A3A3C` | Contorno de controlos | 1.50:1 (usar só com preenchimento contrastado) |
-| `separator` | `#242426` | Linhas de lista | — |
-| `textPrimary` | `#F5F5F7` | Títulos e corpo | **16.60:1** sobre `surface` · **18.06:1** sobre `canvas` |
-| `textSecondary` | `#A1A1A6` | Apoio | **7.03:1** sobre `surface` |
-| `textTertiary` | `#8E8E93` | Menos importante | **5.54:1** sobre `surface` |
-| `textDisabled` | `#636366` | Desativado | — |
-| `action` | `#0A84FF` | Ícones, foco, seleção | **4.95:1** sobre `surface` |
-| `actionFill` | `#0A84FF` | Botão primário (rótulo escuro) | `#0B0B0D` sobre ele: **5.39:1** |
-| `actionText` | `#0A84FF` | Links | **4.95:1** (AA ✓) |
-| `actionPressed` | `#409CFF` | Premido (clareia, não escurece) | — |
-| `actionSoft` | `#0F2A44` | Fundo de seleção | — |
-| `success` | `#30D158` | Sucesso | **8.42:1** |
-| `warning` | `#FF9F0A` | Alerta | **8.28:1** |
-| `error` | `#FF453A` | Erro | **4.99:1** |
-| `info` | `#64D2FF` | Informação | **9.89:1** |
-| `onSemantic` | `#0B0B0D` | Rótulo sobre preenchimentos semânticos | ≥5.39:1 em todos |
+| `canvas` | `#0C0B0A` | Fundo | — |
+| `surface` | `#0C0B0A` | Cartões e listas | — |
+| `surfaceRaised` | `#0C0B0A` | Sheets, diálogos, menus | — |
+| `surfaceSunken` | `#0C0B0A` | Inputs, zonas agrupadas | — |
+| `border` | `#F0F0F0` | Divisores decorativos | **14.8:1** |
+| `borderStrong` | `#F9F9F9` | Contorno de controlos | **17.6:1** |
+| `separator` | `#F0F0F0` | Linhas de lista | **14.8:1** |
+| `textPrimary` | `#F9F9F9` | Títulos e corpo | **17.6:1** |
+| `textSecondary` | `#F0F0F0` | Apoio | **14.8:1** |
+| `textTertiary` | `#F0F0F0` | Menos importante | **14.8:1** |
+| `textDisabled` | `#F0F0F0` | Desativado (isento de AA) | — |
+| `action` | `#FF6A2A` | Ícones, foco, seleção | não-texto/área grande |
+| `actionFill` | `#FF6A2A` | Botão primário (rótulo preto) | `#0C0B0A` sobre ele: **6.1:1** |
+| `actionText` | `#FF6A2A` | Links | não-texto |
+| `actionSoft` | `#FF6A2A` a 12% | Fundo de seleção | — |
+| `success` | `#2E7D32` | Sucesso (alerta) | só em alertas |
+| `warning` | `#F9A825` | Aviso (alerta) | só em alertas |
+| `error` | `#C62828` | Erro (alerta) | só em alertas |
+| `onSemantic` | `#F9F9F9` | Rótulo sobre preenchimentos semânticos | — |
 
-**Regra do escuro:** o preenchimento primário usa rótulo **escuro** (`#0B0B0D`), não branco (branco sobre `#0A84FF` = 3.65:1, falha AA). Esta é uma decisão de identidade, não um workaround.
+**Regra do escuro:** o preenchimento primário mantém o rótulo **preto** (`#0C0B0A`, 6.1:1). Branco sobre laranja dá 2.9:1 e falha AA. A superfície e o canvas coincidem no preto; a separação vem de contorno e tipografia, não de mais tonalidades.
 
 ---
 
@@ -354,7 +346,7 @@ Regras:
 - Altura 28 (chip 32), raio full, padding horizontal 8–12.
 - Texto `caption` 500; ícone 12–14 quando necessário.
 - Semânticos usam `*Soft` de fundo + `*Text` de texto + ícone.
-- Seleção usa `actionSoft` + `actionBorder` + `actionText`; **nunca** preencher com azul sólido e texto pequeno.
+- Seleção usa `actionSoft` + `actionBorder` + `actionText`; **nunca** preencher com laranja sólido e texto branco pequeno (2.9:1).
 
 ### 9.9 Navegação
 - Barra inferior 64 + safe area; ícone 24; label `caption2` 500.
@@ -556,26 +548,26 @@ AlertDialog(
 
 O sistema atual já tem tokens (`AppSpacing`, `AppRadius`, `AppDurations`, `AppSizes`) e tema (`AppTheme`). Signature **não os substitui de imediato**; publica uma camada `signature/*` e mapeia.
 
-### 13.1 `ColorScheme` proposto
+### 13.1 `ColorScheme` implementado (`lib/core/theme/app_theme.dart`)
 
 | Papel M3 | Claro | Escuro |
 |---|---|---|
-| `primary` | `#0071E3` | `#0A84FF` |
-| `onPrimary` | `#FFFFFF` | `#0B0B0D` |
-| `primaryContainer` | `#E8F1FF` | `#0F2A44` |
-| `onPrimaryContainer` | `#0062CC` | `#0A84FF` |
-| `surface` | `#FFFFFF` | `#161618` |
-| `onSurface` | `#1D1D1F` | `#F5F5F7` |
-| `onSurfaceVariant` | `#6E6E73` | `#A1A1A6` |
-| `outline` | `#C7C7CC` | `#3A3A3C` |
-| `outlineVariant` | `#D2D2D7` | `#2C2C2E` |
-| `error` | `#D70015` | `#FF453A` |
-| `onError` | `#FFFFFF` | `#0B0B0D` |
-| `errorContainer` | `#FDECEF` | `#3A0D12` |
-| `onErrorContainer` | `#D70015` | `#FFB4AB` |
-| `scaffoldBackground` | `#F5F5F7` | `#0B0B0D` |
+| `primary` | `#FF6A2A` | `#FF6A2A` |
+| `onPrimary` | `#0C0B0A` | `#0C0B0A` |
+| `primaryContainer` | laranja a 7% sobre `#F9F9F9` | laranja a 12% sobre `#0C0B0A` |
+| `onPrimaryContainer` | `#0C0B0A` | `#F9F9F9` |
+| `surface` | `#F9F9F9` | `#0C0B0A` |
+| `onSurface` | `#0C0B0A` | `#F9F9F9` |
+| `onSurfaceVariant` | `#0C0B0A` | `#F0F0F0` |
+| `outline` | `#F0F0F0` | `#F0F0F0` |
+| `outlineVariant` | `#F0F0F0` | `#F0F0F0` |
+| `error` | `#C62828` | `#C62828` |
+| `onError` | `#F9F9F9` | `#0C0B0A` |
+| `errorContainer` | `#C62828` (véu) | `#C62828` (véu) |
+| `onErrorContainer` | `#C62828` | `#C62828` |
+| `scaffoldBackground` | `#F9F9F9` | `#0C0B0A` |
 
-> **Atenção:** hoje `primary` é slate/bege. A mudança para azul altera a percepção de marca em todos os ecrãs. O plano de migração já prevê troca faseada com flag — este documento não a executa.
+> **Estado:** a migração foi executada. `AppColors` é a fonte única dos HEX e o laranja `#FF6A2A` é a única cor de ação nos dois brilhos.
 
 ### 13.2 Tokens de espaço
 
@@ -625,7 +617,7 @@ O sistema atual já tem tokens (`AppSpacing`, `AppRadius`, `AppDurations`, `AppS
 ### 14.1 Por ecrã (gate antes de aprovar)
 - [ ] Existe **uma** ação primária visível e ela é a mais provável no contexto.
 - [ ] Máximo **1** cartão-herói; o resto é hierarquia secundária.
-- [ ] Azul aparece em ≤8% da superfície; semântica em ≤2%.
+- [ ] Laranja aparece em ≤8% da superfície; semântica em ≤2%.
 - [ ] Todos os valores monetários são tabulares e alinhados.
 - [ ] Contraste AA em texto normal; AAA em texto principal quando possível.
 - [ ] Estados loading/erro/vazio/sucesso desenhados — nenhum “branco” sem explicação.
@@ -641,7 +633,7 @@ O sistema atual já tem tokens (`AppSpacing`, `AppRadius`, `AppDurations`, `AppS
 - Sombras coloridas.
 - Mais de duas famílias tipográficas.
 - Ícones outline e preenchidos misturados na mesma barra.
-- Texto branco sobre azul `#007AFF` em tamanho pequeno.
+- Texto branco sobre laranja `#FF6A2A` em tamanho pequeno (2.9:1).
 - Verde/vermelho como única diferença entre linhas.
 - Cartões dentro de cartões com borda.
 - Tabelas com scroll horizontal em mobile sem alternativa.
@@ -666,7 +658,7 @@ O sistema atual já tem tokens (`AppSpacing`, `AppRadius`, `AppDurations`, `AppS
 
 | Do | Don’t |
 |---|---|
-| Usar azul para indicar “podes agir aqui” | Pintar cabeçalhos e cartões de azul |
+| Usar laranja para indicar “podes agir aqui” | Pintar cabeçalhos e cartões de laranja |
 | Separar secções com espaço e tipografia | Separar com caixas coloridas |
 | Mostrar “Pago” com ícone + texto | Mostrar só um ponto verde |
 | Elevar o cartão que o utilizador pode tocar | Elevar todos os cartões |
@@ -683,19 +675,19 @@ O sistema atual já tem tokens (`AppSpacing`, `AppRadius`, `AppDurations`, `AppS
 
 | Módulo | Cor de ação | Semântica dominante | Nota |
 |---|---|---|---|
-| Dashboard | Azul (período, ver mais) | Alerta (stock/validade) | Semântica só nos alertas |
-| Vendas | Azul (nova venda) | Sucesso (concluída) / erro (anulada) | Totais tabulares |
-| PDV | Azul (confirmar) | Sucesso no recibo | Sem vermelho durante o carrinho |
-| Financeiro | Azul (registar) | Entrada/saída | Duas semânticas apenas no fluxo |
-| Crédito | Azul (quitar) | Alerta (vencido) | Nunca verde em dívida pendente |
-| Produtos | Azul (adicionar) | Alerta (stock baixo) | Tipo de produto neutro |
-| Clientes | Azul (adicionar) | Alerta (fiado) | Avatar neutro |
-| Compras | Azul (registar) | Informação | — |
-| Produção | Azul (registar) | Alerta (matéria-prima) | — |
-| Relatórios | Azul (exportar) | Sucesso/erro nos deltas | Gráficos com azul + neutros |
-| Lojas | Azul (adicionar) | Alerta (limites do plano) | — |
-| Admin | Azul (aprovar) | Erro (rejeitar) / alerta (pendente) | Densidade maior, mesma paleta |
-| Auth | Azul (entrar) | Erro (credenciais) | Sem semântica decorativa |
+| Dashboard | Laranja (período, ver mais) | Alerta (stock/validade) | Semântica só nos alertas |
+| Vendas | Laranja (nova venda) | Sucesso (concluída) / erro (anulada) | Totais tabulares |
+| PDV | Laranja (confirmar) | Sucesso no recibo | Sem vermelho durante o carrinho |
+| Financeiro | Laranja (registar) | Entrada/saída | Duas semânticas apenas no fluxo |
+| Crédito | Laranja (quitar) | Alerta (vencido) | Nunca verde em dívida pendente |
+| Produtos | Laranja (adicionar) | Alerta (stock baixo) | Tipo de produto neutro |
+| Clientes | Laranja (adicionar) | Alerta (fiado) | Avatar neutro |
+| Compras | Laranja (registar) | Informação | — |
+| Produção | Laranja (registar) | Alerta (matéria-prima) | — |
+| Relatórios | Laranja (exportar) | Sucesso/erro nos deltas | Gráficos com laranja + neutros |
+| Lojas | Laranja (adicionar) | Alerta (limites do plano) | — |
+| Admin | Laranja (aprovar) | Erro (rejeitar) / alerta (pendente) | Densidade maior, mesma paleta |
+| Auth | Laranja (entrar) | Erro (credenciais) | Sem semântica decorativa |
 
 ---
 

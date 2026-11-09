@@ -7,14 +7,14 @@
 // `tool/generate_docs_pdf_test.dart` (corrida manual, como
 // generate_icons_test.dart — não entra na suíte `flutter test`).
 //
-// Design (espelho do design system "ultra-clean" do app):
-// - Capa escura (fundo #161D22) com o acento verde da marca e título leve;
+// Design (espelho do design system do app):
+// - Capa escura (fundo #0C0B0A) com o acento laranja da marca e título leve;
 // - Índice com números de página — calculado em DOIS PASSOS (o pacote pdf
 // não sabe a página de um heading antes de renderizar; um widget sonda
 // `context.pageNumber` durante o layout do 1.º passe e o 2.º passe
 // desenha os números reais);
 // - Conteúdo em páginas CLARAS (impressão/leitura): cabeçalhos com régua
-// verde, listas, citações, regras, tabelas com cabeçalho tingido;
+// laranja, listas, citações, regras, tabelas com cabeçalho tingido;
 // - Marcadores de navegação (bookmarks) via `pw.Outline`;
 // - Glifos sem suporte na fonte (emoji, símbolos raros) são removidos
 // usando o cmap da Inter (TtfParser.charToGlyphIndexMap) — nunca fica
@@ -27,38 +27,41 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 // ---------------------------------------------------------------------------
-// Cores da marca (idênticas ao AppTheme — lib/core/theme/app_theme.dart)
+// Cores da marca — paleta OFICIAL do app (lib/core/theme/app_colors.dart):
+// laranja #FF6A2A, cinza #F0F0F0, suave #F9F9F9, preto #0C0B0A.
 // ---------------------------------------------------------------------------
 
-/// Fundo escuro da capa (surface escura do tema do app).
-const PdfColor coverBg = PdfColor.fromInt(0xFF161D22);
+/// Fundo escuro da capa (preto oficial).
+const PdfColor coverBg = PdfColor.fromInt(0xFF0C0B0A);
 
-/// Acento verde da marca.
-const PdfColor accent = PdfColor.fromInt(0xFF22C55E);
+/// Laranja da marca (ações, réguas e destaques — não-texto pequeno).
+const PdfColor accent = PdfColor.fromInt(0xFFFF6A2A);
 
-/// Verde escuro (texto/link sobre fundo claro — primary do tema).
-const PdfColor accentDark = PdfColor.fromInt(0xFF15803D);
+/// Texto/link sobre fundo claro: preto oficial (o laranja só passa AA
+/// para área grande; #FF6A2A sobre branco é 2.9:1).
+const PdfColor accentDark = PdfColor.fromInt(0xFF0C0B0A);
 
 /// Texto principal sobre fundo claro.
-const PdfColor textColor = PdfColor.fromInt(0xFF1A1C1B);
+const PdfColor textColor = PdfColor.fromInt(0xFF0C0B0A);
 
-/// Texto secundário (legendas, meta).
-const PdfColor textMuted = PdfColor.fromInt(0xFF5F6B64);
+/// Texto secundário (legendas, meta) — preto oficial: o cinza #F0F0F0
+/// sobre branco é 1.2:1 e não é legível.
+const PdfColor textMuted = PdfColor.fromInt(0xFF0C0B0A);
 
-/// Cinza claro de fundos de citação.
-const PdfColor quoteBg = PdfColor.fromInt(0xFFF1F3F2);
+/// Cinza de superfície dos fundos de citação.
+const PdfColor quoteBg = PdfColor.fromInt(0xFFF0F0F0);
 
-/// Verde-água claro do cabeçalho das tabelas (secondaryContainer).
-const PdfColor tableHeadBg = PdfColor.fromInt(0xFFD6F5E0);
+/// Cinza de superfície do cabeçalho das tabelas.
+const PdfColor tableHeadBg = PdfColor.fromInt(0xFFF0F0F0);
 
-/// Borda suave (outlineVariant claro).
-const PdfColor borderColor = PdfColor.fromInt(0xFFD9DEDB);
+/// Borda suave (cinza de superfície oficial).
+const PdfColor borderColor = PdfColor.fromInt(0xFFF0F0F0);
 
-/// Cinza claro (texto da capa, notas).
-const PdfColor onCoverMuted = PdfColor.fromInt(0xFFA1A1AA);
+/// Cinza de superfície (texto da capa, notas) — 14.8:1 sobre o preto.
+const PdfColor onCoverMuted = PdfColor.fromInt(0xFFF0F0F0);
 
-/// Branco (texto da capa).
-const PdfColor onCover = PdfColor.fromInt(0xFFF4F4F5);
+/// Branco suave oficial (texto da capa).
+const PdfColor onCover = PdfColor.fromInt(0xFFF9F9F9);
 
 // ---------------------------------------------------------------------------
 // Modelo do documento

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/auth_providers.dart';
-import '../../../core/theme/app_tokens.dart';
+import '../../widgets/app_button.dart';
 
 /// Tela exibida ao dono enquanto a solicitação de acesso aguarda a
 /// aprovação manual do super admin (prazo de até 24h).
@@ -28,50 +31,51 @@ class TenantPendingScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Estado "a aguardar": laranja oficial em véu — o mesmo
+                // ícone-em-superfície usado nas telas de estado.
                 Container(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  width: 72,
+                  height: 72,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: scheme.tertiaryContainer,
+                    color: theme.accent.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.hourglass_top,
-                    size: 48,
-                    color: scheme.onTertiaryContainer,
+                    size: 32,
+                    color: theme.accent,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.lg),
                 Text(
                   l10n.tenantPendingTitle,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.5,
-                  ),
+                  style: AppTypography.headline,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.tenantPendingSubtitle(tenant.businessName),
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: AppTypography.bodyMedium.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.tenantPendingHint,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.outline,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                OutlinedButton.icon(
+                AppButton.secondary(
                   onPressed: () async {
                     await ref.read(signOutUseCaseProvider).call();
                   },
                   icon: const Icon(Icons.logout),
-                  label: Text(l10n.commonSignOut),
+                  label: l10n.commonSignOut,
                 ),
               ],
             ),

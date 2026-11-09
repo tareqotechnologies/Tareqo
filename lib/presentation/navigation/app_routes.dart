@@ -196,10 +196,7 @@ abstract final class AppRoutes {
         return _unknown(settings);
     }
 
-    return MaterialPageRoute<dynamic>(
-      settings: settings,
-      builder: builder,
-    );
+    return MaterialPageRoute<dynamic>(settings: settings, builder: builder);
   }
 
   static T? _arg<T>(RouteSettings settings, String key) {
@@ -248,8 +245,13 @@ abstract final class AppRoutes {
 /// `Navigator.of(context).push(MaterialPageRoute(...))` inline.
 abstract final class AppNavigator {
   /// Abre a rota [name] (ver [AppRoutes]). Retorna o resultado da rota.
-  static Future<T?> push<T>(BuildContext context, String name) {
-    return Navigator.of(context).pushNamed<T>(name);
+  ///
+  /// O Navigator empurra as rotas como `Route<dynamic>`; pedir `T` direto no
+  /// `pushNamed<T>` quebra o cast interno (`Route<bool?>`). Por isso o push
+  /// é `Object?` e o resultado só é devolvido quando casa com [T].
+  static Future<T?> push<T>(BuildContext context, String name) async {
+    final result = await Navigator.of(context).pushNamed<Object?>(name);
+    return result is T ? result : null;
   }
 
   /// Abre com argumentos nomeados (stores/docReader/saleDetail).
@@ -257,11 +259,11 @@ abstract final class AppNavigator {
     BuildContext context,
     String name,
     Map<String, Object?> args,
-  ) {
-    return Navigator.of(context).pushNamed<T>(
-      name,
-      arguments: args,
-    );
+  ) async {
+    final result = await Navigator.of(
+      context,
+    ).pushNamed<Object?>(name, arguments: args);
+    return result is T ? result : null;
   }
 
   /// Abre uma **secção do shell** empurrando a tela correspondente
