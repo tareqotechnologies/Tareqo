@@ -659,28 +659,31 @@ class _HeroMetric extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            // Moderno/minimalista: rótulo pequeno em cinza de superfície
+            // (texto secundário claro) com tracking curto.
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
-              letterSpacing: 0.2,
+              letterSpacing: 0.4,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: _CountUpText(
               cents: cents,
               loading: loading,
+              // Hero 28px w600 — tracking apertado para respiro editorial.
               style: theme.textTheme.titleLarge?.copyWith(
                 color: scheme.onSurface,
                 fontWeight: FontWeight.w600,
-                letterSpacing: -0.4,
+                letterSpacing: -0.2,
               ),
             ),
           ),
           if (subtext != null) ...[
-            const SizedBox(height: 2),
+            const SizedBox(height: AppSpacing.micro),
             Text(
               subtext!,
               maxLines: 1,

@@ -139,16 +139,9 @@ class _AppButtonState extends State<AppButton>
             ).merge(widget.style),
             child: Ink(
               decoration: BoxDecoration(
-                // Sutil: dois papéis do scheme — sem hex fora do tema. O
-                // segundo tom é um brilho NEUTRO (nunca o âmbar de alerta).
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    scheme.primary,
-                    Color.lerp(scheme.primary, scheme.onPrimary, 0.18)!,
-                  ],
-                ),
+                // Minimalista: cor sólida laranja (paleta oficial). Sem
+                // gradiente com tons fora da paleta.
+                color: scheme.primary,
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: content,

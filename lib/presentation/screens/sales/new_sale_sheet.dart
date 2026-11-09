@@ -1132,7 +1132,7 @@ class _Footer extends StatelessWidget {
             value: paymentMethod,
             onChanged: onPaymentMethodChanged,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           Row(
             children: [
               Expanded(
@@ -1153,7 +1153,7 @@ class _Footer extends StatelessWidget {
             ],
           ),
           if (error != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xxs),
             Text(
               error!,
               style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
