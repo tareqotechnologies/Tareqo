@@ -178,12 +178,11 @@ flutter:
   fonts:
     - family: Inter
       fonts:
+        # Instância variável oficial (OFL 1.1, 854 KB) — eixo wght
+        # 100–900 + opsz. A antiga `Inter-Bold.ttf` foi removida: o
+        # motor resolve w700 pelo eixo variável; para PDFs (que não
+        # selecionam wght) usar a instância média documentada.
         - asset: assets/fonts/Inter-Variable.ttf
-        # Instância estática w700 — usada apenas pelos exporters de PDF
-        # (dart_pdf não seleciona o eixo wght da variável e sem fonte bold
-        # registrada os títulos das facturas/relatórios saem sem peso).
-        - asset: assets/fonts/Inter-Bold.ttf
-          weight: 700
     # Mono — família 'monospace' (nome do PAPEL, não da fonte): todos os
     # `fontFamily: 'monospace'` do app (código MFA, IDs do painel admin,
     # snippets do leitor de ajuda) caem aqui. Política de fallback:
