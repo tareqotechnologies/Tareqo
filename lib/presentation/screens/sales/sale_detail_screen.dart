@@ -76,7 +76,7 @@ class _SaleDetailSheet extends StatelessWidget {
                   child: Text(
                     l10n.saleDetailView,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.black,
+                      color: AppColors.brandBlack,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -136,7 +136,7 @@ class _SaleFeedRow extends StatelessWidget {
             child: const Icon(
               Icons.north_east_rounded,
               size: 18,
-              color: AppColors.ice,
+              color: AppColors.softWhite,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -445,7 +445,7 @@ class _SaleItemRow extends ConsumerWidget {
             child: const Icon(
               Icons.north_east_rounded,
               size: 18,
-              color: AppColors.ice,
+              color: AppColors.softWhite,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),

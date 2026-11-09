@@ -123,7 +123,7 @@ class _PulseBadgeState extends State<PulseBadge>
     // chamador mantém o branco original.
     final onBadgeColor = widget.color == null
         ? scheme.onTertiary
-        : AppColors.ice;
+        : AppColors.softWhite;
     final displayText = widget.count > widget.maxCount
         ? '${widget.maxCount}+'
         : '${widget.count}';

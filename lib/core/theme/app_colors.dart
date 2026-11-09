@@ -1,50 +1,45 @@
 import 'package:flutter/material.dart';
 
-/// Paleta OFICIAL do sistema (nova identidade):
+/// Paleta OFICIAL do sistema (identidade 2026-11-09):
 ///
-/// **Paleta principal (interface geral):**
-/// 1. **Preto** `#212121` — textos principais, títulos, ícones principais,
-///    botões de maior destaque, navegação.
-/// 2. **Cinza** `#757575` — textos secundários, descrições, placeholders,
-///    bordas, estados desabilitados, menor hierarquia.
-/// 3. **Terracota** `#B7472A` — destaque, ações primárias, links relevantes,
-///    indicadores ativos, estados selecionados, chamadas importantes.
-/// 4. **Branco gelo** `#E0E0E0` — fundos claros, superfícies, cartões,
-///    modais, contraste suave.
+/// **Paleta principal (interface geral — só estas 4 cores sólidas):**
+/// 1. **Laranja** `#FF6A2A` — ações primárias, links ativos, indicadores,
+///    destaques, estados ativos, navegação.
+/// 2. **Cinza de superfície** `#F0F0F0` — superfícies secundárias, campos,
+///    divisores suaves, fundos alternativos (claro), texto secundário (escuro).
+/// 3. **Branco suave** `#F9F9F9` — fundo principal claro, superfícies,
+///    texto claro em fundos escuros.
+/// 4. **Preto** `#0C0B0A` — texto principal claro, fundo principal escuro,
+///    ícones principais, bordas estruturais.
 ///
 /// **Exceção controlada (alertas semânticos — e SÓ eles):**
-/// - Sucesso `#2E7D32` — confirmações, êxito.
-/// - Erro `#C62828` — falhas, invalidação, destrutivo.
-/// - Aviso `#F9A825` — atenção, risco, pendências.
-/// Nunca em fundo geral, menu, botões comuns, cards, gráficos, logo ou
-/// decoração.
+/// - Sucesso `#2E7D32`, Erro `#C62828`, Aviso `#F9A825` — nunca em fundo
+///   geral, menu, botões comuns, cards, gráficos, logo ou decoração.
 ///
-/// Acessibilidade (WCAG):
-/// - Preto sobre gelo: `#212121` vs `#E0E0E0` ≈ **11.7:1** (AAA).
-/// - Cinza sobre gelo: `#757575` vs `#E0E0E0` ≈ **3.5:1** (AA para texto
-///   grande/ícones; para texto pequeno usar preto).
-/// - Terracota sobre gelo: `#B7472A` vs `#E0E0E0` ≈ **4.0:1** (AA para
-///   texto grande e não-texto; botões primários com texto gelo).
-/// - Sucesso sobre gelo: `#2E7D32` vs `#E0E0E0` ≈ **3.6:1** (não-texto ok).
-/// - Erro sobre gelo: `#C62828` vs `#E0E0E0` ≈ **4.0:1**.
-/// - Aviso sobre gelo: `#F9A825` vs `#E0E0E0` ≈ **1.5:1** — usar texto
-///   preto (#212121) sobre aviso, nunca aviso sobre gelo.
+/// Acessibilidade (WCAG, medido sobre os pares da paleta nativa):
+/// - Preto sobre suave: `#0C0B0A` vs `#F9F9F9` ≈ **17.6:1** (AAA).
+/// - Suave sobre preto: ≈ **17.6:1** (AAA).
+/// - Cinza sobre suave: `#F0F0F0` vs `#F9F9F9` ≈ **1.2:1** — texto
+///   secundário no escuro usa `#F0F0F0` sobre `#0C0B0A` (≈ **14.8:1**).
+/// - Laranja sobre suave: `#FF6A2A` vs `#F9F9F9` ≈ **2.9:1** — só
+///   não-texto/elementos grandes; texto pequeno em laranja usa preto.
+/// - Preto sobre laranja: `#0C0B0A` vs `#FF6A2A` ≈ **6.1:1** (AA texto).
 abstract final class AppColors {
   // ─────────────────────────────────────────────────────────────────────
   // 0. Base oficial (únicas cores sólidas permitidas)
   // ─────────────────────────────────────────────────────────────────────
 
-  /// Preto principal #212121.
-  static const Color black = Color(0xFF212121);
+  /// Laranja principal #FF6A2A.
+  static const Color brandOrange = Color(0xFFFF6A2A);
 
-  /// Cinza secundário #757575.
-  static const Color gray = Color(0xFF757575);
+  /// Cinza de superfície #F0F0F0.
+  static const Color surfaceGray = Color(0xFFF0F0F0);
 
-  /// Terracota / vermelho queimado #B7472A.
-  static const Color terracotta = Color(0xFFB7472A);
+  /// Branco suave #F9F9F9.
+  static const Color softWhite = Color(0xFFF9F9F9);
 
-  /// Branco gelo #E0E0E0.
-  static const Color ice = Color(0xFFE0E0E0);
+  /// Preto principal #0C0B0A.
+  static const Color brandBlack = Color(0xFF0C0B0A);
 
   /// Sucesso #2E7D32 — SÓ em alertas de sucesso/feedback.
   static const Color alertSuccess = Color(0xFF2E7D32);
@@ -59,79 +54,78 @@ abstract final class AppColors {
   // 1. Tema claro (paleta oficial)
   // ─────────────────────────────────────────────────────────────────────
 
-  /// canvas — fundo da aplicação.
-  static const Color lightBackground = ice;
+  /// canvas — fundo da aplicação (#F9F9F9).
+  static const Color lightBackground = softWhite;
 
   /// surface — cartões, listas, sheets, campos.
-  static const Color lightSurface = ice;
+  static const Color lightSurface = softWhite;
 
-  /// surfaceSunken — zonas agrupadas e fundo de inputs.
-  static const Color lightSurfaceSecondary = ice;
+  /// surfaceSunken — zonas agrupadas e fundo de inputs (#F0F0F0).
+  static const Color lightSurfaceSecondary = surfaceGray;
 
-  /// surfaceRaised — superfície com elevação (menus, diálogos).
-  static const Color lightSurfaceElevated = ice;
+  /// surfaceRaised — superfície com elevação.
+  static const Color lightSurfaceElevated = softWhite;
 
-  /// textPrimary — 11.7:1 sobre gelo.
-  static const Color lightTextPrimary = black;
+  /// textPrimary — 17.6:1 sobre suave.
+  static const Color lightTextPrimary = brandBlack;
 
-  /// textSecondary — 3.5:1 sobre gelo (texto pequeno: usar black).
-  static const Color lightTextSecondary = gray;
+  /// textSecondary — preto (AA); cinza sobre suave dá 1.2:1 (ilegível).
+  static const Color lightTextSecondary = brandBlack;
 
-  /// textTertiary — mesmo cinza (paleta limitada, sem cor nova).
-  static const Color lightTextTertiary = gray;
+  /// textTertiary — preto oficial (paleta sem cinza de texto legível).
+  static const Color lightTextTertiary = brandBlack;
 
-  /// border — divisores e contornos decorativos.
-  static const Color lightBorder = gray;
+  /// border — divisores e contornos decorativos (#F0F0F0).
+  static const Color lightBorder = surfaceGray;
 
-  /// borderStrong — contorno de controlos.
-  static const Color lightBorderStrong = black;
+  /// borderStrong — contorno de controlos (preto).
+  static const Color lightBorderStrong = brandBlack;
 
-  /// Control border (outline buttons, fields): cinza sobre gelo.
-  static const Color controlBorder = gray;
+  /// Control border (outline buttons, fields).
+  static const Color controlBorder = brandBlack;
 
   /// separator — linhas de lista e tabela.
-  static const Color lightDivider = gray;
+  static const Color lightDivider = surfaceGray;
 
-  /// textDisabled — cinza (isento de AA por design).
-  static const Color lightTextDisabled = gray;
+  /// textDisabled — cinza de superfície sobre suave (isento de AA).
+  static const Color lightTextDisabled = surfaceGray;
 
-  /// actionFill — fundo de botão primário (terracota).
-  /// Rótulo sobre ele = gelo (4.0:1, AA texto grande).
-  static const Color lightPrimary = terracotta;
+  /// actionFill — fundo de botão primário (laranja).
+  /// Rótulo sobre ele = preto (6.1:1, AA texto).
+  static const Color lightPrimary = brandOrange;
 
-  /// textOnAction — gelo sobre terracota.
-  static const Color lightOnPrimary = ice;
+  /// textOnAction — preto sobre laranja.
+  static const Color lightOnPrimary = brandBlack;
 
   /// Botão secundário: superfície com contorno.
-  static const Color lightSecondaryAction = ice;
+  static const Color lightSecondaryAction = softWhite;
 
   /// Texto do botão secundário.
-  static const Color lightOnSecondary = black;
+  static const Color lightOnSecondary = brandBlack;
 
-  /// action — ícones, foco, seleção (terracota).
-  static const Color lightAction = terracotta;
+  /// action — ícones, foco, seleção (laranja).
+  static const Color lightAction = brandOrange;
 
   /// actionText — links e texto de ação.
-  static const Color lightActionText = black;
+  static const Color lightActionText = brandBlack;
 
-  /// actionPressed — estado premido (terracota com transparência).
-  static const Color lightActionPressed = terracotta;
+  /// actionPressed — estado premido (laranja).
+  static const Color lightActionPressed = brandOrange;
 
-  /// actionSoft — fundo de chip selecionado (terracota a 10%).
-  static const Color lightActionSoft = terracotta;
+  /// actionSoft — fundo de chip selecionado (laranja a 10%).
+  static const Color lightActionSoft = brandOrange;
 
   /// actionBorder — contorno de seleção.
-  static const Color lightActionBorder = terracotta;
+  static const Color lightActionBorder = brandOrange;
 
-  /// warningBright — ícone de alerta (alerta semântico #F9A825).
+  /// warningBright — ícone de alerta (aviso semântico).
   static const Color accentOrange = alertWarning;
 
-  /// warningSoft — fundo de badge de alerta (aviso a 10%).
+  /// warningSoft — fundo de badge de alerta.
   static const Color accentOrangeSoft = alertWarning;
 
-  /// warning — texto de alerta (preto sobre aviso, 11.7:1 sobre gelo
-  /// seria 1.5:1 com aviso — por isso o TEXTO é preto, o aviso é borda/ícone).
-  static const Color warningText = black;
+  /// warning — texto de alerta (preto sobre aviso).
+  static const Color warningText = brandBlack;
 
   /// Alias para `of(...)` e testes de contraste.
   static const Color warning = warningText;
@@ -142,109 +136,109 @@ abstract final class AppColors {
   /// success — ícone/badge de sucesso (alerta semântico #2E7D32).
   static const Color successNeutral = alertSuccess;
 
-  /// successText — texto de sucesso (alerta semântico #2E7D32).
+  /// successText — texto de sucesso (#2E7D32).
   static const Color successText = alertSuccess;
 
-  /// successSoft — fundo de badge de sucesso (verde a 10%).
+  /// successSoft — fundo de badge de sucesso (a 10%).
   static const Color successSoft = alertSuccess;
 
-  /// error — erro e ações destrutivas (alerta semântico #C62828).
+  /// error — erro e ações destrutivas (#C62828).
   static const Color errorNeutral = alertError;
 
-  /// errorSoft — fundo de badge de erro (vermelho a 10%).
+  /// errorSoft — fundo de badge de erro (a 10%).
   static const Color lightErrorSoft = alertError;
 
-  /// info — informação (terracota).
-  static const Color info = terracotta;
+  /// info — informação (laranja; cinza sobre suave é 1.2:1).
+  static const Color info = brandOrange;
 
   /// infoSoft — fundo suave de informação.
-  static const Color infoSoft = terracotta;
+  static const Color infoSoft = brandOrange;
 
   // ─────────────────────────────────────────────────────────────────────
   // 2. Tema escuro (paleta oficial — não é inversão)
   // ─────────────────────────────────────────────────────────────────────
 
   /// canvas escuro — preto oficial.
-  static const Color darkBackground = black;
+  static const Color darkBackground = brandBlack;
 
   /// surface escuro — preto oficial.
-  static const Color darkSurface = black;
+  static const Color darkSurface = brandBlack;
 
   /// surfaceSunken escuro.
-  static const Color darkSurfaceSecondary = black;
+  static const Color darkSurfaceSecondary = brandBlack;
 
   /// surfaceRaised escuro — preto oficial.
-  static const Color darkSurfaceElevated = black;
+  static const Color darkSurfaceElevated = brandBlack;
 
-  /// textPrimary escuro — gelo sobre preto 11.7:1.
-  static const Color darkTextPrimary = ice;
+  /// textPrimary escuro — suave sobre preto 17.6:1.
+  static const Color darkTextPrimary = softWhite;
 
-  /// textSecondary escuro — cinza sobre preto 3.5:1.
-  static const Color darkTextSecondary = gray;
+  /// textSecondary escuro — cinza de superfície sobre preto 14.8:1.
+  static const Color darkTextSecondary = surfaceGray;
 
   /// textTertiary escuro.
-  static const Color darkTextTertiary = gray;
+  static const Color darkTextTertiary = surfaceGray;
 
   /// border escuro — decorativo (cinza sobre preto).
-  static const Color darkBorder = gray;
+  static const Color darkBorder = surfaceGray;
 
   /// borderStrong escuro.
-  static const Color darkBorderStrong = ice;
+  static const Color darkBorderStrong = softWhite;
 
   /// separator escuro.
-  static const Color darkDivider = gray;
+  static const Color darkDivider = surfaceGray;
 
   /// textDisabled escuro.
-  static const Color darkTextDisabled = gray;
+  static const Color darkTextDisabled = surfaceGray;
 
-  /// Botão primário escuro: fundo terracota com rótulo Gelo (4.0:1).
-  static const Color darkPrimary = terracotta;
+  /// Botão primário escuro: laranja com rótulo PRETO (6.1:1).
+  static const Color darkPrimary = brandOrange;
 
-  /// Rótulo gelo sobre terracota no escuro.
-  static const Color darkOnPrimary = ice;
+  /// Rótulo preto sobre laranja no escuro.
+  static const Color darkOnPrimary = brandBlack;
 
   /// Botão secundário escuro.
-  static const Color darkSecondaryAction = black;
+  static const Color darkSecondaryAction = brandBlack;
 
   /// Texto do botão secundário escuro.
-  static const Color darkOnSecondary = ice;
+  static const Color darkOnSecondary = softWhite;
 
-  /// action escuro — terracota sobre preto 3.3:1 (ícones/ação).
-  static const Color darkAction = terracotta;
+  /// action escuro — laranja sobre preto.
+  static const Color darkAction = brandOrange;
 
   /// actionPressed escuro.
-  static const Color darkActionPressed = terracotta;
+  static const Color darkActionPressed = brandOrange;
 
-  /// actionSoft escuro — fundo de seleção (terracota a 12%).
-  static const Color darkActionSoft = terracotta;
+  /// actionSoft escuro — fundo de seleção (laranja a 12%).
+  static const Color darkActionSoft = brandOrange;
 
   /// Alerta escuro (aviso semântico #F9A825).
   static const Color darkAccentOrange = alertWarning;
   static const Color accentOrangeDark = alertWarning;
 
-  /// Fundo suave de alerta escuro (aviso a 10%).
+  /// Fundo suave de alerta escuro.
   static const Color darkAccentOrangeSoft = alertWarning;
 
-  /// Texto de alerta escuro ( gelo sobre fundo escuro — aviso é ícone).
-  static const Color darkWarningText = ice;
+  /// Texto de alerta escuro (suave sobre preto — aviso é ícone/borda).
+  static const Color darkWarningText = softWhite;
 
   /// error escuro (alerta semântico #C62828).
   static const Color darkErrorNeutral = alertError;
 
-  /// Fundo suave de erro escuro (vermelho a 10%).
+  /// Fundo suave de erro escuro.
   static const Color darkErrorSoft = alertError;
 
   /// success escuro (alerta semântico #2E7D32).
   static const Color successNeutralDark = alertSuccess;
 
-  /// info escuro (terracota).
-  static const Color darkInfo = terracotta;
+  /// info escuro (laranja).
+  static const Color darkInfo = brandOrange;
 
   /// Rótulo sobre preenchimentos semânticos no escuro.
-  static const Color onSemanticDark = ice;
+  static const Color onSemanticDark = softWhite;
 
   // ─────────────────────────────────────────────────────────────────────
-  // 3. Alertas (terracota) — mantidos por compatibilidade
+  // 3. Alertas (semânticos) — mantidos por compatibilidade
   // ─────────────────────────────────────────────────────────────────────
 
   static const Color accentOrangeAlert = accentOrange;
@@ -282,9 +276,9 @@ abstract final class AppColors {
   }
 
   /// Cores das etiquetas de categoria de produto (paleta oficial).
-  static const Color categoryResale = gray; // revenda: cinza
-  static const Color categoryProduzido = terracotta; // produzido: terracota
-  static const Color categoryComposto = black; // composto: preto
+  static const Color categoryResale = brandBlack; // revenda: preto
+  static const Color categoryProduzido = brandOrange; // produzido: laranja
+  static const Color categoryComposto = surfaceGray; // composto: cinza
   static Color getIncomeLight(ColorScheme scheme, Brightness brightness) {
     return brightness == Brightness.light
         ? lightSurfaceSecondary
@@ -308,11 +302,11 @@ abstract final class AppColors {
   static const Color onSurfaceVariantDark = darkTextSecondary;
   static const Color surfaceLight = lightSurface;
 
-  /// LEGADO: = ice (não é a ação). Não usar para botões.
-  static const Color primaryLight = ice;
+  /// LEGADO: = softWhite (não é a ação). Não usar para botões.
+  static const Color primaryLight = softWhite;
 
-  /// LEGADO: = black (não é a ação). Não usar para botões.
-  static const Color primaryDark = black;
+  /// LEGADO: = brandBlack (não é a ação). Não usar para botões.
+  static const Color primaryDark = brandBlack;
   static const Color brandMuted = accentOrange;
   static const Color outlineLight = lightBorder;
   static const Color outlineDark = darkBorder;

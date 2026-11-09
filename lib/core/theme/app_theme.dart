@@ -9,12 +9,12 @@ import 'app_typography.dart';
 // `AppStatusColors` acessíveis para quem importa apenas `app_theme.dart`.
 export 'app_colors.dart';
 
-/// Cores auxiliares do [ThemeData] que não existem como getters diretos em
-/// [AppColors] — delegam sempre à paleta oficial (U-23).
+/// Cores auxiliares do [ThemeData] — paleta oficial (U-23).
+/// Delegam para [AppColors] sem fracionamento de nomes.
 final class _AppThemeAuxColors {
-  /// Preto oficial sobre gelo (onSecondary/onTertiary/onInverseSurface no claro).
-  static const Color inkDark = AppColors.black;
-  static const Color inkLight = AppColors.ice;
+  /// Preto oficial (#0C0B0A) sobre gelo.
+  static const Color inkDark = AppColors.brandBlack;
+  static const Color inkLight = AppColors.softWhite;
 }
 
 /// Tema central TAREQO Signature — Material 3 com linguagem de interação Apple.
@@ -106,7 +106,7 @@ abstract final class AppTheme {
     final errorSoft = isLight
         ? AppColors.lightErrorSoft
         : AppColors.darkErrorSoft;
-    final onError = isLight ? AppColors.ice : AppColors.black;
+    final onError = isLight ? AppColors.softWhite : AppColors.brandBlack;
 
     // ── ColorScheme (papéis explícitos) ──────────────────────────────
     final scheme = ColorScheme(
@@ -116,20 +116,20 @@ abstract final class AppTheme {
       primaryContainer: actionTint,
       onPrimaryContainer: textPrimary,
       secondary: textSecondary,
-      onSecondary: isLight ? AppColors.ice : AppColors.black,
+      onSecondary: isLight ? AppColors.softWhite : AppColors.brandBlack,
       secondaryContainer: surfaceSecondary,
       onSecondaryContainer: textPrimary,
       tertiary: warningText,
-      onTertiary: isLight ? AppColors.ice : AppColors.black,
+      onTertiary: isLight ? AppColors.softWhite : AppColors.brandBlack,
       tertiaryContainer: warningSoft,
       onTertiaryContainer: warningText,
       surface: surface,
       onSurface: textPrimary,
       onSurfaceVariant: textSecondary,
       surfaceContainerLowest: isLight
-          ? AppColors.ice
+          ? AppColors.softWhite
           : AppColors.darkBackground,
-      surfaceContainerLow: isLight ? AppColors.ice : surface,
+      surfaceContainerLow: isLight ? AppColors.softWhite : surface,
       surfaceContainer: surfaceSecondary,
       surfaceContainerHigh: surfaceElevated,
       surfaceContainerHighest: canvas,
@@ -140,17 +140,17 @@ abstract final class AppTheme {
       errorContainer: errorSoft,
       onErrorContainer: error,
       inverseSurface: textPrimary,
-      onInverseSurface: isLight ? AppColors.ice : AppColors.black,
+      onInverseSurface: isLight ? AppColors.softWhite : AppColors.brandBlack,
       // Sobre `inverseSurface` (snackbar): o oposto da ação do tema.
       inversePrimary: isLight ? AppColors.darkPrimary : AppColors.lightPrimary,
       shadow: Colors.transparent,
       // Scrim = preto oficial em ambos os temas (modalBarrierColor).
-      scrim: AppColors.black,
+      scrim: AppColors.brandBlack,
       surfaceTint: Colors.transparent,
     );
 
     // ── Overlays de interação (neutros, paleta oficial) ──────────────
-    final stateVeil = isLight ? AppColors.black : AppColors.ice;
+    final stateVeil = isLight ? AppColors.brandBlack : AppColors.softWhite;
     WidgetStateProperty<Color?> surfaceOverlay() =>
         WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) return null;
@@ -168,7 +168,7 @@ abstract final class AppTheme {
 
     // Botão preenchido: o véu vai na direção OPOSTA ao preenchimento (clareia
     // o preto no claro, escurece o gelo no escuro) para o press ser visível.
-    final filledVeil = AppColors.black;
+    final filledVeil = AppColors.brandBlack;
     WidgetStateProperty<Color?> filledOverlay() =>
         WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) return null;
@@ -519,7 +519,7 @@ abstract final class AppTheme {
         backgroundColor: surfaceElevated,
         surfaceTintColor: Colors.transparent,
         modalBackgroundColor: surfaceElevated,
-        modalBarrierColor: AppColors.black.withValues(
+        modalBarrierColor: AppColors.brandBlack.withValues(
           alpha: isLight ? 0.40 : 0.60,
         ),
         modalElevation: AppElevation.e3,
@@ -549,14 +549,14 @@ abstract final class AppTheme {
         backgroundColor: textPrimary,
         contentTextStyle: AppTypography.bodyMedium.copyWith(
           fontWeight: FontWeight.w500,
-          color: isLight ? AppColors.ice : AppColors.black,
+          color: isLight ? AppColors.softWhite : AppColors.brandBlack,
         ),
         // Ação legível sobre o fundo invertido (terracota sobre gelo
         // 4.0:1; no escuro, terracota sobre preto 3.3:1 — não-texto ok).
         actionTextColor: isLight ? accent : AppColors.warningText,
         closeIconColor: isLight
-            ? AppColors.ice.withValues(alpha: 0.7)
-            : AppColors.black,
+            ? AppColors.softWhite.withValues(alpha: 0.7)
+            : AppColors.brandBlack,
       ),
 
       tooltipTheme: TooltipThemeData(
@@ -592,7 +592,7 @@ abstract final class AppTheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return onAction;
-          return isLight ? AppColors.ice : textSecondary;
+          return isLight ? AppColors.softWhite : textSecondary;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return action;

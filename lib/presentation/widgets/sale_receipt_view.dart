@@ -45,7 +45,7 @@ class SaleReceiptView extends StatelessWidget {
 
     return Container(
       // "Papel" do recibo: gelo oficial (sem branco puro).
-      color: AppColors.ice,
+      color: AppColors.softWhite,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.xl,
@@ -156,7 +156,7 @@ class SaleReceiptView extends StatelessWidget {
 final TextStyle _headerStyle = const TextStyle(
   fontFamily: AppTypography.family,
   fontFamilyFallback: AppTypography.familyFallback,
-  color: AppColors.black,
+  color: AppColors.brandBlack,
   fontSize: 12,
   fontWeight: FontWeight.w600,
   letterSpacing: 1.2,
@@ -168,17 +168,17 @@ final TextStyle _headerStyle = const TextStyle(
 final TextStyle _bodyStyle = const TextStyle(
   fontFamily: AppTypography.family,
   fontFamilyFallback: AppTypography.familyFallback,
-  color: AppColors.black,
+  color: AppColors.brandBlack,
   fontSize: 12,
   height: 1.5,
   fontFeatures: [FontFeature.tabularFigures()],
 );
 
-/// Texto secundário (endereço, data, agradecimento) — cinza oficial.
+/// Texto secundário (endereço, data, agradecimento) — cinza de superfície.
 final TextStyle _mutedStyle = const TextStyle(
   fontFamily: AppTypography.family,
   fontFamilyFallback: AppTypography.familyFallback,
-  color: AppColors.gray,
+  color: AppColors.brandBlack,
   fontSize: 12,
   height: 1.5,
 );
@@ -240,7 +240,7 @@ class _DashedDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CustomPaint(
       size: Size(double.infinity, 1),
-      painter: _DashedLinePainter(color: AppColors.gray),
+      painter: _DashedLinePainter(color: AppColors.surfaceGray),
     );
   }
 }

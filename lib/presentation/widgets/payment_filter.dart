@@ -42,7 +42,7 @@ extension PaymentMethodAccent on PaymentMethod {
     // em terracota — paleta oficial (alertas são componentes semânticos,
     // nunca decoração geral).
     PaymentMethod.mPesa => AppColors.alertError,
-    PaymentMethod.eMola => AppColors.terracotta,
+    PaymentMethod.eMola => AppColors.brandOrange,
     PaymentMethod.transfer => theme.warning,
   };
 }

@@ -15,7 +15,7 @@ Future<String?> showBarcodeScanner(BuildContext context) {
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.black,
+    backgroundColor: AppColors.brandBlack,
     builder: (context) => const BarcodeScanSheet(),
   );
 }
@@ -78,13 +78,13 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                       controller: _controller,
                       onDetect: _onDetect,
                       errorBuilder: (context, error) => Container(
-                        color: AppColors.black,
+                        color: AppColors.brandBlack,
                         alignment: Alignment.center,
                         padding: const EdgeInsets.all(AppSpacing.xl),
                         child: Text(
                           l10n.salesBarcodeCameraUnavailable('$error'),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.ice),
+                          style: const TextStyle(color: AppColors.softWhite),
                         ),
                       ),
                     ),
@@ -95,7 +95,7 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                       width: 240,
                       height: 240,
                       decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.ice, width: 3),
+                        border: Border.all(color: AppColors.softWhite, width: 3),
                         borderRadius: BorderRadius.circular(AppRadius.xxl),
                       ),
                     ),
@@ -105,9 +105,9 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                     right: 12,
                     child: IconButton.filled(
                       style: IconButton.styleFrom(
-                        backgroundColor: AppColors.gray.withValues(alpha: 0.54),
+                        backgroundColor: AppColors.surfaceGray.withValues(alpha: 0.54),
                       ),
-                      icon: const Icon(Icons.close, color: AppColors.ice),
+                      icon: const Icon(Icons.close, color: AppColors.softWhite),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -115,7 +115,7 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
                     bottom: 16,
                     child: Text(
                       l10n.salesBarcodeCameraHint,
-                      style: const TextStyle(color: AppColors.ice),
+                      style: const TextStyle(color: AppColors.softWhite),
                     ),
                   ),
                 ],

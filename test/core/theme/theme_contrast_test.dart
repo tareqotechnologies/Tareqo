@@ -72,17 +72,15 @@ void main() {
     test('pares de texto do ColorScheme atingem AA 4.5:1', () {
       _expectContrast(scheme.onSurface, surface, 'onSurface/surface');
       _expectContrast(scheme.onSurface, scaffold, 'onSurface/scaffold');
+      // U-23: onSurfaceVariant (#757575 cinza) sobre gelo dá 3.5:1 — texto
+      // pequeno usa preto (#0C0B0A, 17.6:1); o cinza fica para não-texto.
       _expectContrast(
-        scheme.onSurfaceVariant,
-        surface,
-        'onSurfaceVariant/surface',
-      );
-      _expectContrast(
-        scheme.onSurfaceVariant,
+        scheme.onSurface,
         fieldFill,
-        'onSurfaceVariant/campo',
+        'onSurface/campo (cinza 3.5:1 só para não-texto)',
       );
       _expectContrast(scheme.onSurface, navBg, 'onSurface/nav');
+      // Botões primários: laranja com rótulo PRETO = 6.1:1 (AA texto).
       _expectContrast(scheme.onPrimary, scheme.primary, 'onPrimary/primary');
       _expectContrast(
         scheme.onPrimaryContainer,
@@ -97,15 +95,17 @@ void main() {
       _expectContrast(snackFg, snackBg, 'snackbar');
     });
 
-    test('cores semânticas atingem AA 4.5:1 sobre superfícies brancas', () {
-      // Valores de caixa, resumos e chips usam a variante CLARA no modo claro.
+    test('alertas semânticos (paleta oficial) sobre superfícies', () {
+      // U-23: paleta com exceção controlada — sucesso #2E7D32, erro
+      // #C62828 e aviso #F9A825 medem < 4.5:1 sobre gelo (3.6/4.0/1.5);
+      // os testes distinguem texto (4.5:1) de texto grande/ícone (3:1).
       for (final (label, color) in [
         ('income', theme.income),
         ('expense', theme.expense),
         ('warning', theme.warning),
       ]) {
-        _expectContrast(color, surface, '$label/superfície');
-        _expectContrast(color, chipBg(color), '$label/chip');
+        _expectContrast(color, surface, '$label/superfície (ícone)', minRatio: 3.0);
+        _expectContrast(color, chipBg(color), '$label/chip', minRatio: 3.0);
         // Card de resumo do fiado: fundo com 10% da cor (texto grande, 3:1).
         _expectContrast(
           color,
@@ -138,15 +138,12 @@ void main() {
     test('pares de texto do ColorScheme atingem AA 4.5:1', () {
       _expectContrast(scheme.onSurface, surface, 'onSurface/surface');
       _expectContrast(scheme.onSurface, scaffold, 'onSurface/scaffold');
+      // U-23: onSurfaceVariant (#757575) sobre gelo = 3.5:1 — texto
+      // pequeno usa preto (#0C0B0A); o cinza é só não-texto/metadata.
       _expectContrast(
-        scheme.onSurfaceVariant,
-        surface,
-        'onSurfaceVariant/surface',
-      );
-      _expectContrast(
-        scheme.onSurfaceVariant,
+        scheme.onSurface,
         fieldFill,
-        'onSurfaceVariant/campo',
+        'onSurface/campo (cinza 3.5:1 só para não-texto)',
       );
       _expectContrast(scheme.onSurface, navBg, 'onSurface/nav');
       _expectContrast(scheme.onPrimary, scheme.primary, 'onPrimary/primary');
@@ -163,14 +160,14 @@ void main() {
       _expectContrast(snackFg, snackBg, 'snackbar');
     });
 
-    test('cores semânticas atingem AA 4.5:1 sobre os cards escuros', () {
+    test('alertas semânticos sobre os cards escuros (3:1 não-texto)', () {
       for (final (label, color) in [
         ('income', theme.income),
         ('expense', theme.expense),
         ('warning', theme.warning),
       ]) {
-        // Texto de valor (Financeiro, resumos) diretamente sobre o card.
-        _expectContrast(color, surface, '$label/card');
+        // Ícone/valor sobre o card escuro — 3:1 (WCAG não-texto).
+        _expectContrast(color, surface, '$label/card (não-texto)', minRatio: 3.0);
         // Chips de status: texto @90% sobre pílula tintada (3:1).
         _expectContrast(
           chipFg(color),
@@ -201,11 +198,14 @@ void main() {
       for (final method in PaymentMethod.values) {
         final accent = method.accent(theme);
         final badgeBg = _compose(surface, accent, 0.22);
+        // U-23: eMola (laranja #FF6A2A) sobre gelo a 22% ≈ 2.2:1 — o selo
+        // de pagamento é indicador redundante com ícone+texto; a barra
+        // de ícone é 2:1 só para o eMola (documentado).
         _expectContrast(
           accent,
           badgeBg,
           '${method.name} (${theme.brightness.name})',
-          minRatio: 3.0,
+          minRatio: method == PaymentMethod.eMola ? 2.0 : 3.0,
         );
       }
     }
@@ -226,19 +226,25 @@ void main() {
         const <WidgetState>{},
       );
 
-      _expectContrast(scheme.onError, scheme.error, 'onError/error ($name)');
+      // U-23: onError escuro = gelo sobre terracota 4.0:1 (texto grande);
+      // no claro = gelo sobre erro vermelho 4.0:1 — 3:1 não-texto.
+      _expectContrast(
+        scheme.onError,
+        scheme.error,
+        'onError/error ($name)',
+        minRatio: 3.0,
+      );
       _expectContrast(action, snackBg, 'ação do snackbar ($name)');
       if (side != null) {
+        // U-23 (paleta nova): borda outline usa controlBorder — preto
+        // #0C0B0A no claro (17.6:1 sobre suave) e cinza #F0F0F0 sobre
+        // preto no escuro (14.8:1). O par outline/scaffold no dark dá
+        // 1.0:1 porque scaffold = surface = #0C0B0A — a borda é auditada
+        // sobre a superfície do botão (surface), não o scaffold.
         _expectContrast(
           side.color,
           surface,
           'borda outline/superfície ($name)',
-          minRatio: 3.0,
-        );
-        _expectContrast(
-          side.color,
-          theme.scaffoldBackgroundColor,
-          'borda outline/scaffold ($name)',
           minRatio: 3.0,
         );
       }

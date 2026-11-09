@@ -21,7 +21,7 @@ class InvoiceTemplateConfig {
     this.businessTaxId = '',
     // Paleta oficial: default preto #212121 — antes slate #3D4D55.
     // O utilizado persiste nos prefs do utilizador.
-    this.primaryColor = AppColors.black,
+    this.primaryColor = AppColors.brandBlack,
     this.templateStyle = 'Classic',
   });
 
@@ -112,7 +112,7 @@ class InvoiceTemplateNotifier extends Notifier<InvoiceTemplateConfig> {
           current.businessTaxId.isEmpty &&
           current.logoBytes == null &&
           current.templateStyle == 'Classic' &&
-          current.primaryColor == AppColors.black;
+          current.primaryColor == AppColors.brandBlack;
       if (untouched) state = decoded;
     } catch (_) {
       // Prefs indisponível (ex.: teste) — mantém default sem quebrar.

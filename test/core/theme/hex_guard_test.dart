@@ -30,30 +30,9 @@ void main() {
       );
 
       // Arquivo → ocorrências `Color(0x…)` documentadas (caminho com `/`).
-      const documented = <String, int>{
-        // Paleta de template escolhida pelo utilizador (Fase 0; RE2 — 8
-        // swatches da paleta base + derivados auditados, sem verde).
-        'widgets/color_palette.dart': 8,
-        // Papel do recibo impresso (cores de tinta, não de UI).
-        'widgets/sale_receipt_view.dart': 5,
-        // Identidade das formas de pagamento: M-Pesa, E-Mola, cartão.
-        'widgets/payment_filter.dart': 3,
-        // Recibo impresso partilhado (mesmo papel do view).
-        'screens/sales/sale_receipt_share_sheet.dart': 2,
-        // Foreground do badge âmbar do feed (texto escuro sobre chip) — o
-        // card-hero perdeu o gradiente (Fase de des-artificialização) e
-        // passou a usar só tokens do tema.
-        'screens/dashboard/dashboard_screen.dart': 1,
-        // Template persistente de Factura/Cotação (default RE2 = slate
-        // 0xFF3D4D55 — ctor + check de default; o hex do fromJson fica em
-        // linha própria e não conta no grep).
-        'controllers/invoice_template_providers.dart': 2,
-        // RE2: o verde #22C55E exclusivo do login foi removido — a identidade
-        // agora usa tokens (bege/slate de AppColors), sem hex local.// Documentação adicional de hex para módulo POS (Fase 1+2 migrações).
-      // Foram migrados os literais Color(0xFF...) para AppColors/tokens.
-      'screens/sales/new_sale_sheet.dart': 5,
-      'screens/sales/sale_detail_screen.dart': 1,
-      };
+      // U-23: paleta oficial — nenhum hex literal em apresentação; o
+      // recibo impresso usa tokens (AppColors.brandBlack/surfaceGray).
+      const documented = <String, int>{};
 
       final problems = <String>[];
 

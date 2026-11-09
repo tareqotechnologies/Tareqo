@@ -1142,7 +1142,7 @@ class _ActivityRow extends StatelessWidget {
                           child: Text(
                             item.badge!,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: AppColors.black,
+                              color: AppColors.brandBlack,
                               fontWeight: FontWeight.w500,
                             ),
                           ),

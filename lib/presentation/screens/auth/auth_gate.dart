@@ -486,7 +486,7 @@ class _SplashScreen extends StatelessWidget {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.backgroundDark : AppColors.scaffoldLight;
-    final textPrimary = isDark ? AppColors.ice : AppColors.onSurfaceLight;
+    final textPrimary = isDark ? AppColors.softWhite : AppColors.onSurfaceLight;
     final textSecondary = isDark
         ? AppColors.onSurfaceVariantDark
         : AppColors.onSurfaceVariantLight;

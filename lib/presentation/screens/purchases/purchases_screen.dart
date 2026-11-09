@@ -84,7 +84,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
               onPressed: _openNewPurchase,
               tooltip: l10n.purchasesAddNew,
               backgroundColor: AppColors.accentOrangeDark,
-              foregroundColor: AppColors.ice,
+              foregroundColor: AppColors.softWhite,
               child: const Icon(Icons.add),
             )
           : null,

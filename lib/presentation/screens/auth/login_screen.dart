@@ -62,7 +62,7 @@ class _LoginPalette {
   /// Modo escuro — preto oficial com texto gelo.
   static final _LoginPalette dark = _LoginPalette(
     background: AppColors.darkBackground,
-    textPrimary: AppColors.ice,
+    textPrimary: AppColors.softWhite,
     textSecondary: AppColors.darkTextSecondary,
     // Acento laranja (links, cursor, ícone em foco) sobre o fundo neutro.
     // #F28C00 no claro, #FF9800 no escuro — usadas somente em links
@@ -502,7 +502,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             width: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              color: AppColors.ice,
+                              color: AppColors.softWhite,
                             ),
                           )
                         : Text(

@@ -102,7 +102,7 @@ class _SalesCardState extends State<SalesCard> {
                           child: const Icon(
                             Icons.north_east_rounded,
                             size: 18,
-                            color: AppColors.ice,
+                            color: AppColors.softWhite,
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),

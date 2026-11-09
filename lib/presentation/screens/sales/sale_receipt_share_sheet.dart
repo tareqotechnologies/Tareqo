@@ -161,7 +161,7 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
                     borderRadius: AppRadius.xsAll,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.black.withValues(alpha: 0.08),
+                        color: AppColors.brandBlack.withValues(alpha: 0.08),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -203,8 +203,8 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
               // paleta — proibido na interface geral).
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(52),
-                foregroundColor: AppColors.terracotta,
-                side: const BorderSide(color: AppColors.terracotta),
+                foregroundColor: AppColors.brandOrange,
+                side: const BorderSide(color: AppColors.brandOrange),
               ),
               icon: const Icon(Icons.chat_bubble_outline_rounded),
               label: Text(l10n.saleDetailShareWhatsApp),

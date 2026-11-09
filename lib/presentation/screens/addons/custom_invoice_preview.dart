@@ -67,7 +67,7 @@ class CustomInvoicePreview extends StatelessWidget {
         border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.06),
+            color: AppColors.brandBlack.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -164,7 +164,7 @@ class CustomInvoicePreview extends StatelessWidget {
                       child: Text(
                         l10n.pdfInvoiceDocWord,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: AppColors.ice,
+                          color: AppColors.softWhite,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.5,
                         ),
@@ -232,7 +232,7 @@ class CustomInvoicePreview extends StatelessWidget {
                         child: Text(
                           l10n.pdfItemHeader,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.ice,
+                            color: AppColors.softWhite,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -243,7 +243,7 @@ class CustomInvoicePreview extends StatelessWidget {
                           l10n.customInvoiceQty,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.ice,
+                            color: AppColors.softWhite,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -254,7 +254,7 @@ class CustomInvoicePreview extends StatelessWidget {
                           l10n.pdfUnitPriceHeader,
                           textAlign: TextAlign.right,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.ice,
+                            color: AppColors.softWhite,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

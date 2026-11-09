@@ -573,7 +573,7 @@ class _AuditTile extends StatelessWidget {
         return AppColors.accentOrange;
       default:
         // Neutro semântico (sem papel de cor): cinza oficial.
-        return AppColors.gray;
+        return AppColors.surfaceGray;
     }
   }
 

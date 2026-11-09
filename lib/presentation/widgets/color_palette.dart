@@ -3,20 +3,21 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/generated/app_localizations.dart';
 
-/// Paleta de cores OFICIAL do sistema (4 cores — nova identidade):
-/// Preto #212121, Cinza #757575, Terracota #B7472A, Branco gelo #E0E0E0.
+/// Paleta de cores OFICIAL do sistema (4 cores — identidade 2026-11-09):
+/// Laranja #FF6A2A, Cinza de superfície #F0F0F0, Branco suave #F9F9F9,
+/// Preto #0C0B0A.
 ///
 /// Usada pelos modelos de factura personalizada e cotação. As chaves são
 /// estáveis (pt) — o nome exibido ao usuário vem de [paletteColorName].
 ///
 /// Nota: as cores de template são escolha DO UTILIZADOR para o documento
 /// impresso (identidade própria da empresa dele) — todas derivam da
-/// paleta oficial (`AppColors.black/gray/terracotta/ice`).
+/// paleta oficial (`AppColors.brandOrange/surfaceGray/softWhite/brandBlack`).
 const kColorPalettes = <String, Color>{
-  'Preto': AppColors.black,
-  'Cinza': AppColors.gray,
-  'Terracota': AppColors.terracotta,
-  'Branco gelo': AppColors.ice,
+  'Preto': AppColors.brandBlack,
+  'Cinza': AppColors.surfaceGray,
+  'Terracota': AppColors.brandOrange,
+  'Branco gelo': AppColors.softWhite,
 };
 
 /// Nome localizado da cor da paleta (chave interna → texto visível).
