@@ -217,7 +217,7 @@ class MenuScreen extends ConsumerWidget {
   }
 }
 
-/// Tile de módulo — ícone circular laranja padronizado, texto pequeno.
+/// Tile de módulo — ícone circular laranja oficial, texto pequeno.
 class _MenuTile extends StatelessWidget {
   const _MenuTile({
     required this.icon,
@@ -244,20 +244,20 @@ class _MenuTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Ícone circular tingido padronizado (U-04): fundo/foreground
-          // derivados do acento no brilho atual (theme.accent), nunca
-          // o tom claro fixo + branco. O tile inteiro é o alvo (≥48).
+          // Ícone circular oficial (U-24): fundo laranja #FF6A2A padrão
+          // de ícones em toda a app (nunca HSL derivado, nunca cor fora
+          // da paleta). O tile inteiro é o alvo (≥48).
           Container(
             width: AppSizes.avatarSm,
             height: AppSizes.avatarSm,
-            decoration: BoxDecoration(
-              color: IconTone.darkBackground(theme.accent),
+            decoration: const BoxDecoration(
+              color: AppColors.brandOrange,
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
               size: AppSizes.iconMd,
-              color: IconTone.lightForeground(theme.accent),
+              color: AppColors.softWhite,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -312,19 +312,19 @@ class _SignOutButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Ícone circular tingido discreto (U-04): acento no brilho
-            // atual via IconTone (nunca tom claro fixo + branco).
+            // Ícone circular oficial (U-24): fundo laranja #FF6A2A —
+            // padrão de ícones em toda a app.
             Container(
               width: AppSizes.avatarSm,
               height: AppSizes.avatarSm,
-              decoration: BoxDecoration(
-                color: IconTone.darkBackground(scheme.error),
+              decoration: const BoxDecoration(
+                color: AppColors.brandOrange,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.logout_rounded,
                 size: AppSizes.iconSm,
-                color: IconTone.lightForeground(scheme.error),
+                color: AppColors.softWhite,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),

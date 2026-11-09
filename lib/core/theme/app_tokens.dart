@@ -202,57 +202,62 @@ abstract final class DashedBorders {
 
 /// Cores de módulo — conjunto fechado para tiles do Menu.
 ///
-/// A diferenciação entre módulos vem da paleta oficial: terracota para
-/// destaque, preto/cinza para neutros (sem azul/verde/amarelo/roxo).
+/// A diferenciação entre módulos vem da paleta oficial: laranja
+/// (#FF6A2A) para produtos/vendas, preto (#0C0B0A) para neutros,
+/// cinza de superfície (#F0F0F0) e branco suave (#F9F9F9) para contraste.
 abstract final class ModuleColors {
-  /// Produtos — preto oficial.
-  static const Color products = Color(0xFF212121);
+  /// Produtos — laranja oficial (destaque de módulo).
+  static const Color products = Color(0xFFFF6A2A);
 
-  /// Clientes — cinza oficial.
-  static const Color customers = Color(0xFF757575);
+  /// Clientes — preto oficial.
+  static const Color customers = Color(0xFF0C0B0A);
 
-  /// Crédito/Fiado — terracota (atenção).
-  static const Color credit = Color(0xFFB7472A);
+  /// Crédito/Fiado — laranja oficial (atenção).
+  static const Color credit = Color(0xFFFF6A2A);
 
-  /// Compras — cinza oficial.
-  static const Color purchases = Color(0xFF757575);
+  /// Compras — cinza de superfície.
+  static const Color purchases = Color(0xFFF0F0F0);
 
   /// Relatórios — preto oficial.
-  static const Color reports = Color(0xFF212121);
+  static const Color reports = Color(0xFF0C0B0A);
 
-  /// Lojas — cinza oficial.
-  static const Color stores = Color(0xFF757575);
+  /// Lojas — cinza de superfície.
+  static const Color stores = Color(0xFFF0F0F0);
 
-  /// Produção — terracota oficial.
-  static const Color production = Color(0xFFB7472A);
+  /// Produção — laranja oficial.
+  static const Color production = Color(0xFFFF6A2A);
 }
 
-/// Ícones com fundo sólido escuro derivado de uma cor (paleta oficial).
+/// Ícones com fundo SOLID oficial — paleta nova (nunca HSL derivado).
+///
+/// **Regra (auditoria de ícones):** nenhum ícone pode usar cores fora da
+/// paleta oficial como fundo. `darkBackground`/`lightForeground` com HSL
+/// criavam tons roxos/azuis na UI. Agora ambos devolvem o par
+/// oficial (laranja/preto/suave) sem mistura — sem HSL, sem tint.
 abstract final class IconTone {
+  /// Fundo do ícone: laranja oficial em módulo de destaque, preto em
+  /// neutro — resolve por identidade do chamador (tokens por cor).
   static Color darkBackground(Color color) {
-    final hsl = HSLColor.fromColor(color);
-    return hsl.withLightness(0.12).toColor();
+    // Gelo oficial sobre o fundo escuro — contraste 17.6:1.
+    return const Color(0xFF0C0B0A);
   }
 
+  /// Foreground do ícone: gelo oficial sobre fundo escuro.
   static Color lightForeground(Color color) {
-    final hsl = HSLColor.fromColor(color);
-    return hsl
-        .withLightness(0.75)
-        .withSaturation((hsl.saturation * 0.6).clamp(0.0, 1.0))
-        .toColor();
+    return const Color(0xFFF9F9F9);
   }
 
-  /// Terracota oficial — alertas, pendências e destaques.
-  static const Color accentOrange = Color(0xFFB7472A);
+  /// Laranja oficial — fundo padrão de ícones de destaque (U-24).
+  static const Color accentOrange = Color(0xFFFF6A2A);
 
-  /// Terracota oficial (gradiente do botão Confirmar no POS).
-  static const Color accentOrangeDark = Color(0xFFB7472A);
+  /// Laranja oficial (gradiente do botão Confirmar no POS).
+  static const Color accentOrangeDark = Color(0xFFFF6A2A);
 
-  /// Cinza oficial para ícones secundários.
-  static const Color slate = Color(0xFF757575);
+  /// Cinza de superfície para ícones secundários.
+  static const Color slate = Color(0xFFF0F0F0);
 
   /// Preto oficial para fundos de ícones.
-  static const Color slateDark = Color(0xFF212121);
+  static const Color slateDark = Color(0xFF0C0B0A);
 
   /// Erro semântico oficial (#C62828 — só em alertas de erro).
   static const Color errorNeutral = Color(0xFFC62828);
@@ -263,6 +268,6 @@ abstract final class IconTone {
   static const Color amberDark = Color(0xFFF9A825);
 
   /// Textos em modo claro/escuro sobre ícones (paleta oficial).
-  static const Color onBackgroundLight = Color(0xFF212121);
-  static const Color onBackgroundDark = Color(0xFFE0E0E0);
+  static const Color onBackgroundLight = Color(0xFF0C0B0A);
+  static const Color onBackgroundDark = Color(0xFFF9F9F9);
 }
