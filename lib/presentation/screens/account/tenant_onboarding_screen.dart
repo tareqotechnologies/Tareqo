@@ -110,7 +110,12 @@ class _TenantOnboardingScreenState
       title: l10n.onboardingTitle,
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.xl),
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.pagePaddingForWidth(
+              MediaQuery.sizeOf(context).width,
+            ),
+            vertical: AppSpacing.xl,
+          ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
             child: Column(

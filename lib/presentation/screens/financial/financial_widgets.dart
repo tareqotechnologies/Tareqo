@@ -64,6 +64,7 @@ class TransactionCard extends StatelessWidget {
             children: [
               // ── Categoria + hora ──
               Expanded(
+                flex: 3,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -121,8 +122,12 @@ class TransactionCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.sm),
               // ── Valor ──
-              // FittedBox: encolhe em escala 2.0 em vez de estourar o Row.
+              // Slot TIGHT (flex 2 contra 3 da categoria): o valor ocupa a
+              // fatia direita até à margem e fecha a coluna encostado à
+              // direita. FittedBox mantém a escala 2.0 sem estourar o Row.
               Flexible(
+                flex: 2,
+                fit: FlexFit.tight,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerRight,
@@ -173,6 +178,7 @@ class DateSectionHeader extends StatelessWidget {
         children: [
           // Rótulo do dia (esquerda) — etiqueta de contexto, discreta.
           Expanded(
+            flex: 3,
             child: Text(
               label,
               maxLines: 1,
@@ -182,8 +188,11 @@ class DateSectionHeader extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.xs),
           // Total do dia (direita) — em tinta: o sinal já indica a direção e
-          // o cabeçalho não compete com os montantes das linhas.
+          // o cabeçalho não compete com os montantes das linhas. Slot tight
+          // para encostar à mesma margem direita da lista.
           Flexible(
+            flex: 2,
+            fit: FlexFit.tight,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerRight,

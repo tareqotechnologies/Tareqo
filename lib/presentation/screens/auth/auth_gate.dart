@@ -18,6 +18,7 @@ import '../account/tenant_pending_screen.dart';
 import '../account/tenant_rejected_screen.dart';
 import '../admin/admin_shell.dart';
 import '../shell/app_shell.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import 'login_screen.dart';
 import 'mfa_verification_sheet.dart';
@@ -368,51 +369,91 @@ class _TenantGateState extends ConsumerState<_TenantGate> {
 
 // ─── Error / Blocked screens ────────────────────────────────────────────
 
+/// Layout comum das telas de estado da autenticação (bloqueio e erro) —
+/// ícone em superfície suave, título, mensagem e ações no padrão do
+/// design system.
+class _AuthStateScreen extends StatelessWidget {
+  const _AuthStateScreen({
+    required this.icon,
+    required this.title,
+    required this.message,
+    required this.actions,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: scheme.error.withValues(alpha: 0.10),
+                      borderRadius: AppRadius.lgAll,
+                    ),
+                    child: Icon(icon, size: 32, color: scheme.error),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.headline,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  ...actions,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _BlockedEmployeeScreen extends StatelessWidget {
   const _BlockedEmployeeScreen({required this.onSignOut});
   final VoidCallback onSignOut;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.block, size: 48, color: scheme.error),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.authBlockedTitle,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.authBlockedMessage,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                FilledButton.icon(
-                  onPressed: onSignOut,
-                  icon: const Icon(Icons.logout),
-                  label: Text(l10n.authBlockedSignOut),
-                ),
-              ],
-            ),
-          ),
+    return _AuthStateScreen(
+      icon: Icons.block,
+      title: l10n.authBlockedTitle,
+      message: l10n.authBlockedMessage,
+      actions: [
+        AppButton.primary(
+          onPressed: onSignOut,
+          icon: const Icon(Icons.logout, size: 18),
+          label: l10n.authBlockedSignOut,
         ),
-      ),
+      ],
     );
   }
 }
@@ -424,51 +465,25 @@ class _TenantErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.cloud_off, size: 48, color: scheme.error),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.authErrorLoadAccount,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.authErrorCheckConnection,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                FilledButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: Text(l10n.commonRetry),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: onSignOut,
-                  icon: const Icon(Icons.logout),
-                  label: Text(l10n.commonSignOut),
-                ),
-              ],
-            ),
-          ),
+    return _AuthStateScreen(
+      icon: Icons.cloud_off,
+      title: l10n.authErrorLoadAccount,
+      message: l10n.authErrorCheckConnection,
+      actions: [
+        AppButton.primary(
+          onPressed: onRetry,
+          icon: const Icon(Icons.refresh, size: 18),
+          label: l10n.commonRetry,
         ),
-      ),
+        const SizedBox(height: AppSpacing.xs),
+        AppButton.secondary(
+          onPressed: onSignOut,
+          icon: const Icon(Icons.logout, size: 18),
+          label: l10n.commonSignOut,
+        ),
+      ],
     );
   }
 }
@@ -484,69 +499,72 @@ class _SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final bg = isDark ? AppColors.backgroundDark : AppColors.scaffoldLight;
     final textPrimary = isDark ? AppColors.softWhite : AppColors.onSurfaceLight;
     final textSecondary = isDark
         ? AppColors.onSurfaceVariantDark
         : AppColors.onSurfaceVariantLight;
-    // Acento da marca: bege no escuro (primário do tema escuro) e slate
-    // no claro — o logo/pulse ganha a identidade petróleo sem verde.
-    final accent = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    // Acento da marca: laranja oficial nos dois brilhos — o indicador de
+    // carregamento é uma ação, não uma superfície.
+    final accent = scheme.primary;
 
     return Scaffold(
       backgroundColor: bg,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Logo direto (TQ monograma branco sobre fundo preto).
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.xxl),
-              child: Image.asset(
-                'assets/branding/icon_official.png',
-                width: 120,
-                height: 120,
-                fit: BoxFit.contain,
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Logo direto (TQ monograma branco sobre fundo preto).
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.xxl),
+                child: Image.asset(
+                  'assets/branding/icon_official.png',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.contain,
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            // Título.
-            Text(
-              'TAREQO',
-              // Logótipo: degrau `display` (28/w600); o tracking aberto é
-              // decisão de marca (não um estilo de texto funcional).
-              style: AppTypography.display.copyWith(
-                letterSpacing: 2,
-                color: textPrimary,
+              const SizedBox(height: AppSpacing.xl),
+              // Título.
+              Text(
+                'TAREQO',
+                // Logótipo: degrau `display` (28/w500); o tracking aberto é
+                // decisão de marca (não um estilo de texto funcional).
+                style: AppTypography.display.copyWith(
+                  letterSpacing: 2,
+                  color: textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            // Subtítulo (localizado).
-            Text(
-              l10n.loginTagline,
-              style: AppTypography.bodyMedium.copyWith(
-                color: textSecondary.withValues(alpha: 0.7),
+              const SizedBox(height: AppSpacing.xs),
+              // Subtítulo (localizado).
+              Text(
+                l10n.loginTagline,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyMedium.copyWith(color: textSecondary),
               ),
-            ),
-            const SizedBox(height: 48),
-            // Spinner no acento da marca (bege/slate — sem verde).
-            SizedBox(
-              height: 24,
-              width: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                color: accent,
-                backgroundColor: accent.withValues(alpha: 0.125),
+              const SizedBox(height: AppSpacing.huge),
+              // Spinner no laranja oficial — ação, não superfície.
+              SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: accent,
+                  backgroundColor: accent.withValues(alpha: 0.125),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            // Texto de loading.
-            Text(
-              l10n.splashLoading,
-              style: AppTypography.bodyMedium.copyWith(color: textSecondary),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.lg),
+              // Texto de loading.
+              Text(
+                l10n.splashLoading,
+                style: AppTypography.bodyMedium.copyWith(color: textSecondary),
+              ),
+            ],
+          ),
         ),
       ),
     );

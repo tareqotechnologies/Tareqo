@@ -83,6 +83,11 @@ Regras:
 | `error` | `#C62828` | Erro, destrutivo | só em alertas |
 | `warning` | `#F9A825` | Ícone/borda de aviso (texto sobre ele = preto) | só em alertas |
 
+> **No escuro**, os tons base `#2E7D32`/`#C62828` medem apenas 3.84:1/3.50:1
+> sobre `#0C0B0A` — servem para preenchimento, chip e ícone. Texto pequeno
+> (valores, deltas) usa os tints `#66BB6A`/`#EF5350` (8.32:1/5.64:1), expostos
+> por `theme.income`/`theme.expense`.
+
 ---
 
 ## 3. Tema escuro completo
@@ -106,9 +111,11 @@ O escuro **não é uma inversão**: usa o preto oficial como canvas e o branco s
 | `actionFill` | `#FF6A2A` | Botão primário (rótulo preto) | `#0C0B0A` sobre ele: **6.1:1** |
 | `actionText` | `#FF6A2A` | Links | não-texto |
 | `actionSoft` | `#FF6A2A` a 12% | Fundo de seleção | — |
-| `success` | `#2E7D32` | Sucesso (alerta) | só em alertas |
+| `success` | `#2E7D32` | Sucesso (alerta; preenchimento) | só em alertas |
+| `successText` | `#66BB6A` | Sucesso como TEXTO | **8.32:1** sobre `#0C0B0A` |
 | `warning` | `#F9A825` | Aviso (alerta) | só em alertas |
-| `error` | `#C62828` | Erro (alerta) | só em alertas |
+| `error` | `#C62828` | Erro (alerta; preenchimento) | só em alertas |
+| `errorText` | `#EF5350` | Erro como TEXTO | **5.64:1** sobre `#0C0B0A` |
 | `onSemantic` | `#F9F9F9` | Rótulo sobre preenchimentos semânticos | — |
 
 **Regra do escuro:** o preenchimento primário mantém o rótulo **preto** (`#0C0B0A`, 6.1:1). Branco sobre laranja dá 2.9:1 e falha AA. A superfície e o canvas coincidem no preto; a separação vem de contorno e tipografia, não de mais tonalidades.
@@ -204,6 +211,7 @@ Grelha base **4 px**; incrementos preferenciais: 2, 4, 8, 12, 16, 20, 24, 32, 40
 
 **Regras**
 - Margem horizontal: **16** mobile, **24** tablet, **32** ≥1024.
+- Quebras em `AppBreakpoints` (`compactMax` 599, `mediumMin` 600, `expandedMin` 1024, `sidebarRail` 880) — nunca números mágicos no `build`.
 - Largura máxima de conteúdo: **1040**; acima disso, centrar (nunca esticar listas).
 - Padding de cartão: **16**; cartão de destaque: **20–24**.
 - Entre secções: **24**; entre grupos de formulário: **32**.

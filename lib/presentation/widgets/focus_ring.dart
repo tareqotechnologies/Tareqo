@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_tokens.dart';
+
 /// Anel de foco visível (plano UI/UX — Fase 3.3): borda primária de 2px no
 /// widget focado por teclado físico/Bluetooth — lojas operam com scanner +
 /// teclado, e o highlight padrão do [InkWell] (fill sutil) não é perceptível
@@ -23,7 +25,7 @@ class FocusRing extends StatelessWidget {
     super.key,
     required this.visible,
     this.borderRadius,
-    this.width = 2,
+    this.width = AppSizes.focusRingWidth,
   });
 
   final bool visible;

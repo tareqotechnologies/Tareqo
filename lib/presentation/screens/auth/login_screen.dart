@@ -8,8 +8,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
-import '../../widgets/premium_decor.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../core/theme/app_typography.dart';
 import 'forgot_password_sheet.dart';
@@ -31,8 +31,6 @@ class _LoginPalette {
     required this.textPrimary,
     required this.textSecondary,
     required this.accent,
-    required this.accentDark,
-    required this.onCta,
   });
 
   /// Fundo da página (atrás dos campos).
@@ -47,20 +45,12 @@ class _LoginPalette {
   /// Acento: links, cursor e ícone dos campos com foco.
   final Color accent;
 
-  /// Fundo do botão principal (CTA).
-  final Color accentDark;
-
-  /// Conteúdo sobre o CTA: preto `#0C0B0A` sobre laranja `#FF6A2A` (6.1:1).
-  final Color onCta;
-
   /// Modo escuro — preto oficial com texto gelo.
   static const _LoginPalette dark = _LoginPalette(
     background: AppColors.darkBackground,
     textPrimary: AppColors.softWhite,
     textSecondary: AppColors.darkTextSecondary,
     accent: AppColors.brandOrange,
-    accentDark: AppColors.darkAccentOrange,
-    onCta: AppColors.lightTextPrimary,
   );
 
   /// Modo claro — espelha os neutros do `AppTheme.light` via tokens.
@@ -69,8 +59,6 @@ class _LoginPalette {
     textPrimary: AppColors.lightTextPrimary,
     textSecondary: AppColors.lightTextSecondary,
     accent: AppColors.brandOrange,
-    accentDark: AppColors.darkAccentOrange,
-    onCta: AppColors.lightTextPrimary,
   );
 }
 
@@ -246,32 +234,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       child: Scaffold(
         backgroundColor: palette.background,
-        // Fundo premium: dois halos de luz da cor da marca (canto superior
-        // direito e inferior esquerdo) por trás do formulário — puramente
-        // decorativos, sem toque nem semântica.
-        body: Stack(
-          children: [
-            Positioned(
-              top: -140,
-              right: -120,
-              child: PremiumGlow(
-                color: palette.accent,
-                size: 380,
-                opacity: isDark ? 0.16 : 0.12,
-              ),
-            ),
-            Positioned(
-              bottom: -160,
-              left: -140,
-              child: PremiumGlow(
-                color: palette.accentDark,
-                size: 420,
-                opacity: isDark ? 0.12 : 0.08,
-              ),
-            ),
-            Positioned.fill(child: _buildBody(context, palette)),
-          ],
-        ),
+        // Fundo sólido do tema — sem halos nem gradientes decorativos: a
+        // identidade vem da paleta oficial e da tipografia.
+        body: _buildBody(context, palette),
       ),
     );
   }
@@ -307,25 +272,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // ── Logo ──
-                      // Logo com brilho da marca por baixo e aro de
-                      // cabelo — "joia" de abertura do app.
+                      // Marca em superfície limpa: o ícone oficial sem
+                      // brilho, halo ou sombra colorida.
                       Center(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(AppRadius.xl),
-                            boxShadow: PremiumDecor.glow(
-                              palette.accent,
-                              strength: 1.2,
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(AppRadius.xl),
-                            child: Image.asset(
-                              'assets/branding/icon_official.png',
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.contain,
-                            ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                          child: Image.asset(
+                            'assets/branding/icon_official.png',
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
@@ -452,76 +408,53 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 32),
 
                 // ── Botão Entrar ──
-                // CTA com brilho da marca quando habilitado (o brilho
-                // apaga-se durante o envio — feedback de estado).
-                AnimatedContainer(
-                  duration: AppDurations.fast,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    boxShadow: _isSubmitting
-                        ? null
-                        : PremiumDecor.glow(palette.accentDark),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: palette.accentDark,
-                      foregroundColor: palette.onCta,
-                      disabledBackgroundColor: palette.accentDark.withValues(
-                        alpha: 0.5,
-                      ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        // Design system V4: mesmo raio dos controles
-                        // (botões/campos) — o 14 ad-hoc divergia.
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                      ),
-                      // CTA = labelLarge (14/w500), o mesmo degrau dos
-                      // demais botões primários do app.
-                      textStyle: AppTypography.labelLarge.copyWith(
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: AppColors.softWhite,
-                            ),
-                          )
-                        : Text(
-                            _isSignUpMode ? l10n.loginSignUp : l10n.loginSignIn,
+                // CTA padrão do design system (fill laranja oficial, raio
+                // md, 48dp); sem brilho colorido nem altura ad-hoc.
+                AppButton.primary(
+                  expanded: true,
+                  onPressed: _isSubmitting ? null : _submit,
+                  label: _isSignUpMode ? l10n.loginSignUp : l10n.loginSignIn,
+                  icon: _isSubmitting
+                      ? SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
-                  ),
+                        )
+                      : null,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.md),
 
                 // ── Links ──
                 if (!_isSignUpMode)
                   Center(
-                    child: GestureDetector(
-                      onTap: _isSubmitting ? null : _openForgotPassword,
-                      child: Text(
-                        l10n.loginForgotPassword,
-                        style: AppTypography.labelLarge.copyWith(
-                          color: palette.accent,
-                        ),
+                    child: TextButton(
+                      onPressed: _isSubmitting ? null : _openForgotPassword,
+                      style: TextButton.styleFrom(
+                        foregroundColor: palette.accent,
+                        textStyle: AppTypography.labelLarge,
                       ),
+                      child: Text(l10n.loginForgotPassword),
                     ),
                   ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.xs),
                 Center(
-                  child: GestureDetector(
-                    onTap: _isSubmitting
+                  child: TextButton(
+                    onPressed: _isSubmitting
                         ? null
                         : () => setState(() {
                             _isSignUpMode = !_isSignUpMode;
                             _confirmController.clear();
                           }),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                    ),
                     child: RichText(
                       text: TextSpan(
                         text: _isSignUpMode

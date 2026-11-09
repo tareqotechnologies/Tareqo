@@ -4,13 +4,13 @@ import '../../core/i18n/l10n_ext.dart';
 import '../../core/i18n/payment_method_l10n.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/utils/formatters.dart';
 import '../../domain/entities/sale.dart';
 import '../screens/sales/sale_detail_screen.dart';
 import 'app_page.dart' show HoverableTile;
 import 'focus_ring.dart';
 import 'semantics_composed.dart';
-import 'payment_filter.dart';
 
 /// Linha de venda no padrão do feed de atividade — ícone circular laranja,
 /// título + método/ data à esquerda, valor total à direita.
@@ -51,7 +51,6 @@ class _SalesCardState extends State<SalesCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final accent = _sale.paymentMethod.accent(theme);
     final isCancelled = _sale.status == SaleStatus.cancelled;
 
     // A11y (plano UI/UX — Fase 3.1): a linha inteira é UM nó semântico.
@@ -87,7 +86,7 @@ class _SalesCardState extends State<SalesCard> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm + 1,
+                      vertical: AppSpacing.sm,
                     ),
                     child: Row(
                       children: [
@@ -116,18 +115,18 @@ class _SalesCardState extends State<SalesCard> {
                                 _sale.paymentMethod.labelFor(l10n),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  fontWeight: FontWeight.w500,
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: theme.colorScheme.onSurface,
                                 ),
                               ),
-                              const SizedBox(height: 1),
+                              const SizedBox(height: AppSpacing.micro),
                               // Referência + data — labelSmall discreto.
                               Text(
                                 '${Formatters.saleLabel(_sale.number)} · '
                                 '${Formatters.time(_sale.dateTime)}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.labelSmall?.copyWith(
+                                style: AppTypography.labelSmall.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
@@ -135,7 +134,10 @@ class _SalesCardState extends State<SalesCard> {
                           ),
                         ),
                         const SizedBox(width: AppSpacing.xs),
-                        // Total à direita — labelMedium em destaque laranja.
+                        // Total à direita — valor de linha de transação
+                        // (15/w500, tabular) em tinta: num histórico de
+                        // vendas um total nunca é "ganho/perda", por isso
+                        // as cores de alerta ficam fora da linha.
                         Flexible(
                           child: Align(
                             alignment: Alignment.centerRight,
@@ -143,9 +145,8 @@ class _SalesCardState extends State<SalesCard> {
                               Formatters.currency(_sale.totalAmountCents),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: accent,
+                              style: AppTypography.amountInRow(
+                                theme.colorScheme.onSurface,
                               ),
                             ),
                           ),

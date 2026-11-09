@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../helpers/test_app.dart';
 import '../../../helpers/store_context.dart';
+import '../../../helpers/viewport.dart';
 
 import 'package:tareqo/domain/entities/store.dart';
 import 'package:tareqo/domain/repositories/i_auth_repository.dart';
@@ -178,5 +180,39 @@ void main() {
 
     // then — estado vazio localizado da tela de notificações.
     expect(find.text('Sem notificações'), findsOneWidget);
+  });
+
+  // Responsividade (etapa Shell/navegação): a grelha usa o espaço REAL do
+  // corpo — 2 colunas no telemóvel, 3 no tablet e 4 no desktop. A largura
+  // NÃO pode vir da janela (dentro do shell o conteúdo é limitado a 1040).
+  testWidgets('grelha do Menu adapta as colunas ao espaço disponível', (
+    tester,
+  ) async {
+    usePortraitViewport(tester, size: const Size(400, 1400));
+    final signOut = _SpySignOutUseCase();
+    await _pump(tester, signOut);
+
+    double topo(String label) => tester.getTopLeft(find.text(label)).dy;
+
+    // Telemóvel: 2 colunas — terceiro tile desce para a linha seguinte.
+    expect(topo('Produtos'), topo('Clientes'));
+    expect(topo('Crédito'), greaterThan(topo('Produtos')));
+
+    // Tablet (800): 3 colunas — os três primeiros alinham na mesma linha.
+    tester.view.physicalSize = const Size(800, 1400);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(topo('Produtos'), topo('Clientes'));
+    expect(topo('Clientes'), topo('Crédito'));
+    expect(topo('Compras'), greaterThan(topo('Produtos')));
+
+    // Desktop (1280): 4 colunas — quatro módulos na primeira linha.
+    tester.view.physicalSize = const Size(1280, 1600);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(topo('Produtos'), topo('Clientes'));
+    expect(topo('Clientes'), topo('Crédito'));
+    expect(topo('Crédito'), topo('Compras'));
+    expect(tester.takeException(), isNull);
   });
 }

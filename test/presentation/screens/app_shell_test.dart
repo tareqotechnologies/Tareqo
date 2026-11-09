@@ -712,4 +712,55 @@ void main() {
 
     expect(find.textContaining('1 com erro'), findsOneWidget);
   });
+
+  // A11y / responsividade (etapa Shell): com fonte a 2.0× a AppBar (marca +
+  // secção numa linha), a barra inferior e o rail não podem estourar.
+  testWidgets('shell respeita a escala de texto 2.0 em barra e rail', (
+    tester,
+  ) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+    usePortraitViewport(tester);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ...storeContextOverrides(),
+          getProductsUseCaseProvider.overrideWithValue(
+            _FakeGetProductsUseCase(),
+          ),
+          salesRepositoryProvider.overrideWithValue(_FakeSalesRepository()),
+          getCashFlowUseCaseProvider.overrideWithValue(
+            _FakeGetCashFlowUseCase(),
+          ),
+          getPendingDebtsUseCaseProvider.overrideWithValue(
+            _FakeGetPendingDebtsUseCase(),
+          ),
+          getSettledDebtsUseCaseProvider.overrideWithValue(
+            _FakeGetSettledDebtsUseCase(),
+          ),
+          financeRepositoryProvider.overrideWithValue(_FakeFinanceRepository()),
+          getCustomersUseCaseProvider.overrideWithValue(
+            _FakeGetCustomersUseCase(),
+          ),
+        ],
+        child: testApp(home: const AppShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    // Subsecção do Menu: a AppBar mostra "TAREQO · Produtos" na mesma linha.
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(AppShell)),
+    );
+    container.read(shellIndexProvider.notifier).goTo(AppSection.products);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    // Rail em paisagem larga com a mesma escala.
+    await rotateToLandscape(tester, size: const Size(1280, 800));
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

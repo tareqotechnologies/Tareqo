@@ -11,6 +11,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/utils/receipt_text.dart';
 import '../../../domain/entities/sale.dart';
 import '../../controllers/sales_providers.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/sale_receipt_view.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
@@ -141,13 +142,13 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               l10n.saleDetailShareTitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             // Pré-visualização do recibo (fundo do sheet cinza claro para o
             // "papel" branco do cupom se destacar). O preview rola quando o
             // recibo é longo (muitos itens/escala de texto alta) — o
@@ -178,36 +179,37 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             // Ação principal: partilhar como imagem (share sheet do sistema).
-            FilledButton.icon(
+            AppButton.primary(
+              expanded: true,
               onPressed: _sharing ? null : _shareImage,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-              ),
+              label: l10n.saleDetailShareImage,
               icon: _sharing
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                  ? SizedBox(
+                      width: AppSizes.iconMd,
+                      height: AppSizes.iconMd,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.colorScheme.onPrimary,
+                      ),
                     )
                   : const Icon(Icons.image_outlined),
-              label: Text(l10n.saleDetailShareImage),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
             // WhatsApp: abre o app com o recibo em texto pré-preenchido.
-            OutlinedButton.icon(
+            AppButton.secondary(
+              expanded: true,
               onPressed: _sharing ? null : _shareWhatsApp,
               // Paleta oficial: terracota é terracota em qualquer estado
               // (o verde brand do WhatsApp é uma cor de terceiros fora da
               // paleta — proibido na interface geral).
               style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
                 foregroundColor: AppColors.brandOrange,
                 side: const BorderSide(color: AppColors.brandOrange),
               ),
               icon: const Icon(Icons.chat_bubble_outline_rounded),
-              label: Text(l10n.saleDetailShareWhatsApp),
+              label: l10n.saleDetailShareWhatsApp,
             ),
           ],
         ),

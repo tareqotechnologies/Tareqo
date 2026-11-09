@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../controllers/auth_providers.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../widgets/app_button.dart';
 
 /// [AppLockOverlay] — bloqueio biométrico do app.
 ///
@@ -254,42 +256,40 @@ class _BiometricLockScreen extends StatelessWidget {
                       color: scheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xl),
                   Text(
                     l10n.appLockTitle,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTypography.headline,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     l10n.appLockMessage,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                    style: AppTypography.bodyMedium.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
                   if (failed) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       l10n.appLockError,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.error,
                       ),
                     ),
                   ],
-                  const SizedBox(height: 24),
-                  FilledButton.icon(
+                  const SizedBox(height: AppSpacing.xl),
+                  AppButton.primary(
                     onPressed: authenticating ? null : onUnlock,
                     icon: const Icon(Icons.fingerprint_rounded, size: 18),
-                    label: Text(l10n.appLockUnlock),
+                    label: l10n.appLockUnlock,
                   ),
-                  const SizedBox(height: 4),
-                  TextButton(
+                  const SizedBox(height: AppSpacing.xs),
+                  AppButton.secondary(
                     onPressed: authenticating ? null : onSignOut,
-                    child: Text(l10n.commonSignOut),
+                    label: l10n.commonSignOut,
                   ),
                 ],
               ),

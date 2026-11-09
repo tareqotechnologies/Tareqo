@@ -196,6 +196,22 @@ void main() {
         _expectContrast(color, chipBg(color), '$label/ícone', minRatio: 3.0);
       }
     });
+
+    test('valores semânticos como TEXTO no escuro atingem AA 4.5:1', () {
+      // Os tons base de alerta (#2E7D32/#C62828) medem 3.84/3.50 sobre o
+      // preto — servem para preenchimentos, não para valores monetários em
+      // texto pequeno. `theme.income`/`theme.expense` no escuro devolvem os
+      // tints de texto (#66BB6A/#EF5350) e cumprem AA nos cards e no fundo.
+      for (final (label, color) in [
+        ('income', theme.income),
+        ('expense', theme.expense),
+      ]) {
+        _expectContrast(color, surface, '$label/superfície (texto AA)');
+        _expectContrast(color, scaffold, '$label/scaffold (texto AA)');
+        _expectContrast(color, chipBg(color), '$label/chip (texto AA)');
+        _expectContrast(color, summaryBg(color), '$label/resumo (texto AA)');
+      }
+    });
   });
 
   // Ícones dos cards de Venda/Compra: o selo (PaymentMethodBadge) pinta um

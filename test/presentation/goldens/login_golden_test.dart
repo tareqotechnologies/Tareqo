@@ -79,6 +79,14 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(_buildApp(theme));
+    // O logo é um asset: descodificar fora do runAsync deixa a primeira
+    // captura sem imagem (corrida de decode no harness de goldens).
+    await tester.runAsync(() async {
+      await precacheImage(
+        const AssetImage('assets/branding/icon_official.png'),
+        tester.element(find.byType(LoginScreen)),
+      );
+    });
     await tester.pumpAndSettle();
   }
 

@@ -198,8 +198,10 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
       backgroundColor: scheme.surface,
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.pagePaddingForWidth(
+              MediaQuery.sizeOf(context).width,
+            ),
             vertical: AppSpacing.xxl,
           ),
           child: ConstrainedBox(

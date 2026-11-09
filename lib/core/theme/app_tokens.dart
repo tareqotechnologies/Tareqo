@@ -134,6 +134,39 @@ abstract final class AppSizes {
   static const double contentMaxWidth = 1040;
   static const double dialogMaxWidth = 400;
   static const double fabSize = 56;
+
+  /// Anel de foco visível (2 px) — padrão de teclado/leitor.
+  static const double focusRingWidth = 2;
+}
+
+/// Breakpoints responsivos do ERP (largura lógica em dp).
+///
+/// A hierarquia **muda** em cada faixa — não é apenas redimensionar:
+/// compacto = uma coluna + FAB; médio = mais densidade e sheet largo;
+/// expandido = rail/sidebar persistente e conteúdo centrado.
+abstract final class AppBreakpoints {
+  /// Limite superior do telemóvel (0–599).
+  static const double compactMax = 599;
+
+  /// Início do tablet (600–1023).
+  static const double mediumMin = 600;
+
+  /// Início do desktop (≥1024).
+  static const double expandedMin = 1024;
+
+  /// Corte específico do painel admin: sidebar minimalista (≥880).
+  static const double sidebarRail = 880;
+}
+
+/// Opacidades dos véus de estado (Material state layers).
+///
+/// Valores únicos para hover/pressed/focus/disabled; cada componente
+/// compõe com `color.withValues(alpha: …)` — nunca inventa alfas.
+abstract final class AppStateOpacity {
+  static const double hover = 0.04;
+  static const double pressed = 0.08;
+  static const double focus = 0.12;
+  static const double disabled = 0.38;
 }
 
 /// Curvas de animação naturais.

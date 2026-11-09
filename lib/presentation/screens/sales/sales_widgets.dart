@@ -188,7 +188,7 @@ class _SummaryRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm + 2,
+        vertical: AppSpacing.sm,
       ),
       child: Row(
         children: [
@@ -211,8 +211,8 @@ class _SummaryRow extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.micro),
@@ -220,7 +220,7 @@ class _SummaryRow extends StatelessWidget {
                   details,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(
+                  style: AppTypography.labelSmall.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),

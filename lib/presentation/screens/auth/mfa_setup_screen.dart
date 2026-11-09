@@ -153,7 +153,12 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
         onPressed: () => Navigator.of(context).pop(),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.pagePaddingForWidth(
+            MediaQuery.sizeOf(context).width,
+          ),
+          vertical: AppSpacing.xl,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

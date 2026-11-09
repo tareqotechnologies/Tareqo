@@ -97,9 +97,10 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(shellIndexProvider);
-    final wide =
-        MediaQuery.sizeOf(context).width >=
-        880; // Trigger add-on expiry check when tenant is known.
+    // Rail persistente a partir do corte de sidebar (token único — o mesmo
+    // 880 usado pelo shell do admin). Below it, barra inferior + FAB.
+    final wide = MediaQuery.sizeOf(context).width >= AppBreakpoints.sidebarRail;
+    // Trigger add-on expiry check when tenant is known.
     ref.watch(addonExpiryCheckProvider);
 
     final l10n = context.l10n;
@@ -167,16 +168,10 @@ class AppShell extends ConsumerWidget {
                   height: 26,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        theme.accent,
-                        Color.lerp(theme.accent, scheme.primary, 0.45)!,
-                      ],
-                    ),
+                    // Marca sólida na cor de ação oficial — sem gradiente e
+                    // sem brilho (anti-padrões do design system).
+                    color: scheme.primary,
                     borderRadius: BorderRadius.circular(AppRadius.sm),
-                    boxShadow: PremiumDecor.glow(theme.accent, strength: 0.8),
                   ),
                   child: Text(
                     'T',
@@ -189,12 +184,12 @@ class AppShell extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              // Título da secção atual (U-08): nas subsecções do Menu
-              // (Produtos/Crédito/Clientes) o wordmark é acompanhado do
-              // rótulo real — o utilizador sabe onde está.
+              // Marca + secção numa ÚNICA linha ("TAREQO · Produtos"):
+              // a AppBar tem 56 dp fixos e uma coluna de dois textos
+              // estouraria com escala de texto 2.0. Nas subsecções do Menu
+              // o utilizador continua a saber onde está.
               Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
@@ -203,18 +198,25 @@ class AppShell extends ConsumerWidget {
                         fontWeight: FontWeight.w600,
                         letterSpacing: 1.6,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    if (sectionLabel != null)
+                    if (sectionLabel != null) ...[
                       Text(
-                        sectionLabel,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        ' · ',
+                        style: theme.textTheme.titleSmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
+                      Flexible(
+                        child: Text(
+                          sectionLabel,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -238,24 +240,27 @@ class AppShell extends ConsumerWidget {
         body: wide
             ? Row(
                 children: [
-                  NavigationRail(
-                    selectedIndex: _barIndex(index),
-                    onDestinationSelected: onSelect,
-                    labelType: NavigationRailLabelType.all,
-                    leading: const Padding(
-                      padding: EdgeInsets.only(
-                        top: AppSpacing.md,
-                        bottom: AppSpacing.sm,
+                  // SafeArea só no fundo: em paisagem o gesto do sistema
+                  // deixaria a base do rail sem superfície; o ColoredBox
+                  // mantém o fundo contínuo até à borda do ecrã.
+                  ColoredBox(
+                    color: scheme.surface,
+                    child: SafeArea(
+                      top: false,
+                      child: NavigationRail(
+                        selectedIndex: _barIndex(index),
+                        onDestinationSelected: onSelect,
+                        labelType: NavigationRailLabelType.all,
+                        destinations: [
+                          for (final (icon, selected, label) in destinations)
+                            NavigationRailDestination(
+                              icon: Icon(icon),
+                              selectedIcon: Icon(selected),
+                              label: _NavLabel(text: label),
+                            ),
+                        ],
                       ),
                     ),
-                    destinations: [
-                      for (final (icon, selected, label) in destinations)
-                        NavigationRailDestination(
-                          icon: Icon(icon),
-                          selectedIcon: Icon(selected),
-                          label: _NavLabel(text: label),
-                        ),
-                    ],
                   ),
                   VerticalDivider(
                     width: 1,
@@ -294,7 +299,9 @@ class AppShell extends ConsumerWidget {
                       color: scheme.surface,
                       borderRadius: AppRadius.xxlAll,
                       border: Border.all(color: PremiumDecor.hairline(scheme)),
-                      boxShadow: PremiumDecor.liftShadow(scheme),
+                      // Sombra que sobe do fundo do ecrã (a barra é uma
+                      // superfície elevada sobre o conteúdo, não um cartão).
+                      boxShadow: PremiumDecor.upwardShadow(scheme),
                     ),
                     child: ClipRRect(
                       borderRadius: AppRadius.xxlAll,
@@ -490,9 +497,11 @@ class _ActionTile extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          // A11y (U-19): tile custom anuncia "botão" + título/hint.
+          // A11y (U-19): tile custom anuncia "botão" + título/hint num ÚNICO
+          // nó — excludeSemantics evita repetir os textos do filho.
           child: Semantics(
             button: true,
+            excludeSemantics: true,
             label: title,
             hint: hint,
             child: Padding(

@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
@@ -560,7 +562,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
               children: [
                 scannerZone,
                 searchField,
-                const SizedBox(height: 48),
+                const SizedBox(height: AppSpacing.huge),
                 const Center(child: CircularProgressIndicator()),
               ],
             ),
@@ -568,11 +570,13 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
               children: [
                 scannerZone,
                 searchField,
-                const SizedBox(height: 48),
+                const SizedBox(height: AppSpacing.huge),
                 Center(
                   child: Text(
                     l10n.productsLoadError,
-                    style: theme.textTheme.bodyMedium,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ],
@@ -831,9 +835,10 @@ class _CartProductRow extends StatelessWidget {
                   product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: outOfStock ? theme.colorScheme.outline : null,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: outOfStock
+                        ? theme.colorScheme.outline
+                        : theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.micro),
@@ -846,7 +851,7 @@ class _CartProductRow extends StatelessWidget {
                             '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -859,9 +864,8 @@ class _CartProductRow extends StatelessWidget {
                   productTypeLabel(context, product.type),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -953,9 +957,10 @@ class _Stepper extends StatelessWidget {
                   language: Formatters.currentLanguage,
                 ),
                 textAlign: TextAlign.center,
-                style: theme.textTheme.labelMedium?.copyWith(
+                // O estado ativo já é lido na cápsula tingida e no "+";
+                // o número fica na escala (12/500) nos dois estados.
+                style: AppTypography.labelMedium.copyWith(
                   color: scheme.onSurface,
-                  fontWeight: active ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
             ),
@@ -1011,9 +1016,8 @@ class _CartPill extends StatelessWidget {
                     )
                   : '${Quantity.format(quantity, language: Formatters.currentLanguage)}×',
               textAlign: TextAlign.center,
-              style: theme.textTheme.labelMedium?.copyWith(
+              style: AppTypography.labelMedium.copyWith(
                 color: scheme.onPrimary,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -1027,9 +1031,8 @@ class _CartPill extends StatelessWidget {
                   product.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelLarge?.copyWith(
+                  style: AppTypography.labelLarge.copyWith(
                     color: scheme.onSurface,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.micro),
@@ -1040,16 +1043,15 @@ class _CartPill extends StatelessWidget {
                         productTypeLabel(context, product.type),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: AppTypography.bodySmall.copyWith(
                           color: scheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       Formatters.currency(product.salePriceCents),
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
@@ -1064,10 +1066,7 @@ class _CartPill extends StatelessWidget {
               Quantity.lineTotal(quantity, product.salePriceCents),
             ),
             textAlign: TextAlign.right,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: scheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.amountInRow(scheme.onSurface),
           ),
         ],
       ),
@@ -1137,10 +1136,7 @@ class _CartSummary extends StatelessWidget {
         Expanded(
           child: Text(
             l10n.salesCartSection(itemCount),
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: scheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.labelMedium.copyWith(color: scheme.onSurface),
           ),
         ),
       ],
@@ -1203,7 +1199,7 @@ class _Footer extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.dashboardSaleItems(itemCount),
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -1213,11 +1209,7 @@ class _Footer extends StatelessWidget {
               // ação de confirmar. É o número que fecha a venda.
               Text(
                 Formatters.currency(totalCents),
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: scheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.4,
-                ),
+                style: AppTypography.heroAmount(scheme.onSurface),
               ),
             ],
           ),
@@ -1225,7 +1217,9 @@ class _Footer extends StatelessWidget {
             const SizedBox(height: AppSpacing.xxs),
             Text(
               error!,
-              style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
+              // Variante de TEXTO do erro (AA no escuro; `scheme.error`
+              // é o tom base, para preenchimentos).
+              style: AppTypography.bodySmall.copyWith(color: theme.expense),
             ),
           ],
           const SizedBox(height: AppSpacing.sm),

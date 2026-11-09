@@ -281,21 +281,16 @@ class DashboardScreen extends ConsumerWidget {
                       children: [
                         Text(
                           dateLabel,
-                          style: theme.textTheme.labelSmall?.copyWith(
+                          style: AppTypography.labelSmall.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
-                            letterSpacing: 0.6,
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: AppSpacing.micro),
                         Text(
                           l10n.dashboardGreeting(displayName),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.6,
-                          ),
+                          style: theme.textTheme.headlineMedium,
                         ),
                       ],
                     ),
@@ -306,7 +301,7 @@ class DashboardScreen extends ConsumerWidget {
               ),
               // Chip da loja ativa — discreto; com 2+ lojas vira o
               // seletor rápido; com 1 loja fica apenas informativo.
-              const SizedBox(height: AppSpacing.sm + 2),
+              const SizedBox(height: AppSpacing.sm),
               const StoreSwitcher(hideWhenSingle: false),
               const SizedBox(height: AppSpacing.lg),
               // Card-hero de saldo (canvas estilo app de referência):
@@ -333,8 +328,8 @@ class DashboardScreen extends ConsumerWidget {
                   salesSubtextColor: salesDelta == null
                       ? null
                       : salesDelta >= 0
-                      ? AppColors.successNeutral
-                      : AppColors.errorNeutral,
+                      ? theme.income
+                      : theme.expense,
                   salesLoading: salesAsync.isLoading,
                   receivablesCents: kpis?.pendingTotalCents ?? 0,
                   receivablesSubtext: l10n.dashboardFiadoCount(
@@ -350,10 +345,7 @@ class DashboardScreen extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       l10n.dashboardActivityTitle,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.3,
-                      ),
+                      style: theme.textTheme.titleLarge,
                     ),
                   ),
                   Container(
@@ -364,12 +356,14 @@ class DashboardScreen extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(AppRadius.full),
+                      border: Border.all(
+                        color: PremiumDecor.hairline(theme.colorScheme),
+                      ),
                     ),
                     child: Text(
                       l10n.dashboardActivityEvents(activity.length),
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      style: AppTypography.labelSmall.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -466,11 +460,11 @@ class _BalanceHero extends StatelessWidget {
     final l10n = context.l10n;
     final scheme = theme.colorScheme;
 
-    // Acabamento premium: superfície com véu de marca nos cantos e sombra
-    // elevada em camadas — o conteúdo e a semântica são os mesmos.
+    // Acabamento: superfície elevada do design system — sem gradiente
+    // decorativo nem sombra colorida; o destaque vem da hierarquia
+    // tipográfica e do laranja oficial na pílula da métrica.
     return AppCard(
       elevated: true,
-      gradient: PremiumDecor.heroSurface(scheme, tint: theme.accent),
       borderRadius: AppRadius.xlAll,
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
@@ -509,19 +503,17 @@ class _BalanceHero extends StatelessWidget {
                         size: 14,
                         color: scheme.onPrimaryContainer,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.xs),
                       Text(
                         l10n.dashboardMetricCash,
-                        style: theme.textTheme.labelMedium?.copyWith(
+                        style: AppTypography.labelMedium.copyWith(
                           color: scheme.onPrimaryContainer,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 // Valor grande e tabular — o destaque visual da Home.
                 // Formato "1.000,00 MZN": valor + código da moeda.
                 // 4.2: contagem animada até o valor final.
@@ -663,12 +655,9 @@ class _HeroMetric extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            // Moderno/minimalista: rótulo pequeno em cinza de superfície
-            // (texto secundário claro) com tracking curto.
-            style: theme.textTheme.labelSmall?.copyWith(
+            // Rótulo secundário discreto — mesmo degrau dos metadados.
+            style: AppTypography.labelSmall.copyWith(
               color: scheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.4,
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
@@ -678,12 +667,9 @@ class _HeroMetric extends StatelessWidget {
             child: _CountUpText(
               cents: cents,
               loading: loading,
-              // Hero 28px w600 — tracking apertado para respiro editorial.
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: scheme.onSurface,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.2,
-              ),
+              // Valor de resumo (22/Medium) — abaixo do hero de caixa,
+              // acima do corpo; tabular para alinhar entre métricas.
+              style: AppTypography.summaryAmount(scheme.onSurface),
             ),
           ),
           if (subtext != null) ...[
@@ -692,9 +678,8 @@ class _HeroMetric extends StatelessWidget {
               subtext!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall?.copyWith(
+              style: AppTypography.labelSmall.copyWith(
                 color: subtextColor ?? scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -956,12 +941,12 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
                   color: IconTone.lightForeground(ModuleColors.stores),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   transfer.productName,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -969,37 +954,37 @@ void _showTransferDetails(BuildContext context, StockTransfer transfer) {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           DetailRow.inline(
             icon: Icons.store_outlined,
             label: context.l10n.transfersRowOrigin,
             value: transfer.fromStoreName,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           DetailRow.inline(
             icon: Icons.storefront_outlined,
             label: context.l10n.transfersRowDest,
             value: transfer.toStoreName,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           DetailRow.inline(
             icon: Icons.inventory_2_outlined,
             label: context.l10n.transfersQuantity,
             value: formattedQty,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           DetailRow.inline(
             icon: Icons.calendar_today_outlined,
             label: context.l10n.transfersRowDate,
             value: Formatters.date(transfer.createdAt),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           DetailRow.inline(
             icon: Icons.info_outline,
             label: context.l10n.transfersRowStatus,
             value: transferStatusLabel(transfer.status),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     ),
@@ -1082,7 +1067,7 @@ class _ActivityRow extends StatelessWidget {
     final row = Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm + 2,
+        vertical: AppSpacing.sm,
       ),
       child: Row(
         children: [
@@ -1110,17 +1095,17 @@ class _ActivityRow extends StatelessWidget {
                   item.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   item.details,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -1151,9 +1136,8 @@ class _ActivityRow extends StatelessWidget {
                           fit: BoxFit.scaleDown,
                           child: Text(
                             item.badge!,
-                            style: theme.textTheme.labelSmall?.copyWith(
+                            style: AppTypography.labelSmall.copyWith(
                               color: AppColors.brandBlack,
-                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -1164,10 +1148,9 @@ class _ActivityRow extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style:
                             (item.amount != null
-                                    ? theme.textTheme.bodyMedium
-                                    : theme.textTheme.labelMedium)
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
+                                    ? AppTypography.labelLarge
+                                    : AppTypography.labelMedium)
+                                .copyWith(
                                   color: item.amount != null
                                       ? amountFg
                                       : item.badgeColor,

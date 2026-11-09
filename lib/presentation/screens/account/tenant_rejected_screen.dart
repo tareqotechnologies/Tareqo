@@ -24,80 +24,85 @@ class TenantRejectedScreen extends ConsumerWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Estado "rejeitado": erro oficial (#C62828) em véu —
-                // mesmo ícone-em-superfície da tela de pendência.
-                Container(
-                  width: 72,
-                  height: 72,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: theme.expense.withValues(alpha: 0.10),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.cancel_outlined,
-                    size: 32,
-                    color: theme.expense,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  l10n.tenantRejectedTitle,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.headline,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  l10n.tenantRejectedSubtitle(tenant.businessName),
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                if (tenant.rejectionReason != null &&
-                    tenant.rejectionReason!.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  AppCard(
-                    color: scheme.errorContainer,
-                    borderColor: theme.expense.withValues(alpha: 0.30),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 18,
-                          color: scheme.onErrorContainer,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Expanded(
-                          child: Text(
-                            tenant.rejectionReason!,
-                            style: AppTypography.bodyMedium.copyWith(
-                              color: scheme.onErrorContainer,
-                            ),
-                          ),
-                        ),
-                      ],
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Estado "rejeitado": erro oficial (#C62828) em véu —
+                  // mesmo ícone-em-superfície da tela de pendência.
+                  Container(
+                    width: 72,
+                    height: 72,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: theme.expense.withValues(alpha: 0.10),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.cancel_outlined,
+                      size: 32,
+                      color: theme.expense,
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    l10n.tenantRejectedTitle,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.headline,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    l10n.tenantRejectedSubtitle(tenant.businessName),
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  if (tenant.rejectionReason != null &&
+                      tenant.rejectionReason!.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    AppCard(
+                      // Véu oficial de erro sobre a superfície (o
+                      // `errorContainer` em cheio é o vermelho-base e
+                      // anularia o texto).
+                      color: scheme.error.withValues(alpha: 0.08),
+                      borderColor: scheme.error.withValues(alpha: 0.30),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 18,
+                            color: scheme.error,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Expanded(
+                            child: Text(
+                              tenant.rejectionReason!,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: scheme.onSurface,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.xl),
+                  AppButton.secondary(
+                    onPressed: () async {
+                      await ref.read(signOutUseCaseProvider).call();
+                    },
+                    icon: const Icon(Icons.logout, size: 18),
+                    label: l10n.commonSignOut,
+                  ),
                 ],
-                const SizedBox(height: AppSpacing.xl),
-                AppButton.secondary(
-                  onPressed: () async {
-                    await ref.read(signOutUseCaseProvider).call();
-                  },
-                  icon: const Icon(Icons.logout),
-                  label: l10n.commonSignOut,
-                ),
-              ],
+              ),
             ),
           ),
         ),

@@ -23,61 +23,63 @@ class TenantPendingScreen extends ConsumerWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Estado "a aguardar": laranja oficial em véu — o mesmo
-                // ícone-em-superfície usado nas telas de estado.
-                Container(
-                  width: 72,
-                  height: 72,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: theme.accent.withValues(alpha: 0.10),
-                    shape: BoxShape.circle,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Estado "a aguardar": laranja oficial em véu — o mesmo
+                  // ícone-em-superfície usado nas telas de estado.
+                  Container(
+                    width: 72,
+                    height: 72,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: theme.accent.withValues(alpha: 0.10),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.hourglass_top,
+                      size: 32,
+                      color: theme.accent,
+                    ),
                   ),
-                  child: Icon(
-                    Icons.hourglass_top,
-                    size: 32,
-                    color: theme.accent,
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    l10n.tenantPendingTitle,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.headline,
                   ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  l10n.tenantPendingTitle,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.headline,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  l10n.tenantPendingSubtitle(tenant.businessName),
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: scheme.onSurfaceVariant,
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    l10n.tenantPendingSubtitle(tenant.businessName),
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  l10n.tenantPendingHint,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: scheme.onSurfaceVariant,
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    l10n.tenantPendingHint,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                AppButton.secondary(
-                  onPressed: () async {
-                    await ref.read(signOutUseCaseProvider).call();
-                  },
-                  icon: const Icon(Icons.logout),
-                  label: l10n.commonSignOut,
-                ),
-              ],
+                  const SizedBox(height: AppSpacing.xl),
+                  AppButton.secondary(
+                    onPressed: () async {
+                      await ref.read(signOutUseCaseProvider).call();
+                    },
+                    icon: const Icon(Icons.logout, size: 18),
+                    label: l10n.commonSignOut,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

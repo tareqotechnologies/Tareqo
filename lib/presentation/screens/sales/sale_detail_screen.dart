@@ -6,6 +6,7 @@ import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
 import '../../../data/services/offline_sync_service.dart';
@@ -51,7 +52,6 @@ class _SaleDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
 
     return Padding(
@@ -76,9 +76,8 @@ class _SaleDetailSheet extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: Text(
                     l10n.saleDetailView,
-                    style: theme.textTheme.labelSmall?.copyWith(
+                    style: AppTypography.labelSmall.copyWith(
                       color: AppColors.brandBlack,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -122,7 +121,7 @@ class _SaleFeedRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm + 2,
+        vertical: AppSpacing.sm,
       ),
       child: Row(
         children: [
@@ -149,16 +148,16 @@ class _SaleFeedRow extends StatelessWidget {
                   Formatters.saleLabel(sale.number),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   '${sale.paymentMethod.labelFor(l10n)} · ${Formatters.time(sale.dateTime)}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(
+                  style: AppTypography.labelSmall.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -176,10 +175,7 @@ class _SaleFeedRow extends StatelessWidget {
                     Formatters.signedAmount(subtotal),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.accentOrange,
-                    ),
+                    style: AppTypography.amountInRow(AppColors.accentOrange),
                   ),
             ),
           ),
@@ -323,48 +319,60 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     final canCancel = ref.watch(canCancelSalesProvider);
     final isCancelled = sale.status == SaleStatus.cancelled;
     final activeStore = _activeStore();
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
 
     return AppPage(
       title: l10n.saleDetailTitle,
       useSafeArea: false,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(8, 8, 8, 32),
+        padding: EdgeInsets.fromLTRB(
+          horizontal,
+          AppSpacing.xs,
+          horizontal,
+          AppSpacing.xxl,
+        ),
         children: [
           // ── Header: sale ID + date + payment chip ──
           Text(
             l10n.saleDetailId(Formatters.saleLabel(sale.number)),
             style: theme.textTheme.titleLarge,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             Formatters.dateTime(sale.dateTime),
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: AppTypography.bodyMedium.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 12),
-          if (isCancelled)
-            StatusChip(
-              label: l10n.salesStatusCancelled,
-              color: theme.expense,
-              icon: Icons.block,
-            )
-          else
-            StatusChip(
-              label: sale.paymentMethod.labelFor(context.l10n),
-              color: AppColors.accentOrange,
-              icon: sale.paymentMethod.icon,
-            ),
+          const SizedBox(height: AppSpacing.sm),
+          // Align: no ListView o filho recebe largura total — o selo é uma
+          // pílula e deve abraçar o próprio texto.
+          Align(
+            alignment: Alignment.centerLeft,
+            child: isCancelled
+                ? StatusChip(
+                    label: l10n.salesStatusCancelled,
+                    color: theme.expense,
+                    icon: Icons.block,
+                  )
+                : StatusChip(
+                    label: sale.paymentMethod.labelFor(context.l10n),
+                    color: AppColors.accentOrange,
+                    icon: sale.paymentMethod.icon,
+                  ),
+          ),
           if (isCancelled && sale.cancelledAt != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               '${l10n.saleDetailCancelledAt} ${Formatters.dateTime(sale.cancelledAt!)}',
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ],
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
 
           // ── Items ──
           // Usa o mesmo padrão de linhas do feed de atividade da Home,
@@ -379,7 +387,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
               ),
             _SaleItemRow(item: sale.items[i]),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
 
           // ── Total ──
           // Feed row de total: ícone circular laranja + label + valor em
@@ -391,10 +399,12 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           AppButton.primary(
             label: l10n.saleDetailShareAction,
             onPressed: () => _openShareSheet(activeStore),
-            icon: const Icon(Icons.ios_share, size: 20),
+            icon: const Icon(Icons.ios_share, size: AppSizes.iconMd),
           ),
           if (canCancel && !isCancelled) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
+            // Ação destrutiva: erro semântico AA nos dois temas (o âmbar
+            // “warning” do tema é a tinta neutra — não sinalizava risco).
             AppButton.secondary(
               label: l10n.saleDetailCancelAction,
               onPressed: _cancelling ? null : _confirmCancel,
@@ -406,8 +416,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                     )
                   : const Icon(Icons.delete_outline),
               style: OutlinedButton.styleFrom(
-                foregroundColor: theme.warning,
-                side: BorderSide(color: theme.warning),
+                foregroundColor: theme.expense,
+                side: BorderSide(color: theme.expense),
               ),
             ),
           ],
@@ -431,7 +441,7 @@ class _SaleItemRow extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm + 2,
+        vertical: AppSpacing.sm,
       ),
       child: Row(
         children: [
@@ -458,15 +468,15 @@ class _SaleItemRow extends ConsumerWidget {
                   item.productName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 1),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   '${Quantity.format(item.quantity, language: Formatters.currentLanguage)} × '
                   '${Formatters.currency(item.unitPriceCents)}',
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -481,10 +491,7 @@ class _SaleItemRow extends ConsumerWidget {
                 Formatters.currency(subtotal),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.accentOrange,
-                ),
+                style: AppTypography.amountInRow(AppColors.accentOrange),
               ),
             ),
           ),

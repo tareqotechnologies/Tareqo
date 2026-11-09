@@ -8,6 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// * laranja `#FF6A2A`, cinza `#F0F0F0`, suave `#F9F9F9`, preto `#0C0B0A`;
 /// * alertas semânticos `#2E7D32` (sucesso), `#C62828` (erro),
 ///   `#F9A825` (aviso);
+/// * tints de texto dos MESMOS alertas no escuro (`#66BB6A` sucesso,
+///   `#EF5350` erro) — a variante de texto AA sobre `#0C0B0A`; os tons
+///   base acima continuam para preenchimentos/chips;
 /// * preto com qualquer alfa (sombras/véus da paleta).
 ///
 /// Cores novas entram em `AppColors`/`PdfAccents`, nunca à mão num ecrã.
@@ -21,6 +24,8 @@ void main() {
       0xFF2E7D32, // alerta: sucesso
       0xFFC62828, // alerta: erro
       0xFFF9A825, // alerta: aviso
+      0xFF66BB6A, // alerta: sucesso (texto AA no escuro)
+      0xFFEF5350, // alerta: erro (texto AA no escuro)
     };
 
     final hexPatterns = [

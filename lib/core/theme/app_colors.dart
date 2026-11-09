@@ -51,6 +51,18 @@ abstract final class AppColors {
   static const Color alertWarning = Color(0xFFF9A825);
 
   // ─────────────────────────────────────────────────────────────────────
+  // 0.1 Tints semânticos de TEXTO no escuro (WCAG AA)
+  // ─────────────────────────────────────────────────────────────────────
+
+  /// Verde de texto no escuro — 8.32:1 sobre #0C0B0A (AA/AAA para texto).
+  ///
+  /// Os tons base (#2E7D32/#C62828) ficam para preenchimentos, chips e
+  /// ícones: como texto pequeno sobre preto medem 3.84:1/3.50:1 e falham
+  /// AA 4.5:1. Só estes dois tints são usados em TEXTO monetário no dark.
+  static const Color successTextDark = Color(0xFF66BB6A);
+  static const Color errorTextDark = Color(0xFFEF5350);
+
+  // ─────────────────────────────────────────────────────────────────────
   // 1. Tema claro (paleta oficial)
   // ─────────────────────────────────────────────────────────────────────
 
@@ -254,8 +266,12 @@ abstract final class AppColors {
 
   static Color get income => successNeutral;
   static Color get expense => errorNeutral;
-  static Color get incomeDark => successNeutralDark;
-  static Color get expenseDark => darkErrorNeutral;
+
+  /// Variante de TEXTO do sucesso no escuro (tint AA).
+  static Color get incomeDark => successTextDark;
+
+  /// Variante de TEXTO do erro no escuro (tint AA).
+  static Color get expenseDark => errorTextDark;
   static Color get accent => accentOrange;
   static Color get accentDark => darkAccentOrange;
   static Color get incomeLight => successText;
@@ -375,6 +391,10 @@ class AppStatusColors implements ThemeExtension<AppStatusColors> {
   );
 
   /// Instância do modo escuro.
+  ///
+  /// `income`/`expense` são a variante de TEXTO (tints AA 8.32:1/5.64:1).
+  /// Os tons base (#2E7D32/#C62828) continuam em `success`/`error` para
+  /// preenchimentos e chips.
   static const AppStatusColors dark = AppStatusColors._(
     primary: AppColors.darkPrimary,
     onPrimary: AppColors.darkOnPrimary,
@@ -383,8 +403,8 @@ class AppStatusColors implements ThemeExtension<AppStatusColors> {
     error: AppColors.darkErrorNeutral,
     warning: AppColors.darkWarningText,
     success: AppColors.successNeutralDark,
-    income: AppColors.successNeutralDark,
-    expense: AppColors.darkErrorNeutral,
+    income: AppColors.successTextDark,
+    expense: AppColors.errorTextDark,
     accent: AppColors.darkAccentOrange,
     incomeLight: AppColors.darkSurfaceSecondary,
     expenseLight: AppColors.darkErrorSoft,

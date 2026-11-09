@@ -84,137 +84,155 @@ class MenuScreen extends ConsumerWidget {
 
     final width = MediaQuery.sizeOf(context).width;
     final horizontal = AppSpacing.pagePaddingForWidth(width);
-    // Largura do tile: metade do conteúdo menos o vão entre as colunas.
-    final tileWidth = (width - 2 * horizontal - AppSpacing.xs) / 2;
 
     return AppPage(
       useSafeArea: false,
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-          horizontal,
-          AppSpacing.md,
-          horizontal,
-          AppSpacing.xxl,
-        ),
-        children: [
-          // Cabeçalho premium — título elegante + subtítulo discreto.
-          Text(
-            l10n.appNavMenu,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.3,
+      // LayoutBuilder (e não a largura da janela): dentro do shell o corpo
+      // já está limitado a contentMaxWidth — a grelha precisa de responder
+      // ao espaço REAL disponível, não ao ecrã inteiro.
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final columns = _menuColumns(constraints.maxWidth);
+          // Largura do tile: fatia do conteúdo menos os vãos entre colunas.
+          final tileWidth =
+              (constraints.maxWidth -
+                  2 * horizontal -
+                  (columns - 1) * AppSpacing.sm) /
+              columns;
+
+          return ListView(
+            padding: EdgeInsets.fromLTRB(
+              horizontal,
+              AppSpacing.md,
+              horizontal,
+              AppSpacing.xxl,
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.menuSubtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          // Grelha 2 colunas — tiles com ícone laranja padronizado.
-          Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
             children: [
-              SizedBox(
-                width: tileWidth,
-                child: _MenuTile(
-                  icon: Icons.inventory_2_outlined,
-                  label: l10n.appNavProducts,
-                  onTap: () => goTo(AppSection.products),
+              // Cabeçalho premium — título elegante + subtítulo discreto.
+              Text(l10n.appNavMenu, style: theme.textTheme.headlineSmall),
+              const SizedBox(height: AppSpacing.xxs),
+              Text(
+                l10n.menuSubtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
                 ),
               ),
-              SizedBox(
-                width: tileWidth,
-                child: _MenuTile(
-                  icon: Icons.people_outline_rounded,
-                  label: l10n.appNavCustomers,
-                  onTap: () => goTo(AppSection.customers),
-                ),
+              const SizedBox(height: AppSpacing.lg),
+              // Grelha responsiva — 2 colunas no telemóvel, 3 no tablet e
+              // 4 no desktop; tiles com ícone laranja padronizado.
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  SizedBox(
+                    width: tileWidth,
+                    child: _MenuTile(
+                      icon: Icons.inventory_2_outlined,
+                      label: l10n.appNavProducts,
+                      onTap: () => goTo(AppSection.products),
+                    ),
+                  ),
+                  SizedBox(
+                    width: tileWidth,
+                    child: _MenuTile(
+                      icon: Icons.people_outline_rounded,
+                      label: l10n.appNavCustomers,
+                      onTap: () => goTo(AppSection.customers),
+                    ),
+                  ),
+                  SizedBox(
+                    width: tileWidth,
+                    child: _MenuTile(
+                      icon: Icons.receipt_long_outlined,
+                      label: l10n.appNavCredit,
+                      onTap: () => goTo(AppSection.credit),
+                    ),
+                  ),
+                  if (accessLevel != UserAccessLevel.employee)
+                    SizedBox(
+                      width: tileWidth,
+                      child: _MenuTile(
+                        icon: Icons.local_shipping_outlined,
+                        label: l10n.dashboardModulePurchases,
+                        onTap: openPurchases,
+                      ),
+                    ),
+                  if (accessLevel != UserAccessLevel.employee)
+                    SizedBox(
+                      width: tileWidth,
+                      child: _MenuTile(
+                        icon: Icons.bakery_dining_outlined,
+                        label: l10n.productionTitle,
+                        onTap: openProduction,
+                      ),
+                    ),
+                  if (accessLevel != UserAccessLevel.employee)
+                    SizedBox(
+                      width: tileWidth,
+                      child: _MenuTile(
+                        icon: Icons.bar_chart_outlined,
+                        label: l10n.dashboardModuleReports,
+                        onTap: openReports,
+                      ),
+                    ),
+                  if (tenant != null &&
+                      tenant.status == TenantStatus.approved &&
+                      accessLevel == UserAccessLevel.owner)
+                    SizedBox(
+                      width: tileWidth,
+                      child: _MenuTile(
+                        icon: Icons.storefront_outlined,
+                        label: l10n.dashboardModuleStores,
+                        onTap: () => openStores(tenant),
+                      ),
+                    ),
+                  if (tenant != null &&
+                      tenant.status == TenantStatus.approved &&
+                      accessLevel == UserAccessLevel.owner)
+                    SizedBox(
+                      width: tileWidth,
+                      child: _NotificationsModuleTile(onTap: openNotifications),
+                    ),
+                  if (tenant != null &&
+                      tenant.status == TenantStatus.approved &&
+                      accessLevel == UserAccessLevel.owner)
+                    SizedBox(
+                      width: tileWidth,
+                      child: _MenuTile(
+                        icon: Icons.extension_outlined,
+                        label: l10n.addonsTitle,
+                        onTap: () =>
+                            AppNavigator.push(context, AppRoutes.addons),
+                      ),
+                    ),
+                  SizedBox(
+                    width: tileWidth,
+                    child: _MenuTile(
+                      icon: Icons.shield_outlined,
+                      label: l10n.securitySectionTitle,
+                      onTap: () =>
+                          AppNavigator.push(context, AppRoutes.security),
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(
-                width: tileWidth,
-                child: _MenuTile(
-                  icon: Icons.receipt_long_outlined,
-                  label: l10n.appNavCredit,
-                  onTap: () => goTo(AppSection.credit),
-                ),
-              ),
-              if (accessLevel != UserAccessLevel.employee)
-                SizedBox(
-                  width: tileWidth,
-                  child: _MenuTile(
-                    icon: Icons.local_shipping_outlined,
-                    label: l10n.dashboardModulePurchases,
-                    onTap: openPurchases,
-                  ),
-                ),
-              if (accessLevel != UserAccessLevel.employee)
-                SizedBox(
-                  width: tileWidth,
-                  child: _MenuTile(
-                    icon: Icons.bakery_dining_outlined,
-                    label: l10n.productionTitle,
-                    onTap: openProduction,
-                  ),
-                ),
-              if (accessLevel != UserAccessLevel.employee)
-                SizedBox(
-                  width: tileWidth,
-                  child: _MenuTile(
-                    icon: Icons.bar_chart_outlined,
-                    label: l10n.dashboardModuleReports,
-                    onTap: openReports,
-                  ),
-                ),
-              if (tenant != null &&
-                  tenant.status == TenantStatus.approved &&
-                  accessLevel == UserAccessLevel.owner)
-                SizedBox(
-                  width: tileWidth,
-                  child: _MenuTile(
-                    icon: Icons.storefront_outlined,
-                    label: l10n.dashboardModuleStores,
-                    onTap: () => openStores(tenant),
-                  ),
-                ),
-              if (tenant != null &&
-                  tenant.status == TenantStatus.approved &&
-                  accessLevel == UserAccessLevel.owner)
-                SizedBox(
-                  width: tileWidth,
-                  child: _NotificationsModuleTile(onTap: openNotifications),
-                ),
-              if (tenant != null &&
-                  tenant.status == TenantStatus.approved &&
-                  accessLevel == UserAccessLevel.owner)
-                SizedBox(
-                  width: tileWidth,
-                  child: _MenuTile(
-                    icon: Icons.extension_outlined,
-                    label: l10n.addonsTitle,
-                    onTap: () => AppNavigator.push(context, AppRoutes.addons),
-                  ),
-                ),
-              SizedBox(
-                width: tileWidth,
-                child: _MenuTile(
-                  icon: Icons.shield_outlined,
-                  label: l10n.securitySectionTitle,
-                  onTap: () => AppNavigator.push(context, AppRoutes.security),
-                ),
-              ),
+              const SizedBox(height: AppSpacing.lg),
+              // Terminar sessão — botão Apple style: ícone laranja, texto elegante.
+              _SignOutButton(onTap: confirmSignOut, label: l10n.commonSignOut),
             ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          // Terminar sessão — botão Apple style: ícone laranja, texto elegante.
-          _SignOutButton(onTap: confirmSignOut, label: l10n.commonSignOut),
-        ],
+          );
+        },
       ),
     );
   }
+}
+
+/// Colunas da grelha do Menu por faixa de largura do conteúdo:
+/// telemóvel 2, tablet 3, desktop 4.
+int _menuColumns(double contentWidth) {
+  if (contentWidth >= AppBreakpoints.expandedMin) return 4;
+  if (contentWidth >= AppBreakpoints.mediumMin) return 3;
+  return 2;
 }
 
 /// Tile de módulo — ícone circular laranja oficial, texto pequeno.
