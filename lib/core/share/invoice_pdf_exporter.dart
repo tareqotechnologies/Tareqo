@@ -174,7 +174,7 @@ class InvoicePdfExporter {
             ),
 
           pw.SizedBox(height: gapSection),
-          pw.Divider(color: PdfColors.grey300),
+          pw.Divider(color: PdfAccents.gray),
           pw.SizedBox(height: style.isCompact ? 8 : 16),
 
           // ─── Dados do Cliente ────────────────────────────────
@@ -183,7 +183,7 @@ class InvoicePdfExporter {
             style: const pw.TextStyle(
               fontSize: 10,
               fontWeight: pw.FontWeight.bold,
-              color: PdfColors.grey600,
+              color: PdfAccents.gray,
             ),
           ),
           pw.SizedBox(height: 4),
@@ -197,22 +197,22 @@ class InvoicePdfExporter {
           if (invoice.clientPhone.isNotEmpty)
             pw.Text(
               pdfFill(labels.phoneLabelTemplate, invoice.clientPhone),
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+              style: const pw.TextStyle(fontSize: 9, color: PdfAccents.black),
             ),
           if (invoice.clientEmail.isNotEmpty)
             pw.Text(
               pdfFill(labels.emailLabelTemplate, invoice.clientEmail),
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+              style: const pw.TextStyle(fontSize: 9, color: PdfAccents.black),
             ),
           if (invoice.clientAddress.isNotEmpty)
             pw.Text(
               invoice.clientAddress,
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+              style: const pw.TextStyle(fontSize: 9, color: PdfAccents.black),
             ),
           if (invoice.clientTaxId.isNotEmpty)
             pw.Text(
               pdfFill(labels.taxIdLabelTemplate, invoice.clientTaxId),
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+              style: const pw.TextStyle(fontSize: 9, color: PdfAccents.black),
             ),
 
           pw.SizedBox(height: gapSection),
@@ -247,13 +247,13 @@ class InvoicePdfExporter {
                 pdfTotalRow(
                   labels.discountLabel,
                   '-${Formatters.currency(invoice.discountCents)}',
-                  PdfColors.red700,
+                  PdfAccents.alertError,
                 ),
               if (invoice.taxCents > 0)
                 pdfTotalRow(
                   labels.taxLabel,
                   '+${Formatters.currency(invoice.taxCents)}',
-                  PdfColors.grey700,
+                  PdfAccents.black,
                 ),
             ],
             totalLabel: labels.totalLabel,

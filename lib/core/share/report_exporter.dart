@@ -222,11 +222,11 @@ class ReportExporter {
           pw.SizedBox(height: 6),
           pw.Text(
             '${labels.store}: $storeName · ${labels.period}: $periodLabel',
-            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+            style: const pw.TextStyle(fontSize: 10, color: PdfAccents.black),
           ),
           pw.Text(
             '${labels.generatedAt}: ${Formatters.dateTime(generatedAt)}',
-            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+            style: const pw.TextStyle(fontSize: 10, color: PdfAccents.black),
           ),
           pw.SizedBox(height: 20),
           pw.Row(
@@ -255,7 +255,7 @@ class ReportExporter {
           ),
           pw.SizedBox(height: 8),
           if (report.bestSellers.isEmpty)
-            pw.Text('—', style: const pw.TextStyle(color: PdfColors.grey600))
+            pw.Text('—', style: const pw.TextStyle(color: PdfAccents.gray))
           else
             pw.TableHelper.fromTextArray(
               headers: [
@@ -285,7 +285,7 @@ class ReportExporter {
               headerStyle: const pw.TextStyle(
                 fontSize: 9,
                 fontWeight: pw.FontWeight.bold,
-                color: PdfColors.white,
+                color: PdfAccents.ice,
               ),
               headerDecoration: const pw.BoxDecoration(
                 color: PdfAccents.petrol,
@@ -303,7 +303,7 @@ class ReportExporter {
           ),
           pw.SizedBox(height: 8),
           if (report.perDay.isEmpty)
-            pw.Text('—', style: const pw.TextStyle(color: PdfColors.grey600))
+            pw.Text('—', style: const pw.TextStyle(color: PdfAccents.gray))
           else
             pw.TableHelper.fromTextArray(
               headers: [labels.day, labels.total],
@@ -321,7 +321,7 @@ class ReportExporter {
               headerStyle: const pw.TextStyle(
                 fontSize: 9,
                 fontWeight: pw.FontWeight.bold,
-                color: PdfColors.white,
+                color: PdfAccents.ice,
               ),
               headerDecoration: const pw.BoxDecoration(
                 color: PdfAccents.petrol,
@@ -388,7 +388,7 @@ class ReportExporter {
         children: [
           pw.Text(
             label,
-            style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+            style: const pw.TextStyle(fontSize: 8, color: PdfAccents.black),
           ),
           pw.SizedBox(height: 4),
           pw.Text(

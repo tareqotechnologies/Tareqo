@@ -1,49 +1,56 @@
 import 'package:pdf/pdf.dart';
 
-/// Acentos de PDF alinhados à paleta RE2 (`lib/core/theme/app_colors.dart`).
+/// Acentos de PDF alinhados à paleta OFICIAL (4 cores — nova identidade):
+/// Preto #212121, Cinza #757575, Terracota #B7472A, Branco gelo #E0E0E0 —
+/// mais os alertas semânticos (#2E7D32/#C62828/#F9A825) SÓ em componentes
+/// de alerta no papel.
 ///
-/// Antes, os exporters imprimiam com a família `PdfColors.indigo*` (e a
-/// cotação em `amber700`) — cores fora do sistema visual do app. Estes
-/// tokens são os MESMOS papéis do tema, expressos em `PdfColor` (o pacote
-/// `pdf` não depende de Flutter, então `AppColors` não pode ser importada).
+/// O pacote `pdf` não depende de Flutter, então `AppColors` não pode ser
+/// importada — estes tokens são os MESMOS valores, expressos em `PdfColor`.
 ///
-/// Contraste medido (WCAG):
-/// * `slateDeep` como texto sobre branco: 10.2:1 — valores de KPI/total.
-/// * `slate` como fundo com texto branco: 7.5:1 — cabeçalhos de tabela/selo.
-/// * `petrol` como fundo com texto branco: 14.5:1 — alternativa mais escura.
-/// * `warmBeige` como fundo de cartão KPI com `slateDeep` em texto: 8.9:1.
+/// Contraste medido (WCAG, papel branco):
+/// * `black` como texto: 15.9:1 — valores de KPI/total.
+/// * `black` como fundo com texto gelo: 11.7:1 — cabeçalhos de tabela/selo.
+/// * `gray` como texto secundário: 4.8:1 (AA).
+/// * `terracotta` como fundo com gelo: 4.0:1 (AA texto grande).
 abstract final class PdfAccents {
+  /// Paleta oficial expressa em PdfColor (sem `AppColors` — `pdf` não
+  /// depende de Flutter).
+  static const black = PdfColor.fromInt(0xFF212121);
+  static const gray = PdfColor.fromInt(0xFF757575);
+  static const terracotta = PdfColor.fromInt(0xFFB7472A);
+  static const ice = PdfColor.fromInt(0xFFE0E0E0);
+  static const alertSuccess = PdfColor.fromInt(0xFF2E7D32);
+  static const alertError = PdfColor.fromInt(0xFFC62828);
+  static const alertWarning = PdfColor.fromInt(0xFFF9A825);
+
   /// Estrutura primária — cabeçalhos de tabela, selos, faixas. É o mesmo
-  /// papel do `ColorScheme.primary` do modo claro do app.
-  static const slate = PdfColor.fromInt(0xFF3D4D55);
+  /// papel do `ColorScheme.primary` do modo claro do app (terracota).
+  static const slate = terracotta;
 
-  /// Texto de VALOR (KPI, total) sobre fundo claro — derivação escura do
-  /// slate usada pelo `AppColors.brandMuted`.
-  static const slateDeep = PdfColor.fromInt(0xFF2C3E45);
+  /// Texto de VALOR (KPI, total) sobre fundo claro — preto oficial.
+  static const slateDeep = black;
 
-  /// Identidade profunda (petróleo) — fundo de tabela do relatório de
-  /// vendas, mais sóbrio que o slate. Mesma cor de `AppColors.petrol`.
-  static const petrol = PdfColor.fromInt(0xFF10282A);
+  /// Identidade profunda — fundo de tabela do relatório de vendas:
+  /// preto oficial.
+  static const petrol = black;
 
-  /// Fundo quente de cartão KPI — o `warmBeige` do tema aplicado ao papel.
-  /// Substitui o `indigo50` frio.
-  static const warmBeige = PdfColor.fromInt(0xFFD3C3B9);
+  /// Fundo de cartão KPI — gelo oficial.
+  static const warmBeige = ice;
 
-  /// Acento da cotação — a terracota é o destaque RESERVADO do design
-  /// system; a cotação (documento de negociação) é o lugar dela no papel.
-  static const terracotta = PdfColor.fromInt(0xFFB58863);
+  /// Acento da cotação — terracota oficial (destaque RESERVADO).
+  /// Alias de `terracotta` por compatibilidade de API.
+  static const terracottaAccent = terracotta;
+  // Nota: cotação usa diretamente `terracotta` (ver quotation_pdf_exporter).
 
-  // ── Tinta quente da caixa de pagamento (factura) ──
-  // Cores terrosas substituem a família verde que saiu da semântica do
-  // design system TAREQO. O papel usa tons terrosos (income/success)
-  // ao invés de verde para indicadores financeiros.
+  // ── Caixa de pagamento (factura) — paleta oficial ──
 
-  /// Fundo da caixa de pagamento (terroso, substitui o antigo green50).
-  static const paymentSurface = PdfColor.fromInt(0xFFFBF6F0);
+  /// Fundo da caixa de pagamento — gelo oficial.
+  static const paymentSurface = ice;
 
-  /// Texto principal da caixa de pagamento (terroso, substitui o antigo green900).
-  static const paymentText = PdfColor.fromInt(0xFF5A4632);
+  /// Texto principal da caixa de pagamento — preto oficial.
+  static const paymentText = black;
 
-  /// Texto secundário da caixa de pagamento (terroso, substitui o antigo green800).
-  static const paymentTextMuted = PdfColor.fromInt(0xFF6E5A44);
+  /// Texto secundário da caixa de pagamento — cinza oficial.
+  static const paymentTextMuted = gray;
 }

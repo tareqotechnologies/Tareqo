@@ -190,7 +190,7 @@ class QuotationPdfExporter {
             ),
 
           pw.SizedBox(height: gapSection),
-          pw.Divider(color: PdfColors.grey300),
+          pw.Divider(color: PdfAccents.gray),
           pw.SizedBox(height: style.isCompact ? 8 : 16),
 
           // ─── Dados do Cliente + Validade ─────────────────────
@@ -206,7 +206,7 @@ class QuotationPdfExporter {
                       style: const pw.TextStyle(
                         fontSize: 10,
                         fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.grey600,
+                        color: PdfAccents.gray,
                       ),
                     ),
                     pw.SizedBox(height: 4),
@@ -225,7 +225,7 @@ class QuotationPdfExporter {
                         ),
                         style: const pw.TextStyle(
                           fontSize: 9,
-                          color: PdfColors.grey700,
+                          color: PdfAccents.black,
                         ),
                       ),
                   ],
@@ -239,7 +239,7 @@ class QuotationPdfExporter {
                     style: const pw.TextStyle(
                       fontSize: 10,
                       fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.grey600,
+                      color: PdfAccents.gray,
                     ),
                   ),
                   pw.Text(
@@ -248,8 +248,8 @@ class QuotationPdfExporter {
                       fontSize: 11,
                       fontWeight: pw.FontWeight.bold,
                       color: daysRemaining <= 3
-                          ? PdfColors.red700
-                          : PdfColors.grey800,
+                          ? PdfAccents.alertError
+                          : PdfAccents.black,
                     ),
                   ),
                   pw.Text(
@@ -257,8 +257,8 @@ class QuotationPdfExporter {
                     style: pw.TextStyle(
                       fontSize: 9,
                       color: daysRemaining <= 3
-                          ? PdfColors.red600
-                          : PdfColors.grey600,
+                          ? PdfAccents.alertError
+                          : PdfAccents.gray,
                     ),
                   ),
                 ],
@@ -300,7 +300,7 @@ class QuotationPdfExporter {
                 pdfTotalRow(
                   labels.discountLabel,
                   '-${Formatters.currency(quotation.discountCents)}',
-                  PdfColors.red700,
+                  PdfAccents.alertError,
                 ),
             ],
             totalLabel: labels.totalLabel,
@@ -321,7 +321,7 @@ class QuotationPdfExporter {
           pw.Container(
             padding: const pw.EdgeInsets.all(10),
             decoration: pw.BoxDecoration(
-              color: PdfColors.grey100,
+              color: PdfAccents.ice,
               borderRadius: pw.BorderRadius.circular(6),
             ),
             child: pw.Column(
@@ -332,7 +332,7 @@ class QuotationPdfExporter {
                   style: const pw.TextStyle(
                     fontSize: 9,
                     fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.grey700,
+                    color: PdfAccents.black,
                   ),
                 ),
                 pw.SizedBox(height: 4),
@@ -340,21 +340,21 @@ class QuotationPdfExporter {
                   '• ${labels.validConditionTemplate.replaceFirst('{date}', validUntilLine)}',
                   style: const pw.TextStyle(
                     fontSize: 8,
-                    color: PdfColors.grey600,
+                    color: PdfAccents.gray,
                   ),
                 ),
                 pw.Text(
                   '• ${labels.pricesConditionText}',
                   style: const pw.TextStyle(
                     fontSize: 8,
-                    color: PdfColors.grey600,
+                    color: PdfAccents.gray,
                   ),
                 ),
                 pw.Text(
                   '• ${labels.contactConditionText}',
                   style: const pw.TextStyle(
                     fontSize: 8,
-                    color: PdfColors.grey600,
+                    color: PdfAccents.gray,
                   ),
                 ),
               ],

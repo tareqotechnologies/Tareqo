@@ -7,6 +7,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
+import 'pdf_accent.dart';
+
 /// Peças COMUNS dos exporters de Factura/Cotação (`invoice_pdf_exporter` /
 /// `quotation_pdf_exporter` — antes ~158 blocos idênticos de 12 linhas).
 ///
@@ -137,7 +139,7 @@ pw.Widget pdfDocumentHeader({
                       businessAddress,
                       style: const pw.TextStyle(
                         fontSize: 9,
-                        color: PdfColors.grey700,
+                        color: PdfAccents.black,
                       ),
                     ),
                   if (businessPhone != null && businessPhone.isNotEmpty)
@@ -145,7 +147,7 @@ pw.Widget pdfDocumentHeader({
                       businessPhone,
                       style: const pw.TextStyle(
                         fontSize: 9,
-                        color: PdfColors.grey700,
+                        color: PdfAccents.black,
                       ),
                     ),
                   if (businessTaxId != null && businessTaxId.isNotEmpty)
@@ -153,7 +155,7 @@ pw.Widget pdfDocumentHeader({
                       pdfFill(taxIdLabelTemplate, businessTaxId),
                       style: const pw.TextStyle(
                         fontSize: 9,
-                        color: PdfColors.grey700,
+                        color: PdfAccents.black,
                       ),
                     ),
                 ],
@@ -177,7 +179,7 @@ pw.Widget pdfDocumentHeader({
               style: const pw.TextStyle(
                 fontSize: 14,
                 fontWeight: pw.FontWeight.bold,
-                color: PdfColors.white,
+                color: PdfAccents.ice,
               ),
             ),
           ),
@@ -191,7 +193,7 @@ pw.Widget pdfDocumentHeader({
           ),
           pw.Text(
             dateLine,
-            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+            style: const pw.TextStyle(fontSize: 9, color: PdfAccents.black),
           ),
           if (statusLabel != null) ...[
             pw.SizedBox(height: 4),
@@ -244,7 +246,7 @@ pw.Widget pdfItemsTable({
     headerStyle: const pw.TextStyle(
       fontSize: 9,
       fontWeight: pw.FontWeight.bold,
-      color: PdfColors.white,
+      color: PdfAccents.ice,
     ),
     headerDecoration: pw.BoxDecoration(color: primaryColor),
     cellStyle: const pw.TextStyle(fontSize: 9),
@@ -306,7 +308,7 @@ pw.Widget pdfTotalsBlock({
         child: pw.Column(
           children: [
             ...extraRows,
-            pw.Divider(color: PdfColors.grey300),
+            pw.Divider(color: PdfAccents.gray),
             pdfTotalRow(totalLabel, totalValue, totalColor, isBold: true),
           ],
         ),
@@ -329,13 +331,13 @@ List<pw.Widget> pdfNotesBlock({
       style: const pw.TextStyle(
         fontSize: 9,
         fontWeight: pw.FontWeight.bold,
-        color: PdfColors.grey600,
+        color: PdfAccents.gray,
       ),
     ),
     pw.SizedBox(height: 4),
     pw.Text(
       notes,
-      style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+      style: const pw.TextStyle(fontSize: 9, color: PdfAccents.black),
     ),
   ];
 }
@@ -345,12 +347,12 @@ List<pw.Widget> pdfNotesBlock({
 List<pw.Widget> pdfFooterBlock({required String footerText}) {
   return [
     pw.SizedBox(height: 40),
-    pw.Divider(color: PdfColors.grey300),
+    pw.Divider(color: PdfAccents.gray),
     pw.SizedBox(height: 8),
     pw.Center(
       child: pw.Text(
         footerText,
-        style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
+        style: const pw.TextStyle(fontSize: 8, color: PdfAccents.gray),
       ),
     ),
   ];

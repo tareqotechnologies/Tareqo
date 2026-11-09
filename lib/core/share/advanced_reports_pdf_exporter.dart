@@ -184,7 +184,7 @@ class AdvancedReportsPdfExporter {
                       style: const pw.TextStyle(
                         fontSize: 10,
                         fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.white,
+                        color: PdfAccents.ice,
                       ),
                     ),
                   ),
@@ -193,7 +193,7 @@ class AdvancedReportsPdfExporter {
                     generatedOnLabel.replaceFirst('{date}', dateStr),
                     style: const pw.TextStyle(
                       fontSize: 9,
-                      color: PdfColors.grey600,
+                      color: PdfAccents.gray,
                     ),
                   ),
                 ],
@@ -202,7 +202,7 @@ class AdvancedReportsPdfExporter {
           ),
 
           pw.SizedBox(height: 24),
-          pw.Divider(color: PdfColors.grey300),
+          pw.Divider(color: PdfAccents.gray),
           pw.SizedBox(height: 16),
 
           // ─── KPI Cards ──────────────────────────────────
@@ -230,10 +230,7 @@ class AdvancedReportsPdfExporter {
             if (section.rows.isEmpty)
               pw.Text(
                 noDataLabel,
-                style: const pw.TextStyle(
-                  fontSize: 9,
-                  color: PdfColors.grey500,
-                ),
+                style: const pw.TextStyle(fontSize: 9, color: PdfAccents.gray),
               )
             else
               pw.TableHelper.fromTextArray(
@@ -242,7 +239,7 @@ class AdvancedReportsPdfExporter {
                 headerStyle: const pw.TextStyle(
                   fontSize: 9,
                   fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.white,
+                  color: PdfAccents.ice,
                 ),
                 headerDecoration: const pw.BoxDecoration(
                   color: PdfAccents.petrol,
@@ -254,12 +251,12 @@ class AdvancedReportsPdfExporter {
 
           // ─── Footer ─────────────────────────────────────
           pw.SizedBox(height: 40),
-          pw.Divider(color: PdfColors.grey300),
+          pw.Divider(color: PdfAccents.gray),
           pw.SizedBox(height: 8),
           pw.Center(
             child: pw.Text(
               footerLabel.replaceFirst('{date}', dateStr),
-              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
+              style: const pw.TextStyle(fontSize: 8, color: PdfAccents.gray),
             ),
           ),
         ],
@@ -306,7 +303,7 @@ class AdvancedReportsPdfExporter {
         children: [
           pw.Text(
             label,
-            style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+            style: const pw.TextStyle(fontSize: 8, color: PdfAccents.gray),
           ),
           pw.SizedBox(height: 2),
           pw.Text(
